@@ -154,8 +154,17 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
     const container = containerRef.current;
     if (!container) return undefined;
 
+    // three.js (r163+) requires WebGL2 and throws when a context cannot be
+    // created (e.g. headless Firefox / WebKit). Feature-detect first, then
+    // guard the construction itself, so the page degrades to the notice below
+    // instead of letting the throw reach the React error boundary.
     let renderer: THREE.WebGLRenderer;
     try {
+      const probe = document.createElement('canvas').getContext('webgl2');
+      if (probe == null) {
+        setWebglFailed(true);
+        return undefined;
+      }
       renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     } catch {
       setWebglFailed(true);
@@ -560,7 +569,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
             </p>
             <p className="max-w-md text-xs text-content-tertiary">
               {t('pointcloud.viewer_webgl_desc', {
-                defaultValue: 'WebGL could not start in this browser. Update your browser or enable hardware acceleration.',
+                defaultValue: 'Point Cloud viewer requires a WebGL2-capable browser. Update your browser or enable hardware acceleration.',
               })}
             </p>
           </div>

@@ -794,14 +794,11 @@ async def sv_kpi(
     )
 
 
-@register_kpi(
-    "eac",
-    name="Estimate at Completion",
-    unit="currency",
-    category="financial",
-    source_modules=["finance", "tasks", "projects"],
-    description=("AC + (BAC - EV) / (CPI * SPI) - assumes both perf indices persist (common in construction)."),
-)
+# Pure helper shared by the EAC / ETC / VAC KPI formulas below. NOT a
+# registered KPI itself - the ``@register_kpi("eac", ...)`` decorator lives on
+# ``eac_kpi``, which the registry invokes with ``(session, project_id=...,
+# allowed_project_ids=..., **)``. This helper takes only the four EVM
+# primitives, so it must stay undecorated.
 def _eac_from_primitives(bac: Decimal, pv: Decimal, ev: Decimal, ac: Decimal) -> Decimal:
     """EAC = AC + (BAC - EV) / (CPI * SPI). Falls back to BAC when a
     performance index is undefined (no actuals / no progress yet)."""
@@ -815,6 +812,14 @@ def _eac_from_primitives(bac: Decimal, pv: Decimal, ev: Decimal, ac: Decimal) ->
     return ac + _safe_div(bac - ev, denom)
 
 
+@register_kpi(
+    "eac",
+    name="Estimate at Completion",
+    unit="currency",
+    category="financial",
+    source_modules=["finance", "tasks", "projects"],
+    description=("AC + (BAC - EV) / (CPI * SPI) - assumes both perf indices persist (common in construction)."),
+)
 async def eac_kpi(
     session: AsyncSession,
     project_id: uuid.UUID | None = None,
