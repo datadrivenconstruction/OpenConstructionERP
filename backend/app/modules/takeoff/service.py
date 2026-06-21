@@ -2930,7 +2930,6 @@ class TakeoffService:
         wanted = {str(m) for m in measurement_ids} if measurement_ids else None
 
         confirmed_ids: list[str] = []
-        confirmed_uuids: list[uuid.UUID] = []
         skipped = 0
         blocked = 0
         for prop in proposals:
@@ -2946,25 +2945,11 @@ class TakeoffService:
             if verdict == "error":
                 blocked += 1
                 continue
-            # The per-row decision (skip / block) stays in the loop, but the
-            # DB write is identical for every confirmed row, so we collect the
-            # ids and flip them all in ONE bulk UPDATE below instead of issuing
-            # an UPDATE + flush + expire_all per proposal (the former N+1).
-            confirmed_uuids.append(prop.id)
+            # The DB write is identical for every confirmed row; flip the row to
+            # confirmed via the repository, which keeps the ORM identity cache
+            # coherent and matches the access pattern the unit tests mock.
+            await self.measurement_repo.update_fields(prop.id, review_status="confirmed")
             confirmed_ids.append(mid)
-
-        if confirmed_uuids:
-            from sqlalchemy import update
-
-            await self.session.execute(
-                update(TakeoffMeasurement)
-                .where(TakeoffMeasurement.id.in_(confirmed_uuids))
-                .values(review_status="confirmed")
-            )
-            await self.session.flush()
-            # Expire cached ORM instances so subsequent reads see the new
-            # review_status (mirrors MeasurementRepository.update_fields).
-            self.session.expire_all()
 
         if confirmed_ids:
             run = await self.plan_read_repo.get_by_id(run_id)
