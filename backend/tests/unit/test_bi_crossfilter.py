@@ -57,6 +57,7 @@ class _ComputeSpy:
         period_start: _date | None = None,
         period_end: _date | None = None,
         filters: dict[str, Any] | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> Any:
         self.calls.append(
             {
@@ -65,6 +66,9 @@ class _ComputeSpy:
                 "period_start": period_start,
                 "period_end": period_end,
                 "filters": filters,
+                # IDOR scope forwarded on every path (incl. the off path),
+                # so a non-admin never aggregates beyond accessible projects.
+                "allowed_project_ids": allowed_project_ids,
             },
         )
         # Mirror the real KPIComputation shape just enough.

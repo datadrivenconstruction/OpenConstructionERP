@@ -535,21 +535,26 @@ async def test_delete_catalog_item_blocks_non_owner(session: AsyncSession) -> No
 async def test_owner_and_admin_can_manage_catalog_item(session: AsyncSession) -> None:
     """The catalog owner (and an admin) keep full GET/PATCH/DELETE access."""
     item = await _seed_owned_catalog_item(session)
+    # Capture the PK now: the update/delete handlers below commit, which
+    # expires this ORM instance (expire_on_commit). A later ``item.id`` read
+    # would then trigger a lazy refresh outside the async greenlet and raise
+    # MissingGreenlet. Reading the plain UUID avoids touching the stale row.
+    item_id = item.id
 
     # Owner reads the row.
     read = await get_cost_item(
-        item.id,
+        item_id,
         _OWNER_PAYLOAD,
         service=CostItemService(session),
         catalog_service=CostCatalogService(session),
         locale=None,
         accept_language=None,
     )
-    assert str(read["id"]) == str(item.id)
+    assert str(read["id"]) == str(item_id)
 
     # Owner updates the row.
     updated = await update_cost_item(
-        item.id,
+        item_id,
         CostItemUpdate(description="owner edit"),
         _OWNER_PAYLOAD,
         service=CostItemService(session),
@@ -559,23 +564,23 @@ async def test_owner_and_admin_can_manage_catalog_item(session: AsyncSession) ->
 
     # An admin (different user) can read it too - admins bypass ownership.
     admin_read = await get_cost_item(
-        item.id,
+        item_id,
         _ADMIN_PAYLOAD,
         service=CostItemService(session),
         catalog_service=CostCatalogService(session),
         locale=None,
         accept_language=None,
     )
-    assert str(admin_read["id"]) == str(item.id)
+    assert str(admin_read["id"]) == str(item_id)
 
     # Owner soft-deletes the row.
     await delete_cost_item(
-        item.id,
+        item_id,
         _OWNER_PAYLOAD,
         service=CostItemService(session),
         catalog_service=CostCatalogService(session),
     )
-    deleted = await session.get(CostItem, item.id)
+    deleted = await session.get(CostItem, item_id)
     assert deleted is not None
     assert deleted.is_active is False
 
