@@ -12,6 +12,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ModuleGuideButton,
+  RecoveryCard,
   Skeleton,
 } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -178,6 +179,11 @@ export function CompliancePage({ projectId }: CompliancePageProps) {
             <Skeleton key={i} height={48} className="w-full" rounded="md" />
           ))}
         </div>
+      ) : query.isError ? (
+        <RecoveryCard
+          error={query.error}
+          onRetry={() => query.refetch()}
+        />
       ) : sortedRows.length === 0 ? (
         <EmptyState
           icon={<ShieldCheck size={48} strokeWidth={1.5} />}

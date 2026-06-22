@@ -33,9 +33,11 @@ import { Play, Loader2, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Button, Card, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { toNum } from '@/shared/lib/money';
 
 import {
   simulateRisk,
+  type RiskHistogramBin,
   type RiskSimulateMode,
   type RiskSimulationResult,
 } from './api';
@@ -51,8 +53,14 @@ const ITERATIONS_MAX = 100_000;
 const ITERATIONS_DEFAULT = 10_000;
 const TORNADO_TOP_N = 8;
 
-function fmtCurrencyOrPlain(n: number | null, currency: string): string {
+function fmtCurrencyOrPlain(
+  n: number | string | null | undefined,
+  currency: string,
+): string {
   if (n === null || n === undefined) return '—';
+  // Backend money arrives as a Decimal-rendered string; coerce safely so a
+  // raw string never reaches Intl.NumberFormat (which would render "NaN").
+  const value = toNum(n);
   const safe = /^[A-Z]{3}$/.test(currency) ? currency : '';
   try {
     if (safe) {
@@ -61,20 +69,36 @@ function fmtCurrencyOrPlain(n: number | null, currency: string): string {
         currency: safe,
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-      }).format(n);
+      }).format(value);
     }
     // No currency known — render a bare number with locale grouping.
     return new Intl.NumberFormat(getIntlLocale(), {
       maximumFractionDigits: 0,
-    }).format(n);
+    }).format(value);
   } catch {
-    return `${Math.round(n)}`;
+    return `${Math.round(value)}`;
   }
 }
 
 function fmtDays(n: number | null, t: (k: string, o?: Record<string, unknown>) => string): string {
   if (n === null || n === undefined) return '—';
   return t('risk.montecarlo.days_value', { defaultValue: '{{count}} days', count: n });
+}
+
+/**
+ * Format a histogram bin's midpoint label.
+ *
+ * ``lower``/``upper`` arrive as Decimal-rendered strings on the wire, so both
+ * operands are coerced with ``Number()`` *before* the addition — using the raw
+ * values would string-concatenate ("100000.00" + "150000.00") and then ``/ 2``
+ * would yield ``NaN``, rendering every bar's label as "NaN". Exported for a
+ * focused regression test of that coercion.
+ */
+export function binMidpointLabel(
+  bin: Pick<RiskHistogramBin, 'lower' | 'upper'>,
+  currency: string,
+): string {
+  return fmtCurrencyOrPlain((Number(bin.lower) + Number(bin.upper)) / 2, currency);
 }
 
 export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
@@ -115,7 +139,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
     if (!result || result.histogram_bins.length === 0) return [];
     return result.histogram_bins.map((b) => ({
       // Compact bin label — midpoint formatted with the project currency.
-      label: fmtCurrencyOrPlain((b.lower + b.upper) / 2, currency),
+      label: binMidpointLabel(b, currency),
       count: b.count,
     }));
   }, [result, currency]);
@@ -124,7 +148,8 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
     if (!result) return [];
     return result.tornado.slice(0, TORNADO_TOP_N).map((e) => ({
       code: e.code,
-      contribution: e.contribution,
+      // Decimal-as-string on the wire; coerce so the bar lengths are numeric.
+      contribution: toNum(e.contribution),
     }));
   }, [result]);
 

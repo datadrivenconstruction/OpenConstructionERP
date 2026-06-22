@@ -10,6 +10,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('./api', () => ({
   listComplianceDocs: vi.fn(),
@@ -56,9 +57,15 @@ function renderWithProviders(projectId: string | null = 'proj-1') {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  // RecoveryCard (rendered on the error branch) calls useLocation, so the
+  // tree must sit inside a router.
   return render(
     <QueryClientProvider client={client}>
-      <CompliancePage projectId={projectId} />
+      <MemoryRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <CompliancePage projectId={projectId} />
+      </MemoryRouter>
     </QueryClientProvider>,
   );
 }
@@ -76,6 +83,24 @@ describe('CompliancePage', () => {
         screen.getByText(/no compliance documents/i),
       ).toBeInTheDocument(),
     );
+  });
+
+  it('renders the recovery UI (not the empty state) when the fetch fails', async () => {
+    // A failed load must be visibly distinct from a genuinely empty register:
+    // surfacing "No compliance documents yet" on a network/500/permission
+    // error is a dangerous false negative for a compliance register.
+    vi.mocked(listComplianceDocs).mockRejectedValue(new Error('boom'));
+    renderWithProviders();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /retry/i }),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/couldn’t load this/i)).toBeInTheDocument();
+    // The misleading empty state must NOT render on error.
+    expect(
+      screen.queryByText(/no compliance documents/i),
+    ).not.toBeInTheDocument();
   });
 
   it('renders 3 rows when the API returns 3 docs', async () => {

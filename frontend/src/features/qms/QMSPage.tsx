@@ -41,7 +41,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { SectionIntro } from '@/features/validation';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { apiGet, getAuthToken, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -1287,6 +1287,25 @@ function NCRDrawer({
 
 /* ── ITP Plan Drawer (hold-point sequencing + spec linkage, item 12) ─────── */
 
+/**
+ * Download the ITP-plan compliance dossier (CSV) through an authed fetch.
+ *
+ * The endpoint is JWT-Bearer-only (qms.report.read), so a plain anchor would
+ * navigate without the Authorization header and return 401. We fetch it with
+ * the token, then hand the blob to triggerDownload. Exported for unit tests.
+ */
+export async function downloadPlanComplianceCsv(planId: string): Promise<void> {
+  const token = getAuthToken();
+  const response = await fetch(planComplianceCsvUrl(planId), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new Error(`Export failed (${response.status})`);
+  }
+  const blob = await response.blob();
+  triggerDownload(blob, `itp_plan_${planId}_compliance.csv`);
+}
+
 function ITPPlanDrawer({
   planId,
   plan,
@@ -1299,7 +1318,21 @@ function ITPPlanDrawer({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const [editItemId, setEditItemId] = useState<string | null>(null);
+  const [exportingCsv, setExportingCsv] = useState(false);
+
+  const handleExportComplianceCsv = async () => {
+    if (exportingCsv) return;
+    setExportingCsv(true);
+    try {
+      await downloadPlanComplianceCsv(planId);
+    } catch (err) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    } finally {
+      setExportingCsv(false);
+    }
+  };
 
   const itemsQ = useQuery({
     queryKey: ['qms', 'itp-items', planId],
@@ -1347,17 +1380,17 @@ function ITPPlanDrawer({
                 defaultValue: 'Audit-ready quality dossier',
               })}
             </span>
-            <a
-              href={planComplianceCsvUrl(planId)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded border border-border-light px-2 py-1 text-2xs font-medium text-content-primary hover:bg-surface-tertiary"
+            <button
+              type="button"
+              onClick={handleExportComplianceCsv}
+              disabled={exportingCsv}
+              className="flex items-center gap-1 rounded border border-border-light px-2 py-1 text-2xs font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
             >
-              <Download size={12} />
+              {exportingCsv ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
               {t('qms.export_compliance_csv', {
                 defaultValue: 'Export compliance (CSV)',
               })}
-            </a>
+            </button>
           </div>
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-secondary">

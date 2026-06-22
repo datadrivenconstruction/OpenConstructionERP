@@ -618,9 +618,11 @@ export function fetchPlanComplianceExport(
 }
 
 /**
- * Absolute-relative URL for the CSV compliance export of an ITP plan. The
- * caller opens this in a new tab / triggers a download; the browser carries
- * the auth cookie so no extra fetch wiring is needed.
+ * Path for the CSV compliance export of an ITP plan. The endpoint requires a
+ * JWT Bearer token (qms.report.read), so it CANNOT be opened with a plain
+ * anchor - a top-level navigation cannot send the Authorization header and the
+ * request returns 401. Callers must fetch it with an authed request and pass
+ * the resulting blob to triggerDownload (see QMSPage.tsx).
  */
 export function planComplianceCsvUrl(planId: string): string {
   return `/api/v1/qms/itp-plans/${planId}/compliance-export?format=csv`;

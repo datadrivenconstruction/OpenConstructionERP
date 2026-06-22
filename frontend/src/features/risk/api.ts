@@ -55,10 +55,17 @@ export interface RiskSimulateRequest {
   mode?: RiskSimulateMode;
 }
 
-/** One bin in the contingency histogram (10-bin equal-width by default). */
+/**
+ * One bin in the contingency histogram (10-bin equal-width by default).
+ *
+ * ``lower``/``upper`` are Decimal money serialised as a JSON *string* by the
+ * backend (e.g. ``"100000.00"``). Keep the type honest so call-sites coerce
+ * with ``Number()`` at the boundary instead of string-concatenating
+ * ("100000.00" + "150000.00" → "100000.00150000.00", then ``/ 2`` → NaN).
+ */
 export interface RiskHistogramBin {
-  lower: number;
-  upper: number;
+  lower: number | string;
+  upper: number | string;
   count: number;
 }
 
@@ -66,8 +73,11 @@ export interface RiskHistogramBin {
 export interface RiskTornadoEntry {
   risk_id: string;
   code: string;
-  /** Mean probability-weighted contribution to the project contingency. */
-  contribution: number;
+  /**
+   * Mean probability-weighted contribution to the project contingency.
+   * Decimal-as-string on the wire — coerce with ``Number()`` before arithmetic.
+   */
+  contribution: number | string;
 }
 
 /** Result of a Monte Carlo simulation, mirroring the backend Pydantic model. */
@@ -75,9 +85,11 @@ export interface RiskSimulationResult {
   iterations: number;
   risk_count: number;
   mode: RiskSimulateMode;
-  p50_cost: number | null;
-  p80_cost: number | null;
-  p95_cost: number | null;
+  // Cost percentiles are Decimal-as-string on the wire (or null when the
+  // project mixes currencies / has no cost risks) — coerce with Number().
+  p50_cost: number | string | null;
+  p80_cost: number | string | null;
+  p95_cost: number | string | null;
   p50_schedule_days: number | null;
   p80_schedule_days: number | null;
   p95_schedule_days: number | null;

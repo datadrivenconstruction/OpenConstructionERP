@@ -17,6 +17,7 @@ import {
   Minus,
 } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
+import { RecoveryCard, Skeleton } from '@/shared/ui';
 import { classifyVariance, type VarianceLevel } from './variance-thresholds';
 
 export const PI_QUERY_STALE_MS = 60_000;
@@ -98,6 +99,42 @@ export function ProjectKPIHero({ projectId }: ProjectKPIHeroProps) {
     staleTime: PI_QUERY_STALE_MS,
     enabled: !!projectId,
   });
+
+  // A failed load must never masquerade as a healthy green project: defaulting
+  // the numbers to 0 makes classifyVariance(0) return 'green', so a 500 / 403 /
+  // dropped request would render a fully green dashboard the user could sign off
+  // an estimate against. Consult the query states before deriving any metric.
+  const anyLoading =
+    varianceQ.isLoading || anomaliesQ.isLoading || summaryQ.isLoading;
+  const anyError = varianceQ.isError || anomaliesQ.isError || summaryQ.isError;
+  const firstError =
+    varianceQ.error ?? anomaliesQ.error ?? summaryQ.error ?? undefined;
+  const refetchAll = () => {
+    void varianceQ.refetch();
+    void anomaliesQ.refetch();
+    void summaryQ.refetch();
+  };
+
+  if (anyLoading) {
+    return (
+      <div
+        className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        data-testid="kpi-hero-loading"
+      >
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} height={104} className="w-full" rounded="lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (anyError) {
+    return (
+      <div data-testid="kpi-hero-error">
+        <RecoveryCard error={firstError} onRetry={refetchAll} />
+      </div>
+    );
+  }
 
   const variance = varianceQ.data;
   const variancePct = variance?.variance_pct ?? 0;

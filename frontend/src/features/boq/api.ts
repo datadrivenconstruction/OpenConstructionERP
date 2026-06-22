@@ -159,7 +159,13 @@ export interface Markup {
   markup_type: 'percentage' | 'fixed';
   category: 'overhead' | 'profit' | 'tax' | 'contingency' | 'insurance' | 'bond' | 'other';
   percentage: number;
-  fixed_amount: number;
+  /**
+   * v3 §10 contract: the backend serialises this Decimal money field as a
+   * JSON *string* (e.g. ``"500.00"``), so keep the type honest and coerce
+   * with ``toNum`` from ``@/shared/lib/money`` before any arithmetic — a bare
+   * ``+`` string-concatenates ("1000" + "500.00" → "1000500.00").
+   */
+  fixed_amount: number | string;
   apply_to: 'direct_cost' | 'subtotal' | 'cumulative';
   sort_order: number;
   is_active: boolean;

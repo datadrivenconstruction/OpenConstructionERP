@@ -206,4 +206,19 @@ describe('<ApprovalRoutesPage />', () => {
     const call = (listRoutes as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
     expect(call).toMatchObject({ includeInactive: true });
   });
+
+  it('renders a full-width root container (no centered max-width clamp)', async () => {
+    // Founder UX: the Approval Routes tab must fill the width like its
+    // Permissions (governance) / Validation siblings, which use a plain
+    // "space-y-5 animate-fade-in" root with no "mx-auto max-w-7xl" clamp.
+    (listRoutes as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const { container } = renderPage();
+
+    const root = container.firstChild as HTMLElement;
+    expect(root.className).not.toContain('mx-auto');
+    expect(root.className).not.toContain('max-w-7xl');
+    expect(root.className).toContain('px-4');
+    expect(root.className).toContain('py-4');
+    expect(root.className).toContain('animate-fade-in');
+  });
 });

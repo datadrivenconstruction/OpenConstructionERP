@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } from './api';
 import { fmtWithCurrency } from './boqHelpers';
+import { toNum } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import clsx from 'clsx';
 import {
@@ -145,7 +146,10 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
         let amount = 0;
         const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
         if (m.markup_type === 'fixed') {
-          amount = typeof m.fixed_amount === 'number' && Number.isFinite(m.fixed_amount) ? m.fixed_amount : 0;
+          // fixed_amount arrives as a Decimal-as-string ("500.00"), so a
+          // ``typeof === 'number'`` guard rejected it and rendered every fixed
+          // markup as 0. Coerce through the shared money primitive instead.
+          amount = toNum(m.fixed_amount);
         } else if (m.apply_to === 'cumulative' || m.apply_to === 'subtotal') {
           // The backend treats 'subtotal' identically to 'cumulative' (base =
           // direct cost + the markups before it); GAEB import persists tax
@@ -179,10 +183,8 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       let impact = calcMap.get(markup.id);
       if (impact === undefined) {
         if (markup.markup_type === 'fixed') {
-          impact =
-            typeof markup.fixed_amount === 'number' && Number.isFinite(markup.fixed_amount)
-              ? markup.fixed_amount
-              : 0;
+          // Decimal-as-string wire value; coerce instead of a typeof guard.
+          impact = toNum(markup.fixed_amount);
         } else {
           const pct = markup.percentage ?? 0;
           impact = directCost * (pct / 100);

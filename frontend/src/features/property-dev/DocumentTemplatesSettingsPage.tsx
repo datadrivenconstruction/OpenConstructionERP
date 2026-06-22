@@ -36,6 +36,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import DOMPurify from 'isomorphic-dompurify';
 import {
   AlertOctagon,
   Banknote,
@@ -133,6 +134,23 @@ const RENDERABLE_BUILTIN_DOC_TYPES_FALLBACK = new Set<string>([
   'escrow_release_authorization',
   'refund_authorization',
 ]);
+
+/**
+ * DOMPurify configuration for the in-browser template preview. Templates
+ * are shared (development/tenant) resources authored by other staff, so
+ * the preview is an untrusted-HTML surface. We keep the rich formatting a
+ * printable document needs (headings, tables, the inline styles our own
+ * markdown/plain-text branches emit — DOMPurify sanitises CSS) but force
+ * the sanitiser to drop every scriptable vector: <script>/<iframe>/object
+ * /embed/form elements. DOMPurify strips all event-handler attributes
+ * (onerror/onload/...) by default and its default URI filter neutralises
+ * ``javascript:``/``data:`` URLs. Exported so the XSS test suite stays in
+ * lockstep with the render-time config.
+ */
+export const PREVIEW_SANITIZE_CONFIG = {
+  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
+  ALLOW_DATA_ATTR: false,
+};
 
 /**
  * Decide whether a catalogue entry should expose the Preview /
@@ -1548,14 +1566,15 @@ function TemplateEditorModal({
     }
   };
 
-  // Render the preview pane. For HTML we honour user markup verbatim
-  // (the preview is sandboxed inside the modal body — no script tags are
-  // executed against the host because dangerouslySetInnerHTML in React
-  // strips <script> at hydration on most modern browsers, and our
-  // backend re-renders the template in a non-JS reportlab pipeline at
-  // document-generation time anyway).
+  // Render the preview pane. Templates are development/tenant-shared
+  // resources (not per-user), so the body can contain markup authored by
+  // another staff member. dangerouslySetInnerHTML does NOT strip scripts
+  // and never neutralises event-handler (onerror/onload) or javascript:
+  // URL vectors, so every branch is routed through DOMPurify before it
+  // reaches the DOM (stored-XSS hardening, audit 2026-06-22 #2). The
+  // server-side reportlab render is irrelevant to this in-browser preview.
   const previewHtml = useMemo(() => {
-    if (contentType === 'text/html') return debouncedContent;
+    if (contentType === 'text/html') return DOMPurify.sanitize(debouncedContent, PREVIEW_SANITIZE_CONFIG);
     if (contentType === 'text/markdown') {
       // Tiny markdown renderer covering the 95% case (headings, bold,
       // italic, code, paragraphs). Heavy markdown engines would balloon
@@ -1576,15 +1595,16 @@ function TemplateEditorModal({
       html = html.split(/\n{2,}/).map((p) =>
         p.startsWith('<h') ? p : `<p>${p.replace(/\n/g, '<br/>')}</p>`,
       ).join('\n');
-      return html;
+      return DOMPurify.sanitize(html, PREVIEW_SANITIZE_CONFIG);
     }
     // plain text — escape and wrap in <pre>.
-    return `<pre style="white-space: pre-wrap; font-family: monospace;">${
+    const plain = `<pre style="white-space: pre-wrap; font-family: monospace;">${
       debouncedContent
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
     }</pre>`;
+    return DOMPurify.sanitize(plain, PREVIEW_SANITIZE_CONFIG);
   }, [contentType, debouncedContent]);
 
   return (
