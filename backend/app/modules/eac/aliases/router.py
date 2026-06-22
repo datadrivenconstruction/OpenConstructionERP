@@ -27,7 +27,7 @@ from fastapi import (
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.eac.aliases.bulk_resolver import resolve_bulk
 from app.modules.eac.aliases.resolver import resolve_alias
 
@@ -187,7 +187,11 @@ async def _resolve_tenant_id(session: AsyncSession, user_id: str) -> uuid.UUID:
 # ── List ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/aliases", response_model=list[EacParameterAliasRead])
+@router.get(
+    "/aliases",
+    response_model=list[EacParameterAliasRead],
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def list_aliases_route(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -224,6 +228,7 @@ async def list_aliases_route(
     "/aliases",
     response_model=EacParameterAliasRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("eac.write"))],
 )
 async def create_alias_route(
     payload: EacParameterAliasCreate,
@@ -256,7 +261,11 @@ async def create_alias_route(
 # ── Read one ─────────────────────────────────────────────────────────────
 
 
-@router.get("/aliases/{alias_id}", response_model=EacParameterAliasRead)
+@router.get(
+    "/aliases/{alias_id}",
+    response_model=EacParameterAliasRead,
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def get_alias_route(
     alias_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -281,7 +290,11 @@ async def get_alias_route(
 # ── Update ───────────────────────────────────────────────────────────────
 
 
-@router.put("/aliases/{alias_id}", response_model=EacParameterAliasRead)
+@router.put(
+    "/aliases/{alias_id}",
+    response_model=EacParameterAliasRead,
+    dependencies=[Depends(RequirePermission("eac.write"))],
+)
 async def update_alias_route(
     alias_id: uuid.UUID,
     payload: EacParameterAliasUpdate,
@@ -311,7 +324,11 @@ async def update_alias_route(
 # ── Delete ───────────────────────────────────────────────────────────────
 
 
-@router.delete("/aliases/{alias_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/aliases/{alias_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RequirePermission("eac.delete"))],
+)
 async def delete_alias_route(
     alias_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -350,7 +367,11 @@ async def delete_alias_route(
 # ── Usages ───────────────────────────────────────────────────────────────
 
 
-@router.get("/aliases/{alias_id}/usages", response_model=EacAliasUsageResponse)
+@router.get(
+    "/aliases/{alias_id}/usages",
+    response_model=EacAliasUsageResponse,
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def get_alias_usages_route(
     alias_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -378,7 +399,11 @@ async def get_alias_usages_route(
 # ── Test endpoint (synthetic single-property element) ────────────────────
 
 
-@router.post("/aliases/{alias_id}/test", response_model=EacAliasTestResponse)
+@router.post(
+    "/aliases/{alias_id}/test",
+    response_model=EacAliasTestResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
+)
 async def test_alias_route(
     alias_id: uuid.UUID,
     payload: EacAliasTestRequest,
@@ -421,6 +446,7 @@ async def test_alias_route(
 @router.post(
     "/aliases:resolve-bulk",
     response_model=list[EacAliasResolveResponse],
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def resolve_aliases_bulk_route(
     payload: EacAliasBulkResolveRequest,
@@ -475,7 +501,11 @@ async def resolve_aliases_bulk_route(
 # ── Single resolve helper (companion to :resolve-bulk) ──────────────────
 
 
-@router.post("/aliases:resolve", response_model=EacAliasResolveResponse)
+@router.post(
+    "/aliases:resolve",
+    response_model=EacAliasResolveResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
+)
 async def resolve_alias_route(
     payload: EacAliasResolveRequest,
     user_id: CurrentUserId,
@@ -507,7 +537,10 @@ async def resolve_alias_route(
 # ── Export ───────────────────────────────────────────────────────────────
 
 
-@router.post("/aliases:export")
+@router.post(
+    "/aliases:export",
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def export_aliases_route(
     payload: EacAliasExportRequest,
     user_id: CurrentUserId,
@@ -580,7 +613,11 @@ async def export_aliases_route(
 # ── Import ───────────────────────────────────────────────────────────────
 
 
-@router.post("/aliases:import", response_model=EacAliasImportSummary)
+@router.post(
+    "/aliases:import",
+    response_model=EacAliasImportSummary,
+    dependencies=[Depends(RequirePermission("eac.write"))],
+)
 async def import_aliases_route(
     user_id: CurrentUserId,
     session: SessionDep,

@@ -59,7 +59,7 @@ from app.core.ai.pricing import (
 )
 from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_key_model
 from app.modules.ai.models import AISettings
-from app.modules.clash.models import ClashResult
+from app.modules.clash.models import ClashResult, ClashRun
 from app.modules.clash_ai_triage.models import ClashTriageResult
 from app.modules.clash_ai_triage.prompts import (
     PROMPT_VERSION,
@@ -271,6 +271,15 @@ class ClashTriageService:
             raise ClashSubjectNotFound(f"Clash {clash_id} not found")
         return clash
 
+    async def _project_id_for_clash(self, clash_id: uuid.UUID) -> uuid.UUID | None:
+        """Resolve ``ClashResult → ClashRun → project_id`` (``None`` if orphaned)."""
+        stmt = (
+            select(ClashRun.project_id)
+            .join(ClashResult, ClashResult.run_id == ClashRun.id)
+            .where(ClashResult.id == clash_id)
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
     async def _resolve_subject(self, clash: ClashResult) -> tuple[str, uuid.UUID]:
         """Decide whether the triage targets a clash or a clash_issue.
 
@@ -323,6 +332,7 @@ class ClashTriageService:
         *,
         user_id: uuid.UUID,
         force_refresh: bool = False,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> ClashTriageResult:
         """‌⁠‍Triage one clash. Cached unless ``force_refresh=True``.
 
@@ -332,12 +342,25 @@ class ClashTriageService:
                 provider settings and stamped on the persisted row.
             force_refresh: When True, bypass the cache and force a fresh
                 LLM call.
+            allowed_project_ids: Optional defense-in-depth scope. When given,
+                the clash's owning project MUST be in this set or the call
+                raises :class:`ClashSubjectNotFound` (which the router maps to
+                404). ``None`` skips the check - the router authorizes the
+                single-clash path before calling, so this re-check only guards
+                the fan-out/replay paths where a foreign id could slip in.
 
         Raises:
-            ClashSubjectNotFound: ``clash_id`` does not match any row.
+            ClashSubjectNotFound: ``clash_id`` does not match any row, or the
+                clash is outside ``allowed_project_ids``.
             ClashTriageUnavailable: No AI provider key configured.
         """
         clash = await self._load_clash(clash_id)
+        if allowed_project_ids is not None:
+            project_id = await self._project_id_for_clash(clash_id)
+            if project_id is None or project_id not in allowed_project_ids:
+                # Collapse "foreign" and "orphaned" to the same 404-shaped
+                # error so the caller cannot use it as an existence oracle.
+                raise ClashSubjectNotFound(f"Clash {clash_id} not found")
         subject_type, subject_id = await self._resolve_subject(clash)
 
         # Lock the subject so concurrent callers in the same process
@@ -444,6 +467,7 @@ class ClashTriageService:
         user_id: uuid.UUID,
         max_concurrent: int = 4,
         force_refresh: bool = False,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> list[ClashTriageResult]:
         """‌⁠‍Triage ``clash_ids`` with bounded concurrency.
 
@@ -451,6 +475,11 @@ class ClashTriageService:
         large batch cannot stampede the provider. Per-clash failures are
         logged and skipped - the method always returns whatever rows
         completed successfully.
+
+        ``allowed_project_ids`` is forwarded to each per-clash worker as a
+        defense-in-depth IDOR guard: a clash whose project is outside the set
+        is skipped (treated as a per-clash failure) so a foreign id can never
+        be triaged even if it reaches the service directly.
 
         Implementation note: SQLAlchemy ``AsyncSession`` instances are
         NOT concurrency-safe (only one flush at a time per session). So
@@ -476,6 +505,7 @@ class ClashTriageService:
                             cid,
                             user_id=user_id,
                             force_refresh=force_refresh,
+                            allowed_project_ids=allowed_project_ids,
                         )
                         await worker_session.commit()
                         # Detach so the row stays usable outside the

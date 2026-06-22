@@ -12,3 +12,10 @@ schema v2.0) and evaluated through DuckDB on canonical Parquet data.
 This module provides the foundational ORM layer, JSON Schema, Pydantic
 mirrors, and CRUD API surface (Wave EAC-1.1 + EAC-1.2).
 """
+
+
+async def on_startup() -> None:
+    """‌⁠‍Module startup hook - register RBAC permissions."""
+    from app.modules.eac.permissions import register_eac_permissions
+
+    register_eac_permissions()

@@ -379,3 +379,101 @@ async def test_replay_endpoint_creates_new_row(
     body = replay.json()
     assert body["id"] != original_id
     assert body["prompt_version"] == "v1.1-test"
+
+
+# ── 9. Batch IDOR: a foreign clash in the batch rejects the WHOLE batch ─────
+
+
+async def _set_user_role(email: str, role: str) -> None:
+    """Set a freshly registered user's role + activate them (non-admin)."""
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.users.models import User
+
+    async with async_session_factory() as session:
+        await session.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
+        await session.commit()
+
+
+async def _register_editor(client: AsyncClient) -> tuple[str, dict[str, str]]:
+    """Register a NON-admin editor user and return (user_id, auth-header).
+
+    An editor holds ``clash_triage.execute`` but - unlike the admin fixture -
+    does NOT bypass ``verify_project_access``, so it can actually be denied a
+    foreign project (the scenario this IDOR test needs).
+    """
+    tag = uuid.uuid4().hex[:8]
+    email = f"clash-triage-editor-{tag}@test.io"
+    password = f"ClashTriageEd{tag}9"
+    reg = await client.post(
+        "/api/v1/users/auth/register",
+        json={
+            "email": email,
+            "password": password,
+            "full_name": f"Triage Editor {tag}",
+            "role": "editor",
+        },
+    )
+    assert reg.status_code in (200, 201), reg.text
+    # register demotes new users to viewer; force editor + active directly.
+    await _set_user_role(email, "editor")
+    login = await client.post(
+        "/api/v1/users/auth/login",
+        json={"email": email, "password": password},
+    )
+    token = login.json().get("access_token", "")
+    assert token, login.text
+    return reg.json()["id"], {"Authorization": f"Bearer {token}"}
+
+
+async def _count_triage_rows_for_clash(clash_id: str) -> int:
+    from sqlalchemy import func, select
+
+    from app.database import async_session_factory
+    from app.modules.clash_ai_triage.models import ClashTriageResult
+
+    async with async_session_factory() as session:
+        stmt = select(func.count(ClashTriageResult.id)).where(ClashTriageResult.clash_id == uuid.UUID(clash_id))
+        return int((await session.execute(stmt)).scalar_one() or 0)
+
+
+@pytest.mark.asyncio
+async def test_batch_with_foreign_clash_is_rejected(
+    client: AsyncClient,
+    auth: dict[str, str],
+    project_id: str,
+) -> None:
+    """A batch mixing an owned clash + a foreign clash -> 404, no foreign rows.
+
+    Regression for the IDOR where ``/batch`` authorized only ``clash_ids[0]``:
+    a foreign clash smuggled in at position 1.. was triaged anyway. The caller
+    here is a non-admin editor (no admin access bypass) who owns project A but
+    NOT project B (the admin-owned fixture project).
+    """
+    # Attacker: non-admin editor who owns their own project A.
+    editor_user_id, editor_auth = await _register_editor(client)
+    await _seed_ai_settings(editor_user_id)
+    proj_a = await client.post(
+        "/api/v1/projects/",
+        json={"name": "Editor Own Project", "description": ""},
+        headers=editor_auth,
+    )
+    assert proj_a.status_code in (200, 201), proj_a.text
+    own_clash = await _seed_clash(proj_a.json()["id"])
+
+    # Foreign clash lives in the admin-owned project the editor cannot access.
+    foreign_clash = await _seed_clash(project_id)
+
+    with patch("app.modules.clash_ai_triage.service.call_ai", new=_mock_call_ai):
+        resp = await client.post(
+            "/api/v1/clash-ai-triage/batch",
+            json={"clash_ids": [own_clash, foreign_clash], "max_concurrent": 2},
+            headers=editor_auth,
+        )
+
+    # Whole batch is refused - foreign clash existence is not leaked (404).
+    assert resp.status_code == 404, resp.text
+    # And no triage row was written for EITHER clash (batch refused up-front).
+    assert await _count_triage_rows_for_clash(foreign_clash) == 0
+    assert await _count_triage_rows_for_clash(own_clash) == 0

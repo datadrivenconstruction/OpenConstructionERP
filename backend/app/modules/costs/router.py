@@ -2705,11 +2705,42 @@ async def export_cost_catalog_excel(
 # ── Get by ID ─────────────────────────────────────────────────────────────
 
 
+async def _enforce_item_catalog_ownership(
+    item: CostItem,
+    user: dict[str, Any] | None,
+    catalog_service: CostCatalogService,
+) -> None:
+    """Reject access to a CostItem bound to a catalog the caller does not own.
+
+    Most ``CostItem`` rows are the intentionally-shared global CWICR
+    catalogue (``catalog_id IS NULL``) and stay globally readable/editable
+    by anyone holding the relevant ``costs.*`` permission. Rows that DO
+    carry a ``catalog_id``, however, belong to a user-owned
+    :class:`CostCatalog` (``CostCatalog.created_by``); the catalog-level
+    endpoints already lock those to their owner via
+    :meth:`CostCatalogService.get_owned_catalog`. This mirrors that gate at
+    the item level so the per-item GET/PATCH/DELETE handlers cannot be used
+    to read, tamper with, or soft-delete another user's private catalog
+    item by guessing its UUID.
+
+    Ownership is masked as a 404 (not 403), matching ``get_owned_catalog``,
+    so the response is indistinguishable from a missing catalog and cannot
+    be used as a UUID-existence oracle. Admins bypass the check.
+    """
+    if item.catalog_id is None:
+        return
+    owner_id = _parse_user_uuid((user or {}).get("sub"))
+    is_admin = (user or {}).get("role") == "admin"
+    # Raises 404 when the caller is neither the catalog owner nor an admin.
+    await catalog_service.get_owned_catalog(item.catalog_id, owner_id=owner_id, is_admin=is_admin)
+
+
 @router.get("/{item_id}")
 async def get_cost_item(
     item_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user: OptionalUserPayload,
     service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
     locale: str | None = Query(
         default=None,
         max_length=10,
@@ -2720,8 +2751,14 @@ async def get_cost_item(
     """Get a cost item by ID, with optional locale-specific translation
     of CWICR's frozen-German vocabulary columns (variant_stats,
     classification.category, component units).
+
+    Items in the shared global catalogue (``catalog_id IS NULL``) are
+    readable by anyone, matching the public search/autocomplete contract.
+    Items bound to a user-owned catalog are scoped to their owner (404 to
+    everyone else) so a private catalog's rates can't be read by UUID.
     """
     item = await service.get_cost_item(item_id)
+    await _enforce_item_catalog_ownership(item, user, catalog_service)
     response = CostItemResponse.model_validate(item)
     resolved_locale = _resolve_cost_locale(locale, accept_language)
     return _localize_response_payload(response, resolved_locale)
@@ -2775,10 +2812,20 @@ async def preview_mass_apply(
 async def update_cost_item(
     item_id: uuid.UUID,
     data: CostItemUpdate,
-    _user_id: CurrentUserId,
+    user: CurrentUserPayload,
     service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
 ) -> CostItemResponse:
-    """Update a cost item."""
+    """Update a cost item.
+
+    Items bound to a user-owned catalog (``catalog_id`` set) are scoped to
+    their owner: a non-owner non-admin caller gets a 404 (no write, no
+    existence leak) even though they hold ``costs.update``. Global-catalogue
+    items (``catalog_id IS NULL``) stay editable by anyone with the
+    permission, matching the existing shared-catalogue contract.
+    """
+    existing = await service.get_cost_item(item_id)
+    await _enforce_item_catalog_ownership(existing, user, catalog_service)
     item = await service.update_cost_item(item_id, data)
     return CostItemResponse.model_validate(item)
 
@@ -2793,10 +2840,20 @@ async def update_cost_item(
 )
 async def delete_cost_item(
     item_id: uuid.UUID,
-    _user_id: CurrentUserId,
+    user: CurrentUserPayload,
     service: CostItemService = Depends(_get_service),
+    catalog_service: CostCatalogService = Depends(_get_catalog_service),
 ) -> None:
-    """Soft-delete a cost item."""
+    """Soft-delete a cost item.
+
+    Items bound to a user-owned catalog (``catalog_id`` set) are scoped to
+    their owner: a non-owner non-admin caller gets a 404 (no delete, no
+    existence leak) even though they hold ``costs.delete``. Global-catalogue
+    items (``catalog_id IS NULL``) stay deletable by anyone with the
+    permission, matching the existing shared-catalogue contract.
+    """
+    existing = await service.get_cost_item(item_id)
+    await _enforce_item_catalog_ownership(existing, user, catalog_service)
     await service.delete_cost_item(item_id)
 
 

@@ -34,15 +34,19 @@ from app.modules.costs.router import (
     create_cost_catalog,
     create_cost_item,
     delete_cost_catalog,
+    delete_cost_item,
     export_cost_catalog_excel,
+    get_cost_item,
     import_cost_file,
     list_cost_catalogs,
     update_cost_catalog,
+    update_cost_item,
 )
 from app.modules.costs.schemas import (
     CostCatalogCreate,
     CostCatalogUpdate,
     CostItemCreate,
+    CostItemUpdate,
 )
 from app.modules.costs.service import CostCatalogService, CostItemService
 from tests._pg import transactional_session
@@ -431,3 +435,182 @@ async def test_delete_unknown_catalog_404(session: AsyncSession) -> None:
     with pytest.raises(HTTPException) as exc_info:
         await delete_cost_catalog(uuid.uuid4(), _USER_PAYLOAD, mode="keep_items", service=CostCatalogService(session))
     assert exc_info.value.status_code == 404
+
+
+# ── Item-level ownership on catalog-bound rows (audit finding #3) ────────────
+#
+# A ``CostItem`` carrying a ``catalog_id`` belongs to a user-owned catalog
+# (``CostCatalog.created_by``). The catalog-level endpoints already scope to
+# the owner via ``get_owned_catalog``; these tests pin the SAME gate on the
+# per-item GET/PATCH/DELETE handlers so a non-owner holding ``costs.*`` cannot
+# read, tamper with, or soft-delete another user's private catalog item by
+# guessing its UUID. Rows with ``catalog_id IS NULL`` are the intentionally
+# shared global CWICR catalogue and stay globally editable.
+
+_OWNER_ID = str(uuid.uuid4())
+# Attacker B holds the same ``costs.*`` permissions (the RBAC dependency runs
+# separately) but is NOT the catalog owner and is not an admin.
+_ATTACKER_PAYLOAD = {"sub": str(uuid.uuid4()), "role": "editor"}
+_OWNER_PAYLOAD = {"sub": _OWNER_ID, "role": "editor"}
+_ADMIN_PAYLOAD = {"sub": str(uuid.uuid4()), "role": "admin"}
+
+
+async def _seed_owned_catalog_item(session: AsyncSession) -> CostItem:
+    """Create a catalog owned by ``_OWNER_ID`` with one item bound to it."""
+    catalog_service = CostCatalogService(session)
+    catalog = await catalog_service.create_catalog(
+        CostCatalogCreate(name=f"Private {uuid.uuid4().hex[:8]}", currency="EUR"),
+        created_by=uuid.UUID(_OWNER_ID),
+    )
+    item_service = CostItemService(session)
+    item = await item_service.create_cost_item(
+        CostItemCreate(
+            code=f"OWN-{uuid.uuid4().hex[:8]}",
+            description="Private rate",
+            unit="m2",
+            rate="123.45",
+            catalog_id=catalog.id,
+        )
+    )
+    return item
+
+
+async def test_get_catalog_item_blocks_non_owner(session: AsyncSession) -> None:
+    """A non-owner non-admin GET on a catalog-bound item is masked as 404."""
+    item = await _seed_owned_catalog_item(session)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_cost_item(
+            item.id,
+            _ATTACKER_PAYLOAD,
+            service=CostItemService(session),
+            catalog_service=CostCatalogService(session),
+            locale=None,
+            accept_language=None,
+        )
+    assert exc_info.value.status_code == 404
+
+
+async def test_update_catalog_item_blocks_non_owner(session: AsyncSession) -> None:
+    """A non-owner non-admin PATCH on a catalog-bound item is rejected (404)
+    and the row is left untouched."""
+    item = await _seed_owned_catalog_item(session)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await update_cost_item(
+            item.id,
+            CostItemUpdate(description="attacker-overwrite", rate="0.01"),
+            _ATTACKER_PAYLOAD,
+            service=CostItemService(session),
+            catalog_service=CostCatalogService(session),
+        )
+    assert exc_info.value.status_code == 404
+
+    # The attacker's PATCH must not have mutated the row.
+    survivor = await session.get(CostItem, item.id)
+    assert survivor is not None
+    assert survivor.description == "Private rate"
+    assert survivor.rate == "123.45"
+
+
+async def test_delete_catalog_item_blocks_non_owner(session: AsyncSession) -> None:
+    """A non-owner non-admin DELETE on a catalog-bound item is rejected (404)
+    and the soft-delete flag is left set."""
+    item = await _seed_owned_catalog_item(session)
+
+    with pytest.raises(HTTPException) as exc_info:
+        await delete_cost_item(
+            item.id,
+            _ATTACKER_PAYLOAD,
+            service=CostItemService(session),
+            catalog_service=CostCatalogService(session),
+        )
+    assert exc_info.value.status_code == 404
+
+    survivor = await session.get(CostItem, item.id)
+    assert survivor is not None
+    assert survivor.is_active is True
+
+
+async def test_owner_and_admin_can_manage_catalog_item(session: AsyncSession) -> None:
+    """The catalog owner (and an admin) keep full GET/PATCH/DELETE access."""
+    item = await _seed_owned_catalog_item(session)
+
+    # Owner reads the row.
+    read = await get_cost_item(
+        item.id,
+        _OWNER_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+        locale=None,
+        accept_language=None,
+    )
+    assert str(read["id"]) == str(item.id)
+
+    # Owner updates the row.
+    updated = await update_cost_item(
+        item.id,
+        CostItemUpdate(description="owner edit"),
+        _OWNER_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+    )
+    assert updated.description == "owner edit"
+
+    # An admin (different user) can read it too - admins bypass ownership.
+    admin_read = await get_cost_item(
+        item.id,
+        _ADMIN_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+        locale=None,
+        accept_language=None,
+    )
+    assert str(admin_read["id"]) == str(item.id)
+
+    # Owner soft-deletes the row.
+    await delete_cost_item(
+        item.id,
+        _OWNER_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+    )
+    deleted = await session.get(CostItem, item.id)
+    assert deleted is not None
+    assert deleted.is_active is False
+
+
+async def test_global_catalogue_item_remains_editable_by_anyone(session: AsyncSession) -> None:
+    """An item with no ``catalog_id`` is the shared global catalogue and stays
+    readable + editable by any permitted user (the existing contract)."""
+    item_service = CostItemService(session)
+    item = await item_service.create_cost_item(
+        CostItemCreate(
+            code=f"GLOBAL-{uuid.uuid4().hex[:8]}",
+            description="Shared CWICR rate",
+            unit="m3",
+            rate="50.00",
+        )
+    )
+    assert item.catalog_id is None
+
+    # A non-owner non-admin can read it.
+    read = await get_cost_item(
+        item.id,
+        _ATTACKER_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+        locale=None,
+        accept_language=None,
+    )
+    assert str(read["id"]) == str(item.id)
+
+    # ...and update it (global catalogue is intentionally shared-write).
+    updated = await update_cost_item(
+        item.id,
+        CostItemUpdate(description="shared edit"),
+        _ATTACKER_PAYLOAD,
+        service=CostItemService(session),
+        catalog_service=CostCatalogService(session),
+    )
+    assert updated.description == "shared edit"

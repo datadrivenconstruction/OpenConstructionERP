@@ -107,7 +107,17 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
     ],
     # v2.6.47 sweep
     "requirements": ["get_set", "update_set", "delete_set"],
-    "documents": ["get_document", "download_document", "update_document", "delete_document"],
+    "documents": [
+        "get_document",
+        "download_document",
+        "update_document",
+        "delete_document",
+        # Finding #25 - revision upload must funnel through the same
+        # project-access gate as the other single-document handlers
+        # (the folder-level write gate is pinned separately in
+        # test_documents_revision_folder_write_gate.py).
+        "upload_document_revision",
+    ],
     "teams": ["update_team", "delete_team"],
     # Round-6 audit — dwg_takeoff IDOR sweep. Every endpoint must funnel
     # through ``_gate_by_drawing`` / ``_gate_by_annotation`` /

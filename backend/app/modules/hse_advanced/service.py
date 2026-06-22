@@ -615,6 +615,19 @@ class HSEAdvancedService:
             raise HTTPException(404, "Investigation not found")
         return obj
 
+    async def investigation_project_id(self, obj: HSEIncidentInvestigation) -> uuid.UUID | None:
+        """Resolve the owning project for an investigation.
+
+        ``HSEIncidentInvestigation`` carries no ``project_id`` column - it is
+        keyed by ``incident_ref`` to the safety module's incident. We resolve
+        the project through that link so the router can apply the same
+        project-access (IDOR) guard the JSA / permit / audit / CAPA reads use.
+        Returns ``None`` when the incident cannot be resolved, which the
+        guard treats as "skip" rather than 500-ing on a dangling reference.
+        """
+        stmt = select(SafetyIncident.project_id).where(SafetyIncident.id == obj.incident_ref)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
     async def update_investigation(self, item_id: uuid.UUID, data: InvestigationUpdate) -> HSEIncidentInvestigation:
         obj = await self.get_investigation(item_id)
         fields = data.model_dump(exclude_unset=True)
@@ -1380,6 +1393,20 @@ class HSEAdvancedService:
             evidence_url=payload.evidence_url,
         )
         return await self.finding_repo.create(obj)
+
+    async def finding_project_id(self, finding_id: uuid.UUID) -> uuid.UUID | None:
+        """Resolve the owning project for an audit finding via its parent audit.
+
+        Findings carry no ``project_id`` of their own; they belong to a
+        ``SafetyAudit`` (``audit_id``) which does. Returns ``None`` when the
+        finding (or its audit) cannot be resolved, so the router's
+        project-access guard treats it as "skip" rather than failing hard.
+        """
+        finding = await self.finding_repo.get_by_id(finding_id)
+        if finding is None:
+            return None
+        audit = await self.audit_repo.get_by_id(finding.audit_id)
+        return getattr(audit, "project_id", None) if audit is not None else None
 
     async def delete_finding(self, finding_id: uuid.UUID) -> None:
         await self.finding_repo.delete(finding_id)

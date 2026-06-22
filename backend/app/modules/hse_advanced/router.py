@@ -167,10 +167,17 @@ async def create_investigation(
 @router.get("/investigations/{item_id}", response_model=InvestigationResponse)
 async def get_investigation(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> InvestigationResponse:
+    # IDOR guard: investigations carry no project_id, so resolve the owning
+    # project via the linked safety incident (incident_ref) and verify the
+    # caller may access it before returning the record. RequirePermission
+    # only proves role scope, not access to this specific project's data.
     obj = await service.get_investigation(item_id)
+    await _guard_project(await service.investigation_project_id(obj), user_id, session)
     return InvestigationResponse.model_validate(obj)
 
 
@@ -241,10 +248,13 @@ async def create_jsa(
 @router.get("/jsa/{item_id}", response_model=JSAResponse)
 async def get_jsa(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> JSAResponse:
     obj = await service.get_jsa(item_id)
+    await _guard_project(obj.project_id, user_id, session)
     return JSAResponse.model_validate(obj)
 
 
@@ -381,10 +391,13 @@ async def request_permit(
 @router.get("/permits/{item_id}", response_model=PermitResponse)
 async def get_permit(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> PermitResponse:
     obj = await service.get_permit(item_id)
+    await _guard_project(obj.project_id, user_id, session)
     return PermitResponse.model_validate(obj)
 
 
@@ -743,10 +756,13 @@ async def create_audit(
 @router.get("/audits/{item_id}", response_model=AuditResponse)
 async def get_audit(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> AuditResponse:
     obj = await service.get_audit(item_id)
+    await _guard_project(obj.project_id, user_id, session)
     return AuditResponse.model_validate(obj)
 
 
@@ -800,9 +816,15 @@ async def complete_audit(
 async def create_finding(
     item_id: uuid.UUID,
     payload: AuditFindingCreate,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.conduct_audit")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> AuditFindingResponse:
+    # IDOR guard via the parent audit's project: without it any holder of
+    # conduct_audit could inject findings into another tenant's audit.
+    audit = await service.get_audit(item_id)
+    await _guard_project(audit.project_id, user_id, session)
     obj = await service.create_finding(item_id, payload)
     return AuditFindingResponse.model_validate(obj)
 
@@ -810,9 +832,14 @@ async def create_finding(
 @router.get("/audits/{item_id}/findings", response_model=list[AuditFindingResponse])
 async def list_findings(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> list[AuditFindingResponse]:
+    # IDOR guard via the parent audit's project before disclosing findings.
+    audit = await service.get_audit(item_id)
+    await _guard_project(audit.project_id, user_id, session)
     rows = await service.finding_repo.list_for_audit(item_id)
     return [AuditFindingResponse.model_validate(r) for r in rows]
 
@@ -820,9 +847,13 @@ async def list_findings(
 @router.delete("/audit-findings/{finding_id}", status_code=204)
 async def delete_finding(
     finding_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.delete")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> None:
+    # IDOR guard via the parent audit's project before deleting a finding.
+    await _guard_project(await service.finding_project_id(finding_id), user_id, session)
     await service.delete_finding(finding_id)
 
 
@@ -860,10 +891,13 @@ async def create_capa(
 @router.get("/capas/{item_id}", response_model=CAPAResponse)
 async def get_capa(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> CAPAResponse:
     obj = await service.get_capa(item_id)
+    await _guard_project(obj.project_id, user_id, session)
     return CAPAResponse.model_validate(obj)
 
 
@@ -1171,11 +1205,14 @@ async def permit_dashboard(
 @router.get("/permits/{item_id}/prerequisites", response_model=PermitPrerequisiteStatus)
 async def permit_prereq_status(
     item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.read")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> PermitPrerequisiteStatus:
     """Inspect a permit's prerequisite checklist completion."""
     permit = await service.get_permit(item_id)
+    await _guard_project(permit.project_id, user_id, session)
     return service.permit_prerequisite_status(permit)
 
 

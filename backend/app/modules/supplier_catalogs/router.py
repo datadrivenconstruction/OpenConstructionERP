@@ -412,7 +412,7 @@ async def acknowledge_po(
     user_id: CurrentUserId,
     service: SupplierCatalogsService = Depends(_svc),
 ) -> POResponseExt:
-    po = await service.acknowledge_po(po_id)
+    po = await service.acknowledge_po(po_id, user_id=user_id)
     return POResponseExt.model_validate(po)
 
 
@@ -426,7 +426,7 @@ async def close_po(
     user_id: CurrentUserId,
     service: SupplierCatalogsService = Depends(_svc),
 ) -> POResponseExt:
-    po = await service.close_po(po_id)
+    po = await service.close_po(po_id, user_id=user_id)
     return POResponseExt.model_validate(po)
 
 
@@ -534,7 +534,7 @@ async def create_warehouse(
     user_id: CurrentUserId,
     service: SupplierCatalogsService = Depends(_svc),
 ) -> WarehouseResponse:
-    wh = await service.create_warehouse(data)
+    wh = await service.create_warehouse(data, user_id=user_id)
     return WarehouseResponse.model_validate(wh)
 
 
@@ -561,7 +561,7 @@ async def list_warehouse_balances(
     user_id: CurrentUserId,
     service: SupplierCatalogsService = Depends(_svc),
 ) -> list[StockBalanceResponse]:
-    rows = await service.warehouses.list_balances(warehouse_id)
+    rows = await service.list_warehouse_balances(warehouse_id, user_id=user_id)
     return [StockBalanceResponse.model_validate(b) for b in rows]
 
 

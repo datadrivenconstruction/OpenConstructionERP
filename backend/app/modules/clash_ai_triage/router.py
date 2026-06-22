@@ -83,6 +83,24 @@ async def _project_id_for_clash(session: AsyncSession, clash_id: uuid.UUID) -> u
     return pid
 
 
+async def _project_ids_for_clashes(session: AsyncSession, clash_ids: list[uuid.UUID]) -> dict[uuid.UUID, uuid.UUID]:
+    """Map each clash id → its owning ``project_id`` in a single join query.
+
+    Only ids that resolve through ``ClashResult → ClashRun`` appear in the
+    returned mapping; a missing/orphaned id is simply absent. Callers decide
+    how to treat the gap (the batch endpoint 404s the whole batch).
+    """
+    if not clash_ids:
+        return {}
+    stmt = (
+        select(ClashResult.id, ClashRun.project_id)
+        .join(ClashRun, ClashResult.run_id == ClashRun.id)
+        .where(ClashResult.id.in_(set(clash_ids)))
+    )
+    rows = (await session.execute(stmt)).all()
+    return {cid: pid for cid, pid in rows}
+
+
 def _to_response(row: ClashTriageResult) -> TriageResultResponse:
     """Adapt a persisted row into the wire response shape."""
     return TriageResultResponse(
@@ -165,22 +183,39 @@ async def triage_batch(
     after another - paired with ``max_concurrent`` (in-flight cap) and the
     per-(subject, prompt, model) cache to keep cost predictable.
     """
-    # Verify project access against the first reachable clash. The batch
-    # contract is "all clashes belong to the same project the caller has
-    # access to" - we enforce by sampling the head; the service then
-    # tolerates missing clashes gracefully (skips + logs).
+    # Authorize EVERY clash in the batch, not just the head. A batch may
+    # mix clashes from different projects, and sampling only ``clash_ids[0]``
+    # let a caller smuggle foreign clash ids past the gate (IDOR - the
+    # service tolerates FOREIGN clashes, not just missing ones). We resolve
+    # the owning project for every id in one join query and verify access to
+    # each distinct project; any clash that is unreachable or outside the
+    # caller's accessible projects fails the WHOLE batch with 404 so no
+    # foreign triage row is ever written and existence is not leaked.
     if not body.clash_ids:
         return []
-    head = body.clash_ids[0]
-    project_id = await _project_id_for_clash(session, head)
-    await verify_project_access(project_id, user_id, session)
+    project_by_clash = await _project_ids_for_clashes(session, body.clash_ids)
+    for cid in body.clash_ids:
+        pid = project_by_clash.get(cid)
+        if pid is None:
+            # Missing/orphaned clash id - 404 the batch (mirrors the
+            # single-clash 404 and avoids a partial-trust batch).
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Clash {cid} not found",
+            )
+    for pid in set(project_by_clash.values()):
+        await verify_project_access(pid, user_id, session)
 
+    # Defense-in-depth: pass the verified project set into the service so the
+    # per-clash worker re-checks the clash's project before triaging, even if
+    # this router gate is ever bypassed or the batch is replayed.
     try:
         rows = await service.triage_batch(
             body.clash_ids,
             user_id=uuid.UUID(user_id),
             max_concurrent=body.max_concurrent,
             force_refresh=body.force_refresh,
+            allowed_project_ids=set(project_by_clash.values()),
         )
     except ClashTriageUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc

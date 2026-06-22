@@ -304,6 +304,8 @@ class BIMRequirementService:
         self,
         set_id: uuid.UUID,
         model_id: uuid.UUID,
+        *,
+        user_id: str,
     ) -> dict:
         """Check if BIM elements in a model satisfy the requirements in a set.
 
@@ -314,8 +316,19 @@ class BIMRequirementService:
            (optionally in the specified ``property_group``).
         3. Evaluate the ``constraint_def`` against the actual property value.
 
+        The ``model_id`` is caller-supplied, so the model's project must be
+        re-authorised here even though the router already verified access to
+        the requirement set's project: without this a caller who owns a set
+        in project A could validate against a model from another tenant's
+        project B, turning the attacker-controlled ``element_filter`` /
+        ``constraint_def`` into a cross-tenant property-value oracle. Both a
+        foreign model and one the caller cannot reach collapse to 404 so the
+        model's existence is never leaked - mirroring the ``preview-yaml``
+        endpoint which already gates the model the same way.
+
         Returns a compliance report dict suitable for ``RequirementValidationResponse``.
         """
+        from app.dependencies import verify_project_access
         from app.modules.bim_hub.models import BIMModel
         from app.modules.bim_hub.repository import BIMElementRepository
 
@@ -326,6 +339,19 @@ class BIMRequirementService:
         # Load BIM model and its elements
         model = await self.session.get(BIMModel, model_id)
         if model is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM model not found",
+            )
+        # IDOR guard: the caller must be able to access the MODEL's project,
+        # not just the requirement set's. 404 (not 403) on denial keeps a
+        # foreign model indistinguishable from a missing one.
+        await verify_project_access(model.project_id, str(user_id), self.session)
+        # Defence in depth: a validation only makes sense within one project,
+        # so reject a model that belongs to a different project than the set
+        # even when the caller happens to be able to reach both (again 404 so
+        # the cross-project pairing is not confirmed).
+        if model.project_id != req_set.project_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="BIM model not found",

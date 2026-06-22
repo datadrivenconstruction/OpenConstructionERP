@@ -502,7 +502,14 @@ async def render_dashboard(
     # Read-vs-write RBAC: render is a READ - allow owner/admin + shared
     # (global/role) + project-team access, matching the dashboards grid.
     await _ensure_dashboard_read_access(dashboard_id, user_id, session)
-    result = await service.render_dashboard(dashboard_id)
+    # IDOR scope: portfolio widgets (no project pin) must aggregate only over
+    # the caller's accessible projects, never every tenant's. Admins get None
+    # (unrestricted). Same pattern as the standalone /kpis/* routes.
+    allowed = await accessible_project_ids(session, user_id)
+    result = await service.render_dashboard(
+        dashboard_id,
+        allowed_project_ids=allowed,
+    )
     if result is None:
         raise _not_found("Dashboard not found")
     return result
@@ -544,7 +551,15 @@ async def evaluate_dashboard(
                 detail="filters.project_id must be a UUID",
             ) from exc
         await verify_project_access(project_uuid, user_id, session)
-    result = await service.evaluate_dashboard(dashboard_id, filters=filters)
+    # IDOR scope: portfolio widgets (no project pin) must aggregate only over
+    # the caller's accessible projects, never every tenant's. Admins get None
+    # (unrestricted). Same pattern as the standalone /kpis/* routes.
+    allowed = await accessible_project_ids(session, user_id)
+    result = await service.evaluate_dashboard(
+        dashboard_id,
+        filters=filters,
+        allowed_project_ids=allowed,
+    )
     if result is None:
         raise _not_found("Dashboard not found")
     return result

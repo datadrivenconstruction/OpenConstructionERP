@@ -21,6 +21,7 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastapi import HTTPException
 from pydantic import ValidationError
 
 from app.core.permissions import Role, permission_registry
@@ -291,3 +292,285 @@ def test_closure_permissions_require_manager_role() -> None:
         required = permission_registry.get_min_role(perm)
         # A plain EDITOR must NOT satisfy a closure permission anymore.
         assert required == Role.MANAGER, f"{perm} must require MANAGER (Round-3 Wave F closure gate), got {required}"
+
+
+# ── 5. Cross-tenant GET-by-id IDOR guard (Max-Audit #15) ───────────────────
+#
+# Max-Audit v8.8.3 #15: the single-item READ endpoints for project-scoped HSE
+# resources fetched the row by URL id and returned it WITHOUT calling
+# _guard_project(existing.project_id, ...), even though their PATCH/DELETE
+# siblings do. A VIEWER in tenant A could therefore GET a JSA / permit / audit
+# / CAPA / finding belonging to tenant B by guessing a UUID. These tests drive
+# the router handlers directly with a verify_project_access that denies the
+# foreign project (404, the same opaque surface the real dependency uses) and
+# assert the read is blocked. They FAIL on the pre-fix handlers (which never
+# called the guard) and PASS once the guard is threaded in.
+
+
+class _DenyForProject:
+    """Stand-in for ``verify_project_access`` that denies one project.
+
+    Mirrors the real helper: a 404 is raised for both "missing" and "denied"
+    so the response is opaque. Any *other* project id is allowed through.
+    """
+
+    def __init__(self, denied_project_id: uuid.UUID) -> None:
+        self.denied = denied_project_id
+        self.calls: list[Any] = []
+
+    async def __call__(self, project_id: Any, user_id: Any, session: Any) -> None:
+        self.calls.append(project_id)
+        if project_id == self.denied:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+
+def _seed_jsa(svc: Any, project_id: uuid.UUID) -> uuid.UUID:
+    from app.modules.hse_advanced.models import JobSafetyAnalysis
+
+    now = datetime.now(UTC)
+    jsa = JobSafetyAnalysis(
+        project_id=project_id,
+        task_description="Confined-space entry",
+        work_date="2026-06-01",
+        status="approved",
+        hazards=[],
+        required_ppe=[],
+        risk_score=9,
+        created_at=now,
+        updated_at=now,
+    )
+    jsa.id = uuid.uuid4()
+    svc.jsa_repo.rows[jsa.id] = jsa
+    return jsa.id
+
+
+def _seed_permit(svc: Any, project_id: uuid.UUID) -> uuid.UUID:
+    from app.modules.hse_advanced.models import PermitToWork
+
+    permit = PermitToWork(
+        project_id=project_id,
+        permit_number="PTW-001",
+        permit_type="hot_work",
+        status="active",
+    )
+    permit.id = uuid.uuid4()
+    svc.permit_repo.rows[permit.id] = permit
+    return permit.id
+
+
+def _seed_audit(svc: Any, project_id: uuid.UUID) -> uuid.UUID:
+    from app.modules.hse_advanced.models import SafetyAudit
+
+    audit = SafetyAudit(
+        project_id=project_id,
+        audit_type="internal",
+        conducted_at=datetime.now(UTC),
+        status="in_progress",
+        summary="",
+    )
+    audit.id = uuid.uuid4()
+    svc.audit_repo.rows[audit.id] = audit
+    return audit.id
+
+
+def _seed_capa(svc: Any, project_id: uuid.UUID) -> uuid.UUID:
+    from app.modules.hse_advanced.models import CorrectiveAction
+
+    capa = CorrectiveAction(
+        project_id=project_id,
+        source_type="manual",
+        title="Fix guardrail",
+        description="x",
+        target_date=date.today(),
+        status="open",
+    )
+    capa.id = uuid.uuid4()
+    svc.capa_repo.rows[capa.id] = capa
+    return capa.id
+
+
+@pytest.mark.asyncio
+async def test_get_jsa_denies_foreign_project_viewer() -> None:
+    """A viewer outside the JSA's project gets 404 (no cross-tenant read)."""
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    jsa_id = _seed_jsa(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.get_jsa(jsa_id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    # The guard must have been consulted with the row's true project.
+    assert guard.calls == [PROJECT_B]
+
+
+@pytest.mark.asyncio
+async def test_get_jsa_allows_member_of_project() -> None:
+    """A user with access to the JSA's project reads it normally."""
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    jsa_id = _seed_jsa(svc, PROJECT_A)
+    guard = _DenyForProject(PROJECT_B)  # PROJECT_A is allowed
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        resp = await hse_router.get_jsa(jsa_id, USER_ID, svc.session, None, svc)
+
+    assert resp.id == jsa_id
+    assert guard.calls == [PROJECT_A]
+
+
+@pytest.mark.asyncio
+async def test_get_permit_denies_foreign_project_viewer() -> None:
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    permit_id = _seed_permit(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.get_permit(permit_id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+
+
+@pytest.mark.asyncio
+async def test_get_audit_denies_foreign_project_viewer() -> None:
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    audit_id = _seed_audit(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.get_audit(audit_id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+
+
+@pytest.mark.asyncio
+async def test_get_capa_denies_foreign_project_viewer() -> None:
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    capa_id = _seed_capa(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.get_capa(capa_id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+
+
+@pytest.mark.asyncio
+async def test_list_findings_denies_foreign_audit_viewer() -> None:
+    """Findings are guarded via the parent audit's project."""
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    audit_id = _seed_audit(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.list_findings(audit_id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+
+
+@pytest.mark.asyncio
+async def test_create_finding_denies_foreign_audit_viewer() -> None:
+    """An attacker cannot inject a finding into another tenant's audit."""
+    from app.modules.hse_advanced import router as hse_router
+
+    svc = _make_service()
+    audit_id = _seed_audit(svc, PROJECT_B)
+    guard = _DenyForProject(PROJECT_B)
+    payload = AuditFindingPayload(item_description="Planted finding")
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.create_finding(audit_id, payload, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+    # No finding row was written for the foreign audit.
+    assert all(getattr(r, "audit_id", None) != audit_id for r in svc.finding_repo.rows.values())
+
+
+@pytest.mark.asyncio
+async def test_delete_finding_denies_foreign_audit_viewer() -> None:
+    """A finding may only be deleted by someone with access to its audit's
+    project; the guard resolves the project via the parent audit.
+    """
+    from app.modules.hse_advanced import router as hse_router
+    from app.modules.hse_advanced.models import SafetyAuditFinding
+
+    svc = _make_service()
+    audit_id = _seed_audit(svc, PROJECT_B)
+    finding = SafetyAuditFinding(
+        audit_id=audit_id,
+        item_description="Missing extinguisher",
+        category="other",
+        severity="high",
+        is_passed=False,
+    )
+    finding.id = uuid.uuid4()
+    svc.finding_repo.rows[finding.id] = finding
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.delete_finding(finding.id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]
+    assert finding.id in svc.finding_repo.rows  # not deleted
+
+
+@pytest.mark.asyncio
+async def test_get_investigation_denies_foreign_project_via_incident() -> None:
+    """Investigations carry no project_id; the guard resolves PROJECT_B via
+    the linked safety incident (incident_ref) and denies the viewer.
+    """
+    from app.modules.hse_advanced import router as hse_router
+    from app.modules.hse_advanced.models import HSEIncidentInvestigation
+
+    svc = _make_service()
+    incident_id = uuid.uuid4()
+    inv = HSEIncidentInvestigation(
+        incident_ref=incident_id,
+        started_at=datetime.now(UTC),
+        status="in_progress",
+    )
+    inv.id = uuid.uuid4()
+    svc.investigation_repo.rows[inv.id] = inv
+
+    # Resolve incident_ref -> PROJECT_B (what investigation_project_id queries).
+    class _IncidentSession:
+        async def execute(self, stmt: Any) -> Any:
+            class _R:
+                def scalar_one_or_none(self) -> Any:
+                    return PROJECT_B
+
+            return _R()
+
+    svc.session = _IncidentSession()  # type: ignore[assignment]
+    guard = _DenyForProject(PROJECT_B)
+
+    with patch.object(hse_router, "verify_project_access", guard):
+        with pytest.raises(HTTPException) as exc:
+            await hse_router.get_investigation(inv.id, USER_ID, svc.session, None, svc)
+
+    assert exc.value.status_code == 404
+    assert guard.calls == [PROJECT_B]

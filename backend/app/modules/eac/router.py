@@ -32,7 +32,12 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
-from app.dependencies import CurrentUserId, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.eac.models import (
     GLOBAL_VARIABLE_VALUE_TYPES,
     OUTPUT_MODES,
@@ -147,6 +152,7 @@ def _check_ruleset_kind(value: str | None) -> None:
     "/rules",
     response_model=EacRuleRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("eac.write"))],
 )
 async def create_rule(
     payload: EacRuleCreate,
@@ -200,7 +206,11 @@ async def create_rule(
 # ── Rules: get ──────────────────────────────────────────────────────────
 
 
-@router.get("/rules/{rule_id}", response_model=EacRuleRead)
+@router.get(
+    "/rules/{rule_id}",
+    response_model=EacRuleRead,
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def get_rule(
     rule_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -220,7 +230,11 @@ async def get_rule(
 # ── Rules: list ─────────────────────────────────────────────────────────
 
 
-@router.get("/rules", response_model=list[EacRuleRead])
+@router.get(
+    "/rules",
+    response_model=list[EacRuleRead],
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def list_rules(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -303,7 +317,11 @@ async def list_rules(
 # ── Rules: update ───────────────────────────────────────────────────────
 
 
-@router.put("/rules/{rule_id}", response_model=EacRuleRead)
+@router.put(
+    "/rules/{rule_id}",
+    response_model=EacRuleRead,
+    dependencies=[Depends(RequirePermission("eac.write"))],
+)
 async def update_rule(
     rule_id: uuid.UUID,
     payload: EacRuleUpdate,
@@ -350,7 +368,11 @@ async def update_rule(
 # ── Rules: delete (soft) ────────────────────────────────────────────────
 
 
-@router.delete("/rules/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/rules/{rule_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RequirePermission("eac.delete"))],
+)
 async def delete_rule(
     rule_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -375,6 +397,7 @@ async def delete_rule(
 @router.post(
     "/rules:validate",
     response_model=EacRuleValidateResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def validate_rule(
     payload: EacRuleValidateRequest,
@@ -461,6 +484,7 @@ async def validate_rule(
     "/rulesets",
     response_model=EacRulesetRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("eac.write"))],
 )
 async def create_ruleset(
     payload: EacRulesetCreate,
@@ -490,7 +514,11 @@ async def create_ruleset(
     return EacRulesetRead.model_validate(ruleset)
 
 
-@router.get("/rulesets/{ruleset_id}", response_model=EacRulesetRead)
+@router.get(
+    "/rulesets/{ruleset_id}",
+    response_model=EacRulesetRead,
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def get_ruleset(
     ruleset_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -507,7 +535,11 @@ async def get_ruleset(
     return EacRulesetRead.model_validate(ruleset)
 
 
-@router.get("/rulesets", response_model=list[EacRulesetRead])
+@router.get(
+    "/rulesets",
+    response_model=list[EacRulesetRead],
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def list_rulesets(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -540,7 +572,11 @@ async def list_rulesets(
     return [EacRulesetRead.model_validate(r) for r in rulesets]
 
 
-@router.put("/rulesets/{ruleset_id}", response_model=EacRulesetRead)
+@router.put(
+    "/rulesets/{ruleset_id}",
+    response_model=EacRulesetRead,
+    dependencies=[Depends(RequirePermission("eac.write"))],
+)
 async def update_ruleset(
     ruleset_id: uuid.UUID,
     payload: EacRulesetUpdate,
@@ -567,6 +603,7 @@ async def update_ruleset(
 @router.delete(
     "/rulesets/{ruleset_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RequirePermission("eac.delete"))],
 )
 async def delete_ruleset(
     ruleset_id: uuid.UUID,
@@ -594,6 +631,7 @@ async def delete_ruleset(
 @router.post(
     "/rules:dry-run",
     response_model=EacDryRunResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def dry_run_rule_endpoint(
     payload: EacDryRunRequest,
@@ -684,6 +722,7 @@ async def dry_run_rule_endpoint(
     "/rulesets/{ruleset_id}:run",
     response_model=EacRunRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def run_ruleset_endpoint(
     ruleset_id: uuid.UUID,
@@ -830,7 +869,11 @@ async def run_ruleset_endpoint(
     return EacRunRead.model_validate(run)
 
 
-@router.get("/runs/{run_id}", response_model=EacRunRead)
+@router.get(
+    "/runs/{run_id}",
+    response_model=EacRunRead,
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def get_run(
     run_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -847,7 +890,11 @@ async def get_run(
     return EacRunRead.model_validate(run)
 
 
-@router.get("/runs", response_model=list[EacRunRead])
+@router.get(
+    "/runs",
+    response_model=list[EacRunRead],
+    dependencies=[Depends(RequirePermission("eac.read"))],
+)
 async def list_runs(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -879,6 +926,7 @@ async def list_runs(
 @router.get(
     "/runs/{run_id}/results",
     response_model=list[EacRunResultItemRead],
+    dependencies=[Depends(RequirePermission("eac.read"))],
 )
 async def list_run_results(
     run_id: uuid.UUID,
@@ -929,6 +977,7 @@ async def list_run_results(
 @router.post(
     "/rules:compile",
     response_model=EacCompileResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def compile_rule_endpoint(
     payload: EacCompileRequest,
@@ -981,6 +1030,7 @@ async def compile_rule_endpoint(
 @router.get(
     "/runs/{run_id}/status",
     response_model=EacRunStatusResponse,
+    dependencies=[Depends(RequirePermission("eac.read"))],
 )
 async def get_run_status_endpoint(
     run_id: uuid.UUID,
@@ -1018,6 +1068,7 @@ async def get_run_status_endpoint(
 @router.post(
     "/runs/{run_id}:cancel",
     response_model=EacRunCancelResponse,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def cancel_run_endpoint(
     run_id: uuid.UUID,
@@ -1080,6 +1131,7 @@ async def cancel_run_endpoint(
     "/runs/{run_id}:rerun",
     response_model=EacRunRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("eac.run"))],
 )
 async def rerun_run_endpoint(
     run_id: uuid.UUID,
@@ -1132,6 +1184,7 @@ async def rerun_run_endpoint(
 @router.get(
     "/runs/{run_id_a}:diff/{run_id_b}",
     response_model=EacRunDiffResponse,
+    dependencies=[Depends(RequirePermission("eac.read"))],
 )
 async def diff_runs_endpoint(
     run_id_a: uuid.UUID,

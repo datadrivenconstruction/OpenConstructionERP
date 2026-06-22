@@ -422,6 +422,119 @@ async def test_snag_photo_upload_accepts_valid_jpeg(
     assert res.status_code == 200, res.text
 
 
+# ── Root-create IDOR (audit 2026-06-22 #9) ──────────────────────────────
+#
+# create_development / create_lead / create_buyer accept a foreign parent
+# id (project_id / development_id / plot_id) in the request body. Before
+# the fix the handlers wrote the row with no project-access check, so
+# tenant B could attach a development (and its plots/buyers/contracts) to
+# tenant A's project, or a lead/buyer to tenant A's development. The gates
+# mirror create_plot's ``_verify_owner_via_development`` / the new
+# ``_verify_owner_via_project`` and must collapse to 404.
+
+
+@pytest.mark.asyncio
+async def test_idor_create_development_foreign_project_404(
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
+):
+    """Tenant B cannot create a development under tenant A's project."""
+    res = await client.post(
+        "/api/v1/property-dev/developments/",
+        json={
+            "project_id": tenant_a["project_id"],
+            "code": f"IDOR-{uuid.uuid4().hex[:6]}",
+            "name": "Cross-tenant injection",
+            "total_plots": 1,
+            "currency": "EUR",
+        },
+        headers=tenant_b["headers"],
+    )
+    assert res.status_code == 404, res.text
+
+
+@pytest.mark.asyncio
+async def test_create_development_own_project_still_works(
+    client: AsyncClient,
+    tenant_b,
+):
+    """Sanity: the gate does not block creating under your OWN project."""
+    res = await client.post(
+        "/api/v1/property-dev/developments/",
+        json={
+            "project_id": tenant_b["project_id"],
+            "code": f"OWN-{uuid.uuid4().hex[:6]}",
+            "name": "Legit development",
+            "total_plots": 1,
+            "currency": "EUR",
+        },
+        headers=tenant_b["headers"],
+    )
+    assert res.status_code == 201, res.text
+
+
+@pytest.mark.asyncio
+async def test_idor_create_lead_foreign_development_404(
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
+):
+    """Tenant B cannot attach a lead to tenant A's development."""
+    res = await client.post(
+        "/api/v1/property-dev/leads/",
+        json={
+            "development_id": tenant_a["development_id"],
+            "full_name": "Mallory Lead",
+            "email": f"mallory-{uuid.uuid4().hex[:6]}@evil.io",
+        },
+        headers=tenant_b["headers"],
+    )
+    assert res.status_code == 404, res.text
+
+
+@pytest.mark.asyncio
+async def test_idor_create_buyer_foreign_development_404(
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
+):
+    """Tenant B cannot attach a buyer to tenant A's development."""
+    res = await client.post(
+        "/api/v1/property-dev/buyers/",
+        json={
+            "development_id": tenant_a["development_id"],
+            "full_name": "Mallory Buyer",
+            "email": f"mallory-buyer-{uuid.uuid4().hex[:6]}@evil.io",
+            "status": "lead",
+        },
+        headers=tenant_b["headers"],
+    )
+    assert res.status_code == 404, res.text
+
+
+@pytest.mark.asyncio
+async def test_idor_create_buyer_foreign_plot_404(
+    client: AsyncClient,
+    tenant_a,
+    tenant_b,
+):
+    """Tenant B cannot pin a buyer to tenant A's plot via plot_id, even if
+    development_id points at their own development."""
+    res = await client.post(
+        "/api/v1/property-dev/buyers/",
+        json={
+            "development_id": tenant_b["development_id"],
+            "plot_id": tenant_a["plot_id"],
+            "full_name": "Mallory PlotBuyer",
+            "email": f"mallory-plot-{uuid.uuid4().hex[:6]}@evil.io",
+            "status": "lead",
+        },
+        headers=tenant_b["headers"],
+    )
+    assert res.status_code == 404, res.text
+
+
 # ── FSM rejection ───────────────────────────────────────────────────────
 
 

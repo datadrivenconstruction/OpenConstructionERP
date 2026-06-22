@@ -2128,11 +2128,18 @@ class BIMHubService:
     async def list_quantity_maps(
         self,
         *,
+        project_ids: set[uuid.UUID] | None,
         offset: int = 0,
         limit: int = 100,
     ) -> tuple[list[BIMQuantityMap], int]:
-        """List all quantity mapping rules."""
-        return await self.qmap_repo.list_all(offset=offset, limit=limit)
+        """List quantity mapping rules visible to the caller.
+
+        ``project_ids`` is the caller's accessible-project set (``None`` for
+        admins / unrestricted). Project-scoped rules belonging to other
+        tenants are excluded; ``project_id IS NULL`` rows (global templates)
+        remain visible to everyone.
+        """
+        return await self.qmap_repo.list_scoped(project_ids=project_ids, offset=offset, limit=limit)
 
     async def create_quantity_map(
         self,

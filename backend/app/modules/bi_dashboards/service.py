@@ -465,13 +465,33 @@ class BIDashboardsService:
     async def render_dashboard(
         self,
         dashboard_id: uuid.UUID,
+        *,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> DashboardRenderResponse | None:
+        """Render every widget on a dashboard with its headline KPI value.
+
+        ``allowed_project_ids`` is the caller's accessible-project scope
+        (IDOR defence). It is forwarded to every portfolio ``_kpis.compute``
+        so a non-admin's widgets only aggregate over projects they can
+        access. ``None`` means unrestricted (admin) - the tenant-wide
+        portfolio view.
+
+        The shared widget snapshot cache is scope-blind (keyed by widget),
+        so it is only read AND written for unrestricted callers. A scoped
+        (non-admin) caller always computes live and never serves - nor
+        poisons - the admin's tenant-wide snapshot.
+        """
         dashboard = await self.repo.get_dashboard(dashboard_id)
         if dashboard is None:
             return None
         widgets = await self.repo.list_widgets(dashboard_id)
         results: list[WidgetRenderResult] = []
         now = _now()
+        # The persisted snapshot is keyed by widget id only, so it cannot
+        # distinguish a tenant-wide (admin) value from a scoped one. Only
+        # unrestricted callers may touch it; a scoped caller bypasses the
+        # cache entirely so it never reads an admin-computed aggregate.
+        use_snapshot_cache = allowed_project_ids is None
         # Perf (N+1): batch-load the latest snapshot for every widget in one
         # query instead of one SELECT per widget inside the loop below.
         latest_snapshots = await self.repo.get_latest_snapshots_for_widgets(
@@ -487,7 +507,7 @@ class BIDashboardsService:
             # Try cached snapshot first. SQLite returns naive datetimes -
             # assume UTC so the comparison against ``now`` (always tz-aware)
             # doesn't TypeError.
-            snap = latest_snapshots.get(widget.id)
+            snap = latest_snapshots.get(widget.id) if use_snapshot_cache else None
             snap_valid_until = (
                 snap.valid_until.replace(tzinfo=UTC)
                 if snap is not None and snap.valid_until is not None and snap.valid_until.tzinfo is None
@@ -508,28 +528,32 @@ class BIDashboardsService:
                 breakdown = payload.get("breakdown", {}) or {}
                 from_cache = True
             elif widget.kpi_code is not None:
-                # Compute live + write snapshot
+                # Compute live (portfolio calls scoped to the caller's
+                # accessible projects so a non-admin never aggregates across
+                # every tenant's projects) + write snapshot for admins only.
                 result = await _kpis.compute(
                     widget.kpi_code,
                     self.session,
+                    allowed_project_ids=allowed_project_ids,
                 )
                 value = result.value
                 unit = result.unit
                 breakdown = result.breakdown
-                valid_until = now + timedelta(
-                    seconds=dashboard.refresh_interval_seconds,
-                )
-                await self.repo.write_snapshot(
-                    widget_id=widget.id,
-                    value_json={
-                        "value": str(result.value),
-                        "unit": result.unit,
-                        "breakdown": result.breakdown,
-                        "source_record_count": result.source_record_count,
-                    },
-                    computed_at=now,
-                    valid_until=valid_until,
-                )
+                if use_snapshot_cache:
+                    valid_until = now + timedelta(
+                        seconds=dashboard.refresh_interval_seconds,
+                    )
+                    await self.repo.write_snapshot(
+                        widget_id=widget.id,
+                        value_json={
+                            "value": str(result.value),
+                            "unit": result.unit,
+                            "breakdown": result.breakdown,
+                            "source_record_count": result.source_record_count,
+                        },
+                        computed_at=now,
+                        valid_until=valid_until,
+                    )
 
             results.append(
                 WidgetRenderResult(
@@ -563,6 +587,7 @@ class BIDashboardsService:
         dashboard_id: uuid.UUID,
         *,
         filters: dict[str, Any] | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> DashboardEvaluateResponse | None:
         """Evaluate every widget on a dashboard, optionally cross-filtered.
 
@@ -576,6 +601,14 @@ class BIDashboardsService:
         ``period_start`` / ``period_end`` are first-class - anything else
         is forwarded as ``filters=`` to the KPI formula (each KPI ignores
         keys it doesn't recognise, so unknown keys degrade gracefully).
+
+        ``allowed_project_ids`` is the caller's accessible-project scope
+        (IDOR defence): every portfolio (``project_id is None``)
+        ``_kpis.compute`` and the chart-history query are restricted to it
+        so a non-admin never aggregates over projects they cannot access.
+        ``None`` means unrestricted (admin). The scope-blind widget snapshot
+        cache is reused only for unrestricted callers, mirroring
+        :meth:`render_dashboard`.
         """
         dashboard = await self.repo.get_dashboard(dashboard_id)
         if dashboard is None:
@@ -640,6 +673,7 @@ class BIDashboardsService:
                 kpi_code,
                 project_id=project_id_val,
                 limit=12,
+                allowed_project_ids=allowed_project_ids,
             )
             history_by_kpi[kpi_code] = [
                 {
@@ -657,7 +691,11 @@ class BIDashboardsService:
             breakdown: dict[str, Any] = {}
             if widget.kpi_code is not None:
                 cached = None
-                if not has_active_filter:
+                # The widget snapshot is scope-blind (admin-computed tenant-
+                # wide value), so a scoped (non-admin) caller must never reuse
+                # it - it would leak cross-tenant aggregates. Only unrestricted
+                # callers read the cache.
+                if not has_active_filter and allowed_project_ids is None:
                     cached = await self._fresh_snapshot_payload(widget.id, now)
                 if cached is not None:
                     value = cached[0]
@@ -692,6 +730,7 @@ class BIDashboardsService:
                         period_start=period_start_val,
                         period_end=period_end_val,
                         filters=kpi_filters or None,
+                        allowed_project_ids=allowed_project_ids,
                     )
                     value = computation.value
                     unit = computation.unit
@@ -700,6 +739,7 @@ class BIDashboardsService:
                     computation = await _kpis.compute(
                         widget.kpi_code,
                         self.session,
+                        allowed_project_ids=allowed_project_ids,
                     )
                     value = computation.value
                     unit = computation.unit

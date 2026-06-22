@@ -398,14 +398,36 @@ class BIMQuantityMapRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def list_all(
+    async def list_scoped(
         self,
         *,
+        project_ids: set[uuid.UUID] | None,
+        include_global: bool = True,
         offset: int = 0,
         limit: int = 100,
     ) -> tuple[list[BIMQuantityMap], int]:
-        """List all quantity map rules with pagination."""
+        """List quantity map rules visible to the caller, paginated.
+
+        Scoping rule (mirrors ``accessible_project_ids`` semantics):
+
+        * ``project_ids is None`` -> no project filter (admin / unrestricted),
+          every row is returned.
+        * ``project_ids`` is a (possibly empty) set -> only rows whose
+          ``project_id`` is in that set are returned, plus rows with
+          ``project_id IS NULL`` when ``include_global`` is True (those are
+          the intended global/org templates, not another tenant's data).
+
+        This replaces the old ``list_all`` (no WHERE clause) which leaked
+        every tenant's project-scoped mapping rules through the list endpoint.
+        """
         base = select(BIMQuantityMap)
+
+        if project_ids is not None:
+            scoped = BIMQuantityMap.project_id.in_(project_ids)
+            if include_global:
+                base = base.where(scoped | BIMQuantityMap.project_id.is_(None))
+            else:
+                base = base.where(scoped)
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

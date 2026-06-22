@@ -38,6 +38,7 @@ from app.core.file_signature import (
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.pdf_fonts import BODY_FONT, register_pdf_fonts
+from app.core.sanitize import strip_dangerous_html
 from app.core.validation.messages import translate
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.portal.dependencies import RequirePortalSession
@@ -266,9 +267,15 @@ async def list_developments(
 @router.post("/developments/", response_model=DevelopmentResponse, status_code=201)
 async def create_development(
     data: DevelopmentCreate,
+    session: SessionDep,
+    user_payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> DevelopmentResponse:
+    # R7 IDOR - prevent attaching a development (and its plots/buyers/
+    # contracts) to a project in another tenant by supplying that
+    # project's UUID in the body.
+    await _verify_owner_via_project(session, data.project_id, user_payload)
     obj = await service.create_development(data)
     return DevelopmentResponse.model_validate(obj)
 
@@ -878,6 +885,7 @@ async def list_buyers(
 @router.post("/buyers/", response_model=BuyerResponse, status_code=201)
 async def create_buyer(
     data: BuyerCreate,
+    session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
     sync_to_contacts: bool = Query(
@@ -891,6 +899,11 @@ async def create_buyer(
     ),
     _perm: None = Depends(RequirePermission("property_dev.create")),
 ) -> BuyerResponse:
+    # R7 IDOR - prevent attaching a buyer to another tenant's development
+    # (or plot) by supplying a foreign parent UUID in the body.
+    await _verify_owner_via_development(session, data.development_id, payload)
+    if data.plot_id is not None:
+        await _verify_owner_via_plot(session, data.plot_id, payload)
     caller = payload.get("sub") if isinstance(payload, dict) else None
     return BuyerResponse.model_validate(
         await service.create_buyer(
@@ -1909,6 +1922,31 @@ async def _verify_owner_via_plot(
         raise HTTPException(status_code=404, detail=translate("errors.resource_not_found", locale=get_locale()))
 
 
+async def _verify_owner_via_project(
+    session: SessionDep,
+    project_id: uuid.UUID,
+    payload: dict[str, Any],
+) -> None:
+    """IDOR closure gating a body-supplied ``project_id`` against its owner.
+
+    Mirrors ``_verify_owner_via_development`` but takes the project id
+    directly, for root-creates (e.g. a development) whose parent is a
+    Project rather than a Development. Collapses "exists but not yours" to
+    404 to avoid leaking project-UUID existence. As with the sibling
+    helpers, ownership is strict: only the project owner passes, so a
+    cross-tenant admin still 404s on a project they do not own.
+    """
+    user_id = payload.get("sub") or payload.get("user_id")
+    if user_id is None:
+        raise HTTPException(status_code=404, detail=translate("errors.resource_not_found", locale=get_locale()))
+
+    from app.modules.projects.repository import ProjectRepository
+
+    project = await ProjectRepository(session).get_by_id(project_id)
+    if project is None or str(project.owner_id) != str(user_id):
+        raise HTTPException(status_code=404, detail=translate("errors.resource_not_found", locale=get_locale()))
+
+
 async def _verify_owner_via_development(
     session: SessionDep,
     dev_id: uuid.UUID,
@@ -2356,6 +2394,7 @@ async def list_leads(
 @router.post("/leads/", response_model=LeadResponse, status_code=201)
 async def create_lead(
     data: LeadCreate,
+    session: SessionDep,
     payload: CurrentUserPayload,
     service: PropertyDevService = Depends(_svc),
     sync_to_contacts: bool = Query(
@@ -2368,6 +2407,12 @@ async def create_lead(
     ),
     _perm: None = Depends(RequirePermission("property_dev.lead.create")),
 ) -> LeadResponse:
+    # R7 IDOR - prevent attaching a lead to another tenant's development
+    # by supplying a foreign development UUID. Leads without a development
+    # are top-of-funnel and carry no project-scoped data (see
+    # ``_verify_owner_via_lead``), so only gate when one is supplied.
+    if data.development_id is not None:
+        await _verify_owner_via_development(session, data.development_id, payload)
     caller = payload.get("sub") if isinstance(payload, dict) else None
     return LeadResponse.model_validate(
         await service.create_lead(
@@ -5445,6 +5490,18 @@ async def save_text_custom_document_template(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=(f"Template content exceeds {_CUSTOM_TEMPLATE_MAX_MB} MB limit"),
         )
+
+    # Stored XSS hardening (audit 2026-06-22 #2): templates are
+    # development/tenant-shared resources, so an HTML body authored by one
+    # user is later auto-previewed (dangerouslySetInnerHTML) in another
+    # staff member's authenticated session. Strip the XSS-dangerous subset
+    # (script/iframe/object/embed/svg, on* event handlers, javascript:/
+    # data:text/html URIs) on save so the persisted bytes can never carry
+    # an active payload. Benign layout markup the templates rely on (tables,
+    # styling, {placeholders}) is preserved. Markdown/plain bodies are
+    # escaped at render time and need no HTML strip here.
+    if content_type == "text/html":
+        content_text = strip_dangerous_html(content_text)
 
     is_admin = user_payload.get("role") == "admin"
     user_id_raw = user_payload.get("sub") or user_payload.get("user_id")

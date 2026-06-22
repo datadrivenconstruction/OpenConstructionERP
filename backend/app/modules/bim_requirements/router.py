@@ -314,7 +314,10 @@ async def validate_against_model(
     """
     req_set = await service.get_set(set_id)
     await verify_project_access(req_set.project_id, str(user_id), session)
-    report = await service.validate_against_model(set_id, model_id)
+    # The model_id is caller-supplied, so validate_against_model re-authorises
+    # the MODEL's project (mirroring preview-yaml) - a foreign model 404s
+    # rather than leaking another tenant's elements.
+    report = await service.validate_against_model(set_id, model_id, user_id=str(user_id))
     return RequirementValidationResponse(**report)
 
 

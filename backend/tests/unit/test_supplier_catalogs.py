@@ -69,6 +69,37 @@ async def session() -> AsyncIterator[AsyncSession]:
         yield s
 
 
+@pytest.fixture(autouse=True)
+def _allow_all_project_access(monkeypatch) -> None:
+    """Neutralise the cross-project IDOR gate for the FUNCTIONAL tests.
+
+    Every mutating PR/PO/Invoice/GR/warehouse/stock path now calls
+    ``SupplierCatalogsService._guard_project`` →
+    ``app.dependencies.verify_project_access`` (added to close the cluster's
+    cross-tenant IDOR, finding #1). The functional tests below seed random
+    ``project_id`` values that intentionally have no backing Project row, so
+    the real gate would 404 every one of them. This autouse fixture replaces
+    the gate with an async no-op so the functional tests keep exercising the
+    business logic; the dedicated ``test_cross_project_idor_*`` tests opt OUT
+    (they re-patch the real resolver with stubbed repos) and assert the 404.
+    """
+
+    import app.dependencies as _deps
+
+    # Stash the genuine resolver so the dedicated IDOR tests can re-arm it
+    # (monkeypatch would otherwise overwrite the only reference to it).
+    global _REAL_VERIFY_PROJECT_ACCESS
+    _REAL_VERIFY_PROJECT_ACCESS = _deps.verify_project_access
+
+    async def _noop(project_id, user_id, session):  # noqa: ANN001, ARG001
+        return None
+
+    monkeypatch.setattr("app.dependencies.verify_project_access", _noop)
+
+
+_REAL_VERIFY_PROJECT_ACCESS = None
+
+
 @pytest.fixture
 def captured_events(monkeypatch) -> list[tuple[str, dict]]:
     """Spy on event_bus.publish_detached to capture published events."""
@@ -1609,3 +1640,192 @@ async def test_register_subscribers_idempotent() -> None:
     # Call twice — should not blow up nor double-subscribe.
     register_subscribers()
     register_subscribers()
+
+
+# ── Cross-project IDOR (finding #1) ──────────────────────────────────────────
+#
+# Every mutating PR/PO/Invoice/GR/warehouse/stock path resolves its project
+# from the trusted DB row (or, on create, from the request body) and calls
+# ``verify_project_access`` BEFORE acting. These tests pin that a caller who
+# does NOT own the resource's project gets a 404 (existence-preserving IDOR
+# defence), while the owner still succeeds — covering one PR, one PO and the
+# invoice 3-way-match, the three highest-impact write paths.
+
+
+def _patch_real_project_access(monkeypatch, *, owner_id: str, project_id) -> None:
+    """Re-arm the REAL ``verify_project_access`` with stubbed repos.
+
+    Overrides the autouse ``_allow_all_project_access`` no-op so the genuine
+    owner / 404 logic runs. ``project_id`` is owned by ``owner_id``; every
+    other (project_id, user) combination 404s. Mirrors the canonical pattern
+    in ``tests/modules/finance/test_finance_security.py``.
+    """
+    from types import SimpleNamespace
+
+    project = SimpleNamespace(id=project_id, owner_id=owner_id)
+
+    class _StubProjectRepo:
+        def __init__(self, _session) -> None:  # noqa: ANN001
+            pass
+
+        async def get_by_id(self, pid):  # noqa: ANN001
+            return project if pid == project_id else None
+
+    class _StubUserRepo:
+        def __init__(self, _session) -> None:  # noqa: ANN001
+            pass
+
+        async def get_by_id(self, uid):  # noqa: ANN001
+            return SimpleNamespace(id=uid, role="user")
+
+    monkeypatch.setattr("app.modules.projects.repository.ProjectRepository", _StubProjectRepo)
+    monkeypatch.setattr("app.modules.users.repository.UserRepository", _StubUserRepo)
+    # Restore the real resolver (the autouse fixture stubbed it to a no-op).
+    assert _REAL_VERIFY_PROJECT_ACCESS is not None
+    monkeypatch.setattr("app.dependencies.verify_project_access", _REAL_VERIFY_PROJECT_ACCESS)
+
+    # ``is_project_member`` is consulted for non-owners — keep it negative so
+    # only the owner passes.
+    async def _not_member(*_a, **_k):  # noqa: ANN002, ANN003
+        return False
+
+    monkeypatch.setattr("app.modules.teams.access.is_project_member", _not_member)
+
+
+@pytest.mark.asyncio
+async def test_cross_project_idor_pr_approve(session, monkeypatch):
+    """A foreign user cannot approve another project's PR (404)."""
+    svc = SupplierCatalogsService(session)
+    owner = str(uuid.uuid4())
+    attacker = str(uuid.uuid4())
+    project_id = uuid.uuid4()
+    item = await _seed_item(svc, "SKU-IDOR-PR")
+
+    # Build + submit the PR as the legitimate project owner.
+    pr = await svc.create_pr(
+        PRCreate(
+            project_id=project_id,
+            approval_chain=["x"],
+            lines=[
+                PRLineCreate(
+                    catalog_item_id=item.id,
+                    description="x",
+                    quantity=Decimal("1"),
+                    estimated_unit_price=Decimal("10"),
+                )
+            ],
+        ),
+        user_id=owner,
+    )
+    await svc.submit_pr(pr.id, user_id=owner)
+
+    # Now arm the real access gate: project owned by ``owner`` only.
+    _patch_real_project_access(monkeypatch, owner_id=owner, project_id=project_id)
+
+    # Attacker (no access) → 404, NOT an approval.
+    with pytest.raises(HTTPException) as exc:
+        await svc.approve_pr(pr.id, approver_id=attacker)
+    assert exc.value.status_code == 404
+
+    # Owner still succeeds.
+    approved = await svc.approve_pr(pr.id, approver_id=owner)
+    assert approved.status == "approved"
+
+
+@pytest.mark.asyncio
+async def test_cross_project_idor_po_send(session, monkeypatch):
+    """A foreign user cannot send another project's PO (404)."""
+    svc = SupplierCatalogsService(session)
+    owner = str(uuid.uuid4())
+    attacker = str(uuid.uuid4())
+    project_id = uuid.uuid4()
+    vendor = await _seed_vendor(svc)
+    item = await _seed_item(svc, "SKU-IDOR-PO")
+
+    po = await svc.create_po(
+        POCreateExt(
+            vendor_id=vendor.id,
+            project_id=project_id,
+            lines=[
+                POLineCreate(
+                    catalog_item_id=item.id,
+                    description="x",
+                    ordered_qty=Decimal("1"),
+                    unit_price=Decimal("1"),
+                )
+            ],
+        ),
+        user_id=owner,
+    )
+
+    _patch_real_project_access(monkeypatch, owner_id=owner, project_id=project_id)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.send_po(po.id, user_id=attacker)
+    assert exc.value.status_code == 404
+
+    sent = await svc.send_po(po.id, user_id=owner)
+    assert sent.status == "sent"
+
+
+@pytest.mark.asyncio
+async def test_cross_project_idor_invoice_match(session, monkeypatch):
+    """A foreign user cannot 3-way-match another project's invoice (404)."""
+    svc = SupplierCatalogsService(session)
+    owner = str(uuid.uuid4())
+    attacker = str(uuid.uuid4())
+    project_id = uuid.uuid4()
+    vendor = await _seed_vendor(svc)
+    item = await _seed_item(svc, "SKU-IDOR-INV")
+    wh = await _seed_warehouse(svc)
+
+    po = await svc.create_po(
+        POCreateExt(
+            vendor_id=vendor.id,
+            project_id=project_id,
+            lines=[
+                POLineCreate(
+                    catalog_item_id=item.id,
+                    description="x",
+                    ordered_qty=Decimal("10"),
+                    unit_price=Decimal("100"),
+                )
+            ],
+        ),
+        user_id=owner,
+    )
+    await svc.send_po(po.id, user_id=owner)
+    await svc.post_goods_receipt(
+        GoodsReceiptCreate(
+            po_id=po.id,
+            warehouse_id=wh.id,
+            lines=[
+                GRLineCreate(
+                    po_line_id=po.lines[0].id,
+                    received_qty=Decimal("10"),
+                    accepted_qty=Decimal("10"),
+                )
+            ],
+        ),
+        user_id=owner,
+    )
+    invoice = await svc.create_invoice(
+        VendorInvoiceCreate(
+            number="INV-IDOR",
+            vendor_id=vendor.id,
+            po_id=po.id,
+            subtotal=po.total,
+            tax=Decimal("0"),
+        ),
+        user_id=owner,
+    )
+
+    _patch_real_project_access(monkeypatch, owner_id=owner, project_id=project_id)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.match_invoice(invoice.id, user_id=attacker)
+    assert exc.value.status_code == 404
+
+    # Owner can match.
+    result = await svc.match_invoice(invoice.id, user_id=owner)
+    assert result.status in ("auto_matched", "exception")

@@ -164,6 +164,39 @@ class SupplierCatalogsService:
         self.scorecards = ScorecardRepository(session)
         self.invoice_lines = VendorInvoiceLineRepository(session)
 
+    # ── IDOR guard ────────────────────────────────────────────────────────────
+
+    async def _guard_project(
+        self,
+        project_id: uuid.UUID | None,
+        user_id: str | None,
+    ) -> None:
+        """Reject cross-project access to PR/PO/Invoice/GR/Warehouse/Stock.
+
+        Every mutating PR/PO/Invoice/GR/warehouse/stock path resolves its
+        ``project_id`` from the trusted DB row (or, on create, from the
+        request body) and calls this guard BEFORE acting. ``RequirePermission``
+        only proves the caller holds a GLOBAL role; it does NOT prove the
+        caller may touch THIS project, so without this gate any EDITOR/MANAGER
+        in tenant A could approve PRs, issue/close POs, post goods receipts and
+        3-way-match (approve payment of) invoices in any other tenant's project
+        by guessing a UUID. ``verify_project_access`` raises 404 on both
+        "missing project" and "access denied" so a foreign id never leaks its
+        existence. Mirrors ``procurement.router`` (verify_project_access on
+        every endpoint via the PO's ``project_id``).
+
+        A ``None`` ``project_id`` (warehouses / stock movements may legitimately
+        be tenant-global, ``Warehouse.project_id`` is nullable) is left to the
+        permission gate alone - there is no project to scope to. A ``None``
+        ``user_id`` (system / cron callers) is likewise skipped; the router
+        always supplies the authenticated caller.
+        """
+        if project_id is None or user_id is None:
+            return
+        from app.dependencies import verify_project_access
+
+        await verify_project_access(project_id, str(user_id), self.session)
+
     # ── Vendor ────────────────────────────────────────────────────────────────
 
     async def create_vendor(self, data: VendorCreate, user_id: str | None = None) -> Vendor:
@@ -558,6 +591,10 @@ class SupplierCatalogsService:
         data: PRCreate,
         user_id: str | None = None,
     ) -> PurchaseRequisition:
+        # IDOR: a PR is raised against a project, so the caller must have
+        # access to ``data.project_id`` - not merely hold the global
+        # ``supplier_catalogs.pr.create`` permission.
+        await self._guard_project(data.project_id, user_id)
         number = await self.prs.next_number()
         total_estimate = sum(
             (line.quantity * line.estimated_unit_price for line in data.lines),
@@ -607,6 +644,8 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
             )
+        # IDOR: resolve the project from the trusted PR row before mutating.
+        await self._guard_project(pr.project_id, user_id)
         if pr.status != "draft":
             raise HTTPException(
                 status_code=400,
@@ -638,6 +677,10 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
             )
+        # IDOR: the global ``pr.approve`` permission does NOT prove the caller
+        # may approve THIS project's PR. Resolve the project from the trusted
+        # row and verify access before advancing the approval chain.
+        await self._guard_project(pr.project_id, approver_id)
         if pr.status != "approval_pending":
             raise HTTPException(
                 status_code=400,
@@ -684,6 +727,8 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
             )
+        # IDOR: resolve the project from the trusted PR row before mutating.
+        await self._guard_project(pr.project_id, approver_id)
         if pr.status not in ("approval_pending", "draft"):
             raise HTTPException(
                 status_code=400,
@@ -715,6 +760,11 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_requisition_not_found", locale=get_locale())
             )
+        # IDOR: turning a PR into a PO commits a financial obligation against
+        # the PR's project. Verify the caller may access that project before
+        # converting (otherwise an attacker could convert another tenant's PR
+        # into a PO against an arbitrary vendor).
+        await self._guard_project(pr.project_id, user_id)
         if pr.status != "approved":
             raise HTTPException(
                 status_code=400,
@@ -795,6 +845,9 @@ class SupplierCatalogsService:
         data: POCreateExt,
         user_id: str | None = None,
     ) -> PurchaseOrder:
+        # IDOR: a PO is a financial commitment against ``data.project_id``;
+        # gate it before creating (mirrors procurement.create_purchase_order).
+        await self._guard_project(data.project_id, user_id)
         vendor = await self.vendors.get(data.vendor_id)
         if vendor is None:
             raise HTTPException(status_code=404, detail=translate("errors.vendor_not_found", locale=get_locale()))
@@ -864,6 +917,8 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
             )
+        # IDOR: resolve the project from the trusted PO row before mutating.
+        await self._guard_project(po.project_id, user_id)
         if po.status != "draft":
             raise HTTPException(
                 status_code=400,
@@ -885,12 +940,18 @@ class SupplierCatalogsService:
         assert refreshed is not None
         return refreshed
 
-    async def acknowledge_po(self, po_id: uuid.UUID) -> PurchaseOrder:
+    async def acknowledge_po(
+        self,
+        po_id: uuid.UUID,
+        user_id: str | None = None,
+    ) -> PurchaseOrder:
         po = await self.pos.get(po_id)
         if po is None:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
             )
+        # IDOR: resolve the project from the trusted PO row before mutating.
+        await self._guard_project(po.project_id, user_id)
         if po.status != "sent":
             raise HTTPException(
                 status_code=400,
@@ -905,12 +966,18 @@ class SupplierCatalogsService:
         assert refreshed is not None
         return refreshed
 
-    async def close_po(self, po_id: uuid.UUID) -> PurchaseOrder:
+    async def close_po(
+        self,
+        po_id: uuid.UUID,
+        user_id: str | None = None,
+    ) -> PurchaseOrder:
         po = await self.pos.get(po_id)
         if po is None:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
             )
+        # IDOR: resolve the project from the trusted PO row before mutating.
+        await self._guard_project(po.project_id, user_id)
         if po.status in ("closed", "cancelled"):
             raise HTTPException(
                 status_code=400,
@@ -948,6 +1015,9 @@ class SupplierCatalogsService:
             raise HTTPException(
                 status_code=404, detail=translate("errors.purchase_order_not_found", locale=get_locale())
             )
+        # IDOR: a GR advances stock + commitment against the PO's project;
+        # resolve the project from the trusted PO row and gate before posting.
+        await self._guard_project(po.project_id, user_id)
         if po.status not in ("sent", "acknowledged", "partial"):
             raise HTTPException(
                 status_code=400,
@@ -1126,6 +1196,17 @@ class SupplierCatalogsService:
         vendor = await self.vendors.get(data.vendor_id)
         if vendor is None:
             raise HTTPException(status_code=404, detail=translate("errors.vendor_not_found", locale=get_locale()))
+        # IDOR: a VendorInvoice carries no project_id of its own - it is scoped
+        # through its linked PO. When a PO is supplied, resolve the project from
+        # the trusted PO row and verify the caller may access it before
+        # recording a payable against that project. (An invoice with no PO link
+        # cannot be 3-way-matched/approved; match_invoice re-checks access once
+        # a PO becomes resolvable.)
+        if data.po_id is not None:
+            po = await self.pos.get(data.po_id)
+            if po is None:
+                raise HTTPException(status_code=400, detail="Linked PO not found")
+            await self._guard_project(po.project_id, user_id)
         invoice = VendorInvoice(
             number=data.number,
             vendor_id=data.vendor_id,
@@ -1223,6 +1304,11 @@ class SupplierCatalogsService:
         po = await self.pos.get(invoice.po_id)
         if po is None:
             raise HTTPException(status_code=400, detail="Linked PO not found")
+        # IDOR: 3-way-matching an invoice approves it for payment against the
+        # PO's project. Resolve the project from the trusted PO row and gate
+        # before matching - the global ``invoice.match`` permission alone must
+        # not let a caller approve another tenant's invoice.
+        await self._guard_project(po.project_id, user_id)
 
         # Resolve tolerance profile. Vendor-bound profile takes precedence
         # over the tenant default but loses to an explicit override.
@@ -1423,7 +1509,15 @@ class SupplierCatalogsService:
 
     # ── Warehouse & stock ─────────────────────────────────────────────────────
 
-    async def create_warehouse(self, data: WarehouseCreate) -> Warehouse:
+    async def create_warehouse(
+        self,
+        data: WarehouseCreate,
+        user_id: str | None = None,
+    ) -> Warehouse:
+        # IDOR: when a warehouse is pinned to a project, the caller must be able
+        # to access that project. A project-less (tenant-global) warehouse is
+        # left to the permission gate alone.
+        await self._guard_project(data.project_id, user_id)
         wh = Warehouse(
             code=data.code,
             name=data.name,
@@ -1434,11 +1528,37 @@ class SupplierCatalogsService:
         )
         return await self.warehouses.create(wh)
 
+    async def list_warehouse_balances(
+        self,
+        warehouse_id: uuid.UUID,
+        user_id: str | None = None,
+    ) -> list[Any]:
+        """List stock balances for a warehouse, gated by the warehouse project.
+
+        IDOR: stock balances disclose on-hand quantities and weighted-average
+        unit costs - project-sensitive data when the warehouse is pinned to a
+        project. Resolve the warehouse's project from the trusted row and
+        verify access before returning. A missing warehouse and an
+        inaccessible one both surface as 404 so a foreign id does not leak.
+        """
+        warehouse = await self.warehouses.get(warehouse_id)
+        if warehouse is None:
+            raise HTTPException(status_code=404, detail="Warehouse not found")
+        await self._guard_project(warehouse.project_id, user_id)
+        return await self.warehouses.list_balances(warehouse_id)
+
     async def reserve_stock(
         self,
         data: StockReservePayload,
         user_id: str | None = None,
     ) -> StockMovement:
+        # IDOR: a stock movement mutates a warehouse the caller must be able to
+        # reach. Resolve the warehouse's project (nullable for tenant-global
+        # warehouses) from the trusted row and gate before mutating.
+        warehouse = await self.warehouses.get(data.warehouse_id)
+        if warehouse is None:
+            raise HTTPException(status_code=404, detail="Warehouse not found")
+        await self._guard_project(warehouse.project_id, user_id)
         balance = await self.stock.get_or_create_balance(
             warehouse_id=data.warehouse_id,
             catalog_item_id=data.catalog_item_id,
@@ -1490,6 +1610,12 @@ class SupplierCatalogsService:
         data: StockIssuePayload,
         user_id: str | None = None,
     ) -> StockMovement:
+        # IDOR: resolve the warehouse's project from the trusted row and gate
+        # before issuing stock out of it.
+        warehouse = await self.warehouses.get(data.warehouse_id)
+        if warehouse is None:
+            raise HTTPException(status_code=404, detail="Warehouse not found")
+        await self._guard_project(warehouse.project_id, user_id)
         balance = await self.stock.get_balance(
             warehouse_id=data.warehouse_id,
             catalog_item_id=data.catalog_item_id,
@@ -1551,6 +1677,9 @@ class SupplierCatalogsService:
         wh = await self.warehouses.get(warehouse_id)
         if wh is None:
             raise HTTPException(status_code=404, detail="Warehouse not found")
+        # IDOR: resolve the warehouse's project from the trusted row and gate
+        # before adjusting its balances.
+        await self._guard_project(wh.project_id, user_id)
         movements: list[StockMovement] = []
         for count in data.counts:
             balance = await self.stock.get_or_create_balance(
@@ -2110,6 +2239,12 @@ class SupplierCatalogsService:
                 PurchaseOrder.number == parsed.order_reference,
             )
             po = (await self.session.execute(stmt)).scalar_one_or_none()
+
+        # IDOR: when the PEPPOL invoice references a PO, ingesting (and possibly
+        # auto-matching) it commits a payable against that PO's project. Verify
+        # the caller may access that project before proceeding.
+        if po is not None:
+            await self._guard_project(po.project_id, user_id)
 
         # Create invoice (idempotency: skip if same number+vendor exists)
         from sqlalchemy import select as _select

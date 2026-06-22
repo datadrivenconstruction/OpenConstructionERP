@@ -1,4 +1,4 @@
-"""‌⁠‍Input sanitization for user-supplied text.
+"""Input sanitization for user-supplied text.
 
 We don't want to run user text through a full HTML sanitizer (``bleach``)
 because most construction-ERP fields (project descriptions, BOQ positions,
@@ -9,9 +9,9 @@ HTML would mangle legitimate content.
 Instead, this module removes the **dangerous** subset of HTML that attackers
 use for stored XSS while leaving literal angle brackets alone:
 
-  * ``<script>…</script>`` blocks  - content + tags removed
+  * ``<script>...</script>`` blocks  - content + tags removed
   * ``<iframe>``, ``<object>``, ``<embed>``, ``<svg>`` - content + tags removed
-  * ``on*="…"`` event-handler attributes - attribute removed
+  * ``on*="..."`` event-handler attributes - attribute removed
   * ``javascript:`` / ``vbscript:`` / ``data:text/html`` URIs - replaced with ``#``
 
 The result is safe to render with ``dangerouslySetInnerHTML`` or in plain
@@ -85,12 +85,12 @@ _BLOCK_TAG_OPEN_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Inline event handler attributes: ``onerror="…"``, ``onclick='…'``,
+# Inline event handler attributes: ``onerror="..."``, ``onclick='...'``,
 # ``onmouseover=...`` (no quotes). Covers the attribute anywhere inside a
 # tag, space before required to avoid matching inside names like
 # ``<custom-onfoo="x">``.
 _EVENT_HANDLER_RE = re.compile(
-    r"""‌⁠‍\s+on[a-z]+                      # on-prefix event name
+    r"""\s+on[a-z]+                      # on-prefix event name
         \s*=\s*                          # =
         (?:
             "[^"]*"                      # double-quoted value
@@ -103,7 +103,7 @@ _EVENT_HANDLER_RE = re.compile(
 
 # Dangerous URI schemes inside ``href=`` / ``src=`` / ``action=``.
 _DANGEROUS_URI_RE = re.compile(
-    r"""‌⁠‍(?P<attr>(?:href|src|action|formaction|xlink:href)\s*=\s*)
+    r"""(?P<attr>(?:href|src|action|formaction|xlink:href)\s*=\s*)
         (?P<quote>['"]?)
         \s*
         (?:
@@ -128,7 +128,7 @@ def strip_dangerous_html(value: str) -> str:
     """
     if not value:
         return ""
-    # 1. Drop paired blocks (``<script>`` … ``</script>``) - content has to
+    # 1. Drop paired blocks (``<script>`` ... ``</script>``) - content has to
     # go because the browser would execute it otherwise.
     cleaned = _BLOCK_TAG_RE.sub("", value)
     # 2. Drop orphan openings that never get closed (``<script>alert(1)``
@@ -157,9 +157,9 @@ def strip_dangerous_html(value: str) -> str:
 # The response-layer strip is therefore deliberately stronger:
 #
 #   * removes the *content* of script/style/iframe/etc. blocks entirely
-#     (``<script>alert(1)</script>foo`` → ``foo``)
+#     (``<script>alert(1)</script>foo`` -> ``foo``)
 #   * removes the *tags* of every other element while preserving their text
-#     (``<b>Bold</b> text`` → ``Bold text``)
+#     (``<b>Bold</b> text`` -> ``Bold text``)
 #   * decodes basic numeric and named HTML entities so consumers see real
 #     text, not ``&amp;`` (matters for downstream search / OCR / exports)
 #
@@ -252,11 +252,11 @@ def strip_all_html_tags(value: str) -> str:
 
     Stronger than :func:`strip_dangerous_html`:
 
-    * ``<script>x</script>`` → ``''`` (body dropped along with the tags)
-    * ``<b>Bold</b> text``    → ``Bold text``
-    * ``<div><span>hi</span></div>`` → ``hi``
-    * ``"beam <200mm"``       → ``"beam <200mm"`` (no tag pattern, kept)
-    * ``"a < b > c"``          → ``"a < b > c"`` (same - literal math, not tags)
+    * ``<script>x</script>`` -> ``''`` (body dropped along with the tags)
+    * ``<b>Bold</b> text``    -> ``Bold text``
+    * ``<div><span>hi</span></div>`` -> ``hi``
+    * ``"beam <200mm"``       -> ``"beam <200mm"`` (no tag pattern, kept)
+    * ``"a < b > c"``          -> ``"a < b > c"`` (same - literal math, not tags)
     * trailing whitespace from removed tags is collapsed
 
     Never raises; ``None`` / empty input returns ``""``.

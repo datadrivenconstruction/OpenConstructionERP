@@ -74,7 +74,7 @@ from app.core.i18n import get_locale
 from app.core.rate_limiter import upload_limiter
 from app.core.storage import resolve_data_dir as _resolve_data_dir
 from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, RequireRole, SessionDep, accessible_project_ids
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.schemas import (
     AssetInfoUpdateRequest,
@@ -3421,14 +3421,21 @@ async def cleanup_stale_processing(
 @router.post("/cleanup-orphans/")
 async def cleanup_orphan_bim_files(
     _user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("bim.delete")),
+    _role: None = Depends(RequireRole("admin")),
     service: BIMHubService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Scan ``data/bim/`` and remove directories with no matching DB row.
 
-    Admin-grade disk hygiene. Protects against orphaned RVT/IFC/COLLADA/Excel
-    artefacts left behind by failed uploads, crashed conversions, or manual
-    DB deletes that bypassed the service layer.
+    Admin-grade disk hygiene. This is a GLOBAL, cross-tenant filesystem sweep:
+    it loads every model id in the deployment and ``rmtree``s any model
+    directory under ``data/bim/`` without a matching DB row, crossing tenant
+    boundaries. A project-level MANAGER (``bim.delete``) must never reach it,
+    so it is gated by ``RequireRole("admin")`` - the same pattern used by the
+    clear-database / demo-reset endpoints for tenant-wide bulk deletes.
+
+    Protects against orphaned RVT/IFC/COLLADA/Excel artefacts left behind by
+    failed uploads, crashed conversions, or manual DB deletes that bypassed
+    the service layer.
     """
     return await service.cleanup_orphan_bim_files()
 
@@ -4018,8 +4025,14 @@ async def list_quantity_maps(
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMQuantityMapListResponse:
-    """List quantity mapping rules (global + templates)."""
-    items, total = await service.list_quantity_maps(offset=offset, limit=limit)
+    """List quantity mapping rules visible to the caller.
+
+    Scopes to the caller's accessible projects so a project-scoped rule from
+    another tenant never leaks. Global templates (``project_id IS NULL``)
+    stay visible to everyone; admins see every rule.
+    """
+    scope = await accessible_project_ids(service.session, user_id)
+    items, total = await service.list_quantity_maps(project_ids=scope, offset=offset, limit=limit)
     return BIMQuantityMapListResponse(
         items=[BIMQuantityMapResponse.model_validate(m) for m in items],
         total=total,
@@ -4049,8 +4062,14 @@ async def update_quantity_map(
     _perm: None = Depends(RequirePermission("bim.update")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMQuantityMapResponse:
-    """Update a quantity mapping rule."""
-    # If the existing rule is project-scoped, verify access to that project.
+    """Update a quantity mapping rule.
+
+    A project-scoped rule requires access to its project. A global rule
+    (``project_id IS NULL``) is a cross-tenant shared template, so only an
+    admin may mutate it - a project-level editor in any tenant must not be
+    able to silently rewrite a template every tenant sees. The 404 (not 403)
+    on the non-admin global case keeps the IDOR surface consistent.
+    """
     from app.modules.bim_hub.models import BIMQuantityMap
 
     existing = await service.session.get(BIMQuantityMap, map_id)
@@ -4061,6 +4080,16 @@ async def update_quantity_map(
         )
     if existing.project_id is not None:
         await _verify_project_access(service.session, existing.project_id, user_id)
+    else:
+        # Global/template rule: admins only. ``accessible_project_ids``
+        # returns ``None`` for admins (its "no filter" sentinel); any
+        # non-admin caller gets a set and is rejected as not-found.
+        scope = await accessible_project_ids(service.session, user_id)
+        if scope is not None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Quantity map not found",
+            )
     qmap = await service.update_quantity_map(map_id, data)
     return BIMQuantityMapResponse.model_validate(qmap)
 
