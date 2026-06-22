@@ -88,9 +88,13 @@ _BLOCK_TAG_OPEN_RE = re.compile(
 # Inline event handler attributes: ``onerror="..."``, ``onclick='...'``,
 # ``onmouseover=...`` (no quotes). Covers the attribute anywhere inside a
 # tag, space before required to avoid matching inside names like
-# ``<custom-onfoo="x">``.
+# ``<custom-onfoo="x">``. The boundary is a single ``\s`` rather than ``\s+``:
+# one required space already asserts the boundary, and a variable-length
+# leading quantifier makes ``re.sub`` scan in O(n^2) on long whitespace runs of
+# untrusted input (py/polynomial-redos). ``re.sub`` still strips the whole
+# attribute, so dropping a single leading space changes nothing security-wise.
 _EVENT_HANDLER_RE = re.compile(
-    r"""\s+on[a-z]+                      # on-prefix event name
+    r"""\son[a-z]+                       # on-prefix event name (one space before)
         \s*=\s*                          # =
         (?:
             "[^"]*"                      # double-quoted value
