@@ -7316,6 +7316,7 @@ const resource = {
     "gantt.predecessors": "Préd.",
     "gantt.lag": "Décalage",
     "gantt.resize_column": "Redimensionner la colonne",
+    "gantt.reorder_hint": "Glisser pour déplacer · Alt+↑↓ réordonner · Alt+→← indenter/désindenter",
     "gantt.day_suffix": "j",
     "gantt.progress_short": "%",
     "gantt.collapse": "Réduire",

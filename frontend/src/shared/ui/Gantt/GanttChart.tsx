@@ -73,6 +73,11 @@ export interface GanttProps {
       lag?: number;
     },
   ) => void;
+  /** Commit a structural reorder/re-parent of the rows. Receives the full
+   *  desired top-to-bottom order with each row's new parent (null = root).
+   *  Drives drag-and-drop and Alt+Arrow keyboard moves. Dates/dependencies are
+   *  not touched. When omitted, rows are not draggable/movable. */
+  onActivityReorder?: (items: Array<{ id: string; parentId: string | null }>) => void;
   className?: string;
   showBaseline?: boolean;
   showDependencies?: boolean;
@@ -135,6 +140,120 @@ function buildRowIndex(activities: GanttActivity[]): Map<string, number> {
   return map;
 }
 
+/* ── Structural reorder helpers ─────────────────────────────────── */
+
+type ReorderItem = { id: string; parentId: string | null };
+
+interface OrderNode {
+  id: string;
+  parentId: string | null;
+  children: OrderNode[];
+}
+
+/** Build an ordered tree from the flat (sort_order) activity list. Children
+ *  keep their document order since ``activities`` is already pre-order. */
+function buildOrderNodes(activities: GanttActivity[]): {
+  roots: OrderNode[];
+  byId: Map<string, OrderNode>;
+} {
+  const byId = new Map<string, OrderNode>();
+  for (const a of activities) byId.set(a.id, { id: a.id, parentId: a.parentId ?? null, children: [] });
+  const roots: OrderNode[] = [];
+  for (const a of activities) {
+    const node = byId.get(a.id)!;
+    const parent = node.parentId ? byId.get(node.parentId) : undefined;
+    if (parent) parent.children.push(node);
+    else {
+      node.parentId = null;
+      roots.push(node);
+    }
+  }
+  return { roots, byId };
+}
+
+/** Pre-order flatten back into the {id, parentId} list the API expects. */
+function flattenOrder(roots: OrderNode[]): ReorderItem[] {
+  const out: ReorderItem[] = [];
+  const walk = (nodes: OrderNode[], parentId: string | null) => {
+    for (const n of nodes) {
+      out.push({ id: n.id, parentId });
+      walk(n.children, n.id);
+    }
+  };
+  walk(roots, null);
+  return out;
+}
+
+function siblingArray(node: OrderNode, roots: OrderNode[], byId: Map<string, OrderNode>): OrderNode[] {
+  return node.parentId ? byId.get(node.parentId)?.children ?? roots : roots;
+}
+
+/** True when ``childId`` lives inside ``ancestor``'s subtree (excludes self). */
+function isWithinSubtree(ancestor: OrderNode, childId: string): boolean {
+  const stack = [...ancestor.children];
+  while (stack.length) {
+    const n = stack.pop()!;
+    if (n.id === childId) return true;
+    stack.push(...n.children);
+  }
+  return false;
+}
+
+type ReorderOp = 'up' | 'down' | 'indent' | 'outdent';
+
+/** Apply a keyboard move (the whole subtree travels with the node) and return
+ *  the new flat order, or null when the move is a no-op (e.g. already first). */
+function computeMove(activities: GanttActivity[], id: string, op: ReorderOp): ReorderItem[] | null {
+  const { roots, byId } = buildOrderNodes(activities);
+  const node = byId.get(id);
+  if (!node) return null;
+  const sibs = siblingArray(node, roots, byId);
+  const idx = sibs.findIndex((n) => n.id === id);
+  if (idx < 0) return null;
+
+  if (op === 'up') {
+    if (idx === 0) return null;
+    [sibs[idx - 1], sibs[idx]] = [sibs[idx]!, sibs[idx - 1]!];
+  } else if (op === 'down') {
+    if (idx >= sibs.length - 1) return null;
+    [sibs[idx + 1], sibs[idx]] = [sibs[idx]!, sibs[idx + 1]!];
+  } else if (op === 'indent') {
+    if (idx === 0) return null; // needs a preceding sibling to nest under
+    const prev = sibs[idx - 1]!;
+    sibs.splice(idx, 1);
+    node.parentId = prev.id;
+    prev.children.push(node);
+  } else if (op === 'outdent') {
+    if (!node.parentId) return null; // already at root
+    const parent = byId.get(node.parentId)!;
+    const grand = parent.parentId ? byId.get(parent.parentId)?.children ?? roots : roots;
+    sibs.splice(idx, 1);
+    const parentIdx = grand.findIndex((n) => n.id === parent.id);
+    node.parentId = parent.parentId;
+    grand.splice(parentIdx + 1, 0, node);
+  }
+  return flattenOrder(roots);
+}
+
+/** Drop ``draggedId`` so it becomes a sibling placed just before ``targetId``
+ *  (i.e. takes the target's parent + position). Null when invalid. */
+function computeDrop(activities: GanttActivity[], draggedId: string, targetId: string): ReorderItem[] | null {
+  if (draggedId === targetId) return null;
+  const { roots, byId } = buildOrderNodes(activities);
+  const dragged = byId.get(draggedId);
+  const target = byId.get(targetId);
+  if (!dragged || !target) return null;
+  if (isWithinSubtree(dragged, targetId)) return null; // can't drop into own subtree
+  const dragSibs = siblingArray(dragged, roots, byId);
+  const di = dragSibs.findIndex((n) => n.id === draggedId);
+  if (di >= 0) dragSibs.splice(di, 1);
+  const tgtSibs = siblingArray(target, roots, byId);
+  const ti = tgtSibs.findIndex((n) => n.id === targetId);
+  dragged.parentId = target.parentId;
+  tgtSibs.splice(Math.max(0, ti), 0, dragged);
+  return flattenOrder(roots);
+}
+
 /* ── Component ──────────────────────────────────────────────────── */
 
 export function GanttChart({
@@ -146,6 +265,7 @@ export function GanttChart({
   onActivityDrag,
   onActivityResize,
   onActivityFieldChange,
+  onActivityReorder,
   className = '',
   showBaseline = false,
   showDependencies = true,
@@ -318,6 +438,66 @@ export function GanttChart({
   // Refs for scroll sync
   const tableBodyRef = useRef<HTMLDivElement>(null);
   const svgScrollRef = useRef<HTMLDivElement>(null);
+
+  // ── Row drag-and-drop + keyboard reorder ─────────────────────────
+  const [rowDragId, setRowDragId] = useState<string | null>(null);
+  const [rowDragOverId, setRowDragOverId] = useState<string | null>(null);
+  const focusRowId = useRef<string | null>(null);
+
+  // After a reorder re-renders the list, restore keyboard focus to the row
+  // that moved so the user can keep nudging it with Alt+Arrow.
+  useEffect(() => {
+    if (!focusRowId.current) return;
+    const el = tableBodyRef.current?.querySelector<HTMLElement>(
+      `[data-activity-row="${focusRowId.current}"]`,
+    );
+    el?.focus();
+    focusRowId.current = null;
+  }, [activities]);
+
+  const emitRowMove = useCallback(
+    (id: string, op: ReorderOp) => {
+      if (!onActivityReorder) return;
+      const items = computeMove(activities, id, op);
+      if (items) {
+        focusRowId.current = id;
+        onActivityReorder(items);
+      }
+    },
+    [activities, onActivityReorder],
+  );
+
+  const handleRowKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>, id: string) => {
+      // Only Alt+Arrow, and never while inline-editing a cell.
+      if (!onActivityReorder || editingCell || !e.altKey) return;
+      const op: ReorderOp | null =
+        e.key === 'ArrowUp'
+          ? 'up'
+          : e.key === 'ArrowDown'
+            ? 'down'
+            : e.key === 'ArrowRight'
+              ? 'indent'
+              : e.key === 'ArrowLeft'
+                ? 'outdent'
+                : null;
+      if (!op) return;
+      e.preventDefault();
+      emitRowMove(id, op);
+    },
+    [onActivityReorder, editingCell, emitRowMove],
+  );
+
+  const handleRowDrop = useCallback(
+    (targetId: string) => {
+      if (!onActivityReorder || !rowDragId) return;
+      const items = computeDrop(activities, rowDragId, targetId);
+      setRowDragId(null);
+      setRowDragOverId(null);
+      if (items) onActivityReorder(items);
+    },
+    [activities, rowDragId, onActivityReorder],
+  );
 
   // Drag state
   const [dragState, setDragState] = useState<{
@@ -1094,10 +1274,62 @@ export function GanttChart({
             return (
               <div
                 key={a.id}
+                data-activity-row={a.id}
+                title={
+                  onActivityReorder
+                    ? t('gantt.reorder_hint', 'Drag to move · Alt+↑↓ reorder · Alt+→← indent/outdent')
+                    : undefined
+                }
+                draggable={!!onActivityReorder && !editingCell}
+                tabIndex={onActivityReorder ? 0 : undefined}
+                onKeyDown={onActivityReorder ? (e) => handleRowKeyDown(e, a.id) : undefined}
+                onDragStart={
+                  onActivityReorder
+                    ? (e) => {
+                        setRowDragId(a.id);
+                        e.dataTransfer.effectAllowed = 'move';
+                      }
+                    : undefined
+                }
+                onDragOver={
+                  onActivityReorder && rowDragId && rowDragId !== a.id
+                    ? (e) => {
+                        e.preventDefault();
+                        setRowDragOverId(a.id);
+                      }
+                    : undefined
+                }
+                onDragLeave={
+                  onActivityReorder
+                    ? () => setRowDragOverId((c) => (c === a.id ? null : c))
+                    : undefined
+                }
+                onDrop={
+                  onActivityReorder
+                    ? (e) => {
+                        e.preventDefault();
+                        handleRowDrop(a.id);
+                      }
+                    : undefined
+                }
+                onDragEnd={
+                  onActivityReorder
+                    ? () => {
+                        setRowDragId(null);
+                        setRowDragOverId(null);
+                      }
+                    : undefined
+                }
                 className={`flex items-center border-b border-border-light/60 transition-colors hover:bg-surface-secondary/40 ${
                   idx % 2 === 0 ? 'bg-surface-primary' : 'bg-surface-secondary/20'
                 } ${isCritical ? 'bg-red-50 dark:bg-red-950/20' : ''} ${
                   onActivityClick ? 'cursor-pointer' : ''
+                } ${rowDragId === a.id ? 'opacity-50' : ''} ${
+                  rowDragOverId === a.id ? 'border-t-2 border-t-oe-blue' : ''
+                } ${
+                  onActivityReorder
+                    ? 'outline-none focus:bg-oe-blue/5 focus:ring-1 focus:ring-inset focus:ring-oe-blue/40'
+                    : ''
                 }`}
                 style={{ height: ROW_HEIGHT }}
                 onClick={() => onActivityClick?.(a.id)}

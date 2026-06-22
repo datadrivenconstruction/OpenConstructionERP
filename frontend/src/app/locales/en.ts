@@ -7040,6 +7040,7 @@ const resource = {
     "gantt.predecessors": "Pred.",
     "gantt.lag": "Lag",
     "gantt.resize_column": "Resize column",
+    "gantt.reorder_hint": "Drag to move · Alt+↑↓ reorder · Alt+→← indent/outdent",
     "gantt.day_suffix": "d",
     "gantt.progress_short": "%",
     "gantt.collapse": "Collapse",

@@ -66,6 +66,7 @@ from app.modules.schedule.schemas import (
     ProgressUpdateResponse,
     RelationshipCreate,
     RelationshipResponse,
+    ReorderActivitiesRequest,
     RiskAnalysisResponse,
     ScheduleCreate,
     ScheduleDiffRequest,
@@ -618,6 +619,30 @@ async def update_activity(
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
     activity = await service.update_activity(activity_id, data)
     return _activity_to_response(activity)
+
+
+@router.post(
+    "/schedules/{schedule_id}/activities/reorder/",
+    response_model=list[ActivityResponse],
+    summary="Reorder / re-parent activities",
+    description=(
+        "Apply a new top-to-bottom order (sort_order) and per-row parent_id in "
+        "one atomic call. Structural only: dates and dependencies are untouched."
+    ),
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def reorder_activities(
+    schedule_id: uuid.UUID,
+    body: ReorderActivitiesRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> list[ActivityResponse]:
+    """Reorder/re-parent a schedule's activities (drag-and-drop / indent)."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    activities = await service.reorder_activities(schedule_id, body.items)
+    return [_activity_to_response(a) for a in activities]
 
 
 @router.delete(

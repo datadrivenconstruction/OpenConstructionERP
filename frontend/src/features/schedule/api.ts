@@ -801,6 +801,16 @@ export const scheduleApi = {
     ),
   linkPosition: (activityId: string, positionId: string) =>
     apiPost(`/v1/schedule/activities/${activityId}/link-position/`, { boq_position_id: positionId }),
+  /** Structural reorder/re-parent of a schedule's activities. ``items`` is the
+   *  full desired top-to-bottom order with each row's new parent (null = root).
+   *  Dates and dependencies are untouched. */
+  reorderActivities: (
+    scheduleId: string,
+    items: Array<{ id: string; parentId: string | null }>,
+  ) =>
+    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/activities/reorder/`, {
+      items: items.map((it) => ({ id: it.id, parent_id: it.parentId })),
+    }),
   updateProgress: (activityId: string, progressPct: number) =>
     apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
 

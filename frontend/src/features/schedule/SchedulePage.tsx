@@ -1716,6 +1716,46 @@ function ScheduleDetail({
     [ganttData, patchActivityField],
   );
 
+  // Structural reorder/re-parent from the Gantt grid (drag-and-drop or
+  // Alt+Arrow). Optimistically reorders the cached gantt so the grid reacts
+  // instantly; the server reassigns sort_order/parent_id and reconciles the
+  // summary/task types. Dates and dependencies are left untouched.
+  const reorderActivities = useMutation({
+    mutationFn: (items: Array<{ id: string; parentId: string | null }>) =>
+      scheduleApi.reorderActivities(schedule.id, items),
+    onMutate: async (items) => {
+      const queryKey = ['gantt', schedule.id];
+      await queryClient.cancelQueries({ queryKey });
+      const prev = queryClient.getQueryData<GanttData>(queryKey);
+      if (prev) {
+        const order = new Map(items.map((it, i) => [it.id, i]));
+        const parent = new Map(items.map((it) => [it.id, it.parentId]));
+        const reordered = [...prev.activities]
+          .map((a) => ({
+            ...a,
+            parent_id: parent.has(a.id) ? parent.get(a.id)! : a.parent_id,
+          }))
+          .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+        queryClient.setQueryData<GanttData>(queryKey, { ...prev, activities: reordered });
+      }
+      return { prev };
+    },
+    onError: (error: Error, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['gantt', schedule.id], ctx.prev);
+      addToast({ type: 'error', title: t('toasts.update_failed', { defaultValue: 'Update failed' }), message: error.message });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+    },
+  });
+
+  const handleActivityReorder = useCallback(
+    (items: Array<{ id: string; parentId: string | null }>) => {
+      reorderActivities.mutate(items);
+    },
+    [reorderActivities],
+  );
+
   const renumberWbs = useCallback(() => {
     const acts = ganttData?.activities ?? [];
     if (acts.length === 0) return;
@@ -2221,6 +2261,7 @@ function ScheduleDetail({
                   todayLine={true}
                   onActivityResize={handleActivityResize}
                   onActivityFieldChange={handleActivityFieldChange}
+                  onActivityReorder={activityFilter === 'all' ? handleActivityReorder : undefined}
                   onActivityClick={(id) => {
                     const act = ganttData.activities.find((a) => a.id === id);
                     if (act) openEditActivity(act);

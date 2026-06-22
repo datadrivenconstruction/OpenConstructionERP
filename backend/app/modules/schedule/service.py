@@ -70,6 +70,7 @@ from app.modules.schedule.schemas import (
     GanttActivity,
     GanttData,
     GanttSummary,
+    ReorderActivityItem,
     RiskAnalysisResponse,
     ScheduleCreate,
     ScheduleUpdate,
@@ -1234,6 +1235,98 @@ class ScheduleService:
         )
 
         logger.info("Activity deleted: %s from schedule %s", activity_id, schedule_id)
+
+    async def reorder_activities(
+        self,
+        schedule_id: uuid.UUID,
+        items: list[ReorderActivityItem],
+    ) -> list[Activity]:
+        """Reorder / re-parent a schedule's activities in one atomic write.
+
+        ``items`` is the full desired top-to-bottom order. We assign
+        ``sort_order`` by index and apply each row's ``parent_id``, then
+        reconcile ``activity_type`` (a row that ends up with children becomes a
+        summary; one without becomes a task; milestones are left untouched).
+        Dates and dependencies are untouched - reordering is purely structural.
+
+        Raises HTTPException 404 if the schedule is empty / an id is foreign,
+        422 on a self- or circular-parent relationship.
+        """
+        await self.get_schedule(schedule_id)
+
+        activities, _ = await self.activity_repo.list_for_schedule(schedule_id, limit=5000)
+        by_id = {a.id: a for a in activities}
+        if not items:
+            return activities
+
+        # Validate every referenced id belongs to this schedule.
+        for it in items:
+            if it.id not in by_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Activity {it.id} is not part of schedule {schedule_id}",
+                )
+            if it.parent_id is not None and it.parent_id not in by_id:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Parent {it.parent_id} is not part of schedule {schedule_id}",
+                )
+            if it.parent_id == it.id:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="An activity cannot be its own parent",
+                )
+
+        # Effective parent map: requested where given, else the stored value
+        # (so activities omitted from ``items`` keep their parent).
+        requested_parent = {it.id: it.parent_id for it in items}
+        new_parent: dict[uuid.UUID, uuid.UUID | None] = {
+            a.id: requested_parent.get(a.id, a.parent_id) for a in activities
+        }
+
+        # Reject cycles: walking parents from any node must terminate at None.
+        for a in activities:
+            seen: set[uuid.UUID] = set()
+            cur = new_parent[a.id]
+            while cur is not None:
+                if cur == a.id or cur in seen:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail="Reorder would create a circular parent relationship",
+                    )
+                seen.add(cur)
+                cur = new_parent.get(cur)
+
+        # Child counts under the proposed hierarchy → drives summary/task type.
+        child_count: dict[uuid.UUID, int] = {}
+        for a in activities:
+            p = new_parent[a.id]
+            if p is not None:
+                child_count[p] = child_count.get(p, 0) + 1
+
+        updates: list[dict[str, object]] = []
+        for idx, it in enumerate(items):
+            a = by_id[it.id]
+            row: dict[str, object] = {
+                "id": it.id,
+                "sort_order": idx,
+                "parent_id": it.parent_id,
+            }
+            # Milestones keep their type; everything else follows its children.
+            if a.activity_type != "milestone":
+                row["activity_type"] = "summary" if child_count.get(it.id, 0) > 0 else "task"
+            updates.append(row)
+
+        await self.activity_repo.bulk_update_fields(updates)
+
+        await _safe_publish(
+            "schedule.activities.reordered",
+            {"schedule_id": str(schedule_id), "count": len(updates)},
+            source_module="oe_schedule",
+        )
+
+        activities, _ = await self.activity_repo.list_for_schedule(schedule_id, limit=5000)
+        return activities
 
     async def clear_activities(self, schedule_id: uuid.UUID) -> int:
         """Delete every activity (and its work orders) of a schedule at once.

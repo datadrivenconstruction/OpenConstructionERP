@@ -560,6 +560,32 @@ class GenerateFromBOQRequest(BaseModel):
     )
 
 
+class ReorderActivityItem(BaseModel):
+    """One row in a reorder request: an activity plus its new parent."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: UUID
+    # New WBS parent (None = top level). Lets a single reorder call express
+    # move (sort_order) AND indent/outdent (parent_id) at once.
+    parent_id: UUID | None = None
+
+
+class ReorderActivitiesRequest(BaseModel):
+    """Reorder/re-parent activities of a schedule in one atomic call.
+
+    ``items`` is the full desired top-to-bottom order; the server assigns
+    ``sort_order`` by index and applies each ``parent_id``. Activity types are
+    reconciled afterwards (a row that ends up with children becomes a summary,
+    one without becomes a task; milestones are left untouched). Dates and
+    dependencies are NOT changed - reordering is purely structural.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    items: list[ReorderActivityItem] = Field(default_factory=list)
+
+
 class CPMActivityResult(BaseModel):
     """CPM calculation results for a single activity."""
 
