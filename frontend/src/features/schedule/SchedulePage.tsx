@@ -487,6 +487,12 @@ const PIXELS_PER_DAY: Record<ZoomLevel, number> = {
 
 const ROW_HEIGHT = 44;
 
+/** Persisted width (px) of the table view's left activity panel. */
+const TABLE_LEFT_WIDTH_LS_KEY = 'oe-schedule-table-left-width-v1';
+const TABLE_LEFT_WIDTH_MIN = 160;
+const TABLE_LEFT_WIDTH_MAX = 640;
+const TABLE_LEFT_WIDTH_DEFAULT = 280;
+
 function GanttChart({
   activities,
   onUpdateProgress,
@@ -506,6 +512,45 @@ function GanttChart({
   const ganttScrollRef = useRef<HTMLDivElement>(null);
   // Debounced progress updates
   const [pendingProgress, setPendingProgress] = useState<Record<string, number>>({});
+
+  // ── Resizable left activity panel (persisted) ────────────────────
+  const [leftWidth, setLeftWidth] = useState<number>(() => {
+    const saved = Number(localStorage.getItem(TABLE_LEFT_WIDTH_LS_KEY));
+    return Number.isFinite(saved) && saved >= TABLE_LEFT_WIDTH_MIN && saved <= TABLE_LEFT_WIDTH_MAX
+      ? saved
+      : TABLE_LEFT_WIDTH_DEFAULT;
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(TABLE_LEFT_WIDTH_LS_KEY, String(leftWidth));
+    } catch {
+      /* storage unavailable — keep in-memory width only */
+    }
+  }, [leftWidth]);
+  const leftResize = useRef<{ startX: number; startW: number } | null>(null);
+  const startLeftResize = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      leftResize.current = { startX: e.clientX, startW: leftWidth };
+      const onMove = (ev: globalThis.MouseEvent) => {
+        const r = leftResize.current;
+        if (!r) return;
+        const next = Math.min(
+          TABLE_LEFT_WIDTH_MAX,
+          Math.max(TABLE_LEFT_WIDTH_MIN, r.startW + (ev.clientX - r.startX)),
+        );
+        setLeftWidth(next);
+      };
+      const onUp = () => {
+        leftResize.current = null;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    },
+    [leftWidth],
+  );
 
   useEffect(() => {
     const entries = Object.entries(pendingProgress);
@@ -792,14 +837,31 @@ function GanttChart({
   return (
     <Card padding="none" className="overflow-hidden">
       <div className="flex">
-        {/* LEFT: fixed activity list */}
-        <div className="w-[280px] shrink-0 border-r border-border-light">
+        {/* LEFT: resizable activity list */}
+        <div
+          className="relative shrink-0 border-r border-border-light"
+          style={{ width: leftWidth }}
+        >
           {/* Header labels */}
           <div className="flex h-10 items-center border-b border-border-light bg-surface-secondary/50 px-3">
             <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
               {t('schedule.activity', 'Activity')}
             </span>
           </div>
+          {/* Drag handle to resize the left panel */}
+          <span
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t('gantt.resize_column', 'Resize column')}
+            title={t('gantt.resize_column', 'Resize column')}
+            onMouseDown={startLeftResize}
+            className="group absolute right-0 top-0 z-10 flex h-full w-2 cursor-col-resize justify-center hover:bg-oe-blue/10"
+          >
+            <span
+              aria-hidden="true"
+              className="h-full w-px bg-border group-hover:w-0.5 group-hover:bg-oe-blue"
+            />
+          </span>
           {/* Activity rows — left panel */}
           {sortedActivities.map((activity) => {
             const cpActive = criticalActivityIds != null && criticalActivityIds.size > 0;
