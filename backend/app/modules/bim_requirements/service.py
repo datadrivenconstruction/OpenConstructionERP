@@ -334,7 +334,19 @@ class BIMRequirementService:
 
         # Load requirement set
         req_set = await self.get_set(set_id)
-        reqs = req_set.requirements
+        # Load its requirements with an explicit query rather than the
+        # ``req_set.requirements`` relationship. ``get_set`` fetches the set via
+        # ``session.get``; on an identity-map hit (e.g. the set was created
+        # earlier in this same session) the ``selectin`` loader does not re-run,
+        # so touching the relationship would emit an implicit lazy load and
+        # raise MissingGreenlet under async SQLAlchemy. Reading directly is also
+        # consistent with the export paths (``_load_requirements_as_universal``).
+        reqs_result = await self.session.execute(
+            select(BIMRequirement)
+            .where(BIMRequirement.requirement_set_id == set_id)
+            .order_by(BIMRequirement.created_at)
+        )
+        reqs = list(reqs_result.scalars().all())
 
         # Load BIM model and its elements
         model = await self.session.get(BIMModel, model_id)
