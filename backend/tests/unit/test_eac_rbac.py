@@ -144,10 +144,14 @@ def test_all_mutating_eac_routes_require_permission() -> None:
     Guards against a future endpoint being added (or one of the existing
     ones losing its gate) and silently re-opening the finding-#6 hole.
     """
+    from app.modules.eac.aliases.router import router as eac_aliases_router
     from app.modules.eac.router import router as eac_router
 
     seen: dict[tuple[str, str], bool] = {}
-    for route in eac_router.routes:
+    # The aliases sub-router is included into eac_router at import time, but we
+    # also iterate it directly so its routes are always discoverable regardless
+    # of include ordering (and so each alias route's permission gate is checked).
+    for route in list(eac_router.routes) + list(eac_aliases_router.routes):
         methods = getattr(route, "methods", None) or set()
         path = getattr(route, "path", "")
         for method in methods:

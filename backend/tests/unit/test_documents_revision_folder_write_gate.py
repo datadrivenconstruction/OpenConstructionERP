@@ -108,6 +108,7 @@ async def test_editor_grant_is_accepted() -> None:
 
     with (
         patch.object(documents_router, "verify_project_access", new=AsyncMock(return_value=None)),
+        patch.object(documents_router, "_doc_to_response", new=lambda d: d),
         patch(
             "app.modules.documents.folder_permissions_service.folder_access_for",
             new=AsyncMock(return_value="editor"),
@@ -137,6 +138,7 @@ async def test_project_owner_role_is_accepted() -> None:
 
     with (
         patch.object(documents_router, "verify_project_access", new=AsyncMock(return_value=None)),
+        patch.object(documents_router, "_doc_to_response", new=lambda d: d),
         patch(
             "app.modules.documents.folder_permissions_service.folder_access_for",
             new=AsyncMock(return_value="owner"),

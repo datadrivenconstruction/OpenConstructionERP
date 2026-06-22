@@ -218,12 +218,17 @@ async def client():
 
 async def _register_user(client, suffix: str) -> dict[str, str]:
     """Create a brand-new user account and return its Authorization header."""
+    from tests.integration._auth_helpers import promote_to_admin
+
     email = f"eac-sec-{suffix}@test.io"
     password = f"EacSec{suffix}9X"
     await client.post(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"EAC sec {suffix}"},
     )
+    # EAC writes/runs require EDITOR+ (finding #6); promote so the security
+    # suite can seed rulesets/rules and exercise the run + audit-log path.
+    await promote_to_admin(email)
     resp = await client.post(
         "/api/v1/users/auth/login",
         json={"email": email, "password": password},

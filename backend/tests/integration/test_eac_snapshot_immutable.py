@@ -71,12 +71,17 @@ async def client():
 
 
 async def _register_and_login(client: AsyncClient, tag: str) -> dict[str, str]:
+    from tests.integration._auth_helpers import promote_to_admin
+
     email = f"snap-{tag}-{uuid.uuid4().hex[:6]}@test.io"
     password = f"Snap{tag}9Xq"
     await client.post(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"Snap {tag}"},
     )
+    # EAC writes require EDITOR+ (finding #6); promote so this suite can seed
+    # a ruleset/run before asserting snapshot immutability.
+    await promote_to_admin(email)
     resp = await client.post(
         "/api/v1/users/auth/login",
         json={"email": email, "password": password},

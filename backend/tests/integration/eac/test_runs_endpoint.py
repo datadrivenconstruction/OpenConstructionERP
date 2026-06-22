@@ -53,6 +53,10 @@ async def auth_headers(client):
             "full_name": "EAC Runs Tester",
         },
     )
+    # EAC run/dry-run requires EDITOR+ (finding #6); promote the test user.
+    from tests.integration._auth_helpers import promote_to_admin
+
+    await promote_to_admin(email)
     resp = await client.post(
         "/api/v1/users/auth/login",
         json={"email": email, "password": password},

@@ -53,12 +53,18 @@ async def client():
 
 async def _register_and_login(client: AsyncClient, suffix: str) -> dict[str, str]:
     """Register a fresh user and return its Bearer auth header."""
+    from tests.integration._auth_helpers import promote_to_admin
+
     email = f"idor-eac-{suffix}-{uuid.uuid4().hex[:6]}@test.io"
     password = f"IdorEac{suffix}9X"
     await client.post(
         "/api/v1/users/auth/register",
         json={"email": email, "password": password, "full_name": f"IDOR {suffix}"},
     )
+    # EAC writes/runs require EDITOR+ (finding #6). Promote each tenant's user
+    # so it can seed its own entities; these tests exercise tenant isolation,
+    # not role gating, and EAC has no admin tenant-bypass.
+    await promote_to_admin(email)
     resp = await client.post(
         "/api/v1/users/auth/login",
         json={"email": email, "password": password},
