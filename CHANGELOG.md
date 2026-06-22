@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.8.4] - 2026-06-22
+
+A security and data-integrity hardening release from a deep internal audit.
+
+### Security
+
+- Procurement records now enforce per-project access on every action. You can view, submit, approve, reject, convert, issue, acknowledge, close, receive against or three-way-match a purchase requisition, purchase order, goods receipt or vendor invoice only in projects you can already reach. Previously these endpoints checked only a global role, so any account with the editor or manager role could act on another tenant's procurement and invoice-matching records by supplying their ids.
+- The custom document-template preview no longer renders unsanitised HTML. Template bodies are now cleaned both when saved and before they are previewed, so a template author can no longer plant a script or event-handler payload that would run in another staff member's session when they open the template editor.
+- Private cost-catalogue items now enforce catalogue ownership on read, edit and delete, matching the catalogue-level endpoints. One account can no longer read or change another account's private rates by guessing an item id. The shared global catalogue is unaffected.
+- The estimate-at-completion calculation engine now requires the right role for every action: viewer to read, editor to create or edit rules and rulesets, manager to delete, and editor to run, re-run, cancel or compile. Previously any signed-in account, including a read-only viewer, could create, edit, delete or run the rules that drive cost and validation outputs.
+- Creating a property development, a sales lead or a buyer now verifies you can access the referenced project or parent development before writing, so a development and the plots, buyers and contracts under it can no longer be attached to another tenant's project by id.
+- Validating a requirement set against a BIM model now checks that the model belongs to a project you can access, closing a path that let a requirement set in one project be validated against another tenant's model and read back element counts and property matches.
+- The bill-of-quantities quantity-mapping rules list is now scoped to the projects you can access, so the takeoff and costing rules of other tenants are no longer returned.
+- The cross-tenant cleanup of orphaned BIM storage is now restricted to administrators rather than project managers, matching its global and destructive scope.
+- The single-record read endpoints for job-safety analyses, permits to work, safety audits, audit findings, corrective actions and investigations now enforce project access, so these safety records can no longer be read across tenants by id.
+- Saved business-intelligence dashboards now compute their portfolio KPIs against only the projects the viewer can access, and the dashboard snapshot cache is keyed by the viewer's scope, so a shared dashboard no longer returns cost and earned-value figures aggregated across every tenant.
+- The clash AI triage batch endpoint now authorises every clash in the request rather than only the first, so a batch can no longer be used to triage and read clashes that belong to another tenant's project.
+- Uploading a new document revision now honours folder-level write permission, so a member who holds only a read-only grant on a restricted folder can no longer replace a protected file's contents by posting a revision.
+
+### Fixed
+
+- Bill-of-quantities fixed-amount markups, for example a flat site overhead, bond or contingency, now add into the totals as numbers rather than as text. The editor footer, the Markups panel and the Excel and PDF exports now show the same correct net, VAT and gross figures. Previously a fixed markup could concatenate into the footer total, read as zero in the panel, and carry the wrong totals into the exported documents.
+- Posting realised cost to a budget line now locks the row while it updates, so two postings arriving at the same time from different sources, for example an invoice payment and a labour event, can no longer overwrite each other and silently under-count the actual cost.
+- The bill-of-quantities list now resolves the project exchange rate once and totals positions in a single batched query instead of running a separate set of queries for every bill, so opening a project with many bills is faster and far lighter on the server.
+- Budget committed cost is now reversed when a purchase order is cancelled or reverted from approved, and re-approving an order no longer adds its commitment a second time, so the committed figure and the earned-value and CPI forecasts derived from it stay accurate.
+- Editing a Geo Hub anchor, tileset, imagery layer, terrain source, viewpoint or overlay now merges your change into the saved metadata instead of replacing it, so geocode precision, provenance and other stored keys are no longer lost on a partial edit.
+- The Monte Carlo contingency histogram now reads its bin bounds as numbers, so the chart's axis labels show real values instead of "NaN".
+- Editing a safety incident or observation now merges your change into the saved metadata instead of replacing it, so the recorded man-hours that drive the LTIFR and TRIR safety rates are no longer wiped by an unrelated edit.
+- Inspection signatures now carry a database uniqueness constraint on the signer and role, and completion counts distinct signatories, so a concurrent double-sign can no longer inflate the signatory count or let one person satisfy a multi-signatory completion gate.
+- The ITP-plan "Export compliance (CSV)" download now sends the authentication header through an authed fetch, so it downloads the dossier instead of opening a 401 error page.
+- The compliance-documents register now shows a clear error with a retry when its list fails to load, instead of a misleading "No compliance documents yet" empty state.
+- The nightly and on-demand KPI recalculation now gives each project its own database session, so a single failing query on one project can no longer abort the shared transaction and zero out the KPI snapshots for every project after it.
+- The project-intelligence KPI hero now shows loading and error states instead of defaulting to healthy green zeros, so a failed metric load is no longer indistinguishable from a genuinely healthy project.
+
 ## [8.8.3] - 2026-06-21
 
 ### Security
