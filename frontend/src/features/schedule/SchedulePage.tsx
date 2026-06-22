@@ -22,6 +22,7 @@ import {
   ShieldAlert,
   RotateCcw,
   Download,
+  Hash,
   Box,
   GitBranch,
   TrendingUp,
@@ -165,6 +166,30 @@ function daysBetween(start: string, end: string): number {
   const e = new Date(end).getTime();
   if (isNaN(s) || isNaN(e)) return 1;
   return Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)));
+}
+
+/** Assign hierarchical WBS codes (1, 1.1, 1.2, 2, 2.1, …) to a flat ordered
+ *  list of activities using their parent_id links. Returns a map id→code for
+ *  every activity whose code differs from its current wbs_code. */
+function buildWbsCodes(activities: Activity[]): Map<string, string> {
+  const childrenOf = new Map<string | null, Activity[]>();
+  for (const a of activities) {
+    const key = a.parent_id ?? null;
+    const arr = childrenOf.get(key) ?? [];
+    arr.push(a);
+    childrenOf.set(key, arr);
+  }
+  const result = new Map<string, string>();
+  const assign = (parentId: string | null, prefix: string) => {
+    const kids = childrenOf.get(parentId) ?? [];
+    kids.forEach((a, i) => {
+      const code = prefix ? `${prefix}.${i + 1}` : String(i + 1);
+      result.set(a.id, code);
+      assign(a.id, code);
+    });
+  };
+  assign(null, '');
+  return result;
 }
 
 /** True when the activity's duration was estimated from unit-based production
@@ -1499,6 +1524,19 @@ function ScheduleDetail({
     [ganttData, patchActivityField],
   );
 
+  const renumberWbs = useCallback(() => {
+    const acts = ganttData?.activities ?? [];
+    if (acts.length === 0) return;
+    const newCodes = buildWbsCodes(acts);
+    for (const [id, code] of newCodes) {
+      const act = acts.find((a) => a.id === id);
+      if (act && act.wbs_code !== code) {
+        patchActivityField.mutate({ id, patch: { wbs_code: code } });
+      }
+    }
+    addToast({ type: 'success', title: t('schedule.renumber_wbs_done', { defaultValue: 'WBS codes updated' }) });
+  }, [ganttData, patchActivityField, addToast, t]);
+
   const resetSchedule = useMutation({
     mutationFn: () => scheduleApi.clearActivities(schedule.id),
     onSuccess: () => {
@@ -1778,6 +1816,16 @@ function ScheduleDetail({
                 }}
               >
                 {t('common.export', { defaultValue: 'Export' })}
+              </Button>
+              {/* Renumber WBS */}
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Hash size={14} />}
+                onClick={renumberWbs}
+                title={t('schedule.renumber_wbs_tooltip', { defaultValue: 'Reassign hierarchical WBS codes (1, 1.1, 1.2, …) based on activity order and parent relationships' })}
+              >
+                {t('schedule.renumber_wbs', { defaultValue: 'Renumber WBS' })}
               </Button>
               {/* Reset schedule */}
               <Button

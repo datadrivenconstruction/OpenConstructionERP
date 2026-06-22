@@ -27,6 +27,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import {
@@ -269,6 +270,51 @@ export function GanttChart({
   const DATE_INPUT_CLS =
     'relative z-20 w-[128px] rounded border border-oe-blue bg-surface-primary px-1 py-0.5 text-2xs';
 
+  // ── Collapsible summary rows ─────────────────────────────────────
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+  const toggleCollapse = useCallback((id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  // Depth of each activity in the hierarchy (0 = root)
+  const depthMap = useMemo(() => {
+    const parentIds = new Map<string, string>();
+    for (const a of activities) {
+      if (a.parentId) parentIds.set(a.id, a.parentId);
+    }
+    const map = new Map<string, number>();
+    for (const a of activities) {
+      let depth = 0;
+      let cur = a.parentId;
+      while (cur) { depth++; cur = parentIds.get(cur); }
+      map.set(a.id, depth);
+    }
+    return map;
+  }, [activities]);
+
+  // Activities visible after applying collapse state
+  const visibleActivities = useMemo(() => {
+    if (collapsedIds.size === 0) return activities;
+    const childrenOf = new Map<string, string[]>();
+    for (const a of activities) {
+      if (a.parentId) {
+        const arr = childrenOf.get(a.parentId) ?? [];
+        arr.push(a.id);
+        childrenOf.set(a.parentId, arr);
+      }
+    }
+    const hidden = new Set<string>();
+    const hideDesc = (id: string) => {
+      for (const c of childrenOf.get(id) ?? []) { hidden.add(c); hideDesc(c); }
+    };
+    for (const id of collapsedIds) hideDesc(id);
+    return activities.filter((a) => !hidden.has(a.id));
+  }, [activities, collapsedIds]);
+
   // Refs for scroll sync
   const tableBodyRef = useRef<HTMLDivElement>(null);
   const svgScrollRef = useRef<HTMLDivElement>(null);
@@ -316,9 +362,9 @@ export function GanttChart({
     [timelineStart, timelineEnd, viewMode],
   );
 
-  const bodyHeight = activities.length * ROW_HEIGHT;
+  const bodyHeight = visibleActivities.length * ROW_HEIGHT;
 
-  const rowIndex = useMemo(() => buildRowIndex(activities), [activities]);
+  const rowIndex = useMemo(() => buildRowIndex(visibleActivities), [visibleActivities]);
 
   const headers = useMemo(
     () => generateTimeHeaders(timelineStart, timelineEnd, viewMode, locale),
@@ -338,7 +384,7 @@ export function GanttChart({
   /* ── Bar geometry ───────────────────────────────────────────── */
 
   const bars = useMemo(() => {
-    return activities.map((a) => {
+    return visibleActivities.map((a) => {
       const startD = new Date(a.start);
       const endD = new Date(a.end);
       const x = dateToPx(startD, viewMode, timelineStart);
@@ -357,7 +403,7 @@ export function GanttChart({
 
       return { activity: a, x, width, baselineX, baselineWidth };
     });
-  }, [activities, viewMode, timelineStart, showBaseline]);
+  }, [visibleActivities, viewMode, timelineStart, showBaseline]);
 
   /* ── Dependency arrow paths ─────────────────────────────────── */
 
@@ -855,10 +901,11 @@ export function GanttChart({
           onScroll={handleTableScroll}
           style={{ scrollbarWidth: 'none' }}
         >
-          {activities.map((a, idx) => {
+          {visibleActivities.map((a, idx) => {
             const startD = new Date(a.start);
             const endD = new Date(a.end);
             const isCritical = showCriticalPath && a.isCritical;
+            const depth = depthMap.get(a.id) ?? 0;
             const predText = (a.predecessors ?? [])
               .map((p) => `${p.label} ${p.type}`)
               .join(', ');
@@ -906,17 +953,32 @@ export function GanttChart({
                   );
                 case 'name':
                   return (
-                    <div className="flex w-full min-w-0 items-center gap-1.5">
-                      {a.isMilestone && (
-                        <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0">
+                    <div
+                      className="flex w-full min-w-0 items-center gap-1"
+                      style={{ paddingLeft: depth * 14 }}
+                    >
+                      {/* Collapse toggle for summary/group activities */}
+                      {a.isGroup ? (
+                        <button
+                          type="button"
+                          title={collapsedIds.has(a.id) ? t('gantt.expand', 'Expand') : t('gantt.collapse', 'Collapse')}
+                          onClick={(e) => { e.stopPropagation(); toggleCollapse(a.id); }}
+                          className="shrink-0 flex items-center justify-center w-4 h-4 rounded hover:bg-surface-secondary"
+                        >
+                          <ChevronRight
+                            size={11}
+                            className={`transition-transform duration-150 text-content-tertiary ${collapsedIds.has(a.id) ? '' : 'rotate-90'}`}
+                          />
+                        </button>
+                      ) : a.isMilestone ? (
+                        <svg width="10" height="10" viewBox="0 0 10 10" className="shrink-0 ml-0.5 mr-0.5">
                           <polygon
                             points="5,0 10,5 5,10 0,5"
                             fill={isCritical ? '#ef4444' : '#3b82f6'}
                           />
                         </svg>
-                      )}
-                      {a.isGroup && (
-                        <span className="shrink-0 text-content-tertiary text-[10px] font-bold">[G]</span>
+                      ) : (
+                        <span className="shrink-0 w-4" />
                       )}
                       {isEditing('name') ? (
                         editor(
@@ -1067,7 +1129,7 @@ export function GanttChart({
           className="select-none"
           role="img"
           aria-label={t('gantt.chart_label', 'Gantt chart with {{count}} activities', {
-            count: activities.length,
+            count: visibleActivities.length,
           })}
         >
           <defs>
@@ -1154,7 +1216,7 @@ export function GanttChart({
           {/* ── Body area ───────────────────────────────────────── */}
           <g transform={`translate(0, ${HEADER_HEIGHT})`}>
             {/* Alternating row backgrounds */}
-            {activities.map((_a, idx) => (
+            {visibleActivities.map((_a, idx) => (
               <rect
                 key={`row-bg-${idx}`}
                 x={0}
@@ -1167,7 +1229,7 @@ export function GanttChart({
             ))}
 
             {/* Horizontal row separators */}
-            {activities.map((_a, idx) => (
+            {visibleActivities.map((_a, idx) => (
               <line
                 key={`row-line-${idx}`}
                 x1={0}
