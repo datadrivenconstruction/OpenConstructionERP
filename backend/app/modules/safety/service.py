@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.json_merge import merge_metadata
 from app.modules.safety._dateutil import canonicalize_incident_date, parse_incident_date
 from app.modules.safety.models import SafetyIncident, SafetyObservation
 from app.modules.safety.repository import IncidentRepository, ObservationRepository
@@ -259,8 +260,17 @@ class SafetyService:
         incident = await self.get_incident(incident_id)
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        # Merge a partial metadata patch into the existing column instead of
+        # replacing it wholesale - a PATCH touching one key must not wipe the
+        # rest. The man-hours denominator for the LTIFR/TRIR safety rates lives
+        # only inside metadata (``man_hours_total``), so a naive overwrite would
+        # silently corrupt the statutory frequency-rate KPIs.
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            incoming_meta = fields.pop("metadata")
+            if isinstance(incoming_meta, dict):
+                fields["metadata_"] = merge_metadata(getattr(incident, "metadata_", None), incoming_meta)
+            else:
+                fields["metadata_"] = incoming_meta
         if fields.get("incident_date") is not None:
             fields["incident_date"] = canonicalize_incident_date(fields["incident_date"])
         if "corrective_actions" in fields and fields["corrective_actions"] is not None:
@@ -402,8 +412,14 @@ class SafetyService:
         observation = await self.get_observation(observation_id)
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        # Merge a partial metadata patch into the existing column instead of
+        # replacing it wholesale, so a PATCH touching one key keeps the rest.
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            incoming_meta = fields.pop("metadata")
+            if isinstance(incoming_meta, dict):
+                fields["metadata_"] = merge_metadata(getattr(observation, "metadata_", None), incoming_meta)
+            else:
+                fields["metadata_"] = incoming_meta
 
         # Recompute risk score if severity or likelihood changed
         severity = fields.get("severity", observation.severity)

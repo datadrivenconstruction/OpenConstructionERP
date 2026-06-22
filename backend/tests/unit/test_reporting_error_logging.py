@@ -39,11 +39,20 @@ class _StubSession:
     Making every downstream query fail is exactly what we want here —
     the WHOLE point of the tests is that these per-sub-module failures
     land in the log at WARNING with the project id attached.
+
+    Doubles as both the (shared) "list active projects" session AND the
+    per-project session: ``auto_recalculate_kpis`` now opens a fresh
+    short-lived session per project via ``_project_session_factory`` so
+    one project's failing query cannot poison the next (audit #23). The
+    stub therefore supports the async-context-manager + rollback/commit
+    surface those per-project sessions use.
     """
 
     def __init__(self, project_id: uuid.UUID) -> None:
         self._project_id = project_id
         self._calls = 0
+        self.rollback_calls = 0
+        self.commit_calls = 0
 
     async def execute(self, _stmt):
         self._calls += 1
@@ -64,8 +73,22 @@ class _StubSession:
     async def flush(self):
         return None
 
+    async def rollback(self):
+        self.rollback_calls += 1
+
+    async def commit(self):
+        self.commit_calls += 1
+
     def add(self, _obj):  # pragma: no cover - not exercised by these tests
         return None
+
+    # Async-context-manager surface so the stub can stand in for the
+    # per-project session opened by ``_project_session_factory``.
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *_exc):
+        return False
 
 
 @pytest.fixture
@@ -80,11 +103,17 @@ def reporting_service(stub_session: _StubSession) -> ReportingService:
     # the ``_StubSession`` is sufficient.  We build ``ReportingService``
     # via ``object.__new__`` to skip the repository constructors —
     # they inspect the session in ways a stub cannot satisfy.
+    #
+    # ``_project_session_factory`` is overridden to hand back the SAME
+    # stub for each project so the WARNING-logging assertions still see
+    # the per-sub-module failures the stub raises (a fresh
+    # ``async_session_factory`` would need a live DB, unavailable here).
     svc = object.__new__(ReportingService)
     svc.session = stub_session
     svc.kpi_repo = MagicMock()
     svc.template_repo = MagicMock()
     svc.report_repo = MagicMock()
+    svc._project_session_factory = lambda: stub_session  # type: ignore[method-assign]
     return svc
 
 
@@ -248,6 +277,138 @@ class TestKpiRecalcLogging:
         assert not any("costmodel.get_dashboard" in m for m in messages)
         assert not any("safety.get_stats" in m for m in messages)
         assert not any("rfi.get_stats" in m for m in messages)
+
+
+# ---------------------------------------------------------------------------
+# Per-project session isolation (audit #23): one project's failing query
+# must NOT poison the snapshot of any later project in the batch. On a
+# shared session a PostgreSQL sub-query that aborts the transaction would
+# make every subsequent project raise InFailedSqlTransactionError (all
+# swallowed) and silently persist all-zero KPI rows. Per-project sessions
+# contain the failure to the one project that hit it.
+# ---------------------------------------------------------------------------
+
+
+class _ListSession:
+    """Shared session that only answers the 'list active projects' query."""
+
+    def __init__(self, project_ids: list[uuid.UUID]) -> None:
+        self._project_ids = project_ids
+
+    async def execute(self, _stmt):
+        projects = [SimpleNamespace(id=pid) for pid in self._project_ids]
+        fake_scalars = MagicMock()
+        fake_scalars.all = MagicMock(return_value=projects)
+        fake_result = MagicMock()
+        fake_result.scalars = MagicMock(return_value=fake_scalars)
+        return fake_result
+
+
+class _PoisonedProjectSession:
+    """Per-project session whose EVERY query raises (PostgreSQL abort).
+
+    Mirrors a project whose first sub-query already put the transaction
+    into the aborted state - on a shared session this is what used to
+    cascade into all later projects.
+    """
+
+    def __init__(self) -> None:
+        self.rollback_calls = 0
+        self.committed = False
+        self.added: list = []
+
+    async def execute(self, _stmt):
+        raise RuntimeError("stub-db: transaction aborted for this project")
+
+    async def flush(self):
+        raise RuntimeError("stub-db: cannot flush an aborted transaction")
+
+    async def rollback(self):
+        self.rollback_calls += 1
+
+    async def commit(self):  # pragma: no cover - poisoned project never commits
+        self.committed = True
+
+    def add(self, obj):
+        self.added.append(obj)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *_exc):
+        return False
+
+
+class _CleanProjectSession:
+    """Per-project session that has no existing snapshot and writes cleanly."""
+
+    def __init__(self) -> None:
+        self.committed = False
+        self.flushed = False
+        self.added: list = []
+
+    async def execute(self, _stmt):
+        # Every sub-query returns "nothing": the snapshot-existence lookup
+        # yields scalar_one_or_none()==None, and any aggregate yields None.
+        fake_result = MagicMock()
+        fake_result.scalar_one_or_none = MagicMock(return_value=None)
+        fake_result.scalar_one = MagicMock(return_value=None)
+        fake_result.all = MagicMock(return_value=[])
+        return fake_result
+
+    async def flush(self):
+        self.flushed = True
+
+    async def rollback(self):  # pragma: no cover - clean project never rolls back
+        pass
+
+    async def commit(self):
+        self.committed = True
+
+    def add(self, obj):
+        self.added.append(obj)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *_exc):
+        return False
+
+
+@pytest.mark.asyncio
+async def test_one_poisoned_project_does_not_poison_later_projects():
+    """A project whose per-project session is fully aborted is counted
+    as ``failed`` and rolled back, while a LATER project still gets a
+    clean session and a real snapshot - no cross-project cascade."""
+    poisoned_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
+    clean_id = uuid.UUID("22222222-2222-2222-2222-222222222222")
+
+    poisoned = _PoisonedProjectSession()
+    clean = _CleanProjectSession()
+    per_project_sessions = iter([poisoned, clean])
+
+    svc = object.__new__(ReportingService)
+    svc.session = _ListSession([poisoned_id, clean_id])
+    svc.kpi_repo = MagicMock()
+    svc.template_repo = MagicMock()
+    svc.report_repo = MagicMock()
+    # Hand out a distinct session per project, in order.
+    svc._project_session_factory = lambda: next(per_project_sessions)  # type: ignore[method-assign]
+
+    result = await svc.auto_recalculate_kpis()
+
+    # The poisoned project is isolated: it failed and was rolled back, it
+    # did NOT bring down the clean project that followed it.
+    assert result["total_projects"] == 2
+    assert result["failed"] == 1
+    assert result["processed"] == 1
+    assert poisoned.rollback_calls >= 1
+    assert poisoned.committed is False
+    # The clean project got its own session, wrote a real snapshot row,
+    # flushed and committed - it was NOT skipped/zeroed by the earlier abort.
+    assert clean.flushed is True
+    assert clean.committed is True
+    assert len(clean.added) == 1
 
 
 # ---------------------------------------------------------------------------

@@ -23,6 +23,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.qms.models import QMSInspection
 from app.modules.qms.schemas import (
     AuditCreate,
     AuditUpdate,
@@ -38,7 +39,7 @@ from app.modules.qms.schemas import (
     PunchItemCreate,
     PunchItemUpdate,
 )
-from app.modules.qms.service import QMSService
+from app.modules.qms.service import QMSConflictError, QMSService
 from tests._pg import transactional_session
 
 _PROJECT_ID = uuid.uuid4()
@@ -382,3 +383,85 @@ async def test_start_inspection_writes_audit_log(svc: QMSService) -> None:
 
     log_entries = await svc.repo.list_audit_log(insp.id, entity_type="inspection")
     assert any(e.old_status == "scheduled" and e.new_status == "in_progress" for e in log_entries)
+
+
+# ── Signature dedup + DISTINCT-signatory completion gate (finding #18) ─────
+
+
+async def _inspection_needing_two_signatories(svc: QMSService) -> QMSInspection:
+    """Schedule an inspection linked to an ITP item requiring 2 signatories."""
+    plan = await svc.create_itp_plan(
+        ITPPlanCreate(project_id=_PROJECT_ID, name="P", work_type="concrete"),
+    )
+    item = await svc.add_itp_item(
+        plan.id,
+        ITPItemCreate(
+            control_point_name="CP",
+            hold_witness_point="review",
+            signatories_required=2,
+        ),
+    )
+    return await svc.schedule_inspection(
+        InspectionCreate(project_id=_PROJECT_ID, itp_item_id=item.id),
+    )
+
+
+@pytest.mark.asyncio
+async def test_duplicate_signature_same_user_role_conflicts(svc: QMSService) -> None:
+    """Signing twice as the same (user, role) raises a conflict, not a 2nd row."""
+    insp = await svc.schedule_inspection(InspectionCreate(project_id=_PROJECT_ID))
+    user = uuid.uuid4()
+    await svc.add_signature(
+        insp.id,
+        InspectionSignatureCreate(signer_user_id=user, signer_role="GC"),
+    )
+    with pytest.raises(QMSConflictError, match="already signed"):
+        await svc.add_signature(
+            insp.id,
+            InspectionSignatureCreate(signer_user_id=user, signer_role="GC"),
+        )
+    sigs = await svc.repo.list_signatures(insp.id)
+    assert len(sigs) == 1
+
+
+@pytest.mark.asyncio
+async def test_complete_counts_distinct_signers_not_rows(svc: QMSService) -> None:
+    """One person signing in two roles must not satisfy a 2-signatory gate.
+
+    Finding #18: ``signatories_required`` is a head-count of distinct people.
+    A single user signing in two roles produces two signature rows but still
+    only one signatory, so completion must be refused.
+    """
+    insp = await _inspection_needing_two_signatories(svc)
+    solo = uuid.uuid4()
+    # Same user, two distinct roles → two rows, one distinct signer.
+    await svc.add_signature(
+        insp.id,
+        InspectionSignatureCreate(signer_user_id=solo, signer_role="GC"),
+    )
+    await svc.add_signature(
+        insp.id,
+        InspectionSignatureCreate(signer_user_id=solo, signer_role="inspector"),
+    )
+    sigs = await svc.repo.list_signatures(insp.id)
+    assert len(sigs) == 2  # two rows…
+    with patch("app.modules.qms.service.event_bus.publish_detached", MagicMock()):
+        with pytest.raises(ValueError, match="1/2 required signatures"):
+            await svc.complete_inspection(insp.id, result="passed")
+
+
+@pytest.mark.asyncio
+async def test_complete_passes_with_two_distinct_signers(svc: QMSService) -> None:
+    """Two genuinely different signatories satisfy a 2-signatory gate."""
+    insp = await _inspection_needing_two_signatories(svc)
+    await svc.add_signature(
+        insp.id,
+        InspectionSignatureCreate(signer_user_id=uuid.uuid4(), signer_role="GC"),
+    )
+    await svc.add_signature(
+        insp.id,
+        InspectionSignatureCreate(signer_user_id=uuid.uuid4(), signer_role="inspector"),
+    )
+    with patch("app.modules.qms.service.event_bus.publish_detached", MagicMock()):
+        insp = await svc.complete_inspection(insp.id, result="passed")
+    assert insp.status == "passed"

@@ -460,6 +460,121 @@ async def test_post_actual_none_category_single_row(session: AsyncSession) -> No
     assert len(rows) == 1
 
 
+# ── Extra: lost-update fix — two sequential postings sum correctly ────────────
+
+
+async def test_post_actual_two_postings_sum_under_row_lock(session: AsyncSession) -> None:
+    """Two distinct postings from different sources land on the same row and sum.
+
+    Regression guard for the lost-update race (audit finding #7). Different
+    sources (an invoice payment and a labour event) resolve to the SAME budget
+    row (same project_id + cost_line_id + category) but carry distinct
+    ``(source_kind, source_ref)``, so the idempotency guard does NOT dedupe
+    them — both must be added. Under the fix, the existing-row branch re-fetches
+    the row with ``SELECT ... FOR UPDATE`` immediately before the
+    read-modify-write of the Decimal-as-string ``actual_amount``. That lock is
+    held until the surrounding transaction commits, so a second poster racing on
+    the same row BLOCKS until the first has written its increment and only then
+    reads the now-incremented ``prior`` — serialising concurrent posters so no
+    increment is silently lost. A true two-connection race cannot be exercised
+    inside a single rolled-back test transaction, so this asserts the sequential
+    accumulation the lock guarantees (300 + 250 = 550, never 250 or 300).
+    """
+    project_id = await _seed_project(session)
+    svc = CostSpineService(session)
+
+    await svc.post_actual_to_budget_line(
+        project_id=project_id,
+        cost_line_id=None,
+        cost_category="labor",
+        amount_base="300.00",
+        currency="EUR",
+        source_kind="invoice_paid",
+        source_ref="inv-7:item-2",
+        idempotency_key="inv-7",
+    )
+    line = await svc.post_actual_to_budget_line(
+        project_id=project_id,
+        cost_line_id=None,
+        cost_category="labor",
+        amount_base="250.00",
+        currency="EUR",
+        source_kind="labour_event",  # different source, same target row
+        source_ref="crew-shift-9",
+        idempotency_key="crew-9",
+    )
+
+    assert Decimal(line.actual_amount) == Decimal("550.00")
+    # Both postings are recorded in the trail AND reflected in actual_amount —
+    # the audit trail and the increment stay consistent (no phantom entry).
+    assert len(line.metadata_["postings"]) == 2
+    rows = (await session.execute(select(BudgetLine).where(BudgetLine.project_id == project_id))).scalars().all()
+    assert len(rows) == 1
+
+
+# ── Extra: the lock itself — a SELECT ... FOR UPDATE must hit the existing row ─
+
+
+async def test_post_actual_existing_row_issues_for_update_lock(session: AsyncSession) -> None:
+    """Pin the lock mechanism, not just the sum (audit finding #7).
+
+    The previous test asserts the *outcome* (300 + 250 = 550) which would also
+    hold on the un-fixed code in a single transaction. This one fails the moment
+    someone removes ``with_for_update()``: it spies on the session and asserts the
+    existing-row branch issues a ``SELECT ... FOR UPDATE`` against the BudgetLine
+    row before the read-modify-write of ``actual_amount``. That row lock is what
+    serialises concurrent posters so no increment is silently lost under a real
+    two-connection race.
+    """
+    project_id = await _seed_project(session)
+    svc = CostSpineService(session)
+
+    # Seed the row so the second call takes the existing-row (locked) branch.
+    await svc.post_actual_to_budget_line(
+        project_id=project_id,
+        cost_line_id=None,
+        cost_category="labor",
+        amount_base="300.00",
+        currency="EUR",
+        source_kind="invoice_paid",
+        source_ref="inv-7",
+        idempotency_key="inv-7",
+    )
+
+    captured: list[object] = []
+    original_execute = svc.session.execute
+
+    async def _spy(statement, *args, **kwargs):  # type: ignore[no-untyped-def]
+        captured.append(statement)
+        return await original_execute(statement, *args, **kwargs)
+
+    svc.session.execute = _spy  # type: ignore[method-assign]
+    try:
+        await svc.post_actual_to_budget_line(
+            project_id=project_id,
+            cost_line_id=None,
+            cost_category="labor",
+            amount_base="250.00",
+            currency="EUR",
+            source_kind="labour_event",  # different source, same target row
+            source_ref="crew-9",
+            idempotency_key="crew-9",
+        )
+    finally:
+        svc.session.execute = original_execute  # type: ignore[method-assign]
+
+    def _is_budget_line_for_update(statement: object) -> bool:
+        # ``_for_update_arg`` is set by Select.with_for_update(); None otherwise.
+        if getattr(statement, "_for_update_arg", None) is None:
+            return False
+        return "budget" in str(statement).lower()
+
+    assert any(_is_budget_line_for_update(s) for s in captured), (
+        "post_actual_to_budget_line must SELECT ... FOR UPDATE the BudgetLine row "
+        "before incrementing actual_amount (lost-update lock, finding #7)"
+    )
+
+
 # ── Extra: a negative posting (refund semantics) decrements the actual ────────
 
 

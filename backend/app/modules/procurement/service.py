@@ -638,6 +638,7 @@ class ProcurementService:
         subtotal or tax are changed.
         """
         po = await self.get_po(po_id)  # 404 check
+        prior_status = po.status
 
         fields = data.model_dump(exclude_unset=True, exclude={"items"})
         if "metadata" in fields:
@@ -765,6 +766,33 @@ class ProcurementService:
                 "status": updated.status,
             },
         )
+
+        # Max-Audit #10: when a PO LEAVES the ``approved`` state its budget
+        # commitment must be reversed. The PO FSM allows ``approved -> draft``
+        # (revert) and ``approved -> cancelled``; publish a compensating event
+        # carrying ``amount_total`` so finance can decrement ``committed`` by
+        # exactly what this PO committed. Without this the commitment ledger
+        # only ever grows and phantom commitments corrupt the dashboard / EVM.
+        if prior_status == "approved" and updated.status != prior_status:
+            if updated.status == "cancelled":
+                _decommit_event = "procurement.po.cancelled"
+            elif updated.status == "draft":
+                _decommit_event = "procurement.po.reverted"
+            else:
+                _decommit_event = None
+            if _decommit_event is not None:
+                await _safe_publish(
+                    _decommit_event,
+                    {
+                        "po_id": str(po_id),
+                        "project_id": str(updated.project_id),
+                        "po_number": updated.po_number,
+                        "amount_total": updated.amount_total,
+                        "currency_code": updated.currency_code or "",
+                        "prior_status": prior_status,
+                        "status": updated.status,
+                    },
+                )
 
         updated.vendor_warnings = vendor_warnings  # type: ignore[attr-defined]
 

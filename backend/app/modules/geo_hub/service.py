@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.i18n import get_locale
+from app.core.json_merge import merge_metadata
 from app.core.validation.messages import translate
 from app.modules.geo_hub.geojson_io import (
     kml_looks_like_kml,
@@ -114,13 +115,29 @@ def _validate_tileset_transition(current: str, target: str) -> None:
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
-def _dump(model: Any) -> dict[str, Any]:
-    """``model.model_dump(exclude_unset=True)`` with ``metadata`` -> ``metadata_``."""
+def _dump(model: Any, current: Any = None) -> dict[str, Any]:
+    """``model.model_dump(exclude_unset=True)`` with ``metadata`` -> ``metadata_``.
+
+    A PATCH that sends ``metadata`` partially must MERGE onto whatever is
+    already stored on the row, not replace it - otherwise a request that
+    touches one key (e.g. ``{"metadata": {"label": "Site office"}}``)
+    silently drops every other key (geocode precision/source, rasterisation
+    provenance, GeoJSON feature metadata, etc.). ``current`` is the loaded ORM
+    row the update is being applied to; when an incoming ``metadata`` dict is
+    present we shallow-merge it onto ``current.metadata_`` via the shared
+    :func:`merge_metadata` helper so unmentioned keys survive. A non-dict
+    incoming value (or ``current is None``) falls back to passing the value
+    through unchanged.
+    """
     if model is None:
         return {}
     data = model.model_dump(exclude_unset=True)
     if "metadata" in data:
-        data["metadata_"] = data.pop("metadata")
+        incoming = data.pop("metadata")
+        if isinstance(incoming, dict) and current is not None:
+            data["metadata_"] = merge_metadata(getattr(current, "metadata_", None), incoming)
+        else:
+            data["metadata_"] = incoming
     return data
 
 
@@ -551,7 +568,7 @@ class GeoHubService:
             payload,
             not_found_detail="Anchor not found",
         )
-        await self.anchors.update_fields(anchor_id, **_dump(data))
+        await self.anchors.update_fields(anchor_id, **_dump(data, obj))
         return await self.get_anchor(anchor_id)
 
     async def delete_anchor(
@@ -617,7 +634,7 @@ class GeoHubService:
         )
         if data.status is not None:
             _validate_tileset_transition(obj.status, data.status)
-        await self.tilesets.update_fields(tileset_id, **_dump(data))
+        await self.tilesets.update_fields(tileset_id, **_dump(data, obj))
         return await self.get_tileset(tileset_id)
 
     async def list_tilesets_for_project(
@@ -855,7 +872,7 @@ class GeoHubService:
         )
         if data.default_for_project is True:
             await self.imagery.clear_default_for_project(obj.project_id)
-        await self.imagery.update_fields(layer_id, **_dump(data))
+        await self.imagery.update_fields(layer_id, **_dump(data, obj))
         return await self.get_imagery_layer(layer_id)
 
     async def list_imagery_for_project(
@@ -915,7 +932,7 @@ class GeoHubService:
         obj = await self.get_terrain_source(src_id)
         if data.is_default is True:
             await self.terrain.clear_default()
-        await self.terrain.update_fields(src_id, **_dump(data))
+        await self.terrain.update_fields(src_id, **_dump(data, obj))
         return await self.get_terrain_source(src_id)
 
     async def list_terrain_sources(self) -> list[TerrainSource]:
@@ -970,7 +987,7 @@ class GeoHubService:
             payload,
             not_found_detail="Viewpoint not found",
         )
-        await self.viewpoints.update_fields(vp_id, **_dump(data))
+        await self.viewpoints.update_fields(vp_id, **_dump(data, obj))
         return await self.get_viewpoint(vp_id)
 
     async def list_viewpoints(
@@ -1048,7 +1065,7 @@ class GeoHubService:
                 validate_geojson(data.geojson)
             except ValueError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
-        await self.overlays.update_fields(overlay_id, **_dump(data))
+        await self.overlays.update_fields(overlay_id, **_dump(data, obj))
         return await self.overlays.get_by_id(overlay_id)
 
     async def import_geojson(
@@ -1349,9 +1366,11 @@ class GeoHubService:
         # IDOR-check by reading once before the update; ``expire_all`` in
         # ``update_fields`` would otherwise invalidate the ORM attribute
         # cache and trigger a lazy-load that explodes with ``MissingGreenlet``
-        # under an async session.
-        await self.get_raster_overlay(overlay_id, payload=payload)
-        await self.raster_overlays.update_fields(overlay_id, **_dump(data))
+        # under an async session. Keep the loaded row so ``_dump`` can merge
+        # an incoming ``metadata`` patch onto the stored rasterisation
+        # provenance instead of overwriting it.
+        existing = await self.get_raster_overlay(overlay_id, payload=payload)
+        await self.raster_overlays.update_fields(overlay_id, **_dump(data, existing))
         return await self.get_raster_overlay(overlay_id, payload=payload)
 
     async def delete_raster_overlay(

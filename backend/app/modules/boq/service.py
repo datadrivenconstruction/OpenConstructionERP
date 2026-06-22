@@ -2513,15 +2513,35 @@ class BOQService:
         cent = Decimal("0.01")
         breakdown: dict[uuid.UUID, dict[str, Any]] = {}
 
-        # Active markups for the whole set in one query (sort_order applied),
-        # so per-BOQ markup arithmetic reuses the canonical helper that powers
-        # get_boq_structured / the editor.
+        # Batched loads to keep this hot list path O(1) round trips instead of
+        # O(BOQs). Previously this looped per BOQ firing ``_resolve_project_fx``
+        # (an identical Project JOIN BOQ query) AND an unbounded
+        # ``list_all_for_boq`` per iteration - up to ~2xN queries plus a full
+        # position-table load for a 100-BOQ page on the 1-core VPS.
+        #
+        #  * Active markups for the whole set in one query (sort_order applied),
+        #    so per-BOQ markup arithmetic reuses the canonical helper that
+        #    powers get_boq_structured / the editor.
+        #  * Every position for the whole set in one ``boq_id IN (...)`` query,
+        #    grouped by BOQ (same no-limit / no-eager-load rollup contract as
+        #    ``list_all_for_boq``).
+        #  * The owning project id per BOQ in one query, then the project FX
+        #    table resolved ONCE per distinct project (every BOQ on a list page
+        #    shares the same project - Issue #111 conversion is unchanged, it
+        #    only stops re-running the identical FX lookup per BOQ).
         markups_by_boq = await self.boq_repo.active_markups_for_boqs(boq_ids)
+        positions_by_boq = await self.position_repo.list_all_for_boqs(boq_ids)
+        project_by_boq = await self.position_repo.project_ids_for_boqs(boq_ids)
+
+        fx_by_project: dict[uuid.UUID, tuple[str, dict[str, str]]] = {}
+        for project_id in set(project_by_boq.values()):
+            fx_by_project[project_id] = await self._resolve_project_fx_by_project(project_id)
 
         for boq_id in boq_ids:
-            base_currency, fx_map = await self._resolve_project_fx(boq_id)
+            project_id = project_by_boq.get(boq_id)
+            base_currency, fx_map = fx_by_project.get(project_id, ("", {})) if project_id else ("", {})
             base = (base_currency or "").strip().upper()
-            positions = await self.position_repo.list_all_for_boq(boq_id)
+            positions = positions_by_boq.get(boq_id, [])
 
             direct_cost = Decimal("0")
             currencies: set[str] = set()

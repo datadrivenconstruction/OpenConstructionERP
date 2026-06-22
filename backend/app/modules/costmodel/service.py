@@ -2867,11 +2867,36 @@ class CostSpineService:
             )
             return line
 
-        # ── 6. Existing row: idempotency check on (source_kind, source_ref)
+        # ── 6. Existing row: lock, then idempotency check on (source_kind, source_ref)
+        line_id = line.id
+
+        # Serialise concurrent posters with a row lock (lost-update fix).
+        # ``actual_amount`` is a Decimal-as-string column, so the increment is a
+        # read-modify-write that cannot be expressed as an atomic SQL UPDATE.
+        # Re-fetch the row ``FOR UPDATE`` inside the active transaction
+        # immediately before the read: a second poster landing on the SAME
+        # budget row (same project_id + cost_line_id + category) from a
+        # different source then blocks here until the first transaction commits,
+        # and only afterwards reads the now-incremented ``actual_amount`` -- so
+        # two concurrent postings sum correctly instead of both reading the same
+        # ``prior`` and one increment being silently lost. The idempotency guard
+        # below still de-dupes the SAME (source_kind, source_ref); the lock
+        # serialises DIFFERENT postings racing on the same row. ``FOR UPDATE`` is
+        # honoured on PostgreSQL (the only supported backend); mirrors the
+        # ``with_for_update`` pattern in approval_routes/service.py and
+        # procurement/repository.py. Re-reading the locked row also refreshes
+        # ``actual_amount`` / ``metadata_`` to the latest committed state.
+        from sqlalchemy import select
+
+        locked = (
+            await self.session.execute(select(BudgetLine).where(BudgetLine.id == line_id).with_for_update())
+        ).scalar_one_or_none()
+        if locked is not None:
+            line = locked
+
         # Snapshot every attribute we need BEFORE update_fields() calls
         # expire_all(): reading line.* afterwards would re-issue a sync SELECT
         # and raise MissingGreenlet under the async session.
-        line_id = line.id
         existing_cost_line_id = line.cost_line_id
         line_category = line.category or ""
         md = dict(line.metadata_) if isinstance(line.metadata_, dict) else {}

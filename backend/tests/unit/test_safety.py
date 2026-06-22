@@ -370,6 +370,77 @@ async def test_delete_observation() -> None:
         await svc.get_observation(obs.id)
 
 
+# ── Tests: metadata partial-PATCH merge (safety-rate denominator integrity) ─
+
+
+@pytest.mark.asyncio
+async def test_update_incident_metadata_patch_preserves_man_hours() -> None:
+    """A PATCH that sets one metadata key must NOT wipe man_hours_total.
+
+    The LTIFR/TRIR denominator is stored only inside metadata as
+    ``man_hours_total``. A wholesale metadata replace on update silently
+    deletes it and corrupts the statutory safety-rate KPIs. The fix merges
+    the incoming patch onto the stored value, so unrelated keys survive.
+    """
+    svc = _make_service()
+    with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
+        incident = await svc.create_incident(
+            _incident_data(metadata={"man_hours_total": 120000, "shift": "day"}),
+            user_id="u1",
+        )
+    assert incident.metadata_ == {"man_hours_total": 120000, "shift": "day"}
+
+    updated = await svc.update_incident(
+        incident.id,
+        IncidentUpdate(metadata={"note": "added detail"}),
+    )
+
+    # The single-key patch is merged in; the man-hours denominator and the
+    # other pre-existing key survive (the bug would have dropped both).
+    assert updated.metadata_["man_hours_total"] == 120000
+    assert updated.metadata_["shift"] == "day"
+    assert updated.metadata_["note"] == "added detail"
+
+
+@pytest.mark.asyncio
+async def test_update_incident_metadata_patch_overrides_colliding_key() -> None:
+    """The incoming patch wins on a key it explicitly provides."""
+    svc = _make_service()
+    with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
+        incident = await svc.create_incident(
+            _incident_data(metadata={"man_hours_total": 100000}),
+            user_id="u1",
+        )
+
+    updated = await svc.update_incident(
+        incident.id,
+        IncidentUpdate(metadata={"man_hours_total": 250000}),
+    )
+    assert updated.metadata_["man_hours_total"] == 250000
+
+
+@pytest.mark.asyncio
+async def test_update_observation_metadata_patch_preserves_existing() -> None:
+    """An observation metadata PATCH must merge, not replace."""
+    svc = _make_service()
+    with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
+        obs = await svc.create_observation(
+            _observation_data(metadata={"source": "field-app", "crew": "C7"}),
+            user_id="u1",
+        )
+    assert obs.metadata_ == {"source": "field-app", "crew": "C7"}
+
+    with patch("app.modules.safety.service.event_bus.publish", new_callable=AsyncMock):
+        updated = await svc.update_observation(
+            obs.id,
+            ObservationUpdate(metadata={"reviewed_by": "qa-1"}),
+        )
+
+    assert updated.metadata_["source"] == "field-app"
+    assert updated.metadata_["crew"] == "C7"
+    assert updated.metadata_["reviewed_by"] == "qa-1"
+
+
 # ── Tests: incident-date robustness (safety-reporting integrity) ──────────
 
 

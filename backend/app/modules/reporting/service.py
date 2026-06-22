@@ -1129,219 +1129,47 @@ class ReportingService:
         per project.
 
         Returns a summary dict with counts of processed / failed projects.
+
+        Each project is recalculated on its OWN short-lived session,
+        opened from :data:`app.database.async_session_factory` and
+        committed (or rolled back) before moving to the next project -
+        exactly the isolation the ``project_intelligence`` collector uses
+        (see ``collector._with_own_session``). This is load-bearing on
+        PostgreSQL: a single failing sub-query aborts the whole
+        transaction ('current transaction is aborted'), and the bare
+        per-sub-block ``except`` clauses below swallow that error. With a
+        shared session every *subsequent* query - in this project and in
+        every later project of the batch - would then raise
+        ``InFailedSqlTransactionError`` (also swallowed) and silently
+        persist all-zero/null KPI values. Per-project sessions contain a
+        failure to the one project that hit it, and a project whose
+        snapshot flush fails is rolled back and counted as failed rather
+        than written with fabricated zeros.
         """
-        from sqlalchemy import Float, func, select
-        from sqlalchemy.sql.expression import cast
+        from sqlalchemy import select
 
         from app.modules.projects.models import Project
 
         today = datetime.now(UTC).strftime("%Y-%m-%d")
 
-        # Fetch all active projects
+        # Fetch all active projects (read-only; the shared request session
+        # is fine here - no mutation happens before the per-project loop).
         stmt = select(Project).where(Project.status == "active")
         result = await self.session.execute(stmt)
         projects = list(result.scalars().all())
+        project_ids = [p.id for p in projects]
 
         processed = 0
         failed = 0
 
-        for project in projects:
+        for pid in project_ids:
             try:
-                pid = project.id
-
-                # ── Finance: CPI, SPI, budget consumed ──
-                cpi: str | None = None
-                spi: str | None = None
-                budget_consumed_pct: str | None = None
-                try:
-                    from app.modules.finance.service import FinanceService
-
-                    fin_svc = FinanceService(self.session)
-                    dashboard = await fin_svc.get_dashboard(project_id=pid)
-                    # get_dashboard returns FinanceDashboardResponse.model_dump():
-                    # budget_consumed_pct is already computed from
-                    # total_budget_revised and total_actual, so read it directly.
-                    if dashboard.get("budget_consumed_pct") is not None:
-                        budget_consumed_pct = str(dashboard["budget_consumed_pct"])
-                except Exception as exc:
-                    logger.warning(
-                        "reporting.kpi_recalc finance.get_dashboard failed for project_id=%s "
-                        "(%s) - budget_consumed_pct will be null",
-                        pid,
-                        type(exc).__name__,
-                        exc_info=True,
-                    )
-
-                try:
-                    from app.modules.costmodel.service import CostModelService
-
-                    cm_svc = CostModelService(self.session)
-                    cm_dash = await cm_svc.get_dashboard(pid)
-                    # get_dashboard returns a DashboardResponse (Pydantic model),
-                    # which has no .get() - read cpi/spi as attributes.
-                    if cm_dash.cpi:
-                        cpi = str(cm_dash.cpi)
-                    if cm_dash.spi:
-                        spi = str(cm_dash.spi)
-                except Exception as exc:
-                    logger.warning(
-                        "reporting.kpi_recalc costmodel.get_dashboard failed for project_id=%s "
-                        "(%s) - cpi/spi will be null",
-                        pid,
-                        type(exc).__name__,
-                        exc_info=True,
-                    )
-
-                # ── Safety: open defects & observations ──
-                open_defects = 0
-                open_observations = 0
-                try:
-                    from app.modules.safety.service import SafetyService
-
-                    safety_svc = SafetyService(self.session)
-                    safety_stats = await safety_svc.get_stats(pid)
-                    open_observations = getattr(safety_stats, "total_observations", 0) - getattr(
-                        safety_stats, "closed_observations", 0
-                    )
-                    if open_observations < 0:
-                        open_observations = 0
-                    open_defects = getattr(safety_stats, "total_incidents", 0)
-                except Exception:
-                    logger.warning(
-                        "reporting.kpi_recalc safety.get_stats failed for project_id=%s - "
-                        "open_defects/open_observations default to 0",
-                        pid,
-                        exc_info=True,
-                    )
-
-                # ── RFIs ──
-                open_rfis = 0
-                try:
-                    from app.modules.rfi.service import RFIService
-
-                    rfi_svc = RFIService(self.session)
-                    rfi_stats = await rfi_svc.get_stats(pid)
-                    open_rfis = getattr(rfi_stats, "open", 0)
-                except Exception:
-                    logger.warning(
-                        "reporting.kpi_recalc rfi.get_stats failed for project_id=%s - open_rfis defaults to 0",
-                        pid,
-                        exc_info=True,
-                    )
-
-                # ── Submittals ──
-                open_submittals = 0
-                try:
-                    from sqlalchemy import select as sa_select
-
-                    from app.modules.submittals.models import Submittal
-
-                    sub_count = (
-                        await self.session.execute(
-                            sa_select(func.count(Submittal.id)).where(
-                                Submittal.project_id == pid,
-                                Submittal.status.notin_(["approved", "closed"]),
-                            )
-                        )
-                    ).scalar_one()
-                    open_submittals = sub_count
-                except Exception:
-                    logger.warning(
-                        "reporting.kpi_recalc submittals count failed for project_id=%s - "
-                        "open_submittals defaults to 0",
-                        pid,
-                        exc_info=True,
-                    )
-
-                # ── Schedule progress ──
-                schedule_progress_pct: str | None = None
-                try:
-                    from app.modules.schedule.models import Activity, Schedule
-
-                    sched_ids_stmt = select(Schedule.id).where(Schedule.project_id == pid)
-                    sched_result = await self.session.execute(sched_ids_stmt)
-                    sched_ids = [r[0] for r in sched_result.all()]
-
-                    if sched_ids:
-                        avg_progress = (
-                            await self.session.execute(
-                                select(func.avg(cast(Activity.progress_pct, Float))).where(
-                                    Activity.schedule_id.in_(sched_ids)
-                                )
-                            )
-                        ).scalar_one()
-                        if avg_progress is not None:
-                            schedule_progress_pct = str(round(avg_progress, 1))
-                except Exception:
-                    logger.warning(
-                        "reporting.kpi_recalc schedule.avg_progress failed for project_id=%s - "
-                        "schedule_progress_pct will be null",
-                        pid,
-                        exc_info=True,
-                    )
-
-                # ── Risk score ──
-                risk_score_avg: str | None = None
-                try:
-                    from app.modules.risk.models import RiskItem
-
-                    avg_risk = (
-                        await self.session.execute(
-                            select(func.avg(cast(RiskItem.risk_score, Float))).where(
-                                RiskItem.project_id == pid,
-                                RiskItem.status != "closed",
-                            )
-                        )
-                    ).scalar_one()
-                    if avg_risk is not None:
-                        risk_score_avg = str(round(avg_risk, 2))
-                except Exception:
-                    logger.warning(
-                        "reporting.kpi_recalc risk.avg_score failed for project_id=%s - risk_score_avg will be null",
-                        pid,
-                        exc_info=True,
-                    )
-
-                # ── Create snapshot (upsert for today) ──
-                existing = None
-                existing_stmt = select(KPISnapshot).where(
-                    KPISnapshot.project_id == pid,
-                    KPISnapshot.snapshot_date == today,
-                )
-                existing = (await self.session.execute(existing_stmt)).scalar_one_or_none()
-
-                if existing:
-                    existing.cpi = cpi
-                    existing.spi = spi
-                    existing.budget_consumed_pct = budget_consumed_pct
-                    existing.open_defects = open_defects
-                    existing.open_observations = open_observations
-                    existing.schedule_progress_pct = schedule_progress_pct
-                    existing.open_rfis = open_rfis
-                    existing.open_submittals = open_submittals
-                    existing.risk_score_avg = risk_score_avg
-                else:
-                    snapshot = KPISnapshot(
-                        project_id=pid,
-                        snapshot_date=today,
-                        cpi=cpi,
-                        spi=spi,
-                        budget_consumed_pct=budget_consumed_pct,
-                        open_defects=open_defects,
-                        open_observations=open_observations,
-                        schedule_progress_pct=schedule_progress_pct,
-                        open_rfis=open_rfis,
-                        open_submittals=open_submittals,
-                        risk_score_avg=risk_score_avg,
-                        metadata_={},
-                    )
-                    self.session.add(snapshot)
-
-                await self.session.flush()
+                async with self._project_session_factory() as project_session:
+                    await self._recalc_project_kpis(project_session, pid, today)
+                    await project_session.commit()
                 processed += 1
-
             except Exception:
-                logger.exception("KPI recalculation failed for project %s", project.id)
+                logger.exception("KPI recalculation failed for project %s", pid)
                 failed += 1
 
         logger.info(
@@ -1352,9 +1180,256 @@ class ReportingService:
         return {
             "processed": processed,
             "failed": failed,
-            "total_projects": len(projects),
+            "total_projects": len(project_ids),
             "snapshot_date": today,
         }
+
+    @staticmethod
+    def _project_session_factory():
+        """Open a fresh short-lived session for one project's KPI recalc.
+
+        Indirected through a method (rather than calling
+        ``async_session_factory`` inline) so the per-project isolation can
+        be exercised in unit tests without a live database.
+        """
+        from app.database import async_session_factory
+
+        return async_session_factory()
+
+    async def _recalc_project_kpis(
+        self,
+        session: AsyncSession,
+        pid: uuid.UUID,
+        today: str,
+    ) -> None:
+        """Compute and upsert today's KPI snapshot for a single project.
+
+        Runs every sub-module query against the supplied per-project
+        ``session`` so a failure in one block cannot poison sibling
+        projects. On PostgreSQL a sub-query that aborts the transaction is
+        recovered with ``session.rollback()`` before the snapshot write,
+        and if the core upsert itself fails the caller rolls the project
+        back and records it as failed instead of persisting all-zero
+        values.
+        """
+        from sqlalchemy import Float, func, select
+        from sqlalchemy.sql.expression import cast
+
+        async def _recover() -> None:
+            """Reset an aborted PostgreSQL transaction so the next query runs.
+
+            A swallowed sub-query error leaves the connection in the
+            'current transaction is aborted' state; without this every
+            later statement (and the final snapshot upsert) would itself
+            raise ``InFailedSqlTransactionError``. ``rollback`` is a no-op
+            on a healthy transaction, so it is safe to call unconditionally.
+            """
+            try:
+                await session.rollback()
+            except Exception:
+                logger.debug(
+                    "reporting.kpi_recalc rollback after sub-block failure failed for project_id=%s",
+                    pid,
+                    exc_info=True,
+                )
+
+        # ── Finance: CPI, SPI, budget consumed ──
+        cpi: str | None = None
+        spi: str | None = None
+        budget_consumed_pct: str | None = None
+        try:
+            from app.modules.finance.service import FinanceService
+
+            fin_svc = FinanceService(session)
+            dashboard = await fin_svc.get_dashboard(project_id=pid)
+            # get_dashboard returns FinanceDashboardResponse.model_dump():
+            # budget_consumed_pct is already computed from
+            # total_budget_revised and total_actual, so read it directly.
+            if dashboard.get("budget_consumed_pct") is not None:
+                budget_consumed_pct = str(dashboard["budget_consumed_pct"])
+        except Exception as exc:
+            logger.warning(
+                "reporting.kpi_recalc finance.get_dashboard failed for project_id=%s "
+                "(%s) - budget_consumed_pct will be null",
+                pid,
+                type(exc).__name__,
+                exc_info=True,
+            )
+            await _recover()
+
+        try:
+            from app.modules.costmodel.service import CostModelService
+
+            cm_svc = CostModelService(session)
+            cm_dash = await cm_svc.get_dashboard(pid)
+            # get_dashboard returns a DashboardResponse (Pydantic model),
+            # which has no .get() - read cpi/spi as attributes.
+            if cm_dash.cpi:
+                cpi = str(cm_dash.cpi)
+            if cm_dash.spi:
+                spi = str(cm_dash.spi)
+        except Exception as exc:
+            logger.warning(
+                "reporting.kpi_recalc costmodel.get_dashboard failed for project_id=%s (%s) - cpi/spi will be null",
+                pid,
+                type(exc).__name__,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── Safety: open defects & observations ──
+        open_defects = 0
+        open_observations = 0
+        try:
+            from app.modules.safety.service import SafetyService
+
+            safety_svc = SafetyService(session)
+            safety_stats = await safety_svc.get_stats(pid)
+            open_observations = getattr(safety_stats, "total_observations", 0) - getattr(
+                safety_stats, "closed_observations", 0
+            )
+            if open_observations < 0:
+                open_observations = 0
+            open_defects = getattr(safety_stats, "total_incidents", 0)
+        except Exception:
+            logger.warning(
+                "reporting.kpi_recalc safety.get_stats failed for project_id=%s - "
+                "open_defects/open_observations default to 0",
+                pid,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── RFIs ──
+        open_rfis = 0
+        try:
+            from app.modules.rfi.service import RFIService
+
+            rfi_svc = RFIService(session)
+            rfi_stats = await rfi_svc.get_stats(pid)
+            open_rfis = getattr(rfi_stats, "open", 0)
+        except Exception:
+            logger.warning(
+                "reporting.kpi_recalc rfi.get_stats failed for project_id=%s - open_rfis defaults to 0",
+                pid,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── Submittals ──
+        open_submittals = 0
+        try:
+            from sqlalchemy import select as sa_select
+
+            from app.modules.submittals.models import Submittal
+
+            sub_count = (
+                await session.execute(
+                    sa_select(func.count(Submittal.id)).where(
+                        Submittal.project_id == pid,
+                        Submittal.status.notin_(["approved", "closed"]),
+                    )
+                )
+            ).scalar_one()
+            open_submittals = sub_count
+        except Exception:
+            logger.warning(
+                "reporting.kpi_recalc submittals count failed for project_id=%s - open_submittals defaults to 0",
+                pid,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── Schedule progress ──
+        schedule_progress_pct: str | None = None
+        try:
+            from app.modules.schedule.models import Activity, Schedule
+
+            sched_ids_stmt = select(Schedule.id).where(Schedule.project_id == pid)
+            sched_result = await session.execute(sched_ids_stmt)
+            sched_ids = [r[0] for r in sched_result.all()]
+
+            if sched_ids:
+                avg_progress = (
+                    await session.execute(
+                        select(func.avg(cast(Activity.progress_pct, Float))).where(Activity.schedule_id.in_(sched_ids))
+                    )
+                ).scalar_one()
+                if avg_progress is not None:
+                    schedule_progress_pct = str(round(avg_progress, 1))
+        except Exception:
+            logger.warning(
+                "reporting.kpi_recalc schedule.avg_progress failed for project_id=%s - "
+                "schedule_progress_pct will be null",
+                pid,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── Risk score ──
+        risk_score_avg: str | None = None
+        try:
+            from app.modules.risk.models import RiskItem
+
+            avg_risk = (
+                await session.execute(
+                    select(func.avg(cast(RiskItem.risk_score, Float))).where(
+                        RiskItem.project_id == pid,
+                        RiskItem.status != "closed",
+                    )
+                )
+            ).scalar_one()
+            if avg_risk is not None:
+                risk_score_avg = str(round(avg_risk, 2))
+        except Exception:
+            logger.warning(
+                "reporting.kpi_recalc risk.avg_score failed for project_id=%s - risk_score_avg will be null",
+                pid,
+                exc_info=True,
+            )
+            await _recover()
+
+        # ── Create snapshot (upsert for today) ──
+        # This runs on a transaction recovered by the ``_recover`` calls
+        # above, so the core write is no longer doomed by an earlier
+        # sub-block failure. If it does raise (e.g. a genuinely missing
+        # KPISnapshot table), the exception propagates to the caller which
+        # rolls back this project and counts it as failed - we never write
+        # a snapshot whose figures we could not compute.
+        existing_stmt = select(KPISnapshot).where(
+            KPISnapshot.project_id == pid,
+            KPISnapshot.snapshot_date == today,
+        )
+        existing = (await session.execute(existing_stmt)).scalar_one_or_none()
+
+        if existing:
+            existing.cpi = cpi
+            existing.spi = spi
+            existing.budget_consumed_pct = budget_consumed_pct
+            existing.open_defects = open_defects
+            existing.open_observations = open_observations
+            existing.schedule_progress_pct = schedule_progress_pct
+            existing.open_rfis = open_rfis
+            existing.open_submittals = open_submittals
+            existing.risk_score_avg = risk_score_avg
+        else:
+            snapshot = KPISnapshot(
+                project_id=pid,
+                snapshot_date=today,
+                cpi=cpi,
+                spi=spi,
+                budget_consumed_pct=budget_consumed_pct,
+                open_defects=open_defects,
+                open_observations=open_observations,
+                schedule_progress_pct=schedule_progress_pct,
+                open_rfis=open_rfis,
+                open_submittals=open_submittals,
+                risk_score_avg=risk_score_avg,
+                metadata_={},
+            )
+            session.add(snapshot)
+
+        await session.flush()
 
     # ── Seed system templates ─────────────────────────────────────────────
 

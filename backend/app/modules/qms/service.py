@@ -16,6 +16,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -61,6 +62,16 @@ from app.modules.qms.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class QMSConflictError(ValueError):
+    """A write lost a uniqueness/idempotency race.
+
+    Subclasses :class:`ValueError` so existing ``except ValueError`` handlers
+    still treat it as a client error, while the router can catch it
+    specifically to return ``409 Conflict`` instead of ``400``.
+    """
+
 
 # ── Configurable defaults ─────────────────────────────────────────────────
 # Rework-cost-per-open-punch default. In production this should come from
@@ -466,10 +477,18 @@ class QMSService:
         # Dedup: one (user, role) signature per inspection. Two distinct
         # roles on the same user are still allowed (e.g. GC inspector +
         # designer reviewer when one person wears both hats).
+        #
+        # The pre-flight list-then-check below gives a clean 409 in the common
+        # case, but it is NOT atomic: two concurrent sign requests for the same
+        # (inspection, user, role) can both pass it and both INSERT, inflating
+        # the signatory count and defeating the multi-signatory completion gate.
+        # The ``uq_oe_qms_inspection_signature_inspection_user_role`` unique
+        # constraint (models.py) is the backstop; we catch the resulting
+        # IntegrityError on the loser so it gets a 409 instead of an opaque 500.
         existing = await self.repo.list_signatures(inspection_id)
         for prior in existing:
             if prior.signer_user_id == signer_user_id and prior.signer_role == data.signer_role:
-                raise ValueError(
+                raise QMSConflictError(
                     f"Signer has already signed this inspection in role '{data.signer_role}'",
                 )
         now_iso = _utc_now_iso()
@@ -484,7 +503,22 @@ class QMSService:
             signer_ip=signer_ip,
             signer_user_agent=(signer_user_agent[:512] if signer_user_agent else None),
         )
-        return await self.repo.add_signature(sig)
+        try:
+            return await self.repo.add_signature(sig)
+        except IntegrityError as exc:
+            # Lost the unique-constraint race: another concurrent request
+            # inserted the same (inspection, user, role) signature first.
+            # Roll back so the session is usable, then surface a clean 409.
+            await self.session.rollback()
+            logger.info(
+                "Race on QMS signature inspection=%s user=%s role=%s (treated as duplicate)",
+                inspection_id,
+                signer_user_id,
+                data.signer_role,
+            )
+            raise QMSConflictError(
+                f"Signer has already signed this inspection in role '{data.signer_role}'",
+            ) from exc
 
     async def required_signatures(self, inspection: QMSInspection) -> int:
         """Resolve how many signatures this inspection needs to complete.
@@ -554,10 +588,16 @@ class QMSService:
                     f"(item '{pred_ok.get('predecessor_name') or pred_ok['predecessor_itp_item_id']}')",
                 )
 
+        # Count DISTINCT signers, not raw rows: ``signatories_required`` is a
+        # head-count of separate people, so one person signing in two roles
+        # must not satisfy a 2-signatory gate. (The DB unique constraint stops
+        # the same (user, role) row twice; this stops the same user counting
+        # twice across different roles.)
         sigs = await self.repo.list_signatures(inspection_id)
-        if len(sigs) < required_sigs:
+        distinct_signers = {s.signer_user_id for s in sigs}
+        if len(distinct_signers) < required_sigs:
             raise ValueError(
-                f"Cannot complete inspection: {len(sigs)}/{required_sigs} required signatures collected",
+                f"Cannot complete inspection: {len(distinct_signers)}/{required_sigs} required signatures collected",
             )
 
         update_fields: dict[str, Any] = {
@@ -645,7 +685,7 @@ class QMSService:
             inspection.project_id,
             inspection_id,
             result,
-            len(sigs),
+            len(distinct_signers),
             required_sigs,
             is_hold_point,
         )

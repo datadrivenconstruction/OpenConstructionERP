@@ -97,7 +97,7 @@ from app.modules.qms.schemas import (
     PunchItemUpdate,
     SupplierAuditLink,
 )
-from app.modules.qms.service import QMSService
+from app.modules.qms.service import QMSConflictError, QMSService
 
 router = APIRouter(tags=["qms"])
 logger = logging.getLogger(__name__)
@@ -346,6 +346,10 @@ async def sign_inspection(
             signer_ip=_client_ip(request),
             signer_user_agent=user_agent,
         )
+    except QMSConflictError as exc:
+        # Duplicate (user, role) signature - either caught by the pre-check or
+        # by the DB unique constraint on a concurrent double-sign.
+        raise _conflict(str(exc)) from exc
     except ValueError as exc:
         raise _bad(str(exc)) from exc
     return InspectionSignatureRead.model_validate(sig)

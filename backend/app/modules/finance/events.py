@@ -13,7 +13,20 @@ project's budget rows accordingly:
 * ``procurement.po.approved`` → committed += po.amount_total (TOP-30 #10:
   budget is committed when a PO is approved, the moment the spend is
   authorised, since a PO must be approved before it can be issued)
+* ``procurement.po.cancelled`` / ``procurement.po.reverted`` →
+  committed -= the amount this PO had added (Max-Audit #10: the
+  commitment ledger must be reversible so a cancelled or reverted PO
+  does not leave a phantom commitment on the budget)
 * ``procurement.gr.confirmed`` → committed -= gr.amount, actual += gr.amount
+
+The commitment a PO contributes is idempotent and reversible: each
+approved PO stamps a per-PO marker (``committed_from_po:<po_id>``) in the
+absorbing ``ProjectBudget.metadata_`` recording the amount it added to
+``committed``. A replayed/re-fired ``po.approved`` for the same PO is a
+no-op (the marker already exists), and a cancel/revert decrements exactly
+the marked amount (and only if it was actually added). This keeps
+``committed`` honest under the PO FSM's ``approved -> draft`` /
+``approved -> cancelled`` transitions.
 
 Each handler opens its own short-lived session via
 :data:`async_session_factory` (mirrors the pattern in
@@ -54,6 +67,21 @@ logger = logging.getLogger(__name__)
 # ``retention_amount``, ``currency_code``. Reporting / BI dashboards subscribe
 # to track certified-but-uncollected receivables.
 EVENT_RECEIVABLE_FROM_CLAIM = "finance.invoice.created_from_claim"
+
+# Prefix for the per-PO idempotency/reversal marker stored in
+# ``ProjectBudget.metadata_``. The full key is ``committed_from_po:<po_id>``
+# and the value is the Decimal-string amount this PO added to ``committed``.
+# Its presence makes a replayed ``po.approved`` a no-op and lets a
+# cancel/revert decrement exactly what was added (Max-Audit #10).
+_COMMITTED_FROM_PO_PREFIX = "committed_from_po:"
+
+
+def _committed_marker_key(po_id_raw: object) -> str | None:
+    """Build the ``committed_from_po:<po_id>`` marker key for a PO, or None."""
+    po_id = _coerce_uuid(po_id_raw)
+    if po_id is None:
+        return None
+    return f"{_COMMITTED_FROM_PO_PREFIX}{po_id}"
 
 
 def _to_decimal(value: object, default: Decimal = Decimal("0")) -> Decimal:
@@ -144,10 +172,17 @@ async def _on_po_approved(event: Event) -> None:
     Approval is the commitment moment (TOP-30 #10): a PO must be approved
     before it can be issued, so committing budget here gives a live committed
     figure the instant the spend is authorised, not when the paperwork is sent.
+
+    Idempotent on the PO id (Max-Audit #10): the absorbing budget records a
+    ``committed_from_po:<po_id>`` marker carrying the amount this PO added.
+    A replayed or re-fired ``po.approved`` for the same PO (e.g. after an
+    ``approved -> draft -> approved`` round-trip) finds the marker and is a
+    no-op, so ``committed`` is never inflated twice for one PO.
     """
     data = event.data or {}
     project_id = _coerce_uuid(data.get("project_id"))
     amount = _to_decimal(data.get("amount_total"))
+    marker_key = _committed_marker_key(data.get("po_id"))
     if project_id is None or amount == 0:
         return
     try:
@@ -162,8 +197,21 @@ async def _on_po_approved(event: Event) -> None:
                     amount,
                 )
                 return
+            md = dict(getattr(budget, "metadata_", None) or {})
+            if marker_key is not None and marker_key in md:
+                # This PO already committed against this budget - replayed or
+                # re-fired event. Do NOT add a second time.
+                logger.info(
+                    "finance: po.approved already committed for po=%s on budget %s - skipping (idempotent)",
+                    data.get("po_id"),
+                    budget.id,
+                )
+                return
             current = _to_decimal(budget.committed)
             budget.committed = current + amount
+            if marker_key is not None:
+                md[marker_key] = str(amount)
+                budget.metadata_ = md
             await session.commit()
             logger.info(
                 "finance: po.approved committed += %s on budget %s (project=%s, po=%s)",
@@ -174,6 +222,67 @@ async def _on_po_approved(event: Event) -> None:
             )
     except Exception:
         logger.debug("finance: _on_po_approved failed", exc_info=True)
+
+
+async def _on_po_decommitted(event: Event) -> None:
+    """``procurement.po.cancelled`` / ``procurement.po.reverted`` → committed -= amount.
+
+    Reverses the commitment a PO previously added (Max-Audit #10). When an
+    approved PO is cancelled or reverted to draft the authorised spend no
+    longer exists, so the budget's ``committed`` slot must shed exactly what
+    this PO contributed.
+
+    Decrement strategy: locate the budget that carries this PO's
+    ``committed_from_po:<po_id>`` marker, subtract the marked amount, and
+    clear the marker so the reversal cannot fire twice and a later
+    re-approval can commit cleanly again. If no marker is found (the PO never
+    committed, or its commitment was already reversed) this is a safe no-op -
+    we never decrement a commitment we did not add.
+    """
+    data = event.data or {}
+    project_id = _coerce_uuid(data.get("project_id"))
+    marker_key = _committed_marker_key(data.get("po_id"))
+    if project_id is None or marker_key is None:
+        return
+    try:
+        async with async_session_factory() as session:
+            # The commitment lives on whichever budget absorbed it; the wbs
+            # hint reproduces the same selection used at approval time, but we
+            # only act on a budget that actually carries this PO's marker.
+            wbs_hint = await _resolve_po_wbs(session, data.get("po_id"))
+            budget = await _select_budget_row(session, project_id, wbs_hint)
+            if budget is None:
+                return
+            md = dict(getattr(budget, "metadata_", None) or {})
+            if marker_key not in md:
+                # No commitment recorded for this PO on this budget - nothing
+                # to reverse (never added, or already reversed).
+                logger.info(
+                    "finance: po decommit for po=%s - no commitment marker on budget %s, skipping",
+                    data.get("po_id"),
+                    budget.id,
+                )
+                return
+            added = _to_decimal(md.pop(marker_key))
+            current = _to_decimal(budget.committed)
+            new_committed = current - added
+            # Never let committed go negative (defensive against a parallel
+            # write having already drained it, e.g. via gr.confirmed).
+            if new_committed < 0:
+                new_committed = Decimal("0")
+            budget.committed = new_committed
+            budget.metadata_ = md
+            await session.commit()
+            logger.info(
+                "finance: po %s committed -= %s on budget %s (project=%s, po=%s)",
+                event.name,
+                added,
+                budget.id,
+                project_id,
+                data.get("po_id"),
+            )
+    except Exception:
+        logger.debug("finance: _on_po_decommitted failed", exc_info=True)
 
 
 async def _on_gr_confirmed(event: Event) -> None:
@@ -267,6 +376,11 @@ async def _on_claim_certified(event: Event) -> None:
 
 _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("procurement.po.approved", _on_po_approved),
+    # Max-Audit #10: a cancelled or reverted PO must shed its commitment so
+    # ``committed`` does not carry phantom amounts into the finance dashboard
+    # and EVM. Both events route through the same reversal handler.
+    ("procurement.po.cancelled", _on_po_decommitted),
+    ("procurement.po.reverted", _on_po_decommitted),
     ("procurement.gr.confirmed", _on_gr_confirmed),
     # Gap E (Wave 6): certified progress claim → auto receivable invoice.
     ("contracts.claim.certified", _on_claim_certified),

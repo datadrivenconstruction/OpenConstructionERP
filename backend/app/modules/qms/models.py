@@ -28,7 +28,17 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, Boolean, Date, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Date,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -183,6 +193,21 @@ class QMSInspectionSignature(Base):
     """Signature against a :class:`QMSInspection` event."""
 
     __tablename__ = "oe_qms_inspection_signature"
+
+    # One (user, role) signature per inspection. The service also dedupes in
+    # Python, but that check is not atomic - two concurrent sign requests can
+    # both pass it and both INSERT, inflating the signatory count and bypassing
+    # the multi-signatory completion gate. This DB constraint is the backstop
+    # that serialises concurrent double-signs; sign_inspection catches the
+    # resulting IntegrityError and returns a clean 409.
+    __table_args__ = (
+        UniqueConstraint(
+            "inspection_id",
+            "signer_user_id",
+            "signer_role",
+            name="uq_oe_qms_inspection_signature_inspection_user_role",
+        ),
+    )
 
     inspection_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
