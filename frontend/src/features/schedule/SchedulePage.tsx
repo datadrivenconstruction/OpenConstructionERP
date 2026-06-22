@@ -56,6 +56,7 @@ import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { scheduleGuide } from './scheduleGuide';
 import { fetchBIMModels } from '@/features/bim/api';
+import { boqApi, buildHierarchy, type HierarchyNode } from '@/features/boq/api';
 import type {
   Schedule,
   Activity,
@@ -190,6 +191,13 @@ function buildWbsCodes(activities: Activity[]): Map<string, string> {
   };
   assign(null, '');
   return result;
+}
+
+/** Leaf position ids under a hierarchy node (the node itself when it is a
+ *  leaf). Leaves are the work positions that become schedule tasks. */
+function collectLeafPositionIds(node: HierarchyNode): string[] {
+  if (node.children.length === 0) return [node.position.id];
+  return node.children.flatMap(collectLeafPositionIds);
 }
 
 /** True when the activity's duration was estimated from unit-based production
@@ -1215,6 +1223,63 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
   );
 }
 
+/* ── Position selection tree (Generate-from-BOQ dialog) ────────────────── */
+
+/** One row of the BOQ position tree with a tri-state checkbox, rendered
+ *  recursively. Branch rows derive their state from leaf descendants; toggling
+ *  any row cascades to its whole subtree (handled by the parent's onToggle). */
+function PositionTreeRow({
+  node,
+  checkState,
+  onToggle,
+}: {
+  node: HierarchyNode;
+  checkState: (node: HierarchyNode) => 'checked' | 'indeterminate' | 'unchecked';
+  onToggle: (node: HierarchyNode) => void;
+}) {
+  const state = checkState(node);
+  const isLeaf = node.children.length === 0;
+  return (
+    <div>
+      <label
+        className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 hover:bg-surface-secondary/60"
+        style={{ paddingLeft: node.level * 16 + 4 }}
+      >
+        <input
+          type="checkbox"
+          checked={state === 'checked'}
+          ref={(el) => {
+            if (el) el.indeterminate = state === 'indeterminate';
+          }}
+          onChange={() => onToggle(node)}
+          className="h-3.5 w-3.5 shrink-0 accent-oe-blue"
+        />
+        {node.position.ordinal && (
+          <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">
+            {node.position.ordinal}
+          </span>
+        )}
+        <span
+          className={`min-w-0 flex-1 truncate text-xs ${
+            isLeaf ? 'text-content-secondary' : 'font-medium text-content-primary'
+          }`}
+          title={node.position.description}
+        >
+          {node.position.description || node.position.ordinal || '—'}
+        </span>
+      </label>
+      {node.children.map((child) => (
+        <PositionTreeRow
+          key={child.position.id}
+          node={child}
+          checkState={checkState}
+          onToggle={onToggle}
+        />
+      ))}
+    </div>
+  );
+}
+
 /* ── Schedule Detail View ──────────────────────────────────────────────── */
 
 function ScheduleDetail({
@@ -1243,6 +1308,10 @@ function ScheduleDetail({
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
   const [selectedBOQId, setSelectedBOQId] = useState('');
+  // Selected BOQ *leaf* (work) position ids to include in generation. Branch
+  // (section) rows are derived from these; the backend re-adds the ancestor
+  // summaries automatically, so we only track leaves here.
+  const [selectedPositionIds, setSelectedPositionIds] = useState<Set<string>>(new Set());
   const [generateStartDate, setGenerateStartDate] = useState(
     () => schedule.start_date?.slice(0, 10) || new Date().toISOString().slice(0, 10),
   );
@@ -1299,6 +1368,66 @@ function ScheduleDetail({
     queryFn: () => apiGet<BOQListItem[]>(`/v1/boq/boqs/?project_id=${projectId}`),
     enabled: showGenerateBOQ,
   });
+
+  // Positions of the BOQ the user picked in the Generate dialog — drives the
+  // task-selection tree. Only fetched once a BOQ is chosen.
+  const { data: selectedBoqDetail, isLoading: boqPositionsLoading } = useQuery({
+    queryKey: ['boq-positions', selectedBOQId],
+    queryFn: () => boqApi.get(selectedBOQId),
+    enabled: showGenerateBOQ && !!selectedBOQId,
+  });
+
+  const positionTree = useMemo<HierarchyNode[]>(
+    () => (selectedBoqDetail ? buildHierarchy(selectedBoqDetail.positions) : []),
+    [selectedBoqDetail],
+  );
+
+  // Flat list of leaf position ids (the work positions that become tasks).
+  const leafPositionIds = useMemo<string[]>(() => {
+    const ids: string[] = [];
+    const walk = (nodes: HierarchyNode[]) => {
+      for (const n of nodes) {
+        if (n.children.length === 0) ids.push(n.position.id);
+        else walk(n.children);
+      }
+    };
+    walk(positionTree);
+    return ids;
+  }, [positionTree]);
+
+  // Default to "all selected" whenever a new BOQ's positions load.
+  useEffect(() => {
+    setSelectedPositionIds(new Set(leafPositionIds));
+  }, [leafPositionIds]);
+
+  // Toggle a whole node (cascades to all its leaf descendants).
+  const togglePositionNode = useCallback((node: HierarchyNode) => {
+    const leaves = collectLeafPositionIds(node);
+    setSelectedPositionIds((prev) => {
+      const next = new Set(prev);
+      const allOn = leaves.every((id) => next.has(id));
+      for (const id of leaves) {
+        if (allOn) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  // Tri-state check status of a node, derived from its leaf descendants.
+  const nodeCheckState = useCallback(
+    (node: HierarchyNode): 'checked' | 'indeterminate' | 'unchecked' => {
+      const leaves = collectLeafPositionIds(node);
+      const sel = leaves.reduce((n, id) => n + (selectedPositionIds.has(id) ? 1 : 0), 0);
+      if (sel === 0) return 'unchecked';
+      if (sel === leaves.length) return 'checked';
+      return 'indeterminate';
+    },
+    [selectedPositionIds],
+  );
+
+  const allLeavesSelected =
+    leafPositionIds.length > 0 && selectedPositionIds.size === leafPositionIds.length;
 
   // BIM models check (for showing 4D link hint)
   const { data: bimModelsData } = useQuery({
@@ -1417,18 +1546,19 @@ function ScheduleDetail({
   );
 
   const generateFromBOQ = useMutation({
-    mutationFn: async (boqId: string) => {
+    mutationFn: async ({ boqId, positionIds }: { boqId: string; positionIds?: string[] }) => {
       // Update the schedule start_date before generating so activities use the chosen date
       if (generateStartDate) {
         await scheduleApi.updateSchedule(schedule.id, { start_date: generateStartDate });
       }
-      return scheduleApi.generateFromBOQ(schedule.id, boqId);
+      return scheduleApi.generateFromBOQ(schedule.id, boqId, undefined, positionIds);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
       setShowGenerateBOQ(false);
       setSelectedBOQId('');
+      setSelectedPositionIds(new Set());
       // Reset CPM/risk results since activities changed
       setCpmResult(null);
       setRiskResult(null);
@@ -2390,7 +2520,7 @@ function ScheduleDetail({
           <p className="text-sm text-content-secondary">
             {t(
               'schedule.generate_from_boq_description',
-              'Select a BOQ to auto-generate schedule activities. One activity will be created per BOQ section with cost-proportional durations.',
+              'Pick a BOQ, then choose which positions to schedule. Every level of the selected positions becomes an activity (sections roll up as summaries); durations come from quantities and production rates.',
             )}
           </p>
 
@@ -2444,22 +2574,89 @@ function ScheduleDetail({
               ))}
             </div>
           )}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setShowGenerateBOQ(false)}>
-              {t('common.cancel', 'Cancel')}
-            </Button>
-            <Button
-              variant="primary"
-              disabled={!selectedBOQId || !generateStartDate}
-              loading={generateFromBOQ.isPending}
-              onClick={() => {
-                if (selectedBOQId) {
-                  generateFromBOQ.mutate(selectedBOQId);
-                }
-              }}
-            >
-              {t('schedule.generate', 'Generate')}
-            </Button>
+
+          {/* Task selection tree — choose which BOQ positions become
+              activities. Checking a section cascades to its work positions;
+              the schedule keeps the section as a summary automatically. */}
+          {selectedBOQId && (
+            <div className="rounded-lg border border-border-light">
+              <div className="flex items-center justify-between border-b border-border-light px-3 py-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+                  {t('schedule.select_tasks', { defaultValue: 'Tasks to include' })}
+                </span>
+                {leafPositionIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedPositionIds(
+                        allLeavesSelected ? new Set() : new Set(leafPositionIds),
+                      )
+                    }
+                    className="text-xs font-medium text-oe-blue hover:underline"
+                  >
+                    {allLeavesSelected
+                      ? t('schedule.select_none', { defaultValue: 'Deselect all' })
+                      : t('schedule.select_all', { defaultValue: 'Select all' })}
+                  </button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto px-2 py-2">
+                {boqPositionsLoading ? (
+                  <p className="px-2 py-3 text-xs text-content-tertiary">
+                    {t('common.loading', { defaultValue: 'Loading…' })}
+                  </p>
+                ) : positionTree.length === 0 ? (
+                  <p className="px-2 py-3 text-xs text-content-tertiary">
+                    {t('schedule.boq_no_positions', { defaultValue: 'This BOQ has no positions.' })}
+                  </p>
+                ) : (
+                  positionTree.map((node) => (
+                    <PositionTreeRow
+                      key={node.position.id}
+                      node={node}
+                      checkState={nodeCheckState}
+                      onToggle={togglePositionNode}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <span className="text-xs text-content-tertiary tabular-nums">
+              {selectedBOQId && leafPositionIds.length > 0
+                ? t('schedule.positions_selected', {
+                    defaultValue: '{{count}} of {{total}} tasks selected',
+                    count: selectedPositionIds.size,
+                    total: leafPositionIds.length,
+                  })
+                : ''}
+            </span>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" onClick={() => setShowGenerateBOQ(false)}>
+                {t('common.cancel', 'Cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={!selectedBOQId || !generateStartDate || selectedPositionIds.size === 0}
+                loading={generateFromBOQ.isPending}
+                onClick={() => {
+                  if (selectedBOQId) {
+                    // Send the explicit selection unless everything is picked
+                    // (then omit it so the backend takes the whole BOQ).
+                    generateFromBOQ.mutate({
+                      boqId: selectedBOQId,
+                      positionIds: allLeavesSelected
+                        ? undefined
+                        : Array.from(selectedPositionIds),
+                    });
+                  }
+                }}
+              >
+                {t('schedule.generate', 'Generate')}
+              </Button>
+            </div>
           </div>
         </div>
       </Modal>

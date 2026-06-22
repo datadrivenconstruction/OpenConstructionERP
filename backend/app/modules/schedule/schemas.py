@@ -550,6 +550,14 @@ class GenerateFromBOQRequest(BaseModel):
             "If omitted, defaults to 365 (residential) or 540 (office) based on BOQ metadata."
         ),
     )
+    position_ids: list[UUID] | None = Field(
+        default=None,
+        description=(
+            "Optional subset of BOQ position ids to include. When provided, only "
+            "those positions (plus the ancestors needed to host them) are generated; "
+            "when omitted the whole BOQ is generated."
+        ),
+    )
 
 
 class CPMActivityResult(BaseModel):

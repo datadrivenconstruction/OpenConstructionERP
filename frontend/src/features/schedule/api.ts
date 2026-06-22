@@ -805,10 +805,19 @@ export const scheduleApi = {
     apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
 
   // CPM & BOQ Generation
-  generateFromBOQ: (scheduleId: string, boqId: string, totalProjectDays?: number) =>
+  generateFromBOQ: (
+    scheduleId: string,
+    boqId: string,
+    totalProjectDays?: number,
+    /** Optional subset of BOQ position ids to include. Omit to generate the
+     *  whole BOQ. The backend adds the ancestors needed to host any selected
+     *  leaf, so passing only the desired leaf (work) positions is enough. */
+    positionIds?: string[],
+  ) =>
     apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq/`, {
       boq_id: boqId,
       ...(totalProjectDays != null ? { total_project_days: totalProjectDays } : {}),
+      ...(positionIds != null ? { position_ids: positionIds } : {}),
     }),
   calculateCPM: (scheduleId: string) =>
     apiPost<CriticalPathResponse>(`/v1/schedule/schedules/${scheduleId}/calculate-cpm/`),

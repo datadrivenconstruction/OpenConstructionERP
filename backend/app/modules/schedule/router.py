@@ -447,7 +447,9 @@ async def generate_from_boq(
     """
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     try:
-        await service.generate_from_boq(schedule_id, body.boq_id, body.total_project_days)
+        await service.generate_from_boq(
+            schedule_id, body.boq_id, body.total_project_days, body.position_ids
+        )
         # Re-fetch activities to avoid greenlet/lazy-loading issues
         activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
         return [_activity_to_response(a) for a in activities]

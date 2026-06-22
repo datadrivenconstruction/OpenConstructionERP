@@ -1760,20 +1760,27 @@ class ScheduleService:
         schedule_id: uuid.UUID,
         boq_id: uuid.UUID,
         total_project_days: int | None = None,
+        position_ids: list[uuid.UUID] | None = None,
     ) -> list[Activity]:
-        """Generate hierarchical schedule activities from BOQ sections.
+        """Generate hierarchical schedule activities from BOQ positions.
 
-        Reads all positions from the specified BOQ, creates SUMMARY activities
-        for top-level sections and TASK activities for child positions. Uses
-        quantity-based production rates for duration calculation, working-day
-        calendar (excludes weekends), smart dependencies (sequential within
-        section, overlapping between sections), and milestone markers.
+        Descends EVERY level of the BOQ position tree (not just the top two):
+        a position with children becomes a SUMMARY activity, a leaf position
+        becomes a TASK. Resources live in each position's
+        ``metadata.resources`` and only feed the duration estimate - they are
+        never materialised as activities. Uses quantity-based production rates
+        for duration, a regional working-day calendar (excludes weekends), a
+        sequential FS chain across leaf tasks, summary date rollups, and
+        project start/completion milestones.
 
         Args:
             schedule_id: Target schedule to populate.
-            boq_id: Source BOQ to read sections from.
+            boq_id: Source BOQ to read positions from.
             total_project_days: Override total project duration in calendar days.
                 If None, defaults to 365 (residential) or 540 (office).
+            position_ids: Optional subset of BOQ position ids to include. When
+                given, only those positions (plus the ancestors needed to host
+                them) are materialised; when None the whole BOQ is generated.
 
         Returns:
             List of created Activity ORM objects.
@@ -1889,46 +1896,51 @@ class ScheduleService:
                     count += 1
             return count
 
-        # ── Identify section headers and children ────────────────────────
-        top_level = [p for p in positions if p["parent_id"] is None]
-
-        # Build child map: parent_id_str -> list of child position dicts
-        child_map: dict[str, list[dict]] = {}
+        # ── Build the full position tree (all levels) ────────────────────
+        # Positions are the only tree nodes; resources live in each position's
+        # ``metadata.resources`` and only feed the duration estimate, so they
+        # are never materialised as activities.
+        by_id: dict[str, dict] = {str(p["id"]): p for p in positions}
+        children_of: dict[str | None, list[dict]] = {}
         for p in positions:
-            if p["parent_id"] is not None:
-                parent_str = str(p["parent_id"])
-                if parent_str not in child_map:
-                    child_map[parent_str] = []
-                child_map[parent_str].append(p)
+            key = str(p["parent_id"]) if p["parent_id"] is not None else None
+            children_of.setdefault(key, []).append(p)
 
-        # Build sections with their children
-        sections: list[dict] = []
-        for pos in top_level:
-            pos_id_str = str(pos["id"])
-            children = child_map.get(pos_id_str, [])
-            if children:
-                section_total = sum(_str_to_float(c["total"]) for c in children)
-            else:
-                section_total = _str_to_float(pos["total"])
+        # ── Apply the optional position selection ────────────────────────
+        # With ``position_ids`` we materialise only those positions plus the
+        # ancestors needed to host a selected leaf (so its summaries exist).
+        # The frontend tree already cascades a section's checkbox down to its
+        # descendants, so we honour exactly what it sends and never expand
+        # downward here. Without a selection the whole BOQ is kept.
+        if position_ids is not None:
+            requested = {str(pid) for pid in position_ids if str(pid) in by_id}
+            keep: set[str] = set()
+            for pid in requested:
+                cur: str | None = pid
+                while cur is not None and cur not in keep:
+                    keep.add(cur)
+                    parent = by_id.get(cur, {}).get("parent_id")
+                    cur = str(parent) if parent is not None else None
+        else:
+            keep = set(by_id.keys())
 
-            sections.append(
-                {
-                    "name": pos["description"][:255] if pos["description"] else f"Section {pos['ordinal']}",
-                    "ordinal": pos["ordinal"],
-                    "total": section_total,
-                    "parent_position": pos,
-                    "children": children if children else [pos],
-                }
-            )
+        def _kept_children(pid: str) -> list[dict]:
+            return [c for c in children_of.get(pid, []) if str(c["id"]) in keep]
 
-        if not sections:
+        roots = [p for p in children_of.get(None, []) if str(p["id"]) in keep]
+        if not roots:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No sections found in BOQ",
+                detail="No BOQ positions selected for schedule generation",
             )
 
-        # Compute grand total for cost-proportional fallback
-        grand_total = sum(s["total"] for s in sections)
+        # Grand total over kept LEAF positions for the cost-proportional
+        # duration fallback (the denominator). Guard against zero.
+        grand_total = 0.0
+        for pid in keep:
+            pos = by_id.get(pid)
+            if pos is not None and not _kept_children(pid):
+                grand_total += _str_to_float(pos["total"])
         if grand_total <= 0:
             grand_total = 1.0  # avoid division by zero
 
@@ -1942,195 +1954,143 @@ class ScheduleService:
         else:
             schedule_start = date.today()
 
-        # ── Create hierarchical activities ───────────────────────────────
-        created_activities: list[Activity] = []
+        # ── Create activities recursively (depth-first, document order) ──
+        # A kept position with kept children becomes a SUMMARY; a kept leaf
+        # becomes a TASK. Leaf tasks are scheduled as a sequential FS chain in
+        # document order so the generated plan is contiguous and predictable;
+        # summaries roll up their descendants' span. The planner then refines
+        # dates/links with the inline grid + dependency editor.
+        created_activities: list[dict] = []
         sort_counter = 0
+        cursor = {"date": schedule_start}              # next leaf task start
+        prev_task_id: list[uuid.UUID | None] = [None]  # FS chain anchor
 
-        # Track previous section for inter-section SS dependencies
-        prev_section_summary_id: uuid.UUID | None = None
-        prev_section_duration_work_days: int = 0
+        async def _build(pos: dict, parent_activity_id: uuid.UUID | None) -> tuple[uuid.UUID, date, date] | None:
+            nonlocal sort_counter
+            pid = str(pos["id"])
+            kept_children = _kept_children(pid)
+            ordinal = pos["ordinal"] or ""
+            name = pos["description"][:255] if pos["description"] else f"Position {ordinal}"
 
-        # Track per-section data for summary rollup
-        summary_activity_map: dict[uuid.UUID, list[Activity]] = {}
-
-        # Current date cursor for section starts
-        section_start = schedule_start
-
-        for section_idx, section in enumerate(sections):
-            # ── Create SUMMARY activity (placeholder dates, updated later) ──
-            sort_counter += 1
-            summary = Activity(
-                schedule_id=schedule_id,
-                parent_id=None,
-                name=section["name"],
-                description=f"Summary: BOQ section {section['ordinal']}",
-                wbs_code=section["ordinal"],
-                start_date=section_start.isoformat(),
-                end_date=section_start.isoformat(),  # placeholder
-                duration_days=0,  # placeholder - computed from children
-                progress_pct="0",
-                status="not_started",
-                activity_type="summary",
-                dependencies=[],
-                resources=[],
-                boq_position_ids=[],
-                color="#1e40af",
-                sort_order=sort_counter,
-                metadata_={"source": "boq_generation", "boq_id": str(boq_id)},
-            )
-            summary = await self.activity_repo.create(summary)
-            summary_id = summary.id  # Save ID before any expire_all
-            created_activities.append(
-                {
-                    "activity_type": "summary",
-                    "end_date": summary.end_date,
-                    "id": summary_id,
-                }
-            )
-            summary_activity_map[summary_id] = []
-
-            # Inter-section dependency: SS with lag = 50% of previous section
-            if prev_section_summary_id is not None:
-                lag = max(3, prev_section_duration_work_days // 2)
-                summary_deps = [
-                    {
-                        "activity_id": str(prev_section_summary_id),
-                        "type": "SS",
-                        "lag_days": lag,
-                    }
-                ]
-                await self.activity_repo.update_fields(
-                    summary_id,
-                    dependencies=summary_deps,
-                )
-
-            # ── Create TASK activities for each child position ───────────
-            child_start = section_start
-            prev_child_id: uuid.UUID | None = None
-            section_work_days_total = 0
-
-            for child_idx, child_pos in enumerate(section["children"]):
-                child_quantity = _str_to_float(child_pos["quantity"])
-                child_unit = child_pos["unit"] or ""
-                child_total = _str_to_float(child_pos["total"])
-                child_meta = child_pos.get("metadata_", {}) or {}
-
-                duration_cal, duration_source = _calc_duration_from_resources(
-                    child_meta,
-                    child_quantity,
-                    child_unit,
-                    child_total,
-                    grand_total,
-                    total_project_days,
-                    hours_per_day=hours_per_day,
-                    work_days_per_week=work_days_per_week,
-                )
-                # Convert calendar days to working days for date arithmetic.
-                # Use the project's regional work-week (not a hardcoded 5/7)
-                # so 6-day-week regions (GULF, BRAZIL, CHINA, INDIA) get
-                # working-day counts consistent with the stored duration.
-                work_days = max(1, math.ceil(duration_cal * work_days_per_week / 7))
-                section_work_days_total += work_days
-
-                child_end = _add_working_days(child_start, work_days)
-
-                # Within-section dependency: sequential FS
-                child_deps: list[dict] = []
-                if prev_child_id is not None:
-                    child_deps = [
-                        {
-                            "activity_id": str(prev_child_id),
-                            "type": "FS",
-                            "lag_days": 0,
-                        }
-                    ]
-
+            if kept_children:
+                # ── SUMMARY (dates rolled up from its descendants below) ───
                 sort_counter += 1
-                child_name = (
-                    child_pos["description"][:255] if child_pos["description"] else f"Position {child_pos['ordinal']}"
-                )
-                child_activity = Activity(
+                summary = Activity(
                     schedule_id=schedule_id,
-                    parent_id=summary_id,
-                    name=child_name,
-                    description=(
-                        f"Auto-generated from BOQ position {child_pos['ordinal']} ({child_quantity} {child_unit})"
-                    ),
-                    wbs_code=child_pos["ordinal"] or f"{section['ordinal']}.{child_idx + 1:03d}",
-                    start_date=child_start.isoformat(),
-                    end_date=child_end.isoformat(),
-                    duration_days=duration_cal,
+                    parent_id=parent_activity_id,
+                    name=name,
+                    description=f"Summary: BOQ position {ordinal}",
+                    wbs_code=ordinal,
+                    start_date=cursor["date"].isoformat(),
+                    end_date=cursor["date"].isoformat(),  # placeholder
+                    duration_days=0,
                     progress_pct="0",
                     status="not_started",
-                    activity_type="task",
-                    dependencies=child_deps,
+                    activity_type="summary",
+                    dependencies=[],
                     resources=[],
-                    boq_position_ids=[str(child_pos["id"])],
-                    color="#0071e3",
+                    boq_position_ids=[],
+                    color="#1e40af",
                     sort_order=sort_counter,
-                    metadata_={
-                        "source": "boq_generation",
-                        "boq_id": str(boq_id),
-                        "quantity": child_quantity,
-                        "unit": child_unit,
-                        "labor_hours": child_meta.get("labor_hours", 0),
-                        "workers_per_unit": child_meta.get("workers_per_unit", 0),
-                        # Both keys carry the actual branch taken by the
-                        # duration calculator; "estimated_fallback" marks
-                        # durations derived from the unit production-rate
-                        # table so the UI can flag them as estimates.
-                        "duration_method": duration_source,
-                        "duration_source": duration_source,
-                    },
+                    metadata_={"source": "boq_generation", "boq_id": str(boq_id)},
                 )
-                child_activity = await self.activity_repo.create(child_activity)
-                child_activity_id = child_activity.id  # Save before expire
-                child_activity_start = child_activity.start_date
-                child_activity_end = child_activity.end_date
+                summary = await self.activity_repo.create(summary)
+                sid = summary.id  # save before any expire
+                child_spans: list[tuple[date, date]] = []
+                for child in kept_children:
+                    res = await _build(child, sid)
+                    if res is not None:
+                        child_spans.append((res[1], res[2]))
+                if child_spans:
+                    earliest = min(s for s, _ in child_spans)
+                    latest = max(e for _, e in child_spans)
+                    await self.activity_repo.update_fields(
+                        sid,
+                        start_date=earliest.isoformat(),
+                        end_date=latest.isoformat(),
+                        duration_days=max(1, (latest - earliest).days),
+                        boq_position_ids=[str(c["id"]) for c in kept_children],
+                    )
+                else:
+                    earliest = latest = cursor["date"]
                 created_activities.append(
-                    {
-                        "activity_type": "task",
-                        "end_date": child_activity_end,
-                        "id": child_activity_id,
-                    }
+                    {"activity_type": "summary", "end_date": latest.isoformat(), "id": sid}
                 )
-                # Store as dict to avoid ORM lazy-loading issues
-                summary_activity_map[summary_id].append(
-                    {
-                        "id": child_activity_id,
-                        "start_date": child_activity_start,
-                        "end_date": child_activity_end,
-                    }
-                )
+                return sid, earliest, latest
 
-                prev_child_id = child_activity_id
-                child_start = child_end  # next child starts after this one ends
+            # ── TASK (leaf) ───────────────────────────────────────────────
+            meta = pos.get("metadata_", {}) or {}
+            quantity = _str_to_float(pos["quantity"])
+            unit = pos["unit"] or ""
+            total = _str_to_float(pos["total"])
+            duration_cal, duration_source = _calc_duration_from_resources(
+                meta,
+                quantity,
+                unit,
+                total,
+                grand_total,
+                total_project_days,
+                hours_per_day=hours_per_day,
+                work_days_per_week=work_days_per_week,
+            )
+            # Convert calendar days to working days for date arithmetic, using
+            # the project's regional work-week so 6-day-week regions get
+            # working-day counts consistent with the stored duration.
+            work_days = max(1, math.ceil(duration_cal * work_days_per_week / 7))
+            start = cursor["date"]
+            end = _add_working_days(start, work_days)
 
-            # ── Update SUMMARY dates from children (rollup) ─────────────
-            children_data = summary_activity_map[summary_id]
-            if children_data:
-                earliest_start = min(date.fromisoformat(a["start_date"]) for a in children_data)
-                latest_end = max(date.fromisoformat(a["end_date"]) for a in children_data)
-                summary_duration = (latest_end - earliest_start).days
-                await self.activity_repo.update_fields(
-                    summary_id,
-                    start_date=earliest_start.isoformat(),
-                    end_date=latest_end.isoformat(),
-                    duration_days=max(1, summary_duration),
-                    boq_position_ids=[str(c["id"]) for c in section["children"]],
-                )
+            # Sequential FS chain across leaf tasks (document order).
+            deps: list[dict] = []
+            if prev_task_id[0] is not None:
+                deps = [{"activity_id": str(prev_task_id[0]), "type": "FS", "lag_days": 0}]
 
-            prev_section_summary_id = summary_id
-            prev_section_duration_work_days = section_work_days_total
+            sort_counter += 1
+            task = Activity(
+                schedule_id=schedule_id,
+                parent_id=parent_activity_id,
+                name=name,
+                description=f"Auto-generated from BOQ position {ordinal} ({quantity} {unit})",
+                wbs_code=ordinal or f"{sort_counter:03d}",
+                start_date=start.isoformat(),
+                end_date=end.isoformat(),
+                duration_days=duration_cal,
+                progress_pct="0",
+                status="not_started",
+                activity_type="task",
+                dependencies=deps,
+                resources=[],
+                boq_position_ids=[pid],
+                color="#0071e3",
+                sort_order=sort_counter,
+                metadata_={
+                    "source": "boq_generation",
+                    "boq_id": str(boq_id),
+                    "quantity": quantity,
+                    "unit": unit,
+                    "labor_hours": meta.get("labor_hours", 0),
+                    "workers_per_unit": meta.get("workers_per_unit", 0),
+                    # "estimated_fallback" marks durations derived from the unit
+                    # production-rate table so the UI can flag them as estimates.
+                    "duration_method": duration_source,
+                    "duration_source": duration_source,
+                },
+            )
+            task = await self.activity_repo.create(task)
+            tid = task.id  # save before expire
+            prev_task_id[0] = tid
+            cursor["date"] = end  # next leaf task starts after this one ends
+            created_activities.append(
+                {"activity_type": "task", "end_date": end.isoformat(), "id": tid}
+            )
+            return tid, start, end
 
-            # Next section start: overlap via SS - section_start advances by
-            # half the previous section's working days for partial overlap
-            if children_data:
-                latest_end = max(date.fromisoformat(a["end_date"]) for a in children_data)
-                half_work_days = max(3, section_work_days_total // 2)
-                section_start = _add_working_days(section_start, half_work_days)
-            else:
-                section_start = child_start
+        # Walk the kept top-level positions in document order.
+        last_root_id: uuid.UUID | None = None
+        for root in roots:
+            res = await _build(root, None)
+            if res is not None:
+                last_root_id = res[0]
 
         # ── Add project milestones ───────────────────────────────────────
         # Milestone: Project Start
@@ -2163,8 +2123,8 @@ class ScheduleService:
             }
         )
 
-        # Milestone: Project Completion (depends on last section finishing)
-        if prev_section_summary_id is not None:
+        # Milestone: Project Completion (depends on the last top-level activity)
+        if last_root_id is not None:
             # Find the latest end date across all activities
             all_end_dates = []
             for act_info in created_activities:
@@ -2192,7 +2152,7 @@ class ScheduleService:
                 activity_type="milestone",
                 dependencies=[
                     {
-                        "activity_id": str(prev_section_summary_id),
+                        "activity_id": str(last_root_id),
                         "type": "FS",
                         "lag_days": 0,
                     }
