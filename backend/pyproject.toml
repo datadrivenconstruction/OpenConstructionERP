@@ -234,7 +234,7 @@ dev = [
     # formatter's output, which can shift between ruff releases. A floating
     # spec let CI pick a newer ruff than contributors ran locally, so formatted
     # code still failed the check. Bump this deliberately when adopting a new ruff.
-    "ruff==0.15.14",
+    "ruff==0.15.20",
     "mypy>=1.13.0",
     "pre-commit>=4.0.0",
     "pyinstaller>=6.0.0",
