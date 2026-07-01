@@ -64,9 +64,13 @@ export function DateDisplay({ value, format = 'date', className }: DateDisplayPr
         formatted = new Intl.DateTimeFormat(locale, TIME_OPTIONS).format(dateObj);
         break;
       case 'date':
-      default:
-        formatted = new Intl.DateTimeFormat(locale, DATE_OPTIONS).format(dateObj);
+      default: {
+        const options = (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value))
+          ? { ...DATE_OPTIONS, timeZone: 'UTC' }
+          : DATE_OPTIONS;
+        formatted = new Intl.DateTimeFormat(locale, options).format(dateObj);
         break;
+      }
     }
   } catch {
     formatted = dateObj.toLocaleDateString();

@@ -3,7 +3,7 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/app/i18n';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Table2,
   DollarSign,
@@ -1230,7 +1230,14 @@ export function ProjectDetailPage() {
     boqName: string;
   } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<ProjectTab>('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = (searchParams.get('tab') as ProjectTab) || 'dashboard';
+  const setActiveTab = useCallback(
+    (tab: ProjectTab) => {
+      setSearchParams({ tab });
+    },
+    [setSearchParams],
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(INITIAL_PROJECT_EDIT_FORM);
   const [customizing, setCustomizing] = useState(false);

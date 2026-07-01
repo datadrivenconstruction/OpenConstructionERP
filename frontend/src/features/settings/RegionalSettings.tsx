@@ -78,12 +78,12 @@ interface NumberFormatOption {
 }
 
 const NUMBER_FORMATS: NumberFormatOption[] = [
-  { locale: 'de-DE', label: '1.234,56', example: '1.234,56' },
-  { locale: 'en-US', label: '1,234.56', example: '1,234.56' },
-  { locale: 'fr-FR', label: '1 234,56', example: '1 234,56' },
-  { locale: 'en-GB', label: '1,234.56', example: '1,234.56' },
-  { locale: 'ru-RU', label: '1 234,56', example: '1 234,56' },
-  { locale: 'es-MX', label: '1,234.56', example: '1,234.56' },
+  { locale: 'de-DE', label: '1.234,56 (DE / ES)', example: '1.234,56' },
+  { locale: 'en-US', label: '1,234.56 (US)', example: '1,234.56' },
+  { locale: 'fr-FR', label: '1 234,56 (FR)', example: '1 234,56' },
+  { locale: 'en-GB', label: '1,234.56 (GB)', example: '1,234.56' },
+  { locale: 'ru-RU', label: '1 234,56 (RU)', example: '1 234,56' },
+  { locale: 'es-MX', label: '1,234.56 (MX)', example: '1,234.56' },
 ];
 
 const CURRENCIES = [
@@ -279,7 +279,7 @@ function ToggleGroup<T extends string>({
   onChange: (val: T) => void;
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -508,7 +508,7 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
               value={numberFormat}
               options={NUMBER_FORMATS.map((f) => ({
                 value: f.locale,
-                label: f.example,
+                label: f.label,
               }))}
               onChange={(val) => handleChange('number_format', val)}
             />

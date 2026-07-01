@@ -1499,7 +1499,7 @@ export function PhotoGalleryPage() {
       )}
 
       {/* Filters bar */}
-      <Card className="p-3">
+      <Card className="p-3 relative z-20">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Search */}
           <div className="relative flex-1">

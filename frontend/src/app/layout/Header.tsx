@@ -1412,7 +1412,7 @@ function ProjectSwitcher() {
   }, [projects, activeProjectId, clearProject, isFetching, isError]);
 
   return (
-    <div className="relative hidden sm:block" ref={ref} data-testid="header-project-picker">
+    <div className="relative hidden sm:block min-w-0" ref={ref} data-testid="header-project-picker">
       {/* Split-button — visibly the most-used surface in the app. Left half
           opens the active project's detail; right half (chevron) opens
           the switcher dropdown. Two distinct visual modes:
@@ -1426,7 +1426,7 @@ function ProjectSwitcher() {
           // Audit fix S5 (2026-06-06): cap the pill tighter on lg so the
           // MODULE NAME next to it stops truncating to "Carbo…"/"Takt Pl…"
           // at 1280-1440px; the pill gets its full 260px back on xl+.
-          'flex items-stretch rounded-lg border transition-all max-w-[180px] xl:max-w-[260px] overflow-hidden',
+          'flex items-stretch rounded-lg border transition-all max-w-[180px] xl:max-w-[260px] overflow-hidden min-w-0',
           activeProjectId
             ? 'bg-oe-blue-subtle border-oe-blue/30 hover:bg-oe-blue/10 hover:border-oe-blue/50 shadow-[0_1px_2px_rgba(0,122,255,0.05)]'
             : 'border-dashed border-oe-blue/40 bg-oe-blue/[0.04] hover:bg-oe-blue/[0.08] hover:border-oe-blue/60',
