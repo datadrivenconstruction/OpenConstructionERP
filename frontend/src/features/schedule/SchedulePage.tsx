@@ -63,6 +63,7 @@ import type {
   GanttData,
   CriticalPathResponse,
   RiskAnalysisResponse,
+  WorkCalendarInfo,
 } from './api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -1280,6 +1281,284 @@ function PositionTreeRow({
   );
 }
 
+/* ── Work calendar editor ──────────────────────────────────────────────── */
+
+/** Countries the holiday-preload endpoint has statutory-holiday data for. */
+const HOLIDAY_COUNTRIES = ['FR', 'DE', 'UK', 'US', 'AE', 'BR', 'RU', 'IN', 'JP'] as const;
+
+/**
+ * Editor for the project's work calendar: working weekdays, hours per day and
+ * public holidays. Saves the project's *default* custom calendar, which then
+ * drives every duration/date computation (durations, BOQ generation, CPM).
+ * Deleting it reverts to the built-in regional calendar.
+ */
+function WorkCalendarModal({
+  open,
+  onClose,
+  projectId,
+  calendar,
+}: {
+  open: boolean;
+  onClose: () => void;
+  projectId: string;
+  calendar: WorkCalendarInfo | undefined;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [workDays, setWorkDays] = useState<Set<number>>(new Set([0, 1, 2, 3, 4]));
+  const [hoursPerDay, setHoursPerDay] = useState('8');
+  const [holidays, setHolidays] = useState<string[]>([]);
+  const [newHoliday, setNewHoliday] = useState('');
+  const [holidayCountry, setHolidayCountry] = useState('FR');
+
+  // Re-seed the form from the resolved calendar each time the modal opens.
+  useEffect(() => {
+    if (!open) return;
+    setWorkDays(new Set(calendar?.work_days?.length ? calendar.work_days : [0, 1, 2, 3, 4]));
+    setHoursPerDay(String(calendar?.hours_per_day ?? 8));
+    setHolidays([...(calendar?.holidays ?? [])].sort());
+    setNewHoliday('');
+  }, [open, calendar]);
+
+  // Locale-aware weekday labels; 2024-01-01 is a Monday, matching index 0.
+  const dayLabels = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(getIntlLocale(), { weekday: 'short' });
+    return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2024, 0, 1 + i)));
+  }, []);
+
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['work-calendar', projectId] });
+    // Durations/dates derived from the calendar → refresh every gantt view.
+    queryClient.invalidateQueries({ queryKey: ['gantt'] });
+  }, [queryClient, projectId]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      scheduleApi.saveWorkCalendar({
+        project_id: projectId,
+        work_days: [...workDays].sort(),
+        hours_per_day: Math.max(0.5, Number(hoursPerDay) || 8),
+        holidays,
+      }),
+    onSuccess: () => {
+      invalidate();
+      addToast({
+        type: 'success',
+        title: t('toasts.calendar_saved', { defaultValue: 'Work calendar saved' }),
+      });
+      onClose();
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const reset = useMutation({
+    mutationFn: () => scheduleApi.deleteWorkCalendar(projectId),
+    onSuccess: () => {
+      invalidate();
+      addToast({
+        type: 'success',
+        title: t('toasts.calendar_reset', { defaultValue: 'Regional calendar restored' }),
+      });
+      onClose();
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const currentYear = new Date().getFullYear();
+  const preload = useMutation({
+    mutationFn: () => scheduleApi.getPublicHolidays(holidayCountry, [currentYear, currentYear + 1]),
+    onSuccess: (data) => {
+      setHolidays((prev) => [...new Set([...prev, ...data.holidays])].sort());
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const toggleDay = (d: number) => {
+    setWorkDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(d)) next.delete(d);
+      else next.add(d);
+      return next;
+    });
+  };
+
+  const addHoliday = () => {
+    if (!newHoliday) return;
+    setHolidays((prev) => [...new Set([...prev, newHoliday])].sort());
+    setNewHoliday('');
+  };
+
+  const hoursNum = Number(hoursPerDay);
+  const canSave = workDays.size > 0 && Number.isFinite(hoursNum) && hoursNum > 0 && hoursNum <= 24;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t('schedule.work_calendar_edit', { defaultValue: 'Work calendar' })}
+    >
+      <div className="space-y-4">
+        <p className="text-xs text-content-secondary">
+          {t('schedule.work_calendar_hint', {
+            defaultValue:
+              'Defines the working days, daily hours and holidays used for every duration and date computation in this project. Existing activity dates are not moved; durations are recomputed when dates change.',
+          })}
+        </p>
+
+        {/* Working weekdays */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            {t('schedule.work_days_label', { defaultValue: 'Working days' })}
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {dayLabels.map((label, d) => (
+              <button
+                key={d}
+                type="button"
+                aria-pressed={workDays.has(d)}
+                onClick={() => toggleDay(d)}
+                className={`min-w-11 rounded-lg border px-2.5 py-1.5 text-xs font-medium capitalize transition-colors ${
+                  workDays.has(d)
+                    ? 'border-oe-blue bg-oe-blue text-white'
+                    : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {workDays.size === 0 && (
+            <p className="mt-1 text-xs text-semantic-error">
+              {t('schedule.work_days_required', { defaultValue: 'Select at least one working day.' })}
+            </p>
+          )}
+        </div>
+
+        {/* Hours per day */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-content-primary">
+            {t('schedule.hours_per_day', { defaultValue: 'Hours per day' })}
+          </label>
+          <input
+            type="number"
+            min={0.5}
+            max={24}
+            step={0.5}
+            value={hoursPerDay}
+            onChange={(e) => setHoursPerDay(e.target.value)}
+            className={`${FIELD_CLS} w-28 text-right tabular-nums`}
+          />
+        </div>
+
+        {/* Holidays */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="block text-sm font-medium text-content-primary">
+              {t('schedule.holidays_label', { defaultValue: 'Public holidays / non-working days' })}
+            </label>
+            <span className="text-2xs tabular-nums text-content-tertiary">
+              {t('schedule.holidays_count', {
+                defaultValue: '{{count}} day(s)',
+                count: holidays.length,
+              })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={newHoliday}
+              onChange={(e) => setNewHoliday(e.target.value)}
+              className={`${FIELD_CLS} flex-1`}
+            />
+            <Button variant="secondary" size="sm" disabled={!newHoliday} onClick={addHoliday}>
+              {t('common.add', { defaultValue: 'Add' })}
+            </Button>
+          </div>
+          {/* Statutory-holiday preload */}
+          <div className="mt-2 flex items-center gap-2">
+            <select
+              value={holidayCountry}
+              onChange={(e) => setHolidayCountry(e.target.value)}
+              aria-label={t('schedule.holiday_country', { defaultValue: 'Country' })}
+              className={`${FIELD_CLS} w-24`}
+            >
+              {HOLIDAY_COUNTRIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={preload.isPending}
+              onClick={() => preload.mutate()}
+            >
+              {t('schedule.preload_holidays', {
+                defaultValue: 'Load public holidays {{from}}–{{to}}',
+                from: currentYear,
+                to: currentYear + 1,
+              })}
+            </Button>
+          </div>
+          {holidays.length > 0 && (
+            <div className="mt-2 flex max-h-36 flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-border-light bg-surface-secondary/40 p-2">
+              {holidays.map((h) => (
+                <span
+                  key={h}
+                  className="inline-flex items-center gap-1 rounded-full border border-border-light bg-surface-primary px-2 py-0.5 text-2xs tabular-nums text-content-secondary"
+                >
+                  {h}
+                  <button
+                    type="button"
+                    aria-label={t('common.remove', { defaultValue: 'Remove' })}
+                    onClick={() => setHolidays((prev) => prev.filter((x) => x !== h))}
+                    className="text-content-tertiary transition-colors hover:text-semantic-error"
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <div>
+            {calendar?.source === 'custom' && (
+              <button
+                type="button"
+                onClick={() => reset.mutate()}
+                disabled={reset.isPending}
+                className="text-xs font-medium text-content-tertiary underline-offset-2 transition-colors hover:text-semantic-error hover:underline"
+              >
+                {t('schedule.calendar_reset', { defaultValue: 'Reset to regional calendar' })}
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={onClose}>
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button variant="primary" disabled={!canSave} loading={save.isPending} onClick={() => save.mutate()}>
+              {t('common.save', { defaultValue: 'Save' })}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 /* ── Schedule Detail View ──────────────────────────────────────────────── */
 
 function ScheduleDetail({
@@ -1344,13 +1623,11 @@ function ScheduleDetail({
   // / "NORDIC"; it is kept only as a pre-fetch fallback.
   const { data: workCalendar } = useQuery({
     queryKey: ['work-calendar', projectId],
-    queryFn: () =>
-      apiGet<{ region: string | null; hours_per_day: number; work_days_per_week: number; label: string }>(
-        `/v1/schedule/work-calendar/?project_id=${projectId}`,
-      ),
+    queryFn: () => scheduleApi.getWorkCalendar(projectId),
     enabled: !!projectId,
     staleTime: 300_000,
   });
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const fallbackCal =
     WORK_CALENDAR_INFO[projectData?.region ?? ''] ?? WORK_CALENDAR_INFO['DACH'] ?? { hours: 8, days: 5 };
   const calInfo = workCalendar
@@ -1915,15 +2192,35 @@ function ScheduleDetail({
                 })}
               </Badge>
             )}
-            {/* Work calendar indicator */}
-            <Badge variant="neutral" size="sm" className="flex items-center gap-1">
-              <Clock size={11} />
-              {t('schedule.work_calendar', {
-                defaultValue: '{{hours}}h/day, {{days}} days/week',
-                hours: String(calInfo.hours),
-                days: String(calInfo.days),
-              })}
-            </Badge>
+            {/* Work calendar indicator — click to edit days/hours/holidays */}
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              title={t('schedule.work_calendar_edit', { defaultValue: 'Work calendar' })}
+              className="group"
+            >
+              <Badge
+                variant="neutral"
+                size="sm"
+                className="flex cursor-pointer items-center gap-1 transition-colors group-hover:border-oe-blue/40 group-hover:text-oe-blue"
+              >
+                <Clock size={11} />
+                {t('schedule.work_calendar', {
+                  defaultValue: '{{hours}}h/day, {{days}} days/week',
+                  hours: String(calInfo.hours),
+                  days: String(calInfo.days),
+                })}
+                {workCalendar?.source === 'custom' && (
+                  <span className="text-2xs text-content-tertiary">
+                    {t('schedule.work_calendar_holidays_badge', {
+                      defaultValue: '· {{count}} holidays',
+                      count: workCalendar.holidays.length,
+                    })}
+                  </span>
+                )}
+                <Pencil size={9} className="opacity-0 transition-opacity group-hover:opacity-100" />
+              </Badge>
+            </button>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -2701,6 +2998,14 @@ function ScheduleDetail({
           </div>
         </div>
       </Modal>
+
+      {/* Work calendar editor */}
+      <WorkCalendarModal
+        open={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
+        projectId={projectId}
+        calendar={workCalendar}
+      />
       <ConfirmDialog {...confirmProps} />
     </div>
   );

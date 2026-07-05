@@ -199,6 +199,22 @@ export interface SnapshotEnvelope {
   envelope: Record<string, unknown>;
 }
 
+/** Effective work calendar of a project, as resolved by the backend
+ *  (custom default calendar when defined, else the regional preset). This is
+ *  the calendar every duration/date computation actually uses. */
+export interface WorkCalendarInfo {
+  region: string | null;
+  hours_per_day: number;
+  work_days_per_week: number;
+  label: string;
+  /** Working weekdays, Mon=0..Sun=6. */
+  work_days: number[];
+  /** ISO dates excluded from work (empty for regional presets). */
+  holidays: string[];
+  source: 'custom' | 'regional';
+  calendar_id: string | null;
+}
+
 export interface ScheduleDiffRequestBody {
   base_baseline_id?: string | null;
   base_envelope?: Record<string, unknown> | null;
@@ -813,6 +829,26 @@ export const scheduleApi = {
     }),
   updateProgress: (activityId: string, progressPct: number) =>
     apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
+
+  // Work calendar (days / hours / holidays driving all duration math)
+  getWorkCalendar: (projectId: string) =>
+    apiGet<WorkCalendarInfo>(`/v1/schedule/work-calendar/?project_id=${projectId}`),
+  /** Upsert the project's default custom calendar (drives every duration). */
+  saveWorkCalendar: (data: {
+    project_id: string;
+    work_days: number[];
+    hours_per_day: number;
+    holidays: string[];
+    name?: string;
+  }) => apiPut<WorkCalendarInfo>('/v1/schedule/work-calendar/custom/', data),
+  /** Remove the custom calendar — the regional preset applies again. */
+  deleteWorkCalendar: (projectId: string) =>
+    apiDelete(`/v1/schedule/work-calendar/custom/?project_id=${encodeURIComponent(projectId)}`),
+  /** Statutory public holidays for pre-filling the calendar editor. */
+  getPublicHolidays: (country: string, years: number[]) =>
+    apiGet<{ country: string; years: number[]; holidays: string[] }>(
+      `/v1/schedule/public-holidays/?country=${encodeURIComponent(country)}&years=${years.join(',')}`,
+    ),
 
   // CPM & BOQ Generation
   generateFromBOQ: (

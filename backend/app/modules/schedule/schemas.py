@@ -516,6 +516,57 @@ class WorkCalendarResponse(BaseModel):
     hours_per_day: float = Field(description="Working hours per day")
     work_days_per_week: int = Field(description="Number of working days per week")
     label: str = Field(description="Human-readable calendar label")
+    # ── Effective-calendar extension (custom project calendars) ──────────
+    work_days: list[int] = Field(
+        default_factory=list,
+        description="Working weekdays (Mon=0..Sun=6) of the effective calendar",
+    )
+    holidays: list[str] = Field(
+        default_factory=list,
+        description="ISO holiday dates excluded from duration/date math",
+    )
+    source: str = Field(
+        default="regional",
+        description='"custom" when a user-defined default calendar drives the math, else "regional"',
+    )
+    calendar_id: str | None = Field(
+        default=None,
+        description="Id of the custom calendar row when source=custom",
+    )
+
+
+class WorkCalendarUpsertRequest(BaseModel):
+    """Body for PUT /work-calendar/custom/ — define the project's work calendar.
+
+    Upserts the project's *default* custom calendar
+    (``oe_schedule_advanced_calendar``, ``is_default=True``), which then drives
+    every duration/date computation for the project's schedules.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    work_days: list[int] = Field(
+        default_factory=lambda: [0, 1, 2, 3, 4],
+        min_length=1,
+        max_length=7,
+        description="Working weekdays (Mon=0..Sun=6)",
+    )
+    hours_per_day: float = Field(default=8.0, gt=0, le=24)
+    holidays: list[str] = Field(
+        default_factory=list,
+        max_length=1000,
+        description="ISO YYYY-MM-DD dates excluded from work",
+    )
+    name: str | None = Field(default=None, max_length=255)
+
+
+class PublicHolidaysResponse(BaseModel):
+    """Public holidays for a country/year set (pre-fill helper)."""
+
+    country: str
+    years: list[int]
+    holidays: list[str] = Field(default_factory=list, description="Sorted ISO dates")
 
 
 class ClearActivitiesResponse(BaseModel):

@@ -363,6 +363,30 @@ def _holidays_br(year: int) -> set[date]:
     }
 
 
+def _holidays_fr(year: int) -> set[date]:
+    """French legal public holidays (Code du travail, art. L3133-1).
+
+    The 11 national ``jours fériés``. Moveable feasts (Easter Monday,
+    Ascension, Whit Monday) derive from Easter Sunday via ``dateutil``.
+    Alsace-Moselle's two extra days (Vendredi saint, 26 déc.) are excluded —
+    only nationwide holidays are listed, mirroring the other countries here.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Jour de l'an
+        e + timedelta(days=1),  # Lundi de Pâques
+        date(year, 5, 1),  # Fête du Travail
+        date(year, 5, 8),  # Victoire 1945
+        e + timedelta(days=39),  # Ascension
+        e + timedelta(days=50),  # Lundi de Pentecôte
+        date(year, 7, 14),  # Fête nationale
+        date(year, 8, 15),  # Assomption
+        date(year, 11, 1),  # Toussaint
+        date(year, 11, 11),  # Armistice 1918
+        date(year, 12, 25),  # Noël
+    }
+
+
 def _holidays_ru(year: int) -> set[date]:
     """Russian federal non-working days (Labour Code Art. 112)."""
     return {
@@ -390,6 +414,8 @@ def _holidays_ru(year: int) -> set[date]:
 # GCC Sun–Thu work week: {6, 0, 1, 2, 3}
 
 _WORKING_WEEK: dict[str, frozenset[int]] = {
+    "FR": frozenset({0, 1, 2, 3, 4}),
+    "ES": frozenset({0, 1, 2, 3, 4}),
     "DE": frozenset({0, 1, 2, 3, 4}),
     "AT": frozenset({0, 1, 2, 3, 4}),
     "CH": frozenset({0, 1, 2, 3, 4}),
@@ -414,6 +440,7 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
 
 _HOLIDAY_FUNCS: dict[str, Any] = {
+    "FR": _holidays_fr,
     "DE": _holidays_de,
     "AT": _holidays_de,  # Austrian federal holidays closely mirror Germany's
     "CH": lambda y: {date(y, 1, 1), date(y, 8, 1), date(y, 12, 25)},  # simplified
@@ -454,6 +481,17 @@ def _get_holidays(country_code: str, year: int) -> frozenset[date]:
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
+
+
+def get_public_holidays(country_code: str, year: int) -> list[date]:
+    """Return the sorted public holidays for ``country_code`` in ``year``.
+
+    Thin public wrapper over the per-country calculators, for callers that
+    want the raw dates (e.g. to pre-fill an editable project calendar).
+    Unknown country codes yield an empty list.
+    """
+    cc = (country_code or "").upper().strip()
+    return sorted(_get_holidays(cc, year))
 
 
 def is_working_day(d: date, country_code: str) -> bool:

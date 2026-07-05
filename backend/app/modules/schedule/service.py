@@ -446,15 +446,106 @@ def get_work_calendar(region: str | None = None) -> dict:
     return WORK_CALENDARS["DEFAULT"]
 
 
-def compute_duration(start_date: str, end_date: str, region: str | None = None) -> int:
+async def resolve_project_work_calendar(session, project_id) -> dict:
+    """Resolve the effective work calendar for a project.
+
+    Priority:
+        1. The project's *default* custom calendar
+           (``oe_schedule_advanced_calendar`` row with ``is_default=True``) —
+           user-defined work days, hours per day and holidays.
+        2. The hardcoded regional calendar from :data:`WORK_CALENDARS`
+           (derived from the project's ``region``; no holidays).
+
+    Returns a dict shaped like :func:`get_work_calendar` plus holiday data::
+
+        {
+            "hours_per_day": float,
+            "work_days": set[int],          # weekday() indices, Mon=0
+            "holidays": set[str],           # ISO YYYY-MM-DD strings
+            "label": str,
+            "source": "custom" | "regional",
+            "calendar_id": str | None,      # custom calendar row id
+        }
+
+    Only ``is_default`` calendars drive the schedule math — other calendars a
+    project may hold (per-activity assignments via the progress module) must
+    not silently hijack every duration computation.
+    """
+    from sqlalchemy import select as _select
+
+    try:
+        from app.modules.schedule_advanced.models import Calendar
+
+        stmt = (
+            _select(Calendar)
+            .where(Calendar.project_id == project_id)
+            .where(Calendar.is_default.is_(True))
+            .order_by(Calendar.created_at)
+            .limit(1)
+        )
+        row = (await session.execute(stmt)).scalars().first()
+    except Exception:  # pragma: no cover — table absent on minimal installs
+        row = None
+
+    if row is not None:
+        try:
+            work_days = {int(d) for d in (row.work_days or []) if 0 <= int(d) <= 6}
+        except (TypeError, ValueError):
+            work_days = set()
+        if not work_days:
+            work_days = {0, 1, 2, 3, 4}
+        try:
+            hours = float(row.work_hours_per_day or 8)
+        except (TypeError, ValueError):
+            hours = 8.0
+        holidays = {str(h)[:10] for h in (row.holidays or [])}
+        return {
+            "hours_per_day": hours if hours > 0 else 8.0,
+            "work_days": work_days,
+            "holidays": holidays,
+            "label": row.name or "Custom",
+            "source": "custom",
+            "calendar_id": str(row.id),
+        }
+
+    # Regional fallback (no holidays)
+    from app.modules.projects.repository import ProjectRepository
+
+    project = await ProjectRepository(session).get_by_id(project_id)
+    region = project.region if project else None
+    cal = get_work_calendar(region)
+    return {
+        "hours_per_day": float(cal["hours_per_day"]),
+        "work_days": set(cal["work_days"]),
+        "holidays": set(),
+        "label": cal["label"],
+        "source": "regional",
+        "calendar_id": None,
+    }
+
+
+def compute_duration(
+    start_date: str,
+    end_date: str,
+    region: str | None = None,
+    *,
+    work_days: set[int] | None = None,
+    holidays: set[str] | None = None,
+) -> int:
     """Calculate working days between two ISO date strings.
 
-    Uses regional work calendar (respects different work weeks).
+    Uses the regional work calendar by default (respects different work
+    weeks); callers that resolved a project calendar can inject its
+    ``work_days`` / ``holidays`` instead (see
+    :func:`resolve_project_work_calendar`).
 
     Args:
         start_date: ISO date string (e.g. "2026-04-01").
         end_date: ISO date string (e.g. "2026-04-15").
         region: Optional region for work calendar (e.g. "DACH", "GULF").
+            Ignored when ``work_days`` is given.
+        work_days: Optional explicit working weekdays (Mon=0..Sun=6).
+        holidays: Optional ISO date strings excluded from the count.
 
     Returns:
         Number of working days between start and end, inclusive.
@@ -468,13 +559,13 @@ def compute_duration(start_date: str, end_date: str, region: str | None = None) 
     if end < start:
         return 0
 
-    cal = get_work_calendar(region)
-    work_days_set = cal["work_days"]
+    work_days_set = work_days if work_days is not None else get_work_calendar(region)["work_days"]
+    holiday_set = holidays or set()
 
     working_days = 0
     current = start
     while current <= end:
-        if current.weekday() in work_days_set:
+        if current.weekday() in work_days_set and current.isoformat() not in holiday_set:
             working_days += 1
         current += timedelta(days=1)
 
@@ -684,14 +775,21 @@ class ScheduleService:
             HTTPException 404 if the target schedule doesn't exist.
         """
         # Verify schedule exists
-        await self.get_schedule(data.schedule_id)
+        schedule = await self.get_schedule(data.schedule_id)
+        schedule_project_id = schedule.project_id
 
         # Auto-compute duration only when the client omitted it (sent explicit
         # null / not provided). An explicit ``duration_days=0`` is respected
         # so callers can create milestones / zero-duration events.
         duration = data.duration_days
         if duration is None and data.start_date and data.end_date:
-            duration = compute_duration(data.start_date, data.end_date)
+            cal = await resolve_project_work_calendar(self.session, schedule_project_id)
+            duration = compute_duration(
+                data.start_date,
+                data.end_date,
+                work_days=cal["work_days"],
+                holidays=cal["holidays"],
+            )
         if duration is None:
             duration = 0
 
@@ -1148,11 +1246,19 @@ class ScheduleService:
                 else _incoming
             )
 
-        # Recalculate duration if dates changed
+        # Recalculate duration if dates changed, honouring the project's
+        # effective work calendar (custom default calendar, else regional).
         new_start = fields.get("start_date", activity.start_date)
         new_end = fields.get("end_date", activity.end_date)
         if "start_date" in fields or "end_date" in fields:
-            fields["duration_days"] = compute_duration(new_start, new_end)
+            schedule = await self.get_schedule(schedule_id)
+            cal = await resolve_project_work_calendar(self.session, schedule.project_id)
+            fields["duration_days"] = compute_duration(
+                new_start,
+                new_end,
+                work_days=cal["work_days"],
+                holidays=cal["holidays"],
+            )
 
         # Completion guard (mirrors tasks.complete_task): reject the transition
         # to completed while any canonical predecessor is still open. Skipped
@@ -1773,6 +1879,9 @@ class ScheduleService:
         proj_repo = ProjectRepository(self.session)
         project = await proj_repo.get_by_id(schedule.project_id)
         project_region = project.region if project else None
+        # Effective work calendar (custom default → regional) for the
+        # duration fallback below, resolved once for the whole schedule.
+        work_cal = await resolve_project_work_calendar(self.session, schedule.project_id)
         today = datetime.now(UTC).date()
 
         activities, _ = await self.activity_repo.list_for_schedule(schedule_id)
@@ -1793,7 +1902,12 @@ class ScheduleService:
             # number than the rest of the UI for any multi-week activity.
             duration = act.duration_days or 0
             if not duration:
-                duration = compute_duration(str(act.start_date), str(act.end_date))
+                duration = compute_duration(
+                    str(act.start_date),
+                    str(act.end_date),
+                    work_days=work_cal["work_days"],
+                    holidays=work_cal["holidays"],
+                )
 
             # Derive the effective status: an unfinished activity whose planned
             # end date has already passed is "delayed". This is computed at read
@@ -1947,19 +2061,21 @@ class ScheduleService:
             building_type = boq_meta.get("building_type", "residential")
             total_project_days = 540 if building_type == "office" else 365
 
-        # ── Get regional work calendar from project ──────────────────────
-        # Fetch project to get region for work calendar
-        from app.modules.projects.repository import ProjectRepository
-
-        proj_repo = ProjectRepository(self.session)
-        project = await proj_repo.get_by_id(schedule_project_id)
-        project_region = project.region if project else None
-        cal = get_work_calendar(project_region)
+        # ── Effective work calendar for the project ──────────────────────
+        # Custom default calendar (user-defined days/hours/holidays) when one
+        # exists, else the hardcoded regional calendar.
+        cal = await resolve_project_work_calendar(self.session, schedule_project_id)
         hours_per_day = cal["hours_per_day"]
         work_days_set = cal["work_days"]
+        holiday_set: set[str] = cal["holidays"]
         work_days_per_week = len(work_days_set)
         logger.info(
-            "Using work calendar: %s (%.1fh/day, %d days/week)", cal["label"], hours_per_day, work_days_per_week
+            "Using work calendar: %s (%.1fh/day, %d days/week, %d holidays, source=%s)",
+            cal["label"],
+            hours_per_day,
+            work_days_per_week,
+            len(holiday_set),
+            cal["source"],
         )
 
         # ── Duration calculation from real labor data ──────────────────
@@ -1969,23 +2085,26 @@ class ScheduleService:
         #   3. Unit-based fallback production rates (quantity > 0)
         #   4. Cost-proportional fallback
 
+        def _is_working(d: date) -> bool:
+            return d.weekday() in work_days_set and d.isoformat() not in holiday_set
+
         def _add_working_days(start: date, working_days: int) -> date:
-            """Advance a date by N working days, using regional calendar."""
+            """Advance a date by N working days (weekends + holidays skipped)."""
             current = start
             added = 0
             while added < working_days:
                 current += timedelta(days=1)
-                if current.weekday() in work_days_set:
+                if _is_working(current):
                     added += 1
             return current
 
         def _working_days_between(start: date, end: date) -> int:
-            """Count working days between two dates, using regional calendar."""
+            """Count working days between two dates (weekends + holidays skipped)."""
             count = 0
             current = start
             while current < end:
                 current += timedelta(days=1)
-                if current.weekday() in work_days_set:
+                if _is_working(current):
                     count += 1
             return count
 

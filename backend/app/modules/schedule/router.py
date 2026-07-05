@@ -28,6 +28,7 @@ import io
 import logging
 import uuid
 import xml.etree.ElementTree as ET  # noqa: S405 - types + output tree building only; parsing routed through defusedxml below
+from datetime import date as dt_date
 from decimal import Decimal
 
 import defusedxml.ElementTree as safe_ET
@@ -75,7 +76,9 @@ from app.modules.schedule.schemas import (
     ScheduleStatsResponse,
     ScheduleUpdate,
     SnapshotEnvelopeResponse,
+    PublicHolidaysResponse,
     WorkCalendarResponse,
+    WorkCalendarUpsertRequest,
     WorkOrderCreate,
     WorkOrderResponse,
     WorkOrderUpdate,
@@ -1148,8 +1151,18 @@ async def calculate_cpm_full(
             seen.add(key)
             unique_rels.append(r)
 
-    # Run CPM engine
+    # Run CPM engine. When the caller does not supply a calendar, fall back to
+    # the project's effective work calendar (custom default → regional) so the
+    # date math skips the same weekends/holidays as the rest of the module.
     calendar_dict = body.calendar if body else None
+    if calendar_dict is None:
+        from app.modules.schedule.service import resolve_project_work_calendar
+
+        eff = await resolve_project_work_calendar(session, schedule.project_id)
+        calendar_dict = {
+            "work_days": sorted(eff["work_days"]),
+            "exceptions": sorted(eff["holidays"]),
+        }
     cpm_results = await calculate_cpm(
         act_dicts,
         unique_rels,
@@ -2391,16 +2404,173 @@ async def schedule_work_calendar(
     await verify_project_access(project_id, _user_id, session)
 
     from app.modules.projects.repository import ProjectRepository
+    from app.modules.schedule.service import resolve_project_work_calendar
 
     project = await ProjectRepository(session).get_by_id(project_id)
     region = project.region if project else None
-    cal = get_work_calendar(region)
+    cal = await resolve_project_work_calendar(session, project_id)
     return WorkCalendarResponse(
         region=region,
         hours_per_day=cal["hours_per_day"],
         work_days_per_week=len(cal["work_days"]),
         label=cal["label"],
+        work_days=sorted(cal["work_days"]),
+        holidays=sorted(cal["holidays"]),
+        source=cal["source"],
+        calendar_id=cal["calendar_id"],
     )
+
+
+@router.put(
+    "/work-calendar/custom/",
+    response_model=WorkCalendarResponse,
+    summary="Define the project's work calendar (days, hours, holidays)",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def upsert_project_work_calendar(
+    body: WorkCalendarUpsertRequest,
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> WorkCalendarResponse:
+    """Create or update the project's *default* custom work calendar.
+
+    The row lives in ``oe_schedule_advanced_calendar`` with ``is_default=True``
+    and, once present, drives every duration/date computation for the
+    project's schedules (see ``resolve_project_work_calendar``). Weekday
+    indices follow ``date.weekday()`` (Mon=0..Sun=6); holidays are ISO dates.
+    """
+    await verify_project_access(body.project_id, _user_id, session)
+
+    # Validate weekday indices + holiday date shapes up front.
+    work_days = sorted({int(d) for d in body.work_days if 0 <= int(d) <= 6})
+    if not work_days:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="work_days must contain at least one weekday index (0..6)",
+        )
+    holidays: list[str] = []
+    for h in body.holidays:
+        try:
+            holidays.append(dt_date.fromisoformat(str(h)[:10]).isoformat())
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid holiday date {h!r} — expected ISO YYYY-MM-DD",
+            ) from exc
+    holidays = sorted(set(holidays))
+
+    from decimal import Decimal
+    from sqlalchemy import select
+
+    from app.modules.schedule_advanced.models import Calendar
+
+    stmt = (
+        select(Calendar)
+        .where(Calendar.project_id == body.project_id)
+        .where(Calendar.is_default.is_(True))
+        .order_by(Calendar.created_at)
+        .limit(1)
+    )
+    row = (await session.execute(stmt)).scalars().first()
+    if row is None:
+        row = Calendar(
+            project_id=body.project_id,
+            name=body.name or "Project work calendar",
+            work_days=work_days,
+            work_hours_per_day=Decimal(str(body.hours_per_day)),
+            holidays=holidays,
+            special_shifts={},
+            is_default=True,
+        )
+        session.add(row)
+    else:
+        if body.name:
+            row.name = body.name
+        row.work_days = work_days
+        row.work_hours_per_day = Decimal(str(body.hours_per_day))
+        row.holidays = holidays
+    await session.commit()
+
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.schedule.service import resolve_project_work_calendar
+
+    project = await ProjectRepository(session).get_by_id(body.project_id)
+    cal = await resolve_project_work_calendar(session, body.project_id)
+    return WorkCalendarResponse(
+        region=project.region if project else None,
+        hours_per_day=cal["hours_per_day"],
+        work_days_per_week=len(cal["work_days"]),
+        label=cal["label"],
+        work_days=sorted(cal["work_days"]),
+        holidays=sorted(cal["holidays"]),
+        source=cal["source"],
+        calendar_id=cal["calendar_id"],
+    )
+
+
+@router.delete(
+    "/work-calendar/custom/",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove the project's custom work calendar (revert to regional)",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def delete_project_work_calendar(
+    project_id: uuid.UUID = Query(..., description="Project whose custom calendar to remove"),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> None:
+    """Delete the default custom calendar so the regional one applies again."""
+    await verify_project_access(project_id, _user_id, session)
+
+    from sqlalchemy import select
+
+    from app.modules.schedule_advanced.models import Calendar
+
+    stmt = (
+        select(Calendar)
+        .where(Calendar.project_id == project_id)
+        .where(Calendar.is_default.is_(True))
+    )
+    rows = list((await session.execute(stmt)).scalars().all())
+    for row in rows:
+        await session.delete(row)
+    await session.commit()
+
+
+@router.get(
+    "/public-holidays/",
+    response_model=PublicHolidaysResponse,
+    summary="List public holidays for a country/year set",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_public_holidays(
+    country: str = Query(..., min_length=2, max_length=2, description="ISO 3166-1 alpha-2 code, e.g. FR"),
+    years: str = Query(..., description="Comma-separated years, e.g. 2026,2027"),
+) -> PublicHolidaysResponse:
+    """Return statutory public holidays, for pre-filling a project calendar.
+
+    Dates come from :mod:`app.core.calendar` (fixed dates + computed moveable
+    feasts). Unknown country codes yield an empty list rather than an error.
+    """
+    from app.core.calendar import get_public_holidays
+
+    try:
+        year_list = sorted({int(y) for y in years.split(",") if y.strip()})
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="years must be a comma-separated list of integers",
+        ) from exc
+    if not year_list or len(year_list) > 10 or any(y < 1980 or y > 2099 for y in year_list):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="years must contain 1-10 values between 1980 and 2099",
+        )
+
+    dates: list[str] = []
+    for y in year_list:
+        dates.extend(d.isoformat() for d in get_public_holidays(country, y))
+    return PublicHolidaysResponse(country=country.upper(), years=year_list, holidays=sorted(dates))
 
 
 @router.get(
