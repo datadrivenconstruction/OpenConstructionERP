@@ -13,14 +13,26 @@ incoming ``oe_correspondence`` row, publish ``correspondence.created`` and are
 idempotent on the provider's external message id.
 
 Auth: these endpoints may be called by an external system rather than an
-interactive user, but they are still NOT anonymous. The caller must present a
-valid platform token whose role grants ``inbound.write`` (the
-``dependencies=[RequirePermission(...)]`` gate, copied from the cost-recovery
-router), and the target project must pass :func:`verify_project_access` - which
-404s on both "missing" and "denied" so it never leaks project existence. Webhook
-deliveries additionally carry a provider HMAC signature, verified by the seam
-below. The desired public path for these routes is ``/api/v1/inbound/...``; the
-loader derives the mount from the package directory, so today they land under
+interactive user, but they are still NOT anonymous. The caller must present
+``inbound.write`` via one of two credentials, checked by
+:func:`resolve_capture_caller`:
+
+* a JWT bearer token (interactive user or a caller that can refresh one), same
+  as the rest of the platform; or
+* an ``X-API-Key`` header (:func:`app.dependencies.get_user_from_api_key`) for
+  a headless system that cannot reasonably hold a short-lived JWT indefinitely
+  - this is the credential the module's own "external system" framing implies,
+  and the mechanism already existed in ``app.dependencies`` but was not wired
+  to any permission-gated route before this.
+
+Both paths enforce the identical ``inbound.write`` check (admin bypass, then
+role/permission lookup, with the same stale-JWT live-registry fallback
+``RequirePermission`` uses). The target project must additionally pass
+:func:`verify_project_access` - which 404s on both "missing" and "denied" so it
+never leaks project existence. Webhook deliveries additionally carry a
+provider HMAC signature, verified by the seam below. The desired public path
+for these routes is ``/api/v1/inbound/...``; the loader derives the mount from
+the package directory, so today they land under
 ``/api/v1/inbound-capture/...`` (see the module REPORT for the one-line tweak to
 move them to ``/inbound``).
 """
@@ -34,6 +46,7 @@ import logging
 import os
 import re
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
@@ -41,6 +54,8 @@ from app.dependencies import (
     CurrentUserId,
     RequirePermission,
     SessionDep,
+    get_optional_user_payload,
+    get_user_from_api_key,
     verify_project_access,
 )
 from app.modules.correspondence.models import Correspondence
@@ -144,6 +159,68 @@ def verify_provider_signature(provider: str, raw_body: bytes, headers: object) -
     return hmac.compare_digest(expected, sig.lower())
 
 
+# --- Auth seam: JWT (interactive) or API key (machine caller) ---------------
+
+
+def _check_inbound_write(role: str, permissions: list[str], user_id: str) -> None:
+    """Enforce ``inbound.write`` for a resolved role, whatever the credential.
+
+    Mirrors :class:`app.dependencies.RequirePermission` exactly (admin bypass,
+    then membership in ``permissions``, then a live-registry fallback for a
+    permissions list that predates a role change) so a caller sees identical
+    behaviour regardless of whether it authenticated via JWT or API key.
+    """
+    if role == "admin":
+        return
+    if "inbound.write" in permissions:
+        return
+    from app.core.permissions import permission_registry
+
+    if permission_registry.role_has_permission(role, "inbound.write"):
+        return
+    logger.debug(
+        "Inbound capture permission denied: permission=inbound.write user=%s role=%s",
+        user_id,
+        role,
+    )
+    raise HTTPException(status_code=403, detail="Missing permission: inbound.write")
+
+
+async def resolve_capture_caller(
+    request: Request,
+    payload: Any = Depends(get_optional_user_payload),
+) -> str:
+    """Authorize a capture-endpoint caller and return their user id.
+
+    Tries the platform JWT first (``payload`` is non-``None`` when a valid
+    bearer token was presented - re-hydrated from the DB the same way every
+    other authenticated route sees it). When no JWT was presented, falls back
+    to an ``X-API-Key`` header: the module's own docstring already documents
+    that these endpoints "may be called by an external system rather than an
+    interactive user", and a headless system cannot reasonably keep a
+    short-lived JWT refreshed indefinitely. Either path enforces the same
+    ``inbound.write`` permission before the caller's id is trusted.
+    """
+    if payload is not None:
+        _check_inbound_write(
+            payload.get("role", ""), payload.get("permissions", []), str(payload.get("sub", "unknown"))
+        )
+        return str(payload["sub"])
+
+    if not request.headers.get("x-api-key"):
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await get_user_from_api_key(request)
+    from app.core.permissions import permission_registry
+
+    _check_inbound_write(user.role, permission_registry.get_role_permissions(user.role), str(user.id))
+    return str(user.id)
+
+
 # --- Serialization ----------------------------------------------------------
 
 
@@ -193,12 +270,11 @@ def _parse_project_id(value: str) -> uuid.UUID:
 @router.post(
     "/email",
     response_model=InboundMessageOut,
-    dependencies=[Depends(RequirePermission("inbound.write"))],
 )
 async def capture_inbound_email(
     payload: InboundEmailRequest,
     session: SessionDep,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: str = Depends(resolve_capture_caller),
 ) -> InboundMessageOut:
     """Capture an already-parsed inbound email as incoming correspondence.
 
@@ -218,13 +294,12 @@ async def capture_inbound_email(
 @router.post(
     "/{provider}/webhook",
     response_model=InboundMessageOut,
-    dependencies=[Depends(RequirePermission("inbound.write"))],
 )
 async def capture_inbound_webhook(
     provider: str,
     request: Request,
     session: SessionDep,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: str = Depends(resolve_capture_caller),
 ) -> InboundMessageOut:
     """Capture a provider chat / SMS webhook delivery as incoming correspondence.
 
