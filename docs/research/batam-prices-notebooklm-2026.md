@@ -99,8 +99,16 @@ This **caught the retail estimates running ~2× low** on the two ~jt items:
 | Kunci tanam biasa | 50-120k | **60-250k** | mortise lock basic-SES, tokopedia |
 | Bata roster | 5-15k | **9-15k** | roster beton biji, qhomemart/99.co |
 
-These 4 are now `firecrawl-2026` sourced; the remaining ~7 low-value retail-flagged rows
-stay as domain estimates (small RAB impact) pending a NotebookLM refresh.
+These 4 are now `firecrawl-2026` sourced.
+
+**Batch-4 finalize (2026-07-09):** the remaining 7 batch-4 rows were also firecrawl-verified
+— 2 more were off: **kait angin 8-20k → 30-90k** (metal window-stay, was too low) and seng
+plat talang tightened 40-70k → **30-56k/m'** (BJLS28). MCB box (25-76k), balok kayu 6/12
+(3-4.8jt/m³), pasir beton (250-400k), kerikil (300-450k) confirmed — estimates were right,
+re-flagged `firecrawl-2026`; kayu kelas III stays BP-Batam. **All batch-4 items now
+Batam/firecrawl-grounded.** The 19 rows still tagged `retail-nasional` are the batch-3
+**low-value consumables** (kuas, ampelas, isolasi, lasdop, klem, t-dus, socket, fischer,
+elbow, silicone, membran, etc.) — trivial RAB impact, left as domain estimates by design.
 
 Total prices in DB: **159**.
 

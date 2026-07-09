@@ -109,13 +109,13 @@ material,Flexible hose,unit,15000,35000,retail-nasional (kloset flexi hose)
 upah_harian,Tukang aluminium,OH,155000,166729,BP Batam 2026
 upah_harian,Tukang pipa,OH,157643,166729,99.co Batam 2026
 material,Kunci tanam biasa,buah,60000,250000,"firecrawl-2026 (mortise lock basic-SES, tokopedia/lazada)"
-material,Kait angin,buah,8000,20000,retail-nasional-2026
-material,Seng pelat,m1,40000,70000,retail-nasional-2026 (BJLS28 talang)
+material,Kait angin,buah,30000,90000,"firecrawl-2026 (hak angin/window stay metal, blibli/tokopedia/dekson)"
+material,Seng pelat,m1,30000,56000,"firecrawl-2026 (seng talang BJLS28 /m1, siplah-blibli/tokopedia)"
 material,Bata roster,buah,9000,15000,"firecrawl-2026 (roster beton biji, qhomemart/99.co/tokopedia)"
-material,MCB box,unit,25000,75000,retail-nasional-2026
+material,MCB box,unit,25000,76000,"firecrawl-2026 (Broco box MCB 4 group, tokopedia/monotaro/shopee)"
 material,Pompa jet 27 lpm,unit,1800000,2700000,"firecrawl-2026 (Shimizu PC-260 jet pump, blibli/tokopedia/shopee)"
 material,Tangki toren 0.7 m3,unit,1290000,1825000,"firecrawl-2026 (Penguin TW-70 700L, blibli/lazada/shopee)"
-material,Balok kayu 6/12,m3,3000000,4800000,"retail-nasional-2026 (kamper/borneo, capped <5M)"
-material,Pasir beton,m3,250000,400000,retail-nasional-2026 (= pasir cor Batam)
-material,Kerikil,m3,300000,450000,retail-nasional-2026 (split)
+material,Balok kayu 6/12,m3,3000000,4800000,"firecrawl-2026 (meranti/borneo 6x12 per m3, sejasa/tokopedia; capped <5M)"
+material,Pasir beton,m3,250000,400000,"firecrawl-2026 (pasir cor per m3, jayawan/sejasa; Batam ship-premium)"
+material,Kerikil,m3,300000,450000,firecrawl-2026 (split/kerikil per m3)
 material,Kayu kelas III,m3,1600000,1600000,BP Batam SSH 2026 (= papan kayu kelas III)
