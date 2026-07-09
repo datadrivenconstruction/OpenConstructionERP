@@ -487,6 +487,8 @@ const QuickEstimatePage = lazy(() =>
 const AiEstimatorPage = lazy(() =>
   import('@/features/ai-estimator/AiEstimatorPage').then((m) => ({ default: m.AiEstimatorPage }))
 );
+// ACAP — native SVG 2D floor-plan editor (edits an LLM-generated layout).
+const FloorPlanEditorPage = lazy(() => import('@/acap/FloorPlanEditorPage'));
 
 // Rarely-visited or heavy secondary pages — moved out of the initial
 // `index` bundle (was eager via barrel imports, ~1.4 MB chunk; these
@@ -993,6 +995,7 @@ export default function App() {
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
         <Route path="/projects/:projectId" element={<P title="Project"><ProjectDetailPage /></P>} />
         <Route path="/projects/:projectId/settings" element={<P title="Project Settings"><ProjectSettingsPage /></P>} />
+        <Route path="/projects/:projectId/layout" element={<P title="Layout Editor"><FloorPlanEditorPage /></P>} />
         <Route path="/projects/:projectId/boq/new" element={<P title="New BOQ"><CreateBOQPage /></P>} />
         <Route path="/projects/:projectId/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
 
