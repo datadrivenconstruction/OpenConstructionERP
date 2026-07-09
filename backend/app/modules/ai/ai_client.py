@@ -69,6 +69,9 @@ OPENROUTER_MODEL = "anthropic/claude-sonnet-4"
 MISTRAL_MODEL = "mistral-large-latest"
 GROQ_MODEL = "llama-3.3-70b-versatile"
 DEEPSEEK_MODEL = "deepseek-chat"
+# OpenCode Zen "Go" gateway (opencode.ai/docs/zen) - OpenAI-compatible, hosts
+# deepseek-v4-pro / glm-5.2 etc. Auth via OPENCODE_API_KEY.
+OPENCODE_MODEL = "deepseek-v4-pro"
 
 # Per-provider default model id. This is the single source of truth for the
 # model name sent to each provider's API. Users can override any of these via
@@ -84,6 +87,7 @@ DEFAULT_MODELS: dict[str, str] = {
     "mistral": MISTRAL_MODEL,
     "groq": GROQ_MODEL,
     "deepseek": DEEPSEEK_MODEL,
+    "opencode": OPENCODE_MODEL,
     "together": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "fireworks": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     "perplexity": "sonar-pro",
@@ -428,6 +432,12 @@ _OPENAI_COMPAT_CONFIG = {
     "deepseek": {
         "url": "https://api.deepseek.com/chat/completions",
         "model": DEEPSEEK_MODEL,
+    },
+    # OpenCode Zen "Go" gateway - OpenAI-compatible; serves deepseek-v4-pro,
+    # glm-5.2 (+ flash) under one OPENCODE_API_KEY. https://opencode.ai/docs/zen
+    "opencode": {
+        "url": "https://opencode.ai/zen/go/v1/chat/completions",
+        "model": OPENCODE_MODEL,
     },
     "together": {
         "url": "https://api.together.xyz/v1/chat/completions",
@@ -845,14 +855,15 @@ def _model_override_for(settings: Any, provider: str) -> str | None:
 # common GOOGLE_API_KEY alias. Ordering inside each list is precedence
 # (first match wins). The top-level list order is also the provider-inference
 # precedence - Anthropic first, per the issue request.
+#
+# ACAP deployment policy (user directive): the product resolves ONLY the
+# OpenCode Zen "Go" gateway (primary) and Ollama (failover). Every other
+# provider's caller code stays in this module (≈15 fork modules import
+# ANTHROPIC_MODEL / call_ai / DEFAULT_MODELS, so deleting it would break the
+# build) but is UNREACHABLE via env-key resolution — this list is the gate.
 _ENV_KEY_NAMES: list[tuple[str, list[str]]] = [
-    ("anthropic", ["ANTHROPIC_API_KEY"]),
-    ("openai", ["OPENAI_API_KEY"]),
-    ("gemini", ["GEMINI_API_KEY", "GOOGLE_API_KEY"]),
-    ("openrouter", ["OPENROUTER_API_KEY"]),
-    ("mistral", ["MISTRAL_API_KEY"]),
-    ("groq", ["GROQ_API_KEY"]),
-    ("deepseek", ["DEEPSEEK_API_KEY"]),
+    ("opencode", ["OPENCODE_API_KEY"]),
+    ("ollama", ["OLLAMA_API_KEY"]),
 ]
 
 
@@ -945,6 +956,10 @@ def resolve_provider_and_key(
         (["ollama"], "ollama", None),  # self-hosted: no stored key
         (["vllm"], "vllm", None),  # self-hosted: no stored key
         (["groq", "llama"], "groq", "groq_api_key"),
+        # Match "opencode"/"zen" BEFORE deepseek/glm: the opencode-go default
+        # model id ("deepseek-v4-pro") contains "deepseek", so an explicit
+        # opencode selection must win over the api.deepseek.com route.
+        (["opencode", "zen"], "opencode", "opencode_api_key"),
         (["deepseek"], "deepseek", "deepseek_api_key"),
         (["together"], "together", "together_api_key"),
         (["fireworks"], "fireworks", "fireworks_api_key"),
@@ -986,6 +1001,7 @@ def resolve_provider_and_key(
         ("mistral", "mistral_api_key"),
         ("groq", "groq_api_key"),
         ("deepseek", "deepseek_api_key"),
+        ("opencode", "opencode_api_key"),
         ("together", "together_api_key"),
         ("fireworks", "fireworks_api_key"),
         ("perplexity", "perplexity_api_key"),
