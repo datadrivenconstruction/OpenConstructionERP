@@ -26,20 +26,72 @@ from app.modules.acap.layout.schema import FloorPlan
 from app.modules.acap.models.coefficients import AhspCoefficient
 from app.modules.acap.models.prices import MaterialPrice, Region
 from app.modules.acap.rab.price_map import resolve_price_ref
-from app.modules.acap.takeoff import takeoff
+from app.modules.acap.takeoff import (
+    DOOR_HINGES,
+    KM_TILE_HEIGHT_M,
+    KOLOM_PRAKTIS_SPACING_M,
+    LAMPU_PER_ROOM,
+    PIPA_BERSIH_PER_FIXTURE_M,
+    PIPA_KOTOR_PER_KM_M,
+    PONDASI_SECTION_M2,
+    RISER_M,
+    ROOF_PITCH_FACTOR,
+    SAKLAR_PER_ROOM,
+    STOPKONTAK_PER_ROOM,
+    WALL_HEIGHT_M,
+    WINDOW_HINGES,
+    aggregate,
+)
 
-# ── Scope map: element -> seeded AHSP kode (MVP wall/finish scope only) ─────
-# Deliberately REPLACES any LLM-based element->kode mapping: this is the
-# money path, so the mapping is a static, reviewable module constant.
+# ── Scope map: element -> seeded AHSP kode (whole-house wiring: struktur
+# praktis + finishing + bukaan + sanitair + MEP + atap). Deliberately
+# REPLACES any LLM-based element->kode mapping: this is the money path, so
+# the mapping is a static, reviewable module constant. Multiple labels may
+# share the same kode (e.g. kusen_pintu / kusen_jendela both price off
+# ACAP.KUSEN.ALUMINIUM, at their own quantities) — each label still gets its
+# own line. See docs/plans/2026-07-09-rab-full-wiring-spec.md §3.
 ELEMENT_KODE_MAP: dict[str, str] = {
     "dinding": "ACAP.DINDING.BATA_MERAH_1_4",
     "plesteran": "ACAP.PLESTERAN.1_4",
     "acian": "ACAP.ACIAN.STANDAR",
+    "cat_tembok": "ACAP.CAT.TEMBOK_BARU",
+    "lantai_keramik": "ACAP.LANTAI.KERAMIK_40",
+    "plafon_rangka": "ACAP.PLAFON.RANGKA_HOLLOW",
+    "plafon_gypsum": "ACAP.PLAFON.GYPSUM_9",
+    "cat_plafon": "ACAP.CAT.PLAFON",
+    "atap_rangka": "ACAP.ATAP.RANGKA_BAJARINGAN_C75",
+    "atap_penutup": "ACAP.ATAP.GENTENG_BETON",
+    "listplank": "ACAP.ATAP.LISTPLANK",
+    "kolom_praktis": "ACAP.BETON.KOLOM_PRAKTIS",
+    "ring_praktis": "ACAP.BETON.RING_PRAKTIS",
+    "pondasi": "ACAP.PONDASI.BATU_BELAH_1_4",
+    "kusen_pintu": "ACAP.KUSEN.ALUMINIUM",
+    "daun_pintu": "ACAP.PINTU.PANEL_KAYU",
+    "kunci": "ACAP.HARDWARE.KUNCI_TANAM",
+    "engsel": "ACAP.HARDWARE.ENGSEL",
+    "kusen_jendela": "ACAP.KUSEN.ALUMINIUM",
+    "daun_jendela": "ACAP.JENDELA.KACA_KAYU",
+    "kaca": "ACAP.KACA.POLOS_5",
+    "kait_angin": "ACAP.HARDWARE.KAIT_ANGIN",
+    "km_kloset": "ACAP.SANITAIR.KLOSET_DUDUK",
+    "km_kran": "ACAP.SANITAIR.KRAN",
+    "km_floor_drain": "ACAP.SANITAIR.FLOOR_DRAIN",
+    "km_keramik_dinding": "ACAP.DINDING.KERAMIK_10_20",
+    "km_waterproofing": "ACAP.WATERPROOFING.MEMBRAN",
+    "listrik_lampu": "ACAP.LISTRIK.TITIK_LAMPU",
+    "listrik_stopkontak": "ACAP.LISTRIK.STOP_KONTAK",
+    "listrik_saklar": "ACAP.LISTRIK.SAKLAR",
+    "listrik_mcb": "ACAP.LISTRIK.MCB_BOX",
+    "pipa_bersih": "ACAP.PIPA.AIR_BERSIH_HALF",
+    "pipa_kotor": "ACAP.PIPA.AIR_KOTOR_2",
+    "pompa": "ACAP.POMPA.JET_27",
+    "toren": "ACAP.TANDON.TOREN_700",
 }
 
-# Scopes NOT covered by this phase (need structural parameters + AHSP codes
-# not yet seeded) — informational only, never generates line items.
-NOT_COVERED: list[str] = ["pondasi", "beton_struktur", "lantai", "atap", "plafond"]
+# Scopes NOT covered by this phase (need a structural model — spans, rebar
+# design, footing sizing — beyond a pure take-off) — informational only,
+# never generates line items.
+NOT_COVERED: list[str] = ["footplat", "sloof_beton", "kolom_balok_utama", "tangga"]
 
 _BATAM_REGION_CODE = "BATAM"
 _TWO_DP = Decimal("0.01")
@@ -54,6 +106,69 @@ def _dec(value: Any) -> Decimal:
 
 def _quantize(value: Decimal) -> Decimal:
     return value.quantize(_TWO_DP)
+
+
+def _qty_by_element(agg: dict[str, float]) -> dict[str, Decimal]:
+    """Translate the plan-wide takeoff aggregate into a Decimal quantity per
+    ELEMENT_KODE_MAP label, per the fixed formulas in
+    docs/plans/2026-07-09-rab-full-wiring-spec.md §3. Copied verbatim — no
+    re-derivation of any factor or constant.
+    """
+    net_wall = _dec(agg["net_wall_area_m2"])
+    floor_indoor = _dec(agg["floor_area_indoor_m2"])
+    roof = _dec(agg["roof_footprint_m2"]) * _dec(ROOF_PITCH_FACTOR)
+    top_perimeter = _dec(agg["top_exterior_perimeter_m"])
+    wall_length_total = _dec(agg["wall_length_m"])
+    ground_wall_length = _dec(agg["ground_wall_length_m"])
+    door_count = _dec(agg["door_count"])
+    window_count = _dec(agg["window_count"])
+    wet_room_count = _dec(agg["wet_room_count"])
+    indoor_room_count = _dec(agg["indoor_room_count"])
+    # MCB/pompa/toren: single unit, only if the plan has >=1 indoor room.
+    has_indoor_room = Decimal(1) if agg["indoor_room_count"] >= 1 else Decimal(0)
+
+    return {
+        "dinding": net_wall,
+        "plesteran": net_wall * Decimal(2),
+        "acian": net_wall * Decimal(2),
+        "cat_tembok": net_wall * Decimal(2),
+        "lantai_keramik": floor_indoor,
+        "plafon_rangka": floor_indoor,
+        "plafon_gypsum": floor_indoor,
+        "cat_plafon": floor_indoor,
+        "atap_rangka": roof,
+        "atap_penutup": roof,
+        "listplank": top_perimeter,
+        "kolom_praktis": (wall_length_total / _dec(KOLOM_PRAKTIS_SPACING_M)) * _dec(WALL_HEIGHT_M),
+        "ring_praktis": wall_length_total,
+        "pondasi": ground_wall_length * _dec(PONDASI_SECTION_M2),
+        "kusen_pintu": _dec(agg["door_kusen_len_m"]),
+        "daun_pintu": _dec(agg["door_leaf_area_m2"]),
+        "kunci": door_count,
+        "engsel": door_count * Decimal(DOOR_HINGES) + window_count * Decimal(WINDOW_HINGES),
+        "kusen_jendela": _dec(agg["window_kusen_len_m"]),
+        "daun_jendela": _dec(agg["window_leaf_area_m2"]),
+        "kaca": _dec(agg["glass_area_m2"]),
+        "kait_angin": window_count,
+        "km_kloset": wet_room_count,
+        "km_kran": wet_room_count,
+        "km_floor_drain": wet_room_count,
+        "km_keramik_dinding": _dec(agg["wet_wall_perimeter_m"]) * _dec(KM_TILE_HEIGHT_M),
+        "km_waterproofing": _dec(agg["wet_floor_area_m2"]),
+        "listrik_lampu": indoor_room_count * Decimal(LAMPU_PER_ROOM),
+        "listrik_stopkontak": indoor_room_count * Decimal(STOPKONTAK_PER_ROOM),
+        "listrik_saklar": indoor_room_count * Decimal(SAKLAR_PER_ROOM),
+        "listrik_mcb": has_indoor_room,
+        # "keep it simple" per spec: wet_room_count*2 fixtures * per-fixture
+        # run + a fixed riser allowance (riser is present regardless of
+        # wet-room count, so this line is skipped only when a plan has zero
+        # levels/openings AND the riser constant itself is 0 — never in
+        # practice).
+        "pipa_bersih": wet_room_count * Decimal(2) * _dec(PIPA_BERSIH_PER_FIXTURE_M) + _dec(RISER_M),
+        "pipa_kotor": wet_room_count * _dec(PIPA_KOTOR_PER_KM_M),
+        "pompa": has_indoor_room,
+        "toren": has_indoor_room,
+    }
 
 
 @dataclass
@@ -145,26 +260,37 @@ async def unit_rate_for_kode(
 async def generate_rab(session: AsyncSession, plan: FloorPlan, project_id: uuid.UUID) -> RabResult:
     """Assemble the deterministic RAB line items for *plan*.
 
-    qty = takeoff geometry (summed across every level) x AHSP koefisien x
-    Batam material price. grand_total sums ONLY fully-priced lines;
-    price_missing lines are listed in ``price_missing_lines`` and excluded.
-    """
-    level_results = takeoff(plan)
-    total_net_wall_area = Decimal(str(sum(r["net_wall_area_m2"] for r in level_results)))
+    qty = takeoff geometry (:func:`app.modules.acap.takeoff.aggregate`,
+    summed across every level per element — see :func:`_qty_by_element`) x
+    AHSP koefisien x Batam material price. grand_total sums ONLY
+    fully-priced lines; price_missing lines are listed in
+    ``price_missing_lines`` and excluded.
 
-    qty_by_element: dict[str, Decimal] = {
-        "dinding": total_net_wall_area,
-        "plesteran": total_net_wall_area * Decimal(2),
-        "acian": total_net_wall_area * Decimal(2),
-    }
+    An element whose computed quantity is <= 0 (e.g. no wet rooms -> no
+    sanitair, no openings -> no kusen) is SKIPPED entirely — no zero-qty
+    line is ever emitted.
+    """
+    qty_by_element = _qty_by_element(aggregate(plan))
+
+    # Multiple element labels may share one AHSP kode (e.g. kusen_pintu /
+    # kusen_jendela both price off ACAP.KUSEN.ALUMINIUM) — cache the
+    # coefficient + rate lookup per kode so a shared kode is only queried once.
+    rate_cache: dict[str, tuple[AhspCoefficient, Decimal, list[str], list[str]]] = {}
 
     lines: list[dict[str, Any]] = []
     for element, kode in ELEMENT_KODE_MAP.items():
-        coeff = await _load_coefficient(session, kode)
-        if coeff is None:
-            raise ValueError(f"AHSP kode not found: {kode}")
-        rate, missing, curated = await unit_rate_for_kode(session, kode)
-        qty = qty_by_element[element]
+        qty = qty_by_element.get(element, Decimal("0"))
+        if qty <= 0:
+            continue
+
+        if kode not in rate_cache:
+            coeff = await _load_coefficient(session, kode)
+            if coeff is None:
+                raise ValueError(f"AHSP kode not found: {kode}")
+            rate, missing, curated = await unit_rate_for_kode(session, kode)
+            rate_cache[kode] = (coeff, rate, missing, curated)
+        coeff, rate, missing, curated = rate_cache[kode]
+
         price_missing = bool(missing)
         total = None if price_missing else _quantize(qty * rate)
         lines.append(
