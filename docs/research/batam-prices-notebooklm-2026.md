@@ -47,6 +47,32 @@ appended to the CSV; all jasa-pasang duplicates and junk were dropped. These hav
 NO AHSP code yet, so they don't affect the RAB — they pre-stock the catalog for
 when the foundation/floor/roof/MEP AHSP batch is seeded. CSV now 72 rows total.
 
+## Batch 3 — full-WBS material completion (2026-07-09)
+Paired with the AHSP Batch-2 coefficient seed (53 codes, full rumah WBS). Gap analysis
+listed every material + trade the 22 new codes consume that had NO Batam price; a
+targeted `notebooklm ask` over this notebook priced them. **37 rows appended** (35
+material + 2 upah_harian: tukang aluminium, tukang pipa). item_names deliberately match
+the AHSP bahan names so the RAB price join is direct.
+
+Money-path curation (nothing blind-loaded — NotebookLM honored "tulis '-' jika tak tahu"
+and did NOT hallucinate unknowns):
+- **Grounded as-returned** (Batam / BP-Batam-SSH / Tokopedia): papan kayu III 1.6jt/m³,
+  plywood 12mm 155-233k, dolken 16k, minyak bekisting 41.8k, primer 19.8k, pipa AW ½"
+  8.8k/m, pipa D 2" 22.4k/m, kawat bendrat 30k, kawat las 16k, paku 20k, thinner 19.9k,
+  menie 79.6k, conduit 3.7k/m, sekrup fixer 5k, tukang aluminium/pipa 155-167k/OH.
+- **Curated (domain judgment, flagged in source_url)**: *Profil aluminium 4"* NBLM 20-35k/m'
+  was too low (per-kg/thin-profile confusion) → 45-85k/m' (Batam YKK/Alexindo, FTZ). *Genteng
+  beton* NBLM 9.5-14.5k/pc skewed to premium/keramik → 6-9k/pc (flat concrete tile). These
+  are the money-material items (roof ~880 pcs), so mis-pricing would move the RAB Rp-millions.
+- **retail-nasional (marked)**: low-value stable consumables NBLM had no Batam data for
+  (kuas, ampelas, sealtape, klem, t-dus, socket, fischer, elbow, lasdop, isolasi, flexible
+  hose/conduit, silicone, lem kayu, plamur, kabel NYM 3×2.5, membran bakar) — tiny RAB impact.
+
+Balok kayu kelas II capped at 4.8jt/m³ (loader material bound is 5jt; kamper/meranti raw was
+3.4-5.6jt). Total prices in DB: **148** (research 109 · scraped 39). Still handled in wiring,
+not priced: `pasangan bata 1PC:3PS` (composite → references bata code), `semen warna` (→ semen
+putih), generic `tukang` (→ tukang_batu rate).
+
 ## Refresh
 Re-run the NotebookLM research + `generate data-table`, re-curate, overwrite the CSV,
 re-run the loader. `scraped_at` recency means fresh rows win over older ones in the RAB.

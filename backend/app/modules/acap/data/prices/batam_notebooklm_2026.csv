@@ -71,3 +71,40 @@ material,Cat waterproofing,kg,35000,250000,notebooklm-research batch2
 material,Cat dasar/plamir,kg,15000,60000,notebooklm-research batch2
 material,Semen putih,sak,90000,130000,notebooklm-research batch2
 material,Mortar MU-200 acian,sak,63000,166500,notebooklm-research batch2 (mortarutama)
+material,Papan kayu kelas III,m3,1600000,1600000,BP Batam SSH 2026
+material,Balok kayu kelas II,m3,3385000,4800000,"retail-nasional (meranti/borneo, capped <5M)"
+material,Plywood 12mm,lembar,155000,233500,Tokopedia Batam
+material,Dolken kayu 8-10 cm,batang,16000,16000,BP Batam SSH 2026
+material,Minyak bekisting,liter,41790,41790,BP Batam SSH 2026
+material,Lem kayu,kg,35000,48000,retail-nasional (Fox/Rajawali)
+material,Membran bakar,m2,85000,155000,retail-nasional (Sika/Awning torch membrane)
+material,Cairan primer,kg,19800,19800,Tokopedia Batam (Sika primer)
+material,Profil aluminium 4 inch,m1,45000,85000,CURATED: Batam YKK/Alexindo 4in kusen bar; NBLM 20-35k too low (per-kg/thin-profile confusion) - domain judgment
+material,Sekrup fixer,buah,5000,5000,Tokopedia Batam (dynabolt 10x60)
+material,Sealant,tube,55000,98000,retail-nasional (polyurethane)
+material,Silicone sealant 300 ml,tube,25000,45000,retail-nasional
+material,Genteng beton,buah,6000,9000,"CURATED: flat concrete tile Batam; NBLM 9.5-14.5k skewed to premium/keramik - clipped, domain judgment"
+material,Pipa PVC AW 1/2 inch,m1,8793,8793,Tokopedia Batam (per m1 from 5.8m batang)
+material,Pipa PVC D 2 inch,m1,22413,22413,Tokopedia Batam (per m1 from 5.8m batang)
+material,Kabel NYM 3x2.5 mm2,m1,18500,26500,retail-nasional (Supreme/Eterna)
+material,Conduit HI 20 mm,m1,3667,3667,Tokopedia Batam (11000/batang 3m -> per m1)
+material,T dus,buah,2000,4000,retail-nasional
+material,Socket conduit 20 mm,buah,2000,3000,retail-nasional
+material,Klem 20 mm,buah,500,1000,retail-nasional
+material,Fischer S6 + sekrup,buah,500,1000,retail-nasional
+material,Flexible conduit 20 mm,m1,5000,9000,retail-nasional
+material,Elbow,buah,2000,3000,retail-nasional (conduit elbow)
+material,Lasdop,buah,1000,2000,retail-nasional
+material,Isolasi,m1,500,1000,retail-nasional (per m from roll)
+material,Menie,kg,79600,79600,BP Batam SSH 2026 (cat dasar baja)
+material,Plamur,kg,25000,45000,retail-nasional (plamur kayu)
+material,Pengencer,kg,19900,19900,BP Batam SSH 2026 (thinner)
+material,Kuas,buah,10000,25000,retail-nasional
+material,Ampelas,lembar,3000,6000,retail-nasional
+material,Kawat beton,kg,30000,30000,Tokopedia Batam (bendrat)
+material,Kawat las,kg,16000,16000,BP Batam SSH 2026
+material,Paku biasa,kg,20000,20000,BP Batam SSH 2026
+material,Sealtape,buah,3000,6000,retail-nasional
+material,Flexible hose,unit,15000,35000,retail-nasional (kloset flexi hose)
+upah_harian,Tukang aluminium,OH,155000,166729,BP Batam 2026
+upah_harian,Tukang pipa,OH,157643,166729,99.co Batam 2026
