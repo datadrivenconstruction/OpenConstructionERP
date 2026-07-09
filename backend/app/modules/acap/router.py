@@ -10,7 +10,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session_factory
-from app.dependencies import get_current_user_id
+from app.dependencies import get_current_user_payload
+from app.modules.acap.authz import require_project_access, require_project_owner
 from app.modules.acap.layout.schema import FloorPlan
 
 logger = logging.getLogger(__name__)
@@ -56,13 +57,15 @@ async def generate_layout_endpoint(
     project_id: _uuid.UUID,
     body: GenerateLayoutRequest,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> GenerateLayoutResponse:
     """Generate a new floor-plan version for *project_id* via LLM.
 
     Each call creates a new version (does NOT overwrite older versions).
     The generated plan is validated against :mod:`app.modules.acap.layout.validator`.
     """
+    await require_project_owner(session, project_id, payload)
+
     from app.modules.acap.layout.generator import LayoutGenerationError, generate_layout
     from app.modules.acap.models.floor_plan import FloorPlanRecord, next_version
 
@@ -73,7 +76,7 @@ async def generate_layout_endpoint(
             kavling_width_m=body.kavling_width_m,
             kavling_length_m=body.kavling_length_m,
             jumlah_lantai=body.jumlah_lantai,
-            user_id=current_user,
+            user_id=payload["sub"],
         )
     except LayoutGenerationError as e:
         status = 400 if e.attempts == 0 else 422
@@ -132,9 +135,11 @@ class LayoutSaveResponse(BaseModel):
 async def get_latest_layout_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> LayoutGetResponse:
     """Return the latest (highest version) floor-plan for *project_id*."""
+    await require_project_access(session, project_id, payload)
+
     from sqlalchemy import select
 
     from app.modules.acap.models.floor_plan import FloorPlanRecord
@@ -157,12 +162,14 @@ async def save_layout_endpoint(
     project_id: _uuid.UUID,
     body: FloorPlan,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> LayoutSaveResponse:
     """Persist an edited floor-plan as a NEW version (never overwrites older ones).
 
     Validated against :mod:`app.modules.acap.layout.validator` before saving.
     """
+    await require_project_owner(session, project_id, payload)
+
     from app.modules.acap.layout.validator import LayoutValidationError, validate_plan
     from app.modules.acap.models.floor_plan import FloorPlanRecord, next_version
 
@@ -209,7 +216,7 @@ class GenerateRabResponse(BaseModel):
 async def generate_rab_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> GenerateRabResponse:
     """Generate + persist a deterministic RAB (bill of quantities) for *project_id*.
 
@@ -223,6 +230,8 @@ async def generate_rab_endpoint(
     The persisted ``boq_id`` can be rendered immediately via the existing
     ``GET /boqs/{boq_id}/export/pdf/`` endpoint (no new PDF code needed here).
     """
+    await require_project_owner(session, project_id, payload)
+
     from sqlalchemy import select
 
     from app.modules.acap.models.floor_plan import FloorPlanRecord
@@ -281,7 +290,7 @@ class GenerateTimelineResponse(BaseModel):
 async def generate_timeline_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> GenerateTimelineResponse:
     """Generate a deterministic construction timeline (Gantt JSON) for *project_id*.
 
@@ -290,6 +299,8 @@ async def generate_timeline_endpoint(
     (see :mod:`app.modules.acap.timeline.generator`). NO LLM: durations and
     sequencing are fully deterministic.
     """
+    await require_project_owner(session, project_id, payload)
+
     from sqlalchemy import select
 
     from app.modules.acap.models.floor_plan import FloorPlanRecord
@@ -343,13 +354,15 @@ _TIMELINE_CSV_HEADER = [
 async def export_timeline_csv_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> Response:
     """Export the project's construction timeline as a downloadable CSV.
 
     Same deterministic schedule as ``timeline:generate``, one row per task in
     start-day order. Returns 404 if the project has no saved layout.
     """
+    await require_project_access(session, project_id, payload)
+
     import csv
     import io
 
@@ -419,7 +432,7 @@ def _render_json(record) -> RenderResponse:
 async def generate_render_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> RenderResponse:
     """Render the latest floor-plan to an image (GeminiGen) and persist it.
 
@@ -428,6 +441,10 @@ async def generate_render_endpoint(
     render is DECORATIVE and never feeds the RAB. A provider failure persists a
     ``failed`` RenderRecord and returns it (status=failed) rather than erroring.
     """
+    # Authorize BEFORE the key-gate so a non-owner cannot probe whether the
+    # render service is configured.
+    await require_project_owner(session, project_id, payload)
+
     from sqlalchemy import select
 
     from app.modules.acap.models.floor_plan import FloorPlanRecord
@@ -462,9 +479,11 @@ async def generate_render_endpoint(
 async def list_renders_endpoint(
     project_id: _uuid.UUID,
     session: AsyncSession = Depends(get_session),
-    current_user: str = Depends(get_current_user_id),
+    payload: dict = Depends(get_current_user_payload),
 ) -> list[RenderResponse]:
     """List a project's renders, newest first."""
+    await require_project_access(session, project_id, payload)
+
     from sqlalchemy import select
 
     from app.modules.acap.models.render import RenderRecord

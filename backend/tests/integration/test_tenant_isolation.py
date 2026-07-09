@@ -1294,3 +1294,81 @@ async def test_outsider_cannot_read_shared_saved_view(http_client, rw_project_wo
     )
     assert owner_view.status_code == 200, owner_view.text
     assert owner_view.json()["id"] == w["saved_view_id"]
+
+
+# ── ACAP (layout / RAB / timeline / render) per-project gate (Phase 8) ───────
+#
+# The ACAP endpoints take a project_id and, before Phase 8, only checked the
+# caller was authenticated — not that they may touch THAT project (IDOR). These
+# pin the fix wired in app.modules.acap.authz: an outsider manager (M) is denied
+# on every ACAP route. Writes return 403 (require_project_owner); reads 404
+# (require_project_access, IDOR-hiding). M holds broad RBAC but is not a member
+# of O's project, and ACAP has no RequirePermission gate, so a 403/404 here can
+# ONLY be the ownership guard — never a missing route (owner control below) nor
+# an RBAC block.
+
+
+@pytest.mark.asyncio
+async def test_acap_outsider_cannot_generate_rab(http_client, rw_project_world):
+    w = rw_project_world
+    resp = await http_client.post(
+        f"/api/v1/acap/projects/{w['project_id']}/rab:generate",
+        headers=w["attacker_headers"],
+    )
+    assert resp.status_code == 403, f"LEAK: outsider got {resp.status_code} on ACAP rab:generate. {resp.text!r}"
+
+
+@pytest.mark.asyncio
+async def test_acap_outsider_cannot_generate_timeline(http_client, rw_project_world):
+    w = rw_project_world
+    resp = await http_client.post(
+        f"/api/v1/acap/projects/{w['project_id']}/timeline:generate",
+        headers=w["attacker_headers"],
+    )
+    assert resp.status_code == 403, f"LEAK: outsider got {resp.status_code} on ACAP timeline:generate. {resp.text!r}"
+
+
+@pytest.mark.asyncio
+async def test_acap_outsider_cannot_generate_render(http_client, rw_project_world):
+    """403 must come from the ownership guard, which runs BEFORE the render
+    key-gate (an outsider must not even learn whether the service is configured)."""
+    w = rw_project_world
+    resp = await http_client.post(
+        f"/api/v1/acap/projects/{w['project_id']}/render:generate",
+        headers=w["attacker_headers"],
+    )
+    assert resp.status_code == 403, f"LEAK: outsider got {resp.status_code} on ACAP render:generate. {resp.text!r}"
+
+
+@pytest.mark.asyncio
+async def test_acap_outsider_cannot_read_layout(http_client, rw_project_world):
+    w = rw_project_world
+    resp = await http_client.get(
+        f"/api/v1/acap/projects/{w['project_id']}/layout",
+        headers=w["attacker_headers"],
+    )
+    _assert_cross_tenant_404(resp, verb="GET", target="acap/.../layout")
+
+
+@pytest.mark.asyncio
+async def test_acap_outsider_cannot_list_renders(http_client, rw_project_world):
+    w = rw_project_world
+    resp = await http_client.get(
+        f"/api/v1/acap/projects/{w['project_id']}/renders",
+        headers=w["attacker_headers"],
+    )
+    _assert_cross_tenant_404(resp, verb="GET", target="acap/.../renders")
+
+
+@pytest.mark.asyncio
+async def test_acap_owner_passes_ownership_guard(http_client, rw_project_world):
+    """Positive control: the owner clears the guard. With no floor plan seeded,
+    rab:generate answers 404 'No layout' (NOT 403) — proving O passed the
+    ownership check that blocks the outsider M with a 403."""
+    w = rw_project_world
+    resp = await http_client.post(
+        f"/api/v1/acap/projects/{w['project_id']}/rab:generate",
+        headers=w["owner_headers"],
+    )
+    assert resp.status_code != 403, f"owner wrongly denied by the ownership guard: {resp.text!r}"
+    assert resp.status_code in (200, 404), f"unexpected owner status {resp.status_code}: {resp.text!r}"
