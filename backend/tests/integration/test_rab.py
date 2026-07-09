@@ -123,6 +123,23 @@ async def test_midpoint_price_case_insensitive_latest(session):
 
 
 @pytest.mark.asyncio
+async def test_midpoint_price_live_scraper_beats_research(session):
+    """Labour ground-truth: the arsiteqi Batam day-rate wins over the wide
+    NotebookLM-research range even when the research row is scraped LATER
+    (source rank beats recency), so upah_harian is not inflated."""
+    region_id = await _seed_batam_region(session)
+    # arsiteqi first (older scraped_at), research second (newer) + higher midpoint.
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Tukang Batu",
+                     price_min=140000, price_max=140000, source="arsiteqi.or.id")
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Tukang Batu",
+                     price_min=100000, price_max=270000, source="notebooklm-research")
+
+    price = await midpoint_price(session, "upah_harian", "Tukang Batu")
+
+    assert price == Decimal("140000")  # arsiteqi, not the 185000 research midpoint
+
+
+@pytest.mark.asyncio
 async def test_midpoint_price_no_match_returns_none(session):
     await _seed_batam_region(session)
 

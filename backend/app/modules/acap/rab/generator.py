@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -94,6 +94,14 @@ ELEMENT_KODE_MAP: dict[str, str] = {
 NOT_COVERED: list[str] = ["footplat", "sloof_beton", "kolom_balok_utama", "tangga"]
 
 _BATAM_REGION_CODE = "BATAM"
+
+# Source-trust ranking for price selection (lower = preferred). The live Batam
+# labour scraper (arsiteqi) is the ground-truth day-rate, so it WINS over the
+# wide national NotebookLM-research ranges whose midpoints ran 30-70% high on
+# upah_harian. Only sources listed here get a non-default rank, so materials
+# (no arsiteqi rows) keep the plain latest-wins behaviour untouched.
+_SOURCE_PRIORITY: dict[str, int] = {"arsiteqi.or.id": 0}
+_DEFAULT_SOURCE_RANK = 1
 _TWO_DP = Decimal("0.01")
 
 
@@ -185,11 +193,14 @@ class RabResult:
 
 
 async def midpoint_price(session: AsyncSession, item_type: str, item_name: str) -> Decimal | None:
-    """Latest Batam-region (price_min + price_max) / 2 for (item_type, item_name).
+    """Best-source Batam-region (price_min + price_max) / 2 for (item_type, item_name).
 
-    Case-insensitive exact match on item_name. Returns None (no guess) when
-    no Batam price row matches.
+    Case-insensitive exact match on item_name. When several sources price the
+    same item, the more trustworthy source wins (:data:`_SOURCE_PRIORITY`) and
+    recency (``scraped_at``) breaks ties. Returns None (no guess) when no Batam
+    price row matches.
     """
+    source_rank = case(_SOURCE_PRIORITY, value=MaterialPrice.source, else_=_DEFAULT_SOURCE_RANK)
     stmt = (
         select(MaterialPrice)
         .join(Region, MaterialPrice.region_id == Region.id)
@@ -198,7 +209,7 @@ async def midpoint_price(session: AsyncSession, item_type: str, item_name: str) 
             MaterialPrice.item_type == item_type,
             func.lower(MaterialPrice.item_name) == item_name.lower(),
         )
-        .order_by(MaterialPrice.scraped_at.desc())
+        .order_by(source_rank.asc(), MaterialPrice.scraped_at.desc())
         .limit(1)
     )
     row = (await session.execute(stmt)).scalars().first()
