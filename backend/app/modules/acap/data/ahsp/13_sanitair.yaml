@@ -1,0 +1,72 @@
+# AHSP koefisien — Pekerjaan Sanitair
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022 §3.18.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — all coefficients
+# matched the source table EXACTLY:
+#   §3.18.3.1 hal.327 (kloset duduk/monoblock), §3.18.3.2 hal.328 (kloset jongkok),
+#   §3.18.1.1 hal.326 (wastafel), §3.18.6.2 hal.333 (kran 1/2"-3/4"),
+#   §3.18.6.1 hal.333 (floor drain)
+# "Tukang" here is generic (source names no trade) — priced via the tukang alias.
+kategori: sanitair
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.18"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 326-333) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.SANITAIR.KLOSET_DUDUK
+    uraian: "Pemasangan 1 buah kloset duduk/monoblock"
+    satuan: buah
+    bahan:
+      - {nama: "Kloset duduk", satuan: unit, koef: 1.00}
+      - {nama: "Flexible hose", satuan: unit, koef: 1.00}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.50}
+      - {jabatan: tukang, koef_oh: 1.20}
+      - {jabatan: kepala_tukang, koef_oh: 0.12}
+      - {jabatan: mandor, koef_oh: 0.04}
+    alat: []
+  - kode: ACAP.SANITAIR.KLOSET_JONGKOK
+    uraian: "Pemasangan 1 buah kloset jongkok"
+    satuan: buah
+    bahan:
+      - {nama: "Kloset jongkok", satuan: unit, koef: 1.000}
+      - {nama: "Pasangan bata 1PC:3PS", satuan: m2, koef: 0.036}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.5000}
+      - {jabatan: tukang, koef_oh: 0.5000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0500}
+      - {jabatan: mandor, koef_oh: 0.0167}
+    alat: []
+  - kode: ACAP.SANITAIR.WASTAFEL
+    uraian: "Pemasangan 1 buah wastafel"
+    satuan: buah
+    bahan:
+      - {nama: "Wastafel lengkap", satuan: unit, koef: 1.20}
+      - {nama: "Semen portland", satuan: kg, koef: 6.00}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.01}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.0000}
+      - {jabatan: tukang, koef_oh: 0.5000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0500}
+      - {jabatan: mandor, koef_oh: 0.0167}
+    alat: []
+  - kode: ACAP.SANITAIR.KRAN
+    uraian: "Pemasangan 1 buah kran air diameter 1/2\" atau 3/4\""
+    satuan: buah
+    bahan:
+      - {nama: "Kran air", satuan: buah, koef: 1.000}
+      - {nama: "Sealtape", satuan: buah, koef: 0.025}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.0100}
+      - {jabatan: tukang, koef_oh: 0.4000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0400}
+      - {jabatan: mandor, koef_oh: 0.0033}
+    alat: []
+  - kode: ACAP.SANITAIR.FLOOR_DRAIN
+    uraian: "Pemasangan 1 buah floor drain"
+    satuan: buah
+    bahan:
+      - {nama: "Floor drain", satuan: unit, koef: 1.00}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.0100}
+      - {jabatan: tukang, koef_oh: 0.1000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0100}
+      - {jabatan: mandor, koef_oh: 0.0033}
+    alat: []

@@ -1,0 +1,83 @@
+# AHSP koefisien — Beton Bertulang (pembesian + bekisting)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf cross-check of the
+# NotebookLM extract) — every coefficient matched the source table EXACTLY:
+#   §2.2.1.1.3/4 hal.102 (pembesian — doc unit 1 kg; Ø<12 manual & Ø>=12 semi-mekanis
+#                         share identical bahan+tenaga, differ only in alat cutter/bender)
+#   §2.2.1.3.3 hal.107 (bekisting sloof), §2.2.1.3.4 hal.108 (kolom),
+#   §2.2.1.3.5 hal.108 (balok), §2.2.1.3.6 hal.109 (plat lantai)
+# Bekisting analyses assume "3 kali pakai" (3 reuses of the formwork).
+kategori: beton
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §2.2.1.1, §2.2.1.3"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 102, 107-109) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.BETON.PEMBESIAN
+    uraian: "Pembesian 1 kg penulangan kolom/balok/ring balk/sloof (BjTP atau BjTS)"
+    satuan: kg
+    bahan:
+      - {nama: "Besi beton", satuan: kg, koef: 1.020}
+      - {nama: "Kawat beton", satuan: kg, koef: 0.028}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.00160}
+      - {jabatan: tukang_besi, koef_oh: 0.00160}
+      - {jabatan: kepala_tukang, koef_oh: 0.00016}
+      - {jabatan: mandor, koef_oh: 0.00016}
+    alat: []
+  - kode: ACAP.BEKISTING.SLOOF
+    uraian: "Pemasangan 1 m2 bekisting untuk sloof (3 kali pakai)"
+    satuan: m2
+    bahan:
+      - {nama: "Papan kayu kelas III", satuan: kg, koef: 0.018}
+      - {nama: "Paku 5-10 cm", satuan: kg, koef: 0.300}
+      - {nama: "Minyak bekisting", satuan: liter, koef: 0.100}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.520}
+      - {jabatan: tukang_kayu, koef_oh: 0.260}
+      - {jabatan: kepala_tukang, koef_oh: 0.026}
+      - {jabatan: mandor, koef_oh: 0.009}
+    alat: []
+  - kode: ACAP.BEKISTING.KOLOM
+    uraian: "Pemasangan 1 m2 bekisting untuk kolom (3 kali pakai)"
+    satuan: m2
+    bahan:
+      - {nama: "Paku 5-12 cm", satuan: kg, koef: 0.400}
+      - {nama: "Minyak bekisting", satuan: liter, koef: 0.200}
+      - {nama: "Balok kayu kelas II", satuan: m3, koef: 0.00465}
+      - {nama: "Plywood 12 mm", satuan: lembar, koef: 0.12705}
+      - {nama: "Dolken kayu 8-10 cm", satuan: batang, koef: 0.65000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.660}
+      - {jabatan: tukang_kayu, koef_oh: 0.330}
+      - {jabatan: kepala_tukang, koef_oh: 0.033}
+      - {jabatan: mandor, koef_oh: 0.011}
+    alat: []
+  - kode: ACAP.BEKISTING.BALOK
+    uraian: "Pemasangan 1 m2 bekisting untuk balok (3 kali pakai)"
+    satuan: m2
+    bahan:
+      - {nama: "Paku 5-12 cm", satuan: kg, koef: 0.400}
+      - {nama: "Minyak bekisting", satuan: liter, koef: 0.200}
+      - {nama: "Balok kayu kelas II", satuan: m3, koef: 0.00558}
+      - {nama: "Plywood 12 mm", satuan: lembar, koef: 0.12705}
+      - {nama: "Dolken kayu 8-10 cm", satuan: batang, koef: 0.65000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.660}
+      - {jabatan: tukang_kayu, koef_oh: 0.330}
+      - {jabatan: kepala_tukang, koef_oh: 0.033}
+      - {jabatan: mandor, koef_oh: 0.011}
+    alat: []
+  - kode: ACAP.BEKISTING.PLAT
+    uraian: "Pemasangan 1 m2 bekisting untuk plat lantai (3 kali pakai)"
+    satuan: m2
+    bahan:
+      - {nama: "Paku 5-10 cm", satuan: kg, koef: 0.400}
+      - {nama: "Minyak bekisting", satuan: liter, koef: 0.200}
+      - {nama: "Balok kayu kelas II", satuan: m3, koef: 0.00465}
+      - {nama: "Plywood 12 mm", satuan: lembar, koef: 0.127}
+      - {nama: "Dolken kayu 8-10 cm", satuan: batang, koef: 1.950}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.660}
+      - {jabatan: tukang_kayu, koef_oh: 0.330}
+      - {jabatan: kepala_tukang, koef_oh: 0.033}
+      - {jabatan: mandor, koef_oh: 0.011}
+    alat: []

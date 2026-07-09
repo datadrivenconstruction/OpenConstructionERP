@@ -1,0 +1,82 @@
+# AHSP koefisien — Finishing lanjut (rangka plafon, keramik dinding, genteng,
+# waterproofing, cat kayu/besi)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — all coefficients
+# matched the source table EXACTLY:
+#   §3.5.3.1 hal.211 (rangka plafon besi hollow 40.40 — complements the gypsum
+#                     penutup ACAP.PLAFON.GYPSUM_9 which is penutup-only)
+#   §3.10.1.3 hal.278 (dinding keramik 10x20), §3.1.1.4 hal.177 (atap genteng beton),
+#   §3.4.1 hal.203 (waterproofing membran bakar), §3.8.4 hal.234 (cat kayu/besi baru)
+# NOTE: cat plafon/tembok reuses ACAP.CAT.TEMBOK_BARU (§3.8.10); §3.8.4 here is the
+# wood/steel paint system (menie primer + plamur), for kusen/pintu/railing.
+kategori: finishing
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.5.3, §3.10.1, §3.1.1, §3.4.1, §3.8.4"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 177, 203, 211, 234, 278) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.PLAFON.RANGKA_HOLLOW
+    uraian: "Pemasangan 1 m2 rangka plafon besi hollow 40.40"
+    satuan: m2
+    bahan:
+      - {nama: "Besi hollow 40x40", satuan: m1, koef: 4.00}
+      - {nama: "Kawat las", satuan: kg, koef: 0.05}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.3500}
+      - {jabatan: tukang_besi, koef_oh: 0.3500}
+      - {jabatan: kepala_tukang, koef_oh: 0.0350}
+      - {jabatan: mandor, koef_oh: 0.0117}
+    alat: []
+  - kode: ACAP.DINDING.KERAMIK_10_20
+    uraian: "Pemasangan 1 m2 dinding keramik 10x20 cm (spesi 1 PC : 2 PP)"
+    satuan: m2
+    bahan:
+      - {nama: "Keramik dinding 10x20", satuan: buah, koef: 52.000}
+      - {nama: "Semen portland", satuan: kg, koef: 9.300}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.018}
+      - {nama: "Semen warna", satuan: kg, koef: 2.750}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.500}
+      - {jabatan: tukang_batu, koef_oh: 0.250}
+      - {jabatan: kepala_tukang, koef_oh: 0.025}
+      - {jabatan: mandor, koef_oh: 0.008}
+    alat: []
+  - kode: ACAP.ATAP.GENTENG_BETON
+    uraian: "Pemasangan 1 m2 atap genteng beton"
+    satuan: m2
+    bahan:
+      - {nama: "Genteng beton", satuan: buah, koef: 11.00}
+      - {nama: "Paku biasa", satuan: kg, koef: 0.03}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.2000}
+      - {jabatan: tukang_kayu, koef_oh: 0.1000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0100}
+      - {jabatan: mandor, koef_oh: 0.0033}
+    alat: []
+  - kode: ACAP.WATERPROOFING.MEMBRAN
+    uraian: "Pemasangan 1 m2 waterproofing membran bakar"
+    satuan: m2
+    bahan:
+      - {nama: "Membran bakar", satuan: m2, koef: 1.05}
+      - {nama: "Cairan primer", satuan: kg, koef: 0.30}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.050}
+      - {jabatan: tukang, koef_oh: 0.050}
+      - {jabatan: kepala_tukang, koef_oh: 0.005}
+      - {jabatan: mandor, koef_oh: 0.002}
+    alat: []
+  - kode: ACAP.CAT.KAYU_BESI
+    uraian: "Pengecatan 1 m2 bidang kayu/besi baru (menie, plamur, cat dasar, 2 lapis penutup)"
+    satuan: m2
+    bahan:
+      - {nama: "Menie", satuan: kg, koef: 0.200}
+      - {nama: "Plamur", satuan: kg, koef: 0.150}
+      - {nama: "Cat dasar", satuan: kg, koef: 0.170}
+      - {nama: "Cat penutup", satuan: kg, koef: 0.260}
+      - {nama: "Kuas", satuan: buah, koef: 0.010}
+      - {nama: "Pengencer", satuan: kg, koef: 0.030}
+      - {nama: "Ampelas", satuan: lembar, koef: 0.200}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.0700}
+      - {jabatan: tukang_cat, koef_oh: 0.0090}
+      - {jabatan: kepala_tukang, koef_oh: 0.0009}
+      - {jabatan: mandor, koef_oh: 0.0003}
+    alat: []

@@ -1,0 +1,61 @@
+# AHSP koefisien — Kusen, Pintu, Jendela, Kaca
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — all coefficients
+# matched the source table EXACTLY:
+#   §3.11.3.1 hal.298 (kusen aluminium, per m'), §3.11.1.11 hal.294 (daun pintu panel),
+#   §3.11.1.9 hal.293 (daun pintu/jendela kaca), §3.12.3 hal.313 (kaca polos 5 mm)
+# Pintu/jendela analyses are PEMBUATAN (fabrication) of the leaf; the kusen (frame)
+# is priced separately per m' of frame length.
+kategori: kusen
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.11, §3.12"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 293-298, 313) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.KUSEN.ALUMINIUM
+    uraian: "Pemasangan 1 m' kusen aluminium (profil 4 inch)"
+    satuan: m1
+    bahan:
+      - {nama: "Profil aluminium 4 inch", satuan: m1, koef: 1.10}
+      - {nama: "Sekrup fixer", satuan: buah, koef: 2.00}
+      - {nama: "Sealant", satuan: tube, koef: 0.06}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.043}
+      - {jabatan: tukang_aluminium, koef_oh: 0.043}
+      - {jabatan: kepala_tukang, koef_oh: 0.004}
+      - {jabatan: mandor, koef_oh: 0.001}
+    alat: []
+  - kode: ACAP.PINTU.PANEL_KAYU
+    uraian: "Pembuatan 1 m2 daun pintu panel, kayu kelas I atau II"
+    satuan: m2
+    bahan:
+      - {nama: "Papan kayu", satuan: m3, koef: 0.04}
+      - {nama: "Lem kayu", satuan: kg, koef: 0.50}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.00}
+      - {jabatan: tukang_kayu, koef_oh: 3.00}
+      - {jabatan: kepala_tukang, koef_oh: 0.30}
+      - {jabatan: mandor, koef_oh: 0.10}
+    alat: []
+  - kode: ACAP.JENDELA.KACA_KAYU
+    uraian: "Pembuatan 1 m2 daun pintu/jendela kaca, kayu kelas I atau II"
+    satuan: m2
+    bahan:
+      - {nama: "Papan kayu", satuan: m3, koef: 0.024}
+      - {nama: "Lem kayu", satuan: kg, koef: 0.300}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.5952}
+      - {jabatan: tukang_kayu, koef_oh: 0.2976}
+      - {jabatan: kepala_tukang, koef_oh: 0.0298}
+      - {jabatan: mandor, koef_oh: 0.0099}
+    alat: []
+  - kode: ACAP.KACA.POLOS_5
+    uraian: "Pemasangan 1 m2 kaca polos tebal 5 mm"
+    satuan: m2
+    bahan:
+      - {nama: "Kaca polos 5 mm", satuan: m2, koef: 1.10}
+      - {nama: "Silicone sealant 300 ml", satuan: tube, koef: 0.05}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.015}
+      - {jabatan: tukang, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.005}
+    alat: []

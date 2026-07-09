@@ -32,3 +32,36 @@ House-building structural + wall + finishing chain — enough to drive Phase 5 (
 - Dinding bata merah 1:4 /m²: bata **72 bh**, semen **11.15 kg** (0.223 sak), pasir **0.028 m³**; Pekerja **0.30**, Tukang batu **0.15**, Kepala **0.015**, Mandor **0.008**.
 - Plesteran 1:4 t=2.5cm /m²: semen **10.0 kg** (0.200 sak), pasir **0.025 m³**; Pekerja **0.25**, Tukang batu **0.125**, Kepala **0.013**, Mandor **0.007**.
 - Acian /m²: semen **3.8 kg** (0.076 sak); Pekerja **0.12**, Tukang batu **0.06**, Kepala **0.006**, Mandor **0.003**.
+
+---
+
+## Batch 2 — full-house completion via NotebookLM (2026-07-09)
+
+**Method:** the "next batch" this doc anticipated. Grounded a NotebookLM notebook
+(`AHSP Koefisien Bidang Cipta Karya`) on the **official Permen PUPR No. 1/2022
+Lampiran IV PDF** (860 pp, `maspetruk.dpubinmarcipka.jatengprov.go.id`), extracted
+coefficient tables via `notebooklm ask`, then **verified every line against the
+source PDF with pypdf** (page-dump cross-check). Across **24 candidate analyses in
+4 groups, NotebookLM matched the source table EXACTLY on every coefficient** — zero
+fabrication, zero drift (only a few ±1 page-citation slips, values perfect). This is
+the dual-source loop: NotebookLM as the fast semantic index into 860 pages, pypdf as
+the authoritative verifier. Seeded **22 codes** (5 files `10_`–`14_`); 2 candidates
+folded (pembesian Ø<12/≥12 → 1 code, identical bahan+tenaga; cat plafon reuses
+`ACAP.CAT.TEMBOK_BARU`).
+
+| Group | Codes | Source § (hal.) |
+|---|---|---|
+| Beton bertulang | PEMBESIAN, BEKISTING SLOOF/KOLOM/BALOK/PLAT | §2.2.1.1.3-4 (102), §2.2.1.3.3-6 (107-109) |
+| Kusen/pintu/jendela | KUSEN.ALUMINIUM, PINTU.PANEL_KAYU, JENDELA.KACA_KAYU, KACA.POLOS_5 | §3.11.3.1 (298), §3.11.1.11 (294), §3.11.1.9 (293), §3.12.3 (313) |
+| Finishing lanjut | PLAFON.RANGKA_HOLLOW, DINDING.KERAMIK_10_20, ATAP.GENTENG_BETON, WATERPROOFING.MEMBRAN, CAT.KAYU_BESI | §3.5.3.1 (211), §3.10.1.3 (278), §3.1.1.4 (177), §3.4.1 (203), §3.8.4 (234) |
+| Sanitair + MEP | KLOSET_DUDUK/JONGKOK, WASTAFEL, KRAN, FLOOR_DRAIN, PIPA AIR_BERSIH_HALF/AIR_KOTOR_2, LISTRIK.TITIK_LAMPU | §3.18.* (326-333), §6.4.1.1/19 (587,593), §5.3.1.1 (466) |
+
+**Total AHSP codes now: 53** (31 → 53). Full rumah-tinggal WBS coverage:
+tanah → pondasi → beton (mix + bertulang) → dinding → plesteran/acian → lantai →
+plafon (rangka + penutup) → atap (baja ringan/seng/genteng) → kusen/pintu/jendela →
+cat → sanitair → perpipaan → listrik.
+
+**Not yet wired into RAB output** (same state as the batch-1 finish codes): needs
+`ELEMENT_KODE_MAP` + takeoff qty formulas + `price_map.py` aliases for the new
+materials, **and Batam prices for 3 new trades** (`tukang_aluminium`, `tukang_pipa`,
+`tukang_listrik`) — else those lines flag `PRICE_MISSING`. Follow-on wiring task.

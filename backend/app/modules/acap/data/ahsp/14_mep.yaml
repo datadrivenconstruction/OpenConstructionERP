@@ -1,0 +1,53 @@
+# AHSP koefisien — MEP (perpipaan air + instalasi listrik)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — all coefficients
+# matched the source table EXACTLY:
+#   §6.4.1.1 hal.587 (pipa PVC AW 1/2" air bersih), §6.4.1.19 hal.593 (pipa PVC D 2"
+#                     air kotor), §5.3.1.1 hal.466 (1 titik instalasi lampu/stop kontak)
+# Pipe material coef 1.450/m' already includes fitting & aksesoris (per source note).
+kategori: mep
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §6.4.1, §5.3.1"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 466, 587, 593) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.PIPA.AIR_BERSIH_HALF
+    uraian: "Pemasangan 1 m' pipa PVC AW dia. 1/2\" (15 mm) + fitting"
+    satuan: m1
+    bahan:
+      - {nama: "Pipa PVC AW 1/2 inch", satuan: m1, koef: 1.450}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.017}
+      - {jabatan: tukang_pipa, koef_oh: 0.028}
+      - {jabatan: kepala_tukang, koef_oh: 0.003}
+      - {jabatan: mandor, koef_oh: 0.001}
+    alat: []
+  - kode: ACAP.PIPA.AIR_KOTOR_2
+    uraian: "Pemasangan 1 m' pipa PVC D dia. 2\" (50 mm) + fitting"
+    satuan: m1
+    bahan:
+      - {nama: "Pipa PVC D 2 inch", satuan: m1, koef: 1.450}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.063}
+      - {jabatan: tukang_pipa, koef_oh: 0.104}
+      - {jabatan: kepala_tukang, koef_oh: 0.010}
+      - {jabatan: mandor, koef_oh: 0.003}
+    alat: []
+  - kode: ACAP.LISTRIK.TITIK_LAMPU
+    uraian: "Pemasangan 1 titik instalasi lampu/stop kontak (kabel NYM 3x2,5 + conduit)"
+    satuan: titik
+    bahan:
+      - {nama: "Kabel NYM 3x2.5 mm2", satuan: m1, koef: 8.8}
+      - {nama: "Conduit HI 20 mm", satuan: m1, koef: 8.8}
+      - {nama: "T dus", satuan: buah, koef: 1.0}
+      - {nama: "Socket conduit 20 mm", satuan: buah, koef: 5.0}
+      - {nama: "Klem 20 mm", satuan: buah, koef: 10.0}
+      - {nama: "Fischer S6 + sekrup", satuan: buah, koef: 15.0}
+      - {nama: "Flexible conduit 20 mm", satuan: m1, koef: 1.0}
+      - {nama: "Elbow", satuan: buah, koef: 4.0}
+      - {nama: "Isolasi", satuan: m1, koef: 0.5}
+      - {nama: "Lasdop", satuan: buah, koef: 4.0}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.190}
+      - {jabatan: tukang_listrik, koef_oh: 0.318}
+      - {jabatan: kepala_tukang, koef_oh: 0.032}
+      - {jabatan: mandor, koef_oh: 0.011}
+    alat: []
