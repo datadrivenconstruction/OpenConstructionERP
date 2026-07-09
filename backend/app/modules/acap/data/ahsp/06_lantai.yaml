@@ -1,0 +1,23 @@
+# AHSP koefisien — Pekerjaan Lantai (keramik)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 against the official PDF §3.9.8.3 hal.269
+# (maspetruk.dpubinmarcipka.jatengprov.go.id) — NotebookLM extraction cross-checked
+# line-by-line with pypdf. Labour unit = OH. "Tukang" = tukang_batu (pemasangan).
+kategori: lantai
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.9.8.3"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 269) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.LANTAI.KERAMIK_40
+    uraian: "Pemasangan 1 m2 lantai keramik ukuran 40x40 cm (spesi 1 PC : 2 PP)"
+    satuan: m2
+    bahan:
+      - {nama: "Keramik lantai 40x40", satuan: bh, koef: 6.563}
+      - {nama: "Semen portland", satuan: kg, koef: 13.632}
+      - {nama: "Semen warna", satuan: kg, koef: 1.500}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.027}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.1538}
+      - {jabatan: tukang_batu, koef_oh: 0.0769}
+      - {jabatan: kepala_tukang, koef_oh: 0.0077}
+      - {jabatan: mandor, koef_oh: 0.0026}
+    alat: []

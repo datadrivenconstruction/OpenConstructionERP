@@ -1,0 +1,19 @@
+# AHSP koefisien — Pekerjaan Pengecatan
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022 §3.8.10 hal.237.
+# Verified 2026-07-09 against the official PDF (pypdf cross-check of NotebookLM extract).
+kategori: finishing
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.8.10"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 237) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.CAT.TEMBOK_BARU
+    uraian: "Pengecatan 1 m2 tembok baru (1 lapis plamur, 1 lapis cat dasar, 2 lapis cat penutup)"
+    satuan: m2
+    bahan:
+      - {nama: "Cat dasar", satuan: kg, koef: 0.100}
+      - {nama: "Cat penutup", satuan: kg, koef: 0.260}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.0667}
+      - {jabatan: tukang_cat, koef_oh: 0.0667}
+      - {jabatan: kepala_tukang, koef_oh: 0.0067}
+      - {jabatan: mandor, koef_oh: 0.0022}
+    alat: []

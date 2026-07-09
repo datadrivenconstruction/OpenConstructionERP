@@ -1,0 +1,34 @@
+# AHSP koefisien — Pekerjaan Atap (rangka + penutup)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 against the official PDF (pypdf cross-check of NotebookLM extract):
+#   §2.1.1.1 hal.97  (rangka baja ringan C75, atap pelana)
+#   §3.1.3.1 hal.191 (penutup seng gelombang)
+# The baja-ringan labour (0.734 OH each for pekerja + tukang besi) reads high but is the
+# OFFICIAL value — confirmed verbatim in the source, not a transcription error.
+kategori: atap
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §2.1.1.1, §3.1.3.1"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 97, 191) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.ATAP.RANGKA_BAJARINGAN_C75
+    uraian: "Pemasangan 1 m2 rangka atap baja ringan (canai dingin) profil C75, atap pelana"
+    satuan: m2
+    bahan:
+      - {nama: "Baja ringan C75", satuan: batang, koef: 0.9603}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.734}
+      - {jabatan: tukang_besi, koef_oh: 0.734}
+      - {jabatan: kepala_tukang, koef_oh: 0.073}
+      - {jabatan: mandor, koef_oh: 0.024}
+    alat: []
+  - kode: ACAP.ATAP.PENUTUP_SENG
+    uraian: "Pemasangan 1 m2 penutup atap seng gelombang 105x180 cm"
+    satuan: m2
+    bahan:
+      - {nama: "Seng gelombang", satuan: lembar, koef: 0.70}
+      - {nama: "Paku biasa", satuan: kg, koef: 0.02}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.1200}
+      - {jabatan: tukang_kayu, koef_oh: 0.0600}
+      - {jabatan: kepala_tukang, koef_oh: 0.0060}
+      - {jabatan: mandor, koef_oh: 0.0020}
+    alat: []

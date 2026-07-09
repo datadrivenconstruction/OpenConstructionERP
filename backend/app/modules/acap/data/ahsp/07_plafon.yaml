@@ -1,0 +1,21 @@
+# AHSP koefisien — Pekerjaan Plafon (langit-langit)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022 §3.5.2.1 hal.207.
+# Verified 2026-07-09 against the official PDF (pypdf cross-check of NotebookLM extract).
+# NOTE: this analysis is the gypsum PENUTUP only (board + screws) — the metal/hollow
+# rangka is a separate AHSP item, not included here.
+kategori: plafon
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.5.2.1"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 207) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.PLAFON.GYPSUM_9
+    uraian: "Pemasangan 1 m2 plafon papan gypsum tebal 9 mm (penutup, tanpa rangka)"
+    satuan: m2
+    bahan:
+      - {nama: "Gypsum board 9mm", satuan: lembar, koef: 0.364}
+      - {nama: "Paku sekrup", satuan: kg, koef: 0.110}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.1000}
+      - {jabatan: tukang_kayu, koef_oh: 0.0500}
+      - {jabatan: kepala_tukang, koef_oh: 0.0050}
+      - {jabatan: mandor, koef_oh: 0.0017}
+    alat: []
