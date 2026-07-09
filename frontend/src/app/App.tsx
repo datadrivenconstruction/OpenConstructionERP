@@ -491,6 +491,8 @@ const AiEstimatorPage = lazy(() =>
 const FloorPlanEditorPage = lazy(() => import('@/acap/FloorPlanEditorPage'));
 // ACAP — native SVG construction timeline / Gantt view.
 const TimelinePage = lazy(() => import('@/acap/TimelinePage'));
+// ACAP — visual render viewer (floor plan -> image via GeminiGen).
+const RenderPage = lazy(() => import('@/acap/RenderPage'));
 
 // Rarely-visited or heavy secondary pages — moved out of the initial
 // `index` bundle (was eager via barrel imports, ~1.4 MB chunk; these
@@ -999,6 +1001,7 @@ export default function App() {
         <Route path="/projects/:projectId/settings" element={<P title="Project Settings"><ProjectSettingsPage /></P>} />
         <Route path="/projects/:projectId/layout" element={<P title="Layout Editor"><FloorPlanEditorPage /></P>} />
         <Route path="/projects/:projectId/timeline" element={<P title="Timeline"><TimelinePage /></P>} />
+        <Route path="/projects/:projectId/render" element={<P title="Render Viewer"><RenderPage /></P>} />
         <Route path="/projects/:projectId/boq/new" element={<P title="New BOQ"><CreateBOQPage /></P>} />
         <Route path="/projects/:projectId/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
 
