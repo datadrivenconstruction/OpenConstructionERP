@@ -84,10 +84,23 @@ this batch, so these are **flagged `retail-nasional-2026`** — well-known natio
 ranges (domain judgment), NOT scraped/verified Batam data. Same money-safe posture as the
 batch-3 consumables: transparent provenance, no silent hallucination. Higher-value items
 set to conservative real-market ranges: pompa jet 27lpm 700k-1.4jt, toren 0.7m³ 700k-1.3jt.
-Others: kunci tanam 50-120k, kait angin 8-20k, seng plat talang 40-70k/m', bata roster
-5-15k, MCB box 25-75k, balok kayu 6/12 3-4.8jt/m³, pasir beton 250-400k, kerikil 300-450k,
-kayu kelas III 1.6jt. **These should be re-researched via NotebookLM once its chat backend
-recovers** (refresh procedure below) to replace the retail estimates with Batam-grounded.
+Others: kait angin 8-20k, seng plat talang 40-70k/m', MCB box 25-75k, balok kayu 6/12
+3-4.8jt/m³, pasir beton 250-400k, kerikil 300-450k, kayu kelas III 1.6jt.
+
+**Refresh via firecrawl (2026-07-09, same session):** since NotebookLM chat stayed down,
+the money-items were re-grounded with a **firecrawl live search** (real marketplace
+listings, verifiable) instead — the equivalent grounded path the live scrapers already use.
+This **caught the retail estimates running ~2× low** on the two ~jt items:
+
+| Item | retail estimate | firecrawl-verified real | source |
+|---|---|---|---|
+| Pompa jet 27 lpm | 700k-1.4jt | **1.8jt-2.7jt** | Shimizu PC-260, blibli/tokopedia/shopee |
+| Tangki toren 0.7 m³ | 700k-1.3jt | **1.29jt-1.83jt** | Penguin TW-70 700L, blibli/lazada |
+| Kunci tanam biasa | 50-120k | **60-250k** | mortise lock basic-SES, tokopedia |
+| Bata roster | 5-15k | **9-15k** | roster beton biji, qhomemart/99.co |
+
+These 4 are now `firecrawl-2026` sourced; the remaining ~7 low-value retail-flagged rows
+stay as domain estimates (small RAB impact) pending a NotebookLM refresh.
 
 Total prices in DB: **159**.
 
