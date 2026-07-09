@@ -45,6 +45,12 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-}
       S3_BUCKET: ${S3_BUCKET:-openestimate}
       QDRANT_URL: ${QDRANT_URL:-}
+      # ── ACAP runtime keys ────────────────────────────────────────────────
+      # Product LLM (layout generation) — OpenCode Zen "Go" gateway.
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      # Visual render (Phase 7) — GeminiGen/snapgen.ai. Absent → render:generate
+      # returns a clean 400 (feature simply off), never a 500.
+      GEMINIGEN_API_KEY: ${GEMINIGEN_API_KEY:-}
     volumes:
       - app_data:/data
     expose:
