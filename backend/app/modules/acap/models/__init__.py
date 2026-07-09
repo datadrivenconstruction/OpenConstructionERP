@@ -3,5 +3,13 @@
 from app.modules.acap.models.coefficients import AhspCoefficient, AhspResource  # noqa: F401
 from app.modules.acap.models.floor_plan import FloorPlanRecord  # noqa: F401
 from app.modules.acap.models.prices import MaterialPrice, Region  # noqa: F401
+from app.modules.acap.models.render import RenderRecord  # noqa: F401
 
-__all__ = ["AhspCoefficient", "AhspResource", "FloorPlanRecord", "MaterialPrice", "Region"]
+__all__ = [
+    "AhspCoefficient",
+    "AhspResource",
+    "FloorPlanRecord",
+    "MaterialPrice",
+    "Region",
+    "RenderRecord",
+]

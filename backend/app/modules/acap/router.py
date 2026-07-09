@@ -388,3 +388,91 @@ async def export_timeline_csv_endpoint(
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Visual render (floor plan -> image via GeminiGen) ───────────────────────
+
+
+class RenderResponse(BaseModel):
+    render_id: _uuid.UUID
+    floor_plan_version: int
+    status: str
+    prompt: str
+    storage_key: str | None = None
+    source_url: str | None = None
+    error_message: str | None = None
+
+
+def _render_json(record) -> RenderResponse:
+    return RenderResponse(
+        render_id=record.id,
+        floor_plan_version=record.floor_plan_version,
+        status=record.status,
+        prompt=record.prompt,
+        storage_key=record.storage_key,
+        source_url=record.source_url,
+        error_message=record.error_message,
+    )
+
+
+@router.post("/projects/{project_id}/render:generate")
+async def generate_render_endpoint(
+    project_id: _uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: str = Depends(get_current_user_id),
+) -> RenderResponse:
+    """Render the latest floor-plan to an image (GeminiGen) and persist it.
+
+    KEY-GATED: returns 400 (not 500) when ``GEMINIGEN_API_KEY`` is unset — the
+    integration is real but the service is simply not configured yet. The
+    render is DECORATIVE and never feeds the RAB. A provider failure persists a
+    ``failed`` RenderRecord and returns it (status=failed) rather than erroring.
+    """
+    from sqlalchemy import select
+
+    from app.modules.acap.models.floor_plan import FloorPlanRecord
+    from app.modules.acap.render.client import render_service_configured
+    from app.modules.acap.render.generator import generate_render
+
+    if not render_service_configured():
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "detail": "Render service not configured",
+                "reason": "GEMINIGEN_API_KEY not set",
+            },
+        )
+
+    stmt = (
+        select(FloorPlanRecord)
+        .where(FloorPlanRecord.project_id == project_id)
+        .order_by(FloorPlanRecord.version.desc())
+        .limit(1)
+    )
+    record = (await session.execute(stmt)).scalars().first()
+    if record is None:
+        raise HTTPException(status_code=404, detail="No layout for this project")
+
+    plan = FloorPlan.model_validate(record.plan_json)
+    render = await generate_render(session, project_id, plan, record.version)
+    return _render_json(render)
+
+
+@router.get("/projects/{project_id}/renders")
+async def list_renders_endpoint(
+    project_id: _uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: str = Depends(get_current_user_id),
+) -> list[RenderResponse]:
+    """List a project's renders, newest first."""
+    from sqlalchemy import select
+
+    from app.modules.acap.models.render import RenderRecord
+
+    stmt = (
+        select(RenderRecord)
+        .where(RenderRecord.project_id == project_id)
+        .order_by(RenderRecord.created_at.desc())
+    )
+    records = (await session.execute(stmt)).scalars().all()
+    return [_render_json(r) for r in records]
