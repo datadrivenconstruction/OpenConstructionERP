@@ -1,0 +1,50 @@
+# AHSP koefisien — Beton praktis (kolom & ring balok praktis)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022 §2.2.1.10.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — matched EXACTLY:
+#   §2.2.1.10.1 hal.124 (kolom praktis 11x11), §2.2.1.10.2 hal.125 (ring balok praktis 10x15)
+# These are COMPOSITE analyses: one per-m' rate already bundles beton + pembesian +
+# bekisting (unlike the divisi-2 codes which split them). Concrete-pump/vibrator alat
+# in §..10.2 carry no coefficient in the source table, so omitted.
+kategori: beton
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §2.2.1.10"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 124-125) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.BETON.KOLOM_PRAKTIS
+    uraian: "Pembuatan 1 m' kolom praktis beton bertulang 11x11 (beton+besi+bekisting)"
+    satuan: m1
+    bahan:
+      - {nama: "Kayu kelas III", satuan: m3, koef: 0.002}
+      - {nama: "Paku 5-12 cm", satuan: kg, koef: 0.010}
+      - {nama: "Besi beton", satuan: kg, koef: 3.000}
+      - {nama: "Kawat beton", satuan: kg, koef: 0.450}
+      - {nama: "Semen portland", satuan: kg, koef: 4.000}
+      - {nama: "Pasir beton", satuan: m3, koef: 0.006}
+      - {nama: "Kerikil", satuan: m3, koef: 0.009}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.180}
+      - {jabatan: tukang_batu, koef_oh: 0.020}
+      - {jabatan: tukang_kayu, koef_oh: 0.020}
+      - {jabatan: tukang_besi, koef_oh: 0.020}
+      - {jabatan: kepala_tukang, koef_oh: 0.006}
+      - {jabatan: mandor, koef_oh: 0.009}
+    alat: []
+  - kode: ACAP.BETON.RING_PRAKTIS
+    uraian: "Pembuatan 1 m' ring/balok praktis beton bertulang 10x15 (beton+besi+bekisting)"
+    satuan: m1
+    bahan:
+      - {nama: "Kayu kelas III", satuan: m3, koef: 0.003}
+      - {nama: "Paku 5-12 cm", satuan: kg, koef: 0.020}
+      - {nama: "Minyak bekisting", satuan: liter, koef: 0.200}
+      - {nama: "Besi beton", satuan: kg, koef: 3.600}
+      - {nama: "Kawat beton", satuan: kg, koef: 0.050}
+      - {nama: "Semen portland", satuan: kg, koef: 5.500}
+      - {nama: "Pasir beton", satuan: m3, koef: 0.009}
+      - {nama: "Kerikil", satuan: m3, koef: 0.015}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.297}
+      - {jabatan: tukang_batu, koef_oh: 0.033}
+      - {jabatan: tukang_kayu, koef_oh: 0.033}
+      - {jabatan: tukang_besi, koef_oh: 0.033}
+      - {jabatan: kepala_tukang, koef_oh: 0.010}
+      - {jabatan: mandor, koef_oh: 0.015}
+    alat: []

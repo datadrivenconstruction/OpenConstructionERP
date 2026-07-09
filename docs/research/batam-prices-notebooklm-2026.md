@@ -73,6 +73,24 @@ Balok kayu kelas II capped at 4.8jt/m³ (loader material bound is 5jt; kamper/me
 not priced: `pasangan bata 1PC:3PS` (composite → references bata code), `semen warna` (→ semen
 putih), generic `tukang` (→ tukang_batu rate).
 
+## Batch 4 — prices for the batch-3 codes (2026-07-09)
+Pairs with the 15 batch-3 AHSP codes (kolom/ring praktis, kusen kayu, door hardware,
+talang/listplank, roster, cat plafon, stop kontak/saklar/MCB, pompa, toren). Most
+materials they consume were already priced (besi, kerikil, pasir cor, cat, engsel,
+saklar, kayu III); **11 rows appended** for the genuinely-new ones.
+
+**NotebookLM chat backend was down** (persistent `TransportServerError` timeouts) during
+this batch, so these are **flagged `retail-nasional-2026`** — well-known national retail
+ranges (domain judgment), NOT scraped/verified Batam data. Same money-safe posture as the
+batch-3 consumables: transparent provenance, no silent hallucination. Higher-value items
+set to conservative real-market ranges: pompa jet 27lpm 700k-1.4jt, toren 0.7m³ 700k-1.3jt.
+Others: kunci tanam 50-120k, kait angin 8-20k, seng plat talang 40-70k/m', bata roster
+5-15k, MCB box 25-75k, balok kayu 6/12 3-4.8jt/m³, pasir beton 250-400k, kerikil 300-450k,
+kayu kelas III 1.6jt. **These should be re-researched via NotebookLM once its chat backend
+recovers** (refresh procedure below) to replace the retail estimates with Batam-grounded.
+
+Total prices in DB: **159**.
+
 ## Refresh
 Re-run the NotebookLM research + `generate data-table`, re-curate, overwrite the CSV,
 re-run the loader. `scraped_at` recency means fresh rows win over older ones in the RAB.

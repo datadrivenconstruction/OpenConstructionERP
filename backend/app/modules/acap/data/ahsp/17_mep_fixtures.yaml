@@ -1,0 +1,73 @@
+# AHSP koefisien — MEP fixtures (stop kontak, saklar, MCB box, pompa, tandon)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — matched EXACTLY:
+#   §5.1.5.13 hal.457 (stop kontak), §5.1.5.4 hal.453 (grid switch = saklar point),
+#   §5.1.2.24 hal.448 (MCB box), §6.1.2.4 hal.575 (pompa jet 27 lpm),
+#   §6.1.1.7 hal.569 (tangki toren 0,7 m3)
+kategori: mep
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §5.1, §6.1"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 448-575) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.LISTRIK.STOP_KONTAK
+    uraian: "Pemasangan 1 titik instalasi stop kontak (kabel NYM 3x2,5 + conduit)"
+    satuan: titik
+    bahan:
+      - {nama: "Kabel NYM 3x2.5 mm2", satuan: m1, koef: 14.3}
+      - {nama: "Conduit HI 20 mm", satuan: m1, koef: 14.3}
+      - {nama: "T dus", satuan: buah, koef: 1.0}
+      - {nama: "Socket conduit 20 mm", satuan: buah, koef: 8.0}
+      - {nama: "Klem 20 mm", satuan: buah, koef: 8.0}
+      - {nama: "Fischer S6 + sekrup", satuan: buah, koef: 12.0}
+      - {nama: "Elbow", satuan: buah, koef: 4.0}
+      - {nama: "Isolasi", satuan: m1, koef: 0.5}
+      - {nama: "Lasdop", satuan: buah, koef: 4.0}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.205}
+      - {jabatan: tukang_listrik, koef_oh: 0.342}
+      - {jabatan: kepala_tukang, koef_oh: 0.034}
+      - {jabatan: mandor, koef_oh: 0.011}
+    alat: []
+  - kode: ACAP.LISTRIK.SAKLAR
+    uraian: "Pemasangan 1 buah saklar (grid switch 2x2) + aksesoris"
+    satuan: buah
+    bahan:
+      - {nama: "Saklar", satuan: buah, koef: 1.10}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.074}
+      - {jabatan: tukang_listrik, koef_oh: 0.123}
+      - {jabatan: kepala_tukang, koef_oh: 0.012}
+      - {jabatan: mandor, koef_oh: 0.004}
+    alat: []
+  - kode: ACAP.LISTRIK.MCB_BOX
+    uraian: "Pemasangan 1 unit MCB box + aksesoris"
+    satuan: unit
+    bahan:
+      - {nama: "MCB box", satuan: unit, koef: 1.03}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.105}
+      - {jabatan: tukang_listrik, koef_oh: 0.175}
+      - {jabatan: kepala_tukang, koef_oh: 0.017}
+      - {jabatan: mandor, koef_oh: 0.006}
+    alat: []
+  - kode: ACAP.POMPA.JET_27
+    uraian: "Pemasangan 1 unit pompa jet 27 lpm + aksesoris"
+    satuan: unit
+    bahan:
+      - {nama: "Pompa jet 27 lpm", satuan: unit, koef: 1.1}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.763}
+      - {jabatan: tukang_pipa, koef_oh: 1.274}
+      - {jabatan: kepala_tukang, koef_oh: 0.127}
+      - {jabatan: mandor, koef_oh: 0.038}
+    alat: []
+  - kode: ACAP.TANDON.TOREN_700
+    uraian: "Pemasangan 1 unit tangki toren kapasitas 0,7 m3 + aksesoris"
+    satuan: unit
+    bahan:
+      - {nama: "Tangki toren 0.7 m3", satuan: unit, koef: 1.020}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.129}
+      - {jabatan: tukang, koef_oh: 0.215}
+      - {jabatan: kepala_tukang, koef_oh: 0.021}
+      - {jabatan: mandor, koef_oh: 0.006}
+    alat: []

@@ -56,13 +56,16 @@ items:
       - {jabatan: mandor, koef_oh: 0.007}
     alat: []
   - kode: ACAP.ACIAN.STANDAR
-    uraian: "Acian dinding"
+    # Corrected 2026-07-09 to the authoritative Permen PUPR 1/2022 §3.7.8 hal.229
+    # (pypdf-verified): semen 3.25 kg/m2, labour 0.2/0.1/0.01/0.0033 OH. The earlier
+    # firecrawl values (semen 3.8, labour 0.12/0.06) were superseded by the official AHSP.
+    uraian: "Pemasangan 1 m2 acian dinding"
     satuan: m2
     bahan:
-      - {nama: "Semen portland", satuan: kg, koef: 3.800}
+      - {nama: "Semen portland", satuan: kg, koef: 3.250}
     tenaga:
-      - {jabatan: pekerja, koef_oh: 0.120}
-      - {jabatan: tukang_batu, koef_oh: 0.060}
-      - {jabatan: kepala_tukang, koef_oh: 0.006}
-      - {jabatan: mandor, koef_oh: 0.003}
+      - {jabatan: pekerja, koef_oh: 0.2000}
+      - {jabatan: tukang_batu, koef_oh: 0.1000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0100}
+      - {jabatan: mandor, koef_oh: 0.0033}
     alat: []

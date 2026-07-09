@@ -108,3 +108,14 @@ material,Sealtape,buah,3000,6000,retail-nasional
 material,Flexible hose,unit,15000,35000,retail-nasional (kloset flexi hose)
 upah_harian,Tukang aluminium,OH,155000,166729,BP Batam 2026
 upah_harian,Tukang pipa,OH,157643,166729,99.co Batam 2026
+material,Kunci tanam biasa,buah,50000,120000,retail-nasional-2026 (NBLM chat down; domain retail)
+material,Kait angin,buah,8000,20000,retail-nasional-2026
+material,Seng pelat,m1,40000,70000,retail-nasional-2026 (BJLS28 talang)
+material,Bata roster,buah,5000,15000,retail-nasional-2026
+material,MCB box,unit,25000,75000,retail-nasional-2026
+material,Pompa jet 27 lpm,unit,700000,1400000,retail-nasional-2026 (Shimizu/Panasonic)
+material,Tangki toren 0.7 m3,unit,700000,1300000,retail-nasional-2026 (Penguin/Profil)
+material,Balok kayu 6/12,m3,3000000,4800000,"retail-nasional-2026 (kamper/borneo, capped <5M)"
+material,Pasir beton,m3,250000,400000,retail-nasional-2026 (= pasir cor Batam)
+material,Kerikil,m3,300000,450000,retail-nasional-2026 (split)
+material,Kayu kelas III,m3,1600000,1600000,BP Batam SSH 2026 (= papan kayu kelas III)

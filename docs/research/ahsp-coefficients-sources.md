@@ -65,3 +65,28 @@ cat → sanitair → perpipaan → listrik.
 `ELEMENT_KODE_MAP` + takeoff qty formulas + `price_map.py` aliases for the new
 materials, **and Batam prices for 3 new trades** (`tukang_aluminium`, `tukang_pipa`,
 `tukang_listrik`) — else those lines flag `PRICE_MISSING`. Follow-on wiring task.
+
+---
+
+## Batch 3 — remaining WBS + a correction (2026-07-09)
+
+Same verified loop (NotebookLM index → pypdf verify). Scoped 24 more pekerjaan against
+the PDF; extracted + **pypdf-verified 15 discrete new codes** (composables like footplat/
+tangga/septictank are left to wiring — they're combos of existing beton+pembesian+
+bekisting). Again **100% faithful** on every coefficient.
+
+| File | Codes | Source § (hal.) |
+|---|---|---|
+| 15_beton_praktis | KOLOM_PRAKTIS, RING_PRAKTIS (composite: beton+besi+bekisting per m') | §2.2.1.10.1-2 (124-125) |
+| 16_arsitektur_lanjut | KUSEN.KAYU, HARDWARE.KUNCI_TANAM/ENGSEL/KAIT_ANGIN, ATAP.TALANG_DATAR/LISTPLANK, DINDING.ROSTER, CAT.PLAFON | §3.11.3.2 (299), §3.11.4.2/5/18 (302-310), §3.3.1/3 (200-201), §3.6.3.1 (221), §3.8.20 (242) |
+| 17_mep_fixtures | LISTRIK.STOP_KONTAK/SAKLAR/MCB_BOX, POMPA.JET_27, TANDON.TOREN_700 | §5.1.5.13 (457), §5.1.5.4 (453), §5.1.2.24 (448), §6.1.2.4 (575), §6.1.1.7 (569) |
+
+**CORRECTION (money+timeline path):** verifying §3.7.8 exposed that the batch-1
+firecrawl `ACAP.ACIAN.STANDAR` was off vs the official AHSP — semen **3.8→3.25** kg/m²,
+labour **0.12/0.06→0.20/0.10** OH. Updated `05_plesteran.yaml` to the authoritative value.
+This is exactly what dual-source verification is for: the firecrawl subset (rumahmaterial,
+SNI-format) drifted from the Permen-PUPR original; the official wins.
+
+**Total AHSP codes now: 68** (53 → 68). This is a complete single-storey Batam rumah
+WBS incl. beton praktis, kusen kayu, door hardware, talang/listplank, roster, cat plafon,
+stop kontak/saklar/MCB, pompa + toren. Still wiring-pending (see Batch-2 note).

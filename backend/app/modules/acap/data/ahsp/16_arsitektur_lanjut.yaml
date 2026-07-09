@@ -1,0 +1,109 @@
+# AHSP koefisien — Arsitektur lanjut (kusen kayu, hardware pintu, aksesoris atap,
+# roster, cat plafon)
+# Source: AHSP Bidang Cipta Karya (Lampiran IV), Permen PUPR No. 1/2022.
+# Verified 2026-07-09 line-by-line vs the official PDF (pypdf) — matched EXACTLY:
+#   §3.11.3.2 hal.299 (kusen kayu 6x12), §3.11.4.2 hal.302 (kunci tanam),
+#   §3.11.4.5 hal.303 (engsel), §3.11.4.18 hal.310 (kait angin),
+#   §3.3.1 hal.200 (talang datar seng), §3.3.3 hal.201 (listplank 3x20),
+#   §3.6.3.1 hal.221 (roster/kerawang), §3.8.20 hal.242 (cat plafon)
+# Cat plafon differs from cat tembok (§3.8.10): 1 dasar + 2 penutup, no plamur.
+kategori: arsitektur
+referensi: "AHSP Bidang Cipta Karya, Permen PUPR No. 1/2022 §3.11, §3.3, §3.6.3, §3.8.20"
+sumber: "AHSP Bidang Cipta Karya Lampiran IV (hal. 200-310) — Permen PUPR 1/2022"
+items:
+  - kode: ACAP.KUSEN.KAYU
+    uraian: "Pembuatan+pemasangan 1 m' kusen pintu/jendela kayu kelas I 6x12 cm"
+    satuan: m1
+    bahan:
+      - {nama: "Balok kayu 6/12", satuan: m3, koef: 0.0086}
+      - {nama: "Paku 10 cm", satuan: kg, koef: 0.1276}
+      - {nama: "Lem kayu", satuan: kg, koef: 1.0000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.2857}
+      - {jabatan: tukang_kayu, koef_oh: 0.1429}
+      - {jabatan: kepala_tukang, koef_oh: 0.0143}
+      - {jabatan: mandor, koef_oh: 0.0048}
+    alat: []
+  - kode: ACAP.HARDWARE.KUNCI_TANAM
+    uraian: "Pemasangan 1 buah kunci tanam biasa"
+    satuan: buah
+    bahan:
+      - {nama: "Kunci tanam biasa", satuan: buah, koef: 1.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.010}
+      - {jabatan: tukang_kayu, koef_oh: 0.500}
+      - {jabatan: kepala_tukang, koef_oh: 0.050}
+      - {jabatan: mandor, koef_oh: 0.017}
+    alat: []
+  - kode: ACAP.HARDWARE.ENGSEL
+    uraian: "Pemasangan 1 buah engsel pintu"
+    satuan: buah
+    bahan:
+      - {nama: "Engsel pintu", satuan: buah, koef: 1.00}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.015}
+      - {jabatan: tukang_kayu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.005}
+    alat: []
+  - kode: ACAP.HARDWARE.KAIT_ANGIN
+    uraian: "Pemasangan 1 buah kait angin/grendel jendela"
+    satuan: buah
+    bahan:
+      - {nama: "Kait angin", satuan: buah, koef: 1.00}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.015}
+      - {jabatan: tukang_kayu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.005}
+    alat: []
+  - kode: ACAP.ATAP.TALANG_DATAR
+    uraian: "Pemasangan 1 m' talang datar/jurai seng BJLS 28 lebar 90 cm"
+    satuan: m1
+    bahan:
+      - {nama: "Seng pelat", satuan: m1, koef: 1.050}
+      - {nama: "Paku biasa", satuan: kg, koef: 0.015}
+      - {nama: "Papan kayu kelas III", satuan: m3, koef: 0.019}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.2000}
+      - {jabatan: tukang, koef_oh: 0.2000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0200}
+      - {jabatan: mandor, koef_oh: 0.0067}
+    alat: []
+  - kode: ACAP.ATAP.LISTPLANK
+    uraian: "Pemasangan 1 m' listplank kayu kelas I/II ukuran 3x20 cm"
+    satuan: m1
+    bahan:
+      - {nama: "Papan kayu kelas III", satuan: m3, koef: 0.0108}
+      - {nama: "Paku biasa", satuan: kg, koef: 0.1000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.1000}
+      - {jabatan: tukang_kayu, koef_oh: 0.2000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0200}
+      - {jabatan: mandor, koef_oh: 0.0067}
+    alat: []
+  - kode: ACAP.DINDING.ROSTER
+    uraian: "Pemasangan 1 m2 dinding roster/kerawang 12x11x24 (spesi 1 PC : 3 PP)"
+    satuan: m2
+    bahan:
+      - {nama: "Bata roster", satuan: buah, koef: 36.46}
+      - {nama: "Semen portland", satuan: kg, koef: 11.00}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.035}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.2000}
+      - {jabatan: tukang_batu, koef_oh: 0.1000}
+      - {jabatan: kepala_tukang, koef_oh: 0.0100}
+      - {jabatan: mandor, koef_oh: 0.0033}
+    alat: []
+  - kode: ACAP.CAT.PLAFON
+    uraian: "Pengecatan 1 m2 plafon (1 lapis cat dasar, 2 lapis cat penutup)"
+    satuan: m2
+    bahan:
+      - {nama: "Cat dasar", satuan: kg, koef: 0.120}
+      - {nama: "Cat penutup", satuan: kg, koef: 0.180}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.0625}
+      - {jabatan: tukang_cat, koef_oh: 0.0625}
+      - {jabatan: kepala_tukang, koef_oh: 0.0063}
+      - {jabatan: mandor, koef_oh: 0.0021}
+    alat: []
