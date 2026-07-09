@@ -1,0 +1,99 @@
+# ACAP construction task sequence — static dependency template for a house.
+#
+# ponytail: this is a STATIC finish-to-start DAG, NOT a CPM/resource-levelling
+# solver. Each stage's earliest start = max(end of its `depends_on` stages);
+# stages that share a dependency but not each other run in parallel. Upgrade to
+# a real scheduler only when non-house / multi-crew-levelled projects arrive.
+#
+# `elements` map to app.modules.acap.rab.generator.ELEMENT_KODE_MAP labels, so
+# timeline durations are driven by the SAME take-off quantities as the RAB.
+# `crew` = number of workers on that stage's single crew (man-days / crew =
+# calendar days). `lead_days` = fixed days for a stage with no AHSP work item
+# (persiapan, serah-terima). Values below are reviewable small-house defaults.
+
+stages:
+  - name: persiapan
+    depends_on: []
+    crew: 4
+    lead_days: 3        # bowplank, pembersihan lahan, direksi keet
+    elements: []
+
+  - name: pondasi
+    depends_on: [persiapan]
+    crew: 4
+    lead_days: 0
+    elements: [pondasi]
+
+  - name: struktur
+    depends_on: [pondasi]
+    crew: 4
+    lead_days: 0
+    elements: [kolom_praktis, ring_praktis]
+
+  - name: dinding
+    depends_on: [struktur]
+    crew: 4
+    lead_days: 0
+    elements: [dinding]
+
+  - name: atap
+    depends_on: [dinding]
+    crew: 4
+    lead_days: 0
+    elements: [atap_rangka, atap_penutup, listplank]
+
+  # mep_roughin ∥ bukaan — both depend only on dinding, not each other.
+  - name: mep_roughin
+    depends_on: [dinding]
+    crew: 3
+    lead_days: 0
+    elements: [listrik_lampu, listrik_stopkontak, listrik_saklar, listrik_mcb, pipa_bersih, pipa_kotor]
+
+  - name: bukaan
+    depends_on: [dinding]
+    crew: 3
+    lead_days: 0
+    elements: [kusen_pintu, kusen_jendela, daun_pintu, daun_jendela, kaca, kunci, engsel, kait_angin]
+
+  - name: plesteran
+    depends_on: [mep_roughin]
+    crew: 4
+    lead_days: 0
+    elements: [plesteran, acian]
+
+  - name: plafon
+    depends_on: [atap, mep_roughin]
+    crew: 3
+    lead_days: 0
+    elements: [plafon_rangka, plafon_gypsum]
+
+  # lantai ∥ sanitair ∥ mep_fixtures — all wait only on plesteran.
+  - name: lantai
+    depends_on: [plesteran]
+    crew: 3
+    lead_days: 0
+    elements: [lantai_keramik]
+
+  - name: sanitair
+    depends_on: [plesteran]
+    crew: 2
+    lead_days: 0
+    elements: [km_waterproofing, km_keramik_dinding, km_floor_drain, km_kloset, km_kran]
+
+  - name: mep_fixtures
+    depends_on: [plesteran]
+    crew: 2
+    lead_days: 0
+    elements: [pompa, toren]
+
+  - name: pengecatan
+    depends_on: [plafon, lantai]
+    crew: 3
+    lead_days: 0
+    elements: [cat_tembok, cat_plafon]
+
+  - name: finishing
+    depends_on: [pengecatan, sanitair, bukaan, mep_fixtures]
+    crew: 3
+    lead_days: 2        # pembersihan akhir, serah terima
+    elements: []
