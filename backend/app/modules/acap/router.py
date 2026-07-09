@@ -190,3 +190,70 @@ async def save_layout_endpoint(
     logger.info("Saved edited layout v%d for project %s", version, project_id)
 
     return LayoutSaveResponse(version=version, plan=body.model_dump())
+
+
+# ── RAB (bill-of-quantities) generation ─────────────────────────────────────
+
+
+class GenerateRabResponse(BaseModel):
+    boq_id: _uuid.UUID
+    grand_total: str
+    subtotals_by_kategori: dict[str, str]
+    price_missing_lines: list[dict]
+    not_covered: list[str]
+
+
+@router.post("/projects/{project_id}/rab:generate")
+async def generate_rab_endpoint(
+    project_id: _uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: str = Depends(get_current_user_id),
+) -> GenerateRabResponse:
+    """Generate + persist a deterministic RAB (bill of quantities) for *project_id*.
+
+    Loads the latest saved FloorPlan, computes qty (pure geometry, see
+    :mod:`app.modules.acap.takeoff`) x AHSP koefisien x Batam material price
+    for the wall/finish scope (see :mod:`app.modules.acap.rab.generator`),
+    and persists the result as a BOQ + Positions. NO LLM anywhere in this
+    path — every number is deterministic; a missing Batam price is flagged
+    (never guessed) and surfaced in ``price_missing_lines``.
+
+    The persisted ``boq_id`` can be rendered immediately via the existing
+    ``GET /boqs/{boq_id}/export/pdf/`` endpoint (no new PDF code needed here).
+    """
+    from sqlalchemy import select
+
+    from app.modules.acap.models.floor_plan import FloorPlanRecord
+    from app.modules.acap.rab.generator import generate_rab, persist_rab
+
+    stmt = (
+        select(FloorPlanRecord)
+        .where(FloorPlanRecord.project_id == project_id)
+        .order_by(FloorPlanRecord.version.desc())
+        .limit(1)
+    )
+    record = (await session.execute(stmt)).scalars().first()
+    if record is None:
+        raise HTTPException(status_code=404, detail="No layout for this project")
+
+    plan = FloorPlan.model_validate(record.plan_json)
+    rab_result = await generate_rab(session, plan, project_id)
+    boq_id = await persist_rab(session, project_id, rab_result)
+
+    return GenerateRabResponse(
+        boq_id=boq_id,
+        grand_total=str(rab_result.grand_total),
+        subtotals_by_kategori={kategori: str(total) for kategori, total in rab_result.subtotals_by_kategori.items()},
+        price_missing_lines=[
+            {
+                "kode": line["kode"],
+                "uraian": line["uraian"],
+                "unit": line["unit"],
+                "quantity": str(line["quantity"]),
+                "missing_resources": line["missing_resources"],
+                "kategori": line["kategori"],
+            }
+            for line in rab_result.price_missing_lines
+        ],
+        not_covered=rab_result.not_covered,
+    )
