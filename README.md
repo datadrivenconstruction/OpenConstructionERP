@@ -1,3 +1,20 @@
+# AI Civil Architecture Platform (ACAP)
+
+> **Fork disclosure (AGPL-3.0).** This repository is a fork of
+> [datadrivenconstruction/OpenConstructionERP](https://github.com/datadrivenconstruction/OpenConstructionERP),
+> pinned at commit `721ce49601b8eb3a6b99b2fd2887870348dce6ef` (2026-07-08).
+> Upstream is licensed **AGPL-3.0**; this fork and all modifications are
+> likewise distributed under **AGPL-3.0** (see [LICENSE](LICENSE)). The
+> upstream remote is kept for monthly cherry-picks.
+>
+> **What this fork adds** (namespace `acap`, under `backend/app/modules/acap/`):
+> LLM-driven floor-plan generation → validated JSON (source of truth),
+> deterministic RAB from SNI/AHSP coefficients with Batam pricing, timeline
+> from AHSP labor coefficients, and visual render via indusia-image-gen.
+> The original OpenConstructionERP README follows below unchanged.
+
+---
+
 <div align="center">
 
 # OpenConstructionERP

@@ -401,3 +401,12 @@ frontend/scripts/_workflow-walk.mjs
 frontend/scripts/_shot-*.mjs
 frontend/scripts/_import-map-*.mjs
 frontend/scripts/_i18n_*.py
+
+# gaspol execution ledger (scratch)
+.gaspol/
+
+# local docker port override (machine-specific)
+docker-compose.acap-local.yml
+
+# generated knowledge graph
+graphify-out/
