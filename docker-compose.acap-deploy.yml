@@ -1,0 +1,44 @@
+# Local ACAP deploy — runs the CURRENT backend source (Phases 5-8) as a proper
+# compose service on the existing unified image (which already has every Python
+# dep). Sidesteps the unified image's Vite frontend build, which OOMs on a
+# < ~12 GB Docker Desktop. API only (SERVE_FRONTEND=false).
+#
+# Usage (brings up postgres + acap together; the seeded pg_data volume is shared
+# with the quickstart stack):
+#   export GEMINIGEN_API_KEY=...   # if not already in .env
+#   docker compose -f docker-compose.quickstart.yml \
+#                  -f docker-compose.acap-local.yml \
+#                  -f docker-compose.acap-deploy.yml up -d postgres acap
+services:
+  acap:
+    image: ai-civil-architecture-app          # existing unified image = all deps present
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/srv/be:ro                   # live current source; restart-safe
+      - app_data:/data
+    working_dir: /srv/be
+    environment:
+      DATABASE_URL: postgresql+asyncpg://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
+      DATABASE_SYNC_URL: postgresql://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      GEMINIGEN_API_KEY: ${GEMINIGEN_API_KEY:-}
+      PYTHONPATH: /srv/be
+      APP_ENV: production
+      APP_DEBUG: "false"
+      SERVE_FRONTEND: "false"
+      OE_DATA_DIR: /data
+      ALLOWED_ORIGINS: "http://localhost:8092"
+    entrypoint: ["sh", "-c"]
+    command: ["uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
+    ports:
+      - "8092:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s

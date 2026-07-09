@@ -33,9 +33,14 @@ async def session():
         yield s
 
 
+# The app authenticates as this owner; _make_project makes it the project owner
+# so the Phase-8 per-project authz guards (require_project_owner/access) pass.
+_TEST_OWNER = uuid.UUID("00000000-0000-0000-0000-0000000000aa")
+
+
 def _build_app(session) -> FastAPI:
     """A minimal app exposing the acap router with session/auth overridden."""
-    from app.dependencies import get_current_user_id
+    from app.dependencies import get_current_user_payload
     from app.modules.acap.router import get_session as acap_get_session
     from app.modules.acap.router import router as acap_router
 
@@ -46,19 +51,19 @@ def _build_app(session) -> FastAPI:
         # Hand the app the SAME transactional session the test set up.
         yield session
 
-    def _override_user_id() -> str:
-        return str(uuid.uuid4())
+    def _override_payload() -> dict:
+        return {"sub": str(_TEST_OWNER)}
 
     app.dependency_overrides[acap_get_session] = _override_session
-    app.dependency_overrides[get_current_user_id] = _override_user_id
+    app.dependency_overrides[get_current_user_payload] = _override_payload
     return app
 
 
 async def _make_project(session) -> uuid.UUID:
-    """Create a bare Project and return its id."""
+    """Create a bare Project owned by _TEST_OWNER and return its id."""
     from app.modules.projects.models import Project
 
-    project = Project(name=f"ACAP {uuid.uuid4().hex[:6]}", currency="IDR", owner_id=uuid.uuid4())
+    project = Project(name=f"ACAP {uuid.uuid4().hex[:6]}", currency="IDR", owner_id=_TEST_OWNER)
     session.add(project)
     await session.flush()
     return project.id
