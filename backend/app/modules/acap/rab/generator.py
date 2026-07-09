@@ -25,6 +25,7 @@ from sqlalchemy.orm import selectinload
 from app.modules.acap.layout.schema import FloorPlan
 from app.modules.acap.models.coefficients import AhspCoefficient
 from app.modules.acap.models.prices import MaterialPrice, Region
+from app.modules.acap.rab.price_map import resolve_price_ref
 from app.modules.acap.takeoff import takeoff
 
 # ── Scope map: element -> seeded AHSP kode (MVP wall/finish scope only) ─────
@@ -64,6 +65,7 @@ class RabResult:
     subtotals_by_kategori: dict[str, Decimal]
     grand_total: Decimal
     price_missing_lines: list[dict[str, Any]]
+    curated_lines: list[dict[str, Any]] = field(default_factory=list)
     not_covered: list[str] = field(default_factory=lambda: list(NOT_COVERED))
 
 
@@ -99,13 +101,22 @@ async def _load_coefficient(session: AsyncSession, kode: str) -> AhspCoefficient
     return (await session.execute(stmt)).scalars().first()
 
 
-async def unit_rate_for_kode(session: AsyncSession, kode: str) -> tuple[Decimal, list[str]]:
-    """Sum koef * midpoint_price(tipe, nama) over every resource of *kode*.
+async def unit_rate_for_kode(
+    session: AsyncSession, kode: str
+) -> tuple[Decimal, list[str], list[str]]:
+    """Sum koef * price * unit_factor over every resource of *kode*.
 
-    Returns (rate, missing) where ``missing`` lists the ``nama`` of every
-    resource with no Batam price match. A resource with no match contributes
-    NOTHING to ``rate`` (never a guessed component) — the caller decides
-    whether a non-empty ``missing`` invalidates the whole line.
+    Each resource is reconciled to a Batam price row via
+    :func:`app.modules.acap.rab.price_map.resolve_price_ref` (item_type/name
+    alias + unit-factor conversion), then priced with :func:`midpoint_price`.
+
+    Returns (rate, missing, curated):
+      * ``missing`` — resources with NO market price and NO curated fallback;
+        each contributes NOTHING (never a guessed component).
+      * ``curated`` — resources priced from a code-reviewed curated fallback
+        (no scraped market price exists, e.g. ``mandor``). Surfaced so a
+        curated component is never mistaken for a scraped one; every other
+        number stays 100% market-sourced.
 
     Raises:
         ValueError: *kode* does not exist in the AHSP coefficient DB (a
@@ -117,13 +128,18 @@ async def unit_rate_for_kode(session: AsyncSession, kode: str) -> tuple[Decimal,
 
     rate = Decimal("0")
     missing: list[str] = []
+    curated: list[str] = []
     for resource in coeff.resources:
-        price = await midpoint_price(session, resource.tipe, resource.nama)
+        ref = resolve_price_ref(resource.tipe, resource.nama)
+        price = await midpoint_price(session, ref.item_type, ref.item_name)
+        if price is None and ref.curated_rate is not None:
+            price = ref.curated_rate
+            curated.append(resource.nama)
         if price is None:
             missing.append(resource.nama)
             continue
-        rate += _dec(resource.koef) * price
-    return _quantize(rate), missing
+        rate += _dec(resource.koef) * price * ref.unit_factor
+    return _quantize(rate), missing, curated
 
 
 async def generate_rab(session: AsyncSession, plan: FloorPlan, project_id: uuid.UUID) -> RabResult:
@@ -147,7 +163,7 @@ async def generate_rab(session: AsyncSession, plan: FloorPlan, project_id: uuid.
         coeff = await _load_coefficient(session, kode)
         if coeff is None:
             raise ValueError(f"AHSP kode not found: {kode}")
-        rate, missing = await unit_rate_for_kode(session, kode)
+        rate, missing, curated = await unit_rate_for_kode(session, kode)
         qty = qty_by_element[element]
         price_missing = bool(missing)
         total = None if price_missing else _quantize(qty * rate)
@@ -161,6 +177,7 @@ async def generate_rab(session: AsyncSession, plan: FloorPlan, project_id: uuid.
                 "total": total,
                 "price_missing": price_missing,
                 "missing_resources": missing,
+                "curated_resources": curated,
                 "kategori": coeff.kategori,
             }
         )
@@ -172,12 +189,14 @@ async def generate_rab(session: AsyncSession, plan: FloorPlan, project_id: uuid.
 
     grand_total = _quantize(sum(subtotals.values(), Decimal("0")))
     price_missing_lines = [line for line in lines if line["price_missing"]]
+    curated_lines = [line for line in lines if line.get("curated_resources")]
 
     return RabResult(
         lines=lines,
         subtotals_by_kategori=subtotals,
         grand_total=grand_total,
         price_missing_lines=price_missing_lines,
+        curated_lines=curated_lines,
     )
 
 
@@ -238,6 +257,7 @@ async def persist_rab(session: AsyncSession, project_id: uuid.UUID, rab_result: 
                         "acap_kode": line["kode"],
                         "price_missing": price_missing,
                         "missing_resources": line["missing_resources"],
+                        "curated_resources": line.get("curated_resources", []),
                     },
                 )
             )

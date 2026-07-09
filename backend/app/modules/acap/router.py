@@ -199,7 +199,9 @@ class GenerateRabResponse(BaseModel):
     boq_id: _uuid.UUID
     grand_total: str
     subtotals_by_kategori: dict[str, str]
+    lines: list[dict]
     price_missing_lines: list[dict]
+    curated_lines: list[dict]
     not_covered: list[str]
 
 
@@ -240,20 +242,26 @@ async def generate_rab_endpoint(
     rab_result = await generate_rab(session, plan, project_id)
     boq_id = await persist_rab(session, project_id, rab_result)
 
+    def _line_summary(line: dict) -> dict:
+        return {
+            "kode": line["kode"],
+            "uraian": line["uraian"],
+            "unit": line["unit"],
+            "quantity": str(line["quantity"]),
+            "unit_rate": None if line["unit_rate"] is None else str(line["unit_rate"]),
+            "total": None if line["total"] is None else str(line["total"]),
+            "kategori": line["kategori"],
+            "price_missing": line["price_missing"],
+            "missing_resources": line["missing_resources"],
+            "curated_resources": line.get("curated_resources", []),
+        }
+
     return GenerateRabResponse(
         boq_id=boq_id,
         grand_total=str(rab_result.grand_total),
         subtotals_by_kategori={kategori: str(total) for kategori, total in rab_result.subtotals_by_kategori.items()},
-        price_missing_lines=[
-            {
-                "kode": line["kode"],
-                "uraian": line["uraian"],
-                "unit": line["unit"],
-                "quantity": str(line["quantity"]),
-                "missing_resources": line["missing_resources"],
-                "kategori": line["kategori"],
-            }
-            for line in rab_result.price_missing_lines
-        ],
+        lines=[_line_summary(line) for line in rab_result.lines],
+        price_missing_lines=[_line_summary(line) for line in rab_result.price_missing_lines],
+        curated_lines=[_line_summary(line) for line in rab_result.curated_lines],
         not_covered=rab_result.not_covered,
     )

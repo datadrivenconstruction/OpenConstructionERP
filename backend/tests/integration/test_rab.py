@@ -105,9 +105,10 @@ async def test_unit_rate_exact_worked_example(session):
     await _add_price(session, region_id, item_type="bahan", item_name="BataX", price_min=1000, price_max=1200)
     await _add_price(session, region_id, item_type="tenaga", item_name="TukangX", price_min=150000, price_max=150000)
 
-    rate, missing = await unit_rate_for_kode(session, "TEST.WALL")
+    rate, missing, curated = await unit_rate_for_kode(session, "TEST.WALL")
 
     assert missing == []
+    assert curated == []  # BataX/TukangX are not aliased -> direct match, factor 1
     assert rate == Decimal("122000.00")
 
 
@@ -153,9 +154,10 @@ async def test_unit_rate_price_missing_resource_flagged(session):
     await _add_price(session, region_id, item_type="tenaga", item_name="TukangX", price_min=150000, price_max=150000)
     # Deliberately no price for "BataY".
 
-    rate, missing = await unit_rate_for_kode(session, "TEST.WALL.MISSING")
+    rate, missing, curated = await unit_rate_for_kode(session, "TEST.WALL.MISSING")
 
     assert missing == ["BataY"]
+    assert curated == []
     # Never a guessed number for the missing component: only the matched
     # tenaga contributes (0.1 * 150000 = 15000).
     assert rate == Decimal("15000.00")
@@ -183,7 +185,7 @@ async def test_takeoff_qty_times_rate_exact(session):
     await _add_price(session, region_id, item_type="bahan", item_name="BataX", price_min=1000, price_max=1200)
     await _add_price(session, region_id, item_type="tenaga", item_name="TukangX", price_min=150000, price_max=150000)
 
-    rate, missing = await unit_rate_for_kode(session, "TEST.WALL")
+    rate, missing, _curated = await unit_rate_for_kode(session, "TEST.WALL")
     assert missing == []
     assert rate == Decimal("122000.00")
 
@@ -216,17 +218,48 @@ def _plan_one_room_no_openings() -> FloorPlan:
 
 
 async def _seed_full_wall_finish_prices(session, region_id: uuid.UUID, *, include_pasir: bool = True) -> None:
-    """Seed Batam prices for every bahan/tenaga resource used by
-    ACAP.DINDING.BATA_MERAH_1_4 / ACAP.PLESTERAN.1_4 / ACAP.ACIAN.STANDAR.
+    """Seed Batam prices under the RECONCILED (aliased) item_type/item_name for
+    every resource of ACAP.DINDING.BATA_MERAH_1_4 / ACAP.PLESTERAN.1_4 /
+    ACAP.ACIAN.STANDAR — i.e. what the real scraper produces + price_map aliases.
+    ``mandor`` is intentionally NOT seeded: it is priced via the code-level
+    curated fallback in price_map.py.
     """
-    await _add_price(session, region_id, item_type="bahan", item_name="Bata merah", price_min=900, price_max=1100)
-    await _add_price(session, region_id, item_type="bahan", item_name="Semen portland", price_min=1500, price_max=1700)
+    await _add_price(session, region_id, item_type="material", item_name="Bata merah", price_min=900, price_max=1100)
+    # Semen priced per 50-kg sak; price_map applies the /50 unit factor.
+    await _add_price(session, region_id, item_type="material", item_name="Semen (50 kg)", price_min=75000, price_max=85000)
     if include_pasir:
-        await _add_price(session, region_id, item_type="bahan", item_name="Pasir pasang", price_min=250000, price_max=300000)
-    await _add_price(session, region_id, item_type="tenaga", item_name="pekerja", price_min=120000, price_max=120000)
-    await _add_price(session, region_id, item_type="tenaga", item_name="tukang_batu", price_min=140000, price_max=140000)
-    await _add_price(session, region_id, item_type="tenaga", item_name="kepala_tukang", price_min=160000, price_max=160000)
-    await _add_price(session, region_id, item_type="tenaga", item_name="mandor", price_min=180000, price_max=180000)
+        await _add_price(session, region_id, item_type="material", item_name="Pasir m³", price_min=250000, price_max=300000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Pembantu Tukang", price_min=120000, price_max=120000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Tukang Batu", price_min=140000, price_max=140000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Kepala Tukang", price_min=160000, price_max=160000)
+
+
+@pytest.mark.asyncio
+async def test_reconciliation_alias_unit_factor_and_curated(session):
+    """Locks the money reconciliation: item_type/name alias, the semen /50
+    unit factor, and the curated mandor fallback — exact rupiah.
+
+    ACIAN.STANDAR resources: Semen portland 3.8 kg, pekerja 0.12, tukang_batu
+    0.06, kepala_tukang 0.006, mandor 0.003 OH.
+      semen        3.8   * (100000/50 = 2000) = 7600
+      pekerja      0.12  * 100000             = 12000
+      tukang_batu  0.06  * 140000             = 8400
+      kepala_tukang 0.006 * 175000            = 1050
+      mandor(curated 180000) 0.003 * 180000   = 540
+      total                                    = 29590
+    """
+    await seed_ahsp(session)
+    region_id = await _seed_batam_region(session)
+    await _add_price(session, region_id, item_type="material", item_name="Semen (50 kg)", price_min=100000, price_max=100000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Pembantu Tukang", price_min=100000, price_max=100000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Tukang Batu", price_min=140000, price_max=140000)
+    await _add_price(session, region_id, item_type="upah_harian", item_name="Kepala Tukang", price_min=175000, price_max=175000)
+
+    rate, missing, curated = await unit_rate_for_kode(session, "ACAP.ACIAN.STANDAR")
+
+    assert missing == []
+    assert curated == ["mandor"]  # priced from the curated fallback, surfaced
+    assert rate == Decimal("29590.00")
 
 
 @pytest.mark.asyncio
