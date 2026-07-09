@@ -1,0 +1,60 @@
+# AHSP koefisien — Pekerjaan Dinding (masonry, ½-bata)
+# Source: https://www.rumahmaterial.com/2014/09/analisa-harga-satuan-pasangan-dinding.html (statusCode 200)
+# Standard: SNI 6897 / AHSP. Labour unit = OH. Verified 2026-07-09.
+# Semen normalised sak(50kg)→kg. Per m2 dinding ½ bata.
+kategori: dinding
+referensi: "SNI 6897:2008 / AHSP Permen PUPR No. 1/2022"
+sumber: "https://www.rumahmaterial.com/2014/09/analisa-harga-satuan-pasangan-dinding.html"
+items:
+  - kode: ACAP.DINDING.BATA_MERAH_1_2
+    uraian: "Pasangan dinding bata merah ½ bata, spesi 1 PC : 2 PP"
+    satuan: m2
+    bahan:
+      - {nama: "Bata merah", satuan: bh, koef: 72.000}
+      - {nama: "Semen portland", satuan: kg, koef: 18.600}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.024}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.300}
+      - {jabatan: tukang_batu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.008}
+    alat: []
+  - kode: ACAP.DINDING.BATA_MERAH_1_3
+    uraian: "Pasangan dinding bata merah ½ bata, spesi 1 PC : 3 PP"
+    satuan: m2
+    bahan:
+      - {nama: "Bata merah", satuan: bh, koef: 72.000}
+      - {nama: "Semen portland", satuan: kg, koef: 13.950}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.026}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.300}
+      - {jabatan: tukang_batu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.008}
+    alat: []
+  - kode: ACAP.DINDING.BATA_MERAH_1_4
+    uraian: "Pasangan dinding bata merah ½ bata, spesi 1 PC : 4 PP"
+    satuan: m2
+    bahan:
+      - {nama: "Bata merah", satuan: bh, koef: 72.000}
+      - {nama: "Semen portland", satuan: kg, koef: 11.150}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.028}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.300}
+      - {jabatan: tukang_batu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.008}
+    alat: []
+  - kode: ACAP.DINDING.BATA_MERAH_1_5
+    uraian: "Pasangan dinding bata merah ½ bata, spesi 1 PC : 5 PP"
+    satuan: m2
+    bahan:
+      - {nama: "Bata merah", satuan: bh, koef: 72.000}
+      - {nama: "Semen portland", satuan: kg, koef: 9.300}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.029}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.300}
+      - {jabatan: tukang_batu, koef_oh: 0.150}
+      - {jabatan: kepala_tukang, koef_oh: 0.015}
+      - {jabatan: mandor, koef_oh: 0.008}
+    alat: []

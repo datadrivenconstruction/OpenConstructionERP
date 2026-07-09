@@ -1,0 +1,98 @@
+# AHSP koefisien — Pekerjaan Beton (concrete)
+# Source: https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-beton-sni.html (statusCode 200)
+# Standard: SNI 7394 / AHSP Permen PUPR (kode A.4.1.1.x). Labour unit = OH. Verified 2026-07-09.
+# Aggregate quoted in kg (bobot isi pasir 1400 kg/m3, kerikil 1350 kg/m3 per source).
+kategori: beton
+referensi: "SNI 7394:2008 / AHSP Permen PUPR No. 1/2022"
+sumber: "https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-beton-sni.html"
+items:
+  - kode: ACAP.BETON.K100
+    uraian: "Beton mutu f'c=7.4 MPa (K100), slump (12±2) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.1"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 247.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 869.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 999.000}
+      - {nama: "Air", satuan: liter, koef: 215.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.650}
+      - {jabatan: tukang_batu, koef_oh: 0.275}
+      - {jabatan: kepala_tukang, koef_oh: 0.028}
+      - {jabatan: mandor, koef_oh: 0.083}
+    alat: []
+  - kode: ACAP.BETON.LANTAI_KERJA_K100
+    uraian: "Lantai kerja beton mutu f'c=7.4 MPa (K100), slump (3-6) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.4"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 230.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 893.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 1027.000}
+      - {nama: "Air", satuan: liter, koef: 200.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.200}
+      - {jabatan: tukang_batu, koef_oh: 0.200}
+      - {jabatan: kepala_tukang, koef_oh: 0.020}
+      - {jabatan: mandor, koef_oh: 0.060}
+    alat: []
+  - kode: ACAP.BETON.K150
+    uraian: "Beton mutu f'c=12.2 MPa (K150), slump (12±2) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.3"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 299.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 799.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 1017.000}
+      - {nama: "Air", satuan: liter, koef: 215.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.650}
+      - {jabatan: tukang_batu, koef_oh: 0.275}
+      - {jabatan: kepala_tukang, koef_oh: 0.028}
+      - {jabatan: mandor, koef_oh: 0.083}
+    alat: []
+  - kode: ACAP.BETON.K175
+    uraian: "Beton mutu f'c=14.5 MPa (K175), slump (12±2) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.5"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 326.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 760.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 1029.000}
+      - {nama: "Air", satuan: liter, koef: 215.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.650}
+      - {jabatan: tukang_batu, koef_oh: 0.275}
+      - {jabatan: kepala_tukang, koef_oh: 0.028}
+      - {jabatan: mandor, koef_oh: 0.083}
+    alat: []
+  - kode: ACAP.BETON.K225
+    uraian: "Beton mutu f'c=19.3 MPa (K225), slump (12±2) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.7"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 371.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 698.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 1047.000}
+      - {nama: "Air", satuan: liter, koef: 215.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.650}
+      - {jabatan: tukang_batu, koef_oh: 0.275}
+      - {jabatan: kepala_tukang, koef_oh: 0.028}
+      - {jabatan: mandor, koef_oh: 0.083}
+    alat: []
+  - kode: ACAP.BETON.K300
+    uraian: "Beton mutu f'c=26.4 MPa (K300), slump (12±2) cm"
+    satuan: m3
+    referensi_kode: "A.4.1.1.10"
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 413.000}
+      - {nama: "Pasir beton", satuan: kg, koef: 681.000}
+      - {nama: "Kerikil (maks 30mm)", satuan: kg, koef: 1021.000}
+      - {nama: "Air", satuan: liter, koef: 215.000}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 1.650}
+      - {jabatan: tukang_batu, koef_oh: 0.275}
+      - {jabatan: kepala_tukang, koef_oh: 0.028}
+      - {jabatan: mandor, koef_oh: 0.083}
+    alat: []

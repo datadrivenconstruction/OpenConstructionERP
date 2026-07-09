@@ -1,0 +1,81 @@
+# AHSP koefisien — Pekerjaan Tanah (earthwork)
+# Source: https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-pekerjaan-tanah.html (statusCode 200)
+# Standard: SNI 2835 / AHSP Permen PUPR. Labour unit = OH (orang-hari). Verified 2026-07-09.
+# See docs/research/ahsp-coefficients-sources.md for provenance + the discarded 404-hallucination note.
+kategori: tanah
+referensi: "SNI 2835:2008 / AHSP Permen PUPR No. 1/2022"
+sumber: "https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-pekerjaan-tanah.html"
+items:
+  - kode: ACAP.TANAH.GALIAN_BIASA_1M
+    uraian: "Galian tanah biasa sedalam 1 m"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.750
+      - jabatan: mandor
+        koef_oh: 0.025
+    alat: []
+  - kode: ACAP.TANAH.GALIAN_BIASA_2M
+    uraian: "Galian tanah biasa sedalam 2 m"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.900
+      - jabatan: mandor
+        koef_oh: 0.045
+    alat: []
+  - kode: ACAP.TANAH.GALIAN_BIASA_3M
+    uraian: "Galian tanah biasa sedalam 3 m"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 1.050
+      - jabatan: mandor
+        koef_oh: 0.067
+    alat: []
+  - kode: ACAP.TANAH.URUGAN_KEMBALI
+    uraian: "Pengurugan kembali galian tanah"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.500
+      - jabatan: mandor
+        koef_oh: 0.050
+    alat: []
+  - kode: ACAP.TANAH.PEMADATAN
+    uraian: "Pemadatan tanah (per 20 cm)"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.500
+      - jabatan: mandor
+        koef_oh: 0.050
+    alat: []
+  - kode: ACAP.TANAH.BUANG_TANAH_30M
+    uraian: "Pembuangan tanah sejauh 30 m"
+    satuan: m3
+    bahan: []
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.330
+      - jabatan: mandor
+        koef_oh: 0.010
+    alat: []
+  - kode: ACAP.TANAH.URUGAN_PASIR
+    uraian: "Pengurugan dengan pasir urug"
+    satuan: m3
+    bahan:
+      - nama: "Pasir urug"
+        satuan: m3
+        koef: 1.200
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.300
+      - jabatan: mandor
+        koef_oh: 0.010
+    alat: []

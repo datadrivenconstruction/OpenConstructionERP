@@ -1,0 +1,68 @@
+# AHSP koefisien — Pekerjaan Plesteran & Acian (finishing prep)
+# Source: https://www.rumahmaterial.com/2015/01/analisa-harga-satuan-plesteran-dan.html (statusCode 200)
+# Standard: SNI 2837 / AHSP. Labour unit = OH. Verified 2026-07-09.
+# Semen normalised sak(50kg)→kg. Plesteran tebal 2.5 cm per m2.
+# kategori=finishing so the interior/finishing layer (D3) is accommodated from Phase 1.
+kategori: finishing
+referensi: "SNI 2837:2008 / AHSP Permen PUPR No. 1/2022"
+sumber: "https://www.rumahmaterial.com/2015/01/analisa-harga-satuan-plesteran-dan.html"
+items:
+  - kode: ACAP.PLESTERAN.1_2
+    uraian: "Plesteran spesi 1 PC : 2 PP, tebal 2.5 cm"
+    satuan: m2
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 16.650}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.021}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.250}
+      - {jabatan: tukang_batu, koef_oh: 0.125}
+      - {jabatan: kepala_tukang, koef_oh: 0.013}
+      - {jabatan: mandor, koef_oh: 0.007}
+    alat: []
+  - kode: ACAP.PLESTERAN.1_3
+    uraian: "Plesteran spesi 1 PC : 3 PP, tebal 2.5 cm"
+    satuan: m2
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 12.450}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.024}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.250}
+      - {jabatan: tukang_batu, koef_oh: 0.125}
+      - {jabatan: kepala_tukang, koef_oh: 0.013}
+      - {jabatan: mandor, koef_oh: 0.007}
+    alat: []
+  - kode: ACAP.PLESTERAN.1_4
+    uraian: "Plesteran spesi 1 PC : 4 PP, tebal 2.5 cm"
+    satuan: m2
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 10.000}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.025}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.250}
+      - {jabatan: tukang_batu, koef_oh: 0.125}
+      - {jabatan: kepala_tukang, koef_oh: 0.013}
+      - {jabatan: mandor, koef_oh: 0.007}
+    alat: []
+  - kode: ACAP.PLESTERAN.1_5
+    uraian: "Plesteran spesi 1 PC : 5 PP, tebal 2.5 cm"
+    satuan: m2
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 8.300}
+      - {nama: "Pasir pasang", satuan: m3, koef: 0.026}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.250}
+      - {jabatan: tukang_batu, koef_oh: 0.125}
+      - {jabatan: kepala_tukang, koef_oh: 0.013}
+      - {jabatan: mandor, koef_oh: 0.007}
+    alat: []
+  - kode: ACAP.ACIAN.STANDAR
+    uraian: "Acian dinding"
+    satuan: m2
+    bahan:
+      - {nama: "Semen portland", satuan: kg, koef: 3.800}
+    tenaga:
+      - {jabatan: pekerja, koef_oh: 0.120}
+      - {jabatan: tukang_batu, koef_oh: 0.060}
+      - {jabatan: kepala_tukang, koef_oh: 0.006}
+      - {jabatan: mandor, koef_oh: 0.003}
+    alat: []

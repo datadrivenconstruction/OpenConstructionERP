@@ -1,0 +1,96 @@
+# AHSP koefisien — Pekerjaan Pondasi (foundation)
+# Source: https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-pondasi-sni.html (statusCode 200)
+# Standard: SNI 2836 / AHSP Permen PUPR. Labour unit = OH. Verified 2026-07-09.
+kategori: pondasi
+referensi: "SNI 2836:2008 / AHSP Permen PUPR No. 1/2022"
+sumber: "https://www.rumahmaterial.com/2020/11/analisa-harga-satuan-pondasi-sni.html"
+items:
+  - kode: ACAP.PONDASI.AANSTAMPING
+    uraian: "Pasangan batu kosong (aanstamping)"
+    satuan: m3
+    bahan:
+      - nama: "Batu belah"
+        satuan: m3
+        koef: 1.200
+      - nama: "Pasir urug"
+        satuan: m3
+        koef: 0.432
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 0.780
+      - jabatan: tukang_batu
+        koef_oh: 0.390
+      - jabatan: kepala_tukang
+        koef_oh: 0.039
+      - jabatan: mandor
+        koef_oh: 0.039
+    alat: []
+  - kode: ACAP.PONDASI.BATU_BELAH_1_3
+    uraian: "Pasangan pondasi batu belah campuran 1 SP : 3 PP"
+    satuan: m3
+    bahan:
+      - nama: "Batu belah"
+        satuan: m3
+        koef: 1.200
+      - nama: "Semen portland"
+        satuan: kg
+        koef: 202.000
+      - nama: "Pasir pasang"
+        satuan: m3
+        koef: 0.485
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 1.500
+      - jabatan: tukang_batu
+        koef_oh: 0.750
+      - jabatan: kepala_tukang
+        koef_oh: 0.075
+      - jabatan: mandor
+        koef_oh: 0.075
+    alat: []
+  - kode: ACAP.PONDASI.BATU_BELAH_1_4
+    uraian: "Pasangan pondasi batu belah campuran 1 SP : 4 PP"
+    satuan: m3
+    bahan:
+      - nama: "Batu belah"
+        satuan: m3
+        koef: 1.200
+      - nama: "Semen portland"
+        satuan: kg
+        koef: 163.000
+      - nama: "Pasir pasang"
+        satuan: m3
+        koef: 0.520
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 1.500
+      - jabatan: tukang_batu
+        koef_oh: 0.750
+      - jabatan: kepala_tukang
+        koef_oh: 0.075
+      - jabatan: mandor
+        koef_oh: 0.075
+    alat: []
+  - kode: ACAP.PONDASI.BATU_BELAH_1_5
+    uraian: "Pasangan pondasi batu belah campuran 1 SP : 5 PP"
+    satuan: m3
+    bahan:
+      - nama: "Batu belah"
+        satuan: m3
+        koef: 1.200
+      - nama: "Semen portland"
+        satuan: kg
+        koef: 136.000
+      - nama: "Pasir pasang"
+        satuan: m3
+        koef: 0.544
+    tenaga:
+      - jabatan: pekerja
+        koef_oh: 1.500
+      - jabatan: tukang_batu
+        koef_oh: 0.750
+      - jabatan: kepala_tukang
+        koef_oh: 0.075
+      - jabatan: mandor
+        koef_oh: 0.075
+    alat: []
