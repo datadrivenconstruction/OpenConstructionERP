@@ -36,6 +36,17 @@ Re-running the RAB after load: every wall/finish line prices from real market da
 **zero PRICE_MISSING, zero curated fallback** (mandor is now market-priced). Dinding
 unit rate dropped (bata 1,800→1,075/pc) while plesteran/acian rose (truer Batam labour).
 
+## Batch 2 — additional categories (sanitair / listrik / kusen / plafon / atap)
+A second `data-table` over the same notebook targeted these categories. The raw
+output was **much noisier** — SBM government-budget junk (airfare, meeting-room
+rental), English/Indonesian duplicate rows across 6+ sources, and absurd values
+(LED 100W = Rp 1jt, a pipe-install row with min>max). It was **not** loaded raw.
+Instead a hand-curated, deduped, sane subset of **35 material rows** (Indonesian
+canonical names, `readymix.co.id` / `smsperkasa.com` / Batam toko-derived) was
+appended to the CSV; all jasa-pasang duplicates and junk were dropped. These have
+NO AHSP code yet, so they don't affect the RAB — they pre-stock the catalog for
+when the foundation/floor/roof/MEP AHSP batch is seeded. CSV now 72 rows total.
+
 ## Refresh
 Re-run the NotebookLM research + `generate data-table`, re-curate, overwrite the CSV,
 re-run the loader. `scraped_at` recency means fresh rows win over older ones in the RAB.
