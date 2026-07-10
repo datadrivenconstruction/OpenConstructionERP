@@ -52,6 +52,16 @@ DENY_PATTERNS = [
     r"(^|/)qa-screenshots/",
     r"(^|/)scripts/[^/]*_report\.(json|txt)$",
     r"(^|/)[^/]*__audit_report\.md$",
+    # Cost-base build pipeline internal notes: reports, plans, feasibility
+    # studies, dossiers, runbooks, activation notes and the platform
+    # integration guide. Emitted beside the country parquets; local only.
+    r"(^|/)[A-Z][A-Z0-9_]*_REPORT(_FULL)?\.md$",
+    r"(^|/)[A-Z][A-Z0-9_]*_PLAN\.md$",
+    r"(^|/)[A-Z][A-Z0-9_]*_FEASIBILITY\.md$",
+    r"(^|/)[A-Z][A-Z0-9_]*_(DOSSIER|RUNBOOK)\.md$",
+    r"(^|/)WORLD_[A-Z0-9_]*_INDEX\.md$",
+    r"(^|/)[A-Z][A-Z0-9_]*_ACTIVATION\.md$",
+    r"(^|/)INTEGRATION_GUIDE[^/]*\.md$",
 ]
 _RX = [re.compile(p) for p in DENY_PATTERNS]
 

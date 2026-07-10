@@ -391,3 +391,35 @@ frontend/scripts/_workflow-walk.mjs
 frontend/scripts/_shot-*.mjs
 frontend/scripts/_import-map-*.mjs
 frontend/scripts/_i18n_*.py
+
+# --- Cost-base (CWICR) working artifacts: local only, never publish ---
+# The multi-country cost-base build pipeline emits large spreadsheets, probe
+# dumps and internal notes into the repo root and a couple of working trees.
+# They are data-engineering scratch, not product source (real catalogs live
+# under data/catalog/, real parquets are handled elsewhere). Constraint #9:
+# these must never reach the repo or a build. Root-anchored so they cannot
+# shadow tracked files under data/, marketing-site/, backend/ or docs/.
+/WORLD_COST_BASES/
+/cn_regional_price_variants/
+/_bug*_data_*/
+# Country cost-base spreadsheets and CSV dumps are experiment outputs.
+/*.xlsx
+/*.csv
+~$*.xlsx
+# Internal country reports, plans, feasibility notes and indexes.
+/*_REPORT.md
+/*_PLAN.md
+/*_INDEX.md
+/*_FEASIBILITY.md
+/TURKEY_*.md
+/turkey_columns_answer.md
+# Probe / debug dumps and one-off scratch scripts left at the repo root.
+/_costs*.json
+/_health.json
+/_openapi.json
+/_tok*.json
+/atoe.bin
+/nul
+/translate_*.py
+# Pre-redesign backups (the existing *.backup.* rule misses the .bak suffix).
+*.pre-redesign.bak
