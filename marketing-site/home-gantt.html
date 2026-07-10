@@ -12,149 +12,207 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Gantt Poster design language:
-   paper #fafaf8 · ink #101010 · accent #0284c7 · today #ef4444
-   square corners · hairlines · mono labels · Inter Tight display */
+/* Gantt Poster design language · refined pass
+   paper #f7f8f7 · cards #fff · ink #16181d · accent #0284c7 · today #ef5350
+   hairlines + soft shadows instead of hard borders · 4-12px radii · mono labels */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#fafaf8;color:#101010;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f7f8f7 linear-gradient(180deg,#edf4f9 0,#f7f8f7 560px) no-repeat;color:#16181d;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 .pz{width:min(1240px,calc(100% - 88px));margin:0 auto}
 @media(max-width:720px){.pz{width:calc(100% - 40px)}}
-.p-sec{padding:92px 0 0}
-.p-btn{cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:#101010;color:#fff;font-weight:600;font-size:14px;padding:15px 24px;border:0}
-.p-btn.acc{background:#0284c7}
-.p-btn:hover{background:#0284c7}
-.p-btn.acc:hover{background:#101010}
-.p-link{cursor:pointer;display:inline-block;font-weight:600;font-size:14px;border-bottom:2px solid #101010;padding-bottom:3px}
+.p-sec{padding:96px 0 0}
+.p-btn{cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:#16181d;color:#fff;font-weight:600;font-size:14px;padding:14px 24px;border:0;border-radius:9px;transition:background .18s,transform .18s,box-shadow .18s}
+.p-btn.acc{background:#0284c7;box-shadow:0 10px 24px -12px rgba(2,132,199,.55)}
+.p-btn:hover{background:#0284c7;transform:translateY(-1px)}
+.p-btn.acc:hover{background:#16181d;box-shadow:none}
+.p-link{cursor:pointer;display:inline-block;font-weight:600;font-size:14px;border-bottom:1.5px solid rgba(22,24,29,.55);padding-bottom:3px;transition:color .15s,border-color .15s}
 .p-link:hover{color:#0284c7;border-color:#0284c7}
 @media(prefers-reduced-motion:no-preference){
-  .p-sec{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-  .p-sec.in{opacity:1;transform:none}
+  .p-sec{opacity:0;transition:opacity .45s ease}
+  .p-sec.in{opacity:1}
+  .viz-scurve path.anim{stroke-dasharray:900;stroke-dashoffset:900;transition:stroke-dashoffset 1.2s ease .45s}
+  .p-sec.in .viz-scurve path.anim{stroke-dashoffset:0}
+  .viz-scurve .fade{opacity:0;transition:opacity .9s ease 1.15s}
+  .p-sec.in .viz-scurve .fade{opacity:1}
+  .viz-scurve .fade2{opacity:0;transition:opacity .7s ease .2s}
+  .p-sec.in .viz-scurve .fade2{opacity:1}
+  .tr-bar i{transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.7,.2,1) .25s}
+  .p-sec.in .tr-bar i{transform:scaleX(1)}
+  .bl-track .paid,.bl-track .committed{transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.7,.2,1) .35s}
+  .p-sec.in .bl-track .paid,.p-sec.in .bl-track .committed{transform:scaleX(1)}
 }
+/* card primitive */
+.card{background:#fff;border:1px solid rgba(18,20,26,.08);border-radius:12px;box-shadow:0 1px 2px rgba(18,22,30,.04),0 16px 40px -26px rgba(18,22,30,.16)}
 
 /* top line + nav */
-.p-topline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a9098;padding:14px 0;border-bottom:1px solid rgba(16,16,16,.14)}
+.p-topline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#9aa3ad;padding:14px 0;border-bottom:1px solid rgba(18,20,26,.08)}
 .p-topline b{color:#0284c7;font-weight:500}
-.p-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0}
+.p-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0}
 .p-logo{font:800 17px/1 'Inter Tight',sans-serif;letter-spacing:-.02em;white-space:nowrap}
 .p-logo .l2{color:#6b7280;font-weight:600}
 .p-logo .l3{color:#0284c7}
 .p-links{display:flex;gap:26px;font-size:14px;font-weight:500;color:#5c6675}
 .p-links a{transition:color .15s}
-.p-links a:hover{color:#101010}
+.p-links a:hover{color:#16181d}
 .p-navr{display:flex;align-items:center;gap:10px}
-.p-ghost{cursor:pointer;font-size:13.5px;font-weight:600;color:#101010;border:1px solid rgba(16,16,16,.3);padding:9px 15px}
-.p-ghost:hover{border-color:#0284c7;color:#0284c7}
-.p-navbtn{cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:#101010;padding:10px 17px}
+.p-ghost{cursor:pointer;font-size:13.5px;font-weight:600;color:#16181d;border:1px solid rgba(22,24,29,.16);padding:9px 15px;border-radius:9px;transition:border-color .15s,color .15s}
+.p-ghost:hover{border-color:rgba(2,132,199,.5);color:#0284c7}
+.p-navbtn{cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:#16181d;padding:10px 17px;border-radius:9px;transition:background .18s}
 .p-navbtn:hover{background:#0284c7}
-.p-navwrap{border-bottom:1px solid rgba(16,16,16,.18)}
+.p-navwrap{border-bottom:1px solid rgba(18,20,26,.08);background:rgba(247,248,247,.9)}
 @media(max-width:880px){.p-links{display:none}}
 
-/* gantt primitives */
-.gchart{position:relative;border:1px solid rgba(16,16,16,.4);background-image:linear-gradient(90deg,rgba(16,16,16,.07) 1px,transparent 1px);background-size:calc(100%/12) 100%;overflow:hidden}
-.gscale{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(16,16,16,.22);font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#9aa0a6;text-transform:uppercase}
-.gscale span{padding:9px 0 9px 8px}
-.gtoday{position:absolute;top:0;bottom:0;width:2px;background:#ef4444;z-index:3}
-.gtoday b{position:absolute;top:6px;left:7px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef4444;padding:5px 7px;white-space:nowrap}
+/* gantt chart primitives */
+.gchart{position:relative;background:#fff;border:1px solid rgba(18,20,26,.08);border-radius:14px;box-shadow:0 1px 2px rgba(18,22,30,.04),0 20px 50px -30px rgba(18,22,30,.18);overflow:hidden}
+.gchart::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,rgba(18,20,26,.045) 1px,transparent 1px);background-size:calc(100%/12) 100%;border-radius:inherit}
+.gscale{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(18,20,26,.08);font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#a3adb8;text-transform:uppercase;position:relative;z-index:2}
+.gscale span{padding:10px 0 10px 9px}
+.gtoday{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(239,83,80,.85);z-index:3}
+.gtoday b{position:absolute;top:8px;left:8px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(239,83,80,.6)}
 
 /* ============ block 1 · hero ============ */
 .p-hero{padding-top:52px}
-.p-eyebrow{display:inline-flex;align-items:center;gap:9px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:18px}
-.p-eyebrow i{width:8px;height:8px;background:#16a34a;display:inline-block;animation:pulse 2.2s ease-in-out infinite}
+.p-eyebrow{display:inline-flex;align-items:center;gap:9px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#7c8694;margin-bottom:18px}
+.p-eyebrow i{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;animation:pulse 2.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.35}}
 @media(prefers-reduced-motion:reduce){.p-eyebrow i{animation:none}}
 .p-eyebrow b{color:#0284c7;font-weight:600}
-.gc-rows{padding:26px 12px 36px}
-.gc-bar{width:max-content;max-width:100%;font:800 clamp(34px,5.4vw,74px)/1.02 'Inter Tight',sans-serif;letter-spacing:-.04em;padding:.04em .3em .08em;margin-top:12px;position:relative}
-.gc-bar.b1{background:#101010;color:#fff;margin-left:0}
-.gc-bar.b2{border:2.5px solid #101010;color:#101010;margin-left:8%}
-.gc-bar.b3{background:#0284c7;color:#fff;margin-left:20%}
-.gc-bar.b4{border:2.5px solid #0284c7;color:#0284c7;margin-left:37%;background:repeating-linear-gradient(45deg,rgba(2,132,199,.14) 0 5px,transparent 5px 12px)}
-.gc-bar.b4::after{content:'';position:absolute;right:-8px;top:50%;width:13px;height:13px;background:#101010;transform:translateY(-50%) rotate(45deg)}
-.gc-bar+.gc-bar::before{content:'';position:absolute;left:-2.5px;top:-14px;width:2px;height:14px;background:rgba(16,16,16,.55)}
-@media(max-width:720px){.gc-bar.b2{margin-left:4%}.gc-bar.b3{margin-left:10%}.gc-bar.b4{margin-left:18%}}
-.p-heroGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;margin-top:38px}
-.p-sub{color:#374151;font-size:16.5px;line-height:1.65;max-width:56ch}
-.p-trust{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#6b7280}
+.gc-rows{position:relative;z-index:2;padding:26px 14px 24px}
+.gc-tag{display:block;width:max-content;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#94a0ab;margin:19px 0 6px 2px}
+.gc-tag.t1{margin-top:0}
+.gc-tag.t2{margin-left:8%}.gc-tag.t3{margin-left:20%}.gc-tag.t4{margin-left:37%}
+.gc-ghost{position:absolute;right:2.5%;top:2px;border:1.5px dashed rgba(22,24,29,.26);color:#8a93a0;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:9px 13px;border-radius:7px;background:rgba(255,255,255,.55)}
+@media(max-width:880px){.gc-ghost{display:none}}
+.gc-bar{width:max-content;max-width:100%;font:800 clamp(32px,5.2vw,70px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.038em;padding:.05em .32em .09em;position:relative;border-radius:8px}
+.gc-bar.b1{background:#16181d;color:#fff;margin-left:0}
+.gc-bar.b2{border:1.5px solid rgba(22,24,29,.4);color:#16181d;margin-left:8%;background:rgba(255,255,255,.6)}
+.gc-bar.b3{background:#0284c7;color:#fff;margin-left:20%;box-shadow:0 14px 34px -18px rgba(2,132,199,.55)}
+.gc-bar.b4{border:1.5px solid rgba(2,132,199,.45);color:#0369a1;margin-left:37%;background:repeating-linear-gradient(45deg,rgba(2,132,199,.1) 0 5px,rgba(2,132,199,.02) 5px 12px)}
+.gc-bar.b4::after{content:'';position:absolute;right:-7px;top:50%;width:11px;height:11px;background:#16181d;border-radius:2px;transform:translateY(-50%) rotate(45deg)}
+.gc-bar:not(.b1)::before{content:'';position:absolute;left:-2px;top:-33px;width:1.5px;height:33px;background:rgba(22,24,29,.2)}
+@media(max-width:720px){.gc-bar.b2,.gc-tag.t2{margin-left:4%}.gc-bar.b3,.gc-tag.t3{margin-left:10%}.gc-bar.b4,.gc-tag.t4{margin-left:18%}}
+/* resource histogram strip inside hero chart */
+.gc-hist{position:relative;z-index:2;display:grid;grid-template-columns:repeat(12,1fr);align-items:end;height:58px;border-top:1px dashed rgba(18,20,26,.12);padding:10px 0 0;margin:6px 14px 16px}
+.gc-hist i{height:var(--h);margin:0 8px;background:rgba(2,132,199,.16);border-top:2px solid rgba(2,132,199,.5);border-radius:4px 4px 0 0}
+.gc-hist-lbl{position:absolute;top:8px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
+.p-heroGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;margin-top:40px}
+.p-sub{color:#424a56;font-size:16.5px;line-height:1.68;max-width:56ch}
+.p-trust{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
 .p-trust span::before{content:'✓';color:#0284c7;margin-right:7px;font-weight:700}
-.p-install{border:1px solid rgba(16,16,16,.4);padding:24px;background:#fff}
-.p-install .lbl{display:flex;align-items:center;gap:8px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#6b7280;margin-bottom:12px}
-.p-install code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#0f2b3d;background:#f0f4f7;border:1px solid rgba(16,16,16,.16);padding:14px 15px;margin-bottom:14px;white-space:nowrap;overflow-x:auto}
+.p-install{padding:24px}
+.p-install .lbl{display:flex;align-items:center;gap:8px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:12px}
+.p-install code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#123c5e;background:#f2f6f9;border:1px solid rgba(18,20,26,.06);border-radius:9px;padding:14px 15px;margin-bottom:14px;white-space:nowrap;overflow-x:auto}
 .p-install code b{color:#0284c7;font-weight:600}
-.p-install .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.p-dl{display:block;margin-top:14px;border-top:1px dashed rgba(16,16,16,.25);padding-top:14px}
-.p-dl a.dlmain{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;border-bottom:2px solid #101010;padding-bottom:2px}
+.p-install .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.p-dl{display:block;margin-top:16px;border-top:1px dashed rgba(18,20,26,.14);padding-top:15px}
+.p-dl a.dlmain{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;border-bottom:1.5px solid rgba(22,24,29,.5);padding-bottom:2px;transition:color .15s,border-color .15s}
 .p-dl a.dlmain:hover{color:#0284c7;border-color:#0284c7}
-.p-dl small{display:block;margin-top:7px;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a9098}
+.p-dl small{display:block;margin-top:7px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#9aa3ad}
 .p-dl .demo{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:#0284c7}
-.p-dl .demo:hover{border-bottom:1px solid #0284c7}
 @media(max-width:980px){.p-heroGrid{grid-template-columns:1fr;gap:30px}}
 
 /* section heads */
-.p-secHead{max-width:860px;margin-bottom:34px}
-.p-num{font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#0284c7;text-transform:uppercase}
-.p-secHead h2{font:800 clamp(30px,4vw,52px)/1.06 'Inter Tight',sans-serif;letter-spacing:-.032em;margin:12px 0 14px}
+.p-secHead{max-width:860px;margin-bottom:36px}
+.p-num{font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#0284c7;text-transform:uppercase}
+.p-num::after{content:'';display:inline-block;width:44px;height:1px;background:rgba(2,132,199,.35);vertical-align:2px;margin-left:14px}
+.p-secHead h2{font:800 clamp(29px,3.8vw,48px)/1.08 'Inter Tight',sans-serif;letter-spacing:-.03em;margin:12px 0 14px;color:#121419;text-wrap:balance}
 .p-secHead h2 em{font-style:normal;color:#0284c7}
-.p-secHead p{color:#4b5563;font-size:16.5px;line-height:1.65;max-width:72ch}
+.p-secHead p{color:#4b5563;font-size:16.5px;line-height:1.68;max-width:72ch}
 
-/* ============ block 2 · download ============ */
+/* ============ block 2 · numbers / visualizations ============ */
+.viz-grid{display:grid;grid-template-columns:1.42fr 1fr;gap:16px}
+.viz-card{padding:20px 22px 18px;display:flex;flex-direction:column}
+.viz-scurve{grid-row:span 2}
+.viz-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
+.viz-head em{font-style:normal;color:#aeb7c1;letter-spacing:.1em}
+.viz-scurve svg{width:100%;height:auto;flex:1}
+.viz-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694}
+.viz-legend span{display:inline-flex;align-items:center;gap:7px}
+.viz-legend i{display:inline-block}
+.viz-legend .pl i{width:18px;height:0;border-top:2px dashed #98a1ab}
+.viz-legend .ac i{width:18px;height:2.5px;background:#0284c7;border-radius:2px}
+.viz-legend .td i{width:1.5px;height:12px;background:#ef5350}
+/* trade bars */
+.tr-row{display:grid;grid-template-columns:132px 1fr 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(18,20,26,.08)}
+.tr-row:last-child{border-bottom:0}
+.tr-row .n{font-size:12.5px;font-weight:600;color:#3c4552;line-height:1.3}
+.tr-bar{height:12px;background:#eef1f4;border-radius:5px;overflow:hidden}
+.tr-bar i{display:block;height:100%;background:#0284c7;border-radius:5px}
+.tr-row .v{font:600 11px/1 'JetBrains Mono',monospace;color:#55606e;text-align:right}
+.tr-foot{margin-top:12px;font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#aeb7c1}
+/* budget bullet */
+.bl-num{font:800 clamp(24px,2.6vw,32px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419}
+.bl-sub{font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#8a93a0;margin:6px 0 16px}
+.bl-track{position:relative;height:14px;background:#eef1f4;border-radius:6px}
+.bl-track .committed{position:absolute;left:0;top:0;bottom:0;width:82%;background:rgba(2,132,199,.28);border-radius:6px}
+.bl-track .paid{position:absolute;left:0;top:0;bottom:0;width:54%;background:#0284c7;border-radius:6px}
+.bl-track .budget{position:absolute;top:-4px;bottom:-4px;left:94%;width:2px;background:#16181d;border-radius:1px}
+.bl-track .budget::after{content:'budget';position:absolute;top:-16px;left:-16px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0}
+.bl-stats{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:16px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694}
+.bl-stats i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.bl-stats .sw-paid i{background:#0284c7}
+.bl-stats .sw-com i{background:rgba(2,132,199,.28)}
+.bl-chip{margin-left:auto;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#0369a1;background:rgba(2,132,199,.09);border-radius:999px;padding:6px 10px}
+@media(max-width:980px){.viz-grid{grid-template-columns:1fr}.viz-scurve{grid-row:auto}}
+
+/* ============ block 3 · download ============ */
 .dl-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px;list-style:none}
-.dl-chips li{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(16,16,16,.3);padding:9px 13px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#374151;background:#fff}
-.dl-chips li::before{content:'';width:8px;height:8px;background:#0284c7;flex:none}
-.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.dl-card{border:1.5px solid #101010;background:#fff;padding:22px;display:flex;flex-direction:column;gap:12px;position:relative}
-.dl-card.rec{outline:2px solid #0284c7;outline-offset:-2px}
-.dl-card .flag{position:absolute;top:-11px;right:12px;background:#0284c7;color:#fff;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:5px 7px}
+.dl-chips li{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(18,20,26,.1);background:#fff;border-radius:9px;padding:9px 13px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#55606e}
+.dl-chips li::before{content:'';width:7px;height:7px;border-radius:2px;background:#0284c7;flex:none}
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.dl-card{padding:22px;display:flex;flex-direction:column;gap:12px;position:relative;transition:transform .18s,box-shadow .18s}
+.dl-card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(18,22,30,.04),0 22px 50px -26px rgba(18,22,30,.22)}
+.dl-card.rec{border-color:rgba(2,132,199,.4);box-shadow:0 1px 2px rgba(2,132,199,.05),0 18px 44px -24px rgba(2,132,199,.3)}
+.dl-card .flag{position:absolute;top:-11px;right:14px;background:#0284c7;color:#fff;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;padding:5px 8px;border-radius:5px;box-shadow:0 8px 18px -8px rgba(2,132,199,.6)}
 .dl-head{display:flex;align-items:center;gap:12px}
-.dl-glyph{width:38px;height:38px;border:1.5px solid #101010;display:flex;align-items:center;justify-content:center;flex:none}
-.dl-glyph svg{width:20px;height:20px;fill:#101010}
+.dl-glyph{width:40px;height:40px;border:1px solid rgba(18,20,26,.1);border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none;background:#f7f9fa}
+.dl-glyph svg{width:19px;height:19px;fill:#3c4552}
 .dl-name{font:700 18px/1.1 'Inter Tight',sans-serif}
-.dl-note{color:#6b7280;font-size:12.5px;margin-top:3px}
+.dl-note{color:#7c8694;font-size:12.5px;margin-top:3px}
 .dl-badges{display:flex;flex-wrap:wrap;gap:6px}
-.dl-badges span{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(16,16,16,.25);padding:4px 7px;color:#6b7280}
-.dl-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:9px;background:#101010;color:#fff;font-weight:600;font-size:14px;padding:13px 16px}
+.dl-badges span{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(18,20,26,.1);border-radius:6px;padding:5px 7px;color:#7c8694;background:#fafbfb}
+.dl-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:9px;background:#16181d;color:#fff;font-weight:600;font-size:14px;padding:13px 16px;border-radius:9px;transition:background .18s}
 .dl-btn:hover{background:#0284c7}
-.dl-card.rec .dl-btn{background:#0284c7}
-.dl-card.rec .dl-btn:hover{background:#101010}
-.dl-meta{font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a9098}
+.dl-card.rec .dl-btn{background:#0284c7;box-shadow:0 10px 24px -12px rgba(2,132,199,.55)}
+.dl-card.rec .dl-btn:hover{background:#16181d;box-shadow:none}
+.dl-meta{font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#9aa3ad}
 @media(max-width:920px){.dl-grid{grid-template-columns:1fr}}
 
-/* ============ block 3 · live preview ============ */
-.hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e;margin-bottom:0}
+/* ============ block 4 · live preview ============ */
+.hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e}
 .hp-eyebrow i{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.7);display:inline-block}
-.hp-grid{display:grid;grid-template-columns:380px 1fr;gap:0;border:1px solid rgba(16,16,16,.4);background:#fff}
-.hp-list{border-right:1px solid rgba(16,16,16,.25);display:flex;flex-direction:column}
-.hp-item{display:grid;grid-template-columns:44px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(16,16,16,.12);padding:0;cursor:pointer;font-family:inherit;position:relative}
-.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 11px/1 'JetBrains Mono',monospace;color:#8a9098;border-right:1px solid rgba(16,16,16,.12)}
+.hp-grid{display:grid;grid-template-columns:378px 1fr;gap:0;overflow:hidden;border-radius:14px}
+.hp-list{border-right:1px solid rgba(18,20,26,.08);display:flex;flex-direction:column;background:#fff}
+.hp-item{display:grid;grid-template-columns:46px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(18,20,26,.07);padding:0;cursor:pointer;font-family:inherit;position:relative;transition:background .15s}
+.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 10.5px/1 'JetBrains Mono',monospace;color:#9aa3ad;border-right:1px solid rgba(18,20,26,.06);transition:color .15s}
 .hp-item .bd{padding:13px 16px}
-.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#101010}
-.hp-item .h{display:block;color:#6b7280;font-size:12px;margin-top:3px;line-height:1.4}
-.hp-item:hover{background:rgba(2,132,199,.05)}
-.hp-item.on{background:#101010}
-.hp-item.on .num{color:#fff;border-right-color:rgba(255,255,255,.2);background:#0284c7}
-.hp-item.on .t{color:#fff}
-.hp-item.on .h{color:#b9bec6}
-.hp-more{padding:14px 16px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-top:auto}
+.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#16181d}
+.hp-item .h{display:block;color:#7c8694;font-size:12px;margin-top:3px;line-height:1.45}
+.hp-item:hover{background:rgba(2,132,199,.04)}
+.hp-item.on{background:rgba(2,132,199,.07);box-shadow:inset 3px 0 0 #0284c7}
+.hp-item.on .num{color:#0284c7;font-weight:700}
+.hp-item.on .t{color:#075985}
+.hp-more{padding:14px 16px;font:500 9.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0;margin-top:auto;background:#fafbfb}
 .hp-more b{color:#0284c7;font-size:13px}
-.hp-stage{position:relative;display:flex;flex-direction:column}
-.hp-chrome{display:flex;align-items:center;gap:8px;background:#f4f4f1;border-bottom:1px solid rgba(16,16,16,.14);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#71767c}
-.hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(16,16,16,.18);display:block}
+.hp-stage{position:relative;display:flex;flex-direction:column;background:#fff}
+.hp-chrome{display:flex;align-items:center;gap:8px;background:#f6f8f9;border-bottom:1px solid rgba(18,20,26,.07);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#7c8694}
+.hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(18,20,26,.12);display:block}
 .hp-chrome span{margin-left:8px}
-.hp-chrome em{margin-left:auto;font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
-.hp-shot{flex:1;min-height:0;background:#0b1220}
+.hp-chrome em{margin-left:auto;font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
+.hp-shot{flex:1;min-height:0;background:#f2f4f6}
 .hp-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;aspect-ratio:16/9.4}
-@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(16,16,16,.25);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(16,16,16,.12)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
+@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(18,20,26,.1);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(18,20,26,.06)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
 
 /* footer */
-.p-foot{margin-top:92px;border-top:1px solid rgba(16,16,16,.22)}
-.p-footrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 26px;padding:26px 0 20px;font:500 10.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
-.p-footrow b{color:#101010;font-weight:600}
+.p-foot{margin-top:96px;border-top:1px solid rgba(18,20,26,.09)}
+.p-footrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 26px;padding:26px 0 18px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8a93a0}
+.p-footrow b{color:#16181d;font-weight:600}
 .p-footrow a:hover{color:#0284c7}
-.p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(16,16,16,.1);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(16,16,16,.32);text-transform:uppercase;padding:10px 0 24px}
+.p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.06);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(22,24,29,.26);text-transform:uppercase;padding:10px 0 24px}
 
 /* internal badge */
-.int-badge{position:fixed;left:14px;bottom:14px;z-index:60;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#101010;padding:7px 10px;opacity:.85}
+.int-badge{position:fixed;left:14px;bottom:14px;z-index:60;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(22,24,29,.92);padding:7px 10px;border-radius:7px}
 .int-badge b{color:#7dd3fc;font-weight:600}
 </style>
 </head>
@@ -165,7 +223,7 @@ a{color:inherit;text-decoration:none}
 <!-- nav -->
 <div class="p-navwrap">
   <div class="pz">
-    <div class="p-topline"><span>Programme of works · OpenConstructionERP</span><span>Sheet 01 · Rev A · <b>v10.8.0</b></span></div>
+    <div class="p-topline"><span>Programme of works · OpenConstructionERP</span><span>Sheet 01 · Rev B · <b>v10.8.0</b></span></div>
     <nav class="p-nav">
       <div class="p-logo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
       <div class="p-links">
@@ -190,10 +248,19 @@ a{color:inherit;text-decoration:none}
     <div class="gchart">
       <div class="gscale"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
       <div class="gc-rows">
+        <span class="gc-ghost">next → your project</span>
+        <span class="gc-tag t1">01 · estimate</span>
         <div class="gc-bar b1">Run</div>
+        <span class="gc-tag t2">02 · schedule</span>
         <div class="gc-bar b2">the whole</div>
+        <span class="gc-tag t3">03 · build</span>
         <div class="gc-bar b3">construction</div>
+        <span class="gc-tag t4">04 · hand over</span>
         <div class="gc-bar b4">project.</div>
+      </div>
+      <div class="gc-hist" aria-hidden="true">
+        <span class="gc-hist-lbl">resources · levelled</span>
+        <i style="--h:30%"></i><i style="--h:46%"></i><i style="--h:62%"></i><i style="--h:78%"></i><i style="--h:92%"></i><i style="--h:84%"></i><i style="--h:70%"></i><i style="--h:58%"></i><i style="--h:46%"></i><i style="--h:58%"></i><i style="--h:70%"></i><i style="--h:80%"></i>
       </div>
       <i class="gtoday" style="left:58%" aria-hidden="true"><b>today · v10.8.0</b></i>
     </div>
@@ -202,7 +269,7 @@ a{color:inherit;text-decoration:none}
         <p class="p-sub">Open-source ERP for construction teams. Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.</p>
         <div class="p-trust"><span>Self-hosted</span><span>AGPL-3.0 open source</span><span>26 languages</span><span>149 modules</span></div>
       </div>
-      <div class="p-install">
+      <div class="p-install card">
         <div class="lbl">&gt;_ up and running in one command</div>
         <code><b>$</b> pip install openconstructionerp</code>
         <div class="row">
@@ -219,11 +286,89 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ block 2 · download ============ -->
+<!-- ============ block 2 · the numbers behind the bars ============ -->
+<section class="p-sec" id="sync">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">01 · Cost &amp; time in sync</span>
+      <h2>The numbers behind the bars.</h2>
+      <p>Every bar on the programme is priced. The S-curve, the trade breakdown and the budget health are read live from the BOQ - and move the moment a drawing or a quantity changes.</p>
+    </div>
+    <div class="viz-grid">
+      <figure class="viz-card viz-scurve card">
+        <figcaption class="viz-head"><span>Cash flow · S-curve</span><em>as of W08</em></figcaption>
+        <svg viewBox="0 0 640 322" role="img" aria-label="Planned versus actual cumulative cost S-curve; actual is on track at week eight, 1.28 million of 2.15 million planned">
+          <title>Planned vs actual cumulative cost</title>
+          <!-- grid -->
+          <g stroke="rgba(18,20,26,.06)" stroke-width="1">
+            <line x1="46" y1="24" x2="616" y2="24"/>
+            <line x1="46" y1="108" x2="616" y2="108"/>
+            <line x1="46" y1="192" x2="616" y2="192"/>
+          </g>
+          <line x1="46" y1="276" x2="616" y2="276" stroke="rgba(18,20,26,.14)" stroke-width="1"/>
+          <!-- y labels -->
+          <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8" text-anchor="end">
+            <text x="38" y="27">2.4M</text>
+            <text x="38" y="111">1.6M</text>
+            <text x="38" y="195">0.8M</text>
+            <text x="38" y="279">0</text>
+          </g>
+          <!-- x labels -->
+          <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8">
+            <text x="46" y="298">W01</text>
+            <text x="201" y="298">W04</text>
+            <text x="409" y="298" text-anchor="middle">W08</text>
+            <text x="616" y="298" text-anchor="end">W12</text>
+          </g>
+          <!-- actual area -->
+          <path class="fade" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 L409,276 L46,276 Z" fill="rgba(2,132,199,.09)"/>
+          <!-- planned (dashed) -->
+          <path class="fade2" d="M46,272 C160,264 250,232 340,176 C430,120 530,60 616,34" fill="none" stroke="#98a1ab" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round"/>
+          <!-- actual -->
+          <path class="anim" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- today line -->
+          <line x1="409" y1="20" x2="409" y2="276" stroke="rgba(239,83,80,.85)" stroke-width="1.5"/>
+          <rect x="417" y="24" width="80" height="17" rx="5" fill="#ef5350"/>
+          <text x="457" y="35.5" font-family="'JetBrains Mono',monospace" font-size="8.5" letter-spacing="1" fill="#fff" text-anchor="middle">TODAY · W08</text>
+          <!-- actual end dot + labels -->
+          <circle cx="409" cy="152" r="4.5" fill="#0284c7" stroke="#fff" stroke-width="2"/>
+          <text x="398" y="141" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600" fill="#0369a1" text-anchor="end">actual · €1.28M</text>
+          <text x="612" y="20" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#8a93a0" text-anchor="end">planned · €2.15M</text>
+        </svg>
+        <div class="viz-legend"><span class="pl"><i></i>planned</span><span class="ac"><i></i>actual</span><span class="td"><i></i>today</span></div>
+      </figure>
+      <figure class="viz-card card">
+        <figcaption class="viz-head"><span>Cost by trade</span><em>top 4 · €</em></figcaption>
+        <div class="tr-row" title="Concrete works: €812,400"><span class="n">Concrete works</span><span class="tr-bar"><i style="width:100%"></i></span><span class="v">€812k</span></div>
+        <div class="tr-row" title="MEP services: €551,900"><span class="n">MEP services</span><span class="tr-bar"><i style="width:68%"></i></span><span class="v">€552k</span></div>
+        <div class="tr-row" title="Masonry and envelope: €468,300"><span class="n">Masonry &amp; envelope</span><span class="tr-bar"><i style="width:58%"></i></span><span class="v">€468k</span></div>
+        <div class="tr-row" title="Finishes: €316,700"><span class="n">Finishes</span><span class="tr-bar"><i style="width:39%"></i></span><span class="v">€317k</span></div>
+        <div class="tr-foot">rolled up from 1,240 boq positions</div>
+      </figure>
+      <figure class="viz-card card">
+        <figcaption class="viz-head"><span>Budget health</span><em>riverside tower</em></figcaption>
+        <div class="bl-num">€ 2,148,900</div>
+        <div class="bl-sub">estimate total · live from the boq</div>
+        <div class="bl-track" title="Paid 54%, committed 82%, budget marker at 94%">
+          <span class="committed"></span>
+          <span class="paid"></span>
+          <span class="budget"></span>
+        </div>
+        <div class="bl-stats">
+          <span class="sw-paid"><i></i>paid · 54%</span>
+          <span class="sw-com"><i></i>committed · 82%</span>
+          <span class="bl-chip">on budget · -1.4%</span>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ block 3 · download ============ -->
 <section class="p-sec" id="download">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">01 · Download</span>
+      <span class="p-num">02 · Download</span>
       <h2>Get the <em>real</em> desktop app, free.</h2>
       <p>A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.</p>
     </div>
@@ -234,7 +379,7 @@ a{color:inherit;text-decoration:none}
       <li>Open source, AGPL-3.0</li>
     </ul>
     <div class="dl-grid">
-      <article class="dl-card rec">
+      <article class="dl-card card rec">
         <span class="flag">recommended for you</span>
         <div class="dl-head">
           <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span>
@@ -244,7 +389,7 @@ a{color:inherit;text-decoration:none}
         <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
         <div class="dl-meta">from GitHub Releases · latest build</div>
       </article>
-      <article class="dl-card">
+      <article class="dl-card card">
         <div class="dl-head">
           <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span>
           <div><div class="dl-name">macOS</div><div class="dl-note">macOS 12+ - Apple Silicon</div></div>
@@ -253,7 +398,7 @@ a{color:inherit;text-decoration:none}
         <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
         <div class="dl-meta">from GitHub Releases · latest build</div>
       </article>
-      <article class="dl-card">
+      <article class="dl-card card">
         <div class="dl-head">
           <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2 0 .4.1.8.3 1.1-.8 1.2-1.4 2.7-1.9 4-.5 1.4-1.2 2.4-2 3.3-.9 1-1.6 2.1-1.6 3.7 0 .6.1 1.2.3 1.7-.4.3-.7.8-.7 1.4 0 .9.8 1.7 1.7 1.7.3 0 .6-.1.9-.2.9.7 2 1.2 3.1 1.3.3.6 1 1 1.9 1s1.6-.4 1.9-1c1.1-.1 2.2-.6 3.1-1.3.3.1.6.2.9.2.9 0 1.7-.8 1.7-1.7 0-.6-.3-1.1-.7-1.4.2-.5.3-1.1.3-1.7 0-1.6-.7-2.7-1.6-3.7-.8-.9-1.5-1.9-2-3.3-.5-1.3-1.1-2.8-1.9-4 .2-.3.3-.7.3-1.1 0-1.1-.9-2-2-2z"/></svg></span>
           <div><div class="dl-name">Linux</div><div class="dl-note">AppImage, deb and rpm</div></div>
@@ -266,7 +411,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ block 3 · live preview ============ -->
+<!-- ============ block 4 · live preview ============ -->
 <section class="p-sec" id="demo">
   <div class="pz">
     <div class="p-secHead">
@@ -274,7 +419,7 @@ a{color:inherit;text-decoration:none}
       <h2>Skip the sales call. <em>See it work.</em></h2>
       <p>No six-figure licence to read back your own data.</p>
     </div>
-    <div class="hp-grid">
+    <div class="hp-grid card">
       <div class="hp-list" role="tablist" aria-label="Product preview modules">
         <button class="hp-item on" type="button" role="tab" aria-selected="true" data-shot="/assets/loops/06_Build_BOQ_Fast.gif" data-file="boq-editor">
           <span class="num">01</span><span class="bd"><span class="t">BOQ editor</span><span class="h">Build bills of quantities, priced rows.</span></span>
@@ -301,7 +446,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="hp-stage">
         <div class="hp-chrome"><i></i><i></i><i></i><span id="hp-file">riverside-tower / boq-editor</span><em>recorded in the app</em></div>
-        <div class="hp-shot"><img id="hp-img" src="/assets/loops/06_Build_BOQ_Fast.gif" alt="OpenConstructionERP product preview"></div>
+        <div class="hp-shot"><img id="hp-img" src="/assets/loops/06_Build_BOQ_Fast.gif" alt="OpenConstructionERP product preview" loading="lazy" decoding="async"></div>
       </div>
     </div>
   </div>
