@@ -19,6 +19,8 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f7f8f7 linear-gradient(180deg,#edf4f9 0,#f7f8f7 560px) no-repeat;color:#16181d;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
+::selection{background:rgba(2,132,199,.16)}
+:focus-visible{outline:2px solid rgba(2,132,199,.6);outline-offset:2px;border-radius:4px}
 .pz{width:min(1240px,calc(100% - 88px));margin:0 auto}
 @media(max-width:720px){.pz{width:calc(100% - 40px)}}
 .p-sec{padding:96px 0 0}
@@ -41,6 +43,14 @@ a{color:inherit;text-decoration:none}
   .p-sec.in .tr-bar i{transform:scaleX(1)}
   .bl-track .paid,.bl-track .committed{transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.7,.2,1) .35s}
   .p-sec.in .bl-track .paid,.p-sec.in .bl-track .committed{transform:scaleX(1)}
+  .gc-rows.js-anim .gc-tag,.gc-rows.js-anim .gc-bar{opacity:0;transform:translateX(-10px);transition:opacity .5s ease,transform .5s ease}
+  .gc-rows.js-anim .gc-ghost{opacity:0;transform:none;transition:opacity .6s ease}
+  .gc-rows.js-anim.go .gc-tag,.gc-rows.js-anim.go .gc-bar,.gc-rows.js-anim.go .gc-ghost{opacity:1;transform:none}
+  .gc-rows.js-anim .gc-tag.t1{transition-delay:.05s}.gc-rows.js-anim .gc-bar.b1{transition-delay:.12s}
+  .gc-rows.js-anim .gc-tag.t2{transition-delay:.24s}.gc-rows.js-anim .gc-bar.b2{transition-delay:.31s}
+  .gc-rows.js-anim .gc-tag.t3{transition-delay:.43s}.gc-rows.js-anim .gc-bar.b3{transition-delay:.5s}
+  .gc-rows.js-anim .gc-tag.t4{transition-delay:.62s}.gc-rows.js-anim .gc-bar.b4{transition-delay:.69s}
+  .gc-rows.js-anim .gc-ghost{transition-delay:.95s}
 }
 /* card primitive */
 .card{background:#fff;border:1px solid rgba(18,20,26,.08);border-radius:12px;box-shadow:0 1px 2px rgba(18,22,30,.04),0 16px 40px -26px rgba(18,22,30,.16)}
@@ -86,11 +96,17 @@ a{color:inherit;text-decoration:none}
 @media(max-width:880px){.gc-ghost{display:none}}
 .gc-bar{width:max-content;max-width:100%;font:800 clamp(32px,5.2vw,70px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.038em;padding:.05em .32em .09em;position:relative;border-radius:8px}
 .gc-bar.b1{background:#16181d;color:#fff;margin-left:0}
-.gc-bar.b2{border:1.5px solid rgba(22,24,29,.4);color:#16181d;margin-left:8%;background:rgba(255,255,255,.6)}
+.gc-bar.b2{border:1.5px solid rgba(22,24,29,.5);color:#16181d;margin-left:8%;background:#fff}
 .gc-bar.b3{background:#0284c7;color:#fff;margin-left:20%;box-shadow:0 14px 34px -18px rgba(2,132,199,.55)}
 .gc-bar.b4{border:1.5px solid rgba(2,132,199,.45);color:#0369a1;margin-left:37%;background:repeating-linear-gradient(45deg,rgba(2,132,199,.1) 0 5px,rgba(2,132,199,.02) 5px 12px)}
 .gc-bar.b4::after{content:'';position:absolute;right:-7px;top:50%;width:11px;height:11px;background:#16181d;border-radius:2px;transform:translateY(-50%) rotate(45deg)}
 .gc-bar:not(.b1)::before{content:'';position:absolute;left:-2px;top:-33px;width:1.5px;height:33px;background:rgba(22,24,29,.2)}
+.gc-bar .pc{position:absolute;left:calc(100% + 20px);top:50%;transform:translateY(-50%);font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#98a1ab;white-space:nowrap}
+.gc-bar .pc::before{content:'';display:inline-block;width:14px;height:1px;background:rgba(22,24,29,.25);vertical-align:3px;margin-right:8px}
+.gc-bar .pc.on{color:#0284c7}
+.gc-bar .pc.on::before{background:rgba(2,132,199,.5)}
+@media(max-width:560px){.gc-bar .pc{display:none}}
+.gfuture{position:absolute;top:0;bottom:0;left:58%;right:0;background:rgba(18,20,26,.018);pointer-events:none}
 @media(max-width:720px){.gc-bar.b2,.gc-tag.t2{margin-left:4%}.gc-bar.b3,.gc-tag.t3{margin-left:10%}.gc-bar.b4,.gc-tag.t4{margin-left:18%}}
 /* resource histogram strip inside hero chart */
 .gc-hist{position:relative;z-index:2;display:grid;grid-template-columns:repeat(12,1fr);align-items:end;height:58px;border-top:1px dashed rgba(18,20,26,.12);padding:10px 0 0;margin:6px 14px 16px}
@@ -211,6 +227,35 @@ a{color:inherit;text-decoration:none}
 .p-footrow a:hover{color:#0284c7}
 .p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.06);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(22,24,29,.26);text-transform:uppercase;padding:10px 0 24px}
 
+/* copy-to-clipboard */
+.codewrap{position:relative}
+.codewrap>code{margin-bottom:0;padding-right:78px}
+.p-install .codewrap{margin-bottom:14px}
+.copy{cursor:pointer;position:absolute;right:9px;top:50%;transform:translateY(-50%);font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694;background:#fff;border:1px solid rgba(18,20,26,.12);border-radius:6px;padding:6px 9px;transition:color .15s,border-color .15s}
+.copy:hover{color:#0284c7;border-color:rgba(2,132,199,.5)}
+.copy.ok,.copy.ok:hover{color:#0f766e;border-color:rgba(15,118,110,.4)}
+.copy.dk{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#b9c6d4}
+.copy.dk:hover{color:#7dd3fc;border-color:rgba(125,211,252,.5)}
+.copy.dk.ok,.copy.dk.ok:hover{color:#5eead4;border-color:rgba(94,234,212,.4)}
+
+/* closing cta band */
+.cta{position:relative;background:#101216;border-radius:18px;padding:64px 58px 56px;color:#eef2f7;overflow:hidden;box-shadow:0 30px 70px -42px rgba(16,18,22,.55)}
+.cta::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:calc(100%/12) 100%;border-radius:inherit}
+.cta-start{position:absolute;top:0;bottom:0;left:8.333%;width:1.5px;background:rgba(239,83,80,.9);z-index:1}
+.cta-start b{position:absolute;top:16px;left:9px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap}
+.cta-inner{position:relative;z-index:2;max-width:680px;margin-left:calc(8.333% + 30px)}
+.cta h2{font:800 clamp(30px,4vw,52px)/1.06 'Inter Tight',sans-serif;letter-spacing:-.03em;color:#fff;text-wrap:balance}
+.cta h2 em{font-style:normal;color:#38bdf8}
+.cta p{color:#9fb0c2;font-size:16px;line-height:1.66;margin:15px 0 24px;max-width:56ch}
+.cta .codewrap{max-width:520px}
+.cta-code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#cfe4f5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:14px 78px 14px 15px;white-space:nowrap;overflow-x:auto}
+.cta-code b{color:#38bdf8;font-weight:600}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.cta-ghost{cursor:pointer;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.22);color:#e8eef5;padding:13px 20px;border-radius:9px;font-weight:600;font-size:14px;transition:border-color .15s,color .15s}
+.cta-ghost:hover{border-color:rgba(125,211,252,.55);color:#7dd3fc}
+.cta-foot{margin-top:32px;font:500 9.5px/1.8 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#77879a}
+@media(max-width:720px){.cta{padding:46px 26px 42px}.cta-inner{margin-left:0}.cta-start{left:14px}}
+
 /* internal badge */
 .int-badge{position:fixed;left:14px;bottom:14px;z-index:60;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(22,24,29,.92);padding:7px 10px;border-radius:7px}
 .int-badge b{color:#7dd3fc;font-weight:600}
@@ -247,16 +292,17 @@ a{color:inherit;text-decoration:none}
     <div class="p-eyebrow"><i></i><span><b>v10.8.0</b> · open source on GitHub</span></div>
     <div class="gchart">
       <div class="gscale"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
+      <i class="gfuture" aria-hidden="true"></i>
       <div class="gc-rows">
         <span class="gc-ghost">next → your project</span>
         <span class="gc-tag t1">01 · estimate</span>
-        <div class="gc-bar b1">Run</div>
+        <div class="gc-bar b1">Run<b class="pc">100%</b></div>
         <span class="gc-tag t2">02 · schedule</span>
-        <div class="gc-bar b2">the whole</div>
+        <div class="gc-bar b2">the whole<b class="pc">100%</b></div>
         <span class="gc-tag t3">03 · build</span>
-        <div class="gc-bar b3">construction</div>
+        <div class="gc-bar b3">construction<b class="pc on">82%</b></div>
         <span class="gc-tag t4">04 · hand over</span>
-        <div class="gc-bar b4">project.</div>
+        <div class="gc-bar b4">project.<b class="pc on">61%</b></div>
       </div>
       <div class="gc-hist" aria-hidden="true">
         <span class="gc-hist-lbl">resources · levelled</span>
@@ -271,7 +317,10 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="p-install card">
         <div class="lbl">&gt;_ up and running in one command</div>
-        <code><b>$</b> pip install openconstructionerp</code>
+        <div class="codewrap">
+          <code><b>$</b> pip install openconstructionerp</code>
+          <button class="copy" type="button" data-copy="pip install openconstructionerp">copy</button>
+        </div>
         <div class="row">
           <a class="p-btn acc" href="#download">Install now</a>
           <a class="p-link" href="https://github.com/datadrivenconstruction/OpenConstructionERP" rel="noopener">Star on GitHub</a>
@@ -452,6 +501,28 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
+<!-- closing cta -->
+<section class="p-sec" id="start">
+  <div class="pz">
+    <div class="cta">
+      <i class="cta-start" aria-hidden="true"><b>start · today</b></i>
+      <div class="cta-inner">
+        <h2>Start your programme <em>today.</em></h2>
+        <p>One command, or one download. Open source and self-hosted - your projects, your data and your server, from the first minute.</p>
+        <div class="codewrap">
+          <code class="cta-code"><b>$</b> pip install openconstructionerp</code>
+          <button class="copy dk" type="button" data-copy="pip install openconstructionerp">copy</button>
+        </div>
+        <div class="cta-row">
+          <a class="p-btn acc" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download desktop app</a>
+          <a class="cta-ghost" href="/demo">Try the live demo →</a>
+        </div>
+        <div class="cta-foot">agpl-3.0 · self-hosted · 149 modules · 26 languages · no lock-in</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- footer -->
 <footer class="p-foot">
   <div class="pz">
@@ -474,6 +545,38 @@ a{color:inherit;text-decoration:none}
     },{threshold:0.06});
     secs.forEach(function(s){reveal.observe(s);});
   } else { secs.forEach(function(s){s.classList.add('in');}); }
+
+  /* headline bars settle in like a plan being drawn */
+  var rows=document.querySelector('.gc-rows');
+  if(rows){
+    rows.classList.add('js-anim');
+    requestAnimationFrame(function(){requestAnimationFrame(function(){rows.classList.add('go');});});
+  }
+
+  /* copy install command */
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var txt=btn.getAttribute('data-copy')||'';
+      function done(){
+        btn.classList.add('ok');btn.textContent='copied';
+        setTimeout(function(){btn.classList.remove('ok');btn.textContent='copy';},1800);
+      }
+      function legacy(){
+        try{
+          var ta=document.createElement('textarea');
+          ta.value=txt;ta.setAttribute('readonly','');
+          ta.style.cssText='position:fixed;top:-200px;opacity:0';
+          document.body.appendChild(ta);ta.select();
+          var did=document.execCommand('copy');
+          document.body.removeChild(ta);
+          if(did){done();}
+        }catch(e){}
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(done).catch(legacy);
+      }else{legacy();}
+    });
+  });
 
   /* live preview tab switching */
   var items=[].slice.call(document.querySelectorAll('.hp-item'));
