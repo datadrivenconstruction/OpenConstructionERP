@@ -106,6 +106,7 @@ def _clear_settings_cache(monkeypatch: pytest.MonkeyPatch):
         ("FR_PARIS", "cwicr_fr_v3"),
         ("IT_ROME", "cwicr_it_v3"),
         # Asian + MENA
+        ("ZH_CHINA", "cwicr_zh_v3"),
         ("CN_SHANGHAI", "cwicr_zh_v3"),
         ("JP_TOKYO", "cwicr_ja_v3"),
         ("KR_SEOUL", "cwicr_ko_v3"),
@@ -114,6 +115,7 @@ def _clear_settings_cache(monkeypatch: pytest.MonkeyPatch):
         ("VN_HANOI", "cwicr_vi_v3"),
         ("AE_DUBAI", "cwicr_ar_v3"),
         ("SA_RIYADH", "cwicr_ar_v3"),
+        ("TR_NATIONAL", "cwicr_tr_v3"),
         ("TR_ISTANBUL", "cwicr_tr_v3"),
         ("HI_MUMBAI", "cwicr_hi_v3"),
         ("SV_STOCKHOLM", "cwicr_sv_v3"),
@@ -231,6 +233,7 @@ def test_empty_collection_version_strips_suffix(monkeypatch: pytest.MonkeyPatch)
         ("USA_USD", "US"),
         ("ENG_TORONTO", "CA"),  # Canadian-English file DDC ships
         ("GBR_LONDON", "GB"),  # defensive
+        ("ZH_CHINA", "CN"),
         ("ru_stpetersburg", "RU"),  # case-normalisation
     ],
 )

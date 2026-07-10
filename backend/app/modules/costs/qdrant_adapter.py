@@ -304,6 +304,7 @@ _REGION_HEAD_ALIASES: dict[str, str] = {
     "USA": "US",
     "GBR": "GB",
     "ENG": "CA",  # Canadian-English catalogue file DDC ships
+    "ZH": "CN",  # language-prefixed China ids write ISO country CN
 }
 
 

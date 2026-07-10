@@ -453,12 +453,12 @@ CWICR_V3_CATALOGUES: tuple[CwicrV3Catalogue, ...] = (
     ),
     # ── Asia / MENA ──────────────────────────────────────────────────
     CwicrV3Catalogue(
-        region="CN_SHANGHAI",
+        region="ZH_CHINA",
         country_iso="CN",
-        city="Shanghai",
+        city="National",
         language="zh",
         currency="CNY",
-        ddc_path="ZH___DDC_CWICR/CN_SHANGHAI_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
+        ddc_path="ZH___DDC_CWICR/ZH_CHINA_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
         size_mb=420,
         available=False,
         default_classification_standard="gb50500",
@@ -486,12 +486,12 @@ CWICR_V3_CATALOGUES: tuple[CwicrV3Catalogue, ...] = (
         default_classification_standard="kbim",
     ),
     CwicrV3Catalogue(
-        region="TR_ISTANBUL",
+        region="TR_NATIONAL",
         country_iso="TR",
-        city="Istanbul",
+        city="National",
         language="tr",
         currency="TRY",
-        ddc_path="TR___DDC_CWICR/TR_ISTANBUL_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
+        ddc_path="TR___DDC_CWICR/TR_NATIONAL_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
         size_mb=420,
         available=False,
         default_classification_standard="birimfiyat",
@@ -670,11 +670,9 @@ _HF_PUBLISHED: dict[str, tuple[str, str]] = {
     "RU_STPETERSBURG": ("RU", "RU_STPETERSBURG"),
     "RU_MOSCOW": ("RU", "RU_STPETERSBURG"),
     "SV_STOCKHOLM": ("SV", "SV_STOCKHOLM"),
-    "TR_ISTANBUL": ("TR", "TR_ISTANBUL"),
     "GB_LONDON": ("UK", "UK_GBP"),
     "USA_USD": ("US", "USA_USD"),
     "ZA_JOHANNESBURG": ("ZA", "ZA_JOHANNESBURG"),
-    "CN_SHANGHAI": ("ZH", "ZH_SHANGHAI"),
     # Newly published 2026-05-14 - folder/stem match the HF tree directly.
     "MN_ULAANBAATAR": ("MN", "MN_ULAANBAATAR"),
     "BG_SOFIA": ("BG", "BG_SOFIA"),
@@ -721,20 +719,23 @@ def _apply_hf_overrides(
 CWICR_V3_CATALOGUES = _apply_hf_overrides(CWICR_V3_CATALOGUES)
 
 
+_REGION_ALIASES: dict[str, str] = {
+    "CN_SHANGHAI": "ZH_CHINA",
+    "ZH_SHANGHAI": "ZH_CHINA",
+    "TR_ISTANBUL": "TR_NATIONAL",
+}
+
+
 def get_catalogue(region: str) -> CwicrV3Catalogue | None:
     """Return the registry entry for ``region`` or ``None`` if unknown.
 
-    Lookup is case-insensitive on the input but exact on the keys -
-    aliases are NOT followed. A caller hitting the install endpoint
-    with a legacy id (``UK_GBP``, ``ENG_TORONTO``) gets a clear 404
-    instead of a silently-wrong restore. Convert via
-    :mod:`region_language._ALIASES` upstream if alias support is
-    needed.
+    Lookup is case-insensitive and follows only explicit compatibility
+    aliases for region ids that were renamed to canonical product ids.
     """
 
     if not region:
         return None
-    key = region.strip().upper()
+    key = _REGION_ALIASES.get(region.strip().upper(), region.strip().upper())
     for cat in CWICR_V3_CATALOGUES:
         if cat.region == key:
             return cat

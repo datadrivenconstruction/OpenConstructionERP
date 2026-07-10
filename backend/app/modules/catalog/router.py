@@ -142,11 +142,13 @@ REGION_MAP: dict[str, str] = {
     "SV_STOCKHOLM": "SV___DDC_CWICR",
     "TH_BANGKOK": "TH___DDC_CWICR",
     "TR_ISTANBUL": "TR___DDC_CWICR",
+    "TR_NATIONAL": "TR___DDC_CWICR",
     "UK_GBP": "UK___DDC_CWICR",
     "USA_USD": "US___DDC_CWICR",
     "VI_HANOI": "VI___DDC_CWICR",
     "ZA_JOHANNESBURG": "ZA___DDC_CWICR",
     "ZH_SHANGHAI": "ZH___DDC_CWICR",
+    "ZH_CHINA": "ZH___DDC_CWICR",
 }
 
 _GITHUB_BASE = "https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/main"
@@ -155,6 +157,17 @@ _GITHUB_BASE = "https://raw.githubusercontent.com/datadrivenconstruction/OpenCon
 # CWICR parquet cache in app.modules.costs.router so one folder holds all
 # downloaded reference data, and a region imported once stays available offline.
 _CATALOG_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "catalog"
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_LOCAL_CATALOG_DIRS = (
+    _REPO_ROOT / "data" / "catalog" / "regions",
+    Path.cwd() / "data" / "catalog" / "regions",
+)
+_LOCAL_CATALOG_FILE_ALIASES: dict[str, tuple[str, ...]] = {
+    # The authentic China resource CSV was regenerated under the legacy
+    # language-prefixed catalogue filename. Resolve the product id without
+    # duplicating the generated CSV/XLSX artifacts.
+    "ZH_CHINA": ("ZH_SHANGHAI",),
+}
 
 
 def _read_region_catalog_csv(region: str, folder: str) -> tuple[bytes, str]:
@@ -166,61 +179,85 @@ def _read_region_catalog_csv(region: str, folder: str) -> tuple[bytes, str]:
 
     Lookup order:
       1. Local cache dir (a previous successful download).
-      2. GitHub download (cached on success for the next offline run).
+      2. Repository checkout (`data/catalog/regions`) for locally generated
+         catalogues that have not been published upstream yet.
+      3. GitHub download (cached on success for the next offline run).
 
     Runs in a worker thread (blocking I/O). Returns ``(raw_bytes, source)``
     where ``source`` is ``cache`` / ``github``. Raises ``RuntimeError`` with
     an actionable message when both fail.
     """
-    csv_name = f"DDC_CWICR_{region}_Catalog.csv"
+    candidate_csv_names = (
+        f"DDC_CWICR_{region}_Catalog.csv",
+        *(f"DDC_CWICR_{alias}_Catalog.csv" for alias in _LOCAL_CATALOG_FILE_ALIASES.get(region, ())),
+    )
+    csv_name = candidate_csv_names[0]
 
     # 1. Local cache from a previous download. The 1 KB floor skips a stuck
     #    0-byte file left by an interrupted write.
-    cached = _CATALOG_CACHE_DIR / csv_name
-    try:
-        if cached.is_file() and cached.stat().st_size > 1000:
-            return cached.read_bytes(), "cache"
-    except OSError:
-        logger.warning("Unreadable cached catalog CSV at %s, ignoring", cached)
+    for candidate_csv_name in candidate_csv_names:
+        cached = _CATALOG_CACHE_DIR / candidate_csv_name
+        try:
+            if cached.is_file() and cached.stat().st_size > 1000:
+                return cached.read_bytes(), "cache"
+        except OSError:
+            logger.warning("Unreadable cached catalog CSV at %s, ignoring", cached)
 
-    # 2. GitHub download (cached on success for the next offline run).
+    # 2. Local generated catalogues in a source checkout. This keeps new
+    # authentic bases usable before they are mirrored to the public DDC repo.
+    for local_dir in _LOCAL_CATALOG_DIRS:
+        for candidate_csv_name in candidate_csv_names:
+            local_csv = local_dir / candidate_csv_name
+            try:
+                if local_csv.is_file() and local_csv.stat().st_size > 1000:
+                    return local_csv.read_bytes(), "local"
+            except OSError:
+                logger.warning("Unreadable local catalog CSV at %s, ignoring", local_csv)
+
+    # 3. GitHub download (cached on success for the next offline run).
     # Belt-and-braces: `folder` and `region` come from the static REGION_MAP
     # only (already validated by the caller), but URL-quote them anyway and
     # verify the final URL still has the trusted host. This makes the trust
     # boundary explicit and silences CodeQL's `py/partial-ssrf` finding.
+    import urllib.request
     from urllib.parse import quote, urlparse
 
-    url = f"{_GITHUB_BASE}/{quote(folder, safe='')}/{quote(csv_name, safe='')}"
-    if urlparse(url).netloc != "raw.githubusercontent.com":
-        raise RuntimeError("Catalog source host is not allowed.")
-    logger.info("Downloading catalog CSV: %s", url)
+    last_error: Exception | None = None
+    last_url = ""
+    for candidate_csv_name in candidate_csv_names:
+        url = f"{_GITHUB_BASE}/{quote(folder, safe='')}/{quote(candidate_csv_name, safe='')}"
+        last_url = url
+        if urlparse(url).netloc != "raw.githubusercontent.com":
+            raise RuntimeError("Catalog source host is not allowed.")
+        logger.info("Downloading catalog CSV: %s", url)
 
-    import urllib.request
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": ("OpenConstructionERP (+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)")},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 - host pinned above
+                raw_bytes = resp.read()
+        except Exception as exc:
+            logger.error("Failed to download catalog CSV from %s: %s", url, exc)
+            last_error = exc
+            continue
 
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": ("OpenConstructionERP (+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)")},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 - host pinned above
-            raw_bytes = resp.read()
-    except Exception as exc:
-        logger.error("Failed to download catalog CSV from %s: %s", url, exc)
-        raise RuntimeError(
-            f"Could not load the '{region}' resource catalog: it is not in the local "
-            f"cache and the GitHub download failed "
-            f"({exc.__class__.__name__}: {exc}). URL: {url}. Check that this server "
-            f"can reach raw.githubusercontent.com, or place the CSV at {cached} "
-            f"and retry."
-        ) from exc
+        # Cache under the canonical name for the next (possibly offline) run.
+        try:
+            _CATALOG_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            (_CATALOG_CACHE_DIR / csv_name).write_bytes(raw_bytes)
+        except OSError:
+            logger.warning("Could not cache catalog CSV at %s", _CATALOG_CACHE_DIR / csv_name)
+        return raw_bytes, "github"
 
-    # Cache for the next (possibly offline) run. Best-effort only.
-    try:
-        _CATALOG_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        cached.write_bytes(raw_bytes)
-    except OSError:
-        logger.warning("Could not cache catalog CSV at %s", cached)
-    return raw_bytes, "github"
+    raise RuntimeError(
+        f"Could not load the '{region}' resource catalog: it is not in the local "
+        f"cache and the GitHub download failed "
+        f"({last_error.__class__.__name__}: {last_error}). URL: {last_url}. Check that this server "
+        f"can reach raw.githubusercontent.com, or place the CSV at {_CATALOG_CACHE_DIR / csv_name} "
+        f"and retry."
+    ) from last_error
 
 
 # ── Import from bundled data / cache / GitHub ────────────────────────────
@@ -244,8 +281,8 @@ async def import_catalog_from_github(
     SP_BARCELONA, FR_PARIS, HI_MUMBAI, HR_ZAGREB, ID_JAKARTA, IT_ROME,
     JA_TOKYO, KO_SEOUL, MX_MEXICOCITY, NG_LAGOS, NL_AMSTERDAM, NZ_AUCKLAND,
     PL_WARSAW, PT_SAOPAULO, RO_BUCHAREST, RU_STPETERSBURG, SV_STOCKHOLM,
-    TH_BANGKOK, TR_ISTANBUL, UK_GBP, USA_USD, VI_HANOI, ZA_JOHANNESBURG,
-    ZH_SHANGHAI).
+    TH_BANGKOK, TR_ISTANBUL, TR_NATIONAL, UK_GBP, USA_USD, VI_HANOI,
+    ZA_JOHANNESBURG, ZH_SHANGHAI, ZH_CHINA).
     """
     import csv
     import io
