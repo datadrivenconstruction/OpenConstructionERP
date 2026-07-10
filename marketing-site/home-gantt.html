@@ -101,9 +101,13 @@ a{color:inherit;text-decoration:none}
 @media(max-width:560px){.gc-bar .pc{display:none}}
 .gfuture{position:absolute;top:0;bottom:0;left:58%;right:0;background:rgba(18,20,26,.018);pointer-events:none}
 @media(max-width:720px){.gc-bar.b2,.gc-tag.t2{margin-left:4%}.gc-bar.b3,.gc-tag.t3{margin-left:10%}.gc-bar.b4,.gc-tag.t4{margin-left:18%}}
-.gc-hist{position:relative;z-index:2;display:grid;grid-template-columns:repeat(12,1fr);align-items:end;height:58px;border-top:1px dashed rgba(18,20,26,.12);padding:10px 0 0;margin:6px 14px 16px}
-.gc-hist i{height:var(--h);margin:0 8px;background:rgba(2,132,199,.16);border-top:2px solid rgba(2,132,199,.5);border-radius:4px 4px 0 0}
-.gc-hist-lbl{position:absolute;top:8px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
+.gchart{cursor:ew-resize}
+.gtoday b.flip{left:auto;right:8px}
+.gc-city{position:relative;z-index:2;margin:12px 14px 0;border-top:1px dashed rgba(18,20,26,.12);padding-top:8px}
+.gc-city svg{display:block;width:100%;height:auto}
+.gc-city-lbl{position:absolute;top:12px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
+.crane{opacity:0;transition:opacity .45s ease}
+.crane.on{opacity:1}
 .p-heroGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;margin-top:40px}
 .p-sub{color:#424a56;font-size:16.5px;line-height:1.68;max-width:56ch}
 .p-trust{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
@@ -180,19 +184,7 @@ a{color:inherit;text-decoration:none}
 .df-out .ft{position:relative;z-index:1;margin-top:auto;padding-top:14px;font:500 8.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#77879a}
 @media(max-width:980px){.df-grid{grid-template-columns:1fr}.df-arr{transform:rotate(90deg);padding:2px 0}}
 
-/* ============ 3d building + viz ============ */
-.b-card{padding:0;overflow:hidden;cursor:ew-resize;margin-bottom:16px}
-.b-top{display:grid;grid-template-columns:260px 1fr}
-.b-read{padding:22px 24px 18px;border-right:1px dashed rgba(18,20,26,.12);display:flex;flex-direction:column}
-.b-kick{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
-.b-cost{font:800 clamp(26px,2.6vw,34px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419;font-variant-numeric:tabular-nums}
-.b-sub{font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#98a1ab;margin:7px 0 14px}
-.b-row{display:flex;justify-content:space-between;align-items:baseline;font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694;border-bottom:1px dashed rgba(18,20,26,.1);padding:9px 0}
-.b-row b{font:700 12px/1 'JetBrains Mono',monospace;color:#16181d;letter-spacing:0}
-.b-row b.acc{color:#0284c7}
-.b-hint{margin-top:auto;padding-top:16px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#a3adb8}
-.b-stage{position:relative;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#fbfdff 0,#f3f8fb 100%);padding:10px 10px 0;overflow:hidden}
-.b-stage svg{width:min(430px,92%);height:auto;display:block;transition:transform .2s ease-out}
+/* ============ city + viz ============ */
 .f-r{fill:#fff;stroke:rgba(22,24,29,.32);stroke-width:1}
 .f-l{fill:rgba(2,132,199,.14);stroke:rgba(22,24,29,.32);stroke-width:1}
 .f-t{fill:rgba(2,132,199,.3);stroke:rgba(22,24,29,.35);stroke-width:1}
@@ -200,14 +192,9 @@ a{color:inherit;text-decoration:none}
 .bfl.on{opacity:1;transform:none}
 .bfl.wip{opacity:1;transform:none}
 .bfl.wip .f-r,.bfl.wip .f-l,.bfl.wip .f-t{fill:rgba(2,132,199,.05);stroke:rgba(2,132,199,.55);stroke-dasharray:3 4}
-.bfl.wip .f-w{display:none}
-.b-rail{position:relative;grid-column:1 / -1;display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.08);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#a3adb8;text-transform:uppercase}
-.b-rail span{padding:10px 0 13px 8px;border-left:1px solid rgba(18,20,26,.04)}
-.b-handle{position:absolute;top:-1px;bottom:0;width:1.5px;background:#ef5350;pointer-events:none}
-.b-handle::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:#ef5350;border:2px solid #fff;box-shadow:0 2px 8px rgba(239,83,80,.55)}
-@media(max-width:880px){.b-top{grid-template-columns:1fr}.b-read{border-right:0;border-bottom:1px dashed rgba(18,20,26,.12)}.b-hint{margin-top:14px}}
 
 .viz-grid{display:grid;grid-template-columns:1.42fr 1fr;gap:16px}
+.viz-scurve{cursor:ew-resize}
 .viz-card{padding:20px 22px 18px;display:flex;flex-direction:column}
 .viz-scurve{grid-row:span 2}
 .viz-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
@@ -375,23 +362,23 @@ a{color:inherit;text-decoration:none}
     <div class="p-eyebrow"><i></i><span><b>v10.8.0</b> · open source on GitHub</span></div>
     <div class="gchart">
       <div class="gscale"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
-      <i class="gfuture" aria-hidden="true"></i>
+      <i class="gfuture" id="t-future" aria-hidden="true"></i>
       <div class="gc-rows">
         <span class="gc-ghost">next → your project</span>
         <span class="gc-tag t1">01 · estimate</span>
-        <div class="gc-bar b1">Run<b class="pc">100%</b></div>
+        <div class="gc-bar b1" data-s="0" data-e="0.22">Run<b class="pc">100%</b></div>
         <span class="gc-tag t2">02 · schedule</span>
-        <div class="gc-bar b2">the whole<b class="pc">100%</b></div>
+        <div class="gc-bar b2" data-s="0.08" data-e="0.35">the whole<b class="pc">100%</b></div>
         <span class="gc-tag t3">03 · build</span>
-        <div class="gc-bar b3">construction<b class="pc on">82%</b></div>
+        <div class="gc-bar b3" data-s="0.20" data-e="0.66">construction<b class="pc on">83%</b></div>
         <span class="gc-tag t4">04 · hand over</span>
-        <div class="gc-bar b4">project.<b class="pc on">61%</b></div>
+        <div class="gc-bar b4" data-s="0.37" data-e="0.72">project.<b class="pc on">61%</b></div>
       </div>
-      <div class="gc-hist" aria-hidden="true">
-        <span class="gc-hist-lbl">resources · levelled</span>
-        <i style="--h:30%"></i><i style="--h:46%"></i><i style="--h:62%"></i><i style="--h:78%"></i><i style="--h:92%"></i><i style="--h:84%"></i><i style="--h:70%"></i><i style="--h:58%"></i><i style="--h:46%"></i><i style="--h:58%"></i><i style="--h:70%"></i><i style="--h:80%"></i>
+      <div class="gc-city" aria-hidden="true">
+        <span class="gc-city-lbl">riverside district · 9 buildings · scrub with your mouse</span>
+        <svg id="city" viewBox="0 0 1200 244" preserveAspectRatio="xMidYMax meet"></svg>
       </div>
-      <i class="gtoday" style="left:58%" aria-hidden="true"><b>today · v10.8.0</b></i>
+      <i class="gtoday" id="t-today" style="left:58%" aria-hidden="true"><b id="t-flag">today · W07 · €0.93M</b></i>
     </div>
     <div class="p-heroGrid">
       <div>
@@ -506,89 +493,8 @@ a{color:inherit;text-decoration:none}
     <div class="p-secHead">
       <span class="p-num">03 · cost &amp; time in sync</span>
       <h2>The numbers behind the bars.</h2>
-      <p><b>Slide your mouse across the site</b> - the building rises, and the S-curve, trades and budget follow the same clock. That is the whole product: one timeline, every number live from the BOQ.</p>
+      <p><b>Slide across the programme above - or along the S-curve here.</b> The district builds, the today line moves, and spend, trades and budget follow the same clock: one timeline, every number live from the BOQ.</p>
     </div>
-
-    <!-- interactive 3d building -->
-    <figure class="b-card card" id="bcard">
-      <div class="b-top">
-        <div class="b-read">
-          <div class="b-kick">site preview · riverside tower</div>
-          <div class="b-cost" id="b-cost">€ 0</div>
-          <div class="b-sub">spent to date · live from the boq</div>
-          <div class="b-row"><span>week</span><b class="acc" id="b-week">W01</b></div>
-          <div class="b-row"><span>floors</span><b id="b-floors">0 / 7</b></div>
-          <div class="b-row"><span>programme</span><b id="b-prog">0%</b></div>
-          <div class="b-hint">← slide across the site to scrub time →</div>
-        </div>
-        <div class="b-stage">
-          <svg id="b-svg" viewBox="0 0 360 430" role="img" aria-label="Isometric building rising floor by floor as the timeline is scrubbed">
-            <!-- ground -->
-            <path d="M180,392 L292,336 L180,280 L68,336 Z" fill="rgba(18,20,26,.035)" stroke="rgba(18,20,26,.12)" stroke-width="1"/>
-            <path d="M180,380 L268,336 L180,292 L92,336 Z" fill="none" stroke="rgba(18,20,26,.07)" stroke-width="1"/>
-            <!-- crane -->
-            <g stroke="rgba(22,24,29,.5)" stroke-width="1.4" fill="none">
-              <path d="M52,384 L52,72 M60,384 L60,72"/>
-              <path d="M52,356 L60,348 M52,328 L60,320 M52,300 L60,292 M52,272 L60,264 M52,244 L60,236 M52,216 L60,208 M52,188 L60,180 M52,160 L60,152 M52,132 L60,124 M52,104 L60,96"/>
-              <path d="M60,72 L310,72 M52,72 L20,72"/>
-              <path d="M56,46 L310,72 M56,46 L20,72 M56,46 L56,72"/>
-              <path d="M287,80 L287,146"/>
-            </g>
-            <rect x="12" y="72" width="16" height="12" fill="rgba(22,24,29,.6)" rx="1"/>
-            <rect x="280" y="72" width="12" height="8" fill="rgba(22,24,29,.6)" rx="1"/>
-            <path d="M287,146 L291,152 L287,158 L283,152 Z" fill="rgba(22,24,29,.7)"/>
-            <path d="M56,46 L70,50 L56,56 Z" fill="#ef5350"/>
-            <!-- floors (bottom → top) -->
-            <g class="bfl" data-i="0">
-              <path class="f-l" d="M180,368 L102,329 L102,295 L180,334 Z"/>
-              <path class="f-r" d="M180,368 L258,329 L258,295 L180,334 Z"/>
-              <path class="f-t" d="M180,334 L258,295 L180,256 L102,295 Z"/>
-              <path class="f-w" d="M204,347V335 M228,335V323 M150,344V334"/>
-            </g>
-            <g class="bfl" data-i="1">
-              <path class="f-l" d="M180,334 L102,295 L102,261 L180,300 Z"/>
-              <path class="f-r" d="M180,334 L258,295 L258,261 L180,300 Z"/>
-              <path class="f-t" d="M180,300 L258,261 L180,222 L102,261 Z"/>
-              <path class="f-w" d="M204,313V301 M228,301V289 M150,310V300"/>
-            </g>
-            <g class="bfl" data-i="2">
-              <path class="f-l" d="M180,300 L102,261 L102,227 L180,266 Z"/>
-              <path class="f-r" d="M180,300 L258,261 L258,227 L180,266 Z"/>
-              <path class="f-t" d="M180,266 L258,227 L180,188 L102,227 Z"/>
-              <path class="f-w" d="M204,279V267 M228,267V255 M150,276V266"/>
-            </g>
-            <g class="bfl" data-i="3">
-              <path class="f-l" d="M180,266 L102,227 L102,193 L180,232 Z"/>
-              <path class="f-r" d="M180,266 L258,227 L258,193 L180,232 Z"/>
-              <path class="f-t" d="M180,232 L258,193 L180,154 L102,193 Z"/>
-              <path class="f-w" d="M204,245V233 M228,233V221 M150,242V232"/>
-            </g>
-            <g class="bfl" data-i="4">
-              <path class="f-l" d="M180,232 L102,193 L102,159 L180,198 Z"/>
-              <path class="f-r" d="M180,232 L258,193 L258,159 L180,198 Z"/>
-              <path class="f-t" d="M180,198 L258,159 L180,120 L102,159 Z"/>
-              <path class="f-w" d="M204,211V199 M228,199V187 M150,208V198"/>
-            </g>
-            <g class="bfl" data-i="5">
-              <path class="f-l" d="M180,198 L102,159 L102,125 L180,164 Z"/>
-              <path class="f-r" d="M180,198 L258,159 L258,125 L180,164 Z"/>
-              <path class="f-t" d="M180,164 L258,125 L180,86 L102,125 Z"/>
-              <path class="f-w" d="M204,177V165 M228,165V153 M150,174V164"/>
-            </g>
-            <g class="bfl" data-i="6">
-              <path class="f-l" d="M180,164 L102,125 L102,91 L180,130 Z"/>
-              <path class="f-r" d="M180,164 L258,125 L258,91 L180,130 Z"/>
-              <path class="f-t" d="M180,130 L258,91 L180,52 L102,91 Z"/>
-              <path class="f-w" d="M204,143V131 M228,131V119 M150,140V130"/>
-            </g>
-          </svg>
-        </div>
-        <div class="b-rail" aria-hidden="true">
-          <span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span>
-          <i class="b-handle" id="b-handle" style="left:2%"></i>
-        </div>
-      </div>
-    </figure>
 
     <div class="viz-grid">
       <figure class="viz-card viz-scurve card">
@@ -819,12 +725,9 @@ a{color:inherit;text-decoration:none}
 (function(){
   /* reveal on scroll */
   var secs=[].slice.call(document.querySelectorAll('.p-sec'));
-  var vsyncStarted=false;
-  function startVsync(){ if(!vsyncStarted){ vsyncStarted=true; setTimeout(function(){ if(window.__setP){window.__setP(0.58);} },350); } }
   function markIn(s){
     if(s.classList.contains('in')){return;}
     s.classList.add('in');
-    if(s.id==='vsync'){startVsync();}
   }
   if('IntersectionObserver' in window){
     var reveal=new IntersectionObserver(function(es){
@@ -893,10 +796,10 @@ a{color:inherit;text-decoration:none}
     });
   });
 
-  /* ===== time scrub engine: building + s-curve + trades + budget ===== */
-  var bcard=document.getElementById('bcard');
+  /* ===== time scrub engine: hero city + today line + s-curve + trades + budget ===== */
+  var chart=document.querySelector('.gchart');
   var scActual=document.getElementById('sc-actual');
-  if(!bcard||!scActual||!scActual.getTotalLength){return;}
+  if(!chart||!scActual||!scActual.getTotalLength){return;}
 
   var TOTAL=2148900;
   var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -916,14 +819,66 @@ a{color:inherit;text-decoration:none}
     return samples[lo][1];
   }
 
+  /* build the district: 9 iso buildings, 4 cranes, generated into #city */
+  var SVGNS='http://www.w3.org/2000/svg';
+  function el(n,attrs,parent){
+    var e=document.createElementNS(SVGNS,n);
+    for(var k in attrs){e.setAttribute(k,attrs[k]);}
+    if(parent){parent.appendChild(e);}
+    return e;
+  }
+  var GY=222;
+  var CITY=[
+    {x:90,  w:30, fh:13, n:5, s:0.00, e:0.18},
+    {x:210, w:38, fh:14, n:7, s:0.02, e:0.34, crane:1},
+    {x:330, w:26, fh:12, n:4, s:0.10, e:0.30},
+    {x:470, w:42, fh:15, n:8, s:0.08, e:0.52, crane:1},
+    {x:610, w:30, fh:13, n:5, s:0.25, e:0.55},
+    {x:740, w:40, fh:14, n:9, s:0.20, e:0.72, crane:1},
+    {x:880, w:32, fh:13, n:6, s:0.45, e:0.85},
+    {x:1010,w:38, fh:14, n:7, s:0.55, e:0.98, crane:1},
+    {x:1130,w:26, fh:12, n:4, s:0.70, e:0.99}
+  ];
+  var citySvg=document.getElementById('city');
+  var buildings=[];
+  if(citySvg){
+    el('path',{d:'M18,'+(GY+6)+' L1182,'+(GY+6),stroke:'rgba(18,20,26,.14)','stroke-width':'1'},citySvg);
+    CITY.forEach(function(b){
+      var g=el('g',{},citySvg);
+      var fw=Math.round(b.w*1.12);
+      el('path',{d:'M'+b.x+','+(GY+4)+' L'+(b.x+fw)+','+(GY+4-fw/2)+' L'+b.x+','+(GY+4-fw)+' L'+(b.x-fw)+','+(GY+4-fw/2)+' Z',fill:'rgba(18,20,26,.05)',stroke:'rgba(18,20,26,.1)','stroke-width':'1'},g);
+      var fls=[];
+      for(var i=0;i<b.n;i++){
+        var yb=GY-i*b.fh, yt=yb-b.fh, w=b.w;
+        var fg=el('g',{class:'bfl'},g);
+        el('path',{class:'f-l',d:'M'+b.x+','+yb+' L'+(b.x-w)+','+(yb-w/2)+' L'+(b.x-w)+','+(yt-w/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-r',d:'M'+b.x+','+yb+' L'+(b.x+w)+','+(yb-w/2)+' L'+(b.x+w)+','+(yt-w/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-t',d:'M'+b.x+','+yt+' L'+(b.x+w)+','+(yt-w/2)+' L'+b.x+','+(yt-w)+' L'+(b.x-w)+','+(yt-w/2)+' Z'},fg);
+        fls.push(fg);
+      }
+      var cr=null;
+      if(b.crane){
+        var cx=b.x+b.w+26, topY=GY-b.n*b.fh-34;
+        var jl=b.x-b.w-8, jr=cx+18;
+        cr=el('g',{class:'crane'},g);
+        var st=el('g',{stroke:'rgba(22,24,29,.5)','stroke-width':'1.3',fill:'none'},cr);
+        el('path',{d:'M'+cx+','+GY+' L'+cx+','+topY},st);
+        el('path',{d:'M'+jl+','+topY+' L'+jr+','+topY},st);
+        el('path',{d:'M'+cx+','+(topY-12)+' L'+jl+','+topY+' M'+cx+','+(topY-12)+' L'+jr+','+topY+' M'+cx+','+(topY-12)+' L'+cx+','+topY},st);
+        el('path',{d:'M'+b.x+','+topY+' L'+b.x+','+(topY+24)},st);
+        el('rect',{x:jr-11,y:topY+1,width:11,height:7,rx:1,fill:'rgba(22,24,29,.6)'},cr);
+        el('path',{d:'M'+b.x+','+(topY+24)+' L'+(b.x+4)+','+(topY+30)+' L'+b.x+','+(topY+36)+' L'+(b.x-4)+','+(topY+30)+' Z',fill:'rgba(22,24,29,.7)'},cr);
+        el('path',{d:'M'+cx+','+(topY-12)+' L'+(cx+10)+','+(topY-9)+' L'+cx+','+(topY-6)+' Z',fill:'#ef5350'},cr);
+      }
+      buildings.push({fls:fls,crane:cr,s:b.s,e:b.e,n:b.n});
+    });
+  }
+
   var els={
-    cost:document.getElementById('b-cost'),
-    week:document.getElementById('b-week'),
-    floors:document.getElementById('b-floors'),
-    prog:document.getElementById('b-prog'),
-    handle:document.getElementById('b-handle'),
-    svg:document.getElementById('b-svg'),
-    fls:[].slice.call(document.querySelectorAll('.bfl')),
+    tToday:document.getElementById('t-today'),
+    tFlag:document.getElementById('t-flag'),
+    tFuture:document.getElementById('t-future'),
+    bars:[].slice.call(document.querySelectorAll('.gc-bar[data-s]')),
     clip:document.getElementById('sc-clip'),
     today:document.getElementById('sc-today'),
     flag:document.getElementById('sc-flag'),
@@ -938,7 +893,6 @@ a{color:inherit;text-decoration:none}
     comL:document.getElementById('bl-com-l')
   };
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
-  function fmtEuro(n){return '€ '+Math.round(n).toLocaleString('en-US');}
 
   function apply(p){
     var x=46+570*p;
@@ -948,20 +902,39 @@ a{color:inherit;text-decoration:none}
     var week=1+Math.round(p*11);
     var wk='W'+(week<10?'0':'')+week;
 
-    /* building */
-    var f=p*7;
-    var done=Math.floor(f);
-    els.fls.forEach(function(fl,i){
-      fl.classList.remove('on','wip');
-      if(i<done){fl.classList.add('on');}
-      else if(i===done&&f-done>0.03&&done<7){fl.classList.add('wip');}
+    /* hero: today line + future zone + flag */
+    var pos=(p*100)+'%';
+    if(els.tToday){
+      els.tToday.style.left=pos;
+      els.tFlag.textContent='today · '+wk+' · €'+(cost/1e6).toFixed(2)+'M';
+      if(p>0.8){els.tFlag.classList.add('flip');}else{els.tFlag.classList.remove('flip');}
+    }
+    if(els.tFuture){els.tFuture.style.left=pos;}
+
+    /* hero: % chip per headline bar */
+    els.bars.forEach(function(bar){
+      var chip=bar.querySelector('.pc');
+      if(!chip){return;}
+      var s=parseFloat(bar.getAttribute('data-s'));
+      var e=parseFloat(bar.getAttribute('data-e'));
+      var pct=Math.round(clamp((p-s)/(e-s),0,1)*100);
+      chip.textContent=pct+'%';
+      if(pct>0&&pct<100){chip.classList.add('on');}else{chip.classList.remove('on');}
     });
-    els.cost.textContent=fmtEuro(cost);
-    els.week.textContent=wk;
-    els.floors.textContent=Math.min(done,7)+' / 7';
-    els.prog.textContent=Math.round(p*100)+'%';
-    els.handle.style.left=(p*100)+'%';
-    els.svg.style.transform='translateX('+((0.5-p)*16)+'px)';
+
+    /* hero: the district rises */
+    buildings.forEach(function(b){
+      var f=clamp((p-b.s)/(b.e-b.s),0,1)*b.n;
+      var done=Math.floor(f);
+      b.fls.forEach(function(fl,i){
+        fl.classList.remove('on','wip');
+        if(i<done){fl.classList.add('on');}
+        else if(i===done&&f-done>0.03&&done<b.n){fl.classList.add('wip');}
+      });
+      if(b.crane){
+        if(f>0.01&&f<b.n-0.01){b.crane.classList.add('on');}else{b.crane.classList.remove('on');}
+      }
+    });
 
     /* s-curve */
     els.clip.setAttribute('width',String(x-46));
@@ -1019,17 +992,30 @@ a{color:inherit;text-decoration:none}
   window.__setP=setP;
   apply(cur);
 
-  bcard.addEventListener('mousemove',function(e){
-    var r=bcard.getBoundingClientRect();
-    setP((e.clientX-r.left)/r.width);
-  });
-  bcard.addEventListener('mouseleave',function(){setP(0.58);});
-  bcard.addEventListener('touchmove',function(e){
-    if(e.touches&&e.touches[0]){
-      var r=bcard.getBoundingClientRect();
-      setP((e.touches[0].clientX-r.left)/r.width);
-    }
+  /* scrub by moving the mouse across the hero programme */
+  function scrubX(clientX){
+    var r=chart.getBoundingClientRect();
+    setP((clientX-r.left)/r.width);
+  }
+  chart.addEventListener('mousemove',function(e){scrubX(e.clientX);});
+  chart.addEventListener('mouseleave',function(){setP(0.58);});
+  chart.addEventListener('touchmove',function(e){
+    if(e.touches&&e.touches[0]){scrubX(e.touches[0].clientX);}
   },{passive:true});
+
+  /* the s-curve card scrubs the same clock */
+  var scSvg=document.querySelector('.viz-scurve svg');
+  if(scSvg){
+    scSvg.addEventListener('mousemove',function(e){
+      var r=scSvg.getBoundingClientRect();
+      var vx=(e.clientX-r.left)/r.width*640;
+      setP(clamp((vx-46)/570,0,1));
+    });
+    scSvg.addEventListener('mouseleave',function(){setP(0.58);});
+  }
+
+  /* opening move: the district builds itself up to today */
+  setTimeout(function(){setP(0.58);},900);
 })();
 </script>
 
