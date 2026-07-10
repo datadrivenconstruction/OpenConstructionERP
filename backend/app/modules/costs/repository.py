@@ -10,7 +10,7 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import String, and_, cast, func, or_, select, update
+from sqlalchemy import String, and_, case, cast, func, or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.costs.models import CostItem
@@ -70,6 +70,60 @@ def _classification_expr(depth_key: str) -> Any:
     if "sqlite" in str(_engine.url):
         return json_path_text(CostItem.classification, f"$.{depth_key}")
     return CostItem.classification[depth_key].as_string()
+
+
+# ── Fuzzy (trigram) search availability ──────────────────────────────────────
+#
+# Fuzzy, ranked cost search uses PostgreSQL's pg_trgm extension
+# (``similarity`` / ``word_similarity``). The extension has to be
+# ``CREATE EXTENSION``-installed on the connected database, which is not
+# guaranteed: the embedded runtime builds its schema via ``create_all`` (not the
+# Alembic migration that installs pg_trgm), and a locked-down managed cluster may
+# refuse ``CREATE EXTENSION``. So availability is probed at query time and the
+# search transparently falls back to the plain ILIKE path when pg_trgm is absent.
+#
+# Probing on every request would add a round-trip, so the result is cached for
+# the process. ``reset_trgm_probe`` clears the cache - used by tests that toggle
+# the extension, and available to call after an operator installs pg_trgm on a
+# running cluster (otherwise a restart is needed to pick it up).
+_TRGM_AVAILABLE: bool | None = None
+
+#: word_similarity / similarity cutoff for the fuzzy recall arm. 0.3 mirrors
+#: pg_trgm's own default ``similarity_threshold`` - permissive enough to catch a
+#: single-character typo while still rejecting unrelated rows.
+_FUZZY_SIMILARITY_THRESHOLD = 0.3
+
+
+async def pg_trgm_available(session: AsyncSession) -> bool:
+    """Return True when the pg_trgm extension is installed on the bound database.
+
+    The check is a cheap system-catalogue lookup (``pg_extension``) whose result
+    is cached for the process after the first call. Returns False for any
+    non-PostgreSQL bind and for any error, so a caller can treat False as
+    "use the ILIKE fallback".
+    """
+    global _TRGM_AVAILABLE
+    if _TRGM_AVAILABLE is not None:
+        return _TRGM_AVAILABLE
+    bind = session.bind
+    dialect = bind.dialect.name if bind is not None else ""
+    if dialect != "postgresql":
+        _TRGM_AVAILABLE = False
+        return _TRGM_AVAILABLE
+    try:
+        result = await session.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'"))
+        _TRGM_AVAILABLE = result.first() is not None
+    except Exception:
+        # A permission error or a backend without the catalogue row: treat as
+        # unavailable and fall back to ILIKE rather than surfacing an error.
+        _TRGM_AVAILABLE = False
+    return _TRGM_AVAILABLE
+
+
+def reset_trgm_probe() -> None:
+    """Clear the cached pg_trgm probe so the next call re-checks the database."""
+    global _TRGM_AVAILABLE
+    _TRGM_AVAILABLE = None
 
 
 class CostItemRepository:
@@ -182,6 +236,7 @@ class CostItemRepository:
         limit: int = 50,
         cursor: tuple[str, str] | None = None,
         skip_count: bool = False,
+        fuzzy: bool = True,
     ) -> tuple[list[CostItem], int | None, bool]:
         """Advanced search with multiple filters and keyset pagination.
 
@@ -219,17 +274,37 @@ class CostItemRepository:
             skip_count: When True, the total-count query is skipped and
                 the second tuple element is ``None``. The router uses this
                 for cursor-paginated requests to avoid the count cost.
+            fuzzy: When True (and ``q`` is set, the bind is PostgreSQL and the
+                pg_trgm extension is installed), ``q`` is matched with typo- and
+                word-order-tolerant trigram similarity and results are ranked by
+                relevance (exact, then prefix, then similarity). That branch
+                paginates by OFFSET/LIMIT because the relevance ordering has no
+                monotonic (code, id) keyset to resume after, so the ``cursor``
+                argument is ignored there and the caller wraps the offset in its
+                own cursor token. Any other case (fuzzy off, empty ``q``,
+                non-PostgreSQL bind, or pg_trgm absent) uses the plain ILIKE +
+                keyset path unchanged, so recall never drops below substring
+                matching.
 
         Returns:
             Tuple of (items, total_count_or_None, has_more).
         """
         from app.core.sql_numeric import numeric_value
 
+        use_fuzzy = await self.fuzzy_search_enabled(q, fuzzy)
+
         base = select(CostItem).where(CostItem.is_active.is_(True))
 
         if q:
-            pattern = f"%{q}%"
-            base = base.where(CostItem.code.ilike(pattern) | CostItem.description.ilike(pattern))
+            if use_fuzzy:
+                # Trigram-broadened recall: keep the substring (ILIKE) hits AND
+                # add rows whose description/code are trigram-similar to the
+                # query, so a typo or reordered phrase still matches. Ranking
+                # happens in the ORDER BY of the fuzzy pagination branch below.
+                base = base.where(self._fuzzy_recall_condition(q))
+            else:
+                pattern = f"%{q}%"
+                base = base.where(CostItem.code.ilike(pattern) | CostItem.description.ilike(pattern))
 
         if name:
             base = base.where(CostItem.code.ilike(f"%{name}%"))
@@ -295,6 +370,31 @@ class CostItemRepository:
             count_stmt = select(func.count()).select_from(base.subquery())
             total = (await self.session.execute(count_stmt)).scalar_one()
 
+        if use_fuzzy and q:
+            # Relevance-ranked page. This branch cannot use the (code, id)
+            # keyset cursor because rows are ordered by a computed relevance
+            # score, not by code, so there is no monotonic column pair to
+            # resume after. It paginates by OFFSET/LIMIT instead; the service
+            # packs the offset into the opaque cursor token so cursor-based
+            # clients keep working (see service.encode_offset_cursor). The
+            # tradeoff vs a true keyset is the usual OFFSET one - a concurrent
+            # insert/delete can shift a row across a page boundary - which is
+            # acceptable for a relevance search where page 1 is what matters.
+            score = self._fuzzy_score_expr(q)
+            page_stmt = (
+                base.order_by(
+                    score.desc(),
+                    CostItem.code.asc(),
+                    cast(CostItem.id, String).asc(),
+                )
+                .offset(offset)
+                .limit(limit + 1)
+            )
+            result = await self.session.execute(page_stmt)
+            rows = list(result.scalars().all())
+            has_more = len(rows) > limit
+            return rows[:limit], total, has_more
+
         # Apply keyset filter AFTER the count query so the total reflects
         # the full result set, not the post-cursor remainder.
         page_stmt = base
@@ -329,6 +429,78 @@ class CostItemRepository:
         items = rows[:limit]
 
         return items, total, has_more
+
+    # ── Fuzzy (trigram) search helpers ────────────────────────────────────
+    #
+    # These power the typo- and word-order-tolerant ranking. Everything
+    # degrades to the plain ILIKE keyset path when the extension is missing
+    # (embedded runtime built via create_all, or a cluster where CREATE
+    # EXTENSION was denied) or on a non-PostgreSQL bind, so recall never
+    # regresses below the legacy substring behaviour.
+
+    async def fuzzy_search_enabled(self, q: str | None, fuzzy: bool) -> bool:
+        """Return True when the fuzzy trigram path should handle ``q``.
+
+        Fuzzy ranking runs only when the caller opted in (``fuzzy``), there is a
+        non-empty query, the bound backend is PostgreSQL, and pg_trgm is
+        installed. Any other case returns False so the search falls back to the
+        plain ILIKE + keyset path.
+        """
+        if not fuzzy or not q or not q.strip():
+            return False
+        bind = self.session.bind
+        dialect = bind.dialect.name if bind is not None else ""
+        if dialect != "postgresql":
+            return False
+        return await pg_trgm_available(self.session)
+
+    def _fuzzy_recall_condition(self, q: str) -> Any:
+        """Build the WHERE recall predicate for a fuzzy query.
+
+        Keeps the substring (ILIKE) recall AND adds a trigram-similarity arm on
+        description and code so a mistyped or reordered query still matches. The
+        trigram arms are only added for queries of at least 3 characters (a
+        trigram needs 3 characters); below that, similarity is meaningless and
+        the ILIKE arms carry recall on their own.
+        """
+        q_norm = q.strip().lower()
+        pattern = f"%{q}%"
+        conditions: list[Any] = [
+            CostItem.code.ilike(pattern),
+            CostItem.description.ilike(pattern),
+        ]
+        if len(q_norm) >= 3:
+            desc_lower = func.lower(CostItem.description)
+            code_lower = func.lower(CostItem.code)
+            conditions.append(func.word_similarity(q_norm, desc_lower) >= _FUZZY_SIMILARITY_THRESHOLD)
+            conditions.append(func.similarity(code_lower, q_norm) >= _FUZZY_SIMILARITY_THRESHOLD)
+        return or_(*conditions)
+
+    def _fuzzy_score_expr(self, q: str) -> Any:
+        """Relevance score expression: exact > prefix > trigram similarity.
+
+        Returns ``tier + similarity`` where ``tier`` is 3.0 for an exact
+        code/description match, 2.0 for a prefix match and 1.0 otherwise, and
+        ``similarity`` is the greater of the description word-similarity and the
+        code similarity (both 0..1). Ordering by this expression descending puts
+        exact hits first, then prefixes, then the closest trigram matches. The
+        tier gap (1.0) exceeds the maximum similarity bonus a lower tier can
+        earn, so a lower tier never leapfrogs a higher one.
+        """
+        q_norm = q.strip().lower()
+        desc_lower = func.lower(CostItem.description)
+        code_lower = func.lower(CostItem.code)
+        prefix = f"{q_norm}%"
+        tier = case(
+            (or_(code_lower == q_norm, desc_lower == q_norm), 3.0),
+            (or_(code_lower.like(prefix), desc_lower.like(prefix)), 2.0),
+            else_=1.0,
+        )
+        similarity = func.greatest(
+            func.word_similarity(q_norm, desc_lower),
+            func.similarity(code_lower, q_norm),
+        )
+        return tier + similarity
 
     async def search_for_autocomplete(
         self,

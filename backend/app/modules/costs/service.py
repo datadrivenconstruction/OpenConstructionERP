@@ -96,6 +96,54 @@ def decode_cursor(token: str) -> tuple[str, str] | None:
     return code, item_id
 
 
+# ── Fuzzy-branch offset cursor ─────────────────────────────────────────────
+#
+# The fuzzy (trigram-ranked) search path orders rows by a computed relevance
+# score, so the (code, id) keyset cursor above does not apply - there is no
+# monotonic column pair to resume after. That branch paginates by OFFSET/LIMIT
+# and packs the next offset into the SAME opaque cursor channel, so cursor-based
+# clients (e.g. the BOQ "Add from Database" infinite scroll) keep working
+# without knowing which ranking mode produced the page. The tradeoff vs a true
+# keyset cursor is the standard OFFSET one: a concurrent insert or delete can
+# shift a row across a page boundary. That is acceptable for a relevance-ranked
+# search where the top matches (page 1) are what matter most.
+
+
+def encode_offset_cursor(offset: int) -> str:
+    """Pack a fuzzy-branch OFFSET into a URL-safe base64 cursor token."""
+    payload = _json.dumps({"o": int(offset)}, separators=(",", ":"))
+    return base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+
+
+def decode_offset_cursor(token: str) -> int | None:
+    """Decode a fuzzy-branch offset cursor back to its integer offset.
+
+    Returns ``None`` for any malformed input or a token that is not an offset
+    cursor (e.g. a stale keyset ``(code, id)`` cursor from a non-fuzzy request),
+    so the caller can map the failure to a 400 and let the client restart from
+    the first page.
+    """
+    if not token or not isinstance(token, str):
+        return None
+    try:
+        padded = token + "=" * (-len(token) % 4)
+        raw = base64.urlsafe_b64decode(padded.encode("ascii"))
+    except (binascii.Error, ValueError, UnicodeDecodeError):
+        return None
+    try:
+        data = _json.loads(raw.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    offset = data.get("o")
+    # ``bool`` is a subclass of ``int``; reject it so a stray ``true`` is not
+    # read as offset 1.
+    if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+        return None
+    return offset
+
+
 class CostItemService:
     """Business logic for cost item operations."""
 
@@ -216,6 +264,7 @@ class CostItemService:
             limit=query.limit,
             cursor=None,
             skip_count=False,
+            fuzzy=query.fuzzy,
         )
         # ``total`` is guaranteed non-None here because skip_count=False.
         assert total is not None
@@ -241,6 +290,15 @@ class CostItemService:
         on the first page. Cursor-paginated requests still skip count
         automatically - this flag is for first-page no-filter fast paths.
         """
+        # Fuzzy (trigram-ranked) branch: relevance ordering cannot use the
+        # (code, id) keyset cursor, so it paginates by OFFSET and encodes the
+        # next offset into the cursor channel (see encode_offset_cursor). Only
+        # taken when the query opted into fuzzy AND pg_trgm is available on the
+        # bound PostgreSQL database; otherwise we fall through to the keyset
+        # path below unchanged.
+        if await self.repo.fuzzy_search_enabled(query.q, query.fuzzy):
+            return await self._search_fuzzy_paginated(query, skip_count=skip_count)
+
         decoded_cursor: tuple[str, str] | None = None
         if query.cursor:
             decoded_cursor = decode_cursor(query.cursor)
@@ -275,6 +333,56 @@ class CostItemService:
             last = items[-1]
             next_cursor = encode_cursor(last.code, str(last.id))
 
+        return items, total, has_more, next_cursor
+
+    async def _search_fuzzy_paginated(
+        self,
+        query: CostSearchQuery,
+        *,
+        skip_count: bool,
+    ) -> tuple[list[CostItem], int | None, bool, str | None]:
+        """OFFSET-paginated fuzzy search returning the same 4-tuple shape.
+
+        Rows are ranked by trigram relevance (exact, then prefix, then
+        similarity) in the repository. Pagination is by OFFSET/LIMIT because the
+        relevance ordering has no monotonic keyset to resume after; the offset
+        is carried in the opaque cursor token so cursor-based clients keep
+        paging. An incoming cursor, when present, is a fuzzy offset cursor from a
+        previous page; a malformed or wrong-mode cursor yields a 400 so the
+        client drops the bookmark and refetches from the first page, matching the
+        keyset path's contract. ``total`` is computed on the first page (no
+        cursor) and omitted afterwards, exactly like the keyset branch.
+        """
+        page_offset = query.offset
+        if query.cursor:
+            decoded = decode_offset_cursor(query.cursor)
+            if decoded is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid pagination cursor",
+                )
+            page_offset = decoded
+
+        items, total, has_more = await self.repo.search(
+            q=query.q,
+            name=query.name,
+            description=query.description,
+            unit=query.unit,
+            source=query.source,
+            region=query.region,
+            category=query.category,
+            classification_path=query.classification_path,
+            catalog_id=query.catalog_id,
+            min_rate=query.min_rate,
+            max_rate=query.max_rate,
+            offset=page_offset,
+            limit=query.limit,
+            cursor=None,
+            skip_count=skip_count or bool(query.cursor),
+            fuzzy=True,
+        )
+
+        next_cursor = encode_offset_cursor(page_offset + query.limit) if has_more else None
         return items, total, has_more, next_cursor
 
     async def category_tree(

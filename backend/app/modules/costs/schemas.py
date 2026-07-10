@@ -381,6 +381,18 @@ class CostSearchQuery(BaseModel):
             "(code, id) pair encoded in the cursor."
         ),
     )
+    fuzzy: bool = Field(
+        default=True,
+        description=(
+            "Enable typo- and word-order-tolerant fuzzy ranking for ``q`` using "
+            "PostgreSQL trigram similarity (pg_trgm): exact and prefix hits rank "
+            "first, then trigram similarity. Falls back automatically to plain "
+            "substring (ILIKE) matching when pg_trgm is unavailable, when ``q`` is "
+            "empty, or on a non-PostgreSQL backend, so results never regress "
+            "below the legacy substring behaviour. Set false to force the legacy "
+            "substring path."
+        ),
+    )
 
 
 class CostSearchResponse(BaseModel):

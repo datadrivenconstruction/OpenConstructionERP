@@ -66,6 +66,7 @@ from app.modules.costs.matcher import (
     match_cwicr_items,
 )
 from app.modules.costs.models import CostItem
+from app.modules.costs.resource_pricing import ResourcePriceService
 from app.modules.costs.schemas import (
     BenchmarkRequest,
     BenchmarkResponse,
@@ -94,7 +95,6 @@ from app.modules.costs.schemas import (
     ResourceSeedResponse,
     SuggestCostsForElementRequest,
 )
-from app.modules.costs.resource_pricing import ResourcePriceService
 from app.modules.costs.service import CostBenchmarkService, CostCatalogService, CostItemService
 from app.modules.costs.translations import localize_cost_row
 
@@ -673,6 +673,16 @@ async def search_cost_items(
             "``total`` is omitted."
         ),
     ),
+    fuzzy: bool = Query(
+        default=True,
+        description=(
+            "Typo- and word-order-tolerant fuzzy ranking for ``q`` via "
+            "PostgreSQL trigram similarity. Exact and prefix hits rank first, "
+            "then trigram similarity. Falls back automatically to plain "
+            "substring matching when the pg_trgm extension is unavailable, so "
+            "results never regress. Set false to force the legacy substring path."
+        ),
+    ),
     lite: bool = Query(
         default=False,
         description=(
@@ -732,6 +742,7 @@ async def search_cost_items(
         limit=limit,
         offset=offset,
         cursor=cursor,
+        fuzzy=fuzzy,
     )
     # Fast-path: when no text/category filters are present and we already
     # know the per-region totals from the prewarmed stats cache, skip the
