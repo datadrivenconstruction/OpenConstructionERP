@@ -125,7 +125,7 @@ a{color:inherit;text-decoration:none}
 .p-sub{color:#424a56;font-size:16.5px;line-height:1.68;max-width:56ch}
 .p-trust{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
 .p-trust span::before{content:'✓';color:#0284c7;margin-right:7px;font-weight:700}
-.p-install{padding:24px}
+.p-install{padding:6px 0 0}
 .p-install .lbl{display:flex;align-items:center;gap:8px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:12px}
 .p-install code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#123c5e;background:#f2f6f9;border:1px solid rgba(18,20,26,.06);border-radius:9px;padding:14px 15px;margin-bottom:14px;white-space:nowrap;overflow-x:auto}
 .p-install code b{color:#0284c7;font-weight:600}
@@ -150,52 +150,52 @@ a{color:inherit;text-decoration:none}
 /* ============ demo player (merged tour) ============ */
 .hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e}
 .hp-eyebrow i{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.7);display:inline-block}
-.hp-grid{display:grid;grid-template-columns:378px 1fr;gap:0;overflow:hidden;border-radius:14px}
-.hp-list{border-right:1px solid rgba(18,20,26,.08);display:flex;flex-direction:column;background:#fff}
-.hp-item{display:grid;grid-template-columns:46px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(18,20,26,.07);padding:0;cursor:pointer;font-family:inherit;position:relative;transition:background .15s}
-.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 10.5px/1 'JetBrains Mono',monospace;color:#9aa3ad;border-right:1px solid rgba(18,20,26,.06);transition:color .15s}
-.hp-item .bd{padding:11px 16px}
-.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#16181d}
+.hp-grid{display:grid;grid-template-columns:330px 1fr;gap:36px;align-items:start}
+.hp-list{display:flex;flex-direction:column}
+.hp-item{display:grid;grid-template-columns:34px 1fr;gap:0;align-items:start;text-align:left;background:none;border:0;border-bottom:1px dashed rgba(18,20,26,.1);padding:12px 0 12px 14px;margin-left:-14px;cursor:pointer;font-family:inherit}
+.hp-item .num{font:600 10.5px/1.5 'JetBrains Mono',monospace;color:#9aa3ad;transition:color .15s}
+.hp-item .bd{padding:0}
+.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#16181d;transition:color .15s}
 .hp-item .h{display:block;color:#7c8694;font-size:12px;margin-top:3px;line-height:1.45}
-.hp-item:hover{background:rgba(2,132,199,.04)}
-.hp-item.on{background:rgba(2,132,199,.07);box-shadow:inset 3px 0 0 #0284c7}
+.hp-item:hover .t{color:#0284c7}
+.hp-item.on{box-shadow:inset 2.5px 0 0 #0284c7}
 .hp-item.on .num{color:#0284c7;font-weight:700}
-.hp-item.on .t{color:#075985}
-.hp-more{padding:13px 16px;font:500 9.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0;margin-top:auto;background:#fafbfb}
+.hp-item.on .t{color:#0284c7}
+.hp-more{padding:14px 0 0;font:500 9.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0;margin-top:auto}
 .hp-more b{color:#0284c7;font-size:13px}
-.hp-stage{position:relative;display:flex;flex-direction:column;background:#fff}
+.hp-stage{position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:14px}
 .hp-chrome{display:flex;align-items:center;gap:8px;background:#f6f8f9;border-bottom:1px solid rgba(18,20,26,.07);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#7c8694}
 .hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(18,20,26,.12);display:block}
 .hp-chrome span{margin-left:8px}
 .hp-chrome em{margin-left:auto;font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
 .hp-shot{flex:1;min-height:0;background:#f2f4f6}
 .hp-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;aspect-ratio:16/9.4}
-@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(18,20,26,.1);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(18,20,26,.06)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
+@media(max-width:980px){.hp-grid{grid-template-columns:1fr;gap:22px}.hp-item{margin-left:0;padding-left:0}.hp-item.on{box-shadow:none}.hp-item.on .h{color:#0369a1}}
 
 /* ============ dataflow ============ */
-.df-grid{display:grid;grid-template-columns:250px 64px 1fr 64px 270px;align-items:stretch}
-.df-col{padding:20px;display:flex;flex-direction:column}
-.df-lbl{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
-.df-in{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border:1px dashed rgba(18,20,26,.18);border-radius:9px;margin-bottom:8px;background:rgba(255,255,255,.6)}
-.df-in b{font:700 13px/1.3 'Inter Tight',sans-serif;color:#1f2733}
-.df-in small{font:500 8.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#98a1ab}
-.df-arr{display:flex;align-items:center;justify-content:center;color:rgba(22,24,29,.3)}
+.df-grid{display:grid;grid-template-columns:250px 56px 1fr 56px 260px;align-items:start}
+.df-col{display:flex;flex-direction:column}
+.df-lbl{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:10px}
+.df-in{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px dashed rgba(18,20,26,.1)}
+.df-in:last-child{border-bottom:0}
+.df-in b{font:700 13.5px/1.3 'Inter Tight',sans-serif;color:#1f2733}
+.df-in b::before{content:'◆';color:#0284c7;font-size:8px;margin-right:9px;vertical-align:2px}
+.df-in small{font:500 8.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#98a1ab;padding-left:17px}
+.df-arr{display:flex;align-items:center;justify-content:center;color:rgba(22,24,29,.3);padding-top:64px}
 .df-arr svg{width:38px;height:14px}
-.df-step{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:15px 4px}
+.df-step{display:grid;grid-template-columns:32px 1fr;gap:10px;padding:13px 0}
+.df-step:first-of-type{padding-top:10px}
 .df-step+.df-step{border-top:1px dashed rgba(18,20,26,.1)}
-.df-step .n{width:26px;height:26px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 'JetBrains Mono',monospace;box-shadow:0 6px 14px -6px rgba(2,132,199,.6)}
+.df-step .n{font:700 11px/1.6 'JetBrains Mono',monospace;color:#0284c7}
 .df-step b{display:block;font:700 15px/1.25 'Inter Tight',sans-serif;color:#16181d}
 .df-step small{display:block;margin-top:4px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#8a93a0}
-.df-out{background:#101216;border-radius:12px;color:#e8eef5;padding:22px;display:flex;flex-direction:column;position:relative;overflow:hidden}
-.df-out::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:25% 100%}
-.df-out .dot{position:relative;z-index:1;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7dd3fc;margin-bottom:12px}
-.df-out b{position:relative;z-index:1;font:800 20px/1.2 'Inter Tight',sans-serif;color:#fff}
-.df-out b i{font-style:normal;color:#38bdf8}
-.df-out ul{position:relative;z-index:1;list-style:none;margin-top:14px}
-.df-out li{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#b9c6d4;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.12)}
-.df-out li::before{content:'◆';color:#38bdf8;font-size:8px;margin-right:9px;vertical-align:1px}
-.df-out .ft{position:relative;z-index:1;margin-top:auto;padding-top:14px;font:500 8.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#77879a}
-@media(max-width:980px){.df-grid{grid-template-columns:1fr}.df-arr{transform:rotate(90deg);padding:2px 0}}
+.df-out .big{font:800 19px/1.2 'Inter Tight',sans-serif;color:#16181d;margin:2px 0 4px}
+.df-out .big i{font-style:normal;color:#0284c7}
+.df-out ul{list-style:none}
+.df-out li{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#55606e;padding:10px 0;border-bottom:1px dashed rgba(18,20,26,.1)}
+.df-out li::before{content:'◆';color:#0284c7;font-size:8px;margin-right:9px;vertical-align:1px}
+.df-out .ft{margin-top:14px;font:500 8.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#a3adb8}
+@media(max-width:980px){.df-grid{grid-template-columns:1fr}.df-arr{transform:rotate(90deg);padding:8px 0}}
 
 /* ============ city + viz ============ */
 .f-r{fill:#fff;stroke:rgba(22,24,29,.32);stroke-width:1}
@@ -219,60 +219,58 @@ a{color:inherit;text-decoration:none}
 
 
 /* ============ download ============ */
-.dl-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px;list-style:none}
-.dl-chips li{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(18,20,26,.1);background:#fff;border-radius:9px;padding:9px 13px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#55606e}
-.dl-chips li::before{content:'';width:7px;height:7px;border-radius:2px;background:#0284c7;flex:none}
-.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.dl-card{padding:22px;display:flex;flex-direction:column;gap:12px;position:relative;transition:transform .18s,box-shadow .18s}
-.dl-card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(18,22,30,.04),0 22px 50px -26px rgba(18,22,30,.22)}
-.dl-card.rec{border-color:rgba(2,132,199,.4);box-shadow:0 1px 2px rgba(2,132,199,.05),0 18px 44px -24px rgba(2,132,199,.3)}
-.dl-card .flag{position:absolute;top:-11px;right:14px;background:#0284c7;color:#fff;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;padding:5px 8px;border-radius:5px;box-shadow:0 8px 18px -8px rgba(2,132,199,.6)}
-.dl-head{display:flex;align-items:center;gap:12px}
-.dl-glyph{width:40px;height:40px;border:1px solid rgba(18,20,26,.1);border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none;background:#f7f9fa}
-.dl-glyph svg{width:19px;height:19px;fill:#3c4552}
-.dl-name{font:700 18px/1.1 'Inter Tight',sans-serif}
-.dl-note{color:#7c8694;font-size:12.5px;margin-top:3px}
-.dl-badges{display:flex;flex-wrap:wrap;gap:6px}
-.dl-badges span{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(18,20,26,.1);border-radius:6px;padding:5px 7px;color:#7c8694;background:#fafbfb}
-.dl-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:9px;background:#16181d;color:#fff;font-weight:600;font-size:14px;padding:13px 16px;border-radius:9px;transition:background .18s}
-.dl-btn:hover{background:#0284c7}
-.dl-card.rec .dl-btn{background:#0284c7;box-shadow:0 10px 24px -12px rgba(2,132,199,.55)}
-.dl-card.rec .dl-btn:hover{background:#16181d;box-shadow:none}
-.dl-meta{font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#9aa3ad}
-@media(max-width:920px){.dl-grid{grid-template-columns:1fr}}
+.dl-facts{margin:0 0 6px;font:500 10px/1.9 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
+.dl-facts i{font-style:normal;color:#c3cbd3;margin:0 10px}
+.dl-list{display:flex;flex-direction:column;max-width:920px}
+.dl-row{display:grid;grid-template-columns:36px 1.2fr 1fr auto;gap:18px;align-items:center;padding:17px 0;border-bottom:1px dashed rgba(18,20,26,.12)}
+.dl-row:first-child{border-top:1px dashed rgba(18,20,26,.12)}
+.dl-glyph{width:36px;height:36px;display:flex;align-items:center;justify-content:flex-start}
+.dl-glyph svg{width:20px;height:20px;fill:#3c4552}
+.dl-name{font:700 17px/1.1 'Inter Tight',sans-serif}
+.dl-name .rec{margin-left:10px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#0284c7}
+.dl-note{color:#7c8694;font-size:12.5px;margin-top:4px}
+.dl-badges{font:600 9.5px/1.8 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#8a93a0}
+.dl-link{justify-self:end;display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;border-bottom:1.5px solid rgba(22,24,29,.5);padding-bottom:2px;transition:color .15s,border-color .15s;white-space:nowrap}
+.dl-link:hover{color:#0284c7;border-color:#0284c7}
+.dl-alt{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px 36px;align-items:baseline}
+.dl-alt .lbl{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8a93a0}
+.dl-alt code{font:500 12.5px/1.6 'JetBrains Mono',monospace;color:#123c5e}
+.dl-alt code b{color:#0284c7}
+@media(max-width:780px){.dl-row{grid-template-columns:36px 1fr;row-gap:6px}.dl-badges{grid-column:2}.dl-link{grid-column:2;justify-self:start}}
 
 /* ============ trusted logos ============ */
-.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:10px}
-.tl{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(18,20,26,.08);border-radius:9px;background:#fff;transition:border-color .15s}
-.tl img{width:18px;height:18px;object-fit:contain;opacity:.9;transition:opacity .15s}
-.tl span{font:600 10px/1.3 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#55606e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tl:hover{border-color:rgba(2,132,199,.35)}
-.tl:hover img{opacity:1}
-.tl-foot{margin-top:14px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#a3adb8}
+.tl-grid{display:flex;flex-wrap:wrap;gap:16px 36px}
+.tl{display:inline-flex;align-items:center;gap:10px}
+.tl img{width:18px;height:18px;object-fit:contain;opacity:.9}
+.tl span{font:600 10px/1.3 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#55606e;white-space:nowrap}
+.tl-foot{margin-top:20px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#a3adb8}
 
 /* ============ community ============ */
-.cm-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
-.cm-hero{padding:26px 28px;display:flex;flex-direction:column;align-items:flex-start}
+.cm-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:60px;align-items:start}
+.cm-hero{display:flex;flex-direction:column;align-items:flex-start}
 .cm-kick{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:12px}
 .cm-kick b{color:#0284c7}
 .cm-hero h3{font:800 clamp(22px,2.2vw,30px)/1.15 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419;margin-bottom:10px}
 .cm-hero h3 em{font-style:normal;color:#0284c7}
 .cm-hero p{color:#4b5563;font-size:14px;line-height:1.65;max-width:46ch}
-.cm-badge{display:inline-flex;align-items:center;gap:8px;margin:16px 0 18px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#0369a1;background:rgba(2,132,199,.08);border-radius:999px;padding:7px 11px}
+.cm-stats{display:flex;flex-wrap:wrap;gap:10px 30px;margin:20px 0 22px;font:500 9.5px/1.4 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
+.cm-stats span{display:flex;flex-direction:column;gap:5px}
+.cm-stats b{color:#16181d;font:800 19px/1 'Inter Tight',sans-serif;letter-spacing:-.01em}
 .cm-cta{display:inline-flex;align-items:center;gap:9px;background:#16181d;color:#fff;font-weight:600;font-size:14px;padding:12px 20px;border-radius:9px;transition:background .18s;margin-top:auto}
 .cm-cta:hover{background:#0284c7}
 .cm-cta svg{width:15px;height:15px;fill:currentColor}
-.cm-list{display:flex;flex-direction:column;gap:10px}
-.cm-row{flex:1;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:14px 18px;transition:transform .16s,border-color .16s;cursor:pointer;text-align:left;font-family:inherit}
-.cm-row:hover{transform:translateX(3px);border-color:rgba(2,132,199,.4)}
-.cm-row b{display:block;font:700 14.5px/1.2 'Inter Tight',sans-serif;color:#16181d}
+.cm-list{display:flex;flex-direction:column}
+.cm-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:15px 0;border-bottom:1px dashed rgba(18,20,26,.12);cursor:pointer;text-align:left;font-family:inherit}
+.cm-row:first-child{border-top:1px dashed rgba(18,20,26,.12)}
+.cm-row b{display:block;font:700 14.5px/1.2 'Inter Tight',sans-serif;color:#16181d;transition:color .15s}
 .cm-row small{display:block;color:#7c8694;font-size:12px;line-height:1.5;margin-top:3px}
-.cm-row .arr{color:#98a1ab;font-size:16px;transition:color .15s}
-.cm-row:hover .arr{color:#0284c7}
-@media(max-width:920px){.cm-grid{grid-template-columns:1fr}}
+.cm-row .arr{color:#98a1ab;font-size:16px;transition:color .15s,transform .15s}
+.cm-row:hover b{color:#0284c7}
+.cm-row:hover .arr{color:#0284c7;transform:translateX(3px)}
+@media(max-width:920px){.cm-grid{grid-template-columns:1fr;gap:34px}}
 
 /* ============ watch ============ */
-.watch-frame{overflow:hidden;border-radius:14px;max-width:960px}
+.watch-frame{overflow:hidden;border-radius:14px;max-width:940px;box-shadow:0 1px 2px rgba(18,22,30,.05),0 22px 50px -30px rgba(18,22,30,.24)}
 .watch-link{position:relative;display:block}
 .watch-link img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b1220}
 .watch-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:#0284c7;box-shadow:0 18px 44px -14px rgba(2,132,199,.75),inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;transition:transform .18s,background .18s}
@@ -288,27 +286,23 @@ a{color:inherit;text-decoration:none}
 .copy{cursor:pointer;position:absolute;right:9px;top:50%;transform:translateY(-50%);font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694;background:#fff;border:1px solid rgba(18,20,26,.12);border-radius:6px;padding:6px 9px;transition:color .15s,border-color .15s}
 .copy:hover{color:#0284c7;border-color:rgba(2,132,199,.5)}
 .copy.ok,.copy.ok:hover{color:#0f766e;border-color:rgba(15,118,110,.4)}
-.copy.dk{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#b9c6d4}
-.copy.dk:hover{color:#7dd3fc;border-color:rgba(125,211,252,.5)}
-.copy.dk.ok,.copy.dk.ok:hover{color:#5eead4;border-color:rgba(94,234,212,.4)}
 
 /* closing cta band */
-.cta{position:relative;background:#101216;border-radius:18px;padding:64px 58px 56px;color:#eef2f7;overflow:hidden;box-shadow:0 30px 70px -42px rgba(16,18,22,.55)}
-.cta::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:calc(100%/12) 100%;border-radius:inherit}
-.cta-start{position:absolute;top:0;bottom:0;left:8.333%;width:1.5px;background:rgba(239,83,80,.9);z-index:1}
-.cta-start b{position:absolute;top:16px;left:9px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap}
-.cta-inner{position:relative;z-index:2;max-width:680px;margin-left:calc(8.333% + 30px)}
-.cta h2{font:800 clamp(30px,4vw,52px)/1.06 'Inter Tight',sans-serif;letter-spacing:-.03em;color:#fff;text-wrap:balance}
-.cta h2 em{font-style:normal;color:#38bdf8}
-.cta p{color:#9fb0c2;font-size:16px;line-height:1.66;margin:15px 0 24px;max-width:56ch}
+.cta{position:relative;padding:4px 0 8px 36px;max-width:780px}
+.cta-start{position:absolute;top:0;bottom:0;left:0;width:1.5px;background:rgba(239,83,80,.9)}
+.cta-start b{position:absolute;top:0;left:9px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap}
+.cta-inner{position:relative}
+.cta h2{font:800 clamp(30px,4vw,52px)/1.06 'Inter Tight',sans-serif;letter-spacing:-.03em;color:#121419;text-wrap:balance;padding-top:30px}
+.cta h2 em{font-style:normal;color:#0284c7}
+.cta p{color:#4b5563;font-size:16px;line-height:1.66;margin:15px 0 24px;max-width:56ch}
 .cta .codewrap{max-width:520px}
-.cta-code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#cfe4f5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:14px 78px 14px 15px;white-space:nowrap;overflow-x:auto}
-.cta-code b{color:#38bdf8;font-weight:600}
+.cta-code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#123c5e;background:#f2f6f9;border:1px solid rgba(18,20,26,.06);border-radius:9px;padding:14px 78px 14px 15px;white-space:nowrap;overflow-x:auto}
+.cta-code b{color:#0284c7;font-weight:600}
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
-.cta-ghost{cursor:pointer;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.22);color:#e8eef5;padding:13px 20px;border-radius:9px;font-weight:600;font-size:14px;transition:border-color .15s,color .15s}
-.cta-ghost:hover{border-color:rgba(125,211,252,.55);color:#7dd3fc}
-.cta-foot{margin-top:32px;font:500 9.5px/1.8 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#77879a}
-@media(max-width:720px){.cta{padding:46px 26px 42px}.cta-inner{margin-left:0}.cta-start{left:14px}}
+.cta-ghost{cursor:pointer;display:inline-flex;align-items:center;border:1px solid rgba(22,24,29,.2);color:#16181d;padding:13px 20px;border-radius:9px;font-weight:600;font-size:14px;transition:border-color .15s,color .15s}
+.cta-ghost:hover{border-color:rgba(2,132,199,.55);color:#0284c7}
+.cta-foot{margin-top:28px;font:500 9.5px/1.8 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8a93a0}
+@media(max-width:720px){.cta{padding-left:22px}}
 
 /* footer */
 .p-foot{margin-top:96px;border-top:1px solid rgba(18,20,26,.09)}
@@ -383,7 +377,7 @@ a{color:inherit;text-decoration:none}
         <p class="p-sub">Open-source ERP for construction teams. Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.</p>
         <div class="p-trust"><span>Self-hosted</span><span>AGPL-3.0 open source</span><span>26 languages</span><span>149 modules</span></div>
       </div>
-      <div class="p-install card">
+      <div class="p-install">
         <div class="lbl">&gt;_ up and running in one command</div>
         <div class="codewrap">
           <code><b>$</b> pip install openconstructionerp</code>
@@ -411,7 +405,7 @@ a{color:inherit;text-decoration:none}
       <h2>Skip the sales call. <em>See it work.</em></h2>
       <p>Every module, one click away - real recordings from the app. No six-figure licence to read back your own data.</p>
     </div>
-    <div class="hp-grid card">
+    <div class="hp-grid">
       <div class="hp-list" role="tablist" aria-label="Product preview modules">
         <button class="hp-item on" type="button" role="tab" aria-selected="true" data-shot="/assets/loops/mod_dashboard.gif" data-file="dashboard">
           <span class="num">01</span><span class="bd"><span class="t">Dashboard</span><span class="h">Live KPIs, open work, recent activity.</span></span>
@@ -436,7 +430,7 @@ a{color:inherit;text-decoration:none}
         </button>
         <div class="hp-more"><b>+50</b> more features · tendering, reports, validation, collab, multi-tenant …</div>
       </div>
-      <div class="hp-stage">
+      <div class="hp-stage card">
         <div class="hp-chrome"><i></i><i></i><i></i><span id="hp-file">riverside-tower / dashboard</span><em>recorded in the app</em></div>
         <div class="hp-shot"><img id="hp-img" src="/assets/loops/mod_dashboard.gif" alt="OpenConstructionERP product preview" loading="lazy" decoding="async"></div>
       </div>
@@ -452,7 +446,7 @@ a{color:inherit;text-decoration:none}
       <h2>How a project file <em>becomes</em> a fully priced tender pack.</h2>
       <p>One pipeline, three stages, six file types in. <b>Photos and PDFs</b> on one side, a tender-ready BOQ on the other - every element classified, measured, priced and traceable.</p>
     </div>
-    <div class="df-grid card">
+    <div class="df-grid">
       <div class="df-col">
         <div class="df-lbl">▸ input · project files</div>
         <div class="df-in"><b>PDF takeoff</b><small>vector + scanned</small></div>
@@ -465,14 +459,14 @@ a{color:inherit;text-decoration:none}
       <div class="df-arr" aria-hidden="true"><svg viewBox="0 0 38 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h30" stroke-dasharray="4 4"/><path d="M28 2l7 5-7 5" fill="none"/></svg></div>
       <div class="df-col">
         <div class="df-lbl">▸ normalise · classify · validate</div>
-        <div class="df-step"><span class="n">1</span><span><b>DDC cad2data → canonical</b><small>elements · geometry · quantities<br>JSON + Parquet · single source</small></span></div>
-        <div class="df-step"><span class="n">2</span><span><b>Classify · price</b><small>DIN 276 · NRM · MasterFormat<br>55,000-item cost database</small></span></div>
-        <div class="df-step"><span class="n">3</span><span><b>Validate</b><small>rule sets · completeness · benchmarks<br>traffic-light report before it ships</small></span></div>
+        <div class="df-step"><span class="n">01</span><span><b>DDC cad2data → canonical</b><small>elements · geometry · quantities<br>JSON + Parquet · single source</small></span></div>
+        <div class="df-step"><span class="n">02</span><span><b>Classify · price</b><small>DIN 276 · NRM · MasterFormat<br>55,000-item cost database</small></span></div>
+        <div class="df-step"><span class="n">03</span><span><b>Validate</b><small>rule sets · completeness · benchmarks<br>traffic-light report before it ships</small></span></div>
       </div>
       <div class="df-arr" aria-hidden="true"><svg viewBox="0 0 38 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h30" stroke-dasharray="4 4"/><path d="M28 2l7 5-7 5" fill="none"/></svg></div>
-      <div class="df-out">
-        <span class="dot">▸ output · deliverable</span>
-        <b>Priced BOQ · <i>tender pack</i></b>
+      <div class="df-col df-out">
+        <div class="df-lbl">▸ output · deliverable</div>
+        <div class="big">Priced BOQ · <i>tender pack</i></div>
         <ul>
           <li>GAEB X83 · XML</li>
           <li>Excel · CSV</li>
@@ -493,41 +487,31 @@ a{color:inherit;text-decoration:none}
       <h2>Get the <em>real</em> desktop app, free.</h2>
       <p>A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.</p>
     </div>
-    <ul class="dl-chips">
-      <li>No Python, pip, Docker or DB</li>
-      <li>Data stays local</li>
-      <li>First launch ~60s, then fast</li>
-      <li>Open source, AGPL-3.0</li>
-    </ul>
-    <div class="dl-grid">
-      <article class="dl-card card rec">
-        <span class="flag">recommended for you</span>
-        <div class="dl-head">
-          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span>
-          <div><div class="dl-name">Windows</div><div class="dl-note">Windows 10/11 - 64-bit installer</div></div>
-        </div>
-        <div class="dl-badges"><span>x64</span><span>.exe</span><span>Win 10+</span></div>
-        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
-        <div class="dl-meta">from GitHub Releases · latest build</div>
-      </article>
-      <article class="dl-card card">
-        <div class="dl-head">
-          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span>
-          <div><div class="dl-name">macOS</div><div class="dl-note">macOS 12+ - Apple Silicon</div></div>
-        </div>
-        <div class="dl-badges"><span>aarch64</span><span>.dmg</span><span>12+</span></div>
-        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
-        <div class="dl-meta">from GitHub Releases · latest build</div>
-      </article>
-      <article class="dl-card card">
-        <div class="dl-head">
-          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2 0 .4.1.8.3 1.1-.8 1.2-1.4 2.7-1.9 4-.5 1.4-1.2 2.4-2 3.3-.9 1-1.6 2.1-1.6 3.7 0 .6.1 1.2.3 1.7-.4.3-.7.8-.7 1.4 0 .9.8 1.7 1.7 1.7.3 0 .6-.1.9-.2.9.7 2 1.2 3.1 1.3.3.6 1 1 1.9 1s1.6-.4 1.9-1c1.1-.1 2.2-.6 3.1-1.3.3.1.6.2.9.2.9 0 1.7-.8 1.7-1.7 0-.6-.3-1.1-.7-1.4.2-.5.3-1.1.3-1.7 0-1.6-.7-2.7-1.6-3.7-.8-.9-1.5-1.9-2-3.3-.5-1.3-1.1-2.8-1.9-4 .2-.3.3-.7.3-1.1 0-1.1-.9-2-2-2z"/></svg></span>
-          <div><div class="dl-name">Linux</div><div class="dl-note">AppImage, deb and rpm</div></div>
-        </div>
-        <div class="dl-badges"><span>x86_64</span><span>.AppImage</span><span>.deb / .rpm</span></div>
-        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
-        <div class="dl-meta">from GitHub Releases · latest build</div>
-      </article>
+    <div class="dl-facts">no Python, pip, Docker or DB<i>·</i>data stays local<i>·</i>first launch ~60s, then fast<i>·</i>open source, AGPL-3.0</div>
+    <div class="dl-list">
+      <div class="dl-row">
+        <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span>
+        <div><div class="dl-name">Windows<span class="rec">recommended for you</span></div><div class="dl-note">Windows 10/11 - 64-bit installer</div></div>
+        <div class="dl-badges">x64 · .exe · win 10+</div>
+        <a class="dl-link" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span>
+        <div><div class="dl-name">macOS</div><div class="dl-note">macOS 12+ - Apple Silicon</div></div>
+        <div class="dl-badges">aarch64 · .dmg · macos 12+</div>
+        <a class="dl-link" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+      </div>
+      <div class="dl-row">
+        <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2 0 .4.1.8.3 1.1-.8 1.2-1.4 2.7-1.9 4-.5 1.4-1.2 2.4-2 3.3-.9 1-1.6 2.1-1.6 3.7 0 .6.1 1.2.3 1.7-.4.3-.7.8-.7 1.4 0 .9.8 1.7 1.7 1.7.3 0 .6-.1.9-.2.9.7 2 1.2 3.1 1.3.3.6 1 1 1.9 1s1.6-.4 1.9-1c1.1-.1 2.2-.6 3.1-1.3.3.1.6.2.9.2.9 0 1.7-.8 1.7-1.7 0-.6-.3-1.1-.7-1.4.2-.5.3-1.1.3-1.7 0-1.6-.7-2.7-1.6-3.7-.8-.9-1.5-1.9-2-3.3-.5-1.3-1.1-2.8-1.9-4 .2-.3.3-.7.3-1.1 0-1.1-.9-2-2-2z"/></svg></span>
+        <div><div class="dl-name">Linux</div><div class="dl-note">AppImage, deb and rpm</div></div>
+        <div class="dl-badges">x86_64 · .appimage · .deb / .rpm</div>
+        <a class="dl-link" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+      </div>
+    </div>
+    <div class="dl-alt">
+      <span class="lbl">prefer the terminal?</span>
+      <code><b>$</b> pip install openconstructionerp</code>
+      <code><b>$</b> docker compose up</code>
     </div>
   </div>
 </section>
@@ -569,21 +553,26 @@ a{color:inherit;text-decoration:none}
       <p>AGPL-3.0 on GitHub. Issues and the roadmap live there; if you want to see what's coming next or what broke last week, it's all on the commit log.</p>
     </div>
     <div class="cm-grid">
-      <div class="cm-hero card">
+      <div class="cm-hero">
         <div class="cm-kick"><b>github</b> · datadrivenconstruction</div>
         <h3>Star the repo, <em>shape the roadmap.</em></h3>
         <p>Every issue, PR and roadmap item is public on GitHub. Open an issue, comment on what matters, or send a PR. Contributions of any size are welcome.</p>
-        <span class="cm-badge">AGPL-3.0 · open source</span>
+        <div class="cm-stats">
+          <span><b>149</b>modules</span>
+          <span><b>26</b>languages</span>
+          <span><b>55,000</b>cost positions</span>
+          <span><b>AGPL-3.0</b>licence</span>
+        </div>
         <a class="cm-cta" href="https://github.com/datadrivenconstruction/openconstructionerp" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
           Open the repo →
         </a>
       </div>
       <div class="cm-list">
-        <a class="cm-row card" href="/docs.html"><span><b>Documentation</b><small>Getting started, module SDK, API reference and deployment guides.</small></span><span class="arr">→</span></a>
-        <a class="cm-row card" href="https://github.com/datadrivenconstruction/openconstructionerp/issues" target="_blank" rel="noopener"><span><b>Issues &amp; roadmap</b><small>Every bug, feature request and roadmap item is tracked publicly.</small></span><span class="arr">→</span></a>
-        <a class="cm-row card" href="/docs.html"><span><b>Build a module</b><small>Cookiecutter template, typed SDK, OpenAPI auto-gen. Ship a plugin in an afternoon.</small></span><span class="arr">→</span></a>
-        <a class="cm-row card" href="https://t.me/datadrivenconstruction" target="_blank" rel="noopener"><span><b>Chat on Telegram</b><small>Questions, ideas and show-and-tell. For things that aren't quite an issue yet.</small></span><span class="arr">→</span></a>
+        <a class="cm-row" href="/docs.html"><span><b>Documentation</b><small>Getting started, module SDK, API reference and deployment guides.</small></span><span class="arr">→</span></a>
+        <a class="cm-row" href="https://github.com/datadrivenconstruction/openconstructionerp/issues" target="_blank" rel="noopener"><span><b>Issues &amp; roadmap</b><small>Every bug, feature request and roadmap item is tracked publicly.</small></span><span class="arr">→</span></a>
+        <a class="cm-row" href="/docs.html"><span><b>Build a module</b><small>Cookiecutter template, typed SDK, OpenAPI auto-gen. Ship a plugin in an afternoon.</small></span><span class="arr">→</span></a>
+        <a class="cm-row" href="https://t.me/datadrivenconstruction" target="_blank" rel="noopener"><span><b>Chat on Telegram</b><small>Questions, ideas and show-and-tell. For things that aren't quite an issue yet.</small></span><span class="arr">→</span></a>
       </div>
     </div>
   </div>
@@ -596,8 +585,7 @@ a{color:inherit;text-decoration:none}
       <span class="p-num">06 · watch it run</span>
       <h2>See it work. <em>In one take.</em></h2>
     </div>
-    <div class="watch-frame card">
-      <div class="hp-chrome"><i></i><i></i><i></i><span>walkthrough · one take</span><em>recorded in the app</em></div>
+    <div class="watch-frame">
       <a class="watch-link" href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank" rel="noopener" aria-label="Play the product walkthrough video on YouTube">
         <img src="/assets/stills/video-thumb-openconstructionerp.png?v=4" alt="Product walkthrough video preview" loading="lazy" decoding="async">
         <span class="watch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7z"/></svg></span>
@@ -617,7 +605,7 @@ a{color:inherit;text-decoration:none}
         <p>One command, or one download. Open source and self-hosted - your projects, your data and your server, from the first minute.</p>
         <div class="codewrap">
           <code class="cta-code"><b>$</b> pip install openconstructionerp</code>
-          <button class="copy dk" type="button" data-copy="pip install openconstructionerp">copy</button>
+          <button class="copy" type="button" data-copy="pip install openconstructionerp">copy</button>
         </div>
         <div class="cta-row">
           <a class="p-btn acc" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download desktop app</a>
