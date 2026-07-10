@@ -85,8 +85,16 @@ from app.modules.costs.schemas import (
     RecordUsageRequest,
     RegionalAdjustResponse,
     RegionalIndexResponse,
+    RepriceResponse,
+    ResourcePriceBulkRequest,
+    ResourcePriceListResponse,
+    ResourcePriceRow,
+    ResourcePriceSetRequest,
+    ResourcePriceStats,
+    ResourceSeedResponse,
     SuggestCostsForElementRequest,
 )
+from app.modules.costs.resource_pricing import ResourcePriceService
 from app.modules.costs.service import CostBenchmarkService, CostCatalogService, CostItemService
 from app.modules.costs.translations import localize_cost_row
 
@@ -287,6 +295,10 @@ def _get_service(session: SessionDep) -> CostItemService:
 
 def _get_catalog_service(session: SessionDep) -> CostCatalogService:
     return CostCatalogService(session)
+
+
+def _get_resource_price_service(session: SessionDep) -> ResourcePriceService:
+    return ResourcePriceService(session)
 
 
 def _parse_user_uuid(user_id: str | None) -> uuid.UUID | None:
@@ -985,6 +997,176 @@ async def clear_region_database(
     logger.info("Cleared region %s: %d items deleted", region, count)
     _invalidate_cost_cache()
     return {"deleted": count, "region": region}
+
+
+# ── Resource price sheet (make coefficient bases calculable) ─────────────────
+#
+# CWICR describes each work item through its resource lines (labour / material /
+# machine) with a norm quantity each. Coefficient bases (Vietnam Dinh Muc,
+# Indonesia AHSP) ship those quantities with NO prices - they are priced
+# regionally - so their work items import with a zero rate. These endpoints hold
+# one editable unit price per resource per region, seed it from whatever prices a
+# base already carries, and re-price every work item from the sheet
+# (rate = sum(component.quantity x price)). The same path re-prices a priced base
+# after a local price edit, so it is uniform for coded and codeless bases.
+
+
+def _resource_row(row: Any) -> ResourcePriceRow:
+    return ResourcePriceRow.model_validate(row)
+
+
+@router.get("/resource-prices/{region}/", response_model=ResourcePriceListResponse)
+async def list_resource_prices(
+    region: str,
+    _user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+    search: str | None = Query(default=None, description="Filter by resource name (substring)."),
+    resource_type: str | None = Query(
+        default=None,
+        description="labor | material | equipment | operator | electricity | other.",
+    ),
+    only_unpriced: bool = Query(default=False, description="Only rows still at price 0."),
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> ResourcePriceListResponse:
+    """List the resource price sheet for a region (paginated) with coverage stats.
+
+    The price sheet is what makes a coefficient base estimable: every resource is
+    listed with its current local unit price (0 = still needs a price). Priced
+    bases come pre-filled; edit any row and re-price.
+    """
+    rows, total = await service.list_prices(
+        region,
+        search=search,
+        resource_type=resource_type,
+        only_unpriced=only_unpriced,
+        limit=limit,
+        offset=offset,
+    )
+    stats = await service.region_stats(region)
+    return ResourcePriceListResponse(
+        region=region,
+        total=total,
+        limit=limit,
+        offset=offset,
+        stats=ResourcePriceStats(**stats),
+        rows=[_resource_row(r) for r in rows],
+    )
+
+
+@router.get("/resource-prices/{region}/stats/", response_model=ResourcePriceStats)
+async def resource_price_stats(
+    region: str,
+    _user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+) -> ResourcePriceStats:
+    """Coverage of a region's price sheet (how many resources still need a price)."""
+    return ResourcePriceStats(**await service.region_stats(region))
+
+
+@router.post(
+    "/resource-prices/{region}/seed/",
+    response_model=ResourceSeedResponse,
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def seed_resource_prices(
+    region: str,
+    _user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+) -> ResourceSeedResponse:
+    """(Re)build the price sheet for a region from its work items.
+
+    Collects every distinct resource and seeds its observed unit price (0 for a
+    coefficient base). Idempotent and safe to re-run: rows a user has edited are
+    preserved. Normally runs automatically on region load; this is the manual
+    rebuild.
+    """
+    result = await service.seed_region(region)
+    if result.resources == 0:
+        raise HTTPException(
+            status_code=404,
+            detail=(f"No cost items found for region '{region}'. Load the base first, then seed its price sheet."),
+        )
+    _invalidate_cost_cache()
+    return ResourceSeedResponse(**result.as_dict())
+
+
+@router.put(
+    "/resource-prices/{region}/{resource_key:path}",
+    response_model=ResourcePriceRow,
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def set_resource_price(
+    region: str,
+    resource_key: str,
+    body: ResourcePriceSetRequest,
+    user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+) -> ResourcePriceRow:
+    """Set one resource's unit price for a region.
+
+    ``resource_key`` is the value from the price-sheet row (a resource code, or a
+    ``name:...`` key for codeless bases). Marks the row user-edited so a later
+    re-seed leaves it alone. Call the re-price endpoint afterwards to fold the new
+    price into the region's work-item rates.
+    """
+    try:
+        row = await service.set_price(
+            region,
+            resource_key,
+            body.unit_price,
+            currency=body.currency,
+            unit=body.unit,
+            resource_name=body.resource_name,
+            resource_type=body.resource_type,
+            updated_by=_parse_user_uuid(user_id),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return _resource_row(row)
+
+
+@router.post(
+    "/resource-prices/{region}/bulk/",
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def set_resource_prices_bulk(
+    region: str,
+    body: ResourcePriceBulkRequest,
+    user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+) -> dict:
+    """Apply many resource-price edits to a region in one transaction."""
+    written = await service.set_prices_bulk(
+        region,
+        [item.model_dump() for item in body.items],
+        updated_by=_parse_user_uuid(user_id),
+    )
+    return {"region": region, "written": written}
+
+
+@router.post(
+    "/resource-prices/{region}/reprice/",
+    response_model=RepriceResponse,
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def reprice_region_endpoint(
+    region: str,
+    _user_id: CurrentUserId,
+    service: ResourcePriceService = Depends(_get_resource_price_service),
+    dry_run: bool = Query(default=False, description="Preview the effect without writing."),
+) -> RepriceResponse:
+    """Recompute every work item's rate in a region from the price sheet.
+
+    ``rate = sum(component.quantity x sheet_price)``. Each component's unit price
+    and cost, and the labour/material/equipment breakdown, are refreshed too so
+    the stored rate stays explainable. Use ``dry_run`` to preview coverage before
+    committing.
+    """
+    result = await service.reprice_region(region, dry_run=dry_run)
+    if not dry_run:
+        _invalidate_cost_cache()
+    return RepriceResponse(**result.as_dict())
 
 
 # ── Vector database (LanceDB embedded / Qdrant server) ──────────────────────
@@ -4161,6 +4343,20 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
         result_data.get("skipped", 0),
         duration,
     )
+
+    # Seed the resource price sheet from the freshly imported work items. This is
+    # what lets a coefficient base (Vietnam Dinh Muc, Indonesia AHSP - norm
+    # quantities, no prices) be priced locally: every distinct resource gets an
+    # editable row (0 for a coefficient base, the observed price for a priced
+    # one). Idempotent and fail-soft: a seeding error must never fail the import
+    # (the cost items are already committed), so it is logged and swallowed.
+    if result_data.get("imported", 0) > 0:
+        try:
+            seed = await ResourcePriceService(session).seed_region(db_id)
+            result_data["resource_prices"] = seed.as_dict()
+        except Exception:
+            logger.exception("Resource price seeding failed for %s (non-fatal)", db_id)
+
     _invalidate_cost_cache()
     # A new CWICR parquet may have been written alongside the SQL import
     # (or the import itself writes a parquet artefact). Clear the polars

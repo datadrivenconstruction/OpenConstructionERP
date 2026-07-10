@@ -207,3 +207,54 @@ class CostItemUsage(Base):
 
     def __repr__(self) -> str:
         return f"<CostItemUsage item={self.cost_item_id} project={self.project_id} at={self.used_at}>"
+
+
+class ResourcePrice(Base):
+    """A per-region unit price for one resource (labour, material, machine).
+
+    Backs the resource price sheet that makes coefficient bases calculable
+    locally. Bases such as Vietnam Dinh Muc or Indonesia AHSP ship the full
+    labour / material / machine breakdown as norm quantities but carry NO
+    prices (they are priced regionally), so a work item's rate cannot be
+    computed until someone supplies local resource prices. This table holds one
+    editable price per resource per region; a work item's rate is then
+    ``sum(component.quantity x unit_price)`` over its components.
+
+    Priced bases seed their observed unit prices here on import
+    (``source = cwicr_import``); a user edits any row (``source = user``) and
+    re-prices the region. Codeless bases (no ``resource_code``) key on
+    ``resource_key`` = a normalized resource name, so the sheet works uniformly
+    for coded and codeless bases. ``unit_price`` is a Decimal-as-string like
+    every other money column in the schema (SQLite/Numeric drift safety).
+    """
+
+    __tablename__ = "oe_resource_price"
+    __table_args__ = (
+        UniqueConstraint("region", "resource_key", name="uq_oe_resource_price_region_key"),
+        Index("ix_oe_resource_price_region_active", "region", "is_active"),
+    )
+
+    region: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    # ``resource_code`` when the base carries one, else a normalized name key.
+    resource_key: Mapped[str] = mapped_column(String(300), nullable=False)
+    resource_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    resource_name: Mapped[str] = mapped_column(String(300), nullable=False)
+    # labor | material | equipment | operator | electricity | other
+    resource_type: Mapped[str] = mapped_column(
+        String(30), nullable=False, default="material", server_default="material"
+    )
+    unit: Mapped[str] = mapped_column(String(30), nullable=False, default="", server_default="")
+    # Decimal-as-string (see CostItem.rate). "0" means unpriced (the default for
+    # coefficient bases until a user fills it in).
+    unit_price: Mapped[str] = mapped_column(String(50), nullable=False, default="0", server_default="0")
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
+    effective_date: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    # cwicr_import (seeded from the base) | user (hand-edited) | regional
+    source: Mapped[str] = mapped_column(
+        String(30), nullable=False, default="cwicr_import", server_default="cwicr_import"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ResourcePrice {self.region}/{self.resource_key} = {self.unit_price} {self.currency}>"
