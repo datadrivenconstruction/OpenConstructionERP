@@ -176,6 +176,23 @@ _REGION_CURRENCY_LEGACY: dict[str, str] = {
     "IE_DUBLIN": "EUR",
     "USA_NEWYORK": "USD",
     "SA_RIYADH": "SAR",
+    # China authentic base (Beijing 2012 + Bortala 2022, prefixed rate_codes).
+    # Loaded from our own work-items parquet, not a DDC v3 snapshot, so it lives
+    # in the legacy overlay rather than the v3 registry.
+    "ZH_CHINA": "CNY",
+    # Turkey authentic national base (CSB analyses), separate from the legacy
+    # metro id used by DDC snapshots.
+    "TR_NATIONAL": "TRY",
+    # Authentic national / regional bases loaded from our own work-items
+    # parquet (official government sources), not DDC v3 snapshots, so they sit
+    # in the legacy overlay. The parquet also carries a per-row currency column
+    # that _resolve_currency prefers; these entries are the read-path fallback.
+    "BR_NATIONAL": "BRL",
+    "ES_ANDALUCIA": "EUR",
+    "IT_TOSCANA": "EUR",
+    "VN_NATIONAL": "VND",
+    "ID_NATIONAL": "IDR",
+    "GR_NATIONAL": "EUR",
     # NOTE: ``PT_SAOPAULO`` is intentionally NOT registered - it was a
     # mislabeled tag (São Paulo is Brazil; canonical key is ``BR_SAOPAULO``,
     # supplied by the v3 registry). A stray ``PT_SAOPAULO`` row should hit
@@ -1778,6 +1795,7 @@ _GITHUB_SNAPSHOT_FILES: dict[str, str] = {
     "RU_STPETERSBURG": "RU___DDC_CWICR/RU_STPETERSBURG_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
     "AR_DUBAI": "AR___DDC_CWICR/AR_DUBAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
     "ZH_SHANGHAI": "ZH___DDC_CWICR/ZH_SHANGHAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "ZH_CHINA": "ZH___DDC_CWICR/ZH_SHANGHAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
     "HI_MUMBAI": "HI___DDC_CWICR/HI_MUMBAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
 }
 
@@ -3738,16 +3756,35 @@ _GITHUB_CWICR_FILES: dict[str, str] = {
     "SV_STOCKHOLM": "SV___DDC_CWICR/SV_STOCKHOLM_workitems_costs_resources_DDC_CWICR.parquet",
     "TH_BANGKOK": "TH___DDC_CWICR/TH_BANGKOK_workitems_costs_resources_DDC_CWICR.parquet",
     "TR_ISTANBUL": "TR___DDC_CWICR/TR_ISTANBUL_workitems_costs_resources_DDC_CWICR.parquet",
+    "TR_NATIONAL": "TR___DDC_CWICR/TR_NATIONAL_workitems_costs_resources_DDC_CWICR.parquet",
     "VI_HANOI": "VI___DDC_CWICR/VI_HANOI_workitems_costs_resources_DDC_CWICR.parquet",
     "ZA_JOHANNESBURG": "ZA___DDC_CWICR/ZA_JOHANNESBURG_workitems_costs_resources_DDC_CWICR.parquet",
+    "ZH_CHINA": "ZH___DDC_CWICR/ZH_CHINA_workitems_costs_resources_DDC_CWICR.parquet",
 }
 
 CWICR_SEARCH_PATHS = [
     "../../DDC_Toolkit/pricing/data/excel",
     "../DDC_Toolkit/pricing/data/excel",
+    "../../WORLD_COST_BASES",
+    "../WORLD_COST_BASES",
+    "WORLD_COST_BASES",
     str(Path.home() / "DDC_Toolkit" / "pricing" / "data" / "excel"),
     str(Path.home() / "Desktop" / "CodeProjects" / "DDC_Toolkit" / "pricing" / "data" / "excel"),
+    str(Path.home() / "Desktop" / "CodeProjects" / "ERP_26030500" / "WORLD_COST_BASES"),
 ]
+
+_LOCAL_CWICR_FILE_ALIASES: dict[str, tuple[str, ...]] = {
+    # The canonical local export is still named `TR_*`, while the product id
+    # must distinguish it from the legacy metro snapshot `TR_ISTANBUL`.
+    "TR_NATIONAL": ("TR",),
+    # Bare-country national bases: the product id carries a `_NATIONAL` suffix,
+    # but the exported parquet keeps the short country prefix. ES_ANDALUCIA and
+    # IT_TOSCANA already match their own file names, so they need no alias.
+    "BR_NATIONAL": ("BR",),
+    "VN_NATIONAL": ("VN",),
+    "ID_NATIONAL": ("ID",),
+    "GR_NATIONAL": ("GR",),
+}
 
 # Local cache directory for downloaded parquet files. The cache is
 # persistent: a successfully downloaded regional parquet is kept and reused
@@ -3875,13 +3912,28 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
          ``app/data/cwicr`` (empty by default - see ``_BUNDLED_CWICR_DIR``).
       4. GitHub download as the last resort.
     """
-    # Priority 1: Parquet files in local DDC_Toolkit (fastest and most reliable)
+    candidate_prefixes = (db_id, *_LOCAL_CWICR_FILE_ALIASES.get(db_id, ()))
+
+    # Priority 1: Parquet files in local DDC_Toolkit / generated base folders
+    # (fastest and most reliable)
     for search_path in CWICR_SEARCH_PATHS:
-        parquet_path = Path(search_path).parent / "parquet"
-        if parquet_path.exists():
-            for f in parquet_path.iterdir():
-                if f.name.startswith(db_id) and f.suffix == ".parquet":
-                    return f
+        roots = [Path(search_path), Path(search_path).parent / "parquet"]
+        for parquet_path in roots:
+            if not parquet_path.exists():
+                continue
+            matches = [
+                f
+                for f in parquet_path.iterdir()
+                if f.suffix == ".parquet" and any(f.name.startswith(prefix) for prefix in candidate_prefixes)
+            ]
+            if matches:
+                # A region prefix can match more than one parquet in the same
+                # folder (e.g. the canonical IT_TOSCANA_workitems_costs_resources
+                # base alongside an auxiliary IT_TOSCANA_province_price_variants).
+                # Always prefer the canonical work-items base; sort otherwise so
+                # the choice is deterministic rather than filesystem-order.
+                canonical = [f for f in matches if "workitems_costs_resources" in f.name]
+                return canonical[0] if canonical else sorted(matches)[0]
 
     # Priority 2: Excel SIMPLE
     for search_path in CWICR_SEARCH_PATHS:
@@ -3889,7 +3941,11 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
         if not p.exists():
             continue
         for f in p.iterdir():
-            if f.name.startswith(db_id) and "_SIMPLE" in f.name and f.suffix == ".xlsx":
+            if (
+                any(f.name.startswith(prefix) for prefix in candidate_prefixes)
+                and "_SIMPLE" in f.name
+                and f.suffix == ".xlsx"
+            ):
                 return f
 
     # Priority 3: Any Excel
@@ -3898,7 +3954,7 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
         if not p.exists():
             continue
         for f in p.iterdir():
-            if f.name.startswith(db_id) and f.suffix == ".xlsx":
+            if any(f.name.startswith(prefix) for prefix in candidate_prefixes) and f.suffix == ".xlsx":
                 return f
 
     # Priority 4: Persistent local cache from a previous download. The 1 KB
@@ -4362,6 +4418,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         "row_type",
         "is_machine",
         "is_material",
+        "is_labor",
     ]
     available_res_cols = [c for c in res_cols if c in df.columns]
 
@@ -4507,16 +4564,24 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         ].copy()
         res_df = res_df[res_df["resource_name"].fillna("").str.len() > 0]
         if _cost_col in res_df.columns:
-            # Keep abstract-resource rows even with cost==0 - they're a
-            # variant slot the user picks from. Without this carve-out
-            # KAME-LI-MENE-KAPU and similar amortisation/option rows get
-            # silently dropped and the user loses one of their variant
-            # picks.
+            # A row is a genuine resource component when it carries EITHER a
+            # cost OR a norm quantity. Coefficient bases (Vietnam Dinh Muc,
+            # Indonesia AHSP) publish the full labour / material / machine
+            # breakdown with norm quantities but no prices (priced regionally),
+            # so gating on cost alone dropped every one of their resources.
+            # Keeping rows that carry a quantity fixes that; priced bases are
+            # unaffected (their resource rows already carry a cost) beyond also
+            # retaining a few legitimately unpriced-but-quantified lines.
+            _keep = res_df[_cost_col].fillna(0).astype(float).abs() > 0.001
+            if "resource_quantity" in res_df.columns:
+                _keep = _keep | (pd.to_numeric(res_df["resource_quantity"], errors="coerce").fillna(0.0).abs() > 1e-9)
+            # Abstract-resource rows are variant slots the user picks from - keep
+            # them even when both cost and quantity are zero. Without this
+            # carve-out KAME-LI-MENE-KAPU and similar amortisation / option rows
+            # get silently dropped and the user loses one of their variant picks.
             if "price_abstract_resource_variable_parts" in res_df.columns:
-                _is_abstract = res_df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
-                res_df = res_df[(res_df[_cost_col].fillna(0).astype(float).abs() > 0.001) | _is_abstract]
-            else:
-                res_df = res_df[res_df[_cost_col].fillna(0).astype(float).abs() > 0.001]
+                _keep = _keep | (res_df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0)
+            res_df = res_df[_keep]
         if "row_type" in res_df.columns:
             res_df = res_df[res_df["row_type"].fillna("") != "Scope of work"]
 
@@ -4576,6 +4641,17 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             ctype_arr = ctype_arr.mask(_is_mach, "equipment")
             ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Machinist"), "operator")
             ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Electricity"), "electricity")
+            # Explicit labour flag. Most bases tag the labour line with is_labor
+            # rather than putting a labor unit on a material row, so fill any row
+            # still left "other" that carries is_labor. Guarded on == "other" so
+            # it never overrides a material / equipment / operator classification
+            # already set above. Without this, coefficient bases (Vietnam Dinh
+            # Muc, Indonesia AHSP) and even the priced bases' plain labour lines
+            # fall through unclassified instead of typing as labor.
+            _is_labor = (
+                res_df.get("is_labor", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
+            )
+            ctype_arr = ctype_arr.mask(_is_labor & (ctype_arr == "other"), "labor")
             res_df["_type"] = ctype_arr
 
             # Build records via zip over numpy arrays - much faster than iterrows

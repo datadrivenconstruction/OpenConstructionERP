@@ -54,6 +54,17 @@ _REGION_CURRENCY_LEGACY: dict[str, str] = {
     "IE_DUBLIN": "EUR",
     "USA_NEWYORK": "USD",
     "SA_RIYADH": "SAR",
+    # China authentic base - kept in lockstep with the router's legacy overlay.
+    "ZH_CHINA": "CNY",
+    # Turkey authentic national base - kept in lockstep with the router overlay.
+    "TR_NATIONAL": "TRY",
+    # National / regional official bases - kept in lockstep with the router overlay.
+    "BR_NATIONAL": "BRL",
+    "ES_ANDALUCIA": "EUR",
+    "IT_TOSCANA": "EUR",
+    "VN_NATIONAL": "VND",
+    "ID_NATIONAL": "IDR",
+    "GR_NATIONAL": "EUR",
     # NOTE: ``PT_SAOPAULO`` is intentionally NOT registered - it was a
     # mislabeled tag (São Paulo is Brazil; canonical key is ``BR_SAOPAULO``,
     # supplied by the v3 registry). A stray ``PT_SAOPAULO`` row should hit the

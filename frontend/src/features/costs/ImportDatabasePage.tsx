@@ -316,7 +316,7 @@ const CWICR_DATABASES: CWICRDatabase[] = [
   { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'Sao Paulo', lang: 'Portugues', currency: 'BRL', flagId: 'br', parquetName: 'PT_SAOPAULO' },
   { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB', flagId: 'ru', parquetName: 'RU_STPETERSBURG' },
   { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED', flagId: 'ae', parquetName: 'AR_DUBAI' },
-  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY', flagId: 'cn', parquetName: 'ZH_SHANGHAI' },
+  { id: 'ZH_CHINA', name: 'China', city: 'National', lang: 'Chinese', currency: 'CNY', flagId: 'cn', parquetName: 'ZH_CHINA' },
   { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in', parquetName: 'HI_MUMBAI' },
   // Added 2026-04-28 — DDC CWICR repo grew from 11 to 30 country folders.
   { id: 'AU_SYDNEY', name: 'Australia', city: 'Sydney', lang: 'English', currency: 'AUD', flagId: 'au', parquetName: 'AU_SYDNEY' },
@@ -329,7 +329,7 @@ const CWICR_DATABASES: CWICRDatabase[] = [
   { id: 'BG_SOFIA', name: 'Bulgaria', city: 'Sofia', lang: 'Balgarski', currency: 'BGN', flagId: 'bg', parquetName: 'BG_SOFIA' },
   { id: 'RO_BUCHAREST', name: 'Romania', city: 'Bucharest', lang: 'Romana', currency: 'RON', flagId: 'ro', parquetName: 'RO_BUCHAREST' },
   { id: 'SV_STOCKHOLM', name: 'Sweden', city: 'Stockholm', lang: 'Svenska', currency: 'SEK', flagId: 'se', parquetName: 'SV_STOCKHOLM' },
-  { id: 'TR_ISTANBUL', name: 'Türkiye', city: 'Istanbul', lang: 'Türkçe', currency: 'TRY', flagId: 'tr', parquetName: 'TR_ISTANBUL' },
+  { id: 'TR_NATIONAL', name: 'Türkiye', city: 'National', lang: 'Türkçe', currency: 'TRY', flagId: 'tr', parquetName: 'TR_NATIONAL' },
   { id: 'JA_TOKYO', name: 'Japan', city: 'Tokyo', lang: 'Nihongo', currency: 'JPY', flagId: 'jp', parquetName: 'JA_TOKYO' },
   { id: 'KO_SEOUL', name: 'South Korea', city: 'Seoul', lang: 'Hangugeo', currency: 'KRW', flagId: 'kr', parquetName: 'KO_SEOUL' },
   { id: 'TH_BANGKOK', name: 'Thailand', city: 'Bangkok', lang: 'Thai', currency: 'THB', flagId: 'th', parquetName: 'TH_BANGKOK' },
@@ -338,6 +338,14 @@ const CWICR_DATABASES: CWICRDatabase[] = [
   { id: 'MX_MEXICOCITY', name: 'Mexico', city: 'Mexico City', lang: 'Espanol', currency: 'MXN', flagId: 'mx', parquetName: 'MX_MEXICOCITY' },
   { id: 'ZA_JOHANNESBURG', name: 'South Africa', city: 'Johannesburg', lang: 'English', currency: 'ZAR', flagId: 'za', parquetName: 'ZA_JOHANNESBURG' },
   { id: 'NG_LAGOS', name: 'Nigeria', city: 'Lagos', lang: 'English', currency: 'NGN', flagId: 'ng', parquetName: 'NG_LAGOS' },
+  // Authentic national / regional official bases - loaded from the local
+  // WORLD_COST_BASES parquet (official government sources), not GitHub snapshots.
+  { id: 'BR_NATIONAL', name: 'Brazil (SINAPI)', city: 'National', lang: 'Portugues', currency: 'BRL', flagId: 'br', parquetName: 'BR' },
+  { id: 'ES_ANDALUCIA', name: 'Spain (BCCA)', city: 'Andalucia', lang: 'Espanol', currency: 'EUR', flagId: 'es', parquetName: 'ES_ANDALUCIA' },
+  { id: 'IT_TOSCANA', name: 'Italy (Toscana)', city: 'Toscana', lang: 'Italiano', currency: 'EUR', flagId: 'it', parquetName: 'IT_TOSCANA' },
+  { id: 'VN_NATIONAL', name: 'Vietnam (Dinh Muc)', city: 'National', lang: 'Tieng Viet', currency: 'VND', flagId: 'vn', parquetName: 'VN' },
+  { id: 'ID_NATIONAL', name: 'Indonesia (AHSP)', city: 'National', lang: 'Bahasa Indonesia', currency: 'IDR', flagId: 'id', parquetName: 'ID' },
+  { id: 'GR_NATIONAL', name: 'Greece (GGDE)', city: 'National', lang: 'Ellinika', currency: 'EUR', flagId: 'gr', parquetName: 'GR' },
 ];
 
 // Databases that may only be available via GitHub download (not in local DDC_Toolkit).
@@ -357,7 +365,6 @@ const GITHUB_ONLY_DBS = new Set([
   'BG_SOFIA',
   'RO_BUCHAREST',
   'SV_STOCKHOLM',
-  'TR_ISTANBUL',
   'JA_TOKYO',
   'KO_SEOUL',
   'TH_BANGKOK',

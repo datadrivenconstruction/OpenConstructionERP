@@ -129,7 +129,7 @@ REGION_LANGUAGE: dict[str, str] = {
     # Nordic
     "SV_STOCKHOLM": "sv",
     # Asia / MENA
-    "CN_SHANGHAI": "zh",
+    "ZH_CHINA": "zh",  # authentic Beijing 2012 + Bortala 2022 base (language-prefixed id)
     "JP_TOKYO": "ja",
     "KR_SEOUL": "ko",
     "MN_ULAANBAATAR": "mn",  # Mongolian
@@ -138,8 +138,15 @@ REGION_LANGUAGE: dict[str, str] = {
     "VN_HANOI": "vi",
     "AE_DUBAI": "ar",
     "SA_RIYADH": "ar",
-    "TR_ISTANBUL": "tr",
+    "TR_NATIONAL": "tr",  # authentic CSB national unit-price analyses
     "HI_MUMBAI": "hi",
+    # Authentic national / regional official bases (own work-items parquet)
+    "BR_NATIONAL": "pt",  # SINAPI analytical compositions
+    "ES_ANDALUCIA": "es",  # BCCA (Banco de Costes de la Construccion de Andalucia)
+    "IT_TOSCANA": "it",  # Prezzario Regione Toscana
+    "VN_NATIONAL": "vi",  # Dinh Muc national norms
+    "ID_NATIONAL": "id",  # AHSP national unit-price analyses
+    "GR_NATIONAL": "el",  # GGDE analytical tariffs
     # LatAm
     "MX_MEXICO": "es",
     "MX_MEXICOCITY": "es",
@@ -156,7 +163,9 @@ _ALIASES: dict[str, str] = {
     "ENG_TORONTO": "CA_TORONTO",  # mis-prefixed in a 2025 batch
     "SP_BARCELONA": "ES_MADRID",  # ES is the ISO code; SP was a typo
     "CS_PRAGUE": "CZ_PRAGUE",  # CS is the language code, not country
-    "ZH_SHANGHAI": "CN_SHANGHAI",  # language-prefixed catalogue id
+    "CN_SHANGHAI": "ZH_CHINA",  # old v3 China id
+    "ZH_SHANGHAI": "ZH_CHINA",  # language-prefixed catalogue id
+    "TR_ISTANBUL": "TR_NATIONAL",  # old metro id
     "JA_TOKYO": "JP_TOKYO",
     "KO_SEOUL": "KR_SEOUL",
     "VI_HANOI": "VN_HANOI",
@@ -208,7 +217,7 @@ def _load_region_language_yaml_overlay() -> None:
 
     regions = raw.get("regions") or {}
     aliases = raw.get("aliases") or {}
-    overrides = raw.get("country_overrides") or {}
+    overrides = raw.get("country_overrides") or raw.get("bare_country_overrides") or {}
 
     merged = 0
     for k, v in regions.items() if isinstance(regions, dict) else []:

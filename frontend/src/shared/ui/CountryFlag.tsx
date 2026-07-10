@@ -67,6 +67,9 @@ const FLAGS: Record<string, string> = {
   // BG — Bulgaria
   bg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3"><rect width="5" height="1" fill="#fff"/><rect y="1" width="5" height="1" fill="#00966E"/><rect y="2" width="5" height="1" fill="#D62612"/></svg>`,
 
+  // GR — Greece (9 blue-white stripes + white cross on blue canton)
+  gr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 18"><rect width="27" height="18" fill="#0D5EAF"/><g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g><rect width="10" height="10" fill="#0D5EAF"/><rect x="4" width="2" height="10" fill="#fff"/><rect y="4" width="10" height="2" fill="#fff"/></svg>`,
+
   // US — United States (proper white star polygons, not font glyphs which
   // render as empty boxes inside an <img> data-URI without a guaranteed font)
   us: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 10"><defs><polygon id="us-s" points="0,-0.32 0.072,-0.099 0.304,-0.099 0.116,0.038 0.188,0.259 0,0.122 -0.188,0.259 -0.116,0.038 -0.304,-0.099 -0.072,-0.099" fill="#fff"/></defs><rect width="19" height="10" fill="#B22234"/><g fill="#fff"><rect y=".77" width="19" height=".77"/><rect y="2.31" width="19" height=".77"/><rect y="3.85" width="19" height=".77"/><rect y="5.38" width="19" height=".77"/><rect y="6.92" width="19" height=".77"/><rect y="8.46" width="19" height=".77"/></g><rect width="7.6" height="5.38" fill="#3C3B6E"/><g><use href="#us-s" x="0.76" y="0.7"/><use href="#us-s" x="2.28" y="0.7"/><use href="#us-s" x="3.8" y="0.7"/><use href="#us-s" x="5.32" y="0.7"/><use href="#us-s" x="6.84" y="0.7"/><use href="#us-s" x="1.52" y="1.6"/><use href="#us-s" x="3.04" y="1.6"/><use href="#us-s" x="4.56" y="1.6"/><use href="#us-s" x="6.08" y="1.6"/><use href="#us-s" x="0.76" y="2.5"/><use href="#us-s" x="2.28" y="2.5"/><use href="#us-s" x="3.8" y="2.5"/><use href="#us-s" x="5.32" y="2.5"/><use href="#us-s" x="6.84" y="2.5"/><use href="#us-s" x="1.52" y="3.4"/><use href="#us-s" x="3.04" y="3.4"/><use href="#us-s" x="4.56" y="3.4"/><use href="#us-s" x="6.08" y="3.4"/><use href="#us-s" x="0.76" y="4.3"/><use href="#us-s" x="2.28" y="4.3"/><use href="#us-s" x="3.8" y="4.3"/><use href="#us-s" x="5.32" y="4.3"/><use href="#us-s" x="6.84" y="4.3"/></g></svg>`,
@@ -118,6 +121,11 @@ const FLAGS: Record<string, string> = {
 
   // MN — Mongolia (red-blue-red vertical + simplified soyombo on hoist red)
   mn: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="3" height="6" fill="#C4272F"/><rect x="3" width="3" height="6" fill="#015197"/><rect x="6" width="3" height="6" fill="#C4272F"/><g fill="#F9CF02" transform="translate(1.5,3)"><circle r=".25"/><rect x="-.55" y="-1.4" width=".3" height="1" rx=".05"/><rect x=".25" y="-1.4" width=".3" height="1" rx=".05"/><rect x="-.55" y=".4" width=".3" height="1" rx=".05"/><rect x=".25" y=".4" width=".3" height="1" rx=".05"/><rect x="-1.05" y="-.15" width=".25" height=".3" rx=".05"/><rect x=".8" y="-.15" width=".25" height=".3" rx=".05"/></g></svg>`,
+
+  // CIS — Commonwealth of Independent States (СНГ). Not an ISO country; a
+  // provenance badge for the in-house GESN/CWICR post-Soviet norm bases.
+  // Blue field + gold sun emblem (CIS colours), distinct from any national flag.
+  cis: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#2A6CC6"/><g stroke="#F4C430" stroke-width="1.1" stroke-linecap="round"><line x1="15" y1="3.9" x2="15" y2="2.3"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(45 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(90 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(135 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(180 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(225 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(270 15 10)"/><line x1="15" y1="3.9" x2="15" y2="2.3" transform="rotate(315 15 10)"/></g><circle cx="15" cy="10" r="5" fill="none" stroke="#F4C430" stroke-width="1.2"/><circle cx="15" cy="10" r="1.9" fill="#F4C430"/></svg>`,
 };
 
 /** Fallback emoji map for unknown codes. Covers everything that lands in
@@ -129,12 +137,14 @@ const EMOJI_FALLBACK: Record<string, string> = {
   ru: '🇷🇺', cn: '🇨🇳', sa: '🇸🇦', in: '🇮🇳', tr: '🇹🇷',
   it: '🇮🇹', nl: '🇳🇱', pl: '🇵🇱', cz: '🇨🇿', jp: '🇯🇵',
   kr: '🇰🇷', se: '🇸🇪', no: '🇳🇴', dk: '🇩🇰', fi: '🇫🇮',
-  us: '🇺🇸', ca: '🇨🇦', ae: '🇦🇪', bg: '🇧🇬',
+  us: '🇺🇸', ca: '🇨🇦', ae: '🇦🇪', bg: '🇧🇬', gr: '🇬🇷',
   // v2.6.23 — flags for the 19 newly-shipped CWICR cost-database regions
   au: '🇦🇺', hr: '🇭🇷', id: '🇮🇩', mx: '🇲🇽', ng: '🇳🇬',
   nz: '🇳🇿', ro: '🇷🇴', th: '🇹🇭', vn: '🇻🇳', za: '🇿🇦',
   // v3.0.4 — Mongolian locale (community contribution; PR #125)
   mn: '🇲🇳',
+  // CIS provenance badge (has an SVG above; fallback only)
+  cis: '🤝',
 };
 
 /** Region-key prefixes that don't match an ISO code directly.
@@ -200,4 +210,19 @@ export function CountryFlag({ code, size = 16, className = '' }: CountryFlagProp
       loading="lazy"
     />
   );
+}
+
+/** ISO codes of CIS (Commonwealth of Independent States / СНГ) members. The
+ *  in-house GESN/CWICR cost bases share the post-Soviet norm lineage, so the
+ *  cost-database pickers badge them with the shared CIS emblem rather than a
+ *  single national flag. This is provenance, not geography — it is applied
+ *  only by callers that opt in via `originFlagCode`, and never changes the
+ *  plain national flag anywhere else. */
+export const CIS_ISO = new Set(['ru', 'by', 'kz', 'kg', 'tj', 'am', 'az', 'uz', 'md']);
+
+/** Map a region's country ISO to the flag code to show in a cost-base
+ *  selector: the CIS emblem for post-Soviet norm bases, otherwise the ISO
+ *  itself (which `CountryFlag` resolves to the national flag). */
+export function originFlagCode(code: string): string {
+  return CIS_ISO.has((code || '').toLowerCase()) ? 'cis' : code;
 }

@@ -115,7 +115,7 @@ regions:
   SV_STOCKHOLM: sv
 
   # ── Asia / MENA ─────────────────────────────────────────────────────
-  CN_SHANGHAI: zh
+  ZH_CHINA: zh
   JP_TOKYO: ja
   KR_SEOUL: ko
   ID_JAKARTA: id
@@ -123,8 +123,16 @@ regions:
   VN_HANOI: vi
   AE_DUBAI: ar
   SA_RIYADH: ar
-  TR_ISTANBUL: tr
+  TR_NATIONAL: tr
   HI_MUMBAI: hi
+
+  # ── Authentic national / regional official bases ────────────────────
+  BR_NATIONAL: pt        # SINAPI analytical compositions
+  ES_ANDALUCIA: es       # BCCA (Andalucia)
+  IT_TOSCANA: it         # Prezzario Regione Toscana
+  VN_NATIONAL: vi        # Dinh Muc national norms
+  ID_NATIONAL: id        # AHSP national unit-price analyses
+  GR_NATIONAL: el        # GGDE analytical tariffs
 
   # ── LatAm ───────────────────────────────────────────────────────────
   MX_MEXICO: es
@@ -136,7 +144,9 @@ aliases:
   ENG_TORONTO: CA_TORONTO    # mis-prefixed in a 2025 batch
   SP_BARCELONA: ES_MADRID    # ES is the ISO code; SP was a typo
   CS_PRAGUE: CZ_PRAGUE       # CS is the language code, not country
-  ZH_SHANGHAI: CN_SHANGHAI   # language-prefixed catalogue id
+  ZH_SHANGHAI: ZH_CHINA      # language-prefixed catalogue id
+  CN_SHANGHAI: ZH_CHINA      # old v3 China id
+  TR_ISTANBUL: TR_NATIONAL   # old metro id
   JA_TOKYO: JP_TOKYO
   KO_SEOUL: KR_SEOUL
   VI_HANOI: VN_HANOI

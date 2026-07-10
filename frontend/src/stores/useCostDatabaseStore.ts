@@ -9,9 +9,15 @@ import { create } from 'zustand';
 
 const ACTIVE_DB_KEY = 'oe_active_database';
 
+const REGION_ALIASES: Record<string, string> = {
+  TR_ISTANBUL: 'TR_NATIONAL',
+  ZH_SHANGHAI: 'ZH_CHINA',
+};
+
 function readActiveRegion(): string {
   try {
-    return localStorage.getItem(ACTIVE_DB_KEY) ?? '';
+    const saved = localStorage.getItem(ACTIVE_DB_KEY) ?? '';
+    return REGION_ALIASES[saved] ?? saved;
   } catch {
     return '';
   }
@@ -34,7 +40,7 @@ export const REGION_MAP: Record<string, RegionInfo> = {
   PT_SAOPAULO: { label: 'Brazil (BRL)', name: 'Brazil / Portugal', flag: 'br', currency: 'BRL' },
   RU_STPETERSBURG: { label: 'Russia (RUB)', name: 'Russia / CIS', flag: 'ru', currency: 'RUB' },
   AR_DUBAI: { label: 'Middle East (AED)', name: 'Middle East / Gulf', flag: 'ae', currency: 'AED' },
-  ZH_SHANGHAI: { label: 'China (CNY)', name: 'China', flag: 'cn', currency: 'CNY' },
+  ZH_CHINA: { label: 'China (CNY)', name: 'China', flag: 'cn', currency: 'CNY' },
   HI_MUMBAI: { label: 'India (INR)', name: 'India / South Asia', flag: 'in', currency: 'INR' },
   // Added 2026-04-28 — DDC CWICR repo expanded from 11 to 30 regions.
   AU_SYDNEY: { label: 'Australia (AUD)', name: 'Australia', flag: 'au', currency: 'AUD' },
@@ -53,9 +59,16 @@ export const REGION_MAP: Record<string, RegionInfo> = {
   RO_BUCHAREST: { label: 'Romania (RON)', name: 'Romania', flag: 'ro', currency: 'RON' },
   SV_STOCKHOLM: { label: 'Sweden (SEK)', name: 'Sweden', flag: 'se', currency: 'SEK' },
   TH_BANGKOK: { label: 'Thailand (THB)', name: 'Thailand', flag: 'th', currency: 'THB' },
-  TR_ISTANBUL: { label: 'Türkiye (TRY)', name: 'Türkiye', flag: 'tr', currency: 'TRY' },
+  TR_NATIONAL: { label: 'Türkiye (TRY)', name: 'Türkiye', flag: 'tr', currency: 'TRY' },
   VI_HANOI: { label: 'Vietnam (VND)', name: 'Vietnam', flag: 'vn', currency: 'VND' },
   ZA_JOHANNESBURG: { label: 'South Africa (ZAR)', name: 'South Africa', flag: 'za', currency: 'ZAR' },
+  // Authentic national / regional official bases (own local parquet).
+  BR_NATIONAL: { label: 'Brazil (BRL)', name: 'Brazil (SINAPI)', flag: 'br', currency: 'BRL' },
+  ES_ANDALUCIA: { label: 'Spain (EUR)', name: 'Spain (BCCA)', flag: 'es', currency: 'EUR' },
+  IT_TOSCANA: { label: 'Italy (EUR)', name: 'Italy (Toscana)', flag: 'it', currency: 'EUR' },
+  VN_NATIONAL: { label: 'Vietnam (VND)', name: 'Vietnam (Dinh Muc)', flag: 'vn', currency: 'VND' },
+  ID_NATIONAL: { label: 'Indonesia (IDR)', name: 'Indonesia (AHSP)', flag: 'id', currency: 'IDR' },
+  GR_NATIONAL: { label: 'Greece (EUR)', name: 'Greece (GGDE)', flag: 'gr', currency: 'EUR' },
   CUSTOM: { label: 'My Database', name: 'My Database', flag: 'custom', currency: '' },
 };
 
@@ -70,11 +83,12 @@ export const useCostDatabaseStore = create<CostDatabaseStore>((set) => ({
   activeRegion: readActiveRegion(),
 
   setActiveRegion: (region: string) => {
+    const canonical = REGION_ALIASES[region] ?? region;
     try {
-      localStorage.setItem(ACTIVE_DB_KEY, region);
+      localStorage.setItem(ACTIVE_DB_KEY, canonical);
     } catch {
       // Storage unavailable — ignore.
     }
-    set({ activeRegion: region });
+    set({ activeRegion: canonical });
   },
 }));
