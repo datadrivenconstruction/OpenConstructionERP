@@ -404,8 +404,17 @@ const ADVISOR_REGION_OPTIONS = new Set([
   'CA_TORONTO',
   'FR_PARIS',
   'ES_BARCELONA',
+  'ZH_CHINA',
+  'TR_NATIONAL',
   'AE_DUBAI',
   'SA_RIYADH',
+  // Authentic national / regional official bases (own local parquet)
+  'BR_NATIONAL',
+  'ES_ANDALUCIA',
+  'IT_TOSCANA',
+  'VN_NATIONAL',
+  'ID_NATIONAL',
+  'GR_NATIONAL',
 ]);
 
 export function AdvisorPage() {
@@ -705,8 +714,16 @@ export function AdvisorPage() {
               <option value="CA_TORONTO">Canada (Toronto)</option>
               <option value="FR_PARIS">France (Paris)</option>
               <option value="ES_BARCELONA">Spain (Barcelona)</option>
+              <option value="ZH_CHINA">China (National)</option>
+              <option value="TR_NATIONAL">Türkiye (National)</option>
               <option value="AE_DUBAI">UAE (Dubai)</option>
               <option value="SA_RIYADH">Saudi Arabia</option>
+              <option value="BR_NATIONAL">Brazil (SINAPI)</option>
+              <option value="ES_ANDALUCIA">Spain (Andalucía)</option>
+              <option value="IT_TOSCANA">Italy (Toscana)</option>
+              <option value="VN_NATIONAL">Vietnam (Dinh Muc)</option>
+              <option value="ID_NATIONAL">Indonesia (AHSP)</option>
+              <option value="GR_NATIONAL">Greece (GGDE)</option>
             </select>
           </div>
 
