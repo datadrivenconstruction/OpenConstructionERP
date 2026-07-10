@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Restyle Lab · 10 направлений редизайна · internal</title>
+<title>Restyle Lab · 17 направлений редизайна · internal</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="googlebot" content="noindex, nofollow">
 <meta name="description" content="Internal design exploration page. Not for indexing.">
@@ -363,20 +363,204 @@ background-size:120px 120px,120px 120px,24px 24px,24px 24px}
 .s10-panel{background:#f6f3ed;border:1px solid rgba(60,50,40,.09);border-radius:28px;padding:22px;box-shadow:0 1px 2px rgba(60,50,40,.05),0 30px 70px -36px rgba(60,50,40,.4)}
 .s10-panel .fui{--fbg:#fdfbf7;--fbar:#f1ece3;--fline:rgba(60,50,40,.1);--fink:#3a332c;--fmut:#8a8074;--facc:#a84b2f;box-shadow:none;border-color:rgba(60,50,40,.12)}
 @media(max-width:980px){.s10-hero{grid-template-columns:1fr}}
+
+/* ============ 11 SWISS NOIR ============ */
+.s11{background:#0b0b0a;--ink:#f4f4f2;--mut:#9aa1a9;--acc:#38bdf8;color:var(--ink)}
+.s11 .dnav{border-bottom:1px solid rgba(244,244,242,.75)}
+.s11 .dghost{border-radius:0;border-color:rgba(244,244,242,.28);color:var(--ink)}
+.s11 .dbtn{background:#f4f4f2;color:#0b0b0a;border-radius:0}
+.s11-cols{position:absolute;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(90deg,rgba(244,244,242,.06) 1px,transparent 1px);background-size:calc(100%/6) 100%}
+.s11-meta{display:flex;justify-content:space-between;gap:14px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#9aa1a9;padding:16px 0;border-bottom:1px solid rgba(244,244,242,.18)}
+.s11-meta b{color:var(--acc);font-weight:500}
+.s11-meta span:nth-child(3){display:none}
+@media(min-width:880px){.s11-meta span:nth-child(3){display:inline}}
+.s11-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:54px 0 34px}
+.s11-h1{font:800 clamp(50px,8.4vw,116px)/0.98 'Inter Tight',sans-serif;letter-spacing:-.045em;max-width:12ch}
+.s11-h1 em{font-style:normal;color:var(--acc)}
+.s11-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:44px}
+.s11-sub{max-width:52ch;color:#c6ccd2;font-size:16.5px;line-height:1.6}
+.s11-ctas{display:flex;align-items:center;gap:22px}
+.s11-btn{cursor:pointer;background:#f4f4f2;color:#0b0b0a;font-weight:600;font-size:14px;padding:15px 26px}
+.s11-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #f4f4f2;padding-bottom:3px}
+.s11-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #f4f4f2;margin-bottom:56px}
+.s11-stats div{padding:20px 18px 4px;border-right:1px solid rgba(244,244,242,.18)}
+.s11-stats div:last-child{border-right:0}
+.s11-stats b{display:block;font:700 clamp(24px,2.6vw,34px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em}
+.s11-stats span{display:block;margin-top:8px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#9aa1a9}
+.s11-mark{position:absolute;right:-20px;bottom:-70px;z-index:1;font:900 clamp(200px,26vw,360px)/1 'Inter Tight',sans-serif;letter-spacing:-.05em;color:transparent;-webkit-text-stroke:1.5px rgba(244,244,242,.12);pointer-events:none;user-select:none}
+@media(max-width:680px){.s11-stats{grid-template-columns:1fr 1fr}.s11-stats div{border-bottom:1px solid rgba(244,244,242,.18)}}
+
+/* ============ 12 SWISS POSTER ============ */
+.s12{background:#f4f4f1;--ink:#0d0d0c;--mut:#6b7280;--acc:#0284c7;color:var(--ink)}
+.s12 .dbtn{background:#0d0d0c;border-radius:0}
+.s12 .dghost{border-radius:0;border-color:rgba(13,13,12,.35)}
+.s12 .dnav{justify-content:flex-start;gap:36px}
+.s12 .dnavr{margin-left:auto}
+.s12-block{position:absolute;top:0;right:0;width:min(44%,560px);height:76%;background:var(--acc);z-index:1}
+.s12-block::before{content:'+';position:absolute;left:26px;top:20px;color:rgba(255,255,255,.85);font:400 22px/1 'JetBrains Mono',monospace}
+.s12-block::after{content:'';position:absolute;right:26px;top:120px;width:44px;height:44px;border:1.5px solid rgba(255,255,255,.7)}
+.s12-blk-in{position:absolute;left:0;right:0;bottom:30px;padding:0 32px;color:#fff}
+.s12-blk-in small{display:block;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:4px}
+.s12-blk-in b{font:900 clamp(80px,10.5vw,170px)/0.9 'Inter Tight',sans-serif;letter-spacing:-.05em}
+.s12-circle{position:absolute;width:200px;height:200px;border:1.5px solid rgba(13,13,12,.8);border-radius:50%;z-index:2;pointer-events:none;top:13%;right:calc(min(44%,560px) - 100px)}
+.s12-side{position:absolute;left:24px;bottom:44px;writing-mode:vertical-rl;transform:rotate(180deg);font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:#8b8f94;z-index:2}
+.s12-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:54px 0 30px;max-width:58%}
+.s12-eyebrow{font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:24px}
+.s12-h1{font:800 clamp(48px,7.6vw,112px)/0.96 'Inter Tight',sans-serif;letter-spacing:-.045em}
+.s12-h1 em{font-style:normal;color:var(--acc)}
+.s12-sub{max-width:42ch;color:#374151;font-size:16px;line-height:1.6;margin-top:26px}
+.s12-ctas{display:flex;align-items:center;gap:22px;margin-top:32px}
+.s12-btn{cursor:pointer;background:#0d0d0c;color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s12-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #0d0d0c;padding-bottom:3px}
+.s12-stats{display:flex;flex-wrap:wrap;gap:10px 30px;border-top:1px solid #0d0d0c;padding:16px 0;margin-bottom:52px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7280;position:relative;z-index:2}
+.s12-stats b{color:#0d0d0c}
+@media(max-width:880px){.s12-block,.s12-circle,.s12-side{display:none}.s12-hero{max-width:100%}}
+
+/* ============ 13 SWISS DATASHEET ============ */
+.s13{background:#fcfcfb;--ink:#101010;--mut:#71767c;--acc:#0284c7;color:var(--ink)}
+.s13 .dbtn{background:#101010;border-radius:0}
+.s13 .dghost{border-radius:0;border-color:rgba(16,16,16,.3)}
+.s13-bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 16px;border-top:1px solid #101010;border-bottom:1px solid #101010;padding:13px 0;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#71767c}
+.s13-bar .st{display:inline-flex;align-items:center;gap:8px;color:var(--acc)}
+.s13-bar .st i{width:8px;height:8px;background:var(--acc);display:inline-block}
+.s13-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0 26px}
+.s13-h1{font:800 clamp(42px,6.6vw,92px)/1.0 'Inter Tight',sans-serif;letter-spacing:-.04em;max-width:14ch}
+.s13-h1 em{font-style:normal;color:var(--acc)}
+.s13-sub{max-width:56ch;color:#3f4449;font-size:16px;line-height:1.6;margin-top:22px}
+.s13-data{width:100%;max-width:760px;margin-top:38px;font-family:'JetBrains Mono',monospace}
+.s13-dr{display:flex;align-items:baseline;gap:12px;padding:11px 0}
+.s13-dr>span:first-child{color:#71767c;text-transform:uppercase;letter-spacing:.1em;font-size:11px;white-space:nowrap}
+.s13-dr i{flex:1;border-bottom:1.5px dotted rgba(16,16,16,.35);transform:translateY(-3px)}
+.s13-dr b{font-weight:700;font-size:13px;white-space:nowrap}
+.s13-dr b.acc{color:var(--acc)}
+.s13-ctas{display:flex;gap:14px;margin:36px 0 58px}
+.s13-btn{cursor:pointer;background:#101010;color:#fff;font:600 12.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:16px 24px}
+.s13-btn.ghost{background:transparent;color:#101010;border:1px solid #101010}
+@media(max-width:620px){.s13-dr b{white-space:normal;text-align:right}}
+
+/* ============ 14 SWISS CONSTRUCT ============ */
+.s14{background:#f6f6f3;--ink:#0d0d0c;--mut:#6b7280;--acc:#0284c7;color:var(--ink)}
+.s14 .dbtn{background:#0d0d0c;border-radius:0}
+.s14 .dghost{border-radius:0;border-color:rgba(13,13,12,.35)}
+.s14-hero{flex:1;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding:44px 0 60px}
+.s14-eyebrow{font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:24px}
+.s14-h1{font:800 clamp(44px,6.4vw,94px)/0.98 'Inter Tight',sans-serif;letter-spacing:-.045em}
+.s14-h1 em{font-style:normal;color:var(--acc)}
+.s14-sub{max-width:46ch;color:#374151;font-size:16px;line-height:1.6;margin-top:24px}
+.s14-ctas{display:flex;align-items:center;gap:22px;margin-top:32px}
+.s14-btn{cursor:pointer;background:#0d0d0c;color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s14-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #0d0d0c;padding-bottom:3px}
+.s14-stats{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:38px;font:500 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#6b7280}
+.s14-stats b{color:#0d0d0c}
+.s14-fig{position:relative;width:100%;max-width:520px;aspect-ratio:1/1;justify-self:end;border:1px solid rgba(13,13,12,.4);background-image:linear-gradient(rgba(13,13,12,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(13,13,12,.05) 1px,transparent 1px);background-size:44px 44px;background-position:center}
+.s14-fig::before,.s14-fig::after{position:absolute;font:400 16px/1 'JetBrains Mono',monospace;color:rgba(13,13,12,.55)}
+.s14-fig::before{content:'+';top:8px;left:10px}
+.s14-fig::after{content:'+';bottom:8px;right:10px}
+.s14-line{position:absolute;left:4%;bottom:20%;width:92%;height:1.5px;background:#0d0d0c;transform:rotate(-26deg);transform-origin:left bottom}
+.s14-c{position:absolute;width:44%;aspect-ratio:1;border-radius:50%;background:var(--acc);left:11%;top:13%}
+.s14-tri{position:absolute;width:30%;aspect-ratio:1;background:#0d0d0c;clip-path:polygon(50% 0,0 100%,100% 100%);left:22%;bottom:9%}
+.s14-sq{position:absolute;width:36%;aspect-ratio:1;border:1.5px solid #0d0d0c;right:10%;top:32%;background:rgba(246,246,243,.65)}
+.s14-cap{position:absolute;left:16px;bottom:12px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
+@media(max-width:980px){.s14-hero{grid-template-columns:1fr}.s14-fig{justify-self:start}}
+.s12 .dghost{border-color:rgba(255,255,255,.8);color:#fff}
+
+/* ============ 15 GANTT POSTER (авторский) ============ */
+.s15{background:#fafaf8;--ink:#101010;--mut:#6b7280;--acc:#0284c7;color:var(--ink)}
+.s15 .dbtn{background:#101010;border-radius:0}
+.s15 .dghost{border-radius:0;border-color:rgba(16,16,16,.3)}
+.s15-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:44px 0 26px}
+.s15-eyebrow{font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:18px}
+.s15-chart{position:relative;border:1px solid rgba(16,16,16,.35);background-image:linear-gradient(90deg,rgba(16,16,16,.07) 1px,transparent 1px);background-size:calc(100%/12) 100%;padding:0 0 36px;overflow:hidden}
+.s15-scale{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(16,16,16,.2);font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#9aa0a6;text-transform:uppercase}
+.s15-scale span{padding:9px 0 9px 8px}
+.s15-rows{padding:26px 12px 0}
+.s15-bar{width:max-content;max-width:100%;font:800 clamp(34px,5.6vw,76px)/1.02 'Inter Tight',sans-serif;letter-spacing:-.04em;padding:.04em .3em .08em;margin-top:12px;position:relative}
+.s15-bar.b1{background:#101010;color:#fff;margin-left:0}
+.s15-bar.b2{border:2.5px solid #101010;color:#101010;margin-left:8%}
+.s15-bar.b3{background:var(--acc);color:#fff;margin-left:20%}
+.s15-bar.b4{border:2.5px solid var(--acc);color:var(--acc);margin-left:37%;background:repeating-linear-gradient(45deg,rgba(2,132,199,.14) 0 5px,transparent 5px 12px)}
+.s15-bar.b4::after{content:'';position:absolute;right:-8px;top:50%;width:13px;height:13px;background:#101010;transform:translateY(-50%) rotate(45deg)}
+.s15-today{position:absolute;top:0;bottom:0;left:58%;width:2px;background:#ef4444;z-index:3}
+.s15-today b{position:absolute;top:6px;left:7px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef4444;padding:5px 7px;white-space:nowrap}
+.s15-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:22px;margin-top:34px}
+.s15-sub{max-width:52ch;color:#374151;font-size:16px;line-height:1.6}
+.s15-ctas{display:flex;align-items:center;gap:20px}
+.s15-btn{cursor:pointer;background:#101010;color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s15-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #101010;padding-bottom:3px}
+.s15-stats{display:flex;flex-wrap:wrap;gap:8px 26px;margin:30px 0 56px;font:500 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#6b7280}
+.s15-stats b{color:#101010}
+@media(max-width:720px){.s15-bar.b2{margin-left:4%}.s15-bar.b3{margin-left:10%}.s15-bar.b4{margin-left:18%}.s15-today{left:74%}}
+
+/* ============ 16 WORK IN PROGRESS (авторский) ============ */
+.s16{background:#fbfbf9;--ink:#12100e;--mut:#6f6a64;--acc:#0284c7;color:var(--ink);background-image:radial-gradient(rgba(18,16,14,.13) 1px,transparent 1px);background-size:26px 26px}
+.s16 .dbtn{background:#12100e;border-radius:0}
+.s16 .dghost{border-radius:0;border-color:rgba(18,16,14,.3)}
+.s16-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0 30px}
+.s16-eyebrow{font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6f6a64;margin-bottom:22px}
+.s16-h1{font:800 clamp(46px,7.4vw,104px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.045em;max-width:13ch}
+.s16-wip{position:relative;display:inline-block;border:2px dashed var(--acc);padding:.02em .1em;
+ background:repeating-linear-gradient(45deg,var(--acc) 0 3px,transparent 3px 10px);
+ -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.5px var(--acc)}
+.s16-flag{position:absolute;left:calc(100% + 40px);top:20%;font:600 10px/1 'JetBrains Mono',monospace;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--acc);padding:6px 8px;white-space:nowrap;-webkit-text-stroke:0;-webkit-text-fill-color:#fff}
+.s16-flag::before{content:'';position:absolute;right:100%;top:50%;width:38px;height:1.5px;background:var(--acc)}
+.s16-legend{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:30px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6f6a64}
+.s16-legend i{display:inline-block;width:22px;height:11px;margin-right:8px;vertical-align:-1px}
+.s16-legend .solid i{background:#12100e}
+.s16-legend .hatch i{border:1px solid var(--acc);background:repeating-linear-gradient(45deg,rgba(2,132,199,.5) 0 2px,transparent 2px 7px)}
+.s16-sub{max-width:54ch;color:#4a453f;font-size:16px;line-height:1.65;margin-top:24px}
+.s16-meter{max-width:560px;width:100%;margin-top:34px}
+.s16-meter .lbl{display:flex;justify-content:space-between;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6f6a64;margin-bottom:8px}
+.s16-meter .tr{height:10px;border:1px solid #12100e;position:relative}
+.s16-meter .tr i{position:absolute;top:1px;bottom:1px;left:1px;width:87%;background:var(--acc)}
+.s16-ctas{display:flex;align-items:center;gap:20px;margin:36px 0 58px}
+.s16-btn{cursor:pointer;background:#12100e;color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s16-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #12100e;padding-bottom:3px}
+@media(max-width:900px){.s16-flag{display:none}}
+
+/* ============ 17 LASER LEVEL (авторский) ============ */
+.s17{background:#f7f7f4;--ink:#0e0e0d;--mut:#6b7280;--acc:#0284c7;color:var(--ink);justify-content:center}
+.s17 .dz{flex:0 0 auto}
+.s17 .dbtn{background:#0e0e0d;border-radius:0}
+.s17 .dghost{border-radius:0;border-color:rgba(14,14,13,.3)}
+.s17-hero{padding:52px 0 0}
+.s17-top{display:flex;justify-content:space-between;align-items:flex-end;gap:26px}
+.s17-eyebrow{font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:22px}
+.s17-h1{font:800 clamp(48px,7.6vw,108px)/1.0 'Inter Tight',sans-serif;letter-spacing:-.045em;max-width:14ch}
+.s17-h1 em{font-style:normal;color:var(--acc)}
+.s17-level{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex:none}
+.s17-vial{position:relative;width:130px;height:26px;border:1.5px solid #0e0e0d;border-radius:999px;background:#fff}
+.s17-vial::before,.s17-vial::after{content:'';position:absolute;top:3px;bottom:3px;width:1.5px;background:rgba(14,14,13,.5)}
+.s17-vial::before{left:calc(50% - 15px)}
+.s17-vial::after{left:calc(50% + 15px)}
+.s17-vial i{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px rgba(2,132,199,.6)}
+.s17-level small{font:600 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
+.s17-linewrap{position:relative;margin-top:-12px;z-index:3;pointer-events:none}
+.s17-tickrow{position:absolute;bottom:2px;left:0;right:0;height:9px;background-image:repeating-linear-gradient(90deg,rgba(2,132,199,.5) 0 1.5px,transparent 1.5px 64px)}
+.s17-line{height:2px;background:var(--acc);box-shadow:0 0 14px rgba(2,132,199,.55),0 0 3px rgba(2,132,199,.9)}
+.s17-under{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:24px;margin-top:30px}
+.s17-sub{max-width:50ch;color:#3f4449;font-size:16px;line-height:1.6}
+.s17-ctas{display:flex;align-items:center;gap:20px}
+.s17-btn{cursor:pointer;background:var(--acc);color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s17-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #0e0e0d;padding-bottom:3px}
+.s17-stats{display:flex;flex-wrap:wrap;gap:8px 26px;margin:42px 0 58px;font:500 11px/1.5 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#6b7280}
+.s17-stats b{color:#0e0e0d}
+@media(max-width:880px){.s17-level{display:none}}
 </style>
 </head>
 <body>
 
 <header class="lab-top">
   <span class="lab-kicker"><i></i>internal · noindex · не в навигации</span>
-  <h1>Restyle Lab: <em>10 направлений</em> для нового openconstructionerp.com</h1>
-  <p class="lab-lead">Каждый блок ниже - это <b>живой мокап новой главной страницы</b> в одном из 10 актуальных
-  минималистичных стилей 2026 года. Контент везде одинаковый (реальный headline, реальные CTA и цифры),
-  меняется только визуальный язык - так честнее сравнивать. Все мокапы свёрстаны вживую, не картинки:
-  можно смотреть на разных ширинах экрана.</p>
+  <h1>Restyle Lab: <em>17 направлений</em> для нового openconstructionerp.com</h1>
+  <p class="lab-lead">Каждый блок ниже - это <b>живой мокап новой главной страницы</b>. 10 базовых направлений
+  по актуальным трендам 2026 года, <b>Swiss-серия (11-14)</b> - четыре вариации направления 01,
+  и <b>три авторских концепта (15-17)</b>, придуманных специально под стройку, а не взятых из трендов.
+  Контент везде одинаковый (реальный headline, реальные CTA и цифры), меняется только визуальный язык -
+  так честнее сравнивать. Все мокапы свёрстаны вживую, не картинки.</p>
   <p class="lab-how">Как выбирать: листай вниз (справа точки-навигация), отметь 1-2 фаворита.
-  Можно миксовать: «основа 07, типографика из 01, тёмная секция из 03». Страница закрыта от индексации
-  (noindex, ссылок на неё с сайта нет).</p>
+  Можно миксовать: «основа 07, типографика из 01, тёмная секция из 03». Swiss-серия: 11 noir, 12 плакат,
+  13 техпаспорт, 14 баухаус. Авторские: 15 заголовок-график работ, 16 штриховка «незавершёнки»,
+  17 лазерный нивелир. Страница закрыта от индексации (noindex, ссылок на неё с сайта нет).</p>
   <nav class="lab-chips">
     <a href="#s1"><b>01</b>Swiss Precision</a>
     <a href="#s2"><b>02</b>Blueprint</a>
@@ -388,6 +572,13 @@ background-size:120px 120px,120px 120px,24px 24px,24px 24px}
     <a href="#s8"><b>08</b>Terminal</a>
     <a href="#s9"><b>09</b>Kinetic Type</a>
     <a href="#s10"><b>10</b>Warm Concrete</a>
+    <a href="#s11"><b>11</b>Swiss Noir</a>
+    <a href="#s12"><b>12</b>Swiss Poster</a>
+    <a href="#s13"><b>13</b>Swiss Datasheet</a>
+    <a href="#s14"><b>14</b>Swiss Construct</a>
+    <a href="#s15"><b>15</b>Gantt Poster</a>
+    <a href="#s16"><b>16</b>Work in Progress</a>
+    <a href="#s17"><b>17</b>Laser Level</a>
   </nav>
 </header>
 
@@ -401,7 +592,7 @@ background-size:120px 120px,120px 120px,24px 24px,24px 24px}
     </div>
     <p>Швейцарская школа 2.0: огромный шрифт, видимая колоночная сетка, mono-подписи, один акцентный цвет.
     Самый <b>«дорогой» и вневременной</b> вариант - так сейчас выглядят сильные инженерные бренды.
-    Риск: требует дисциплины в контенте, «шума» не прощает.</p>
+    Риск: требует дисциплины в контенте, «шума» не прощает. <b>Вариации этого направления - №11-14 в конце страницы.</b></p>
   </div>
   <div class="demo s1">
     <div class="s1-cols" aria-hidden="true"></div>
@@ -790,6 +981,259 @@ background-size:120px 120px,120px 120px,24px 24px,24px 24px}
   </div>
 </section>
 
+<!-- ==================== 11 SWISS NOIR ==================== -->
+<section class="style-block" id="s11">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">11</span><h2>Swiss Noir</h2>
+      <div class="sm-tags"><span>swiss-серия</span><span>тёмный</span><span>типографика</span></div>
+    </div>
+    <p>Вариация 01: та же строгая сетка и гигантская типографика, но в инверсии - почти чёрный фон, светлый шрифт,
+    синий акцент. <b>Инженерно и эффектно одновременно.</b>
+    Риск: тёмный тон обязывает выдержать в нём весь сайт, не только hero.</p>
+  </div>
+  <div class="demo s11">
+    <div class="s11-cols" aria-hidden="true"></div>
+    <div class="s11-mark" aria-hidden="true">11</div>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s11-meta"><span>Open-source construction ERP</span><b>v10.8.0</b><span>Est. 2025</span><span>AGPL-3.0</span></div>
+      <div class="s11-hero">
+        <h1 class="s11-h1">Run the whole construction <em>project.</em></h1>
+        <div class="s11-row">
+          <p class="s11-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time stay in sync with the drawings and the BOQ behind them.</p>
+          <div class="s11-ctas"><span class="s11-btn">Install now</span><span class="s11-link">Star on GitHub</span></div>
+        </div>
+      </div>
+      <div class="s11-stats">
+        <div><b>149</b><span>modules</span></div>
+        <div><b>55,000+</b><span>cost items</span></div>
+        <div><b>26</b><span>languages</span></div>
+        <div><b>AGPL-3.0</b><span>open source</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 12 SWISS POSTER ==================== -->
+<section class="style-block" id="s12">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">12</span><h2>Swiss Poster</h2>
+      <div class="sm-tags"><span>swiss-серия</span><span>светлый</span><span>плакат</span><span>смелый</span></div>
+    </div>
+    <p>Вариация 01 в духе цюрихского плаката: асимметрия, гигантская выворотка «ERP» на синем поле,
+    вертикальная подпись вдоль края, окружность как графический жест. <b>Чистая афиша</b> - самый смелый в Swiss-серии.
+    Риск: плакат не любит длинных текстов, контент придётся жёстко редактировать.</p>
+  </div>
+  <div class="demo s12">
+    <div class="s12-block" aria-hidden="true"><div class="s12-blk-in"><small>open construction</small><b>ERP</b></div></div>
+    <i class="s12-circle" aria-hidden="true"></i>
+    <span class="s12-side" aria-hidden="true">poster series · no 12 · zürich school · 2026</span>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s12-hero">
+        <div class="s12-eyebrow">v10.8.0 · open source · AGPL-3.0</div>
+        <h1 class="s12-h1">Run the whole construction <em>project.</em></h1>
+        <p class="s12-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install.</p>
+        <div class="s12-ctas"><span class="s12-btn">Install now</span><span class="s12-link">Star on GitHub</span></div>
+      </div>
+      <div class="s12-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 13 SWISS DATASHEET ==================== -->
+<section class="style-block" id="s13">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">13</span><h2>Swiss Datasheet</h2>
+      <div class="sm-tags"><span>swiss-серия</span><span>светлый</span><span>техпаспорт</span></div>
+    </div>
+    <p>Вариация 01 как технический паспорт изделия: строка статуса, характеристики с пунктирными лидерами,
+    как в спецификациях и каталогах компонентов. <b>Инженерная честность:</b> сайт читается как datasheet продукта.
+    Риск: эмоций мало - работает, когда продукт говорит сам за себя.</p>
+  </div>
+  <div class="demo s13">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s13-bar"><span>Technical data sheet · OCE-ERP</span><span>Rev 2026-07</span><span class="st"><i></i>In production</span></div>
+      <div class="s13-hero">
+        <h1 class="s13-h1">Run the whole construction <em>project.</em></h1>
+        <p class="s13-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time stay in sync with the drawings and the BOQ behind them.</p>
+        <div class="s13-data">
+          <div class="s13-dr"><span>Scope</span><i></i><b>estimate to handover</b></div>
+          <div class="s13-dr"><span>Modules</span><i></i><b>149</b></div>
+          <div class="s13-dr"><span>Cost items</span><i></i><b>55,000+</b></div>
+          <div class="s13-dr"><span>Languages</span><i></i><b>26</b></div>
+          <div class="s13-dr"><span>Licence</span><i></i><b>AGPL-3.0 · open source</b></div>
+          <div class="s13-dr"><span>Install</span><i></i><b class="acc">pip install openconstructionerp</b></div>
+        </div>
+        <div class="s13-ctas"><span class="s13-btn">Install now</span><span class="s13-btn ghost">Star on GitHub</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 14 SWISS CONSTRUCT ==================== -->
+<section class="style-block" id="s14">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">14</span><h2>Swiss Construct</h2>
+      <div class="sm-tags"><span>swiss-серия</span><span>светлый</span><span>баухаус-композиция</span></div>
+    </div>
+    <p>Вариация 01 с геометрической композицией из строительных примитивов - кран, плита, опалубка,
+    подписанные как fig. 01-03. <b>Даёт 01-му фирменный графический знак</b>, оставаясь строгим.
+    Риск: абстракция должна остаться тонкой, не превратиться в иллюстрацию.</p>
+  </div>
+  <div class="demo s14">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s14-hero">
+        <div>
+          <div class="s14-eyebrow">Open-source construction ERP · v10.8.0</div>
+          <h1 class="s14-h1">Run the whole construction <em>project.</em></h1>
+          <p class="s14-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install.</p>
+          <div class="s14-ctas"><span class="s14-btn">Install now</span><span class="s14-link">Star on GitHub</span></div>
+          <div class="s14-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span></div>
+        </div>
+        <div class="s14-fig" aria-hidden="true">
+          <i class="s14-line"></i>
+          <i class="s14-c"></i>
+          <i class="s14-tri"></i>
+          <i class="s14-sq"></i>
+          <span class="s14-cap">fig. 01 crane · fig. 02 slab · fig. 03 formwork</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 15 GANTT POSTER (авторский концепт) ==================== -->
+<section class="style-block" id="s15">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">15</span><h2>Gantt Poster</h2>
+      <div class="sm-tags"><span>авторский концепт</span><span>светлый</span><span>план-график</span></div>
+    </div>
+    <p>Авторский концепт под нашу предметку: заголовок свёрстан как график производства работ - слова-этапы лежат
+    на таймлайне со шкалой недель, вехой и красной линией «сегодня». <b>Сайт сам выглядит как план проекта.</b>
+    Такого хода нет ни у кого в отрасли. Риск: каскад надо аккуратно упрощать на мобильном.</p>
+  </div>
+  <div class="demo s15">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s15-hero">
+        <div class="s15-eyebrow">Programme of works · open-source construction ERP · v10.8.0</div>
+        <div class="s15-chart">
+          <div class="s15-scale"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
+          <div class="s15-rows">
+            <div class="s15-bar b1">Run</div>
+            <div class="s15-bar b2">the whole</div>
+            <div class="s15-bar b3">construction</div>
+            <div class="s15-bar b4">project.</div>
+          </div>
+          <i class="s15-today" aria-hidden="true"><b>today · v10.8.0</b></i>
+        </div>
+        <div class="s15-row">
+          <p class="s15-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time stay in sync with the BOQ behind them.</p>
+          <div class="s15-ctas"><span class="s15-btn acc">Install now</span><span class="s15-link">Star on GitHub</span></div>
+        </div>
+        <div class="s15-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span><span><b>AGPL-3.0</b></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 16 WORK IN PROGRESS (авторский концепт) ==================== -->
+<section class="style-block" id="s16">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">16</span><h2>Work in Progress</h2>
+      <div class="sm-tags"><span>авторский концепт</span><span>светлый</span><span>язык чертежа</span></div>
+    </div>
+    <p>Авторский концепт на языке проектной документации: построенное - залито, ещё не построенное -
+    <b>заштриховано, как будущие работы на чертеже</b>, с выноской степени готовности, легендой и шкалой покрытия сметы.
+    Тихий сторителлинг, который наша аудитория считывает без слов. Риск: штриховку держать деликатной, чтобы не рябило.</p>
+  </div>
+  <div class="demo s16">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s16-hero">
+        <div class="s16-eyebrow">Open-source construction ERP · v10.8.0 · drawing convention: hatch = planned</div>
+        <h1 class="s16-h1">Run the whole construction <span class="s16-wip">project.<i class="s16-flag">pos 04 · in progress · 62%</i></span></h1>
+        <div class="s16-legend">
+          <span class="solid"><i></i>built · shipped modules</span>
+          <span class="hatch"><i></i>planned · on the roadmap</span>
+        </div>
+        <p class="s16-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. The platform grows like a building: open, in public, position by position.</p>
+        <div class="s16-meter">
+          <div class="lbl"><span>estimate coverage</span><span>87%</span></div>
+          <div class="tr"><i></i></div>
+        </div>
+        <div class="s16-ctas"><span class="s16-btn">Install now</span><span class="s16-link">Star on GitHub</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 17 LASER LEVEL (авторский концепт) ==================== -->
+<section class="style-block" id="s17">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">17</span><h2>Laser Level</h2>
+      <div class="sm-tags"><span>авторский концепт</span><span>светлый</span><span>один жест</span></div>
+    </div>
+    <p>Авторский концепт «одной идеи»: светящаяся линия лазерного нивелира проходит через весь экран точно
+    по базовой линии заголовка, всё на странице выравнивается по ней, а пузырьковый уровень показывает «в ноль»:
+    <b>смета, график и BOQ - на одном уровне</b>. Самый минималистичный способ сказать «всё сходится».
+    Риск: идея должна остаться единственной, декор добавлять нельзя.</p>
+  </div>
+  <div class="demo s17">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s17-hero">
+        <div class="s17-top">
+          <div>
+            <div class="s17-eyebrow">Open-source construction ERP · v10.8.0</div>
+            <h1 class="s17-h1">Run the whole construction <em>project.</em></h1>
+          </div>
+          <div class="s17-level" aria-hidden="true"><div class="s17-vial"><i></i></div><small>cost · time · boq<br>in sync</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="s17-linewrap" aria-hidden="true"><div class="s17-tickrow"></div><div class="s17-line"></div></div>
+    <div class="dz">
+      <div class="s17-under">
+        <p class="s17-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Everything lines up to the same level: the BOQ.</p>
+        <div class="s17-ctas"><span class="s17-btn">Install now</span><span class="s17-link">Star on GitHub</span></div>
+      </div>
+      <div class="s17-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span><span><b>AGPL-3.0</b></span></div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <footer class="lab-end">
@@ -813,6 +1257,13 @@ background-size:120px 120px,120px 120px,24px 24px,24px 24px}
   <a href="#s8"><i></i><span>08 Terminal</span></a>
   <a href="#s9"><i></i><span>09 Kinetic Type</span></a>
   <a href="#s10"><i></i><span>10 Warm Concrete</span></a>
+  <a href="#s11"><i></i><span>11 Swiss Noir</span></a>
+  <a href="#s12"><i></i><span>12 Swiss Poster</span></a>
+  <a href="#s13"><i></i><span>13 Swiss Datasheet</span></a>
+  <a href="#s14"><i></i><span>14 Swiss Construct</span></a>
+  <a href="#s15"><i></i><span>15 Gantt Poster</span></a>
+  <a href="#s16"><i></i><span>16 Work in Progress</span></a>
+  <a href="#s17"><i></i><span>17 Laser Level</span></a>
 </nav>
 
 <script>
