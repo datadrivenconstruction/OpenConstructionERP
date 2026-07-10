@@ -113,9 +113,13 @@ def _normalise_band(base: float, lo: float, hi: float) -> tuple[float, float, fl
 
 # ── Region-to-GitHub mapping ─────────────────────────────────────────────
 
-# All 30 regional catalogs published in the DDC CWICR repository. Each key is
-# the metro-coded region id that names the catalog CSV
-# (DDC_CWICR_<region>_Catalog.csv), the value is the repo folder that holds it.
+# The 30 metro-coded regional catalogs DDC publishes, plus the authentic
+# national / regional bases we generate locally from official government
+# sources. Each key is the region id that names the catalog CSV
+# (DDC_CWICR_<region>_Catalog.csv); the value is the repo folder used only as
+# the GitHub fallback path (locally generated catalogs resolve from the source
+# checkout in ``data/catalog/regions`` first), and follows the same
+# uppercased-language-code convention as the published metros.
 REGION_MAP: dict[str, str] = {
     "AR_DUBAI": "AR___DDC_CWICR",
     "AU_SYDNEY": "AU___DDC_CWICR",
@@ -149,6 +153,21 @@ REGION_MAP: dict[str, str] = {
     "ZA_JOHANNESBURG": "ZA___DDC_CWICR",
     "ZH_SHANGHAI": "ZH___DDC_CWICR",
     "ZH_CHINA": "ZH___DDC_CWICR",
+    # Authentic national / regional bases generated locally from official
+    # government sources (SINAPI, BCCA, Prezzario Regione Toscana, GGDE, Dinh
+    # Muc, AHSP). Their resource catalogs ship in ``data/catalog/regions`` and
+    # resolve from the local checkout, so the folder is only a GitHub fallback.
+    # BR_NATIONAL / ES_ANDALUCIA / IT_TOSCANA / GR_NATIONAL are priced, coded
+    # bases with a real resource catalog. VN_NATIONAL and ID_NATIONAL are
+    # codeless coefficient bases (no priced resources) served by the resource
+    # price-sheet feature; they are listed here only so the region id is a
+    # recognised key rather than an "Unknown region".
+    "BR_NATIONAL": "PT___DDC_CWICR",
+    "ES_ANDALUCIA": "ES___DDC_CWICR",
+    "IT_TOSCANA": "IT___DDC_CWICR",
+    "GR_NATIONAL": "EL___DDC_CWICR",
+    "VN_NATIONAL": "VI___DDC_CWICR",
+    "ID_NATIONAL": "ID___DDC_CWICR",
 }
 
 _GITHUB_BASE = "https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/main"
@@ -276,13 +295,16 @@ async def import_catalog_from_github(
     public CWICR data repository and caches it, so a region imported once
     stays available without network access.
 
-    Accepts any of the 30 region ids in ``REGION_MAP`` (one metro per CWICR
-    locale: AR_DUBAI, AU_SYDNEY, BG_SOFIA, CS_PRAGUE, DE_BERLIN, ENG_TORONTO,
+    Accepts any of the region ids in ``REGION_MAP``: the 30 metro locales
+    (AR_DUBAI, AU_SYDNEY, BG_SOFIA, CS_PRAGUE, DE_BERLIN, ENG_TORONTO,
     SP_BARCELONA, FR_PARIS, HI_MUMBAI, HR_ZAGREB, ID_JAKARTA, IT_ROME,
     JA_TOKYO, KO_SEOUL, MX_MEXICOCITY, NG_LAGOS, NL_AMSTERDAM, NZ_AUCKLAND,
     PL_WARSAW, PT_SAOPAULO, RO_BUCHAREST, RU_STPETERSBURG, SV_STOCKHOLM,
     TH_BANGKOK, TR_ISTANBUL, TR_NATIONAL, UK_GBP, USA_USD, VI_HANOI,
-    ZA_JOHANNESBURG, ZH_SHANGHAI, ZH_CHINA).
+    ZA_JOHANNESBURG, ZH_SHANGHAI, ZH_CHINA) plus the authentic national /
+    regional bases (BR_NATIONAL, ES_ANDALUCIA, IT_TOSCANA, GR_NATIONAL). The
+    codeless coefficient bases VN_NATIONAL and ID_NATIONAL are recognised keys
+    but have no resource catalog to import.
     """
     import csv
     import io
