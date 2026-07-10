@@ -12,9 +12,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Gantt Poster design language · refined pass
+/* Gantt Poster design language · real-blocks pass
    paper #f7f8f7 · cards #fff · ink #16181d · accent #0284c7 · today #ef5350
-   hairlines + soft shadows instead of hard borders · 4-12px radii · mono labels */
+   hairlines + soft shadows · 4-14px radii · mono labels · single accent */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f7f8f7 linear-gradient(180deg,#edf4f9 0,#f7f8f7 560px) no-repeat;color:#16181d;-webkit-font-smoothing:antialiased}
@@ -33,16 +33,8 @@ a{color:inherit;text-decoration:none}
 @media(prefers-reduced-motion:no-preference){
   .p-sec{opacity:0;transition:opacity .45s ease}
   .p-sec.in{opacity:1}
-  .viz-scurve path.anim{stroke-dasharray:900;stroke-dashoffset:900;transition:stroke-dashoffset 1.2s ease .45s}
-  .p-sec.in .viz-scurve path.anim{stroke-dashoffset:0}
-  .viz-scurve .fade{opacity:0;transition:opacity .9s ease 1.15s}
-  .p-sec.in .viz-scurve .fade{opacity:1}
   .viz-scurve .fade2{opacity:0;transition:opacity .7s ease .2s}
   .p-sec.in .viz-scurve .fade2{opacity:1}
-  .tr-bar i{transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.7,.2,1) .25s}
-  .p-sec.in .tr-bar i{transform:scaleX(1)}
-  .bl-track .paid,.bl-track .committed{transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.7,.2,1) .35s}
-  .p-sec.in .bl-track .paid,.p-sec.in .bl-track .committed{transform:scaleX(1)}
   .gc-rows.js-anim .gc-tag,.gc-rows.js-anim .gc-bar{opacity:0;transform:translateX(-10px);transition:opacity .5s ease,transform .5s ease}
   .gc-rows.js-anim .gc-ghost{opacity:0;transform:none;transition:opacity .6s ease}
   .gc-rows.js-anim.go .gc-tag,.gc-rows.js-anim.go .gc-bar,.gc-rows.js-anim.go .gc-ghost{opacity:1;transform:none}
@@ -51,6 +43,7 @@ a{color:inherit;text-decoration:none}
   .gc-rows.js-anim .gc-tag.t3{transition-delay:.43s}.gc-rows.js-anim .gc-bar.b3{transition-delay:.5s}
   .gc-rows.js-anim .gc-tag.t4{transition-delay:.62s}.gc-rows.js-anim .gc-bar.b4{transition-delay:.69s}
   .gc-rows.js-anim .gc-ghost{transition-delay:.95s}
+  .bfl{opacity:0;transform:translateY(12px);transition:opacity .3s ease,transform .3s ease}
 }
 /* card primitive */
 .card{background:#fff;border:1px solid rgba(18,20,26,.08);border-radius:12px;box-shadow:0 1px 2px rgba(18,22,30,.04),0 16px 40px -26px rgba(18,22,30,.16)}
@@ -81,7 +74,7 @@ a{color:inherit;text-decoration:none}
 .gtoday{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(239,83,80,.85);z-index:3}
 .gtoday b{position:absolute;top:8px;left:8px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(239,83,80,.6)}
 
-/* ============ block 1 · hero ============ */
+/* ============ hero ============ */
 .p-hero{padding-top:52px}
 .p-eyebrow{display:inline-flex;align-items:center;gap:9px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#7c8694;margin-bottom:18px}
 .p-eyebrow i{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;animation:pulse 2.2s ease-in-out infinite}
@@ -108,7 +101,6 @@ a{color:inherit;text-decoration:none}
 @media(max-width:560px){.gc-bar .pc{display:none}}
 .gfuture{position:absolute;top:0;bottom:0;left:58%;right:0;background:rgba(18,20,26,.018);pointer-events:none}
 @media(max-width:720px){.gc-bar.b2,.gc-tag.t2{margin-left:4%}.gc-bar.b3,.gc-tag.t3{margin-left:10%}.gc-bar.b4,.gc-tag.t4{margin-left:18%}}
-/* resource histogram strip inside hero chart */
 .gc-hist{position:relative;z-index:2;display:grid;grid-template-columns:repeat(12,1fr);align-items:end;height:58px;border-top:1px dashed rgba(18,20,26,.12);padding:10px 0 0;margin:6px 14px 16px}
 .gc-hist i{height:var(--h);margin:0 8px;background:rgba(2,132,199,.16);border-top:2px solid rgba(2,132,199,.5);border-radius:4px 4px 0 0}
 .gc-hist-lbl{position:absolute;top:8px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
@@ -129,14 +121,92 @@ a{color:inherit;text-decoration:none}
 @media(max-width:980px){.p-heroGrid{grid-template-columns:1fr;gap:30px}}
 
 /* section heads */
-.p-secHead{max-width:860px;margin-bottom:36px}
+.p-secHead{max-width:880px;margin-bottom:36px}
 .p-num{font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#0284c7;text-transform:uppercase}
 .p-num::after{content:'';display:inline-block;width:44px;height:1px;background:rgba(2,132,199,.35);vertical-align:2px;margin-left:14px}
 .p-secHead h2{font:800 clamp(29px,3.8vw,48px)/1.08 'Inter Tight',sans-serif;letter-spacing:-.03em;margin:12px 0 14px;color:#121419;text-wrap:balance}
 .p-secHead h2 em{font-style:normal;color:#0284c7}
-.p-secHead p{color:#4b5563;font-size:16.5px;line-height:1.68;max-width:72ch}
+.p-secHead h2.sm{font-size:clamp(24px,2.8vw,34px)}
+.p-secHead p{color:#4b5563;font-size:16.5px;line-height:1.68;max-width:76ch}
+.p-secHead p b{color:#16181d}
 
-/* ============ block 2 · numbers / visualizations ============ */
+/* ============ demo player (merged tour) ============ */
+.hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e}
+.hp-eyebrow i{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.7);display:inline-block}
+.hp-grid{display:grid;grid-template-columns:378px 1fr;gap:0;overflow:hidden;border-radius:14px}
+.hp-list{border-right:1px solid rgba(18,20,26,.08);display:flex;flex-direction:column;background:#fff}
+.hp-item{display:grid;grid-template-columns:46px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(18,20,26,.07);padding:0;cursor:pointer;font-family:inherit;position:relative;transition:background .15s}
+.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 10.5px/1 'JetBrains Mono',monospace;color:#9aa3ad;border-right:1px solid rgba(18,20,26,.06);transition:color .15s}
+.hp-item .bd{padding:11px 16px}
+.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#16181d}
+.hp-item .h{display:block;color:#7c8694;font-size:12px;margin-top:3px;line-height:1.45}
+.hp-item:hover{background:rgba(2,132,199,.04)}
+.hp-item.on{background:rgba(2,132,199,.07);box-shadow:inset 3px 0 0 #0284c7}
+.hp-item.on .num{color:#0284c7;font-weight:700}
+.hp-item.on .t{color:#075985}
+.hp-more{padding:13px 16px;font:500 9.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0;margin-top:auto;background:#fafbfb}
+.hp-more b{color:#0284c7;font-size:13px}
+.hp-stage{position:relative;display:flex;flex-direction:column;background:#fff}
+.hp-chrome{display:flex;align-items:center;gap:8px;background:#f6f8f9;border-bottom:1px solid rgba(18,20,26,.07);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#7c8694}
+.hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(18,20,26,.12);display:block}
+.hp-chrome span{margin-left:8px}
+.hp-chrome em{margin-left:auto;font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
+.hp-shot{flex:1;min-height:0;background:#f2f4f6}
+.hp-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;aspect-ratio:16/9.4}
+@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(18,20,26,.1);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(18,20,26,.06)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
+
+/* ============ dataflow ============ */
+.df-grid{display:grid;grid-template-columns:250px 64px 1fr 64px 270px;align-items:stretch}
+.df-col{padding:20px;display:flex;flex-direction:column}
+.df-lbl{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
+.df-in{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border:1px dashed rgba(18,20,26,.18);border-radius:9px;margin-bottom:8px;background:rgba(255,255,255,.6)}
+.df-in b{font:700 13px/1.3 'Inter Tight',sans-serif;color:#1f2733}
+.df-in small{font:500 8.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#98a1ab}
+.df-arr{display:flex;align-items:center;justify-content:center;color:rgba(22,24,29,.3)}
+.df-arr svg{width:38px;height:14px}
+.df-step{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:15px 4px}
+.df-step+.df-step{border-top:1px dashed rgba(18,20,26,.1)}
+.df-step .n{width:26px;height:26px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11.5px/1 'JetBrains Mono',monospace;box-shadow:0 6px 14px -6px rgba(2,132,199,.6)}
+.df-step b{display:block;font:700 15px/1.25 'Inter Tight',sans-serif;color:#16181d}
+.df-step small{display:block;margin-top:4px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#8a93a0}
+.df-out{background:#101216;border-radius:12px;color:#e8eef5;padding:22px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.df-out::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:25% 100%}
+.df-out .dot{position:relative;z-index:1;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#7dd3fc;margin-bottom:12px}
+.df-out b{position:relative;z-index:1;font:800 20px/1.2 'Inter Tight',sans-serif;color:#fff}
+.df-out b i{font-style:normal;color:#38bdf8}
+.df-out ul{position:relative;z-index:1;list-style:none;margin-top:14px}
+.df-out li{font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#b9c6d4;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.12)}
+.df-out li::before{content:'◆';color:#38bdf8;font-size:8px;margin-right:9px;vertical-align:1px}
+.df-out .ft{position:relative;z-index:1;margin-top:auto;padding-top:14px;font:500 8.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#77879a}
+@media(max-width:980px){.df-grid{grid-template-columns:1fr}.df-arr{transform:rotate(90deg);padding:2px 0}}
+
+/* ============ 3d building + viz ============ */
+.b-card{padding:0;overflow:hidden;cursor:ew-resize;margin-bottom:16px}
+.b-top{display:grid;grid-template-columns:260px 1fr}
+.b-read{padding:22px 24px 18px;border-right:1px dashed rgba(18,20,26,.12);display:flex;flex-direction:column}
+.b-kick{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
+.b-cost{font:800 clamp(26px,2.6vw,34px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419;font-variant-numeric:tabular-nums}
+.b-sub{font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#98a1ab;margin:7px 0 14px}
+.b-row{display:flex;justify-content:space-between;align-items:baseline;font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694;border-bottom:1px dashed rgba(18,20,26,.1);padding:9px 0}
+.b-row b{font:700 12px/1 'JetBrains Mono',monospace;color:#16181d;letter-spacing:0}
+.b-row b.acc{color:#0284c7}
+.b-hint{margin-top:auto;padding-top:16px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#a3adb8}
+.b-stage{position:relative;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#fbfdff 0,#f3f8fb 100%);padding:10px 10px 0;overflow:hidden}
+.b-stage svg{width:min(430px,92%);height:auto;display:block;transition:transform .2s ease-out}
+.f-r{fill:#fff;stroke:rgba(22,24,29,.32);stroke-width:1}
+.f-l{fill:rgba(2,132,199,.14);stroke:rgba(22,24,29,.32);stroke-width:1}
+.f-t{fill:rgba(2,132,199,.3);stroke:rgba(22,24,29,.35);stroke-width:1}
+.f-w{stroke:rgba(2,132,199,.55);stroke-width:2;fill:none;stroke-linecap:round}
+.bfl.on{opacity:1;transform:none}
+.bfl.wip{opacity:1;transform:none}
+.bfl.wip .f-r,.bfl.wip .f-l,.bfl.wip .f-t{fill:rgba(2,132,199,.05);stroke:rgba(2,132,199,.55);stroke-dasharray:3 4}
+.bfl.wip .f-w{display:none}
+.b-rail{position:relative;grid-column:1 / -1;display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.08);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#a3adb8;text-transform:uppercase}
+.b-rail span{padding:10px 0 13px 8px;border-left:1px solid rgba(18,20,26,.04)}
+.b-handle{position:absolute;top:-1px;bottom:0;width:1.5px;background:#ef5350;pointer-events:none}
+.b-handle::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:#ef5350;border:2px solid #fff;box-shadow:0 2px 8px rgba(239,83,80,.55)}
+@media(max-width:880px){.b-top{grid-template-columns:1fr}.b-read{border-right:0;border-bottom:1px dashed rgba(18,20,26,.12)}.b-hint{margin-top:14px}}
+
 .viz-grid{display:grid;grid-template-columns:1.42fr 1fr;gap:16px}
 .viz-card{padding:20px 22px 18px;display:flex;flex-direction:column}
 .viz-scurve{grid-row:span 2}
@@ -149,20 +219,18 @@ a{color:inherit;text-decoration:none}
 .viz-legend .pl i{width:18px;height:0;border-top:2px dashed #98a1ab}
 .viz-legend .ac i{width:18px;height:2.5px;background:#0284c7;border-radius:2px}
 .viz-legend .td i{width:1.5px;height:12px;background:#ef5350}
-/* trade bars */
 .tr-row{display:grid;grid-template-columns:132px 1fr 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(18,20,26,.08)}
 .tr-row:last-child{border-bottom:0}
 .tr-row .n{font-size:12.5px;font-weight:600;color:#3c4552;line-height:1.3}
 .tr-bar{height:12px;background:#eef1f4;border-radius:5px;overflow:hidden}
-.tr-bar i{display:block;height:100%;background:#0284c7;border-radius:5px}
-.tr-row .v{font:600 11px/1 'JetBrains Mono',monospace;color:#55606e;text-align:right}
+.tr-bar i{display:block;height:100%;width:0;background:#0284c7;border-radius:5px}
+.tr-row .v{font:600 11px/1 'JetBrains Mono',monospace;color:#55606e;text-align:right;font-variant-numeric:tabular-nums}
 .tr-foot{margin-top:12px;font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#aeb7c1}
-/* budget bullet */
 .bl-num{font:800 clamp(24px,2.6vw,32px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419}
 .bl-sub{font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#8a93a0;margin:6px 0 16px}
 .bl-track{position:relative;height:14px;background:#eef1f4;border-radius:6px}
-.bl-track .committed{position:absolute;left:0;top:0;bottom:0;width:82%;background:rgba(2,132,199,.28);border-radius:6px}
-.bl-track .paid{position:absolute;left:0;top:0;bottom:0;width:54%;background:#0284c7;border-radius:6px}
+.bl-track .committed{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(2,132,199,.28);border-radius:6px}
+.bl-track .paid{position:absolute;left:0;top:0;bottom:0;width:0;background:#0284c7;border-radius:6px}
 .bl-track .budget{position:absolute;top:-4px;bottom:-4px;left:94%;width:2px;background:#16181d;border-radius:1px}
 .bl-track .budget::after{content:'budget';position:absolute;top:-16px;left:-16px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0}
 .bl-stats{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:16px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694}
@@ -172,7 +240,7 @@ a{color:inherit;text-decoration:none}
 .bl-chip{margin-left:auto;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#0369a1;background:rgba(2,132,199,.09);border-radius:999px;padding:6px 10px}
 @media(max-width:980px){.viz-grid{grid-template-columns:1fr}.viz-scurve{grid-row:auto}}
 
-/* ============ block 3 · download ============ */
+/* ============ download ============ */
 .dl-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px;list-style:none}
 .dl-chips li{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(18,20,26,.1);background:#fff;border-radius:9px;padding:9px 13px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#55606e}
 .dl-chips li::before{content:'';width:7px;height:7px;border-radius:2px;background:#0284c7;flex:none}
@@ -195,37 +263,45 @@ a{color:inherit;text-decoration:none}
 .dl-meta{font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#9aa3ad}
 @media(max-width:920px){.dl-grid{grid-template-columns:1fr}}
 
-/* ============ block 4 · live preview ============ */
-.hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e}
-.hp-eyebrow i{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.7);display:inline-block}
-.hp-grid{display:grid;grid-template-columns:378px 1fr;gap:0;overflow:hidden;border-radius:14px}
-.hp-list{border-right:1px solid rgba(18,20,26,.08);display:flex;flex-direction:column;background:#fff}
-.hp-item{display:grid;grid-template-columns:46px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(18,20,26,.07);padding:0;cursor:pointer;font-family:inherit;position:relative;transition:background .15s}
-.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 10.5px/1 'JetBrains Mono',monospace;color:#9aa3ad;border-right:1px solid rgba(18,20,26,.06);transition:color .15s}
-.hp-item .bd{padding:13px 16px}
-.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#16181d}
-.hp-item .h{display:block;color:#7c8694;font-size:12px;margin-top:3px;line-height:1.45}
-.hp-item:hover{background:rgba(2,132,199,.04)}
-.hp-item.on{background:rgba(2,132,199,.07);box-shadow:inset 3px 0 0 #0284c7}
-.hp-item.on .num{color:#0284c7;font-weight:700}
-.hp-item.on .t{color:#075985}
-.hp-more{padding:14px 16px;font:500 9.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0;margin-top:auto;background:#fafbfb}
-.hp-more b{color:#0284c7;font-size:13px}
-.hp-stage{position:relative;display:flex;flex-direction:column;background:#fff}
-.hp-chrome{display:flex;align-items:center;gap:8px;background:#f6f8f9;border-bottom:1px solid rgba(18,20,26,.07);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#7c8694}
-.hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(18,20,26,.12);display:block}
-.hp-chrome span{margin-left:8px}
-.hp-chrome em{margin-left:auto;font-style:normal;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
-.hp-shot{flex:1;min-height:0;background:#f2f4f6}
-.hp-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;aspect-ratio:16/9.4}
-@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(18,20,26,.1);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(18,20,26,.06)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
+/* ============ trusted logos ============ */
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:10px}
+.tl{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(18,20,26,.08);border-radius:9px;background:#fff;transition:border-color .15s}
+.tl img{width:18px;height:18px;object-fit:contain;opacity:.9;transition:opacity .15s}
+.tl span{font:600 10px/1.3 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:#55606e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl:hover{border-color:rgba(2,132,199,.35)}
+.tl:hover img{opacity:1}
+.tl-foot{margin-top:14px;font:500 9px/1.7 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#a3adb8}
 
-/* footer */
-.p-foot{margin-top:96px;border-top:1px solid rgba(18,20,26,.09)}
-.p-footrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 26px;padding:26px 0 18px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8a93a0}
-.p-footrow b{color:#16181d;font-weight:600}
-.p-footrow a:hover{color:#0284c7}
-.p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.06);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(22,24,29,.26);text-transform:uppercase;padding:10px 0 24px}
+/* ============ community ============ */
+.cm-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.cm-hero{padding:26px 28px;display:flex;flex-direction:column;align-items:flex-start}
+.cm-kick{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:12px}
+.cm-kick b{color:#0284c7}
+.cm-hero h3{font:800 clamp(22px,2.2vw,30px)/1.15 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419;margin-bottom:10px}
+.cm-hero h3 em{font-style:normal;color:#0284c7}
+.cm-hero p{color:#4b5563;font-size:14px;line-height:1.65;max-width:46ch}
+.cm-badge{display:inline-flex;align-items:center;gap:8px;margin:16px 0 18px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#0369a1;background:rgba(2,132,199,.08);border-radius:999px;padding:7px 11px}
+.cm-cta{display:inline-flex;align-items:center;gap:9px;background:#16181d;color:#fff;font-weight:600;font-size:14px;padding:12px 20px;border-radius:9px;transition:background .18s;margin-top:auto}
+.cm-cta:hover{background:#0284c7}
+.cm-cta svg{width:15px;height:15px;fill:currentColor}
+.cm-list{display:flex;flex-direction:column;gap:10px}
+.cm-row{flex:1;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:14px 18px;transition:transform .16s,border-color .16s;cursor:pointer;text-align:left;font-family:inherit}
+.cm-row:hover{transform:translateX(3px);border-color:rgba(2,132,199,.4)}
+.cm-row b{display:block;font:700 14.5px/1.2 'Inter Tight',sans-serif;color:#16181d}
+.cm-row small{display:block;color:#7c8694;font-size:12px;line-height:1.5;margin-top:3px}
+.cm-row .arr{color:#98a1ab;font-size:16px;transition:color .15s}
+.cm-row:hover .arr{color:#0284c7}
+@media(max-width:920px){.cm-grid{grid-template-columns:1fr}}
+
+/* ============ watch ============ */
+.watch-frame{overflow:hidden;border-radius:14px;max-width:960px}
+.watch-link{position:relative;display:block}
+.watch-link img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b1220}
+.watch-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:#0284c7;box-shadow:0 18px 44px -14px rgba(2,132,199,.75),inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;transition:transform .18s,background .18s}
+.watch-play svg{width:26px;height:26px;fill:#fff;margin-left:3px}
+.watch-link:hover .watch-play{transform:translate(-50%,-50%) scale(1.07)}
+.watch-badge{position:absolute;left:16px;bottom:14px;display:inline-flex;align-items:center;gap:8px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(16,18,22,.82);padding:8px 11px;border-radius:7px}
+.watch-badge i{width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block}
 
 /* copy-to-clipboard */
 .codewrap{position:relative}
@@ -256,6 +332,13 @@ a{color:inherit;text-decoration:none}
 .cta-foot{margin-top:32px;font:500 9.5px/1.8 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#77879a}
 @media(max-width:720px){.cta{padding:46px 26px 42px}.cta-inner{margin-left:0}.cta-start{left:14px}}
 
+/* footer */
+.p-foot{margin-top:96px;border-top:1px solid rgba(18,20,26,.09)}
+.p-footrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 26px;padding:26px 0 18px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8a93a0}
+.p-footrow b{color:#16181d;font-weight:600}
+.p-footrow a:hover{color:#0284c7}
+.p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(18,20,26,.06);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(22,24,29,.26);text-transform:uppercase;padding:10px 0 24px}
+
 /* internal badge */
 .int-badge{position:fixed;left:14px;bottom:14px;z-index:60;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:rgba(22,24,29,.92);padding:7px 10px;border-radius:7px}
 .int-badge b{color:#7dd3fc;font-weight:600}
@@ -268,13 +351,13 @@ a{color:inherit;text-decoration:none}
 <!-- nav -->
 <div class="p-navwrap">
   <div class="pz">
-    <div class="p-topline"><span>Programme of works · OpenConstructionERP</span><span>Sheet 01 · Rev B · <b>v10.8.0</b></span></div>
+    <div class="p-topline"><span>Programme of works · OpenConstructionERP</span><span>Sheet 01 · Rev C · <b>v10.8.0</b></span></div>
     <nav class="p-nav">
       <div class="p-logo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
       <div class="p-links">
         <a href="#demo">Product</a>
-        <a href="/services.html">Practices</a>
-        <a href="/standards.html">Standards</a>
+        <a href="#dataflow">How it works</a>
+        <a href="#download">Download</a>
         <a href="/news.html">News</a>
         <a href="/docs.html">Docs</a>
       </div>
@@ -286,7 +369,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ============ block 1 · hero ============ -->
+<!-- ============ hero ============ -->
 <section class="p-sec p-hero in">
   <div class="pz">
     <div class="p-eyebrow"><i></i><span><b>v10.8.0</b> · open source on GitHub</span></div>
@@ -335,89 +418,252 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ block 2 · the numbers behind the bars ============ -->
-<section class="p-sec" id="sync">
+<!-- ============ 01 · demo player (tour) ============ -->
+<section class="p-sec" id="demo">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">01 · Cost &amp; time in sync</span>
-      <h2>The numbers behind the bars.</h2>
-      <p>Every bar on the programme is priced. The S-curve, the trade breakdown and the budget health are read live from the BOQ - and move the moment a drawing or a quantity changes.</p>
+      <span class="hp-eyebrow"><i></i>01 · take the tour · no sign-up, no demo call</span>
+      <h2>Skip the sales call. <em>See it work.</em></h2>
+      <p>Every module, one click away - real recordings from the app. No six-figure licence to read back your own data.</p>
     </div>
+    <div class="hp-grid card">
+      <div class="hp-list" role="tablist" aria-label="Product preview modules">
+        <button class="hp-item on" type="button" role="tab" aria-selected="true" data-shot="/assets/loops/mod_dashboard.gif" data-file="dashboard">
+          <span class="num">01</span><span class="bd"><span class="t">Dashboard</span><span class="h">Live KPIs, open work, recent activity.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/06_Build_BOQ_Fast.gif" data-file="boq-editor">
+          <span class="num">02</span><span class="bd"><span class="t">BOQ editor</span><span class="h">Build bills of quantities, priced rows.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/05_Instant_Search.gif" data-file="cost-database">
+          <span class="num">03</span><span class="bd"><span class="t">Cost database</span><span class="h">55,000 priced positions · 110+ modules.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/04_PDF_Takeoff.gif" data-file="pdf-takeoff">
+          <span class="num">04</span><span class="bd"><span class="t">PDF → BOQ</span><span class="h">Click-to-measure on PDF drawings.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/10_DWG_Layers.gif" data-file="dwg-to-boq">
+          <span class="num">05</span><span class="bd"><span class="t">DWG → BOQ</span><span class="h">DWG and DGN pushed into BOQ.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/09_Bulk_Link_BIM_Group.gif" data-file="bim-to-boq">
+          <span class="num">06</span><span class="bd"><span class="t">BIM → BOQ</span><span class="h">Link IFC and RVT models to estimates.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/02_AI_Photo_to_Estimate.gif" data-file="ai-estimate">
+          <span class="num">07</span><span class="bd"><span class="t">AI Estimate</span><span class="h">Photo or doc → priced first pass.</span></span>
+        </button>
+        <div class="hp-more"><b>+50</b> more features · tendering, reports, validation, collab, multi-tenant …</div>
+      </div>
+      <div class="hp-stage">
+        <div class="hp-chrome"><i></i><i></i><i></i><span id="hp-file">riverside-tower / dashboard</span><em>recorded in the app</em></div>
+        <div class="hp-shot"><img id="hp-img" src="/assets/loops/mod_dashboard.gif" alt="OpenConstructionERP product preview" loading="lazy" decoding="async"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 · dataflow ============ -->
+<section class="p-sec" id="dataflow">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">02 · data flow · concept → priced BOQ → tender pack</span>
+      <h2>How a project file <em>becomes</em> a fully priced tender pack.</h2>
+      <p>One pipeline, three stages, six file types in. <b>Photos and PDFs</b> on one side, a tender-ready BOQ on the other - every element classified, measured, priced and traceable.</p>
+    </div>
+    <div class="df-grid card">
+      <div class="df-col">
+        <div class="df-lbl">▸ input · project files</div>
+        <div class="df-in"><b>PDF takeoff</b><small>vector + scanned</small></div>
+        <div class="df-in"><b>DWG · DGN</b><small>2D + 3D drawings</small></div>
+        <div class="df-in"><b>RVT</b><small>native model</small></div>
+        <div class="df-in"><b>IFC 4 · 4.3</b><small>openBIM</small></div>
+        <div class="df-in"><b>Photo · image</b><small>site photo · drone shot</small></div>
+        <div class="df-in"><b>GAEB X83 · X84</b><small>tender exchange</small></div>
+      </div>
+      <div class="df-arr" aria-hidden="true"><svg viewBox="0 0 38 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h30" stroke-dasharray="4 4"/><path d="M28 2l7 5-7 5" fill="none"/></svg></div>
+      <div class="df-col">
+        <div class="df-lbl">▸ normalise · classify · validate</div>
+        <div class="df-step"><span class="n">1</span><span><b>DDC cad2data → canonical</b><small>elements · geometry · quantities<br>JSON + Parquet · single source</small></span></div>
+        <div class="df-step"><span class="n">2</span><span><b>Classify · price</b><small>DIN 276 · NRM · MasterFormat<br>55,000-item cost database</small></span></div>
+        <div class="df-step"><span class="n">3</span><span><b>Validate</b><small>rule sets · completeness · benchmarks<br>traffic-light report before it ships</small></span></div>
+      </div>
+      <div class="df-arr" aria-hidden="true"><svg viewBox="0 0 38 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h30" stroke-dasharray="4 4"/><path d="M28 2l7 5-7 5" fill="none"/></svg></div>
+      <div class="df-out">
+        <span class="dot">▸ output · deliverable</span>
+        <b>Priced BOQ · <i>tender pack</i></b>
+        <ul>
+          <li>GAEB X83 · XML</li>
+          <li>Excel · CSV</li>
+          <li>PDF summary</li>
+          <li>API · JSON · Parquet</li>
+        </ul>
+        <span class="ft">classified · measured · priced · traceable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 · cost & time in sync (3d site) ============ -->
+<section class="p-sec" id="vsync">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">03 · cost &amp; time in sync</span>
+      <h2>The numbers behind the bars.</h2>
+      <p><b>Slide your mouse across the site</b> - the building rises, and the S-curve, trades and budget follow the same clock. That is the whole product: one timeline, every number live from the BOQ.</p>
+    </div>
+
+    <!-- interactive 3d building -->
+    <figure class="b-card card" id="bcard">
+      <div class="b-top">
+        <div class="b-read">
+          <div class="b-kick">site preview · riverside tower</div>
+          <div class="b-cost" id="b-cost">€ 0</div>
+          <div class="b-sub">spent to date · live from the boq</div>
+          <div class="b-row"><span>week</span><b class="acc" id="b-week">W01</b></div>
+          <div class="b-row"><span>floors</span><b id="b-floors">0 / 7</b></div>
+          <div class="b-row"><span>programme</span><b id="b-prog">0%</b></div>
+          <div class="b-hint">← slide across the site to scrub time →</div>
+        </div>
+        <div class="b-stage">
+          <svg id="b-svg" viewBox="0 0 360 430" role="img" aria-label="Isometric building rising floor by floor as the timeline is scrubbed">
+            <!-- ground -->
+            <path d="M180,392 L292,336 L180,280 L68,336 Z" fill="rgba(18,20,26,.035)" stroke="rgba(18,20,26,.12)" stroke-width="1"/>
+            <path d="M180,380 L268,336 L180,292 L92,336 Z" fill="none" stroke="rgba(18,20,26,.07)" stroke-width="1"/>
+            <!-- crane -->
+            <g stroke="rgba(22,24,29,.5)" stroke-width="1.4" fill="none">
+              <path d="M52,384 L52,72 M60,384 L60,72"/>
+              <path d="M52,356 L60,348 M52,328 L60,320 M52,300 L60,292 M52,272 L60,264 M52,244 L60,236 M52,216 L60,208 M52,188 L60,180 M52,160 L60,152 M52,132 L60,124 M52,104 L60,96"/>
+              <path d="M60,72 L310,72 M52,72 L20,72"/>
+              <path d="M56,46 L310,72 M56,46 L20,72 M56,46 L56,72"/>
+              <path d="M287,80 L287,146"/>
+            </g>
+            <rect x="12" y="72" width="16" height="12" fill="rgba(22,24,29,.6)" rx="1"/>
+            <rect x="280" y="72" width="12" height="8" fill="rgba(22,24,29,.6)" rx="1"/>
+            <path d="M287,146 L291,152 L287,158 L283,152 Z" fill="rgba(22,24,29,.7)"/>
+            <path d="M56,46 L70,50 L56,56 Z" fill="#ef5350"/>
+            <!-- floors (bottom → top) -->
+            <g class="bfl" data-i="0">
+              <path class="f-l" d="M180,368 L102,329 L102,295 L180,334 Z"/>
+              <path class="f-r" d="M180,368 L258,329 L258,295 L180,334 Z"/>
+              <path class="f-t" d="M180,334 L258,295 L180,256 L102,295 Z"/>
+              <path class="f-w" d="M204,347V335 M228,335V323 M150,344V334"/>
+            </g>
+            <g class="bfl" data-i="1">
+              <path class="f-l" d="M180,334 L102,295 L102,261 L180,300 Z"/>
+              <path class="f-r" d="M180,334 L258,295 L258,261 L180,300 Z"/>
+              <path class="f-t" d="M180,300 L258,261 L180,222 L102,261 Z"/>
+              <path class="f-w" d="M204,313V301 M228,301V289 M150,310V300"/>
+            </g>
+            <g class="bfl" data-i="2">
+              <path class="f-l" d="M180,300 L102,261 L102,227 L180,266 Z"/>
+              <path class="f-r" d="M180,300 L258,261 L258,227 L180,266 Z"/>
+              <path class="f-t" d="M180,266 L258,227 L180,188 L102,227 Z"/>
+              <path class="f-w" d="M204,279V267 M228,267V255 M150,276V266"/>
+            </g>
+            <g class="bfl" data-i="3">
+              <path class="f-l" d="M180,266 L102,227 L102,193 L180,232 Z"/>
+              <path class="f-r" d="M180,266 L258,227 L258,193 L180,232 Z"/>
+              <path class="f-t" d="M180,232 L258,193 L180,154 L102,193 Z"/>
+              <path class="f-w" d="M204,245V233 M228,233V221 M150,242V232"/>
+            </g>
+            <g class="bfl" data-i="4">
+              <path class="f-l" d="M180,232 L102,193 L102,159 L180,198 Z"/>
+              <path class="f-r" d="M180,232 L258,193 L258,159 L180,198 Z"/>
+              <path class="f-t" d="M180,198 L258,159 L180,120 L102,159 Z"/>
+              <path class="f-w" d="M204,211V199 M228,199V187 M150,208V198"/>
+            </g>
+            <g class="bfl" data-i="5">
+              <path class="f-l" d="M180,198 L102,159 L102,125 L180,164 Z"/>
+              <path class="f-r" d="M180,198 L258,159 L258,125 L180,164 Z"/>
+              <path class="f-t" d="M180,164 L258,125 L180,86 L102,125 Z"/>
+              <path class="f-w" d="M204,177V165 M228,165V153 M150,174V164"/>
+            </g>
+            <g class="bfl" data-i="6">
+              <path class="f-l" d="M180,164 L102,125 L102,91 L180,130 Z"/>
+              <path class="f-r" d="M180,164 L258,125 L258,91 L180,130 Z"/>
+              <path class="f-t" d="M180,130 L258,91 L180,52 L102,91 Z"/>
+              <path class="f-w" d="M204,143V131 M228,131V119 M150,140V130"/>
+            </g>
+          </svg>
+        </div>
+        <div class="b-rail" aria-hidden="true">
+          <span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span>
+          <i class="b-handle" id="b-handle" style="left:2%"></i>
+        </div>
+      </div>
+    </figure>
+
     <div class="viz-grid">
       <figure class="viz-card viz-scurve card">
-        <figcaption class="viz-head"><span>Cash flow · S-curve</span><em>as of W08</em></figcaption>
-        <svg viewBox="0 0 640 322" role="img" aria-label="Planned versus actual cumulative cost S-curve; actual is on track at week eight, 1.28 million of 2.15 million planned">
+        <figcaption class="viz-head"><span>Cash flow · S-curve</span><em id="vs-asof">as of W01</em></figcaption>
+        <svg viewBox="0 0 640 322" role="img" aria-label="Planned versus actual cumulative cost S-curve, driven by the timeline scrub">
           <title>Planned vs actual cumulative cost</title>
-          <!-- grid -->
+          <defs>
+            <clipPath id="scClip"><rect id="sc-clip" x="46" y="0" width="0" height="322"/></clipPath>
+          </defs>
           <g stroke="rgba(18,20,26,.06)" stroke-width="1">
             <line x1="46" y1="24" x2="616" y2="24"/>
             <line x1="46" y1="108" x2="616" y2="108"/>
             <line x1="46" y1="192" x2="616" y2="192"/>
           </g>
           <line x1="46" y1="276" x2="616" y2="276" stroke="rgba(18,20,26,.14)" stroke-width="1"/>
-          <!-- y labels -->
           <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8" text-anchor="end">
             <text x="38" y="27">2.4M</text>
             <text x="38" y="111">1.6M</text>
             <text x="38" y="195">0.8M</text>
             <text x="38" y="279">0</text>
           </g>
-          <!-- x labels -->
           <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8">
             <text x="46" y="298">W01</text>
             <text x="201" y="298">W04</text>
             <text x="409" y="298" text-anchor="middle">W08</text>
             <text x="616" y="298" text-anchor="end">W12</text>
           </g>
-          <!-- actual area -->
-          <path class="fade" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 L409,276 L46,276 Z" fill="rgba(2,132,199,.09)"/>
-          <!-- planned (dashed) -->
           <path class="fade2" d="M46,272 C160,264 250,232 340,176 C430,120 530,60 616,34" fill="none" stroke="#98a1ab" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round"/>
-          <!-- actual -->
-          <path class="anim" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- today line -->
-          <line x1="409" y1="20" x2="409" y2="276" stroke="rgba(239,83,80,.85)" stroke-width="1.5"/>
-          <rect x="417" y="24" width="80" height="17" rx="5" fill="#ef5350"/>
-          <text x="457" y="35.5" font-family="'JetBrains Mono',monospace" font-size="8.5" letter-spacing="1" fill="#fff" text-anchor="middle">TODAY · W08</text>
-          <!-- actual end dot + labels -->
-          <circle cx="409" cy="152" r="4.5" fill="#0284c7" stroke="#fff" stroke-width="2"/>
-          <text x="398" y="141" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600" fill="#0369a1" text-anchor="end">actual · €1.28M</text>
+          <g clip-path="url(#scClip)">
+            <path d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 C470,118 550,66 616,34 L616,276 L46,276 Z" fill="rgba(2,132,199,.09)"/>
+            <path id="sc-actual" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 C470,118 550,66 616,34" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <line id="sc-today" x1="46" y1="20" x2="46" y2="276" stroke="rgba(239,83,80,.85)" stroke-width="1.5"/>
+          <g id="sc-flag" transform="translate(54,24)">
+            <rect width="66" height="17" rx="5" fill="#ef5350"/>
+            <text id="sc-flagtext" x="33" y="11.5" font-family="'JetBrains Mono',monospace" font-size="8.5" letter-spacing="1" fill="#fff" text-anchor="middle">W01</text>
+          </g>
+          <circle id="sc-dot" cx="46" cy="272" r="4.5" fill="#0284c7" stroke="#fff" stroke-width="2"/>
+          <text id="sc-lab" x="170" y="261" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600" fill="#0369a1" text-anchor="end">actual · €0.00M</text>
           <text x="612" y="20" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#8a93a0" text-anchor="end">planned · €2.15M</text>
         </svg>
         <div class="viz-legend"><span class="pl"><i></i>planned</span><span class="ac"><i></i>actual</span><span class="td"><i></i>today</span></div>
       </figure>
       <figure class="viz-card card">
         <figcaption class="viz-head"><span>Cost by trade</span><em>top 4 · €</em></figcaption>
-        <div class="tr-row" title="Concrete works: €812,400"><span class="n">Concrete works</span><span class="tr-bar"><i style="width:100%"></i></span><span class="v">€812k</span></div>
-        <div class="tr-row" title="MEP services: €551,900"><span class="n">MEP services</span><span class="tr-bar"><i style="width:68%"></i></span><span class="v">€552k</span></div>
-        <div class="tr-row" title="Masonry and envelope: €468,300"><span class="n">Masonry &amp; envelope</span><span class="tr-bar"><i style="width:58%"></i></span><span class="v">€468k</span></div>
-        <div class="tr-row" title="Finishes: €316,700"><span class="n">Finishes</span><span class="tr-bar"><i style="width:39%"></i></span><span class="v">€317k</span></div>
+        <div class="tr-row" data-w="100" data-v="812" data-s="0.04" data-e="0.42"><span class="n">Concrete works</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
+        <div class="tr-row" data-w="68" data-v="552" data-s="0.30" data-e="0.78"><span class="n">MEP services</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
+        <div class="tr-row" data-w="58" data-v="468" data-s="0.18" data-e="0.62"><span class="n">Masonry &amp; envelope</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
+        <div class="tr-row" data-w="39" data-v="317" data-s="0.55" data-e="0.96"><span class="n">Finishes</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
         <div class="tr-foot">rolled up from 1,240 boq positions</div>
       </figure>
       <figure class="viz-card card">
         <figcaption class="viz-head"><span>Budget health</span><em>riverside tower</em></figcaption>
         <div class="bl-num">€ 2,148,900</div>
         <div class="bl-sub">estimate total · live from the boq</div>
-        <div class="bl-track" title="Paid 54%, committed 82%, budget marker at 94%">
-          <span class="committed"></span>
-          <span class="paid"></span>
+        <div class="bl-track">
+          <span class="committed" id="bl-com"></span>
+          <span class="paid" id="bl-paid"></span>
           <span class="budget"></span>
         </div>
         <div class="bl-stats">
-          <span class="sw-paid"><i></i>paid · 54%</span>
-          <span class="sw-com"><i></i>committed · 82%</span>
-          <span class="bl-chip">on budget · -1.4%</span>
+          <span class="sw-paid"><i></i>paid · <b id="bl-paid-l">0</b>%</span>
+          <span class="sw-com"><i></i>committed · <b id="bl-com-l">0</b>%</span>
+          <span class="bl-chip">on budget</span>
         </div>
       </figure>
     </div>
   </div>
 </section>
 
-<!-- ============ block 3 · download ============ -->
+<!-- ============ 04 · download ============ -->
 <section class="p-sec" id="download">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">02 · Download</span>
+      <span class="p-num">04 · download</span>
       <h2>Get the <em>real</em> desktop app, free.</h2>
       <p>A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.</p>
     </div>
@@ -460,48 +706,82 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ block 4 · live preview ============ -->
-<section class="p-sec" id="demo">
+<!-- ============ 05 · trusted ============ -->
+<section class="p-sec" id="trusted">
   <div class="pz">
     <div class="p-secHead">
-      <span class="hp-eyebrow"><i></i>Live preview · no sign-up, no demo call</span>
-      <h2>Skip the sales call. <em>See it work.</em></h2>
-      <p>No six-figure licence to read back your own data.</p>
+      <span class="p-num">05 · who's looking</span>
+      <h2 class="sm">Engineers, construction firms and consultancies exploring OpenConstructionERP.</h2>
+      <p>A snapshot of the construction, engineering and infrastructure teams that signed up to try it or have worked with DataDrivenConstruction's open tools - across Europe, North America, MENA, APAC and Oceania.</p>
     </div>
-    <div class="hp-grid card">
-      <div class="hp-list" role="tablist" aria-label="Product preview modules">
-        <button class="hp-item on" type="button" role="tab" aria-selected="true" data-shot="/assets/loops/06_Build_BOQ_Fast.gif" data-file="boq-editor">
-          <span class="num">01</span><span class="bd"><span class="t">BOQ editor</span><span class="h">Build bills of quantities, priced rows.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/05_Instant_Search.gif" data-file="cost-database">
-          <span class="num">02</span><span class="bd"><span class="t">Cost database</span><span class="h">55,000 priced positions · 110+ modules.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/09_Bulk_Link_BIM_Group.gif" data-file="bim-to-boq">
-          <span class="num">03</span><span class="bd"><span class="t">BIM → BOQ</span><span class="h">Link IFC and RVT models to estimates.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/10_DWG_Layers.gif" data-file="dwg-to-boq">
-          <span class="num">04</span><span class="bd"><span class="t">DWG → BOQ</span><span class="h">DWG and DGN pushed into BOQ.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/04_PDF_Takeoff.gif" data-file="pdf-takeoff">
-          <span class="num">05</span><span class="bd"><span class="t">PDF → BOQ</span><span class="h">Click-to-measure on PDF drawings.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/09_Bulk_Link_BIM_Group.gif" data-file="bulk-cad-groups">
-          <span class="num">06</span><span class="bd"><span class="t">Bulk CAD groups</span><span class="h">Link many elements, one pass.</span></span>
-        </button>
-        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/02_AI_Photo_to_Estimate.gif" data-file="ai-estimate">
-          <span class="num">07</span><span class="bd"><span class="t">AI Estimate</span><span class="h">Photo or doc → priced first pass.</span></span>
-        </button>
-        <div class="hp-more"><b>+50</b> more features · tendering, reports, validation, collab, multi-tenant …</div>
+    <div class="tl-grid">
+      <span class="tl"><img src="/assets/partners/atkinsrealis.svg" alt="" loading="lazy"><span>AtkinsRéalis</span></span>
+      <span class="tl"><img src="/assets/partners/mace-group.svg" alt="" loading="lazy"><span>Mace Group</span></span>
+      <span class="tl"><img src="/assets/partners/colas.webp" alt="" loading="lazy"><span>Colas</span></span>
+      <span class="tl"><img src="/assets/partners/max-bogl.svg" alt="" loading="lazy"><span>Max Bögl</span></span>
+      <span class="tl"><img src="/assets/partners/swietelsky.svg" alt="" loading="lazy"><span>Swietelsky</span></span>
+      <span class="tl"><img src="/assets/partners/erbud.svg" alt="" loading="lazy"><span>Erbud</span></span>
+      <span class="tl"><img src="/assets/partners/consolis.svg" alt="" loading="lazy"><span>Consolis</span></span>
+      <span class="tl"><img src="/assets/partners/unispace.svg" alt="" loading="lazy"><span>Unispace</span></span>
+      <span class="tl"><img src="/assets/partners/ilo.svg" alt="" loading="lazy"><span>ILO</span></span>
+      <span class="tl"><img src="/assets/partners/teichert.svg" alt="" loading="lazy"><span>Teichert</span></span>
+      <span class="tl"><img src="/assets/partners/pdms.svg" alt="" loading="lazy"><span>PDMS</span></span>
+      <span class="tl"><img src="/assets/partners/tekhne.webp" alt="" loading="lazy"><span>Tekhne</span></span>
+      <span class="tl"><img src="/assets/partners/atmiid.webp" alt="" loading="lazy"><span>ATMIID</span></span>
+      <span class="tl"><img src="/assets/partners/brevart.webp" alt="" loading="lazy"><span>Brevart</span></span>
+    </div>
+    <div class="tl-foot">signed up to try openconstructionerp or worked with ddc open tools</div>
+  </div>
+</section>
+
+<!-- ============ 06 · community ============ -->
+<section class="p-sec" id="community">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">06 · open source</span>
+      <h2>The repo, <em>in the open.</em></h2>
+      <p>AGPL-3.0 on GitHub. Issues and the roadmap live there; if you want to see what's coming next or what broke last week, it's all on the commit log.</p>
+    </div>
+    <div class="cm-grid">
+      <div class="cm-hero card">
+        <div class="cm-kick"><b>github</b> · datadrivenconstruction</div>
+        <h3>Star the repo, <em>shape the roadmap.</em></h3>
+        <p>Every issue, PR and roadmap item is public on GitHub. Open an issue, comment on what matters, or send a PR. Contributions of any size are welcome.</p>
+        <span class="cm-badge">AGPL-3.0 · open source</span>
+        <a class="cm-cta" href="https://github.com/datadrivenconstruction/openconstructionerp" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          Open the repo →
+        </a>
       </div>
-      <div class="hp-stage">
-        <div class="hp-chrome"><i></i><i></i><i></i><span id="hp-file">riverside-tower / boq-editor</span><em>recorded in the app</em></div>
-        <div class="hp-shot"><img id="hp-img" src="/assets/loops/06_Build_BOQ_Fast.gif" alt="OpenConstructionERP product preview" loading="lazy" decoding="async"></div>
+      <div class="cm-list">
+        <a class="cm-row card" href="/docs.html"><span><b>Documentation</b><small>Getting started, module SDK, API reference and deployment guides.</small></span><span class="arr">→</span></a>
+        <a class="cm-row card" href="https://github.com/datadrivenconstruction/openconstructionerp/issues" target="_blank" rel="noopener"><span><b>Issues &amp; roadmap</b><small>Every bug, feature request and roadmap item is tracked publicly.</small></span><span class="arr">→</span></a>
+        <a class="cm-row card" href="/docs.html"><span><b>Build a module</b><small>Cookiecutter template, typed SDK, OpenAPI auto-gen. Ship a plugin in an afternoon.</small></span><span class="arr">→</span></a>
+        <a class="cm-row card" href="https://t.me/datadrivenconstruction" target="_blank" rel="noopener"><span><b>Chat on Telegram</b><small>Questions, ideas and show-and-tell. For things that aren't quite an issue yet.</small></span><span class="arr">→</span></a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- closing cta -->
+<!-- ============ 07 · watch ============ -->
+<section class="p-sec" id="watch">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">07 · watch it run</span>
+      <h2>See it work. <em>In one take.</em></h2>
+    </div>
+    <div class="watch-frame card">
+      <div class="hp-chrome"><i></i><i></i><i></i><span>walkthrough · one take</span><em>recorded in the app</em></div>
+      <a class="watch-link" href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank" rel="noopener" aria-label="Play the product walkthrough video on YouTube">
+        <img src="/assets/stills/video-thumb-openconstructionerp.png?v=4" alt="Product walkthrough video preview" loading="lazy" decoding="async">
+        <span class="watch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7z"/></svg></span>
+        <span class="watch-badge"><i></i>watch · no sign-up</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ closing cta ============ -->
 <section class="p-sec" id="start">
   <div class="pz">
     <div class="cta">
@@ -539,18 +819,40 @@ a{color:inherit;text-decoration:none}
 (function(){
   /* reveal on scroll */
   var secs=[].slice.call(document.querySelectorAll('.p-sec'));
+  var vsyncStarted=false;
+  function startVsync(){ if(!vsyncStarted){ vsyncStarted=true; setTimeout(function(){ if(window.__setP){window.__setP(0.58);} },350); } }
+  function markIn(s){
+    if(s.classList.contains('in')){return;}
+    s.classList.add('in');
+    if(s.id==='vsync'){startVsync();}
+  }
   if('IntersectionObserver' in window){
     var reveal=new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); reveal.unobserve(e.target);} });
+      es.forEach(function(e){
+        if(e.isIntersecting){markIn(e.target);reveal.unobserve(e.target);}
+      });
     },{threshold:0.06});
     secs.forEach(function(s){reveal.observe(s);});
-  } else { secs.forEach(function(s){s.classList.add('in');}); }
+  } else { secs.forEach(markIn); }
+  /* scroll fallback: reveal must not depend on IO callbacks alone */
+  function revealByRect(){
+    var vh=window.innerHeight||800;
+    secs.forEach(function(s){
+      if(!s.classList.contains('in')&&s.getBoundingClientRect().top<vh*0.94){markIn(s);}
+    });
+    if(secs.every(function(s){return s.classList.contains('in');})){
+      window.removeEventListener('scroll',revealByRect);
+    }
+  }
+  window.addEventListener('scroll',revealByRect,{passive:true});
+  setTimeout(revealByRect,600);
 
   /* headline bars settle in like a plan being drawn */
   var rows=document.querySelector('.gc-rows');
   if(rows){
     rows.classList.add('js-anim');
     requestAnimationFrame(function(){requestAnimationFrame(function(){rows.classList.add('go');});});
+    setTimeout(function(){rows.classList.add('go');},700);
   }
 
   /* copy install command */
@@ -590,6 +892,144 @@ a{color:inherit;text-decoration:none}
       file.textContent='riverside-tower / '+it.getAttribute('data-file');
     });
   });
+
+  /* ===== time scrub engine: building + s-curve + trades + budget ===== */
+  var bcard=document.getElementById('bcard');
+  var scActual=document.getElementById('sc-actual');
+  if(!bcard||!scActual||!scActual.getTotalLength){return;}
+
+  var TOTAL=2148900;
+  var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* sample the actual curve once: x → y lookup */
+  var samples=[];
+  try{
+    var L=scActual.getTotalLength();
+    for(var i=0;i<=160;i++){
+      var pt=scActual.getPointAtLength(L*i/160);
+      samples.push([pt.x,pt.y]);
+    }
+  }catch(e){return;}
+  function yAtX(x){
+    var lo=0,hi=samples.length-1;
+    while(lo<hi){var mid=(lo+hi)>>1; if(samples[mid][0]<x){lo=mid+1;}else{hi=mid;}}
+    return samples[lo][1];
+  }
+
+  var els={
+    cost:document.getElementById('b-cost'),
+    week:document.getElementById('b-week'),
+    floors:document.getElementById('b-floors'),
+    prog:document.getElementById('b-prog'),
+    handle:document.getElementById('b-handle'),
+    svg:document.getElementById('b-svg'),
+    fls:[].slice.call(document.querySelectorAll('.bfl')),
+    clip:document.getElementById('sc-clip'),
+    today:document.getElementById('sc-today'),
+    flag:document.getElementById('sc-flag'),
+    flagtext:document.getElementById('sc-flagtext'),
+    dot:document.getElementById('sc-dot'),
+    lab:document.getElementById('sc-lab'),
+    asof:document.getElementById('vs-asof'),
+    trs:[].slice.call(document.querySelectorAll('.tr-row')),
+    paid:document.getElementById('bl-paid'),
+    com:document.getElementById('bl-com'),
+    paidL:document.getElementById('bl-paid-l'),
+    comL:document.getElementById('bl-com-l')
+  };
+  function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+  function fmtEuro(n){return '€ '+Math.round(n).toLocaleString('en-US');}
+
+  function apply(p){
+    var x=46+570*p;
+    var y=yAtX(x);
+    var frac=clamp((276-y)/242,0,1);
+    var cost=TOTAL*frac;
+    var week=1+Math.round(p*11);
+    var wk='W'+(week<10?'0':'')+week;
+
+    /* building */
+    var f=p*7;
+    var done=Math.floor(f);
+    els.fls.forEach(function(fl,i){
+      fl.classList.remove('on','wip');
+      if(i<done){fl.classList.add('on');}
+      else if(i===done&&f-done>0.03&&done<7){fl.classList.add('wip');}
+    });
+    els.cost.textContent=fmtEuro(cost);
+    els.week.textContent=wk;
+    els.floors.textContent=Math.min(done,7)+' / 7';
+    els.prog.textContent=Math.round(p*100)+'%';
+    els.handle.style.left=(p*100)+'%';
+    els.svg.style.transform='translateX('+((0.5-p)*16)+'px)';
+
+    /* s-curve */
+    els.clip.setAttribute('width',String(x-46));
+    els.today.setAttribute('x1',x);els.today.setAttribute('x2',x);
+    els.flag.setAttribute('transform','translate('+(x>500?x-74:x+8)+',24)');
+    els.flagtext.textContent=wk;
+    els.dot.setAttribute('cx',x);els.dot.setAttribute('cy',y);
+    els.lab.setAttribute('x',Math.max(x-10,150));els.lab.setAttribute('y',Math.max(y-12,14));
+    els.lab.textContent='actual · €'+(cost/1e6).toFixed(2)+'M';
+    els.asof.textContent='as of '+wk;
+
+    /* trades */
+    els.trs.forEach(function(tr){
+      var w=parseFloat(tr.getAttribute('data-w'));
+      var v=parseFloat(tr.getAttribute('data-v'));
+      var s=parseFloat(tr.getAttribute('data-s'));
+      var e=parseFloat(tr.getAttribute('data-e'));
+      var fi=clamp((p-s)/(e-s),0,1);
+      tr.querySelector('.tr-bar i').style.width=(w*fi)+'%';
+      tr.querySelector('.v').textContent='€'+Math.round(v*fi)+'k';
+    });
+
+    /* budget */
+    var paid=Math.round(93*frac);
+    var com=Math.min(97,paid+28);
+    els.paid.style.width=paid+'%';
+    els.com.style.width=com+'%';
+    els.paidL.textContent=paid;
+    els.comL.textContent=com;
+  }
+
+  /* rAF with a setTimeout fallback: keeps the scrub alive if frame
+     production stalls briefly (heavy GIF decode etc.) */
+  var cur=0.02,target=0.02,pending=false;
+  function schedule(){
+    if(pending){return;}
+    pending=true;
+    var fired=false;
+    function go(){ if(fired){return;} fired=true; pending=false; loop(); }
+    requestAnimationFrame(go);
+    setTimeout(go,45);
+  }
+  function loop(){
+    var d=target-cur;
+    if(Math.abs(d)<0.0015){cur=target;apply(cur);return;}
+    cur+=d*0.14;
+    apply(cur);
+    schedule();
+  }
+  function setP(t){
+    target=clamp(t,0.02,1);
+    if(RM){cur=target;apply(cur);return;}
+    schedule();
+  }
+  window.__setP=setP;
+  apply(cur);
+
+  bcard.addEventListener('mousemove',function(e){
+    var r=bcard.getBoundingClientRect();
+    setP((e.clientX-r.left)/r.width);
+  });
+  bcard.addEventListener('mouseleave',function(){setP(0.58);});
+  bcard.addEventListener('touchmove',function(e){
+    if(e.touches&&e.touches[0]){
+      var r=bcard.getBoundingClientRect();
+      setP((e.touches[0].clientX-r.left)/r.width);
+    }
+  },{passive:true});
 })();
 </script>
 
