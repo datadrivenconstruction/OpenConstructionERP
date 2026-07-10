@@ -119,6 +119,17 @@ def _clear_settings_cache(monkeypatch: pytest.MonkeyPatch):
         ("TR_ISTANBUL", "cwicr_tr_v3"),
         ("HI_MUMBAI", "cwicr_hi_v3"),
         ("SV_STOCKHOLM", "cwicr_sv_v3"),
+        # Authentic national / regional official bases (2026-07 world-cost
+        # -bases wave, task #31). ZH_CHINA and TR_NATIONAL above are the two
+        # earlier members of this wave; the rest share a language collection
+        # with a metro catalogue except GR_NATIONAL, whose Greek "el" head
+        # opens the brand-new cwicr_el_v3 collection.
+        ("BR_NATIONAL", "cwicr_pt_v3"),  # SINAPI, shares Portuguese collection
+        ("ES_ANDALUCIA", "cwicr_es_v3"),  # BCCA Andalucia
+        ("IT_TOSCANA", "cwicr_it_v3"),  # Prezzario Regione Toscana
+        ("VN_NATIONAL", "cwicr_vi_v3"),  # Dinh Muc national norms
+        ("ID_NATIONAL", "cwicr_id_v3"),  # AHSP national analyses
+        ("GR_NATIONAL", "cwicr_el_v3"),  # GGDE - brand-new Greek collection
     ],
 )
 def test_region_id_resolves_to_language_collection(region: str, collection: str) -> None:
@@ -234,6 +245,17 @@ def test_empty_collection_version_strips_suffix(monkeypatch: pytest.MonkeyPatch)
         ("ENG_TORONTO", "CA"),  # Canadian-English file DDC ships
         ("GBR_LONDON", "GB"),  # defensive
         ("ZH_CHINA", "CN"),
+        # National bases (2026-07 wave, task #31): the region prefix already is
+        # the ISO-3166 alpha-2 code DDC writes into the ``country`` payload, so
+        # none of these needs a head alias. ZH_CHINA above is the sole
+        # language-prefixed exception (ZH -> CN via _REGION_HEAD_ALIASES).
+        ("TR_NATIONAL", "TR"),
+        ("BR_NATIONAL", "BR"),
+        ("ES_ANDALUCIA", "ES"),
+        ("IT_TOSCANA", "IT"),
+        ("VN_NATIONAL", "VN"),
+        ("ID_NATIONAL", "ID"),
+        ("GR_NATIONAL", "GR"),
         ("ru_stpetersburg", "RU"),  # case-normalisation
     ],
 )
@@ -302,6 +324,27 @@ def test_country_head_present_true_when_probe_disabled(
     monkeypatch.setenv("CWICR_COLLECTION_PROBE", "0")
     get_settings.cache_clear()
     assert qa._country_head_present("cwicr_en_v3", "CA") is True
+
+
+# ── World cost bases 2026-07 wave: GR_NATIONAL headline (task #31) ────────
+#
+# Eight national/regional bases route transitively through
+# ``region_language.language_for`` - the adapter keeps no per-region table of
+# its own, so the extended parametrize lists above already lock the full
+# region -> collection and region -> head contract. GR_NATIONAL earns its own
+# guard because it is the only base that opens a brand-new language collection
+# (Greek ``el`` -> ``cwicr_el_v3``): if the language table ever drops it,
+# ``language_for`` falls back to English and Greek estimates silently search
+# ``cwicr_en_v3`` with no error to signal the miss.
+
+
+def test_greek_national_base_opens_the_new_el_collection() -> None:
+    """``GR_NATIONAL`` must resolve to the brand-new ``cwicr_el_v3``."""
+    assert country_to_collection("GR_NATIONAL") == "cwicr_el_v3"
+    # Bare ``"GR"`` resolves the same way via the auto-built head map.
+    assert country_to_collection("GR") == "cwicr_el_v3"
+    # The head pin is the ISO-3166 alpha-2 code, no alias needed.
+    assert country_filter_for("GR_NATIONAL") == "GR"
 
 
 # ── _build_filter — 29 indexed payload fields per MAPPING_PROCESS.md §2.2 ──
