@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenConstructionERP · Gantt direction preview · internal</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="description" content="Internal design preview. Not for indexing.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎛️%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Gantt Poster design language:
+   paper #fafaf8 · ink #101010 · accent #0284c7 · today #ef4444
+   square corners · hairlines · mono labels · Inter Tight display */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#fafaf8;color:#101010;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.pz{width:min(1240px,calc(100% - 88px));margin:0 auto}
+@media(max-width:720px){.pz{width:calc(100% - 40px)}}
+.p-sec{padding:92px 0 0}
+.p-btn{cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:#101010;color:#fff;font-weight:600;font-size:14px;padding:15px 24px;border:0}
+.p-btn.acc{background:#0284c7}
+.p-btn:hover{background:#0284c7}
+.p-btn.acc:hover{background:#101010}
+.p-link{cursor:pointer;display:inline-block;font-weight:600;font-size:14px;border-bottom:2px solid #101010;padding-bottom:3px}
+.p-link:hover{color:#0284c7;border-color:#0284c7}
+@media(prefers-reduced-motion:no-preference){
+  .p-sec{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .p-sec.in{opacity:1;transform:none}
+}
+
+/* top line + nav */
+.p-topline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a9098;padding:14px 0;border-bottom:1px solid rgba(16,16,16,.14)}
+.p-topline b{color:#0284c7;font-weight:500}
+.p-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0}
+.p-logo{font:800 17px/1 'Inter Tight',sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.p-logo .l2{color:#6b7280;font-weight:600}
+.p-logo .l3{color:#0284c7}
+.p-links{display:flex;gap:26px;font-size:14px;font-weight:500;color:#5c6675}
+.p-links a{transition:color .15s}
+.p-links a:hover{color:#101010}
+.p-navr{display:flex;align-items:center;gap:10px}
+.p-ghost{cursor:pointer;font-size:13.5px;font-weight:600;color:#101010;border:1px solid rgba(16,16,16,.3);padding:9px 15px}
+.p-ghost:hover{border-color:#0284c7;color:#0284c7}
+.p-navbtn{cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:#101010;padding:10px 17px}
+.p-navbtn:hover{background:#0284c7}
+.p-navwrap{border-bottom:1px solid rgba(16,16,16,.18)}
+@media(max-width:880px){.p-links{display:none}}
+
+/* gantt primitives */
+.gchart{position:relative;border:1px solid rgba(16,16,16,.4);background-image:linear-gradient(90deg,rgba(16,16,16,.07) 1px,transparent 1px);background-size:calc(100%/12) 100%;overflow:hidden}
+.gscale{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(16,16,16,.22);font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#9aa0a6;text-transform:uppercase}
+.gscale span{padding:9px 0 9px 8px}
+.gtoday{position:absolute;top:0;bottom:0;width:2px;background:#ef4444;z-index:3}
+.gtoday b{position:absolute;top:6px;left:7px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#ef4444;padding:5px 7px;white-space:nowrap}
+
+/* ============ block 1 · hero ============ */
+.p-hero{padding-top:52px}
+.p-eyebrow{display:inline-flex;align-items:center;gap:9px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-bottom:18px}
+.p-eyebrow i{width:8px;height:8px;background:#16a34a;display:inline-block;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.p-eyebrow i{animation:none}}
+.p-eyebrow b{color:#0284c7;font-weight:600}
+.gc-rows{padding:26px 12px 36px}
+.gc-bar{width:max-content;max-width:100%;font:800 clamp(34px,5.4vw,74px)/1.02 'Inter Tight',sans-serif;letter-spacing:-.04em;padding:.04em .3em .08em;margin-top:12px;position:relative}
+.gc-bar.b1{background:#101010;color:#fff;margin-left:0}
+.gc-bar.b2{border:2.5px solid #101010;color:#101010;margin-left:8%}
+.gc-bar.b3{background:#0284c7;color:#fff;margin-left:20%}
+.gc-bar.b4{border:2.5px solid #0284c7;color:#0284c7;margin-left:37%;background:repeating-linear-gradient(45deg,rgba(2,132,199,.14) 0 5px,transparent 5px 12px)}
+.gc-bar.b4::after{content:'';position:absolute;right:-8px;top:50%;width:13px;height:13px;background:#101010;transform:translateY(-50%) rotate(45deg)}
+.gc-bar+.gc-bar::before{content:'';position:absolute;left:-2.5px;top:-14px;width:2px;height:14px;background:rgba(16,16,16,.55)}
+@media(max-width:720px){.gc-bar.b2{margin-left:4%}.gc-bar.b3{margin-left:10%}.gc-bar.b4{margin-left:18%}}
+.p-heroGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;margin-top:38px}
+.p-sub{color:#374151;font-size:16.5px;line-height:1.65;max-width:56ch}
+.p-trust{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#6b7280}
+.p-trust span::before{content:'✓';color:#0284c7;margin-right:7px;font-weight:700}
+.p-install{border:1px solid rgba(16,16,16,.4);padding:24px;background:#fff}
+.p-install .lbl{display:flex;align-items:center;gap:8px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#6b7280;margin-bottom:12px}
+.p-install code{display:block;font:500 13.5px/1 'JetBrains Mono',monospace;color:#0f2b3d;background:#f0f4f7;border:1px solid rgba(16,16,16,.16);padding:14px 15px;margin-bottom:14px;white-space:nowrap;overflow-x:auto}
+.p-install code b{color:#0284c7;font-weight:600}
+.p-install .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.p-dl{display:block;margin-top:14px;border-top:1px dashed rgba(16,16,16,.25);padding-top:14px}
+.p-dl a.dlmain{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;border-bottom:2px solid #101010;padding-bottom:2px}
+.p-dl a.dlmain:hover{color:#0284c7;border-color:#0284c7}
+.p-dl small{display:block;margin-top:7px;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a9098}
+.p-dl .demo{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:#0284c7}
+.p-dl .demo:hover{border-bottom:1px solid #0284c7}
+@media(max-width:980px){.p-heroGrid{grid-template-columns:1fr;gap:30px}}
+
+/* section heads */
+.p-secHead{max-width:860px;margin-bottom:34px}
+.p-num{font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#0284c7;text-transform:uppercase}
+.p-secHead h2{font:800 clamp(30px,4vw,52px)/1.06 'Inter Tight',sans-serif;letter-spacing:-.032em;margin:12px 0 14px}
+.p-secHead h2 em{font-style:normal;color:#0284c7}
+.p-secHead p{color:#4b5563;font-size:16.5px;line-height:1.65;max-width:72ch}
+
+/* ============ block 2 · download ============ */
+.dl-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px;list-style:none}
+.dl-chips li{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(16,16,16,.3);padding:9px 13px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#374151;background:#fff}
+.dl-chips li::before{content:'';width:8px;height:8px;background:#0284c7;flex:none}
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.dl-card{border:1.5px solid #101010;background:#fff;padding:22px;display:flex;flex-direction:column;gap:12px;position:relative}
+.dl-card.rec{outline:2px solid #0284c7;outline-offset:-2px}
+.dl-card .flag{position:absolute;top:-11px;right:12px;background:#0284c7;color:#fff;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:5px 7px}
+.dl-head{display:flex;align-items:center;gap:12px}
+.dl-glyph{width:38px;height:38px;border:1.5px solid #101010;display:flex;align-items:center;justify-content:center;flex:none}
+.dl-glyph svg{width:20px;height:20px;fill:#101010}
+.dl-name{font:700 18px/1.1 'Inter Tight',sans-serif}
+.dl-note{color:#6b7280;font-size:12.5px;margin-top:3px}
+.dl-badges{display:flex;flex-wrap:wrap;gap:6px}
+.dl-badges span{font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(16,16,16,.25);padding:4px 7px;color:#6b7280}
+.dl-btn{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:9px;background:#101010;color:#fff;font-weight:600;font-size:14px;padding:13px 16px}
+.dl-btn:hover{background:#0284c7}
+.dl-card.rec .dl-btn{background:#0284c7}
+.dl-card.rec .dl-btn:hover{background:#101010}
+.dl-meta{font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a9098}
+@media(max-width:920px){.dl-grid{grid-template-columns:1fr}}
+
+/* ============ block 3 · live preview ============ */
+.hp-eyebrow{display:inline-flex;align-items:center;gap:9px;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#0f766e;margin-bottom:0}
+.hp-eyebrow i{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px rgba(16,185,129,.7);display:inline-block}
+.hp-grid{display:grid;grid-template-columns:380px 1fr;gap:0;border:1px solid rgba(16,16,16,.4);background:#fff}
+.hp-list{border-right:1px solid rgba(16,16,16,.25);display:flex;flex-direction:column}
+.hp-item{display:grid;grid-template-columns:44px 1fr;gap:0;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid rgba(16,16,16,.12);padding:0;cursor:pointer;font-family:inherit;position:relative}
+.hp-item .num{align-self:stretch;display:flex;align-items:center;justify-content:center;font:600 11px/1 'JetBrains Mono',monospace;color:#8a9098;border-right:1px solid rgba(16,16,16,.12)}
+.hp-item .bd{padding:13px 16px}
+.hp-item .t{display:block;font:700 15px/1.2 'Inter Tight',sans-serif;color:#101010}
+.hp-item .h{display:block;color:#6b7280;font-size:12px;margin-top:3px;line-height:1.4}
+.hp-item:hover{background:rgba(2,132,199,.05)}
+.hp-item.on{background:#101010}
+.hp-item.on .num{color:#fff;border-right-color:rgba(255,255,255,.2);background:#0284c7}
+.hp-item.on .t{color:#fff}
+.hp-item.on .h{color:#b9bec6}
+.hp-more{padding:14px 16px;font:500 10px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-top:auto}
+.hp-more b{color:#0284c7;font-size:13px}
+.hp-stage{position:relative;display:flex;flex-direction:column}
+.hp-chrome{display:flex;align-items:center;gap:8px;background:#f4f4f1;border-bottom:1px solid rgba(16,16,16,.14);padding:11px 14px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#71767c}
+.hp-chrome i{width:9px;height:9px;border-radius:50%;background:rgba(16,16,16,.18);display:block}
+.hp-chrome span{margin-left:8px}
+.hp-chrome em{margin-left:auto;font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#0284c7}
+.hp-shot{flex:1;min-height:0;background:#0b1220}
+.hp-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;aspect-ratio:16/9.4}
+@media(max-width:980px){.hp-grid{grid-template-columns:1fr}.hp-list{border-right:0;border-bottom:1px solid rgba(16,16,16,.25);flex-direction:row;flex-wrap:wrap}.hp-item{flex:1 1 46%;border-right:1px solid rgba(16,16,16,.12)}.hp-item .num{display:none}.hp-item .bd{padding:11px 12px}.hp-more{flex:1 1 100%;margin:0}}
+
+/* footer */
+.p-foot{margin-top:92px;border-top:1px solid rgba(16,16,16,.22)}
+.p-footrow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 26px;padding:26px 0 20px;font:500 10.5px/1.7 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
+.p-footrow b{color:#101010;font-weight:600}
+.p-footrow a:hover{color:#0284c7}
+.p-footscale{display:grid;grid-template-columns:repeat(12,1fr);border-top:1px solid rgba(16,16,16,.1);font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:rgba(16,16,16,.32);text-transform:uppercase;padding:10px 0 24px}
+
+/* internal badge */
+.int-badge{position:fixed;left:14px;bottom:14px;z-index:60;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#101010;padding:7px 10px;opacity:.85}
+.int-badge b{color:#7dd3fc;font-weight:600}
+</style>
+</head>
+<body>
+
+<span class="int-badge">internal preview · noindex · <b>gantt direction</b></span>
+
+<!-- nav -->
+<div class="p-navwrap">
+  <div class="pz">
+    <div class="p-topline"><span>Programme of works · OpenConstructionERP</span><span>Sheet 01 · Rev A · <b>v10.8.0</b></span></div>
+    <nav class="p-nav">
+      <div class="p-logo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+      <div class="p-links">
+        <a href="#demo">Product</a>
+        <a href="/services.html">Practices</a>
+        <a href="/standards.html">Standards</a>
+        <a href="/news.html">News</a>
+        <a href="/docs.html">Docs</a>
+      </div>
+      <div class="p-navr">
+        <a class="p-ghost" href="https://github.com/datadrivenconstruction/OpenConstructionERP" rel="noopener">GitHub</a>
+        <a class="p-navbtn" href="/demo-register.html">Get a demo</a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ============ block 1 · hero ============ -->
+<section class="p-sec p-hero in">
+  <div class="pz">
+    <div class="p-eyebrow"><i></i><span><b>v10.8.0</b> · open source on GitHub</span></div>
+    <div class="gchart">
+      <div class="gscale"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
+      <div class="gc-rows">
+        <div class="gc-bar b1">Run</div>
+        <div class="gc-bar b2">the whole</div>
+        <div class="gc-bar b3">construction</div>
+        <div class="gc-bar b4">project.</div>
+      </div>
+      <i class="gtoday" style="left:58%" aria-hidden="true"><b>today · v10.8.0</b></i>
+    </div>
+    <div class="p-heroGrid">
+      <div>
+        <p class="p-sub">Open-source ERP for construction teams. Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.</p>
+        <div class="p-trust"><span>Self-hosted</span><span>AGPL-3.0 open source</span><span>26 languages</span><span>149 modules</span></div>
+      </div>
+      <div class="p-install">
+        <div class="lbl">&gt;_ up and running in one command</div>
+        <code><b>$</b> pip install openconstructionerp</code>
+        <div class="row">
+          <a class="p-btn acc" href="#download">Install now</a>
+          <a class="p-link" href="https://github.com/datadrivenconstruction/OpenConstructionERP" rel="noopener">Star on GitHub</a>
+        </div>
+        <div class="p-dl">
+          <a class="dlmain" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download the desktop app ↓</a>
+          <small>free · no Python, no Docker, nothing to set up</small>
+          <a class="demo" href="/demo">Or try the live demo in your browser →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ block 2 · download ============ -->
+<section class="p-sec" id="download">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="p-num">01 · Download</span>
+      <h2>Get the <em>real</em> desktop app, free.</h2>
+      <p>A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.</p>
+    </div>
+    <ul class="dl-chips">
+      <li>No Python, pip, Docker or DB</li>
+      <li>Data stays local</li>
+      <li>First launch ~60s, then fast</li>
+      <li>Open source, AGPL-3.0</li>
+    </ul>
+    <div class="dl-grid">
+      <article class="dl-card rec">
+        <span class="flag">recommended for you</span>
+        <div class="dl-head">
+          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M3 5.4 10.4 4.3v6.6H3zM10.4 11.6v6.6L3 17.1V11.6zM11.5 4.1 21 2.7v8.2h-9.5zM21 11.9v8.2l-9.5-1.4v-6.8z"/></svg></span>
+          <div><div class="dl-name">Windows</div><div class="dl-note">Windows 10/11 - 64-bit installer</div></div>
+        </div>
+        <div class="dl-badges"><span>x64</span><span>.exe</span><span>Win 10+</span></div>
+        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+        <div class="dl-meta">from GitHub Releases · latest build</div>
+      </article>
+      <article class="dl-card">
+        <div class="dl-head">
+          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.7-3.1.7-.6 0-1.6-.7-2.7-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.4 2 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0-.1-2.1-.8-2.1-3.1zM14.5 6.3c.6-.7 1-1.6.9-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.4 2.4-1.1z"/></svg></span>
+          <div><div class="dl-name">macOS</div><div class="dl-note">macOS 12+ - Apple Silicon</div></div>
+        </div>
+        <div class="dl-badges"><span>aarch64</span><span>.dmg</span><span>12+</span></div>
+        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+        <div class="dl-meta">from GitHub Releases · latest build</div>
+      </article>
+      <article class="dl-card">
+        <div class="dl-head">
+          <span class="dl-glyph"><svg viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2 0 .4.1.8.3 1.1-.8 1.2-1.4 2.7-1.9 4-.5 1.4-1.2 2.4-2 3.3-.9 1-1.6 2.1-1.6 3.7 0 .6.1 1.2.3 1.7-.4.3-.7.8-.7 1.4 0 .9.8 1.7 1.7 1.7.3 0 .6-.1.9-.2.9.7 2 1.2 3.1 1.3.3.6 1 1 1.9 1s1.6-.4 1.9-1c1.1-.1 2.2-.6 3.1-1.3.3.1.6.2.9.2.9 0 1.7-.8 1.7-1.7 0-.6-.3-1.1-.7-1.4.2-.5.3-1.1.3-1.7 0-1.6-.7-2.7-1.6-3.7-.8-.9-1.5-1.9-2-3.3-.5-1.3-1.1-2.8-1.9-4 .2-.3.3-.7.3-1.1 0-1.1-.9-2-2-2z"/></svg></span>
+          <div><div class="dl-name">Linux</div><div class="dl-note">AppImage, deb and rpm</div></div>
+        </div>
+        <div class="dl-badges"><span>x86_64</span><span>.AppImage</span><span>.deb / .rpm</span></div>
+        <a class="dl-btn" href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest" rel="noopener">Download ↓</a>
+        <div class="dl-meta">from GitHub Releases · latest build</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ block 3 · live preview ============ -->
+<section class="p-sec" id="demo">
+  <div class="pz">
+    <div class="p-secHead">
+      <span class="hp-eyebrow"><i></i>Live preview · no sign-up, no demo call</span>
+      <h2>Skip the sales call. <em>See it work.</em></h2>
+      <p>No six-figure licence to read back your own data.</p>
+    </div>
+    <div class="hp-grid">
+      <div class="hp-list" role="tablist" aria-label="Product preview modules">
+        <button class="hp-item on" type="button" role="tab" aria-selected="true" data-shot="/assets/loops/06_Build_BOQ_Fast.gif" data-file="boq-editor">
+          <span class="num">01</span><span class="bd"><span class="t">BOQ editor</span><span class="h">Build bills of quantities, priced rows.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/05_Instant_Search.gif" data-file="cost-database">
+          <span class="num">02</span><span class="bd"><span class="t">Cost database</span><span class="h">55,000 priced positions · 110+ modules.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/09_Bulk_Link_BIM_Group.gif" data-file="bim-to-boq">
+          <span class="num">03</span><span class="bd"><span class="t">BIM → BOQ</span><span class="h">Link IFC and RVT models to estimates.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/10_DWG_Layers.gif" data-file="dwg-to-boq">
+          <span class="num">04</span><span class="bd"><span class="t">DWG → BOQ</span><span class="h">DWG and DGN pushed into BOQ.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/04_PDF_Takeoff.gif" data-file="pdf-takeoff">
+          <span class="num">05</span><span class="bd"><span class="t">PDF → BOQ</span><span class="h">Click-to-measure on PDF drawings.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/09_Bulk_Link_BIM_Group.gif" data-file="bulk-cad-groups">
+          <span class="num">06</span><span class="bd"><span class="t">Bulk CAD groups</span><span class="h">Link many elements, one pass.</span></span>
+        </button>
+        <button class="hp-item" type="button" role="tab" aria-selected="false" data-shot="/assets/loops/02_AI_Photo_to_Estimate.gif" data-file="ai-estimate">
+          <span class="num">07</span><span class="bd"><span class="t">AI Estimate</span><span class="h">Photo or doc → priced first pass.</span></span>
+        </button>
+        <div class="hp-more"><b>+50</b> more features · tendering, reports, validation, collab, multi-tenant …</div>
+      </div>
+      <div class="hp-stage">
+        <div class="hp-chrome"><i></i><i></i><i></i><span id="hp-file">riverside-tower / boq-editor</span><em>recorded in the app</em></div>
+        <div class="hp-shot"><img id="hp-img" src="/assets/loops/06_Build_BOQ_Fast.gif" alt="OpenConstructionERP product preview"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer class="p-foot">
+  <div class="pz">
+    <div class="p-footrow">
+      <span><b>OpenConstructionERP</b> · open source · AGPL-3.0</span>
+      <span><a href="https://github.com/datadrivenconstruction/OpenConstructionERP" rel="noopener">GitHub</a> · <a href="/docs.html">Docs</a> · <a href="/news.html">News</a> · <a href="/contact.html">Contact</a></span>
+      <span>datadrivenconstruction</span>
+    </div>
+    <div class="p-footscale" aria-hidden="true"><span>W01</span><span>W02</span><span>W03</span><span>W04</span><span>W05</span><span>W06</span><span>W07</span><span>W08</span><span>W09</span><span>W10</span><span>W11</span><span>W12</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* reveal on scroll */
+  var secs=[].slice.call(document.querySelectorAll('.p-sec'));
+  if('IntersectionObserver' in window){
+    var reveal=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); reveal.unobserve(e.target);} });
+    },{threshold:0.06});
+    secs.forEach(function(s){reveal.observe(s);});
+  } else { secs.forEach(function(s){s.classList.add('in');}); }
+
+  /* live preview tab switching */
+  var items=[].slice.call(document.querySelectorAll('.hp-item'));
+  var img=document.getElementById('hp-img');
+  var file=document.getElementById('hp-file');
+  items.forEach(function(it){
+    it.addEventListener('click',function(){
+      items.forEach(function(o){o.classList.remove('on');o.setAttribute('aria-selected','false');});
+      it.classList.add('on');it.setAttribute('aria-selected','true');
+      img.src=it.getAttribute('data-shot');
+      file.textContent='riverside-tower / '+it.getAttribute('data-file');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
