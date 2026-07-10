@@ -204,10 +204,18 @@ a{color:inherit;text-decoration:none}
 .f-w{stroke:rgba(2,132,199,.5);stroke-width:2;fill:none;stroke-linecap:round}
 .f-wl{stroke:rgba(255,255,255,.78);stroke-width:2;fill:none;stroke-linecap:round}
 .f-d{stroke:rgba(2,132,199,.6);stroke-width:3.5;fill:none;stroke-linecap:round}
+.f-m{stroke:rgba(255,255,255,.72);stroke-width:1.1;fill:none}
+.f-sb{stroke:rgba(22,24,29,.14);stroke-width:1;fill:none}
+.b-glass .f-r{fill:rgba(2,132,199,.17)}
+.b-glass .f-l{fill:rgba(2,132,199,.32)}
+.b-glass .f-t{fill:rgba(2,132,199,.4)}
+.b-conc .f-r{fill:#f7f7f5}
+.b-conc .f-l{fill:rgba(18,20,26,.10)}
+.b-conc .f-t{fill:rgba(18,20,26,.15)}
 .bfl.on{opacity:1;transform:none}
 .bfl.wip{opacity:1;transform:none}
 .bfl.wip .f-r,.bfl.wip .f-l,.bfl.wip .f-t{fill:rgba(2,132,199,.05);stroke:rgba(2,132,199,.55);stroke-dasharray:3 4}
-.bfl.wip .f-w,.bfl.wip .f-wl,.bfl.wip .f-d{opacity:0}
+.bfl.wip .f-w,.bfl.wip .f-wl,.bfl.wip .f-d,.bfl.wip .f-m,.bfl.wip .f-sb{opacity:0}
 
 
 /* ============ download ============ */
@@ -360,12 +368,12 @@ a{color:inherit;text-decoration:none}
       <div class="gc-data" aria-hidden="true">
         <span class="gd"><span>spent</span><b id="d-spent">€1.33M</b></span>
         <span class="gd"><span>programme</span><b class="acc" id="d-prog">58%</b></span>
-        <span class="gd"><span>floors up</span><b id="d-floors">50 / 77</b></span>
+        <span class="gd"><span>floors up</span><b id="d-floors">45 / 70</b></span>
         <span class="gd"><span>cranes on site</span><b id="d-cranes">2</b></span>
         <span class="gd-hint" id="d-hint">◂ ▸ scrub time with your mouse</span>
       </div>
       <div class="gc-city" aria-hidden="true">
-        <span class="gc-city-lbl">riverside district · 13 buildings · 77 floors</span>
+        <span class="gc-city-lbl">riverside district · 14 buildings · 70 floors</span>
         <svg id="city" viewBox="0 0 1200 244" preserveAspectRatio="xMidYMax meet"></svg>
       </div>
       <i class="gtoday" id="t-today" style="left:58%" aria-hidden="true"><b id="t-flag"><span class="tf-a" id="tf-week">today · W07</span><span class="tf-b" id="tf-spent">€1.33M spent</span></b></i>
@@ -723,79 +731,134 @@ a{color:inherit;text-decoration:none}
     return e;
   }
 
-  /* the district: 13 iso buildings, 6 tower cranes; windows + doors on the
-     facades, roof plant & antennas on handover, trees once a block is done */
+  /* the district: 14 iso buildings in four typologies - gabled townhouses,
+     residential slabs with floor bands, glass curtain-wall towers, punched
+     concrete mid-rises - plus a podium block and a stepped landmark tower.
+     6 tower cranes serve live sites; roofs, plant rooms and antennas go on
+     at handover, street trees follow block by block */
   var GY=222;
   var CITY=[
-    {x:68,  w:30,d:24,fh:12,n:4,s:0.00,e:0.15,roof:1},
-    {x:155, w:32,d:28,fh:13,n:6,s:0.02,e:0.28,crane:1},
-    {x:248, w:34,d:26,fh:12,n:5,s:0.06,e:0.24},
-    {x:340, w:28,d:32,fh:14,n:8,s:0.05,e:0.45,crane:1,ant:1},
-    {x:432, w:30,d:26,fh:12,n:5,s:0.16,e:0.40,roof:1},
-    {x:525, w:38,d:30,fh:14,n:7,s:0.14,e:0.55,crane:1},
-    {x:620, w:28,d:24,fh:12,n:6,s:0.30,e:0.60},
-    {x:710, w:34,d:28,fh:15,n:9,s:0.24,e:0.78,crane:1,ant:1},
-    {x:800, w:28,d:24,fh:12,n:5,s:0.42,e:0.68,roof:1},
-    {x:890, w:36,d:30,fh:13,n:7,s:0.45,e:0.88,crane:1},
-    {x:982, w:32,d:26,fh:13,n:6,s:0.58,e:0.95,roof:1},
-    {x:1072,w:30,d:24,fh:12,n:5,s:0.66,e:0.97,crane:1},
-    {x:1152,w:30,d:22,fh:12,n:4,s:0.78,e:0.995}
+    {x:55,  w:16,d:13,fh:13,n:2, s:0.00,e:0.10,type:'house'},
+    {x:105, w:16,d:13,fh:13,n:2, s:0.03,e:0.13,type:'house'},
+    {x:155, w:16,d:13,fh:13,n:2, s:0.06,e:0.16,type:'house'},
+    {x:235, w:38,d:26,fh:12,n:5, s:0.02,e:0.30,type:'res',crane:1},
+    {x:330, w:26,d:30,fh:13,n:8, s:0.05,e:0.45,type:'glass',crane:1,ant:1},
+    {x:425, w:30,d:24,fh:12,n:5, s:0.16,e:0.42,type:'conc',roof:1},
+    {x:520, w:26,d:24,fh:13,n:8, s:0.14,e:0.58,type:'glass',crane:1,pod:2,ps:1.5,roof:1},
+    {x:615, w:34,d:22,fh:12,n:4, s:0.32,e:0.58,type:'res'},
+    {x:705, w:30,d:28,fh:14,n:10,s:0.22,e:0.80,type:'conc',crane:1,ant:1,top:7,ts:0.72},
+    {x:800, w:28,d:22,fh:12,n:5, s:0.44,e:0.70,type:'conc',roof:1},
+    {x:890, w:36,d:28,fh:13,n:6, s:0.46,e:0.88,type:'res',crane:1},
+    {x:985, w:30,d:26,fh:13,n:7, s:0.58,e:0.95,type:'glass',ant:1},
+    {x:1075,w:28,d:22,fh:12,n:4, s:0.68,e:0.97,type:'conc',crane:1,roof:1},
+    {x:1150,w:16,d:13,fh:13,n:2, s:0.80,e:0.97,type:'house'}
   ];
-  var TREES=[[26,0],[105,1],[296,2],[470,4],[660,6],[838,8],[1026,10],[1188,12]];
+  var TREES=[[25,0],[180,2],[292,3],[465,5],[655,7],[840,9],[1030,11],[1185,13]];
   var TOTALFLOORS=0;
   CITY.forEach(function(b){TOTALFLOORS+=b.n;});
+
+  /* podium floors run wider, setback floors narrower */
+  function fscale(b,i){
+    if(b.pod&&i<b.pod){return b.ps||1.4;}
+    if(b.top!=null&&i>=b.top){return b.ts||0.72;}
+    return 1;
+  }
 
   var citySvg=document.getElementById('city');
   var buildings=[],treeEls=[];
   if(citySvg){
     el('path',{d:'M14,'+(GY+6)+' L1186,'+(GY+6),stroke:'rgba(18,20,26,.14)','stroke-width':'1'},citySvg);
     CITY.forEach(function(b){
-      var g=el('g',{},citySvg);
-      var fw=Math.round((b.w+b.d)/2*1.14);
+      var pmax=Math.max(fscale(b,0),1);
+      var g=el('g',{class:'b-'+b.type},citySvg);
+      var fw=Math.round((b.w+b.d)/2*1.14*pmax);
       el('path',{d:'M'+b.x+','+(GY+4)+' L'+(b.x+fw)+','+(GY+4-fw/2)+' L'+b.x+','+(GY+4-fw)+' L'+(b.x-fw)+','+(GY+4-fw/2)+' Z',fill:'rgba(18,20,26,.05)',stroke:'rgba(18,20,26,.1)','stroke-width':'1'},g);
       var fls=[];
       for(var i=0;i<b.n;i++){
+        var sc=fscale(b,i), wi=b.w*sc, di=b.d*sc;
         var yb=GY-i*b.fh, yt=yb-b.fh;
         var fg=el('g',{class:'bfl'},g);
-        el('path',{class:'f-l',d:'M'+b.x+','+yb+' L'+(b.x-b.w)+','+(yb-b.w/2)+' L'+(b.x-b.w)+','+(yt-b.w/2)+' L'+b.x+','+yt+' Z'},fg);
-        el('path',{class:'f-r',d:'M'+b.x+','+yb+' L'+(b.x+b.d)+','+(yb-b.d/2)+' L'+(b.x+b.d)+','+(yt-b.d/2)+' L'+b.x+','+yt+' Z'},fg);
-        el('path',{class:'f-t',d:'M'+b.x+','+yt+' L'+(b.x+b.d)+','+(yt-b.d/2)+' L'+(b.x+b.d-b.w)+','+(yt-b.d/2-b.w/2)+' L'+(b.x-b.w)+','+(yt-b.w/2)+' Z'},fg);
-        /* facade: windows on the lit right face, pale windows on the shaded
-           left face, an entrance door on the ground floor */
-        var wt=b.d>=28?[0.26,0.52,0.78]:[0.32,0.68];
-        wt.forEach(function(t,k){
-          var xw=b.x+b.d*t, ytw=yt-(b.d*t)/2;
-          var isDoor=(i===0&&k===(wt.length>2?1:0));
-          el('path',{class:isDoor?'f-d':'f-w',d:'M'+xw+','+(ytw+b.fh*(isDoor?0.4:0.3))+' L'+xw+','+(ytw+b.fh*(isDoor?0.94:0.72))},fg);
-        });
-        [0.34,0.68].forEach(function(t){
-          var xw=b.x-b.w*t, ytw=yt-(b.w*t)/2;
-          el('path',{class:'f-wl',d:'M'+xw+','+(ytw+b.fh*0.3)+' L'+xw+','+(ytw+b.fh*0.72)},fg);
-        });
+        el('path',{class:'f-l',d:'M'+b.x+','+yb+' L'+(b.x-wi)+','+(yb-wi/2)+' L'+(b.x-wi)+','+(yt-wi/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-r',d:'M'+b.x+','+yb+' L'+(b.x+di)+','+(yb-di/2)+' L'+(b.x+di)+','+(yt-di/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-t',d:'M'+b.x+','+yt+' L'+(b.x+di)+','+(yt-di/2)+' L'+(b.x+di-wi)+','+(yt-di/2-wi/2)+' L'+(b.x-wi)+','+(yt-wi/2)+' Z'},fg);
+        if(b.type==='glass'){
+          /* curtain wall: white mullions on both glass faces */
+          [0.2,0.4,0.6,0.8].forEach(function(t){
+            var xw=b.x+di*t, ytw=yt-(di*t)/2;
+            el('path',{class:'f-m',d:'M'+xw+','+(ytw+b.fh*0.1)+' L'+xw+','+(ytw+b.fh*0.9)},fg);
+          });
+          [0.35,0.7].forEach(function(t){
+            var xw=b.x-wi*t, ytw=yt-(wi*t)/2;
+            el('path',{class:'f-m',d:'M'+xw+','+(ytw+b.fh*0.1)+' L'+xw+','+(ytw+b.fh*0.9)},fg);
+          });
+          if(i===0){
+            var gdx=b.x+di*0.5, gdy=yt-(di*0.5)/2;
+            el('path',{class:'f-d',d:'M'+gdx+','+(gdy+b.fh*0.4)+' L'+gdx+','+(gdy+b.fh*0.94)},fg);
+          }
+        }else if(b.type==='house'){
+          /* townhouse: door + one window below, two windows above */
+          if(i===0){
+            var hdx=b.x+di*0.5, hdy=yt-(di*0.5)/2;
+            el('path',{class:'f-d',d:'M'+hdx+','+(hdy+b.fh*0.4)+' L'+hdx+','+(hdy+b.fh*0.94)},fg);
+            var hwx=b.x+di*0.82, hwy=yt-(di*0.82)/2;
+            el('path',{class:'f-w',d:'M'+hwx+','+(hwy+b.fh*0.3)+' L'+hwx+','+(hwy+b.fh*0.62)},fg);
+          }else{
+            [0.32,0.7].forEach(function(t){
+              var xw=b.x+di*t, ytw=yt-(di*t)/2;
+              el('path',{class:'f-w',d:'M'+xw+','+(ytw+b.fh*0.3)+' L'+xw+','+(ytw+b.fh*0.72)},fg);
+            });
+          }
+          var lwx=b.x-wi*0.5, lwy=yt-(wi*0.5)/2;
+          el('path',{class:'f-wl',d:'M'+lwx+','+(lwy+b.fh*0.3)+' L'+lwx+','+(lwy+b.fh*0.72)},fg);
+        }else{
+          /* residential / concrete: punched windows + ground-floor door */
+          var wt=(b.type==='res'&&di>=26)?[0.25,0.5,0.75]:[0.32,0.68];
+          wt.forEach(function(t,k){
+            var xw=b.x+di*t, ytw=yt-(di*t)/2;
+            var isDoor=(i===0&&k===(wt.length>2?1:0));
+            el('path',{class:isDoor?'f-d':'f-w',d:'M'+xw+','+(ytw+b.fh*(isDoor?0.4:0.3))+' L'+xw+','+(ytw+b.fh*(isDoor?0.94:0.72))},fg);
+          });
+          [0.34,0.68].forEach(function(t){
+            var xw=b.x-wi*t, ytw=yt-(wi*t)/2;
+            el('path',{class:'f-wl',d:'M'+xw+','+(ytw+b.fh*0.3)+' L'+xw+','+(ytw+b.fh*0.72)},fg);
+          });
+          if(b.type==='res'){
+            el('path',{class:'f-sb',d:'M'+b.x+','+(yb-1.2)+' L'+(b.x+di)+','+(yb-di/2-1.2)},fg);
+          }
+        }
         fls.push(fg);
       }
-      /* roof gear: plant room / antenna, shown once the building tops out */
+      /* what goes on the roof at handover */
       var topYb=GY-b.n*b.fh;
       var topper=null;
-      if(b.roof||b.ant){
+      if(b.type==='house'){
+        /* pitched roof + chimney */
         topper=el('g',{class:'topper'},g);
+        var rh=9, ax=b.x-b.w/2, ay=topYb-b.w/4-rh;
+        el('path',{d:'M'+b.x+','+topYb+' L'+(b.x-b.w)+','+(topYb-b.w/2)+' L'+ax+','+ay+' Z',fill:'#fff',stroke:'rgba(22,24,29,.4)','stroke-width':'1'},topper);
+        el('path',{d:'M'+b.x+','+topYb+' L'+(b.x+b.d)+','+(topYb-b.d/2)+' L'+(ax+b.d)+','+(ay-b.d/2)+' L'+ax+','+ay+' Z',fill:'rgba(22,24,29,.42)',stroke:'rgba(22,24,29,.5)','stroke-width':'1'},topper);
+        var chx=ax+b.d*0.72, chy=ay-(b.d*0.72)/2;
+        el('rect',{x:chx-1.7,y:chy-8,width:3.4,height:8,rx:.5,fill:'rgba(22,24,29,.55)'},topper);
+      }else if(b.roof||b.ant){
+        topper=el('g',{class:'topper'},g);
+        var tsc=fscale(b,b.n-1);
         if(b.roof){
-          var rx=b.x-5, ry=topYb-Math.round(b.w*0.2), rw=10, rd=8, rh=7;
-          el('path',{d:'M'+rx+','+ry+' L'+(rx-rw)+','+(ry-rw/2)+' L'+(rx-rw)+','+(ry-rw/2-rh)+' L'+rx+','+(ry-rh)+' Z',fill:'rgba(2,132,199,.14)',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
-          el('path',{d:'M'+rx+','+ry+' L'+(rx+rd)+','+(ry-rd/2)+' L'+(rx+rd)+','+(ry-rd/2-rh)+' L'+rx+','+(ry-rh)+' Z',fill:'#fff',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
-          el('path',{d:'M'+rx+','+(ry-rh)+' L'+(rx+rd)+','+(ry-rd/2-rh)+' L'+(rx+rd-rw)+','+(ry-rd/2-rw/2-rh)+' L'+(rx-rw)+','+(ry-rw/2-rh)+' Z',fill:'rgba(2,132,199,.3)',stroke:'rgba(22,24,29,.35)','stroke-width':'1'},topper);
+          var rx=b.x-5, ry=topYb-Math.round(b.w*tsc*0.2), rw=10, rd=8, rh2=7;
+          el('path',{d:'M'+rx+','+ry+' L'+(rx-rw)+','+(ry-rw/2)+' L'+(rx-rw)+','+(ry-rw/2-rh2)+' L'+rx+','+(ry-rh2)+' Z',fill:'rgba(2,132,199,.14)',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
+          el('path',{d:'M'+rx+','+ry+' L'+(rx+rd)+','+(ry-rd/2)+' L'+(rx+rd)+','+(ry-rd/2-rh2)+' L'+rx+','+(ry-rh2)+' Z',fill:'#fff',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
+          el('path',{d:'M'+rx+','+(ry-rh2)+' L'+(rx+rd)+','+(ry-rd/2-rh2)+' L'+(rx+rd-rw)+','+(ry-rd/2-rw/2-rh2)+' L'+(rx-rw)+','+(ry-rw/2-rh2)+' Z',fill:'rgba(2,132,199,.3)',stroke:'rgba(22,24,29,.35)','stroke-width':'1'},topper);
         }
         if(b.ant){
-          var ax=b.x+5, ay=topYb-Math.round(b.d*0.2);
-          el('path',{d:'M'+ax+','+ay+' L'+ax+','+(ay-19),stroke:'rgba(22,24,29,.5)','stroke-width':'1.3'},topper);
-          el('circle',{cx:ax,cy:ay-21,r:2,fill:'#ef5350'},topper);
+          var ax2=b.x+5, ay2=topYb-Math.round(b.d*tsc*0.2);
+          el('path',{d:'M'+ax2+','+ay2+' L'+ax2+','+(ay2-19),stroke:'rgba(22,24,29,.5)','stroke-width':'1.3'},topper);
+          el('circle',{cx:ax2,cy:ay2-21,r:2,fill:'#ef5350'},topper);
         }
       }
       /* tower crane, on site only while the building is under construction */
       var cr=null;
       if(b.crane){
-        var cx=b.x+b.d+16, topY=GY-b.n*b.fh-30;
-        var jl=b.x-b.w-6, jr=cx+14;
+        var cx=b.x+b.d*pmax+16, topY=GY-b.n*b.fh-30;
+        var jl=b.x-b.w*pmax-6, jr=cx+14;
         cr=el('g',{class:'crane'},g);
         var st=el('g',{stroke:'rgba(22,24,29,.5)','stroke-width':'1.2',fill:'none'},cr);
         el('path',{d:'M'+cx+','+GY+' L'+cx+','+topY},st);
