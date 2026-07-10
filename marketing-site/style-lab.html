@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restyle Lab · 10 направлений редизайна · internal</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="description" content="Internal design exploration page. Not for indexing.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎛️%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ chrome (галерейная обвязка) ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#e9ebee;color:#0b1220;-webkit-font-smoothing:antialiased}
+.lab-top{max-width:1160px;margin:0 auto;padding:72px 28px 44px}
+.lab-kicker{display:inline-flex;align-items:center;gap:10px;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#7c2d12;background:#fde8d7;border:1px solid #f5cdb0;border-radius:999px;padding:8px 14px}
+.lab-kicker i{width:7px;height:7px;border-radius:50%;background:#ea580c;display:inline-block}
+.lab-top h1{font:800 clamp(34px,5vw,54px)/1.05 'Inter Tight',sans-serif;letter-spacing:-.03em;margin:22px 0 14px}
+.lab-top h1 em{font-style:normal;color:#0284c7}
+.lab-lead{max-width:78ch;color:#3f4c60;font-size:16.5px;line-height:1.65}
+.lab-lead b{color:#0b1220}
+.lab-how{margin-top:18px;max-width:78ch;color:#5b6a7e;font-size:14.5px;line-height:1.6}
+.lab-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.lab-chips a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#22303f;background:#fff;border:1px solid rgba(15,23,42,.1);border-radius:999px;padding:8px 14px 8px 10px;font-size:13.5px;font-weight:600;transition:border-color .15s,transform .15s}
+.lab-chips a:hover{border-color:#0284c7;transform:translateY(-1px)}
+.lab-chips a b{font:700 11px/1 'JetBrains Mono',monospace;background:#0b1220;color:#fff;border-radius:999px;padding:5px 7px}
+.style-block{margin-top:26px;scroll-margin-top:10px}
+.style-meta{max-width:1160px;margin:0 auto;padding:36px 28px 18px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 28px}
+.sm-left{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.sm-num{font:700 13px/1 'JetBrains Mono',monospace;color:#94a3b8;letter-spacing:.1em}
+.style-meta h2{font:700 25px/1.15 'Inter Tight',sans-serif;letter-spacing:-.015em}
+.sm-tags{display:flex;gap:6px;flex-wrap:wrap}
+.sm-tags span{font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#475569;background:#f1f5f9;border:1px solid rgba(15,23,42,.08);border-radius:999px;padding:5px 9px}
+.style-meta p{flex-basis:100%;color:#46556a;font-size:14.5px;line-height:1.6;max-width:100ch}
+.style-meta p b{color:#0b1220}
+.demo{position:relative;overflow:hidden;min-height:790px;display:flex;flex-direction:column}
+.dz{position:relative;z-index:2;width:min(1240px,calc(100% - 88px));margin:0 auto;display:flex;flex-direction:column;flex:1}
+@media(max-width:720px){.dz{width:calc(100% - 40px)}}
+/* reveal */
+@media(prefers-reduced-motion:no-preference){
+  .style-block{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+  .style-block.in{opacity:1;transform:none}
+}
+/* dotnav */
+.dotnav{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:9px}
+.dotnav a{position:relative;width:26px;height:16px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.dotnav a i{width:8px;height:8px;border-radius:50%;background:#94a3b8;transition:all .2s;display:block}
+.dotnav a:hover i,.dotnav a.on i{background:#0284c7;transform:scale(1.45)}
+.dotnav a span{position:absolute;right:30px;top:50%;transform:translateY(-50%);white-space:nowrap;font:600 11px/1 'JetBrains Mono',monospace;background:#0b1220;color:#fff;padding:6px 9px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .15s}
+.dotnav a:hover span{opacity:1}
+@media(max-width:960px){.dotnav{display:none}}
+/* footer */
+.lab-end{max-width:1160px;margin:40px auto 90px;padding:0 28px}
+.lab-end-card{background:#0b1220;color:#e6effb;border-radius:20px;padding:44px 46px}
+.lab-end-card h2{font:800 clamp(26px,3.4vw,38px)/1.15 'Inter Tight',sans-serif;letter-spacing:-.02em;margin-bottom:14px}
+.lab-end-card p{color:#9fb1c9;font-size:15.5px;line-height:1.7;max-width:86ch}
+.lab-end-card b{color:#7dd3fc}
+@media(max-width:720px){.lab-end-card{padding:30px 24px}}
+
+/* ============ общие примитивы мокапов ============ */
+.demo{--ink:#0b1220;--mut:#5b6a7e;--acc:#0284c7}
+.dnav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:26px 0;color:var(--ink)}
+.dlogo{font:800 17px/1 'Inter Tight',sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.dlogo .l2{color:var(--mut);font-weight:600}
+.dlogo .l3{color:var(--acc)}
+.dlinks{display:flex;gap:26px;font-size:14px;font-weight:500;color:var(--mut)}
+.dlinks span{cursor:pointer;transition:color .15s}
+.dlinks span:hover{color:var(--ink)}
+.dnavr{display:flex;align-items:center;gap:10px}
+.dghost{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink);border:1px solid rgba(11,18,32,.16);border-radius:10px;padding:8px 14px}
+.dbtn{cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;background:var(--acc);border-radius:10px;padding:9px 16px}
+@media(max-width:880px){.dlinks{display:none}}
+/* fake product UI (BOQ window) */
+.fui{--fbg:#0b1220;--fbar:#0e1729;--fline:rgba(255,255,255,.07);--fink:#dbe7f6;--fmut:#7e8fa8;--facc:#38bdf8;background:var(--fbg);border:1px solid var(--fline);border-radius:14px;overflow:hidden;font-size:13px;box-shadow:0 30px 80px -30px rgba(2,10,30,.5);text-align:left}
+.fui-bar{display:flex;align-items:center;gap:8px;background:var(--fbar);border-bottom:1px solid var(--fline);padding:11px 14px;color:var(--fmut);font:500 12px/1 'JetBrains Mono',monospace}
+.fui-bar i{width:9px;height:9px;border-radius:50%;background:var(--fline);display:block}
+.fui-bar span{margin-left:8px}
+.fui-bar em{margin-left:auto;font-style:normal;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--facc)}
+.fui-r{display:grid;grid-template-columns:58px 1fr 84px 52px 100px;gap:10px;padding:11px 16px;border-bottom:1px solid var(--fline);color:var(--fink);align-items:center}
+.fui-r:last-child{border-bottom:0}
+.fui-r span:nth-child(1),.fui-r span:nth-child(3),.fui-r span:nth-child(5){font-family:'JetBrains Mono',monospace;font-size:12px}
+.fui-r span:nth-child(3),.fui-r span:nth-child(5){text-align:right}
+.fui-r span:nth-child(4){color:var(--fmut);font-size:12px}
+.fui-h{color:var(--fmut);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.fui-h span{font-size:10.5px!important}
+.fui-ai{background:color-mix(in srgb,var(--facc) 9%,transparent)}
+.fui-ai .conf{display:inline-block;margin-left:8px;font:600 10px/1 'JetBrains Mono',monospace;color:var(--facc);border:1px solid color-mix(in srgb,var(--facc) 45%,transparent);border-radius:999px;padding:3px 6px;vertical-align:1px}
+.fui-t{font-weight:700}
+.fui-t span:nth-child(5){color:var(--facc)}
+@media(max-width:680px){.fui-r{grid-template-columns:44px 1fr 84px}.fui-r span:nth-child(3),.fui-r span:nth-child(4){display:none}.fui-r span:nth-child(5){text-align:right}}
+
+/* ============ 01 SWISS PRECISION ============ */
+.s1{background:#fbfbfa;--ink:#0d0d0c;--mut:#6b7280;--acc:#0284c7;color:var(--ink)}
+.s1 .dnav{border-bottom:1px solid rgba(13,13,12,.9)}
+.s1 .dbtn{background:#0d0d0c;border-radius:0}
+.s1 .dghost{border-radius:0;border-color:rgba(13,13,12,.35)}
+.s1-cols{position:absolute;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(90deg,rgba(13,13,12,.06) 1px,transparent 1px);background-size:calc(100%/6) 100%}
+.s1-meta{display:flex;justify-content:space-between;gap:14px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#6b7280;padding:16px 0;border-bottom:1px solid rgba(13,13,12,.14)}
+.s1-meta span:nth-child(3){display:none}
+@media(min-width:880px){.s1-meta span:nth-child(3){display:inline}}
+.s1-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:54px 0 34px}
+.s1-h1{font:800 clamp(50px,8.4vw,116px)/0.98 'Inter Tight',sans-serif;letter-spacing:-.045em;max-width:12ch}
+.s1-h1 em{font-style:normal;color:var(--acc)}
+.s1-row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:44px}
+.s1-sub{max-width:52ch;color:#374151;font-size:16.5px;line-height:1.6}
+.s1-ctas{display:flex;align-items:center;gap:22px}
+.s1-btn{cursor:pointer;background:#0d0d0c;color:#fff;font-weight:600;font-size:14px;padding:15px 26px}
+.s1-link{cursor:pointer;font-weight:600;font-size:14px;border-bottom:2px solid #0d0d0c;padding-bottom:3px}
+.s1-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #0d0d0c;margin-bottom:56px}
+.s1-stats div{padding:20px 18px 4px;border-right:1px solid rgba(13,13,12,.14)}
+.s1-stats div:last-child{border-right:0}
+.s1-stats b{display:block;font:700 clamp(24px,2.6vw,34px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em}
+.s1-stats span{display:block;margin-top:8px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#6b7280}
+.s1-mark{position:absolute;right:-20px;bottom:-70px;z-index:1;font:900 clamp(200px,26vw,360px)/1 'Inter Tight',sans-serif;letter-spacing:-.05em;color:transparent;-webkit-text-stroke:1.5px rgba(13,13,12,.1);pointer-events:none;user-select:none}
+@media(max-width:680px){.s1-stats{grid-template-columns:1fr 1fr}.s1-stats div{border-bottom:1px solid rgba(13,13,12,.14)}}
+
+/* ============ 02 BLUEPRINT ============ */
+.s2{background:#f5f9fc;--ink:#0b3a5c;--mut:#4a6e8a;--acc:#0284c7;color:var(--ink);
+background-image:linear-gradient(rgba(2,132,199,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(2,132,199,.13) 1px,transparent 1px),linear-gradient(rgba(2,132,199,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(2,132,199,.05) 1px,transparent 1px);
+background-size:120px 120px,120px 120px,24px 24px,24px 24px}
+.s2-frame{position:absolute;inset:22px;border:1.5px solid rgba(11,58,92,.5);pointer-events:none;z-index:1}
+.s2-frame::before,.s2-frame::after{content:'+';position:absolute;font:400 18px/1 'JetBrains Mono',monospace;color:rgba(2,132,199,.75)}
+.s2-frame::before{top:-10px;left:-7px}
+.s2-frame::after{bottom:-9px;right:-7px}
+.s2 .dnav{padding-top:44px}
+.s2 .dlinks{font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;gap:20px}
+.s2 .dbtn{border-radius:3px}
+.s2 .dghost{border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-color:rgba(11,58,92,.35)}
+.s2-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0 30px;max-width:920px}
+.s2-eyebrow{font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);margin-bottom:22px}
+.s2-h1{font:700 clamp(44px,7.2vw,96px)/1.02 'Space Grotesk',sans-serif;letter-spacing:-.03em}
+.s2-h1 em{font-style:normal;color:var(--acc)}
+.s2-dim{display:flex;align-items:center;margin:30px 0 26px;max-width:640px}
+.s2-dim i{flex:1;height:1px;background:var(--acc);position:relative}
+.s2-dim i::before,.s2-dim i::after{content:'';position:absolute;top:-5px;width:1px;height:11px;background:var(--acc)}
+.s2-dim i:first-child::before{left:0}.s2-dim i:first-child::after{display:none}
+.s2-dim i:last-child::after{right:0}.s2-dim i:last-child::before{display:none}
+.s2-dim span{font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);padding:0 14px;white-space:nowrap}
+.s2-sub{max-width:56ch;color:#33566f;font-size:16px;line-height:1.65}
+.s2-ctas{display:flex;gap:12px;margin-top:30px}
+.s2-btn{cursor:pointer;background:var(--acc);color:#fff;font-weight:600;font-size:14px;padding:13px 22px;border-radius:3px}
+.s2-btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(11,58,92,.4);font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase}
+.s2-stats{display:flex;flex-wrap:wrap;gap:8px 26px;margin:8px 0 60px;font:500 12px/1.4 'JetBrains Mono',monospace;color:#33566f}
+.s2-stats b{color:var(--ink)}
+.s2-tb{position:absolute;right:42px;bottom:42px;z-index:2;width:250px;border:1px solid rgba(11,58,92,.55);background:rgba(255,255,255,.82);backdrop-filter:blur(4px);font-family:'JetBrains Mono',monospace}
+.s2-tb>div{display:flex;justify-content:space-between;gap:10px;padding:8px 11px;border-bottom:1px solid rgba(11,58,92,.25)}
+.s2-tb>div:last-child{border-bottom:0}
+.s2-tb span{font-size:9.5px;letter-spacing:.12em;color:#4a6e8a}
+.s2-tb b{font-size:10.5px;letter-spacing:.04em;color:var(--ink);font-weight:600;text-align:right}
+.s2-cross{position:absolute;font:400 16px/1 'JetBrains Mono',monospace;color:rgba(2,132,199,.6);z-index:1;pointer-events:none}
+@media(max-width:880px){.s2-tb{display:none}}
+
+/* ============ 03 DARK GLOW ============ */
+.s3{background:#05070d;--ink:#eef4ff;--mut:#8ba0bd;--acc:#38bdf8;color:var(--ink)}
+.s3::before{content:'';position:absolute;inset:0;background:radial-gradient(900px 480px at 50% -8%,rgba(56,189,248,.2),transparent 62%),radial-gradient(700px 420px at 84% 4%,rgba(129,140,248,.13),transparent 60%);pointer-events:none}
+.s3 .dghost{border-color:rgba(255,255,255,.16);color:#dbe7f6}
+.s3 .dbtn{background:#eef4ff;color:#0a0f1e}
+.s3-hero{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;padding:48px 0 24px}
+.s3-pill{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:#a8c8ef;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 16px;margin-bottom:28px;cursor:pointer}
+.s3-pill i{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 12px #34d399;display:block}
+.s3-pill b{color:#eef4ff;font-weight:600}
+.s3-h1{font:700 clamp(44px,6.6vw,92px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.035em;max-width:16ch}
+.s3-h1 em{font-style:normal;background:linear-gradient(92deg,#38bdf8 10%,#818cf8 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.s3-sub{max-width:62ch;color:#93a6c2;font-size:17px;line-height:1.65;margin-top:22px}
+.s3-ctas{display:flex;gap:12px;margin-top:32px}
+.s3-btn{cursor:pointer;background:#eef4ff;color:#0a0f1e;font-weight:600;font-size:14.5px;padding:13px 24px;border-radius:11px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 14px 40px -12px rgba(56,189,248,.4)}
+.s3-btn.ghost{background:rgba(255,255,255,.05);color:#dbe7f6;border:1px solid rgba(255,255,255,.14);box-shadow:none}
+.s3-fui{width:min(880px,100%);margin:52px auto 0;position:relative}
+.s3-fui::before{content:'';position:absolute;inset:-1px;border-radius:15px;background:linear-gradient(120deg,rgba(56,189,248,.5),rgba(129,140,248,.2) 40%,transparent 70%);z-index:-1;filter:blur(.5px)}
+.s3-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 30px;margin:34px 0 58px;font:500 12.5px/1 'JetBrains Mono',monospace;color:#6d819e}
+.s3-stats b{color:#b9cce8}
+
+/* ============ 04 BENTO ============ */
+.s4{background:#f3f4f6;--ink:#111826;--mut:#5c6675;--acc:#0284c7;color:var(--ink)}
+.s4 .dbtn{border-radius:12px}
+.s4 .dghost{border-radius:12px}
+.s4-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;padding:26px 0 58px;flex:1}
+.s4-t{background:#fff;border:1px solid rgba(17,24,38,.06);border-radius:22px;padding:30px;box-shadow:0 1px 2px rgba(17,24,38,.03),0 12px 32px -18px rgba(17,24,38,.1);display:flex;flex-direction:column;justify-content:space-between;min-height:150px}
+.s4-main{grid-column:span 7;grid-row:span 2;justify-content:center;gap:22px}
+.s4-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#0369a1;background:#e0f2fe;border-radius:999px;padding:7px 13px}
+.s4-h1{font:800 clamp(36px,4.6vw,62px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.035em}
+.s4-h1 em{font-style:normal;color:var(--acc)}
+.s4-sub{color:#4b5563;font-size:16px;line-height:1.6;max-width:52ch}
+.s4-ctas{display:flex;gap:10px}
+.s4-btn{cursor:pointer;background:var(--acc);color:#fff;font-weight:600;font-size:14px;padding:12px 20px;border-radius:13px}
+.s4-btn.ghost{background:#fff;color:var(--ink);border:1px solid rgba(17,24,38,.12)}
+.s4-shot{grid-column:span 5;grid-row:span 2;padding:0;overflow:hidden;background:#0b1220;border:0}
+.s4-shot .fui{border:0;border-radius:0;box-shadow:none;height:100%}
+.s4-stat b{font:800 clamp(30px,3vw,44px)/1 'Inter Tight',sans-serif;letter-spacing:-.03em}
+.s4-stat b em{font-style:normal;color:var(--acc)}
+.s4-stat span{color:#5c6675;font-size:13.5px;font-weight:500;margin-top:10px}
+.s4-stat{grid-column:span 3}
+.s4-langs{grid-column:span 3}
+.s4-langs .cl{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.s4-langs .cl i{font:600 10px/1 'JetBrains Mono',monospace;color:#475569;background:#f1f5f9;border-radius:6px;padding:5px 6px;font-style:normal}
+.s4-dark{grid-column:span 3;background:#0b1220;color:#eaf2ff;border-color:#0b1220;cursor:pointer}
+.s4-dark b{font:700 19px/1.3 'Inter Tight',sans-serif}
+.s4-dark span{color:#7dd3fc;font-size:13.5px;font-weight:600;margin-top:10px}
+@media(max-width:1020px){.s4-main{grid-column:span 12}.s4-shot{grid-column:span 12;min-height:320px}.s4-stat,.s4-langs,.s4-dark{grid-column:span 6}}
+@media(max-width:620px){.s4-stat,.s4-langs,.s4-dark{grid-column:span 12}}
+
+/* ============ 05 EDITORIAL SERIF ============ */
+.s5{background:#faf6ef;--ink:#23201b;--mut:#7c7266;--acc:#b4441f;color:var(--ink)}
+.s5 .dlogo .l3{color:var(--acc)}
+.s5 .dbtn{background:var(--ink);border-radius:0;padding:9px 18px}
+.s5 .dghost{border-radius:0;border-color:rgba(35,32,27,.3)}
+.s5 .dnav{border-bottom:1px solid rgba(35,32,27,.16)}
+.s5-hero{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;padding:52px 0 20px}
+.s5-kicker{display:flex;align-items:center;gap:16px;width:min(560px,100%);margin-bottom:34px;color:#8a7f70;font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.24em;text-transform:uppercase}
+.s5-kicker::before,.s5-kicker::after{content:'';flex:1;height:1px;background:rgba(35,32,27,.22)}
+.s5-h1{font:400 clamp(52px,8.2vw,116px)/1.02 'Instrument Serif',serif;letter-spacing:-.015em;max-width:14ch}
+.s5-h1 em{font-style:italic;color:var(--acc)}
+.s5-sub{font-size:17.5px;line-height:1.7;color:#5c5347;max-width:58ch;margin-top:26px}
+.s5-cols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px;width:100%;max-width:980px;margin:52px auto 62px;text-align:left}
+.s5-cols>div{border-top:1px solid rgba(35,32,27,.3);padding-top:18px}
+.s5-cols h4{font:600 10.5px/1 'Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#8a7f70;margin-bottom:14px}
+.s5-drop{font-size:15px;line-height:1.75;color:#4a4237}
+.s5-drop::first-letter{font:400 54px/0.8 'Instrument Serif',serif;float:left;padding:8px 10px 0 0;color:var(--ink)}
+.s5-list{list-style:none;font-size:14.5px;line-height:2.1;color:#4a4237}
+.s5-list b{font:400 15px 'Instrument Serif',serif;font-style:italic;color:var(--acc);margin-right:8px}
+.s5-ctacol span{display:block;cursor:pointer;font-weight:600;font-size:15px;margin-bottom:14px;border-bottom:1px solid var(--ink);padding-bottom:5px;width:fit-content}
+.s5-ctacol span.q{border-color:transparent;color:#7c7266;font-weight:500}
+.s5-pgnum{position:absolute;bottom:26px;font:400 12px 'Instrument Serif',serif;color:#8a7f70;z-index:2}
+.s5-pgnum.l{left:34px}.s5-pgnum.r{right:34px}
+@media(max-width:880px){.s5-cols{grid-template-columns:1fr;gap:24px}}
+
+/* ============ 06 LEDGER BRUTALISM ============ */
+.s6{background:#fff;--ink:#0a0a0a;--mut:#4b4b4b;--acc:#ff4d00;color:var(--ink)}
+.s6 .dnav{border:1px solid var(--ink);padding:0;margin-top:30px}
+.s6 .dlogo{padding:16px 18px;border-right:1px solid var(--ink)}
+.s6 .dlinks{padding:0 18px;font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.s6 .dnavr{margin-left:auto;gap:0;align-self:stretch}
+.s6 .dghost{border:0;border-left:1px solid var(--ink);border-radius:0;align-self:stretch;display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;padding:0 18px}
+.s6 .dbtn{background:var(--ink);border-radius:0;align-self:stretch;display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:0 18px}
+.s6-sheet{border:1px solid var(--ink);border-top:0;margin-top:34px;font-size:14px}
+.s6-row{display:grid;grid-template-columns:64px 1fr 110px 90px 130px;border-top:1px solid var(--ink)}
+.s6-row>*{padding:12px 14px;border-right:1px solid var(--ink);display:flex;align-items:center}
+.s6-row>*:last-child{border-right:0}
+.s6-row .num,.s6-row .qty,.s6-row .tot{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.s6-row .qty,.s6-row .tot{justify-content:flex-end}
+.s6-row .unit{color:var(--mut);font-family:'JetBrains Mono',monospace;font-size:12px}
+.s6-head>*{padding:9px 14px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.s6-heror{grid-template-columns:64px 1fr}
+.s6-heror .num{align-items:flex-start;padding-top:20px}
+.s6-hero{display:block;padding:34px 26px 30px}
+.s6-h1{font:400 clamp(38px,6.4vw,84px)/0.96 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+.s6-h1 em{font-style:normal;color:var(--acc)}
+.s6-hero p{margin-top:18px;max-width:64ch;color:#333;font-size:15px;line-height:1.6}
+.s6-r:hover{background:var(--ink);color:#fff}
+.s6-r:hover .unit{color:#bbb}
+.s6-total{background:var(--ink);color:#fff}
+.s6-total .tot{background:var(--acc);color:#fff;font-weight:700}
+.s6-total .desc{font:600 12px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase}
+.s6-ctas{display:flex;gap:0;margin:26px 0 60px}
+.s6-btn{cursor:pointer;background:var(--acc);color:#fff;font:600 13px/1 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:17px 28px;border:1px solid var(--acc)}
+.s6-btn:hover{background:var(--ink);border-color:var(--ink)}
+.s6-btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--ink);border-left:0}
+.s6-btn.ghost:hover{background:var(--ink);color:#fff}
+@media(max-width:760px){.s6-row{grid-template-columns:48px 1fr 100px}.s6-row .qty,.s6-row .unit{display:none}}
+
+/* ============ 07 LIQUID GLASS ============ */
+.s7{background:#eaf1f9;color:#0b2540;--ink:#0b2540;--mut:#48617c;--acc:#0284c7}
+.s7-blobs i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;pointer-events:none;will-change:transform}
+.s7-blobs .b1{width:600px;height:600px;background:#7dd3fc;top:-160px;left:4%}
+.s7-blobs .b2{width:520px;height:520px;background:#c4b5fd;top:-60px;right:-6%}
+.s7-blobs .b3{width:640px;height:420px;background:#a7f3d0;bottom:-180px;left:32%}
+@media(prefers-reduced-motion:no-preference){
+.live .s7-blobs .b1{animation:s7f 16s ease-in-out infinite alternate}
+.live .s7-blobs .b2{animation:s7f 19s ease-in-out infinite alternate-reverse}
+@keyframes s7f{to{transform:translate(50px,36px)}}
+}
+.s7 .dnav{margin-top:22px;background:rgba(255,255,255,.5);backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);border:1px solid rgba(255,255,255,.7);border-radius:999px;padding:10px 12px 10px 22px;box-shadow:0 14px 44px -18px rgba(15,40,80,.25),inset 0 1px 0 rgba(255,255,255,.8)}
+.s7 .dbtn{border-radius:999px;background:rgba(2,132,199,.92);box-shadow:0 10px 26px -10px rgba(2,132,199,.7)}
+.s7 .dghost{border-radius:999px;background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.8)}
+.s7-hero{flex:1;display:flex;align-items:center;padding:44px 0 64px}
+.s7-panel{width:100%;background:rgba(255,255,255,.44);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);border:1px solid rgba(255,255,255,.65);border-radius:32px;box-shadow:0 34px 90px -34px rgba(15,40,80,.35),inset 0 1px 0 rgba(255,255,255,.85);padding:clamp(30px,5vw,64px);display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center}
+.s7-pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#075985;background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85);border-radius:999px;padding:7px 14px;margin-bottom:20px;box-shadow:inset 0 1px 0 #fff}
+.s7-h1{font:700 clamp(38px,5.2vw,72px)/1.04 'Inter Tight',sans-serif;letter-spacing:-.035em}
+.s7-h1 em{font-style:normal;color:var(--acc)}
+.s7-sub{color:#3c5876;font-size:16.5px;line-height:1.65;max-width:50ch;margin-top:18px}
+.s7-ctas{display:flex;gap:10px;margin-top:28px}
+.s7-btn{cursor:pointer;background:rgba(2,132,199,.92);color:#fff;font-weight:600;font-size:14.5px;padding:13px 24px;border-radius:999px;box-shadow:0 14px 30px -12px rgba(2,132,199,.75),inset 0 1px 0 rgba(255,255,255,.35)}
+.s7-btn.ghost{background:rgba(255,255,255,.6);color:#0b2540;border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 0 #fff}
+.s7-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}
+.s7-chips i{font:600 11.5px/1 'JetBrains Mono',monospace;font-style:normal;color:#075985;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:8px 12px;box-shadow:inset 0 1px 0 #fff}
+.s7-fui .fui{--fbg:rgba(255,255,255,.55);--fbar:rgba(255,255,255,.5);--fline:rgba(11,37,64,.09);--fink:#123c5e;--fmut:#597b97;--facc:#0284c7;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.75);box-shadow:0 26px 60px -28px rgba(15,40,80,.4),inset 0 1px 0 rgba(255,255,255,.9)}
+@media(max-width:1040px){.s7-panel{grid-template-columns:1fr}.s7-fui{order:2}}
+
+/* ============ 08 TERMINAL ============ */
+.s8{background:#0a0f14;--ink:#e7f2ee;--mut:#8ba39b;--acc:#2dd4bf;color:var(--ink);font-family:'JetBrains Mono',monospace}
+.s8::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px);pointer-events:none}
+.s8 .dnav{font-family:'JetBrains Mono',monospace}
+.s8 .dlogo{font:700 14px 'JetBrains Mono',monospace;color:var(--acc)}
+.s8 .dlogo .l2,.s8 .dlogo .l3{color:var(--acc)}
+.s8 .dlinks{font-size:12.5px;gap:18px}
+.s8 .dlinks span::before{content:'['}
+.s8 .dlinks span::after{content:']'}
+.s8 .dghost{border-radius:4px;border-color:#22333c;color:#b7ccc4;font-family:'JetBrains Mono',monospace;font-size:12px}
+.s8 .dbtn{border-radius:4px;background:var(--acc);color:#06231e;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+.s8-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:44px 0 20px;max-width:900px}
+.s8-cmd{font-size:13.5px;color:#8ba39b;margin-bottom:26px}
+.s8-cmd b{color:var(--acc);font-weight:600}
+.s8-cmd em{font-style:normal;color:#e7f2ee}
+.s8-h1{font:700 clamp(30px,4.8vw,64px)/1.14 'JetBrains Mono',monospace;letter-spacing:-.03em;text-transform:uppercase}
+.s8-h1 em{font-style:normal;color:var(--acc)}
+.s8-cursor{display:inline-block;width:.55em;height:1em;background:var(--acc);vertical-align:-.12em;margin-left:6px}
+@media(prefers-reduced-motion:no-preference){.live .s8-cursor{animation:s8b 1.1s steps(1) infinite}@keyframes s8b{50%{opacity:0}}}
+.s8-sub{color:#9db5ad;font-size:14px;line-height:1.8;max-width:66ch;margin-top:22px;font-family:'JetBrains Mono',monospace}
+.s8-ctas{display:flex;gap:10px;margin-top:30px}
+.s8-btn{cursor:pointer;background:var(--acc);color:#06231e;font:700 13px 'JetBrains Mono',monospace;padding:13px 20px;border-radius:4px}
+.s8-btn.ghost{background:transparent;color:#b7ccc4;border:1px solid #22333c}
+.s8-log{width:min(760px,100%);margin:44px 0 60px;background:#0c1319;border:1px solid #1c2b33;border-radius:8px;overflow:hidden;font-size:12.5px}
+.s8-log-bar{display:flex;gap:7px;align-items:center;background:#0f1820;border-bottom:1px solid #1c2b33;padding:10px 13px;color:#5f7a72;font-size:11.5px}
+.s8-log-bar i{width:8px;height:8px;border-radius:50%;background:#1c2b33;display:block}
+.s8-log-bar span{margin-left:6px}
+.s8-line{display:flex;gap:14px;padding:8px 16px;color:#9db5ad;border-bottom:1px solid rgba(28,43,51,.5)}
+.s8-line:last-child{border-bottom:0}
+.s8-line .ok{color:var(--acc);flex:0 0 62px}
+.s8-line .ms{margin-left:auto;color:#5f7a72}
+.s8-line.rdy{background:rgba(45,212,191,.07);color:#d9efe9}
+.s8-line.rdy .ok{color:#06231e;background:var(--acc);border-radius:3px;text-align:center;font-weight:700}
+
+/* ============ 09 KINETIC TYPE ============ */
+.s9{background:#fff;--ink:#0a0a0a;--mut:#555;--acc:#0284c7;color:var(--ink)}
+.s9 .dbtn{border-radius:999px;background:#0a0a0a}
+.s9 .dghost{border-radius:999px}
+.s9-hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0 0}
+.s9-l{font:900 clamp(50px,9.6vw,138px)/0.95 'Inter Tight',sans-serif;letter-spacing:-.045em;text-transform:uppercase}
+.s9-l.out{color:transparent;-webkit-text-stroke:2px #0a0a0a}
+.s9-l.out em{font-style:normal;color:var(--acc);-webkit-text-stroke:0}
+.s9-band{margin:14px calc(50% - 50vw);background:var(--acc);transform:rotate(-1.4deg) scale(1.03);overflow:hidden}
+.s9-band-in{display:flex;white-space:nowrap;width:max-content}
+@media(prefers-reduced-motion:no-preference){.live .s9-band-in{animation:s9m 17s linear infinite}@keyframes s9m{to{transform:translateX(-50%)}}}
+.s9-band b{font:900 clamp(34px,6vw,84px)/1.22 'Inter Tight',sans-serif;letter-spacing:-.03em;text-transform:uppercase;color:#fff;padding:0 .35em;flex:none}
+.s9-band b i{font-style:normal;color:rgba(255,255,255,.45);padding:0 .35em}
+.s9-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:26px;margin:44px 0 64px}
+.s9-sub{max-width:52ch;color:#444;font-size:16.5px;line-height:1.65}
+.s9-ctas{display:flex;align-items:center;gap:18px}
+.s9-circle{cursor:pointer;width:128px;height:128px;border-radius:50%;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:14.5px;transition:transform .25s,background .25s}
+.s9-circle small{font-weight:500;font-size:11px;color:#9ab8ce}
+.s9-circle:hover{transform:scale(1.06) rotate(-4deg);background:var(--acc)}
+.s9-link{cursor:pointer;font-weight:700;font-size:14.5px;border-bottom:2px solid #0a0a0a;padding-bottom:3px}
+
+/* ============ 10 WARM CONCRETE ============ */
+.s10{background:#e9e5df;--ink:#292420;--mut:#6d655c;--acc:#a84b2f;color:var(--ink)}
+.s10::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.05;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.s10 .dbtn{background:var(--acc);border-radius:12px}
+.s10 .dghost{border-color:rgba(41,36,32,.2);border-radius:12px}
+.s10-hero{flex:1;display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center;padding:44px 0 64px}
+.s10-chip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--acc);background:rgba(168,75,47,.1);border-radius:999px;padding:8px 14px;margin-bottom:24px}
+.s10-h1{font:700 clamp(40px,5.8vw,80px)/1.06 'Inter',sans-serif;letter-spacing:-.03em}
+.s10-h1 em{font-style:normal;color:var(--acc)}
+.s10-sub{color:#5d554b;font-size:17px;line-height:1.7;max-width:50ch;margin-top:22px}
+.s10-ctas{display:flex;gap:12px;margin-top:32px}
+.s10-btn{cursor:pointer;background:var(--acc);color:#fff;font-weight:600;font-size:14.5px;padding:14px 24px;border-radius:14px;box-shadow:0 14px 30px -14px rgba(168,75,47,.55)}
+.s10-btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(41,36,32,.22);box-shadow:none}
+.s10-stats{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:40px;color:#6d655c;font-size:13.5px;font-weight:500}
+.s10-stats b{color:var(--ink);font-weight:700}
+.s10-panel{background:#f6f3ed;border:1px solid rgba(60,50,40,.09);border-radius:28px;padding:22px;box-shadow:0 1px 2px rgba(60,50,40,.05),0 30px 70px -36px rgba(60,50,40,.4)}
+.s10-panel .fui{--fbg:#fdfbf7;--fbar:#f1ece3;--fline:rgba(60,50,40,.1);--fink:#3a332c;--fmut:#8a8074;--facc:#a84b2f;box-shadow:none;border-color:rgba(60,50,40,.12)}
+@media(max-width:980px){.s10-hero{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="lab-top">
+  <span class="lab-kicker"><i></i>internal · noindex · не в навигации</span>
+  <h1>Restyle Lab: <em>10 направлений</em> для нового openconstructionerp.com</h1>
+  <p class="lab-lead">Каждый блок ниже - это <b>живой мокап новой главной страницы</b> в одном из 10 актуальных
+  минималистичных стилей 2026 года. Контент везде одинаковый (реальный headline, реальные CTA и цифры),
+  меняется только визуальный язык - так честнее сравнивать. Все мокапы свёрстаны вживую, не картинки:
+  можно смотреть на разных ширинах экрана.</p>
+  <p class="lab-how">Как выбирать: листай вниз (справа точки-навигация), отметь 1-2 фаворита.
+  Можно миксовать: «основа 07, типографика из 01, тёмная секция из 03». Страница закрыта от индексации
+  (noindex, ссылок на неё с сайта нет).</p>
+  <nav class="lab-chips">
+    <a href="#s1"><b>01</b>Swiss Precision</a>
+    <a href="#s2"><b>02</b>Blueprint</a>
+    <a href="#s3"><b>03</b>Dark Glow</a>
+    <a href="#s4"><b>04</b>Bento</a>
+    <a href="#s5"><b>05</b>Editorial Serif</a>
+    <a href="#s6"><b>06</b>Ledger Brutalism</a>
+    <a href="#s7"><b>07</b>Liquid Glass</a>
+    <a href="#s8"><b>08</b>Terminal</a>
+    <a href="#s9"><b>09</b>Kinetic Type</a>
+    <a href="#s10"><b>10</b>Warm Concrete</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- ==================== 01 SWISS ==================== -->
+<section class="style-block" id="s1">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">01</span><h2>Swiss Precision</h2>
+      <div class="sm-tags"><span>светлый</span><span>типографика</span><span>сетка</span><span>вне времени</span></div>
+    </div>
+    <p>Швейцарская школа 2.0: огромный шрифт, видимая колоночная сетка, mono-подписи, один акцентный цвет.
+    Самый <b>«дорогой» и вневременной</b> вариант - так сейчас выглядят сильные инженерные бренды.
+    Риск: требует дисциплины в контенте, «шума» не прощает.</p>
+  </div>
+  <div class="demo s1">
+    <div class="s1-cols" aria-hidden="true"></div>
+    <div class="s1-mark" aria-hidden="true">01</div>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s1-meta"><span>Open-source construction ERP</span><span>v10.8.0</span><span>Est. 2025</span><span>AGPL-3.0</span></div>
+      <div class="s1-hero">
+        <h1 class="s1-h1">Run the whole construction <em>project.</em></h1>
+        <div class="s1-row">
+          <p class="s1-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time stay in sync with the drawings and the BOQ behind them.</p>
+          <div class="s1-ctas"><span class="s1-btn">Install now</span><span class="s1-link">Star on GitHub</span></div>
+        </div>
+      </div>
+      <div class="s1-stats">
+        <div><b>149</b><span>modules</span></div>
+        <div><b>55,000+</b><span>cost items</span></div>
+        <div><b>26</b><span>languages</span></div>
+        <div><b>AGPL-3.0</b><span>open source</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 02 BLUEPRINT ==================== -->
+<section class="style-block" id="s2">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">02</span><h2>Blueprint / Drafting</h2>
+      <div class="sm-tags"><span>светлый</span><span>отраслевой</span><span>инженерный</span><span>уникальный</span></div>
+    </div>
+    <p>Язык рабочих чертежей: миллиметровка, рамка листа, размерные линии, штамп в углу.
+    <b>Никто из конкурентов так не выглядит</b>, а наша аудитория (сметчики, инженеры ПТО) считывает этот язык мгновенно.
+    Риск: легко переборщить с декором - держать всё тонким.</p>
+  </div>
+  <div class="demo s2">
+    <div class="s2-frame" aria-hidden="true"></div>
+    <span class="s2-cross" style="top:130px;right:18%" aria-hidden="true">+</span>
+    <span class="s2-cross" style="bottom:180px;left:12%" aria-hidden="true">+</span>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s2-hero">
+        <div class="s2-eyebrow">Drawing № OCE-2026 · Rev B · Open-source construction ERP</div>
+        <h1 class="s2-h1">Run the whole construction <em>project</em></h1>
+        <div class="s2-dim"><i></i><span>full scope · estimate to handover</span><i></i></div>
+        <p class="s2-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Figures stay in sync with the drawings and the BOQ behind them.</p>
+        <div class="s2-ctas"><span class="s2-btn">Install now</span><span class="s2-btn ghost">Star on GitHub</span></div>
+        <div class="s2-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span><span><b>AGPL-3.0</b></span></div>
+      </div>
+    </div>
+    <div class="s2-tb" aria-hidden="true">
+      <div><span>PROJECT</span><b>OPENCONSTRUCTIONERP</b></div>
+      <div><span>DRAWING</span><b>HOMEPAGE / REDESIGN</b></div>
+      <div><span>SCALE</span><b>1 : 1</b></div>
+      <div><span>SHEET</span><b>02 / 10</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 03 DARK GLOW ==================== -->
+<section class="style-block" id="s3">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">03</span><h2>Dark Glow</h2>
+      <div class="sm-tags"><span>тёмный</span><span>saas-стандарт</span><span>продукт в центре</span></div>
+    </div>
+    <p>Тёмная тема с мягким свечением, стеклянные карточки, градиентное слово в заголовке, продукт-окно с подсветкой.
+    Это <b>де-факто стандарт современных dev/SaaS-продуктов</b> - выглядит дорого и знакомо технической аудитории.
+    Риск: таких сайтов много, нужен свой характер (наш - реальное BOQ-окно).</p>
+  </div>
+  <div class="demo s3">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s3-hero">
+        <span class="s3-pill"><i></i><b>v10.8.0</b>&nbsp;· open source on GitHub</span>
+        <h1 class="s3-h1">Run the whole <em>construction project</em></h1>
+        <p class="s3-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.</p>
+        <div class="s3-ctas"><span class="s3-btn">Install now</span><span class="s3-btn ghost">Star on GitHub</span></div>
+        <div class="s3-fui">
+          <div class="fui">
+            <div class="fui-bar"><i></i><i></i><i></i><span>riverside-tower / boq</span><em>synced</em></div>
+            <div class="fui-r fui-h"><span>POS</span><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
+            <div class="fui-r"><span>01.02</span><span>In-situ concrete wall C30/37, 24 cm</span><span>412.0</span><span>m³</span><span>131,180</span></div>
+            <div class="fui-r"><span>01.03</span><span>Reinforcement B500B, ø12-25</span><span>48.6</span><span>t</span><span>68,040</span></div>
+            <div class="fui-r fui-ai"><span>02.01</span><span>Interior plaster, 2 coats<span class="conf">AI · 87%</span></span><span>2,410</span><span>m²</span><span>54,230</span></div>
+            <div class="fui-r fui-t"><span></span><span>Estimate total</span><span></span><span></span><span>2,148,900</span></div>
+          </div>
+        </div>
+        <div class="s3-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span><span><b>AGPL-3.0</b> licence</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 04 BENTO ==================== -->
+<section class="style-block" id="s4">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">04</span><h2>Bento Modular</h2>
+      <div class="sm-tags"><span>светлый</span><span>карточки</span><span>много фактов сразу</span></div>
+    </div>
+    <p>Всё - плитки одной сетки: заголовок, живое окно продукта, цифры, языки, CTA. Формат, который задал тон
+    последним поколениям продуктовых сайтов. <b>Идеален для нас:</b> платформа модульная, и сетка это буквально показывает.
+    Риск: может выглядеть «как у всех», если не наполнить плитки живым продуктом.</p>
+  </div>
+  <div class="demo s4">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s4-grid">
+        <div class="s4-t s4-main">
+          <span class="s4-chip">v10.8.0 · open source on GitHub</span>
+          <h1 class="s4-h1">Run the whole construction <em>project.</em></h1>
+          <p class="s4-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Everything stays in sync with the BOQ behind it.</p>
+          <div class="s4-ctas"><span class="s4-btn">Install now</span><span class="s4-btn ghost">Star on GitHub</span></div>
+        </div>
+        <div class="s4-t s4-shot">
+          <div class="fui">
+            <div class="fui-bar"><i></i><i></i><i></i><span>riverside-tower / boq</span><em>synced</em></div>
+            <div class="fui-r fui-h"><span>POS</span><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
+            <div class="fui-r"><span>01.02</span><span>Concrete wall C30/37, 24 cm</span><span>412.0</span><span>m³</span><span>131,180</span></div>
+            <div class="fui-r"><span>01.03</span><span>Reinforcement B500B</span><span>48.6</span><span>t</span><span>68,040</span></div>
+            <div class="fui-r fui-ai"><span>02.01</span><span>Interior plaster<span class="conf">AI · 87%</span></span><span>2,410</span><span>m²</span><span>54,230</span></div>
+            <div class="fui-r"><span>02.04</span><span>Aerated block masonry 36.5</span><span>1,286</span><span>m²</span><span>92,590</span></div>
+            <div class="fui-r fui-t"><span></span><span>Estimate total</span><span></span><span></span><span>2,148,900</span></div>
+          </div>
+        </div>
+        <div class="s4-t s4-stat"><b>149<em>+</em></b><span>modules, from takeoff to handover</span></div>
+        <div class="s4-t s4-stat"><b>55k</b><span>cost items in the open CWICR database</span></div>
+        <div class="s4-t s4-langs"><b style="font:800 30px/1 'Inter Tight',sans-serif">26</b>
+          <div class="cl"><i>EN</i><i>DE</i><i>FR</i><i>ES</i><i>IT</i><i>PT</i><i>NL</i><i>PL</i><i>RU</i><i>TR</i><i>ZH</i><i>JA</i><i>KO</i><i>AR</i><i>+12</i></div>
+        </div>
+        <div class="s4-t s4-dark"><b>Self-hosted. Your data stays yours.</b><span>Install in one command →</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 05 EDITORIAL ==================== -->
+<section class="style-block" id="s5">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">05</span><h2>Editorial Serif</h2>
+      <div class="sm-tags"><span>светлый</span><span>журнальный</span><span>серифы</span><span>тренд 2025-26</span></div>
+    </div>
+    <p>Архитектурный журнал: крупная антиква с курсивом, крем-бумага, буквица, тонкие линейки.
+    Серифный ренессанс - один из главных трендов, выделяет среди «одинаковых SaaS».
+    <b>Очень человечный и премиальный</b>. Риск: меньше «софтверности» - продукт надо показывать ниже по странице.</p>
+  </div>
+  <div class="demo s5">
+    <span class="s5-pgnum l" aria-hidden="true">№ 05</span>
+    <span class="s5-pgnum r" aria-hidden="true">MMXXVI</span>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s5-hero">
+        <div class="s5-kicker">The open construction platform · since 2025</div>
+        <h1 class="s5-h1">Run the whole <em>construction project.</em></h1>
+        <p class="s5-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Open source, self-hosted, in 26 languages.</p>
+        <div class="s5-cols">
+          <div>
+            <h4>From the editors</h4>
+            <p class="s5-drop">Construction runs on documents that disagree with each other. The estimate says one thing, the schedule another, the site diary a third. We built one platform where the BOQ, the drawings and the field reports share a single source of truth.</p>
+          </div>
+          <div>
+            <h4>In this platform</h4>
+            <ul class="s5-list">
+              <li><b>i.</b>Estimates & BOQ, 55k cost items</li>
+              <li><b>ii.</b>Takeoff from PDF and BIM</li>
+              <li><b>iii.</b>Tenders, contracts, payments</li>
+              <li><b>iv.</b>Site diaries & quality control</li>
+            </ul>
+          </div>
+          <div class="s5-ctacol">
+            <h4>Begin</h4>
+            <span>Install now →</span>
+            <span>Star on GitHub →</span>
+            <span class="q">AGPL-3.0 · 149 modules</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 06 LEDGER ==================== -->
+<section class="style-block" id="s6">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">06</span><h2>Ledger Brutalism</h2>
+      <div class="sm-tags"><span>светлый</span><span>дерзкий</span><span>смета как приём</span><span>сигнальный оранжевый</span></div>
+    </div>
+    <p>Необроутализм, прирученный сметой: вся главная - это ведомость работ с позициями, единицами и итогом
+    <b>TOTAL: €0.00 (open source)</b>. Жёсткие линии, Archivo Black, сигнальный оранжевый со стройплощадки.
+    Самый смелый и самый запоминающийся вариант. Риск: полярный - либо влюбляет, либо отпугивает консервативных клиентов.</p>
+  </div>
+  <div class="demo s6">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Standards</span><span>News</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s6-sheet">
+        <div class="s6-row s6-head"><span>Pos</span><span>Description of works</span><span class="qty">Qty</span><span>Unit</span><span class="tot">Total</span></div>
+        <div class="s6-row s6-heror"><span class="num">00</span>
+          <div class="s6-hero">
+            <h1 class="s6-h1">Run the whole construction project<em>.</em></h1>
+            <p>Open-source ERP for construction teams. Estimates, schedules, tenders, contracts, site tasks and reporting in one install.</p>
+          </div>
+        </div>
+        <div class="s6-row s6-r"><span class="num">01</span><span>Estimating, BOQ & cost databases</span><span class="qty">55,000</span><span class="unit">items</span><span class="tot">included</span></div>
+        <div class="s6-row s6-r"><span class="num">02</span><span>Takeoff from PDF drawings & BIM models</span><span class="qty">149</span><span class="unit">modules</span><span class="tot">included</span></div>
+        <div class="s6-row s6-r"><span class="num">03</span><span>Tenders, contracts, site control & reporting</span><span class="qty">26</span><span class="unit">langs</span><span class="tot">included</span></div>
+        <div class="s6-row s6-total"><span></span><span class="desc">Total · AGPL-3.0 open source</span><span class="qty"></span><span class="unit"></span><span class="tot">€ 0.00</span></div>
+      </div>
+      <div class="s6-ctas"><span class="s6-btn">Install now</span><span class="s6-btn ghost">Star on GitHub</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 07 LIQUID GLASS ==================== -->
+<section class="style-block" id="s7">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">07</span><h2>Liquid Glass</h2>
+      <div class="sm-tags"><span>светлый</span><span>стекло</span><span>главный тренд 2025-26</span><span>мягкий</span></div>
+    </div>
+    <p>Матовое стекло поверх мягких цветовых пятен: плавающая стеклянная навигация, полупрозрачные панели,
+    блики. Язык, который сейчас <b>задаёт тон всем ОС и премиальным продуктам</b> - ощущается максимально «2026».
+    Риск: на слабых машинах blur дороже, и нужен контроль контраста текста.</p>
+  </div>
+  <div class="demo s7">
+    <div class="s7-blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s7-hero">
+        <div class="s7-panel">
+          <div>
+            <span class="s7-pill">v10.8.0 · open source on GitHub</span>
+            <h1 class="s7-h1">Run the whole construction <em>project.</em></h1>
+            <p class="s7-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time stay in sync with the BOQ.</p>
+            <div class="s7-ctas"><span class="s7-btn">Install now</span><span class="s7-btn ghost">Star on GitHub</span></div>
+            <div class="s7-chips"><i>149 modules</i><i>55k cost items</i><i>26 languages</i><i>AGPL-3.0</i></div>
+          </div>
+          <div class="s7-fui">
+            <div class="fui">
+              <div class="fui-bar"><i></i><i></i><i></i><span>riverside-tower / boq</span><em>synced</em></div>
+              <div class="fui-r fui-h"><span>POS</span><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
+              <div class="fui-r"><span>01.02</span><span>Concrete wall C30/37</span><span>412.0</span><span>m³</span><span>131,180</span></div>
+              <div class="fui-r"><span>01.03</span><span>Reinforcement B500B</span><span>48.6</span><span>t</span><span>68,040</span></div>
+              <div class="fui-r fui-ai"><span>02.01</span><span>Interior plaster<span class="conf">AI · 87%</span></span><span>2,410</span><span>m²</span><span>54,230</span></div>
+              <div class="fui-r fui-t"><span></span><span>Estimate total</span><span></span><span></span><span>2,148,900</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 08 TERMINAL ==================== -->
+<section class="style-block" id="s8">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">08</span><h2>Terminal / Console</h2>
+      <div class="sm-tags"><span>тёмный</span><span>моноширинный</span><span>dev-аудитория</span><span>self-hosted</span></div>
+    </div>
+    <p>Всё моноширинным шрифтом, лог запуска сервера, мигающий курсор, кнопки-скобки.
+    Говорит на языке тех, кто будет ставить систему себе на сервер: <b>«одна команда - и работает»</b>.
+    Отлично подчёркивает open source и self-hosted. Риск: сметчику-нетехнарю может показаться суровым.</p>
+  </div>
+  <div class="demo s8">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">~/open-construction-erp</div>
+        <div class="dlinks"><span>product</span><span>standards</span><span>news</span><span>docs</span></div>
+        <div class="dnavr"><span class="dghost">github</span><span class="dbtn">get_demo</span></div>
+      </div>
+      <div class="s8-hero">
+        <div class="s8-cmd"><b>$</b> pip install <em>openconstructionerp</em> <span style="color:#5f7a72">// one command, no Docker, no cloud</span></div>
+        <h1 class="s8-h1">Run the whole <em>construction</em> project<span class="s8-cursor" aria-hidden="true"></span></h1>
+        <p class="s8-sub">open-source erp for construction teams. estimates, schedules, tenders, contracts, site tasks and reporting in one install. self-hosted: your data never leaves your server.</p>
+        <div class="s8-ctas"><span class="s8-btn">[ install now ]</span><span class="s8-btn ghost">[ star on github ]</span></div>
+        <div class="s8-log">
+          <div class="s8-log-bar"><i></i><i></i><i></i><span>oce serve --port 8080</span></div>
+          <div class="s8-line"><span class="ok">[ ok ]</span><span>boq.engine · 55,000 cost items</span><span class="ms">12 ms</span></div>
+          <div class="s8-line"><span class="ok">[ ok ]</span><span>takeoff.pdf + takeoff.bim</span><span class="ms">38 ms</span></div>
+          <div class="s8-line"><span class="ok">[ ok ]</span><span>tenders.gaeb · contracts · payments</span><span class="ms">9 ms</span></div>
+          <div class="s8-line"><span class="ok">[ ok ]</span><span>i18n · 26 locales loaded</span><span class="ms">21 ms</span></div>
+          <div class="s8-line rdy"><span class="ok">ready</span><span>http://localhost:8080 · 149 modules · AGPL-3.0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 09 KINETIC ==================== -->
+<section class="style-block" id="s9">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">09</span><h2>Kinetic Type</h2>
+      <div class="sm-tags"><span>светлый</span><span>движение</span><span>плакатный</span><span>смелый</span></div>
+    </div>
+    <p>Плакатная типографика в движении: гигантские строки, бегущая лента с этапами стройки, контурное слово.
+    Ощущение энергии и уверенности, <b>очень заметно и очень «сейчас»</b>.
+    Риск: движение должно быть дозированным (у нас лента одна и уважает reduced-motion).</p>
+  </div>
+  <div class="demo s9">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s9-hero">
+        <div class="s9-l">Run the whole</div>
+        <div class="s9-band" aria-hidden="true"><div class="s9-band-in">
+          <b>Estimate<i>·</i>Takeoff<i>·</i>Tender<i>·</i>Schedule<i>·</i>Site<i>·</i>Handover<i>·</i></b>
+          <b>Estimate<i>·</i>Takeoff<i>·</i>Tender<i>·</i>Schedule<i>·</i>Site<i>·</i>Handover<i>·</i></b>
+        </div></div>
+        <div class="s9-l out">construction <em>project.</em></div>
+        <div class="s9-row">
+          <p class="s9-sub">Open-source ERP for construction teams. One install, 149 modules, 26 languages. Cost and time stay in sync with the BOQ behind them.</p>
+          <div class="s9-ctas">
+            <span class="s9-circle">Install<small>one command</small></span>
+            <span class="s9-link">Star on GitHub</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 10 WARM CONCRETE ==================== -->
+<section class="style-block" id="s10">
+  <div class="style-meta">
+    <div class="sm-left"><span class="sm-num">10</span><h2>Warm Concrete</h2>
+      <div class="sm-tags"><span>светлый</span><span>тёплый</span><span>спокойный</span><span>материальный</span></div>
+    </div>
+    <p>Тёплый минимализм: бетонно-песочная палитра, терракотовый акцент, мягкие панели, лёгкое зерно.
+    «Тихая роскошь» вместо стерильного белого - <b>человечный и материальный</b>, перекликается со стройматериалами.
+    Риск: терракота уводит от текущего синего бренда (это может быть и плюсом - решить сознательно).</p>
+  </div>
+  <div class="demo s10">
+    <div class="dz">
+      <div class="dnav">
+        <div class="dlogo">Open<span class="l2">Construction</span><span class="l3">ERP</span></div>
+        <div class="dlinks"><span>Product</span><span>Practices</span><span>Standards</span><span>News</span><span>Docs</span></div>
+        <div class="dnavr"><span class="dghost">GitHub</span><span class="dbtn">Get a demo</span></div>
+      </div>
+      <div class="s10-hero">
+        <div>
+          <span class="s10-chip">v10.8.0 · open source on GitHub</span>
+          <h1 class="s10-h1">Run the whole construction <em>project.</em></h1>
+          <p class="s10-sub">Estimates, schedules, tenders, contracts, site tasks and reporting in one install. Built for construction teams, not for the cloud vendor.</p>
+          <div class="s10-ctas"><span class="s10-btn">Install now</span><span class="s10-btn ghost">Star on GitHub</span></div>
+          <div class="s10-stats"><span><b>149</b> modules</span><span><b>55,000+</b> cost items</span><span><b>26</b> languages</span><span><b>AGPL-3.0</b></span></div>
+        </div>
+        <div class="s10-panel">
+          <div class="fui">
+            <div class="fui-bar"><i></i><i></i><i></i><span>riverside-tower / boq</span><em>synced</em></div>
+            <div class="fui-r fui-h"><span>POS</span><span>Description</span><span>Qty</span><span>Unit</span><span>Total</span></div>
+            <div class="fui-r"><span>01.02</span><span>Concrete wall C30/37, 24 cm</span><span>412.0</span><span>m³</span><span>131,180</span></div>
+            <div class="fui-r"><span>01.03</span><span>Reinforcement B500B</span><span>48.6</span><span>t</span><span>68,040</span></div>
+            <div class="fui-r fui-ai"><span>02.01</span><span>Interior plaster<span class="conf">AI · 87%</span></span><span>2,410</span><span>m²</span><span>54,230</span></div>
+            <div class="fui-r fui-t"><span></span><span>Estimate total</span><span></span><span></span><span>2,148,900</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="lab-end">
+  <div class="lab-end-card">
+    <h2>Что дальше</h2>
+    <p>Выбери <b>1-2 фаворита</b> (можно с оговорками: «основа 07, но типографика из 01, и тёмная тема из 03 для секции продукта»).
+    Дальше я соберу полноценный прототип новой главной в выбранном стиле на этой же скрытой странице,
+    прогоним его по всем брейкпоинтам и темам, и только потом перенесём на боевой index.html и остальные страницы.
+    Страница служебная: noindex, в навигации и sitemap её нет.</p>
+  </div>
+</footer>
+
+<nav class="dotnav" aria-label="Styles">
+  <a href="#s1"><i></i><span>01 Swiss Precision</span></a>
+  <a href="#s2"><i></i><span>02 Blueprint</span></a>
+  <a href="#s3"><i></i><span>03 Dark Glow</span></a>
+  <a href="#s4"><i></i><span>04 Bento</span></a>
+  <a href="#s5"><i></i><span>05 Editorial Serif</span></a>
+  <a href="#s6"><i></i><span>06 Ledger Brutalism</span></a>
+  <a href="#s7"><i></i><span>07 Liquid Glass</span></a>
+  <a href="#s8"><i></i><span>08 Terminal</span></a>
+  <a href="#s9"><i></i><span>09 Kinetic Type</span></a>
+  <a href="#s10"><i></i><span>10 Warm Concrete</span></a>
+</nav>
+
+<script>
+(function(){
+  var blocks=[].slice.call(document.querySelectorAll('.style-block'));
+  var dots=[].slice.call(document.querySelectorAll('.dotnav a'));
+  if('IntersectionObserver' in window){
+    var reveal=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); reveal.unobserve(e.target);} });
+    },{threshold:0.06});
+    blocks.forEach(function(b){reveal.observe(b);});
+    var spot=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          dots.forEach(function(d){d.classList.toggle('on', d.getAttribute('href')==='#'+e.target.id);});
+        }
+      });
+    },{rootMargin:'-42% 0px -42% 0px'});
+    blocks.forEach(function(b){spot.observe(b);});
+    /* run costly CSS animations only while the section is on screen */
+    var live=new IntersectionObserver(function(es){
+      es.forEach(function(e){e.target.classList.toggle('live', e.isIntersecting);});
+    },{rootMargin:'80px 0px 80px 0px'});
+    blocks.forEach(function(b){live.observe(b);});
+  } else {
+    blocks.forEach(function(b){b.classList.add('in');});
+  }
+})();
+</script>
+
+</body>
+</html>
