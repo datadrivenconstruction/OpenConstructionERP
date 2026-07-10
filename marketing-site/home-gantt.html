@@ -33,8 +33,6 @@ a{color:inherit;text-decoration:none}
 @media(prefers-reduced-motion:no-preference){
   .p-sec{opacity:0;transition:opacity .45s ease}
   .p-sec.in{opacity:1}
-  .viz-scurve .fade2{opacity:0;transition:opacity .7s ease .2s}
-  .p-sec.in .viz-scurve .fade2{opacity:1}
   .gc-rows.js-anim .gc-tag,.gc-rows.js-anim .gc-bar{opacity:0;transform:translateX(-10px);transition:opacity .5s ease,transform .5s ease}
   .gc-rows.js-anim .gc-ghost{opacity:0;transform:none;transition:opacity .6s ease}
   .gc-rows.js-anim.go .gc-tag,.gc-rows.js-anim.go .gc-bar,.gc-rows.js-anim.go .gc-ghost{opacity:1;transform:none}
@@ -72,7 +70,9 @@ a{color:inherit;text-decoration:none}
 .gscale{display:grid;grid-template-columns:repeat(12,1fr);border-bottom:1px solid rgba(18,20,26,.08);font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:#a3adb8;text-transform:uppercase;position:relative;z-index:2}
 .gscale span{padding:10px 0 10px 9px}
 .gtoday{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(239,83,80,.85);z-index:3}
-.gtoday b{position:absolute;top:8px;left:8px;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#ef5350;padding:5px 8px;border-radius:5px;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(239,83,80,.6)}
+.gtoday b{position:absolute;top:8px;left:8px;display:flex;align-items:stretch;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;border-radius:5px;overflow:hidden;box-shadow:0 6px 18px -6px rgba(239,83,80,.5)}
+.gtoday b .tf-a{background:#ef5350;color:#fff;padding:5px 8px}
+.gtoday b .tf-b{background:#fff;color:#16181d;padding:5px 8px;border:1px solid rgba(18,20,26,.12);border-left:0;border-radius:0 5px 5px 0}
 
 /* ============ hero ============ */
 .p-hero{padding-top:52px}
@@ -103,11 +103,24 @@ a{color:inherit;text-decoration:none}
 @media(max-width:720px){.gc-bar.b2,.gc-tag.t2{margin-left:4%}.gc-bar.b3,.gc-tag.t3{margin-left:10%}.gc-bar.b4,.gc-tag.t4{margin-left:18%}}
 .gchart{cursor:ew-resize}
 .gtoday b.flip{left:auto;right:8px}
-.gc-city{position:relative;z-index:2;margin:12px 14px 0;border-top:1px dashed rgba(18,20,26,.12);padding-top:8px}
+.gscale span{transition:color .2s,background-color .2s}
+.gscale span.on{color:#0284c7;background:rgba(2,132,199,.07);font-weight:700}
+.gc-data{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px;margin:16px 14px 0;border-top:1px dashed rgba(18,20,26,.12);padding-top:12px}
+.gd{display:inline-flex;align-items:baseline;gap:8px;font:500 9px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#98a1ab}
+.gd b{font:600 11.5px/1 'JetBrains Mono',monospace;letter-spacing:.04em;color:#16181d;font-variant-numeric:tabular-nums}
+.gd b.acc{color:#0284c7}
+.gd-hint{margin-left:auto;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#0284c7;animation:hintp 2.4s ease-in-out infinite;transition:opacity .5s ease}
+.gd-hint.off{opacity:0;animation:none}
+@keyframes hintp{50%{opacity:.4}}
+@media(prefers-reduced-motion:reduce){.gd-hint{animation:none}}
+@media(max-width:720px){.gd-hint{display:none}}
+.gc-city{position:relative;z-index:2;margin:6px 14px 0}
 .gc-city svg{display:block;width:100%;height:auto}
-.gc-city-lbl{position:absolute;top:12px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
+.gc-city-lbl{position:absolute;top:6px;right:2px;font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#aeb7c1}
 .crane{opacity:0;transition:opacity .45s ease}
 .crane.on{opacity:1}
+.tree,.topper{opacity:0;transition:opacity .5s ease}
+.tree.on,.topper.on{opacity:1}
 .p-heroGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;margin-top:40px}
 .p-sub{color:#424a56;font-size:16.5px;line-height:1.68;max-width:56ch}
 .p-trust{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;font:500 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#7c8694}
@@ -188,44 +201,14 @@ a{color:inherit;text-decoration:none}
 .f-r{fill:#fff;stroke:rgba(22,24,29,.32);stroke-width:1}
 .f-l{fill:rgba(2,132,199,.14);stroke:rgba(22,24,29,.32);stroke-width:1}
 .f-t{fill:rgba(2,132,199,.3);stroke:rgba(22,24,29,.35);stroke-width:1}
-.f-w{stroke:rgba(2,132,199,.55);stroke-width:2;fill:none;stroke-linecap:round}
+.f-w{stroke:rgba(2,132,199,.5);stroke-width:2;fill:none;stroke-linecap:round}
+.f-wl{stroke:rgba(255,255,255,.78);stroke-width:2;fill:none;stroke-linecap:round}
+.f-d{stroke:rgba(2,132,199,.6);stroke-width:3.5;fill:none;stroke-linecap:round}
 .bfl.on{opacity:1;transform:none}
 .bfl.wip{opacity:1;transform:none}
 .bfl.wip .f-r,.bfl.wip .f-l,.bfl.wip .f-t{fill:rgba(2,132,199,.05);stroke:rgba(2,132,199,.55);stroke-dasharray:3 4}
+.bfl.wip .f-w,.bfl.wip .f-wl,.bfl.wip .f-d{opacity:0}
 
-.viz-grid{display:grid;grid-template-columns:1.42fr 1fr;gap:16px}
-.viz-scurve{cursor:ew-resize}
-.viz-card{padding:20px 22px 18px;display:flex;flex-direction:column}
-.viz-scurve{grid-row:span 2}
-.viz-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a93a0;margin-bottom:14px}
-.viz-head em{font-style:normal;color:#aeb7c1;letter-spacing:.1em}
-.viz-scurve svg{width:100%;height:auto;flex:1}
-.viz-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694}
-.viz-legend span{display:inline-flex;align-items:center;gap:7px}
-.viz-legend i{display:inline-block}
-.viz-legend .pl i{width:18px;height:0;border-top:2px dashed #98a1ab}
-.viz-legend .ac i{width:18px;height:2.5px;background:#0284c7;border-radius:2px}
-.viz-legend .td i{width:1.5px;height:12px;background:#ef5350}
-.tr-row{display:grid;grid-template-columns:132px 1fr 64px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(18,20,26,.08)}
-.tr-row:last-child{border-bottom:0}
-.tr-row .n{font-size:12.5px;font-weight:600;color:#3c4552;line-height:1.3}
-.tr-bar{height:12px;background:#eef1f4;border-radius:5px;overflow:hidden}
-.tr-bar i{display:block;height:100%;width:0;background:#0284c7;border-radius:5px}
-.tr-row .v{font:600 11px/1 'JetBrains Mono',monospace;color:#55606e;text-align:right;font-variant-numeric:tabular-nums}
-.tr-foot{margin-top:12px;font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#aeb7c1}
-.bl-num{font:800 clamp(24px,2.6vw,32px)/1 'Inter Tight',sans-serif;letter-spacing:-.02em;color:#121419}
-.bl-sub{font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;color:#8a93a0;margin:6px 0 16px}
-.bl-track{position:relative;height:14px;background:#eef1f4;border-radius:6px}
-.bl-track .committed{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(2,132,199,.28);border-radius:6px}
-.bl-track .paid{position:absolute;left:0;top:0;bottom:0;width:0;background:#0284c7;border-radius:6px}
-.bl-track .budget{position:absolute;top:-4px;bottom:-4px;left:94%;width:2px;background:#16181d;border-radius:1px}
-.bl-track .budget::after{content:'budget';position:absolute;top:-16px;left:-16px;font:600 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#8a93a0}
-.bl-stats{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-top:16px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7c8694}
-.bl-stats i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.bl-stats .sw-paid i{background:#0284c7}
-.bl-stats .sw-com i{background:rgba(2,132,199,.28)}
-.bl-chip{margin-left:auto;font:600 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#0369a1;background:rgba(2,132,199,.09);border-radius:999px;padding:6px 10px}
-@media(max-width:980px){.viz-grid{grid-template-columns:1fr}.viz-scurve{grid-row:auto}}
 
 /* ============ download ============ */
 .dl-chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px;list-style:none}
@@ -366,19 +349,26 @@ a{color:inherit;text-decoration:none}
       <div class="gc-rows">
         <span class="gc-ghost">next → your project</span>
         <span class="gc-tag t1">01 · estimate</span>
-        <div class="gc-bar b1" data-s="0" data-e="0.22">Run<b class="pc">100%</b></div>
+        <div class="gc-bar b1" data-s="0" data-e="0.22">Run<b class="pc">100% ✓</b></div>
         <span class="gc-tag t2">02 · schedule</span>
-        <div class="gc-bar b2" data-s="0.08" data-e="0.35">the whole<b class="pc">100%</b></div>
+        <div class="gc-bar b2" data-s="0.08" data-e="0.35">the whole<b class="pc">100% ✓</b></div>
         <span class="gc-tag t3">03 · build</span>
         <div class="gc-bar b3" data-s="0.20" data-e="0.66">construction<b class="pc on">83%</b></div>
         <span class="gc-tag t4">04 · hand over</span>
-        <div class="gc-bar b4" data-s="0.37" data-e="0.72">project.<b class="pc on">61%</b></div>
+        <div class="gc-bar b4" data-s="0.37" data-e="0.72">project.<b class="pc on">60%</b></div>
+      </div>
+      <div class="gc-data" aria-hidden="true">
+        <span class="gd"><span>spent</span><b id="d-spent">€1.33M</b></span>
+        <span class="gd"><span>programme</span><b class="acc" id="d-prog">58%</b></span>
+        <span class="gd"><span>floors up</span><b id="d-floors">50 / 77</b></span>
+        <span class="gd"><span>cranes on site</span><b id="d-cranes">2</b></span>
+        <span class="gd-hint" id="d-hint">◂ ▸ scrub time with your mouse</span>
       </div>
       <div class="gc-city" aria-hidden="true">
-        <span class="gc-city-lbl">riverside district · 9 buildings · scrub with your mouse</span>
+        <span class="gc-city-lbl">riverside district · 13 buildings · 77 floors</span>
         <svg id="city" viewBox="0 0 1200 244" preserveAspectRatio="xMidYMax meet"></svg>
       </div>
-      <i class="gtoday" id="t-today" style="left:58%" aria-hidden="true"><b id="t-flag">today · W07 · €0.93M</b></i>
+      <i class="gtoday" id="t-today" style="left:58%" aria-hidden="true"><b id="t-flag"><span class="tf-a" id="tf-week">today · W07</span><span class="tf-b" id="tf-spent">€1.33M spent</span></b></i>
     </div>
     <div class="p-heroGrid">
       <div>
@@ -487,89 +477,11 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ 03 · cost & time in sync (3d site) ============ -->
-<section class="p-sec" id="vsync">
-  <div class="pz">
-    <div class="p-secHead">
-      <span class="p-num">03 · cost &amp; time in sync</span>
-      <h2>The numbers behind the bars.</h2>
-      <p><b>Slide across the programme above - or along the S-curve here.</b> The district builds, the today line moves, and spend, trades and budget follow the same clock: one timeline, every number live from the BOQ.</p>
-    </div>
-
-    <div class="viz-grid">
-      <figure class="viz-card viz-scurve card">
-        <figcaption class="viz-head"><span>Cash flow · S-curve</span><em id="vs-asof">as of W01</em></figcaption>
-        <svg viewBox="0 0 640 322" role="img" aria-label="Planned versus actual cumulative cost S-curve, driven by the timeline scrub">
-          <title>Planned vs actual cumulative cost</title>
-          <defs>
-            <clipPath id="scClip"><rect id="sc-clip" x="46" y="0" width="0" height="322"/></clipPath>
-          </defs>
-          <g stroke="rgba(18,20,26,.06)" stroke-width="1">
-            <line x1="46" y1="24" x2="616" y2="24"/>
-            <line x1="46" y1="108" x2="616" y2="108"/>
-            <line x1="46" y1="192" x2="616" y2="192"/>
-          </g>
-          <line x1="46" y1="276" x2="616" y2="276" stroke="rgba(18,20,26,.14)" stroke-width="1"/>
-          <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8" text-anchor="end">
-            <text x="38" y="27">2.4M</text>
-            <text x="38" y="111">1.6M</text>
-            <text x="38" y="195">0.8M</text>
-            <text x="38" y="279">0</text>
-          </g>
-          <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#a3adb8">
-            <text x="46" y="298">W01</text>
-            <text x="201" y="298">W04</text>
-            <text x="409" y="298" text-anchor="middle">W08</text>
-            <text x="616" y="298" text-anchor="end">W12</text>
-          </g>
-          <path class="fade2" d="M46,272 C160,264 250,232 340,176 C430,120 530,60 616,34" fill="none" stroke="#98a1ab" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round"/>
-          <g clip-path="url(#scClip)">
-            <path d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 C470,118 550,66 616,34 L616,276 L46,276 Z" fill="rgba(2,132,199,.09)"/>
-            <path id="sc-actual" d="M46,272 C150,268 230,246 310,208 C350,189 382,172 409,152 C470,118 550,66 616,34" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
-          </g>
-          <line id="sc-today" x1="46" y1="20" x2="46" y2="276" stroke="rgba(239,83,80,.85)" stroke-width="1.5"/>
-          <g id="sc-flag" transform="translate(54,24)">
-            <rect width="66" height="17" rx="5" fill="#ef5350"/>
-            <text id="sc-flagtext" x="33" y="11.5" font-family="'JetBrains Mono',monospace" font-size="8.5" letter-spacing="1" fill="#fff" text-anchor="middle">W01</text>
-          </g>
-          <circle id="sc-dot" cx="46" cy="272" r="4.5" fill="#0284c7" stroke="#fff" stroke-width="2"/>
-          <text id="sc-lab" x="170" y="261" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="600" fill="#0369a1" text-anchor="end">actual · €0.00M</text>
-          <text x="612" y="20" font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#8a93a0" text-anchor="end">planned · €2.15M</text>
-        </svg>
-        <div class="viz-legend"><span class="pl"><i></i>planned</span><span class="ac"><i></i>actual</span><span class="td"><i></i>today</span></div>
-      </figure>
-      <figure class="viz-card card">
-        <figcaption class="viz-head"><span>Cost by trade</span><em>top 4 · €</em></figcaption>
-        <div class="tr-row" data-w="100" data-v="812" data-s="0.04" data-e="0.42"><span class="n">Concrete works</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
-        <div class="tr-row" data-w="68" data-v="552" data-s="0.30" data-e="0.78"><span class="n">MEP services</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
-        <div class="tr-row" data-w="58" data-v="468" data-s="0.18" data-e="0.62"><span class="n">Masonry &amp; envelope</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
-        <div class="tr-row" data-w="39" data-v="317" data-s="0.55" data-e="0.96"><span class="n">Finishes</span><span class="tr-bar"><i></i></span><span class="v">€0k</span></div>
-        <div class="tr-foot">rolled up from 1,240 boq positions</div>
-      </figure>
-      <figure class="viz-card card">
-        <figcaption class="viz-head"><span>Budget health</span><em>riverside tower</em></figcaption>
-        <div class="bl-num">€ 2,148,900</div>
-        <div class="bl-sub">estimate total · live from the boq</div>
-        <div class="bl-track">
-          <span class="committed" id="bl-com"></span>
-          <span class="paid" id="bl-paid"></span>
-          <span class="budget"></span>
-        </div>
-        <div class="bl-stats">
-          <span class="sw-paid"><i></i>paid · <b id="bl-paid-l">0</b>%</span>
-          <span class="sw-com"><i></i>committed · <b id="bl-com-l">0</b>%</span>
-          <span class="bl-chip">on budget</span>
-        </div>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 04 · download ============ -->
+<!-- ============ 03 · download ============ -->
 <section class="p-sec" id="download">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">04 · download</span>
+      <span class="p-num">03 · download</span>
       <h2>Get the <em>real</em> desktop app, free.</h2>
       <p>A native build of OpenConstructionERP. No Python, no pip, no Docker, no database to set up. One file, run it, done. Your data stays on your machine.</p>
     </div>
@@ -612,11 +524,11 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ 05 · trusted ============ -->
+<!-- ============ 04 · trusted ============ -->
 <section class="p-sec" id="trusted">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">05 · who's looking</span>
+      <span class="p-num">04 · who's looking</span>
       <h2 class="sm">Engineers, construction firms and consultancies exploring OpenConstructionERP.</h2>
       <p>A snapshot of the construction, engineering and infrastructure teams that signed up to try it or have worked with DataDrivenConstruction's open tools - across Europe, North America, MENA, APAC and Oceania.</p>
     </div>
@@ -640,11 +552,11 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ 06 · community ============ -->
+<!-- ============ 05 · community ============ -->
 <section class="p-sec" id="community">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">06 · open source</span>
+      <span class="p-num">05 · open source</span>
       <h2>The repo, <em>in the open.</em></h2>
       <p>AGPL-3.0 on GitHub. Issues and the roadmap live there; if you want to see what's coming next or what broke last week, it's all on the commit log.</p>
     </div>
@@ -669,11 +581,11 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ============ 07 · watch ============ -->
+<!-- ============ 06 · watch ============ -->
 <section class="p-sec" id="watch">
   <div class="pz">
     <div class="p-secHead">
-      <span class="p-num">07 · watch it run</span>
+      <span class="p-num">06 · watch it run</span>
       <h2>See it work. <em>In one take.</em></h2>
     </div>
     <div class="watch-frame card">
@@ -796,30 +708,13 @@ a{color:inherit;text-decoration:none}
     });
   });
 
-  /* ===== time scrub engine: hero city + today line + s-curve + trades + budget ===== */
+  /* ===== time scrub engine: hero district + today line ===== */
   var chart=document.querySelector('.gchart');
-  var scActual=document.getElementById('sc-actual');
-  if(!chart||!scActual||!scActual.getTotalLength){return;}
+  if(!chart||!document.createElementNS){return;}
 
   var TOTAL=2148900;
   var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* sample the actual curve once: x → y lookup */
-  var samples=[];
-  try{
-    var L=scActual.getTotalLength();
-    for(var i=0;i<=160;i++){
-      var pt=scActual.getPointAtLength(L*i/160);
-      samples.push([pt.x,pt.y]);
-    }
-  }catch(e){return;}
-  function yAtX(x){
-    var lo=0,hi=samples.length-1;
-    while(lo<hi){var mid=(lo+hi)>>1; if(samples[mid][0]<x){lo=mid+1;}else{hi=mid;}}
-    return samples[lo][1];
-  }
-
-  /* build the district: 9 iso buildings, 4 cranes, generated into #city */
   var SVGNS='http://www.w3.org/2000/svg';
   function el(n,attrs,parent){
     var e=document.createElementNS(SVGNS,n);
@@ -827,143 +722,179 @@ a{color:inherit;text-decoration:none}
     if(parent){parent.appendChild(e);}
     return e;
   }
+
+  /* the district: 13 iso buildings, 6 tower cranes; windows + doors on the
+     facades, roof plant & antennas on handover, trees once a block is done */
   var GY=222;
   var CITY=[
-    {x:90,  w:30, fh:13, n:5, s:0.00, e:0.18},
-    {x:210, w:38, fh:14, n:7, s:0.02, e:0.34, crane:1},
-    {x:330, w:26, fh:12, n:4, s:0.10, e:0.30},
-    {x:470, w:42, fh:15, n:8, s:0.08, e:0.52, crane:1},
-    {x:610, w:30, fh:13, n:5, s:0.25, e:0.55},
-    {x:740, w:40, fh:14, n:9, s:0.20, e:0.72, crane:1},
-    {x:880, w:32, fh:13, n:6, s:0.45, e:0.85},
-    {x:1010,w:38, fh:14, n:7, s:0.55, e:0.98, crane:1},
-    {x:1130,w:26, fh:12, n:4, s:0.70, e:0.99}
+    {x:68,  w:30,d:24,fh:12,n:4,s:0.00,e:0.15,roof:1},
+    {x:155, w:32,d:28,fh:13,n:6,s:0.02,e:0.28,crane:1},
+    {x:248, w:34,d:26,fh:12,n:5,s:0.06,e:0.24},
+    {x:340, w:28,d:32,fh:14,n:8,s:0.05,e:0.45,crane:1,ant:1},
+    {x:432, w:30,d:26,fh:12,n:5,s:0.16,e:0.40,roof:1},
+    {x:525, w:38,d:30,fh:14,n:7,s:0.14,e:0.55,crane:1},
+    {x:620, w:28,d:24,fh:12,n:6,s:0.30,e:0.60},
+    {x:710, w:34,d:28,fh:15,n:9,s:0.24,e:0.78,crane:1,ant:1},
+    {x:800, w:28,d:24,fh:12,n:5,s:0.42,e:0.68,roof:1},
+    {x:890, w:36,d:30,fh:13,n:7,s:0.45,e:0.88,crane:1},
+    {x:982, w:32,d:26,fh:13,n:6,s:0.58,e:0.95,roof:1},
+    {x:1072,w:30,d:24,fh:12,n:5,s:0.66,e:0.97,crane:1},
+    {x:1152,w:30,d:22,fh:12,n:4,s:0.78,e:0.995}
   ];
+  var TREES=[[26,0],[105,1],[296,2],[470,4],[660,6],[838,8],[1026,10],[1188,12]];
+  var TOTALFLOORS=0;
+  CITY.forEach(function(b){TOTALFLOORS+=b.n;});
+
   var citySvg=document.getElementById('city');
-  var buildings=[];
+  var buildings=[],treeEls=[];
   if(citySvg){
-    el('path',{d:'M18,'+(GY+6)+' L1182,'+(GY+6),stroke:'rgba(18,20,26,.14)','stroke-width':'1'},citySvg);
+    el('path',{d:'M14,'+(GY+6)+' L1186,'+(GY+6),stroke:'rgba(18,20,26,.14)','stroke-width':'1'},citySvg);
     CITY.forEach(function(b){
       var g=el('g',{},citySvg);
-      var fw=Math.round(b.w*1.12);
+      var fw=Math.round((b.w+b.d)/2*1.14);
       el('path',{d:'M'+b.x+','+(GY+4)+' L'+(b.x+fw)+','+(GY+4-fw/2)+' L'+b.x+','+(GY+4-fw)+' L'+(b.x-fw)+','+(GY+4-fw/2)+' Z',fill:'rgba(18,20,26,.05)',stroke:'rgba(18,20,26,.1)','stroke-width':'1'},g);
       var fls=[];
       for(var i=0;i<b.n;i++){
-        var yb=GY-i*b.fh, yt=yb-b.fh, w=b.w;
+        var yb=GY-i*b.fh, yt=yb-b.fh;
         var fg=el('g',{class:'bfl'},g);
-        el('path',{class:'f-l',d:'M'+b.x+','+yb+' L'+(b.x-w)+','+(yb-w/2)+' L'+(b.x-w)+','+(yt-w/2)+' L'+b.x+','+yt+' Z'},fg);
-        el('path',{class:'f-r',d:'M'+b.x+','+yb+' L'+(b.x+w)+','+(yb-w/2)+' L'+(b.x+w)+','+(yt-w/2)+' L'+b.x+','+yt+' Z'},fg);
-        el('path',{class:'f-t',d:'M'+b.x+','+yt+' L'+(b.x+w)+','+(yt-w/2)+' L'+b.x+','+(yt-w)+' L'+(b.x-w)+','+(yt-w/2)+' Z'},fg);
+        el('path',{class:'f-l',d:'M'+b.x+','+yb+' L'+(b.x-b.w)+','+(yb-b.w/2)+' L'+(b.x-b.w)+','+(yt-b.w/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-r',d:'M'+b.x+','+yb+' L'+(b.x+b.d)+','+(yb-b.d/2)+' L'+(b.x+b.d)+','+(yt-b.d/2)+' L'+b.x+','+yt+' Z'},fg);
+        el('path',{class:'f-t',d:'M'+b.x+','+yt+' L'+(b.x+b.d)+','+(yt-b.d/2)+' L'+(b.x+b.d-b.w)+','+(yt-b.d/2-b.w/2)+' L'+(b.x-b.w)+','+(yt-b.w/2)+' Z'},fg);
+        /* facade: windows on the lit right face, pale windows on the shaded
+           left face, an entrance door on the ground floor */
+        var wt=b.d>=28?[0.26,0.52,0.78]:[0.32,0.68];
+        wt.forEach(function(t,k){
+          var xw=b.x+b.d*t, ytw=yt-(b.d*t)/2;
+          var isDoor=(i===0&&k===(wt.length>2?1:0));
+          el('path',{class:isDoor?'f-d':'f-w',d:'M'+xw+','+(ytw+b.fh*(isDoor?0.4:0.3))+' L'+xw+','+(ytw+b.fh*(isDoor?0.94:0.72))},fg);
+        });
+        [0.34,0.68].forEach(function(t){
+          var xw=b.x-b.w*t, ytw=yt-(b.w*t)/2;
+          el('path',{class:'f-wl',d:'M'+xw+','+(ytw+b.fh*0.3)+' L'+xw+','+(ytw+b.fh*0.72)},fg);
+        });
         fls.push(fg);
       }
+      /* roof gear: plant room / antenna, shown once the building tops out */
+      var topYb=GY-b.n*b.fh;
+      var topper=null;
+      if(b.roof||b.ant){
+        topper=el('g',{class:'topper'},g);
+        if(b.roof){
+          var rx=b.x-5, ry=topYb-Math.round(b.w*0.2), rw=10, rd=8, rh=7;
+          el('path',{d:'M'+rx+','+ry+' L'+(rx-rw)+','+(ry-rw/2)+' L'+(rx-rw)+','+(ry-rw/2-rh)+' L'+rx+','+(ry-rh)+' Z',fill:'rgba(2,132,199,.14)',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
+          el('path',{d:'M'+rx+','+ry+' L'+(rx+rd)+','+(ry-rd/2)+' L'+(rx+rd)+','+(ry-rd/2-rh)+' L'+rx+','+(ry-rh)+' Z',fill:'#fff',stroke:'rgba(22,24,29,.32)','stroke-width':'1'},topper);
+          el('path',{d:'M'+rx+','+(ry-rh)+' L'+(rx+rd)+','+(ry-rd/2-rh)+' L'+(rx+rd-rw)+','+(ry-rd/2-rw/2-rh)+' L'+(rx-rw)+','+(ry-rw/2-rh)+' Z',fill:'rgba(2,132,199,.3)',stroke:'rgba(22,24,29,.35)','stroke-width':'1'},topper);
+        }
+        if(b.ant){
+          var ax=b.x+5, ay=topYb-Math.round(b.d*0.2);
+          el('path',{d:'M'+ax+','+ay+' L'+ax+','+(ay-19),stroke:'rgba(22,24,29,.5)','stroke-width':'1.3'},topper);
+          el('circle',{cx:ax,cy:ay-21,r:2,fill:'#ef5350'},topper);
+        }
+      }
+      /* tower crane, on site only while the building is under construction */
       var cr=null;
       if(b.crane){
-        var cx=b.x+b.w+26, topY=GY-b.n*b.fh-34;
-        var jl=b.x-b.w-8, jr=cx+18;
+        var cx=b.x+b.d+16, topY=GY-b.n*b.fh-30;
+        var jl=b.x-b.w-6, jr=cx+14;
         cr=el('g',{class:'crane'},g);
-        var st=el('g',{stroke:'rgba(22,24,29,.5)','stroke-width':'1.3',fill:'none'},cr);
+        var st=el('g',{stroke:'rgba(22,24,29,.5)','stroke-width':'1.2',fill:'none'},cr);
         el('path',{d:'M'+cx+','+GY+' L'+cx+','+topY},st);
         el('path',{d:'M'+jl+','+topY+' L'+jr+','+topY},st);
-        el('path',{d:'M'+cx+','+(topY-12)+' L'+jl+','+topY+' M'+cx+','+(topY-12)+' L'+jr+','+topY+' M'+cx+','+(topY-12)+' L'+cx+','+topY},st);
-        el('path',{d:'M'+b.x+','+topY+' L'+b.x+','+(topY+24)},st);
-        el('rect',{x:jr-11,y:topY+1,width:11,height:7,rx:1,fill:'rgba(22,24,29,.6)'},cr);
-        el('path',{d:'M'+b.x+','+(topY+24)+' L'+(b.x+4)+','+(topY+30)+' L'+b.x+','+(topY+36)+' L'+(b.x-4)+','+(topY+30)+' Z',fill:'rgba(22,24,29,.7)'},cr);
-        el('path',{d:'M'+cx+','+(topY-12)+' L'+(cx+10)+','+(topY-9)+' L'+cx+','+(topY-6)+' Z',fill:'#ef5350'},cr);
+        el('path',{d:'M'+cx+','+(topY-11)+' L'+jl+','+topY+' M'+cx+','+(topY-11)+' L'+jr+','+topY+' M'+cx+','+(topY-11)+' L'+cx+','+topY},st);
+        el('path',{d:'M'+b.x+','+topY+' L'+b.x+','+(topY+22)},st);
+        el('rect',{x:jr-10,y:topY+1,width:10,height:6,rx:1,fill:'rgba(22,24,29,.6)'},cr);
+        el('path',{d:'M'+b.x+','+(topY+22)+' L'+(b.x+4)+','+(topY+28)+' L'+b.x+','+(topY+34)+' L'+(b.x-4)+','+(topY+28)+' Z',fill:'rgba(22,24,29,.7)'},cr);
+        el('path',{d:'M'+cx+','+(topY-11)+' L'+(cx+9)+','+(topY-8.5)+' L'+cx+','+(topY-6)+' Z',fill:'#ef5350'},cr);
       }
-      buildings.push({fls:fls,crane:cr,s:b.s,e:b.e,n:b.n});
+      buildings.push({fls:fls,crane:cr,topper:topper,s:b.s,e:b.e,n:b.n});
+    });
+    /* street trees: landscaping follows handover, block by block */
+    TREES.forEach(function(t){
+      var g=el('g',{class:'tree'},citySvg);
+      el('path',{d:'M'+t[0]+','+(GY+4)+' L'+t[0]+','+(GY-8),stroke:'rgba(22,24,29,.45)','stroke-width':'1.5'},g);
+      el('circle',{cx:t[0],cy:GY-15,r:7,fill:'rgba(34,148,86,.30)'},g);
+      el('circle',{cx:t[0]-4.5,cy:GY-11,r:4.5,fill:'rgba(34,148,86,.22)'},g);
+      treeEls.push({g:g,after:t[1]});
     });
   }
 
   var els={
     tToday:document.getElementById('t-today'),
     tFlag:document.getElementById('t-flag'),
+    tfWeek:document.getElementById('tf-week'),
+    tfSpent:document.getElementById('tf-spent'),
     tFuture:document.getElementById('t-future'),
     bars:[].slice.call(document.querySelectorAll('.gc-bar[data-s]')),
-    clip:document.getElementById('sc-clip'),
-    today:document.getElementById('sc-today'),
-    flag:document.getElementById('sc-flag'),
-    flagtext:document.getElementById('sc-flagtext'),
-    dot:document.getElementById('sc-dot'),
-    lab:document.getElementById('sc-lab'),
-    asof:document.getElementById('vs-asof'),
-    trs:[].slice.call(document.querySelectorAll('.tr-row')),
-    paid:document.getElementById('bl-paid'),
-    com:document.getElementById('bl-com'),
-    paidL:document.getElementById('bl-paid-l'),
-    comL:document.getElementById('bl-com-l')
+    weeks:[].slice.call(document.querySelectorAll('.gscale span')),
+    dSpent:document.getElementById('d-spent'),
+    dProg:document.getElementById('d-prog'),
+    dFloors:document.getElementById('d-floors'),
+    dCranes:document.getElementById('d-cranes')
   };
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+  function ss(t){return t*t*(3-2*t);}
 
   function apply(p){
-    var x=46+570*p;
-    var y=yAtX(x);
-    var frac=clamp((276-y)/242,0,1);
-    var cost=TOTAL*frac;
+    var cost=TOTAL*ss(p);
     var week=1+Math.round(p*11);
     var wk='W'+(week<10?'0':'')+week;
-
-    /* hero: today line + future zone + flag */
     var pos=(p*100)+'%';
+
+    /* today line + flag + future zone + week highlight */
     if(els.tToday){
       els.tToday.style.left=pos;
-      els.tFlag.textContent='today · '+wk+' · €'+(cost/1e6).toFixed(2)+'M';
+      els.tfWeek.textContent='today · '+wk;
+      els.tfSpent.textContent='€'+(cost/1e6).toFixed(2)+'M spent';
       if(p>0.8){els.tFlag.classList.add('flip');}else{els.tFlag.classList.remove('flip');}
     }
     if(els.tFuture){els.tFuture.style.left=pos;}
+    els.weeks.forEach(function(wq,i){
+      if(i===week-1){wq.classList.add('on');}else{wq.classList.remove('on');}
+    });
 
-    /* hero: % chip per headline bar */
+    /* % chip per headline bar */
     els.bars.forEach(function(bar){
       var chip=bar.querySelector('.pc');
       if(!chip){return;}
       var s=parseFloat(bar.getAttribute('data-s'));
       var e=parseFloat(bar.getAttribute('data-e'));
       var pct=Math.round(clamp((p-s)/(e-s),0,1)*100);
-      chip.textContent=pct+'%';
+      chip.textContent=pct===100?'100% ✓':pct+'%';
       if(pct>0&&pct<100){chip.classList.add('on');}else{chip.classList.remove('on');}
     });
 
-    /* hero: the district rises */
+    /* the district rises */
+    var floorsUp=0,cranesOn=0;
+    var doneFlags=[];
     buildings.forEach(function(b){
       var f=clamp((p-b.s)/(b.e-b.s),0,1)*b.n;
       var done=Math.floor(f);
+      floorsUp+=Math.min(done,b.n);
+      doneFlags.push(f>=b.n);
       b.fls.forEach(function(fl,i){
         fl.classList.remove('on','wip');
         if(i<done){fl.classList.add('on');}
         else if(i===done&&f-done>0.03&&done<b.n){fl.classList.add('wip');}
       });
       if(b.crane){
-        if(f>0.01&&f<b.n-0.01){b.crane.classList.add('on');}else{b.crane.classList.remove('on');}
+        if(f>0.01&&f<b.n-0.01){b.crane.classList.add('on');cranesOn++;}
+        else{b.crane.classList.remove('on');}
+      }
+      if(b.topper){
+        if(f>=b.n){b.topper.classList.add('on');}else{b.topper.classList.remove('on');}
       }
     });
-
-    /* s-curve */
-    els.clip.setAttribute('width',String(x-46));
-    els.today.setAttribute('x1',x);els.today.setAttribute('x2',x);
-    els.flag.setAttribute('transform','translate('+(x>500?x-74:x+8)+',24)');
-    els.flagtext.textContent=wk;
-    els.dot.setAttribute('cx',x);els.dot.setAttribute('cy',y);
-    els.lab.setAttribute('x',Math.max(x-10,150));els.lab.setAttribute('y',Math.max(y-12,14));
-    els.lab.textContent='actual · €'+(cost/1e6).toFixed(2)+'M';
-    els.asof.textContent='as of '+wk;
-
-    /* trades */
-    els.trs.forEach(function(tr){
-      var w=parseFloat(tr.getAttribute('data-w'));
-      var v=parseFloat(tr.getAttribute('data-v'));
-      var s=parseFloat(tr.getAttribute('data-s'));
-      var e=parseFloat(tr.getAttribute('data-e'));
-      var fi=clamp((p-s)/(e-s),0,1);
-      tr.querySelector('.tr-bar i').style.width=(w*fi)+'%';
-      tr.querySelector('.v').textContent='€'+Math.round(v*fi)+'k';
+    treeEls.forEach(function(t){
+      if(doneFlags[t.after]){t.g.classList.add('on');}else{t.g.classList.remove('on');}
     });
 
-    /* budget */
-    var paid=Math.round(93*frac);
-    var com=Math.min(97,paid+28);
-    els.paid.style.width=paid+'%';
-    els.com.style.width=com+'%';
-    els.paidL.textContent=paid;
-    els.comL.textContent=com;
+    /* live readout strip */
+    if(els.dSpent){
+      els.dSpent.textContent='€'+(cost/1e6).toFixed(2)+'M';
+      els.dProg.textContent=Math.round(p*100)+'%';
+      els.dFloors.textContent=floorsUp+' / '+TOTALFLOORS;
+      els.dCranes.textContent=String(cranesOn);
+    }
   }
 
   /* rAF with a setTimeout fallback: keeps the scrub alive if frame
@@ -993,26 +924,19 @@ a{color:inherit;text-decoration:none}
   apply(cur);
 
   /* scrub by moving the mouse across the hero programme */
+  var hint=document.getElementById('d-hint'),hinted=false;
   function scrubX(clientX){
     var r=chart.getBoundingClientRect();
     setP((clientX-r.left)/r.width);
   }
-  chart.addEventListener('mousemove',function(e){scrubX(e.clientX);});
+  chart.addEventListener('mousemove',function(e){
+    if(!hinted&&hint){hinted=true;hint.classList.add('off');}
+    scrubX(e.clientX);
+  });
   chart.addEventListener('mouseleave',function(){setP(0.58);});
   chart.addEventListener('touchmove',function(e){
     if(e.touches&&e.touches[0]){scrubX(e.touches[0].clientX);}
   },{passive:true});
-
-  /* the s-curve card scrubs the same clock */
-  var scSvg=document.querySelector('.viz-scurve svg');
-  if(scSvg){
-    scSvg.addEventListener('mousemove',function(e){
-      var r=scSvg.getBoundingClientRect();
-      var vx=(e.clientX-r.left)/r.width*640;
-      setP(clamp((vx-46)/570,0,1));
-    });
-    scSvg.addEventListener('mouseleave',function(){setP(0.58);});
-  }
 
   /* opening move: the district builds itself up to today */
   setTimeout(function(){setP(0.58);},900);
