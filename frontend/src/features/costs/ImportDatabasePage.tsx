@@ -26,6 +26,7 @@ import { apiGet, apiPost, apiDelete, triggerDownload, extractErrorMessageFromBod
 import { formatFileSize } from '@/shared/lib/formatters';
 import { COMMON_CURRENCIES } from '@/features/boq/boqHelpers';
 import { fetchCostCatalogs, type CostCatalog } from './api';
+import { ResourcePriceSheetPanel } from './ResourcePriceSheetPanel';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -2466,6 +2467,10 @@ export function ImportDatabasePage() {
 
       {/* Loaded Databases section */}
       <LoadedDatabasesSection />
+
+      {/* Resource prices - price the coefficient bases (Vietnam Dinh Muc,
+          Indonesia AHSP) so their zero-rate work items become estimable. */}
+      <ResourcePriceSheetPanel />
 
       {/* Divider */}
       <div className="flex items-center gap-3">
