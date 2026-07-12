@@ -6,6 +6,7 @@ import logging
 import uuid as _uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import File, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -495,3 +496,364 @@ async def list_renders_endpoint(
     )
     records = (await session.execute(stmt)).scalars().all()
     return [_render_json(r) for r in records]
+
+
+# ── Interior render (per-room via GeminiGen) ─────────────────────────────────
+
+
+class InteriorGenerateRequest(BaseModel):
+    room_name: str
+    style: str
+
+
+class InteriorRenderResponse(BaseModel):
+    interior_id: _uuid.UUID
+    room_name: str
+    style: str
+    status: str
+    prompt: str
+    storage_key: str | None = None
+    source_url: str | None = None
+    error_message: str | None = None
+
+
+def _interior_render_json(record) -> InteriorRenderResponse:
+    return InteriorRenderResponse(
+        interior_id=record.id,
+        room_name=record.room_name,
+        style=record.style,
+        status=record.status,
+        prompt=record.prompt,
+        storage_key=record.storage_key,
+        source_url=record.source_url,
+        error_message=record.error_message,
+    )
+
+
+@router.post("/projects/{project_id}/interior:generate")
+async def generate_interior_endpoint(
+    project_id: _uuid.UUID,
+    body: InteriorGenerateRequest,
+    session: AsyncSession = Depends(get_session),
+    payload: dict = Depends(get_current_user_payload),
+) -> InteriorRenderResponse:
+    """Generate an interior render for a single room via GeminiGen.
+
+    Loads the latest saved FloorPlan, builds a prompt per room+style, calls
+    the external render service, downloads the result to object storage, and
+    persists an ``InteriorRenderRecord``. KEY-GATED: returns 400 (not 500)
+    when ``GEMINIGEN_API_KEY`` is unset.
+    """
+    await require_project_owner(session, project_id, payload)
+
+    from sqlalchemy import select
+
+    from app.modules.acap.interior.prompts import build_interior_prompt
+    from app.modules.acap.models.floor_plan import FloorPlanRecord
+    from app.modules.acap.models.interior_render import InteriorRenderRecord
+    from app.modules.acap.render.client import (
+        RenderNotConfiguredError,
+        RenderServiceError,
+        generate_render_image,
+        render_service_configured,
+    )
+
+    if not render_service_configured():
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "detail": "Render service not configured",
+                "reason": "GEMINIGEN_API_KEY not set",
+            },
+        )
+
+    stmt = (
+        select(FloorPlanRecord)
+        .where(FloorPlanRecord.project_id == project_id)
+        .order_by(FloorPlanRecord.version.desc())
+        .limit(1)
+    )
+    record = (await session.execute(stmt)).scalars().first()
+    if record is None:
+        raise HTTPException(status_code=404, detail="Generate a floor plan first")
+
+    plan = FloorPlan.model_validate(record.plan_json)
+
+    # Find room by name across all levels.
+    found_room = None
+    for level in plan.levels:
+        for room in level.rooms:
+            if room.name == body.room_name:
+                found_room = (room, level.level)
+                break
+        if found_room:
+            break
+    if found_room is None:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Room '{body.room_name}' not found in layout",
+        )
+
+    room, room_level = found_room
+
+    try:
+        prompt = build_interior_prompt(
+            room_name=room.name,
+            room_type=room.type,
+            area_m2=room.area_m2,
+            style=body.style,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    # Persist pending record first.
+    irecord = InteriorRenderRecord(
+        project_id=project_id,
+        floor_plan_version=record.version,
+        room_name=body.room_name,
+        style=body.style,
+        prompt=prompt,
+        model="nano-banana-pro",
+        status="pending",
+    )
+    session.add(irecord)
+    await session.flush()
+
+    # Call external render service.
+    import httpx
+
+    from app.core.storage import get_storage_backend
+
+    try:
+        result = await generate_render_image(prompt)
+        media_url = result.get("media_url")
+        if not media_url:
+            raise RenderServiceError("provider returned no media URL")
+
+        async with httpx.AsyncClient(timeout=60.0) as dl_client:
+            dl_resp = await dl_client.get(media_url)
+            if dl_resp.status_code >= 400:
+                raise RenderServiceError(
+                    f"download: HTTP {dl_resp.status_code} fetching image"
+                )
+            image_bytes = dl_resp.content
+            if len(image_bytes) < 1024:
+                raise RenderServiceError(
+                    f"download: image body too small ({len(image_bytes)} bytes)"
+                )
+
+        from uuid import uuid4
+
+        storage = get_storage_backend()
+        key = f"acap/interiors/{project_id}/{uuid4().hex}.png"
+        await storage.put(key, image_bytes)
+
+        irecord.provider_uuid = result.get("uuid")
+        irecord.source_url = media_url
+        irecord.storage_key = key
+        irecord.status = "completed"
+    except RenderServiceError as exc:
+        irecord.status = "failed"
+        irecord.error_message = str(exc)[:500]
+
+    await session.flush()
+    return _interior_render_json(irecord)
+
+
+@router.get("/projects/{project_id}/interiors")
+async def list_interiors_endpoint(
+    project_id: _uuid.UUID,
+    room_name: str | None = None,
+    session: AsyncSession = Depends(get_session),
+    payload: dict = Depends(get_current_user_payload),
+) -> list[InteriorRenderResponse]:
+    """List a project's interior renders, newest first.
+
+    Optionally filter by ``room_name`` query parameter.
+    """
+    await require_project_access(session, project_id, payload)
+
+    from sqlalchemy import select
+
+    from app.modules.acap.models.interior_render import InteriorRenderRecord
+
+    stmt = (
+        select(InteriorRenderRecord)
+        .where(InteriorRenderRecord.project_id == project_id)
+    )
+    if room_name:
+        stmt = stmt.where(InteriorRenderRecord.room_name == room_name)
+    stmt = stmt.order_by(InteriorRenderRecord.created_at.desc())
+
+    records = (await session.execute(stmt)).scalars().all()
+    return [_interior_render_json(r) for r in records]
+
+
+# ── Plan-image upload (Vision extract source) ────────────────────────────────
+
+
+_ALLOWED_PLAN_IMAGE_CONTENT_TYPES = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/webp": "webp",
+    "application/pdf": "pdf",
+}
+_MAX_PLAN_IMAGE_BYTES = 15 * 1024 * 1024  # 15 MiB
+
+
+class PlanImageResponse(BaseModel):
+    image_id: _uuid.UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+
+
+@router.post("/projects/{project_id}/plan-images")
+async def upload_plan_image_endpoint(
+    project_id: _uuid.UUID,
+    file: UploadFile = File(...),
+    session: AsyncSession = Depends(get_session),
+    payload: dict = Depends(get_current_user_payload),
+) -> PlanImageResponse:
+    """Persist an uploaded floor-plan image to object storage + record its metadata.
+
+    Designed as the input to the Gemini-vision extract step. SECURITY:
+    content-type is allowlisted, size is capped at 15 MiB, the storage key is
+    server-generated (client filename is NEVER trusted into the key path), and
+    authz (project owner) is checked BEFORE any byte of the body is read.
+    """
+    await require_project_owner(session, project_id, payload)
+
+    content_type = (file.content_type or "").lower()
+    ext = _ALLOWED_PLAN_IMAGE_CONTENT_TYPES.get(content_type)
+    if ext is None:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+
+    # Reject before pulling the whole body into a single bytes object. Starlette
+    # populates file.size from the parsed part; when it's absent (no
+    # content-length) fall back to the post-read check below.
+    # ponytail: parser still spools the part first; a true streaming cap needs
+    # Starlette max_part_size at app config — upgrade there if abuse shows up.
+    if file.size is not None and file.size > _MAX_PLAN_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="File too large (max 15 MiB)")
+
+    data = await file.read()
+    if len(data) > _MAX_PLAN_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail="File too large (max 15 MiB)")
+
+    # Import INSIDE the handler so tests can monkeypatch get_storage_backend.
+    from app.core.storage import get_storage_backend
+    from uuid import uuid4
+
+    from app.modules.acap.models.plan_image import PlanImageRecord
+
+    storage = get_storage_backend()
+    key = f"acap/plan-images/{project_id}/{uuid4().hex}.{ext}"
+    await storage.put(key, data)
+
+    record = PlanImageRecord(
+        project_id=project_id,
+        filename=file.filename or "unnamed",
+        content_type=content_type,
+        size_bytes=len(data),
+        storage_key=key,
+        status="uploaded",
+    )
+    session.add(record)
+    await session.flush()
+
+    logger.info(
+        "Uploaded plan image %s for project %s (%d bytes, %s)",
+        record.id,
+        project_id,
+        len(data),
+        content_type,
+    )
+
+    return PlanImageResponse(
+        image_id=record.id,
+        filename=record.filename,
+        content_type=record.content_type,
+        size_bytes=record.size_bytes,
+    )
+
+
+# ── Plan-image extraction (Gemini vision) ──────────────────────────────────
+
+
+class ExtractResponse(BaseModel):
+    draft_plan: dict
+    valid: bool
+    reasons: list[str]
+    model: str
+
+
+@router.post("/projects/{project_id}/plan-images/{image_id}/extract")
+async def extract_plan_image_endpoint(
+    project_id: _uuid.UUID,
+    image_id: _uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    payload: dict = Depends(get_current_user_payload),
+) -> ExtractResponse:
+    """Extract a floor-plan from an uploaded plan image via Gemini vision.
+
+    Key-gated: returns 400 (not 500) when ``GOOGLE_API_KEY`` is unset.
+    The extract NEVER writes to ``oe_acap_floor_plan`` — the draft is returned
+    to the caller for manual confirmation and optional save.
+    """
+    await require_project_owner(session, project_id, payload)
+
+    from app.modules.acap.models.plan_image import PlanImageRecord
+    from app.modules.acap.vision.client import (
+        VisionNotConfiguredError,
+        VisionServiceError,
+        _model,
+        extract_floor_plan,
+        vision_service_configured,
+    )
+    from app.modules.acap.vision.extractor import build_draft_plan
+    from app.core.storage import get_storage_backend
+
+    if not vision_service_configured():
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "detail": "Vision service not configured",
+                "reason": "GOOGLE_API_KEY not set",
+            },
+        )
+
+    from sqlalchemy import select
+
+    stmt = select(PlanImageRecord).where(PlanImageRecord.id == image_id)
+    record = (await session.execute(stmt)).scalars().first()
+    if record is None or record.project_id != project_id:
+        raise HTTPException(status_code=404, detail="Plan image not found")
+
+    storage = get_storage_backend()
+    try:
+        image_bytes = await storage.get(record.storage_key)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Image data not found in storage")
+
+    try:
+        extraction = await extract_floor_plan(image_bytes, record.content_type)
+    except VisionNotConfiguredError:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "detail": "Vision service not configured",
+                "reason": "GOOGLE_API_KEY not set",
+            },
+        )
+    except VisionServiceError as e:
+        raise HTTPException(status_code=502, detail="Vision extraction failed")
+
+    draft, valid, reasons = build_draft_plan(extraction)
+
+    return ExtractResponse(
+        draft_plan=draft,
+        valid=valid,
+        reasons=reasons,
+        model=_model(),
+    )

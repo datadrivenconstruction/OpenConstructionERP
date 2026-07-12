@@ -493,6 +493,9 @@ const FloorPlanEditorPage = lazy(() => import('@/acap/FloorPlanEditorPage'));
 const TimelinePage = lazy(() => import('@/acap/TimelinePage'));
 // ACAP — visual render viewer (floor plan -> image via GeminiGen).
 const RenderPage = lazy(() => import('@/acap/RenderPage'));
+// ACAP — guided Studio flow (Upload → Extract → Konfirmasi → RAB → Timeline → 3D → Interior).
+const StudioHomePage = lazy(() => import('@/acap/studio/StudioHomePage'));
+const StudioPage = lazy(() => import('@/acap/studio/StudioPage'));
 
 // Rarely-visited or heavy secondary pages — moved out of the initial
 // `index` bundle (was eager via barrel imports, ~1.4 MB chunk; these
@@ -999,6 +1002,8 @@ export default function App() {
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
         <Route path="/projects/:projectId" element={<P title="Project"><ProjectDetailPage /></P>} />
         <Route path="/projects/:projectId/settings" element={<P title="Project Settings"><ProjectSettingsPage /></P>} />
+        <Route path="/studio" element={<P title="ACAP Studio"><StudioHomePage /></P>} />
+        <Route path="/projects/:projectId/studio" element={<P title="ACAP Studio"><StudioPage /></P>} />
         <Route path="/projects/:projectId/layout" element={<P title="Layout Editor"><FloorPlanEditorPage /></P>} />
         <Route path="/projects/:projectId/timeline" element={<P title="Timeline"><TimelinePage /></P>} />
         <Route path="/projects/:projectId/render" element={<P title="Render Viewer"><RenderPage /></P>} />

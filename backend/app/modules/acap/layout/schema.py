@@ -62,7 +62,7 @@ class Room(BaseModel):
     NOT repeated at the end (closed implicitly).
     """
 
-    name: str
+    name: str = Field(max_length=120)
     type: ROOM_TYPES  # type: ignore[valid-type]
     polygon: list[Point]
     area_m2: float = Field(ge=0.0)

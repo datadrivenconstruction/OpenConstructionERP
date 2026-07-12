@@ -204,6 +204,12 @@ interface NavGroup {
 // Group labels use `t('sidebar.group.<slug>', { defaultValue: '<EN>' })`.
 // The locale keys are added by a later pass; until then the English
 // default renders. Item labelKeys reuse the existing locale strings.
+// NOTE(acap): the hideInSimple flags below (grp_takeoff, grp_reality,
+// grp_commercial — plus the enterprise groups that already carried the
+// flag) were set/extended for the Indonesia/ACAP simple-mode launch
+// (2026-07-12) to declutter the default sidebar around a small residential
+// estimation workflow. Nothing is deleted; switching to Advanced view
+// (useViewModeStore) restores full visibility.
 const navGroups: NavGroup[] = [
   // ── 1. OVERVIEW (always visible) ───────────────────────────────────
   // The few entry points every user touches every session.
@@ -213,6 +219,7 @@ const navGroups: NavGroup[] = [
     defaultLabel: 'Overview',
     defaultOpen: true,
     items: [
+      { labelKey: 'nav.acap_studio', to: '/studio', icon: Wand2 },
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
       // Cases (playbooks) - guided, cross-module worked examples. Sits in
@@ -233,6 +240,7 @@ const navGroups: NavGroup[] = [
     labelKey: 'sidebar.group.takeoff',
     defaultLabel: 'Takeoff',
     defaultOpen: true,
+    hideInSimple: true,
     items: [
       { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
@@ -305,6 +313,7 @@ const navGroups: NavGroup[] = [
     defaultLabel: 'Reality Capture & 3D',
     dynamicGroupKey: 'reality',
     defaultOpen: true,
+    hideInSimple: true,
     items: [
       { labelKey: 'sidebar.geo_hub', to: '/geo', icon: Globe, badge: 'BETA' },
       { labelKey: 'nav.point_cloud', to: '/pointcloud', icon: ScanLine, badge: 'BETA' },
@@ -371,11 +380,12 @@ const navGroups: NavGroup[] = [
     labelKey: 'sidebar.group.commercial',
     defaultLabel: 'Commercial',
     defaultOpen: true,
-    // Visible in Simple mode too. A user reported "there is no contracts
-    // module" because this whole group was hidden outside Advanced mode
-    // (hideInSimple). The group now shows with Contracts always visible;
-    // CRM and Subcontractors stay advanced-only so Simple mode surfaces
-    // just the core commercial entry point without extra clutter.
+    // Hidden in Simple mode for the Indonesia/ACAP launch (2026-07-12) —
+    // supersedes the earlier "visible in Simple mode too" exception for a
+    // small residential RAB workflow. Still fully reachable via the
+    // Advanced view toggle. CRM and Subcontractors remain advancedOnly
+    // within the group for when it is shown.
+    hideInSimple: true,
     items: [
       { labelKey: 'nav.crm', to: '/crm', icon: Briefcase, advancedOnly: true },
       { labelKey: 'nav.contracts', to: '/contracts', icon: FileSignature },

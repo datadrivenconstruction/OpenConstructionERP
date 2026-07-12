@@ -4451,6 +4451,7 @@ const resource = {
     "nav.boq": "Daftar Kuantitas",
     "nav.costs": "Basis Data Biaya",
     "nav.dashboard": "Dasbor",
+    "nav.acap_studio": "ACAP Studio",
     "nav.daily_diary": "Buku Harian Proyek",
     "nav.equipment": "Peralatan & Armada",
     "nav.resources": "Sumber Daya & Tim",

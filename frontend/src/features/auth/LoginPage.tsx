@@ -103,7 +103,7 @@ export function LoginPage() {
         return next;
       }
     } catch { /* ignore */ }
-    return '/';
+    return '/studio';
   })();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

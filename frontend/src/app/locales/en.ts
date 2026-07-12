@@ -4190,6 +4190,7 @@ const resource = {
     "nav.boq": "Bill of Quantities",
     "nav.costs": "Cost Database",
     "nav.dashboard": "Dashboard",
+    "nav.acap_studio": "ACAP Studio",
     "nav.cases": "Cases",
     "cases.page_title": "Cases",
     "cases.page_subtitle": "Guided, end-to-end playbooks that walk you through several modules in order. Pick a case, optionally choose a sample project to learn on, and follow each step.",
