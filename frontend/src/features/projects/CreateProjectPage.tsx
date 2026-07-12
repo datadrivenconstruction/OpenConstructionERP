@@ -1,5 +1,5 @@
 import {
-  useState, useEffect, useRef,
+  useState, useEffect, useMemo, useRef,
   type ChangeEvent, type KeyboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +33,8 @@ export interface OptionGroup {
   options: { value: string; label: string }[];
 }
 
-const REGION_GROUPS: OptionGroup[] = [
+/* TODO(acap): foreign regions hidden temporarily for Indonesia-only launch — un-comment to restore multi-market.
+const REGION_GROUPS_FOREIGN: OptionGroup[] = [
   {
     group: 'Europe',
     options: [
@@ -96,6 +97,39 @@ const REGION_GROUPS: OptionGroup[] = [
     ],
   },
 ];
+*/
+
+const REGION_GROUPS: OptionGroup[] = [
+  {
+    group: 'Indonesia',
+    options: [
+      { value: 'Batam', label: 'Batam' },
+      { value: 'Jakarta', label: 'Jakarta' },
+      { value: 'Surabaya', label: 'Surabaya' },
+      { value: 'Bandung', label: 'Bandung' },
+      { value: 'Medan', label: 'Medan' },
+      { value: 'Semarang', label: 'Semarang' },
+      { value: 'Makassar', label: 'Makassar' },
+      { value: 'Bekasi', label: 'Bekasi' },
+      { value: 'Tangerang', label: 'Tangerang' },
+      { value: 'Depok', label: 'Depok' },
+      { value: 'Palembang', label: 'Palembang' },
+      { value: 'Denpasar', label: 'Denpasar (Bali)' },
+      { value: 'Yogyakarta', label: 'Yogyakarta' },
+      { value: 'Balikpapan', label: 'Balikpapan' },
+      { value: 'Pekanbaru', label: 'Pekanbaru' },
+      { value: 'Bogor', label: 'Bogor' },
+      { value: 'Malang', label: 'Malang' },
+      { value: 'Padang', label: 'Padang' },
+      { value: 'Manado', label: 'Manado' },
+      { value: 'Samarinda', label: 'Samarinda' },
+    ],
+  },
+  {
+    group: 'Lainnya',
+    options: [{ value: '__custom__', label: 'Kota lain…' }],
+  },
+];
 
 // Project region → backend REGION_PACK key (scoring is a strict dict
 // lookup with no aliasing, so we must hand it an exact pack key or ''
@@ -120,6 +154,26 @@ const REGION_TO_PACK: Record<string, string> = {
   Australia: 'asia_pacific',
   NewZealand: 'asia_pacific',
   India: 'india',
+  Batam: 'asia_pacific',
+  Jakarta: 'asia_pacific',
+  Surabaya: 'asia_pacific',
+  Bandung: 'asia_pacific',
+  Medan: 'asia_pacific',
+  Semarang: 'asia_pacific',
+  Makassar: 'asia_pacific',
+  Bekasi: 'asia_pacific',
+  Tangerang: 'asia_pacific',
+  Depok: 'asia_pacific',
+  Palembang: 'asia_pacific',
+  Denpasar: 'asia_pacific',
+  Yogyakarta: 'asia_pacific',
+  Balikpapan: 'asia_pacific',
+  Pekanbaru: 'asia_pacific',
+  Bogor: 'asia_pacific',
+  Malang: 'asia_pacific',
+  Padang: 'asia_pacific',
+  Manado: 'asia_pacific',
+  Samarinda: 'asia_pacific',
 };
 
 // ── Classification Standards ──────────────────────────────────────────────
@@ -142,6 +196,29 @@ const STANDARD_GROUPS: OptionGroup[] = [
     options: [{ value: '__custom__', label: 'Custom...' }],
   },
 ];
+
+const INDONESIA_STANDARD_GROUPS: OptionGroup[] = [
+  {
+    group: 'Standar Indonesia',
+    options: [
+      { value: 'ahsp', label: 'AHSP (Analisa Harga Satuan Pekerjaan — Permen PUPR 1/2022)' },
+      { value: 'sni', label: 'SNI (Standar Nasional Indonesia)' },
+    ],
+  },
+];
+
+// City values that make up the active (Indonesia-only) REGION_GROUPS, so
+// the classification standard can react to region without hardcoding the
+// city list a second time.
+const INDONESIA_REGION_VALUES = new Set(
+  (REGION_GROUPS.find((g) => g.group === 'Indonesia')?.options ?? []).map((o) => o.value),
+);
+
+// '__custom__' (the "Kota lain…" pick) is treated as NON-Indonesia so the
+// user gets the full foreign standards list for a region we don't know.
+function isIndonesiaRegion(region: string): boolean {
+  return INDONESIA_REGION_VALUES.has(region);
+}
 
 // ── Currencies (all major construction market currencies) ─────────────────
 
@@ -656,6 +733,31 @@ export function CreateProjectModal({
       : (form.classification_standard ?? '');
   const effectiveCurrency =
     form.currency === '__custom__' ? customCurrency.trim() : (form.currency ?? '');
+
+  // Classification standard reacts to region: Indonesian cities get the
+  // AHSP/SNI standard list, everything else (incl. "Kota lain…") keeps
+  // the full foreign standards list.
+  const isRegionIndonesia = isIndonesiaRegion(form.region ?? '');
+  const standardGroups = useMemo(
+    () => (isRegionIndonesia ? INDONESIA_STANDARD_GROUPS : STANDARD_GROUPS),
+    [isRegionIndonesia],
+  );
+
+  // Keep the selected standard consistent with the active group when the
+  // region's Indonesian-ness flips — otherwise the select would keep a
+  // value ("din276", "ahsp"...) that no longer appears in its own list.
+  useEffect(() => {
+    setForm((prev) => {
+      if (isRegionIndonesia) {
+        if (prev.classification_standard === 'ahsp' || prev.classification_standard === 'sni') return prev;
+        return { ...prev, classification_standard: 'ahsp' };
+      }
+      if (prev.classification_standard === 'ahsp' || prev.classification_standard === 'sni') {
+        return { ...prev, classification_standard: '' };
+      }
+      return prev;
+    });
+  }, [isRegionIndonesia]);
 
   // Any meaningful input → closing should confirm before discarding.
   const dirty =
@@ -1348,7 +1450,7 @@ export function CreateProjectModal({
                       optional
                       optionalText={t('projects.create.optional_badge', { defaultValue: 'Optional' })}
                       value={form.classification_standard ?? ''}
-                      groups={STANDARD_GROUPS}
+                      groups={standardGroups}
                       placeholder={t('projects.select_standard', { defaultValue: '-- Select standard --' })}
                       onChange={(v) => set('classification_standard', v)}
                     />
@@ -1742,7 +1844,7 @@ export function CreateProjectModal({
                   <GroupedSelectField
                     label={t('projects.classification_standard', { defaultValue: 'Classification Standard' })}
                     value={form.classification_standard ?? ''}
-                    groups={STANDARD_GROUPS}
+                    groups={standardGroups}
                     placeholder={t('projects.select_standard', { defaultValue: '-- Select standard --' })}
                     onChange={(v) => set('classification_standard', v)}
                   />
@@ -2029,7 +2131,7 @@ export function CreateProjectModal({
                     value={
                       form.classification_standard === '__custom__'
                         ? (customStandard.trim() || '—')
-                        : (labelFor(STANDARD_GROUPS, form.classification_standard ?? '') || '—')
+                        : (labelFor(standardGroups, form.classification_standard ?? '') || '—')
                     }
                   />
                   <SummaryRow

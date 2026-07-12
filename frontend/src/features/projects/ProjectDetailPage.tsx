@@ -2014,10 +2014,14 @@ export function ProjectDetailPage() {
           { key: 'tendering' as ProjectTab, label: t('projects.tendering'), icon: <Gavel size={15} /> },
           { key: 'photos' as ProjectTab, label: t('projects.photos.tab_label', { defaultValue: 'Photos' }), icon: <ImageIcon size={15} /> },
           { key: 'compliance' as ProjectTab, label: t('compliance.tab_label', { defaultValue: 'Compliance' }), icon: <ShieldCheck size={15} /> },
-        ]).map((tab) => (
+          { key: 'acap-layout', label: 'Denah', icon: <LayoutGrid size={15} />, to: `/projects/${projectId}/layout` },
+          // TODO(acap): add RAB tab once the RAB page exists
+          { key: 'acap-timeline', label: 'Timeline', icon: <CalendarClock size={15} />, to: `/projects/${projectId}/timeline` },
+          { key: 'acap-render', label: 'Render', icon: <ImageIcon size={15} />, to: `/projects/${projectId}/render` },
+        ] as { key: string; label: string; icon: JSX.Element; to?: string }[]).map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => (tab.to ? navigate(tab.to) : setActiveTab(tab.key as ProjectTab))}
             className={`
               flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
               ${

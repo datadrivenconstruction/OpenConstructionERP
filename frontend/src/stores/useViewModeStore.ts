@@ -16,9 +16,14 @@ const STORAGE_KEY = 'oe_view_mode';
 function readMode(): ViewMode {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
-    return v === 'simple' ? 'simple' : 'advanced';
+    // Default is 'simple' for the Indonesia/ACAP launch (a first-time user
+    // with no persisted choice sees the decluttered sidebar). An explicit
+    // 'advanced' choice — stored the moment a user flips the toggle — is
+    // still honored and persists across sessions, so this only changes the
+    // out-of-the-box default, not the toggle's reversibility.
+    return v === 'advanced' ? 'advanced' : 'simple';
   } catch {
-    return 'advanced';
+    return 'simple';
   }
 }
 
