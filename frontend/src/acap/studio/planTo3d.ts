@@ -22,8 +22,8 @@ export interface WallBox {
 }
 
 function edgeKey(a: Point, b: Point): string {
-  const pts = [a, b].sort((p, q) => p.x - q.x || p.y - q.y);
-  return `${Math.round(pts[0].x * 1000)},${Math.round(pts[0].y * 1000)}-${Math.round(pts[1].x * 1000)},${Math.round(pts[1].y * 1000)}`;
+  const [p0, p1] = [a, b].sort((p, q) => p.x - q.x || p.y - q.y);
+  return `${Math.round(p0.x * 1000)},${Math.round(p0.y * 1000)}-${Math.round(p1.x * 1000)},${Math.round(p1.y * 1000)}`;
 }
 
 export function planToMeshes(plan: FloorPlan): { floors: Slab[]; walls: WallBox[] } {
@@ -51,6 +51,7 @@ export function planToMeshes(plan: FloorPlan): { floors: Slab[]; walls: WallBox[
         const j = (i + 1) % poly.length;
         const a = poly[i];
         const b = poly[j];
+        if (!a || !b) continue;
         const key = edgeKey(a, b);
         if (seenEdges.has(key)) continue;
         seenEdges.add(key);

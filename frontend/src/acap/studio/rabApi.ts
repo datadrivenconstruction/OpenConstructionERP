@@ -1,4 +1,4 @@
-import { apiPost, triggerDownload, getAuthToken } from '@/shared/lib/api';
+import { apiPost, triggerDownload } from '@/shared/lib/api';
 
 const PREFIX = '/v1/acap';
 
