@@ -56,7 +56,8 @@ export function InteriorStep({ projectId }: InteriorStepProps) {
           }
         }
         setRooms(allRooms);
-        if (allRooms.length > 0) setSelectedRoom(allRooms[0].name);
+        const first = allRooms[0];
+        if (first) setSelectedRoom(first.name);
       })
       .catch(() => {});
 

@@ -74,7 +74,7 @@ describe('planToMeshes', () => {
     //  slab top itself sits at 3.0, on top of the ground-floor walls.)
     const level2Slabs = floors.filter((s) => s.z > 0);
     expect(level2Slabs).toHaveLength(1);
-    expect(level2Slabs[0].z).toBe(3.0);
+    expect(level2Slabs[0]!.z).toBe(3.0);
   });
 
   it('deduplicates shared edges into one wall', () => {

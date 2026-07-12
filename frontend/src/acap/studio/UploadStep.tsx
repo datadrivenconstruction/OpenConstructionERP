@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Upload, Loader2, AlertTriangle } from 'lucide-react';
-import { getErrorMessage, ApiError } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
 import { uploadPlanImage, extractPlanImage, isVisionNotConfiguredError, type ExtractResponse } from './studioApi';
 
 const ACCEPT = '.png,.jpg,.jpeg,.webp,.pdf';

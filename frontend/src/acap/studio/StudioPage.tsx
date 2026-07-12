@@ -111,7 +111,7 @@ export default function StudioPage() {
             </button>
           </div>
         ) : (
-          <StepPending title={STEP_TITLES[step - 1]} />
+          <StepPending title={STEP_TITLES[step - 1] ?? ''} />
         );
       case 3:
         return draft ? (
@@ -122,7 +122,7 @@ export default function StudioPage() {
             onSaved={handleSaved}
           />
         ) : (
-          <StepPending title={STEP_TITLES[step - 1]} />
+          <StepPending title={STEP_TITLES[step - 1] ?? ''} />
         );
       case 4:
         return <RabStep projectId={projectId} />;
@@ -133,7 +133,7 @@ export default function StudioPage() {
       case 7:
         return <InteriorStep projectId={projectId} />;
       default:
-        return <StepPending title={STEP_TITLES[step - 1]} />;
+        return <StepPending title={STEP_TITLES[step - 1] ?? ''} />;
     }
   };
 

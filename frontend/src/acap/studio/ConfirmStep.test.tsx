@@ -81,8 +81,8 @@ describe('ConfirmStep', () => {
     fireEvent.change(widthInput, { target: { value: '6' } });
 
     expect(onDraftChange).toHaveBeenCalled();
-    const updated = onDraftChange.mock.calls[0][0] as FloorPlan;
-    const room = updated.levels[0].rooms[0];
+    const updated = onDraftChange.mock.calls[0]![0] as FloorPlan;
+    const room = updated.levels[0]!.rooms[0]!;
     const xs = room.polygon.map((p) => p.x);
     expect(Math.max(...xs) - Math.min(...xs)).toBe(6);
   });

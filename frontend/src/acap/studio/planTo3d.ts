@@ -22,7 +22,9 @@ export interface WallBox {
 }
 
 function edgeKey(a: Point, b: Point): string {
-  const [p0, p1] = [a, b].sort((p, q) => p.x - q.x || p.y - q.y);
+  const swap = b.x < a.x || (b.x === a.x && b.y < a.y);
+  const p0 = swap ? b : a;
+  const p1 = swap ? a : b;
   return `${Math.round(p0.x * 1000)},${Math.round(p0.y * 1000)}-${Math.round(p1.x * 1000)},${Math.round(p1.y * 1000)}`;
 }
 

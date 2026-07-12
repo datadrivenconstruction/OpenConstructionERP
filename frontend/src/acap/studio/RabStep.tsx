@@ -3,7 +3,7 @@ import { Loader2, AlertTriangle, Info } from 'lucide-react';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { generateRab, downloadRabCsv } from './rabApi';
 import { buildRabCsv } from './rabCsv';
-import type { RabResponse, RabLine } from './rabApi';
+import type { RabResponse } from './rabApi';
 
 type RabState =
   | { status: 'idle' }
