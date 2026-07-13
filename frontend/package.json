@@ -33,7 +33,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "exceljs": "^4.4.0",
-    "i18next": "^24.2.3",
+    "i18next": "^26.3.6",
     "isomorphic-dompurify": "^3.18.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
