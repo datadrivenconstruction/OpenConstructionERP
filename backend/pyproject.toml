@@ -90,7 +90,7 @@ dependencies = [
     # which the dashboards integrity detector and its tests were written
     # against. Revisit and lift the cap when adopting pandas 3 deliberately.
     "pandas>=2.2.0,<3",
-    "pyarrow>=23.0.1,<25",
+    "pyarrow>=23.0.1,<26",
     "trimesh>=4.0.0",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
     # "collada"); without it trimesh.load() of a .dae raises ImportError and the
