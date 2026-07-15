@@ -22,16 +22,31 @@ before any apply flow:
 | **E5.2 locked-figure guard** | `locked_guard.py` — pure policy-as-code. Once a figure is locked, no flow may change it; byte-identical re-writes pass, mutations raise `LockedFigureViolation`. Backing store: `locked_figure` table. |
 | **E5.3 confidence framework** | `confidence.py` — one uniform `score / band / rationale` for every insight. Corroboration bonuses first, caps last (hard ceiling); a degraded feed's reduced confidence is always explained, never silent. Config-as-data: `confidence_config` table (versioned). |
 | **Data model** | `models.py` — `confidence_config`, `locked_figure`, plus the insight tables the later phases fill: `readiness_result` (E1), `risk_score` + `risk_factor` (E2), `decision` (E4). |
-| **RBAC** | `permissions.py` — `schedule_intelligence.{read,score,attribute,quantify,decide,apply,configure,lock}`, registered in `__init__.on_startup()`. Apply flows reuse the `app/core` approval gate + audit — no new gate. |
+| **RBAC** | `permissions.py` — `schedule_intelligence.{read,watch,score,attribute,quantify,decide,apply,configure,lock}`, registered in `__init__.on_startup()`. Apply flows reuse the `app/core` approval gate + audit — no new gate. |
 | **API** | `router.py` — governance surface: lock / list / unlock / dry-run-verify locked figures; get / versioned-upsert / preview confidence config. Mounted at `/api/v1/schedule-intelligence/`. |
 
 Every project-scoped endpoint is gated twice: `RequirePermission(...)` (RBAC)
 + `verify_project_access(...)` (404-on-deny IDOR defence).
 
+## Status — Phase 1 (E1 Readiness / "Watch") ✅
+
+Turns `schedule_advanced`'s binary ready/not-ready into a deterministic
+**Ready / At-risk / Blocked** classification per look-ahead activity, persisted
+as `readiness_result` snapshots.
+
+| Area | What's here |
+|---|---|
+| **Engine** | `readiness_engine.py` — a **pure** classifier (no I/O, no clock). `classify_activity` / `evaluate_look_ahead` apply a hardcoded truth table over raw constraints + optional CPM float; `run_digest` hashes the canonical inputs into the `evaluation_run_id` so a re-run is idempotent (E1.1-AC6). Each verdict carries a `binding_constraint_ref`, traceable `drivers[]` (P4), a `float_burn` delta vs the prior snapshot, and a uniform E5.3 confidence. |
+| **Correctness catch** | Consumes **raw** constraint rows: `cannot_clear → BLOCKED` is handled here, because `schedule_advanced.constraint_ready_state` treats `cannot_clear` as *not open* and would call a permanently-blocked activity "ready". Open-blocker subset is exactly `{open, in_progress, escalated}`. |
+| **Service** | `service.evaluate_readiness` derives the look-ahead's project (IDOR 404), pulls constraints via `schedule_advanced`, resolves best-effort CPM float (one swappable `_resolve_float` against `oe_schedule_activity`), runs the engine under the project's confidence policy, and snapshots one idempotent run. `list_readiness` returns the latest run. |
+| **API** | `POST …/projects/{id}/look-aheads/{la}/readiness/evaluate` (gated `.watch`) and `GET …/projects/{id}/readiness` (gated `.read`). |
+
+The `task_ref ↔ schedule-activity` float join is intentionally best-effort for
+the MVP: unresolved float degrades confidence (never silently), and `_resolve_float`
+is the single swap-point when a richer task↔activity mapping lands.
+
 ## What comes next
 
-- **Phase 1 — E1 Readiness (Watch):** `readiness_engine.py` classifies
-  look-ahead activities Ready / At-risk / Blocked, deterministically.
 - **Phase 2 — E2 Risk (Score):** `risk_scoring.py`, a weighted-factor forward
   score behind a pluggable `Scorer` interface (ML out of MVP).
 - **Phase 3–4 — E3/E4 (Attribute → Quantify → Decide):** attribution over the

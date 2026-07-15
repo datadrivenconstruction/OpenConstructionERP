@@ -11,10 +11,14 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.schedule_intelligence.models import ConfidenceConfig, LockedFigure
+from app.modules.schedule_intelligence.models import (
+    ConfidenceConfig,
+    LockedFigure,
+    ReadinessResult,
+)
 
 
 class LockedFigureRepository:
@@ -102,3 +106,82 @@ class ConfidenceConfigRepository:
         self.session.add(row)
         await self.session.flush()
         return row
+
+
+class ReadinessResultRepository:
+    """Access to :class:`ReadinessResult` snapshots (E1 Watch backing store).
+
+    A single ``evaluate`` produces one *run* — a batch of rows sharing one
+    deterministic ``evaluation_run_id``. Reads return the latest run; writes are
+    idempotent per run id (the service short-circuits when a run already exists).
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def bulk_add(self, rows: list[ReadinessResult]) -> list[ReadinessResult]:
+        for row in rows:
+            self.session.add(row)
+        await self.session.flush()
+        return rows
+
+    async def list_by_run(self, project_id: uuid.UUID, evaluation_run_id: str) -> list[ReadinessResult]:
+        """All rows of one specific run, oldest-first (stable insert order)."""
+        stmt = (
+            select(ReadinessResult)
+            .where(
+                ReadinessResult.project_id == project_id,
+                ReadinessResult.evaluation_run_id == evaluation_run_id,
+            )
+            .order_by(ReadinessResult.created_at.asc(), ReadinessResult.activity_ref.asc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def latest_run_id(
+        self,
+        project_id: uuid.UUID,
+        *,
+        look_ahead_ref: str | None = None,
+    ) -> str | None:
+        """The ``evaluation_run_id`` of the most recently created snapshot."""
+        stmt = select(ReadinessResult.evaluation_run_id).where(ReadinessResult.project_id == project_id)
+        if look_ahead_ref is not None:
+            stmt = stmt.where(ReadinessResult.look_ahead_ref == look_ahead_ref)
+        stmt = stmt.order_by(desc(ReadinessResult.created_at)).limit(1)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
+    async def list_latest_run(
+        self,
+        project_id: uuid.UUID,
+        *,
+        look_ahead_ref: str | None = None,
+    ) -> list[ReadinessResult]:
+        """Every row of the latest run (optionally scoped to one look-ahead)."""
+        run_id = await self.latest_run_id(project_id, look_ahead_ref=look_ahead_ref)
+        if run_id is None:
+            return []
+        return await self.list_by_run(project_id, run_id)
+
+    async def get_prior_by_activity(
+        self,
+        project_id: uuid.UUID,
+        activity_ref: str,
+        *,
+        exclude_run_id: str | None = None,
+    ) -> ReadinessResult | None:
+        """The most recent prior snapshot for one activity (for float-burn).
+
+        ``exclude_run_id`` skips the run currently being written so a fresh row
+        never compares against itself.
+        """
+        stmt = select(ReadinessResult).where(
+            ReadinessResult.project_id == project_id,
+            ReadinessResult.activity_ref == activity_ref,
+        )
+        if exclude_run_id is not None:
+            stmt = stmt.where(ReadinessResult.evaluation_run_id != exclude_run_id)
+        stmt = stmt.order_by(desc(ReadinessResult.created_at)).limit(1)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()

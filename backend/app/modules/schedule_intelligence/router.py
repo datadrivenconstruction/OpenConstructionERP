@@ -25,6 +25,7 @@ from app.dependencies import (
 )
 from app.modules.schedule_intelligence import service
 from app.modules.schedule_intelligence.confidence import ConfidencePolicy
+from app.modules.schedule_intelligence.models import ReadinessResult
 from app.modules.schedule_intelligence.schemas import (
     ConfidenceConfigRead,
     ConfidenceConfigUpsert,
@@ -32,6 +33,9 @@ from app.modules.schedule_intelligence.schemas import (
     ConfidencePreviewResponse,
     LockedFigureRead,
     LockFigureRequest,
+    ReadinessEvaluateRequest,
+    ReadinessResultRead,
+    ReadinessRunResponse,
     VerifyWritesRequest,
     VerifyWritesResponse,
     WriteViolation,
@@ -46,6 +50,22 @@ def _as_uuid(user_id: str) -> uuid.UUID | None:
         return uuid.UUID(str(user_id))
     except (ValueError, TypeError):
         return None
+
+
+def _readiness_run_response(
+    run_id: str | None,
+    rows: list[ReadinessResult],
+) -> ReadinessRunResponse:
+    counts: dict[str, int] = {"ready": 0, "at_risk": 0, "blocked": 0}
+    for r in rows:
+        counts[r.classification] = counts.get(r.classification, 0) + 1
+    look_ahead_ref = rows[0].look_ahead_ref if rows else None
+    return ReadinessRunResponse(
+        evaluation_run_id=run_id,
+        look_ahead_ref=look_ahead_ref,
+        counts=counts,
+        results=[ReadinessResultRead.model_validate(r) for r in rows],
+    )
 
 
 def _config_read(source: str, policy: ConfidencePolicy) -> ConfidenceConfigRead:
@@ -197,3 +217,46 @@ async def preview_confidence(
     await verify_project_access(project_id, user_id, session)
     result = await service.preview_confidence(session, project_id, payload)
     return ConfidencePreviewResponse(score=result.score, band=result.band, rationale=result.rationale)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# E1 — Readiness (Watch)
+# ─────────────────────────────────────────────────────────────────────────────
+@router.post(
+    "/projects/{project_id}/look-aheads/{look_ahead_id}/readiness/evaluate",
+    response_model=ReadinessRunResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def evaluate_readiness(
+    project_id: uuid.UUID,
+    look_ahead_id: uuid.UUID,
+    payload: ReadinessEvaluateRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _: None = Depends(RequirePermission("schedule_intelligence.watch")),
+) -> ReadinessRunResponse:
+    """Evaluate & snapshot Ready/At-risk/Blocked for a look-ahead's activities.
+
+    Idempotent: re-running over identical inputs returns the existing run.
+    """
+    await verify_project_access(project_id, user_id, session)
+    run_id, rows = await service.evaluate_readiness(session, project_id, look_ahead_id, today=payload.today)
+    await session.commit()
+    return _readiness_run_response(run_id, rows)
+
+
+@router.get(
+    "/projects/{project_id}/readiness",
+    response_model=ReadinessRunResponse,
+)
+async def list_readiness(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    look_ahead_id: uuid.UUID | None = Query(None),
+    _: None = Depends(RequirePermission("schedule_intelligence.read")),
+) -> ReadinessRunResponse:
+    """Return the latest readiness run (optionally scoped to one look-ahead)."""
+    await verify_project_access(project_id, user_id, session)
+    run_id, rows = await service.list_readiness(session, project_id, look_ahead_id=look_ahead_id)
+    return _readiness_run_response(run_id, rows)

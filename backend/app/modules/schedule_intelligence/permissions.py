@@ -8,8 +8,8 @@ from ``__init__.on_startup``.
 
 Rationale for the role floors:
     * ``read`` — VIEWER: anyone on the project may see insights.
-    * ``score`` / ``attribute`` / ``quantify`` — EDITOR: running the engines
-      and staging analysis is normal project work.
+    * ``watch`` / ``score`` / ``attribute`` / ``quantify`` — EDITOR: running the
+      engines and staging analysis is normal project work.
     * ``decide`` — MANAGER: choosing a claim-vs-accelerate recommendation is a
       commercial judgement.
     * ``apply`` — MANAGER: applying a decision changes committed state; it also
@@ -30,6 +30,7 @@ def register_schedule_intelligence_permissions() -> None:
         "schedule_intelligence",
         {
             "schedule_intelligence.read": Role.VIEWER,
+            "schedule_intelligence.watch": Role.EDITOR,
             "schedule_intelligence.score": Role.EDITOR,
             "schedule_intelligence.attribute": Role.EDITOR,
             "schedule_intelligence.quantify": Role.EDITOR,

@@ -1,19 +1,25 @@
 """Schedule Intelligence Pydantic schemas — request / response shapes.
 
-Phase 0 exposes only the **governance surface** (locked figures + confidence
-config + a confidence preview). The per-insight schemas (readiness, risk,
-decision) arrive with their engines in Phases 1–4.
+Phase 0 exposes the **governance surface** (locked figures + confidence config +
+a confidence preview); Phase 1 adds the **readiness (Watch)** surface. The
+remaining per-insight schemas (risk, decision) arrive with their engines in
+Phases 2–4.
 """
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.schedule_intelligence.enums import ConfidenceBand, LockedFigureType
+from app.modules.schedule_intelligence.enums import (
+    ConfidenceBand,
+    LockedFigureType,
+    ReadinessClass,
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,3 +129,58 @@ class ConfidencePreviewResponse(BaseModel):
     score: float
     band: ConfidenceBand
     rationale: list[dict[str, Any]] = Field(default_factory=list)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# E1 — Readiness (Watch)
+# ─────────────────────────────────────────────────────────────────────────────
+class ReadinessEvaluateRequest(BaseModel):
+    """Trigger a readiness evaluation for a look-ahead.
+
+    ``today`` overrides the evaluation date (defaults to the server's UTC date);
+    supplying it makes the deterministic ``evaluation_run_id`` reproducible in
+    tests and back-dated re-runs.
+    """
+
+    today: date | None = None
+
+
+class ReadinessDriver(BaseModel):
+    """One traceable reason behind a classification (P4): links to a source row."""
+
+    type: str
+    ref: str
+    detail: str
+
+
+class ReadinessResultRead(BaseModel):
+    """A persisted readiness snapshot row."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID
+    activity_ref: str
+    look_ahead_ref: str | None
+    classification: ReadinessClass
+    binding_constraint_ref: str | None
+    need_by_date: datetime | None
+    planned_start_date: datetime | None
+    total_float_days: int | None
+    float_burn_days: int | None
+    drivers: list[ReadinessDriver] = Field(default_factory=list)
+    confidence_score: Decimal | None
+    confidence_band: str | None
+    confidence_rationale: list[dict[str, Any]] = Field(default_factory=list)
+    evaluation_run_id: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ReadinessRunResponse(BaseModel):
+    """A whole readiness run: its id, per-class counts, and the rows."""
+
+    evaluation_run_id: str | None
+    look_ahead_ref: str | None = None
+    counts: dict[str, int] = Field(default_factory=dict)
+    results: list[ReadinessResultRead] = Field(default_factory=list)
