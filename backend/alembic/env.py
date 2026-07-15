@@ -82,6 +82,7 @@ from app.modules.rfq_bidding import models as _rfq_bidding  # noqa: F401, E402
 from app.modules.risk import models as _risk  # noqa: F401, E402
 from app.modules.safety import models as _safety  # noqa: F401, E402
 from app.modules.schedule import models as _sched  # noqa: F401, E402
+from app.modules.schedule_intelligence import models as _sched_intel  # noqa: F401, E402
 from app.modules.submittals import models as _submittals  # noqa: F401, E402
 from app.modules.takeoff import models as _takeoff  # noqa: F401, E402
 from app.modules.tasks import models as _tasks  # noqa: F401, E402
