@@ -398,7 +398,7 @@ Build professional cost estimates with a powerful BOQ editor. The full lifecycle
 ```
   Upload              Convert            Validate           Estimate           Tender
  ┌────────┐        ┌──────────┐       ┌───────────┐      ┌──────────┐      ┌──────────┐
- │PDF/CAD │───────▶│ Extract  │──────▶│ 42 rules  │─────▶│BOQ Editor│─────▶│ Bid Pkgs │
+ │PDF/CAD │──────▶│ Extract  │──────▶│ 42 rules  │────▶│BOQ Editor│─────▶│ Bid Pkgs │
  │Photo   │        │quantities│       │ DIN/NRM/  │      │ + AI     │      │ Compare  │
  │Text    │        │ + AI     │       │ MasterFmt │      │ + Costs  │      │ Award    │
  └────────┘        └──────────┘       └───────────┘      └──────────┘      └──────────┘
@@ -441,12 +441,12 @@ Extract quantities from any source - drawings, models, text, or photos:
   Source              DDC cad2data         Canonical            Match              BOQ
  ┌────────┐         ┌──────────────┐    ┌──────────┐       ┌──────────┐      ┌──────────┐
  │.rvt    │         │ Element      │    │ Elements │       │ Classify │      │ Positions│
- │.ifc    │────────▶│ extraction   │───▶│ + Quants │──────▶│ (DIN/NRM)│─────▶│ + Linked │
+ │.ifc    │───────▶│ extraction   │───▶│ + Quants │─────▶│ (DIN/NRM)│─────▶│ + Linked │
  │.dwg    │         │ (no IFC OS)  │    │ + Props  │       │ + Costs  │      │ geometry │
  │.dgn    │         └──────────────┘    └──────────┘       └──────────┘      └──────────┘
  │.pdf    │                                                                         │
  │photo   │         ┌──────────────┐                                          ┌─────┴────┐
- │text    │────────▶│ CV / OCR / AI│──────────────────────────────────────▶  │ BIM Pick │
+ │text    │───────▶│ CV / OCR / AI │────────────────────────────────────────▶│ BIM Pick │
  └────────┘         │ (PaddleOCR + │                                          │ area/vol │
                     │  YOLOv11)    │                                          │ /length  │
                     └──────────────┘                                          └──────────┘
@@ -469,14 +469,14 @@ Anchor every project on a real spherical earth - Cesium 3D Tiles 1.1 with live H
 
 ```
    Anchor              Globe                Mode               Deeplink            Fly-to
- ┌──────────┐       ┌──────────┐       ┌───────────┐       ┌────────────┐      ┌──────────┐
- │ Project  │       │ Cesium   │       │  Global   │       │ ?model=…   │      │ BIM scene│
- │ Plot     │──────▶│ 3D Tiles │──────▶│  Project  │──────▶│ ?plot=…    │─────▶│ PropDev  │
+ ┌──────────┐       ┌──────────┐       ┌───────────┐       ┌────────────┐      ┌────────────┐
+ │ Project  │       │ Cesium   │       │  Global   │       │ ?model=…   │      │ BIM scene  │
+ │ Plot     │──────▶│ 3D Tiles │─────▶│  Project  │─────▶│ ?plot=…    │─────▶│ PropDev    │
  │ CAD model│       │ live HUD │       │ Developm. │       │ ?dev_id=…  │      │ Daily Diary│
- └──────────┘       └──────────┘       └───────────┘       └────────────┘      └──────────┘
-       ▲                  │                                                          │
-       │                  ▼                                                          │
-       │           ┌──────────────┐                                                  │
+ └──────────┘       └──────────┘       └───────────┘       └────────────┘      └────────────┘
+       ▲                  │                                                           │
+       │                  ▼                                                           │
+       │           ┌──────────────┐                                                   │
        └───────────│ Pin layers   │ ◀────── HSE · Punchlist · Daily Diary ◀──────────┘
                    └──────────────┘
 ```
@@ -500,11 +500,11 @@ End-to-end real-estate developer workflow - from first lead to handover snags to
 ```
    Lead          Reservation         SPA              Handover           Warranty
  ┌────────┐    ┌──────────┐     ┌──────────┐      ┌───────────┐      ┌──────────┐
- │ CRM    │───▶│ Hold +   │────▶│ Contract │─────▶│ Snags     │─────▶│ Defects  │
+ │ CRM    │───▶│ Hold +   │───▶│ Contract │────▶│ Snags     │─────▶│ Defects  │
  │ inbox  │    │ deposit  │     │ + Escrow │      │ + Photos  │      │ liability│
  │ Broker │    │ schedule │     │ schedule │      │ + Sign-off│      │ + Promote│
  └────────┘    └──────────┘     └──────────┘      └───────────┘      └──────────┘
-      │              │                │                  │                  │
+      │              │                │                  │                   │
       └──────────────┴────────────────┴──── Contact bridge (idempotent tags) ┘
                                               ▼
                                      ┌────────────────┐
@@ -536,7 +536,7 @@ One module for three lodging kinds - worker camps for site crews, rentals for st
 ```
    PropDev block         Accommodation         Rooms              Bookings           Charges
  ┌──────────────┐      ┌──────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
- │ Plots #1..N  │──1▶──│ Worker camp  │───▶│ available  │───▶│ reserved   │───▶│ base rent  │
+ │ Plots #1..N  │──1▶──│ Worker camp │───▶│ available  │──▶│ reserved   │───▶│ base rent  │
  │ (PropDev)    │ click│ Rental       │    │ occupied   │    │ checked_in │    │ extras     │
  │              │      │ Hotel        │    │ maintenance│    │ checked_out│    │ deposits   │
  └──────────────┘      └──────────────┘    │ blocked    │    │ cancelled  │    │ refunds    │
@@ -570,11 +570,11 @@ Bottom-right floating chat on every page - talks to the entire ERP database thro
 
 ```
   Any page          Floating button       Panel + 17 tools     Streamed
- ┌────────┐        ┌──────────────┐     ┌──────────────┐     ┌──────────┐
- │/projects│       │  bottom-right │     │ get_projects │     │ tool card│
- │/boq    │──FAB──▶│   ◯ Message  │────▶│ search_cwicr │────▶│ rendered │
- │/geo    │        │   (badge: 3) │     │ create_boq   │     │ in chat  │
- └────────┘        └──────────────┘     └──────────────┘     └──────────┘
+ ┌─────────┐        ┌───────────────┐     ┌──────────────┐     ┌──────────┐
+ │/projects│        │  bottom-right │     │ get_projects │     │ tool card│
+ │/boq     │──FAB──▶│   ◯ Message  │───▶│ search_cwicr │───▶│ rendered │
+ │/geo     │        │   (badge: 3)  │     │ create_boq   │     │ in chat  │
+ └─────────┘        └───────────────┘     └──────────────┘     └──────────┘
 ```
 
 - **Always-on** - Mounted in `AppLayout`, available on every route (Dashboard, BOQ, BIM, Geo, PropDev, Accommodation, all 161 modules)
@@ -592,7 +592,7 @@ Multi-disciplinary BIM coordination with AI-assisted issue triage:
   Federation         Raw clashes        Smart Issues       AI Triage         BCF 3.0
  ┌──────────┐      ┌────────────┐     ┌────────────┐    ┌────────────┐    ┌──────────┐
  │ ARC ·STR │      │ thousands  │     │ clustered  │    │ severity   │    │ any BCF  │
- │ MEP ·HSE │─────▶│ raw pairs  │────▶│ by zone +  │───▶│ rework $   │───▶│ viewer   │
+ │ MEP ·HSE │─────▶│ raw pairs  │───▶│ by zone +  │──▶│ rework $   │───▶│ viewer   │
  │ models   │      │ + distance │     │ disciplines│    │ confidence │    │ or tool  │
  └──────────┘      └────────────┘     └────────────┘    └────────────┘    └──────────┘
                                             │                                  ▲
@@ -632,7 +632,7 @@ Complete your estimation workflow:
 ```
    BOQ           Bid Package        Distribute         Compare           Award
  ┌────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌──────────┐
- │ priced │───▶│ subset +   │───▶│ Subs (mail │───▶│ side-by-   │───▶│ winner   │
+ │ priced │───▶│ subset +   │──▶│ Subs (mail │──▶│ side-by-   │───▶│ winner   │
  │ sections    │ instructions    │ + portal)  │    │ side mirror│    │ + change │
  │        │    │ + scope    │    │            │    │ + anomalies│    │   orders │
  └────────┘    └────────────┘    └────────────┘    └────────────┘    └──────────┘
