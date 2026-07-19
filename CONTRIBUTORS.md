@@ -71,7 +71,13 @@ implementation is our own.
 - **arvildev** ([@arvildev](https://github.com/arvildev)): pointed out that the required
   `POSTGRES_PASSWORD` and `JWT_SECRET` interpolations in the quickstart Docker Compose file
   needed quoting so the YAML parses before the fail-fast checks run
-  ([#227](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/227)).
+  ([#227](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/227)). Later
+  filed three PDF takeoff UI reports: an overlong Calibrate button label
+  ([#366](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/366)),
+  transient draw-preview overlays that were not suppressed during a scroll
+  ([#367](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/367)) and the
+  toolbar top row wrapping to a second line when side panels are open
+  ([#368](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/368)).
 - **Aidan Koetaan** ([@aidankoetaan-tech](https://github.com/aidankoetaan-tech),
   akoetaan@cut.ac.za): proposed a South Africa construction pack and shared a reference
   implementation covering SANS 1200 and ASAQS measurement, CIDB contractor grading, the
@@ -149,6 +155,38 @@ implementation is our own.
   app now ships
   ([#125](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/125),
   [#137](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/137)).
+
+- **buzzy84** ([@buzzy84](https://github.com/buzzy84)): proposed a client BOQ Excel round-trip
+  that preserves a bill's structure through export and re-import
+  ([#360](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/360)) and
+  parametric BOQ assemblies with formula-driven child lines
+  ([#365](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/365)), both of
+  which the app now supports.
+- **Tigercatman** ([@Tigercatman](https://github.com/Tigercatman)): reported a client portal
+  view problem in the property development flow
+  ([#342](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/342)) and that a
+  portal user's Telegram bot notification did not render correctly
+  ([#361](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/361)).
+- **Mr-OpenR** ([@Mr-OpenR](https://github.com/Mr-OpenR)): sent an in-app bug report from the
+  Files area ([#340](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/340)).
+- **ziadeh** ([@ziadeh](https://github.com/ziadeh)): proposed a schedule-intelligence readiness
+  capability that watches a programme for early-warning signals
+  ([#362](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/362)).
+- **elric-cpu** ([@elric-cpu](https://github.com/elric-cpu)): proposed turning an accepted
+  estimate into a job with immutable scope and value snapshots and guarded, audited state
+  transitions ([#364](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/364)).
+- **alisadikinma** ([@alisadikinma](https://github.com/alisadikinma)): opened a feature pull
+  request ([#345](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/345)).
+- **LetsBIMtogether** ([@LetsBIMtogether](https://github.com/LetsBIMtogether)): flagged spacing
+  and border characters that were misaligned in the README process diagrams
+  ([#370](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/370)). We reworked
+  the diagrams ourselves.
+- **EQSTLab** ([@EQSTLab](https://github.com/EQSTLab)): responsibly reported a security issue
+  through private disclosure, which we reviewed and addressed in a later release.
+- **nullbenny** ([@nullbenny](https://github.com/nullbenny)): responsibly reported a security
+  issue through private disclosure, which we reviewed and addressed in a later release.
+- **dizconnectz** ([@dizconnectz](https://github.com/dizconnectz)): responsibly reported a
+  security issue through private disclosure, which we reviewed and addressed in a later release.
 
 See the full list of everyone who has contributed:
 

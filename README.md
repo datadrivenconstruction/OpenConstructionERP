@@ -457,7 +457,7 @@ Extract quantities from any source - drawings, models, text, or photos:
  │.dgn    │         └──────────────┘    └──────────┘       └──────────┘      └──────────┘
  │.pdf    │                                                                         │
  │photo   │         ┌──────────────┐                                          ┌─────┴────┐
- │text    │────────▶│ CV / OCR / AI│──────────────────────────────────────▶  │ BIM Pick │
+ │text    │────────▶│ CV / OCR / AI│───────────────────────────────────────▶  │ BIM Pick │
  └────────┘         │ (PaddleOCR + │                                          │ area/vol │
                     │  YOLOv11)    │                                          │ /length  │
                     └──────────────┘                                          └──────────┘
@@ -480,11 +480,11 @@ Anchor every project on a real spherical earth - Cesium 3D Tiles 1.1 with live H
 
 ```
    Anchor              Globe                Mode               Deeplink            Fly-to
- ┌──────────┐       ┌──────────┐       ┌───────────┐       ┌────────────┐      ┌──────────┐
- │ Project  │       │ Cesium   │       │  Global   │       │ ?model=…   │      │ BIM scene│
- │ Plot     │──────▶│ 3D Tiles │──────▶│  Project  │──────▶│ ?plot=…    │─────▶│ PropDev  │
+ ┌──────────┐       ┌──────────┐       ┌───────────┐       ┌────────────┐      ┌────────────┐
+ │ Project  │       │ Cesium   │       │  Global   │       │ ?model=…   │      │ BIM scene  │
+ │ Plot     │──────▶│ 3D Tiles │──────▶│  Project  │──────▶│ ?plot=…    │─────▶│ PropDev    │
  │ CAD model│       │ live HUD │       │ Developm. │       │ ?dev_id=…  │      │ Daily Diary│
- └──────────┘       └──────────┘       └───────────┘       └────────────┘      └──────────┘
+ └──────────┘       └──────────┘       └───────────┘       └────────────┘      └────────────┘
        ▲                  │                                                          │
        │                  ▼                                                          │
        │           ┌──────────────┐                                                  │
@@ -516,7 +516,8 @@ End-to-end real-estate developer workflow - from first lead to handover snags to
  │ Broker │    │ schedule │     │ schedule │      │ + Sign-off│      │ + Promote│
  └────────┘    └──────────┘     └──────────┘      └───────────┘      └──────────┘
       │              │                │                  │                  │
-      └──────────────┴────────────────┴──── Contact bridge (idempotent tags) ┘
+      └──────────────┴────────────────┴───────┬──────────┴──────────────────┘
+      Contact bridge (idempotent tags)        │
                                               ▼
                                      ┌────────────────┐
                                      │ Price Matrix   │
@@ -581,11 +582,11 @@ Bottom-right floating chat on every page - talks to the entire ERP database thro
 
 ```
   Any page          Floating button       Panel + 17 tools     Streamed
- ┌────────┐        ┌──────────────┐     ┌──────────────┐     ┌──────────┐
- │/projects│       │  bottom-right │     │ get_projects │     │ tool card│
- │/boq    │──FAB──▶│   ◯ Message  │────▶│ search_cwicr │────▶│ rendered │
- │/geo    │        │   (badge: 3) │     │ create_boq   │     │ in chat  │
- └────────┘        └──────────────┘     └──────────────┘     └──────────┘
+ ┌─────────┐        ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+ │/projects│        │ bottom-right │     │ get_projects │     │ tool card│
+ │/boq     │──FAB──▶│   ◯ Message  │────▶│ search_cwicr │────▶│ rendered │
+ │/geo     │        │   (badge: 3) │     │ create_boq   │     │ in chat  │
+ └─────────┘        └──────────────┘     └──────────────┘     └──────────┘
 ```
 
 - **Always-on** - Mounted in `AppLayout`, available on every route (Dashboard, BOQ, BIM, Geo, PropDev, Accommodation, all 111 modules)
@@ -644,7 +645,7 @@ Complete your estimation workflow:
    BOQ           Bid Package        Distribute         Compare           Award
  ┌────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌──────────┐
  │ priced │───▶│ subset +   │───▶│ Subs (mail │───▶│ side-by-   │───▶│ winner   │
- │ sections    │ instructions    │ + portal)  │    │ side mirror│    │ + change │
+ │sections│    │instructions│    │ + portal)  │    │ side mirror│    │ + change │
  │        │    │ + scope    │    │            │    │ + anomalies│    │   orders │
  └────────┘    └────────────┘    └────────────┘    └────────────┘    └──────────┘
                                                           │                │
