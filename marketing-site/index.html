@@ -15290,14 +15290,14 @@
         <div class="number-foot" data-i18n="numbers.card1_foot">updated monthly</div>
       </div>
       <div class="number-card reveal delay-2" style="--tint: var(--accent-2)">
-        <div class="number-eyebrow" data-i18n="numbers.card2_eyebrow">CAD formats</div>
-        <div class="number-value" data-count="4">0</div>
-        <p class="number-label" data-i18n="numbers.card2_label">native CAD ingest, DWG, RVT, IFC and DGN into one canonical format.</p>
-        <div class="number-foot">DWG &middot; RVT &middot; IFC &middot; DGN</div>
+        <div class="number-eyebrow" data-i18n="numbers.card2_eyebrow">import formats</div>
+        <div class="number-value" data-count="20" data-suffix="+">0<span class="suffix">+</span></div>
+        <p class="number-label" data-i18n="numbers.card2_label">IFC, DWG/DGN, Excel/CSV, PDF and 20+ more formats in - and 40+ formats back out of one canonical model.</p>
+        <div class="number-foot">IFC &middot; DWG &middot; DGN &middot; Excel &middot; CSV &middot; PDF &middot; 20+ in &middot; 40+ out</div>
       </div>
       <div class="number-card reveal delay-3" style="--tint: var(--accent-3)">
         <div class="number-eyebrow" data-i18n="numbers.card3_eyebrow">modules</div>
-        <div class="number-value" data-count="110" data-suffix="+">0<span class="suffix">+</span></div>
+        <div class="number-value" data-count="127" data-suffix="+">0<span class="suffix">+</span></div>
         <p class="number-label" data-i18n="numbers.card3_label">plug-in modules covering the full site workflow, projects, BOQ, takeoff, tenders and more.</p>
         <div class="number-foot" data-i18n="numbers.card3_foot">add &amp; remove like packages</div>
       </div>
@@ -21943,7 +21943,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         try {
           // Cache-bust on each release so updated copy reaches users without
           // a hard refresh. LOCALE_VERSION is bumped on every content change.
-          const LOCALE_VERSION = '20260615a';
+          const LOCALE_VERSION = '20260721e';
           const res = await fetch(`locales/${lang}.json?v=${LOCALE_VERSION}`, { cache: 'default' });
           if (!res.ok) throw 0;
           const json = await res.json();
