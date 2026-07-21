@@ -79,6 +79,50 @@ logger = logging.getLogger(__name__)
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
+def _dedup_str_list(raw: Any) -> list[str]:
+    """Coerce a value into an ordered, deduped list of non-empty strings.
+
+    Used for the multi-base ``catalogue_ids``: preserves the user's pick
+    order, drops blanks and exact repeats, and returns ``[]`` for anything
+    that is not a list so callers never have to guard the shape.
+    """
+    if not isinstance(raw, list):
+        return []
+    seen: set[str] = set()
+    out: list[str] = []
+    for x in raw:
+        s = str(x).strip()
+        if s and s not in seen:
+            seen.add(s)
+            out.append(s)
+    return out
+
+
+def _effective_catalogues(sess: MatchSession) -> list[str]:
+    """Ordered, deduped catalogue region ids this run should rank across.
+
+    Precedence:
+        1. the session's multi-base ``metadata_["catalogue_ids"]`` when set;
+        2. else the single bound catalogue (the ``catalogue_id`` UUID column,
+           or the ``catalogue_region`` metadata string);
+        3. else ``[]`` so the caller keeps today's auto-bind behaviour.
+
+    Each entry is a distinct base; currencies are never blended across them.
+    """
+    md = sess.metadata_ or {}
+    out = _dedup_str_list(md.get("catalogue_ids"))
+    if out:
+        return out
+    single: str | None = None
+    if sess.catalogue_id is not None:
+        single = str(sess.catalogue_id)
+    else:
+        region = md.get("catalogue_region")
+        if isinstance(region, str) and region.strip():
+            single = region.strip()
+    return [single] if single else []
+
+
 def _to_session_read(row: MatchSession) -> schemas.SessionRead:
     # Catalogue id is either a legacy CostDatabase UUID (stored on the
     # ``catalogue_id`` column) or a CWICR v3 region string like
@@ -86,13 +130,18 @@ def _to_session_read(row: MatchSession) -> schemas.SessionRead:
     # the column itself is typed UUID and rejects region strings).
     # Surface whichever is set so the wizard's "Catalogue" pill on
     # subsequent reads matches what the user picked.
+    md = row.metadata_ or {}
     cat_id: str | None = None
     if row.catalogue_id is not None:
         cat_id = str(row.catalogue_id)
     else:
-        region = (row.metadata_ or {}).get("catalogue_region")
+        region = md.get("catalogue_region")
         if isinstance(region, str) and region:
             cat_id = region
+    # Wave-2 multi-base: the ordered catalogue set lives in ``metadata_``.
+    # Surface it (deduped, order preserved) so the wizard can re-render the
+    # exact bases the user picked. ``None`` when only a single base was set.
+    catalogue_ids = _dedup_str_list(md.get("catalogue_ids")) or None
     return schemas.SessionRead(
         id=row.id,
         project_id=row.project_id,
@@ -105,6 +154,7 @@ def _to_session_read(row: MatchSession) -> schemas.SessionRead:
         auto_confirm_threshold=_to_decimal(row.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD),
         use_net_quantities=row.use_net_quantities,
         catalogue_id=cat_id,
+        catalogue_ids=catalogue_ids,
         is_archived=bool(getattr(row, "is_archived", False) or False),
         construction_stage=getattr(row, "construction_stage", None) or None,
         last_active_at=getattr(row, "last_active_at", None),
@@ -1530,6 +1580,14 @@ class MatchElementsService:
             except (ValueError, TypeError):
                 metadata["catalogue_region"] = spec.catalogue_id
 
+        # Wave-2 multi-base: persist the full ordered catalogue set (deduped)
+        # so the run can rank across every picked base. Stored alongside the
+        # single ``catalogue_id`` column; ``_to_session_read`` returns it and
+        # ``run_match`` reads it via ``_effective_catalogues``.
+        catalogue_ids = _dedup_str_list(spec.catalogue_ids)
+        if catalogue_ids:
+            metadata["catalogue_ids"] = catalogue_ids
+
         now = datetime.now(UTC)
         row = MatchSession(
             project_id=spec.project_id,
@@ -1614,6 +1672,18 @@ class MatchElementsService:
                     row.catalogue_id = None
                     md["catalogue_region"] = patch.catalogue_id
             row.metadata_ = md
+        # Wave-2 multi-base selection. ``model_fields_set`` lets an explicit
+        # ``null`` / ``[]`` clear the set while an omitted field leaves it
+        # untouched. Catalogue changes don't affect grouping, so (like the
+        # single ``catalogue_id`` above) this never triggers a regroup.
+        if "catalogue_ids" in patch.model_fields_set:
+            md2 = dict(row.metadata_ or {})
+            deduped_ids = _dedup_str_list(patch.catalogue_ids)
+            if deduped_ids:
+                md2["catalogue_ids"] = deduped_ids
+            else:
+                md2.pop("catalogue_ids", None)
+            row.metadata_ = md2
         if patch.is_archived is not None:
             row.is_archived = patch.is_archived
         # v3-P10b: stage flips don't trigger regroup - they only affect
@@ -2214,6 +2284,101 @@ class MatchElementsService:
             "error": progress.get("error"),
         }
 
+    @staticmethod
+    def _merge_multibase_candidates(
+        candidates: list[MatchCandidate],
+    ) -> list[MatchCandidate]:
+        """Merge fan-out candidates: dedup by (source base, code), order by score.
+
+        Every candidate is stamped with the base it was searched in
+        (``region_code``), so the same rate ``code`` returned from two
+        different bases stays as two distinct base-tagged candidates - that
+        is the multi-base feature. Only an exact ``(region_code, code)``
+        repeat is collapsed. The sort is stable, so score ties preserve the
+        catalogue-then-rank order the fan-out produced (deterministic).
+        """
+        seen: set[tuple[str, str]] = set()
+        merged: list[MatchCandidate] = []
+        for c in candidates:
+            key = ((c.region_code or ""), (c.code or ""))
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(c)
+        merged.sort(key=lambda c: c.score, reverse=True)
+        return merged
+
+    async def _rank_multibase(
+        self,
+        *,
+        db: AsyncSession,
+        matcher: Any,
+        envelope: ElementEnvelope,
+        project_id: uuid.UUID,
+        effective: list[str],
+        top_k: int,
+        settings_row: Any,
+    ) -> list[MatchCandidate]:
+        """Fan the per-group rank out across every effective catalogue base.
+
+        The vector / llm ranker resolves which catalogue collection to search
+        from the project's match-settings binding, so each pass points that
+        binding at one base, ranks, then stamps the returned candidates with
+        that base's region id (``region_code``) so the UI source-base chip is
+        truthful. The original binding is always restored - even on error -
+        so a multi-base run never mutates the project's persisted catalogue.
+
+        Money stays Decimal-as-string on each candidate and currencies are
+        never blended: every candidate keeps the currency of the base it
+        came from, and the merge step dedups only exact (base, code) repeats.
+        """
+        saved_id = settings_row.cost_database_id
+        # Forward-compat: a ranker that fans out over a plural
+        # ``cost_database_ids`` binding (not on disk yet) must search exactly
+        # this base too, so keep the documented cost_database_ids[0] ==
+        # cost_database_id invariant when the column exists.
+        has_plural = hasattr(settings_row, "cost_database_ids")
+        saved_plural = getattr(settings_row, "cost_database_ids", None) if has_plural else None
+        collected: list[MatchCandidate] = []
+        try:
+            for cat in effective:
+                settings_row.cost_database_id = cat
+                if has_plural:
+                    try:
+                        settings_row.cost_database_ids = [cat]
+                    except Exception:  # noqa: BLE001 - never fail a run on this
+                        pass
+                await db.flush()
+                try:
+                    cands = await matcher.rank(
+                        envelope=envelope,
+                        project_id=project_id,
+                        catalogue_id=None,
+                        top_k=top_k,
+                    )
+                except Exception as exc:  # noqa: BLE001 - degrade per base
+                    logger.warning(
+                        "run_match multibase: rank failed for base %s: %s",
+                        cat,
+                        exc,
+                    )
+                    cands = []
+                for c in cands:
+                    # This pass searched exactly ``cat``, so tag every hit
+                    # with it. Authoritative and truthful; the merge dedup
+                    # key relies on this stamp.
+                    c.region_code = cat
+                collected.extend(cands)
+        finally:
+            settings_row.cost_database_id = saved_id
+            if has_plural:
+                try:
+                    settings_row.cost_database_ids = saved_plural
+                except Exception:  # noqa: BLE001
+                    pass
+            await db.flush()
+        return self._merge_multibase_candidates(collected)
+
     async def run_match(
         self,
         db: AsyncSession,
@@ -2260,11 +2425,26 @@ class MatchElementsService:
 
         threshold = _to_decimal(sess.auto_confirm_threshold, DEFAULT_AUTO_CONFIRM_THRESHOLD)
 
+        # Wave-2 multi-base fan-out. ``effective`` is the ordered set of
+        # catalogue bases this run should rank across (session catalogue_ids
+        # -> single bound catalogue -> empty for auto-bind). Multi-base is a
+        # strictly additive, opt-in path: len<=1 keeps today's exact code
+        # path, results and ordering. Only vector / llm scope their search
+        # by catalogue, so the fan-out is gated to them - the resources
+        # matcher scans the catalogue-agnostic resource table and fanning it
+        # out would only mint mislabelled duplicates.
+        effective = _effective_catalogues(sess)
+        multibase = len(effective) > 1 and spec.method in ("vector", "llm")
+
         # Auto-bind catalogue late: existing sessions created before this
         # check landed don't trigger the create_session path again, so we
         # repeat the bind here. Idempotent - no-op when already bound.
+        # Skipped for a multi-base run: the fan-out below binds each
+        # effective base in turn, so the single-catalogue short-circuit
+        # (which would abort on a bound base that happens to be empty) must
+        # not gate a run the user explicitly scoped to several bases.
         bound_catalogue_id: str | None = None
-        if spec.method == "vector":
+        if spec.method == "vector" and not multibase:
             try:
                 from app.modules.projects.service import (  # noqa: PLC0415
                     auto_bind_dominant_catalogue,
@@ -2468,6 +2648,20 @@ class MatchElementsService:
         # bar moving at ~25fps-equivalent while halving the write
         # amplification on big sessions.
         flush_every = 1 if groups_total <= 20 else 4
+
+        # Multi-base fan-out needs the project's match-settings row so it can
+        # retarget the ranker at each base in turn (and restore it after the
+        # run). Fetched once here so the per-group fan-out only flips the
+        # binding, never re-queries. ``None`` on the single-base path so that
+        # path stays byte-identical to before.
+        match_settings_row: Any = None
+        if multibase:
+            from app.modules.projects.service import (  # noqa: PLC0415
+                get_or_create_match_settings,
+            )
+
+            match_settings_row = await get_or_create_match_settings(db, sess.project_id)
+
         for idx, grow in enumerate(rows):
             members = [by_id[eid] for eid in (grow.element_ids or []) if eid in by_id]
             if not members:
@@ -2496,12 +2690,26 @@ class MatchElementsService:
                 )
                 continue
             try:
-                candidates = await matcher.rank(
-                    envelope=envelope,
-                    project_id=sess.project_id,
-                    catalogue_id=sess.catalogue_id,
-                    top_k=spec.top_k,
-                )
+                if multibase and match_settings_row is not None:
+                    # Rank the group against every effective base and merge
+                    # the base-tagged candidates. Same rate code surfacing in
+                    # two bases stays as two distinct source-tagged rows.
+                    candidates = await self._rank_multibase(
+                        db=db,
+                        matcher=matcher,
+                        envelope=envelope,
+                        project_id=sess.project_id,
+                        effective=effective,
+                        top_k=spec.top_k,
+                        settings_row=match_settings_row,
+                    )
+                else:
+                    candidates = await matcher.rank(
+                        envelope=envelope,
+                        project_id=sess.project_id,
+                        catalogue_id=sess.catalogue_id,
+                        top_k=spec.top_k,
+                    )
             except Exception as exc:  # noqa: BLE001 - log + degrade per group
                 logger.warning(
                     "Matcher %s failed for group %s: %s",

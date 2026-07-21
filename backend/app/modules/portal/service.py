@@ -560,6 +560,30 @@ class PortalService:
         stmt = _select(Project).where(Project.id.in_(accessible)).order_by(Project.name)
         return list((await self.session.execute(stmt)).scalars().all())
 
+    async def list_accessible_documents(
+        self,
+        portal_user_id: uuid.UUID,
+    ) -> list[Any]:
+        """Return the documents (metadata rows) the caller can currently see.
+
+        Resolves the caller's non-expired ``document`` access rules to real
+        :class:`Document` rows so the portal Documents tab can list what has
+        been shared with them. A rule pointing at a document that no longer
+        exists is silently skipped - the ``IN`` filter simply does not match
+        it. Returns ORM rows carrying metadata only (id, name, file_size,
+        mime_type, project_id); it never loads or returns file bytes. The
+        content is streamed separately by the router after a fresh RLS check.
+        """
+        from sqlalchemy import select as _select
+
+        from app.modules.documents.models import Document
+
+        accessible = await self.list_accessible_resources(portal_user_id, "document")
+        if not accessible:
+            return []
+        stmt = _select(Document).where(Document.id.in_(accessible)).order_by(Document.name)
+        return list((await self.session.execute(stmt)).scalars().all())
+
     async def enforce_rls(
         self,
         portal_user_id: uuid.UUID,

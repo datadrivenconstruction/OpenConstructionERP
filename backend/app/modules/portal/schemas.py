@@ -357,6 +357,35 @@ class PortalProjectSummaryList(BaseModel):
     total: int = 0
 
 
+# ── Portal-side shared-document library ───────────────────────────────────
+
+
+class PortalSharedDocument(BaseModel):
+    """A document an admin has shared with the portal caller.
+
+    Metadata-only projection of the documents module's ``Document`` model -
+    it never carries file bytes. ``name`` is the document's stored title /
+    filename. The caller fetches the content separately via
+    ``GET /me/documents/{document_id}/content``, which re-checks the RLS
+    grant before streaming a single byte.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    file_size: int = 0
+    mime_type: str = ""
+    project_id: UUID
+
+
+class PortalSharedDocumentList(BaseModel):
+    """List of documents shared with the portal caller."""
+
+    items: list[PortalSharedDocument] = Field(default_factory=list)
+    total: int = 0
+
+
 # ── Portal-side payment-application submission ────────────────────────────
 
 
@@ -518,6 +547,8 @@ __all__ = [
     "PortalProgressReportEntry",
     "PortalProgressReportList",
     "PortalSelfPatch",
+    "PortalSharedDocument",
+    "PortalSharedDocumentList",
     "PortalTicketCreate",
     "PortalTicketList",
     "PortalTicketResponse",

@@ -64,8 +64,9 @@ from typing import Any
 from app.core.csv_safety import neutralise_formula
 
 __all__ = [
-    "ExportFormatError",
     "SUPPORTED_FORMATS",
+    "ExportFormatError",
+    "base_name_for_region",
     "export_report",
 ]
 
@@ -87,6 +88,142 @@ _MEDIA_TYPES: dict[str, str] = {
 
 class ExportFormatError(ValueError):
     """Raised when an unsupported export format is requested."""
+
+
+# ── Cost-base provenance (region -> human name) ─────────────────────────────
+#
+# A multi-base estimate draws cost lines from more than one cost database
+# ("base"), each stamped on the BOQ position under
+# ``metadata.cost_item_region``. The service layer aggregates those into a
+# ``bases_used`` snapshot section (see
+# ``ReportingService._assemble_bases_used_section``) that the exporters below
+# surface as a "Cost Bases Used" table.
+#
+# There is no canonical region -> display-name table on the backend (the UI
+# keeps one in its cost-database store), so we keep a small one here. Lookup
+# falls back to a country-head name, then the raw code, so nothing renders
+# blank. Values mirror the UI labels; add new bases to either family here.
+_REGION_DISPLAY_NAMES: dict[str, str] = {
+    "USA_USD": "United States",
+    "USA_NEWYORK": "United States",
+    "UK_GBP": "United Kingdom",
+    "GB_LONDON": "United Kingdom",
+    "DE_BERLIN": "Germany / DACH",
+    "DE_MUNICH": "Germany / DACH",
+    "AT_VIENNA": "Austria",
+    "CH_ZURICH": "Switzerland",
+    "FR_PARIS": "France",
+    "SP_BARCELONA": "Spain / Latin America",
+    "ES_MADRID": "Spain / Latin America",
+    "ES_ANDALUCIA": "Spain (BCCA)",
+    "IT_ROME": "Italy",
+    "IT_TOSCANA": "Italy (Toscana)",
+    "PT_SAOPAULO": "Brazil / Portugal",
+    "BR_SAOPAULO": "Brazil / Portugal",
+    "BR_NATIONAL": "Brazil (SINAPI)",
+    "RU_STPETERSBURG": "Russia / CIS",
+    "RU_MOSCOW": "Russia / CIS",
+    "AR_DUBAI": "Middle East / Gulf",
+    "AE_DUBAI": "Middle East / Gulf",
+    "ZH_CHINA": "China",
+    "HI_MUMBAI": "India / South Asia",
+    "IN_MUMBAI": "India / South Asia",
+    "AU_SYDNEY": "Australia",
+    "BG_SOFIA": "Bulgaria",
+    "CS_PRAGUE": "Czech Republic",
+    "CZ_PRAGUE": "Czech Republic",
+    "HR_ZAGREB": "Croatia",
+    "ID_JAKARTA": "Indonesia",
+    "ID_NATIONAL": "Indonesia (AHSP)",
+    "JA_TOKYO": "Japan",
+    "JP_TOKYO": "Japan",
+    "KO_SEOUL": "South Korea",
+    "KR_SEOUL": "South Korea",
+    "MX_MEXICOCITY": "Mexico",
+    "NG_LAGOS": "Nigeria",
+    "NL_AMSTERDAM": "Netherlands",
+    "NZ_AUCKLAND": "New Zealand",
+    "PL_WARSAW": "Poland",
+    "RO_BUCHAREST": "Romania",
+    "SV_STOCKHOLM": "Sweden",
+    "TH_BANGKOK": "Thailand",
+    "TR_NATIONAL": "Turkiye",
+    "VI_HANOI": "Vietnam",
+    "VN_HANOI": "Vietnam",
+    "VN_NATIONAL": "Vietnam (Dinh Muc)",
+    "ZA_JOHANNESBURG": "South Africa",
+    "GR_NATIONAL": "Greece (GGDE)",
+    "ENG_TORONTO": "Canada / International",
+    "CA_TORONTO": "Canada / International",
+    "CUSTOM": "My Database",
+}
+
+_COUNTRY_HEAD_NAMES: dict[str, str] = {
+    "DE": "Germany",
+    "AT": "Austria",
+    "CH": "Switzerland",
+    "FR": "France",
+    "ES": "Spain",
+    "SP": "Spain",
+    "IT": "Italy",
+    "PT": "Portugal",
+    "BR": "Brazil",
+    "GB": "United Kingdom",
+    "UK": "United Kingdom",
+    "IE": "Ireland",
+    "USA": "United States",
+    "US": "United States",
+    "CA": "Canada",
+    "ENG": "Canada",
+    "AU": "Australia",
+    "NZ": "New Zealand",
+    "ZA": "South Africa",
+    "NG": "Nigeria",
+    "IN": "India",
+    "HI": "India",
+    "PL": "Poland",
+    "CZ": "Czech Republic",
+    "CS": "Czech Republic",
+    "RO": "Romania",
+    "RU": "Russia",
+    "BG": "Bulgaria",
+    "HR": "Croatia",
+    "NL": "Netherlands",
+    "BE": "Belgium",
+    "SV": "Sweden",
+    "SE": "Sweden",
+    "ZH": "China",
+    "CN": "China",
+    "JP": "Japan",
+    "JA": "Japan",
+    "KR": "South Korea",
+    "KO": "South Korea",
+    "ID": "Indonesia",
+    "TH": "Thailand",
+    "VN": "Vietnam",
+    "VI": "Vietnam",
+    "AE": "Middle East / Gulf",
+    "AR": "Middle East / Gulf",
+    "TR": "Turkiye",
+    "GR": "Greece",
+    "MX": "Mexico",
+}
+
+
+def base_name_for_region(region: str | None) -> str:
+    """Return a human-readable cost-base name for a stamped region code.
+
+    Resolves against the small display-name table above, then a country-head
+    fallback (``DE_BREMEN`` -> ``Germany``), and finally the raw code so a
+    base never renders blank. ``None`` / empty -> ``""``.
+    """
+    if not region:
+        return ""
+    exact = _REGION_DISPLAY_NAMES.get(region)
+    if exact:
+        return exact
+    head = region.split("_", 1)[0].upper()
+    return _COUNTRY_HEAD_NAMES.get(head, region)
 
 
 # ── Section resolution ────────────────────────────────────────────────────
@@ -115,6 +252,30 @@ def _resolve_sections(
     from app.modules.reporting.renderer import _DEFAULT_SECTIONS
 
     return _DEFAULT_SECTIONS.get(report_type, [{"id": "summary", "title": "Summary"}])
+
+
+def _sections_with_bases_used(
+    report_type: str,
+    template_data: dict[str, Any] | None,
+    snapshot: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Resolve the section list, appending a synthetic ``bases_used`` section.
+
+    ``bases_used`` is a record list (``[{base, currency, positions}, ...]``)
+    assembled by the service layer for multi-base estimates. It is not part of
+    any template, so we append it here - without mutating the shared default
+    list - and let the generic record-table renderer emit it uniformly across
+    CSV / XLSX / PDF. Appended only when the key holds a non-empty list and no
+    template section already claims that id, so single-base reports (which
+    carry no ``bases_used`` key) are unchanged.
+    """
+    sections = _resolve_sections(report_type, template_data)
+    bases = snapshot.get("bases_used") if isinstance(snapshot, dict) else None
+    if not (isinstance(bases, list) and bases):
+        return sections
+    if any(str(s.get("id", "")).strip() == "bases_used" for s in sections):
+        return sections
+    return [*sections, {"id": "bases_used", "title": "Cost Bases Used"}]
 
 
 def _section_title(section: dict[str, Any]) -> str:
@@ -260,7 +421,7 @@ def _export_csv(
     writer.writerow(["Generated", neutralise_formula(generated_at)])
 
     rendered_any = False
-    for section in _resolve_sections(report_type, template_data):
+    for section in _sections_with_bases_used(report_type, template_data, snapshot):
         sid = str(section.get("id", "")).strip()
         payload = snapshot.get(sid)
         if _section_is_empty(payload):
@@ -346,7 +507,7 @@ def _export_xlsx(
     row += 1  # blank spacer
 
     rendered_any = False
-    for section in _resolve_sections(report_type, template_data):
+    for section in _sections_with_bases_used(report_type, template_data, snapshot):
         sid = str(section.get("id", "")).strip()
         payload = snapshot.get(sid)
         if _section_is_empty(payload):
@@ -534,7 +695,7 @@ def _export_pdf(
     col_widths = [usable_width * 0.35, usable_width * 0.65]
 
     rendered_any = False
-    for section in _resolve_sections(report_type, template_data):
+    for section in _sections_with_bases_used(report_type, template_data, snapshot):
         sid = str(section.get("id", "")).strip()
         payload = snapshot.get(sid)
         if _section_is_empty(payload):

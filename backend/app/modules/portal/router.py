@@ -25,15 +25,18 @@ Two surfaces, mounted under ``/api/v1/portal/``:
         GET    /me/notifications
         POST   /me/notifications/{id}/read
         POST   /me/document-access
+        GET    /me/documents
+        GET    /me/documents/{id}/content
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 
 from fastapi import APIRouter, Depends, Query, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.portal.dependencies import (
@@ -65,6 +68,8 @@ from app.modules.portal.schemas import (
     PortalProjectSummary,
     PortalProjectSummaryList,
     PortalSelfPatch,
+    PortalSharedDocument,
+    PortalSharedDocumentList,
     PortalTicketCreate,
     PortalTicketList,
     PortalTicketResponse,
@@ -978,6 +983,112 @@ async def portal_me_payment_agreements(
         for agr, wps in pairs
     ]
     return PortalAgreementSummaryList(items=items, total=len(items))
+
+
+# ── Portal-side shared-document library ───────────────────────────────────
+
+
+@router.get(
+    "/me/documents",
+    response_model=PortalSharedDocumentList,
+)
+async def portal_me_documents(
+    user: RequirePortalSession,
+    service: PortalService = Depends(_get_service),
+) -> PortalSharedDocumentList:
+    """List the documents an admin has shared with the caller.
+
+    Scoped server-side to the caller's non-expired ``document`` access rules
+    - it never reveals a document the portal user was not explicitly granted.
+    Returns metadata only (id, name, size, mime type, project); the bytes are
+    fetched separately via ``GET /me/documents/{document_id}/content``, which
+    re-checks the grant before streaming.
+    """
+    docs = await service.list_accessible_documents(user.id)
+    items = [PortalSharedDocument.model_validate(d) for d in docs]
+    return PortalSharedDocumentList(items=items, total=len(items))
+
+
+@router.get(
+    "/me/documents/{document_id}/content",
+    responses={
+        200: {"description": "The shared document's file bytes (Range-capable)"},
+        403: {"description": "No access rule grants this document to the caller"},
+        404: {"description": "The document row no longer exists"},
+        410: {"description": "Metadata exists but the file is gone from disk"},
+    },
+)
+async def portal_me_document_content(
+    document_id: uuid.UUID,
+    request: Request,
+    user: RequirePortalSession,
+    session: SessionDep,
+    service: PortalService = Depends(_get_service),
+) -> FileResponse:
+    """Stream one shared document's bytes to the portal caller.
+
+    Security (critical): the FIRST thing this does is enforce RLS - the
+    caller must hold a non-expired ``document`` access rule of at least
+    ``view`` on exactly this ``document_id``, else the request is refused 403
+    before the document row is ever loaded. The client-supplied id is never
+    trusted without that check, so a portal user can never pull a document
+    that was not explicitly shared with them. ``enforce_rls`` consults only
+    the access-rule table, so the 403 is returned identically whether or not
+    the id exists - an ungranted caller cannot even probe for existence.
+
+    Disk handling mirrors the public share-file endpoint: 404 when the
+    document row is gone, 410 when the metadata row exists but the blob is no
+    longer on disk. On success the access is written to the same audit log the
+    internal admin surface reads, and the file is returned via a Range-capable
+    ``FileResponse`` (real media type; inline for image / audio / video so the
+    browser can preview and seek, attachment otherwise).
+    """
+    from fastapi import HTTPException
+    from sqlalchemy import select as _select
+
+    from app.modules.documents.models import Document
+
+    # 1. RLS FIRST - refuse before touching the document row.
+    if not await service.enforce_rls(user.id, "document", document_id, required="view"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No access to this document",
+        )
+
+    # 2. The grant is proven; only now resolve the row.
+    doc = (await session.execute(_select(Document).where(Document.id == document_id))).scalar_one_or_none()
+    if doc is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File no longer exists",
+        )
+
+    file_path = doc.file_path
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="File is no longer on disk",
+        )
+
+    # 3. Audit the access (same log the admin document-access surface reads).
+    await service.record_document_access(
+        portal_user_id=user.id,
+        document_type="document",
+        document_id=document_id,
+        action="view",
+        ip_address=_client_ip(request),
+    )
+
+    # 4. Stream it. FileResponse honours the Range header (206 partial) on its
+    #    own, so large PDFs and video preview / seek work without extra plumbing.
+    media_type = doc.mime_type or "application/octet-stream"
+    inline = media_type.startswith(("image/", "audio/", "video/"))
+    return FileResponse(
+        path=file_path,
+        filename=doc.name,
+        media_type=media_type,
+        content_disposition_type="inline" if inline else "attachment",
+    )
 
 
 __all__ = ["router"]

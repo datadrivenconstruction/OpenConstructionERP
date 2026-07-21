@@ -523,3 +523,153 @@ async def test_reset_clears_cost_database_id(
     )
     assert resp.status_code == 200
     assert resp.json()["cost_database_id"] is None
+
+
+# ── v3-P8 multibase: cost_database_ids (list) ─────────────────────────────
+#
+# The multibase wave lets a project pin several catalogues at once via
+# ``cost_database_ids: list[str]``. The singular ``cost_database_id`` stays
+# for back-compat and is kept in lockstep with the head of the list
+# (``cost_database_ids[0] == cost_database_id``). The list is validated
+# (per-member width), de-duplicated, and capped so a runaway payload can't
+# fan the ranker out across hundreds of collections.
+
+
+@pytest.mark.asyncio
+async def test_default_cost_database_ids_is_empty(
+    client: AsyncClient,
+    project_owned_by,
+) -> None:
+    """A fresh project starts with an empty multibase list."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.get(f"/api/v1/projects/{project_id}/match-settings")
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["cost_database_ids"] == []
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_ids_round_trip_and_primary_sync(
+    client: AsyncClient,
+    project_owned_by,
+) -> None:
+    """PATCH writes the list; GET reads it back; the singular id stays in
+    lockstep with the head of the list (the documented invariant)."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_ids": ["DE_BERLIN", "CH_ZURICH"]},
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert set(body["cost_database_ids"]) == {"DE_BERLIN", "CH_ZURICH"}
+    assert len(body["cost_database_ids"]) == 2
+    # cost_database_ids[0] == cost_database_id.
+    assert body["cost_database_id"] == body["cost_database_ids"][0]
+
+    resp_get = await client.get(f"/api/v1/projects/{project_id}/match-settings")
+    got = resp_get.json()
+    assert set(got["cost_database_ids"]) == {"DE_BERLIN", "CH_ZURICH"}
+    assert got["cost_database_id"] == got["cost_database_ids"][0]
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_ids_dedupes_members(
+    client: AsyncClient,
+    project_owned_by,
+) -> None:
+    """A duplicated member collapses - the ranker never queries the same
+    catalogue twice."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_ids": ["DE_BERLIN", "DE_BERLIN", "CH_ZURICH"]},
+    )
+    assert resp.status_code == 200, resp.text
+    ids = resp.json()["cost_database_ids"]
+    assert len(ids) == 2
+    assert set(ids) == {"DE_BERLIN", "CH_ZURICH"}
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_ids_rejects_oversized_member(
+    client: AsyncClient,
+    project_owned_by,
+) -> None:
+    """Each member obeys the same 32-char width as the singular column."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_ids": ["DE_BERLIN", "A" * 33]},
+    )
+    assert resp.status_code == 422, resp.text
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_ids_caps_member_count(
+    client: AsyncClient,
+    project_owned_by,
+) -> None:
+    """A runaway list is capped: the endpoint either rejects it (422) or
+    truncates it to a sane bound - never fans the ranker out across an
+    unbounded number of collections."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    oversized = [f"R{i}_CITY" for i in range(40)]
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_ids": oversized},
+    )
+    assert resp.status_code == 422 or len(resp.json()["cost_database_ids"]) < 40, resp.text
+
+
+# ── v3-P8 multibase: migration reversibility ──────────────────────────────
+
+
+def test_cost_database_ids_migration_is_reversible() -> None:
+    """The migration that adds ``cost_database_ids`` to
+    ``oe_projects_match_settings`` must ship a real, reversible up/down pair:
+    an ``add_column`` in ``upgrade()`` and a matching ``drop_column`` in
+    ``downgrade()``, with a proper revision chain.
+
+    This is the static companion (no DB spin-up) to
+    ``tests/integration/test_migrations_roundtrip.py`` and guards the
+    'missing or broken downgrade' bug class for the multibase column. The
+    live column-at-head behaviour is exercised by the round-trip PATCH/GET
+    tests above, which run against the create_all schema.
+    """
+    from pathlib import Path
+
+    versions_dir = Path(__file__).resolve().parents[2] / "alembic" / "versions"
+    assert versions_dir.is_dir(), f"alembic versions dir not found at {versions_dir}"
+
+    candidates = [
+        p
+        for p in versions_dir.glob("*.py")
+        if "cost_database_ids" in p.read_text(encoding="utf-8")
+    ]
+    if not candidates:
+        pytest.skip("cost_database_ids migration not present yet (parallel wave)")
+
+    src = candidates[0].read_text(encoding="utf-8")
+
+    upgrade_body = src.partition("def upgrade")[2].split("\ndef ", 1)[0]
+    downgrade_body = src.partition("def downgrade")[2].split("\ndef ", 1)[0]
+
+    assert "add_column" in upgrade_body and "cost_database_ids" in upgrade_body, (
+        "upgrade() must add the cost_database_ids column"
+    )
+    assert "drop_column" in downgrade_body and "cost_database_ids" in downgrade_body, (
+        "downgrade() must drop the cost_database_ids column (no empty/broken downgrade)"
+    )
+    # Revision chain integrity - the migration must be linked, not orphaned.
+    assert "revision" in src
+    assert "down_revision" in src

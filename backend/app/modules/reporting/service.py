@@ -1047,6 +1047,13 @@ class ReportingService:
         if report_type == "progress_report":
             await self._assemble_progress_section(project_id, snapshot)
 
+        # ── Cost-base provenance → bases_used section ──
+        # A multi-base estimate draws cost lines from more than one cost
+        # database. Surface which bases fed the numbers so a downloaded cost
+        # report is honest about its provenance. Self-hides at <= 1 base.
+        if report_type == "cost_report":
+            await self._assemble_bases_used_section(project_id, snapshot)
+
         return snapshot or None
 
     async def _assemble_progress_section(
@@ -1114,6 +1121,86 @@ class ReportingService:
         except Exception:
             logger.debug(
                 "reporting._build_default_snapshot: progress data unavailable for %s",
+                project_id,
+                exc_info=True,
+            )
+
+    async def _assemble_bases_used_section(
+        self,
+        project_id: uuid.UUID,
+        snapshot: dict,
+    ) -> None:
+        """Populate ``snapshot['bases_used']`` with the distinct cost bases
+        that fed this project's BOQ positions.
+
+        Reads each costed position's ``metadata.cost_item_region`` (plus the
+        currency stamped alongside it) across every BOQ in the project, maps
+        the region to a human-readable base name, and emits one record per
+        base: ``{"base": ..., "currency": ..., "positions": count}`` (sorted
+        by descending line count). The exporters render it as a "Cost Bases
+        Used" table.
+
+        Self-hides at <= 1 distinct base: a single-base estimate reads exactly
+        as before, with no block. Counts and currency codes are labels only -
+        no money is summed or converted, so currencies are never blended.
+        Best-effort: mutates ``snapshot`` in place and never raises (a failure
+        simply omits the block).
+        """
+        try:
+            from sqlalchemy import select
+
+            from app.modules.boq.models import BOQ, Position
+            from app.modules.reporting.exporters import base_name_for_region
+
+            boq_ids = (
+                (await self.session.execute(select(BOQ.id).where(BOQ.project_id == project_id)))
+                .scalars()
+                .all()
+            )
+            if not boq_ids:
+                return
+
+            rows = (
+                await self.session.execute(
+                    select(Position.metadata_, Position.unit).where(Position.boq_id.in_(boq_ids))
+                )
+            ).all()
+
+            by_region: dict[str, dict[str, Any]] = {}
+            for meta, unit in rows:
+                # Skip section headers (empty unit) - they are not costed lines.
+                if not unit or not str(unit).strip():
+                    continue
+                if not isinstance(meta, dict):
+                    continue
+                region = meta.get("cost_item_region")
+                if not region or not isinstance(region, str):
+                    continue
+                currency = meta.get("cost_item_currency") or meta.get("currency") or ""
+                bucket = by_region.setdefault(region, {"positions": 0, "currency": ""})
+                bucket["positions"] += 1
+                if not bucket["currency"] and isinstance(currency, str):
+                    bucket["currency"] = currency
+
+            # Self-hide: a single base (or none) reads as today - no block.
+            if len(by_region) < 2:
+                return
+
+            snapshot["bases_used"] = [
+                {
+                    "base": base_name_for_region(region) or region,
+                    "currency": data["currency"],
+                    "positions": data["positions"],
+                }
+                for region, data in sorted(
+                    by_region.items(),
+                    key=lambda kv: kv[1]["positions"],
+                    reverse=True,
+                )
+            ]
+        except Exception:
+            logger.debug(
+                "reporting._build_default_snapshot: bases-used unavailable for %s",
                 project_id,
                 exc_info=True,
             )

@@ -180,9 +180,9 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         price="Free",
     ),
     MarketplaceModule(
-        id="cwicr-zh-shanghai",
-        name="CWICR China (Shanghai, CNY)",
-        description="55,719 construction cost items for the Chinese market. Shanghai rates in CNY with GB/T classification system.",
+        id="cwicr-zh-china",
+        name="CWICR China (National, CNY)",
+        description="Authentic Chinese construction cost base using the local ZH_CHINA dataset in CNY with GB/T classification support.",
         category="cost_database",
         icon="Database",
         version="2.0.0",
@@ -337,15 +337,15 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         price="Free",
     ),
     MarketplaceModule(
-        id="catalog-zh-shanghai",
-        name="Resource Catalog: Chinese (Shanghai, CNY)",
-        description="Curated resource catalog for the Chinese market. Materials, equipment, labor, and operators with Shanghai regional pricing in CNY. Downloadable from DDC CWICR GitHub repository.",
+        id="catalog-zh-china",
+        name="Resource Catalog: Chinese (National, CNY)",
+        description="Curated resource catalog for the Chinese market. Materials, equipment, labor, and operators with national ZH_CHINA pricing in CNY.",
         category="resource_catalog",
         icon="Boxes",
         version="2.0.0",
         size_mb=2.0,
         author=_DDC,
-        tags=["Asia Pacific", "CNY", "Shanghai", "Chinese"],
+        tags=["Asia Pacific", "CNY", "China", "Chinese"],
         requires=["oe_catalog"],
         price="Free",
     ),
@@ -471,8 +471,8 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         price="Free",
     ),
     MarketplaceModule(
-        id="vector-zh-shanghai",
-        name="Vector Index: China (Shanghai)",
+        id="vector-zh-china",
+        name="Vector Index: China (National)",
         description="Pre-built semantic vector index for CWICR China database. Enables AI-powered cost item search and GB/T classification matching.",
         category="vector_index",
         icon="Sparkles",
@@ -480,7 +480,7 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         size_mb=24.1,
         author=_DDC,
         tags=["AI", "Semantic Search", "China"],
-        requires=["oe_costs", "cwicr-zh-shanghai"],
+        requires=["oe_costs", "cwicr-zh-china"],
         price="Free",
     ),
     MarketplaceModule(
@@ -906,6 +906,11 @@ MARKETPLACE_MODULES += [
 
 # Index by id for fast lookup
 _MODULES_BY_ID: dict[str, MarketplaceModule] = {m.id: m for m in MARKETPLACE_MODULES}
+_MODULE_ID_ALIASES: dict[str, str] = {
+    "cwicr-zh-shanghai": "cwicr-zh-china",
+    "catalog-zh-shanghai": "catalog-zh-china",
+    "vector-zh-shanghai": "vector-zh-china",
+}
 
 
 def get_marketplace_catalog(
@@ -942,7 +947,8 @@ def get_marketplace_catalog(
         "catalog-ru-stpetersburg": "RU_STPETERSBURG",
         "catalog-uk-gbp": "UK_GBP",
         "catalog-usa-usd": "USA_USD",
-        "catalog-zh-shanghai": "ZH_SHANGHAI",
+        "catalog-zh-shanghai": "ZH_CHINA",
+        "catalog-zh-china": "ZH_CHINA",
     }
 
     _loaded_regions = loaded_catalog_regions or set()
@@ -985,4 +991,4 @@ def get_marketplace_catalog(
 
 def get_marketplace_module(module_id: str) -> MarketplaceModule | None:
     """Look up a single marketplace module by id."""
-    return _MODULES_BY_ID.get(module_id)
+    return _MODULES_BY_ID.get(_MODULE_ID_ALIASES.get(module_id, module_id))

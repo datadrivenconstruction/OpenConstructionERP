@@ -94,6 +94,14 @@ class SessionCreate(BaseModel):
     # ``uuid.UUID | None``, which 422'd every wizard submission because
     # region ids contain underscores.
     catalogue_id: str | None = None
+    # Wave-2 multi-base: the wizard can rank a session across several CWICR
+    # v3 catalogues at once. ``catalogue_ids`` carries the full ordered set
+    # of catalogue region ids (SAME identifier space as ``catalogue_id`` -
+    # "DE_BERLIN", "USA_USD", ...), and ``catalogue_id`` stays equal to
+    # ``catalogue_ids[0]`` for back-compat. Persisted on
+    # ``MatchSession.metadata_["catalogue_ids"]`` (no new DB column). A
+    # single base (1-element list or None) keeps today's exact behaviour.
+    catalogue_ids: list[str] | None = None
     construction_stage: ConstructionStage | None = None
     # MAPPING_PROCESS.md §4.1.6 - free-form text inputs for the "text"
     # source. List of strings (simple) or per-line dicts
@@ -138,6 +146,10 @@ class SessionUpdate(BaseModel):
     use_net_quantities: bool | None = None
     # See ``SessionCreate.catalogue_id`` - region string OR legacy UUID.
     catalogue_id: str | None = None
+    # See ``SessionCreate.catalogue_ids``. Send the full ordered set to
+    # re-scope the run across multiple bases; ``[]`` / ``null`` clears the
+    # multi-base selection back to the single ``catalogue_id``.
+    catalogue_ids: list[str] | None = None
     is_archived: bool | None = None
     construction_stage: ConstructionStage | None = None
 
@@ -158,6 +170,10 @@ class SessionRead(BaseModel):
     use_net_quantities: bool
     # See ``SessionCreate.catalogue_id`` - region string OR legacy UUID.
     catalogue_id: str | None = None
+    # Ordered multi-base selection (catalogue region ids). ``None`` or a
+    # single-element list when the session targets one base - the UI
+    # self-hides its multi-base chrome in that case.
+    catalogue_ids: list[str] | None = None
     is_archived: bool = False
     construction_stage: ConstructionStage | None = None
     last_active_at: datetime | None = None

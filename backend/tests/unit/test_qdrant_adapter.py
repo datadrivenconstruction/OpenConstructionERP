@@ -1066,23 +1066,33 @@ async def test_cross_language_search_dedups_same_base_across_languages(
 async def test_cross_language_search_dedupes_country_list(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Caller mistakenly passes the primary in additional_countries —
-    only one search per language collection should fire."""
+    """An *exact* duplicate region id (the same catalogue passed more than
+    once) fires only one search.
+
+    v3-P8 multibase note: the fan-out now issues one query per distinct
+    catalogue so two regions that share a language collection but pin
+    different countries (DE_BERLIN vs CH_ZURICH) are NOT collapsed - see
+    ``test_cross_language_search_fans_out_per_country_pin``. What still
+    collapses is a byte-identical duplicate: the same region id resolves to
+    the same collection AND the same country pin, so a second query is pure
+    redundancy. This holds regardless of how the fan-out keys distinct
+    bases (by collection, by (collection, country-pin), or by region id)."""
     call_count = {"n": 0}
 
-    async def fake_search(**_: object):
+    async def fake_search(*, country: str, **_: object):
         call_count["n"] += 1
-        return [QdrantHit(rate_code="X", country="DE", score=0.9)]
+        hit = QdrantHit(rate_code="X", country="DE", score=0.9)
+        hit.source_region = country
+        return [hit]
 
     monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
 
     await cross_language_search(
         primary_country="DE_BERLIN",
-        # AT_VIENNA + CH_ZURICH all map to cwicr_de_v3, same as DE_BERLIN
-        additional_countries=["DE_MUNICH", "AT_VIENNA", "CH_ZURICH"],
+        # The primary passed twice more - an exact-duplicate catalogue.
+        additional_countries=["DE_BERLIN", "DE_BERLIN"],
         core_query="x",
     )
-    # All 4 inputs share the same collection — one call only
     assert call_count["n"] == 1
 
 
@@ -1153,6 +1163,99 @@ async def test_cross_language_search_caps_output_at_limit(
         limit=3,
     )
     assert len(out) == 3
+
+
+# ── v3-P8 multibase: source_region provenance + per-pin fan-out ───────────
+#
+# The multibase wave lets a project load more than one catalogue at once
+# (DE_BERLIN + CH_ZURICH, say). Two guarantees are pinned here:
+#
+#   1. ``QdrantHit`` carries a ``source_region`` stamp so a hit fanned out
+#      across bases still knows which catalogue produced it - provenance
+#      that survives the base-code dedup and is later carried onto the BOQ
+#      position.
+#   2. ``cross_language_search`` fans out once per *distinct country pin*,
+#      not once per language collection: DE_BERLIN and CH_ZURICH share
+#      ``cwicr_de_v3`` but pin DE vs CH, so both must be searched or the
+#      Swiss rates are silently invisible.
+
+
+def test_qdrant_hit_carries_source_region_provenance_field() -> None:
+    """The dataclass exposes ``source_region`` and it defaults falsy.
+
+    A falsy default keeps single-base search byte-identical: nothing is
+    stamped unless the multibase fan-out explicitly sets it."""
+    hit = QdrantHit(rate_code="03.330.10", country="DE", score=0.9)
+    # Tolerant of either "" or None as the additive, back-compat default.
+    assert not hit.source_region
+    hit.source_region = "DE_BERLIN"
+    assert hit.source_region == "DE_BERLIN"
+
+
+@pytest.mark.asyncio
+async def test_cross_language_search_fans_out_per_country_pin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """[DE_BERLIN, CH_ZURICH] share ``cwicr_de_v3`` but pin distinct
+    countries, so the fan-out must issue TWO searches (one per catalogue),
+    and each surviving hit keeps its origin region in ``source_region``."""
+    # The distinct country pins are exactly why the two are not redundant
+    # (the autouse fixture disables the probe, so pinning is pure).
+    assert country_filter_for("DE_BERLIN") == "DE"
+    assert country_filter_for("CH_ZURICH") == "CH"
+
+    calls: list[str] = []
+    # Distinct base codes so neither hit is deduped away by base_code().
+    codes = {"DE_BERLIN": "03.331.10.de.m3", "CH_ZURICH": "03.332.10.de.m3"}
+
+    async def fake_search(*, country: str, **_: object):
+        calls.append(country)
+        hit = QdrantHit(rate_code=codes[country], country=country, score=0.9)
+        hit.source_region = country
+        return [hit]
+
+    monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
+
+    out = await cross_language_search(
+        primary_country="DE_BERLIN",
+        additional_countries=["CH_ZURICH"],
+        core_query="wand",
+    )
+    assert sorted(calls) == ["CH_ZURICH", "DE_BERLIN"]
+    assert len(calls) == 2
+    # Both survive (distinct bases) and each keeps its provenance stamp.
+    assert {h.source_region for h in out} == {"DE_BERLIN", "CH_ZURICH"}
+
+
+@pytest.mark.asyncio
+async def test_cross_language_search_preserves_source_region_through_dedup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When two bases surface the SAME logical rate (same base_code), dedup
+    keeps the higher-scoring representative *and* its ``source_region`` - the
+    provenance must not be lost when the duplicate is dropped."""
+
+    async def fake_search(*, country: str, **_: object):
+        if country.startswith("DE"):
+            hit = QdrantHit(rate_code="03.330.10.de.m3", country="DE", score=0.92)
+            hit.source_region = "DE_BERLIN"
+        else:
+            # Same base_code (03.330.10) in the French collection, lower score.
+            hit = QdrantHit(rate_code="03.330.10.fr.m3", country="FR", score=0.70)
+            hit.source_region = "FR_PARIS"
+        return [hit]
+
+    monkeypatch.setattr("app.modules.costs.qdrant_adapter.search", fake_search)
+
+    out = await cross_language_search(
+        primary_country="DE_BERLIN",
+        additional_countries=["FR_PARIS"],
+        core_query="wall",
+    )
+    # base_code("03.330.10.de.m3") == base_code("03.330.10.fr.m3") -> 1 survivor.
+    assert len(out) == 1
+    # DE won on score; its provenance stamp is intact after the dedup.
+    assert out[0].source_region == "DE_BERLIN"
 
 
 # ── cross_lang_lookup — §6.2 "точный подход" ──────────────────────────────

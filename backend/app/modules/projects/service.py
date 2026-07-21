@@ -1433,10 +1433,10 @@ async def auto_bind_dominant_catalogue(
     # qdrant_adapter.py for the contract. Pinned to a representative
     # country per language so the country payload predicate doesn't
     # over-narrow (US is the most populous English country in CWICR,
-    # CN_SHANGHAI for zh, RU for ru, etc).
+    # ZH_CHINA for zh, RU for ru, etc).
     _LANG_TO_REGION: dict[str, str] = {
         "en": "US",
-        "zh": "CN_SHANGHAI",
+        "zh": "ZH_CHINA",
         "ru": "RU",
         "vi": "VN",
         "es": "ES",

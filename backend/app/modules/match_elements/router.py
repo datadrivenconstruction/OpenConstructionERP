@@ -165,6 +165,10 @@ async def create_session_from_excel(
     # the service layer routes each kind to its own storage slot. Was
     # ``uuid.UUID | None`` before, which 422'd every wizard submission.
     catalogue_id: str | None = Form(None),
+    # Wave-2 multi-base: repeated form field carrying the full ordered set
+    # of catalogue region ids to rank across (catalogue_id == catalogue_ids[0]
+    # for back-compat). Omit / send one value for today's single-base run.
+    catalogue_ids: list[str] | None = Form(None),
     construction_stage: str | None = Form(None),
 ) -> schemas.SessionRead:
     """‌⁠‍Upload an xlsx BoQ and create a match session in one round-trip.
@@ -210,6 +214,7 @@ async def create_session_from_excel(
         source="boq",
         name=name or (file.filename or "BoQ Import"),
         catalogue_id=catalogue_id,
+        catalogue_ids=catalogue_ids,
         construction_stage=construction_stage,  # type: ignore[arg-type]
         boq_rows=rows,
     )
@@ -239,6 +244,9 @@ async def create_session_from_pdf(
     # Region id ("DE_BERLIN", ...) or a legacy UUID - the service routes
     # each kind to its own storage slot (mirrors the Excel endpoint).
     catalogue_id: str | None = Form(None),
+    # Wave-2 multi-base: repeated form field with the full ordered set of
+    # catalogue region ids to rank across (see the Excel endpoint).
+    catalogue_ids: list[str] | None = Form(None),
     construction_stage: str | None = Form(None),
 ) -> schemas.SessionRead:
     """‌⁠‍Upload a tender PDF and create a match session in one round-trip.
@@ -290,6 +298,7 @@ async def create_session_from_pdf(
         source="pdf",
         name=name or (file.filename or "PDF Import"),
         catalogue_id=catalogue_id,
+        catalogue_ids=catalogue_ids,
         construction_stage=construction_stage,  # type: ignore[arg-type]
         pdf_rows=rows,
     )
@@ -319,6 +328,9 @@ async def create_session_from_image(
     # Region id ("DE_BERLIN", ...) or a legacy UUID - the service routes
     # each kind to its own storage slot (mirrors the Excel / PDF endpoints).
     catalogue_id: str | None = Form(None),
+    # Wave-2 multi-base: repeated form field with the full ordered set of
+    # catalogue region ids to rank across (see the Excel / PDF endpoints).
+    catalogue_ids: list[str] | None = Form(None),
     construction_stage: str | None = Form(None),
 ) -> schemas.SessionRead:
     """‌⁠‍Upload one photo / drawing and create an image-source session.
@@ -391,6 +403,7 @@ async def create_session_from_image(
         source="image",
         name=name or (image.filename or "Photo / Drawing"),
         catalogue_id=catalogue_id,
+        catalogue_ids=catalogue_ids,
         construction_stage=construction_stage,  # type: ignore[arg-type]
         image={
             "path": str(file_path),
