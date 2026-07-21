@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "ツアーへ",
+    "title": "すべてのモジュールが<em>ワンクリックで。</em>"
+  },
   "nav": {
     "demo": "デモ",
     "tour": "ツアー",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "質問、アイデア、成果の共有。まだIssueにするほどでないことはこちらへ。",
     "stargazer_heading": "すでに<em>スターをつけた人々。</em>",
     "stargazer_meta": "GitHubで見る →",
+    "contributor_heading": "<em>コントリビューター</em>",
+    "contributor_meta": "GitHubで見る →",
     "many_more": "+ 他多数"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · なぜ作っているのか",
-    "para1": "私は業界標準の商用ツールで10年間、建設積算に携わってきました - PDFビューアにガムテープで貼り付けたスプレッドシートも含めて。良い部分はエンタープライズライセンスとベンダーロックインの裏に閉じ込められ、悪い部分はどこにでもありました。",
-    "para2": "OpenConstructionERPは<a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a>の内部パイプラインとして始まりました - <strong>CWICR</strong>コストデータベース(55,000以上の項目)、<strong>cad2data</strong> CAD解析パイプライン、分類マッピング。商用ERPの請求する金額と業界が実際に必要とするものの間の差が広がり続けていたため、オープンソース化しました。",
-    "para3": "AGPL-3.0で配布され、2 GBのVPSで動作し、すべては<a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHub</a>にあります。",
+    "para1": "この十年間、私は建設プロジェクトのリソース管理に携わってきました。その過程で、この業界のツールがどのように生まれてきたのか、設計自動化の最初の試みから今日の ERP プラットフォームに至るまでの歩みに興味を持つようになり、それが二本のやや長めの文章 <span style=\"color: var(--ink-3);\">(<em>“The Lobbyists’ Wars and the Development of BIM”</em> と <em>“The History of the BIM Map”</em>)</span> になりました。自分たちがどうやってここまで来たのかを踏まえなければ、物事がこれからどこへ向かうのかを見通すのは難しいものです。",
+    "para2": "これらのテーマについては長年かなりの量を書いてきましたし、その一部は多くの読者に読んでいただけました。執筆と並行して、私は建設会社やコンサルティング会社、デベロッパー、ソフトウェアベンダーに対し、プロジェクトデータの扱い方について助言してきました。データを意思決定の副産物ではなく、意思決定の土台として捉えるという考え方です。その仕事を通じて、私は業界を両側から見ることができました。ツールを作る人々と、それを日々使う人々の両方です。そうした観察の多くは、私の著書 <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a> に反映されており、現在は 16 言語で読むことができます（<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>）。",
+    "para3": "さらに二つの課題が私を忙しくさせていました。一つは、そもそも開かれることを想定していない独自ファイル形式に、開発者でない人でもアクセスできるようにすることでした。もう一つは、リソースモデルを通じて建設作業をよりすっきりと記述する方法を見つけることでした。どちらも無料のツールとして実を結びました。<a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM コンバーター</a>（Revit、IFC、DWG、DGN → 構造化データ）は <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">GitHub 上で</a>公開しており、もう一つの <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a> は建設作業とリソースの多言語データベースで、11 言語で 55,000 を超える項目を収録し、<a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a> として公開しています。",
     "founder_title": "創業者、datadrivenconstruction.io",
     "recently_shipped": "最近リリース",
     "changelog_more": "完全な変更履歴はGitHubで <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "フラッグシップ製品 · datadrivenconstruction.io",
     "group_github": "github のオープンソース · datadrivenconstruction",
     "group_socials": "ネットワーク上で見つける",
-    "para4": "近年の AI ツールの進化により、ようやくその仕事 - 方法論、データモデル、過去の実装 - を 1 つのプラットフォームに集約することが可能になりました。今では一般公開され、オープンソースになっています。",
-    "pull": "進歩は対話から生まれます - 視点の衝突と、新しいアプローチへの開かれた姿勢から。建設業界の不可避な「Uber 化」、そして建設プロジェクトのコストおよび時間見積もりプロセスの透明性についてのこの対話に、ぜひご参加いただければ幸いです。",
+    "para4": "そのすべては、私が長い間つくりたいと思っていたもの、つまり建設業向けのオープンでモジュラーな ERP のための土台でした。最新世代のツールによって、方法論やデータモデル、これまでの実装を一つのプラットフォームにまとめることが、ようやく現実的になりました。それが今、公開され、オープンソースになりました。",
+    "pull": "私の経験では、最良のアイデアは対話から、そして意見の食い違いから生まれることが多いものです。建設業の「ウーバー化（Uberization）」に向けた動きや、コストと工期のより透明性の高い見積もりをめぐる問いに関心をお持ちでしたら、ぜひその議論に加わっていただけるとうれしいです。",
     "ref_agents_meta": "自動化ツールボックス",
     "ref_agents_name": "DDC AIエージェント & スキル",
     "ref_book_meta": "リファレンス読本",
@@ -582,14 +588,14 @@
     "reject": "必須以外を拒否"
   },
   "trust": {
-    "title": "すでに使い始めているエンジニア、施工会社、コンサルタント",
-    "sub": "OpenConstructionERP 公開初週に登録した建設・エンジニアリング・インフラチームのスナップショット - ヨーロッパ、北米、MENA、APAC、オセアニアから。"
+    "title": "OpenConstructionERP を試している建設会社、エンジニアリング会社、コンサルタント",
+    "sub": "OpenConstructionERP の試用に登録した、または DataDrivenConstruction のオープンツールを利用してきた建設・エンジニアリング・インフラ分野のチームの一例です。欧州、北米、中東・北アフリカ、アジア太平洋、オセアニアにわたります。"
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · オープンな研究の系譜",
     "title": "DataDrivenConstruction の上に構築。",
     "lede": "OpenConstructionERP は、10年にわたるオープンな建設テック研究から生まれました。",
-    "trusted_title": "DataDrivenConstruction コミュニティに集うエンジニア、施工会社、コンサルタント",
+    "trusted_title": "エンジニア、建設会社、コンサルタント - DataDrivenConstruction のクライアントとユーザー",
     "trusted_sub": "OpenConstructionERP のデモを実際に体験し、さらに DataDrivenConstruction のオープンツール、データセット、ワークショップを活用してきた建設、エンジニアリング、インフラの各チームの一端をご紹介します。対象は欧州、北米、中東アフリカ、アジア太平洋、オセアニアの各地域に及びます。"
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "閉じる"
   },
   "modgrid": {
+    "pain_overview": "スプレッドシートやフォルダの管理に追われるのはもう終わり - すべてのプロジェクト、ファイル、数字を一つの場所に。",
+    "pain_estimation": "壊れたExcelの数式とはお別れ - ライブでマルチ通貨対応のコスト集計を備えた構造化BOQ。",
+    "pain_takeoff": "手作業での再計測はもう不要 - 数量はPDF、図面、BIMから直接取得。",
+    "pain_ai": "白紙からのスタートはもう不要 - 写真や図面を数分で見積もり済みの概算に。",
+    "pain_planning": "バラバラなスケジュールはもう終わり - 予算に対して計画、基準設定、進捗追跡を一気通貫で。",
+    "pain_operations": "現場で起きたことを見失うのはもう終わり - 日報、労務、写真を現場でそのまま記録。",
+    "pain_finance": "月末の予期せぬ出来事とはお別れ - コスト、請求、キャッシュフローが作業の進行とともに更新。",
+    "pain_commercial": "受信トレイで案件を追い回すのはもう終わり - 入札、顧客、契約を一つのパイプラインに。",
+    "pain_communication": "散らばったメールのやり取りはもう終わり - 連絡先、メッセージ、承認を作業のそばに。",
+    "pain_documentation": "手作業でのレポート再作成はもう終わり - ドキュメントや提出書類をライブデータから自動生成。",
+    "pain_quality": "書類の死角はもうない - チェックリスト、検証、インシデントを常に監査対応の状態に。",
     "eyebrow": "同梱内容",
     "title": "ワンインストール。<em>建設業務スタック一式。</em>",
     "sub": "積算、数量拾い、BIM、工程、財務、現場業務 - すべてのモジュールが同じデータベースに直結。マーケットも有料壁もシート課金もありません。",

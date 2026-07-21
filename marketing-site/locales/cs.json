@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "Prohlídka",
+    "title": "Každý modul <em>na jedno kliknutí.</em>"
+  },
   "nav": {
     "demo": "Demo",
     "tour": "Prohlídka",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "Otázky, nápady a ukázky. Připojte se k věcem, které ještě nejsou tak úplně ticketem.",
     "stargazer_heading": "Lidé, kteří už <em>repozitáři dali hvězdu.</em>",
     "stargazer_meta": "Vidět je na GitHubu →",
+    "contributor_heading": "<em>Přispěvatelé</em>",
+    "contributor_meta": "Vidět je na GitHubu →",
     "many_more": "+ mnoho dalších"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · proč to stavíme",
-    "para1": "Strávil jsem deset let stavebním rozpočtováním ve standardních komerčních nástrojích oboru - včetně tabulek nalepených na PDF prohlížečích. Dobré části byly zamčené za enterprise licencemi a vendor lock-inem. Ty špatné byly všude.",
-    "para2": "OpenConstructionERP začalo jako interní pipeline za <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a> - databáze nákladů <strong>CWICR</strong> (55 000+ položek), CAD parsovací pipeline <strong>cad2data</strong>, mapování klasifikací. Otevřeli jsme to, protože propast mezi tím, co komerční ERP účtují, a tím, co obor skutečně potřebuje, se stále zvětšovala.",
-    "para3": "Distribuuje se pod AGPL-3.0, běží na 2 GB VPS a vše je na <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHubu</a>.",
+    "para1": "Posledních deset let se věnuji řízení zdrojů ve stavebních projektech. Cestou mě začalo zajímat, jak vznikaly nástroje tohoto oboru - od prvních pokusů o automatizaci projektování až po dnešní ERP platformy - a z toho vzešlo několik delších textů <span style=\"color: var(--ink-3);\">(<em>„The Lobbyists’ Wars and the Development of BIM”</em> a <em>„The History of the BIM Map”</em>)</span>. Těžko poznat, kam věci směřují, bez představy o tom, jak jsme se sem dostali.",
+    "para2": "Za ta léta jsem o těchto tématech napsal dost a část z toho našla široké čtenářstvo. Vedle psaní jsem radil stavebním a poradenským firmám, developerům a dodavatelům softwaru v tom, jak zacházejí s projektovými daty - aby je brali jako základ rozhodování, a ne jako jeho vedlejší produkt. Díky té práci jsem viděl obor z obou stran: lidi, kteří nástroje tvoří, i lidi, kteří je každý den používají. Řada těchto postřehů skončila v mé knize <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>, která je nyní dostupná v 16 jazycích (<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>).",
+    "para3": "Zaměstnávaly mě ještě dva další problémy. Prvním bylo pomoci neprogramátorům dostat se do uzavřených formátů souborů, které se nikdy neměly otevírat. Druhým bylo najít srozumitelnější způsob, jak popsat stavební práce pomocí zdrojového modelu. Oba přinesly volně dostupné nástroje: <a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">převodníky DDC CAD/BIM</a> (Revit, IFC, DWG, DGN → strukturovaná data) <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">na GitHubu</a> a <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>, vícejazyčnou databázi stavebních prací a zdrojů - přes 55 000 položek v 11 jazycích, zveřejněnou jako <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a>.",
     "founder_title": "zakladatel, datadrivenconstruction.io",
     "recently_shipped": "Nedávno vydáno",
     "changelog_more": "Celý changelog na GitHubu <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "vlajkové produkty · datadrivenconstruction.io",
     "group_github": "open source na github · datadrivenconstruction",
     "group_socials": "najdi nás napříč sítí",
-    "para4": "Nedávná generace AI nástrojů konečně umožnila sjednotit tuhle práci - metodologii, datové modely a předchozí implementace - do jediné platformy. Je teď veřejná a open source.",
-    "pull": "Pokrok se rodí z dialogu - ze střetu perspektiv a otevřenosti vůči novým přístupům. Byl bych rád, kdybys byl ochoten zapojit se do téhle konverzace o nevyhnutelné uberizaci stavebnictví a transparentnosti procesů odhadu nákladů a času u stavebních projektů.",
+    "para4": "To vše byla příprava pro něco, co jsem už dlouho chtěl vytvořit: otevřené, modulární ERP pro stavebnictví. Nejnovější generace nástrojů konečně umožnila spojit metodiku, datové modely a dřívější implementace do jedné platformy. Nyní je veřejné a open source.",
+    "pull": "Podle mé zkušenosti nejlepší nápady vznikají z rozhovoru - a z nesouhlasu. Pokud vás zajímají otázky kolem posunu stavebnictví k „uberizaci” a k transparentnějšímu odhadování nákladů a času, rád vás v té diskusi uvítám.",
     "ref_agents_meta": "Sada nástrojů pro automatizaci",
     "ref_agents_name": "AI agenti a dovednosti DDC",
     "ref_book_meta": "Referenční četba",
@@ -582,14 +588,14 @@
     "reject": "Odmítnout nepodstatné"
   },
   "trust": {
-    "title": "inženýři, dodavatelé a poradenské firmy, kteří už ho používají",
-    "sub": "Přehled stavebních, inženýrských a infrastrukturních týmů, které se zaregistrovaly v prvních týdnech OpenConstructionERP - napříč Evropou, Severní Amerikou, regionem MENA, APAC a Oceánií."
+    "title": "Inženýři, stavební firmy a poradenské společnosti, kteří zkoumají OpenConstructionERP",
+    "sub": "Přehled stavebních, inženýrských a infrastrukturních týmů, které se zaregistrovaly, aby vyzkoušely OpenConstructionERP, nebo pracovaly s otevřenými nástroji DataDrivenConstruction - napříč Evropou, Severní Amerikou, oblastí MENA, APAC a Oceánií."
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · otevřená výzkumná linie",
     "title": "Postaveno na DataDrivenConstruction.",
     "lede": "OpenConstructionERP vyrůstá z desetiletí otevřeného výzkumu ve stavební technologii.",
-    "trusted_title": "Inženýři, dodavatelé a poradenské firmy v komunitě DataDrivenConstruction",
+    "trusted_title": "Inženýři, dodavatelé a poradenské společnosti - klienti a uživatelé DataDrivenConstruction",
     "trusted_sub": "Přehled stavebních, inženýrských a infrastrukturních týmů, které prozkoumaly demo OpenConstructionERP a pracovaly s otevřenými nástroji, datovými sadami a workshopy společnosti DataDrivenConstruction, napříč Evropou, Severní Amerikou, regionem MENA, oblastí APAC a Australasií."
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "Zobrazit méně"
   },
   "modgrid": {
+    "pain_overview": "Konec žonglování s tabulkami a složkami - jeden domov pro každý projekt, soubor i číslo.",
+    "pain_estimation": "Konec rozbitých vzorců v Excelu - strukturované BOQs s živým, víceměnovým souhrnem nákladů.",
+    "pain_takeoff": "Konec ručního přeměřování - množství tažená přímo z PDF, výkresů a BIM.",
+    "pain_ai": "Vynechte prázdnou stránku - z fotky či výkresu uděláte naceněný rozpočet během pár minut.",
+    "pain_planning": "Konec nepropojených harmonogramů - plánujte, nastavte základní plán a sledujte postup oproti rozpočtu.",
+    "pain_operations": "Přestaňte ztrácet dění na stavbě - deníky, práce a fotky zachycené přímo v terénu.",
+    "pain_finance": "Konec překvapení na konci měsíce - náklady, faktury a cashflow se aktualizují, jak práce probíhá.",
+    "pain_commercial": "Přestaňte honit zakázky v e-mailu - poptávky, klienti a smlouvy v jednom toku.",
+    "pain_communication": "Konec roztříštěných e-mailových vláken - kontakty, zprávy a schvalování přímo u práce.",
+    "pain_documentation": "Přestaňte sestavovat reporty ručně - dokumenty a podání generované z živých dat.",
+    "pain_quality": "Konec slepých míst v papírování - kontrolní seznamy, validace a incidenty připravené k auditu.",
     "eyebrow": "Co je v krabici",
     "title": "Jedna instalace. <em>Celý stavební stack.</em>",
     "sub": "Rozpočtování, výkazy výměr, BIM, harmonogramy, finance, provoz na stavbě - každý modul už zapojený do jedné databáze. Žádný marketplace, žádné paywally, žádné placené přídavky na uživatele.",

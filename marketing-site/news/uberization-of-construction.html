@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Uberization of Construction and the future of building - OpenConstructionERP</title>
+<meta name="description" content="A talk from Future/s of Construction 2026 at ETH Zurich, in plain language: why project budgets and schedules are still set by expert opinion instead of verifiable numbers - and how open data is about to change who gets to calculate a project's cost and time." />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://openconstructionerp.com/news/uberization-of-construction.html" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="OpenConstructionERP" />
+<meta property="og:url" content="https://openconstructionerp.com/news/uberization-of-construction.html" />
+<meta property="og:title" content="The Uberization of Construction and the future of building" />
+<meta property="og:description" content="Why projects will soon be calculated from data, and how clients will start estimating cost and time themselves. A plain-language talk from Future/s of Construction 2026 at ETH Zurich." />
+<meta property="og:image" content="https://openconstructionerp.com/news/assets/uberization-of-construction/images/cover.jpg" />
+<meta property="article:published_time" content="2026-06-19T00:00:00Z" />
+<meta property="article:author" content="Artem Boiko" />
+<meta property="article:tag" content="Talk" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Uberization of Construction and the future of building" />
+<meta name="twitter:description" content="Why projects will soon be calculated from data, and how clients will start estimating cost and time themselves. A talk from Future/s of Construction 2026 at ETH Zurich." />
+<meta name="twitter:image" content="https://openconstructionerp.com/news/assets/uberization-of-construction/images/cover.jpg" />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Uberization of Construction and the future of building",
+  "datePublished": "2026-06-19",
+  "author": { "@type": "Person", "name": "Artem Boiko" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DataDrivenConstruction",
+    "logo": { "@type": "ImageObject", "url": "https://openconstructionerp.com/favicon.svg" }
+  },
+  "image": "https://openconstructionerp.com/news/assets/uberization-of-construction/images/cover.jpg",
+  "mainEntityOfPage": "https://openconstructionerp.com/news/uberization-of-construction.html"
+}
+</script>
+
+<style>
+  @font-face { font-family: 'Inter'; src: url('/news/assets/open-erp-own-your-stack/fonts/Inter.ttf'); font-weight: 100 900; font-style: normal; }
+  @font-face { font-family: 'Newsreader'; src: url('/news/assets/open-erp-own-your-stack/fonts/Newsreader.ttf'); font-weight: 200 800; font-style: normal; }
+  @font-face { font-family: 'Newsreader'; src: url('/news/assets/open-erp-own-your-stack/fonts/Newsreader-Italic.ttf'); font-weight: 200 800; font-style: italic; }
+
+  * { box-sizing: border-box; }
+  html { background: #ECEEF2; }
+  body {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0 20px 60px 20px;
+    font-weight: 400;
+  }
+  img { max-width: 100%; display: block; }
+
+  /* ─── TOP NAV - same visual language as the main marketing site ─── */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(248, 250, 252, 0.92);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+            backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.09);
+    margin: 0 -20px 30px;
+  }
+  .topnav-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 12px clamp(20px, 4vw, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  .topnav-left { display: flex; align-items: center; gap: 14px; }
+  .topnav .brand {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: baseline;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.015em;
+  }
+  .topnav .brand-seg-1 { color: #0b1220; }
+  .topnav .brand-seg-2 { color: #475569; }
+  .topnav .brand-seg-3 { color: #2d5e8e; font-weight: 800; }
+  .topnav-links {
+    display: flex;
+    gap: clamp(10px, 1.6vw, 22px);
+    align-items: center;
+    font-size: 14px;
+  }
+  .topnav-links a {
+    color: #475569;
+    font-weight: 500;
+    padding: 6px 4px;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .topnav-links a:hover, .topnav-links a.is-active { color: #2d5e8e; }
+  .topnav-links a.is-active { font-weight: 600; }
+  .topnav-right { display: flex; align-items: center; gap: 10px; }
+  .topnav-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+  }
+  .topnav-pill.github {
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    color: #1e293b;
+    background: transparent;
+  }
+  .topnav-pill.github:hover { border-color: #2d5e8e; color: #2d5e8e; }
+  .topnav-pill.cta {
+    background: linear-gradient(135deg, #2d5e8e 0%, #244c74 100%);
+    color: #ffffff;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.3) inset,
+      0 8px 18px -8px rgba(45, 94, 142, 0.5);
+  }
+  .topnav-pill.cta:hover { transform: translateY(-1px); color: #fff; }
+  .topnav-pill .arrow { transition: transform 0.15s ease; }
+  .topnav-pill:hover .arrow { transform: translateX(2px); }
+  @media (max-width: 980px) {
+    .topnav-links a:not(.news-link), .topnav-pill.github { display: none; }
+  }
+
+  .stage { max-width: 880px; margin: 0 auto; }
+
+  .banner {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    color: #64748B;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0 0 14px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+  }
+  .banner .right { color: #94A3B8; }
+
+  /* The sheet */
+  .sheet {
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(15,23,42,0.04), 0 12px 32px rgba(15,23,42,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  /* Hero with logo + tagline */
+  .hero {
+    background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+    color: #ffffff;
+    padding: 40px 56px 36px 56px;
+    position: relative;
+  }
+  .hero .hero-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+  .hero .hero-logo {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 6px 10px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .hero .hero-logo img { height: 30px; width: auto; }
+  .hero .hero-issue {
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-family: 'Newsreader', serif;
+    font-size: 30pt;
+    line-height: 1.12;
+    font-weight: 500;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #BFDBFE;
+  }
+  .hero .hero-deck {
+    font-family: 'Inter', sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.88);
+    margin: 0;
+    max-width: 580px;
+    font-weight: 400;
+  }
+
+  .content { padding: 38px 56px 46px 56px; }
+
+  .greeting {
+    font-family: 'Newsreader', serif;
+    font-size: 17pt;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0 0 14px 0;
+    letter-spacing: -0.01em;
+  }
+
+  /* Body paragraphs */
+  .body p {
+    margin: 0 0 14px 0;
+    text-align: left;
+    hyphens: auto;
+    font-size: 11.5pt;
+    line-height: 1.6;
+  }
+  .body p.lead {
+    font-size: 13.5pt;
+    line-height: 1.5;
+    color: #2a2a27;
+    font-weight: 350;
+    margin-bottom: 18px;
+  }
+  .body p.lead em {
+    font-style: italic;
+    color: #1E40AF;
+    font-weight: 400;
+  }
+  .body strong { font-weight: 600; color: #1a1a1a; }
+  .body em { font-style: italic; }
+
+  /* Kicker section header */
+  h3.kicker {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #1E40AF;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin: 32px 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h3.kicker::after {
+    content: "";
+    flex: 1;
+    height: 0.5px;
+    background: #CBD5E1;
+  }
+
+  /* Big section title */
+  h2.bigtitle {
+    font-family: 'Newsreader', serif;
+    font-size: 22pt;
+    font-weight: 500;
+    line-height: 1.18;
+    color: #1a1a1a;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.018em;
+  }
+  h2.bigtitle em { font-style: italic; color: #1E40AF; font-weight: 400; }
+
+  /* Figure (image with caption) */
+  figure.fig { margin: 18px 0 22px 0; }
+  figure.fig img {
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+    border: 0.5px solid #E2E8F0;
+  }
+  figure.fig figcaption {
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    color: #64748B;
+    margin-top: 8px;
+    line-height: 1.45;
+    font-style: normal;
+  }
+  figure.fig figcaption b { color: #1a1a1a; font-weight: 600; margin-right: 4px; }
+
+  /* Facts list */
+  ul.facts { list-style: none; margin: 4px 0 18px 0; padding: 0; }
+  ul.facts li {
+    padding: 9px 0 9px 22px;
+    border-bottom: 0.5px solid #E2E8F0;
+    position: relative;
+    font-family: 'Newsreader', serif;
+    font-size: 11.5pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+  }
+  ul.facts li:last-child { border-bottom: none; }
+  ul.facts li::before {
+    content: "-";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    color: #1E40AF;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  ul.facts li b {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 10.5pt;
+    color: #1a1a1a;
+    margin-right: 4px;
+  }
+
+  /* Feature blocks - numbered talking points */
+  .feature {
+    margin: 22px 0 28px 0;
+    padding: 22px 0 0 0;
+    border-top: 0.5px solid #E2E8F0;
+  }
+  .feature .ftitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 14pt;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.01em;
+  }
+  .feature .ftitle .num { color: #1E40AF; font-weight: 700; margin-right: 8px; }
+  .feature p.intro {
+    font-family: 'Newsreader', serif;
+    font-size: 11.5pt;
+    line-height: 1.55;
+    color: #334155;
+    margin: 0 0 14px 0;
+  }
+
+  /* Pull-quote / callout */
+  .costnote {
+    background: #F8FAFC;
+    border-left: 3px solid #1E40AF;
+    padding: 18px 22px;
+    margin: 18px 0 8px 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #334155;
+    border-radius: 0 3px 3px 0;
+  }
+  .costnote .label {
+    font-family: 'Inter', sans-serif;
+    font-size: 7.5pt;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #1E40AF;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .costnote strong { color: #1a1a1a; }
+
+  /* Generic button row + button styles */
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 8px 0;
+    align-items: center;
+  }
+  .btn-row.center { justify-content: center; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 3px;
+    line-height: 1;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: 0.92; }
+  .btn .ico { display: inline-block; width: 14px; height: 14px; line-height: 1; }
+  .btn-yt { background: #FF0000; color: #ffffff; box-shadow: 0 2px 6px rgba(255,0,0,0.18); }
+  .btn-gh { background: #0F172A; color: #ffffff; box-shadow: 0 2px 6px rgba(15,23,42,0.18); }
+  .btn-outline { background: #ffffff; color: #1a1a1a; border: 1px solid #CBD5E1; }
+  .btn-blue { background: #1E40AF; color: #ffffff; box-shadow: 0 2px 6px rgba(30,64,175,0.18); }
+
+  /* Video thumbnail block */
+  .video-block { margin: 18px 0 4px 0; }
+  .video-thumb {
+    display: block;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 0.5px solid #E2E8F0;
+    box-shadow: 0 6px 24px rgba(15,23,42,0.10);
+    text-decoration: none;
+  }
+  .video-thumb img { width: 100%; height: auto; display: block; }
+  .video-thumb .play-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%);
+    pointer-events: none;
+  }
+  .video-thumb .play-btn {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76px; height: 76px;
+    border-radius: 999px;
+    background: rgba(255, 0, 0, 0.92);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    transition: transform 0.18s ease, background 0.18s ease;
+  }
+  .video-thumb:hover .play-btn { transform: translate(-50%, -50%) scale(1.07); background: #FF0000; }
+  .video-thumb .play-btn svg { width: 30px; height: 30px; margin-left: 4px; fill: #ffffff; }
+  .video-thumb .badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(15,23,42,0.85);
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+  }
+  .video-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 9pt;
+    color: #64748B;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .video-meta b { color: #1a1a1a; font-weight: 600; }
+
+  /* Signature / contact strip */
+  .sig {
+    border-top: 0.5px solid #CBD5E1;
+    padding-top: 22px;
+    margin-top: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.55;
+    color: #334155;
+  }
+  .sig .contact { color: #475569; }
+  .sig .contact a { color: #1E40AF; text-decoration: none; border-bottom: 0.5px solid #CBD5E1; }
+
+  /* Bottom dark band */
+  .footer-band {
+    background: #0F172A;
+    color: #94A3B8;
+    padding: 24px 56px;
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.55;
+  }
+  .footer-band .links { color: #BFDBFE; margin-bottom: 6px; }
+  .footer-band .links a { color: #BFDBFE; text-decoration: none; margin-right: 14px; }
+
+  .footnote {
+    max-width: 760px;
+    margin: 22px auto 0 auto;
+    font-family: 'Inter', sans-serif;
+    font-size: 8.5pt;
+    color: #94A3B8;
+    line-height: 1.55;
+    padding: 0 4px;
+  }
+  .footnote a { color: #64748B; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 30px 24px 26px 24px; }
+    .hero h1 { font-size: 24pt; }
+    .content { padding: 28px 24px 36px 24px; }
+    .footer-band { padding: 22px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- TOP NAV - main site menu                                      -->
+<!-- ============================================================ -->
+<nav class="topnav" aria-label="Primary">
+  <div class="topnav-inner">
+    <div class="topnav-left">
+      <a class="brand" href="/">
+        <span class="brand-seg-1">Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span>
+      </a>
+    </div>
+    <div class="topnav-links">
+      <a href="/services.html">Practices</a>
+      <a href="/industries.html">Industries</a>
+      <a href="/standards.html">Standards</a>
+      <a href="/maturity.html">Maturity</a>
+      <a href="/partners.html">Partners</a>
+      <a href="/news.html" class="news-link is-active">News</a>
+      <a href="/docs.html">Docs</a>
+    </div>
+    <div class="topnav-right">
+      <a class="topnav-pill github" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="topnav-pill cta" href="/demo">
+        <span>Try demo</span>
+        <svg class="arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="stage">
+
+  <div class="banner">
+    <span><a href="/news.html" style="color:inherit;text-decoration:none;">&larr; Back to news</a></span>
+    <span class="right">Talk · ETH Zurich · Published 19 June 2026</span>
+  </div>
+
+  <div class="sheet">
+
+    <!-- ============== HERO ============== -->
+    <div class="hero">
+      <div class="hero-row">
+        <div class="hero-issue">Talk · Future/s of Construction 2026 · ETH Zürich</div>
+      </div>
+      <h1>The Uberization of Construction <em>and the future of building</em></h1>
+      <p class="hero-deck">Why projects will soon be calculated from data - and how clients will start estimating cost and time themselves. A plain-language talk on what is changing in construction right now.</p>
+    </div>
+
+    <!-- ============== CONTENT ============== -->
+    <div class="content">
+
+    <h2 class="greeting">From expert opinion to numbers anyone can verify.</h2>
+
+    <div class="body">
+
+      <p class="lead">For most of its history, construction has run on expert judgment. Budgets, schedules and costs are set by experienced people, and they are trusted because of <em>who</em> produced them - not because anyone can check the numbers underneath. This talk, given at the Future/s of Construction 2026 conference at ETH Zürich, makes one simple argument: that is about to change.</p>
+
+      <p>As project data becomes open and machine-readable, estimating a building's cost and time stops being a closed, specialist craft - and starts becoming something a client can do too. The talk explains, in everyday language, what is shifting in the industry right now: where the data already lives, how to get it out without heavy software, and why AI has quietly moved estimating within reach of anyone who can describe what they want.</p>
+
+      <!-- ============== VIDEO ============== -->
+      <h3 class="kicker">Watch the talk</h3>
+
+      <div class="video-block">
+        <a class="video-thumb" href="https://www.youtube.com/watch?v=R_PQQHXY-rQ" target="_blank" rel="noopener">
+          <img src="assets/uberization-of-construction/images/cover.jpg" alt="The Uberization of Construction - talk at Future/s of Construction 2026, ETH Zürich" loading="eager" decoding="async">
+          <div class="play-overlay"></div>
+          <span class="badge">▶ Future/s of Construction 2026</span>
+          <span class="play-btn" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </a>
+        <div class="video-meta"><b>The Uberization of Construction and the Future of Building.</b> The video description has timecodes for every topic, so you can start from any point. Audio tracks are available in the major languages.</div>
+
+        <div class="btn-row">
+          <a class="btn btn-yt" href="https://www.youtube.com/watch?v=R_PQQHXY-rQ" target="_blank" rel="noopener">
+            <span class="ico">▶</span> Watch on YouTube
+          </a>
+          <a class="btn btn-outline" href="https://www.youtube.com/@datadrivenconstruction" target="_blank" rel="noopener">
+            Subscribe to channel
+          </a>
+          <a class="btn btn-blue" href="https://openconstructionerp.com/demo" target="_blank" rel="noopener">
+            Open live demo →
+          </a>
+        </div>
+      </div>
+
+      <!-- ============== WHAT THE TALK COVERS ============== -->
+      <h3 class="kicker">What the talk covers</h3>
+
+      <div class="feature">
+        <div class="ftitle"><span class="num">01</span>Numbers you can verify, not opinions you must trust</div>
+        <p class="intro">A project's most important figures - the budget, the schedule, the final cost - still rest on individual expertise. When the basis is a spreadsheet nobody else can open, or a judgment call, every decision downstream inherits that uncertainty. The alternative is already here: estimates that trace back to the model and the data they came from, so anyone can check them.</p>
+      </div>
+
+      <div class="feature">
+        <div class="ftitle"><span class="num">02</span>Get the data out of any project - without heavy BIM software</div>
+        <p class="intro">The geometry and quantities you need are already inside the design files. You do not need a wall of specialist buttons to reach them. The same Revit, IFC and DWG files can be converted straight into databases and ordinary spreadsheets that any estimator can read - no expensive modelling suite required just to count what is in the model.</p>
+      </div>
+
+      <div class="feature">
+        <div class="ftitle"><span class="num">03</span>The 30-year head start nobody talks about</div>
+        <p class="intro">The largest software vendors have been reading CAD and BIM files as databases for three decades. That capability was never a secret - it simply stayed locked inside proprietary tools, and the wider market never noticed. Open converters now put the same approach in everyone's hands.</p>
+      </div>
+
+      <div class="feature">
+        <div class="ftitle"><span class="num">04</span>AI that estimates from a plain-language request</div>
+        <p class="intro">Today's AI assistants - ChatGPT, Claude and others - can take a request written in ordinary words ("how much concrete is in this model, and what would it cost?") and return quantities and a priced estimate, working directly on the project data. The skill shifts from operating software to asking the right question.</p>
+      </div>
+
+      <div class="feature">
+        <div class="ftitle"><span class="num">05</span>Open data - and estimating stops being the contractor's job alone</div>
+        <p class="intro">When project data is open and the tools to read it are free, the contractor is no longer the only party who can put a number on a building. Clients, owners and public bodies can run their own estimates - and check the ones they are given. That is the "Uberization" in the title: not cheaper labour, but a market where verifiable cost and time are available to everyone, instead of being gatekept by whoever owns the software.</p>
+      </div>
+
+      <div class="costnote">
+        <span class="label">The punchline</span>
+        <strong>Estimating a project's cost will not be the contractor's job alone anymore.</strong> Once the data is open and AI can read it, the same numbers are available to the client, the owner and the public body that pays for the work - and a price can finally be checked, not just trusted.
+      </div>
+
+      <!-- ============== TIE-IN ============== -->
+      <h3 class="kicker">From the idea to working software</h3>
+
+      <p>OpenConstructionERP is this argument turned into a working, open-source platform. Open converters read <code style="font-family:monospace;font-size:10pt;background:#EFF6FF;padding:1px 5px;border-radius:2px;color:#1E40AF;">.rvt</code>, <code style="font-family:monospace;font-size:10pt;background:#EFF6FF;padding:1px 5px;border-radius:2px;color:#1E40AF;">.ifc</code> and <code style="font-family:monospace;font-size:10pt;background:#EFF6FF;padding:1px 5px;border-radius:2px;color:#1E40AF;">.dwg</code> files into structured data; an open cost database prices the quantities; and an AI layer proposes estimates in plain language - all self-hosted, under AGPL-3.0, with the data on your own infrastructure. The live demo runs the full flow from model import to a priced bill of quantities.</p>
+
+      <div class="btn-row">
+        <a class="btn btn-blue" href="https://openconstructionerp.com/demo" target="_blank" rel="noopener">
+          Try the live demo →
+        </a>
+        <a class="btn btn-gh" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+          <span class="ico">★</span> View on GitHub
+        </a>
+        <a class="btn btn-yt" href="https://www.youtube.com/watch?v=R_PQQHXY-rQ" target="_blank" rel="noopener">
+          <span class="ico">▶</span> Watch the talk
+        </a>
+      </div>
+
+      <!-- ============== TRADEMARK NOTICE ============== -->
+      <p style="font-family:'Inter',sans-serif;font-size:9pt;color:#94a3b8;margin:32px 0 0 0;line-height:1.5;border-top:1px solid #e2e8f0;padding-top:16px;">
+        <strong>Trademark notice.</strong> All product and company names, file-format extensions (e.g. <code>.rvt</code>, <code>.ifc</code>, <code>.dwg</code>) and AI assistant names referenced in this article are the property of their respective owners. Their use here is descriptive and refers to interoperability or industry context only. No affiliation, endorsement or sponsorship is implied unless explicitly stated.
+      </p>
+
+    </div>
+    <!-- end .body -->
+
+    <!-- Contact strip -->
+    <div class="sig">
+      <div class="contact">
+        Get in touch: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a> &nbsp;·&nbsp;
+        <a href="https://datadrivenconstruction.io">datadrivenconstruction.io</a> &nbsp;·&nbsp;
+        <a href="https://openconstructionerp.com">openconstructionerp.com</a>
+      </div>
+    </div>
+
+    </div>
+    <!-- end .content -->
+
+    <!-- ============== DARK FOOTER BAND ============== -->
+    <div class="footer-band">
+      <div class="links">
+        <a href="https://github.com/datadrivenconstruction/OpenConstructionERP">GitHub</a>
+        <a href="https://openconstructionerp.com/demo">Live demo</a>
+        <a href="https://datadrivenconstruction.io">DDC site</a>
+        <a href="https://www.youtube.com/@datadrivenconstruction">YouTube</a>
+      </div>
+      DataDrivenConstruction · Graben-Neudorf, near Karlsruhe, Germany · OpenConstructionERP is licensed under AGPL-3.0 · Talk recorded at Future/s of Construction 2026, ETH Zürich.
+    </div>
+
+  </div>
+
+  <p class="footnote">
+    Published under AGPL-3.0. Full source on <a href="https://github.com/datadrivenconstruction/OpenConstructionERP">github.com/datadrivenconstruction/OpenConstructionERP</a>. The live <a href="https://openconstructionerp.com">openconstructionerp.com</a> tracks the newest release. · <a href="/news.html">All news</a>
+  </p>
+
+</div>
+
+<script src="/news/assets/related-articles.js" defer></script>
+
+</body>
+</html>

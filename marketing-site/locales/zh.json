@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "开始导览",
+    "title": "每个模块，<em>一键即达。</em>"
+  },
   "nav": {
     "demo": "演示",
     "tour": "导览",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "提问、创意与展示。对还不算 issue 的事情,欢迎进来聊聊。",
     "stargazer_heading": "已经<em>为仓库加星</em>的人们。",
     "stargazer_meta": "在 GitHub 上查看 →",
+    "contributor_heading": "<em>贡献者</em>",
+    "contributor_meta": "在 GitHub 上查看 →",
     "many_more": "+ 更多"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · 我们为什么要做这个",
-    "para1": "我在行业标准的商业工具中做了十年建筑预算 - 其中还包括那些用胶带粘在 PDF 阅读器上的电子表格。好的部分被锁在企业许可与厂商锁定背后。糟糕的部分则无处不在。",
-    "para2": "OpenConstructionERP 最初是 <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a> 背后的内部流水线 - 包括 <strong>CWICR</strong> 造价数据库(55,000+ 条目)、<strong>cad2data</strong> CAD 解析流水线和分类映射。我们将其开源,是因为商业 ERP 收费的东西与行业真正需要的东西之间的差距越来越大。",
-    "para3": "它以 AGPL-3.0 协议发布,可在 2 GB 的 VPS 上运行,一切都在 <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHub</a> 上。",
+    "para1": "过去十年里，我一直从事建筑项目的资源管理工作。在这个过程中，我开始好奇这个行业的工具究竟是怎样一步步形成的，从设计自动化的最初尝试，到今天的 ERP 平台，于是就写成了两篇较长的文章 <span style=\"color: var(--ink-3);\">(<em>“The Lobbyists’ Wars and the Development of BIM”</em> 和 <em>“The History of the BIM Map”</em>)</span>。如果不了解我们是怎么走到今天的，就很难看清事情正朝哪个方向发展。",
+    "para2": "这些年我在这些主题上写了不少东西，其中一部分获得了广泛的读者。除了写作，我还为建筑与咨询公司、开发商以及软件厂商提供咨询，帮助他们处理项目数据，把数据当作决策的基础，而不是决策的副产品。这份工作让我得以从两个角度观察这个行业：既看到打造工具的人，也看到每天使用这些工具的人。这些观察中的很多内容后来都写进了我的书 <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>，如今已有 16 种语言版本（<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>）。",
+    "para3": "另外还有两个问题让我一直忙碌。一个是帮助非开发者打开那些本就不打算对外开放的专有文件格式。另一个是寻找一种更清晰的方式，通过资源模型来描述建筑工程。这两件事都催生了免费工具：<a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM 转换器</a>（Revit、IFC、DWG、DGN → 结构化数据）<a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">在 GitHub 上</a>提供，以及 <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>，一个涵盖建筑工程与资源的多语言数据库，收录 11 种语言、超过 55,000 个条目，以 <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a> 的形式发布。",
     "founder_title": "创始人,datadrivenconstruction.io",
     "recently_shipped": "近期发布",
     "changelog_more": "在 GitHub 查看完整更新日志 <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "旗舰产品 · datadrivenconstruction.io",
     "group_github": "github 开源 · datadrivenconstruction",
     "group_socials": "在各大网络上找到我们",
-    "para4": "最近一代的 AI 工具终于让这件事变得可行 -- 把方法论、数据模型和过往实现整合到一个平台里。如今它已公开,并以开源形式发布。",
-    "pull": "进步源自对话 -- 源自观点的碰撞,以及对新思路的开放。如果你愿意加入这场对话 -- 谈一谈建筑行业不可避免的「Uber 化」,以及建设项目成本与时间估算流程的透明化,我将不胜感激。",
+    "para4": "这一切都是为我长久以来想要打造的东西打下的基础：一个开放的、模块化的建筑行业 ERP。最新一代的工具终于让我能够切实地把方法论、数据模型和早期的实现整合到一个平台之中。它现在已经公开并开源。",
+    "pull": "以我的经验，最好的想法往往来自交流，也来自分歧。如果你也对建筑业走向“优步化（Uberization）”、以及走向更透明的成本与工期估算这些话题感兴趣，我很乐意邀请你加入这场讨论。",
     "ref_agents_meta": "自动化工具箱",
     "ref_agents_name": "DDC AI 智能体与技能",
     "ref_book_meta": "参考读物",
@@ -582,14 +588,14 @@
     "reject": "拒绝非必要"
   },
   "trust": {
-    "title": "工程师、承包商和咨询公司已经在使用它",
-    "sub": "OpenConstructionERP 上线头几周注册的建筑、工程与基础设施团队的一个剪影 -- 来自欧洲、北美、中东与北非（MENA）、亚太（APAC）和大洋洲。"
+    "title": "正在体验 OpenConstructionERP 的工程师、建筑公司和咨询机构",
+    "sub": "这是注册试用 OpenConstructionERP 或使用过 DataDrivenConstruction 开放工具的建筑、工程和基础设施团队的缩影，遍及欧洲、北美、中东和北非、亚太及大洋洲。"
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · 开放研究脉络",
     "title": "构建于 DataDrivenConstruction 之上。",
     "lede": "OpenConstructionERP 源自十年来的开放建筑技术研究。",
-    "trusted_title": "DataDrivenConstruction 社区中的工程师、承包商和咨询机构",
+    "trusted_title": "工程师、承包商和咨询公司 - DataDrivenConstruction 的客户和用户",
     "trusted_sub": "这是建筑、工程与基础设施团队的一个缩影，他们体验了 OpenConstructionERP 演示，并使用了 DataDrivenConstruction 的开放工具、数据集和工作坊，遍及欧洲、北美、中东与北非地区、亚太地区以及澳大拉西亚。"
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "收起"
   },
   "modgrid": {
+    "pain_overview": "告别表格与文件夹的来回切换 - 每个项目、文件和数字都有统一的归宿。",
+    "pain_estimation": "再也没有失效的 Excel 公式 - 结构化 BOQ，多币种造价实时汇总。",
+    "pain_takeoff": "无需再手工重复测量 - 工程量直接从 PDF、图纸和 BIM 中提取。",
+    "pain_ai": "不必从空白页起步 - 几分钟内将一张照片或图纸变成带价估算。",
+    "pain_planning": "告别脱节的进度计划 - 编制计划、设定基线，并对照预算跟踪进展。",
+    "pain_operations": "不再遗漏现场发生的一切 - 施工日志、人工和照片在现场即时记录。",
+    "pain_finance": "月末不再有意外 - 造价、发票和现金流随工作进展实时更新。",
+    "pain_commercial": "不必在收件箱里追着生意跑 - 招投标、客户和合同汇入同一条管道。",
+    "pain_communication": "告别零散的邮件往来 - 联系人、消息和审批就在工作旁边。",
+    "pain_documentation": "无需再手工重做报表 - 文档和报审资料由实时数据自动生成。",
+    "pain_quality": "不再有文书盲区 - 检查表、校验和事故记录始终随时可审计。",
     "eyebrow": "盒内一览",
     "title": "一次安装。<em>完整的建筑工作栈。</em>",
     "sub": "造价、量算、BIM、进度、财务、现场作业 - 所有模块共享同一数据库。无应用市场、无付费墙、无按席附加费。",

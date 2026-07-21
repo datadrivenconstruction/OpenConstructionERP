@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "Tutustu",
+    "title": "Jokainen moduuli <em>yhden klikkauksen päässä.</em>"
+  },
   "nav": {
     "demo": "Demo",
     "tour": "Kierros",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "Kysymykset, ideat ja näytä-ja-kerro. Hyppää mukaan asioihin, jotka eivät vielä ole issue.",
     "stargazer_heading": "Ihmiset, jotka ovat jo <em>tähdittäneet repon.</em>",
     "stargazer_meta": "Katso heidät GitHubissa →",
+    "contributor_heading": "<em>Avustajat</em>",
+    "contributor_meta": "Katso heidät GitHubissa →",
     "many_more": "+ monia muita"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · miksi rakennamme tätä",
-    "para1": "Vietin kymmenen vuotta tekemässä rakennusalan kustannuslaskentaa alan tavallisilla kaupallisilla työkaluilla - mukaan lukien taulukkolaskentoihin teipatut PDF-katselimet. Hyvät osat olivat lukittu enterprise-lisenssien ja toimittajalukon taakse. Huonot osat olivat kaikkialla.",
-    "para2": "OpenConstructionERP alkoi <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstructionin</a> sisäisenä putkena - <strong>CWICR</strong>-kustannustietokanta (55 000+ nimikettä), <strong>cad2data</strong>-CAD-parsintaputki, luokitusmappaus. Avasimme sen lähdekoodin, koska ero sen välillä, mistä kaupalliset ERP:t veloittavat ja mitä ala todella tarvitsee, jatkoi kasvamistaan.",
-    "para3": "Se toimitetaan AGPL-3.0-lisenssillä, pyörii 2 GB:n VPS:llä ja kaikki on <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHubissa</a>.",
+    "para1": "Olen viimeiset kymmenen vuotta työskennellyt rakennushankkeiden resurssienhallinnan parissa. Matkan varrella aloin uteliaana pohtia, miten alan työkalut ovat syntyneet - suunnittelun automatisoinnin ensiaskeleista tämän päivän ERP-alustoihin - ja siitä syntyi pari pidempää kirjoitusta <span style=\"color: var(--ink-3);\">(<em>”The Lobbyists’ Wars and the Development of BIM”</em> ja <em>”The History of the BIM Map”</em>)</span>. On vaikea nähdä, minne asiat ovat menossa, jos ei hahmota, miten tähän on tultu.",
+    "para2": "Olen vuosien varrella kirjoittanut näistä aiheista melkoisesti, ja osa siitä on tavoittanut laajan lukijakunnan. Kirjoittamisen ohella olen konsultoinut rakennus- ja konsulttiyrityksiä, kehittäjiä ja ohjelmistotoimittajia siinä, miten ne käsittelevät hankkeidensa dataa - jotta sitä kohdeltaisiin päätösten perustana eikä niiden sivutuotteena. Tuon työn ansiosta näin alan molemmilta puolilta: ne, jotka rakentavat työkalut, ja ne, jotka käyttävät niitä joka päivä. Monet näistä havainnoista päätyivät kirjaani <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>, joka on nyt saatavilla 16 kielellä (<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>).",
+    "para3": "Kaksi muuta ongelmaa pitivät minut kiireisenä. Toinen oli auttaa ei-kehittäjiä pääsemään käsiksi suljettuihin tiedostomuotoihin, joita ei ollut koskaan tarkoitettu avattaviksi. Toinen oli löytää selkeämpi tapa kuvata rakennustöitä resurssimallin avulla. Molemmista syntyi ilmaisia työkaluja: <a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM -muuntimet</a> (Revit, IFC, DWG, DGN → jäsenneltyä dataa) <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">GitHubissa</a> ja <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>, monikielinen rakennustöiden ja resurssien tietokanta - yli 55 000 nimikettä 11 kielellä, julkaistuna nimellä <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a>.",
     "founder_title": "perustaja, datadrivenconstruction.io",
     "recently_shipped": "Äskettäin julkaistu",
     "changelog_more": "Täysi muutosloki GitHubissa <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "lippulaivatuotteet · datadrivenconstruction.io",
     "group_github": "avoin lähdekoodi githubissa · datadrivenconstruction",
     "group_socials": "löydä meidät verkostosta",
-    "para4": "Uusin AI-työkalujen sukupolvi teki vihdoin mahdolliseksi koota tämän työn - metodologian, datamallit ja aiemmat toteutukset - yhdeksi alustaksi. Se on nyt julkinen ja avointa lähdekoodia.",
-    "pull": "Edistys syntyy dialogista - näkökulmien yhteentörmäyksestä ja avoimuudesta uusille lähestymistavoille. Olisin kiitollinen, jos osallistuisit tähän keskusteluun rakennusalan väistämättömästä Uberisaatiosta sekä rakennushankkeiden kustannus- ja aika-arviointiprosessien läpinäkyvyydestä.",
+    "para4": "Kaikki tämä oli pohjatyötä jollekin, jota olin halunnut rakentaa jo pitkään: avoin, modulaarinen ERP rakennusalalle. Uusin työkalujen sukupolvi teki vihdoin käytännölliseksi koota menetelmät, tietomallit ja aiemmat toteutukset yhteen alustaan. Se on nyt julkinen ja avointa lähdekoodia.",
+    "pull": "Kokemukseni mukaan parhaat ideat syntyvät keskustelusta - ja erimielisyydestä. Jos sinua kiinnostavat kysymykset rakentamisen siirtymisestä kohti ”uberisaatiota” ja läpinäkyvämpää kustannus- ja aika-arviointia, otan sinut mielelläni mukaan siihen keskusteluun.",
     "ref_agents_meta": "Automaatiotyökalupakki",
     "ref_agents_name": "DDC AI-agentit ja -taidot",
     "ref_book_meta": "Lähdelukemista",
@@ -582,14 +588,14 @@
     "reject": "Hylkää ei-välttämättömät"
   },
   "trust": {
-    "title": "insinöörit, urakoitsijat ja konsulttiyritykset, jotka jo käyttävät sitä",
-    "sub": "Otos rakennus-, suunnittelu- ja infrastruktuuritiimeistä, jotka rekisteröityivät OpenConstructionERP:n ensimmäisten viikkojen aikana - Euroopassa, Pohjois-Amerikassa, MENA-alueella, APAC-alueella ja Oseaniassa."
+    "title": "Insinöörit, rakennusyritykset ja konsulttitoimistot, jotka tutustuvat OpenConstructionERP:hen",
+    "sub": "Katsaus rakennus-, suunnittelu- ja infratiimeihin, jotka ovat ilmoittautuneet kokeilemaan OpenConstructionERP:tä tai työskennelleet DataDrivenConstructionin avointen työkalujen kanssa - eri puolilla Eurooppaa, Pohjois-Amerikkaa, MENA-aluetta, APAC-aluetta ja Oseaniaa."
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · avoin tutkimuslinja",
     "title": "Rakennettu DataDrivenConstructionin pohjalle.",
     "lede": "OpenConstructionERP kasvaa vuosikymmenestä avointa rakennusteknologian tutkimusta.",
-    "trusted_title": "Insinöörejä, urakoitsijoita ja konsulttitoimistoja DataDrivenConstruction-yhteisössä",
+    "trusted_title": "Insinöörit, urakoitsijat ja konsulttiyritykset - DataDrivenConstructionin asiakkaat ja käyttäjät",
     "trusted_sub": "Katsaus rakentamisen, suunnittelun ja infrastruktuurin tiimeihin, jotka ovat tutustuneet OpenConstructionERP-demoon ja työskennelleet DataDrivenConstructionin avointen työkalujen, datajoukkojen ja työpajojen parissa Euroopassa, Pohjois-Amerikassa, MENA-alueella, APAC-alueella ja Australaasiassa."
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "Näytä vähemmän"
   },
   "modgrid": {
+    "pain_overview": "Lopeta taulukoiden ja kansioiden jongleeraus - yksi koti jokaiselle projektille, tiedostolle ja luvulle.",
+    "pain_estimation": "Ei enää rikkinäisiä Excel-kaavoja - jäsennellyt BOQs ja reaaliaikainen, monivaluuttainen kustannuskooste.",
+    "pain_takeoff": "Lopeta käsin mittaaminen uudelleen - määrät suoraan PDF-tiedostoista, piirustuksista ja BIM-malleista.",
+    "pain_ai": "Unohda tyhjä sivu - muuta valokuva tai piirustus hinnoitelluksi kustannusarvioksi minuuteissa.",
+    "pain_planning": "Ei irrallisia aikatauluja - suunnittele, aseta lähtötaso ja seuraa edistymistä budjettia vasten.",
+    "pain_operations": "Lopeta työmaan tapahtumien katoaminen - päiväkirjat, työ ja valokuvat talteen kentällä.",
+    "pain_finance": "Ei yllätyksiä kuukauden lopussa - kustannukset, laskut ja kassavirta päivittyvät työn edetessä.",
+    "pain_commercial": "Lopeta kauppojen jahtaaminen sähköpostissa - tarjoukset, asiakkaat ja sopimukset yhdessä putkessa.",
+    "pain_communication": "Ei hajallaan olevia sähköpostiketjuja - yhteystiedot, viestit ja hyväksynnät työn vierellä.",
+    "pain_documentation": "Lopeta raporttien rakentaminen käsin uudelleen - asiakirjat ja toimitusaineistot luodaan reaaliaikaisesta datasta.",
+    "pain_quality": "Ei sokeita pisteitä paperitöissä - tarkistuslistat, validointi ja poikkeamat auditointivalmiina.",
     "eyebrow": "Mitä pakkaus sisältää",
     "title": "Yksi asennus. <em>Koko rakennuspino.</em>",
     "sub": "Kustannuslaskenta, määrälaskenta, BIM, aikataulutus, talous, työmaatoiminta - jokainen moduuli on jo kytketty samaan tietokantaan. Ei kauppapaikkaa, ei maksumuureja, ei käyttäjäkohtaisia lisämaksuja.",

@@ -2294,11 +2294,15 @@
       color: var(--ink-2);
       font-weight: 600;
       letter-spacing: 0.01em;
+      min-width: 0; /* let the grid cell shrink so long localized placeholders never overflow */
     }
     .apply-form label.full { grid-column: 1 / -1; }
     .apply-form input,
     .apply-form select,
     .apply-form textarea {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
       padding: 12px 14px;
       border: 1px solid var(--line-2);
       border-radius: 10px;
@@ -2306,8 +2310,11 @@
       color: var(--ink-0);
       font-family: inherit;
       font-size: 14.5px;
+      text-overflow: ellipsis; /* long placeholders/values clip cleanly instead of overflowing */
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
+    .apply-form input::placeholder,
+    .apply-form textarea::placeholder { overflow: hidden; text-overflow: ellipsis; }
     .apply-form input:hover,
     .apply-form select:hover,
     .apply-form textarea:hover {

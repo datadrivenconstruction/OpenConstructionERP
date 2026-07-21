@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "Ta rundturen",
+    "title": "Varje modul <em>ett klick bort.</em>"
+  },
   "nav": {
     "demo": "Demo",
     "tour": "Rundtur",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "Frågor, idéer och show-and-tell. Hoppa in för saker som ännu inte riktigt är ett ärende.",
     "stargazer_heading": "Personer som redan <em>stjärnmärkt repot.</em>",
     "stargazer_meta": "Se dem på GitHub →",
+    "contributor_heading": "<em>Bidragsgivare</em>",
+    "contributor_meta": "Se dem på GitHub →",
     "many_more": "+ många fler"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · varför vi bygger detta",
-    "para1": "Jag tillbringade tio år med byggkalkylering i branschens standardmässiga kommersiella verktyg - kalkylblad ihoptejpade med PDF-läsare inkluderat. De bra delarna var inlåsta bakom företagslicenser och leverantörsinlåsning. De dåliga delarna fanns överallt.",
-    "para2": "OpenConstructionERP började som den interna pipelinen bakom <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a> - kostnadsdatabasen <strong>CWICR</strong> (55 000+ poster), CAD-parsningspipelinen <strong>cad2data</strong>, klassificeringsmappningen. Vi öppnade källkoden eftersom gapet mellan det kommersiella ERP-system tar betalt för och det branschen faktiskt behöver bara blev större.",
-    "para3": "Det levereras under AGPL-3.0, det kör på en 2 GB VPS, och allt finns på <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHub</a>.",
+    "para1": "De senaste tio åren har jag arbetat med resurshantering för byggprojekt. På vägen blev jag nyfiken på hur branschens verktyg egentligen kom till - från de första försöken med projekteringsautomation till dagens ERP-plattformar - och det blev till ett par längre texter <span style=\"color: var(--ink-3);\">(<em>”The Lobbyists’ Wars and the Development of BIM”</em> och <em>”The History of the BIM Map”</em>)</span>. Det är svårt att se vart vi är på väg utan en känsla för hur vi hamnade här.",
+    "para2": "Jag har skrivit en hel del om de här ämnena genom åren, och en del av det fick många läsare. Vid sidan av skrivandet har jag arbetat som konsult åt bygg- och konsultföretag, fastighetsutvecklare och programvaruleverantörer kring hur de hanterar sina projektdata - att behandla dem som grunden för beslut snarare än en biprodukt av dem. Det arbetet lät mig se branschen från båda hållen: de som bygger verktygen, och de som använder dem varje dag. Många av de iakttagelserna hamnade i min bok <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>, nu tillgänglig på 16 språk (<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>).",
+    "para3": "Två andra problem höll mig sysselsatt. Det ena var att hjälpa icke-utvecklare in i proprietära filformat som aldrig var tänkta att öppnas. Det andra var att hitta ett renare sätt att beskriva byggarbeten genom en resursmodell. Båda gav upphov till gratis verktyg: <a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM-konverterare</a> (Revit, IFC, DWG, DGN → strukturerad data) <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">på GitHub</a>, och <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>, en flerspråkig databas över byggarbeten och resurser - över 55 000 poster på 11 språk, publicerad som <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a>.",
     "founder_title": "grundare, datadrivenconstruction.io",
     "recently_shipped": "Senast levererat",
     "changelog_more": "Fullständig ändringslogg på GitHub <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "flaggskeppsprodukter · datadrivenconstruction.io",
     "group_github": "öppen källkod på github · datadrivenconstruction",
     "group_socials": "hitta oss över hela nätverket",
-    "para4": "Den senaste generationen av AI-verktyg gjorde det äntligen möjligt att samla det arbetet - metodik, datamodeller och tidigare implementationer - i en enda plattform. Det är nu offentligt och öppen källkod.",
-    "pull": "Framsteg föds ur dialog - ur perspektivens möte och öppenhet för nya angreppssätt. Jag skulle vara tacksam om du ville delta i den här konversationen om byggbranschens oundvikliga Uberisering och transparensen i kostnads- och tidsuppskattningsprocesser för byggprojekt.",
+    "para4": "Allt detta var grundarbetet för något jag länge hade velat bygga: ett öppet, modulärt ERP för byggbranschen. Den senaste generationen av verktyg gjorde det äntligen praktiskt att föra samman metodiken, datamodellerna och tidigare implementeringar till en enda plattform. Det är nu offentligt och öppen källkod.",
+    "pull": "Min erfarenhet är att de bästa idéerna ofta växer fram ur samtal - och ur oenighet. Om frågorna kring byggbranschens rörelse mot ”uberisering”, och mot mer transparent uppskattning av kostnad och tid, är intressanta för dig, vill jag gärna ha med dig i den diskussionen.",
     "ref_agents_meta": "Automatiseringsverktygslåda",
     "ref_agents_name": "DDC AI Agents & Skills",
     "ref_book_meta": "Referenslitteratur",
@@ -582,14 +588,14 @@
     "reject": "Avvisa icke-nödvändiga"
   },
   "trust": {
-    "title": "ingenjörer, entreprenörer och konsulter som redan kör det",
-    "sub": "Ett urval av bygg-, ingenjörs- och infrastrukturteam som registrerade sig under OpenConstructionERP:s första veckor - i Europa, Nordamerika, MENA, APAC och Oceanien."
+    "title": "Ingenjörer, byggföretag och konsultbolag som utforskar OpenConstructionERP",
+    "sub": "En ögonblicksbild av de bygg-, ingenjörs- och infrastrukturteam som har anmält sig för att testa OpenConstructionERP eller har arbetat med DataDrivenConstructions öppna verktyg - i Europa, Nordamerika, MENA, APAC och Oceanien."
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · öppen forskningslinje",
     "title": "Byggt på DataDrivenConstruction.",
     "lede": "OpenConstructionERP växer fram ur tio år av öppen forskning inom byggteknik.",
-    "trusted_title": "Ingenjörer, entreprenörer och konsultbolag i DataDrivenConstruction-communityt",
+    "trusted_title": "Ingenjörer, entreprenörer och konsultföretag - kunder och användare av DataDrivenConstruction",
     "trusted_sub": "En ögonblicksbild av de bygg-, ingenjörs- och infrastrukturteam som har utforskat OpenConstructionERP-demon och arbetat med DataDrivenConstructions öppna verktyg, dataset och workshops, i Europa, Nordamerika, MENA, APAC och Australasien."
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "Visa mindre"
   },
   "modgrid": {
+    "pain_overview": "Sluta jonglera kalkylblad och mappar - ett hem för varje projekt, fil och siffra.",
+    "pain_estimation": "Inga fler trasiga Excel-formler - strukturerade BOQs med levande kostnadssummering i flera valutor.",
+    "pain_takeoff": "Sluta mäta om för hand - mängder hämtade direkt från PDF, ritningar och BIM.",
+    "pain_ai": "Hoppa över det tomma bladet - gör ett foto eller en ritning till en prissatt kalkyl på några minuter.",
+    "pain_planning": "Inga frånkopplade tidplaner - planera, sätt baslinje och följ framsteg mot budgeten.",
+    "pain_operations": "Sluta tappa bort vad som hände på bygget - dagböcker, arbetstid och foton fångade ute i fält.",
+    "pain_finance": "Inga överraskningar vid månadsslut - kostnader, fakturor och kassaflöde uppdateras medan arbetet pågår.",
+    "pain_commercial": "Sluta jaga affärer i inkorgen - anbud, kunder och kontrakt i en enda pipeline.",
+    "pain_communication": "Inga utspridda e-posttrådar - kontakter, meddelanden och godkännanden bredvid arbetet.",
+    "pain_documentation": "Sluta bygga om rapporter för hand - dokument och underlag genererade från levande data.",
+    "pain_quality": "Inga blinda fläckar i pappersarbetet - checklistor, validering och avvikelser hålls redo för granskning.",
     "eyebrow": "Vad som ingår",
     "title": "En installation. <em>Hela byggstacken.</em>",
     "sub": "Kalkyler, mängdavtagning, BIM, tidsplanering, ekonomi, platsdrift - varje modul redan inkopplad mot samma databas. Ingen marknadsplats, inga betalväggar, inga tilläggsavgifter per användare.",

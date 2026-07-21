@@ -588,11 +588,21 @@ h1.display em{
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
   }
 
-  /* If user already registered earlier, skip the form and send them to /demo/. */
+  /* If the visitor already requested access on this device, show a quick
+     shortcut into the workspace above the form instead of hard-redirecting.
+     The form stays visible, so the page is never a dead bounce and access can
+     still be requested again (for example with a different email). */
   var reg = localStorage.getItem('oe_demo_registered');
   if(reg){
-    window.location.href = '/demo/';
-    return;
+    var fsel = document.getElementById('formSection');
+    if(fsel){
+      var rnote = document.createElement('div');
+      rnote.setAttribute('role','status');
+      rnote.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:11px 14px;border-radius:10px;background:color-mix(in oklab,var(--accent) 8%,transparent);border:1px solid color-mix(in oklab,var(--accent) 26%,var(--line-1));font-size:12.5px;color:var(--ink-2)';
+      rnote.innerHTML = '<span>You already requested demo access on this device.</span>'
+        + '<a href="/demo/" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#fff;font-weight:600;font-size:12.5px;text-decoration:none;white-space:nowrap">Enter demo workspace &rarr;</a>';
+      fsel.insertBefore(rnote, fsel.firstChild);
+    }
   }
 
   var form = document.getElementById('demoForm');

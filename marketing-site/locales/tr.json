@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "Turu başlat",
+    "title": "Her modül, <em>bir tık uzakta.</em>"
+  },
   "nav": {
     "demo": "Demo",
     "tour": "Tur",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "Sorular, fikirler ve göster-anlat. Henüz tam olarak issue olmayan şeyler için uğrayın.",
     "stargazer_heading": "Repo'yu daha şimdiden <em>yıldızlamış olanlar.</em>",
     "stargazer_meta": "Onları GitHub'da görün →",
+    "contributor_heading": "<em>Katkıda bulunanlar</em>",
+    "contributor_meta": "Onları GitHub'da görün →",
     "many_more": "+ çok daha fazlası"
   },
   "numbers": {
@@ -406,9 +412,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · bunu neden yapıyoruz",
-    "para1": "Sektörün standart ticari araçlarında on yıl inşaat keşifi yaptım - PDF görüntüleyicilere bantla yapıştırılmış elektronik tablolar dahil. İyi parçalar kurumsal lisansların ve satıcıya bağımlılığın arkasında kilitliydi. Kötü parçalar ise her yerdeydi.",
-    "para2": "OpenConstructionERP, <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a>'ın arkasındaki dahili boru hattı olarak başladı - <strong>CWICR</strong> maliyet veritabanı (55.000+ kalem), <strong>cad2data</strong> CAD ayrıştırma boru hattı, sınıflandırma eşlemesi. Ticari ERP'lerin ücretlendirdiği ile sektörün gerçekten ihtiyaç duyduğu arasındaki uçurum giderek büyüdüğü için açık kaynaklı hale getirdik.",
-    "para3": "AGPL-3.0 altında yayınlanır, 2 GB bir VPS'de çalışır ve her şey <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHub</a>'dadır.",
+    "para1": "Son on yıldır inşaat projelerinde kaynak yönetimi üzerine çalışıyorum. Bu süreçte, sektörün araçlarının nasıl ortaya çıktığını merak etmeye başladım - tasarım otomasyonuna yönelik ilk denemelerden bugünün ERP platformlarına kadar - ve bu merak birkaç uzun yazıya dönüştü <span style=\"color: var(--ink-3);\">(<em>“The Lobbyists’ Wars and the Development of BIM”</em> ve <em>“The History of the BIM Map”</em>)</span>. Buraya nasıl geldiğimizi kavramadan işlerin nereye gittiğini görmek zor.",
+    "para2": "Yıllar içinde bu konularda hayli yazdım ve yazdıklarımın bir kısmı geniş bir okur kitlesine ulaştı. Yazmanın yanı sıra, inşaat ve danışmanlık firmalarına, geliştiricilere ve yazılım sağlayıcılarına, proje verilerini nasıl ele aldıkları konusunda danışmanlık yaptım - bu verileri kararların bir yan ürünü olarak değil, kararların temeli olarak görerek. Bu çalışma bana sektörü her iki taraftan da görme imkânı verdi: araçları geliştirenler ve onları her gün kullananlar. Bu gözlemlerin çoğu, artık 16 dilde erişilebilen <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a> kitabımda yer buldu (<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>).",
+    "para3": "İki sorun daha beni meşgul etti. Biri, geliştirici olmayanların, açılması hiçbir zaman amaçlanmamış tescilli dosya biçimlerine erişmesine yardımcı olmaktı. Diğeri ise inşaat işlerini bir kaynak modeli aracılığıyla daha temiz bir biçimde tanımlamanın bir yolunu bulmaktı. Her ikisi de ücretsiz araçlar ortaya çıkardı: <a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM dönüştürücüleri</a> (Revit, IFC, DWG, DGN → yapılandırılmış veri) <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">GitHub üzerinde</a> ve <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>, inşaat işleri ve kaynaklarından oluşan çok dilli bir veritabanı - 11 dilde 55.000'den fazla kalem, <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a> olarak yayımlandı.",
     "founder_title": "kurucu, datadrivenconstruction.io",
     "recently_shipped": "Son yayınlananlar",
     "changelog_more": "Tam değişiklik günlüğü GitHub'da <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -417,8 +423,8 @@
     "group_flagship": "amiral gemisi ürünler · datadrivenconstruction.io",
     "group_github": "github'da open source · datadrivenconstruction",
     "group_socials": "bizi ağ genelinde bul",
-    "para4": "Son nesil AI araçları nihayet bu çalışmayı - metodolojiyi, veri modellerini ve önceki uygulamaları - tek bir platformda toplamayı mümkün kıldı. Artık herkese açık ve open source.",
-    "pull": "İlerleme diyalogdan doğar - bakış açılarının çarpışmasından ve yeni yaklaşımlara açıklıktan. İnşaat sektörünün kaçınılmaz uberleşmesi ve inşaat projelerinde maliyet ve zaman tahmin süreçlerinin şeffaflığı üzerine bu sohbete katılmaya razı olursan minnettar olurum.",
+    "para4": "Bütün bunlar, uzun zamandır yapmak istediğim bir şeyin temeliydi: inşaat için açık, modüler bir ERP. En yeni nesil araçlar, metodolojiyi, veri modellerini ve önceki uygulamaları tek bir platformda bir araya getirmeyi nihayet pratik hale getirdi. Artık herkese açık ve açık kaynak.",
+    "pull": "Deneyimlerime göre en iyi fikirler çoğunlukla sohbetten doğar - ve fikir ayrılığından. İnşaatın “Uberleşmeye” doğru yönelişiyle ve daha şeffaf maliyet ile zaman tahminiyle ilgili sorular ilginizi çekiyorsa, sizi bu tartışmada aramızda görmekten mutluluk duyarım.",
     "ref_agents_meta": "Otomasyon araç kutusu",
     "ref_agents_name": "DDC AI Ajanları ve Yetenekleri",
     "ref_book_meta": "Referans okuma",
@@ -582,14 +588,14 @@
     "reject": "Gerekli olmayanları reddet"
   },
   "trust": {
-    "title": "şu anda kullanan mühendisler, müteahhitler ve danışmanlık şirketleri",
-    "sub": "OpenConstructionERP'nin ilk haftalarında kaydolan inşaat, mühendislik ve altyapı ekiplerinden bir kesit - Avrupa, Kuzey Amerika, MENA, APAC ve Okyanusya'da."
+    "title": "OpenConstructionERP'yi keşfeden mühendisler, inşaat firmaları ve danışmanlık şirketleri",
+    "sub": "OpenConstructionERP'yi denemek için kaydolan veya DataDrivenConstruction'ın açık araçlarıyla çalışmış inşaat, mühendislik ve altyapı ekiplerinden bir kesit - Avrupa, Kuzey Amerika, MENA, APAC ve Okyanusya genelinde."
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · açık araştırma silsilesi",
     "title": "DataDrivenConstruction üzerine kuruldu.",
     "lede": "OpenConstructionERP, on yıllık açık inşaat-teknolojisi araştırmasından doğdu.",
-    "trusted_title": "DataDrivenConstruction topluluğundaki mühendisler, müteahhitler ve danışmanlık firmaları",
+    "trusted_title": "Mühendisler, yükleniciler ve danışmanlık firmaları - DataDrivenConstruction müşterileri ve kullanıcıları",
     "trusted_sub": "Avrupa, Kuzey Amerika, MENA, APAC ve Avustralasya genelinde OpenConstructionERP demosunu inceleyen ve DataDrivenConstruction'ın açık araçları, veri kümeleri ve atölyeleriyle çalışan inşaat, mühendislik ve altyapı ekiplerinden bir kesit."
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "Daha az göster"
   },
   "modgrid": {
+    "pain_overview": "Elektronik tablolar ve klasörlerle uğraşmayı bırakın - her proje, dosya ve rakam için tek bir merkez.",
+    "pain_estimation": "Bozuk Excel formüllerine son - canlı, çok para birimli maliyet toplamasıyla yapılandırılmış BOQ'lar.",
+    "pain_takeoff": "Elle yeniden ölçmeyi bırakın - miktarlar doğrudan PDF'lerden, çizimlerden ve BIM'den çekilir.",
+    "pain_ai": "Boş sayfayı atlayın - bir fotoğrafı veya çizimi dakikalar içinde fiyatlı bir tahmine dönüştürün.",
+    "pain_planning": "Kopuk programlara son - planlayın, referans alın ve ilerlemeyi bütçeye göre takip edin.",
+    "pain_operations": "Sahada olanları kaybetmeyi bırakın - günlükler, işçilik ve fotoğraflar sahada yakalanır.",
+    "pain_finance": "Ay sonu sürprizlerine son - maliyetler, faturalar ve nakit akışı iş ilerledikçe güncellenir.",
+    "pain_commercial": "Anlaşmaları gelen kutunuzda kovalamayı bırakın - ihaleler, müşteriler ve sözleşmeler tek bir hatta.",
+    "pain_communication": "Dağınık e-posta zincirlerine son - kişiler, mesajlar ve onaylar işin yanı başında.",
+    "pain_documentation": "Raporları elle yeniden oluşturmayı bırakın - belgeler ve sunumlar canlı verilerden üretilir.",
+    "pain_quality": "Evrak işlerinde kör nokta kalmasın - kontrol listeleri, doğrulama ve olaylar denetime hazır tutulur.",
     "eyebrow": "Kutunun içinde neler var",
     "title": "Tek kurulum. <em>İnşaatın tüm yığını.</em>",
     "sub": "Keşif, metraj, BIM, planlama, finans, saha operasyonları - tüm modüller aynı veritabanına bağlı. Pazaryeri yok, ödeme duvarı yok, koltuk başına ek ücret yok.",

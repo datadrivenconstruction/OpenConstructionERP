@@ -671,6 +671,21 @@
     .brand-seg-2 { color: var(--accent); }
     .brand-seg-3 { color: var(--ink-0); }
     [data-theme="dark"] .brand-seg-3 { color: var(--ink-0); }
+    /* Module count chip - how many modules ship in the open core */
+    .brand-count {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 7px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: 0;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+      border-radius: 6px;
+    }
 
     .lang-toggle {
       height: 36px;
@@ -1816,7 +1831,10 @@
     .hc-pos-c5 { left: calc(var(--cl-c-x) + var(--hc-col));                top: calc(var(--cl-c-y) - var(--hc-zig)); }
 
     /* Cluster D - 6 hexes (2-row 3-zigzag block) at bottom-right. */
-    .hc-pos-d1 { left: var(--cl-d-x);                                      top: var(--cl-d-y); }
+    /* Daily log sits on Cashflow's upper-right slanted edge (one column
+       right of Cashflow, half a hex up). Moved out from the old top-left
+       slot of the cluster. */
+    .hc-pos-d1 { left: calc(var(--cl-d-x) + var(--hc-col) * 3);            top: calc(var(--cl-d-y) - var(--hc-zig)); }
     .hc-pos-d2 { left: calc(var(--cl-d-x) + var(--hc-col));                top: calc(var(--cl-d-y) + var(--hc-zig)); }
     .hc-pos-d3 { left: calc(var(--cl-d-x) + var(--hc-col) * 2);            top: var(--cl-d-y); }
     .hc-pos-d4 { left: var(--cl-d-x);                                      top: calc(var(--cl-d-y) + var(--hc-h)); }
@@ -1825,7 +1843,10 @@
 
     /* Extra module hexes - more cells to reflect the growing module count.
        Each tiles one step off an existing neighbour (no overlap). */
-    .hc-pos-a4 { left: calc(var(--cl-a-x) + var(--hc-col));                top: calc(var(--cl-a-y) + var(--hc-h) + var(--hc-zig)); }
+    /* CRM sits on BOQ's top flat edge (directly above BOQ; also the
+       upper-right neighbour of Projects). Moved up two rows from its old
+       slot below BOQ. */
+    .hc-pos-a4 { left: calc(var(--cl-a-x) + var(--hc-col));                top: calc(var(--cl-a-y) + var(--hc-zig) - var(--hc-h)); }
     .hc-pos-b6 { left: calc(var(--cl-b-x) + var(--hc-col) * 3);            top: calc(var(--cl-b-y) + var(--hc-zig)); }
 
     /* Entrance stagger - each cluster cascades in as a chunk. */
@@ -3779,6 +3800,171 @@
       .hp-nav-item { min-width: 210px; padding: 10px 12px; }
       .hp-nav-item::before { display: none; }
     }
+
+    /* ================================================================ */
+    /* MODULE CAROUSEL (mc-*) - Apple-style hover/click showcase.        */
+    /* Self-contained + additive. Mirrors the .hp-player / .hp-nav-item  */
+    /* / .hero-preview-frame patterns. Delete this block + the matching  */
+    /* HTML section + JS IIFE to fully revert.                           */
+    /* ================================================================ */
+    .mc-section {
+      /* Carousel retired in favour of the per-card hover popup on the module
+         grid below (.mod-cell -> #mod-hovercard). Markup kept in the DOM for
+         easy revert; remove this display:none to bring the carousel back. */
+      display: none;
+      max-width: 1280px;
+      margin: clamp(40px, 6vw, 72px) auto 0;
+      padding: 0 clamp(20px, 3vw, 40px);
+    }
+    .mc-head {
+      text-align: center;
+      margin-bottom: clamp(22px, 3vw, 34px);
+    }
+    .mc-eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .mc-title {
+      font-family: 'Instrument Serif', serif;
+      font-weight: 400;
+      font-size: clamp(26px, 3.2vw, 40px);
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin: 0;
+    }
+    .mc-title em { color: var(--accent); font-style: italic; }
+    .mc-player {
+      display: grid;
+      grid-template-columns: minmax(220px, 300px) 1fr;
+      gap: clamp(18px, 2.4vw, 34px);
+      align-items: start;
+    }
+    .mc-tablist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mc-tab {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      align-items: start;
+      gap: 12px;
+      padding: 14px 14px 14px 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+      color: var(--ink-2);
+      position: relative;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+    .mc-tab::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 16px; bottom: 16px;
+      width: 2px;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(.22,.61,.36,1);
+    }
+    .mc-tab:hover {
+      background: color-mix(in oklab, var(--accent) 5%, transparent);
+      color: var(--ink-0);
+    }
+    .mc-tab.is-active {
+      background: color-mix(in oklab, var(--accent) 9%, transparent);
+      border-color: color-mix(in oklab, var(--accent) 28%, var(--line-1));
+      color: var(--ink-0);
+    }
+    .mc-tab.is-active::before { transform: scaleY(1); }
+    .mc-tab:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .mc-tab-num {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-weight: 500;
+      font-size: 17px;
+      line-height: 1.1;
+      color: var(--ink-3);
+      letter-spacing: -0.02em;
+      margin-top: 1px;
+      transition: color 0.25s ease;
+    }
+    .mc-tab.is-active .mc-tab-num { color: var(--accent); }
+    .mc-tab-body { display: block; min-width: 0; }
+    .mc-tab-title {
+      display: block;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 14.5px;
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      color: inherit;
+      margin-bottom: 3px;
+    }
+    .mc-tab-hint {
+      display: block;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--ink-3);
+    }
+    .mc-stage { min-width: 0; }
+    .mc-frame {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: color-mix(in oklab, #ffffff 60%, transparent);
+      border: 1px solid var(--line-1);
+      box-shadow:
+        0 40px 80px -28px rgba(45, 94, 142, 0.10),
+        0 20px 40px -18px rgba(15, 23, 42, 0.16);
+    }
+    .mc-chrome {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: linear-gradient(180deg, color-mix(in oklab, #ffffff 88%, transparent), color-mix(in oklab, #ffffff 74%, transparent));
+      border-bottom: 1px solid var(--line-0);
+    }
+    .mc-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
+    .mc-shot {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: color-mix(in oklab, #ffffff 60%, transparent);
+    }
+    .mc-shot img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    .mc-shot.is-swapping img { opacity: 0; }
+    [data-theme="dark"] .mc-frame,
+    [data-theme="dark"] .mc-shot { background: color-mix(in oklab, #141d30 60%, transparent); }
+    @media (max-width: 860px) {
+      .mc-player { grid-template-columns: 1fr; gap: 16px; }
+      .mc-tablist { flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+      .mc-tab { min-width: 220px; flex: 0 0 auto; scroll-snap-align: start; }
+      .mc-tab::before { display: none; }
+    }
+
     .hero-preview-frame {
       position: relative;
       border-radius: 18px 18px 0 0;
@@ -3821,6 +4007,10 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
+      /* Cap the hero demo so it renders visibly smaller and stays centered,
+         while remaining fully responsive (no fixed height). */
+      max-width: 880px;
+      margin-inline: auto;
     }
     .hp-slide {
       position: absolute;
@@ -4170,6 +4360,28 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* The one main move you make in this module - "what you do", under "what it is". */
+    .mod-cell-flow {
+      margin: 6px 0 0;
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 9.5px;
+      font-weight: 600;
+      line-height: 1.38;
+      letter-spacing: -0.003em;
+      color: color-mix(in oklab, var(--tint, var(--accent)) 72%, var(--ink-1));
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .mod-cell-flow::before {
+      content: "\2192\00a0";
+      font-weight: 800;
+      color: var(--tint, var(--accent));
+    }
+    [data-theme="dark"] .mod-cell-flow {
+      color: color-mix(in oklab, var(--tint, var(--accent)) 58%, #c7d2e6);
+    }
     [data-theme="dark"] .mod-cell {
       background: color-mix(in oklab, #141d30 72%, transparent);
     }
@@ -4249,6 +4461,273 @@
     }
     .mod-overview.is-expanded .mod-overview-toggle-btn .chevron { transform: rotate(180deg); }
     .mod-toggle-count { opacity: 0.55; margin-left: 4px; }
+
+    /* ── Module overview as a stepped, illustrated walk ───────────────── */
+    /* Each category reads as a numbered step (auto-counter, no per-group   */
+    /* markup); the three always-visible groups carry a product screenshot, */
+    /* echoing the product-tour timeline so "what's in the box" scans like  */
+    /* a guided walk rather than a flat dump.                               */
+    .mod-overview { counter-reset: modstep; }
+    .mod-group {
+      position: relative;
+      display: block;
+      grid-template-columns: none;
+      gap: 0;
+      margin-top: clamp(22px, 2.6vw, 38px);
+      padding-left: clamp(44px, 4vw, 58px);
+    }
+    .mod-group:first-of-type { margin-top: clamp(6px, 1vw, 12px); }
+    .mod-group > .mod-group-label::before {
+      counter-increment: modstep;
+      content: counter(modstep, decimal-leading-zero);
+      position: absolute;
+      left: 0; top: -3px;
+      width: 38px; height: 38px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; font-weight: 600;
+      color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 9%, #ffffff);
+      border: 1.5px solid color-mix(in oklab, var(--accent) 34%, var(--line-1));
+      border-radius: 999px;
+      box-shadow: inset 0 1px 0 color-mix(in oklab, #ffffff 55%, transparent),
+                  0 5px 12px -7px color-mix(in oklab, var(--accent) 55%, transparent);
+      z-index: 2;
+    }
+    .mod-group::before {
+      content: '';
+      position: absolute;
+      left: 18px; top: 42px; bottom: 10px;
+      width: 2px;
+      background: linear-gradient(to bottom,
+        color-mix(in oklab, var(--accent) 32%, var(--line-1)),
+        color-mix(in oklab, var(--accent) 6%, var(--line-1)));
+      z-index: 0;
+    }
+    .mod-group-label {
+      display: block;
+      border: 0 !important;
+      margin: 7px 0 13px;
+      padding: 0;
+      min-height: 0;
+      font-family: 'Inter Tight', sans-serif;
+      font-size: clamp(14.5px, 1.2vw, 17px);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      color: var(--ink-0);
+    }
+    .mod-group--shot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 332px);
+      grid-template-areas: "label label" "chips shot";
+      column-gap: clamp(14px, 1.8vw, 26px);
+      align-items: start;
+    }
+    .mod-group--shot > .mod-group-label { grid-area: label; }
+    .mod-group--shot > .mod-grid { grid-area: chips; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mod-step-shot {
+      grid-area: shot;
+      margin: 0;
+      align-self: stretch;
+      border-radius: 13px;
+      overflow: hidden;
+      border: 1px solid var(--line-1);
+      background: color-mix(in oklab, #ffffff 60%, transparent);
+      box-shadow: 0 22px 46px -30px color-mix(in oklab, var(--accent) 55%, transparent);
+      min-height: 168px;
+    }
+    .mod-step-shot img {
+      display: block;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      aspect-ratio: 16 / 11;
+    }
+    /* Static icon panel that replaces the always-looping group GIF: same frame
+       (grid-area: shot, border, radius, background, shadow) as .mod-step-shot,
+       but a centered column of an accent-tinted icon above a one-line pain
+       caption. The group's GIF still lives in data-group-shot on the figure and
+       surfaces in the per-cell hover popup (see setupModuleHoverCard). */
+    .mod-step-icon {
+      grid-area: shot;
+      margin: 0;
+      align-self: stretch;
+      min-height: 168px;
+      border-radius: 13px;
+      border: 1px solid var(--line-1);
+      background: color-mix(in oklab, #ffffff 60%, transparent);
+      box-shadow: 0 22px 46px -30px color-mix(in oklab, var(--accent) 55%, transparent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: clamp(18px, 2vw, 26px);
+      text-align: center;
+    }
+    [data-theme="dark"] .mod-step-icon {
+      background: color-mix(in oklab, #141d30 60%, transparent);
+    }
+    .mod-step-ico {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+      color: var(--accent);
+      flex: none;
+    }
+    .mod-step-ico svg { width: 40px; height: 40px; }
+    .mod-step-pain {
+      margin: 0;
+      max-width: 30ch;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--ink-1);
+    }
+    /* Module hover preview: hovering a module swaps its group GIF + caption. */
+    .mod-step-shot { position: relative; }
+    .mod-step-shot img { transition: opacity .18s ease; }
+    .mod-shot-cap { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 16px 15px 13px; display: flex; flex-direction: column; gap: 3px; color: #fff; opacity: 0; transition: opacity .18s ease; pointer-events: none; background: linear-gradient(to top, rgba(3,10,24,.86), rgba(3,10,24,.5) 58%, rgba(3,10,24,0)); }
+    .mod-shot-cap.is-on { opacity: 1; }
+    .mod-shot-cap-t { font-weight: 700; font-size: 13.5px; letter-spacing: -.2px; }
+    .mod-shot-cap-s { font-size: 11.5px; line-height: 1.35; opacity: .9; }
+    .mod-cell.is-active { border-color: color-mix(in oklab, var(--tint, var(--accent)) 60%, var(--line-1)); box-shadow: 0 12px 28px -16px color-mix(in oklab, var(--tint, var(--accent)) 70%, transparent); }
+
+    /* Large hover preview: on hovering a module card, the full screen recording
+       is shown near-screen-size (object-fit: contain so nothing is cropped) over
+       a soft dimmed backdrop. pointer-events: none so it never blocks the cells
+       underneath; a short hide delay (JS) prevents flicker when moving between
+       adjacent cards. Suppressed on touch devices (no hover). */
+    /* Full-screen centered overlay is RETIRED: the per-card floating popup
+       (#mod-hovercard) is the hover experience now. We force display:none here
+       (overriding the display:flex below) so the legacy OE_MOD_HOVER IIFE can
+       keep running harmlessly - its in-frame GIF/caption swap and the cell
+       .is-active highlight still work; only this centered overlay is hidden.
+       Delete this line to restore the old big-preview. */
+    #mod-bigpreview { display: none !important; }
+    #mod-bigpreview { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; opacity: 0; pointer-events: none; transition: opacity .2s ease; background: rgba(3,10,24,.52); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    #mod-bigpreview.is-on { opacity: 1; }
+    #mod-bigpreview > figure { position: relative; margin: 0; width: 100%; max-width: min(1200px, 90vw); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.16); box-shadow: 0 44px 100px -34px rgba(0,0,0,.7); transform: scale(.985); transition: transform .2s ease; }
+    #mod-bigpreview.is-on > figure { transform: scale(1); }
+    #mod-bigpreview img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; background: #0b1220; }
+    #mod-bigpreview figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 24px 18px; display: flex; flex-direction: column; gap: 4px; color: #fff; background: linear-gradient(to top, rgba(3,10,24,.92), rgba(3,10,24,.45) 60%, rgba(3,10,24,0)); }
+    #mod-bigpreview .t { font-weight: 700; font-size: 18px; letter-spacing: -.2px; }
+    #mod-bigpreview .s { font-size: 13px; line-height: 1.4; opacity: .92; }
+    @media (hover: none) { #mod-bigpreview { display: none !important; } }
+
+    /* ── Module hover popup (#mod-hovercard) ─────────────────────────────
+       A single shared floating panel reused for every .mod-cell. On hover /
+       keyboard-focus of a card it pops up near that card (follow-style,
+       clamped to the viewport by JS) showing a browser-chrome frame, the
+       module's preview GIF, and the card's own name + short description.
+       Fades + slightly scales in. Position is driven by left/top set inline
+       from JS; transform handles only the entrance animation.
+       Disabled entirely on touch / small screens (see media queries below). */
+    #mod-hovercard {
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 9600;
+      width: 340px;
+      max-width: 86vw;
+      border-radius: 14px;
+      overflow: hidden;
+      background: color-mix(in oklab, #ffffff 92%, transparent);
+      border: 1px solid var(--line-1);
+      box-shadow:
+        0 30px 70px -30px rgba(15, 23, 42, 0.45),
+        0 14px 30px -18px rgba(45, 94, 142, 0.30);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px) scale(.96);
+      transform-origin: top left;
+      transition: opacity .18s ease, transform .18s cubic-bezier(.22,.61,.36,1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      will-change: transform, opacity, left, top;
+    }
+    #mod-hovercard.is-on {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    #mod-hovercard .mc-chrome { padding: 9px 14px; }
+    #mod-hovercard .mc-shot {
+      aspect-ratio: 16 / 10;
+      background: #0b1220;
+    }
+    #mod-hovercard .mc-shot img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #mod-hovercard .mod-hc-meta {
+      padding: 11px 14px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      border-top: 1px solid var(--line-0);
+      background: color-mix(in oklab, #ffffff 70%, transparent);
+    }
+    #mod-hovercard .mod-hc-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+      line-height: 1.25;
+    }
+    #mod-hovercard .mod-hc-desc {
+      font-size: 11.5px;
+      line-height: 1.4;
+      color: var(--ink-2);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    [data-theme="dark"] #mod-hovercard {
+      background: color-mix(in oklab, #141d30 90%, transparent);
+    }
+    [data-theme="dark"] #mod-hovercard .mod-hc-meta {
+      background: color-mix(in oklab, #141d30 60%, transparent);
+    }
+    /* No transform-based entrance under reduced motion: appear instantly. */
+    @media (prefers-reduced-motion: reduce) {
+      #mod-hovercard {
+        transition: opacity .12s linear;
+        transform: none;
+      }
+      #mod-hovercard.is-on { transform: none; }
+    }
+    /* Touch / no-hover / small screens: popup is off; grid stays as-is. */
+    @media (hover: none), (max-width: 900px) {
+      #mod-hovercard { display: none !important; }
+    }
+
+    @media (max-width: 900px) {
+      .mod-group--shot {
+        grid-template-columns: 1fr;
+        grid-template-areas: "label" "shot" "chips";
+      }
+      .mod-group--shot > .mod-step-shot,
+      .mod-group--shot > .mod-step-icon { max-width: 520px; min-height: 0; }
+      .mod-group--shot > .mod-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .mod-group { padding-left: 40px; }
+      .mod-group--shot > .mod-grid { grid-template-columns: 1fr; }
+    }
+    [data-theme="dark"] .mod-group > .mod-group-label::before {
+      background: color-mix(in oklab, var(--accent) 18%, #141d30);
+      box-shadow: inset 0 1px 0 color-mix(in oklab, #ffffff 12%, transparent),
+                  0 5px 12px -7px color-mix(in oklab, var(--accent) 50%, transparent);
+    }
+    [data-theme="dark"] .mod-step-shot { background: color-mix(in oklab, #141d30 60%, transparent); }
 
     /* ================================================================ */
     /* FLOW STRIP - 5 USPs                                               */
@@ -7355,11 +7834,59 @@
     .stargazer-head .meta a:hover { text-decoration: underline; }
     .stargazer-grid {
       /* Fixed-pixel tracks so the grid fills exactly N columns per row with
-         no ragged last row. JS trims the DOM to count % cols == 0. */
+         no ragged last row. JS trims the DOM to count % cols == 0.
+         Dense 28px tiles / 6px gap so many more people fit per row (~24 cols
+         at 70% width) and many more rows render. setupStargazers() recomputes
+         --star-cols from the same tile/gap AND caps the number of rows to the
+         contributor wall's height, so this block is never taller than it. */
       display: grid;
-      grid-template-columns: repeat(var(--star-cols, 24), 40px);
-      gap: 8px;
+      grid-template-columns: repeat(var(--star-cols, 24), 28px);
+      gap: 6px;
       justify-content: center;
+    }
+    /* ---- Community split: Contributors (30%) | Stargazers (70%), one row ----
+       LEFT  = .contributor-wall: a fixed 6-column wall (~6x5) of the people who
+               build it (GitHub contributors), 30% of the row.
+       RIGHT = .stargazer-wall: the people who starred us, 70% of the row, fluid
+               so it fans out to many columns (>6). The stargazer grid keeps its
+               original width-driven --star-cols rule (set by setupStargazers());
+               at 70% width and the denser 32px tiles that now resolves to ~22-24
+               columns. */
+    .community-split {
+      max-width: 1280px;
+      margin: 56px auto 0;
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+    }
+    .community-split > .contributor-wall { flex: 0 0 30%; min-width: 0; }
+    .community-split > .stargazer-wall   { flex: 1 1 0;   min-width: 0; }
+    /* Walls inside the split shed their standalone centering/width. */
+    .community-split > .stargazer-wall,
+    .community-split > .contributor-wall { margin: 0; max-width: none; }
+    /* Contributor wall reuses the stargazer card chrome. */
+    .contributor-wall {
+      padding: 32px clamp(16px, 2vw, 28px);
+      border-radius: 24px;
+      border: 1px solid var(--line-1);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--accent) 4%, transparent), transparent 70%),
+        color-mix(in oklab, #ffffff 62%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    /* Fixed 6-column contributor wall (left-aligned). */
+    .contributor-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 40px);
+      gap: 8px;
+      justify-content: start;
+    }
+    /* Stack the two walls on narrow viewports. */
+    @media (max-width: 900px) {
+      .community-split { flex-direction: column; margin-top: 40px; }
+      .community-split > .contributor-wall,
+      .community-split > .stargazer-wall { flex: 1 1 auto; }
     }
     .star-avatar {
       position: relative;
@@ -7434,6 +7961,12 @@
     .star-avatar-more .stack-1 { left: 0;  z-index: 3; }
     .star-avatar-more .stack-2 { left: 14px; z-index: 2; opacity: 0.85; filter: saturate(0.75); }
     .star-avatar-more .stack-3 { left: 28px; z-index: 1; opacity: 0.65; filter: saturate(0.55); }
+    /* Stargazer grid uses dense 28px tiles, so its "+N" pill stacks shrink to
+       match the row height (the contributor wall keeps the 40px-tuned size). */
+    .stargazer-grid .star-avatar-more .stack { width: 26px; height: 26px; }
+    .stargazer-grid .star-avatar-more .stack-2 { left: 10px; }
+    .stargazer-grid .star-avatar-more .stack-3 { left: 20px; }
+    .stargazer-grid .star-avatar-more .stack-label { left: 52px; }
     .star-avatar-more .stack-label {
       position: absolute;
       left: 72px;
@@ -7451,13 +7984,21 @@
 
     @media (max-width: 640px) {
       .stargazer-grid {
-        grid-template-columns: repeat(var(--star-cols, 10), 32px);
+        grid-template-columns: repeat(var(--star-cols, 10), 28px);
         gap: 6px;
       }
       .star-avatar-more .stack { width: 30px; height: 30px; }
       .star-avatar-more .stack-2 { left: 11px; }
       .star-avatar-more .stack-3 { left: 22px; }
       .star-avatar-more .stack-label { left: 60px; font-size: 9.5px; }
+    }
+    /* Contributor wall on phones: same 6 columns, smaller tiles.
+       (The stargazer grid stays fluid on mobile - many columns.) */
+    @media (max-width: 640px) {
+      .contributor-grid {
+        grid-template-columns: repeat(6, 32px);
+        gap: 6px;
+      }
     }
 
     /* ================================================================ */
@@ -11935,7 +12476,7 @@
       <div class="nav-left">
         <a class="brand" href="/">
           <span class="brand-name">
-            <span class="brand-seg brand-seg-1">Open</span><span class="brand-seg brand-seg-2">Construction</span><span class="brand-seg brand-seg-3">ERP</span>
+            <span class="brand-seg brand-seg-1">Open</span><span class="brand-seg brand-seg-2">Construction</span><span class="brand-seg brand-seg-3">ERP</span><span class="brand-count" title="modules in the open core">+127</span>
           </span>
         </a>
 
@@ -12047,7 +12588,7 @@
 
       <div class="eyebrow" id="fx-eyebrow">
         <span class="dot" aria-hidden="true"></span>
-        <span><b id="latest-version">v7.10.0</b> &middot; <span id="latest-version-meta" data-i18n="hero.version_meta">open source on GitHub</span></span>
+        <span><b id="latest-version">v8.6.0</b> &middot; <span id="latest-version-meta" data-i18n="hero.version_meta">open source on GitHub</span></span>
       </div>
 
       <h1 class="headline" id="headline" data-i18n-html="hero.headline">
@@ -12504,25 +13045,25 @@
            with shared slanted edges. Middle is open for the city. -->
       <div class="module-honeycomb" aria-label="Platform modules">
         <!-- CLUSTER A (3 hexes, top-left) - planning. Sky tint. -->
-        <span class="hc-cell hc-pos-a1" style="--tint: var(--accent);" tabindex="0">
+        <span class="hc-cell hc-pos-a1" style="--tint: var(--accent);" tabindex="0" role="button" data-shot="assets/loops/14_Projects_Dashboard.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">◫</span><span class="hc-title" data-i18n="hero.mod_projects_title">Projects</span><span class="hc-sub" data-i18n="hero.mod_projects_sub">portfolio</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_projects_feature">Portfolio<br>&amp; teams</span></span>
         </span>
-        <span class="hc-cell hc-pos-a2" style="--tint: var(--accent);" tabindex="0">
+        <span class="hc-cell hc-pos-a2" style="--tint: var(--accent);" tabindex="0" role="button" data-shot="assets/loops/06_Build_BOQ_Fast.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">☰</span><span class="hc-title">BOQ</span><span class="hc-sub" data-i18n="hero.mod_boq_sub">assemblies</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_boq_feature">Live<br>totals</span></span>
         </span>
-        <span class="hc-cell hc-pos-a3" style="--tint: var(--accent);" tabindex="0">
+        <span class="hc-cell hc-pos-a3" style="--tint: var(--accent);" tabindex="0" role="button" data-shot="assets/loops/mod_schedule.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">◷</span><span class="hc-title" data-i18n="hero.mod_schedules_title">Schedules</span><span class="hc-sub" data-i18n="hero.mod_schedules_sub">4D gantt</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_schedules_feature">Gantt<br>&amp; BOQ</span></span>
         </span>
-        <span class="hc-cell hc-pos-a4" style="--tint: var(--accent);" tabindex="0">
+        <span class="hc-cell hc-pos-a4" style="--tint: var(--accent);" tabindex="0" role="button" data-shot="assets/loops/mod_crm.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">☎</span><span class="hc-title">CRM</span><span class="hc-sub">pipeline</span>
           </span>
@@ -12530,37 +13071,37 @@
         </span>
 
         <!-- CLUSTER B (5 hexes, top-right) - measurement &amp; cost. Blue tint. -->
-        <span class="hc-cell hc-pos-b1" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b1" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/04_PDF_Takeoff.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">✶</span><span class="hc-title" data-i18n="hero.mod_takeoff_title">Takeoff</span><span class="hc-sub" data-i18n="hero.mod_takeoff_sub">auto</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_takeoff_feature">AI suggests<br>you confirm</span></span>
         </span>
-        <span class="hc-cell hc-pos-b2" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b2" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/10_DWG_Layers.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">◈</span><span class="hc-title">CAD / BIM</span><span class="hc-sub">DWG · IFC</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature">DWG · IFC<br>RVT · DGN</span></span>
         </span>
-        <span class="hc-cell hc-pos-b3" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b3" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/05_Instant_Search.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">€</span><span class="hc-title" data-i18n="hero.mod_costs_title">Costs</span><span class="hc-sub" data-i18n="hero.mod_costs_sub">55k items</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_costs_feature">55k items<br>vector search</span></span>
         </span>
-        <span class="hc-cell hc-pos-b4" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b4" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/mod_validation.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">✓</span><span class="hc-title" data-i18n="hero.mod_validation_title">Validation</span><span class="hc-sub" data-i18n="hero.mod_validation_sub">compliance</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_validation_feature">Traffic-light<br>report</span></span>
         </span>
-        <span class="hc-cell hc-pos-b5" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b5" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/mod_crm.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⎋</span><span class="hc-title" data-i18n="hero.mod_tenders_title">Tenders</span><span class="hc-sub" data-i18n="hero.mod_tenders_sub">bid packs</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_tenders_feature">Compare<br>bids</span></span>
         </span>
-        <span class="hc-cell hc-pos-b6" style="--tint: var(--accent-3);" tabindex="0">
+        <span class="hc-cell hc-pos-b6" style="--tint: var(--accent-3);" tabindex="0" role="button" data-shot="assets/loops/mod_validation.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">♻</span><span class="hc-title">Carbon</span><span class="hc-sub">5D LCA</span>
           </span>
@@ -12568,31 +13109,31 @@
         </span>
 
         <!-- CLUSTER C (4 hexes, bottom-left) - execution. Cyan tint. -->
-        <span class="hc-cell hc-pos-c1" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-c1" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_crm.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">§</span><span class="hc-title" data-i18n="hero.mod_contracts_title">Contracts</span><span class="hc-sub" data-i18n="hero.mod_contracts_sub">awards</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_contracts_feature">One<br>audit trail</span></span>
         </span>
-        <span class="hc-cell hc-pos-c2" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-c2" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_assets.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">▣</span><span class="hc-title" data-i18n="hero.mod_inventory_title">Inventory</span><span class="hc-sub" data-i18n="hero.mod_inventory_sub">materials</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_inventory_feature">Stock<br>&amp; orders</span></span>
         </span>
-        <span class="hc-cell hc-pos-c3" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-c3" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_validation.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⊕</span><span class="hc-title" data-i18n="hero.mod_safety_title">Safety</span><span class="hc-sub">HSE</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_safety_feature">Incidents<br>&amp; toolbox</span></span>
         </span>
-        <span class="hc-cell hc-pos-c4" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-c4" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_assets.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⎘</span><span class="hc-title" data-i18n="hero.mod_documents_title">Documents</span><span class="hc-sub" data-i18n="hero.mod_documents_sub">revisions</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_documents_feature">Revisions<br>&amp; diffs</span></span>
         </span>
-        <span class="hc-cell hc-pos-c5" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-c5" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_diary.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⚙</span><span class="hc-title" data-i18n="hero.mod_site_tasks_title">Site tasks</span><span class="hc-sub" data-i18n="hero.mod_site_tasks_sub">daily</span>
           </span>
@@ -12602,37 +13143,37 @@
         <!-- CLUSTER D (5 hexes, bottom-right) - operations, finance, admin.
              Cyan tint. (AI removed: it's a cross-cutting capability, not
              a business module - lives in Takeoff / Costs instead.) -->
-        <span class="hc-cell hc-pos-d1" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d1" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_diary.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">✎</span><span class="hc-title">Daily log</span><span class="hc-sub">site diary</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature">Diary<br>&amp; weather</span></span>
         </span>
-        <span class="hc-cell hc-pos-d6" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d6" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_finance.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⛭</span><span class="hc-title" data-i18n="hero.mod_equipment_title">Equipment</span><span class="hc-sub" data-i18n="hero.mod_equipment_sub">fleet</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_equipment_feature">Fleet<br>&amp; plant</span></span>
         </span>
-        <span class="hc-cell hc-pos-d2" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d2" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_validation.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⦿</span><span class="hc-title" data-i18n="hero.mod_quality_title">Quality</span><span class="hc-sub">QA · QC</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_quality_feature">Defects<br>&amp; audits</span></span>
         </span>
-        <span class="hc-cell hc-pos-d3" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d3" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/mod_finance.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">⎔</span><span class="hc-title" data-i18n="hero.mod_cashflow_title">Cashflow</span><span class="hc-sub" data-i18n="hero.mod_cashflow_sub">invoices</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature" data-i18n-html="hero.mod_cashflow_feature">Invoicing<br>&amp; budgets</span></span>
         </span>
-        <span class="hc-cell hc-pos-d4" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d4" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/13_Data_Explorer_Pivot.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">◐</span><span class="hc-title" data-i18n="hero.mod_reporting_title">Reporting</span><span class="hc-sub" data-i18n="hero.mod_reporting_sub">exports</span>
           </span>
           <span class="hc-face hc-face-back"><span class="hc-feature">PDF · GAEB<br>JSON · API</span></span>
         </span>
-        <span class="hc-cell hc-pos-d5" style="--tint: var(--accent-5);" tabindex="0">
+        <span class="hc-cell hc-pos-d5" style="--tint: var(--accent-5);" tabindex="0" role="button" data-shot="assets/loops/07_Role_Based_Onboarding.gif">
           <span class="hc-face hc-face-front">
             <span class="hc-ico" aria-hidden="true">◉</span><span class="hc-title" data-i18n="hero.mod_users_title">Users</span><span class="hc-sub">RBAC · SSO</span>
           </span>
@@ -12782,7 +13323,7 @@
     .dl-chip-i{width:15px;height:15px;flex:none;fill:var(--accent-2);}
 
     .dl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch;}
-    .dl-card{position:relative;display:flex;flex-direction:column;min-height:100%;background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 92%,#fff 8%),var(--card-bg));border:1px solid var(--line-1);border-radius:18px;padding:24px 22px 24px;box-shadow:var(--shadow-card);backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
+    .dl-card{position:relative;display:flex;flex-direction:column;min-height:100%;background:color-mix(in srgb,var(--card-bg) 56%,transparent);border:1px solid color-mix(in srgb,var(--line-1) 65%,transparent);border-radius:18px;padding:24px 22px 24px;box-shadow:var(--shadow-card),inset 0 1px 0 rgba(255,255,255,.5);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
     [data-theme="dark"] .dl-card{background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 90%,#fff 4%),var(--card-bg));}
     .dl-card::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));opacity:.36;transition:opacity .25s ease;}
     .dl-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 28px 58px -22px rgba(15,23,42,.36);border-color:var(--line-2);}
@@ -12839,7 +13380,7 @@
        three OS download cards above (.dl-grid) - both are direct children of
        .home-dl, so dropping the max-width lines this block up edge to edge
        with that card row. Premium, balanced, Apple-tier hierarchy. */
-    .dl-dev{position:relative;width:100%;margin:40px 0 0;padding:40px clamp(24px,3.4vw,46px) 38px;background:linear-gradient(180deg,color-mix(in srgb,var(--card-bg) 94%,#fff 6%),var(--card-bg));border:1px solid var(--line-1);border-radius:22px;box-shadow:0 2px 4px rgba(15,23,42,.05),0 34px 80px -42px rgba(15,23,42,.4),inset 0 1px 0 rgba(255,255,255,.5);backdrop-filter:blur(12px);overflow:hidden;}
+    .dl-dev{position:relative;width:100%;margin:40px 0 0;padding:40px clamp(24px,3.4vw,46px) 38px;background:color-mix(in srgb,var(--card-bg) 56%,transparent);border:1px solid color-mix(in srgb,var(--line-1) 65%,transparent);border-radius:22px;box-shadow:0 2px 4px rgba(15,23,42,.05),0 34px 80px -42px rgba(15,23,42,.4),inset 0 1px 0 rgba(255,255,255,.5);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);overflow:hidden;}
     .dl-dev::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));}
     [data-theme="dark"] .dl-dev{box-shadow:0 2px 4px rgba(0,0,0,.25),0 34px 80px -44px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);}
     /* Centered header for cohesion with the section's own centered head. */
@@ -13408,6 +13949,97 @@
     </div>
 
     <!-- ============================================================ -->
+    <!-- MODULE CAROUSEL - Apple-style hover/click product showcase.   -->
+    <!-- Self-contained, additive block (mc-* classes only). Left = a  -->
+    <!-- vertical tablist of 7 modules; right = a stage that swaps the  -->
+    <!-- module's GIF on hover/click. Auto-rotates ~4s; pauses on       -->
+    <!-- hover/focus; disabled under prefers-reduced-motion. All copy   -->
+    <!-- reuses existing demo.* / modgrid.* i18n keys (heading is a new -->
+    <!-- modcar.* key set). Module GIF previews reuse existing          -->
+    <!-- assets/loops/*.gif; some are placeholders (see report).        -->
+    <!-- ============================================================ -->
+    <section class="mc-section reveal" aria-labelledby="mc-heading">
+      <div class="mc-head">
+        <span class="mc-eyebrow" data-i18n="modcar.eyebrow">Take the tour</span>
+        <h3 class="mc-title" id="mc-heading" data-i18n-html="modcar.title">
+          Every module, <em>one click away.</em>
+        </h3>
+      </div>
+      <div class="mc-player" data-mod-carousel>
+        <div class="mc-tablist" role="tablist" aria-orientation="vertical" aria-label="Module previews">
+          <button type="button" class="mc-tab is-active" role="tab" id="mc-tab-0" aria-selected="true" aria-controls="mc-stage" tabindex="0"
+                  data-shot="assets/loops/mod_dashboard.gif">
+            <span class="mc-tab-num">01</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="modgrid.dashboard_title">Dashboard</span>
+              <span class="mc-tab-hint" data-i18n="modgrid.dashboard_desc">Live KPIs, open work, recent activity. Customizable tiles per role.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-1" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/06_Build_BOQ_Fast.gif">
+            <span class="mc-tab-num">02</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab1_title">BOQ editor</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab1_hint">Build bills of quantities, priced rows.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-2" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/05_Instant_Search.gif">
+            <span class="mc-tab-num">03</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab2_title">Cost database</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab2_hint">55,000 priced positions · 110+ modules.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-3" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/04_PDF_Takeoff.gif">
+            <span class="mc-tab-num">04</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab5_title">PDF → BOQ</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab5_hint">Click-to-measure on PDF drawings.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-4" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/10_DWG_Layers.gif">
+            <span class="mc-tab-num">05</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab4_title">AutoCAD → BOQ</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab4_hint">DWG and DGN pushed into BOQ.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-5" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/09_Bulk_Link_BIM_Group.gif">
+            <span class="mc-tab-num">06</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab3_title">BIM → BOQ</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab3_hint">Link IFC and RVT models to estimates.</span>
+            </span>
+          </button>
+          <button type="button" class="mc-tab" role="tab" id="mc-tab-6" aria-selected="false" aria-controls="mc-stage" tabindex="-1"
+                  data-shot="assets/loops/02_AI_Photo_to_Estimate.gif">
+            <span class="mc-tab-num">07</span>
+            <span class="mc-tab-body">
+              <span class="mc-tab-title" data-i18n="demo.tab7_title">AI Estimate</span>
+              <span class="mc-tab-hint" data-i18n="demo.tab7_hint">Photo or doc → priced first pass.</span>
+            </span>
+          </button>
+        </div>
+        <div class="mc-stage">
+          <div class="mc-frame">
+            <div class="mc-chrome" aria-hidden="true">
+              <span class="mc-dot" style="background:#f87171"></span>
+              <span class="mc-dot" style="background:#fbbf24"></span>
+              <span class="mc-dot" style="background:#34d399"></span>
+            </div>
+            <div class="mc-shot" id="mc-stage" role="tabpanel" aria-live="polite" aria-labelledby="mc-tab-0">
+              <img id="mc-shot-img" src="assets/loops/mod_dashboard.gif" alt="" loading="lazy" decoding="async" width="2000" height="1125" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- MODULE OVERVIEW - full inventory of in-app modules            -->
     <!-- Mirrors the in-app sidebar 1:1 (same lucide icons, same       -->
     <!-- labels, same order). Cards are keyboard-focusable but not     -->
@@ -13426,16 +14058,21 @@
       </div>
 
       <!-- ── OVERVIEW ───────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-overview-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-overview-h">
         <h4 id="modgroup-overview-h" class="mod-group-label" data-i18n="modgrid.group_overview">Overview</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_dashboard.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_overview">Stop juggling spreadsheets and folders - one home for every project, file and number.</figcaption>
+        </figure>
         <div class="mod-grid">
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent);" data-shot="assets/loops/mod_dashboard.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.dashboard_title">Dashboard</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.dashboard_desc">Live KPIs, open work, recent activity. Customizable tiles per role.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.dashboard_flow">Scan portfolio KPIs, click a tile to drill in</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13445,6 +14082,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.projects_title">Projects</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.projects_desc">Create projects, set scope and currency, invite the team. The home base for every other module.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.projects_flow">Create a project, set its essentials, open the hub</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13454,31 +14092,38 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.files_title">Project files</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.files_desc">One unified file tree for documents, photos, BIM and CAD. Drag, drop, version, share.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.files_flow">Drop a file in, open it, the right tool launches</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── ESTIMATION ─────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-estimation-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-estimation-h">
         <h4 id="modgroup-estimation-h" class="mod-group-label" data-i18n="modgrid.group_estimation">Estimation</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_boq.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8.5" y1="11" x2="8.51" y2="11"/><line x1="12" y1="11" x2="12.01" y2="11"/><line x1="15.5" y1="11" x2="15.51" y2="11"/><line x1="8.5" y1="14.5" x2="8.51" y2="14.5"/><line x1="12" y1="14.5" x2="12.01" y2="14.5"/><line x1="15.5" y1="14.5" x2="15.51" y2="14.5"/><line x1="8.5" y1="18" x2="8.51" y2="18"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="15.5" y1="18" x2="15.51" y2="18"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_estimation">No more broken Excel formulas - structured BOQs with live, multi-currency cost rollup.</figcaption>
+        </figure>
         <div class="mod-grid">
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent);" data-shot="assets/loops/06_Build_BOQ_Fast.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.boq_title">BOQ</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.boq_desc">Hierarchical bill of quantities with assemblies, formulas, multi-currency, and live cost rollup.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.boq_flow">Add priced positions, quantities and rates roll up live</p>
             </div>
           </div>
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);" data-shot="assets/loops/05_Instant_Search.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.costs_title">Cost database</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.costs_desc">Tens of thousands of priced positions across regions, with semantic search and rate history.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.costs_flow">Search the priced catalogue, send the rate to your estimate</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13488,6 +14133,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.match_title">Match elements</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.match_desc">AI-ranked cost-code candidates per element group, with confidence scores and human review.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.match_flow">Match model elements to cost codes, priced BOQ appears</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13497,6 +14143,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.assemblies_title">Assemblies</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.assemblies_desc">Reusable recipes: bundle materials, labor and equipment into one priced line you reuse across projects.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.assemblies_flow">Bundle materials, labor and equipment into one rate, apply to BOQ</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13506,6 +14153,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.catalog_title">Catalog</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.catalog_desc">Master library of materials, products and SKUs across suppliers and regions, ready to drop into any BOQ.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.catalog_flow">Search a priced resource, drop it into your BOQ</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13515,31 +14163,38 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.qrules_title">Quantity rules</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.qrules_desc">Define how takeoff numbers turn into priced BOQ lines, then auto-apply to every model and drawing.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.qrules_flow">Write a rule, apply it, quantities fill the BOQ</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── TAKEOFF ────────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-takeoff-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-takeoff-h">
         <h4 id="modgroup-takeoff-h" class="mod-group-label" data-i18n="modgrid.group_takeoff">Takeoff &amp; BIM</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_pdftakeoff.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M12 3 5 6.5v7L12 17l7-3.5v-7L12 3Z"/><path d="M5 6.5 12 10l7-3.5"/><path d="M12 10v7"/><path d="m2.5 19.5 5-5"/><path d="m4 18 1.2 1.2"/><path d="m6 16 1.2 1.2"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_takeoff">Stop re-measuring by hand - quantities pulled straight from PDFs, drawings and BIM.</figcaption>
+        </figure>
         <div class="mod-grid">
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);" data-shot="assets/loops/04_PDF_Takeoff.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.pdftakeoff_title">PDF takeoff</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.pdftakeoff_desc">Click-to-measure on PDF drawings. Lengths, areas, counts push straight into the BOQ.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.pdftakeoff_flow">Click to measure on drawings, quantities push to BOQ</p>
             </div>
           </div>
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);" data-shot="assets/loops/10_DWG_Layers.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 0L2.7 5.3a2.41 2.41 0 0 0 0 3.4L7 13"/><path d="m8 6 2-2"/><path d="m18 16 2-2"/><path d="m17 11 4.3 4.3c.94.94.94 2.46 0 3.4l-2.6 2.6c-.94.94-2.46.94-3.4 0L11 17"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.dwgtakeoff_title">DWG takeoff</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.dwgtakeoff_desc">Import DWG drawings, isolate layers, count blocks and measure polylines without leaving the browser.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.dwgtakeoff_flow">Measure off the DWG, quantities flow to the BOQ</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13549,15 +14204,17 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.dataexplorer_title">CAD/BIM data explorer</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.dataexplorer_desc">Spreadsheet view over every element in your model. Filter, group, pivot, export as if it were a database.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.dataexplorer_flow">Load a model, slice and pivot its elements, export</p>
             </div>
           </div>
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);" data-shot="assets/loops/09_Bulk_Link_BIM_Group.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.bim_title">BIM viewer</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.bim_desc">Upload IFC, RVT, DWG. View, slice, color by property, and link elements straight to the BOQ.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.bim_flow">Open a 3D model, click elements, read quantities into the BOQ</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13567,6 +14224,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.clash_title">Clash detection</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.clash_desc">Find geometric collisions across federated models with depth-aware clustering and issue tracking.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.clash_flow">Run a check across models, triage every conflict it finds</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13576,6 +14234,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.bimrules_title">BIM rules</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.bimrules_desc">Declare what your model must contain - required properties, value ranges - and validate every upload automatically.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.bimrules_flow">Define your model requirements, validate every BIM upload against them</p>
             </div>
           </div>
         </div>
@@ -13585,16 +14244,21 @@
       <div class="mod-overview-more" id="mod-overview-more">
 
       <!-- ── AI ESTIMATION ──────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-ai-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-ai-h">
         <h4 id="modgroup-ai-h" class="mod-group-label" data-i18n="modgrid.group_ai">AI estimation</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_aiest.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M10 3.5 11.7 8 16 9.5 11.7 11 10 15.5 8.3 11 4 9.5 8.3 8 10 3.5Z"/><path d="M17.5 14.5 18.3 17 20.5 17.8 18.3 18.6 17.5 21 16.7 18.6 14.5 17.8 16.7 17 17.5 14.5Z"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_ai">Skip the blank page - turn a photo or drawing into a priced estimate in minutes.</figcaption>
+        </figure>
         <div class="mod-grid">
-          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
+          <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);" data-shot="assets/loops/02_AI_Photo_to_Estimate.gif">
             <span class="mod-cell-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
             </span>
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.aiest_title">AI estimate</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.aiest_desc">Photo, sketch or document in, first-pass priced estimate out. You review and adjust before saving.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.aiest_flow">Feed in a source, AI prices it, you confirm</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13604,6 +14268,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.advisor_title">AI advisor</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.advisor_desc">Ask questions about your estimate in plain English. Get cited answers, not vague chatter.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.advisor_flow">Ask a cost question, get cited rates back</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13613,6 +14278,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.pi_title">Estimation dashboard</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.pi_desc">Project intelligence: completeness, cost benchmarks, anomalies and risks at a glance.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.pi_flow">Grade estimate readiness, fix the top gap</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13622,14 +14288,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.chat_title">ERP chat</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.chat_desc">Conversational interface across all your project data. "What's my exposure on lot 4?" works.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.chat_flow">Ask in plain language, answers render as live tables</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── PLANNING & CONTROL ─────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-planning-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-planning-h">
         <h4 id="modgroup-planning-h" class="mod-group-label" data-i18n="modgrid.group_planning">Planning &amp; control</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_schedule.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><line x1="6.5" y1="13" x2="12" y2="13"/><line x1="9" y1="16.5" x2="15.5" y2="16.5"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_planning">No disconnected schedules - plan, baseline and track progress against the budget.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13638,6 +14309,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.schedule_title">Schedule</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.schedule_desc">Build the project timeline with dependencies, milestones and a draggable Gantt view.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.schedule_flow">Build activities, drag them across the Gantt timeline</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13647,6 +14319,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.scheduleadv_title">Schedule (advanced)</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.scheduleadv_desc">Critical path, resource leveling, baselines, what-if scenarios for planners who need the full kit.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.scheduleadv_flow">Clear look-ahead constraints, lock in weekly commitments</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13656,6 +14329,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.tasks_title">Tasks</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.tasks_desc">Lightweight task tracker tied to projects, BOQ lines, drawings and people. Kanban or list view.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.tasks_flow">Add a task, drag the card across columns to done</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13665,6 +14339,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.fived_title">5D cost model</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.fived_desc">Time-phased cashflow: see budget burn week-by-week as the schedule slides or scope changes.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.fived_flow">Turn the BOQ into a budget, watch it burn</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13674,14 +14349,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.risk_title">Risk register</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.risk_desc">Log risks, score impact and likelihood, assign owners, track mitigation through to closeout.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.risk_flow">Log a risk, score probability times impact, it lands on the matrix</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── FIELD OPERATIONS ───────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-ops-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-ops-h">
         <h4 id="modgroup-ops-h" class="mod-group-label" data-i18n="modgrid.group_operations">Field operations</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_diary.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M3 18a9 9 0 0 1 18 0"/><line x1="2" y1="18" x2="22" y2="18"/><path d="M10 9.2V5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3.7"/><path d="M7 11.5V10a2 2 0 0 1 2-2"/><path d="M17 11.5V10a2 2 0 0 0-2-2"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_operations">Stop losing what happened on site - diaries, labour and photos captured in the field.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13690,6 +14370,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.diary_title">Daily diary</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.diary_desc">Site log per day: crews on site, weather, deliveries, delays. Becomes the official record.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.diary_flow">Open today's diary, log the day, sign it</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13699,6 +14380,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.equipment_title">Equipment</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.equipment_desc">Track machines, hours, fuel, service intervals. Move equipment between sites with full history.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.equipment_flow">Log machine hours, maintenance work orders fire automatically</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13708,6 +14390,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.resources_title">Resources</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.resources_desc">Plan and assign crews, skills and rates. Match the right team to the right task without spreadsheets.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.resources_flow">Assign a crew to dates, double-bookings flagged instantly</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13717,6 +14400,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.service_title">Service</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.service_desc">Maintenance tickets, callouts, recurring inspections. Close the loop from request to sign-off.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.service_flow">Log a ticket, dispatch an engineer, bill the visit</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13726,14 +14410,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.portal_title">Portal</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.portal_desc">Lightweight outside-facing workspace for subcontractors, clients and inspectors. Share only what they need.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.portal_flow">Invite an outsider, grant access to one resource</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── FINANCE ────────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-finance-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-finance-h">
         <h4 id="modgroup-finance-h" class="mod-group-label" data-i18n="modgrid.group_finance">Finance</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_finance.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="5.5" y1="9.5" x2="5.51" y2="9.5"/><line x1="18.5" y1="14.5" x2="18.51" y2="14.5"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_finance">No month-end surprises - costs, invoices and cashflow update as the work happens.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13742,6 +14431,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.finance_title">Finance</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.finance_desc">Budgets, invoices, payments and cashflow per project. Multi-currency with frozen FX appendix on every export.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.finance_flow">Log invoices and payments, watch budget variance light up</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13751,6 +14441,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.procurement_title">Procurement</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.procurement_desc">Purchase orders, three-way invoice match, supplier scoring. From RFQ to delivery to payable, in one flow.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.procurement_flow">Raise a purchase order, issue it, turn it into a payable</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13760,6 +14451,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.tendering_title">Tendering</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.tendering_desc">Package a tender, send to suppliers, collect bids, compare side-by-side, award and convert to contract.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.tendering_flow">Package a BOQ, collect bids, compare, award the winner</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13769,14 +14461,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.co_title">Change orders</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.co_desc">Track scope changes from request through approval. Roll the delta back into the BOQ and budget automatically.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.co_flow">Log a scope change, approve it, delta flows to the BOQ</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── COMMERCIAL ─────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-commercial-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-commercial-h">
         <h4 id="modgroup-commercial-h" class="mod-group-label" data-i18n="modgrid.group_commercial">Commercial</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_crm.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M3 4h18l-7 8v7l-4 2v-9L3 4Z"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_commercial">Stop chasing deals in your inbox - tenders, clients and contracts in one pipeline.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13785,6 +14482,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.crm_title">CRM</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.crm_desc">Pipeline of leads and opportunities, tied to estimates. Win-loss reasons feed back into your bid library.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.crm_flow">Drag deals stage by stage across the pipeline, win or lose</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13794,6 +14492,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.contracts_title">Contracts</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.contracts_desc">Master and subcontracts with their clauses, milestones, retentions and signatures all in one place.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.contracts_flow">Set up a contract, bill progress claims against it</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13803,6 +14502,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.subs_title">Subcontractors</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.subs_desc">Roster of trades with rates, insurance, performance scores. Pull them into bids in a couple of clicks.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.subs_flow">Prequalify a trade, approved firms unlock for bids</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13812,6 +14512,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.bidmgmt_title">Bid management</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.bidmgmt_desc">Track every bid you've sent and received, with status, leveling, anomalies, and award recommendations.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.bidmgmt_flow">Level bids side by side, award the winner</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13821,6 +14522,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.variations_title">Variations</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.variations_desc">Branch a contract version, price the variation, get sign-off, merge back. The same way you handle code, for scope.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.variations_flow">Raise a variation, price the impact, approve into an order</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13830,6 +14532,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.suppliers_title">Supplier catalogs</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.suppliers_desc">Live price lists from your suppliers, mapped to your catalog. Refreshable without breaking historic estimates.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.suppliers_flow">Import supplier price lists, compare per item, buy cheapest</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13839,14 +14542,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.propdev_title">Property development</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.propdev_desc">Track lots, units and assets across a development. Sales, leasing, handover dates and warranty in one view.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.propdev_flow">Reserve a unit, sign the contract, hand over keys</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── COMMUNICATION ──────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-comm-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-comm-h">
         <h4 id="modgroup-comm-h" class="mod-group-label" data-i18n="modgrid.group_communication">Communication</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_contacts.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M8 13.5H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1.5"/><path d="M19 9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v3l-3.5-3H10a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2h9Z"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_communication">No scattered email threads - contacts, messages and approvals beside the work.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13855,6 +14563,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.contacts_title">Contacts</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.contacts_desc">Address book for every company and person on a project. Linked to bids, contracts and correspondence.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.contacts_flow">Add a company or person once, reuse everywhere</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13864,6 +14573,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.meetings_title">Meetings</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.meetings_desc">Schedule, agenda, attendees, minutes, action items. Linked to the decisions they produce.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.meetings_flow">Log the meeting, complete it, action items become tasks</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13873,6 +14583,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.rfi_title">RFI</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.rfi_desc">Requests for information with deadlines, attachments and a clear answer trail. No more lost email threads.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.rfi_flow">Raise a question, track ball in court, answer lands on record</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13882,6 +14593,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.submittals_title">Submittals</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.submittals_desc">Materials and product approvals tracked from submission to acceptance, with reviewer comments.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.submittals_flow">Submit a drawing or sample, reviewer returns an approval decision</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13891,6 +14603,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.transmittals_title">Transmittals</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.transmittals_desc">Send drawings and documents with a proper paper trail: who got what, when, and which revision.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.transmittals_flow">Issue documents to recipients, track who acknowledged receipt</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13900,14 +14613,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.corr_title">Correspondence</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.corr_desc">Project email and letters logged against the work they touch. Searchable years later.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.corr_flow">Log each letter, attach the file, link the thread</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── DOCUMENTS ──────────────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-docs-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-docs-h">
         <h4 id="modgroup-docs-h" class="mod-group-label" data-i18n="modgrid.group_documentation">Documents &amp; reports</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_assets.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6"/><line x1="8" y1="7" x2="11" y2="7"/><line x1="8" y1="11" x2="13" y2="11"/><line x1="9" y1="18" x2="9" y2="15"/><line x1="12" y1="18" x2="12" y2="14"/><line x1="15" y1="18" x2="15" y2="16"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_documentation">Stop rebuilding reports by hand - documents and submittals generated from live data.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13916,6 +14634,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.assets_title">Assets</span><span class="mod-cell-beta">beta</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.assets_desc">Inventory of physical and digital assets handed over to the client, with warranty and service info.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.assets_flow">Record each asset's warranty and service details, export for handover</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13925,6 +14644,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.cde_title">CDE</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.cde_desc">Common data environment for drawings, models and specs. Status, revision, ownership, all visible.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.cde_flow">Move each document container through WIP, Shared, Published</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -13934,6 +14654,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.photos_title">Photos</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.photos_desc">Site photos with date, location and the BOQ line or drawing they relate to. Filter by anything.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.photos_flow">Drop in site photos, tag them, find any shot fast</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13943,6 +14664,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.markups_title">Markups</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.markups_desc">Annotate drawings, PDFs and models. Comments, callouts and clouds saved against the source file.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.markups_flow">Draw a markup on the drawing, it sticks to the page</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -13952,6 +14674,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.fieldreports_title">Field reports</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.fieldreports_desc">Structured site reports - progress, issues, photos - sent from the field, ready to share with stakeholders.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.fieldreports_flow">Log the site day, submit, get it approved</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -13961,6 +14684,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.reports_title">Reports</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.reports_desc">Pre-built and custom report templates. Export to PDF, Excel and JSON. Schedulable.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.reports_flow">Pick a report, choose a format, download the file</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -13970,14 +14694,19 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.bi_title">BI dashboards</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.bi_desc">Build your own dashboards over project, cost and operational data. Drag, drop, drill down.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.bi_flow">Open a board, live KPIs render, click to drill in</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ── QUALITY & SAFETY ───────────────────────────────────────── -->
-      <section class="mod-group" aria-labelledby="modgroup-quality-h">
+      <section class="mod-group mod-group--shot" aria-labelledby="modgroup-quality-h">
         <h4 id="modgroup-quality-h" class="mod-group-label" data-i18n="modgrid.group_quality">Quality &amp; safety</h4>
+        <figure class="mod-step-icon" data-group-shot="assets/loops/mod_validation.gif">
+          <span class="mod-step-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="40" height="40"><path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 11.5 2 2 4-4"/></svg></span>
+          <figcaption class="mod-step-pain" data-i18n="modgrid.pain_quality">No paperwork blind spots - checklists, validation and incidents kept audit-ready.</figcaption>
+        </figure>
         <div class="mod-grid">
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
             <span class="mod-cell-icon" aria-hidden="true">
@@ -13986,6 +14715,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.validation_title">Validation</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.validation_desc">Run rule sets against any import - BOQ, drawings, models - and get a traffic-light report you can act on.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.validation_flow">Pick a BOQ, hit Run, read the traffic-light report</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -13995,6 +14725,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.inspections_title">Inspections</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.inspections_desc">Walk-the-site checklists with pass/fail items, photos and electronic sign-off, online or offline.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.inspections_flow">Run the checklist, mark pass or fail, raise the defect</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-4);">
@@ -14004,6 +14735,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.ncr_title">Non-conformance</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.ncr_desc">Log defects and deviations, assign root cause, track corrective action through to closeout.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.ncr_flow">Log a defect against spec, fix the cause, close it out</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -14013,6 +14745,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.safety_title">Safety</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.safety_desc">Toolbox talks, incident logs, near-miss reports and corrective actions tied to the work where they happened.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.safety_flow">Log an incident or hazard, safety stats update instantly</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-6);">
@@ -14022,6 +14755,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.punch_title">Punchlist</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.punch_desc">Closeout snag list per area, trade or unit. Photo, owner, due date, status - visible to the whole team.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.punch_flow">Log a snag, drive it to a verified close</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent);">
@@ -14031,6 +14765,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.qms_title">Quality management</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.qms_desc">Document control, ITP plans, audits and certifications, ready for client and third-party reviews.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.qms_flow">Inspect against ITP hold points, sign off or raise an NCR</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-3);">
@@ -14040,6 +14775,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.hse_title">HSE (advanced)</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.hse_desc">Health, safety and environment compliance with hazard registers, JSAs and statutory reporting.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.hse_flow">Drive a safety finding from investigation to verified close-out</p>
             </div>
           </div>
           <div class="mod-cell" tabindex="0" style="--tint: var(--accent-5);">
@@ -14049,6 +14785,7 @@
             <div class="mod-cell-body">
               <div class="mod-cell-name"><span data-i18n="modgrid.carbon_title">Carbon</span></div>
               <p class="mod-cell-desc" data-i18n="modgrid.carbon_desc">Embodied and operational carbon per project. Compare design options before they're built.</p>
+              <p class="mod-cell-flow" data-i18n="modgrid.carbon_flow">Tag BOQ items with carbon factors, footprint adds up</p>
             </div>
           </div>
         </div>
@@ -14095,10 +14832,10 @@
   <!-- ============================================================ -->
   <!-- SECTION 1.3 - TRUSTED BY (relocated below demo per design)    -->
   <!-- ============================================================ -->
-  <section class="ddc-trusted reveal" aria-label="Trusted by early adopters" id="trusted">
+  <section class="ddc-trusted reveal" aria-label="Organisations exploring OpenConstructionERP" id="trusted">
     <div class="ddc-trusted-head">
-      <div class="ddc-trusted-title" data-i18n="trust.title">engineers, contractors and consultancies in the DataDrivenConstruction community</div>
-      <div class="ddc-trusted-sub" data-i18n="trust.sub">A snapshot of the construction, engineering and infrastructure teams that have worked with DataDrivenConstruction's open tools, datasets and workshops, across Europe, North America, MENA, APAC and Australasia.</div>
+      <div class="ddc-trusted-title" data-i18n="trust.title">Engineers, construction firms and consultancies exploring OpenConstructionERP</div>
+      <div class="ddc-trusted-sub" data-i18n="trust.sub">A snapshot of the construction, engineering and infrastructure teams that signed up to try OpenConstructionERP or have worked with DataDrivenConstruction's open tools - across Europe, North America, MENA, APAC and Oceania.</div>
     </div>
     <div class="ddc-marquee-rows">
 
@@ -14193,443 +14930,29 @@
         </div>
       </div>
 
-    </div>
-  </section>
-
-
-
-
-
-  <!-- ================================================================ -->
-  <!-- SECTION 9.5 - DATA FLOW (project file → priced BOQ → tender pack) -->
-  <!-- ================================================================ -->
-  <style>
-    .df-section { padding: 64px 0 48px; }
-    .df-section .section-head { margin-bottom: 18px; }
-    .df-wrap { max-width: 1280px; margin: 0 auto; padding: 0 clamp(0px, 2vw, 24px); }
-
-    .df-card {
-      margin: 28px auto 0;
-      max-width: 1280px;
-      padding: 28px 32px 26px;
-      border-radius: 22px;
-      background: var(--bg-1);
-      border: 1px solid var(--line-1);
-      position: relative; overflow: hidden;
-    }
-
-    /* ─── Animated SVG flow ─────────────────────────────────── */
-    .df-flow { width: 100%; aspect-ratio: 12 / 5; min-height: 320px; }
-    .df-flow svg { width: 100%; height: 100%; display: block; }
-    .df-flow .df-eyebrow {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em;
-      fill: var(--ink-3); text-transform: uppercase;
-    }
-    .df-flow .df-name {
-      font-family: 'Inter Tight', sans-serif; font-size: 12.5px;
-      font-weight: 600; fill: var(--ink-0); letter-spacing: -0.005em;
-    }
-    .df-flow .df-tag {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10px; fill: var(--ink-3); letter-spacing: 0.03em;
-    }
-    .df-flow .df-rect {
-      fill: var(--bg-2, #ffffff); stroke: var(--line-2, rgba(15,23,42,0.16));
-      stroke-width: 1.1;
-    }
-    .df-flow .df-rect-out {
-      fill: color-mix(in oklab, var(--accent-3) 6%, var(--bg-2, #ffffff));
-      stroke: color-mix(in oklab, var(--accent-3) 32%, var(--line-1));
-      stroke-width: 1.2;
-    }
-    .df-flow .df-rect-pivot {
-      fill: color-mix(in oklab, var(--accent) 8%, var(--bg-1));
-      stroke: var(--accent); stroke-width: 1.6;
-    }
-    .df-flow .df-mini-st {
-      fill: none; stroke: var(--accent); stroke-width: 1.3;
-      stroke-linecap: round; stroke-linejoin: round;
-    }
-    .df-flow .df-mini-fl { fill: color-mix(in oklab, var(--accent) 18%, transparent); stroke: none; }
-    .df-flow .df-mini-out-st { stroke: var(--accent-3); }
-    .df-flow .df-mini-out-fl { fill: color-mix(in oklab, var(--accent-3) 18%, transparent); stroke: none; }
-
-    .df-flow .df-trace {
-      fill: none; stroke: rgba(15,23,42,0.13); stroke-width: 1.3;
-    }
-    .df-flow .df-pulse {
-      fill: none; stroke-width: 2.6; stroke-linecap: round;
-      stroke-dasharray: 8 280;
-      animation: dfPulse 3.6s linear infinite;
-      opacity: 0.95;
-    }
-    @keyframes dfPulse { 0% { stroke-dashoffset: 280; } 100% { stroke-dashoffset: -280; } }
-    .df-flow .df-pulse-2 { animation-delay: 0.4s; }
-    .df-flow .df-pulse-3 { animation-delay: 0.8s; }
-    .df-flow .df-pulse-4 { animation-delay: 1.2s; }
-    .df-flow .df-pulse-5 { animation-delay: 1.6s; }
-    .df-flow .df-pulse-6 { animation-delay: 2.0s; }
-    .df-flow .df-pulse-7 { animation-delay: 2.4s; }
-    .df-flow .df-pulse-8 { animation-delay: 2.8s; }
-
-    .df-legend {
-      display: flex; flex-wrap: wrap; gap: 18px;
-      margin-top: 14px; padding-top: 14px;
-      border-top: 1px dashed var(--line-1);
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 11px; color: var(--ink-3); letter-spacing: 0.03em;
-    }
-    .df-legend b { color: var(--ink-1); font-weight: 600; }
-    .df-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-
-    /* worked example - single horizontal strip */
-    .df-walk {
-      margin-top: 22px;
-      padding: 18px 22px;
-      border-radius: 14px;
-      background: color-mix(in oklab, var(--accent-2) 5%, var(--bg-1));
-      border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--line-1));
-    }
-    .df-walk-eyebrow {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
-    }
-    .df-walk h4 {
-      font-family: 'Inter Tight', sans-serif; font-size: 16px; font-weight: 600;
-      color: var(--ink-0); margin: 0 0 14px; letter-spacing: -0.01em;
-    }
-    .df-walk h4 em {
-      font-family: 'Fraunces', serif; font-style: italic; font-weight: 500;
-      background: linear-gradient(110deg, var(--accent-2), var(--accent), var(--accent-3));
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .df-walk-strip { display: grid; gap: 10px; grid-template-columns: repeat(6, 1fr); }
-    @media (max-width: 1100px) { .df-walk-strip { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 600px)  { .df-walk-strip { grid-template-columns: repeat(2, 1fr); } }
-    .df-walk-step {
-      padding: 10px 12px; border-radius: 10px;
-      background: var(--bg-1); border: 1px solid var(--line-1);
-    }
-    .df-walk-step-head {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--accent); margin: 0 0 4px;
-    }
-    .df-walk-step-name {
-      font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600;
-      color: var(--ink-0); letter-spacing: -0.005em; margin: 0 0 4px; line-height: 1.25;
-    }
-    .df-walk-step-val {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10.5px; color: var(--ink-2); line-height: 1.4;
-    }
-    .df-walk-step-val b { color: var(--ink-0); font-weight: 600; }
-
-    /* stats chips */
-    .df-stats { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; }
-    .df-stat {
-      flex: 1 1 160px; padding: 12px 16px;
-      border-radius: 12px; background: var(--bg-1); border: 1px solid var(--line-1);
-      display: flex; flex-direction: column; gap: 2px;
-    }
-    .df-stat-num {
-      font-family: 'Inter Tight', sans-serif; font-size: 22px; font-weight: 700;
-      letter-spacing: -0.02em; color: var(--ink-0); line-height: 1;
-    }
-    .df-stat-num em {
-      font-family: 'Fraunces', serif; font-style: italic; font-weight: 400;
-      background: linear-gradient(110deg, var(--accent-2), var(--accent), var(--accent-3));
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .df-stat-label {
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.03em; margin-top: 2px;
-    }
-  </style>
-
-  <section class="section df-section reveal" id="dataflow" aria-label="Data flow - concept to priced BOQ">
-    <div class="section-head reveal">
-      <div class="section-eyebrow">
-        <span class="bar"></span>
-        <span>Data flow · concept → priced BOQ → tender pack</span>
-      </div>
-      <h2 class="section-title">
-        How a project file <em>becomes</em> a fully priced tender pack.
-      </h2>
-      <p class="section-lede">
-        One pipeline, three stages, six file types in. <b>Photos and PDFs</b> on one side,
-        a tender‑ready BOQ on the other - every element classified, measured, priced and traceable.
-      </p>
-    </div>
-
-    <div class="df-card reveal-up">
-
-      <!-- ════ animated flow visualisation ════ -->
-      <div class="df-flow">
-        <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          <defs>
-            <linearGradient id="dfGradIn" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="#3c6fa0" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#3c6fa0" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="#2d5e8e" stop-opacity="0"/>
-            </linearGradient>
-            <linearGradient id="dfGradMid" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="#2d5e8e" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#2d5e8e" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="#244c74" stop-opacity="0"/>
-            </linearGradient>
-            <linearGradient id="dfGradOut" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="#244c74" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#244c74" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="#3c6fa0" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-
-          <!-- ═════════ INPUT column (6 pills) ═════════ -->
-          <text class="df-eyebrow" x="0" y="14">▸ INPUT · project files</text>
-          <!-- 6 inputs evenly distributed top to bottom (y centres at 56, 124, 192, 260, 328, 396) -->
-          <g>
-            <!-- PDF - page + hatched takeoff -->
-            <rect class="df-rect" x="0" y="32"  width="200" height="48" rx="10"/>
-            <g transform="translate(16, 42)">
-              <path class="df-mini-st" d="M 4 2 L 18 2 L 24 8 L 24 26 L 4 26 Z M 18 2 L 18 8 L 24 8"/>
-              <path class="df-mini-st" d="M 8 14 L 20 14 L 20 22 L 8 22 Z M 8 14 L 20 22 M 8 22 L 20 14"/>
-            </g>
-            <text class="df-name" x="48" y="58">PDF takeoff</text>
-            <text class="df-tag"  x="48" y="73">vector + scanned</text>
-
-            <!-- DWG - 2D plan + dim -->
-            <rect class="df-rect" x="0" y="100" width="200" height="48" rx="10"/>
-            <g transform="translate(14, 110)">
-              <path class="df-mini-st" d="M 2 24 L 28 24 M 2 24 L 2 8 L 16 8 L 16 16 L 28 16"/>
-              <path class="df-mini-st" d="M 2 4 L 16 4 M 2 3 L 2 5 M 16 3 L 16 5"/>
-            </g>
-            <text class="df-name" x="48" y="126">DWG · DGN</text>
-            <text class="df-tag"  x="48" y="141">AutoCAD · 2D + 3D drawings</text>
-
-            <!-- RVT - iso-cube -->
-            <rect class="df-rect" x="0" y="168" width="200" height="48" rx="10"/>
-            <g transform="translate(14, 178)">
-              <path class="df-mini-fl" d="M 4 14 L 14 8 L 24 14 L 14 20 Z"/>
-              <path class="df-mini-st" d="M 4 14 L 14 8 L 24 14 L 14 20 Z M 4 14 L 4 22 L 14 28 L 14 20 M 24 14 L 24 22 L 14 28"/>
-            </g>
-            <text class="df-name" x="48" y="194">RVT · Revit</text>
-            <text class="df-tag"  x="48" y="209">native model</text>
-
-            <!-- IFC - building w/ ids -->
-            <rect class="df-rect" x="0" y="236" width="200" height="48" rx="10"/>
-            <g transform="translate(16, 246)">
-              <path class="df-mini-fl" d="M 4 4 L 22 4 L 22 22 L 4 22 Z"/>
-              <path class="df-mini-st" d="M 4 4 L 22 4 L 22 22 L 4 22 Z M 13 4 L 13 22 M 4 13 L 22 13"/>
-              <circle class="df-mini-st" cx="8" cy="8" r="1.2"/><circle class="df-mini-st" cx="18" cy="18" r="1.2"/>
-            </g>
-            <text class="df-name" x="48" y="262">IFC 4 · 4.3</text>
-            <text class="df-tag"  x="48" y="277">openBIM</text>
-
-            <!-- PHOTO - camera viewfinder -->
-            <rect class="df-rect" x="0" y="304" width="200" height="48" rx="10"/>
-            <g transform="translate(14, 314)">
-              <path class="df-mini-st" d="M 2 7 L 6 7 L 8 4 L 22 4 L 24 7 L 28 7 L 28 24 L 2 24 Z"/>
-              <circle class="df-mini-fl" cx="15" cy="15" r="5"/>
-              <circle class="df-mini-st" cx="15" cy="15" r="5"/>
-            </g>
-            <text class="df-name" x="48" y="330">Photo · image</text>
-            <text class="df-tag"  x="48" y="345">site photo · drone shot</text>
-
-            <!-- GAEB - tabular -->
-            <rect class="df-rect" x="0" y="372" width="200" height="48" rx="10"/>
-            <g transform="translate(16, 382)">
-              <path class="df-mini-st" d="M 2 2 L 24 2 L 24 22 L 2 22 Z M 2 9 L 24 9 M 2 16 L 24 16 M 12 2 L 12 22"/>
-            </g>
-            <text class="df-name" x="48" y="398">GAEB X83 · X84</text>
-            <text class="df-tag"  x="48" y="413">tender exchange</text>
-          </g>
-
-          <!-- ═════════ MIDDLE pivot (DDC + Canonical + Classify/Validate) ═════════ -->
-          <text class="df-eyebrow" x="430" y="14">▸ NORMALISE · CLASSIFY · VALIDATE</text>
-          <rect class="df-rect-pivot" x="430" y="32" width="320" height="388" rx="14"/>
-
-          <!-- 3 stacked stages inside the pivot -->
-          <g transform="translate(450, 60)">
-            <!-- Stage 1: DDC + Canonical -->
-            <circle r="11" cx="11" cy="11" fill="#2d5e8e"/>
-            <text x="11" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#fff">1</text>
-            <text class="df-name" x="32" y="14" style="font-size:14px;">DDC cad2data → Canonical</text>
-            <text class="df-tag"  x="32" y="30" style="font-size:10.5px;">elements · geometry · quantities</text>
-            <text class="df-tag"  x="32" y="44" style="font-size:10.5px;">JSON + Parquet · single source</text>
-          </g>
-
-          <line x1="446" y1="158" x2="734" y2="158" stroke="rgba(45,94,142,0.25)" stroke-dasharray="3 3"/>
-
-          <g transform="translate(450, 178)">
-            <!-- Stage 2: Classify + Price -->
-            <circle r="11" cx="11" cy="11" fill="#2d5e8e"/>
-            <text x="11" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#fff">2</text>
-            <text class="df-name" x="32" y="14" style="font-size:14px;">Classify · price</text>
-            <text class="df-tag"  x="32" y="30" style="font-size:10.5px;">DIN 276 · NRM · MasterFormat</text>
-            <text class="df-tag"  x="32" y="44" style="font-size:10.5px;">GAEB · CWICR ~55K vector match</text>
-          </g>
-
-          <line x1="446" y1="276" x2="734" y2="276" stroke="rgba(45,94,142,0.25)" stroke-dasharray="3 3"/>
-
-          <g transform="translate(450, 296)">
-            <!-- Stage 3: Validate -->
-            <circle r="11" cx="11" cy="11" fill="#2d5e8e"/>
-            <text x="11" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#fff">3</text>
-            <text class="df-name" x="32" y="14" style="font-size:14px;">Validate</text>
-            <text class="df-tag"  x="32" y="30" style="font-size:10.5px;">46 rules · 5 packs</text>
-            <text class="df-tag"  x="32" y="44" style="font-size:10.5px;">structure · completeness</text>
-            <text class="df-tag"  x="32" y="62" style="font-size:10.5px; fill: var(--accent);">→ traffic-light per element</text>
-          </g>
-
-          <!-- ═════════ OUTPUT column (7 pills) ═════════ -->
-          <text class="df-eyebrow" x="1000" y="14">▸ OUTPUT · tender pack</text>
-          <g>
-            <!-- GAEB X83 -->
-            <rect class="df-rect-out" x="1000" y="32"  width="200" height="48" rx="10"/>
-            <g transform="translate(1014, 42)">
-              <path class="df-mini-out-st df-mini-st" d="M 2 2 L 24 2 L 24 22 L 2 22 Z M 2 8 L 24 8 M 2 14 L 24 14 M 2 20 L 24 20 M 13 2 L 13 22"/>
-            </g>
-            <text class="df-name" x="1048" y="58">GAEB X83</text>
-            <text class="df-tag"  x="1048" y="73">round-trip tender</text>
-
-            <!-- XLSX/CSV -->
-            <rect class="df-rect-out" x="1000" y="89" width="200" height="48" rx="10"/>
-            <g transform="translate(1012, 99)">
-              <path class="df-mini-out-st df-mini-st" d="M 2 4 L 28 4 L 28 22 L 2 22 Z M 2 11 L 28 11 M 2 17 L 28 17 M 11 4 L 11 22 M 20 4 L 20 22"/>
-            </g>
-            <text class="df-name" x="1048" y="115">XLSX · CSV</text>
-            <text class="df-tag"  x="1048" y="130">priced positions</text>
-
-            <!-- PDF report w/ chart -->
-            <rect class="df-rect-out" x="1000" y="146" width="200" height="48" rx="10"/>
-            <g transform="translate(1014, 156)">
-              <path class="df-mini-out-st df-mini-st" d="M 4 2 L 18 2 L 24 8 L 24 26 L 4 26 Z M 18 2 L 18 8 L 24 8"/>
-              <path class="df-mini-out-st df-mini-st" d="M 8 18 L 11 14 L 14 16 L 20 10"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="8" cy="18" r="1.1"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="11" cy="14" r="1.1"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="14" cy="16" r="1.1"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="20" cy="10" r="1.1"/>
-            </g>
-            <text class="df-name" x="1048" y="172">PDF report</text>
-            <text class="df-tag"  x="1048" y="187">cost summary</text>
-
-            <!-- 4D · schedule (Gantt timeline) -->
-            <rect class="df-rect-out" x="1000" y="203" width="200" height="48" rx="10"/>
-            <g transform="translate(1012, 213)">
-              <path class="df-mini-out-st df-mini-st" d="M 2 5 L 16 5 M 6 12 L 24 12 M 4 19 L 18 19"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="2"  cy="5"  r="1.1"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="6"  cy="12" r="1.1"/>
-              <circle class="df-mini-out-fl df-mini-fl" cx="4"  cy="19" r="1.1"/>
-            </g>
-            <text class="df-name" x="1048" y="229">4D &middot; schedule</text>
-            <text class="df-tag"  x="1048" y="244">tasks · Gantt · sequencing</text>
-
-            <!-- 5D · cost-time analytics (bar chart) -->
-            <rect class="df-rect-out" x="1000" y="260" width="200" height="48" rx="10"/>
-            <g transform="translate(1014, 270)">
-              <path class="df-mini-out-st df-mini-st" d="M 4 24 L 4 18 L 8 18 L 8 24 Z M 11 24 L 11 12 L 15 12 L 15 24 Z M 18 24 L 18 5 L 22 5 L 22 24 Z"/>
-              <path class="df-mini-out-st df-mini-st" d="M 2 24 L 24 24"/>
-            </g>
-            <text class="df-name" x="1048" y="286">5D &middot; cost &times; time</text>
-            <text class="df-tag"  x="1048" y="301">cashflow · S-curve · earned value</text>
-
-            <!-- REST · webhooks -->
-            <rect class="df-rect-out" x="1000" y="317" width="200" height="48" rx="10"/>
-            <g transform="translate(1012, 327)">
-              <path class="df-mini-out-st df-mini-st" d="M 4 6 L 9 12 L 4 18 M 24 6 L 19 12 L 24 18 M 17 4 L 11 20"/>
-            </g>
-            <text class="df-name" x="1048" y="343">REST &middot; webhooks</text>
-            <text class="df-tag"  x="1048" y="358">to ERP / accounting / PM tools</text>
-
-            <!-- JSON · Parquet canonical -->
-            <rect class="df-rect-out" x="1000" y="372" width="200" height="48" rx="10"/>
-            <g transform="translate(1014, 382)">
-              <path class="df-mini-out-st df-mini-st" d="M 4 6 L 14 2 L 24 6 L 14 10 Z"/>
-              <path class="df-mini-out-st df-mini-st" d="M 4 12 L 14 16 L 24 12"/>
-              <path class="df-mini-out-st df-mini-st" d="M 4 18 L 14 22 L 24 18"/>
-            </g>
-            <text class="df-name" x="1048" y="398">JSON &middot; Parquet</text>
-            <text class="df-tag"  x="1048" y="413">canonical export</text>
-          </g>
-
-          <!-- ═════════ traces (input → pivot) ═════════ -->
-          <g class="df-trace">
-            <path d="M 200 56  C 300 56,  380 220, 430 156"/>
-            <path d="M 200 124 C 300 124, 380 220, 430 200"/>
-            <path d="M 200 192 C 300 192, 380 220, 430 226"/>
-            <path d="M 200 260 C 300 260, 380 240, 430 254"/>
-            <path d="M 200 328 C 300 328, 380 280, 430 290"/>
-            <path d="M 200 396 C 300 396, 380 320, 430 326"/>
-          </g>
-          <!-- ═════════ traces (pivot → output, 7 pills) ═════════ -->
-          <g class="df-trace">
-            <path d="M 750 140 C 830 140, 920 56,  1000 56"/>
-            <path d="M 750 170 C 830 170, 920 113, 1000 113"/>
-            <path d="M 750 200 C 830 200, 920 170, 1000 170"/>
-            <path d="M 750 226 C 830 226, 920 227, 1000 227"/>
-            <path d="M 750 252 C 830 252, 920 284, 1000 284"/>
-            <path d="M 750 282 C 830 282, 920 341, 1000 341"/>
-            <path d="M 750 312 C 830 312, 920 396, 1000 396"/>
-          </g>
-
-          <!-- ═════════ animated pulses ═════════ -->
-          <path class="df-pulse"          d="M 200 56  C 300 56,  380 220, 430 156" stroke="url(#dfGradIn)"/>
-          <path class="df-pulse df-pulse-2" d="M 200 192 C 300 192, 380 220, 430 226" stroke="url(#dfGradIn)"/>
-          <path class="df-pulse df-pulse-3" d="M 200 328 C 300 328, 380 280, 430 290" stroke="url(#dfGradIn)"/>
-          <path class="df-pulse df-pulse-4" d="M 200 396 C 300 396, 380 320, 430 326" stroke="url(#dfGradIn)"/>
-          <path class="df-pulse df-pulse-5" d="M 750 170 C 830 170, 920 113, 1000 113" stroke="url(#dfGradOut)"/>
-          <path class="df-pulse df-pulse-6" d="M 750 226 C 830 226, 920 227, 1000 227" stroke="url(#dfGradOut)"/>
-          <path class="df-pulse df-pulse-7" d="M 750 252 C 830 252, 920 284, 1000 284" stroke="url(#dfGradOut)"/>
-          <path class="df-pulse df-pulse-8" d="M 750 312 C 830 312, 920 396, 1000 396" stroke="url(#dfGradOut)"/>
-        </svg>
-      </div>
-
-      <!-- worked example - concrete wall journey -->
-      <div class="df-walk">
-        <p class="df-walk-eyebrow">▸ Worked example · one wall, end-to-end</p>
-        <h4>What we extract from a single CAD element <em>before</em> it lands as a BOQ row.</h4>
-        <div class="df-walk-strip">
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ Element</p>
-            <p class="df-walk-step-name">Wall_Lvl01_E034</p>
-            <p class="df-walk-step-val">stable across model revisions</p>
-          </div>
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ Class</p>
-            <p class="df-walk-step-name">DIN 276 · KG 330</p>
-            <p class="df-walk-step-val">Außenwände · external wall</p>
-          </div>
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ Geometry</p>
-            <p class="df-walk-step-name">12.5 × 3.0 × 0.24 m</p>
-            <p class="df-walk-step-val"><b>9.0 m³</b> · 37.5 m²</p>
-          </div>
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ Properties</p>
-            <p class="df-walk-step-name">Concrete C30/37</p>
-            <p class="df-walk-step-val">F90 fire rating</p>
-          </div>
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ Cost</p>
-            <p class="df-walk-step-name">CWICR · DACH</p>
-            <p class="df-walk-step-val"><b>€ 245 / m³</b> matched</p>
-          </div>
-          <div class="df-walk-step">
-            <p class="df-walk-step-head">▸ BOQ line</p>
-            <p class="df-walk-step-name">9.0 m³ × € 245</p>
-            <p class="df-walk-step-val"><b>€ 2,205</b> on the tender</p>
-          </div>
+      <!-- Row 4 - reverse (large organisations from recent access requests) -->
+      <div class="ddc-marquee">
+        <div class="ddc-marquee-track ddc-reverse">
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://sodexo.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://sodexo.com&size=256" data-text="Sodexo" alt="Sodexo" loading="lazy" decoding="async"><span class="ddc-logo-name">Sodexo</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lodhagroup.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lodhagroup.com&size=256" data-text="Lodha Group" alt="Lodha Group" loading="lazy" decoding="async"><span class="ddc-logo-name">Lodha Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://ictas.com.tr&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://ictas.com.tr&size=256" data-text="IC İçtaş" alt="IC Ictas" loading="lazy" decoding="async"><span class="ddc-logo-name">IC İçtaş</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lqgroup.org.uk&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lqgroup.org.uk&size=256" data-text="L&amp;Q" alt="L&Q" loading="lazy" decoding="async"><span class="ddc-logo-name">L&amp;Q</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://rsrg.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://rsrg.com&size=256" data-text="Rhomberg Sersa Rail Group" alt="Rhomberg Sersa Rail Group" loading="lazy" decoding="async"><span class="ddc-logo-name">Rhomberg Sersa Rail Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://beckgroup.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://beckgroup.com&size=256" data-text="The Beck Group" alt="The Beck Group" loading="lazy" decoding="async"><span class="ddc-logo-name">The Beck Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://woolpert.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://woolpert.com&size=256" data-text="Woolpert" alt="Woolpert" loading="lazy" decoding="async"><span class="ddc-logo-name">Woolpert</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://stecol.eu&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://stecol.eu&size=256" data-text="Stecol" alt="Stecol" loading="lazy" decoding="async"><span class="ddc-logo-name">Stecol</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://tucrail.be&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://tucrail.be&size=256" data-text="Tucrail" alt="Tucrail" loading="lazy" decoding="async"><span class="ddc-logo-name">Tucrail</span></span>
+          <!-- Duplicate set - required for the seamless loop. -->
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://sodexo.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://sodexo.com&size=256" data-text="Sodexo" alt="Sodexo" loading="lazy" decoding="async"><span class="ddc-logo-name">Sodexo</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lodhagroup.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lodhagroup.com&size=256" data-text="Lodha Group" alt="Lodha Group" loading="lazy" decoding="async"><span class="ddc-logo-name">Lodha Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://ictas.com.tr&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://ictas.com.tr&size=256" data-text="IC İçtaş" alt="IC Ictas" loading="lazy" decoding="async"><span class="ddc-logo-name">IC İçtaş</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lqgroup.org.uk&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://lqgroup.org.uk&size=256" data-text="L&amp;Q" alt="L&Q" loading="lazy" decoding="async"><span class="ddc-logo-name">L&amp;Q</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://rsrg.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://rsrg.com&size=256" data-text="Rhomberg Sersa Rail Group" alt="Rhomberg Sersa Rail Group" loading="lazy" decoding="async"><span class="ddc-logo-name">Rhomberg Sersa Rail Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://beckgroup.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://beckgroup.com&size=256" data-text="The Beck Group" alt="The Beck Group" loading="lazy" decoding="async"><span class="ddc-logo-name">The Beck Group</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://woolpert.com&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://woolpert.com&size=256" data-text="Woolpert" alt="Woolpert" loading="lazy" decoding="async"><span class="ddc-logo-name">Woolpert</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://stecol.eu&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://stecol.eu&size=256" data-text="Stecol" alt="Stecol" loading="lazy" decoding="async"><span class="ddc-logo-name">Stecol</span></span>
+          <span class="ddc-logo"><img class="ddc-brand-logo" src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://tucrail.be&size=256" data-sources="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://tucrail.be&size=256" data-text="Tucrail" alt="Tucrail" loading="lazy" decoding="async"><span class="ddc-logo-name">Tucrail</span></span>
         </div>
-      </div>
-
-      <div class="df-stats">
-        <div class="df-stat"><span class="df-stat-num"><em>~55K</em></span><span class="df-stat-label">CWICR priced positions</span></div>
-        <div class="df-stat"><span class="df-stat-num"><em>5</em></span><span class="df-stat-label">rule packs · DIN/NRM/MFM/GAEB/DPGF</span></div>
-        <div class="df-stat"><span class="df-stat-num"><em>6 → 7</em></span><span class="df-stat-label">file types in · exports out (incl. 4D &middot; 5D)</span></div>
-        <div class="df-stat"><span class="df-stat-num"><em>100%</em></span><span class="df-stat-label">trace · element ↔ rule ↔ price</span></div>
       </div>
 
     </div>
@@ -14723,7 +15046,54 @@
       </div>
     </div>
 
-    <div class="stargazer-wall reveal">
+    <div class="community-split reveal">
+      <!-- LEFT (30%): the people who build it - GitHub contributors, fixed 6-column wall.
+           SSR avatars hotlink github.com/<login>.png; setupContributors() refreshes
+           + merges any new contributors live from the GitHub API. -->
+      <div class="contributor-wall">
+        <div class="stargazer-head">
+          <h3 data-i18n-html="community.contributor_heading"><em>Contributors</em></h3>
+          <div class="meta">
+            <a href="https://github.com/datadrivenconstruction/openconstructionerp/graphs/contributors" target="_blank" rel="noopener" data-i18n="community.contributor_meta">See them on GitHub &rarr;</a>
+          </div>
+        </div>
+        <div class="contributor-grid">
+          <a href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener" title="datadrivenconstruction" class="star-avatar"><img src="https://github.com/datadrivenconstruction.png?size=80" alt="datadrivenconstruction" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/gbatkhuyag" target="_blank" rel="noopener" title="gbatkhuyag" class="star-avatar"><img src="https://github.com/gbatkhuyag.png?size=80" alt="gbatkhuyag" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/skolodi" target="_blank" rel="noopener" title="skolodi" class="star-avatar"><img src="https://github.com/skolodi.png?size=80" alt="skolodi" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/rrvizuete" target="_blank" rel="noopener" title="rrvizuete" class="star-avatar"><img src="https://github.com/rrvizuete.png?size=80" alt="rrvizuete" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/rashidengg-arch" target="_blank" rel="noopener" title="rashidengg-arch" class="star-avatar"><img src="https://github.com/rashidengg-arch.png?size=80" alt="rashidengg-arch" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/online14230" target="_blank" rel="noopener" title="online14230" class="star-avatar"><img src="https://github.com/online14230.png?size=80" alt="online14230" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/migfrazao2003" target="_blank" rel="noopener" title="migfrazao2003" class="star-avatar"><img src="https://github.com/migfrazao2003.png?size=80" alt="migfrazao2003" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/maher00746" target="_blank" rel="noopener" title="maher00746" class="star-avatar"><img src="https://github.com/maher00746.png?size=80" alt="maher00746" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/jyloveqq" target="_blank" rel="noopener" title="jyloveqq" class="star-avatar"><img src="https://github.com/jyloveqq.png?size=80" alt="jyloveqq" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/hanisedawy" target="_blank" rel="noopener" title="hanisedawy" class="star-avatar"><img src="https://github.com/hanisedawy.png?size=80" alt="hanisedawy" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/expalex1507" target="_blank" rel="noopener" title="expalex1507" class="star-avatar"><img src="https://github.com/expalex1507.png?size=80" alt="expalex1507" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/thiemotorres" target="_blank" rel="noopener" title="thiemotorres" class="star-avatar"><img src="https://github.com/thiemotorres.png?size=80" alt="thiemotorres" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/sergeilapp" target="_blank" rel="noopener" title="sergeilapp" class="star-avatar"><img src="https://github.com/sergeilapp.png?size=80" alt="sergeilapp" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/Mourdi59" target="_blank" rel="noopener" title="Mourdi59" class="star-avatar"><img src="https://github.com/Mourdi59.png?size=80" alt="Mourdi59" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/mohandshamada" target="_blank" rel="noopener" title="mohandshamada" class="star-avatar"><img src="https://github.com/mohandshamada.png?size=80" alt="mohandshamada" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/mkozjak" target="_blank" rel="noopener" title="mkozjak" class="star-avatar"><img src="https://github.com/mkozjak.png?size=80" alt="mkozjak" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/bvisible" target="_blank" rel="noopener" title="bvisible" class="star-avatar"><img src="https://github.com/bvisible.png?size=80" alt="bvisible" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/jehadbaniodeh" target="_blank" rel="noopener" title="jehadbaniodeh" class="star-avatar"><img src="https://github.com/jehadbaniodeh.png?size=80" alt="jehadbaniodeh" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/JORBDAAG" target="_blank" rel="noopener" title="JORBDAAG" class="star-avatar"><img src="https://github.com/JORBDAAG.png?size=80" alt="JORBDAAG" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/hungdd84" target="_blank" rel="noopener" title="hungdd84" class="star-avatar"><img src="https://github.com/hungdd84.png?size=80" alt="hungdd84" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/DevpratikDevelopers" target="_blank" rel="noopener" title="DevpratikDevelopers" class="star-avatar"><img src="https://github.com/DevpratikDevelopers.png?size=80" alt="DevpratikDevelopers" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/consigcody94" target="_blank" rel="noopener" title="consigcody94" class="star-avatar"><img src="https://github.com/consigcody94.png?size=80" alt="consigcody94" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/ChristianSantoro" target="_blank" rel="noopener" title="ChristianSantoro" class="star-avatar"><img src="https://github.com/ChristianSantoro.png?size=80" alt="ChristianSantoro" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/candcconsulting" target="_blank" rel="noopener" title="candcconsulting" class="star-avatar"><img src="https://github.com/candcconsulting.png?size=80" alt="candcconsulting" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/braedonsaunders" target="_blank" rel="noopener" title="braedonsaunders" class="star-avatar"><img src="https://github.com/braedonsaunders.png?size=80" alt="braedonsaunders" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/alikhalilx" target="_blank" rel="noopener" title="alikhalilx" class="star-avatar"><img src="https://github.com/alikhalilx.png?size=80" alt="alikhalilx" loading="lazy" decoding="async" width="40" height="40" /></a>
+          <a href="https://github.com/datadrivenconstruction/openconstructionerp/graphs/contributors" target="_blank" rel="noopener" title="See all contributors on GitHub" class="star-avatar star-avatar-more" aria-label="See all contributors">
+            <span class="stack stack-1"></span>
+            <span class="stack stack-2"></span>
+            <span class="stack stack-3"></span>
+            <span class="stack-label" data-i18n="community.many_more">+ many more</span>
+          </a>
+        </div>
+      </div>
+      <!-- RIGHT (70%): people who starred us - fluid wall, many columns (>6) -->
+      <div class="stargazer-wall">
       <div class="stargazer-head">
         <h3 data-i18n-html="community.stargazer_heading">People who've already <em>starred the repo.</em></h3>
         <div class="meta">
@@ -14799,6 +15169,7 @@
         </a>
       </div>
     </div>
+    </div>
 
     <!-- Recent releases - moved here from the founder note sidebar. The
          repo activity belongs alongside the open-source / community block. -->
@@ -14812,9 +15183,9 @@
       </div>
       <ul class="release-ticker-list">
                 <li id="latest-release-row">
-          <span class="ver" id="latest-release-tag">v7.10.0</span>
-          <span class="note" id="latest-release-note">Markdown tables in the assistant chat, the project setup window fully translated across 27 languages and a lighter install.</span>
-          <span class="date" id="latest-release-date">2026-06-13</span>
+          <span class="ver" id="latest-release-tag">v8.6.0</span>
+          <span class="note" id="latest-release-note">A data-driven estimating methodology engine, a full vector DWG and DXF takeoff, and construction machinery costed separately from installed equipment.</span>
+          <span class="date" id="latest-release-date">2026-06-18</span>
         </li>
         <li>
           <span class="ver">v7.3.0</span>
@@ -14867,9 +15238,6 @@
       <h2 class="video-intro-title" data-i18n-html="video_intro.title">
         See it work. <em>In one take.</em>
       </h2>
-      <p class="video-intro-sub" data-i18n="video_intro.sub">
-        A short walkthrough of the whole pipeline - drawing in, tender out. No voiceover, no narration, just the product doing what it does.
-      </p>
     </div>
 
     <div class="video-intro-frame">
@@ -15526,17 +15894,17 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           <span class="bar"></span>
           <span data-i18n="voices.eyebrow_note">A note from the founder</span>
         </span>
-        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para1">Over the past ten years, I have been deeply involved in resource management for construction projects. This journey inevitably led me to study the history of the technologies that have shaped the industry, from the earliest attempts at design automation to modern ERP platforms <span style="color: var(--ink-3);">(see the series of articles <em>&ldquo;The Lobbyists&rsquo; Wars and the Development of BIM&rdquo;</em> and <em>&ldquo;The History of the BIM Map&rdquo;</em>)</span>. Without understanding where we came from, it is impossible to see where we are going.</p>
+        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para1">For the past ten years I&rsquo;ve worked on resource management for construction projects. Along the way I got curious about how the industry&rsquo;s tools came to be - from the first attempts at design automation to today&rsquo;s ERP platforms - and that turned into a couple of longer pieces <span style="color: var(--ink-3);">(<em>&ldquo;The Lobbyists&rsquo; Wars and the Development of BIM&rdquo;</em> and <em>&ldquo;The History of the BIM Map&rdquo;</em>)</span>. It&rsquo;s hard to see where things are heading without a sense of how we got here.</p>
 
-        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para2">Over the years, dozens of articles have come off my desk, read by millions of professionals around the world. At the same time, I&rsquo;ve consulted with major construction and consulting firms, developers, and software vendors themselves on data management in projects, helping them navigate processes where data is not a byproduct but the foundation for decision-making. This work gave me a rare opportunity to see the industry from both sides: through the eyes of those who create the tools and through the eyes of those who use them in real projects every day. Many of these observations and reflections are collected in my book <a href="https://datadrivenconstruction.io/" target="_blank" rel="noopener"><em>Data-Driven Construction</em></a>, which is now available in 16 languages, at <a href="https://datadrivenconstruction.io/books/" target="_blank" rel="noopener">datadrivenconstruction.io/books</a>.</p>
+        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para2">I&rsquo;ve written a fair amount on these topics over the years, and some of it found a wide readership. Alongside the writing, I&rsquo;ve consulted for construction and consulting firms, developers, and software vendors on how they handle project data - treating it as the basis for decisions rather than a byproduct of them. That work let me see the industry from both sides: the people who build the tools, and the people who use them every day. A lot of those observations ended up in my book <a href="https://datadrivenconstruction.io/" target="_blank" rel="noopener"><em>Data-Driven Construction</em></a>, now available in 16 languages (<a href="https://datadrivenconstruction.io/books/" target="_blank" rel="noopener">datadrivenconstruction.io/books</a>).</p>
 
-        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para3">Two other things have kept me busy: helping non-developers get into proprietary formats that were never meant to be opened, and finding a cleaner way to describe construction work through a resource model. These efforts have resulted in free tools, the <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN" target="_blank" rel="noopener">DDC CAD/BIM data converters</a> (Revit, IFC, DWG, DGN &rarr; structured data), <a href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">available on GitHub</a>, and the multilingual <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener">CWICR database</a> of construction works and resources, over 55,000 items in 11 languages, published as <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener">OpenConstructionEstimate-DDC-CWICR</a>. All of this was a necessary step toward an idea I&rsquo;ve been pursuing for the past decade, an open-source modular ERP for the construction industry.</p>
+        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para3">Two other problems kept me busy. One was helping non-developers get into proprietary file formats that were never meant to be opened. The other was finding a cleaner way to describe construction work through a resource model. Both produced free tools: the <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN" target="_blank" rel="noopener">DDC CAD/BIM converters</a> (Revit, IFC, DWG, DGN &rarr; structured data) <a href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">on GitHub</a>, and <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener">CWICR</a>, a multilingual database of construction works and resources - over 55,000 items in 11 languages, published as <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener">OpenConstructionEstimate-DDC-CWICR</a>.</p>
 
-        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para4">The recent generation of AI tooling finally made it feasible to consolidate that work, the methodology, data models, and prior implementations, into a single platform. It&rsquo;s now public and open source.</p>
+        <p class="section-lede" style="margin-bottom: 18px;" data-i18n-html="voices.para4">All of it was groundwork for something I&rsquo;d wanted to build for a long time: an open, modular ERP for construction. The latest generation of tooling finally made it practical to pull the methodology, data models, and earlier implementations together into one platform. It&rsquo;s now public and open source.</p>
 
         <div class="voices-spacer" aria-hidden="true"></div>
 
-        <p class="voices-pull" style="font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 15px; line-height: 1.55; color: var(--ink-0); margin: 24px 0 0; padding-left: 14px; border-left: 2px solid var(--accent); max-width: 60ch;" data-i18n-html="voices.pull">Progress is born from dialogue, from the clash of perspectives and openness to new approaches. I would be grateful if you would be willing to participate in this conversation on the inevitable Uberization of the construction industry and the transparency of cost and time estimation processes for construction projects.</p>
+        <p class="voices-pull" style="font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 15px; line-height: 1.55; color: var(--ink-0); margin: 24px 0 0; padding-left: 14px; border-left: 2px solid var(--accent); max-width: 60ch;" data-i18n-html="voices.pull">In my experience the best ideas tend to come out of conversation - and out of disagreement. If the questions around construction&rsquo;s move toward &ldquo;Uberization,&rdquo; and toward more transparent cost and time estimation, are interesting to you, I&rsquo;d be glad to have you in that discussion.</p>
         <p style="font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 16px; color: var(--ink-0); margin: 24px 0 4px;">
           Artem Boiko
         </p>
@@ -15694,7 +16062,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
          in a styled text fallback so the card never looks broken.            -->
     <div class="ddc-trusted reveal">
       <div class="ddc-trusted-head">
-        <div class="ddc-trusted-title" data-i18n="ddc.trusted_title">Engineers, contractors and consultancies in the DataDrivenConstruction community</div>
+        <div class="ddc-trusted-title" data-i18n="ddc.trusted_title">Engineers, contractors and consultancies - clients and users of DataDrivenConstruction</div>
         <div class="ddc-trusted-sub" data-i18n="ddc.trusted_sub">A snapshot of the construction, engineering and infrastructure teams that have explored the OpenConstructionERP demo and worked with DataDrivenConstruction's open tools, datasets and workshops, across Europe, North America, MENA, APAC and Australasia.</div>
       </div>
       <div class="ddc-marquee-rows">
@@ -17988,7 +18356,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         <p class="pa-eyebrow">Practice atlas · the deeper view</p>
         <h2>Where to look <em>after</em> the homepage.</h2>
         <p class="pa-lede">
-          Four reference pages built on what OCERP actually ships in v7.10.0 -
+          Four reference pages built on what OCERP actually ships in v8.6.0 -
           <b>code‑level audited, no marketing fiction.</b> Take the assessment to find your starting point,
           then go deeper into practices, industries and standards.
         </p>
@@ -18078,7 +18446,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <div class="pa-side-body">
               <div class="pa-side-eyebrow">▸ P‑01 .. P‑05</div>
               <h4 class="pa-side-title"><em>Practice</em> areas</h4>
-              <p class="pa-side-desc">5 disciplines with <b>platform vs partner</b> column per practice. What ships in v7.10.0, what's still partner work.</p>
+              <p class="pa-side-desc">5 disciplines with <b>platform vs partner</b> column per practice. What ships in v8.6.0, what's still partner work.</p>
               <div class="pa-side-tags">
                 <span class="pa-side-tag is-accent">110+ modules</span>
                 <span class="pa-side-tag">BIM · Cost · Takeoff</span>
@@ -18126,7 +18494,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <div class="pa-side-body">
               <div class="pa-side-eyebrow">▸ Code‑audit</div>
               <h4 class="pa-side-title"><em>Standards</em> reference</h4>
-              <p class="pa-side-desc">Every standard with a registered reader, writer or validator in v7.10.0. <b>46 rules · 5 packs</b>. Roadmap items called out separately.</p>
+              <p class="pa-side-desc">Every standard with a registered reader, writer or validator in v8.6.0. <b>46 rules · 5 packs</b>. Roadmap items called out separately.</p>
               <div class="pa-side-tags">
                 <span class="pa-side-tag is-accent">IFC · GAEB · BCF</span>
                 <span class="pa-side-tag">DIN · NRM · CSI</span>
@@ -19073,9 +19441,11 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
       const meta = document.querySelector('.stargazer-head .meta');
       if (!grid) return;
 
-      const TILE_DESKTOP = 40;
-      const GAP_DESKTOP  = 8;
-      const TILE_MOBILE  = 32;
+      // Must match .stargazer-grid CSS tracks/gap so fitRows() computes the
+      // real column count. Dense 28px tiles / 6px gap = many more per row.
+      const TILE_DESKTOP = 28;
+      const GAP_DESKTOP  = 6;
+      const TILE_MOBILE  = 28;
       const GAP_MOBILE   = 6;
 
       const renderAvatar = (u) => {
@@ -19089,7 +19459,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         img.src = u.avatar_url + (u.avatar_url.includes('?') ? '&' : '?') + 's=80';
         img.alt = u.login;
         img.loading = 'lazy';
-        img.width = 40; img.height = 40;
+        img.width = 28; img.height = 28;
         a.appendChild(img);
         return a;
       };
@@ -19101,11 +19471,26 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         const gap  = mobile ? GAP_MOBILE  : GAP_DESKTOP;
         const cols = Math.max(1, Math.floor((w + gap) / (tile + gap)));
         grid.style.setProperty('--star-cols', String(cols));
-        const cells = grid.querySelectorAll('.star-avatar');
-        const keep = Math.floor(cells.length / cols) * cols;
-        cells.forEach((c, i) => {
-          (c).style.display = i < keep ? '' : 'none';
-        });
+
+        // Show (almost) everyone who starred us: the wall is a proud, near-full
+        // count, trimmed only to whole rows for a clean bottom edge, with the
+        // "see all on GitHub" pill as the last cell. We deliberately no longer
+        // cap the wall to the contributor grid's height - the wall should carry
+        // as many stargazers on screen as will fit.
+        const maxRows = Infinity;
+
+        const pill = grid.querySelector('.star-avatar-more');
+        const pillSpan = pill ? 3 : 0; // the pill spans 3 grid columns
+        const avatars = Array.from(grid.querySelectorAll('.star-avatar')).filter((c) => c !== pill);
+        const capacity = (maxRows === Infinity) ? Infinity : maxRows * cols;
+        const availAvatars = (capacity === Infinity) ? avatars.length : Math.max(0, capacity - pillSpan);
+        let shown = Math.min(avatars.length, availAvatars);
+        // Clean bottom edge: (shown avatars + pill span) fills whole rows.
+        if (cols > pillSpan) {
+          shown = Math.max(0, Math.floor((shown + pillSpan) / cols) * cols - pillSpan);
+        }
+        avatars.forEach((c, i) => { (c).style.display = i < shown ? '' : 'none'; });
+        if (pill) (pill).style.display = '';
       };
 
       // Pull stargazers from multiple DDC repos and merge with the
@@ -19120,13 +19505,22 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
       const repos = [
         'datadrivenconstruction/openconstructionerp',
       ];
-      Promise.all(
-        repos.map((r) =>
-          fetch(`https://api.github.com/repos/${r}/stargazers?per_page=100&page=1`)
-            .then((res) => (res.ok ? res.json() : []))
-            .catch(() => [])
-        )
-      )
+      // Pull enough pages to cover (almost) every stargazer - the repo is past
+      // 480 stars, so 5 pages of 100 keep the wall complete as we grow; the
+      // dedup/merge below handles the extra batches, and fitRows() trims only to
+      // whole rows.
+      const STAR_PAGES = [1, 2, 3, 4, 5];
+      const fetches = [];
+      repos.forEach((r) => {
+        STAR_PAGES.forEach((pg) => {
+          fetches.push(
+            fetch(`https://api.github.com/repos/${r}/stargazers?per_page=100&page=${pg}`)
+              .then((res) => (res.ok ? res.json() : []))
+              .catch(() => [])
+          );
+        });
+      });
+      Promise.all(fetches)
         .then((batches) => {
           const seen = new Set(existing);
           const additions = [];
@@ -19155,6 +19549,57 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         cancelAnimationFrame(rAf);
         rAf = requestAnimationFrame(fitRows);
       });
+      // Re-cap once fonts/images settle (the contributor grid's height, which
+      // sets our row cap, is only final then).
+      window.addEventListener('load', () => requestAnimationFrame(fitRows));
+    })();
+
+    /* Contributor wall - live GitHub fetch (mirrors setupStargazers).
+       SSR seeds the first ~26 contributors; here we refresh + merge any new
+       ones from the contributors API, skipping bots + dupes, capped so the
+       fixed 6-column wall stays ~5 rows. If the fetch fails we keep SSR. */
+    (function setupContributors() {
+      const grid = document.querySelector('.contributor-grid');
+      if (!grid) return;
+      const morePill = grid.querySelector('.star-avatar-more');
+      const existing = new Set();
+      grid.querySelectorAll('.star-avatar:not(.star-avatar-more)').forEach((a) => {
+        const login = a.title || a.querySelector('img')?.alt;
+        if (login) existing.add(login.toLowerCase());
+      });
+      const MAX = 29; // up to ~5 rows of 6 once the "+ many more" cell is counted
+      const renderAvatar = (u) => {
+        const a = document.createElement('a');
+        a.href = 'https://github.com/' + u.login;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = u.login;
+        a.className = 'star-avatar';
+        const img = document.createElement('img');
+        img.src = u.avatar_url + (u.avatar_url.includes('?') ? '&' : '?') + 's=80';
+        img.alt = u.login;
+        img.loading = 'lazy';
+        img.width = 40; img.height = 40;
+        a.appendChild(img);
+        return a;
+      };
+      fetch('https://api.github.com/repos/datadrivenconstruction/openconstructionerp/contributors?per_page=100')
+        .then((res) => (res.ok ? res.json() : []))
+        .then((users) => {
+          if (!Array.isArray(users)) return;
+          const seen = new Set(existing);
+          let count = existing.size;
+          users.forEach((u) => {
+            const login = u && u.login ? u.login : '';
+            const k = login.toLowerCase();
+            if (!login || (u.type && u.type === 'Bot') || /\[bot\]$/.test(login) || seen.has(k)) return;
+            if (count >= MAX) return;
+            seen.add(k); count += 1;
+            const a = renderAvatar(u);
+            if (morePill) grid.insertBefore(a, morePill); else grid.appendChild(a);
+          });
+        })
+        .catch(() => {});
     })();
 
     /* Tour player - tabbed navigator drives a single stage.
@@ -20969,6 +21414,465 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
   </script>
 
   <!-- ================================================================ -->
+  <!-- Module carousel - drives the Apple-style mc-* showcase: hover or  -->
+  <!-- click (or arrow keys) selects a module; the stage GIF swaps with  -->
+  <!-- a short crossfade. Auto-rotates every ~4s, pausing on hover/focus -->
+  <!-- and fully disabled under prefers-reduced-motion. Self-contained.  -->
+  <!-- ================================================================ -->
+  <script>
+    (function setupModuleCarousel() {
+      var root = document.querySelector('[data-mod-carousel]');
+      if (!root) return;
+      var tabs = Array.prototype.slice.call(root.querySelectorAll('.mc-tab'));
+      var shot = root.querySelector('.mc-shot');
+      var img  = document.getElementById('mc-shot-img');
+      if (!tabs.length || !shot || !img) return;
+
+      var reduceMotion = false;
+      try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+      var current = -1;
+      var swapTimer = 0;
+
+      // Swap the stage image with a brief crossfade. GIFs are only fetched
+      // when first shown (lazy <img>), so idle modules cost nothing.
+      function showShot(src) {
+        if (!src || img.getAttribute('src') === src) return;
+        shot.classList.add('is-swapping');
+        clearTimeout(swapTimer);
+        swapTimer = setTimeout(function () {
+          img.setAttribute('src', src);
+          // next frame: fade back in
+          requestAnimationFrame(function () { shot.classList.remove('is-swapping'); });
+        }, reduceMotion ? 0 : 180);
+      }
+
+      function select(idx, focus) {
+        if (idx < 0 || idx >= tabs.length || idx === current) {
+          if (idx >= 0 && focus && tabs[idx]) tabs[idx].focus();
+          return;
+        }
+        current = idx;
+        tabs.forEach(function (t, i) {
+          var on = i === idx;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.setAttribute('tabindex', on ? '0' : '-1');
+        });
+        if (shot.id) {
+          shot.setAttribute('aria-labelledby', tabs[idx].id || '');
+        }
+        showShot(tabs[idx].getAttribute('data-shot'));
+        if (focus && tabs[idx]) tabs[idx].focus();
+      }
+
+      // --- Auto-rotate (Apple-style), paused on hover / focus-within ----
+      var AUTO_MS = 4000;
+      var rotateTimer = 0;
+      var paused = false;
+      function tick() {
+        if (paused) return;
+        select((current + 1) % tabs.length, false);
+      }
+      function startAuto() {
+        if (reduceMotion) return;
+        stopAuto();
+        rotateTimer = setInterval(tick, AUTO_MS);
+      }
+      function stopAuto() {
+        if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = 0; }
+      }
+      function pause() { paused = true; }
+      function resume() { paused = false; }
+
+      // Hover / focus on any tab selects it; hovering the whole player
+      // pauses auto-rotate so the user controls the stage.
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener('mouseenter', function () { select(i, false); });
+        tab.addEventListener('focus', function () { select(i, false); });
+        tab.addEventListener('click', function () { select(i, false); });
+        tab.addEventListener('keydown', function (ev) {
+          var k = ev.key;
+          var last = tabs.length - 1;
+          var next = -1;
+          if (k === 'ArrowDown' || k === 'ArrowRight') next = (i + 1) % tabs.length;
+          else if (k === 'ArrowUp' || k === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+          else if (k === 'Home') next = 0;
+          else if (k === 'End') next = last;
+          else return;
+          ev.preventDefault();
+          select(next, true);
+        });
+      });
+
+      root.addEventListener('mouseenter', pause);
+      root.addEventListener('mouseleave', resume);
+      root.addEventListener('focusin', pause);
+      root.addEventListener('focusout', resume);
+
+      // Don't burn cycles while off-screen; (re)start auto-rotate in view.
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) startAuto(); else stopAuto();
+          });
+        }, { threshold: 0.2 });
+        io.observe(root);
+      } else {
+        startAuto();
+      }
+
+      // Initialise on the first tab (matches the server-rendered is-active).
+      var startIdx = tabs.findIndex(function (t) { return t.classList.contains('is-active'); });
+      current = startIdx < 0 ? 0 : startIdx;
+      // Ensure aria + image are consistent with the initial active tab.
+      img.setAttribute('src', tabs[current].getAttribute('data-shot') || img.getAttribute('src'));
+    })();
+  </script>
+
+  <!-- ================================================================ -->
+  <!-- Module hover popup - replaces the retired carousel. Hovering OR    -->
+  <!-- keyboard-focusing any .mod-cell in #modules-overview pops a single -->
+  <!-- shared floating panel (#mod-hovercard) near that card: a browser-  -->
+  <!-- chrome frame, the module's preview GIF, and the card's own name +  -->
+  <!-- short description. GIF = the cell's data-shot, else its parent      -->
+  <!-- .mod-group .mod-step-shot img src (fallback so every cell shows     -->
+  <!-- something). Fade + slight scale in; reduced-motion = instant; off   -->
+  <!-- on touch / <=900px. Independent of the legacy OE_MOD_HOVER IIFE.    -->
+  <!-- ================================================================ -->
+  <script>
+    (function setupModuleHoverCard() {
+      var overview = document.getElementById('modules-overview');
+      if (!overview) return;
+
+      // Bail entirely on touch / no-hover / small screens (CSS hides the card
+      // too, but we also skip all wiring so the grid behaves exactly as-is).
+      var noHover = false, smallScreen = false;
+      try {
+        noHover = window.matchMedia('(hover: none)').matches;
+        smallScreen = window.matchMedia('(max-width: 900px)').matches;
+      } catch (e) {}
+      if (noHover || smallScreen) return;
+
+      var reduceMotion = false;
+      try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+      var cells = Array.prototype.slice.call(overview.querySelectorAll('.mod-cell'));
+      if (!cells.length) return;
+
+      // Build the single shared popup once and append to <body> so it's never
+      // clipped by the grid's overflow/stacking context.
+      var card = document.getElementById('mod-hovercard');
+      if (!card) {
+        card = document.createElement('div');
+        card.id = 'mod-hovercard';
+        card.setAttribute('aria-hidden', 'true');
+        card.innerHTML =
+          '<div class="mc-chrome" aria-hidden="true">' +
+            '<span class="mc-dot" style="background:#f87171"></span>' +
+            '<span class="mc-dot" style="background:#fbbf24"></span>' +
+            '<span class="mc-dot" style="background:#34d399"></span>' +
+          '</div>' +
+          '<div class="mc-shot"><img alt="" decoding="async" /></div>' +
+          '<div class="mod-hc-meta">' +
+            '<span class="mod-hc-name"></span>' +
+            '<span class="mod-hc-desc"></span>' +
+          '</div>';
+        document.body.appendChild(card);
+      }
+      var cardImg  = card.querySelector('img');
+      var cardName = card.querySelector('.mod-hc-name');
+      var cardDesc = card.querySelector('.mod-hc-desc');
+
+      // Resolve a cell's GIF: explicit data-shot wins; else fall back to the
+      // cell's parent .mod-group icon figure, which carries the group GIF on
+      // its data-group-shot attribute (the always-looping GIF is gone).
+      function shotFor(cell) {
+        var s = cell.getAttribute('data-shot');
+        if (s) return s;
+        var grp = cell.closest('.mod-group');
+        var fg = grp && grp.querySelector('.mod-step-icon');
+        return fg ? fg.getAttribute('data-group-shot') : '';
+      }
+
+      // Pre-resolve + preload each cell's GIF so the popup paints instantly.
+      var preloaded = {};
+      cells.forEach(function (cell) {
+        var src = shotFor(cell);
+        cell._hcShot = src;
+        if (src && !preloaded[src]) { preloaded[src] = 1; var p = new Image(); p.src = src; }
+      });
+
+      var hideTimer = 0;
+      var W = 340; // keep in sync with #mod-hovercard width in CSS
+
+      function place(cell) {
+        var r = cell.getBoundingClientRect();
+        var vw = document.documentElement.clientWidth;
+        var vh = document.documentElement.clientHeight;
+        var cw = card.offsetWidth || W;
+        var ch = card.offsetHeight || 240;
+        var pad = 12;
+        // Prefer to the right of the card; flip left if it would overflow.
+        var left = r.right + pad;
+        if (left + cw + pad > vw) left = r.left - cw - pad;
+        if (left < pad) left = Math.max(pad, (vw - cw) / 2);
+        // Vertically align to the card top, clamped into the viewport.
+        var top = r.top;
+        if (top + ch + pad > vh) top = vh - ch - pad;
+        if (top < pad) top = pad;
+        card.style.left = Math.round(left) + 'px';
+        card.style.top  = Math.round(top) + 'px';
+      }
+
+      function show(cell) {
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0; }
+        var src = cell._hcShot || shotFor(cell);
+        if (src && cardImg.getAttribute('src') !== src) cardImg.setAttribute('src', src);
+        var nameEl = cell.querySelector('.mod-cell-name > span') || cell.querySelector('.mod-cell-name');
+        var descEl = cell.querySelector('.mod-cell-desc');
+        cardName.textContent = nameEl ? nameEl.textContent.trim() : '';
+        cardDesc.textContent = descEl ? descEl.textContent.trim() : '';
+        place(cell);
+        // Force layout before adding .is-on so the entrance transition runs.
+        void card.offsetWidth;
+        card.classList.add('is-on');
+        card.setAttribute('aria-hidden', 'false');
+      }
+
+      function hide() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () {
+          card.classList.remove('is-on');
+          card.setAttribute('aria-hidden', 'true');
+          hideTimer = 0;
+        }, 120);
+      }
+
+      cells.forEach(function (cell) {
+        cell.addEventListener('mouseenter', function () { show(cell); });
+        cell.addEventListener('mouseleave', hide);
+        cell.addEventListener('focusin', function () { show(cell); });
+        cell.addEventListener('focusout', hide);
+      });
+
+      // Keep the popup glued to its card while the page scrolls / resizes.
+      function reposition() {
+        if (!card.classList.contains('is-on')) return;
+        var active = cells.find(function (c) { return c.matches(':hover') || c.contains(document.activeElement); });
+        if (active) place(active); else hide();
+      }
+      window.addEventListener('scroll', reposition, { passive: true });
+      window.addEventListener('resize', reposition);
+    })();
+  </script>
+
+  <!-- ================================================================ -->
+  <!-- Hero honeycomb preview + click-to-scroll.                         -->
+  <!-- Hovering / focusing a hex tile floats a small browser-chrome      -->
+  <!-- frame next to it showing that module's GIF; clicking (or Enter /  -->
+  <!-- Space) smooth-scrolls to the full module overview below. The      -->
+  <!-- hexes keep their own CSS flip on hover - this only adds the        -->
+  <!-- floating preview + scroll behaviour. Off on touch / <=900px.      -->
+  <!-- ================================================================ -->
+  <style>
+    #hero-hexpreview {
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 9600;
+      width: 300px;
+      max-width: 86vw;
+      border-radius: 14px;
+      overflow: hidden;
+      background: color-mix(in oklab, #ffffff 92%, transparent);
+      border: 1px solid var(--line-1);
+      box-shadow:
+        0 30px 70px -30px rgba(15, 23, 42, 0.45),
+        0 14px 30px -18px rgba(45, 94, 142, 0.30);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px) scale(.96);
+      transform-origin: top left;
+      transition: opacity .18s ease, transform .18s cubic-bezier(.22,.61,.36,1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      will-change: transform, opacity, left, top;
+    }
+    #hero-hexpreview.is-on { opacity: 1; transform: translateY(0) scale(1); }
+    #hero-hexpreview .hxp-chrome {
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 14px;
+    }
+    #hero-hexpreview .hxp-dot { width: 10px; height: 10px; border-radius: 50%; }
+    #hero-hexpreview .hxp-shot { position: relative; aspect-ratio: 16 / 10; background: #0b1220; }
+    #hero-hexpreview .hxp-shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    #hero-hexpreview .hxp-title {
+      padding: 11px 14px 13px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+      line-height: 1.25;
+      border-top: 1px solid var(--line-0);
+      background: color-mix(in oklab, #ffffff 70%, transparent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    [data-theme="dark"] #hero-hexpreview { background: color-mix(in oklab, #141d30 90%, transparent); }
+    [data-theme="dark"] #hero-hexpreview .hxp-title { background: color-mix(in oklab, #141d30 60%, transparent); }
+    @media (prefers-reduced-motion: reduce) {
+      #hero-hexpreview { transition: opacity .12s linear; transform: none; }
+      #hero-hexpreview.is-on { transform: none; }
+    }
+    @media (hover: none), (max-width: 900px) {
+      #hero-hexpreview { display: none !important; }
+    }
+  </style>
+  <script>
+    (function heroHexPreview() {
+      var honeycomb = document.querySelector('.module-honeycomb');
+      if (!honeycomb) return;
+
+      var dest = document.getElementById('modules-overview');
+
+      // Click / keyboard scroll-to-overview works on every screen size; the
+      // floating GIF preview is desktop-hover-only (set up further below).
+      var cells = Array.prototype.slice.call(honeycomb.querySelectorAll('.hc-cell'));
+      if (!cells.length) return;
+
+      function goToOverview() {
+        if (dest && typeof dest.scrollIntoView === 'function') {
+          dest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      // Touch / no-hover / small screens: skip all preview wiring (CSS hides the
+      // panel too) but still allow click-to-scroll.
+      var noHover = false, smallScreen = false;
+      try {
+        noHover = window.matchMedia('(hover: none)').matches;
+      } catch (e) {}
+      smallScreen = window.innerWidth <= 900;
+      var previewOn = !(noHover || smallScreen);
+
+      var reduceMotion = false;
+      try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+      var panel = null, panelImg = null, panelTitle = null, hideTimer = 0;
+      var W = 300; // keep in sync with #hero-hexpreview width in CSS
+
+      if (previewOn) {
+        panel = document.getElementById('hero-hexpreview');
+        if (!panel) {
+          panel = document.createElement('div');
+          panel.id = 'hero-hexpreview';
+          panel.setAttribute('aria-hidden', 'true');
+          panel.innerHTML =
+            '<div class="hxp-chrome" aria-hidden="true">' +
+              '<span class="hxp-dot" style="background:#f87171"></span>' +
+              '<span class="hxp-dot" style="background:#fbbf24"></span>' +
+              '<span class="hxp-dot" style="background:#34d399"></span>' +
+            '</div>' +
+            '<div class="hxp-shot"><img alt="" decoding="async" /></div>' +
+            '<div class="hxp-title"></div>';
+          document.body.appendChild(panel);
+        }
+        panelImg = panel.querySelector('img');
+        panelTitle = panel.querySelector('.hxp-title');
+
+        // Preload each cell's GIF once so the preview paints instantly.
+        var preloaded = {};
+        cells.forEach(function (cell) {
+          var src = cell.getAttribute('data-shot');
+          if (src && !preloaded[src]) { preloaded[src] = 1; var p = new Image(); p.src = src; }
+        });
+      }
+
+      function titleFor(cell) {
+        var t = cell.querySelector('.hc-title');
+        return t ? t.textContent.trim() : '';
+      }
+
+      function place(cell) {
+        var r = cell.getBoundingClientRect();
+        var vw = document.documentElement.clientWidth;
+        var vh = document.documentElement.clientHeight;
+        var cw = panel.offsetWidth || W;
+        var ch = panel.offsetHeight || 220;
+        var pad = 12;
+        // Prefer just to the right of the hex; flip to the left on overflow.
+        var left = r.right + pad;
+        if (left + cw + pad > vw) left = r.left - cw - pad;
+        if (left < pad) left = Math.max(pad, (vw - cw) / 2);
+        var top = r.top;
+        if (top + ch + pad > vh) top = vh - ch - pad;
+        if (top < pad) top = pad;
+        panel.style.left = Math.round(left) + 'px';
+        panel.style.top = Math.round(top) + 'px';
+      }
+
+      function show(cell) {
+        if (!previewOn || !panel) return;
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0; }
+        var src = cell.getAttribute('data-shot');
+        if (src && panelImg.getAttribute('src') !== src) panelImg.setAttribute('src', src);
+        panelTitle.textContent = titleFor(cell);
+        place(cell);
+        void panel.offsetWidth; // force layout so the entrance transition runs
+        panel.classList.add('is-on');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function hide() {
+        if (!previewOn || !panel) return;
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () {
+          panel.classList.remove('is-on');
+          panel.setAttribute('aria-hidden', 'true');
+          hideTimer = 0;
+        }, 120);
+      }
+
+      function hideNow() {
+        if (!previewOn || !panel) return;
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = 0; }
+        panel.classList.remove('is-on');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      cells.forEach(function (cell) {
+        if (previewOn) {
+          cell.addEventListener('mouseenter', function () { show(cell); });
+          cell.addEventListener('mouseleave', hide);
+          cell.addEventListener('focusin', function () { show(cell); });
+          cell.addEventListener('focusout', hide);
+        }
+        cell.addEventListener('click', function () { hideNow(); goToOverview(); });
+        cell.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+            ev.preventDefault();
+            hideNow();
+            goToOverview();
+          }
+        });
+      });
+
+      if (previewOn) {
+        // Keep the preview glued to its hex while scrolling / resizing.
+        function reposition() {
+          if (!panel.classList.contains('is-on')) return;
+          var active = cells.find(function (c) { return c.matches(':hover') || c.contains(document.activeElement); });
+          if (active) place(active); else hide();
+        }
+        window.addEventListener('scroll', reposition, { passive: true });
+        window.addEventListener('resize', reposition);
+      }
+    })();
+  </script>
+
+  <!-- ================================================================ -->
   <!-- i18n - 20-language runtime: detects language (URL → localStorage  -->
   <!-- → navigator → IP geolocation → EN fallback), fetches locale JSON, -->
   <!-- rewrites every [data-i18n] element, persists the user's choice.   -->
@@ -21536,6 +22440,50 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
   });
   var custom = document.getElementById('custom-form');
   if (custom) bind(custom, '/api/inquiry', 'inquiry');
+})();
+</script>
+<script>/* OE_MOD_HOVER */
+(function(){
+  var BASE='assets/loops/';
+  var MAP={dashboard:'mod_dashboard',projects:'mod_projects',files:'mod_files',boq:'mod_boq',costs:'mod_costs',match:'mod_match',assemblies:'mod_assemblies',catalog:'mod_catalog',qrules:'mod_qrules',pdftakeoff:'mod_pdftakeoff',dwgtakeoff:'mod_dwgtakeoff',dataexplorer:'mod_dataexplorer',bim:'mod_bim',clash:'mod_clash',bimrules:'mod_bimrules',aiest:'mod_aiest',advisor:'mod_advisor',pi:'mod_pi',chat:'mod_chat',schedule:'mod_schedule',scheduleadv:'mod_scheduleadv',tasks:'mod_tasks',fived:'mod_fived',risk:'mod_risk',diary:'mod_diary',equipment:'mod_equipment',resources:'mod_resources',service:'mod_service',portal:'mod_portal',finance:'mod_finance',procurement:'mod_procurement',tendering:'mod_tendering',co:'mod_co',crm:'mod_crm',contracts:'mod_contracts',subs:'mod_subs',bidmgmt:'mod_bidmgmt',variations:'mod_variations',suppliers:'mod_suppliers',propdev:'mod_propdev',contacts:'mod_contacts',meetings:'mod_meetings',rfi:'mod_rfi',submittals:'mod_submittals',transmittals:'mod_transmittals',corr:'mod_corr',assets:'mod_assets',cde:'mod_cde',photos:'mod_photos',markups:'mod_markups',fieldreports:'mod_fieldreports',reports:'mod_reports',bi:'mod_bi',validation:'mod_validation',inspections:'mod_inspections',ncr:'mod_ncr',safety:'mod_safety',punch:'mod_punch',qms:'mod_qms',hse:'mod_hse',carbon:'mod_carbon'};
+  function init(){
+    // Shared large hover preview (full module screen, near-screen-size).
+    var big=document.getElementById('mod-bigpreview');
+    if(!big){
+      big=document.createElement('div'); big.id='mod-bigpreview'; big.setAttribute('aria-hidden','true');
+      var bfig=document.createElement('figure'), bimg=document.createElement('img'), bcap=document.createElement('figcaption');
+      bimg.alt=''; bimg.decoding='async';
+      var bts=document.createElement('span'); bts.className='t'; var bss=document.createElement('span'); bss.className='s';
+      bcap.appendChild(bts); bcap.appendChild(bss); bfig.appendChild(bimg); bfig.appendChild(bcap);
+      big.appendChild(bfig); document.body.appendChild(big);
+    }
+    var bigImg=big.querySelector('img'), bigT=big.querySelector('.t'), bigS=big.querySelector('.s'), bigTimer=null;
+    function showBig(src,ti,su){ if(bigTimer){ clearTimeout(bigTimer); bigTimer=null; } if(bigImg.getAttribute('src')!==src) bigImg.setAttribute('src',src); bigT.textContent=ti||''; bigS.textContent=su||''; big.classList.add('is-on'); }
+    function hideBig(){ if(bigTimer) clearTimeout(bigTimer); bigTimer=setTimeout(function(){ big.classList.remove('is-on'); bigTimer=null; },140); }
+    var groups=document.querySelectorAll('.mod-overview .mod-group--shot');
+    groups.forEach(function(group){
+      var fig=group.querySelector('.mod-step-shot'); if(!fig) return;
+      var img=fig.querySelector('img'); if(!img) return;
+      var def=img.getAttribute('src');
+      var cap=fig.querySelector('.mod-shot-cap');
+      if(!cap){ cap=document.createElement('figcaption'); cap.className='mod-shot-cap'; var t=document.createElement('span'); t.className='mod-shot-cap-t'; var s=document.createElement('span'); s.className='mod-shot-cap-s'; cap.appendChild(t); cap.appendChild(s); fig.appendChild(cap); }
+      var capT=cap.querySelector('.mod-shot-cap-t'), capS=cap.querySelector('.mod-shot-cap-s');
+      var cur=def;
+      function setShot(src){ if(cur===src) return; cur=src; img.style.opacity='0'; requestAnimationFrame(function(){ img.src=src; requestAnimationFrame(function(){ img.style.opacity='1'; }); }); }
+      var cells=group.querySelectorAll('.mod-cell'); var seen={};
+      cells.forEach(function(cell){
+        var keyEl=cell.querySelector('.mod-cell-name [data-i18n]');
+        var key=keyEl?keyEl.getAttribute('data-i18n').replace('modgrid.','').replace('_title',''):'';
+        var gif=MAP[key]?BASE+MAP[key]+'.gif':def;
+        if(!seen[gif]){ seen[gif]=1; var pre=new Image(); pre.src=gif; }
+        var nameEl=keyEl||cell.querySelector('.mod-cell-name'); var flowEl=cell.querySelector('.mod-cell-flow');
+        function show(){ var ti=nameEl?nameEl.textContent.trim():''; var su=flowEl?flowEl.textContent.trim():''; setShot(gif); capT.textContent=ti; capS.textContent=su; cap.classList.add('is-on'); cell.classList.add('is-active'); showBig(gif,ti,su); }
+        function hide(){ setShot(def); cap.classList.remove('is-on'); cell.classList.remove('is-active'); hideBig(); }
+        cell.addEventListener('mouseenter',show); cell.addEventListener('mouseleave',hide); cell.addEventListener('focusin',show); cell.addEventListener('focusout',hide);
+      });
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
 </script>
 </body>

@@ -1,4 +1,8 @@
 {
+  "modcar": {
+    "eyebrow": "Ver el recorrido",
+    "title": "Cada módulo, <em>a un clic de distancia.</em>"
+  },
   "nav": {
     "demo": "Demo",
     "tour": "Recorrido",
@@ -215,6 +219,8 @@
     "modcard_4_desc": "Preguntas, ideas y muestras. Únete para cosas que aún no son un issue.",
     "stargazer_heading": "Personas que ya <em>pusieron estrella al repo.</em>",
     "stargazer_meta": "Míralos en GitHub →",
+    "contributor_heading": "<em>Colaboradores</em>",
+    "contributor_meta": "Míralos en GitHub →",
     "many_more": "+ muchos más"
   },
   "numbers": {
@@ -423,9 +429,9 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · por qué lo estamos construyendo",
-    "para1": "Pasé diez años haciendo estimaciones de construcción con las herramientas comerciales estándar de la industria - incluidas hojas de cálculo pegadas con cinta adhesiva a visores de PDF. Lo bueno estaba detrás de licencias empresariales y lock-in de proveedor. Lo malo estaba en todas partes.",
-    "para2": "OpenConstructionERP nació como el pipeline interno detrás de <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">DataDrivenConstruction</a> - la base de datos de costos <strong>CWICR</strong> (55.000+ ítems), el pipeline de parseo CAD <strong>cad2data</strong>, el mapeo de clasificaciones. Lo liberamos como open-source porque la brecha entre lo que cobran los ERP comerciales y lo que la industria realmente necesita seguía ampliándose.",
-    "para3": "Se publica bajo AGPL-3.0, corre en una VPS de 2 GB y todo está en <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\" style=\"color: var(--accent); text-decoration: underline; text-underline-offset: 2px;\">GitHub</a>.",
+    "para1": "Durante los últimos diez años he trabajado en la gestión de recursos para proyectos de construcción. Por el camino me picó la curiosidad por saber cómo surgieron las herramientas del sector - desde los primeros intentos de automatización del diseño hasta las plataformas ERP de hoy - y de ahí salieron un par de textos más extensos <span style=\"color: var(--ink-3);\">(<em>«The Lobbyists’ Wars and the Development of BIM»</em> y <em>«The History of the BIM Map»</em>)</span>. Es difícil ver hacia dónde vamos sin entender cómo hemos llegado hasta aquí.",
+    "para2": "He escrito bastante sobre estos temas a lo largo de los años, y parte de ello llegó a un público amplio. Además de escribir, he asesorado a empresas de construcción y consultoría, promotores y proveedores de software sobre cómo gestionan los datos de sus proyectos - tratándolos como la base de las decisiones y no como un subproducto de ellas. Ese trabajo me permitió ver el sector desde ambos lados: quienes crean las herramientas y quienes las usan cada día. Muchas de esas observaciones acabaron en mi libro <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>, ahora disponible en 16 idiomas (<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>).",
+    "para3": "Otros dos problemas me mantuvieron ocupado. Uno era ayudar a quienes no son desarrolladores a entrar en formatos de archivo propietarios que nunca se pensaron para abrirse. El otro era encontrar una forma más clara de describir el trabajo de construcción mediante un modelo de recursos. De ambos salieron herramientas gratuitas: los <a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">convertidores CAD/BIM de DDC</a> (Revit, IFC, DWG, DGN → datos estructurados) <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">en GitHub</a>, y <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR</a>, una base de datos multilingüe de trabajos y recursos de construcción - más de 55.000 elementos en 11 idiomas, publicada como <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a>.",
     "founder_title": "fundador, datadrivenconstruction.io",
     "recently_shipped": "Publicado recientemente",
     "changelog_more": "Changelog completo en GitHub <svg viewBox=\"0 0 24 24\" width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>",
@@ -434,8 +440,8 @@
     "group_flagship": "productos estrella · datadrivenconstruction.io",
     "group_github": "open source en github · datadrivenconstruction",
     "group_socials": "encuéntranos en la red",
-    "para4": "La reciente generación de herramientas de IA ha hecho por fin viable consolidar todo ese trabajo - metodología, modelos de datos e implementaciones previas - en una única plataforma. Ahora es pública y de código abierto.",
-    "pull": "El progreso nace del diálogo - del choque de perspectivas y de la apertura a nuevos enfoques. Agradecería tu participación en esta conversación sobre la inevitable «uberización» del sector de la construcción y la transparencia de los procesos de estimación de costes y plazos en los proyectos de obra.",
+    "para4": "Todo ello fue la base de algo que quería construir desde hacía mucho tiempo: un ERP abierto y modular para la construcción. La última generación de herramientas por fin hizo práctico reunir la metodología, los modelos de datos y las implementaciones anteriores en una sola plataforma. Ahora es público y de código abierto.",
+    "pull": "Según mi experiencia, las mejores ideas suelen surgir de la conversación - y del desacuerdo. Si te interesan las preguntas en torno a la «uberización» de la construcción y a una estimación más transparente de costes y plazos, me encantaría contar contigo en esa conversación.",
     "ref_agents_meta": "Caja de herramientas de automatización",
     "ref_agents_name": "Agentes y Skills de IA de DDC",
     "ref_book_meta": "Lectura de referencia",
@@ -599,14 +605,14 @@
     "reject": "Rechazar no esenciales"
   },
   "trust": {
-    "title": "ingenieros, constructoras y consultoras que ya lo usan",
-    "sub": "Una muestra de los equipos de construcción, ingeniería e infraestructura que se registraron en las primeras semanas de OpenConstructionERP - en Europa, Norteamérica, MENA, APAC y Oceanía."
+    "title": "Ingenieros, empresas constructoras y consultoras que exploran OpenConstructionERP",
+    "sub": "Una muestra de los equipos de construcción, ingeniería e infraestructura que se registraron para probar OpenConstructionERP o han trabajado con las herramientas abiertas de DataDrivenConstruction - en Europa, Norteamérica, MENA, APAC y Oceanía."
   },
   "ddc": {
     "eyebrow": "<span class=\"num\">10</span> · linaje de investigación abierta",
     "title": "Construido sobre DataDrivenConstruction.",
     "lede": "OpenConstructionERP nace de una década de investigación abierta en tecnología de la construcción.",
-    "trusted_title": "Ingenieros, contratistas y consultoras de la comunidad de DataDrivenConstruction",
+    "trusted_title": "Ingenieros, contratistas y consultoras - clientes y usuarios de DataDrivenConstruction",
     "trusted_sub": "Una muestra de los equipos de construcción, ingeniería e infraestructura que han explorado la demo de OpenConstructionERP y han trabajado con las herramientas abiertas, los conjuntos de datos y los talleres de DataDrivenConstruction, en Europa, Norteamérica, Oriente Medio y Norte de África, Asia-Pacífico y Australasia."
   },
   "custom": {
@@ -714,6 +720,17 @@
     "read_less": "Mostrar menos"
   },
   "modgrid": {
+    "pain_overview": "Deja de hacer malabares con hojas de cálculo y carpetas - un único hogar para cada proyecto, archivo y cifra.",
+    "pain_estimation": "Se acabaron las fórmulas rotas de Excel - BOQs estructurados con cálculo de costos en vivo y multidivisa.",
+    "pain_takeoff": "Deja de volver a medir a mano - cantidades extraídas directamente de PDFs, planos y BIM.",
+    "pain_ai": "Olvídate de la página en blanco - convierte una foto o un plano en un presupuesto valorado en minutos.",
+    "pain_planning": "Sin cronogramas desconectados - planifica, fija la línea base y controla el avance frente al presupuesto.",
+    "pain_operations": "Deja de perder lo que pasa en obra - diarios, mano de obra y fotos capturados en el campo.",
+    "pain_finance": "Sin sorpresas a fin de mes - costos, facturas y flujo de caja se actualizan a medida que avanza el trabajo.",
+    "pain_commercial": "Deja de perseguir tratos en tu bandeja de entrada - licitaciones, clientes y contratos en un solo flujo.",
+    "pain_communication": "Sin hilos de correo dispersos - contactos, mensajes y aprobaciones junto al trabajo.",
+    "pain_documentation": "Deja de rehacer informes a mano - documentos y entregables generados a partir de datos en vivo.",
+    "pain_quality": "Sin puntos ciegos de papeleo - listas de verificación, validación e incidencias siempre listas para auditoría.",
     "eyebrow": "Qué incluye",
     "title": "Una instalación. <em>Todo el stack de construcción.</em>",
     "sub": "Presupuestación, mediciones, BIM, planificación, finanzas, operaciones de obra - cada módulo ya conectado a la misma base de datos. Sin marketplace, sin paywalls, sin add-ons por usuario.",

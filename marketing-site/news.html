@@ -396,6 +396,11 @@
       color: var(--accent-4);
       border: 1px solid color-mix(in oklab, var(--accent-4) 28%, transparent);
     }
+    .chip.talk {
+      background: color-mix(in oklab, #dc2626 12%, transparent);
+      color: #b91c1c;
+      border: 1px solid color-mix(in oklab, #dc2626 28%, transparent);
+    }
     .card-date {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
@@ -667,8 +672,37 @@
   <div class="wrap">
     <div class="news-grid">
 
-      <!-- Featured: Concept paper -->
+      <!-- Featured: Uberization talk (ETH Zurich, Future/s of Construction 2026) -->
       <article class="card is-featured">
+        <a class="card-link" href="/news/uberization-of-construction.html" aria-label="Read: The Uberization of Construction and the future of building">
+          <div class="card-media">
+            <img src="/news/assets/uberization-of-construction/images/cover.jpg" alt="The Uberization of Construction - talk at Future/s of Construction 2026, ETH Zürich" loading="eager" decoding="async" />
+          </div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="chip talk">Talk</span>
+              <span class="card-date">2026-06-19</span>
+              <span class="card-date">·</span>
+              <span class="card-date">~4 min read</span>
+            </div>
+            <h2>The Uberization of Construction and the future of building.</h2>
+            <p class="excerpt">
+              A plain-language talk from Future/s of Construction 2026 at ETH Zürich: why budgets,
+              schedules and costs are still set by expert opinion instead of verifiable numbers - how
+              to pull data out of Revit, IFC and DWG without heavy BIM software, how today's AI estimates
+              from a simple request in plain words, and why estimating a project's cost will not be the
+              contractor's job alone anymore.
+            </p>
+            <span class="read-more">
+              Watch the talk &amp; read more
+              <svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+      </article>
+
+      <!-- Concept paper -->
+      <article class="card">
         <a class="card-link" href="/news/open-erp-own-your-stack.html" aria-label="Read: An open construction ERP for teams who want to own their stack" data-i18n-aria-label="page.news.card_concept_aria">
           <div class="card-media">
             <img src="/news/assets/open-erp-own-your-stack/images/hero-overview.jpg" alt="OpenConstructionERP - platform overview dashboard" loading="eager" decoding="async" data-i18n-attr="alt:page.news.card_concept_img_alt" />
@@ -692,6 +726,34 @@
               Read the concept paper
               <svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </span>
+          </div>
+        </a>
+      </article>
+
+      <!-- v8.5.0 release -->
+      <article class="card">
+        <a class="card-link" href="/news/v8-5-0.html" aria-label="Read: v8.5.0 - takeoff that reads your drawings, from DWG vectors to PDF scale">
+          <div class="card-media placeholder" aria-hidden="true">
+            <svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="chip release" data-i18n="page.news.chip_release">Release</span>
+              <span class="card-date">2026-06-18</span>
+              <span class="card-date">·</span>
+              <span class="card-date">~4 min read</span>
+            </div>
+            <h2>v8.5.0 - takeoff that reads your drawings, from DWG vectors to PDF scale.</h2>
+            <p class="excerpt">
+              OpenConstructionERP turns drawings into quantities. DWG and DXF
+              takeoff becomes a full vector takeoff: one click produces a
+              per-layer quantity table with the right unit for each layer, plus
+              count-by-block, Excel export and drawing-text search. The PDF
+              takeoff viewer is now a real drawing tool with thumbnails,
+              find-on-sheet and a live readout, and it reads the scale printed on
+              the sheet for one-click calibration. Structural steel can be priced
+              by mass.
+            </p>
           </div>
         </a>
       </article>
