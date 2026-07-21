@@ -14,16 +14,27 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { X, GitCompare, Loader2, ArrowRight } from 'lucide-react';
+import { X, GitCompare, Loader2, ArrowRight, MapPin } from 'lucide-react';
 import clsx from 'clsx';
 import { Badge } from '@/shared/ui';
+import { CountryFlag } from '@/shared/ui/CountryFlag';
+import { REGION_MAP } from '@/stores/useCostDatabaseStore';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { boqApi } from './api';
 import { CHANGE_VARIANT, filterCompareRows, showsPair } from './compareHelpers';
+import {
+  PriceSpreadBand,
+  computeSpread,
+  usePriceByRegion,
+  type ByRegionEntry,
+} from './PriceSpreadBand';
 
 export interface BOQCompareDrawerProps {
-  /** The BOQ acting as the comparison baseline (reference frame). */
-  boqId: string;
-  projectId: string;
+  /** The BOQ acting as the comparison baseline (reference frame). Optional so
+   *  the drawer can also run in "where else priced" mode (see
+   *  ``costItemCode``), which is opened from a BOQ line and needs no BOQ ids. */
+  boqId?: string;
+  projectId?: string;
   isOpen: boolean;
   onClose: () => void;
   /**
@@ -32,6 +43,22 @@ export interface BOQCompareDrawerProps {
    * picker: the baseline is pre-selected and grouped at the top.
    */
   parentEstimateId?: string | null;
+  /**
+   * "Where else is this priced?" mode. When set, the drawer drops the
+   * estimate-vs-estimate diff and instead shows the per-region price of a
+   * single cost code across every loaded / known cost base. Opened by the
+   * clickable provenance chip on a BOQ line.
+   */
+  costItemCode?: string;
+  /** The base this line's rate was taken from (highlighted in the list). */
+  costItemRegion?: string | null;
+  /** Inline ``price_intelligence.by_region`` the caller already has for the
+   *  line, if any - avoids a refetch. When absent the drawer fetches by code. */
+  byRegion?: ByRegionEntry[];
+  /** The BOQ line's own currency, so the mini spread compares like-for-like. */
+  lineCurrency?: string;
+  /** The BOQ line's own unit rate, marked on the mini spread band. */
+  lineRate?: number | null;
 }
 
 export function BOQCompareDrawer({
@@ -40,10 +67,17 @@ export function BOQCompareDrawer({
   isOpen,
   onClose,
   parentEstimateId,
+  costItemCode,
+  costItemRegion,
+  byRegion,
+  lineCurrency,
+  lineRate,
 }: BOQCompareDrawerProps) {
   const { t } = useTranslation();
   const [otherId, setOtherId] = useState<string>('');
   const [hideUnchanged, setHideUnchanged] = useState(true);
+  // "Where else is this priced?" takes over the drawer when a code is supplied.
+  const codeMode = !!costItemCode;
 
   // Close on Escape (mirrors VersionHistoryDrawer).
   useEffect(() => {
@@ -61,8 +95,8 @@ export function BOQCompareDrawer({
 
   const { data: boqs } = useQuery({
     queryKey: ['boqs', projectId],
-    queryFn: () => boqApi.list(projectId),
-    enabled: isOpen && !!projectId,
+    queryFn: () => boqApi.list(projectId as string),
+    enabled: isOpen && !codeMode && !!projectId,
   });
 
   // Classify the other BOQs by their lineage to this one so the picker can
@@ -105,8 +139,8 @@ export function BOQCompareDrawer({
     error,
   } = useQuery({
     queryKey: ['boq-compare', boqId, otherId],
-    queryFn: () => boqApi.compareBoqs(boqId, otherId),
-    enabled: isOpen && !!boqId && !!otherId,
+    queryFn: () => boqApi.compareBoqs(boqId as string, otherId),
+    enabled: isOpen && !codeMode && !!boqId && !!otherId,
     retry: false,
   });
 
@@ -136,16 +170,31 @@ export function BOQCompareDrawer({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={t('boq.compare_title', { defaultValue: 'Compare estimates' })}
+        aria-label={
+          codeMode
+            ? t('boq.where_priced_title', { defaultValue: 'Where else is this priced?' })
+            : t('boq.compare_title', { defaultValue: 'Compare estimates' })
+        }
         className="relative ml-auto flex h-full w-[560px] flex-col bg-surface-elevated border-l border-border shadow-2xl animate-slide-in-right"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <GitCompare size={16} className="text-oe-blue" />
-            <h3 className="text-sm font-semibold text-content-primary">
-              {t('boq.compare_title', { defaultValue: 'Compare estimates' })}
+          <div className="flex items-center gap-2 min-w-0">
+            {codeMode ? (
+              <MapPin size={16} className="text-oe-blue shrink-0" />
+            ) : (
+              <GitCompare size={16} className="text-oe-blue shrink-0" />
+            )}
+            <h3 className="text-sm font-semibold text-content-primary truncate">
+              {codeMode
+                ? t('boq.where_priced_title', { defaultValue: 'Where else is this priced?' })
+                : t('boq.compare_title', { defaultValue: 'Compare estimates' })}
             </h3>
+            {codeMode && (
+              <span className="shrink-0 rounded bg-surface-secondary px-1.5 py-0.5 text-2xs font-mono text-content-secondary">
+                {costItemCode}
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -155,6 +204,18 @@ export function BOQCompareDrawer({
             <X size={16} />
           </button>
         </div>
+
+        {codeMode ? (
+          <WherePricedPanel
+            code={costItemCode as string}
+            currentRegion={costItemRegion}
+            inlineByRegion={byRegion}
+            lineCurrency={lineCurrency}
+            lineRate={lineRate}
+            isOpen={isOpen}
+          />
+        ) : (
+          <>
 
         {/* Other-BOQ picker */}
         <div className="border-b border-border p-3 space-y-2">
@@ -423,7 +484,189 @@ export function BOQCompareDrawer({
             </table>
           )}
         </div>
+          </>
+        )}
       </div>
+    </div>
+  );
+}
+
+/* ── "Where else is this priced?" panel ─────────────────────────────────
+ *  Given one cost code, show its unit rate across every loaded / known base.
+ *  Currencies are shown per-base and NEVER blended; the optional mini spread
+ *  band aggregates only the bases priced in the BOQ line's own currency. */
+
+interface WherePricedPanelProps {
+  code: string;
+  currentRegion?: string | null;
+  inlineByRegion?: ByRegionEntry[];
+  lineCurrency?: string;
+  lineRate?: number | null;
+  isOpen: boolean;
+}
+
+function WherePricedPanel({
+  code,
+  currentRegion,
+  inlineByRegion,
+  lineCurrency,
+  lineRate,
+  isOpen,
+}: WherePricedPanelProps) {
+  const { t } = useTranslation();
+  // Use the inline list the caller already has; otherwise fetch by code.
+  const hasInline = Array.isArray(inlineByRegion) && inlineByRegion.length > 0;
+  const { entries: fetched, isLoading } = usePriceByRegion(code, {
+    enabled: isOpen && !hasInline,
+  });
+  const entries = hasInline ? (inlineByRegion as ByRegionEntry[]) : fetched;
+
+  const curRegionKey = (currentRegion || '').trim().toUpperCase();
+
+  // Same-currency spread (line currency, else the modal currency) for the
+  // header band. computeSpread guarantees a single currency and never blends.
+  const spread = useMemo(
+    () => computeSpread(entries, { currency: lineCurrency }),
+    [entries, lineCurrency],
+  );
+
+  const money = useCallback((v: number, currency?: string | null) => {
+    let num: string;
+    try {
+      num = new Intl.NumberFormat(getIntlLocale(), { maximumFractionDigits: 2 }).format(v);
+    } catch {
+      num = String(v);
+    }
+    return currency ? `${num} ${currency}` : num;
+  }, []);
+
+  // Order: the line's own base first, then priced bases cheapest-first WITHIN
+  // each currency (grouped by currency so we never rank across currencies),
+  // then coefficient / price-less bases by region key.
+  const ordered = useMemo(() => {
+    const priced = entries.filter(
+      (e) => e.coefficient !== true && e.priceless !== true && Number.isFinite(Number(e.unit_rate)) && Number(e.unit_rate) > 0,
+    );
+    const rest = entries.filter((e) => !priced.includes(e));
+    priced.sort((a, b) => {
+      const ca = (a.currency || '').toUpperCase();
+      const cb = (b.currency || '').toUpperCase();
+      if (ca !== cb) return ca < cb ? -1 : 1;
+      return Number(a.unit_rate) - Number(b.unit_rate);
+    });
+    rest.sort((a, b) => a.region.localeCompare(b.region));
+    const all = [...priced, ...rest];
+    all.sort((a, b) => {
+      const aCur = a.region.trim().toUpperCase() === curRegionKey ? 0 : 1;
+      const bCur = b.region.trim().toUpperCase() === curRegionKey ? 0 : 1;
+      return aCur - bCur;
+    });
+    return all;
+  }, [entries, curRegionKey]);
+
+  return (
+    <div className="flex-1 overflow-y-auto">
+      {/* Explanatory note - currencies are per-base, not converted. */}
+      <div className="border-b border-border px-4 py-3">
+        <p className="text-2xs text-content-tertiary">
+          {t('boq.where_priced_note', {
+            defaultValue:
+              'Unit rate for this code in each loaded cost base. Each price is shown in the currency of its own base and is not converted.',
+          })}
+        </p>
+        {spread && (
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-2xs text-content-secondary mb-1">
+              <span>
+                {t('boq.where_priced_spread_label', {
+                  defaultValue: 'Spread across {{count}} bases ({{currency}})',
+                  count: spread.count,
+                  currency: spread.currency,
+                })}
+              </span>
+              <span className="font-mono text-content-tertiary">
+                {money(spread.min, spread.currency)} - {money(spread.max, spread.currency)}
+              </span>
+            </div>
+            <div className="relative h-4 w-full">
+              <PriceSpreadBand
+                spread={spread}
+                value={
+                  typeof lineRate === 'number' &&
+                  (lineCurrency || '').trim().toUpperCase() === spread.currency
+                    ? lineRate
+                    : null
+                }
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Per-base list */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 size={20} className="animate-spin text-content-tertiary" />
+        </div>
+      ) : ordered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <MapPin size={28} className="text-content-quaternary mb-3" />
+          <p className="text-sm text-content-secondary">
+            {t('boq.where_priced_empty', {
+              defaultValue: 'This code is not priced in any other loaded base.',
+            })}
+          </p>
+        </div>
+      ) : (
+        <ul className="divide-y divide-border-light">
+          {ordered.map((e) => {
+            const isCurrent = e.region.trim().toUpperCase() === curRegionKey;
+            const label = REGION_MAP[e.region]?.name ?? e.region;
+            const priced =
+              e.coefficient !== true &&
+              e.priceless !== true &&
+              Number.isFinite(Number(e.unit_rate)) &&
+              Number(e.unit_rate) > 0;
+            return (
+              <li
+                key={e.region}
+                className={clsx(
+                  'flex items-center gap-2 px-4 py-2',
+                  isCurrent && 'bg-oe-blue/5',
+                )}
+              >
+                <CountryFlag code={e.region} size={16} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-content-primary truncate">
+                      {label}
+                    </span>
+                    {isCurrent && (
+                      <Badge variant="blue" size="sm">
+                        {t('boq.where_priced_this_line', { defaultValue: 'This line' })}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-2xs text-content-tertiary font-mono">{e.region}</span>
+                </div>
+                <div className="shrink-0 text-right">
+                  {priced ? (
+                    <span className="text-xs font-mono font-semibold text-content-primary tabular-nums">
+                      {money(Number(e.unit_rate), e.currency)}
+                    </span>
+                  ) : (
+                    <span className="text-2xs text-content-tertiary">
+                      {e.coefficient
+                        ? t('boq.where_priced_coefficient', { defaultValue: 'coefficient base' })
+                        : t('boq.where_priced_no_price', { defaultValue: 'no unit price' })}
+                    </span>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

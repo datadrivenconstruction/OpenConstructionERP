@@ -29,6 +29,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { CountryFlag, originFlagCode } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -454,6 +455,11 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
                     >
                       <td className="py-1.5 pr-2">
                         <div className="flex items-center gap-1.5">
+                          <CountryFlag
+                            code={originFlagCode(c.country_iso)}
+                            size={16}
+                            className="shadow-xs border border-black/5"
+                          />
                           <span className="font-medium text-content-primary">
                             {c.country_iso}
                           </span>

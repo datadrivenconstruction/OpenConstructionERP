@@ -13,6 +13,7 @@ import {
   isSection,
   type Position,
 } from './api';
+import { basesUsed, distinctBaseCount, provenanceOf } from './exportProvenance';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -158,10 +159,29 @@ export function buildBOQSheetData(options: ExportOptions): {
   /** Indices (0-based) of rows that contain numeric BOQ data and should
    *  receive currency / quantity number formatting. */
   numberFormatStartRow: number;
+  /** Total column count (9, or 12 when multi-base provenance columns are
+   *  appended) so the workbook builder can size the sheet correctly. */
+  columnCount: number;
 } {
   const { positions, boqTitle, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
   const grouped = groupPositionsIntoSections(positions);
-  const colCount = BOQ_COLUMNS.length;
+  // Base / Source / Currency provenance columns self-hide unless the
+  // estimate mixes 2+ distinct cost bases, so a single-base BOQ exports
+  // exactly as it does today (no new columns, no layout change).
+  const showProvenance = distinctBaseCount(positions) >= 2;
+  const columns = showProvenance
+    ? [...BOQ_COLUMNS, 'Base', 'Source', 'Currency']
+    : [...BOQ_COLUMNS];
+  const colCount = columns.length;
+  /** Provenance trailer cells for a costed line row (base + source +
+   *  currency), or nothing when single-base. Every cell neutralised. */
+  const provOf = (pos: Position): Row => {
+    if (!showProvenance) return [];
+    const p = provenanceOf(pos);
+    return [neutraliseFormula(p.base), neutraliseFormula(p.source), neutraliseFormula(p.currency)];
+  };
+  /** Blank provenance trailer for section / subtotal / resource rows. */
+  const provBlank = (): Row => (showProvenance ? [null, null, null] : []);
   const itemCount = positions.filter((p) => !isSection(p)).length;
   const sectionCount = grouped.sections.length;
   const dateStr = new Date().toLocaleDateString(undefined, {
@@ -203,7 +223,7 @@ export function buildBOQSheetData(options: ExportOptions): {
   rows.push(Array(colCount).fill(null));
 
   // Column headers (row index 4 → first data row at index 5)
-  rows.push([...BOQ_COLUMNS]);
+  rows.push([...columns]);
   const numberFormatStartRow = rows.length; // 0-based start for number formatting
 
   // ── Data rows ─────────────────────────────────────────────────────────
@@ -223,6 +243,7 @@ export function buildBOQSheetData(options: ExportOptions): {
       null,
       null,
       null,
+      ...provBlank(),
     ]);
     merge(sectionRowIdx, 1, sectionRowIdx, 4);
 
@@ -242,6 +263,7 @@ export function buildBOQSheetData(options: ExportOptions): {
         })(),
         null,
         null,
+        ...provOf(child),
       ]);
       for (const r of getResources(child)) {
         const rTotal = r.total ?? r.quantity * r.unit_rate;
@@ -257,6 +279,7 @@ export function buildBOQSheetData(options: ExportOptions): {
           null,
           neutraliseFormula(r.type || ''),
           neutraliseFormula(r.code || ''),
+          ...provBlank(),
         ]);
       }
     }
@@ -271,6 +294,7 @@ export function buildBOQSheetData(options: ExportOptions): {
       null,
       null,
       null,
+      ...provBlank(),
     ]);
     merge(rows.length - 1, 1, rows.length - 1, 4);
 
@@ -293,6 +317,7 @@ export function buildBOQSheetData(options: ExportOptions): {
       })(),
       null,
       null,
+      ...provOf(pos),
     ]);
     for (const r of getResources(pos)) {
       const rTotal = r.total ?? r.quantity * r.unit_rate;
@@ -306,6 +331,7 @@ export function buildBOQSheetData(options: ExportOptions): {
         null,
         neutraliseFormula(r.type || ''),
         neutraliseFormula(r.code || ''),
+        ...provBlank(),
       ]);
     }
   }
@@ -353,7 +379,7 @@ export function buildBOQSheetData(options: ExportOptions): {
   ]);
   merge(rows.length - 1, 0, rows.length - 1, colCount - 1);
 
-  return { rows, merges, numberFormatStartRow };
+  return { rows, merges, numberFormatStartRow, columnCount: colCount };
 }
 
 /* ── Summary sheet builder ────────────────────────────────────────────── */
@@ -406,6 +432,20 @@ export function buildSummarySheetData(options: ExportOptions): {
   rows.push([null, null, null]);
   rows.push(['GROSS TOTAL', null, grossTotal]);
 
+  // Estimate-level "Cost Bases Used" block. Self-hides for a single-base
+  // estimate (see distinctBaseCount). The line count lives in column 2 (the
+  // summary number-format only touches column 3, so counts stay plain
+  // integers); each base keeps its own currency code - no currency is blended.
+  const bases = basesUsed(positions);
+  if (bases.length >= 2) {
+    rows.push([null, null, null]);
+    rows.push(['COST BASES USED', null, null]);
+    rows.push(['Base', 'Positions', 'Currency']);
+    for (const b of bases) {
+      rows.push([neutraliseFormula(b.base), b.positions, neutraliseFormula(b.currency)]);
+    }
+  }
+
   return { rows, numberFormatStartRow };
 }
 
@@ -427,7 +467,7 @@ export async function buildBOQWorkbookBuffer(options: ExportOptions): Promise<Ar
 
   // ── BOQ sheet ─────────────────────────────────────────────────────────
   const boqSheet = wb.addWorksheet('BOQ');
-  const { rows: boqRows, merges, numberFormatStartRow } = buildBOQSheetData(options);
+  const { rows: boqRows, merges, numberFormatStartRow, columnCount } = buildBOQSheetData(options);
 
   for (const row of boqRows) {
     boqSheet.addRow(row);
@@ -437,17 +477,20 @@ export async function buildBOQWorkbookBuffer(options: ExportOptions): Promise<Ar
     boqSheet.mergeCells(m.topRow, m.topCol, m.bottomRow, m.bottomCol);
   }
 
-  boqSheet.columns = [
-    { width: 12 }, // No.
-    { width: 50 }, // Description
-    { width: 8 }, // Unit
-    { width: 14 }, // Quantity
-    { width: 14 }, // Unit Rate
-    { width: 16 }, // Total
-    { width: 22 }, // Variant
-    { width: 12 }, // Type
-    { width: 14 }, // Code
+  const boqColumnWidths = [
+    12, // No.
+    50, // Description
+    8, // Unit
+    14, // Quantity
+    14, // Unit Rate
+    16, // Total
+    22, // Variant
+    12, // Type
+    14, // Code
   ];
+  // Multi-base only: Base / Source / Currency provenance columns.
+  if (columnCount > boqColumnWidths.length) boqColumnWidths.push(26, 16, 12);
+  boqSheet.columns = boqColumnWidths.map((width) => ({ width }));
 
   // Number format for quantity / unit rate / total columns (1-based: 4, 5, 6).
   // The newly-added Variant column (1-based 7) is always text — no numFmt.

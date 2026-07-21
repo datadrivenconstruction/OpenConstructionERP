@@ -1513,7 +1513,8 @@ function DataPackagesTab() {
     'catalog-ru-stpetersburg': 'RU_STPETERSBURG',
     'catalog-uk-gbp': 'UK_GBP',
     'catalog-usa-usd': 'USA_USD',
-    'catalog-zh-shanghai': 'ZH_SHANGHAI',
+    'catalog-zh-shanghai': 'ZH_CHINA',
+    'catalog-zh-china': 'ZH_CHINA',
   };
 
   async function handleInstallClick(mod: MarketplaceModule): Promise<void> {
@@ -1550,7 +1551,8 @@ function DataPackagesTab() {
           'vector-de-berlin': 'DE_BERLIN', 'vector-eng-toronto': 'ENG_TORONTO',
           'vector-fr-paris': 'FR_PARIS', 'vector-sp-barcelona': 'SP_BARCELONA',
           'vector-pt-saopaulo': 'PT_SAOPAULO', 'vector-ru-stpetersburg': 'RU_STPETERSBURG',
-          'vector-ar-dubai': 'AR_DUBAI', 'vector-zh-shanghai': 'ZH_SHANGHAI',
+          'vector-ar-dubai': 'AR_DUBAI', 'vector-zh-shanghai': 'ZH_CHINA',
+          'vector-zh-china': 'ZH_CHINA',
           'vector-hi-mumbai': 'HI_MUMBAI',
         };
         const dbId = VECTOR_ID_TO_DB[mod.id];

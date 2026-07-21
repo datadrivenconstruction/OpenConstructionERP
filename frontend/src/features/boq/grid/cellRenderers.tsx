@@ -51,6 +51,20 @@ import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { isFormula, evaluateFormula } from './cellEditors';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
+import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
+import { CountryFlag } from '@/shared/ui/CountryFlag';
+import { BOQCompareDrawer } from '../BOQCompareDrawer';
+import {
+  PriceSpreadBand,
+  computeSpread,
+  usePriceByRegion,
+  resolveInlineByRegion,
+} from '../PriceSpreadBand';
+
+/** Stable empty-array reference for the ``loadedBases`` selector fallback, so
+ *  a single-base estimate never re-renders every rate cell on each store
+ *  update. */
+const EMPTY_BASES: string[] = [];
 
 /* ── Variant suffix stripper ──────────────────────────────────────────
  *  Legacy CWICR position-mode applies appended "(Variant: <label>)" /
@@ -5031,6 +5045,104 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
     [ctx, data, meta, numericVal, stats],
   );
 
+  // ── Multi-base price provenance + spread ────────────────────────────────
+  // A subtle spread band behind the rate and a clickable "where else priced"
+  // provenance chip. Both are strictly multi-base affordances: with one (or
+  // zero) cost base loaded they render nothing, so a single-base estimate
+  // looks exactly as it did before.
+  const loadedBases =
+    useCostDatabaseStore((s) => (s as { loadedBases?: string[] }).loadedBases) ?? EMPTY_BASES;
+  const multiBase = loadedBases.length >= 2;
+  const costItemCode =
+    typeof meta.cost_item_code === 'string' && (meta.cost_item_code as string).trim()
+      ? (meta.cost_item_code as string)
+      : undefined;
+  const costItemRegion =
+    typeof meta.cost_item_region === 'string' && (meta.cost_item_region as string).trim()
+      ? (meta.cost_item_region as string)
+      : undefined;
+  const inlineByRegion = useMemo(
+    () => resolveInlineByRegion(data as Record<string, unknown>),
+    [data],
+  );
+  // Fetch the per-region price list only when the row does not already carry
+  // it, and only in multi-base mode. Deduped + cached by react-query, so many
+  // cells asking for the same code share one request.
+  const needFetchByRegion = multiBase && !!costItemCode && inlineByRegion.length < 2;
+  const { entries: fetchedByRegion } = usePriceByRegion(costItemCode, {
+    enabled: needFetchByRegion,
+  });
+  const byRegion = inlineByRegion.length >= 2 ? inlineByRegion : fetchedByRegion;
+  // Spread is computed only within THIS line's currency - never blended.
+  const priceSpread = useMemo(
+    () => (multiBase ? computeSpread(byRegion, { currency }) : null),
+    [multiBase, byRegion, currency],
+  );
+  const [wherePricedOpen, setWherePricedOpen] = useState(false);
+  const showProvenance = multiBase && !!costItemCode && !!costItemRegion;
+
+  const fmtSpreadNum = (n: number) => {
+    try {
+      return new Intl.NumberFormat(getIntlLocale(), { maximumFractionDigits: 2 }).format(n);
+    } catch {
+      return String(n);
+    }
+  };
+  const spreadBandEl = priceSpread ? (
+    <PriceSpreadBand spread={priceSpread} value={numericVal} />
+  ) : null;
+  const spreadTitle = priceSpread
+    ? t('boq.price_spread_tooltip', {
+        defaultValue:
+          'Same code across {{count}} bases ({{currency}}): min {{min}} / p25 {{p25}} / median {{median}} / p75 {{p75}} / max {{max}}. This line: {{value}}.',
+        count: priceSpread.count,
+        currency: priceSpread.currency,
+        min: fmtSpreadNum(priceSpread.min),
+        p25: fmtSpreadNum(priceSpread.p25),
+        median: fmtSpreadNum(priceSpread.median),
+        p75: fmtSpreadNum(priceSpread.p75),
+        max: fmtSpreadNum(priceSpread.max),
+        value: fmtSpreadNum(numericVal),
+      })
+    : undefined;
+  const provenanceChipEl = showProvenance ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        setWherePricedOpen(true);
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="mr-auto shrink-0 inline-flex items-center gap-1 h-5 pl-0.5 pr-1 rounded
+                 text-[10px] font-medium text-content-tertiary ring-1 ring-border-light
+                 hover:bg-oe-blue/10 hover:text-oe-blue-text transition-colors cursor-pointer"
+      title={t('boq.where_priced_chip_tooltip', {
+        defaultValue: 'Rate from {{region}}. Click to see where else this code is priced.',
+        region: REGION_MAP[costItemRegion as string]?.name ?? (costItemRegion as string),
+      })}
+      aria-label={t('boq.where_priced_chip_aria', { defaultValue: 'Where else is this priced' })}
+      data-testid={`boq-where-priced-${data.id}`}
+    >
+      <CountryFlag code={costItemRegion as string} size={12} />
+      {priceSpread && <span className="tabular-nums">{priceSpread.count}</span>}
+    </button>
+  ) : null;
+  const wherePricedPortal =
+    wherePricedOpen && showProvenance
+      ? createPortal(
+          <BOQCompareDrawer
+            isOpen={wherePricedOpen}
+            onClose={() => setWherePricedOpen(false)}
+            costItemCode={costItemCode}
+            costItemRegion={costItemRegion}
+            byRegion={byRegion}
+            lineCurrency={currency}
+            lineRate={numericVal}
+          />,
+          document.body,
+        )
+      : null;
+
   // No variant cache → render the formatted number, prefixed with a
   // compact currency badge when the position is priced in a non-base
   // currency. Cell is still editable (click → AG Grid mounts the number
@@ -5040,7 +5152,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
     if (isForeignCurrency) {
       return (
         <span
-          className={`flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px] ${colorClass}`}
+          className={`relative flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px] ${colorClass}`}
           title={t('boq.position_currency_tooltip', {
             defaultValue:
               'This position is priced in {{code}} ({{symbol}}), not the project currency {{base}}. Totals are converted to {{base}} using the project FX rate.',
@@ -5049,6 +5161,8 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
             base: baseCurrency,
           })}
         >
+          {spreadBandEl}
+          {provenanceChipEl}
           <span
             className="shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-bold
                        bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300
@@ -5057,13 +5171,27 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
           >
             {CURRENCY_SYMBOL[currency] ?? ''}{currency}
           </span>
-          <span>{formatted}</span>
+          <span className="relative" title={spreadTitle}>{formatted}</span>
+          {wherePricedPortal}
+        </span>
+      );
+    }
+    if (!spreadBandEl && !provenanceChipEl) {
+      return (
+        <span className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${colorClass}`}>
+          {formatted}
         </span>
       );
     }
     return (
-      <span className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${colorClass}`}>
-        {formatted}
+      <span
+        className={`relative flex items-center justify-end gap-1.5 w-full h-full text-xs tabular-nums leading-[32px] ${colorClass}`}
+        title={spreadTitle}
+      >
+        {spreadBandEl}
+        {provenanceChipEl}
+        <span className="relative">{formatted}</span>
+        {wherePricedPortal}
       </span>
     );
   }
@@ -5097,7 +5225,12 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
         });
 
   return (
-    <span className="flex items-center justify-end gap-1.5 w-full h-full text-xs tabular-nums leading-[32px]">
+    <span
+      className="relative flex items-center justify-end gap-1.5 w-full h-full text-xs tabular-nums leading-[32px]"
+      title={spreadTitle}
+    >
+      {spreadBandEl}
+      {provenanceChipEl}
       {/* Pill renders LEFT of the number so the formatted value sits flush
           with the cell's right edge (= cell.right - 8px from !pr-2). This
           matches the resource sub-row layout (combobox/pill on the left,
@@ -5147,7 +5280,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
           {CURRENCY_SYMBOL[currency] ?? ''}{currency}
         </span>
       )}
-      <span className={isResourceDriven ? 'text-content-tertiary' : ''}>{formatted}</span>
+      <span className={`relative ${isResourceDriven ? 'text-content-tertiary' : ''}`}>{formatted}</span>
       {pickerOpen && hasVariants && (
         <VariantPicker
           variants={variants!}
@@ -5162,6 +5295,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
           onClose={closePicker}
         />
       )}
+      {wherePricedPortal}
     </span>
   );
 }

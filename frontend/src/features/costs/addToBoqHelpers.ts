@@ -321,3 +321,255 @@ export function buildBoqPositionDraft(
 
   return { unitRate, metadata };
 }
+
+/* ── Reprice-in-place (cross-base) ─────────────────────────────────────── */
+
+/**
+ * Body for ``PATCH /v1/boq/positions/{id}`` that re-applies the SAME code's
+ * rate sourced from a different loaded base. It reuses the exact same
+ * ``buildBoqPositionDraft`` builder the add-to-BOQ flow uses, so the position
+ * goes back through the server-side variant-snapshot re-freeze
+ * (``_stamp_variant_snapshot`` / ``_stamp_resource_variant_snapshots`` in
+ * ``boq/service.py``) with no duplicated freeze logic here.
+ *
+ * Money contract: ``unit_rate`` rides the wire as a Decimal-as-string and is
+ * NEVER converted. When the new base is denominated in another currency the
+ * foreign figure lands verbatim; the currency is surfaced on the stamp
+ * (``metadata.currency`` / ``cost_item_currency``) so the BOQ FX rollup can
+ * convert for display via the project's fx_rates instead of treating it as
+ * base.
+ */
+export interface RepricePayload {
+  /** New unit rate as a Decimal string (not converted). */
+  unit_rate: string;
+  /** Rebuilt position metadata carrying the refreshed provenance stamp. */
+  metadata: Record<string, unknown>;
+  /** New base's CostItem id (top-level so the server re-links + validates). */
+  cost_item_id: string;
+  source: 'cost_database';
+}
+
+/**
+ * Non-monetary breadcrumb written onto the position metadata when it is
+ * repriced from another base. The authoritative provenance is
+ * ``cost_item_region`` / ``currency`` (set by ``buildBoqPositionDraft``);
+ * this only lets the UI show "repriced from X" without a second lookup and
+ * is never read by any cost rollup.
+ */
+export interface RepriceProvenance {
+  from_region: string | null;
+  from_currency: string | null;
+  to_region: string | null;
+  to_currency: string;
+  at: string;
+}
+
+/**
+ * Build the PATCH body that reprices a BOQ position to the same code's rate
+ * from ``targetItem`` (fetched full from the new base). Pure: no network.
+ *
+ * @param targetItem     Full cost item pulled from the NEW base (same code).
+ * @param targetCurrency Resolved ISO 4217 code for the new base.
+ * @param synthLabels    Localized labels for the cost-summary synth fallback.
+ * @param opts           Current base/currency for the breadcrumb, and the
+ *                       existing position metadata to merge over so a reprice
+ *                       does not wipe position-specific keys.
+ */
+export function buildRepricePayload(
+  targetItem: FullCostItem,
+  targetCurrency: string,
+  synthLabels: SynthLabels,
+  opts?: {
+    fromRegion?: string | null;
+    fromCurrency?: string | null;
+    existingMetadata?: Record<string, unknown>;
+  },
+): RepricePayload {
+  const { unitRate, metadata } = buildBoqPositionDraft(targetItem, targetCurrency, synthLabels);
+  const toCurrency = (targetCurrency || '').trim().toUpperCase();
+
+  // Tag every resource line with the base it now comes from, so a later
+  // "save as assembly" remembers each component's source base. The
+  // position-level stamp (cost_item_region) is already set by
+  // buildBoqPositionDraft; this mirrors it per resource.
+  const resources = metadata.resources;
+  if (Array.isArray(resources)) {
+    for (const r of resources) {
+      if (r && typeof r === 'object') {
+        (r as Record<string, unknown>).source_base = targetItem.region ?? null;
+      }
+    }
+  }
+
+  const provenance: RepriceProvenance = {
+    from_region: opts?.fromRegion ?? null,
+    from_currency: (opts?.fromCurrency ?? '').trim().toUpperCase() || null,
+    to_region: targetItem.region ?? null,
+    to_currency: toCurrency,
+    at: new Date().toISOString(),
+  };
+  metadata.repriced_from = provenance;
+
+  // Merge over the existing position metadata so a reprice keeps
+  // position-specific keys (quantity links like ``bim_qty_source`` /
+  // ``pdf_measurement_source``, notes, validation) that must survive a rate
+  // swap, while the cost fields ``buildBoqPositionDraft`` re-owns are dropped
+  // from the carry-over so no stale data from the previous base lingers. The
+  // stale ``variant_snapshot`` is dropped too so the server re-freezes cleanly
+  // against the new rate/currency.
+  let finalMeta = metadata;
+  const existing = opts?.existingMetadata;
+  if (existing && typeof existing === 'object') {
+    const managed = new Set<string>([
+      'resources',
+      'cost_breakdown',
+      'resource_count',
+      'variant',
+      'variant_default',
+      'variant_snapshot',
+      'cost_item_variants',
+      'cost_item_variant_stats',
+      'cost_item_variant_count',
+      'cost_item_variant_mean',
+      'cost_item_variant_min',
+      'cost_item_variant_max',
+      'repriced_from',
+    ]);
+    const preserved: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(existing)) {
+      if (!managed.has(k)) preserved[k] = v;
+    }
+    finalMeta = { ...preserved, ...metadata };
+  }
+
+  return {
+    unit_rate: String(unitRate),
+    metadata: finalMeta,
+    cost_item_id: targetItem.id,
+    source: 'cost_database',
+  };
+}
+
+/* ── Cross-base assembly ───────────────────────────────────────────────── */
+
+/** Assembly resource kinds accepted by the assemblies API. Declared locally
+ *  so this pure helper stays decoupled from the assemblies feature module;
+ *  the literals are identical to ``ResourceType`` in
+ *  ``@/features/assemblies/api`` so a draft is structurally assignable to a
+ *  ``CreateComponentData``. */
+export type AssemblyResourceType =
+  | 'material'
+  | 'labor'
+  | 'equipment'
+  | 'operator'
+  | 'subcontractor'
+  | 'overhead';
+
+/** Map a loose BOQ resource ``type`` (which also allows 'electricity' /
+ *  'other') onto a valid assembly resource kind; unknowns fall to material. */
+function normalizeAssemblyResourceType(raw: unknown): AssemblyResourceType {
+  const s = String(raw ?? '').trim().toLowerCase();
+  if (
+    s === 'labor' ||
+    s === 'equipment' ||
+    s === 'operator' ||
+    s === 'subcontractor' ||
+    s === 'overhead'
+  ) {
+    return s;
+  }
+  return 'material';
+}
+
+/**
+ * One assembly component derived from a cross-base pick, shaped to match the
+ * assemblies ``CreateComponentData`` contract. The source base and its
+ * currency ride in ``metadata`` (``source_base`` / ``source_currency``) so a
+ * cross-base assembly remembers where each line's rate came from. Currencies
+ * are never blended into a single stored figure: each component keeps its own
+ * ``source_currency`` and the caller must refuse to persist a multi-currency
+ * pick under one assembly currency.
+ */
+export interface CrossBaseComponentDraft {
+  description: string;
+  resource_type: AssemblyResourceType;
+  factor: number;
+  quantity: number;
+  unit: string;
+  unit_cost: number;
+  metadata: Record<string, unknown>;
+}
+
+/** Map one persisted BOQ resource line (``metadata.resources[i]``) to a
+ *  cross-base assembly component, carrying the resource's source base. When a
+ *  line has no per-line ``source_base`` (never repriced individually) the
+ *  position-level fallback base/currency is used. */
+export function crossBaseComponentFromResource(
+  resource: Record<string, unknown>,
+  fallbackBase: string | null,
+  fallbackCurrency: string,
+): CrossBaseComponentDraft {
+  const sourceBase =
+    typeof resource.source_base === 'string' && resource.source_base
+      ? resource.source_base
+      : fallbackBase;
+  const sourceCurrency = (
+    (typeof resource.currency === 'string' && resource.currency
+      ? resource.currency
+      : fallbackCurrency) || ''
+  )
+    .trim()
+    .toUpperCase();
+  const qty = typeof resource.quantity === 'number' && resource.quantity > 0 ? resource.quantity : 1;
+  const rate = typeof resource.unit_rate === 'number' ? resource.unit_rate : 0;
+  const unit = typeof resource.unit === 'string' && resource.unit ? resource.unit : 'pcs';
+  const name = String(resource.name ?? resource.code ?? '').trim();
+  return {
+    description: name,
+    resource_type: normalizeAssemblyResourceType(resource.type),
+    factor: 1,
+    quantity: qty,
+    unit,
+    unit_cost: rate,
+    metadata: { source_base: sourceBase, source_currency: sourceCurrency },
+  };
+}
+
+/** The full result of turning a position's cross-base pick into assembly
+ *  components: the components (each tagged with its source base) plus the
+ *  currency guard used to block a blended (multi-currency) save. */
+export interface CrossBaseAssemblyDraft {
+  components: CrossBaseComponentDraft[];
+  /** Distinct source currencies across the components (upper-cased). */
+  currencies: string[];
+  /** True when the pick spans more than one currency: it must NOT be stored
+   *  as one assembly (that would blend currencies into the total). */
+  blended: boolean;
+}
+
+/**
+ * Build the cross-base assembly draft from a position's persisted metadata.
+ * Reads ``metadata.resources[]``; each resource becomes a component that
+ * remembers its ``source_base``. Returns an empty component list when the
+ * position carries no resource breakdown (the caller then synthesises a
+ * single line from the position itself).
+ */
+export function buildCrossBaseAssemblyDraft(
+  positionMetadata: Record<string, unknown> | undefined,
+  fallbackBase: string | null,
+  fallbackCurrency: string,
+): CrossBaseAssemblyDraft {
+  const raw = positionMetadata?.resources;
+  const list = Array.isArray(raw) ? raw : [];
+  const components = list
+    .filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
+    .map((r) => crossBaseComponentFromResource(r, fallbackBase, fallbackCurrency));
+  const currencies = Array.from(
+    new Set(
+      components
+        .map((c) => String(c.metadata.source_currency ?? '').trim().toUpperCase())
+        .filter(Boolean),
+    ),
+  );
+  return { components, currencies, blended: currencies.length > 1 };
+}

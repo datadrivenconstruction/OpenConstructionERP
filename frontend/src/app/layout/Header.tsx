@@ -11,6 +11,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useModuleInfoStore } from '@/stores/useModuleInfoStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { CountryFlag, PartnerLogoBadge } from '@/shared/ui';
+import { LoadedBasesTray } from '@/shared/cost-bases';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
@@ -274,6 +275,12 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             Visible at every breakpoint - on mobile the in-page card is the
             only other surface, so this is the sole way back. */}
         <ModuleInfoReopener />
+
+        {/* Loaded cost-bases tray - flag chips that scope search across the
+            installed bases, each with a small completeness meter. Self-hides
+            entirely at <=1 base, so single-base operators see today's header
+            unchanged. Sits with the project / region cluster. */}
+        <LoadedBasesTray />
       </div>
 
       {/* ── Partner co-brand chip (center column) ───────────────────────

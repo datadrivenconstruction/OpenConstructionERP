@@ -5,6 +5,7 @@ import {
   isSection,
   type Position,
 } from './api';
+import { basesUsed, distinctBaseCount, provenanceOf } from './exportProvenance';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -309,6 +310,9 @@ function renderBOQTables(
 ): void {
   const { sections, ungrouped } = buildSectionGroups(options.positions);
   const pageW = doc.internal.pageSize.getWidth();
+  // Per-line "Base" column self-hides unless the estimate mixes 2+ distinct
+  // cost bases, so a single-base BOQ prints exactly as it does today.
+  const showBase = distinctBaseCount(options.positions) >= 2;
 
   // Section heading bar
   doc.setFillColor(...BRAND_DARK);
@@ -353,6 +357,7 @@ function renderBOQTables(
         formatNumber(p.quantity, locale),
         formatCurrency(p.unit_rate, options.currency, locale),
         formatCurrency(p.total, options.currency, locale),
+        ...(showBase ? [provenanceOf(p).base] : []),
       ]);
       // Add resource sub-rows
       const meta = p.metadata ?? (p as unknown as Record<string, unknown>).metadata_;
@@ -368,13 +373,14 @@ function renderBOQTables(
           formatNumber(r.quantity, locale),
           formatCurrency(r.unit_rate, options.currency, locale),
           formatCurrency(rTotal, options.currency, locale),
+          ...(showBase ? [''] : []),
         ]);
       }
     }
 
     autoTable(doc, {
       startY: currentY,
-      head: [['No.', 'Description', 'Unit', 'Qty', 'Unit Rate', 'Total']],
+      head: [['No.', 'Description', 'Unit', 'Qty', 'Unit Rate', 'Total', ...(showBase ? ['Base'] : [])]],
       body,
       headStyles: headerStyles,
       bodyStyles: { fontSize: 8, textColor: BRAND_DARK },
@@ -386,6 +392,7 @@ function renderBOQTables(
         3: { cellWidth: 22, halign: 'right' },
         4: { cellWidth: 28, halign: 'right' },
         5: { cellWidth: 28, halign: 'right', fontStyle: 'bold' },
+        ...(showBase ? { 6: { cellWidth: 24 } } : {}),
       },
       margin: { left: 15, right: 15 },
       theme: 'grid',
@@ -530,6 +537,36 @@ function renderSummary(
   doc.setTextColor(...WHITE);
   doc.text('GROSS TOTAL', 22, boxY + 10);
   doc.text(formatCurrency(options.grossTotal, options.currency, locale), pageW - 22, boxY + 10, { align: 'right' });
+
+  // ── Cost Bases Used ─────────────────────────────────────────────────
+  // Estimate-level provenance block. Self-hides for a single-base estimate
+  // (see distinctBaseCount). Rendered inline on the summary page (no extra
+  // doc.addPage) and each base keeps its own currency - nothing is blended.
+  const bases = basesUsed(options.positions);
+  if (bases.length >= 2) {
+    const basesTitleY = boxY + 24;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...BRAND_DARK);
+    doc.text('Cost Bases Used', 15, basesTitleY);
+    autoTable(doc, {
+      startY: basesTitleY + 3,
+      head: [['Cost Base', 'Currency', 'Positions']],
+      body: bases.map((b) => [b.base, b.currency || '-', String(b.positions)]),
+      headStyles: { fillColor: BRAND_MID, textColor: WHITE, fontSize: 8.5 },
+      bodyStyles: { fontSize: 8.5, textColor: BRAND_DARK },
+      alternateRowStyles: { fillColor: [248, 250, 252] as [number, number, number] },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 30, halign: 'right' },
+      },
+      margin: { left: 15, right: 15 },
+      theme: 'grid',
+      tableLineColor: BRAND_LIGHT,
+      tableLineWidth: 0.2,
+    });
+  }
 }
 
 /* ── Main export function ───────────────────────────────────────────────── */

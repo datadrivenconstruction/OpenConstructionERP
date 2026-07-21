@@ -8,11 +8,22 @@ import {
   CheckCircle2,
   XCircle,
   Download,
+  Sparkles,
+  Info,
+  Globe,
+  Landmark,
 } from 'lucide-react';
 import { Button, Card, CardHeader, CardContent, Badge, Breadcrumb, CountryFlag, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { useCostDatabaseStore } from '@/stores/useCostDatabaseStore';
+import {
+  recommendedRegionFor,
+  isCoefficientBase,
+  isGlobalCwicrBase,
+} from '@/features/costs/baseRecommendation';
+import { useBaseStats, WhyThisBase } from '@/features/costs/baseStats';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,6 +95,37 @@ const CWICR_DATABASES: CWICRDatabase[] = [
   { id: 'ID_NATIONAL', name: 'Indonesia (AHSP)', city: 'National', lang: 'Bahasa Indonesia', currency: 'IDR', flagId: 'id' },
   { id: 'GR_NATIONAL', name: 'Greece (GGDE)', city: 'National', lang: 'Ellinika', currency: 'EUR', flagId: 'gr' },
 ];
+
+// Split the picker into the global CWICR master family and the authentic
+// national official bases, so the two very different kinds of data are not
+// mixed in one flat grid (grouping parity with the cost surfaces). The split is
+// static (isGlobalCwicrBase falls back to the known national set without the
+// live manifest), so it is safe to compute once at module scope.
+const GLOBAL_DATABASES = CWICR_DATABASES.filter((d) => isGlobalCwicrBase(d.id));
+const NATIONAL_DATABASES = CWICR_DATABASES.filter((d) => !isGlobalCwicrBase(d.id));
+const ALL_REGION_IDS = CWICR_DATABASES.map((d) => d.id);
+
+// Soft language -> region bias for the coverage recommendation. Best-effort: an
+// unmapped language simply falls back to a coverage-ranked pick. The global
+// copies all share one master, so this only chooses which currency / language
+// copy to spotlight, never a fake coverage difference.
+const LANG_REGION_HINT: Record<string, string> = {
+  en: 'USA_USD',
+  de: 'DE_BERLIN',
+  fr: 'FR_PARIS',
+  es: 'SP_BARCELONA',
+  pt: 'PT_SAOPAULO',
+  it: 'IT_ROME',
+  nl: 'NL_AMSTERDAM',
+  pl: 'PL_WARSAW',
+  ru: 'RU_STPETERSBURG',
+  tr: 'TR_NATIONAL',
+  zh: 'ZH_CHINA',
+  ja: 'JA_TOKYO',
+  ko: 'KO_SEOUL',
+  ar: 'AR_DUBAI',
+  hi: 'HI_MUMBAI',
+};
 
 // ── Demo project definitions ────────────────────────────────────────────────
 
@@ -157,14 +199,20 @@ function RegionCard({
   itemCount,
   onLoad,
   disabled,
+  recommended = false,
 }: {
   db: CWICRDatabase;
   status: CardStatus;
   itemCount: number | null;
   onLoad: () => void;
   disabled: boolean;
+  /** Spotlight this base as the coverage recommendation. */
+  recommended?: boolean;
 }) {
   const { t } = useTranslation();
+  // Coefficient books (norms, no ready unit prices) need a resource price sheet
+  // before they show rates - flag them honestly so the load is not a surprise.
+  const coefficient = isCoefficientBase(db.id);
 
   return (
     <div
@@ -204,6 +252,22 @@ function RegionCard({
           <div className="text-2xs text-content-tertiary">
             {db.city} &middot; {db.currency}
           </div>
+          {(recommended || coefficient) && (
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              {recommended && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue-text">
+                  <Sparkles size={10} className="shrink-0" />
+                  {t('costs.base_recommended', { defaultValue: 'Recommended' })}
+                </span>
+              )}
+              {coefficient && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-medium text-[#b45309]">
+                  <Info size={10} className="shrink-0" />
+                  {t('costs.base_coefficient_short', { defaultValue: 'Coefficient book' })}
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-1.5 mt-1">
             {status === 'loaded' && itemCount != null ? (
               <span className="text-2xs text-semantic-success font-medium">
@@ -336,11 +400,22 @@ function DemoCard({
 // ── Main Page ───────────────────────────────────────────────────────────────
 
 export function DatabaseSetupPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Coverage recommendation: bias toward the current UI language, then let real
+  // coverage stats refine the pick once the base-stats manifest loads. Empty
+  // string when nothing sensible can be chosen (never badges an arbitrary base).
+  const baseStats = useBaseStats();
+  const langBase = (i18n.language || 'en').split('-')[0] ?? 'en';
+  const recommendedRegion =
+    recommendedRegionFor(ALL_REGION_IDS, {
+      manifest: baseStats,
+      prefer: LANG_REGION_HINT[langBase],
+    }) ?? '';
 
   // ── Database status tracking ──
   const [dbStatuses, setDbStatuses] = useState<Record<string, CardStatus>>(() => {
@@ -386,6 +461,26 @@ export function DatabaseSetupPage() {
       }
       setDbStatuses(newStatuses);
       setDbItemCounts(newCounts);
+
+      // Register the authoritative set of loaded bases into the cost-database
+      // store, and seed the active base when the user has exactly one loaded and
+      // has not chosen one yet (single base = today's behaviour).
+      const loaded = regionStats.filter((s) => s.count > 0).map((s) => s.region);
+      try {
+        const store = useCostDatabaseStore.getState();
+        // Only write when the set actually changed, so the window-focus refetch
+        // does not churn subscribers with an identical array on every focus.
+        const current = store.loadedBases ?? [];
+        const unchanged =
+          current.length === loaded.length && loaded.every((r) => current.includes(r));
+        if (!unchanged) store.setLoadedBases(loaded);
+        const first = loaded[0];
+        if (!store.activeRegion && loaded.length === 1 && first) {
+          store.setActiveRegion(first);
+        }
+      } catch {
+        // Store shape unavailable - non-critical.
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regionStats]);
@@ -471,6 +566,17 @@ export function DatabaseSetupPage() {
         setDbStatuses((prev) => ({ ...prev, [db.id]: 'loaded' }));
         setDbItemCounts((prev) => ({ ...prev, [db.id]: totalItems || imported }));
         addLoadedDatabase(db.id);
+
+        // Mirror the load into the cost-database store so the cost surfaces know
+        // this base exists, and seed the active base the first time nothing is
+        // chosen (single base = today's behaviour).
+        try {
+          const store = useCostDatabaseStore.getState();
+          store.addLoadedBase(db.id);
+          if (!store.activeRegion) store.setActiveRegion(db.id);
+        } catch {
+          // Store shape unavailable - non-critical.
+        }
 
         // Single combined toast with longer duration so the user has
         // time to follow the "View →" links surfaced on the card.
@@ -594,6 +700,11 @@ export function DatabaseSetupPage() {
         setDbStatuses((prev) => ({ ...prev, [db.id]: 'loaded' }));
         setDbItemCounts((prev) => ({ ...prev, [db.id]: totalItems || imported }));
         addLoadedDatabase(db.id);
+        try {
+          useCostDatabaseStore.getState().addLoadedBase(db.id);
+        } catch {
+          // Store shape unavailable - non-critical.
+        }
       } catch {
         setDbStatuses((prev) => ({ ...prev, [db.id]: 'failed' }));
       }
@@ -739,8 +850,34 @@ export function DatabaseSetupPage() {
           }
         />
         <CardContent>
+          {/* Coverage recommendation: which base fits, and why. Self-hides the
+              coverage numbers until the base-stats manifest loads. */}
+          {recommendedRegion && (
+            <WhyThisBase
+              region={recommendedRegion}
+              bases={ALL_REGION_IDS}
+              variant="hint"
+              manifest={baseStats}
+              className="mb-4"
+            />
+          )}
+
+          {/* Global CWICR master family - one catalogue, many currencies. */}
+          <div className="mb-2 flex items-center gap-2">
+            <Globe size={15} className="shrink-0 text-content-tertiary" />
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+              {t('setup.group_global_cwicr', { defaultValue: 'Global CWICR bases' })}
+            </h4>
+            <span className="text-2xs text-content-quaternary">{GLOBAL_DATABASES.length}</span>
+          </div>
+          <p className="mb-2.5 max-w-2xl text-2xs text-content-tertiary">
+            {t('setup.group_global_cwicr_desc', {
+              defaultValue:
+                'One master catalogue of 55,000+ works, re-priced and translated per region. Pick the currency and language you work in - the coverage is the same across them.',
+            })}
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {CWICR_DATABASES.map((db) => (
+            {GLOBAL_DATABASES.map((db) => (
               <RegionCard
                 key={db.id}
                 db={db}
@@ -748,9 +885,44 @@ export function DatabaseSetupPage() {
                 itemCount={dbItemCounts[db.id] ?? null}
                 onLoad={() => handleLoadRegion(db)}
                 disabled={loadAllActive && dbStatuses[db.id] !== 'loading'}
+                recommended={db.id === recommendedRegion}
               />
             ))}
           </div>
+
+          {/* National official bases - authentic local books with own data. */}
+          {NATIONAL_DATABASES.length > 0 && (
+            <div className="mt-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Landmark size={15} className="shrink-0 text-content-tertiary" />
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                  {t('setup.group_national', { defaultValue: 'National official bases' })}
+                </h4>
+                <span className="text-2xs text-content-quaternary">
+                  {NATIONAL_DATABASES.length}
+                </span>
+              </div>
+              <p className="mb-2.5 max-w-2xl text-2xs text-content-tertiary">
+                {t('setup.group_national_desc', {
+                  defaultValue:
+                    'Authentic local books with their own data. Some are coefficient books that need a resource price sheet before they show unit rates.',
+                })}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                {NATIONAL_DATABASES.map((db) => (
+                  <RegionCard
+                    key={db.id}
+                    db={db}
+                    status={dbStatuses[db.id] ?? 'idle'}
+                    itemCount={dbItemCounts[db.id] ?? null}
+                    onLoad={() => handleLoadRegion(db)}
+                    disabled={loadAllActive && dbStatuses[db.id] !== 'loading'}
+                    recommended={db.id === recommendedRegion}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Load all progress indicator */}
           {loadAllActive && (

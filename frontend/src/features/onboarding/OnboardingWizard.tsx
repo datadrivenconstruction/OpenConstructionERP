@@ -53,6 +53,9 @@ import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 import { apiGet, apiPost, extractErrorMessageFromBody } from '@/shared/lib/api';
+import { useCostDatabaseStore } from '@/stores/useCostDatabaseStore';
+import { recommendedRegionFor } from '@/features/costs/baseRecommendation';
+import { WhyThisBase, useBaseStats } from '@/features/costs/baseStats';
 import {
   ALL_MODULES,
   MODULE_GROUPS,
@@ -2470,6 +2473,15 @@ function StepDataSetup({
   const suggestedRegion = getSuggestedRegion(selectedLang);
   const suggestedDemoId = getSuggestedDemo(selectedLang);
 
+  // Coverage-aware recommendation: bias toward the language-suggested region,
+  // then let real coverage stats refine it once the base-stats manifest loads.
+  // Falls back to the language suggestion when stats are unavailable.
+  const baseStats = useBaseStats();
+  const allRegionIds = CWICR_DATABASES.map((d) => d.id);
+  const recommendedRegion =
+    recommendedRegionFor(allRegionIds, { manifest: baseStats, prefer: suggestedRegion }) ??
+    suggestedRegion;
+
   // ── Cost Database state ──
   const [selectedRegion, setSelectedRegion] = useState(suggestedRegion);
   const [loadingDb, setLoadingDb] = useState(false);
@@ -2601,6 +2613,18 @@ function StepDataSetup({
             }
           } catch {
             // ignore
+          }
+
+          // Register the freshly loaded base into the cost-database store so the
+          // cost surfaces know which bases exist, and seed the active base the
+          // first time the user has not chosen one (single base = today's
+          // behaviour). The localStorage record above stays as the durable copy.
+          try {
+            const store = useCostDatabaseStore.getState();
+            store.addLoadedBase(region);
+            if (!store.activeRegion) store.setActiveRegion(region);
+          } catch {
+            // Store shape unavailable - non-critical.
           }
 
           addToast({
@@ -2878,6 +2902,19 @@ function StepDataSetup({
           defaultValue: 'Optional setup steps. You can skip any or all of these.',
         })}
       </p>
+
+      {/* Coverage recommendation: which cost base fits, and why. The coverage
+          numbers stay hidden until the base-stats manifest loads. */}
+      {recommendedRegion && (
+        <div className="mt-4 w-full max-w-2xl">
+          <WhyThisBase
+            region={recommendedRegion}
+            bases={allRegionIds}
+            variant="hint"
+            manifest={baseStats}
+          />
+        </div>
+      )}
 
       <div className="mt-6 w-full max-w-2xl space-y-4">
         {/* ── Partner packs: the lead, one-click full-workspace install ──── */}

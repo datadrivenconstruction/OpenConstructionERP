@@ -22,6 +22,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CountryFlag, originFlagCode } from '@/shared/ui';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -821,8 +822,13 @@ export function CatalogueStep({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium text-sm text-content-primary truncate">
-                          {c.country_iso} · {c.city}
+                        <div className="flex items-center gap-1.5 font-medium text-sm text-content-primary truncate">
+                          <CountryFlag
+                            code={originFlagCode(c.country_iso)}
+                            size={16}
+                            className="shadow-xs border border-black/5"
+                          />
+                          <span className="truncate">{c.country_iso} · {c.city}</span>
                         </div>
                         <div className="text-[11px] text-content-tertiary mt-0.5">
                           {c.language?.toUpperCase()} · {c.currency} · {c.size_mb} MB
