@@ -82,6 +82,29 @@ class TakeoffDocument(Base):
     """Uploaded PDF document for quantity takeoff."""
 
     __tablename__ = "oe_takeoff_document"
+    __table_args__ = (
+        # One takeoff document per (project, source Project-Files document).
+        # POST /documents/from-source find-or-creates by (project_id,
+        # source_document_id): it does an unlocked SELECT then INSERT, so two
+        # concurrent opens of the same source PDF could both miss and both
+        # insert, minting duplicate rows that strand measurements on an
+        # unreachable document id (issue #369). This unique index is the
+        # database-level guard - the losing INSERT raises IntegrityError and the
+        # service resolves to the winning row. source_document_id is NULL for
+        # direct uploads, and PostgreSQL treats NULLs as distinct in a unique
+        # index, so ordinary uploads never collide; the constraint only ever
+        # binds the from-source rows that carry a non-NULL source id. Kept a
+        # plain (non-partial) unique index on purpose so the startup
+        # postgres_auto_migrate heal, which reconstructs plain indexes but skips
+        # partial/expression ones, materialises it on already-provisioned
+        # embedded and external databases too.
+        Index(
+            "uq_takeoff_document_project_source",
+            "project_id",
+            "source_document_id",
+            unique=True,
+        ),
+    )
 
     filename: Mapped[str] = mapped_column(String(500), nullable=False)
     pages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

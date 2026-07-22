@@ -86,6 +86,15 @@ export interface PlaybookStep {
   /** What this step produces: the data / artifacts it leaves behind. Shown as the
    *  "Out" side of the flow, so the user sees what comes out of the step. */
   outputs?: StepFlowItem[];
+  /** Optional one-line sentence shown above the "In" list, explaining in plain
+   *  words what the user brings into the step. `inputsHintDefault` is the English
+   *  fallback; `inputsHintKey` localizes it (same key + fallback pattern). */
+  inputsHintKey?: string;
+  inputsHintDefault?: string;
+  /** Optional one-line sentence shown above the "Out" list, explaining what the
+   *  user walks away with. `outputsHintDefault` is the English fallback. */
+  outputsHintKey?: string;
+  outputsHintDefault?: string;
   /** Optional CSS selector for a future in-module spotlight highlight. */
   spotlightSelector?: string;
 }

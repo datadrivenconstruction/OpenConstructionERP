@@ -934,6 +934,102 @@ export function getFinalAccountChecklist(
   );
 }
 
+/* ── Gain-share preview (GMP target-cost) ─────────────────────────────── */
+//
+// GET /contracts/{id}/gainshare-preview?actual_cost=… returns the gain / pain
+// split for a hypothetical out-turn cost. It is only valid for GMP contracts
+// (400 otherwise) and needs a gain-share configuration (404 otherwise). Money
+// fields are Decimal on the wire (typed number | string; coerce with toNum).
+// Note: the response carries no currency, so callers pass the contract's.
+
+/** GMP gain / pain split computed for a given out-turn cost. */
+export interface GainshareCalculation {
+  actual_cost: number | string;
+  target_cost: number | string;
+  gmp_cap: number | string;
+  /** Under-run below target, shared between owner and contractor. */
+  savings: number | string;
+  owner_share: number | string;
+  contractor_share: number | string;
+  /** Over-run above target. */
+  overrun: number | string;
+  /** Who carries the over-run, e.g. `contractor` / `owner` / `shared`. */
+  overrun_responsibility: string;
+}
+
+/** Preview the gain / pain split for a GMP contract at a given out-turn cost. */
+export function getGainsharePreview(
+  contractId: string,
+  actualCost: number | string,
+): Promise<GainshareCalculation> {
+  const qs = new URLSearchParams({ actual_cost: String(actualCost) });
+  return apiGet<GainshareCalculation>(
+    `/v1/contracts/contracts/${contractId}/gainshare-preview?${qs.toString()}`,
+  );
+}
+
+/* ── Security / bonds coverage ────────────────────────────────────────── */
+
+/** Bonds / guarantees / insurance held against a contract, summarised. */
+export interface SecurityCoverage {
+  contract_id: string;
+  currency: string;
+  /** Total securities recorded, in any status. */
+  count: number;
+  /** How many are currently `active`. */
+  active_count: number;
+  /** Sum of active security amounts (Decimal on the wire; coerce with toNum). */
+  total_active_amount: number | string;
+  /** Count of securities per status, e.g. `{ required: 1, active: 2 }`. */
+  by_status: Record<string, number>;
+  /** Distinct security types among the active ones, sorted. */
+  active_types: string[];
+}
+
+/** Summary of bonds / guarantees / insurance held on a contract. */
+export function getSecurityCoverage(
+  contractId: string,
+): Promise<SecurityCoverage> {
+  return apiGet<SecurityCoverage>(
+    `/v1/contracts/contracts/${contractId}/security-coverage`,
+  );
+}
+
+/* ── Milestone payment schedule ───────────────────────────────────────── */
+
+/** One resolved milestone in the payment schedule. */
+export interface MilestoneScheduleItem {
+  id: string;
+  code: string;
+  name: string;
+  /** ISO date the milestone is planned for, or null when unscheduled. */
+  planned_date: string | null;
+  /** What releases the milestone, e.g. `date` / `completion` / `approval`. */
+  trigger: string;
+  /** One of `pending` / `reached` / `invoiced` / `paid`. */
+  status: string;
+  /** Resolved milestone value (Decimal on the wire; coerce with toNum). */
+  value: number | string;
+}
+
+export interface MilestoneSchedule {
+  contract_id: string;
+  currency: string;
+  count: number;
+  /** Total scheduled milestone value (Decimal on the wire; coerce with toNum). */
+  scheduled_value: number | string;
+  milestones: MilestoneScheduleItem[];
+}
+
+/** Resolve each milestone's value and the total scheduled milestone value. */
+export function getMilestoneSchedule(
+  contractId: string,
+): Promise<MilestoneSchedule> {
+  return apiGet<MilestoneSchedule>(
+    `/v1/contracts/contracts/${contractId}/milestone-schedule`,
+  );
+}
+
 /* ── Back-compat aliases (old skeleton names) ─────────────────────────── */
 
 export type Contract = ContractItem;

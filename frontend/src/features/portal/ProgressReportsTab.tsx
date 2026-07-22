@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { FileText, ExternalLink, Download, Loader2 } from 'lucide-react';
 import { Badge, EmptyState, SkeletonTable } from '@/shared/ui';
+import { openInNewTab } from '@/shared/lib/desktop';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { projectsApi } from '@/features/projects/api';
@@ -205,7 +206,7 @@ function ReportRow({ report }: { report: ProgressReport }) {
       if (html) {
         const blob = new Blob([html], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank', 'noopener,noreferrer');
+        openInNewTab(url);
         // Revoke a little later so the new tab has time to load.
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       }

@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 
 HookHandler = Callable[..., Any]
 
+_HOOKS_BUILD_TAG: str = "29635cd3762e6ff6"
+
 
 @dataclass
 class HookEntry:

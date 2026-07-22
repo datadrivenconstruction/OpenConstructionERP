@@ -87,11 +87,26 @@ export function BIMViewCube({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-    });
+    // Creating the renderer spins up a WebGL context, which can fail: WebGL may
+    // be disabled or on a blocklisted GPU, or the browser's per-page context
+    // budget (Chrome caps it near 16) may already be spent by the main viewer
+    // and other 3-D widgets. When it fails, three.js throws from deep inside the
+    // constructor - getShaderPrecisionFormat can return null, so reading
+    // `.precision` on it raises a TypeError. The View Cube is a non-essential
+    // navigation gizmo, so swallow that and leave the cube blank rather than let
+    // the error escape the effect and tear down the whole page (e.g. Model
+    // Review) through the error boundary.
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+    } catch (err) {
+      console.warn('[BIMViewCube] WebGL unavailable, hiding the view cube', err);
+      return;
+    }
     renderer.setPixelRatio(window.devicePixelRatio || 1);
     renderer.setSize(size, size, false);
     renderer.setClearColor(0x000000, 0);

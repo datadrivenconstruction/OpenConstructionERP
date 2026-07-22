@@ -135,6 +135,10 @@ class RouteResponse(BaseModel):
     target_kind: str
     is_active: bool
     created_by: UUID | None
+    # Set only on platform-seeded presets (tenant-wide read-only review flows);
+    # NULL for every user-created route. The UI flags a preset from this and the
+    # API rejects edits / deletes of a route that carries it.
+    system_key: str | None = None
     created_at: datetime
     updated_at: datetime
     steps: list[StepResponse] = Field(default_factory=list)
@@ -283,3 +287,79 @@ class EscalationOut(BaseModel):
     reason: str
     chain_length: int
     current_holder: str | None
+
+
+# ── Dry-run simulation payloads ──────────────────────────────────────
+
+
+class SimulateDecision(BaseModel):
+    """One step's hypothetical decision tally for a what-if dry run.
+
+    ``distinct_approvers`` defaults to ``approvals`` (each approval treated as
+    a different person), which is the common case; set it lower to model the
+    same person approving twice against an all / majority gate.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    ordinal: int = Field(ge=1, le=100)
+    approvals: int = Field(default=0, ge=0, le=100)
+    rejections: int = Field(default=0, ge=0, le=100)
+    distinct_approvers: int | None = Field(default=None, ge=0, le=100)
+
+
+class SimulateRequest(BaseModel):
+    """Optional body for ``POST /routes/{id}/simulate``.
+
+    An empty body runs only the happy path (every step approved by the minimum
+    number of approvers). Supplying ``decisions`` adds a second what-if walk;
+    steps left out of the list keep their happy-path minimum.
+    """
+
+    decisions: list[SimulateDecision] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def _ordinals_unique(self) -> SimulateRequest:
+        ordinals = [d.ordinal for d in self.decisions]
+        if len(ordinals) != len(set(ordinals)):
+            raise ValueError("Each step ordinal may appear at most once in decisions")
+        return self
+
+
+class SimulatedStep(BaseModel):
+    """Per-step analysis of a route template in a dry run."""
+
+    ordinal: int
+    mode: str
+    approver_role: str | None
+    approver_user_id: UUID | None
+    quorum_required: int | None
+    min_approvals_to_clear: int
+    needs_multiple_approvers: bool
+    note: str
+
+
+class SimulationOutcome(BaseModel):
+    """Where one dry-run walk (happy path or scenario) ends up.
+
+    ``outcome`` is ``completed`` (reaches approved), ``rejected`` (a rejection
+    short-circuits the workflow) or ``stuck`` (a step never gathers enough
+    approvals). ``stopped_at_ordinal`` is the step it ended on (null when it
+    completed), and ``trace`` is a step-by-step human-readable explanation.
+    """
+
+    outcome: Literal["completed", "rejected", "stuck"]
+    stopped_at_ordinal: int | None
+    trace: list[str]
+
+
+class RouteSimulationResponse(BaseModel):
+    """Result of dry-running a route template."""
+
+    route_id: UUID
+    target_kind: str
+    step_count: int
+    steps: list[SimulatedStep]
+    happy_path: SimulationOutcome
+    scenario: SimulationOutcome | None = None
+    warnings: list[str] = Field(default_factory=list)

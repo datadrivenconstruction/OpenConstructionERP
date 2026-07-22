@@ -2,13 +2,16 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // ContractAnalyticsPanels — the "Analytics & close-out" grouping on the
-// contract detail drawer. It surfaces four read-only backend endpoints that had
+// contract detail drawer. It surfaces seven read-only backend endpoints that had
 // no frontend consumer:
 //
 //   • GET /contracts/{id}/sov-status              → SoV billed/earned/paid table
 //   • GET /contracts/{id}/completeness            → traffic-light rule report
 //   • GET /contracts/{id}/eot-summary             → extension-of-time exposure
 //   • GET /contracts/{id}/final-account-checklist → close-out readiness list
+//   • GET /contracts/{id}/gainshare-preview       → GMP gain/pain split preview
+//   • GET /contracts/{id}/security-coverage       → bonds/guarantees coverage
+//   • GET /contracts/{id}/milestone-schedule      → payment milestone schedule
 //
 // Each panel owns its React Query (keyed by contract id), renders loading /
 // error / empty states consistent with the rest of the page, degrades a 403 to
@@ -16,7 +19,7 @@
 // tie-outs with the module's success / warning / danger semantics (emerald /
 // amber / red, matching ComplianceGate.tsx).
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -38,9 +41,13 @@ import {
   Loader2,
   Lock,
   Info,
+  Scale,
+  Landmark,
+  Flag,
+  Coins,
 } from 'lucide-react';
 
-import { Card, Badge, Button } from '@/shared/ui';
+import { Card, Badge, Button, Input } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import {
@@ -48,9 +55,13 @@ import {
   getContractCompleteness,
   getEotSummary,
   getFinalAccountChecklist,
+  getGainsharePreview,
+  getSecurityCoverage,
+  getMilestoneSchedule,
   listContractLines,
   type CompletenessFinding,
   type FinalAccountCheckItem,
+  type MilestoneScheduleItem,
 } from './api';
 
 /* ── Semantic tie-out colours (mirror ComplianceGate.tsx) ─────────────── */
@@ -59,6 +70,9 @@ const SUCCESS = 'text-emerald-600 dark:text-emerald-400';
 const WARNING = 'text-amber-600 dark:text-amber-400';
 const DANGER = 'text-red-600 dark:text-red-400';
 const MUTED = 'text-content-tertiary';
+
+/** Mirror of the (unexported) Badge variant union, for status → badge mapping. */
+type BadgeTone = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
 /** Coerce a decimal-string (or number) money value to a finite number. */
 function toNum(v: number | string | null | undefined): number {
@@ -73,12 +87,22 @@ function fmtPct(v: number | string | null | undefined): string {
 
 /** Narrow a thrown ApiError to a 403 without importing the class. */
 function isForbidden(err: unknown): boolean {
-  return (
-    !!err &&
-    typeof err === 'object' &&
-    'status' in err &&
-    (err as { status: number }).status === 403
-  );
+  return errorStatus(err) === 403;
+}
+
+/** Read the HTTP status off a thrown ApiError, or undefined for other errors. */
+function errorStatus(err: unknown): number | undefined {
+  if (err && typeof err === 'object' && 'status' in err) {
+    const s = (err as { status: unknown }).status;
+    return typeof s === 'number' ? s : undefined;
+  }
+  return undefined;
+}
+
+/** Humanise a backend enum value ("performance_bond" → "Performance bond"). */
+function humanize(v: string): string {
+  const spaced = v.replace(/[_-]+/g, ' ').trim();
+  return spaced ? spaced.charAt(0).toUpperCase() + spaced.slice(1) : v;
 }
 
 /* ── Shared panel chrome ──────────────────────────────────────────────── */
@@ -770,11 +794,565 @@ function FinalAccountChecklistPanel({ contractId }: { contractId: string }) {
   );
 }
 
+/* ── Shared metric tile (gain-share & security panels) ────────────────── */
+
+/** Compact labelled metric tile (twin of {@link EotStat}, reused by panels 5-6). */
+function StatTile({
+  label,
+  value,
+  valueCls,
+}: {
+  label: string;
+  value: ReactNode;
+  valueCls?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
+      <p className="text-2xs uppercase tracking-wide text-content-tertiary">{label}</p>
+      <p className={clsx('mt-0.5 text-sm font-semibold text-content-primary', valueCls)}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/* ── 5 · Gain-share (GMP target-cost) preview ─────────────────────────── */
+
+function GainsharePanel({
+  contractId,
+  currency,
+}: {
+  contractId: string;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+  const [costInput, setCostInput] = useState('');
+  const [submitted, setSubmitted] = useState<number | null>(null);
+
+  const q = useQuery({
+    queryKey: ['contracts', 'gainshare-preview', contractId, submitted],
+    queryFn: () => getGainsharePreview(contractId, submitted as number),
+    enabled: submitted != null,
+    retry: false,
+  });
+
+  const parsed = Number(costInput);
+  const canSubmit =
+    costInput.trim() !== '' && Number.isFinite(parsed) && parsed > 0;
+
+  const money = (v: number | string) => (
+    <MoneyDisplay amount={toNum(v)} currency={currency || undefined} />
+  );
+
+  let body: ReactNode;
+  if (submitted == null) {
+    body = (
+      <PanelEmpty
+        label={t('contracts.gainshare_prompt', {
+          defaultValue:
+            'Enter an out-turn cost above to preview the gain and pain split.',
+        })}
+      />
+    );
+  } else if (q.isLoading) {
+    body = (
+      <PanelLoading
+        label={t('contracts.gainshare_loading', {
+          defaultValue: 'Calculating gain and pain split...',
+        })}
+      />
+    );
+  } else if (q.isError) {
+    const st = errorStatus(q.error);
+    if (st === 403) {
+      body = <PanelForbidden />;
+    } else if (st === 400) {
+      body = (
+        <PanelEmpty
+          label={t('contracts.gainshare_not_applicable', {
+            defaultValue:
+              'Gain share applies to guaranteed maximum price contracts only.',
+          })}
+        />
+      );
+    } else if (st === 404) {
+      body = (
+        <PanelEmpty
+          label={t('contracts.gainshare_no_config', {
+            defaultValue:
+              'No target cost and share split is configured for this contract yet.',
+          })}
+        />
+      );
+    } else {
+      body = <PanelError onRetry={() => void q.refetch()} />;
+    }
+  } else if (q.data) {
+    const d = q.data;
+    const savings = toNum(d.savings);
+    const overrun = toNum(d.overrun);
+    body = (
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <StatTile
+            label={t('contracts.gainshare_actual_cost', {
+              defaultValue: 'Out-turn cost',
+            })}
+            value={money(d.actual_cost)}
+          />
+          <StatTile
+            label={t('contracts.gainshare_target_cost', {
+              defaultValue: 'Target cost',
+            })}
+            value={money(d.target_cost)}
+          />
+          <StatTile
+            label={t('contracts.gainshare_gmp_cap', {
+              defaultValue: 'Guaranteed maximum',
+            })}
+            value={money(d.gmp_cap)}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <StatTile
+            label={t('contracts.gainshare_savings', {
+              defaultValue: 'Savings (gain)',
+            })}
+            value={money(d.savings)}
+            valueCls={savings > 0 ? SUCCESS : undefined}
+          />
+          <StatTile
+            label={t('contracts.gainshare_overrun', {
+              defaultValue: 'Overrun (pain)',
+            })}
+            value={money(d.overrun)}
+            valueCls={overrun > 0 ? DANGER : undefined}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <StatTile
+            label={t('contracts.gainshare_owner_share', {
+              defaultValue: 'Owner share',
+            })}
+            value={money(d.owner_share)}
+          />
+          <StatTile
+            label={t('contracts.gainshare_contractor_share', {
+              defaultValue: 'Contractor share',
+            })}
+            value={money(d.contractor_share)}
+          />
+        </div>
+        <p className="text-2xs text-content-tertiary">
+          {t('contracts.gainshare_overrun_responsibility', {
+            defaultValue: 'Overrun carried by',
+          })}
+          :{' '}
+          <span className="font-medium text-content-secondary">
+            {humanize(d.overrun_responsibility)}
+          </span>
+        </p>
+      </div>
+    );
+  } else {
+    body = null;
+  }
+
+  return (
+    <Card padding="sm">
+      <PanelHeader
+        icon={<Scale size={14} className="text-oe-blue" />}
+        title={t('contracts.gainshare_title', {
+          defaultValue: 'Gain share preview',
+        })}
+      />
+      <p className="mb-2 text-2xs text-content-tertiary">
+        {t('contracts.gainshare_intro', {
+          defaultValue:
+            'Enter a forecast or actual out-turn cost to preview the target-cost gain and pain split.',
+        })}
+      </p>
+      <form
+        className="mb-3 flex items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (canSubmit) setSubmitted(parsed);
+        }}
+      >
+        <div className="flex-1">
+          <Input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="any"
+            value={costInput}
+            onChange={(e) => setCostInput(e.target.value)}
+            icon={<Coins size={14} />}
+            placeholder={t('contracts.gainshare_cost_placeholder', {
+              defaultValue: 'e.g. 4800000',
+            })}
+            aria-label={t('contracts.gainshare_cost_label', {
+              defaultValue: 'Out-turn cost',
+            })}
+          />
+        </div>
+        <Button
+          type="submit"
+          size="sm"
+          variant="secondary"
+          disabled={!canSubmit}
+          loading={submitted != null && q.isFetching}
+        >
+          {t('contracts.gainshare_preview_action', { defaultValue: 'Preview' })}
+        </Button>
+      </form>
+      {body}
+    </Card>
+  );
+}
+
+/* ── 6 · Security / bonds coverage ────────────────────────────────────── */
+
+/** English fallback labels for the stable security-status enum. */
+const SECURITY_STATUS_LABELS: Record<string, string> = {
+  required: 'Required',
+  received: 'Received',
+  active: 'Active',
+  expired: 'Expired',
+  released: 'Released',
+  claimed: 'Claimed',
+};
+
+function securityStatusLabel(t: TFunction, status: string): string {
+  return t(`contracts.security_status_${status}`, {
+    defaultValue: SECURITY_STATUS_LABELS[status] ?? humanize(status),
+  });
+}
+
+function securityStatusTone(status: string): BadgeTone {
+  switch (status) {
+    case 'active':
+      return 'success';
+    case 'received':
+      return 'blue';
+    case 'required':
+    case 'expired':
+      return 'warning';
+    case 'claimed':
+      return 'error';
+    default:
+      return 'neutral';
+  }
+}
+
+function SecurityCoveragePanel({
+  contractId,
+  currency,
+}: {
+  contractId: string;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+  const q = useQuery({
+    queryKey: ['contracts', 'security-coverage', contractId],
+    queryFn: () => getSecurityCoverage(contractId),
+    retry: false,
+  });
+
+  const fallback = fallbackNode(
+    q,
+    t('contracts.security_coverage_loading', {
+      defaultValue: 'Loading security coverage...',
+    }),
+  );
+
+  let body: ReactNode = fallback;
+  if (!fallback && q.data) {
+    const d = q.data;
+    if (d.count === 0) {
+      body = (
+        <PanelEmpty
+          label={t('contracts.security_coverage_empty', {
+            defaultValue:
+              'No bonds, guarantees or insurance recorded for this contract.',
+          })}
+        />
+      );
+    } else {
+      const cur = d.currency || currency;
+      const statuses = Object.entries(d.by_status).sort((a, b) => b[1] - a[1]);
+      body = (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <StatTile
+              label={t('contracts.security_coverage_active_amount', {
+                defaultValue: 'Active cover',
+              })}
+              value={
+                <MoneyDisplay
+                  amount={toNum(d.total_active_amount)}
+                  currency={cur || undefined}
+                />
+              }
+              valueCls={d.active_count > 0 ? SUCCESS : undefined}
+            />
+            <StatTile
+              label={t('contracts.security_coverage_active_count', {
+                defaultValue: 'Active securities',
+              })}
+              value={d.active_count}
+            />
+            <StatTile
+              label={t('contracts.security_coverage_total_count', {
+                defaultValue: 'Total recorded',
+              })}
+              value={d.count}
+            />
+          </div>
+
+          <div>
+            <p className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              {t('contracts.security_coverage_by_status', {
+                defaultValue: 'By status',
+              })}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {statuses.map(([status, n]) => (
+                <Badge key={status} variant={securityStatusTone(status)} dot>
+                  {securityStatusLabel(t, status)} · {n}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {d.active_types.length > 0 && (
+            <div>
+              <p className="mb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                {t('contracts.security_coverage_active_types', {
+                  defaultValue: 'Active types',
+                })}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {d.active_types.map((ty) => (
+                  <span
+                    key={ty}
+                    className="rounded-md border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs text-content-secondary"
+                  >
+                    {humanize(ty)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
+
+  return (
+    <Card padding="sm">
+      <PanelHeader
+        icon={<Landmark size={14} className="text-oe-blue" />}
+        title={t('contracts.security_coverage_title', {
+          defaultValue: 'Security and bonds coverage',
+        })}
+      />
+      {body}
+    </Card>
+  );
+}
+
+/* ── 7 · Milestone payment schedule ───────────────────────────────────── */
+
+/** English fallback labels for the stable milestone-status enum. */
+const MILESTONE_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  reached: 'Reached',
+  invoiced: 'Invoiced',
+  paid: 'Paid',
+};
+
+function milestoneStatusLabel(t: TFunction, status: string): string {
+  return t(`contracts.milestone_status_${status}`, {
+    defaultValue: MILESTONE_STATUS_LABELS[status] ?? humanize(status),
+  });
+}
+
+function milestoneStatusTone(status: string): BadgeTone {
+  switch (status) {
+    case 'paid':
+      return 'success';
+    case 'invoiced':
+    case 'reached':
+      return 'blue';
+    default:
+      return 'neutral';
+  }
+}
+
+function MilestoneRow({
+  m,
+  currency,
+  label,
+  tone,
+}: {
+  m: MilestoneScheduleItem;
+  currency: string;
+  label: string;
+  tone: BadgeTone;
+}) {
+  return (
+    <tr className="border-t border-border-light">
+      <td className="py-1 pr-2">
+        {m.code && (
+          <span className="mr-1 font-mono text-2xs text-content-tertiary">
+            {m.code}
+          </span>
+        )}
+        <span className="text-content-primary">{m.name}</span>
+      </td>
+      <td className="py-1 pr-2 text-content-secondary">
+        {m.planned_date ? <DateDisplay value={m.planned_date} /> : '-'}
+      </td>
+      <td className="py-1 pr-2 text-2xs text-content-tertiary">
+        {humanize(m.trigger)}
+      </td>
+      <td className="py-1 pr-2">
+        <Badge variant={tone}>{label}</Badge>
+      </td>
+      <td className="py-1 text-right tabular-nums text-content-secondary">
+        <MoneyDisplay amount={toNum(m.value)} currency={currency || undefined} />
+      </td>
+    </tr>
+  );
+}
+
+function MilestoneSchedulePanel({
+  contractId,
+  currency,
+}: {
+  contractId: string;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+  const q = useQuery({
+    queryKey: ['contracts', 'milestone-schedule', contractId],
+    queryFn: () => getMilestoneSchedule(contractId),
+    retry: false,
+  });
+
+  const fallback = fallbackNode(
+    q,
+    t('contracts.milestone_schedule_loading', {
+      defaultValue: 'Loading milestone schedule...',
+    }),
+  );
+
+  let body: ReactNode = fallback;
+  let totalBadge: ReactNode = null;
+  if (!fallback && q.data) {
+    const d = q.data;
+    const cur = d.currency || currency;
+    if (d.count === 0) {
+      body = (
+        <PanelEmpty
+          label={t('contracts.milestone_schedule_empty', {
+            defaultValue: 'No payment milestones defined for this contract.',
+          })}
+        />
+      );
+    } else {
+      totalBadge = (
+        <span className="text-2xs uppercase tracking-wide text-content-tertiary">
+          {t('contracts.milestone_schedule_total', {
+            defaultValue: 'Total scheduled',
+          })}
+          :{' '}
+          <span className="font-medium text-content-secondary">
+            <MoneyDisplay
+              amount={toNum(d.scheduled_value)}
+              currency={cur || undefined}
+            />
+          </span>
+        </span>
+      );
+      // Order by planned date (unscheduled milestones last), then by code.
+      const rows = [...d.milestones].sort((a, b) => {
+        if (a.planned_date && b.planned_date) {
+          return a.planned_date.localeCompare(b.planned_date);
+        }
+        if (a.planned_date) return -1;
+        if (b.planned_date) return 1;
+        return a.code.localeCompare(b.code);
+      });
+      body = (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-2xs uppercase tracking-wide text-content-tertiary">
+              <tr>
+                <th className="py-1 text-left">
+                  {t('contracts.milestone_col_milestone', {
+                    defaultValue: 'Milestone',
+                  })}
+                </th>
+                <th className="py-1 text-left">
+                  {t('contracts.milestone_col_date', {
+                    defaultValue: 'Planned date',
+                  })}
+                </th>
+                <th className="py-1 text-left">
+                  {t('contracts.milestone_col_trigger', {
+                    defaultValue: 'Trigger',
+                  })}
+                </th>
+                <th className="py-1 text-left">
+                  {t('contracts.milestone_col_status', {
+                    defaultValue: 'Status',
+                  })}
+                </th>
+                <th className="py-1 text-right">
+                  {t('contracts.milestone_col_value', {
+                    defaultValue: 'Value',
+                  })}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((m) => (
+                <MilestoneRow
+                  key={m.id}
+                  m={m}
+                  currency={cur}
+                  label={milestoneStatusLabel(t, m.status)}
+                  tone={milestoneStatusTone(m.status)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <Card padding="sm">
+      <PanelHeader
+        icon={<Flag size={14} className="text-oe-blue" />}
+        title={t('contracts.milestone_schedule_title', {
+          defaultValue: 'Milestone schedule',
+        })}
+        right={totalBadge ?? undefined}
+      />
+      {body}
+    </Card>
+  );
+}
+
 /* ── Grouping ─────────────────────────────────────────────────────────── */
 
 /**
  * "Analytics & close-out" grouping for the contract detail drawer. Renders the
- * four analytics panels as stacked cards, each with its own query so a slow or
+ * seven analytics panels as stacked cards, each with its own query so a slow or
  * forbidden endpoint never blocks the others.
  */
 export function ContractAnalyticsPanels({
@@ -808,6 +1386,9 @@ export function ContractAnalyticsPanels({
       <CompletenessPanel contractId={contractId} />
       <EotSummaryPanel contractId={contractId} />
       <FinalAccountChecklistPanel contractId={contractId} />
+      <GainsharePanel contractId={contractId} currency={currency} />
+      <SecurityCoveragePanel contractId={contractId} currency={currency} />
+      <MilestoneSchedulePanel contractId={contractId} currency={currency} />
     </section>
   );
 }

@@ -9012,8 +9012,13 @@ class RenumberRequest(BaseModel):
     (gap-of-10 scheme, padded ordinals) so existing clients keep working.
     """
 
-    scheme: Literal["gap10", "gap100", "sequential", "dotted"] = "gap10"
+    scheme: Literal["gap10", "gap100", "sequential", "dotted", "custom"] = "gap10"
     pad: bool = True
+    # ``custom`` scheme only: the first leaf number and the increment between
+    # positions, so the user can define any numbering they want (e.g. start=100,
+    # step=5 -> 01.100, 01.105, 01.110). Ignored by the fixed schemes above.
+    start: int = 10
+    step: int = 10
 
 
 @router.post(
@@ -9042,6 +9047,8 @@ async def renumber_positions(
       good for fixed-scope BOQs that won't get extra positions later.
     * ``dotted`` - ``1, 1.1, 1.2, 1.3`` - short-form decimal numbering
       common in NRM-style measurement.
+    * ``custom`` - user-defined ``start`` and ``step`` (e.g. start=100, step=5
+      -> ``01.100, 01.105, 01.110``) so any numbering can be dialled in.
 
     The ``pad`` option controls whether top-level section numbers are
     zero-padded to two digits (``01`` vs ``1``).
@@ -9054,14 +9061,23 @@ async def renumber_positions(
 
     # Step (gap) per scheme. Sequential and dotted have step=1; gap10/gap100
     # leave room to insert.
+    is_custom = opts.scheme == "custom"
     step_per_scheme: dict[str, int] = {
         "gap10": 10,
         "gap100": 100,
         "sequential": 1,
         "dotted": 1,
+        "custom": max(1, opts.step),
     }
     step = step_per_scheme[opts.scheme]
+    custom_start = max(0, opts.start)
     use_dotted = opts.scheme == "dotted"
+
+    def _leaf_value(idx: int) -> int:
+        """Numeric value for the idx-th (1-based) leaf within its parent group."""
+        if is_custom:
+            return custom_start + (idx - 1) * step
+        return idx * step
 
     def _fmt_section(idx: int) -> str:
         if not opts.pad:
@@ -9069,7 +9085,8 @@ async def renumber_positions(
         return f"{idx:02d}"
 
     def _fmt_leaf_value(parent_ord: str, value: int) -> str:
-        if use_dotted:
+        # dotted and custom keep the raw integer; the fixed gap schemes zero-pad.
+        if use_dotted or is_custom:
             return f"{parent_ord}.{value}"
         # Width: 2 digits for gap10/sequential, 3 digits for gap100
         width = 3 if opts.scheme == "gap100" else 2
@@ -9077,7 +9094,7 @@ async def renumber_positions(
 
     def _fmt_top_leaf(value: int) -> str:
         # Top-level leaves without a parent section.
-        if use_dotted:
+        if use_dotted or is_custom:
             return str(value)
         width = 4 if opts.scheme in ("gap10", "gap100") else 2
         return f"{value:0{width}d}"
@@ -9120,13 +9137,13 @@ async def renumber_positions(
                     new_ord = _fmt_section(section_idx)
                 else:
                     leaf_idx += 1
-                    new_ord = _fmt_leaf_value(parent_ordinal or "", leaf_idx * step)
+                    new_ord = _fmt_leaf_value(parent_ordinal or "", _leaf_value(leaf_idx))
             else:
                 leaf_idx += 1
                 if parent_ordinal:
-                    new_ord = _fmt_leaf_value(parent_ordinal, leaf_idx * step)
+                    new_ord = _fmt_leaf_value(parent_ordinal, _leaf_value(leaf_idx))
                 else:
-                    new_ord = _fmt_top_leaf(leaf_idx * step)
+                    new_ord = _fmt_top_leaf(_leaf_value(leaf_idx))
             updates.append((child.id, new_ord))
             _walk(str(child.id), new_ord)
 

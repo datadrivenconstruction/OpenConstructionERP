@@ -21,6 +21,8 @@ import {
   File,
   Network,
   Archive,
+  Users,
+  Gauge,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, RecoveryCard, SkeletonTable, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -38,6 +40,8 @@ import {
   fetchContainerRevisions,
   createContainerRevision,
   fetchSuitabilityCodes,
+  fetchFunctionalRoles,
+  fetchCDEReadiness,
   fetchCDEStats,
   type CDEContainer,
   type CDEState,
@@ -1233,6 +1237,312 @@ function HowCdeWorks() {
   );
 }
 
+/* ── Functional roles (ISO 19650) ──────────────────────────────────────── */
+
+/** Accent per functional role, following the workflow (author -> reviewer ->
+ *  approver, viewer throughout). Initial-badge colours, no extra icon imports. */
+const ROLE_ACCENT: Record<string, string> = {
+  author: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  reviewer: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  approver: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  viewer: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+};
+
+/**
+ * The four ISO 19650 functional roles (Author / Reviewer / Approver / Viewer)
+ * and what each one does at every CDE state. Agreeing these responsibilities
+ * once, up front, is what keeps a CDE a live source of truth instead of a dead
+ * document dump - so the model is shown here as reference, driven by
+ * GET /v1/cde/functional-roles. Static reference data (no project needed).
+ */
+function CdeFunctionalRoles() {
+  const { t } = useTranslation();
+  const { data } = useQuery({
+    queryKey: ['cde-functional-roles'],
+    queryFn: fetchFunctionalRoles,
+    staleTime: Infinity,
+  });
+  if (!data) return null;
+  const { roles, states, matrix } = data;
+
+  return (
+    <Card padding="md">
+      <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+        <Users size={15} className="text-oe-blue" />
+        {t('cde.roles_title', { defaultValue: 'Roles and responsibilities' })}
+      </h2>
+      <p className="mt-1 text-xs text-content-tertiary">
+        {t('cde.roles_intro', {
+          defaultValue:
+            'ISO 19650 organises information work around four functional roles. Agree who does what once and reuse it on every discipline - the same person can author their own package and only view another.',
+        })}
+      </p>
+
+      {/* Role cards */}
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {roles.map((role) => {
+          const name = t(`cde.role_${role.key}_name`, { defaultValue: role.name });
+          return (
+            <div
+              key={role.key}
+              className="rounded-lg border border-border-light bg-surface-secondary/40 p-3"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={clsx(
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-bold',
+                    ROLE_ACCENT[role.key] ?? ROLE_ACCENT.viewer,
+                  )}
+                  aria-hidden="true"
+                >
+                  {name.charAt(0)}
+                </span>
+                <span className="text-xs font-semibold text-content-primary">{name}</span>
+                {role.gate && (
+                  <Badge variant="blue" size="sm" className="ml-auto">
+                    {t('cde.roles_gate', { defaultValue: 'Gate {{gate}}', gate: role.gate })}
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1.5 text-2xs leading-relaxed text-content-tertiary">
+                {t(`cde.role_${role.key}_summary`, { defaultValue: role.summary })}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Responsibility matrix: what each role does in each state */}
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[34rem] border-collapse text-2xs">
+          <thead>
+            <tr className="text-content-tertiary">
+              <th className="px-2 py-1.5 text-left font-medium uppercase tracking-wide">
+                {t('cde.roles_matrix_state', { defaultValue: 'State' })}
+              </th>
+              {roles.map((role) => (
+                <th key={role.key} className="px-2 py-1.5 text-left font-medium">
+                  {t(`cde.role_${role.key}_name`, { defaultValue: role.name })}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {states.map((state) => {
+              const cfg = STATE_CONFIG[state] ?? STATE_CONFIG.wip;
+              return (
+                <tr key={state} className="border-t border-border-light">
+                  <td className="px-2 py-1.5">
+                    <Badge variant={cfg.variant} size="sm" className={cfg.cls}>
+                      {t(`cde.state_${state}`, { defaultValue: cfg.label })}
+                    </Badge>
+                  </td>
+                  {roles.map((role) => {
+                    const action = matrix[state]?.[role.key] ?? '-';
+                    const idle = action === '-';
+                    return (
+                      <td
+                        key={role.key}
+                        className={clsx(
+                          'px-2 py-1.5',
+                          idle ? 'text-content-quaternary' : 'text-content-secondary',
+                        )}
+                      >
+                        {idle ? '·' : action}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+/* ── Go-live readiness (ISO 19650) ─────────────────────────────────────── */
+
+type ReadinessLevel = 'not_started' | 'forming' | 'operational' | 'mature';
+
+/** Level -> badge tone, progress-bar fill and default English label. Keeps the
+ *  scorecard's colour language consistent with the rest of the module (neutral
+ *  -> amber -> blue -> green mirrors the WIP -> Shared -> Published lifecycle). */
+const READINESS_LEVEL: Record<
+  ReadinessLevel,
+  { variant: 'neutral' | 'blue' | 'success' | 'warning'; bar: string; label: string }
+> = {
+  not_started: { variant: 'neutral', bar: 'bg-gray-300 dark:bg-gray-600', label: 'Not started' },
+  forming: { variant: 'warning', bar: 'bg-amber-400', label: 'Forming' },
+  operational: { variant: 'blue', bar: 'bg-oe-blue', label: 'Operational' },
+  mature: { variant: 'success', bar: 'bg-green-500', label: 'Mature' },
+};
+
+/**
+ * A project's CDE go-live readiness: how far the team has got from "switched on"
+ * to "actually running the ISO 19650 workflow you can trust". Standing a CDE up
+ * is more than turning it on - containers have to be created, named and
+ * classified, work has to move out of WIP into Shared and on to Published, gate
+ * crossings have to be signed and revisions versioned. The score, level and the
+ * next few things to fix come straight from the project's real container and
+ * transition state via GET /v1/cde/readiness, so this is a live checklist, not
+ * a brochure. Only renders once a project is in context.
+ */
+function CdeReadiness({ projectId }: { projectId: string }) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useQuery({
+    queryKey: ['cde-readiness', projectId],
+    queryFn: () => fetchCDEReadiness(projectId),
+    enabled: !!projectId,
+    staleTime: 30_000,
+  });
+
+  if (!projectId) return null;
+
+  if (isLoading || !data) {
+    return (
+      <Card padding="md">
+        <div className="h-5 w-48 animate-pulse rounded bg-surface-secondary" />
+        <div className="mt-3 h-2 w-full animate-pulse rounded-full bg-surface-secondary" />
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-8 animate-pulse rounded-lg bg-surface-secondary" />
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
+  const level = (data.level as ReadinessLevel) ?? 'not_started';
+  const cfg = READINESS_LEVEL[level] ?? READINESS_LEVEL.not_started;
+  const done = data.signals.filter((s) => s.done).length;
+
+  return (
+    <Card padding="md">
+      {/* Header + score */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+            <Gauge size={15} className="text-oe-blue" />
+            {t('cde.readiness_title', { defaultValue: 'Go-live readiness' })}
+          </h2>
+          <p className="mt-1 max-w-xl text-xs text-content-tertiary">
+            {t('cde.readiness_intro', {
+              defaultValue:
+                'Standing up a CDE is more than switching it on. This scores how far this project has actually run the ISO 19650 workflow - naming, classification, the move through Shared and Published, signed gates and versioned revisions - and points at the next few things to fix.',
+            })}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="text-right">
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold tabular-nums leading-none text-content-primary">
+                {data.score}
+              </span>
+              <span className="text-sm font-medium text-content-tertiary">/100</span>
+            </div>
+            <div className="mt-1 flex items-center justify-end gap-1.5">
+              <Badge variant={cfg.variant} size="sm">
+                {t(`cde.readiness_level_${level}`, { defaultValue: cfg.label })}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mt-3">
+        <div
+          className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary"
+          role="progressbar"
+          aria-valuenow={data.score}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={t('cde.readiness_title', { defaultValue: 'Go-live readiness' })}
+        >
+          <div
+            className={clsx('h-full rounded-full transition-[width] duration-500 ease-oe', cfg.bar)}
+            style={{ width: `${Math.max(2, data.score)}%` }}
+          />
+        </div>
+        <div className="mt-1.5 flex items-center justify-between text-2xs text-content-tertiary">
+          <span>
+            {t('cde.readiness_milestones_met', {
+              defaultValue: '{{done}} of {{total}} milestones met',
+              done,
+              total: data.signals.length,
+            })}
+          </span>
+          <span className="tabular-nums">
+            {t('cde.readiness_across_containers', {
+              defaultValue: '{{count}} container(s)',
+              count: data.total_containers,
+            })}
+          </span>
+        </div>
+      </div>
+
+      {/* Signal checklist */}
+      <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+        {data.signals.map((s) => {
+          const label = t(`cde.readiness_signal_${s.key}`, { defaultValue: s.label });
+          const hint = t(`cde.readiness_hint_${s.key}`, { defaultValue: s.hint });
+          return (
+            <li
+              key={s.key}
+              className={clsx(
+                'flex items-center gap-2 rounded-lg border px-2.5 py-1.5',
+                s.done
+                  ? 'border-green-200 bg-green-50/60 dark:border-green-900/40 dark:bg-green-900/10'
+                  : 'border-border-light bg-surface-secondary/40',
+              )}
+              title={hint}
+            >
+              <span
+                className={clsx(
+                  'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                  s.done
+                    ? 'border-green-500 bg-green-500 text-white'
+                    : 'border-border text-transparent',
+                )}
+                aria-hidden="true"
+              >
+                {s.done && <Check size={11} strokeWidth={3} />}
+              </span>
+              <span
+                className={clsx(
+                  'flex-1 truncate text-xs',
+                  s.done ? 'text-content-secondary' : 'text-content-tertiary',
+                )}
+              >
+                {label}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Next actions nudge */}
+      {data.next_actions.length > 0 && (
+        <div className="mt-3 flex flex-col gap-1 border-t border-border-light pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
+          <span className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+            {t('cde.readiness_next', { defaultValue: 'Next' })}
+          </span>
+          {data.next_actions.map((a, i) => (
+            <Fragment key={a.key}>
+              {i > 0 && <span className="hidden text-content-quaternary sm:inline">·</span>}
+              <span className="text-2xs text-content-tertiary" title={t(`cde.readiness_hint_${a.key}`, { defaultValue: a.hint })}>
+                {t(`cde.readiness_signal_${a.key}`, { defaultValue: a.label })}
+              </span>
+            </Fragment>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CDEPage() {
@@ -1582,6 +1892,13 @@ export function CDEPage() {
       </DismissibleInfo>
 
       <HowCdeWorks />
+
+      <CdeFunctionalRoles />
+
+      {/* Go-live readiness scorecard — the project's live ISO 19650 status and
+          the next few things to fix, so a CDE never quietly becomes a dead
+          document dump. Renders whenever a project is in context. */}
+      {projectId && <CdeReadiness projectId={projectId} />}
 
       {/* Summary cards — fed by the /cde/stats aggregate endpoint. Shows the
           full ISO 19650 lifecycle (Total + every state) so users can see how

@@ -103,9 +103,9 @@ async def test_formwork_end_to_end(client: AsyncClient):
     sys_resp = await client.post(
         "/api/v1/formwork/systems/",
         json={
-            "name": "Smoke Test Doka Framax",
+            "name": "Smoke Test Framed Panel",
             "system_type": "wall",
-            "supplier": "Doka",
+            "supplier": "Doker",
             "material": "steel",
             "reuses_max": 100,
             "unit_rate": "65.00",

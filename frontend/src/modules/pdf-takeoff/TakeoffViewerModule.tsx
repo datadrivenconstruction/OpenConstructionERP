@@ -175,6 +175,7 @@ import {
   measurementLabel,
 } from '../../features/takeoff/lib/takeoff-display-units';
 import { ElementCostMatchPanel } from '@/features/match';
+import { openLink } from '@/shared/lib/desktop';
 
 // Configure PDF.js worker — bundled locally (no CDN dependency)
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -5393,7 +5394,7 @@ export default function TakeoffViewerModule({
   const handleOpenLinkedPosition = useCallback((m: Measurement) => {
     if (!m.linkedBoqId || !m.linkedPositionId) return;
     // Absolute navigation; takeoff is embedded under /takeoff route.
-    window.open(`/boq/${m.linkedBoqId}?highlight=${m.linkedPositionId}`, '_blank', 'noopener');
+    openLink(`/boq/${m.linkedBoqId}?highlight=${m.linkedPositionId}`);
   }, []);
 
   /** Ledger row click → navigate to the measurement.  Switch to its page
@@ -7772,8 +7773,7 @@ export default function TakeoffViewerModule({
                     fileKind="takeoff"
                     fileId={selectedMeasurement.serverId}
                     onChipClick={(ref) => {
-                      const openTab = (path: string) =>
-                        window.open(path, '_blank', 'noopener');
+                      const openTab = (path: string) => openLink(path);
                       switch (ref.target_type) {
                         case 'rfi':
                           openTab(`/rfi/${ref.target_id}`);

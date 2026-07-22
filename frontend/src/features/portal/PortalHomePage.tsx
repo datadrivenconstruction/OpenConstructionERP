@@ -45,6 +45,7 @@ import {
   X,
 } from 'lucide-react';
 import { Badge, Card, EmptyState, SkeletonTable } from '@/shared/ui';
+import { openInNewTab } from '@/shared/lib/desktop';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -851,7 +852,7 @@ function DocumentCard({ doc }: { doc: PortalSharedDocument }) {
     setBusy('open');
     await withBlob((blob) => {
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openInNewTab(url);
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     });
     setBusy(null);

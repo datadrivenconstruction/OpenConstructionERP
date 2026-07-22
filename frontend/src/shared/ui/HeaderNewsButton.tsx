@@ -30,6 +30,7 @@ import { Newspaper, X, ExternalLink } from 'lucide-react';
 import clsx from 'clsx';
 
 import { APP_VERSION } from '@/shared/lib/version';
+import { openLink } from '@/shared/lib/desktop';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 /** Shared with WhatsNewCard: which release the user has acknowledged. */
@@ -109,7 +110,7 @@ export function HeaderNewsButton({ className }: { className?: string }) {
   };
 
   const handleOpenNews = () => {
-    window.open(NEWS_URL, '_blank', 'noopener,noreferrer');
+    openLink(NEWS_URL);
     setOpen(false);
   };
 

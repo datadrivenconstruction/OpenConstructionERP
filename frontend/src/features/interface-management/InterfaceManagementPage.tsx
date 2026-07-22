@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Network,
@@ -21,6 +21,10 @@ import {
   ArrowRight,
   ListChecks,
   Ban,
+  HelpCircle,
+  CalendarClock,
+  ExternalLink,
+  Link2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, ConfirmDialog } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -39,12 +43,15 @@ import {
   deleteInterface,
   createAction,
   updateAction,
+  fetchRfiOptions,
+  fetchScheduleActivityOptions,
   isInterfaceOverdue,
   parsePct,
   ALL_INTERFACE_TYPES,
   ALL_INTERFACE_STATUSES,
   ALL_PRIORITIES,
   UNASSIGNED,
+  type LinkOption,
   type InterfaceRecord,
   type InterfaceAction,
   type InterfaceType,
@@ -237,6 +244,8 @@ interface InterfaceFormState {
   location: string;
   description: string;
   notes: string;
+  rfi_id: string;
+  schedule_activity_id: string;
 }
 
 const EMPTY_FORM: InterfaceFormState = {
@@ -255,6 +264,8 @@ const EMPTY_FORM: InterfaceFormState = {
   location: '',
   description: '',
   notes: '',
+  rfi_id: '',
+  schedule_activity_id: '',
 };
 
 function formFromRecord(rec: InterfaceRecord): InterfaceFormState {
@@ -283,6 +294,8 @@ function formFromRecord(rec: InterfaceRecord): InterfaceFormState {
     location: rec.location ?? '',
     description: rec.description ?? '',
     notes: rec.notes ?? '',
+    rfi_id: rec.rfi_id ?? '',
+    schedule_activity_id: rec.schedule_activity_id ?? '',
   };
 }
 
@@ -303,16 +316,20 @@ function formToPayload(form: InterfaceFormState): InterfaceWritePayload {
     location: orNull(form.location),
     description: orNull(form.description),
     notes: orNull(form.notes),
+    rfi_id: orNull(form.rfi_id),
+    schedule_activity_id: orNull(form.schedule_activity_id),
   };
 }
 
 function InterfaceModal({
   initial,
+  projectId,
   onClose,
   onSubmit,
   isPending,
 }: {
   initial: InterfaceRecord | null;
+  projectId: string;
   onClose: () => void;
   onSubmit: (payload: InterfaceWritePayload) => void;
   isPending: boolean;
@@ -322,6 +339,36 @@ function InterfaceModal({
     initial ? formFromRecord(initial) : EMPTY_FORM,
   );
   const [touched, setTouched] = useState(false);
+
+  // Linked-reference pickers. Both degrade to an empty list on failure (the
+  // section still renders with a "nothing to link" note), so an unreadable RFI
+  // or schedule module never blocks creating or editing an interface. If the
+  // record already carries a link whose row is not in the loaded options (e.g.
+  // it points at another schedule, or the user cannot read it), we still keep
+  // it selectable so an edit does not silently drop the existing link.
+  const rfiOptionsQuery = useQuery({
+    queryKey: ['interface-management', 'rfi-options', projectId],
+    queryFn: () => fetchRfiOptions(projectId),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+  const activityOptionsQuery = useQuery({
+    queryKey: ['interface-management', 'activity-options', projectId],
+    queryFn: () => fetchScheduleActivityOptions(projectId),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+  const rfiOptions = rfiOptionsQuery.data ?? [];
+  const activityOptions = activityOptionsQuery.data ?? [];
+
+  // Keep a selected-but-unlisted link visible in its dropdown so editing an
+  // interface never quietly clears an id the picker did not load.
+  const withCurrent = (options: LinkOption[], current: string): LinkOption[] =>
+    current && !options.some((o) => o.id === current)
+      ? [{ id: current, label: current }, ...options]
+      : options;
+  const rfiSelectOptions = withCurrent(rfiOptions, form.rfi_id);
+  const activitySelectOptions = withCurrent(activityOptions, form.schedule_activity_id);
 
   const set = <K extends keyof InterfaceFormState>(key: K, value: InterfaceFormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -609,6 +656,69 @@ function InterfaceModal({
               onChange={(e) => set('notes', e.target.value)}
               className={textareaCls}
             />
+          </div>
+
+          {/* Linked references — connect this interface into the thread that
+              resolves it: the RFI raising the technical question, and the
+              programme activity whose need-by date it gates. Both are optional
+              soft links the backend already stores. */}
+          <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
+            <div className="mb-2 flex items-center gap-1.5">
+              <Link2 size={14} className="text-content-tertiary" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                {t('interface_management.section_links', { defaultValue: 'Linked references' })}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="if-rfi" className="mb-1.5 block text-sm font-medium text-content-primary">
+                  {t('interface_management.field_rfi', { defaultValue: 'Related RFI' })}
+                </label>
+                <select
+                  id="if-rfi"
+                  value={form.rfi_id}
+                  onChange={(e) => set('rfi_id', e.target.value)}
+                  className={selectCls}
+                >
+                  <option value="">{t('interface_management.link_none', { defaultValue: 'None' })}</option>
+                  {rfiSelectOptions.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                {rfiOptions.length === 0 && !rfiOptionsQuery.isLoading && (
+                  <p className="mt-1 text-2xs text-content-tertiary">
+                    {t('interface_management.no_rfis_to_link', { defaultValue: 'No RFIs in this project yet.' })}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="if-activity" className="mb-1.5 block text-sm font-medium text-content-primary">
+                  {t('interface_management.field_schedule_activity', { defaultValue: 'Schedule activity' })}
+                </label>
+                <select
+                  id="if-activity"
+                  value={form.schedule_activity_id}
+                  onChange={(e) => set('schedule_activity_id', e.target.value)}
+                  className={selectCls}
+                >
+                  <option value="">{t('interface_management.link_none', { defaultValue: 'None' })}</option>
+                  {activitySelectOptions.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                {activityOptions.length === 0 && !activityOptionsQuery.isLoading && (
+                  <p className="mt-1 text-2xs text-content-tertiary">
+                    {t('interface_management.no_activities_to_link', {
+                      defaultValue: 'No schedule activities in this project yet.',
+                    })}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -959,6 +1069,39 @@ const InterfaceRow = React.memo(function InterfaceRow({
                 {t('interface_management.field_notes', { defaultValue: 'Notes' })}
               </p>
               <p className="whitespace-pre-wrap text-sm text-content-primary">{iface.notes}</p>
+            </div>
+          )}
+
+          {/* Linked references — deep links to the RFI and programme activity
+              this interface is tied to (soft links, so we link out by id). */}
+          {(iface.rfi_id || iface.schedule_activity_id) && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-2xs uppercase tracking-wide text-content-tertiary">
+                <Link2 size={11} />
+                {t('interface_management.section_links', { defaultValue: 'Linked references' })}
+              </span>
+              {iface.rfi_id && (
+                <Link
+                  to={`/rfi/${iface.rfi_id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
+                >
+                  <HelpCircle size={11} />
+                  {t('interface_management.view_rfi', { defaultValue: 'View RFI' })}
+                  <ExternalLink size={10} aria-hidden="true" />
+                </Link>
+              )}
+              {iface.schedule_activity_id && (
+                <Link
+                  to="/schedule"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-2 py-0.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
+                >
+                  <CalendarClock size={11} />
+                  {t('interface_management.view_activity', { defaultValue: 'Open in schedule' })}
+                  <ExternalLink size={10} aria-hidden="true" />
+                </Link>
+              )}
             </div>
           )}
 
@@ -1373,6 +1516,7 @@ export function InterfaceManagementPage() {
       {modalOpen && (
         <InterfaceModal
           initial={editing}
+          projectId={projectId}
           onClose={() => {
             setModalOpen(false);
             setEditing(null);

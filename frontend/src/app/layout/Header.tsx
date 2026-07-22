@@ -27,7 +27,7 @@ import {
 import { APP_VERSION, APP_BUILD_FINGERPRINT } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useI18nReady } from '@/shared/lib/useI18nReady';
-import { isTauri, openAppInBrowser } from '@/shared/lib/desktop';
+import { isTauri, openAppInBrowser, openLink } from '@/shared/lib/desktop';
 import { SupportUsButton } from './SupportUsButton';
 import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
@@ -519,7 +519,7 @@ function BugReportMenu() {
     setOpen(false);
     const { url, body } = buildBugReportUrl(t);
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openLink(url);
       return;
     }
     void copyToClipboard(body).then((ok) => {
@@ -565,7 +565,7 @@ function BugReportMenu() {
       app_version: APP_VERSION,
       platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
     });
-    window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
+    openLink(`https://openconstructionerp.com/contact.html?${params}`);
   };
 
   const handleDownloadLog = () => {
@@ -791,7 +791,7 @@ function HelpMenu() {
       feedback: 'true',
       app_version: APP_VERSION,
     });
-    window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
+    openLink(`https://openconstructionerp.com/contact.html?${params}`);
   };
 
   return (

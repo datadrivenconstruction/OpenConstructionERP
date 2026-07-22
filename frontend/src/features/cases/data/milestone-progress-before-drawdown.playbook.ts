@@ -49,6 +49,14 @@ const playbook: Playbook = {
           label: "Verified progress",
         },
       ],
+      inputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.milestones.in.hint",
+      inputsHintDefault:
+        "Bring the live programme and the exact milestone the valuation is claimed against. With both open you can point at one dated milestone and read straight off the schedule whether it is finished or only close.",
+      outputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.milestones.out.hint",
+      outputsHintDefault:
+        "You walk away with a firm reached or not-reached decision for that milestone and the verified percent complete behind it, ready to defend if the figure is questioned later.",
       titleKey:
         "cases.milestone_progress_before_drawdown.step.milestones.title",
       titleDefault: "Check the milestone against the programme",
@@ -94,6 +102,14 @@ const playbook: Playbook = {
           label: "Claim consistency check",
         },
       ],
+      inputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.earned.in.hint",
+      inputsHintDefault:
+        "Bring the milestone you just confirmed together with the cost booked to date and the value that was planned for this point. Having the three side by side is what lets you weigh the claim against the real spend.",
+      outputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.earned.out.hint",
+      outputsHintDefault:
+        "You get a clear earned-value reading and a simple consistency check: does what has been earned line up with the milestone being claimed, or is one running ahead of the other.",
       titleKey: "cases.milestone_progress_before_drawdown.step.earned.title",
       titleDefault: "Read the earned value to date",
       whatKey: "cases.milestone_progress_before_drawdown.step.earned.what",
@@ -138,6 +154,14 @@ const playbook: Playbook = {
           label: "Released drawdown",
         },
       ],
+      inputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.approve.in.hint",
+      inputsHintDefault:
+        "Bring the earned-value reading, the confirmed milestone status and the amount on the valuation. These three together tell you exactly how much of the claim the evidence actually supports.",
+      outputsHintKey:
+        "cases.milestone_progress_before_drawdown.step.approve.out.hint",
+      outputsHintDefault:
+        "You issue an approved valuation for the amount the evidence supports and release the matching drawdown, with any partial amount clearly noted against a milestone still in progress.",
       titleKey: "cases.milestone_progress_before_drawdown.step.approve.title",
       titleDefault: "Approve the valuation",
       whatKey: "cases.milestone_progress_before_drawdown.step.approve.what",

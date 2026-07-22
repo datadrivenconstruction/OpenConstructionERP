@@ -172,11 +172,25 @@ export function MiniGeometryPreview({
     if (!canvas || !modelId || elementIds.length === 0) return;
 
     // --- Init Three.js ---
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: false,
-    });
+    // Creating the renderer can throw when WebGL is unavailable or the browser's
+    // per-page context cap is already spent (see the note above): three.js reads
+    // `.precision` off a null shader-precision format and raises a TypeError.
+    // Treat it like any other load failure - mark the preview errored and bail,
+    // never let it escape the effect and crash the host page.
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+      });
+    } catch (err) {
+      console.warn('[MiniGeometryPreview] WebGL unavailable', err);
+      loadingRef.current = false;
+      errorRef.current = true;
+      onError?.();
+      return;
+    }
     renderer.setPixelRatio(1);
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;

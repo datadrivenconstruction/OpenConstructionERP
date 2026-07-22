@@ -38,6 +38,27 @@ interface ChangelogEntry {
 // date, title and meaning intact; trim the prose, not the facts.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '12.1.0',
+    date: '2026-07-21',
+    tag: 'NEW',
+    summary:
+      'Approval routes get a tenant-wide preset library and a dry-run simulator, interface management links to RFIs and schedule activities, and the CDE adds ISO 19650 roles with a per-project go-live readiness score. National cost bases translate into the market language with a per-row revision id, cases show a compact process row, BOQ positions renumber freely, and the multi-tenant RLS policy is hardened.',
+  },
+  {
+    version: '12.0.1',
+    date: '2026-07-19',
+    tag: 'NEW',
+    summary:
+      'Patch release. Corrects a frontend type-build error introduced in 12.0.0 that stopped the container image from building, with no functional or behavioural change.',
+  },
+  {
+    version: '12.0.0',
+    date: '2026-07-19',
+    tag: 'NEW',
+    summary:
+      'Model review now runs twenty more automatic checks over an imported model, from missing element properties and dimensions to duplicate marks and classification coverage, all shown in the review panel and folded into the completeness score. New screens surface analytics that were computed but never shown: a physical progress page with an actual against planned S-curve and quantity variance, contract gain share, security coverage and milestone schedule panels, and a finance retention ledger, each translated into every language.',
+  },
+  {
     version: '11.18.0',
     date: '2026-07-18',
     tag: 'NEW',

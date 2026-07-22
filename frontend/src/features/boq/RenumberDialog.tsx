@@ -18,14 +18,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
-import { X, Hash, Check, ListOrdered, Layers, Minus, AlertTriangle } from 'lucide-react';
+import { X, Hash, Check, ListOrdered, Layers, Minus, AlertTriangle, SlidersHorizontal } from 'lucide-react';
 
-export type RenumberScheme = 'gap10' | 'gap100' | 'sequential' | 'dotted';
+export type RenumberScheme = 'gap10' | 'gap100' | 'sequential' | 'dotted' | 'custom';
+
+/** Custom-scheme numbers: first leaf number and the increment between positions. */
+export interface RenumberCustom {
+  start: number;
+  step: number;
+}
 
 interface RenumberDialogProps {
   open: boolean;
   onClose: () => void;
-  onApply: (scheme: RenumberScheme, pad: boolean) => void;
+  onApply: (scheme: RenumberScheme, pad: boolean, custom: RenumberCustom) => void;
   isApplying: boolean;
   /** Real BOQ positions used for the preview. We only need ordinal + parent_id + unit. */
   samplePositions: Array<{ ordinal: string; description?: string; unit?: string; parent_id?: string | null }>;
@@ -80,6 +86,15 @@ const SCHEMES: SchemeInfo[] = [
     descDefault: 'Short-form decimal numbering common in NRM-style measurement.',
     example: ['1', '1.1', '1.2', '1.3', '2', '2.1'],
   },
+  {
+    id: 'custom',
+    icon: SlidersHorizontal,
+    titleKey: 'boq.renumber_scheme_custom',
+    titleDefault: 'Custom',
+    descKey: 'boq.renumber_scheme_custom_desc',
+    descDefault: 'Choose your own start number and step. Full control over the numbering.',
+    example: ['01', '01.100', '01.105', '01.110'],
+  },
 ];
 
 /* ── Client-side preview generator ───────────────────────────────── */
@@ -89,21 +104,28 @@ function buildPreview(
   scheme: RenumberScheme,
   pad: boolean,
   limit: number,
+  custom: RenumberCustom,
 ): Array<{ before: string; after: string; description: string }> {
   if (!positions.length) return [];
 
+  const isCustom = scheme === 'custom';
   const stepPerScheme: Record<RenumberScheme, number> = {
     gap10: 10,
     gap100: 100,
     sequential: 1,
     dotted: 1,
+    custom: Math.max(1, custom.step || 1),
   };
   const step = stepPerScheme[scheme];
+  const customStart = Math.max(0, custom.start || 0);
   const useDotted = scheme === 'dotted';
+
+  // Numeric value of the idx-th (1-based) leaf within its parent group.
+  const leafValue = (idx: number) => (isCustom ? customStart + (idx - 1) * step : idx * step);
 
   const fmtSection = (idx: number) => (pad ? String(idx).padStart(2, '0') : String(idx));
   const fmtLeaf = (parentOrd: string, value: number) => {
-    if (useDotted) return `${parentOrd}.${value}`;
+    if (useDotted || isCustom) return `${parentOrd}.${value}`;
     const width = scheme === 'gap100' ? 3 : 2;
     return `${parentOrd}.${String(value).padStart(width, '0')}`;
   };
@@ -138,17 +160,17 @@ function buildPreview(
           newOrd = fmtSection(sectionIdx);
         } else {
           leafIdx += 1;
-          newOrd = fmtLeaf(parentOrd ?? '', leafIdx * step);
+          newOrd = fmtLeaf(parentOrd ?? '', leafValue(leafIdx));
         }
       } else {
         leafIdx += 1;
         if (parentOrd) {
-          newOrd = fmtLeaf(parentOrd, leafIdx * step);
+          newOrd = fmtLeaf(parentOrd, leafValue(leafIdx));
         } else {
           // Top-level leaf without a section parent
-          newOrd = useDotted
-            ? String(leafIdx * step)
-            : String(leafIdx * step).padStart(scheme === 'gap10' || scheme === 'gap100' ? 4 : 2, '0');
+          newOrd = useDotted || isCustom
+            ? String(leafValue(leafIdx))
+            : String(leafValue(leafIdx)).padStart(scheme === 'gap10' || scheme === 'gap100' ? 4 : 2, '0');
         }
       }
       result.push({
@@ -176,6 +198,8 @@ export function RenumberDialog({
   const { t } = useTranslation();
   const [scheme, setScheme] = useState<RenumberScheme>('gap10');
   const [pad, setPad] = useState(true);
+  const [start, setStart] = useState(10);
+  const [step, setStep] = useState(10);
 
   // Close on Escape
   useEffect(() => {
@@ -188,13 +212,13 @@ export function RenumberDialog({
   }, [open, onClose, isApplying]);
 
   const preview = useMemo(
-    () => buildPreview(samplePositions, scheme, pad, 5),
-    [samplePositions, scheme, pad],
+    () => buildPreview(samplePositions, scheme, pad, 5, { start, step }),
+    [samplePositions, scheme, pad, start, step],
   );
 
   const handleApply = useCallback(() => {
-    onApply(scheme, pad);
-  }, [onApply, scheme, pad]);
+    onApply(scheme, pad, { start, step });
+  }, [onApply, scheme, pad, start, step]);
 
   if (!open) return null;
 
@@ -310,6 +334,38 @@ export function RenumberDialog({
               );
             })}
           </div>
+
+          {/* Custom start + step (only for the Custom scheme) */}
+          {scheme === 'custom' && (
+            <div className="grid grid-cols-2 gap-2.5">
+              <label className="rounded-xl border border-border bg-surface-base px-3 py-2.5 block">
+                <div className="text-[11px] font-medium text-content-secondary mb-1">
+                  {t('boq.renumber_custom_start', { defaultValue: 'Start number' })}
+                </div>
+                <input
+                  type="number"
+                  min={0}
+                  value={start}
+                  disabled={isApplying}
+                  onChange={(e) => setStart(Math.max(0, Number(e.target.value) || 0))}
+                  className="w-full bg-transparent text-sm font-mono tabular-nums text-content-primary outline-none disabled:opacity-50"
+                />
+              </label>
+              <label className="rounded-xl border border-border bg-surface-base px-3 py-2.5 block">
+                <div className="text-[11px] font-medium text-content-secondary mb-1">
+                  {t('boq.renumber_custom_step', { defaultValue: 'Step' })}
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  value={step}
+                  disabled={isApplying}
+                  onChange={(e) => setStep(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-full bg-transparent text-sm font-mono tabular-nums text-content-primary outline-none disabled:opacity-50"
+                />
+              </label>
+            </div>
+          )}
 
           {/* Pad toggle */}
           <label className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-base px-3 py-2.5 cursor-pointer hover:bg-surface-secondary/40 transition-colors">

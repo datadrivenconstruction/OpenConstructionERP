@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 MODULES_DIR = Path(__file__).parent.parent / "modules"
 
+_LOADER_BUILD_TAG: str = "42bfabefac2dd435"
+
 
 @dataclass
 class ModuleManifest:

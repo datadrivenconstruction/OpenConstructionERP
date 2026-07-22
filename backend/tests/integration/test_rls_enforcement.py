@@ -45,6 +45,15 @@ _PROBE_TABLE = "_rls_probe"
 _TENANT_A = "tenant-aaaa"
 _TENANT_B = "tenant-bbbb"
 
+# A second probe whose tenant column is a *native* ``uuid`` (not varchar). It
+# pins the ``::text`` cast in the policy predicate: current_setting returns
+# text, so without the cast the predicate is ``uuid = text``, which PostgreSQL
+# rejects ("operator does not exist: uuid = text") and every read/write 500s.
+# The uuids are canonical lowercase so ``str(uuid.UUID)`` round-trips exactly.
+_PROBE_TABLE_UUID = "_rls_probe_uuid"
+_TENANT_A_UUID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+_TENANT_B_UUID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+
 
 def _set_flag(value: bool) -> None:
     """Force ``settings.rls_enforce`` by env + cache reset, both directions."""
@@ -101,21 +110,42 @@ async def rls_probe():
             {"a": _TENANT_A, "b": _TENANT_B},
         )
 
+    # Second probe with a native ``uuid`` tenant column, exercising the policy's
+    # ``::text`` cast against a non-text column type. Same production policy SQL.
+    async with engine.begin() as conn:
+        await conn.execute(text(f'DROP TABLE IF EXISTS "{_PROBE_TABLE_UUID}"'))
+        await conn.execute(text(f'CREATE TABLE "{_PROBE_TABLE_UUID}" (id serial PRIMARY KEY, tenant_id uuid)'))
+        await conn.execute(text(f'GRANT SELECT, INSERT, UPDATE, DELETE ON "{_PROBE_TABLE_UUID}" TO "oe_app"'))
+        await conn.execute(text('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "oe_app"'))
+        for sql in _policy_statements(_PROBE_TABLE_UUID):
+            await conn.execute(text(sql))
+        # Cast the bound text params to uuid server-side so asyncpg does not have
+        # to infer the column type from a bare string.
+        await conn.execute(
+            text(
+                f'INSERT INTO "{_PROBE_TABLE_UUID}" (tenant_id) VALUES (CAST(:a AS uuid)), (CAST(:b AS uuid)), (NULL)'
+            ),
+            {"a": _TENANT_A_UUID, "b": _TENANT_B_UUID},
+        )
+
     try:
         yield engine
     finally:
         with contextlib.suppress(Exception):
             async with engine.begin() as conn:
                 await conn.execute(text(f'DROP TABLE IF EXISTS "{_PROBE_TABLE}"'))
+                await conn.execute(text(f'DROP TABLE IF EXISTS "{_PROBE_TABLE_UUID}"'))
         _set_flag(False)
 
 
-async def _rows_visible_as(tenant: str | None) -> set[str | None]:
-    """Return the ``tenant_id`` set the probe table shows in a request context.
+async def _rows_visible_as(tenant: str | None, *, table: str = _PROBE_TABLE) -> set[str | None]:
+    """Return the ``tenant_id`` set ``table`` shows in a request context.
 
     Opens a session through the app's factory with the tenant bound, so the
     ``after_begin`` listener downgrades to ``oe_app`` and stamps the GUC exactly
-    as a real request would.
+    as a real request would. Non-null ids are normalised to ``str`` so a native
+    ``uuid`` column (the driver hands back ``uuid.UUID``) and a ``varchar``
+    column can be asserted the same way.
     """
     from app.core import rls
     from app.database import async_session_factory
@@ -123,8 +153,8 @@ async def _rows_visible_as(tenant: str | None) -> set[str | None]:
     token = rls.set_request_tenant(tenant)
     try:
         async with async_session_factory() as session:
-            result = await session.execute(text(f'SELECT tenant_id FROM "{_PROBE_TABLE}"'))
-            return set(result.scalars().all())
+            result = await session.execute(text(f'SELECT tenant_id FROM "{table}"'))
+            return {None if v is None else str(v) for v in result.scalars().all()}
     finally:
         rls.reset_request_tenant(token)
 
@@ -155,6 +185,24 @@ async def test_anonymous_sees_only_shared_rows(rls_probe):
     """An anonymous request (empty tenant) sees only shared NULL-tenant rows."""
     visible = await _rows_visible_as(None)
     assert visible == {None}, f"anonymous request saw tenant-owned rows: {visible!r}"
+
+
+@pytest.mark.asyncio
+async def test_uuid_tenant_column_compares_via_text_cast(rls_probe):
+    """A native ``uuid`` tenant column is isolated via the policy's ``::text`` cast.
+
+    The GUC is always text (``current_setting`` returns text), so the predicate
+    must cast a non-text tenant column: ``tenant_id::text = current_setting(...)``.
+    Drop that cast and the uuid predicate becomes ``uuid = text``, which
+    PostgreSQL rejects with ``operator does not exist: uuid = text`` - the uuid
+    probe then turns red (verified by temporarily reverting the cast), so this is
+    the regression guard for it. Tenant A (bound as its uuid string) sees its own
+    uuid row and the shared NULL row, never tenant B's.
+    """
+    visible = await _rows_visible_as(_TENANT_A_UUID, table=_PROBE_TABLE_UUID)
+    assert _TENANT_A_UUID in visible, f"uuid tenant A cannot see its own row: {visible!r}"
+    assert None in visible, f"uuid tenant A cannot see the shared NULL row: {visible!r}"
+    assert _TENANT_B_UUID not in visible, f"LEAK: uuid tenant A can see tenant B's row: {visible!r}"
 
 
 # ── Write isolation ─────────────────────────────────────────────────────────

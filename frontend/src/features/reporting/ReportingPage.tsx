@@ -36,6 +36,7 @@ import {
   Skeleton,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { openInNewTab } from '@/shared/lib/desktop';
 import { reportingGuide } from './reportingGuide';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -2310,15 +2311,15 @@ function ReportViewerModal({
                     .then((r) => (r.ok ? r.blob() : Promise.reject(r)))
                     .then((blob) => {
                       const objUrl = URL.createObjectURL(blob);
-                      window.open(objUrl, '_blank', 'noopener,noreferrer');
+                      openInNewTab(objUrl);
                       // Revoke after a delay so the new tab has time to load.
                       setTimeout(() => URL.revokeObjectURL(objUrl), 30_000);
                     })
                     .catch(() => {
-                      window.open(url, '_blank', 'noopener,noreferrer');
+                      openInNewTab(url);
                     });
                 } else {
-                  window.open(url, '_blank', 'noopener,noreferrer');
+                  openInNewTab(url);
                 }
               }}
               disabled={loading || !!errorKind}

@@ -1266,6 +1266,14 @@ async def load_base_market(
     # Ensure the base parquet is loaded before repricing it (idempotent).
     await load_cwicr_region(base_region, session)
 
+    # Switch the base's work-item TEXT to the market's language before repricing.
+    # A national base ships one English parquet plus a translated parquet per app
+    # language; the market card picks the language (its ``lang_code``). Text
+    # follows the language, price follows the market - the two are orthogonal, so
+    # the text swap runs first and the reprice below preserves the translated
+    # component names. No-op for English/untranslated markets.
+    await _ensure_region_text_language(base_region, base_registry.market_lang_code(market_token), session)
+
     from app.modules.catalog.router import fetch_market_catalog_rows
 
     try:
@@ -4144,6 +4152,25 @@ _GITHUB_CWICR_BASE_URL = "https://github.com/datadrivenconstruction/OpenConstruc
 _GITHUB_CWICR_FILES: dict[str, str] = base_registry.github_workitems_files()
 _GITHUB_CWICR_FILES.setdefault("CA_TORONTO", _GITHUB_CWICR_FILES["ENG_TORONTO"])
 
+# Per-language work-item parquets of the national bases, keyed by the
+# ``<region>_<lang>`` pseudo-region (e.g. ``ZH_CHINA_ru``). Kept separate from
+# ``_GITHUB_CWICR_FILES`` so these translations are downloadable for a market
+# language swap but never surface in the ``/available-databases`` region list.
+_GITHUB_CWICR_LANG_FILES: dict[str, str] = base_registry.national_language_workitems_files()
+
+# Which app language each already-loaded national base currently renders its
+# work-item text in. Process-local fast path for the market-switch language swap
+# (see ``_ensure_region_text_language``): re-selecting a market of the same
+# language becomes a no-op. The swap itself is idempotent, so a cold process
+# simply re-runs it once on the first switch. Cleared whenever a region is loaded
+# fresh (it reverts to the home English text at that point).
+_REGION_ACTIVE_LANG: dict[str, str] = {}
+
+# CostItem columns the language swap rewrites - the text-bearing ones only.
+# Deliberately excludes ``rate``/``currency`` (the market reprice owns those),
+# ``descriptions`` (the separate multilang map) and the identity columns.
+_TRANSLATED_TEXT_COLS: tuple[str, ...] = ("description", "unit", "classification", "components", "tags")
+
 CWICR_SEARCH_PATHS = [
     "../../DDC_Toolkit/pricing/data/excel",
     "../DDC_Toolkit/pricing/data/excel",
@@ -4226,7 +4253,7 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     HTTPException emitted upstream can surface it instead of a generic
     "not found" message.
     """
-    github_path = _GITHUB_CWICR_FILES.get(db_id)
+    github_path = _GITHUB_CWICR_FILES.get(db_id) or _GITHUB_CWICR_LANG_FILES.get(db_id)
     if not github_path:
         _LAST_DOWNLOAD_ERROR[db_id] = (
             f"backend has no GitHub mapping for '{db_id}'. Upgrade with "
@@ -4496,6 +4523,10 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             "duration_seconds": duration,
         }
 
+    # A fresh (re)load repopulates the region from its home English parquet, so
+    # forget any language the market-switch swap had recorded for it.
+    _REGION_ACTIVE_LANG.pop(db_id, None)
+
     # Find the file (async - GitHub download runs in thread pool)
     cwicr_path = await _find_cwicr_file(db_id)
     if not cwicr_path:
@@ -4714,6 +4745,105 @@ def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
         raw.close()
         engine.dispose()
     return inserted
+
+
+def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, staging_region: str) -> int:
+    """Copy a translated parquet's work-item text onto ``base_region`` in place.
+
+    The national bases ship one English work-item parquet plus a translated
+    parquet per app language. To render a base in another language WITHOUT
+    deleting its cost items (their ids are referenced by user element->cost
+    matches, assemblies and the usage ledger via FK, so a delete+reinsert would
+    cascade those away), this:
+
+    1. imports the language parquet into a transient ``staging_region`` with the
+       same canonical parquet->rows transform (:func:`_process_and_insert_cwicr`),
+    2. copies the translated text columns (:data:`_TRANSLATED_TEXT_COLS`) onto the
+       live ``base_region`` rows, joined on ``code`` so every id is preserved, and
+    3. drops the staging region.
+
+    Prices are untouched here - the caller reprices afterwards, and
+    :meth:`reprice_region` keeps each component's (now translated) name. Runs in a
+    thread (sync DB work). Idempotent: pre-cleans and drops the staging region so a
+    retry starts clean and leaves nothing behind. Returns the number of live rows
+    updated.
+    """
+    import os as _os
+
+    from sqlalchemy import create_engine, text
+
+    if not sync_url:
+        sync_url = _os.environ.get("DATABASE_SYNC_URL", "")
+
+    table = CostItem.__table__.name  # oe_costs_item
+    set_clause = ", ".join(f"{c} = s.{c}" for c in _TRANSLATED_TEXT_COLS)
+
+    engine = create_engine(sync_url)
+    try:
+        # Clear any staging rows a previous interrupted run may have left.
+        with engine.begin() as conn:
+            conn.execute(text(f"DELETE FROM {table} WHERE region = :r"), {"r": staging_region})  # noqa: S608
+        # Reuse the canonical parquet->rows transform, targeting staging. Same
+        # dedup-by-rate_code, so staging carries one row per ``code`` exactly like
+        # the live region - the join below is 1:1.
+        _process_and_insert_cwicr(lang_parquet, staging_region, sync_url)
+        # Overlay translated text onto the live region (ids and prices preserved),
+        # then drop staging. A single set-based UPDATE ... FROM self-join.
+        with engine.begin() as conn:
+            updated = conn.execute(
+                text(  # noqa: S608
+                    f"UPDATE {table} AS t SET {set_clause} FROM {table} AS s "
+                    f"WHERE t.region = :base AND s.region = :stage AND t.code = s.code"
+                ),
+                {"base": base_region, "stage": staging_region},
+            ).rowcount
+            conn.execute(text(f"DELETE FROM {table} WHERE region = :r"), {"r": staging_region})  # noqa: S608
+        return int(updated or 0)
+    finally:
+        engine.dispose()
+
+
+async def _ensure_region_text_language(base_region: str, lang_code: str | None, session: AsyncSession) -> None:
+    """Ensure an already-loaded national base renders its work items in ``lang_code``.
+
+    Swaps the region's text in place (see :func:`_swap_region_text_sync`). No-op
+    for a non-national base, a language we do not translate (e.g. ``en`` markets or
+    ``es-MX``, which keep the home English text), an unavailable translation
+    parquet, or a region already showing that language.
+    """
+    if not lang_code:
+        return
+    lang_region = base_registry.national_language_region(base_region, lang_code)
+    if lang_region is None:
+        return
+    if _REGION_ACTIVE_LANG.get(base_region) == lang_code:
+        return
+
+    parquet = await _find_cwicr_file(lang_region)
+    if not parquet:
+        logger.info(
+            "No %s translation parquet for base %s; keeping current work-item text",
+            lang_code,
+            base_region,
+        )
+        return
+
+    import asyncio
+    import os as _os
+
+    from app.config import get_settings
+
+    target = _os.environ.get("DATABASE_SYNC_URL") or get_settings().database_sync_url
+    staging_region = f"__xlate_{base_region}_{lang_code}"
+    try:
+        updated = await asyncio.to_thread(_swap_region_text_sync, target, str(parquet), base_region, staging_region)
+    except Exception:
+        logger.exception("Language swap to %s failed for %s (keeping current text)", lang_code, base_region)
+        return
+
+    _REGION_ACTIVE_LANG[base_region] = lang_code
+    _invalidate_cost_cache()
+    logger.info("Swapped %s work-item text to %s (%d items updated)", base_region, lang_code, updated)
 
 
 def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:

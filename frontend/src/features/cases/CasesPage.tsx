@@ -435,7 +435,7 @@ function CasesList() {
                 the who/role filters below. */}
             <div className="rounded-2xl border border-border-light bg-surface-secondary/40 p-2.5 dark:bg-white/[0.03]">
               <div
-                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
                 role="group"
                 aria-label={t("cases.stage_selector.heading", {
                   defaultValue: "Project lifecycle",
@@ -488,7 +488,7 @@ function CasesList() {
                       <span className="min-w-0 flex-1">
                         <span
                           className={clsx(
-                            "block truncate text-xs font-semibold leading-tight",
+                            "block text-xs font-semibold leading-tight",
                             !active && "text-content-primary",
                           )}
                         >
@@ -542,7 +542,7 @@ function CasesList() {
               </span>
             </div>
             <div
-              className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
               role="group"
               aria-label={t("cases.company_selector.heading", {
                 defaultValue: "My company",
@@ -575,11 +575,13 @@ function CasesList() {
                       id={c.id}
                       fallbackIcon={Icon}
                       fallbackClass={c.tint.text}
+                      tileClass={c.tint.tile}
+                      withKindBadge
                       className="h-14 w-14"
                       title={t(c.labelKey, { defaultValue: c.labelDefault })}
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-semibold leading-tight">
+                      <span className="block text-xs font-semibold leading-tight">
                         {t(c.labelKey, { defaultValue: c.labelDefault })}
                       </span>
                       <span className="mt-0.5 block text-2xs tabular-nums text-content-tertiary">
@@ -627,7 +629,7 @@ function CasesList() {
               </span>
             </div>
             <div
-              className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
               role="group"
               aria-label={t("cases.role_selector.heading", {
                 defaultValue: "Your role",
@@ -657,11 +659,12 @@ function CasesList() {
                   >
                     <RoleArt
                       role={r.id}
+                      withKindBadge
                       className="h-14 w-14 shrink-0"
                       title={t(r.labelKey, { defaultValue: r.labelDefault })}
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-semibold leading-tight">
+                      <span className="block text-xs font-semibold leading-tight">
                         {t(r.labelKey, { defaultValue: r.labelDefault })}
                       </span>
                       <span className="mt-0.5 block text-2xs tabular-nums text-content-tertiary">
@@ -825,6 +828,7 @@ function CasesList() {
           {role ? (
             <RoleArt
               role={role}
+              withKindBadge
               className="h-14 w-14"
               title={t(ROLE_BY_ID[role]?.labelKey ?? "", {
                 defaultValue: ROLE_BY_ID[role]?.labelDefault ?? "",
@@ -838,6 +842,8 @@ function CasesList() {
                   COMPANY_TYPE_BY_ID[companyType]?.icon ?? Briefcase
                 }
                 fallbackClass={tintForCompany(companyType).text}
+                tileClass={tintForCompany(companyType).tile}
+                withKindBadge
                 className="h-14 w-14"
                 title={t(COMPANY_TYPE_BY_ID[companyType]?.labelKey ?? "", {
                   defaultValue:
@@ -924,7 +930,7 @@ function CasesList() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
             {windowed.map((pb) => {
               const stageId = stageByPlaybook.get(pb.id);
               return (
@@ -1144,68 +1150,12 @@ function CaseCard({
         </div>
       </div>
 
-      {/* Card content */}
-      <div className="flex flex-1 flex-col p-3.5 pl-4">
-        <h3 className="text-sm font-semibold leading-snug text-content-primary">
+      {/* Resting content: illustration + a tight title keep the grid dense; the
+          fuller story surfaces in the hover overlay below. */}
+      <div className="flex flex-1 flex-col gap-1.5 p-2.5">
+        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-content-primary">
           {t(pb.titleKey, { defaultValue: pb.titleDefault })}
         </h3>
-        <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-content-secondary">
-          {t(pb.descKey, { defaultValue: pb.descDefault })}
-        </p>
-
-        {/* Lifecycle stage: where in the project this case happens. */}
-        {stage && StageIcon && (
-          <div className="mt-3">
-            <span className="inline-flex items-center gap-1 rounded-full border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
-              <StageIcon size={10} strokeWidth={2} aria-hidden="true" />
-              {t("cases.card.stage", {
-                defaultValue: "Stage {{num}}: {{label}}",
-                num: stage.num,
-                label: t(stage.shortKey, { defaultValue: stage.shortDefault }),
-              })}
-            </span>
-          </div>
-        )}
-
-        {/* Who this case is for: the professional roles that run it, shown as
-            their persona avatars. The avatars are inline SVG, so they gate on
-            `near` too, with same-sized placeholder discs to avoid any shift. */}
-        {roles.length > 0 && (
-          <div
-            className="mt-3 flex items-center -space-x-1.5"
-            aria-label={roles
-              .map((id) =>
-                t(ROLE_BY_ID[id]?.labelKey ?? "", {
-                  defaultValue: ROLE_BY_ID[id]?.labelDefault ?? id,
-                }),
-              )
-              .join(", ")}
-          >
-            {shownRoles.map((id) =>
-              near ? (
-                <RoleAvatar
-                  key={id}
-                  role={id}
-                  className="h-6 w-6 rounded-full ring-2 ring-surface-primary"
-                  title={t(ROLE_BY_ID[id]?.labelKey ?? "", {
-                    defaultValue: ROLE_BY_ID[id]?.labelDefault ?? id,
-                  })}
-                />
-              ) : (
-                <span
-                  key={id}
-                  className="h-6 w-6 rounded-full bg-surface-secondary ring-2 ring-surface-primary"
-                  aria-hidden="true"
-                />
-              ),
-            )}
-            {roles.length > 3 && (
-              <span className="ml-2 text-2xs font-medium text-content-tertiary">
-                +{roles.length - 3}
-              </span>
-            )}
-          </div>
-        )}
 
         {/* Progress bar (only once started) */}
         {started && (
@@ -1233,33 +1183,90 @@ function CaseCard({
           </div>
         )}
 
-        {/* Footer meta + CTA */}
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border-light pt-3">
-          <div className="flex items-center gap-3 text-2xs text-content-tertiary">
+        {/* Resting meta: steps and time (or live progress) on one tight line. */}
+        <div className="mt-auto flex items-center justify-between gap-1 text-2xs text-content-tertiary">
+          <span className="inline-flex items-center gap-1">
+            <ListChecks size={11} aria-hidden="true" />
+            {t("cases.card.steps", {
+              defaultValue: "{{count}} steps",
+              count: total,
+            })}
+          </span>
+          {started ? (
+            <span className="font-semibold tabular-nums text-oe-blue">{pct}%</span>
+          ) : (
             <span className="inline-flex items-center gap-1">
-              <ListChecks size={12} aria-hidden="true" />
-              {t("cases.card.steps", {
-                defaultValue: "{{count}} steps",
-                count: total,
+              <Clock size={11} aria-hidden="true" />
+              {t("cases.card.minutes_short", {
+                defaultValue: "{{count}} min",
+                count: pb.estMinutes,
               })}
             </span>
-            <span className="inline-flex items-center gap-1">
-              <Clock size={12} aria-hidden="true" />
-              {t("cases.card.minutes", {
-                defaultValue: "about {{count}} min",
+          )}
+        </div>
+      </div>
+
+      {/* Hover / focus reveal: the fuller story surfaces over the whole card so
+          the dense resting grid still explains itself at a glance. The panel is
+          pointer-events-none so the card stays a single click target. */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-2 bg-gradient-to-t from-slate-950/95 via-slate-950/90 to-slate-950/80 p-3 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+        <h4 className="line-clamp-2 text-xs font-semibold leading-snug text-white">
+          {t(pb.titleKey, { defaultValue: pb.titleDefault })}
+        </h4>
+        <p className="line-clamp-4 text-2xs leading-relaxed text-white/80">
+          {t(pb.descKey, { defaultValue: pb.descDefault })}
+        </p>
+        <div className="mt-auto flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {stage && StageIcon && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-inset ring-white/20">
+                <StageIcon size={10} strokeWidth={2} aria-hidden="true" />
+                {t(stage.shortKey, { defaultValue: stage.shortDefault })}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white ring-1 ring-inset ring-white/20">
+              <Clock size={10} aria-hidden="true" />
+              {t("cases.card.minutes_short", {
+                defaultValue: "{{count}} min",
                 count: pb.estMinutes,
               })}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-oe-blue">
+          {roles.length > 0 && (
+            <div
+              className="flex items-center -space-x-1.5"
+              aria-label={roles
+                .map((id) =>
+                  t(ROLE_BY_ID[id]?.labelKey ?? "", {
+                    defaultValue: ROLE_BY_ID[id]?.labelDefault ?? id,
+                  }),
+                )
+                .join(", ")}
+            >
+              {shownRoles.map((id) =>
+                near ? (
+                  <RoleAvatar
+                    key={id}
+                    role={id}
+                    className="h-5 w-5 rounded-full ring-2 ring-slate-950"
+                    title={t(ROLE_BY_ID[id]?.labelKey ?? "", {
+                      defaultValue: ROLE_BY_ID[id]?.labelDefault ?? id,
+                    })}
+                  />
+                ) : null,
+              )}
+              {roles.length > 3 && (
+                <span className="ml-2 text-[10px] font-medium text-white/70">
+                  +{roles.length - 3}
+                </span>
+              )}
+            </div>
+          )}
+          <span className="inline-flex items-center gap-1 text-2xs font-semibold text-white">
             {started
               ? t("cases.card.continue", { defaultValue: "Continue" })
               : t("cases.card.open", { defaultValue: "Open" })}
-            <ArrowRight
-              size={13}
-              className="transition-transform group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
+            <ArrowRight size={12} aria-hidden="true" />
           </span>
         </div>
       </div>

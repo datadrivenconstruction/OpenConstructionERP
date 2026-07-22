@@ -68,6 +68,11 @@ DENY_PATTERNS = [
     r"(^|/)WORLD_[A-Z0-9_]*_INDEX\.md$",
     r"(^|/)[A-Z][A-Z0-9_]*_ACTIVATION\.md$",
     r"(^|/)INTEGRATION_GUIDE[^/]*\.md$",
+    # Provenance / watermark tooling and the integrity verifier are internal
+    # only - never public (they document the covert marker scheme). Kept
+    # locally, gitignored, blocked here across git tree, CI and wheel/dir.
+    r"(^|/)tools/watermark/",
+    r"(^|/)scripts/integrity_check\.py$",
 ]
 _RX = [re.compile(p) for p in DENY_PATTERNS]
 

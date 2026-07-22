@@ -112,6 +112,65 @@ export async function openExternalUrl(url: string): Promise<boolean> {
 }
 
 /**
+ * Open a URL in a genuinely new browser tab, never a chrome-less popup.
+ *
+ * Clicks a hidden anchor carrying rel="noopener" rather than passing a features
+ * string to `window.open`: any non-empty features string (even just "noopener")
+ * makes Chromium spawn a popup window with no address bar or back button
+ * instead of a real tab. Use this for things the user opens to look at - a
+ * generated PDF, a report - where a fresh surface is always wanted.
+ */
+export function openInNewTab(url: string): void {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/**
+ * Open a link the way the current build can actually honour.
+ *
+ * Web build: a real browser tab (see `openInNewTab`), so a link never lands in
+ * a chrome-less popup window.
+ *
+ * Desktop (Tauri) shell: a webview cannot open a browser tab. A genuinely
+ * external site (or a mail / tel link) is handed to the OS default browser, so
+ * it opens with full navigation rather than a bare webview window; a same-origin
+ * app route is followed in place, keeping the app shell and the signed-in
+ * session instead of a stray window. Anything else (blob:, data:) falls back to
+ * a new tab.
+ */
+export function openLink(url: string): void {
+  let resolved: URL | null = null;
+  try {
+    resolved = new URL(url, window.location.href);
+  } catch {
+    resolved = null;
+  }
+  const scheme = resolved?.protocol.toLowerCase() ?? '';
+  const isHttp = scheme === 'http:' || scheme === 'https:';
+  const isExternalWeb = isHttp && resolved!.origin !== window.location.origin;
+  const isMail = scheme === 'mailto:' || scheme === 'tel:';
+  const isSameOriginRoute = isHttp && resolved!.origin === window.location.origin;
+
+  if (isTauri) {
+    if (isExternalWeb || isMail) {
+      void openExternalUrl(resolved!.href);
+      return;
+    }
+    if (isSameOriginRoute) {
+      window.location.assign(resolved!.href);
+      return;
+    }
+  }
+  openInNewTab(url);
+}
+
+/**
  * Route every external-link click to the OS browser (desktop only).
  *
  * Inside the Tauri webview a plain `<a href="https://…" target="_blank">` goes

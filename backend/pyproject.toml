@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "11.18.0"
+version = "12.1.0"
 description = "Open-source construction cost estimation, multi-currency BOQ, AI vector matching, CAD/BIM takeoff without IfcOpenShell, resource-based cost DB import with example templates, 48 regional catalogues, 27 languages. AGPL-3.0. After install, run: openconstructionerp"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -90,7 +90,7 @@ dependencies = [
     # which the dashboards integrity detector and its tests were written
     # against. Revisit and lift the cap when adopting pandas 3 deliberately.
     "pandas>=2.2.0,<3",
-    "pyarrow>=23.0.1,<25",
+    "pyarrow>=23.0.1,<26",
     "trimesh>=4.0.0",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
     # "collada"); without it trimesh.load() of a .dae raises ImportError and the

@@ -141,22 +141,6 @@ function ConnectorChip({ down = false }: { down?: boolean }): ReactElement {
   );
 }
 
-/** A short vertical connector: a down chip between two stacked flow blocks. Used
- *  in the step block, where In -> Action -> Out always reads top to bottom. */
-function FlowConnector(): ReactElement {
-  return (
-    <div className="flex items-center justify-center" aria-hidden="true">
-      <span className="flex flex-col items-center">
-        <span className="h-2 w-px bg-border" />
-        <span className="my-0.5">
-          <ConnectorChip down />
-        </span>
-        <span className="h-2 w-px bg-border" />
-      </span>
-    </div>
-  );
-}
-
 /** The thumbnail for one step in the process card row: the step's bespoke
  *  process scene when it has one, otherwise its icon scene, framed so the row
  *  reads as a strip of pictures of the actual work. */
@@ -189,6 +173,8 @@ function StepBlock({
   why,
   inputs,
   outputs,
+  inputsHint,
+  outputsHint,
   scene,
   done,
   isCurrent,
@@ -206,6 +192,8 @@ function StepBlock({
   why: string;
   inputs: string[];
   outputs: string[];
+  inputsHint?: string;
+  outputsHint?: string;
   scene: ReactElement;
   done: boolean;
   isCurrent: boolean;
@@ -244,7 +232,7 @@ function StepBlock({
       id={id}
       aria-current={isCurrent ? "step" : undefined}
       className={clsx(
-        "scroll-mt-4 rounded-2xl border bg-surface-primary p-3.5 shadow-xs transition-colors sm:p-4",
+        "relative scroll-mt-4 rounded-2xl border bg-surface-primary p-3.5 shadow-xs transition-colors sm:p-4",
         isCurrent
           ? "border-oe-blue/50 ring-1 ring-inset ring-oe-blue/20"
           : done
@@ -252,44 +240,46 @@ function StepBlock({
             : "border-border-light",
       )}
     >
-      {/* Header: number/status, step counter + module, title */}
-      <div className="mb-3 flex items-start gap-2.5">
-        <span
-          className={clsx(
-            "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-            done
-              ? "bg-semantic-success text-white"
-              : isCurrent
-                ? "bg-oe-blue text-white"
-                : "bg-surface-secondary text-content-secondary ring-1 ring-inset ring-border-light",
-          )}
-          aria-hidden="true"
-        >
-          {done ? <Check size={16} strokeWidth={2.5} /> : index + 1}
+      {/* Step number / status, pinned to the top-right corner so the counter,
+          title, "What you do" and "Why" below all share one clean left edge. */}
+      <span
+        className={clsx(
+          "absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold",
+          done
+            ? "bg-semantic-success text-white"
+            : isCurrent
+              ? "bg-oe-blue text-white"
+              : "bg-surface-secondary text-content-secondary ring-1 ring-inset ring-border-light",
+        )}
+        aria-hidden="true"
+      >
+        {done ? <Check size={16} strokeWidth={2.5} /> : index + 1}
+      </span>
+
+      {/* Step counter + module tag: a left-aligned row, padded to clear the
+          corner badge. */}
+      <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 pe-9">
+        <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          {t("cases.step_counter", {
+            defaultValue: "Step {{n}} of {{total}}",
+            n: index + 1,
+            total,
+          })}
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-              {t("cases.step_counter", {
-                defaultValue: "Step {{n}} of {{total}}",
-                n: index + 1,
-                total,
-              })}
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
-              <Icon size={12} strokeWidth={2} aria-hidden="true" />
-              {moduleLabel}
-            </span>
-          </div>
-          <h3 className="mt-1 text-base font-semibold leading-snug text-content-primary sm:text-lg">
-            {title}
-          </h3>
-        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border-light bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary">
+          <Icon size={12} strokeWidth={2} aria-hidden="true" />
+          {moduleLabel}
+        </span>
       </div>
 
-      {/* Body: text on the left, the In -> Action -> Out flow on the right */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,19rem)] lg:gap-6">
+      {/* Title + detail on the left, the data flow on the right. `items-start`
+          keeps the In / Out cards' top aligned with the step title, and every
+          left-column line shares one left edge. */}
+      <div className="grid gap-4 lg:grid-cols-[2fr_3fr] lg:items-start lg:gap-6">
         <div className="min-w-0 space-y-3">
+          <h3 className="text-base font-semibold leading-snug text-content-primary sm:text-lg">
+            {title}
+          </h3>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-oe-blue-text">
               {t("cases.step.what", { defaultValue: "What you do" })}
@@ -320,26 +310,44 @@ function StepBlock({
           </div>
         </div>
 
-        {/* Data flow: In -> module action -> Out, stacked top to bottom. */}
+        {/* Data flow: what goes in, the module you open, what comes out - three
+            equal-height blocks read left to right so the hand-off is obvious.
+            Stacks on narrow screens. */}
         <div className="min-w-0">
           {hasFlow ? (
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-2.5">
               <FlowSide
                 label={t("cases.flow.in", { defaultValue: "Goes in" })}
                 items={inputs}
                 tone="in"
+                hint={inputsHint}
               />
-              <FlowConnector />
-              {sceneButton}
-              <FlowConnector />
+              <div
+                className="hidden items-center justify-center sm:flex"
+                aria-hidden="true"
+              >
+                <ConnectorChip />
+              </div>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-border-light bg-surface-secondary/40 p-3">
+                {sceneButton}
+              </div>
+              <div
+                className="hidden items-center justify-center sm:flex"
+                aria-hidden="true"
+              >
+                <ConnectorChip />
+              </div>
               <FlowSide
                 label={t("cases.flow.out", { defaultValue: "Comes out" })}
                 items={outputs}
                 tone="out"
+                hint={outputsHint}
               />
             </div>
           ) : (
-            sceneButton
+            <div className="rounded-xl border border-border-light bg-surface-secondary/40 p-3">
+              {sceneButton}
+            </div>
           )}
         </div>
       </div>
@@ -599,6 +607,18 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
     [t],
   );
 
+  // Resolve the optional one-line hint that sits above an In / Out list and
+  // explains, in a sentence, what the estimator is bringing in or getting out.
+  const resolveHint = useCallback(
+    (step: PlaybookStep, side: "inputs" | "outputs"): string | undefined => {
+      const key = side === "inputs" ? step.inputsHintKey : step.outputsHintKey;
+      const def = side === "inputs" ? step.inputsHintDefault : step.outputsHintDefault;
+      if (key) return t(key, { defaultValue: def ?? "" }) || undefined;
+      return def || undefined;
+    },
+    [t],
+  );
+
   const title = t(playbook.titleKey, { defaultValue: playbook.titleDefault });
   const desc = t(playbook.descKey, { defaultValue: playbook.descDefault });
   const longDesc =
@@ -673,7 +693,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
         {/* Two columns on wide screens: the case identity and purpose on the
             left, a compact control panel (progress, the primary action, reset
             and the sample-project picker) on the right. They stack on narrow
-            screens. This keeps the header short instead of one tall stack. */}
+            screens; the panel sits at its natural height, top-aligned. */}
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start lg:gap-8">
           {/* Left: what this case is and why */}
           <div className="min-w-0">
@@ -793,90 +813,84 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
         </div>
       </header>
 
-        {/* The process: a compact, full-width row of step cards below the header. */}
-        <section aria-label={t("cases.the_process", { defaultValue: "The process" })}>
-          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-              {t("cases.the_process", { defaultValue: "The process" })}
-            </p>
-            <p className="text-xs text-content-tertiary">
-              {t("cases.process_help", {
-                defaultValue: "Choose a step to see what happens and why",
-              })}
-            </p>
-          </div>
-          {/* One row of step cards on wide screens (2 up on the narrowest). For
-              longer cases this wraps to a second row rather than shrinking the
-              cards past readable. */}
-          <ol
-            className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6"
-            aria-label={title}
-          >
-            {playbook.steps.map((step, i) => {
-              const done = isStepDone(progress, step.id);
-              const isCurrent = i === currentIndex;
-              const stepTitle = t(step.titleKey, { defaultValue: step.titleDefault });
-              const stepModule = step.moduleLabelKey
-                ? t(step.moduleLabelKey, { defaultValue: step.moduleLabel })
-                : step.moduleLabel;
-              return (
-                <li key={step.id} className="min-w-0">
-                  <button
-                    type="button"
-                    ref={(el) => {
-                      cardRefs.current[i] = el;
-                    }}
-                    onClick={() => {
-                      selectStep(i);
-                      scrollToStep(step.id);
-                    }}
-                    onKeyDown={(e) => onCardKeyDown(e, i)}
-                    aria-current={isCurrent ? "step" : undefined}
+      {/* ── The process: a full-width row of step cards, up to six across and
+          wrapping after that. Each card is a picture of the work and its title;
+          clicking one jumps to that step below and marks it current. ──────── */}
+      <section aria-label={t("cases.the_process", { defaultValue: "The process" })}>
+        <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            {t("cases.the_process", { defaultValue: "The process" })}
+          </p>
+          <p className="text-xs text-content-tertiary">
+            {t("cases.process_help", {
+              defaultValue: "Choose a step to see what happens and why",
+            })}
+          </p>
+        </div>
+        {/* Six across from the small breakpoint up so the strip stays a compact
+            journey map (three across on the narrowest screens); more steps just
+            wrap to a second row of six. */}
+        <ol
+          className="grid grid-cols-3 gap-2 sm:grid-cols-6"
+          aria-label={title}
+        >
+          {playbook.steps.map((step, i) => {
+            const done = isStepDone(progress, step.id);
+            const isCurrent = i === currentIndex;
+            const stepTitle = t(step.titleKey, { defaultValue: step.titleDefault });
+            return (
+              <li key={step.id} className="min-w-0">
+                <button
+                  type="button"
+                  ref={(el) => {
+                    cardRefs.current[i] = el;
+                  }}
+                  onClick={() => {
+                    selectStep(i);
+                    scrollToStep(step.id);
+                  }}
+                  onKeyDown={(e) => onCardKeyDown(e, i)}
+                  aria-current={isCurrent ? "step" : undefined}
+                  title={stepTitle}
+                  className={clsx(
+                    "group flex h-full w-full flex-col gap-1 rounded-lg border p-1 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40",
+                    isCurrent
+                      ? "border-oe-blue bg-oe-blue-subtle ring-1 ring-inset ring-oe-blue/30"
+                      : done
+                        ? "border-semantic-success/30 bg-semantic-success/10 hover:border-semantic-success/50"
+                        : "border-border-light bg-surface-primary hover:border-oe-blue/40 hover:bg-surface-secondary/40",
+                  )}
+                >
+                  <div className="relative">
+                    <StepThumb step={step} className="aspect-[16/9] w-full" />
+                    <span
+                      className={clsx(
+                        "absolute start-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-2xs font-bold shadow-sm",
+                        done
+                          ? "bg-semantic-success text-white"
+                          : isCurrent
+                            ? "bg-oe-blue text-white"
+                            : "bg-surface-primary/95 text-content-secondary ring-1 ring-inset ring-border-light",
+                      )}
+                      aria-hidden="true"
+                    >
+                      {done ? <Check size={12} strokeWidth={2.5} /> : i + 1}
+                    </span>
+                  </div>
+                  <span
                     className={clsx(
-                      "group flex h-full w-full flex-col gap-2 rounded-xl border p-2 text-left transition-all",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40",
-                      isCurrent
-                        ? "border-oe-blue bg-oe-blue-subtle shadow-sm ring-1 ring-inset ring-oe-blue/30"
-                        : done
-                          ? "border-semantic-success/30 bg-semantic-success/10 hover:border-semantic-success/50"
-                          : "border-border-light bg-surface-primary hover:border-oe-blue/40 hover:bg-surface-secondary/40",
+                      "line-clamp-2 px-0.5 text-2xs font-semibold leading-snug",
+                      isCurrent ? "text-oe-blue-text" : "text-content-primary",
                     )}
                   >
-                    <span className="relative">
-                      <StepThumb step={step} className="aspect-[16/9] w-full" />
-                      <span
-                        className={clsx(
-                          "absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-2xs font-bold shadow-sm",
-                          done
-                            ? "bg-semantic-success text-white"
-                            : isCurrent
-                              ? "bg-oe-blue text-white"
-                              : "bg-surface-primary text-content-secondary ring-1 ring-inset ring-border-light",
-                        )}
-                        aria-hidden="true"
-                      >
-                        {done ? <Check size={13} strokeWidth={2.5} /> : i + 1}
-                      </span>
-                    </span>
-                    <span className="min-w-0">
-                      <span
-                        className={clsx(
-                          "block text-xs font-semibold leading-snug line-clamp-2",
-                          isCurrent ? "text-oe-blue-text" : "text-content-primary",
-                        )}
-                      >
-                        {stepTitle}
-                      </span>
-                      <span className="mt-1 inline-block max-w-full truncate rounded border border-border-light bg-surface-secondary px-1.5 py-px text-2xs font-medium text-content-tertiary">
-                        {stepModule}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
+                    {stepTitle}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
 
       {/* ── Every step, in full, one under the other ─────────────────────── */}
       <div className="space-y-3">
@@ -898,6 +912,8 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
               why={t(step.whyKey, { defaultValue: step.whyDefault })}
               inputs={resolveFlow(step, "inputs")}
               outputs={resolveFlow(step, "outputs")}
+              inputsHint={resolveHint(step, "inputs")}
+              outputsHint={resolveHint(step, "outputs")}
               scene={sceneFor(step, stepTitle)}
               done={isStepDone(progress, step.id)}
               isCurrent={i === currentIndex}

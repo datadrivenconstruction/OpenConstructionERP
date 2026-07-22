@@ -24,6 +24,7 @@ import {
   Settings,
   Info,
   TrendingUp,
+  Activity,
   Phone,
   ChevronDown,
   ChevronRight,
@@ -370,6 +371,7 @@ const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
+      { labelKey: 'nav.progress', to: '/progress', icon: Activity, advancedOnly: true },
       { labelKey: 'nav.capacity_planning', to: '/portfolio/capacity', icon: CalendarRange, advancedOnly: true },
       { labelKey: 'nav.resource_leveling', to: '/portfolio/leveling', icon: Scale, advancedOnly: true },
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert, advancedOnly: true },

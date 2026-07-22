@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Check } from 'lucide-react';
 import clsx from 'clsx';
+import { openLink } from '@/shared/lib/desktop';
 
 /**
  * Newsletter Subscribe trigger in the header.
@@ -61,7 +62,7 @@ export function SubscribeButton({ condensed = false }: { condensed?: boolean } =
   }, []);
 
   function handleClick() {
-    window.open(SUBSCRIBE_URL, '_blank', 'noopener,noreferrer');
+    openLink(SUBSCRIBE_URL);
     // Optimistic flag — next visit shows the "Subscribed" pill even if
     // the site never sent us a postMessage. User who didn't actually
     // complete the form will still see the button and can re-click.

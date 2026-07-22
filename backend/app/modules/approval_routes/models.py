@@ -79,7 +79,13 @@ class Route(Base):
     """Approval route template (definition, not an active workflow)."""
 
     __tablename__ = "oe_approval_routes_route"
-    __table_args__ = (Index("ix_approval_route_project_kind", "project_id", "target_kind"),)
+    __table_args__ = (
+        Index("ix_approval_route_project_kind", "project_id", "target_kind"),
+        # Unique among platform-seeded presets; NULLs (user routes) are
+        # distinct in PostgreSQL so ordinary routes never collide. Declared
+        # on the model so the startup schema heal reconstructs it too.
+        Index("uq_approval_route_system_key", "system_key", unique=True),
+    )
 
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
@@ -100,6 +106,11 @@ class Route(Base):
         nullable=True,
         default=None,
     )
+    # Stable identifier for platform-seeded system presets (tenant-wide
+    # ISO 19650 review flows). NULL for every user-created route; set only
+    # by ``seed.py`` so the startup seed is idempotent and the API can flag
+    # a route as a read-only preset.
+    system_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
         return f"<Route {self.name!r} kind={self.target_kind} active={self.is_active}>"

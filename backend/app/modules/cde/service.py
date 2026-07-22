@@ -23,13 +23,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cde_states import CDEState, CDEStateMachine
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.modules.cde import readiness as cde_readiness
 from app.modules.cde.models import DocumentContainer, DocumentRevision, StateTransition
 from app.modules.cde.repository import ContainerRepository, RevisionRepository
 from app.modules.cde.schemas import (
+    CDEReadinessResponse,
     CDEStatsResponse,
     ContainerCreate,
     ContainerTransmittalLink,
     ContainerUpdate,
+    ReadinessNextAction,
+    ReadinessSignalStatus,
     RevisionCreate,
     StateTransitionRequest,
 )
@@ -694,6 +698,59 @@ class CDEService:
             by_state=raw["by_state"],
             by_discipline=raw["by_discipline"],
             latest_revisions=raw["latest_revisions"],
+        )
+
+    async def compute_readiness(self, project_id: uuid.UUID) -> CDEReadinessResponse:
+        """Score how ready a project's CDE is to go live.
+
+        Reads the project's real container / transition / revision state, maps it
+        onto the readiness engine's observed signal keys, and returns the weighted
+        score, level, full checklist and the leading unmet milestones. The scoring
+        itself is the pure :mod:`app.modules.cde.readiness` engine - this method
+        only translates database facts into the keys that engine recognises.
+        """
+        facts = await self.container_repo.readiness_facts_for_project(project_id)
+
+        observed: set[str] = set()
+        if facts["total"] > 0:
+            observed.add("containers_created")
+        if facts["has_naming"]:
+            observed.add("structured_naming")
+        if facts["has_suitability"]:
+            observed.add("suitability_assigned")
+        if facts["has_classification"]:
+            observed.add("classification_used")
+        states = facts["states"]
+        if states & {"shared", "published", "archived"}:
+            observed.add("shared_reached")
+        if states & {"published", "archived"}:
+            observed.add("published_reached")
+        if "archived" in states:
+            observed.add("lifecycle_archived")
+        if facts["has_signed_transition"]:
+            observed.add("gate_signed")
+        if facts["has_multi_revision"]:
+            observed.add("revision_controlled")
+
+        result = cde_readiness.evaluate(frozenset(observed))
+        return CDEReadinessResponse(
+            score=result.score,
+            level=result.level,
+            total_containers=facts["total"],
+            signals=[
+                ReadinessSignalStatus(
+                    key=s.signal.key,
+                    label=s.signal.label,
+                    weight=s.signal.weight,
+                    hint=s.signal.hint,
+                    done=s.done,
+                )
+                for s in result.signals
+            ],
+            next_actions=[
+                ReadinessNextAction(key=s.key, label=s.label, hint=s.hint)
+                for s in result.next_actions
+            ],
         )
 
     # ── ISO 19650 naming convention ──────────────────────────────────────

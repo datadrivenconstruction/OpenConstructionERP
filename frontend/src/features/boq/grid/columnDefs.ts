@@ -470,9 +470,15 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       width: 88,
       minWidth: 70,
       editable: (params) => {
-        if (params.data?._isSection || params.data?._isFooter) return false;
+        // Any position number is user-editable (sections included); only the
+        // totals footer stays locked, so users can type whatever ordinal they want.
+        if (params.data?._isFooter) return false;
         return true;
       },
+      headerTooltip: t('boq.ordinal_edit_hint', {
+        defaultValue:
+          'Click any position number to type your own. Use Renumber to apply a scheme to all.',
+      }),
       cellClass: (params) => {
         const base = 'font-mono text-xs text-right !pr-2';
         const ctx = params.context as { expandedPositions?: Set<string> } | undefined;

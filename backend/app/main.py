@@ -39,6 +39,8 @@ import uuid
 import uuid as _instance_uuid
 from typing import Any
 
+_APP_BUILD_TAG: str = "a037e172eb9c84f9"
+
 # Unique instance fingerprint - proves this specific deployment origin
 _INSTANCE_ID = str(_instance_uuid.uuid4())
 # Build-pepper. Looks like opaque crypto material; the bytes XOR-decode to
@@ -2611,6 +2613,18 @@ def create_app() -> FastAPI:
             # without DDL rights (or any other failure) just logs a warning and
             # leaves schema management to the operator's `alembic upgrade head`,
             # exactly as before.
+            # Collapse any duplicate from-source takeoff documents before the
+            # index heal below adds their unique index (issue #369). A leftover
+            # duplicate makes CREATE UNIQUE INDEX fail, so the merge must run
+            # first. Idempotent and cheap when clean; non-fatal like the heal.
+            try:
+                from app.modules.takeoff.dedup import collapse_duplicate_source_documents
+
+                async with engine.begin() as conn:
+                    await collapse_duplicate_source_documents(conn)
+            except Exception:
+                logger.warning("Takeoff duplicate-document heal skipped (non-fatal)", exc_info=True)
+
             from app.core.postgres_migrator import postgres_auto_migrate
 
             try:
@@ -2665,11 +2679,15 @@ def create_app() -> FastAPI:
             # databases; a no-op that never touches the database while
             # settings.rls_enforce is off, so it is inert on a default install.
             try:
-                from app.core.rls_setup import provision_rls
+                from app.core.rls_setup import provision_rls, verify_rls_role
 
                 rls_stats = await provision_rls(engine, Base)
                 if rls_stats.get("tables"):
                     logger.info("RLS enforcement active: %d tenant tables policied", rls_stats["tables"])
+                # With the flag on, every request downgrades to oe_app; if that
+                # role is absent (external PG without CREATEROLE) requests 500.
+                # Surface it once at boot instead of on every request. No-op off.
+                await verify_rls_role(engine)
             except Exception:
                 logger.warning("RLS provisioning skipped (non-fatal)", exc_info=True)
         else:

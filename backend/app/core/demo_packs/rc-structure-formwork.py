@@ -118,7 +118,7 @@ TEMPLATE = DemoTemplate(
             "KG 331 - Tragende Aussenwaende (Schalung/Beton)",
             {"din276": "331"},
             [
-                ("331.1", "Schalung Aussenwand Rahmenschalung Framax 25cm, beidseitig (Wall framed formwork)", "m2", 9200, 33.50, {"din276": "331"}),
+                ("331.1", "Schalung Aussenwand Rahmenschalung 25cm, beidseitig (Wall framed formwork)", "m2", 9200, 33.50, {"din276": "331"}),
                 ("331.2", "Schalung Wandanschluss / Ankerstellen DIN 18218 (Tie / anchor points)", "pcs", 4600, 6.80, {"din276": "331"}),
                 ("331.3", "Schalhaut sichtbeton-tauglich SB2 Zuschlag (Fair-faced facing surcharge)", "m2", 2400, 9.50, {"din276": "331"}),
                 ("331.4", "Stahlbeton Aussenwand C30/37, d=25cm, XC4/XF4 (RC external wall)", "m3", 1150, 152.00, {"din276": "331"}),
@@ -152,7 +152,7 @@ TEMPLATE = DemoTemplate(
             {"din276": "341"},
             [
                 ("341.1", "Selbstkletterschalung Kerne SKE, Auf-/Abbau + Vorhaltung (Self-climbing formwork cores)", "m2", 3600, 78.00, {"din276": "341"}),
-                ("341.2", "Schalung Innenwaende Traegerschalung Top50, d=30cm (Girder wall formwork)", "m2", 6400, 31.50, {"din276": "341"}),
+                ("341.2", "Schalung Innenwaende Traegerschalung, d=30cm (Girder wall formwork)", "m2", 6400, 31.50, {"din276": "341"}),
                 ("341.3", "Stahlbeton Kernwaende C35/45, d=30cm (RC core walls)", "m3", 980, 162.00, {"din276": "341"}),
                 ("341.4", "Stahlbeton Innenwaende C30/37, d=25cm (RC internal walls)", "m3", 640, 150.00, {"din276": "341"}),
                 ("341.5", "Bewehrung Kerne + Innenwaende BSt 500 B, ~110 kg/m3 (Reinforcement)", "t", 178, 1520.00, {"din276": "341"}),
@@ -168,7 +168,7 @@ TEMPLATE = DemoTemplate(
             "KG 351 - Decken (Deckenschalung/Beton)",
             {"din276": "351"},
             [
-                ("351.1", "Deckenschalung Deckentische Dokadek 30, h bis 3,20m (Slab table formwork)", "m2", 20400, 29.50, {"din276": "351"}),
+                ("351.1", "Deckenschalung Deckentische, h bis 3,20m (Slab table formwork)", "m2", 20400, 29.50, {"din276": "351"}),
                 ("351.2", "Deckenschalung Traegerschalung Rand-/Restflaechen (Beam-girder slab formwork)", "m2", 4800, 34.00, {"din276": "351"}),
                 ("351.3", "Stahlbeton Flachdecke C30/37, d=30cm, XC4/XD1 (RC flat slab)", "m3", 6720, 148.00, {"din276": "351"}),
                 ("351.4", "Bewehrung Decken BSt 500 B, ~130 kg/m3 (Slab reinforcement)", "t", 874, 1480.00, {"din276": "351"}),
@@ -188,7 +188,7 @@ TEMPLATE = DemoTemplate(
             {"din276": "352"},
             [
                 ("352.1", "Traggeruest Deckenstuetzen Eurex, Auf-/Abbau (Falsework props erect/strip)", "m2", 25200, 8.50, {"din276": "352"}),
-                ("352.2", "Lasttuerme Staxo 100 hohe Geschosshoehe (Shoring towers high storeys)", "pcs", 320, 145.00, {"din276": "352"}),
+                ("352.2", "Lasttuerme fuer hohe Geschosshoehe (Shoring towers high storeys)", "pcs", 320, 145.00, {"din276": "352"}),
                 ("352.3", "Vorhaltung Schalung/Traggeruest je Betonierabschnitt (Standing time per pour)", "month", 16, 38000.00, {"din276": "352"}),
                 ("352.4", "Schalungsumsetzen / Kran-Umsetztakt Decken (Crane re-positioning cycles)", "each", 24, 4200.00, {"din276": "352"}),
                 ("352.5", "Trennmittel / Schalungsoel umweltvertraeglich (Release agent)", "l", 6800, 4.80, {"din276": "352"}),
@@ -320,7 +320,7 @@ TEMPLATE = DemoTemplate(
         "concrete_grades": "C30/37 - C45/55",
         "exposure_classes": "XC4, XD3, XF4 (Streusalzbelastung)",
         "reinforcement": "BSt 500 B / 500 S (DIN 488)",
-        "formwork_systems": "Rahmenschalung (Framax), Traegerschalung (Top50), Deckentische (Dokadek 30), Stuetzenschalung, Selbstkletterschalung (SKE)",
+        "formwork_systems": "Rahmenschalung, Traegerschalung, Deckentische, Stuetzenschalung, Selbstkletterschalung",
         "standards": "DIN EN 1992-1-1, DIN EN 206/DIN 1045-2, DIN EN 13670/DIN 1045-3, DIN 18218, DIN EN 12812, VOB/C DIN 18331",
         "safety": "DGUV Information 101-008 (Schalungsarbeiten)",
         "permit_note": "Baugenehmigung Stadt Stuttgart, Baurechtsamt; Pruefstatik durch Pruefingenieur fuer Baustatik (PIB)",

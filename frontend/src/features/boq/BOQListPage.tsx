@@ -1040,13 +1040,14 @@ export function BOQListPage() {
           }}
         />
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {paginatedBoqs.map((boq, i) => (
             <Card
               key={boq.id}
               hoverable
               padding="none"
-              className={`cursor-pointer animate-card-in border-l-4 ${valueBorderColor(boq.grandTotal)} ${selectedForCompare?.id === boq.id ? 'ring-2 ring-oe-blue' : ''}`}
+              className={`group relative flex h-full flex-col cursor-pointer animate-card-in overflow-hidden border-l-4 ${valueBorderColor(boq.grandTotal)} ${selectedForCompare?.id === boq.id ? 'ring-2 ring-oe-blue' : ''}`}
               style={{ animationDelay: `${50 + i * 30}ms` }}
               onClick={() => {
                 if (compareMode && selectedForCompare && selectedForCompare.id !== boq.id) {
@@ -1056,80 +1057,70 @@ export function BOQListPage() {
                 }
               }}
             >
-              <div className="flex items-center gap-4 px-5 py-3.5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
-                  <Table2 size={18} strokeWidth={1.75} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-content-primary truncate">{boq.name}</span>
-                    <Badge variant={statusVariant(boq.status)} size="sm" dot>{statusLabel(boq.status)}</Badge>
-                    {isCollabEnabled && <PresenceAvatars boqId={boq.id} />}
+              {/* Card body, product-card rhythm: identity at the top (icon,
+                  status, the estimate name and where it lives); the money is
+                  anchored to the bottom just above the actions, so every card
+                  in a row lines its total and controls up on one baseline no
+                  matter how many lines each name wraps to. */}
+              <div className="flex flex-col gap-2.5 p-4 pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
+                    <Table2 size={18} strokeWidth={1.75} />
                   </div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
-                    <span className="truncate">{boq.projectName}</span>
+                  <Badge variant={statusVariant(boq.status)} size="sm" dot>{statusLabel(boq.status)}</Badge>
+                </div>
+
+                <div>
+                  <h3
+                    className="text-sm font-semibold leading-snug text-content-primary line-clamp-2"
+                    title={boq.name}
+                  >
+                    {boq.name}
+                  </h3>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-content-tertiary">
+                    <span className="max-w-[55%] truncate">{boq.projectName}</span>
                     <FileTypeChips
                       fileTypes={fileTypesByProject?.[boq.project_id]}
                       size="xs"
                     />
-                    <span>·</span>
-                    <span className="tabular-nums">{boq.positionCount} {t('boq.positions_short', { defaultValue: 'pos.' })}</span>
-                  </div>
-                  <div className="mt-1 text-base font-bold text-content-primary tabular-nums">
-                    {currencyFmt.format(boq.grandTotal)} {boq.currency}
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-2xs text-content-quaternary hidden sm:inline">
+              {/* Money + actions form one bottom summary zone, split from the
+                  identity block by a single hairline. `mt-auto` pins the zone
+                  to the card bottom, so the breathing room on a short card
+                  falls above the rule and reads as deliberate. */}
+              <div className="mt-auto border-t border-border-light px-4 pb-2 pt-3">
+                <div className="text-xl font-bold leading-none text-content-primary tabular-nums">
+                  {currencyFmt.format(boq.grandTotal)}
+                  <span className="ml-1 text-xs font-medium text-content-tertiary">{boq.currency}</span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-content-tertiary">
+                  <span className="tabular-nums">
+                    {boq.positionCount} {t('boq.positions_short', { defaultValue: 'pos.' })}
+                  </span>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarDays size={11} />
                     <DateDisplay value={boq.created_at} />
                   </span>
+                  {isCollabEnabled && (
+                    <span className="ml-auto"><PresenceAvatars boqId={boq.id} /></span>
+                  )}
+                </div>
+              </div>
 
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleCompareClick(boq.id, boq.currency); }}
-                    className={`flex h-7 w-7 items-center justify-center rounded-md transition-all ${
-                      selectedForCompare?.id === boq.id
-                        ? 'text-oe-blue-text bg-oe-blue-subtle'
-                        : 'text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle'
-                    }`}
-                    title={
-                      compareMode && selectedForCompare?.id === boq.id
-                        ? t('boq.compare_selected', { defaultValue: 'Selected for comparison' })
-                        : t('boq.compare', { defaultValue: 'Compare' })
-                    }
-                  >
-                    <GitCompareArrows size={13} />
-                  </button>
-
-                  {/* CONN-34: build a 4D schedule straight from this BOQ.
-                      Deep-links into /schedule pre-selecting the project and
-                      pre-opening Generate-from-BOQ with this BOQ chosen, so
-                      the estimate-to-programme step is one click instead of a
-                      manual hunt for the right schedule and BOQ. */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(
-                        `/schedule?project_id=${encodeURIComponent(boq.project_id)}&generateBoqId=${encodeURIComponent(boq.id)}`,
-                      );
-                    }}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
-                    title={t('boq.build_schedule', { defaultValue: 'Build schedule from this BOQ' })}
-                  >
-                    <CalendarDays size={13} />
-                  </button>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(boq.id); }}
-                    disabled={duplicateMutation.isPending}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
-                    title={t('boq.duplicate', { defaultValue: 'Duplicate' })}
-                  >
-                    <Copy size={13} />
-                  </button>
-
-                  {confirmDeleteId === boq.id ? (
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              {/* Footer action bar — flows directly under the total in the
+                  same bottom zone (no second rule), so the summary reads as one
+                  block rather than two stacked strips. */}
+              <div className="flex items-center justify-between gap-1 px-2.5 pb-2.5 pt-1">
+                {confirmDeleteId === boq.id ? (
+                  <div className="flex w-full items-center justify-between gap-1" onClick={(e) => e.stopPropagation()}>
+                    <span className="pl-1 text-2xs text-content-tertiary">
+                      {t('boq.delete_confirm_q', { defaultValue: 'Delete?' })}
+                    </span>
+                    <div className="flex items-center gap-1">
                       <Button variant="danger" size="sm" onClick={() => deleteMutation.mutate(boq.id)} loading={deleteMutation.isPending}>
                         {t('common.delete')}
                       </Button>
@@ -1137,24 +1128,73 @@ export function BOQListPage() {
                         {t('common.cancel')}
                       </Button>
                     </div>
-                  ) : (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(boq.id); }}
-                      className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
-                      title={t('common.delete')}
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCompareClick(boq.id, boq.currency); }}
+                        className={`flex h-7 w-7 items-center justify-center rounded-md transition-all ${
+                          selectedForCompare?.id === boq.id
+                            ? 'text-oe-blue-text bg-oe-blue-subtle'
+                            : 'text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle'
+                        }`}
+                        title={
+                          compareMode && selectedForCompare?.id === boq.id
+                            ? t('boq.compare_selected', { defaultValue: 'Selected for comparison' })
+                            : t('boq.compare', { defaultValue: 'Compare' })
+                        }
+                      >
+                        <GitCompareArrows size={13} />
+                      </button>
 
-                  <ArrowRight size={14} className="text-content-quaternary ml-1" />
-                </div>
+                      {/* CONN-34: build a 4D schedule straight from this BOQ. */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(
+                            `/schedule?project_id=${encodeURIComponent(boq.project_id)}&generateBoqId=${encodeURIComponent(boq.id)}`,
+                          );
+                        }}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all"
+                        title={t('boq.build_schedule', { defaultValue: 'Build schedule from this BOQ' })}
+                      >
+                        <CalendarDays size={13} />
+                      </button>
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(boq.id); }}
+                        disabled={duplicateMutation.isPending}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-all disabled:opacity-40"
+                        title={t('boq.duplicate', { defaultValue: 'Duplicate' })}
+                      >
+                        <Copy size={13} />
+                      </button>
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(boq.id); }}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
+                        title={t('common.delete')}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+
+                    {/* Open affordance — appears on hover so the card reads as
+                        clickable without adding permanent clutter. */}
+                    <span className="inline-flex items-center gap-1 pr-1 text-2xs font-semibold text-oe-blue-text opacity-0 transition-opacity group-hover:opacity-100">
+                      {t('boq.open', { defaultValue: 'Open' })}
+                      <ArrowRight size={13} />
+                    </span>
+                  </>
+                )}
               </div>
             </Card>
           ))}
+          </div>
 
           {/* Pagination */}
-          <div className="mt-6 flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3">
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
                 <button

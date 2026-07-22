@@ -45,6 +45,7 @@ import {
   GitBranch,
   ClipboardList,
   TrendingUp,
+  Activity,
   CalendarRange,
   Scale,
   ShieldAlert,
@@ -135,6 +136,7 @@ const ROUTE_ICON_MAP: Record<string, LucideIcon> = {
   '/tasks': ClipboardList,
   // ── 7. Cost Control & Risk ────────────────────────────────────────
   '/5d': TrendingUp,
+  '/progress': Activity,
   '/portfolio/capacity': CalendarRange,
   '/portfolio/leveling': Scale,
   '/risks': ShieldAlert,

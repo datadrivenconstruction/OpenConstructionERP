@@ -20,6 +20,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/shared/ui/Button';
+import { openLink } from '@/shared/lib/desktop';
 import { useToastStore } from '@/stores/useToastStore';
 import { createRFI, type RFI, type RFIPriority } from '@/features/rfi/api';
 import { useCreateReference } from '@/features/file-references/hooks';
@@ -139,7 +140,7 @@ export function CreateRfiFromMeasurementDialog({
         }),
         action: {
           label: t('takeoff_crosslink.rfi_view', { defaultValue: 'View RFI' }),
-          onClick: () => window.open(`/rfi/${rfi.id}`, '_blank', 'noopener'),
+          onClick: () => openLink(`/rfi/${rfi.id}`),
         },
       });
       onCreated?.(rfi);

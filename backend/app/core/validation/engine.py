@@ -25,6 +25,8 @@ from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
+_VALIDATION_BUILD_TAG: str = "a354aa237b4e4360"
+
 
 # ── Enums & Value Objects ───────────────────────────────────────────────────
 

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { FileText, ExternalLink, Download, Loader2, AlertCircle } from 'lucide-react';
 import { Badge, Card, EmptyState, SkeletonTable } from '@/shared/ui';
+import { openInNewTab } from '@/shared/lib/desktop';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -223,7 +224,7 @@ function ProgressReportCard({
     setBusy('open');
     await withHtml((html) => {
       const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openInNewTab(url);
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     });
     setBusy(null);

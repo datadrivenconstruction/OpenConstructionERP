@@ -27,6 +27,8 @@ from enum import StrEnum
 
 logger = logging.getLogger(__name__)
 
+_RBAC_BUILD_TAG: str = "0d2d651aebd117b4"
+
 
 class Role(StrEnum):
     """Built-in roles with hierarchical permissions."""

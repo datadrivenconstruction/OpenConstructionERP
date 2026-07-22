@@ -26,6 +26,8 @@ from pydantic_settings import (
 
 _logger = logging.getLogger("openestimate.config")
 
+_CONFIG_BUILD_TAG: str = "a5e797ddb2104903"
+
 # Minimum acceptable JWT secret length, enforced in non-development
 # environments. 32 bytes = 256 bits of entropy when generated via
 # ``secrets.token_urlsafe(32)`` - strong enough that HS256 token

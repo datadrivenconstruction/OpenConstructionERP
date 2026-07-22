@@ -97,6 +97,54 @@ export interface SuitabilityCodesResponse {
   by_state: Record<CDEState, SuitabilityCodeEntry[]>;
 }
 
+export interface FunctionalRoleEntry {
+  key: string;
+  name: string;
+  /** State-machine role this maps to (viewer / task_team_manager / lead_ap ...). */
+  cde_role: string;
+  /** Gate this role is accountable for (A / B), or null. */
+  gate: string | null;
+  acts_on: CDEState[];
+  permissions: string[];
+  summary: string;
+}
+
+export interface FunctionalRolesResponse {
+  roles: FunctionalRoleEntry[];
+  states: CDEState[];
+  /** state -> role key -> short action label ("-" when the role is idle). */
+  matrix: Record<string, Record<string, string>>;
+}
+
+export interface ReadinessSignalStatus {
+  key: string;
+  label: string;
+  weight: number;
+  hint: string;
+  done: boolean;
+}
+
+export interface ReadinessNextAction {
+  key: string;
+  label: string;
+  hint: string;
+}
+
+export type CDEReadinessLevel =
+  | 'not_started'
+  | 'forming'
+  | 'operational'
+  | 'mature';
+
+export interface CDEReadiness {
+  /** Weighted percent in [0, 100]. */
+  score: number;
+  level: CDEReadinessLevel;
+  total_containers: number;
+  signals: ReadinessSignalStatus[];
+  next_actions: ReadinessNextAction[];
+}
+
 export interface StateTransitionEntry {
   id: string;
   container_id: string;
@@ -174,6 +222,10 @@ export async function fetchSuitabilityCodes(): Promise<SuitabilityCodesResponse>
   return apiGet<SuitabilityCodesResponse>('/v1/cde/suitability-codes/');
 }
 
+export async function fetchFunctionalRoles(): Promise<FunctionalRolesResponse> {
+  return apiGet<FunctionalRolesResponse>('/v1/cde/functional-roles/');
+}
+
 export interface CDEStats {
   total: number;
   by_state: Record<string, number>;
@@ -183,6 +235,12 @@ export interface CDEStats {
 
 export async function fetchCDEStats(projectId: string): Promise<CDEStats> {
   return apiGet<CDEStats>(`/v1/cde/stats/?project_id=${encodeURIComponent(projectId)}`);
+}
+
+export async function fetchCDEReadiness(projectId: string): Promise<CDEReadiness> {
+  return apiGet<CDEReadiness>(
+    `/v1/cde/readiness/?project_id=${encodeURIComponent(projectId)}`,
+  );
 }
 
 export async function fetchContainerHistory(

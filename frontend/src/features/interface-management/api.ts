@@ -185,6 +185,16 @@ export interface InterfaceWritePayload {
   need_by_date?: string | null;
   location?: string | null;
   notes?: string | null;
+  /** Soft link to the RFI that resolves this interface (id string, no FK). */
+  rfi_id?: string | null;
+  /** Soft link to the programme activity this interface gates (activity id). */
+  schedule_activity_id?: string | null;
+}
+
+/** One option for the linked-reference pickers (RFI / schedule activity). */
+export interface LinkOption {
+  id: string;
+  label: string;
 }
 
 export interface ActionWritePayload {
@@ -316,4 +326,72 @@ export async function fetchWorkPackageHealth(
 
 export async function fetchRegister(projectId: string): Promise<InterfaceRegister> {
   return apiGet<InterfaceRegister>(`${BASE}/${projectId}/register`);
+}
+
+/* -- Linked-reference picker options --------------------------------------- */
+
+/** Minimal RFI row shape used only to build the linked-RFI picker options. */
+interface RfiPickerRow {
+  id: string;
+  rfi_number: string;
+  subject: string;
+}
+
+/** Minimal schedule / activity row shapes for the linked-activity picker. */
+interface SchedulePickerRow {
+  id: string;
+  name: string;
+}
+interface ActivityPickerRow {
+  id: string;
+  name: string;
+}
+
+/**
+ * Load the project's RFIs as picker options ("RFI-007 - Duct clash at L3").
+ *
+ * Reuses the RFI list endpoint the correspondence module already links against.
+ * A failure degrades to an empty list so the picker still renders (with a
+ * "nothing to link" note) rather than breaking the interface modal.
+ */
+export async function fetchRfiOptions(projectId: string): Promise<LinkOption[]> {
+  const rows = await apiGet<RfiPickerRow[]>(`/v1/rfi/?project_id=${projectId}`);
+  return (rows ?? []).map((r) => ({
+    id: r.id,
+    label: [r.rfi_number, r.subject].filter(Boolean).join(' - ') || r.id,
+  }));
+}
+
+/**
+ * Load the project's schedule activities as picker options.
+ *
+ * There is no flat per-project activities endpoint, so this lists the project's
+ * schedules and then their activities, flattening the result. It is capped at
+ * the first few schedules and each activities call degrades to an empty list so
+ * one unreadable schedule never breaks the whole picker; the outer caller wraps
+ * this in a query that also degrades to an empty list on error.
+ */
+export async function fetchScheduleActivityOptions(projectId: string): Promise<LinkOption[]> {
+  const raw = await apiGet<SchedulePickerRow[] | { items: SchedulePickerRow[] }>(
+    `/v1/schedule/schedules/?project_id=${projectId}`,
+  );
+  const schedules = Array.isArray(raw) ? raw : (raw?.items ?? []);
+  // Cap the fan-out: a project rarely has more than a couple of schedules, and
+  // we never want an unbounded burst of activity requests from a picker.
+  const capped = schedules.slice(0, 5);
+  const perSchedule = await Promise.all(
+    capped.map((s) =>
+      apiGet<ActivityPickerRow[]>(`/v1/schedule/schedules/${s.id}/activities/`)
+        .then((acts) =>
+          (acts ?? []).map((a) => ({
+            id: a.id,
+            // Prefix with the schedule name when the project has more than one,
+            // so two activities called "Excavation" stay distinguishable.
+            label: capped.length > 1 && s.name ? `${s.name} - ${a.name}` : a.name || a.id,
+          })),
+        )
+        .catch(() => [] as LinkOption[]),
+    ),
+  );
+  return perSchedule.flat();
 }

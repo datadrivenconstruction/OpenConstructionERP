@@ -26,6 +26,7 @@ import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { EstimateRollupCard } from '@/features/estimate-rollup';
 import {
   ALLOWANCE_TYPES,
   ALLOWANCE_TYPE_DEFAULT_LABELS,
@@ -482,6 +483,9 @@ export function AllowancesPage() {
           </Button>
         }
       />
+
+      {/* How the remaining allowances roll into the whole estimate total. */}
+      <EstimateRollupCard projectId={projectId} />
 
       {showAdd && (
         <AddAllowanceForm

@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.takeoff.models import AiTakeoffRun, TakeoffDocument, TakeoffMeasurement
@@ -1408,7 +1409,19 @@ class TakeoffService:
             source_document_id=source_document_id,
         )
 
-        return await self.repo.create(doc)
+        try:
+            return await self.repo.create(doc)
+        except IntegrityError:
+            # A concurrent from-source open won the (project_id,
+            # source_document_id) unique index (issue #369). The PDF bytes this
+            # losing insert wrote to disk above are orphaned by the coming
+            # rollback, so remove them, then re-raise for the caller to resolve
+            # to the winning row. Only the from-source path passes a
+            # source_document_id and can trip this; a direct upload has a NULL
+            # source id and never collides.
+            with contextlib.suppress(OSError):
+                file_path.unlink()
+            raise
 
     async def get_or_create_takeoff_from_source(
         self,
@@ -1433,19 +1446,32 @@ class TakeoffService:
         degradation as a normal upload) and the new row is stamped with
         ``source_document_id`` so the next open reuses it.
         """
-        existing = await self.repo.get_by_source_document_id(
-            source_document_id, project_id=uuid.UUID(source_project_id)
-        )
+        project_uuid = uuid.UUID(source_project_id)
+        existing = await self.repo.get_by_source_document_id(source_document_id, project_id=project_uuid)
         if existing is not None:
             return existing
-        return await self.upload_document(
-            filename=filename,
-            content=content,
-            size_bytes=size_bytes,
-            owner_id=owner_id,
-            project_id=source_project_id,
-            source_document_id=source_document_id,
-        )
+        try:
+            return await self.upload_document(
+                filename=filename,
+                content=content,
+                size_bytes=size_bytes,
+                owner_id=owner_id,
+                project_id=source_project_id,
+                source_document_id=source_document_id,
+            )
+        except IntegrityError:
+            # Lost the find-or-create race: a concurrent request created the
+            # takeoff document for this source first and the unique index
+            # rejected our insert (issue #369). Roll our failed transaction back
+            # and return the winner, so both callers converge on one row and no
+            # measurement is ever stranded on a duplicate. If the re-lookup
+            # still finds nothing the violation was something else, so re-raise
+            # it untouched.
+            await self.session.rollback()
+            existing = await self.repo.get_by_source_document_id(source_document_id, project_id=project_uuid)
+            if existing is not None:
+                return existing
+            raise
 
     async def get_document(self, doc_id: str) -> TakeoffDocument | None:
         return await self.repo.get_by_id(uuid.UUID(doc_id))

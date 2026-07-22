@@ -434,6 +434,14 @@ frontend/scripts/_i18n_*.py
 # Pre-redesign backups (the existing *.backup.* rule misses the .bak suffix).
 *.pre-redesign.bak
 
+# --- Provenance / watermark tooling: local only, never publish ---
+# The watermark generator, its registry and the integrity verifier document
+# the covert marker scheme, so they stay local and out of the public repo
+# (constraint #9). The markers themselves remain planted in shipped source;
+# only the tooling that explains them is withheld.
+/tools/watermark/
+/scripts/integrity_check.py
+
 # --- Internal working notes: local only, never publish (constraint #9) ---
 # Underscore-prefixed markdown / text files anywhere in the tree are scratch:
 # agent handoffs, audit residue, a11y sweeps, planning notes, per-issue reply

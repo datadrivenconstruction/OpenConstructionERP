@@ -101,7 +101,7 @@ import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
 import { CustomColumnsDialog } from './CustomColumnsDialog';
 import { BOQVariablesDialog } from './BOQVariablesDialog';
 import { CostPerAreaBenchmark } from './CostPerAreaBenchmark';
-import { RenumberDialog } from './RenumberDialog';
+import { RenumberDialog, type RenumberScheme, type RenumberCustom } from './RenumberDialog';
 import { LinkedPositionsModal } from './LinkedPositionsModal';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
@@ -746,8 +746,8 @@ export function BOQEditorPage() {
   const [renumberDialogOpen, setRenumberDialogOpen] = useState(false);
 
   const renumberMutation = useMutation({
-    mutationFn: ({ scheme, pad }: { scheme: 'gap10' | 'gap100' | 'sequential' | 'dotted'; pad: boolean }) =>
-      boqApi.renumberPositions(boqId!, { scheme, pad }),
+    mutationFn: ({ scheme, pad, start, step }: { scheme: RenumberScheme; pad: boolean; start?: number; step?: number }) =>
+      boqApi.renumberPositions(boqId!, { scheme, pad, start, step }),
     onSuccess: (result) => {
       invalidateAll();
       setRenumberDialogOpen(false);
@@ -889,8 +889,8 @@ export function BOQEditorPage() {
   }, []);
 
   const handleRenumberApply = useCallback(
-    (scheme: 'gap10' | 'gap100' | 'sequential' | 'dotted', pad: boolean) => {
-      renumberMutation.mutate({ scheme, pad });
+    (scheme: RenumberScheme, pad: boolean, custom: RenumberCustom) => {
+      renumberMutation.mutate({ scheme, pad, start: custom.start, step: custom.step });
     },
     [renumberMutation],
   );

@@ -1760,7 +1760,12 @@ export const boqApi = {
      - dotted:     1, 1.1, 1.2      (NRM-style short form) */
   renumberPositions: (
     boqId: string,
-    options?: { scheme?: 'gap10' | 'gap100' | 'sequential' | 'dotted'; pad?: boolean },
+    options?: {
+      scheme?: 'gap10' | 'gap100' | 'sequential' | 'dotted' | 'custom';
+      pad?: boolean;
+      start?: number;
+      step?: number;
+    },
   ) =>
     apiPost<{ renumbered: number; scheme: string }>(
       `/v1/boq/boqs/${boqId}/renumber/`,

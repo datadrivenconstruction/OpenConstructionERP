@@ -15,7 +15,7 @@ without DDL rights simply skips (best-effort per statement). It:
 
 The policy is deliberately non-breaking for a first rollout:
 
-    USING / WITH CHECK: tenant_id IS NULL OR tenant_id = current_setting('app.current_tenant', true)
+    USING / WITH CHECK: tenant_id IS NULL OR tenant_id::text = current_setting('app.current_tenant', true)
 
 so a tenant can never read or write another tenant's rows, while rows with a
 NULL ``tenant_id`` (legacy/system rows, and the many columns still nullable
@@ -97,7 +97,12 @@ def _role_setup_statements() -> list[str]:
 def _policy_statements(table_name: str) -> list[str]:
     """Idempotent DDL that enables RLS and installs the policy on one table."""
     quoted = f'"{table_name}"'
-    predicate = f"({_TENANT_COLUMN} IS NULL OR {_TENANT_COLUMN} = current_setting('{GUC_NAME}', true))"
+    # Cast the tenant column to text before comparing to the GUC. current_setting
+    # always returns text, so a text-family tenant_id (the GUID type renders as
+    # varchar(36) today) compares directly - but a native-uuid or otherwise
+    # non-text tenant_id would raise "operator does not exist: uuid = text" and
+    # 500 every read. ``::text`` keeps the predicate correct for any column type.
+    predicate = f"({_TENANT_COLUMN} IS NULL OR {_TENANT_COLUMN}::text = current_setting('{GUC_NAME}', true))"
     return [
         f"ALTER TABLE {quoted} ENABLE ROW LEVEL SECURITY",
         # FORCE so the policy also binds the table owner. A superuser still
@@ -204,3 +209,59 @@ async def provision_rls(engine: AsyncEngine, base) -> dict[str, int]:  # noqa: A
         # its lock. A busy table simply defers to the next boot.
         await conn.execute(text("SET LOCAL lock_timeout = '3s'"))
         return await apply_rls(conn, base)
+
+
+async def verify_rls_role(engine: AsyncEngine) -> bool:
+    """Warn loudly at startup if enforcement is on but ``oe_app`` is unusable.
+
+    When the flag is on, every request transaction issues ``SET LOCAL ROLE
+    "oe_app"`` (see :func:`app.core.rls.install`). If that role was never
+    created - the common case being an external PostgreSQL whose app login lacks
+    CREATEROLE, so :func:`provision_rls` could not create it and its best-effort
+    SAVEPOINT swallowed the failure - every request then fails with a 500. This
+    surfaces that misconfiguration at boot with an unmistakable error instead of
+    leaving it to the first request.
+
+    Never raises: a misconfigured flag must not by itself crash startup, so any
+    failure only logs. A no-op that returns ``False`` while the flag is off.
+
+    Returns True only when the role exists *and* is assumable by the connecting
+    user; False otherwise (including the flag-off no-op).
+    """
+    if not rls_enabled():
+        return False
+    try:
+        async with engine.begin() as conn:
+            exists = (
+                await conn.execute(
+                    text("SELECT 1 FROM pg_roles WHERE rolname = :r"),
+                    {"r": APP_ROLE},
+                )
+            ).scalar()
+            if not exists:
+                logger.error(
+                    "RLS ENFORCEMENT IS ON (rls_enforce=true) BUT ROLE %r DOES NOT EXIST. "
+                    "provision_rls could not create it - the database login most likely lacks "
+                    "CREATEROLE (common on managed/external PostgreSQL). Every request will "
+                    "fail with 500 on 'SET LOCAL ROLE \"%s\"'. Create the role and grant it to "
+                    "the app login, or turn rls_enforce off.",
+                    APP_ROLE,
+                    APP_ROLE,
+                )
+                return False
+            # Existing in the catalog is not enough: the connecting user must be
+            # able to assume it (provision_rls grants it to CURRENT_USER, but that
+            # grant is best-effort too). Prove it in this throwaway transaction;
+            # SET LOCAL ROLE resets on commit, so nothing leaks to the pool.
+            await conn.execute(text(f'SET LOCAL ROLE "{APP_ROLE}"'))
+        logger.info("RLS enforcement: runtime role %r present and assumable", APP_ROLE)
+        return True
+    except Exception as exc:  # noqa: BLE001 - a boot check must never crash boot
+        logger.error(
+            "RLS enforcement is ON but runtime role %r could not be verified: %s. "
+            "Requests may fail with 500 until the role exists and is granted to the app "
+            "login. Create it manually or turn rls_enforce off.",
+            APP_ROLE,
+            exc,
+        )
+        return False

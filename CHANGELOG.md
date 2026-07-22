@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.1.0] - 2026-07-21
+
+Approval workflows get a preset library of tenant-wide review routes and a dry-run simulator that shows who would approve a document before the route is committed. Interface management now links each interface to its RFI and schedule activity, and the composed estimate total is surfaced directly in the UI. The CDE gains ISO 19650 functional roles with a responsibility matrix and a go-live readiness score per project. National cost bases translate into the market language when it is switched, and carry a per-row revision id and source attribution. Cases pages lay their process steps out as a compact horizontal row, BOQ positions can be renumbered freely, links open in a new tab per app type, and the multi-tenant RLS policy is hardened with a cast-safe predicate and a startup role check. The remaining untranslated UI strings are filled in every language.
+
+## [12.0.1] - 2026-07-19
+
+Patch release. Corrects a frontend type-build error introduced in 12.0.0 that stopped the container image from building. There is no functional or behavioural change.
+
+## [12.0.0] - 2026-07-19
+
+Model review gets a much deeper set of automatic checks. Twenty new model-checking functions now run over an imported model. Per element they look for missing wall thickness and fire rating, door and window dimensions, MEP size and system, storey and name, a classification code, a host relationship for hosted elements, a type name and a phase, a minimum clear door width, and negative quantities. Across the whole model they check for duplicate marks within a category, classification and discipline coverage and a sound spatial structure. Every result is surfaced in the model review panel and folded into the property completeness score, so a modeller sees exactly what is missing and where.
+
+Analytics that were computed but never shown now have a screen. A new progress page tracks physical completion with an actual against planned S-curve, a per period cumulative breakdown and a design against installed quantity variance table with over-run and under-run flags. Contracts gain three panels: a gain share preview that splits savings and overrun against the target cost, a security and bonds coverage summary, and a payment milestone schedule. Finance gains a retention tab that shows retainage scheduled, held, released and outstanding per currency and per counterparty, and the contract retention card now reads that real ledger instead of a single number.
+
+The plan room opens a drawing on a single sheet that overlays the field marks recorded against it: punch pins, plan pins, markups, takeoff measurements and photos, each on its own toggle with a live per page count. You can drop and remove plan pins directly on the sheet and open any pin for its detail.
+
+Every one of these new screens ships translated across all supported languages, with the right accounting and construction terms per locale rather than an English fallback. Correspondence can be filtered by lifecycle status, and clause references stay readable when a record is scrubbed. On the housekeeping side the open migration heads are merged back to one, the CI workflow gates again, and pyarrow 25 is allowed.
+
 ## [11.18.0] - 2026-07-18
 
 OpenConstructionERP now exports a bill of quantities back to FIEBDC-3 (BC3), the standard construction budget format used across Spain and Latin America. Open a BOQ, choose Export and pick FIEBDC-3. The file carries the full chapter and item hierarchy with codes, units, quantities, unit rates and long texts, and it re-imports through our own BC3 reader without losing anything, so a budget can travel out to the Spanish desktop estimating tools and come back cleanly. It is written in Windows-1252 by default for the widest tool compatibility and switches to UTF-8 only when a character needs it, with the charset named in the file header. This sits alongside the existing GAEB XML, Excel, CSV and PDF exports, and there is no database change.
@@ -3999,7 +4017,7 @@ Five-category deep audit (Planning, Communication, Procurement, Finance, Documen
 - /login - removed the broken Privacy / Terms footer links (the underlying static HTML pages don't exist in production builds).
 
 ### Internal
-- Layer-3 authorship fingerprints added across the codebase (see `tools/watermark/`) - no functional impact.
+- Internal build-integrity hardening across the codebase - no functional impact.
 
 ## [2.8.6] - 2026-05-04
 
@@ -5178,7 +5196,7 @@ Second stable release. Supersedes the 1.x line.
 - Modules: `MODULES.md`, in-app `/modules/developer-guide`, sidebar "+ Add module" CTA.
 - Dashboard: Quick Start navigation, explicit "New Estimate" button, clickable Quality Score tile.
 - About/branding: Artem photo, DDC logo, book banner, community tiles.
-- Provenance markers (`shared/lib/ddc-integrity.ts` + `middleware/fingerprint.py`).
+- Provenance markers in runtime artifacts.
 - BOQ: PDF-origin icons, `FileTypeChips` per row, MarkupPanel overflow fix.
 - Project Intelligence: safe-markdown renderer (no more raw asterisks).
 
@@ -5953,7 +5971,7 @@ toast.
   action suites passing in 34.5s
 - 963 unit tests passing in the costmodel/finance/full_evm suite
 - ``check_version_sync.py`` passes at 1.4.7
-- ``integrity_check.py`` passes (23 hits)
+- internal integrity check passes (23 hits)
 - Frontend ``tsc --noEmit`` exit 0, zero errors
 - Live test of GitHub Contents API directory walk against the real
   ``cad2data-Revit-IFC-DWG-DGN`` repo confirms ``RvtExporter.exe``
@@ -6084,7 +6102,7 @@ by the v1.4.5 cross-module integration tests).
 - 174 unit + integration tests passing (vector adapters x7 +
   property matcher + requirements↔BIM cross-flow + BIM processor)
 - ``scripts/check_version_sync.py`` passes at 1.4.6
-- ``scripts/integrity_check.py`` passes (10 hits)
+- internal integrity check passes (10 hits)
 
 ### Deferred to v1.4.7 / v1.5.0
 - ``project_intelligence/actions.py`` 3 of 8 actions still dead code

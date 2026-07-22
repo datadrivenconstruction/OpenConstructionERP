@@ -56,6 +56,7 @@ from app.modules.approval_routes.schemas import (
     RouteCreate,
     RouteUpdate,
 )
+from app.modules.approval_routes.simulate import step_cleared
 
 logger = logging.getLogger(__name__)
 
@@ -967,53 +968,35 @@ class ApprovalRouteService:
             instance_id=instance.id,
             step_id=step.id,
         )
-        # Only count decisive (approved) rows for advance purposes.
+        # Tally the decisive rows once, then defer the advance rule to
+        # ``simulate.step_cleared`` - the single source of truth shared with
+        # the dry-run simulator so the running engine and the preview can
+        # never disagree.
+        #
+        # Role semantics (the engine does not expand roles to members - that
+        # is the consumer module's job) are driven by ``mode``:
+        #   any      - first approval advances
+        #   all      - every eligible approver approves, no rejection rows
+        #   majority - > 50% of the eligible approvers approved, no rejections
+        # When the author declares the eligible population on the step
+        # (``required_approver_count``) it is evaluated against that. Without
+        # it, ``all`` / ``majority`` require more than one distinct approver as
+        # the safe, non-deadlocking fallback, so the first approver cannot
+        # close a gate that was meant to require several.
         approvals = [s for s in states if s.decision == "approved"]
         approver_ids: set[uuid.UUID | None] = {s.approver_user_id for s in approvals}
-
-        if step.approver_user_id is not None:
-            # User-pinned: one approval from that user advances.
-            cleared = step.approver_user_id in approver_ids
-        else:
-            # Role-based: the engine does not expand roles to members
-            # (that's the consumer module's job), so we use sensible
-            # defaults driven by ``mode``:
-            #
-            #   any       - first approval advances
-            #   all       - every eligible approver has to approve, with no
-            #               rejection rows (rejections short-circuit upstream)
-            #   majority  - > 50% of the eligible approvers approved
-            #               (rejections short-circuit)
-            #
-            # The consumer can override this by passing an explicit
-            # ``approver_user_id`` list when defining the route - at that
-            # point the step becomes user-pinned per row.
-            #
-            # ``all`` / ``majority`` must NOT clear on a single approval:
-            # that evaluated only the rows submitted so far, not the
-            # eligible population, so the very first approver closed a gate
-            # that was meant to require several. When the route author has
-            # declared the eligible population on the step
-            # (``required_approver_count``) we evaluate against it; without
-            # it we cannot know the true population, so we require more than
-            # one distinct approver to have approved (with no rejection) as
-            # the safe non-deadlocking fallback.
-            quorum = step.required_approver_count
-            approver_count = len({s.approver_user_id for s in approvals})
-            rejections = [s for s in states if s.decision == "rejected"]
-            if step.mode == "any":
-                cleared = len(approvals) >= 1
-            elif step.mode == "majority":
-                if quorum is not None and quorum >= 1:
-                    cleared = approver_count * 2 > quorum and len(rejections) == 0
-                else:
-                    total_acted = len([s for s in states if s.decision != "pending"])
-                    cleared = total_acted >= 2 and len(approvals) * 2 > total_acted
-            else:  # "all"
-                if quorum is not None and quorum >= 1:
-                    cleared = approver_count >= quorum and len(rejections) == 0
-                else:
-                    cleared = approver_count >= 2 and len(rejections) == 0
+        rejections = [s for s in states if s.decision == "rejected"]
+        total_acted = len([s for s in states if s.decision != "pending"])
+        cleared = step_cleared(
+            mode=step.mode,
+            user_pinned=step.approver_user_id is not None,
+            pinned_user_approved=step.approver_user_id in approver_ids,
+            approvals=len(approvals),
+            distinct_approvers=len(approver_ids),
+            rejections=len(rejections),
+            total_acted=total_acted,
+            quorum=step.required_approver_count,
+        )
 
         if not cleared:
             return None

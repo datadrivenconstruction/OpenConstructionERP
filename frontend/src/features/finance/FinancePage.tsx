@@ -31,6 +31,7 @@ import {
   Plug,
   Inbox,
   Scale,
+  Landmark,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -68,6 +69,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { ConnectorsTab } from './ConnectorsTab';
 import { InvoiceInboxTab } from './InvoiceInboxTab';
 import { StatementsTab } from './StatementsTab';
+import { RetentionLedgerTab } from './RetentionLedgerTab';
 import { financeGuide } from './financeGuide';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -215,7 +217,7 @@ interface EVMData {
 
 /* ── Constants ────────────────────────────────────────────────────────── */
 
-type FinanceTab = 'budgets' | 'invoices' | 'inbox' | 'payments' | 'statements' | 'evm' | 'connectors';
+type FinanceTab = 'budgets' | 'invoices' | 'inbox' | 'payments' | 'statements' | 'retention' | 'evm' | 'connectors';
 type InvoiceSubTab = 'payable' | 'receivable';
 
 /** Common currency shortlist for the create/edit selects. NOT a default —
@@ -647,7 +649,7 @@ export function FinancePage() {
   // (and any other caller) can drill straight into a specific Finance section.
   // The param is consumed and cleared with replace so a refresh / share keeps
   // the user wherever they navigated to next (CONN-74 consumer).
-  const VALID_TABS: readonly FinanceTab[] = ['budgets', 'invoices', 'inbox', 'payments', 'statements', 'evm', 'connectors'];
+  const VALID_TABS: readonly FinanceTab[] = ['budgets', 'invoices', 'inbox', 'payments', 'statements', 'retention', 'evm', 'connectors'];
   useEffect(() => {
     const requested = searchParams.get('tab');
     if (requested && VALID_TABS.includes(requested as FinanceTab)) {
@@ -685,6 +687,11 @@ export function FinancePage() {
       key: 'statements',
       label: t('finance.stmt_tab', { defaultValue: 'Statements' }),
       icon: <Scale size={15} />,
+    },
+    {
+      key: 'retention',
+      label: t('finance.retention_tab', { defaultValue: 'Retention' }),
+      icon: <Landmark size={15} />,
     },
     {
       key: 'evm',
@@ -789,6 +796,7 @@ export function FinancePage() {
           {projectId && activeTab === 'invoices' && <InvoicesTab projectId={projectId} />}
           {projectId && activeTab === 'inbox' && <InvoiceInboxTab projectId={projectId} />}
           {projectId && activeTab === 'statements' && <StatementsTab projectId={projectId} />}
+          {projectId && activeTab === 'retention' && <RetentionLedgerTab projectId={projectId} />}
           {projectId && activeTab === 'payments' && (
             <PaymentsTab
               projectId={projectId}

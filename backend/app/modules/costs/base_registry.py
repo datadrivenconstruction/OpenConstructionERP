@@ -1,3 +1,5 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Single source of truth for the CWICR cost-base catalog.
 
 The public DDC CWICR data repository publishes nine cost-base families. One of
@@ -578,6 +580,9 @@ _BY_REGION: dict[str, BaseVariant] = {v.region: v for v in iter_variants() if v.
 #: Every known market token (the ``markets/`` file tokens), for endpoint validation.
 _MARKET_TOKENS: frozenset[str] = frozenset(m.token for m in _MARKET_CATALOGS)
 
+#: Home regions of the national bases - each ships per-language work-item parquets.
+_NATIONAL_REGIONS: frozenset[str] = frozenset(fam.variants[0].region for fam in _NATIONAL_FAMILIES)
+
 
 def variant_by_region(region: str) -> BaseVariant | None:
     """Return the canonical (home) variant for a platform region id, or ``None``."""
@@ -589,9 +594,117 @@ def is_known_market(market_token: str) -> bool:
     return market_token in _MARKET_TOKENS
 
 
+#: Market token -> its language code (the trailing token segment, e.g. ``ru``).
+_MARKET_LANG: dict[str, str] = {m.token: m.lang_code for m in _MARKET_CATALOGS}
+
+
+def market_lang_code(market_token: str) -> str | None:
+    """Return a market's language code (e.g. ``RU_MOSCOW_ru`` -> ``ru``), or None."""
+    return _MARKET_LANG.get(market_token)
+
+
 def github_workitems_files() -> dict[str, str]:
-    """Map region id to its work-item parquet path (repo-root relative)."""
+    """Map region id to its work-item parquet path (repo-root relative).
+
+    Only the real, user-loadable regions (home + global markets). The national
+    bases' per-language parquets are a separate map,
+    :func:`national_language_workitems_files`, so they resolve for a market-switch
+    language swap without appearing in the ``/available-databases`` listing.
+    """
     return {v.region: v.workitems_path for v in iter_variants()}
+
+
+# ── Per-language work-item parquets for the national bases ──────────────────
+# Every national base is translated into all app languages; each language ships
+# a work-item parquet under ``<base_folder>/<LANG>___DDC_CWICR/`` mirroring the
+# global base's per-market layout. A national base's market cards pick a language
+# via the market's ``lang_code``; loading that market swaps the region's text to
+# the language parquet (translated descriptions, categories and resources), then
+# the existing market reprice sets the market's price level on top. Text follows
+# the language; price follows the market - the two are orthogonal.
+NATIONAL_TRANSLATION_LANGS: tuple[str, ...] = (
+    "ar",
+    "bg",
+    "cs",
+    "da",
+    "de",
+    "es",
+    "fi",
+    "fr",
+    "hi",
+    "hr",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "mn",
+    "nl",
+    "no",
+    "pl",
+    "pt",
+    "ro",
+    "ru",
+    "sv",
+    "th",
+    "tr",
+    "vi",
+    "zh",
+)
+
+_WORKITEMS_SUFFIX = "_workitems_costs_resources_DDC_CWICR.parquet"
+
+
+def _national_base_parts(base_region: str) -> tuple[str, str] | None:
+    """Return ``(base_folder, file_token)`` for a national base, else ``None``.
+
+    Derived from the home variant's ``workitems_path``
+    (``<base_folder>/<file_token>_workitems_costs_resources_DDC_CWICR.parquet``).
+    """
+    home = _BY_REGION.get(base_region)
+    if home is None or base_region not in _NATIONAL_REGIONS:
+        return None
+    folder, _, filename = home.workitems_path.rpartition("/")
+    if not filename.endswith(_WORKITEMS_SUFFIX):
+        return None
+    return folder, filename[: -len(_WORKITEMS_SUFFIX)]
+
+
+def national_language_workitems_path(base_region: str, lang_code: str) -> str | None:
+    """Repo-relative path of a national base's per-language work-item parquet.
+
+    ``None`` when ``base_region`` is not a national base or ``lang_code`` is not a
+    translated language.
+    """
+    if lang_code not in NATIONAL_TRANSLATION_LANGS:
+        return None
+    parts = _national_base_parts(base_region)
+    if parts is None:
+        return None
+    folder, token = parts
+    return f"{folder}/{lang_code.upper()}___DDC_CWICR/{token}_{lang_code}{_WORKITEMS_SUFFIX}"
+
+
+def national_language_region(base_region: str, lang_code: str) -> str | None:
+    """Loader ``db_id`` (``<region>_<lang>``) for a national language parquet.
+
+    ``None`` when there is no distinct language parquet to load for this base and
+    language (not national, or unknown language). Callers treat ``None`` as
+    "keep the home parquet already loaded for ``base_region``".
+    """
+    if national_language_workitems_path(base_region, lang_code) is None:
+        return None
+    return f"{base_region}_{lang_code}"
+
+
+def national_language_workitems_files() -> dict[str, str]:
+    """Map every ``<region>_<lang>`` pseudo-region to its language parquet path."""
+    out: dict[str, str] = {}
+    for region in _NATIONAL_REGIONS:
+        for lang in NATIONAL_TRANSLATION_LANGS:
+            path = national_language_workitems_path(region, lang)
+            if path is not None:
+                out[f"{region}_{lang}"] = path
+    return out
 
 
 def github_catalog_folder(region: str) -> str | None:

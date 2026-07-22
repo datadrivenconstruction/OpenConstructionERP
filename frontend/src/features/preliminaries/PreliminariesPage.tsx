@@ -27,6 +27,7 @@ import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { EstimateRollupCard } from '@/features/estimate-rollup';
 import {
   fetchPrelimItems,
   createPrelimItem,
@@ -253,6 +254,9 @@ export function PreliminariesPage() {
             'Price the general conditions - site establishment, staff, temporary works, standing plant and welfare - as time-related items times the project duration plus fixed one-offs. The total adds to the estimate alongside the measured work.',
         })}
       />
+
+      {/* How these preliminaries roll into the whole estimate total. */}
+      <EstimateRollupCard projectId={projectId} />
 
       {isLoading ? (
         <SkeletonTable rows={5} columns={5} />

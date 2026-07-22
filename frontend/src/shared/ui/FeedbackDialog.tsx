@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Bug, Lightbulb, MessageCircle, ExternalLink, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { apiPost } from '@/shared/lib/api';
+import { openLink } from '@/shared/lib/desktop';
 import { useToastStore } from '@/stores/useToastStore';
 
 interface FeedbackDialogProps {
@@ -111,7 +112,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
       title: subject.trim() ? `[${category}] ${subject.trim()}` : '',
       body: description.trim() || '',
     });
-    window.open(`${GITHUB_ISSUES_URL}?${params}`, '_blank', 'noopener');
+    openLink(`${GITHUB_ISSUES_URL}?${params}`);
   }
 
   if (!open) return null;
