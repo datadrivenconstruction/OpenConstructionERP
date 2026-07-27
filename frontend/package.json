@@ -44,7 +44,7 @@
     "react-i18next": "^15.7.4",
     "react-map-gl": "^8.1.1",
     "react-resizable-panels": "^4.12.0",
-    "react-router-dom": "^6.30.4",
+    "react-router-dom": "^7.0.0",
     "recharts": "^3.9.0",
     "three": "^0.185.0",
     "three-mesh-bvh": "^0.9.11",
