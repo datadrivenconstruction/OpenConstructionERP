@@ -62,6 +62,7 @@ UNITS_RAW = "raw"
 UNITS_IMPERIAL = "imperial"
 
 # Exact factors (international foot).
+_FT_TO_M = 0.3048
 _SQFT_TO_SQM = 0.09290304
 _CUFT_TO_CUM = 0.028316846592
 
@@ -140,15 +141,28 @@ _DISCIPLINE_KEYWORDS: tuple[tuple[tuple[str, ...], str], ...] = (
     ),
 )
 
-# Tolerant key lookup for instance rows. The two MCP servers in the wild
+# Tolerant key lookup for instance rows. The MCP servers in the wild
 # disagree on casing and on whether the id field is Id/ElementId, so every
 # plausible spelling is probed instead of pinning one shape.
 _INSTANCE_ID_KEYS = ("Id", "ElementId", "elementId", "id", "UniqueId", "uniqueId")
 _INSTANCE_NAME_KEYS = ("Name", "name", "TypeName", "typeName", "FamilyName", "familyName")
 _INSTANCE_CATEGORY_KEYS = ("Category", "category", "CategoryName", "categoryName")
-_INSTANCE_FAMILY_KEYS = ("FamilyName", "familyName", "Family", "family")
-_INSTANCE_TYPE_KEYS = ("TypeName", "typeName", "Type", "type")
 _INSTANCE_LEVEL_KEYS = ("Level", "level", "LevelName", "levelName", "Storey", "storey")
+
+# Locale-formatted geometry values, checked for separator ambiguity so a
+# declined value is reported rather than silently missing.
+_INSTANCE_GEOMETRY_KEYS = (
+    "LocationX",
+    "LocationY",
+    "LocationZ",
+    "StartX",
+    "StartY",
+    "StartZ",
+    "EndX",
+    "EndY",
+    "EndZ",
+    "Length",
+)
 
 # Revit categories that hold drafting/view bookkeeping rather than
 # building elements. BIMElement doubles as the project asset register, so
@@ -310,21 +324,21 @@ def _element_type_for(category: str | None) -> str | None:
     return _clip(ifc_class or category, _MAX_ELEMENT_TYPE)
 
 
-def _quantities(area: Any, volume: Any, units: str) -> dict[str, Any]:
+def _quantities(area: Any, volume: Any, units: str, length: Any = None) -> dict[str, Any]:
     """Build the ``quantities`` dict honouring the ``units`` contract."""
     quantities: dict[str, Any] = {}
-    area_value = _as_float(area)
-    volume_value = _as_float(volume)
-    if units == UNITS_IMPERIAL:
-        if area_value is not None:
-            quantities["area_m2"] = area_value * _SQFT_TO_SQM
-        if volume_value is not None:
-            quantities["volume_m3"] = volume_value * _CUFT_TO_CUM
-    else:
-        if area_value is not None:
-            quantities["area_raw"] = area_value
-        if volume_value is not None:
-            quantities["volume_raw"] = volume_value
+    for raw, imperial_key, imperial_factor, raw_key in (
+        (area, "area_m2", _SQFT_TO_SQM, "area_raw"),
+        (volume, "volume_m3", _CUFT_TO_CUM, "volume_raw"),
+        (length, "length_m", _FT_TO_M, "length_raw"),
+    ):
+        value = parse_localised_number(raw)
+        if value is None:
+            continue
+        if units == UNITS_IMPERIAL:
+            quantities[imperial_key] = value * imperial_factor
+        else:
+            quantities[raw_key] = value
     return quantities
 
 
@@ -338,9 +352,77 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+def has_ambiguous_separator(raw: Any) -> bool:
+    """Whether a numeric string's single comma could be either separator.
+
+    ``"1,234"`` is 1234 under en-US grouping and 1.234 under de-DE/id-ID
+    decimals. Exactly three digits after a lone comma is the one shape
+    where both readings are legitimate, and picking wrong is a 1000x
+    error - so the caller declines the value instead of guessing.
+    """
+    if isinstance(raw, (int, float)) or raw is None:
+        return False
+    text = str(raw).strip()
+    if "." in text or text.count(",") != 1:
+        return False
+    return len(text.rsplit(",", 1)[1]) == 3
+
+
+def parse_localised_number(raw: Any) -> float | None:
+    """Parse a number that may carry locale-specific separators.
+
+    ``revit-mcp`` formats element property values through the
+    workstation's Windows regional settings, so a Revit session on an
+    id-ID/de-DE machine emits ``"-202,83"`` where an en-US one emits
+    ``"-202.83"``. Plain :func:`float` raises on the former, which would
+    silently drop every coordinate and length in the dump.
+
+    Args:
+        raw: The value as it appears in the dump - number or string.
+
+    Returns:
+        The parsed value, or ``None`` when it is not numeric or when the
+        separator is genuinely ambiguous (see
+        :func:`has_ambiguous_separator`).
+    """
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        return float(raw)
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if not text:
+        return None
+
+    if "." in text and "," in text:
+        # Whichever separator comes last is the decimal point; the other
+        # groups thousands. Covers both "1.234,56" and "1,234.56".
+        decimal_sep = "," if text.rfind(",") > text.rfind(".") else "."
+        grouping_sep = "." if decimal_sep == "," else ","
+        text = text.replace(grouping_sep, "").replace(decimal_sep, ".")
+    elif "," in text:
+        if has_ambiguous_separator(text):
+            return None
+        # Several commas can only be grouping ("1,234,567"); a single one
+        # with 1-2 trailing digits can only be a decimal comma.
+        text = text.replace(",", "") if text.count(",") > 1 else text.replace(",", ".")
+
+    return _as_float(text)
+
+
 def _units_note(units: str) -> str:
     """Value stamped into ``metadata["units"]`` for quantity-bearing rows."""
-    return "m2/m3 (assumed ft2/ft3 source)" if units == UNITS_IMPERIAL else "unverified"
+    return "m/m2/m3 (converted from assumed ft source)" if units == UNITS_IMPERIAL else "unverified"
+
+
+def _length_factor(units: str) -> float:
+    """Scale applied to coordinates and bounding boxes.
+
+    Quantities and coordinates must share one scale: a row whose
+    ``length_m`` is metric while its ``bounding_box`` stays in feet reads
+    as consistent and is not, which is exactly the kind of mismatch a
+    spatial consumer cannot detect.
+    """
+    return _FT_TO_M if units == UNITS_IMPERIAL else 1.0
 
 
 def _instance_elements(
@@ -375,9 +457,12 @@ def _instance_elements(
             "holds only part of the view; raise the tool's limit and re-run.",
         )
 
+    factor = _length_factor(units)
     rows: list[dict[str, Any]] = []
     skipped = 0
     dropped_annotation = 0
+    ambiguous_numbers = 0
+    without_storey = 0
     for raw in raw_elements:
         if not isinstance(raw, dict):
             skipped += 1
@@ -390,28 +475,36 @@ def _instance_elements(
         if not include_annotation and is_annotation_category(category):
             dropped_annotation += 1
             continue
-        family = _first(raw, _INSTANCE_FAMILY_KEYS)
-        type_name = _first(raw, _INSTANCE_TYPE_KEYS)
-        properties: dict[str, Any] = {"source": SOURCE, "revit_element_id": native_id}
-        if category:
-            properties["revit_category"] = category
-        if family:
-            properties["revit_family"] = family
-        if type_name:
-            properties["revit_type"] = type_name
+
+        # mcp-server-for-revit nests per-element parameters one level down
+        # under "Properties"; other builds put them alongside the id. Merge
+        # so the field probes below see one flat namespace, with the
+        # top-level record winning any collision.
+        nested = raw.get("Properties") if isinstance(raw.get("Properties"), dict) else {}
+        flat: dict[str, Any] = {**nested, **raw}
+
+        storey = _first(flat, _INSTANCE_LEVEL_KEYS)
+        if storey is None:
+            without_storey += 1
+
+        properties = _instance_properties(raw, flat, native_id, category, factor)
+        ambiguous_numbers += sum(1 for key in _INSTANCE_GEOMETRY_KEYS if has_ambiguous_separator(flat.get(key)))
+
         rows.append(
             {
                 "stable_id": _stable_id("rvt", native_id),
                 "element_type": _element_type_for(category),
-                "name": _clip(_first(raw, _INSTANCE_NAME_KEYS) or type_name or native_id, _MAX_NAME),
-                "storey": _clip(_first(raw, _INSTANCE_LEVEL_KEYS), _MAX_STOREY),
+                "name": _clip(_first(flat, _INSTANCE_NAME_KEYS) or native_id, _MAX_NAME),
+                "storey": _clip(storey, _MAX_STOREY),
                 "discipline": _clip(infer_discipline(category), _MAX_DISCIPLINE),
                 "properties": properties,
                 "quantities": _quantities(
-                    _first(raw, ("Area", "area")),
-                    _first(raw, ("Volume", "volume")),
+                    _first(flat, ("Area", "area")),
+                    _first(flat, ("Volume", "volume")),
                     units,
+                    length=_first(flat, ("Length", "length")),
                 ),
+                "bounding_box": _bounding_box(flat, factor),
                 "metadata": {"tier": "instance", "source": SOURCE, "units": _units_note(units)},
             },
         )
@@ -425,7 +518,109 @@ def _instance_elements(
             f"{dropped_annotation} instance row(s) dropped as annotation/view "
             "categories - pass include_annotation=True to keep them.",
         )
+    if ambiguous_numbers:
+        warnings.append(
+            f"{ambiguous_numbers} geometry value(s) declined: a lone comma with three "
+            "trailing digits reads as 1234 under en-US grouping and 1.234 under a "
+            "decimal-comma locale, so the value was left out rather than risk a "
+            "1000x error. The raw strings are kept in properties.revit_raw_geometry.",
+        )
+    if without_storey:
+        warnings.append(
+            f"{without_storey} of {len(rows)} instance row(s) carry no level/storey - "
+            "get_current_view_elements does not report one. BIMElement.storey stays "
+            "NULL, so storey filters and per-floor grouping will not see these rows.",
+        )
     return rows
+
+
+def _instance_properties(
+    raw: dict[str, Any],
+    flat: dict[str, Any],
+    native_id: Any,
+    category: Any,
+    factor: float = 1.0,
+) -> dict[str, Any]:
+    """Assemble ``properties`` for one instance row."""
+    properties: dict[str, Any] = {"source": SOURCE, "revit_element_id": native_id}
+    if category:
+        properties["revit_category"] = category
+    if raw.get("UniqueId"):
+        properties["revit_unique_id"] = raw["UniqueId"]
+
+    # Deliberately NOT recorded as revit_type: Revit's Element.Name returns
+    # the *instance* name where the instance has one and the type name
+    # otherwise, and the dump gives no way to tell which. Observed in one
+    # electrical model: Lighting Fixtures reported type names ("HIGHBAY
+    # 120W NRML") while Electrical Equipment reported panel designations
+    # ("MCC", "DB-UTILTY"). Filing either under revit_type would mislabel
+    # the other, so the raw value stays in the ``name`` column alone.
+    #
+    # Caveat: mcp-server-for-revit fills Properties.Family and
+    # Properties.Type with the same numeric type ElementId, not names. They
+    # are recorded as ids so nothing reads them as a family name; the
+    # readable family name lives only in analyze_model_statistics. The id
+    # is still the one *reliable* way to group instances by type, since it
+    # does not depend on how Element.Name resolved.
+    type_id = _first(flat, ("Type", "type"))
+    family_id = _first(flat, ("Family", "family"))
+    if type_id is not None and str(type_id).isdigit():
+        properties["revit_type_id"] = str(type_id)
+    if family_id is not None and str(family_id).isdigit() and str(family_id) != str(type_id):
+        properties["revit_family_id"] = str(family_id)
+
+    for source_key, target_key in (("Mark", "revit_mark"), ("Comments", "revit_comments")):
+        value = flat.get(source_key)
+        if isinstance(value, str) and value.strip():
+            properties[target_key] = value.strip()
+
+    location = _point(flat, ("LocationX", "LocationY", "LocationZ"), factor)
+    if location:
+        properties["revit_location"] = location
+    start = _point(flat, ("StartX", "StartY", "StartZ"), factor)
+    if start:
+        properties["revit_start"] = start
+    end = _point(flat, ("EndX", "EndY", "EndZ"), factor)
+    if end:
+        properties["revit_end"] = end
+
+    # Keep the unparsed strings whenever anything geometric was declined,
+    # so a rejected value is recoverable instead of lost.
+    declined = {key: flat[key] for key in _INSTANCE_GEOMETRY_KEYS if has_ambiguous_separator(flat.get(key))}
+    if declined:
+        properties["revit_raw_geometry"] = declined
+
+    return properties
+
+
+def _point(flat: dict[str, Any], keys: tuple[str, str, str], factor: float = 1.0) -> dict[str, float] | None:
+    """Parse an (x, y, z) triple; ``None`` unless all three resolve."""
+    values = [parse_localised_number(flat.get(key)) for key in keys]
+    if any(value is None for value in values):
+        return None
+    return {axis: value * factor for axis, value in zip("xyz", values, strict=True)}  # type: ignore[misc]
+
+
+def _bounding_box(flat: dict[str, Any], factor: float = 1.0) -> dict[str, float] | None:
+    """Bounding box for a line-based element, from its start/end points.
+
+    Only line-based elements (cable tray runs, conduit) carry a real
+    extent. A point-based fixture would yield a zero-volume box that reads
+    as a bug downstream, so its position is kept in
+    ``properties["revit_location"]`` instead and no box is emitted.
+    """
+    start = _point(flat, ("StartX", "StartY", "StartZ"), factor)
+    end = _point(flat, ("EndX", "EndY", "EndZ"), factor)
+    if not start or not end:
+        return None
+    return {
+        "min_x": min(start["x"], end["x"]),
+        "min_y": min(start["y"], end["y"]),
+        "min_z": min(start["z"], end["z"]),
+        "max_x": max(start["x"], end["x"]),
+        "max_y": max(start["y"], end["y"]),
+        "max_z": max(start["z"], end["z"]),
+    }
 
 
 def _type_elements(

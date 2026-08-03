@@ -51,6 +51,14 @@ viewports and nothing else — `FilteredElementCount: 0` with no error. Open a
 looks like a broken dump. Run `analyze_model_statistics` first and pick the
 categories it reports.
 
+**Merge the tool responses into one file.** Getting all three tiers means
+one dump holding `analyze_model_statistics`, `get_material_quantities` *and*
+a `get_current_view_elements` taken from a model view. If you collected
+them in separate sessions (a sheet-view pass, then a 3D pass), merge the
+objects — the converter takes whatever keys are present, and the project
+name comes from `analyze_model_statistics`, so a 3D-only dump falls back to
+naming the model after the active view.
+
 ## 2. Convert
 
 ```bash
@@ -66,16 +74,48 @@ count and a warning list, and exits `1` only when the dump yields nothing.
 
 ### Units
 
-The Revit API reports areas in ft² and volumes in ft³ internally, and the
-MCP servers forward those numbers with no unit field. Nothing in the dump
-lets the converter *verify* which unit it received, so it does not guess:
+The Revit API reports lengths in feet internally, and the MCP servers
+forward the numbers with no unit field. Nothing in the dump *states* the
+unit, so the converter does not assume one:
 
-- `--units raw` (default) — numbers kept verbatim as `area_raw` /
-  `volume_raw`, with `metadata.units = "unverified"`.
-- `--units imperial` — read as ft²/ft³, emitted as `area_m2` / `volume_m3`.
+- `--units raw` (default) — numbers kept verbatim as `length_raw` /
+  `area_raw` / `volume_raw`, coordinates unscaled, and
+  `metadata.units = "unverified"`.
+- `--units imperial` — read as ft/ft²/ft³, emitted as `length_m` /
+  `area_m2` / `volume_m3` with coordinates and bounding boxes scaled to
+  metres by the same factor.
 
-Confirm against a known quantity in Revit before trusting converted totals
-downstream. Plausible-looking magnitudes are not confirmation.
+Quantities and coordinates always share one scale. A row whose `length_m`
+is metric while its `bounding_box` stayed in feet would read as consistent
+and not be — the kind of mismatch a spatial consumer cannot detect.
+
+**How to check your own dump.** Two tests, both cheap:
+
+1. Look at `analyze_model_statistics.levels[].elevation`. If the project
+   was designed in metric, feet values land on exact metric round numbers.
+   In one real model, `-0.984256293145908` → `-0.300 m`,
+   `16.404199475065617` → `5.000 m` and `36.089238845144358` → `11.000 m`
+   after `× 0.3048` — conclusive.
+2. For a line-based element, compare the reported `Length` against the
+   distance between its start and end points after conversion. They must
+   agree; if they do, both were in the same unit you assumed.
+
+Plausible-looking magnitudes on their own are not confirmation.
+
+### Locale-formatted numbers
+
+Element property values are formatted through the workstation's Windows
+regional settings. A Revit session on an id-ID or de-DE machine emits
+`"-202,83"` where an en-US one emits `"-202.83"`, so `float()` raises on
+every coordinate and length in the dump. The converter handles both, plus
+grouped forms like `"1.234,56"` and `"1,234.56"`.
+
+One shape is genuinely ambiguous: a lone comma with exactly three trailing
+digits. `"1,234"` is 1234 under en-US grouping and 1.234 under a
+decimal-comma locale, and guessing wrong is a 1000× error. Those values are
+**declined** rather than guessed — the row loses that quantity, the raw
+strings are preserved in `properties.revit_raw_geometry`, and the count
+appears in the warnings.
 
 ### Annotation categories
 
@@ -107,7 +147,37 @@ itself.
 
 Each row records its origin in `metadata.tier` (`instance` / `type` /
 `material`) and keeps its Revit provenance in `properties`
-(`revit_category`, `revit_family`, `revit_type`, `revit_element_id`).
+(`revit_category`, `revit_element_id`, `revit_unique_id`, `revit_type_id`,
+plus `revit_mark` and `revit_comments` when set).
+
+Point-based elements carry `properties.revit_location`. Line-based ones
+carry `revit_start` / `revit_end`, a real `bounding_box` and a `length`
+quantity. A point-based fixture gets **no** bounding box: a zero-volume box
+at its position reads as a bug downstream.
+
+### Joining instances to their types is not reliable by name
+
+Revit's `Element.Name` returns the *instance* name where the instance has
+one and the type name otherwise, and nothing in the dump distinguishes the
+two cases. In one real electrical model, Lighting Fixtures reported type
+names (`HIGHBAY 120W NRML`, which matches `analyze_model_statistics`)
+while Electrical Equipment reported panel designations (`MCC`,
+`DB-UTILTY`, `CONTROL PANEL`, none of which appear as types).
+
+So the converter files that value in the `name` column only and never
+claims it is a type name. Two consequences:
+
+- `properties.revit_type_id` — the numeric type ElementId — is the one
+  reliable way to group instances by type, because it does not depend on
+  how `Element.Name` resolved. Note that `Properties.Family` and
+  `Properties.Type` both hold this same id; neither is a family name.
+- Joining the instance tier to the type tier by name covered about 70% of
+  instances in that model. The rest were either equipment carrying its own
+  name, or system families (Cable Trays, Cable Tray Fittings) that
+  `analyze_model_statistics` reports with `typeCount: 0` and therefore
+  produce no type rows at all.
+
+The readable family name exists only in `analyze_model_statistics`.
 
 Categories resolve to canonical IFC classes through
 `app.modules.match_elements.revit_ifc_map`, so imported rows inherit the
@@ -116,11 +186,16 @@ confident mapping keeps its raw Revit name rather than being forced into a
 wrong class — Revit's `Security Devices`, which mixes cameras, door
 contacts and panic buttons, is the deliberate example.
 
-Two things this route cannot give you:
+Three things this route cannot give you:
 
 - **No geometry.** The MCP read tools return properties, not meshes, so
   imported elements have no `mesh_ref` and will not appear in the 3D
   viewer. Upload the `.rvt`/`.ifc` through the normal CAD pipeline for that.
+- **No storey.** `get_current_view_elements` reports no level or storey
+  field, so `BIMElement.storey` stays `NULL` and per-floor filters will not
+  see these rows. The converter reports the count in its warnings rather
+  than inferring a level from the Z coordinate — level boundaries are not
+  in the dump, so any such assignment would be a guess.
 - **No per-element quantities from the material tier.** Material area and
   volume are aggregates across every element that uses the material. The
   element ids are preserved as `properties.revit_element_ids` so a later
@@ -130,8 +205,13 @@ Two things this route cannot give you:
 
 ## Field-name tolerance
 
-The instance tier probes several spellings for each field
-(`Id`/`ElementId`/`elementId`/`id`, `Category`/`categoryName`, …) because
-the MCP servers in circulation disagree on casing. Rows with no
-recognisable element id are skipped and counted in the warnings rather
-than silently dropped.
+`mcp-server-for-revit` nests per-element parameters under `Properties`
+while other builds put them alongside the id, so the converter flattens
+both into one namespace before reading. Within that, it probes several
+spellings per field (`Id`/`ElementId`/`elementId`/`id`,
+`Category`/`categoryName`, `Level`/`levelName`, …) because the servers in
+circulation disagree on casing.
+
+Rows with no recognisable element id are skipped and counted in the
+warnings rather than silently dropped. Unknown categories are kept, not
+filtered — only categories positively recognised as drafting are excluded.

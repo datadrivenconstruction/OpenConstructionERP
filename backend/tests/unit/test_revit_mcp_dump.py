@@ -6,12 +6,20 @@ No DB, no session, no MCP process - plain dict in, dict out. The dump
 shape under test is what ``mcp-server-for-revit`` 1.0.0 actually emits;
 the fixture documents which parts are verbatim and which are invented.
 
-The instance tier is exercised from inline dicts rather than the fixture
-because its per-element field spellings are *inferred*: every real dump
-seen so far was taken with a DrawingSheet active, which yields an empty
-element list. The converter therefore probes several plausible key
-spellings, and these tests pin that tolerance so a future real sample
-either passes or fails loudly.
+Two fixtures, two real-world situations:
+
+``sheet_view_dump.json``
+    A dump taken with a DrawingSheet active - no model instances, so only
+    the type and material tiers land.
+``model_view_dump.json``
+    A dump taken from a 3D view, in the shape a real
+    ``get_current_view_elements`` response has: parameters nested under
+    ``Properties``, ``Name`` holding the *type* name, ``Family``/``Type``
+    both holding the numeric type ElementId, locale-formatted numbers and
+    no level/storey field anywhere.
+
+Inline dicts cover the tolerance paths (alternative key spellings, other
+locales) that neither fixture exhibits.
 """
 
 from __future__ import annotations
@@ -28,17 +36,25 @@ from app.modules.bim_hub.revit_mcp_dump import (
     UNITS_RAW,
     build_bulk_import_payload,
     convert_dump,
+    has_ambiguous_separator,
     infer_discipline,
     is_annotation_category,
+    parse_localised_number,
 )
 from app.modules.bim_hub.schemas import BIMElementBulkImport
 
-FIXTURE = Path(__file__).parents[1] / "fixtures" / "revit_mcp" / "sheet_view_dump.json"
+FIXTURE_DIR = Path(__file__).parents[1] / "fixtures" / "revit_mcp"
+_FT_TO_M = 0.3048
 
 
 @pytest.fixture
 def dump() -> dict[str, Any]:
-    return json.loads(FIXTURE.read_text(encoding="utf-8"))
+    return json.loads((FIXTURE_DIR / "sheet_view_dump.json").read_text(encoding="utf-8"))
+
+
+@pytest.fixture
+def model_dump() -> dict[str, Any]:
+    return json.loads((FIXTURE_DIR / "model_view_dump.json").read_text(encoding="utf-8"))
 
 
 def _by_tier(elements: list[dict[str, Any]], tier: str) -> list[dict[str, Any]]:
@@ -189,7 +205,7 @@ def test_imperial_units_convert_to_metric(dump: dict[str, Any]) -> None:
     assert glass["quantities"]["area_m2"] == pytest.approx(100.0 * 0.09290304)
     assert glass["quantities"]["volume_m3"] == pytest.approx(10.0 * 0.028316846592)
     assert "area_raw" not in glass["quantities"]
-    assert "ft2/ft3" in glass["metadata"]["units"]
+    assert glass["metadata"]["units"] == "m/m2/m3 (converted from assumed ft source)"
 
 
 def test_zero_quantities_are_kept_not_dropped(dump: dict[str, Any]) -> None:
@@ -284,6 +300,166 @@ def test_instance_annotation_rows_are_dropped_by_default() -> None:
     kept = convert_dump(payload).elements
     assert [e["properties"]["revit_category"] for e in kept] == ["Lighting Fixtures"]
     assert len(convert_dump(payload, include_annotation=True).elements) == 2
+
+
+# ── Locale-formatted numbers ─────────────────────────────────────────────────
+
+
+def test_decimal_comma_is_parsed() -> None:
+    # Every numeric value in a dump from an id-ID/de-DE workstation looks
+    # like this; plain float() raises on all of them.
+    assert parse_localised_number("-202,83") == pytest.approx(-202.83)
+    assert parse_localised_number("22,80") == pytest.approx(22.80)
+    assert parse_localised_number("0,00") == 0.0
+
+
+def test_decimal_dot_and_plain_numbers_still_work() -> None:
+    assert parse_localised_number("-202.83") == pytest.approx(-202.83)
+    assert parse_localised_number(16.404199475065617) == pytest.approx(16.404199475065617)
+    assert parse_localised_number(7) == 7.0
+
+
+def test_mixed_separators_resolve_by_position() -> None:
+    # Whichever separator comes last is the decimal point.
+    assert parse_localised_number("1.234,56") == pytest.approx(1234.56)
+    assert parse_localised_number("1,234.56") == pytest.approx(1234.56)
+    # Repeated commas can only be grouping.
+    assert parse_localised_number("1,234,567") == pytest.approx(1234567.0)
+
+
+def test_lone_comma_with_three_digits_is_declined_not_guessed() -> None:
+    # "1,234" is 1234 under en-US grouping and 1.234 under a decimal-comma
+    # locale. Guessing wrong is a 1000x error, so nothing is returned.
+    assert has_ambiguous_separator("1,234")
+    assert parse_localised_number("1,234") is None
+    # One or two trailing digits are unambiguous.
+    assert not has_ambiguous_separator("1,23")
+    assert not has_ambiguous_separator("22,8")
+    assert not has_ambiguous_separator(16.4)
+
+
+def test_non_numeric_values_yield_none() -> None:
+    assert parse_localised_number("") is None
+    assert parse_localised_number("   ") is None
+    assert parse_localised_number(None) is None
+    assert parse_localised_number("N/A") is None
+    assert parse_localised_number(True) is None
+
+
+# ── Real model-view shape ────────────────────────────────────────────────────
+
+
+def test_model_view_dump_yields_instance_rows(model_dump: dict[str, Any]) -> None:
+    result = convert_dump(model_dump)
+
+    # 5 filtered elements, one of them a Room Tag dropped as annotation.
+    assert len(_by_tier(result.elements, "instance")) == 4
+    assert "SAMPLE TAG" not in {e["name"] for e in result.elements}
+
+
+def test_nested_properties_are_read(model_dump: dict[str, Any]) -> None:
+    highbay = _named(convert_dump(model_dump).elements, "HIGHBAY 120W NRML")
+
+    assert highbay["element_type"] == "IfcLightFixture"
+    assert highbay["discipline"] == "electrical"
+    assert highbay["properties"]["revit_comments"] == "LIGHTING"
+    assert highbay["properties"]["revit_unique_id"].endswith("-000c3501")
+    # Comma-formatted coordinates survive as numbers, unscaled under raw.
+    assert highbay["properties"]["revit_location"] == {"x": -202.83, "y": 401.24, "z": 29.53}
+
+
+def test_numeric_type_ids_are_not_mistaken_for_family_names(model_dump: dict[str, Any]) -> None:
+    highbay = _named(convert_dump(model_dump).elements, "HIGHBAY 120W NRML")
+    properties = highbay["properties"]
+
+    # This server puts the numeric type ElementId in both Family and Type.
+    # Recording either as a family *name* would be a lie, so only the id
+    # is kept - and only once, since the two values are identical.
+    assert properties["revit_type_id"] == "627207"
+    assert "revit_family_id" not in properties
+    assert "revit_family" not in properties
+
+
+def test_element_name_is_not_filed_as_a_type_name(model_dump: dict[str, Any]) -> None:
+    highbay = _named(convert_dump(model_dump).elements, "HIGHBAY 120W NRML")
+
+    # Revit's Element.Name is the instance name where the instance has one
+    # and the type name otherwise, with nothing in the dump distinguishing
+    # them - one real electrical model reported type names for Lighting
+    # Fixtures and panel designations ("MCC") for Electrical Equipment. So
+    # the raw value lives in the name column and is not claimed as a type.
+    assert highbay["name"] == "HIGHBAY 120W NRML"
+    assert "revit_type" not in highbay["properties"]
+
+
+def test_empty_mark_and_comments_are_omitted(model_dump: dict[str, Any]) -> None:
+    reader = _named(convert_dump(model_dump).elements, "CARD READER")
+
+    assert "revit_mark" not in reader["properties"]
+    assert "revit_comments" not in reader["properties"]
+
+
+def test_mark_is_kept_when_set(model_dump: dict[str, Any]) -> None:
+    tray = _named(convert_dump(model_dump).elements, "SAMPLE CABLE TRAY")
+
+    assert tray["properties"]["revit_mark"] == "CT-01"
+
+
+def test_line_based_elements_get_a_bounding_box(model_dump: dict[str, Any]) -> None:
+    tray = _named(convert_dump(model_dump).elements, "SAMPLE CABLE TRAY")
+
+    assert tray["bounding_box"] == {
+        "min_x": -75.25,
+        "min_y": 408.66,
+        "min_z": 30.51,
+        "max_x": -75.25,
+        "max_y": 431.46,
+        "max_z": 30.51,
+    }
+    assert tray["quantities"]["length_raw"] == pytest.approx(22.80)
+
+
+def test_point_based_elements_get_no_bounding_box(model_dump: dict[str, Any]) -> None:
+    highbay = _named(convert_dump(model_dump).elements, "HIGHBAY 120W NRML")
+
+    # A zero-volume box at the fixture's position would read as a bug.
+    assert highbay["bounding_box"] is None
+    assert "revit_location" in highbay["properties"]
+
+
+def test_coordinates_and_length_share_one_scale(model_dump: dict[str, Any]) -> None:
+    tray = _named(convert_dump(model_dump, units=UNITS_IMPERIAL).elements, "SAMPLE CABLE TRAY")
+
+    start = tray["properties"]["revit_start"]
+    end = tray["properties"]["revit_end"]
+    span = abs(end["y"] - start["y"])
+
+    # The Revit-reported Length must agree with the geometry after
+    # conversion; a metric length beside a foot-scaled box is exactly the
+    # mismatch a spatial consumer cannot detect.
+    assert tray["quantities"]["length_m"] == pytest.approx(span)
+    assert tray["quantities"]["length_m"] == pytest.approx(22.80 * _FT_TO_M)
+    assert tray["bounding_box"]["max_y"] == pytest.approx(431.46 * _FT_TO_M)
+
+
+def test_ambiguous_geometry_is_reported_and_recoverable(model_dump: dict[str, Any]) -> None:
+    result = convert_dump(model_dump)
+    ambiguous = _named(result.elements, "SAMPLE AMBIGUOUS")
+
+    # The "1,234" values are declined, so no length and no box.
+    assert "length_raw" not in ambiguous["quantities"]
+    assert ambiguous["bounding_box"] is None
+    # ... but the raw strings are kept so nothing is unrecoverable.
+    assert ambiguous["properties"]["revit_raw_geometry"] == {"EndY": "1,234", "Length": "1,234"}
+    assert any("declined" in w for w in result.warnings)
+
+
+def test_missing_storey_is_reported(model_dump: dict[str, Any]) -> None:
+    result = convert_dump(model_dump)
+
+    assert all(e["storey"] is None for e in _by_tier(result.elements, "instance"))
+    warning = next(w for w in result.warnings if "level/storey" in w)
+    assert "4 of 4" in warning
 
 
 # ── Identity + schema conformance ────────────────────────────────────────────

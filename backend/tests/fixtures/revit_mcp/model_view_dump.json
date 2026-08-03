@@ -1,0 +1,129 @@
+{
+  "_comment": [
+    "Synthetic dump in the exact shape mcp-server-for-revit 1.0.0 returns for",
+    "get_current_view_elements when a 3D view is active. Structure, field names",
+    "and the decimal-comma number formatting are verbatim from a real response;",
+    "project/type names, ids and coordinates are invented.",
+    "",
+    "Shape notes this fixture pins:",
+    "  * per-element parameters are nested under 'Properties', not top level",
+    "  * 'Name' is the TYPE name, and is the join key to the type tier",
+    "  * 'Properties.Family' and 'Properties.Type' both hold the numeric type",
+    "    ElementId - neither is a readable family name",
+    "  * numbers are locale strings ('-202,83'), so float() raises on them",
+    "  * point-based elements carry LocationX/Y/Z; line-based carry",
+    "    StartX/Y/Z + EndX/Y/Z + Length, and nothing carries a level/storey",
+    "",
+    "Element 5 deliberately holds a lone comma with three trailing digits",
+    "('1,234'), the one separator shape that is genuinely ambiguous."
+  ],
+  "get_current_view_info": {
+    "Id": 500001,
+    "UniqueId": "00000000-0000-0000-0000-000000000000-0007a121",
+    "Name": "{3D - SAMPLE}",
+    "ViewType": "ThreeD",
+    "IsTemplate": false,
+    "Scale": 1,
+    "DetailLevel": "Fine"
+  },
+  "get_current_view_elements": {
+    "categoryFilters": [
+      "OST_LightingFixtures",
+      "OST_CableTray",
+      "OST_SecurityDevices",
+      "OST_RoomTags"
+    ],
+    "result": {
+      "ViewId": 500001,
+      "ViewName": "{3D - SAMPLE}",
+      "TotalElementsInView": 6,
+      "FilteredElementCount": 5,
+      "Truncated": false,
+      "Elements": [
+        {
+          "Id": 800001,
+          "UniqueId": "aaaaaaaa-0000-0000-0000-000000000001-000c3501",
+          "Name": "HIGHBAY 120W NRML",
+          "Category": "Lighting Fixtures",
+          "Properties": {
+            "ElementId": "800001",
+            "LocationX": "-202,83",
+            "LocationY": "401,24",
+            "LocationZ": "29,53",
+            "Comments": "LIGHTING",
+            "Mark": "",
+            "Family": "627207",
+            "Type": "627207"
+          }
+        },
+        {
+          "Id": 800002,
+          "UniqueId": "aaaaaaaa-0000-0000-0000-000000000002-000c3502",
+          "Name": "SAMPLE CABLE TRAY",
+          "Category": "Cable Trays",
+          "Properties": {
+            "ElementId": "800002",
+            "StartX": "-75,25",
+            "StartY": "408,66",
+            "StartZ": "30,51",
+            "EndX": "-75,25",
+            "EndY": "431,46",
+            "EndZ": "30,51",
+            "Length": "22,80",
+            "Comments": "LV LADDER",
+            "Mark": "CT-01",
+            "Family": "338780",
+            "Type": "338780"
+          }
+        },
+        {
+          "Id": 800003,
+          "UniqueId": "aaaaaaaa-0000-0000-0000-000000000003-000c3503",
+          "Name": "CARD READER",
+          "Category": "Security Devices",
+          "Properties": {
+            "ElementId": "800003",
+            "LocationX": "10,50",
+            "LocationY": "20,25",
+            "LocationZ": "4,92",
+            "Comments": "",
+            "Mark": "",
+            "Family": "812345",
+            "Type": "812345"
+          }
+        },
+        {
+          "Id": 800004,
+          "UniqueId": "aaaaaaaa-0000-0000-0000-000000000004-000c3504",
+          "Name": "SAMPLE TAG",
+          "Category": "Room Tags",
+          "Properties": {
+            "ElementId": "800004",
+            "Comments": "",
+            "Mark": ""
+          }
+        },
+        {
+          "Id": 800005,
+          "UniqueId": "aaaaaaaa-0000-0000-0000-000000000005-000c3505",
+          "Name": "SAMPLE AMBIGUOUS",
+          "Category": "Cable Trays",
+          "Properties": {
+            "ElementId": "800005",
+            "StartX": "0,00",
+            "StartY": "0,00",
+            "StartZ": "0,00",
+            "EndX": "0,00",
+            "EndY": "1,234",
+            "EndZ": "0,00",
+            "Length": "1,234",
+            "Comments": "",
+            "Mark": "",
+            "Family": "338780",
+            "Type": "338780"
+          }
+        }
+      ]
+    }
+  }
+}
