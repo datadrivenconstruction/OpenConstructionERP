@@ -1,0 +1,181 @@
+{
+  "_comment": [
+    "Synthetic revit-mcp dump mirroring the shape a real electrical model",
+    "produces when the operator runs the MCP read tools with a DrawingSheet",
+    "as the active view. Category names, tool keys and field spellings are",
+    "verbatim from mcp-server-for-revit 1.0.0; project/family names and all",
+    "numbers are invented. Exercises: the empty-view-elements warning path,",
+    "the annotation-category filter, IFC crosswalk hits and misses, and the",
+    "raw-vs-imperial unit contract."
+  ],
+  "get_current_view_info": {
+    "Id": 100001,
+    "UniqueId": "00000000-0000-0000-0000-000000000000-000186a1",
+    "Name": "SAMPLE SHEET - LIGHTING LAYOUT",
+    "ViewType": "DrawingSheet",
+    "IsTemplate": false,
+    "Scale": 1,
+    "DetailLevel": "Undefined"
+  },
+  "get_current_view_elements": {
+    "categoryFilters": ["OST_Walls", "OST_Floors"],
+    "result": {
+      "ViewId": 100001,
+      "ViewName": "SAMPLE SHEET - LIGHTING LAYOUT",
+      "TotalElementsInView": 5,
+      "FilteredElementCount": 0,
+      "Truncated": false,
+      "Elements": []
+    }
+  },
+  "get_material_quantities": {
+    "totalMaterials": 3,
+    "totalCount": 3,
+    "truncated": false,
+    "totalArea": 300.0,
+    "totalVolume": 30.0,
+    "materials": [
+      {
+        "materialId": 5001,
+        "materialName": "Sample Glass",
+        "materialClass": "Glass",
+        "area": 100.0,
+        "volume": 10.0,
+        "elementCount": 3,
+        "elementIds": [900001, 900002, 900003]
+      },
+      {
+        "materialId": 5002,
+        "materialName": "Sample Steel",
+        "materialClass": "Metal",
+        "area": 200.0,
+        "volume": 20.0,
+        "elementCount": 2,
+        "elementIds": [900004, 900005]
+      },
+      {
+        "materialId": 5003,
+        "materialName": "Sample Zero-Geometry",
+        "materialClass": "Generic",
+        "area": 0,
+        "volume": 0,
+        "elementCount": 1,
+        "elementIds": [900006]
+      }
+    ],
+    "success": true,
+    "message": "Successfully calculated quantities for 3 materials"
+  },
+  "analyze_model_statistics": {
+    "projectName": "SAMPLE-ELECTRICAL-UTILITY",
+    "totalElements": 1000,
+    "totalTypes": 12,
+    "totalFamilies": 6,
+    "totalViews": 10,
+    "totalSheets": 2,
+    "categories": [
+      {
+        "categoryName": "Materials",
+        "elementCount": 500,
+        "typeCount": 0,
+        "familyCount": 0
+      },
+      {
+        "categoryName": "Generic Annotations",
+        "elementCount": 40,
+        "typeCount": 1,
+        "familyCount": 1,
+        "types": [
+          {
+            "typeName": "SAMPLE_TAG",
+            "familyName": "SAMPLE_TAG",
+            "instanceCount": 40
+          }
+        ]
+      },
+      {
+        "categoryName": "Lighting Fixtures",
+        "elementCount": 30,
+        "typeCount": 2,
+        "familyCount": 2,
+        "types": [
+          {
+            "typeName": "HIGHBAY 120W",
+            "familyName": "SAMPLE_HIGHBAY",
+            "instanceCount": 20
+          },
+          {
+            "typeName": "RECESSED 600x600",
+            "familyName": "SAMPLE_RECESSED",
+            "instanceCount": 10
+          }
+        ]
+      },
+      {
+        "categoryName": "Fire Alarm Devices",
+        "elementCount": 12,
+        "typeCount": 1,
+        "familyCount": 1,
+        "types": [
+          {
+            "typeName": "SMOKE",
+            "familyName": "SAMPLE_FIRE_ALARM",
+            "instanceCount": 12
+          }
+        ]
+      },
+      {
+        "categoryName": "Communication Devices",
+        "elementCount": 8,
+        "typeCount": 1,
+        "familyCount": 1,
+        "types": [
+          {
+            "typeName": "CEILING SPEAKER",
+            "familyName": "SAMPLE_SPEAKER",
+            "instanceCount": 8
+          }
+        ]
+      },
+      {
+        "categoryName": "Security Devices",
+        "elementCount": 6,
+        "typeCount": 1,
+        "familyCount": 1,
+        "types": [
+          {
+            "typeName": "CARD READER",
+            "familyName": "SAMPLE_ACCESS_CONTROL",
+            "instanceCount": 6
+          }
+        ]
+      },
+      {
+        "categoryName": "Cable Trays",
+        "elementCount": 20,
+        "typeCount": 0,
+        "familyCount": 0
+      },
+      {
+        "categoryName": "Room Tags",
+        "elementCount": 9,
+        "typeCount": 0,
+        "familyCount": 0
+      }
+    ],
+    "levels": [
+      {
+        "levelName": "GROUND FLOOR",
+        "elevation": 0.0,
+        "elementCount": 80
+      },
+      {
+        "levelName": "1st FLOOR",
+        "elevation": 16.404199475065617,
+        "elementCount": 20
+      }
+    ],
+    "success": true,
+    "message": "Successfully analyzed model with 1000 elements across 8 categories"
+  }
+}

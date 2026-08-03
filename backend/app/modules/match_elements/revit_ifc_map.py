@@ -106,6 +106,27 @@ OST_TO_IFC: dict[str, str] = {
     "electrical fixtures": "IfcElectricAppliance",
     "electrical fixture": "IfcElectricAppliance",
     "electrical equipment": "IfcDistributionElement",
+    "lighting devices": "IfcLightFixture",
+    "lighting device": "IfcLightFixture",
+    # Revit splits detection/notification hardware out of "Electrical
+    # Fixtures" into its own discipline categories. ifc_labels already
+    # carries IfcAlarm (mep / DIN276 474) and IfcCommunicationsAppliance
+    # (mep / 445); without these keys an electrical model's fire-alarm and
+    # comms devices resolved to None and lost their trade + cost hints.
+    "fire alarm devices": "IfcAlarm",
+    "fire alarm device": "IfcAlarm",
+    "communication devices": "IfcCommunicationsAppliance",
+    "communication device": "IfcCommunicationsAppliance",
+    "data devices": "IfcCommunicationsAppliance",
+    "data device": "IfcCommunicationsAppliance",
+    "telephone devices": "IfcCommunicationsAppliance",
+    "telephone device": "IfcCommunicationsAppliance",
+    "nurse call devices": "IfcCommunicationsAppliance",
+    "nurse call device": "IfcCommunicationsAppliance",
+    # NOTE: Revit "Security Devices" is deliberately NOT mapped. The
+    # category mixes cameras (IfcAudioVisualAppliance), door contacts
+    # (IfcSensor) and panic buttons (IfcAlarm), so any single class would
+    # be wrong for most of its instances. Callers keep the raw category.
     # ── Furniture / casework / generic ───────────────────────────────
     "furniture": "IfcFurniture",
     "casework": "IfcFurniture",
@@ -116,6 +137,10 @@ OST_TO_IFC: dict[str, str] = {
     "parking": "IfcSpace",
     "rooms": "IfcSpace",
     "room": "IfcSpace",
+    # MEP "Spaces" are the analytical twin of architectural Rooms and map
+    # to the same IFC entity.
+    "spaces": "IfcSpace",
+    "space": "IfcSpace",
     "areas": "IfcSpace",
     "area": "IfcSpace",
 }
