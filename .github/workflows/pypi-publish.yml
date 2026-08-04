@@ -58,7 +58,7 @@ jobs:
         run: python scripts/check_repo_hygiene.py
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           # Cesium 1.137+ requires Node 22; tsc-on-prebuild needs the full
           # devDeps set, so the frontend job is locked to 22.
