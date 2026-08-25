@@ -1,0 +1,30 @@
+[
+  {
+    "tag": "SPAN",
+    "text": "Mullets Aluminum Products, Inc.",
+    "color": "rgb(91, 94, 102)",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "rgb(229, 231, 235)"
+  },
+  {
+    "tag": "DIV",
+    "text": "Mullets Aluminum Products, Inc.",
+    "color": "rgb(29, 29, 31)",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "rgb(229, 231, 235)"
+  },
+  {
+    "tag": "DIV",
+    "text": "Powered by OpenConstructionERP · In partnership with Mullets Aluminum Products, Inc.",
+    "color": "rgb(102, 107, 120)",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "rgb(229, 231, 235)"
+  },
+  {
+    "tag": "DIV",
+    "text": "White-label partner pack for Mullets Aluminum Products, Inc.",
+    "color": "rgb(91, 94, 102)",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "rgb(229, 231, 235)"
+  }
+]

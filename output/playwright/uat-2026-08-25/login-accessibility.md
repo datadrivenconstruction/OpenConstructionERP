@@ -1,0 +1,232 @@
+- generic [ref=e3] [box=0,0,1440,1000]:
+  - generic [box=0,0,1440,1000]:
+    - generic [box=-30,-20,835,1217]:
+      - generic [box=-30,-20,763,533]:
+        - generic [box=-30,-20,60,28]: Pos.
+        - generic [box=30,-20,199,29]: Description
+        - generic [box=228,-18,49,28]: Unit
+        - generic [box=276,-18,70,28]: Qty
+        - generic [box=344,-17,78,28]: Rate
+        - generic [box=421,-17,90,28]: Total
+        - generic [box=508,-16,55,28]: CG
+        - generic [box=-30,7,60,34]: "300"
+        - generic [box=30,8,200,35]: Structure - Building Construction
+        - generic [box=-30,41,61,34]: "01.001"
+        - generic [box=348,43,79,34]: €295.00
+        - generic [box=-30,75,61,35]: "01.002"
+        - generic [box=232,77,50,34]: m²
+        - generic [box=516,78,56,34]: "330"
+        - generic [box=-30,110,61,35]: "01.003"
+        - generic [box=281,111,72,35]: 10,368
+        - generic [box=352,111,80,35]: €2.18
+        - generic [box=-30,144,62,35]: "01.004"
+        - generic [box=31,145,205,36]: Reinforced concrete C30/37, walls
+        - generic [box=283,145,72,35]: "156.00"
+        - generic [box=-30,179,62,36]: "01.005"
+        - generic [box=32,180,206,36]: Formwork walls, smooth finish
+        - generic [box=356,180,81,35]: €42.50
+        - generic [box=434,181,93,35]: €53,040
+        - generic [box=525,181,57,35]: "330"
+        - generic [box=32,215,207,36]: Subtotal CG 330
+        - generic [box=437,216,94,36]: €162,222
+        - generic [box=527,216,57,35]: "330"
+        - generic [box=-30,251,63,36]: "340"
+        - generic [box=32,251,208,36]: Structure - Interior Walls
+        - generic [box=-30,287,63,37]: "02.001"
+        - generic [box=290,287,74,36]: "890.00"
+        - generic [box=362,287,82,36]: €68.00
+        - generic [box=441,287,95,36]: €60,520
+        - generic [box=-30,324,63,37]: "02.002"
+        - generic [box=33,323,210,37]: Masonry KS 11.5cm, partition
+        - generic [box=242,323,51,37]: m²
+        - generic [box=291,323,74,37]: "620.00"
+        - generic [box=364,323,83,37]: €48.00
+        - generic [box=33,360,211,38]: Subtotal CG 340
+        - generic [box=446,360,96,37]: €90,280
+        - generic [box=539,359,59,37]: "340"
+        - generic [box=-30,398,64,38]: "400"
+        - generic [box=34,397,212,38]: Building Services - HVAC
+        - generic [box=-30,436,64,38]: "04.001"
+        - generic [box=246,435,52,38]: m
+        - generic [box=296,434,76,38]: "840.00"
+        - generic [box=370,434,84,38]: €28.50
+        - generic [box=452,434,97,38]: €23,940
+        - generic [box=545,433,59,38]: "420"
+        - generic [box=-30,474,65,39]: "04.002"
+        - generic [box=247,473,53,39]: m
+    - generic [box=694,-10,736,1292]:
+      - generic [box=728,-10,702,997]:
+        - generic [box=826,-6,600,202]:
+          - img [box=826,-6,600,202]:
+            - generic [box=867,20,103,14]: COST PER TRADE
+            - generic [box=872,182,30,12]: KG300
+            - generic [box=928,182,30,12]: KG330
+            - generic [box=984,181,30,12]: KG340
+            - generic [box=1041,181,30,12]: KG400
+            - generic [box=1098,181,30,12]: KG420
+            - generic [box=1155,181,30,12]: KG440
+            - generic [box=1212,180,30,12]: KG500
+            - generic [box=1270,180,30,12]: KG530
+            - generic [box=1328,180,30,12]: KG540
+        - generic [box=790,203,327,290]:
+          - img [box=790,203,327,290]:
+            - generic [box=909,226,117,14]: BOQ BREAKDOWN
+            - generic [box=880,330,152,33]: \u20AC4.2M
+            - generic [box=928,369,53,13]: total budget
+        - generic [box=1108,202,318,294]:
+          - img [box=1108,202,318,294]:
+            - generic [box=1147,226,93,14]: PROJECT KPIs
+            - generic [box=1145,257,257,27]:
+              - generic [box=1145,263,19,14]: SPI
+              - generic [box=1361,257,35,21]: "1.04"
+            - generic [box=1142,301,259,27]:
+              - generic [box=1142,307,20,14]: CPI
+              - generic [box=1360,302,34,22]: "0.97"
+            - generic [box=1140,346,261,28]:
+              - generic [box=1140,352,26,15]: EAC
+              - generic [box=1344,347,52,22]: €4.3M
+            - generic [box=1136,392,264,29]:
+              - generic [box=1136,398,46,15]: Variance
+              - generic [box=1347,393,47,23]: "-2.8%"
+            - generic [box=1135,438,259,24]:
+              - generic [box=1135,445,48,15]: Progress
+              - generic [box=1357,440,37,23]: 68%
+        - generic [box=764,500,661,215]:
+          - img [box=764,500,661,215]:
+            - generic [box=808,524,206,17]: S-CURVE - PLANNED vs ACTUAL
+            - generic [box=1276,523,37,14]: Planned
+            - generic [box=1368,524,30,14]: Actual
+        - generic [box=733,713,352,258]:
+          - img [box=733,713,352,258]:
+            - generic [box=784,737,78,18]: ELEVATION
+            - generic [box=882,944,38,15]: 46.00 m
+        - generic [box=1079,719,347,262]:
+          - img [box=1079,719,347,262]:
+            - generic [box=1118,744,78,18]: SCHEDULE
+            - generic [box=1115,785,225,28]: Foundation
+            - generic [box=1113,823,227,29]: Structure
+            - generic [box=1111,862,246,30]: Facade
+            - generic [box=1109,902,247,31]: MEP
+            - generic [box=1107,941,266,32]: Finishing
+  - generic [ref=e4] [box=1174,15,251,36]:
+    - radiogroup "Theme" [ref=e5] [box=1174,15,99,36]:
+      - radio "Light" [ref=e6] [cursor=pointer] [box=1176,18,30,30]
+      - radio "Dark" [ref=e13] [cursor=pointer] [box=1208,18,30,30]
+      - radio "System" [checked] [ref=e16] [cursor=pointer] [box=1240,18,30,30]
+    - button "English" [ref=e20] [cursor=pointer] [box=1280,15,145,36]
+  - generic [ref=e27] [box=720,0,720,1000]:
+    - generic [ref=e28] [box=795,163,585,27]: Open Source
+    - 'heading "The #1 open-source workspace for construction project management" [level=2] [ref=e34] [box=795,209,585,78]': "The #1 open-source workspace forconstruction project management"
+    - paragraph [ref=e35] [box=795,306,420,56]: Professional BOQ, 4D scheduling, 5D cost model, and tendering - all in one open-source platform.
+    - generic [ref=e36] [box=795,381,585,50]:
+      - generic [ref=e37] [box=795,381,63,50]:
+        - generic [ref=e38] [box=795,381,63,32]: 120K+
+        - generic [ref=e39] [box=795,415,63,16]: cost items
+      - generic [ref=e40] [box=876,381,48,50]:
+        - generic [ref=e41] [box=876,381,48,32]: "41"
+        - generic [ref=e42] [box=876,415,48,16]: languages
+      - generic [ref=e43] [box=943,381,34,50]:
+        - generic [ref=e44] [box=943,381,34,32]: "47"
+        - generic [ref=e45] [box=943,415,34,16]: regions
+      - generic [ref=e46] [box=996,381,59,50]:
+        - generic [ref=e47] [box=996,381,59,32]: "6"
+        - generic [ref=e48] [box=996,415,59,16]: CAD formats
+      - generic [ref=e49] [box=1074,381,47,50]:
+        - generic [ref=e50] [box=1074,381,47,32]: 180+
+        - generic [ref=e51] [box=1074,415,47,16]: modules
+      - generic [ref=e52] [box=1140,381,38,50]:
+        - generic [ref=e53] [box=1140,381,38,32]: "28"
+        - generic [ref=e54] [box=1140,415,38,16]: sections
+    - generic [ref=e56] [box=795,469,560,280]:
+      - generic [ref=e57] [box=811,483,88,102]: Local
+      - generic [ref=e63] [box=899,483,88,102]: AI
+      - generic [ref=e76] [box=987,483,88,102]: Takeoff
+      - generic [ref=e85] [box=1075,483,88,102]: CAD
+      - generic [ref=e93] [box=1163,483,88,102]: BIM
+      - generic [ref=e99] [box=1251,483,88,102]: 5D
+      - generic [ref=e105] [box=855,559,88,102]: Costs
+      - generic [ref=e112] [box=943,559,88,102]: BOQ
+      - generic [ref=e118] [box=1031,559,88,102]: Workspace
+      - generic [ref=e125] [box=1119,559,88,102]: Schedule
+      - generic [ref=e132] [box=1207,559,88,102]: Tendering
+      - generic [ref=e137] [box=811,635,88,102]: Realtime
+      - generic [ref=e142] [box=899,635,88,102]: Resources
+      - generic [ref=e155] [box=987,635,88,102]: Tasks
+      - generic [ref=e161] [box=1075,635,88,102]: Validate
+      - generic [ref=e168] [box=1163,635,88,102]: Files
+      - generic [ref=e173] [box=1251,635,88,102]: Exports
+    - generic [ref=e179] [box=795,757,585,73]:
+      - generic [ref=e180] [box=795,757,210,73]:
+        - generic [ref=e182] [box=810,757,195,16]: Your data, your machine
+        - paragraph [ref=e187] [box=810,776,195,53]: Nothing leaves your computer. Full ownership, zero cloud dependency.
+      - generic [ref=e188] [box=1024,757,210,55]:
+        - generic [ref=e190] [box=1039,757,195,16]: AI-assisted, human-confirmed
+        - paragraph [ref=e202] [box=1039,776,195,36]: Smart suggestions with confidence scores. You always have the final say.
+    - generic [ref=e204] [box=795,845,585,16]:
+      - link "AGPL-3.0" [ref=e207] [cursor=pointer] [box=813,845,46,16]:
+        - /url: /api/source
+      - generic [ref=e208] [box=867,845,3,16]: ·
+      - link "OpenConstructionERP.com" [ref=e209] [cursor=pointer] [box=877,845,126,16]:
+        - /url: https://OpenConstructionERP.com
+  - generic [ref=e211] [box=170,152,380,696]:
+    - generic [ref=e212] [box=170,159,380,53]:
+      - generic [ref=e213] [box=209,159,302,26]:
+        - generic [ref=e214] [box=209,159,268,26]: OpenConstructionERP
+        - button "Customize logo" [ref=e228] [cursor=pointer] [box=485,159,26,26]
+      - paragraph [ref=e232] [box=240,193,239,19]: Professional construction project workspace
+    - generic [ref=e233] [box=178,240,365,325]:
+      - heading "Sign in" [level=1] [ref=e234] [box=199,258,1,1]
+      - generic [ref=e235] [box=200,270,320,37]:
+        - heading "Sign in" [level=2] [ref=e236] [box=200,270,320,21]
+        - paragraph [ref=e237] [box=200,293,320,14]: Enter your credentials to access your workspace
+      - form "Sign in" [ref=e238] [box=200,311,320,193]:
+        - generic [ref=e240] [box=200,322,320,56]:
+          - generic [ref=e241] [box=200,322,320,18]: Email
+          - textbox "Email" [active] [ref=e243] [box=200,346,320,32]:
+            - /placeholder: you@company.com
+        - generic [ref=e244] [box=200,389,320,54]:
+          - generic [ref=e245] [box=200,389,320,18]:
+            - generic [ref=e246] [box=200,389,52,18]: Password
+            - link "Forgot password?" [ref=e247] [cursor=pointer] [box=448,391,72,13]:
+              - /url: /forgot-password
+          - generic [ref=e248] [box=200,411,320,32]:
+            - textbox "Password" [ref=e249] [box=200,411,320,32]:
+              - /placeholder: Enter your password
+            - button "Show password" [ref=e250] [cursor=pointer] [box=495,411,25,32]
+        - generic [ref=e255] [cursor=pointer] [box=200,454,320,14]:
+          - checkbox "Remember me for 30 days" [ref=e256] [box=200,455,13,13]
+          - generic [ref=e257] [box=220,454,118,14]: Remember me for 30 days
+        - button "Sign in" [ref=e259] [cursor=pointer] [box=200,479,320,36]
+      - paragraph [ref=e262] [box=200,543,320,14]:
+        - text: Don't have an account?
+        - link "Create account" [ref=e263] [cursor=pointer] [box=380,544,67,12]:
+          - /url: /register
+    - generic [ref=e264] [box=170,585,380,176]:
+      - generic [ref=e265] [box=170,585,380,176]:
+        - button "Try demo (no signup)" [expanded] [ref=e267] [cursor=pointer] [box=171,586,378,38]
+        - generic [ref=e273] [box=171,631,378,137]:
+          - button "A Admin demo@openconstructionerp.com · Administrator" [ref=e274] [cursor=pointer] [box=182,641,356,56]:
+            - generic [ref=e275] [box=196,652,34,34]: A
+            - generic [ref=e276] [box=241,651,256,35]:
+              - generic [ref=e277] [box=241,651,256,19]: Admin
+              - generic [ref=e278] [box=241,670,256,16]: demo@openconstructionerp.com · Administrator
+          - button "M Michael Carter manager@openconstructionerp.com · Manager" [ref=e281] [cursor=pointer] [box=182,703,356,56]:
+            - generic [ref=e282] [box=196,714,34,34]: M
+            - generic [ref=e283] [box=241,713,256,35]:
+              - generic [ref=e284] [box=241,713,256,19]: Michael Carter
+              - generic [ref=e285] [box=241,732,256,16]: manager@openconstructionerp.com · Manager
+      - generic [ref=e288] [box=520,593,23,23]:
+        - button "About the demo sign-in block" [ref=e289] [cursor=pointer] [box=520,593,23,23]
+        - tooltip "Optional demo sign-in. It only appears while demo accounts are enabled, so an administrator can turn it off." [box=303,623,240,74]
+    - generic [ref=e292] [box=170,777,380,58]:
+      - link "GitHub - Source code" [ref=e293] [cursor=pointer] [box=170,777,184,58]:
+        - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+        - generic [ref=e298] [box=229,791,85,30]:
+          - generic [ref=e299] [box=229,791,85,16]: GitHub
+          - generic [ref=e300] [box=229,807,85,14]: Source code
+      - link "Community - Get help & discuss" [ref=e304] [cursor=pointer] [box=366,777,184,58]:
+        - /url: https://t.me/datadrivenconstruction
+        - generic [ref=e311] [box=425,791,85,30]:
+          - generic [ref=e312] [box=425,791,85,16]: Community
+          - generic [ref=e313] [box=425,807,85,14]: Get help & discuss
+    - generic [ref=e317] [box=170,834,380,14]: v15.7.0

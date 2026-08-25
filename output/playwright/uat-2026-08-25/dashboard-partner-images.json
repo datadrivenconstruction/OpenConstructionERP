@@ -1,0 +1,34 @@
+[
+  {
+    "alt": "Mullets Aluminum Products, Inc. logo",
+    "src": "http://127.0.0.1:18080/api/v1/partner-pack/logo/mullets-aluminum",
+    "naturalWidth": 262,
+    "naturalHeight": 75,
+    "box": {
+      "x": 303.4375,
+      "y": 16.61931800842285,
+      "width": 18.75,
+      "height": 18.75,
+      "top": 16.61931800842285,
+      "right": 322.1875,
+      "bottom": 35.36931800842285,
+      "left": 303.4375
+    }
+  },
+  {
+    "alt": "Mullets Aluminum Products, Inc. logo",
+    "src": "http://127.0.0.1:18080/api/v1/partner-pack/logo/mullets-aluminum",
+    "naturalWidth": 262,
+    "naturalHeight": 75,
+    "box": {
+      "x": 291.97442626953125,
+      "y": 91.84658813476562,
+      "width": 41.25,
+      "height": 41.25,
+      "top": 91.84658813476562,
+      "right": 333.22442626953125,
+      "bottom": 133.09658813476562,
+      "left": 291.97442626953125
+    }
+  }
+]

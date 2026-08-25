@@ -1,0 +1,38 @@
+{
+  "chain": [
+    {
+      "tag": "A",
+      "class": "flex min-w-0 items-center gap-3 hover:opacity-90",
+      "color": "rgb(23, 23, 23)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "style": null
+    },
+    {
+      "tag": "DIV",
+      "class": "flex items-center justify-between gap-3 rounded-lg border border-border border-l-[3px] bg-surface-secondary px-4 py-3 text-sm shadow-sm ",
+      "color": "rgb(23, 23, 23)",
+      "background": "rgb(245, 245, 247)",
+      "border": "rgb(210, 210, 215) rgb(210, 210, 215) rgb(210, 210, 215) rgb(0, 85, 166)",
+      "style": "border-left-color: rgb(0, 85, 166); background-image: linear-gradient(90deg, rgba(0, 85, 166, 0.15), rgba(0, 85, 166, 0.05) 55%, transparent);"
+    },
+    {
+      "tag": "DIV",
+      "class": "space-y-5 animate-fade-in",
+      "color": "rgb(23, 23, 23)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "style": null
+    },
+    {
+      "tag": "MAIN",
+      "class": "px-4 pt-6 pb-4 sm:px-7",
+      "color": "rgb(23, 23, 23)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "style": null
+    }
+  ],
+  "rootStyle": "--ddc-origin: \"DDC-CWICR-OE\"; --ddc-author: \"Artem Boiko\"; --oe-sidebar-width: 248px;",
+  "bodyStyle": null
+}

@@ -1,0 +1,1414 @@
+- generic [ref=e318] [box=0,0,1433,3248]:
+  - complementary [ref=e320] [box=0,0,248,1000]:
+    - generic [ref=e322] [box=19,11,210,30]:
+      - link "OpenConstructionERP" [ref=e324] [cursor=pointer] [box=19,17,175,19]:
+        - /url: https://openconstructionerp.com/?utm_source=app
+      - button "Customize branding" [ref=e333] [cursor=pointer] [box=199,11,30,30]
+    - button "Collapse sidebar" [ref=e337] [cursor=pointer] [box=239,477,19,45]
+    - button "Search" [ref=e341] [cursor=pointer] [box=11,56,225,31]:
+      - generic [ref=e346] [box=203,63,24,17]: ⌘K
+    - navigation "Main navigation" [ref=e347] [box=0,90,248,609]:
+      - generic [ref=e348] [box=11,109,218,131]:
+        - button "Collapse Overview" [expanded] [ref=e350] [cursor=pointer] [box=11,109,218,22]:
+          - generic [ref=e351] [box=19,113,70,15]: Overview
+        - list [ref=e356] [box=11,133,218,107]:
+          - listitem [ref=e357] [box=11,133,218,25]:
+            - link "Dashboard G D Pin Dashboard" [ref=e358] [cursor=pointer] [box=11,133,218,25]:
+              - /url: /
+              - generic "Dashboard" [ref=e364] [box=47,137,61,18]
+              - generic [ref=e365] [box=162,139,32,13]: G D
+              - button "Pin Dashboard" [ref=e367] [box=205,138,15,15]
+          - listitem [ref=e370] [box=11,160,218,25]:
+            - link "Projects G P Pin Projects" [ref=e371] [cursor=pointer] [box=11,160,218,25]:
+              - /url: /projects
+              - generic "Projects" [ref=e374] [box=47,164,44,18]
+              - generic [ref=e375] [box=162,166,32,13]: G P
+              - button "Pin Projects" [ref=e377] [box=205,165,15,15]
+          - listitem [ref=e380] [box=11,188,218,25]:
+            - link "Cases Pin Cases" [ref=e381] [cursor=pointer] [box=11,188,218,25]:
+              - /url: /cases
+              - generic "Cases" [ref=e386] [box=47,191,35,18]
+              - button "Pin Cases" [ref=e391] [box=205,193,15,15]
+          - listitem [ref=e394] [box=11,215,218,25]:
+            - link "Documents Pin Documents" [ref=e395] [cursor=pointer] [box=11,215,218,25]:
+              - /url: /files
+              - generic "Documents" [ref=e398] [box=47,219,63,18]
+              - button "Pin Documents" [ref=e403] [box=205,220,15,15]
+      - generic [ref=e406] [box=11,251,218,131]:
+        - button "Collapse Takeoff" [expanded] [ref=e408] [cursor=pointer] [box=11,251,218,22]:
+          - generic [ref=e409] [box=19,255,62,15]: Takeoff
+        - list [ref=e414] [box=11,275,218,107]:
+          - listitem [ref=e415] [box=11,275,218,25]:
+            - link "PDF Measurements Pin PDF Measurements" [ref=e416] [cursor=pointer] [box=11,275,218,25]:
+              - /url: /takeoff?tab=measurements
+              - generic "PDF Measurements" [ref=e423] [box=47,279,110,18]
+              - button "Pin PDF Measurements" [ref=e428] [box=205,281,15,15]
+          - listitem [ref=e431] [box=11,303,218,25]:
+            - link "DWG Takeoff Pin DWG Takeoff" [ref=e432] [cursor=pointer] [box=11,303,218,25]:
+              - /url: /dwg-takeoff
+              - generic "DWG Takeoff" [ref=e440] [box=47,306,73,18]
+              - button "Pin DWG Takeoff" [ref=e445] [box=205,308,15,15]
+          - listitem [ref=e448] [box=11,330,218,25]:
+            - link "BIM 3D Takeoff G M Pin BIM 3D Takeoff" [ref=e449] [cursor=pointer] [box=11,330,218,25]:
+              - /url: /bim
+              - generic "BIM 3D Takeoff" [ref=e453] [box=47,334,84,18]
+              - generic [ref=e454] [box=162,336,32,13]: G M
+              - button "Pin BIM 3D Takeoff" [ref=e456] [box=205,335,15,15]
+          - listitem [ref=e459] [box=11,357,218,25]:
+            - link "Quantity Takeoff Pin Quantity Takeoff" [ref=e460] [cursor=pointer] [box=11,357,218,25]:
+              - /url: /quantities
+              - generic "Quantity Takeoff" [ref=e467] [box=47,361,88,18]
+              - button "Pin Quantity Takeoff" [ref=e472] [box=205,362,15,15]
+      - generic [ref=e475] [box=11,394,218,213]:
+        - button "Collapse Cost Data" [expanded] [ref=e477] [cursor=pointer] [box=11,394,218,22]:
+          - generic [ref=e478] [box=19,398,74,15]: Cost Data
+        - list [ref=e483] [box=11,418,218,189]:
+          - listitem [ref=e484] [box=11,418,218,25]:
+            - link "Cost Database G C Pin Cost Database" [ref=e485] [cursor=pointer] [box=11,418,218,25]:
+              - /url: /costs
+              - generic "Cost Database" [ref=e490] [box=47,422,82,18]
+              - generic [ref=e491] [box=162,424,32,13]: G C
+              - button "Pin Cost Database" [ref=e493] [box=205,423,15,15]
+          - listitem [ref=e496] [box=11,445,218,25]:
+            - link "Resource Catalog Pin Resource Catalog" [ref=e497] [cursor=pointer] [box=11,445,218,25]:
+              - /url: /catalog
+              - generic "Resource Catalog" [ref=e508] [box=47,449,99,18]
+              - button "Pin Resource Catalog" [ref=e513] [box=205,450,15,15]
+          - listitem [ref=e516] [box=11,472,218,25]:
+            - link "Cost Explorer Pin Cost Explorer" [ref=e517] [cursor=pointer] [box=11,472,218,25]:
+              - /url: /cost-explorer
+              - generic "Cost Explorer" [ref=e521] [box=47,476,74,18]
+              - button "Pin Cost Explorer" [ref=e526] [box=205,478,15,15]
+          - listitem [ref=e529] [box=11,500,218,25]:
+            - link "Assemblies Pin Assemblies" [ref=e530] [cursor=pointer] [box=11,500,218,25]:
+              - /url: /assemblies
+              - generic "Assemblies" [ref=e535] [box=47,503,63,18]
+              - button "Pin Assemblies" [ref=e540] [box=205,505,15,15]
+          - listitem [ref=e543] [box=11,527,218,25]:
+            - link "Cost Match Pin Cost Match" [ref=e544] [cursor=pointer] [box=11,527,218,25]:
+              - /url: /cost-match
+              - generic "Cost Match" [ref=e548] [box=47,531,62,18]
+              - button "Pin Cost Match" [ref=e553] [box=205,532,15,15]
+          - listitem [ref=e556] [box=11,554,218,25]:
+            - link "Currencies Pin Currencies" [ref=e557] [cursor=pointer] [box=11,554,218,25]:
+              - /url: /fx
+              - generic "Currencies" [ref=e561] [box=47,558,60,18]
+              - button "Pin Currencies" [ref=e566] [box=205,559,15,15]
+          - listitem [ref=e569] [box=11,581,218,25]:
+            - link "Cost Benchmarks Pin Cost Benchmarks" [ref=e570] [cursor=pointer] [box=11,581,218,25]:
+              - /url: /benchmarks
+              - generic "Cost Benchmarks" [ref=e573] [box=47,585,98,18]
+              - button "Pin Cost Benchmarks" [ref=e578] [box=205,587,15,15]
+      - generic [ref=e581] [box=11,618,218,176]:
+        - button "Collapse Estimating" [expanded] [ref=e583] [cursor=pointer] [box=11,618,218,22]:
+          - generic [ref=e584] [box=19,622,79,15]: Estimating
+        - list [ref=e589] [box=11,642,218,152]:
+          - listitem [ref=e590] [box=11,642,218,25]:
+            - link "Bid Schedule G B Pin Bid Schedule" [ref=e591] [cursor=pointer] [box=11,642,218,25]:
+              - /url: /boq
+              - generic "Bid Schedule" [ref=e594] [box=47,646,73,18]
+              - generic [ref=e595] [box=162,648,32,13]: G B
+              - button "Pin Bid Schedule" [ref=e597] [box=205,647,15,15]
+          - listitem [ref=e600] [box=11,669,218,43]:
+            - link "CAD-BIM Match → Cost beta Pin CAD-BIM Match → Cost" [ref=e601] [cursor=pointer] [box=11,669,218,43]:
+              - /url: /match-elements
+              - generic "CAD-BIM Match → Cost" [ref=e605] [box=47,673,82,36]
+              - generic [ref=e606] [box=136,683,58,15]: beta
+              - button "Pin CAD-BIM Match → Cost" [ref=e611] [box=205,683,15,15]
+          - listitem [ref=e614] [box=11,714,218,25]:
+            - link "Estimation Dashboard Pin Estimation Dashboard" [ref=e615] [cursor=pointer] [box=11,714,218,25]:
+              - /url: /project-intelligence
+              - generic "Estimation Dashboard" [ref=e628] [box=47,718,121,18]
+              - button "Pin Estimation Dashboard" [ref=e633] [box=205,720,15,15]
+          - listitem [ref=e636] [box=11,742,218,25]:
+            - link "Conceptual Estimate Pin Conceptual Estimate" [ref=e637] [cursor=pointer] [box=11,742,218,25]:
+              - /url: /rom-estimate
+              - generic "Conceptual Estimate" [ref=e641] [box=47,745,114,18]
+              - button "Pin Conceptual Estimate" [ref=e646] [box=205,747,15,15]
+          - listitem [ref=e649] [box=11,769,218,25]:
+            - link "Methodologies Pin Methodologies" [ref=e650] [cursor=pointer] [box=11,769,218,25]:
+              - /url: /methodologies
+              - generic "Methodologies" [ref=e652] [box=47,773,80,18]
+              - button "Pin Methodologies" [ref=e657] [box=205,774,15,15]
+      - generic [ref=e660] [box=11,806,218,104]:
+        - button "Collapse Drawings & Files" [expanded] [ref=e662] [cursor=pointer] [box=11,806,218,22]:
+          - generic [ref=e663] [box=19,809,119,15]: Drawings & Files
+        - list [ref=e668] [box=11,830,218,80]:
+          - listitem [ref=e669] [box=11,830,218,25]:
+            - link "Drawing Sheets Pin Drawing Sheets" [ref=e670] [cursor=pointer] [box=11,830,218,25]:
+              - /url: /sheets
+              - generic "Drawing Sheets" [ref=e674] [box=47,833,87,18]
+              - button "Pin Drawing Sheets" [ref=e679] [box=205,835,15,15]
+          - listitem [ref=e682] [box=11,857,218,25]:
+            - link "Plan Room beta Pin Plan Room" [ref=e683] [cursor=pointer] [box=11,857,218,25]:
+              - /url: /plan-room
+              - generic "Plan Room" [ref=e688] [box=47,861,61,18]
+              - generic [ref=e689] [box=136,862,58,15]: beta
+              - button "Pin Plan Room" [ref=e694] [box=205,862,15,15]
+          - listitem [ref=e697] [box=11,884,218,25]:
+            - link "Markups Pin Markups" [ref=e698] [cursor=pointer] [box=11,884,218,25]:
+              - /url: /markups
+              - generic "Markups" [ref=e704] [box=47,888,48,18]
+              - button "Pin Markups" [ref=e709] [box=205,889,15,15]
+      - generic [ref=e712] [box=11,921,218,104]:
+        - button "Collapse Reality Capture & 3D" [expanded] [ref=e714] [cursor=pointer] [box=11,921,218,22]:
+          - generic [ref=e715] [box=19,924,146,15]: Reality Capture & 3D
+        - list [ref=e720] [box=11,945,218,80]:
+          - listitem [ref=e721] [box=11,945,218,25]:
+            - link "Geo Hub beta Pin Geo Hub" [ref=e722] [cursor=pointer] [box=11,945,218,25]:
+              - /url: /geo
+              - generic "Geo Hub" [ref=e726] [box=47,949,50,18]
+              - generic [ref=e727] [box=136,950,58,15]: beta
+              - button "Pin Geo Hub" [ref=e732] [box=205,950,15,15]
+          - listitem [ref=e735] [box=11,972,218,25]:
+            - link "Point Cloud beta Pin Point Cloud" [ref=e736] [cursor=pointer] [box=11,972,218,25]:
+              - /url: /pointcloud
+              - generic "Point Cloud" [ref=e742] [box=47,976,64,18]
+              - generic [ref=e743] [box=136,977,58,15]: beta
+              - button "Pin Point Cloud" [ref=e748] [box=205,977,15,15]
+          - listitem [ref=e751] [box=11,999,218,25]:
+            - link "CAD-BIM BI Explorer Pin CAD-BIM BI Explorer" [ref=e752] [cursor=pointer] [box=11,999,218,25]:
+              - /url: /data-explorer
+              - generic "CAD-BIM BI Explorer" [ref=e755] [box=47,1003,117,18]
+              - button "Pin CAD-BIM BI Explorer" [ref=e760] [box=205,1004,15,15]
+      - generic [ref=e763] [box=11,1036,218,267]:
+        - button "Collapse Model Coordination" [expanded] [ref=e765] [cursor=pointer] [box=11,1036,218,22]:
+          - generic [ref=e766] [box=19,1040,141,15]: Model Coordination
+        - list [ref=e771] [box=11,1060,218,242]:
+          - listitem [ref=e772] [box=11,1060,218,43]:
+            - link "Coordination Hub beta Pin Coordination Hub" [ref=e773] [cursor=pointer] [box=11,1060,218,43]:
+              - /url: /coordination
+              - generic "Coordination Hub" [ref=e779] [box=47,1064,82,36]
+              - generic [ref=e780] [box=136,1074,58,15]: beta
+              - button "Pin Coordination Hub" [ref=e785] [box=205,1074,15,15]
+          - listitem [ref=e788] [box=11,1105,218,25]:
+            - link "Model Review beta Pin Model Review" [ref=e789] [cursor=pointer] [box=11,1105,218,25]:
+              - /url: /model-review
+              - generic "Model Review" [ref=e797] [box=47,1109,78,18]
+              - generic [ref=e798] [box=136,1110,58,15]: beta
+              - button "Pin Model Review" [ref=e803] [box=205,1110,15,15]
+          - listitem [ref=e806] [box=11,1132,218,25]:
+            - link "BIM Federations Pin BIM Federations" [ref=e807] [cursor=pointer] [box=11,1132,218,25]:
+              - /url: /bim/federations
+              - generic "BIM Federations" [ref=e812] [box=47,1136,90,18]
+              - button "Pin BIM Federations" [ref=e817] [box=205,1138,15,15]
+          - listitem [ref=e820] [box=11,1160,218,43]:
+            - link "Clash Detection beta Pin Clash Detection" [ref=e821] [cursor=pointer] [box=11,1160,218,43]:
+              - /url: /clash
+              - generic "Clash Detection" [ref=e829] [box=47,1163,82,36]
+              - generic [ref=e830] [box=136,1174,58,15]: beta
+              - button "Pin Clash Detection" [ref=e835] [box=205,1174,15,15]
+          - listitem [ref=e838] [box=11,1205,218,25]:
+            - link "Model Issues beta Pin Model Issues" [ref=e839] [cursor=pointer] [box=11,1205,218,25]:
+              - /url: /bcf
+              - generic "Model Issues" [ref=e842] [box=47,1208,73,18]
+              - generic [ref=e843] [box=136,1210,58,15]: beta
+              - button "Pin Model Issues" [ref=e848] [box=205,1210,15,15]
+          - listitem [ref=e851] [box=11,1232,218,25]:
+            - link "BIM Rules Pin BIM Rules" [ref=e852] [cursor=pointer] [box=11,1232,218,25]:
+              - /url: /bim/rules?mode=requirements
+              - generic "BIM Rules" [ref=e854] [box=47,1236,57,18]
+              - button "Pin BIM Rules" [ref=e859] [box=205,1237,15,15]
+          - listitem [ref=e862] [box=11,1259,218,43]:
+            - link "EIR Matrix (ISO 19650) beta Pin EIR Matrix (ISO 19650)" [ref=e863] [cursor=pointer] [box=11,1259,218,43]:
+              - /url: /requirements/matrix
+              - generic "EIR Matrix (ISO 19650)" [ref=e868] [box=47,1263,82,36]
+              - generic [ref=e869] [box=136,1273,58,15]: beta
+              - button "Pin EIR Matrix (ISO 19650)" [ref=e874] [box=205,1273,15,15]
+      - generic [ref=e877] [box=11,1314,218,158]:
+        - button "Collapse Scheduling" [expanded] [ref=e879] [cursor=pointer] [box=11,1314,218,22]:
+          - generic [ref=e880] [box=19,1317,84,15]: Scheduling
+        - list [ref=e885] [box=11,1338,218,134]:
+          - listitem [ref=e886] [box=11,1338,218,25]:
+            - link "4D Schedule Pin 4D Schedule" [ref=e887] [cursor=pointer] [box=11,1338,218,25]:
+              - /url: /schedule
+              - generic "4D Schedule" [ref=e890] [box=47,1341,71,18]
+              - button "Pin 4D Schedule" [ref=e895] [box=205,1343,15,15]
+          - listitem [ref=e898] [box=11,1365,218,25]:
+            - link "Advanced Schedule Pin Advanced Schedule" [ref=e899] [cursor=pointer] [box=11,1365,218,25]:
+              - /url: /schedule-advanced
+              - generic "Advanced Schedule" [ref=e903] [box=47,1369,110,18]
+              - button "Pin Advanced Schedule" [ref=e908] [box=205,1370,15,15]
+          - listitem [ref=e911] [box=11,1392,218,25]:
+            - link "Portfolio Pin Portfolio" [ref=e912] [cursor=pointer] [box=11,1392,218,25]:
+              - /url: /portfolio
+              - generic "Portfolio" [ref=e918] [box=47,1396,45,18]
+              - button "Pin Portfolio" [ref=e923] [box=205,1397,15,15]
+          - listitem [ref=e926] [box=11,1419,218,25]:
+            - link "Takt Planning Pin Takt Planning" [ref=e927] [cursor=pointer] [box=11,1419,218,25]:
+              - /url: /takt
+              - generic "Takt Planning" [ref=e932] [box=47,1423,74,18]
+              - button "Pin Takt Planning" [ref=e937] [box=205,1425,15,15]
+          - listitem [ref=e940] [box=11,1447,218,25]:
+            - link "Tasks Pin Tasks" [ref=e941] [cursor=pointer] [box=11,1447,218,25]:
+              - /url: /tasks
+              - generic "Tasks" [ref=e945] [box=47,1450,32,18]
+              - button "Pin Tasks" [ref=e950] [box=205,1452,15,15]
+      - generic [ref=e953] [box=11,1483,218,258]:
+        - button "Collapse Cost Control & Risk" [expanded] [ref=e955] [cursor=pointer] [box=11,1483,218,22]:
+          - generic [ref=e956] [box=19,1487,142,15]: Cost Control & Risk
+        - list [ref=e961] [box=11,1507,218,234]:
+          - listitem [ref=e962] [box=11,1507,218,25]:
+            - link "5D Cost Model Pin 5D Cost Model" [ref=e963] [cursor=pointer] [box=11,1507,218,25]:
+              - /url: /5d
+              - generic "5D Cost Model" [ref=e967] [box=47,1511,82,18]
+              - button "Pin 5D Cost Model" [ref=e972] [box=205,1513,15,15]
+          - listitem [ref=e975] [box=11,1535,218,25]:
+            - link "Progress Pin Progress" [ref=e976] [cursor=pointer] [box=11,1535,218,25]:
+              - /url: /progress
+              - generic "Progress" [ref=e979] [box=47,1538,49,18]
+              - button "Pin Progress" [ref=e984] [box=205,1540,15,15]
+          - listitem [ref=e987] [box=11,1562,218,25]:
+            - link "Earned Value Pin Earned Value" [ref=e988] [cursor=pointer] [box=11,1562,218,25]:
+              - /url: /full-evm
+              - generic "Earned Value" [ref=e992] [box=47,1566,74,18]
+              - button "Pin Earned Value" [ref=e997] [box=205,1567,15,15]
+          - listitem [ref=e1000] [box=11,1589,218,25]:
+            - link "Capacity Planning Pin Capacity Planning" [ref=e1001] [cursor=pointer] [box=11,1589,218,25]:
+              - /url: /portfolio/capacity
+              - generic "Capacity Planning" [ref=e1004] [box=47,1593,99,18]
+              - button "Pin Capacity Planning" [ref=e1009] [box=205,1594,15,15]
+          - listitem [ref=e1012] [box=11,1616,218,25]:
+            - link "Resource Leveling Pin Resource Leveling" [ref=e1013] [cursor=pointer] [box=11,1616,218,25]:
+              - /url: /portfolio/leveling
+              - generic "Resource Leveling" [ref=e1018] [box=47,1620,102,18]
+              - button "Pin Resource Leveling" [ref=e1023] [box=205,1622,15,15]
+          - listitem [ref=e1026] [box=11,1644,218,25]:
+            - link "Risk Register Pin Risk Register" [ref=e1027] [cursor=pointer] [box=11,1644,218,25]:
+              - /url: /risks
+              - generic "Risk Register" [ref=e1030] [box=47,1647,73,18]
+              - button "Pin Risk Register" [ref=e1035] [box=205,1649,15,15]
+          - listitem [ref=e1038] [box=11,1671,218,43]:
+            - link "Cost-Value Reconciliation Pin Cost-Value Reconciliation" [ref=e1039] [cursor=pointer] [box=11,1671,218,43]:
+              - /url: /cvr
+              - generic "Cost-Value Reconciliation" [ref=e1044] [box=47,1675,122,36]
+              - button "Pin Cost-Value Reconciliation" [ref=e1049] [box=205,1685,15,15]
+          - listitem [ref=e1052] [box=11,1716,218,25]:
+            - link "Post-calculation Pin Post-calculation" [ref=e1053] [cursor=pointer] [box=11,1716,218,25]:
+              - /url: /postcalc
+              - generic "Post-calculation" [ref=e1057] [box=47,1720,86,18]
+              - button "Pin Post-calculation" [ref=e1062] [box=205,1721,15,15]
+      - generic [ref=e1065] [box=11,1753,218,204]:
+        - button "Collapse Commercial" [expanded] [ref=e1067] [cursor=pointer] [box=11,1753,218,22]:
+          - generic [ref=e1068] [box=19,1756,87,15]: Commercial
+        - list [ref=e1073] [box=11,1777,218,179]:
+          - listitem [ref=e1074] [box=11,1777,218,25]:
+            - link "CRM Pin CRM" [ref=e1075] [cursor=pointer] [box=11,1777,218,25]:
+              - /url: /crm
+              - generic "CRM" [ref=e1079] [box=47,1780,29,18]
+              - button "Pin CRM" [ref=e1084] [box=205,1782,15,15]
+          - listitem [ref=e1087] [box=11,1804,218,25]:
+            - link "Contracts Pin Contracts" [ref=e1088] [cursor=pointer] [box=11,1804,218,25]:
+              - /url: /contracts
+              - generic "Contracts" [ref=e1092] [box=47,1808,53,18]
+              - button "Pin Contracts" [ref=e1097] [box=205,1809,15,15]
+          - listitem [ref=e1100] [box=11,1831,218,25]:
+            - link "Payment Clock Pin Payment Clock" [ref=e1101] [cursor=pointer] [box=11,1831,218,25]:
+              - /url: /payment-clock
+              - generic "Payment Clock" [ref=e1106] [box=47,1835,83,18]
+              - button "Pin Payment Clock" [ref=e1111] [box=205,1836,15,15]
+          - listitem [ref=e1114] [box=11,1858,218,25]:
+            - link "Withholding Tax Pin Withholding Tax" [ref=e1115] [cursor=pointer] [box=11,1858,218,25]:
+              - /url: /tax-withholding
+              - generic "Withholding Tax" [ref=e1120] [box=47,1862,87,18]
+              - button "Pin Withholding Tax" [ref=e1125] [box=205,1864,15,15]
+          - listitem [ref=e1128] [box=11,1886,218,25]:
+            - link "E-invoice Clearance Pin E-invoice Clearance" [ref=e1129] [cursor=pointer] [box=11,1886,218,25]:
+              - /url: /einvoice-clearance
+              - generic "E-invoice Clearance" [ref=e1133] [box=47,1889,110,18]
+              - button "Pin E-invoice Clearance" [ref=e1138] [box=205,1891,15,15]
+          - listitem [ref=e1141] [box=11,1913,218,43]:
+            - link "Subcontractor Directory Pin Subcontractor Directory" [ref=e1142] [cursor=pointer] [box=11,1913,218,43]:
+              - /url: /subcontractors
+              - generic "Subcontractor Directory" [ref=e1148] [box=47,1917,122,36]
+              - button "Pin Subcontractor Directory" [ref=e1153] [box=205,1927,15,15]
+      - generic [ref=e1156] [box=11,1967,218,131]:
+        - button "Collapse Procurement" [expanded] [ref=e1158] [cursor=pointer] [box=11,1967,218,22]:
+          - generic [ref=e1159] [box=19,1971,97,15]: Procurement
+        - list [ref=e1164] [box=11,1991,218,107]:
+          - listitem [ref=e1165] [box=11,1991,218,25]:
+            - link "Procurement Pin Procurement" [ref=e1166] [cursor=pointer] [box=11,1991,218,25]:
+              - /url: /procurement
+              - generic "Procurement" [ref=e1171] [box=47,1995,71,18]
+              - button "Pin Procurement" [ref=e1176] [box=205,1997,15,15]
+          - listitem [ref=e1179] [box=11,2019,218,25]:
+            - link "Bid Management Pin Bid Management" [ref=e1180] [cursor=pointer] [box=11,2019,218,25]:
+              - /url: /bid-management
+              - generic "Bid Management" [ref=e1185] [box=47,2022,94,18]
+              - button "Pin Bid Management" [ref=e1190] [box=205,2024,15,15]
+          - listitem [ref=e1193] [box=11,2046,218,25]:
+            - link "Tendering Pin Tendering" [ref=e1194] [cursor=pointer] [box=11,2046,218,25]:
+              - /url: /tendering
+              - generic "Tendering" [ref=e1198] [box=47,2050,54,18]
+              - button "Pin Tendering" [ref=e1203] [box=205,2051,15,15]
+          - listitem [ref=e1206] [box=11,2073,218,25]:
+            - link "Supplier Catalogs Pin Supplier Catalogs" [ref=e1207] [cursor=pointer] [box=11,2073,218,25]:
+              - /url: /supplier-catalogs
+              - generic "Supplier Catalogs" [ref=e1212] [box=47,2077,97,18]
+              - button "Pin Supplier Catalogs" [ref=e1217] [box=205,2078,15,15]
+      - generic [ref=e1220] [box=11,2110,218,176]:
+        - button "Collapse Estimate Detail" [expanded] [ref=e1222] [cursor=pointer] [box=11,2110,218,22]:
+          - generic [ref=e1223] [box=19,2114,110,15]: Estimate Detail
+        - list [ref=e1228] [box=11,2134,218,152]:
+          - listitem [ref=e1229] [box=11,2134,218,25]:
+            - link "Basis of Estimate Pin Basis of Estimate" [ref=e1230] [cursor=pointer] [box=11,2134,218,25]:
+              - /url: /estimate-basis
+              - generic "Basis of Estimate" [ref=e1234] [box=47,2138,95,18]
+              - button "Pin Basis of Estimate" [ref=e1239] [box=205,2139,15,15]
+          - listitem [ref=e1242] [box=11,2161,218,25]:
+            - link "General conditions Pin General conditions" [ref=e1243] [cursor=pointer] [box=11,2161,218,25]:
+              - /url: /preliminaries
+              - generic "General conditions" [ref=e1247] [box=47,2165,102,18]
+              - button "Pin General conditions" [ref=e1252] [box=205,2166,15,15]
+          - listitem [ref=e1255] [box=11,2188,218,43]:
+            - link "Allowances & Contingency Pin Allowances & Contingency" [ref=e1256] [cursor=pointer] [box=11,2188,218,43]:
+              - /url: /allowances
+              - generic "Allowances & Contingency" [ref=e1260] [box=47,2192,122,36]
+              - button "Pin Allowances & Contingency" [ref=e1265] [box=205,2203,15,15]
+          - listitem [ref=e1268] [box=11,2233,218,25]:
+            - link "Design Options Pin Design Options" [ref=e1269] [cursor=pointer] [box=11,2233,218,25]:
+              - /url: /design-options
+              - generic "Design Options" [ref=e1274] [box=47,2237,84,18]
+              - button "Pin Design Options" [ref=e1279] [box=205,2239,15,15]
+          - listitem [ref=e1282] [box=11,2261,218,25]:
+            - link "Formwork Pin Formwork" [ref=e1283] [cursor=pointer] [box=11,2261,218,25]:
+              - /url: /formwork
+              - generic "Formwork" [ref=e1294] [box=47,2264,55,18]
+              - button "Pin Formwork" [ref=e1299] [box=205,2266,15,15]
+      - generic [ref=e1302] [box=11,2297,218,204]:
+        - button "Collapse Change" [expanded] [ref=e1304] [cursor=pointer] [box=11,2297,218,22]:
+          - generic [ref=e1305] [box=19,2301,58,15]: Change
+        - list [ref=e1310] [box=11,2321,218,179]:
+          - listitem [ref=e1311] [box=11,2321,218,25]:
+            - link "Variations Pin Variations" [ref=e1312] [cursor=pointer] [box=11,2321,218,25]:
+              - /url: /variations
+              - generic "Variations" [ref=e1317] [box=47,2325,54,18]
+              - button "Pin Variations" [ref=e1322] [box=205,2327,15,15]
+          - listitem [ref=e1325] [box=11,2349,218,43]:
+            - link "Management of Change Pin Management of Change" [ref=e1326] [cursor=pointer] [box=11,2349,218,43]:
+              - /url: /moc
+              - generic "Management of Change" [ref=e1335] [box=47,2352,122,36]
+              - button "Pin Management of Change" [ref=e1340] [box=205,2363,15,15]
+          - listitem [ref=e1343] [box=11,2394,218,25]:
+            - link "Change Orders Pin Change Orders" [ref=e1344] [cursor=pointer] [box=11,2394,218,25]:
+              - /url: /changeorders
+              - generic "Change Orders" [ref=e1349] [box=47,2398,85,18]
+              - button "Pin Change Orders" [ref=e1354] [box=205,2399,15,15]
+          - listitem [ref=e1357] [box=11,2421,218,25]:
+            - link "Change Intelligence Pin Change Intelligence" [ref=e1358] [cursor=pointer] [box=11,2421,218,25]:
+              - /url: /change-intelligence
+              - generic "Change Intelligence" [ref=e1371] [box=47,2425,109,18]
+              - button "Pin Change Intelligence" [ref=e1376] [box=205,2426,15,15]
+          - listitem [ref=e1379] [box=11,2448,218,25]:
+            - link "Claims Evidence Pin Claims Evidence" [ref=e1380] [cursor=pointer] [box=11,2448,218,25]:
+              - /url: /claims-evidence
+              - generic "Claims Evidence" [ref=e1384] [box=47,2452,92,18]
+              - button "Pin Claims Evidence" [ref=e1389] [box=205,2453,15,15]
+          - listitem [ref=e1392] [box=11,2476,218,25]:
+            - link "Value Realized Pin Value Realized" [ref=e1393] [cursor=pointer] [box=11,2476,218,25]:
+              - /url: /value
+              - generic "Value Realized" [ref=e1397] [box=47,2479,82,18]
+              - button "Pin Value Realized" [ref=e1402] [box=205,2481,15,15]
+      - generic [ref=e1405] [box=11,2512,218,231]:
+        - button "Collapse Records & Capture" [expanded] [ref=e1407] [cursor=pointer] [box=11,2512,218,22]:
+          - generic [ref=e1408] [box=19,2516,135,15]: Records & Capture
+        - list [ref=e1413] [box=11,2536,218,207]:
+          - listitem [ref=e1414] [box=11,2536,218,25]:
+            - link "Phone Log Pin Phone Log" [ref=e1415] [cursor=pointer] [box=11,2536,218,25]:
+              - /url: /phone-log
+              - generic "Phone Log" [ref=e1418] [box=47,2540,60,18]
+              - button "Pin Phone Log" [ref=e1423] [box=205,2541,15,15]
+          - listitem [ref=e1426] [box=11,2563,218,43]:
+            - link "Document Connectors Pin Document Connectors" [ref=e1427] [cursor=pointer] [box=11,2563,218,43]:
+              - /url: /connectors
+              - generic "Document Connectors" [ref=e1430] [box=47,2567,122,36]
+              - button "Pin Document Connectors" [ref=e1435] [box=205,2578,15,15]
+          - listitem [ref=e1438] [box=11,2609,218,25]:
+            - link "Event Reconciliation Pin Event Reconciliation" [ref=e1439] [cursor=pointer] [box=11,2609,218,25]:
+              - /url: /reconciliation
+              - generic "Event Reconciliation" [ref=e1443] [box=47,2612,111,18]
+              - button "Pin Event Reconciliation" [ref=e1448] [box=205,2614,15,15]
+          - listitem [ref=e1451] [box=11,2636,218,25]:
+            - link "Inbound Capture Pin Inbound Capture" [ref=e1452] [cursor=pointer] [box=11,2636,218,25]:
+              - /url: /inbound
+              - generic "Inbound Capture" [ref=e1457] [box=47,2640,92,18]
+              - button "Pin Inbound Capture" [ref=e1462] [box=205,2641,15,15]
+          - listitem [ref=e1465] [box=11,2663,218,25]:
+            - link "Email Delay Scan Pin Email Delay Scan" [ref=e1466] [cursor=pointer] [box=11,2663,218,25]:
+              - /url: /inbound-email
+              - generic "Email Delay Scan" [ref=e1470] [box=47,2667,97,18]
+              - button "Pin Email Delay Scan" [ref=e1475] [box=205,2668,15,15]
+          - listitem [ref=e1478] [box=11,2690,218,25]:
+            - link "Find Records Pin Find Records" [ref=e1479] [cursor=pointer] [box=11,2690,218,25]:
+              - /url: /find
+              - generic "Find Records" [ref=e1485] [box=47,2694,73,18]
+              - button "Pin Find Records" [ref=e1490] [box=205,2695,15,15]
+          - listitem [ref=e1493] [box=11,2718,218,25]:
+            - link "Route Classifier Pin Route Classifier" [ref=e1494] [cursor=pointer] [box=11,2718,218,25]:
+              - /url: /project-route
+              - generic "Route Classifier" [ref=e1496] [box=47,2721,86,18]
+              - button "Pin Route Classifier" [ref=e1501] [box=205,2723,15,15]
+      - generic [ref=e1504] [box=11,2754,218,104]:
+        - button "Collapse Field Operations" [expanded] [ref=e1506] [cursor=pointer] [box=11,2754,218,22]:
+          - generic [ref=e1507] [box=19,2758,120,15]: Field Operations
+        - list [ref=e1512] [box=11,2778,218,80]:
+          - listitem [ref=e1513] [box=11,2778,218,25]:
+            - link "Daily Diary Pin Daily Diary" [ref=e1514] [cursor=pointer] [box=11,2778,218,25]:
+              - /url: /daily-diary
+              - generic "Daily Diary" [ref=e1517] [box=47,2782,59,18]
+              - button "Pin Daily Diary" [ref=e1522] [box=205,2783,15,15]
+          - listitem [ref=e1525] [box=11,2805,218,25]:
+            - link "Field Reports Pin Field Reports" [ref=e1526] [cursor=pointer] [box=11,2805,218,25]:
+              - /url: /field-reports
+              - generic "Field Reports" [ref=e1530] [box=47,2809,73,18]
+              - button "Pin Field Reports" [ref=e1535] [box=205,2811,15,15]
+          - listitem [ref=e1538] [box=11,2833,218,25]:
+            - link "Field Time Pin Field Time" [ref=e1539] [cursor=pointer] [box=11,2833,218,25]:
+              - /url: /field-time
+              - generic "Field Time" [ref=e1543] [box=47,2836,57,18]
+              - button "Pin Field Time" [ref=e1548] [box=205,2838,15,15]
+      - generic [ref=e1551] [box=11,2869,218,204]:
+        - button "Collapse On Site" [expanded] [ref=e1553] [cursor=pointer] [box=11,2869,218,22]:
+          - generic [ref=e1554] [box=19,2873,55,15]: On Site
+        - list [ref=e1559] [box=11,2893,218,179]:
+          - listitem [ref=e1560] [box=11,2893,218,25]:
+            - link "Site Mobilisation Pin Site Mobilisation" [ref=e1561] [cursor=pointer] [box=11,2893,218,25]:
+              - /url: /site-prep
+              - generic "Site Mobilisation" [ref=e1564] [box=47,2897,89,18]
+              - button "Pin Site Mobilisation" [ref=e1569] [box=205,2899,15,15]
+          - listitem [ref=e1572] [box=11,2921,218,43]:
+            - link "Service & Maintenance Pin Service & Maintenance" [ref=e1573] [cursor=pointer] [box=11,2921,218,43]:
+              - /url: /service
+              - generic "Service & Maintenance" [ref=e1576] [box=47,2924,122,36]
+              - button "Pin Service & Maintenance" [ref=e1581] [box=205,2935,15,15]
+          - listitem [ref=e1584] [box=11,2966,218,25]:
+            - link "Site Logistics Pin Site Logistics" [ref=e1585] [cursor=pointer] [box=11,2966,218,25]:
+              - /url: /site-logistics
+              - generic "Site Logistics" [ref=e1591] [box=47,2970,72,18]
+              - button "Pin Site Logistics" [ref=e1596] [box=205,2971,15,15]
+          - listitem [ref=e1599] [box=11,2993,218,25]:
+            - link "Site Inventory Pin Site Inventory" [ref=e1600] [cursor=pointer] [box=11,2993,218,25]:
+              - /url: /site-inventory
+              - generic "Site Inventory" [ref=e1604] [box=47,2997,75,18]
+              - button "Pin Site Inventory" [ref=e1609] [box=205,2998,15,15]
+          - listitem [ref=e1612] [box=11,3020,218,25]:
+            - link "Site Supervision Pin Site Supervision" [ref=e1613] [cursor=pointer] [box=11,3020,218,25]:
+              - /url: /site-supervision
+              - generic "Site Supervision" [ref=e1619] [box=47,3024,89,18]
+              - button "Pin Site Supervision" [ref=e1624] [box=205,3025,15,15]
+          - listitem [ref=e1627] [box=11,3048,218,25]:
+            - link "Client & Partner Portal Pin Client & Partner Portal" [ref=e1628] [cursor=pointer] [box=11,3048,218,25]:
+              - /url: /portal
+              - generic "Client & Partner Portal" [ref=e1632] [box=47,3051,122,18]
+              - button "Pin Client & Partner Portal" [ref=e1637] [box=205,3053,15,15]
+      - generic [ref=e1640] [box=11,3084,218,213]:
+        - button "Collapse Resources & Assets" [expanded] [ref=e1642] [cursor=pointer] [box=11,3084,218,22]:
+          - generic [ref=e1643] [box=19,3088,140,15]: Resources & Assets
+        - list [ref=e1648] [box=11,3108,218,189]:
+          - listitem [ref=e1649] [box=11,3108,218,25]:
+            - link "Equipment & Fleet Pin Equipment & Fleet" [ref=e1650] [cursor=pointer] [box=11,3108,218,25]:
+              - /url: /equipment
+              - generic "Equipment & Fleet" [ref=e1656] [box=47,3112,101,18]
+              - button "Pin Equipment & Fleet" [ref=e1661] [box=205,3113,15,15]
+          - listitem [ref=e1664] [box=11,3135,218,25]:
+            - link "Resources & Crew Pin Resources & Crew" [ref=e1665] [cursor=pointer] [box=11,3135,218,25]:
+              - /url: /resources
+              - generic "Resources & Crew" [ref=e1671] [box=47,3139,103,18]
+              - button "Pin Resources & Crew" [ref=e1676] [box=205,3141,15,15]
+          - listitem [ref=e1679] [box=11,3163,218,25]:
+            - link "Credentials Pin Credentials" [ref=e1680] [cursor=pointer] [box=11,3163,218,25]:
+              - /url: /credentials
+              - generic "Credentials" [ref=e1684] [box=47,3166,62,18]
+              - button "Pin Credentials" [ref=e1689] [box=205,3168,15,15]
+          - listitem [ref=e1692] [box=11,3190,218,25]:
+            - link "Payroll Pin Payroll" [ref=e1693] [cursor=pointer] [box=11,3190,218,25]:
+              - /url: /payroll
+              - generic "Payroll" [ref=e1697] [box=47,3194,37,18]
+              - button "Pin Payroll" [ref=e1702] [box=205,3195,15,15]
+          - listitem [ref=e1705] [box=11,3217,218,25]:
+            - link "Certified Payroll Pin Certified Payroll" [ref=e1706] [cursor=pointer] [box=11,3217,218,25]:
+              - /url: /certified-payroll
+              - generic "Certified Payroll" [ref=e1711] [box=47,3221,86,18]
+              - button "Pin Certified Payroll" [ref=e1716] [box=205,3222,15,15]
+          - listitem [ref=e1719] [box=11,3244,218,25]:
+            - link "Building Assets (FM) Pin Building Assets (FM)" [ref=e1720] [cursor=pointer] [box=11,3244,218,25]:
+              - /url: /assets
+              - generic "Building Assets (FM)" [ref=e1725] [box=47,3248,113,18]
+              - button "Pin Building Assets (FM)" [ref=e1730] [box=205,3250,15,15]
+          - listitem [ref=e1733] [box=11,3272,218,25]:
+            - link "Off-site / Prefab Pin Off-site / Prefab" [ref=e1734] [cursor=pointer] [box=11,3272,218,25]:
+              - /url: /prefab
+              - generic "Off-site / Prefab" [ref=e1737] [box=47,3275,85,18]
+              - button "Pin Off-site / Prefab" [ref=e1742] [box=205,3277,15,15]
+      - generic [ref=e1745] [box=11,3308,218,240]:
+        - button "Collapse Quality" [expanded] [ref=e1747] [cursor=pointer] [box=11,3308,218,22]:
+          - generic [ref=e1748] [box=19,3312,59,15]: Quality
+        - list [ref=e1753] [box=11,3332,218,216]:
+          - listitem [ref=e1754] [box=11,3332,218,25]:
+            - link "Issues Pin Issues" [ref=e1755] [cursor=pointer] [box=11,3332,218,25]:
+              - /url: /issues
+              - generic "Issues" [ref=e1759] [box=47,3336,36,18]
+              - button "Pin Issues" [ref=e1764] [box=205,3338,15,15]
+          - listitem [ref=e1767] [box=11,3360,218,25]:
+            - link "Validation Pin Validation" [ref=e1768] [cursor=pointer] [box=11,3360,218,25]:
+              - /url: /validation
+              - generic "Validation" [ref=e1772] [box=47,3363,53,18]
+              - button "Pin Validation" [ref=e1777] [box=205,3365,15,15]
+          - listitem [ref=e1780] [box=11,3387,218,25]:
+            - link "Inspections Pin Inspections" [ref=e1781] [cursor=pointer] [box=11,3387,218,25]:
+              - /url: /inspections
+              - generic "Inspections" [ref=e1786] [box=47,3391,62,18]
+              - button "Pin Inspections" [ref=e1791] [box=205,3392,15,15]
+          - listitem [ref=e1794] [box=11,3414,218,25]:
+            - link "Construction Control Pin Construction Control" [ref=e1795] [cursor=pointer] [box=11,3414,218,25]:
+              - /url: /construction-control
+              - generic "Construction Control" [ref=e1799] [box=47,3418,112,18]
+              - button "Pin Construction Control" [ref=e1804] [box=205,3419,15,15]
+          - listitem [ref=e1807] [box=11,3441,218,25]:
+            - link "NCRs Pin NCRs" [ref=e1808] [cursor=pointer] [box=11,3441,218,25]:
+              - /url: /ncr
+              - generic "NCRs" [ref=e1811] [box=47,3445,33,18]
+              - button "Pin NCRs" [ref=e1816] [box=205,3447,15,15]
+          - listitem [ref=e1819] [box=11,3469,218,25]:
+            - link "Punch List Pin Punch List" [ref=e1820] [cursor=pointer] [box=11,3469,218,25]:
+              - /url: /punchlist
+              - generic "Punch List" [ref=e1824] [box=47,3472,57,18]
+              - button "Pin Punch List" [ref=e1829] [box=205,3474,15,15]
+          - listitem [ref=e1832] [box=11,3496,218,25]:
+            - link "Deadlines Pin Deadlines" [ref=e1833] [cursor=pointer] [box=11,3496,218,25]:
+              - /url: /deadlines
+              - generic "Deadlines" [ref=e1841] [box=47,3500,55,18]
+              - button "Pin Deadlines" [ref=e1846] [box=205,3501,15,15]
+          - listitem [ref=e1849] [box=11,3523,218,25]:
+            - link "Review Authority Pin Review Authority" [ref=e1850] [cursor=pointer] [box=11,3523,218,25]:
+              - /url: /review-authority
+              - generic "Review Authority" [ref=e1855] [box=47,3527,92,18]
+              - button "Pin Review Authority" [ref=e1860] [box=205,3528,15,15]
+      - generic [ref=e1863] [box=11,3560,218,149]:
+        - button "Collapse Handover & Commissioning" [expanded] [ref=e1865] [cursor=pointer] [box=11,3560,218,22]:
+          - generic [ref=e1866] [box=19,3563,183,15]: Handover & Commissioning
+        - list [ref=e1871] [box=11,3584,218,125]:
+          - listitem [ref=e1872] [box=11,3584,218,25]:
+            - link "Commissioning Pin Commissioning" [ref=e1873] [cursor=pointer] [box=11,3584,218,25]:
+              - /url: /commissioning
+              - generic "Commissioning" [ref=e1878] [box=47,3588,85,18]
+              - button "Pin Commissioning" [ref=e1883] [box=205,3589,15,15]
+          - listitem [ref=e1886] [box=11,3611,218,25]:
+            - link "Handover & Closeout Pin Handover & Closeout" [ref=e1887] [cursor=pointer] [box=11,3611,218,25]:
+              - /url: /closeout
+              - generic "Handover & Closeout" [ref=e1893] [box=47,3615,117,18]
+              - button "Pin Handover & Closeout" [ref=e1898] [box=205,3616,15,15]
+          - listitem [ref=e1901] [box=11,3638,218,43]:
+            - link "Warranties & Defects Liability Pin Warranties & Defects Liability" [ref=e1902] [cursor=pointer] [box=11,3638,218,43]:
+              - /url: /defects-liability
+              - generic "Warranties & Defects Liability" [ref=e1905] [box=47,3642,122,36]
+              - button "Pin Warranties & Defects Liability" [ref=e1910] [box=205,3652,15,15]
+          - listitem [ref=e1913] [box=11,3683,218,25]:
+            - link "Forms & checklists Pin Forms & checklists" [ref=e1914] [cursor=pointer] [box=11,3683,218,25]:
+              - /url: /forms
+              - generic "Forms & checklists" [ref=e1918] [box=47,3687,103,18]
+              - button "Pin Forms & checklists" [ref=e1923] [box=205,3689,15,15]
+      - generic [ref=e1926] [box=11,3720,218,131]:
+        - button "Collapse Safety & ESG" [expanded] [ref=e1928] [cursor=pointer] [box=11,3720,218,22]:
+          - generic [ref=e1929] [box=19,3724,93,15]: Safety & ESG
+        - list [ref=e1934] [box=11,3744,218,107]:
+          - listitem [ref=e1935] [box=11,3744,218,25]:
+            - link "Safety Pin Safety" [ref=e1936] [cursor=pointer] [box=11,3744,218,25]:
+              - /url: /safety
+              - generic "Safety" [ref=e1942] [box=47,3748,35,18]
+              - button "Pin Safety" [ref=e1947] [box=205,3749,15,15]
+          - listitem [ref=e1950] [box=11,3771,218,25]:
+            - link "HSE Management Pin HSE Management" [ref=e1951] [cursor=pointer] [box=11,3771,218,25]:
+              - /url: /hse-advanced
+              - generic "HSE Management" [ref=e1954] [box=47,3775,102,18]
+              - button "Pin HSE Management" [ref=e1959] [box=205,3777,15,15]
+          - listitem [ref=e1962] [box=11,3799,218,25]:
+            - link "Temporary Works Pin Temporary Works" [ref=e1963] [cursor=pointer] [box=11,3799,218,25]:
+              - /url: /temporary-works
+              - generic "Temporary Works" [ref=e1969] [box=47,3802,97,18]
+              - button "Pin Temporary Works" [ref=e1974] [box=205,3804,15,15]
+          - listitem [ref=e1977] [box=11,3826,218,25]:
+            - link "Quality Management Pin Quality Management" [ref=e1978] [cursor=pointer] [box=11,3826,218,25]:
+              - /url: /qms
+              - generic "Quality Management" [ref=e1982] [box=47,3830,114,18]
+              - button "Pin Quality Management" [ref=e1987] [box=205,3831,15,15]
+      - generic [ref=e1990] [box=11,3862,218,122]:
+        - button "Collapse ESG & Carbon" [expanded] [ref=e1992] [cursor=pointer] [box=11,3862,218,22]:
+          - generic [ref=e1993] [box=19,3866,97,15]: ESG & Carbon
+        - list [ref=e1998] [box=11,3887,218,98]:
+          - listitem [ref=e1999] [box=11,3887,218,25]:
+            - link "Carbon & ESG Pin Carbon & ESG" [ref=e2000] [cursor=pointer] [box=11,3887,218,25]:
+              - /url: /carbon
+              - generic "Carbon & ESG" [ref=e2004] [box=47,3890,82,18]
+              - button "Pin Carbon & ESG" [ref=e2009] [box=205,3892,15,15]
+          - listitem [ref=e2012] [box=11,3914,218,25]:
+            - link "Sustainability Pin Sustainability" [ref=e2013] [cursor=pointer] [box=11,3914,218,25]:
+              - /url: /sustainability
+              - generic "Sustainability" [ref=e2017] [box=47,3918,72,18]
+              - button "Pin Sustainability" [ref=e2022] [box=205,3919,15,15]
+          - listitem [ref=e2025] [box=11,3941,218,43]:
+            - link "ESG Site Performance Pin ESG Site Performance" [ref=e2026] [cursor=pointer] [box=11,3941,218,43]:
+              - /url: /esg
+              - generic "ESG Site Performance" [ref=e2030] [box=47,3945,122,36]
+              - button "Pin ESG Site Performance" [ref=e2035] [box=205,3955,15,15]
+      - generic [ref=e2038] [box=11,3995,218,240]:
+        - button "Collapse Communication" [expanded] [ref=e2040] [cursor=pointer] [box=11,3995,218,22]:
+          - generic [ref=e2041] [box=19,3999,107,15]: Communication
+        - list [ref=e2046] [box=11,4020,218,216]:
+          - listitem [ref=e2047] [box=11,4020,218,25]:
+            - link "Contacts Pin Contacts" [ref=e2048] [cursor=pointer] [box=11,4020,218,25]:
+              - /url: /contacts
+              - generic "Contacts" [ref=e2054] [box=47,4023,49,18]
+              - button "Pin Contacts" [ref=e2059] [box=205,4025,15,15]
+          - listitem [ref=e2062] [box=11,4047,218,25]:
+            - link "Teams and visibility Pin Teams and visibility" [ref=e2063] [cursor=pointer] [box=11,4047,218,25]:
+              - /url: /teams
+              - generic "Teams and visibility" [ref=e2067] [box=47,4051,105,18]
+              - button "Pin Teams and visibility" [ref=e2072] [box=205,4052,15,15]
+          - listitem [ref=e2075] [box=11,4074,218,25]:
+            - link "Meetings Pin Meetings" [ref=e2076] [cursor=pointer] [box=11,4074,218,25]:
+              - /url: /meetings
+              - generic "Meetings" [ref=e2079] [box=47,4078,50,18]
+              - button "Pin Meetings" [ref=e2084] [box=205,4079,15,15]
+          - listitem [ref=e2087] [box=11,4101,218,25]:
+            - link "RFIs Pin RFIs" [ref=e2088] [cursor=pointer] [box=11,4101,218,25]:
+              - /url: /rfi
+              - generic "RFIs" [ref=e2092] [box=47,4105,26,18]
+              - button "Pin RFIs" [ref=e2097] [box=205,4106,15,15]
+          - listitem [ref=e2100] [box=11,4129,218,25]:
+            - link "Interface Register Pin Interface Register" [ref=e2101] [cursor=pointer] [box=11,4129,218,25]:
+              - /url: /interface-management
+              - generic "Interface Register" [ref=e2107] [box=47,4132,97,18]
+              - button "Pin Interface Register" [ref=e2112] [box=205,4134,15,15]
+          - listitem [ref=e2115] [box=11,4156,218,25]:
+            - link "Correspondence Pin Correspondence" [ref=e2116] [cursor=pointer] [box=11,4156,218,25]:
+              - /url: /correspondence
+              - generic "Correspondence" [ref=e2120] [box=47,4160,92,18]
+              - button "Pin Correspondence" [ref=e2125] [box=205,4161,15,15]
+          - listitem [ref=e2128] [box=11,4183,218,25]:
+            - link "Authority Submissions Pin Authority Submissions" [ref=e2129] [cursor=pointer] [box=11,4183,218,25]:
+              - /url: /authority-submissions
+              - generic "Authority Submissions" [ref=e2133] [box=47,4187,122,18]
+              - button "Pin Authority Submissions" [ref=e2138] [box=205,4188,15,15]
+          - listitem [ref=e2141] [box=11,4210,218,25]:
+            - link "Collaboration Pin Collaboration" [ref=e2142] [cursor=pointer] [box=11,4210,218,25]:
+              - /url: /collaboration
+              - generic "Collaboration" [ref=e2148] [box=47,4214,72,18]
+              - button "Pin Collaboration" [ref=e2153] [box=205,4215,15,15]
+      - generic [ref=e2156] [box=11,4247,218,204]:
+        - button "Collapse Documents" [expanded] [ref=e2158] [cursor=pointer] [box=11,4247,218,22]:
+          - generic [ref=e2159] [box=19,4251,81,15]: Documents
+        - list [ref=e2164] [box=11,4271,218,179]:
+          - listitem [ref=e2165] [box=11,4271,218,25]:
+            - link "Submittals Pin Submittals" [ref=e2166] [cursor=pointer] [box=11,4271,218,25]:
+              - /url: /submittals
+              - generic "Submittals" [ref=e2171] [box=47,4275,57,18]
+              - button "Pin Submittals" [ref=e2176] [box=205,4276,15,15]
+          - listitem [ref=e2179] [box=11,4298,218,25]:
+            - link "Transmittals Pin Transmittals" [ref=e2180] [cursor=pointer] [box=11,4298,218,25]:
+              - /url: /transmittals
+              - generic "Transmittals" [ref=e2184] [box=47,4302,66,18]
+              - button "Pin Transmittals" [ref=e2189] [box=205,4303,15,15]
+          - listitem [ref=e2192] [box=11,4325,218,43]:
+            - link "Common Data Environment Pin Common Data Environment" [ref=e2193] [cursor=pointer] [box=11,4325,218,43]:
+              - /url: /cde
+              - generic "Common Data Environment" [ref=e2198] [box=47,4329,122,36]
+              - button "Pin Common Data Environment" [ref=e2203] [box=205,4340,15,15]
+          - listitem [ref=e2206] [box=11,4371,218,25]:
+            - link "Source Data Pin Source Data" [ref=e2207] [cursor=pointer] [box=11,4371,218,25]:
+              - /url: /source-data
+              - generic "Source Data" [ref=e2212] [box=47,4374,69,18]
+              - button "Pin Source Data" [ref=e2217] [box=205,4376,15,15]
+          - listitem [ref=e2220] [box=11,4398,218,25]:
+            - link "E-Signatures Pin E-Signatures" [ref=e2221] [cursor=pointer] [box=11,4398,218,25]:
+              - /url: /signing
+              - generic "E-Signatures" [ref=e2227] [box=47,4402,71,18]
+              - button "Pin E-Signatures" [ref=e2232] [box=205,4403,15,15]
+          - listitem [ref=e2235] [box=11,4425,218,25]:
+            - link "Project Photos Pin Project Photos" [ref=e2236] [cursor=pointer] [box=11,4425,218,25]:
+              - /url: /photos
+              - generic "Project Photos" [ref=e2240] [box=47,4429,80,18]
+              - button "Pin Project Photos" [ref=e2245] [box=205,4430,15,15]
+      - generic [ref=e2248] [box=11,4462,218,212]:
+        - button "Collapse Real Estate" [expanded] [ref=e2250] [cursor=pointer] [box=11,4462,218,22]:
+          - generic [ref=e2251] [box=19,4465,87,15]: Real Estate
+        - list [ref=e2256] [box=11,4486,218,188]:
+          - listitem [ref=e2257] [box=11,4486,218,43]:
+            - link "Property Development Pin Property Development" [ref=e2258] [cursor=pointer] [box=11,4486,218,43]:
+              - /url: /property-dev
+              - generic "Property Development" [ref=e2263] [box=47,4490,122,36]
+              - button "Pin Property Development" [ref=e2268] [box=205,4500,15,15]
+          - listitem [ref=e2271] [box=11,4531,218,43]:
+            - link "Accommodation beta Pin Accommodation" [ref=e2272] [cursor=pointer] [box=11,4531,218,43]:
+              - /url: /accommodation
+              - generic "Accommodation" [ref=e2277] [box=47,4535,82,36]
+              - generic [ref=e2278] [box=136,4545,58,15]: beta
+              - button "Pin Accommodation" [ref=e2283] [box=205,4545,15,15]
+          - listitem [ref=e2286] [box=11,4576,218,43]:
+            - link "Developer Dashboards Pin Developer Dashboards" [ref=e2287] [cursor=pointer] [box=11,4576,218,43]:
+              - /url: /property-dev/dashboards
+              - generic "Developer Dashboards" [ref=e2290] [box=47,4580,122,36]
+              - button "Pin Developer Dashboards" [ref=e2295] [box=205,4590,15,15]
+          - listitem [ref=e2298] [box=11,4621,218,25]:
+            - link "House Types Pin House Types" [ref=e2299] [cursor=pointer] [box=11,4621,218,25]:
+              - /url: /property-dev/settings/house-types
+              - generic "House Types" [ref=e2304] [box=47,4625,72,18]
+              - button "Pin House Types" [ref=e2309] [box=205,4626,15,15]
+          - listitem [ref=e2312] [box=11,4648,218,25]:
+            - link "Document Templates Pin Document Templates" [ref=e2313] [cursor=pointer] [box=11,4648,218,25]:
+              - /url: /property-dev/settings/document-templates
+              - generic "Document Templates" [ref=e2317] [box=47,4652,116,18]
+              - button "Pin Document Templates" [ref=e2322] [box=205,4654,15,15]
+      - generic [ref=e2325] [box=11,4685,218,149]:
+        - button "Collapse Finance" [expanded] [ref=e2327] [cursor=pointer] [box=11,4685,218,22]:
+          - generic [ref=e2328] [box=19,4689,60,15]: Finance
+        - list [ref=e2333] [box=11,4709,218,125]:
+          - listitem [ref=e2334] [box=11,4709,218,25]:
+            - link "Finance Pin Finance" [ref=e2335] [cursor=pointer] [box=11,4709,218,25]:
+              - /url: /finance
+              - generic "Finance" [ref=e2339] [box=47,4713,44,18]
+              - button "Pin Finance" [ref=e2344] [box=205,4714,15,15]
+          - listitem [ref=e2347] [box=11,4736,218,25]:
+            - link "Analytics Pin Analytics" [ref=e2348] [cursor=pointer] [box=11,4736,218,25]:
+              - /url: /analytics
+              - generic "Analytics" [ref=e2352] [box=47,4740,49,18]
+              - button "Pin Analytics" [ref=e2357] [box=205,4741,15,15]
+          - listitem [ref=e2360] [box=11,4764,218,25]:
+            - link "Reports Pin Reports" [ref=e2361] [cursor=pointer] [box=11,4764,218,25]:
+              - /url: /reports
+              - generic "Reports" [ref=e2365] [box=47,4767,43,18]
+              - button "Pin Reports" [ref=e2370] [box=205,4769,15,15]
+          - listitem [ref=e2373] [box=11,4791,218,43]:
+            - link "Reporting Dashboards Pin Reporting Dashboards" [ref=e2374] [cursor=pointer] [box=11,4791,218,43]:
+              - /url: /reporting
+              - generic "Reporting Dashboards" [ref=e2377] [box=47,4795,122,36]
+              - button "Pin Reporting Dashboards" [ref=e2382] [box=205,4805,15,15]
+      - generic [ref=e2385] [box=11,4845,218,131]:
+        - button "Collapse Controls & BI" [expanded] [ref=e2387] [cursor=pointer] [box=11,4845,218,22]:
+          - generic [ref=e2388] [box=19,4849,99,15]: Controls & BI
+        - list [ref=e2393] [box=11,4869,218,107]:
+          - listitem [ref=e2394] [box=11,4869,218,25]:
+            - link "Project Controls Pin Project Controls" [ref=e2395] [cursor=pointer] [box=11,4869,218,25]:
+              - /url: /project-controls
+              - generic "Project Controls" [ref=e2399] [box=47,4873,87,18]
+              - button "Pin Project Controls" [ref=e2404] [box=205,4875,15,15]
+          - listitem [ref=e2407] [box=11,4897,218,25]:
+            - link "BI Dashboards Pin BI Dashboards" [ref=e2408] [cursor=pointer] [box=11,4897,218,25]:
+              - /url: /bi-dashboards
+              - generic "BI Dashboards" [ref=e2411] [box=47,4900,82,18]
+              - button "Pin BI Dashboards" [ref=e2416] [box=205,4902,15,15]
+          - listitem [ref=e2419] [box=11,4924,218,25]:
+            - link "Model Snapshots Pin Model Snapshots" [ref=e2420] [cursor=pointer] [box=11,4924,218,25]:
+              - /url: /dashboards
+              - generic "Model Snapshots" [ref=e2424] [box=47,4928,96,18]
+              - button "Pin Model Snapshots" [ref=e2429] [box=205,4929,15,15]
+          - listitem [ref=e2432] [box=11,4951,218,25]:
+            - link "Architecture Map Pin Architecture Map" [ref=e2433] [cursor=pointer] [box=11,4951,218,25]:
+              - /url: /architecture
+              - generic "Architecture Map" [ref=e2438] [box=47,4955,93,18]
+              - button "Pin Architecture Map" [ref=e2443] [box=205,4956,15,15]
+      - generic [ref=e2447] [box=11,5000,218,158]:
+        - button "Collapse Rate Build-up" [expanded] [ref=e2449] [cursor=pointer] [box=11,5000,218,22]:
+          - generic [ref=e2450] [box=19,5004,97,15]: Rate Build-up
+        - list [ref=e2455] [box=11,5024,218,134]:
+          - listitem [ref=e2456] [box=11,5024,218,25]:
+            - link "Production Norms Pin Production Norms" [ref=e2457] [cursor=pointer] [box=11,5024,218,25]:
+              - /url: /norm-expansion
+              - generic "Production Norms" [ref=e2461] [box=47,5028,99,18]
+              - button "Pin Production Norms" [ref=e2466] [box=205,5029,15,15]
+          - listitem [ref=e2469] [box=11,5051,218,25]:
+            - link "Labor Rates Pin Labor Rates" [ref=e2470] [cursor=pointer] [box=11,5051,218,25]:
+              - /url: /labor-rates
+              - generic "Labor Rates" [ref=e2476] [box=47,5055,67,18]
+              - button "Pin Labor Rates" [ref=e2481] [box=205,5056,15,15]
+          - listitem [ref=e2484] [box=11,5079,218,25]:
+            - link "Waste Factors Pin Waste Factors" [ref=e2485] [cursor=pointer] [box=11,5079,218,25]:
+              - /url: /waste-factors
+              - generic "Waste Factors" [ref=e2492] [box=47,5082,79,18]
+              - button "Pin Waste Factors" [ref=e2497] [box=205,5084,15,15]
+          - listitem [ref=e2500] [box=11,5106,218,25]:
+            - link "Price Index Pin Price Index" [ref=e2501] [cursor=pointer] [box=11,5106,218,25]:
+              - /url: /price-index
+              - generic "Price Index" [ref=e2505] [box=47,5110,61,18]
+              - button "Pin Price Index" [ref=e2510] [box=205,5111,15,15]
+          - listitem [ref=e2513] [box=11,5133,218,25]:
+            - link "Resource Summary Pin Resource Summary" [ref=e2514] [cursor=pointer] [box=11,5133,218,25]:
+              - /url: /resource-summary
+              - generic "Resource Summary" [ref=e2519] [box=47,5137,110,18]
+              - button "Pin Resource Summary" [ref=e2524] [box=205,5138,15,15]
+      - button "Expand AI Estimating" [ref=e2529] [cursor=pointer] [box=11,5170,218,22]:
+        - generic [ref=e2530] [box=19,5173,94,15]: AI Estimating
+      - generic [ref=e2535] [box=11,5203,218,176]:
+        - button "Collapse Automation & AI" [expanded] [ref=e2537] [cursor=pointer] [box=11,5203,218,22]:
+          - generic [ref=e2538] [box=19,5207,111,15]: Automation & AI
+        - list [ref=e2543] [box=11,5227,218,152]:
+          - listitem [ref=e2544] [box=11,5227,218,25]:
+            - link "AI Agents beta Pin AI Agents" [ref=e2545] [cursor=pointer] [box=11,5227,218,25]:
+              - /url: /ai-agents
+              - generic "AI Agents" [ref=e2549] [box=47,5231,53,18]
+              - generic [ref=e2550] [box=136,5232,58,15]: beta
+              - button "Pin AI Agents" [ref=e2555] [box=205,5232,15,15]
+          - listitem [ref=e2558] [box=11,5254,218,25]:
+            - link "AI Cost Advisor Pin AI Cost Advisor" [ref=e2559] [cursor=pointer] [box=11,5254,218,25]:
+              - /url: /advisor
+              - generic "AI Cost Advisor" [ref=e2562] [box=47,5258,84,18]
+              - button "Pin AI Cost Advisor" [ref=e2567] [box=205,5260,15,15]
+          - listitem [ref=e2570] [box=11,5282,218,25]:
+            - link "AI Chat Pin AI Chat" [ref=e2571] [cursor=pointer] [box=11,5282,218,25]:
+              - /url: /chat
+              - generic "AI Chat" [ref=e2574] [box=47,5285,41,18]
+              - button "Pin AI Chat" [ref=e2579] [box=205,5287,15,15]
+          - listitem [ref=e2582] [box=11,5309,218,43]:
+            - link "Pipeline Builder beta Pin Pipeline Builder" [ref=e2583] [cursor=pointer] [box=11,5309,218,43]:
+              - /url: /pipelines
+              - generic "Pipeline Builder" [ref=e2588] [box=47,5313,82,36]
+              - generic [ref=e2589] [box=136,5323,58,15]: beta
+              - button "Pin Pipeline Builder" [ref=e2594] [box=205,5323,15,15]
+          - listitem [ref=e2597] [box=11,5354,218,25]:
+            - link "Module Builder Pin Module Builder" [ref=e2598] [cursor=pointer] [box=11,5354,218,25]:
+              - /url: /module-builder
+              - generic "Module Builder" [ref=e2602] [box=47,5358,82,18]
+              - button "Pin Module Builder" [ref=e2607] [box=205,5359,15,15]
+      - generic "149 of 149 modules are shown in this menu" [ref=e2611] [box=23,5389,196,30]:
+        - generic [ref=e2622] [box=74,5396,85,16]:
+          - text: "149"
+          - generic [ref=e2623] [box=91,5397,28,13]: / 149
+          - text: modules
+        - link "Manage modules" [ref=e2624] [cursor=pointer] [box=166,5394,19,19]:
+          - /url: /modules
+      - button "Edit menu" [ref=e2629] [cursor=pointer] [box=23,5426,196,29]
+      - link "Add module Build your own · developer guide" [ref=e2635] [cursor=pointer] [box=23,5465,196,45]:
+        - /url: /modules/developer-guide
+        - generic [ref=e2638] [box=68,5473,140,28]:
+          - generic [ref=e2639] [box=68,5473,140,14]: Add module
+          - generic [ref=e2640] [box=68,5489,140,13]: Build your own · developer guide
+      - button "Request a custom module Missing something? Tell us what you need" [ref=e2642] [cursor=pointer] [box=23,5517,196,45]:
+        - generic [ref=e2646] [box=68,5526,140,28]:
+          - generic [ref=e2647] [box=68,5526,140,14]: Request a custom module
+          - generic [ref=e2648] [box=68,5541,140,13]: Missing something? Tell us what you need
+    - generic [ref=e2649] [box=0,699,248,301]:
+      - list [ref=e2651] [box=7,707,233,64]:
+        - listitem [ref=e2652] [box=7,707,115,30]:
+          - button "Settings" [ref=e2653] [cursor=pointer] [box=7,707,115,30]
+        - listitem [ref=e2658] [box=126,707,115,30]:
+          - button "Users" [ref=e2659] [cursor=pointer] [box=126,707,115,30]
+        - listitem [ref=e2666] [box=7,740,115,30]:
+          - button "Edit menu" [ref=e2667] [cursor=pointer] [box=7,740,115,30]
+        - listitem [ref=e2672] [box=126,740,115,30]:
+          - button "About" [ref=e2673] [cursor=pointer] [box=126,740,115,30]
+      - generic [ref=e2678] [box=15,782,218,98]:
+        - button "View update details for v15.8.0" [ref=e2679] [cursor=pointer] [box=16,782,216,97]:
+          - generic [ref=e2680] [box=16,782,216,97]:
+            - generic [ref=e2681] [box=27,792,194,32]:
+              - generic [ref=e2687] [box=57,792,91,32]: v15.7.0 → v15.8.0
+              - generic [ref=e2688] [box=155,800,65,17]: available
+            - generic [ref=e2689] [box=27,830,194,16]: 8/25/2026
+            - generic [ref=e2691] [box=27,854,194,16]: Details
+        - button "Dismiss" [ref=e2696] [cursor=pointer] [box=208,788,19,19]
+      - generic [ref=e2701] [box=15,888,218,37]:
+        - link "Uberization of Construction - Read the article" [ref=e2702] [cursor=pointer] [box=15,888,218,37]:
+          - /url: https://openconstructionerp.com/uberization-of-construction/
+          - generic [ref=e2707] [box=51,898,170,15]:
+            - generic [ref=e2708] [box=51,898,170,15]: Uberization of Construction
+            - generic [box=51,913,170,0]:
+              - generic [box=51,913,170,0]:
+                - generic [ref=e2709] [box=51,917,170,30]: Open data, transparency, and the idea behind the platform
+                - generic [ref=e2710] [box=51,953,170,16]: Read the article
+        - button "Dismiss" [ref=e2714] [cursor=pointer] [box=209,893,19,19]
+      - generic [ref=e2718] [box=7,932,233,61]:
+        - generic [ref=e2719] [box=7,935,233,30]:
+          - link "GitHub repository" [ref=e2720] [cursor=pointer] [box=7,935,115,30]:
+            - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+            - generic [ref=e2724] [box=36,945,78,11]: GitHub
+          - link "Telegram community" [ref=e2725] [cursor=pointer] [box=126,935,115,30]:
+            - /url: https://t.me/datadrivenconstruction
+            - generic [ref=e2728] [box=154,945,78,11]: Community
+        - generic [ref=e2729] [box=7,971,233,14]:
+          - generic [ref=e2730] [box=81,971,30,14]: v15.7.0
+          - generic [ref=e2731] [box=117,971,3,14]: ·
+          - link "AGPL-3.0" [ref=e2732] [cursor=pointer] [box=126,971,41,14]:
+            - /url: /api/source
+  - generic [ref=e2733] [box=0,0,1433,3248]:
+    - banner [ref=e2734] [box=248,0,1185,52]:
+      - generic [ref=e2736] [box=278,8,96,36]:
+        - generic [ref=e2738] [box=278,8,39,36]:
+          - button "Select project" [ref=e2739] [cursor=pointer] [box=279,9,13,34]
+          - button "Switch Project" [ref=e2744] [cursor=pointer] [box=292,9,29,34]
+        - heading "Dashboard" [level=1] [ref=e2749] [box=354,16,21,21]
+      - generic [ref=e2752] [box=287,13,213,26]:
+        - link "Mullets Aluminum Products, Inc. logo Mullets Aluminum Products, Inc." [ref=e2753] [cursor=pointer] [box=296,17,171,19]:
+          - /url: /modules?tab=partner-packs
+          - img "Mullets Aluminum Products, Inc. logo" [ref=e2754] [box=296,17,19,19]
+          - generic [ref=e2755] [box=321,19,146,15]: Mullets Aluminum Products, Inc.
+        - button "Hide partner badge" [ref=e2756] [cursor=pointer] [box=474,18,16,16]
+      - generic [ref=e2760] [box=412,9,991,34]:
+        - button "Project journey" [ref=e2761] [cursor=pointer] [box=412,11,133,30]
+        - button "Search ⌘K" [ref=e2770] [cursor=pointer] [box=561,11,210,30]:
+          - generic [ref=e2774] [box=594,17,39,19]: Search
+          - generic [ref=e2775] [box=735,18,24,17]: ⌘K
+        - button "Notifications" [ref=e2778] [cursor=pointer] [box=787,9,34,34]:
+          - generic [ref=e2782] [box=804,7,18,15]: "89"
+        - button "What's new" [ref=e2783] [cursor=pointer] [box=828,11,30,30]
+        - button "Build a module" [ref=e2788] [cursor=pointer] [box=866,11,109,30]
+        - button "Support us" [ref=e2793] [cursor=pointer] [box=982,11,105,30]
+        - button "Get release notes by email - opens the newsletter form on openconstructionerp.com" [ref=e2797] [cursor=pointer] [box=1094,11,95,30]:
+          - generic [ref=e2801] [box=1126,19,51,15]: Subscribe
+        - button "Report a bug or send feedback" [ref=e2803] [cursor=pointer] [box=1197,11,30,30]
+        - button "Help & feedback" [ref=e2814] [cursor=pointer] [box=1234,11,30,30]
+        - 'button "Language: English (US)" [ref=e2820] [cursor=pointer] [box=1280,11,48,30]'
+        - button "System" [ref=e2823] [cursor=pointer] [box=1335,11,30,30]
+        - button "Account menu" [ref=e2827] [cursor=pointer] [box=1373,11,30,30]: D
+    - main [ref=e2831] [box=248,52,1185,3196]:
+      - generic [ref=e2832] [box=274,74,1132,3159]:
+        - generic [ref=e2833] [box=274,74,1132,76]:
+          - link "Mullets Aluminum Products, Inc. logo Mullets Aluminum Products, Inc. Powered by OpenConstructionERP · In partnership with Mullets Aluminum Products, Inc. White-label partner pack for Mullets Aluminum Products, Inc." [ref=e2834] [cursor=pointer] [box=292,87,582,52]:
+            - /url: /modules?tab=partner-packs
+            - img "Mullets Aluminum Products, Inc. logo" [ref=e2835] [box=292,92,41,41]
+            - generic [ref=e2836] [box=344,87,530,52]:
+              - generic [ref=e2837] [box=344,87,530,19]: Mullets Aluminum Products, Inc.
+              - generic [ref=e2838] [box=344,107,530,14]: Powered by OpenConstructionERP · In partnership with Mullets Aluminum Products, Inc.
+              - generic [ref=e2839] [box=344,123,530,15]: White-label partner pack for Mullets Aluminum Products, Inc.
+          - button "Hide partner badge" [ref=e2840] [cursor=pointer] [box=1369,102,21,21]
+        - region "What's new in v15.7.0" [ref=e2844] [box=274,169,1132,74]:
+          - generic [ref=e2845] [box=275,170,1130,72]:
+            - generic [ref=e2851] [box=328,196,238,19]:
+              - heading "What's new in v15.7.0" [level=2] [ref=e2852] [box=328,196,125,19]
+              - generic [ref=e2853] [box=460,197,106,18]: Tap a chip for details.
+            - generic [ref=e2854] [box=577,179,538,53]:
+              - button "Section a scan" [ref=e2855] [cursor=pointer] [box=577,179,97,24]
+              - button "Measure points" [ref=e2863] [cursor=pointer] [box=680,179,100,24]
+              - button "Elevation colors" [ref=e2871] [cursor=pointer] [box=786,179,102,24]
+              - button "Snapshot" [ref=e2875] [cursor=pointer] [box=894,179,74,24]
+              - button "Cost base first" [ref=e2880] [cursor=pointer] [box=973,179,95,24]
+              - button "Start-here cases" [ref=e2887] [cursor=pointer] [box=577,209,105,24]
+            - generic [ref=e2892] [box=1127,193,264,26]:
+              - button "Take a quick tour" [ref=e2893] [cursor=pointer] [box=1127,194,118,24]
+              - button "Full release notes" [ref=e2897] [cursor=pointer] [box=1250,194,109,24]
+              - button "Dismiss" [ref=e2900] [cursor=pointer] [box=1364,193,26,26]
+        - generic [ref=e2904] [box=274,261,1132,30]:
+          - heading "Good morning, Elena" [level=1] [ref=e2905] [box=274,263,220,26]
+          - generic [ref=e2906] [box=699,261,708,30]:
+            - button "New Project" [ref=e2907] [cursor=pointer] [box=699,261,116,30]
+            - button "New Estimate" [ref=e2912] [cursor=pointer] [box=822,261,125,30]
+            - button "Quick Start Estimate" [ref=e2918] [cursor=pointer] [box=955,261,160,30]
+            - button "Customize" [ref=e2923] [cursor=pointer] [box=1122,261,107,30]
+            - button "Start guided tour for this module" [ref=e2931] [cursor=pointer] [box=1237,263,59,26]:
+              - generic [ref=e2935] [box=1266,269,20,15]: Tour
+            - button "Learn how this module works" [ref=e2936] [cursor=pointer] [box=1303,263,103,26]:
+              - generic [ref=e2940] [box=1332,269,64,15]: How it works
+        - generic [ref=e2941] [box=274,310,1132,26]:
+          - link "DataDrivenConstruction by DataDrivenConstruction" [ref=e2942] [cursor=pointer] [box=282,315,173,16]:
+            - /url: https://datadrivenconstruction.io/?utm_source=erp
+            - img "DataDrivenConstruction" [ref=e2943] [box=282,317,44,13]
+            - generic [ref=e2944] [box=331,315,123,16]: by DataDrivenConstruction
+          - 'link "The #1 open-source construction ERP" [ref=e2946] [cursor=pointer] [box=485,316,208,15]':
+            - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+          - generic [ref=e2956] [box=725,310,378,26]:
+            - button "0 Projects" [ref=e2957] [cursor=pointer] [box=725,310,81,26]:
+              - generic [ref=e2963] [box=752,316,6,15]: "0"
+              - generic [ref=e2964] [box=763,316,33,14]: Projects
+            - button "0 Bid Schedules" [ref=e2965] [cursor=pointer] [box=814,310,107,26]:
+              - generic [ref=e2970] [box=841,316,6,15]: "0"
+              - generic [ref=e2971] [box=852,316,60,14]: Bid Schedules
+            - button "188 Modules" [ref=e2972] [cursor=pointer] [box=928,310,95,26]:
+              - generic [ref=e2977] [box=955,316,17,15]: "188"
+              - generic [ref=e2978] [box=978,316,35,14]: Modules
+            - button "3 Users" [ref=e2979] [cursor=pointer] [box=1031,310,72,26]:
+              - generic [ref=e2986] [box=1058,316,6,15]: "3"
+              - generic [ref=e2987] [box=1069,316,24,14]: Users
+        - generic [ref=e2988] [box=274,355,1132,2878]:
+          - generic [ref=e2990] [box=274,355,1132,197]:
+            - generic [ref=e2991] [box=290,371,1100,39]:
+              - generic [ref=e2996] [box=343,371,856,39]:
+                - generic [ref=e2997] [box=343,371,856,19]:
+                  - paragraph [ref=e2998] [box=343,371,168,19]: Start here - learn by example
+                  - generic [ref=e2999] [box=518,372,92,18]: 202 cases in total
+                - paragraph [ref=e3000] [box=343,392,856,18]: Follow a guided playbook from a PDF to a priced, validated estimate, step by step across the modules.
+              - button "Browse all 202 cases" [ref=e3001] [cursor=pointer] [box=1214,371,177,38]
+            - generic [ref=e3004] [box=290,421,1100,115]:
+              - generic [ref=e3005] [box=290,421,1100,14]: Popular starting points
+              - generic [ref=e3008] [box=290,441,1100,95]:
+                - button "Set up a project and hand it over Set up a project and hand it over 5 steps" [ref=e3009] [cursor=pointer] [box=290,441,93,95]:
+                  - img "Set up a project and hand it over" [ref=e3011] [box=291,442,91,50]
+                  - generic [ref=e3023] [box=291,493,91,42]:
+                    - generic [ref=e3024] [box=299,499,76,15]: Set up a project and hand it over
+                    - generic [ref=e3025] [box=299,516,76,14]: 5 steps
+                - button "Check an estimate before you send it Check an estimate before you send it 3 steps" [ref=e3026] [cursor=pointer] [box=391,441,93,95]:
+                  - img "Check an estimate before you send it" [ref=e3028] [box=392,442,91,50]
+                  - generic [ref=e3046] [box=392,493,91,42]:
+                    - generic [ref=e3047] [box=399,499,76,15]: Check an estimate before you send it
+                    - generic [ref=e3048] [box=399,516,76,14]: 3 steps
+                - button "Run a tender from a BOQ Run a tender from a BOQ 5 steps" [ref=e3049] [cursor=pointer] [box=492,441,93,95]:
+                  - img "Run a tender from a BOQ" [ref=e3051] [box=492,442,91,50]
+                  - generic [ref=e3070] [box=492,493,91,42]:
+                    - generic [ref=e3071] [box=500,499,76,15]: Run a tender from a BOQ
+                    - generic [ref=e3072] [box=500,516,76,14]: 5 steps
+                - button "Procure materials from the BOQ Procure materials from the BOQ 4 steps" [ref=e3073] [cursor=pointer] [box=592,441,93,95]:
+                  - img "Procure materials from the BOQ" [ref=e3075] [box=593,442,91,50]:
+                    - generic [ref=e3087] [box=642,462,6,2]: order
+                  - generic [ref=e3094] [box=593,493,91,42]:
+                    - generic [ref=e3095] [box=601,499,76,15]: Procure materials from the BOQ
+                    - generic [ref=e3096] [box=601,516,76,14]: 4 steps
+                - button "Get 6D carbon from a BIM model Get 6D carbon from a BIM model 5 steps" [ref=e3097] [cursor=pointer] [box=693,441,93,95]:
+                  - img "Get 6D carbon from a BIM model" [ref=e3099] [box=694,442,91,50]:
+                    - generic [ref=e3107] [box=743,461,4,2]: CO2
+                  - generic [ref=e3111] [box=694,493,91,42]:
+                    - generic [ref=e3112] [box=701,499,76,15]: Get 6D carbon from a BIM model
+                    - generic [ref=e3113] [box=701,516,76,14]: 5 steps
+                - button "Build a baseline and track progress Build a baseline and track progress 4 steps" [ref=e3114] [cursor=pointer] [box=794,441,93,95]:
+                  - img "Build a baseline and track progress" [ref=e3116] [box=795,442,91,50]
+                  - generic [ref=e3130] [box=795,493,91,42]:
+                    - generic [ref=e3131] [box=802,499,76,15]: Build a baseline and track progress
+                    - generic [ref=e3132] [box=802,516,76,14]: 4 steps
+                - button "Get quantities from a BIM model Get quantities from a BIM model 3 steps" [ref=e3133] [cursor=pointer] [box=894,441,93,95]:
+                  - img "Get quantities from a BIM model" [ref=e3135] [box=895,442,91,50]
+                  - generic [ref=e3152] [box=895,493,91,42]:
+                    - generic [ref=e3153] [box=903,499,76,15]: Get quantities from a BIM model
+                    - generic [ref=e3154] [box=903,516,76,14]: 3 steps
+                - button "Measure quantities from a DWG Measure quantities from a DWG 3 steps" [ref=e3155] [cursor=pointer] [box=995,441,93,95]:
+                  - img "Measure quantities from a DWG" [ref=e3157] [box=996,442,91,50]:
+                    - generic [ref=e3168] [box=1052,464,3,2]: m2
+                    - generic [ref=e3170] [box=1052,469,3,2]: "12"
+                  - generic [ref=e3171] [box=996,493,91,42]:
+                    - generic [ref=e3172] [box=1004,499,76,15]: Measure quantities from a DWG
+                    - generic [ref=e3173] [box=1004,516,76,14]: 3 steps
+                - button "Run the site day Run the site day 4 steps" [ref=e3174] [cursor=pointer] [box=1096,441,93,95]:
+                  - img "Run the site day" [ref=e3176] [box=1097,442,91,50]:
+                    - generic [ref=e3186] [box=1133,464,4,2]: hrs
+                  - generic [ref=e3196] [box=1097,493,91,42]:
+                    - generic [ref=e3197] [box=1104,499,76,15]: Run the site day
+                    - generic [ref=e3198] [box=1104,516,76,14]: 4 steps
+                - button "Inspect work and close a non-conformance Inspect work and close a non-conformance 3 steps" [ref=e3199] [cursor=pointer] [box=1197,441,93,95]:
+                  - img "Inspect work and close a non-conformance" [ref=e3201] [box=1198,442,91,50]:
+                    - generic [ref=e3211] [box=1245,462,4,2]: NCR
+                  - generic [ref=e3216] [box=1198,493,91,42]:
+                    - generic [ref=e3217] [box=1205,499,76,15]: Inspect work and close a non-conformance
+                    - generic [ref=e3218] [box=1205,516,76,14]: 3 steps
+                - button "All 202 cases" [ref=e3219] [cursor=pointer] [box=1297,441,93,95]
+          - generic [ref=e3225] [box=274,590,1132,101]:
+            - generic [ref=e3230] [box=339,621,50,37]:
+              - generic [ref=e3231] [box=339,621,50,20]: €0.00
+              - generic [ref=e3233] [box=339,643,50,15]: Total Value
+            - generic [ref=e3239] [box=625,621,76,37]:
+              - generic [ref=e3240] [box=625,621,76,20]:
+                - generic [ref=e3241] [box=625,621,9,20]: "0"
+                - generic [ref=e3242] [box=639,625,44,15]: estimates
+              - generic [ref=e3243] [box=625,643,76,15]: Active Estimates
+            - generic [ref=e3248] [box=911,621,77,37]:
+              - generic [ref=e3249] [box=911,621,77,20]:
+                - generic [ref=e3250] [box=911,621,9,20]: "0"
+                - generic [ref=e3251] [box=925,625,63,15]: No schedules
+              - generic [ref=e3252] [box=911,643,77,15]: Schedule Status
+            - button "0 of 0 priced Priced positions" [ref=e3253] [cursor=pointer] [box=1132,590,275,101]:
+              - generic [ref=e3258] [box=1197,620,80,39]:
+                - generic [ref=e3259] [box=1197,620,80,22]: 0 of 0 priced
+                - generic [ref=e3271] [box=1197,644,80,15]: Priced positions
+          - generic [ref=e3273] [box=274,709,557,151]:
+            - generic [ref=e3274] [box=298,732,510,24]:
+              - heading "Finance summary" [level=3] [ref=e3276] [box=298,732,155,24]
+              - button "Open Finance" [ref=e3282] [cursor=pointer] [box=726,738,82,15]
+            - generic [ref=e3286] [box=298,771,510,65]:
+              - button "Open change orders None open" [ref=e3287] [cursor=pointer] [box=298,771,249,65]:
+                - generic [ref=e3288] [box=310,784,225,14]: Open change orders
+                - generic [ref=e3293] [box=310,802,225,22]: None open
+              - button "Budget warnings 0" [ref=e3294] [cursor=pointer] [box=558,771,249,65]:
+                - generic [ref=e3295] [box=570,783,225,14]: Budget warnings
+                - generic [ref=e3298] [box=570,801,225,23]: "0"
+          - generic [ref=e3302] [box=274,878,1132,651]:
+            - generic [ref=e3304] [box=298,902,1085,26]:
+              - heading "Recent Projects" [level=3] [ref=e3306] [box=298,902,116,21]
+              - button "Projects" [ref=e3308] [cursor=pointer] [box=1306,902,77,26]
+            - generic [ref=e3315] [box=651,1074,380,308]:
+              - heading "Welcome, let's start with your first project" [level=3] [ref=e3319] [box=689,1202,303,21]
+              - paragraph [ref=e3320] [box=673,1228,335,19]: Projects organize your bid schedules, schedules, and reports.
+              - generic [ref=e3322] [box=723,1266,235,56]:
+                - button "Create project" [ref=e3323] [cursor=pointer] [box=780,1266,121,30]
+                - paragraph [ref=e3327] [box=723,1307,235,15]: Or load a demo project from Settings → Demo data
+          - generic [ref=e3329] [box=274,1548,557,415]:
+            - generic [ref=e3331] [box=290,1564,525,24]:
+              - heading "Inbox 89" [level=3] [ref=e3333] [box=290,1564,94,24]:
+                - generic [ref=e3334] [box=290,1564,94,21]:
+                  - text: Inbox
+                  - generic [ref=e3338] [box=362,1565,22,19]: "89"
+              - button "View all" [ref=e3340] [cursor=pointer] [box=763,1569,52,15]
+            - generic [ref=e3343] [box=275,1595,555,366]:
+              - generic [ref=e3345] [box=275,1595,360,366]:
+                - generic [ref=e3346] [box=275,1595,360,46]:
+                  - button "Escalated overdue item 2h ago" [ref=e3347] [cursor=pointer] [box=283,1605,298,26]:
+                    - generic [ref=e3353] [box=328,1605,196,15]:
+                      - paragraph [ref=e3354] [box=328,1605,162,15]: Escalated overdue item
+                      - generic [ref=e3355] [box=495,1605,29,14]: 2h ago
+                  - generic [ref=e3362] [box=585,1605,43,22]:
+                    - button "Mark as seen" [ref=e3363] [cursor=pointer] [box=585,1606,20,20]
+                    - button "Dismiss" [ref=e3366] [cursor=pointer] [box=607,1606,20,20]
+                - generic [ref=e3370] [box=275,1641,360,46]:
+                  - 'button "Overdue: CT Room Radiation Shielding 2h ago" [ref=e3371] [cursor=pointer] [box=283,1650,298,26]':
+                    - generic [ref=e3377] [box=328,1650,196,15]:
+                      - paragraph [ref=e3378] [box=328,1650,162,15]: "Overdue: CT Room Radiation Shielding"
+                      - generic [ref=e3379] [box=495,1651,29,14]: 2h ago
+                  - generic [ref=e3386] [box=585,1650,43,22]:
+                    - button "Mark as seen" [ref=e3387] [cursor=pointer] [box=585,1652,20,20]
+                    - button "Dismiss" [ref=e3390] [cursor=pointer] [box=607,1652,20,20]
+                - generic [ref=e3394] [box=275,1687,360,46]:
+                  - button "Escalated overdue item 2h ago" [ref=e3395] [cursor=pointer] [box=283,1696,298,26]:
+                    - generic [ref=e3401] [box=328,1696,196,15]:
+                      - paragraph [ref=e3402] [box=328,1696,162,15]: Escalated overdue item
+                      - generic [ref=e3403] [box=495,1697,29,14]: 2h ago
+                  - generic [ref=e3410] [box=585,1696,43,22]:
+                    - button "Mark as seen" [ref=e3411] [cursor=pointer] [box=585,1698,20,20]
+                    - button "Dismiss" [ref=e3414] [cursor=pointer] [box=607,1698,20,20]
+                - generic [ref=e3418] [box=275,1733,360,46]:
+                  - 'button "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection 2h ago" [ref=e3419] [cursor=pointer] [box=283,1742,298,26]':
+                    - generic [ref=e3425] [box=328,1742,196,15]:
+                      - paragraph [ref=e3426] [box=328,1742,162,15]: "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection"
+                      - generic [ref=e3427] [box=495,1743,29,14]: 2h ago
+                  - generic [ref=e3434] [box=585,1742,43,22]:
+                    - button "Mark as seen" [ref=e3435] [cursor=pointer] [box=585,1744,20,20]
+                    - button "Dismiss" [ref=e3438] [cursor=pointer] [box=607,1744,20,20]
+                - generic [ref=e3442] [box=275,1779,360,46]:
+                  - button "Escalated overdue item 2h ago" [ref=e3443] [cursor=pointer] [box=283,1788,298,26]:
+                    - generic [ref=e3449] [box=328,1788,196,15]:
+                      - paragraph [ref=e3450] [box=328,1788,162,15]: Escalated overdue item
+                      - generic [ref=e3451] [box=495,1789,29,14]: 2h ago
+                  - generic [ref=e3458] [box=585,1788,43,22]:
+                    - button "Mark as seen" [ref=e3459] [cursor=pointer] [box=585,1790,20,20]
+                    - button "Dismiss" [ref=e3462] [cursor=pointer] [box=607,1790,20,20]
+                - generic [ref=e3466] [box=275,1825,360,46]:
+                  - 'button "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection 2h ago" [ref=e3467] [cursor=pointer] [box=283,1834,298,26]':
+                    - generic [ref=e3473] [box=328,1834,196,15]:
+                      - paragraph [ref=e3474] [box=328,1834,162,15]: "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection"
+                      - generic [ref=e3475] [box=495,1835,29,14]: 2h ago
+                  - generic [ref=e3482] [box=585,1834,43,22]:
+                    - button "Mark as seen" [ref=e3483] [cursor=pointer] [box=585,1836,20,20]
+                    - button "Dismiss" [ref=e3486] [cursor=pointer] [box=607,1836,20,20]
+                - generic [ref=e3490] [box=275,1871,360,46]:
+                  - button "Escalated overdue item 2h ago" [ref=e3491] [cursor=pointer] [box=283,1880,298,26]:
+                    - generic [ref=e3497] [box=328,1880,196,15]:
+                      - paragraph [ref=e3498] [box=328,1880,162,15]: Escalated overdue item
+                      - generic [ref=e3499] [box=495,1880,29,14]: 2h ago
+                  - generic [ref=e3506] [box=585,1880,43,22]:
+                    - button "Mark as seen" [ref=e3507] [cursor=pointer] [box=585,1882,20,20]
+                    - button "Dismiss" [ref=e3510] [cursor=pointer] [box=607,1882,20,20]
+                - generic [ref=e3514] [box=275,1917,360,45]:
+                  - 'button "Overdue: Abwasser-, Wasser-, Gasanlagen inspection 2h ago" [ref=e3515] [cursor=pointer] [box=283,1926,298,26]':
+                    - generic [ref=e3521] [box=328,1926,196,15]:
+                      - paragraph [ref=e3522] [box=328,1926,162,15]: "Overdue: Abwasser-, Wasser-, Gasanlagen inspection"
+                      - generic [ref=e3523] [box=495,1926,29,14]: 2h ago
+                  - generic [ref=e3530] [box=585,1926,43,22]:
+                    - button "Mark as seen" [ref=e3531] [cursor=pointer] [box=585,1928,20,20]
+                    - button "Dismiss" [ref=e3534] [cursor=pointer] [box=607,1928,20,20]
+              - generic [ref=e3539] [box=635,1595,195,171]:
+                - button "0 approvals" [ref=e3540] [cursor=pointer] [box=651,1610,164,43]:
+                  - generic [ref=e3546] [box=698,1616,40,32]:
+                    - generic [ref=e3547] [box=698,1616,40,16]: "0"
+                    - generic [ref=e3548] [box=698,1634,40,14]: approvals
+                - button "89 alerts" [ref=e3549] [cursor=pointer] [box=651,1665,164,43]:
+                  - generic [ref=e3554] [box=698,1670,22,32]:
+                    - generic [ref=e3555] [box=698,1670,22,16]: "89"
+                    - generic [ref=e3556] [box=698,1688,22,14]: alerts
+                - paragraph [ref=e3557] [box=651,1719,164,33]: Approvals and alerts that need you, newest first.
+          - region "File upload area" [ref=e3561] [box=851,1549,555,413]:
+            - generic [ref=e3566] [box=931,1715,342,80]:
+              - generic [ref=e3567] [box=931,1715,342,19]: Drop files here
+              - paragraph [ref=e3568] [box=931,1736,342,15]: Create a project first, then upload files here.
+              - button "Create a project" [ref=e3569] [cursor=pointer] [box=931,1758,81,14]
+              - button "0 documents · open in Documents →" [disabled] [ref=e3574] [box=931,1781,169,14]
+            - generic [ref=e3579] [box=1289,1742,96,26]:
+              - button "Upload Files" [disabled] [box=1289,1742,96,26]
+          - generic [ref=e3581] [box=274,2000,1132,274]:
+            - generic [ref=e3583] [box=274,2000,181,26]:
+              - heading "Getting Started" [level=2] [ref=e3587] [box=312,2003,108,21]
+              - generic [ref=e3588] [box=431,2004,24,19]: 1/6
+            - generic [ref=e3592] [box=274,2069,1132,205]:
+              - generic [ref=e3600] [box=275,2070,174,201]:
+                - generic [ref=e3601] [box=294,2089,137,30]: "1"
+                - heading "Load Cost Database" [level=4] [ref=e3608] [box=294,2134,137,18]
+                - paragraph [ref=e3609] [box=294,2157,137,54]: Import regional pricing data with 55,000+ items
+                - button "Completed" [ref=e3611] [cursor=pointer] [box=294,2226,137,26]
+              - generic [ref=e3620] [box=466,2070,174,201]:
+                - generic [ref=e3621] [box=485,2089,137,30]: "2"
+                - heading "Enable AI Search" [level=4] [ref=e3626] [box=485,2134,137,18]
+                - paragraph [ref=e3627] [box=485,2157,137,54]: Generate vector embeddings for semantic cost matching
+                - button "Configure" [ref=e3629] [cursor=pointer] [box=485,2226,137,26]
+              - generic [ref=e3637] [box=658,2070,174,201]:
+                - generic [ref=e3638] [box=676,2089,137,30]: "3"
+                - heading "Connect AI" [level=4] [ref=e3644] [box=676,2134,137,18]
+                - paragraph [ref=e3645] [box=676,2157,137,54]: Add your API keys for AI-powered estimation
+                - button "Add API Keys" [ref=e3647] [cursor=pointer] [box=676,2226,137,26]
+              - generic [ref=e3655] [box=849,2070,174,201]:
+                - generic [ref=e3656] [box=868,2089,137,30]: "4"
+                - heading "Create Project" [level=4] [ref=e3661] [box=868,2134,137,18]
+                - paragraph [ref=e3662] [box=868,2157,137,54]: Start your first construction estimation project
+                - generic [ref=e3664] [box=868,2226,137,26]:
+                  - button "New Project" [ref=e3665] [cursor=pointer] [box=868,2226,95,26]
+                  - button "Demo" [ref=e3670] [cursor=pointer] [box=968,2226,63,26]
+              - generic [ref=e3679] [box=1040,2070,174,201]:
+                - generic [ref=e3680] [box=1059,2089,137,30]: "5"
+                - heading "Build Your Bid Schedule" [level=4] [ref=e3686] [box=1059,2134,137,36]
+                - paragraph [ref=e3687] [box=1059,2175,137,36]: Create a Bid Schedule with AI assistance
+                - generic [ref=e3688] [box=1059,2226,137,26]:
+                  - button "Create Bid Schedule" [disabled] [box=1059,2226,137,26]
+              - generic [ref=e3692] [box=1231,2070,174,201]:
+                - generic [ref=e3693] [box=1250,2089,137,30]: "6"
+                - heading "Set Quantities" [level=4] [ref=e3698] [box=1250,2134,137,18]
+                - paragraph [ref=e3699] [box=1250,2157,137,54]: Add quantities and unit rates to your Bid Schedule positions
+                - generic [ref=e3700] [box=1250,2226,137,26]:
+                  - button "Open Bid Schedule" [disabled] [box=1250,2226,137,26]
+          - generic [ref=e3703] [box=274,2293,1132,167]:
+            - heading "Suggested Next Steps" [level=3] [ref=e3707] [box=298,2293,132,19]
+            - generic [ref=e3708] [box=274,2323,1132,137]:
+              - button [ref=e3709] [cursor=pointer] [box=274,2323,370,137]:
+                - generic [ref=e3713] [box=290,2364,338,57]:
+                  - heading "Try the AI Quick Estimate" [level=4] [ref=e3714] [box=290,2364,338,18]
+                  - paragraph [ref=e3715] [box=290,2386,338,36]: Describe a project in plain language and get a draft bid schedule in seconds, review, adjust, and ship.
+                - generic [ref=e3716] [box=290,2429,96,15]: Open AI Estimate
+              - button [ref=e3719] [cursor=pointer] [box=655,2323,370,137]:
+                - generic [ref=e3725] [box=671,2364,338,57]:
+                  - heading "Upload a CAD or BIM model" [level=4] [ref=e3726] [box=671,2364,338,18]
+                  - paragraph [ref=e3727] [box=671,2386,338,36]: Drop a RVT, IFC, DWG or DGN file, the converter extracts quantities and matches elements to cost positions.
+                - generic [ref=e3728] [box=671,2429,63,15]: Open BIM
+              - button [ref=e3731] [cursor=pointer] [box=1037,2323,370,137]:
+                - generic [ref=e3737] [box=1052,2364,338,57]:
+                  - heading "Explore the cost database" [level=4] [ref=e3738] [box=1052,2364,338,18]
+                  - paragraph [ref=e3739] [box=1052,2386,338,36]: Browse 55,000+ regional unit rates with semantic search across CWICR / GAEB sources.
+                - generic [ref=e3740] [box=1052,2429,71,15]: Open Costs
+          - generic [ref=e3746] [box=274,2479,362,295]:
+            - heading "System Status" [level=3] [ref=e3749] [box=298,2502,106,21]
+            - generic [ref=e3751] [box=298,2538,316,212]:
+              - generic [ref=e3752] [box=298,2538,316,19]:
+                - generic [ref=e3753] [box=298,2538,80,19]: API Server
+                - generic [ref=e3756] [box=568,2540,45,14]: v15.7.0
+              - generic [ref=e3761] [box=298,2568,316,19]:
+                - generic [ref=e3762] [box=298,2568,74,19]: Database
+                - generic [ref=e3767] [box=555,2571,58,14]: postgresql
+              - generic [ref=e3772] [box=298,2598,316,19]:
+                - generic [ref=e3773] [box=298,2598,76,19]: Vector DB
+                - generic [ref=e3777] [box=566,2601,48,14]: lancedb
+              - generic [ref=e3782] [box=298,2629,316,19]:
+                - generic [ref=e3783] [box=298,2629,87,19]: AI Providers
+                - generic [ref=e3787] [box=538,2631,75,14]: Not configured
+              - generic [ref=e3792] [box=298,2671,316,19]:
+                - generic [ref=e3793] [box=298,2671,87,19]: Modules loaded
+                - generic [ref=e3794] [box=593,2671,21,19]: "188"
+              - generic [ref=e3795] [box=298,2701,316,19]:
+                - generic [ref=e3796] [box=298,2701,83,19]: Validation rules
+                - generic [ref=e3797] [box=593,2701,21,19]: "286"
+              - generic [ref=e3798] [box=298,2732,316,19]:
+                - generic [ref=e3799] [box=298,2732,61,19]: Languages
+                - generic [ref=e3800] [box=599,2732,14,19]: "41"
+          - generic [ref=e3803] [box=274,2793,1132,262]:
+            - generic [ref=e3804] [box=298,2816,1085,48]:
+              - heading "Operations snapshot" [level=3] [ref=e3805] [box=313,2827,1055,19]
+              - paragraph [ref=e3806] [box=313,2846,1055,14]: Health across nine operations modules, empty tiles light up as data lands.
+            - list [ref=e3808] [box=298,2879,1085,152]:
+              - listitem [ref=e3809] [box=298,2879,357,46]:
+                - button "Bid Schedule Summary —" [ref=e3810] [cursor=pointer] [box=298,2879,357,46]:
+                  - generic [ref=e3815] [box=345,2887,275,29]:
+                    - generic [ref=e3816] [box=345,2887,275,15]: Bid Schedule Summary
+                    - generic [ref=e3817] [box=345,2902,275,14]: —
+              - listitem [ref=e3820] [box=662,2879,357,46]:
+                - button "Validation Health —" [ref=e3821] [cursor=pointer] [box=662,2879,357,46]:
+                  - generic [ref=e3826] [box=710,2887,275,29]:
+                    - generic [ref=e3827] [box=710,2887,275,15]: Validation Health
+                    - generic [ref=e3828] [box=710,2902,275,14]: —
+              - listitem [ref=e3831] [box=1026,2879,357,46]:
+                - button "Clash Health —" [ref=e3832] [cursor=pointer] [box=1026,2879,357,46]:
+                  - generic [ref=e3845] [box=1074,2887,275,29]:
+                    - generic [ref=e3846] [box=1074,2887,275,15]: Clash Health
+                    - generic [ref=e3847] [box=1074,2902,275,14]: —
+              - listitem [ref=e3850] [box=298,2932,357,46]:
+                - button "Critical Path —" [ref=e3851] [cursor=pointer] [box=298,2932,357,46]:
+                  - generic [ref=e3857] [box=345,2941,275,29]:
+                    - generic [ref=e3858] [box=345,2941,275,15]: Critical Path
+                    - generic [ref=e3859] [box=345,2956,275,14]: —
+              - listitem [ref=e3862] [box=662,2932,357,46]:
+                - button "Top Risks —" [ref=e3863] [cursor=pointer] [box=662,2932,357,46]:
+                  - generic [ref=e3867] [box=710,2941,275,29]:
+                    - generic [ref=e3868] [box=710,2941,275,15]: Top Risks
+                    - generic [ref=e3869] [box=710,2956,275,14]: —
+              - listitem [ref=e3872] [box=1026,2932,357,46]:
+                - button "HSE Scorecard —" [ref=e3873] [cursor=pointer] [box=1026,2932,357,46]:
+                  - generic [ref=e3880] [box=1074,2941,275,29]:
+                    - generic [ref=e3881] [box=1074,2941,275,15]: HSE Scorecard
+                    - generic [ref=e3882] [box=1074,2956,275,14]: —
+              - listitem [ref=e3885] [box=298,2986,357,46]:
+                - button "Procurement —" [ref=e3886] [cursor=pointer] [box=298,2986,357,46]:
+                  - generic [ref=e3892] [box=345,2994,275,29]:
+                    - generic [ref=e3893] [box=345,2994,275,15]: Procurement
+                    - generic [ref=e3894] [box=345,3009,275,14]: —
+              - listitem [ref=e3897] [box=662,2986,357,46]:
+                - button "Budget Variance —" [ref=e3898] [cursor=pointer] [box=662,2986,357,46]:
+                  - generic [ref=e3903] [box=710,2994,275,29]:
+                    - generic [ref=e3904] [box=710,2994,275,15]: Budget Variance
+                    - generic [ref=e3905] [box=710,3009,275,14]: —
+              - listitem [ref=e3908] [box=1026,2986,357,46]:
+                - button "Change Orders —" [ref=e3909] [cursor=pointer] [box=1026,2986,357,46]:
+                  - generic [ref=e3914] [box=1074,2994,275,29]:
+                    - generic [ref=e3915] [box=1074,2994,275,15]: Change Orders
+                    - generic [ref=e3916] [box=1074,3009,275,14]: —
+          - generic [ref=e3922] [box=658,3111,749,122]:
+            - generic [ref=e3923] [box=681,3134,702,26]:
+              - heading "Latest site photos" [level=3] [ref=e3928] [box=705,3138,107,19]
+              - button "View all" [ref=e3929] [cursor=pointer] [box=1308,3134,75,26]
+            - generic [ref=e3934] [box=681,3176,702,34]:
+              - button [ref=e3935] [cursor=pointer] [box=681,3176,52,34]:
+                - img "Facade complete at dusk" [ref=e3936] [box=682,3177,50,33]
+                - generic [box=682,3098,50,111]:
+                  - generic [box=692,3120,31,15]: Residential House - Reference Build
+                  - time [box=692,3143,31,55]: 6 months ago
+              - button [ref=e3937] [cursor=pointer] [box=740,3176,52,34]:
+                - img "MEP rough-in on a residential floor" [ref=e3938] [box=741,3177,50,33]
+                - generic [box=741,3098,50,111]:
+                  - generic [box=751,3121,31,15]: Residential House - Reference Build
+                  - time [box=751,3143,31,55]: 8 months ago
+              - button [ref=e3939] [cursor=pointer] [box=800,3176,52,34]:
+                - img "Interior framing and drywall" [ref=e3940] [box=800,3177,50,33]
+                - generic [box=800,3098,50,111]:
+                  - generic [box=810,3121,31,15]: Residential House - Reference Build
+                  - time [box=810,3143,31,55]: 9 months ago
+              - button [ref=e3941] [cursor=pointer] [box=859,3176,52,34]:
+                - img "Tower crane lifting materials" [ref=e3942] [box=860,3177,50,33]
+                - generic [box=860,3098,50,111]:
+                  - generic [box=869,3121,31,15]: Lebensmittelmarkt Heidelberg
+                  - time [box=869,3143,31,55]: 12 months ago
+              - button [ref=e3943] [cursor=pointer] [box=918,3176,52,34]:
+                - img "Window wall installation" [ref=e3944] [box=919,3177,50,33]
+                - generic [box=919,3098,50,111]:
+                  - generic [box=928,3121,31,15]: Residential House - Reference Build
+                  - time [box=928,3143,26,55]: about 1 year ago
+              - button [ref=e3945] [cursor=pointer] [box=977,3176,52,34]:
+                - img "Superstructure rising" [ref=e3946] [box=978,3177,50,33]
+                - generic [box=978,3098,50,111]:
+                  - generic [box=987,3121,31,15]: Lebensmittelmarkt Heidelberg
+                  - time [box=987,3143,26,55]: over 1 year ago
+              - button [ref=e3947] [cursor=pointer] [box=1036,3176,52,34]:
+                - img "Rebar placement on the slab" [ref=e3948] [box=1037,3177,50,33]
+                - generic [box=1037,3098,50,111]:
+                  - generic [box=1046,3121,31,15]: Lebensmittelmarkt Karlsruhe
+                  - time [box=1046,3143,26,55]: over 1 year ago
+              - button [ref=e3949] [cursor=pointer] [box=1095,3176,52,34]:
+                - img "Flying formwork on a typical floor" [ref=e3950] [box=1096,3177,50,33]
+                - generic [box=1096,3098,50,111]:
+                  - generic [box=1105,3121,31,15]: Residential House - Reference Build
+                  - time [box=1105,3143,26,55]: over 1 year ago
+              - button [ref=e3951] [cursor=pointer] [box=1154,3176,52,34]:
+                - img "Concrete core and tower crane" [ref=e3952] [box=1155,3177,50,33]
+                - generic [box=1155,3098,50,111]:
+                  - generic [box=1164,3121,31,15]: Lebensmittelmarkt Karlsruhe
+                  - time [box=1164,3143,26,55]: over 1 year ago
+              - button [ref=e3953] [cursor=pointer] [box=1213,3176,52,34]:
+                - img "Mat slab foundation pour" [ref=e3954] [box=1214,3177,50,33]
+                - generic [box=1214,3098,50,111]:
+                  - generic [box=1224,3121,31,15]: Lebensmittelmarkt Karlsruhe
+                  - time [box=1224,3143,30,55]: almost 2 years ago
+              - button [ref=e3955] [cursor=pointer] [box=1272,3176,52,34]:
+                - img "Shoring and deep excavation" [ref=e3956] [box=1273,3177,50,33]
+                - generic [box=1273,3098,50,111]:
+                  - generic [box=1283,3121,31,15]: Lebensmittelmarkt Karlsruhe
+                  - time [box=1283,3143,30,55]: almost 2 years ago
+              - button [ref=e3957] [cursor=pointer] [box=1331,3176,52,34]:
+                - img "Site hoarding and excavation start" [ref=e3958] [box=1332,3177,50,33]
+                - generic [box=1332,3098,50,111]:
+                  - generic [box=1342,3121,31,15]: Residential House - Reference Build
+                  - time [box=1342,3143,30,55]: about 2 years ago
+  - button "Ask AI about your data" [ref=e3959] [cursor=pointer] [box=1365,932,53,53]

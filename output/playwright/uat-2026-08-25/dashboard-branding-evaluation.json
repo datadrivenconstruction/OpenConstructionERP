@@ -1,0 +1,12 @@
+{
+  "url": "http://127.0.0.1:18080/dashboard",
+  "title": "Dashboard | OpenConstructionERP",
+  "cssVars": {
+    "--oe-text-primary": "#1d1d1f"
+  },
+  "bodyColor": "rgb(23, 23, 23)",
+  "bodyBackground": "rgb(255, 255, 255)",
+  "hasMullets": true,
+  "hasAttribution": false,
+  "htmlSnippet": false
+}
