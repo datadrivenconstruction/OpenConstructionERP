@@ -53,6 +53,7 @@ For developers extending or building on OpenConstructionERP.
 
 - [Partner packs](./partner-packs/README.md) - code-free preset bundles that brand and pre-configure an install for a region or vertical, setting currency, locale, cost catalogues, validation rules and onboarding.
 - [Partner pack manifest reference](./partner-packs/MANIFEST_REFERENCE.md) - every manifest field, with types, defaults and examples.
+- [Mullets Aluminum Products deployment profile](../packs/mullets-aluminum/README.md) - the CADcoLabs branch-specific pack, activation paths, verified branding, and current UAT boundary.
 
 ## Architecture and decision records
 

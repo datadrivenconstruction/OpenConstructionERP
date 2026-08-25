@@ -8,6 +8,13 @@
 
 Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tendering - all in one self-hosted platform.
 
+> **CADcoLabs deployment profile:** branch `001` includes the
+> [`mullets-aluminum`](packs/mullets-aluminum/README.md) partner pack for
+> **Mullets Aluminum Products, Inc.** It applies the approved Mullets logo,
+> `#0055A6` primary blue, `en-US`, and `USD` while retaining the required
+> OpenConstructionERP attribution. The customization is declarative: it adds no
+> application code, database schema, or Mullets business data.
+
 **Like WordPress for construction companies** - pick modules from the marketplace, drop in your own, or replace ours with custom-built ones. Same plug-and-play model, but for BOQ, scheduling, cost control, BIM, and tendering.
 
 **A platform companies build any construction app on.** Use OpenConstructionERP as the base to assemble the exact software a project needs and to build your own modules on top, from estimating and BIM to scheduling and site delivery. One open, powerful foundation for anything you run in construction.
@@ -54,6 +61,25 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 
 ---
 
+## Mullets Aluminum Products deployment
+
+The Mullets profile co-brands the authenticated OpenConstructionERP workspace
+without replacing the upstream product identity or AGPL attribution.
+
+<img src="output/playwright/uat-2026-08-25/dashboard.png" alt="OpenConstructionERP dashboard co-branded for Mullets Aluminum Products, Inc." width="800" />
+
+- Pack source and activation notes: [`packs/mullets-aluminum/README.md`](packs/mullets-aluminum/README.md)
+- Partner-pack platform documentation: [`docs/partner-packs/README.md`](docs/partner-packs/README.md)
+- Rendered UAT evidence: [`output/playwright/uat-2026-08-25/`](output/playwright/uat-2026-08-25/)
+
+Rendered UAT verified the exact Mullets logo and company name, `#0055A6`
+branding, OpenConstructionERP attribution, the authenticated dashboard, and
+basic Projects, BOQ, Costs, Tendering, and Scheduling navigation. The sign-in
+page remains OpenConstructionERP-branded and does not yet show the Mullets
+identity; that is a known visual blocker, not a completed customization.
+
+---
+
 <details open>
 <summary><h2>Table of Contents</h2></summary>
 
@@ -68,6 +94,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> **Get Started**
 - [Why OpenConstructionERP?](#why-openconstructionerp)
+- [Mullets deployment](#mullets-aluminum-products-deployment)
 - [See It In Action](#see-it-in-action)
 - [Quick Start](#quick-start)
 - [Demo Accounts](#demo-accounts)

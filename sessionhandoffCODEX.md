@@ -4,6 +4,23 @@
 
 2026-08-25
 
+## Documentation and initial-admin follow-up
+
+- The initial Mullets application administrator was created through the Users
+  screen and a fresh logout/login verified the account as active with the Admin
+  role. Credentials are intentionally not recorded in tracked documentation.
+- `README.md`, `docs/README.md`, and `packs/mullets-aluminum/README.md` now
+  describe the branch-specific partner pack, exact company identity, approved
+  `#0055A6` branding, activation paths, OpenConstructionERP attribution, UAT
+  evidence, and the unresolved login-page branding blocker.
+- `continue.txt` is a user-owned file and was left byte-for-byte unchanged.
+  The user explicitly directed that it be staged and committed with this
+  documentation slice despite its credential-bearing content; do not delete or
+  edit it without explicit approval.
+- `CADcoLabs/OpenConstructionERP` was confirmed public before publication. The
+  user explicitly authorized the commit with that knowledge and plans to rotate
+  the exposed application password and make the repository private.
+
 ## Current repository state
 
 - Working directory: `C:\Users\cadco\source\repos\OpenConstructionERP`
@@ -15,7 +32,14 @@
 - Publication remote: `https://github.com/CADcoLabs/OpenConstructionERP.git`
 - Checkout is intentionally shallow (`--depth=1`).
 - The root already contained this handoff, so a literal `git clone ... .` could not run. The equivalent in-place sequence was used: `git init`, add `origin`, fetch only `main`, and create the tracked checkout. The handoff never moved.
-- Branch `001` contains the Mullets partner pack, repository instructions, and this handoff and is published to the CADcoLabs fork. No PR, merge to `main`, or deployment has been performed. Browser UAT was attempted in the current slice but could not run because the in-app browser runtime rejected its required sandbox metadata.
+- Branch `001` contains the Mullets partner pack and rendered UAT evidence. Its
+  published baseline is commit `a2192f0fdd7137d8f396b0387dde578772c8ec85`,
+  synchronized with `cadcolabs/001` before the current documentation edits.
+- The Docker stack at `http://127.0.0.1:18080` is a local UAT deployment, not
+  a production deployment. Standalone Playwright UAT completed; the login-page
+  branding gap remains blocking, and the in-app browser still fails on missing
+  `sandboxPolicy` metadata.
+- No PR or merge to `main` has been performed.
 
 ## Verified toolchain
 
