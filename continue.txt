@@ -1,1 +1,16 @@
 cadcolabs @ gmail.com / Mullets admin7! / admin role
+
+
+
+
+• The live app now serves the rebuilt frontend and is healthy. Only the app container changed; PostgreSQL and SQL Server container
+  IDs are unchanged, all three volume creation records are unchanged, and both the partner-pack and new frontend mounts are read-
+  only.
+
+  I’m moving to standalone Playwright UAT now. I’ll first capture an unauthenticated login baseline, then use the existing session/
+  account path if available; I will not create or modify an account.
+
+  UAT closeout (2026-08-25): standalone Playwright opened /login and confirmed the active Mullets partner logo, exact partner name,
+  and powered-by attribution in the login brand block. The existing no-signup Admin demo path reached /dashboard successfully;
+  no account was created or modified. The focused LoginPage.partner-branding.test.tsx passed (1 file, 1 test), and the prior frontend
+  typecheck/build passed. Remaining work is review/commit of the intentional source, focused test, and handoff changes.
