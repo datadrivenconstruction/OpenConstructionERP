@@ -19,6 +19,7 @@ import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
 import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
+import { partnerLogoUrl, usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { APP_VERSION } from '@/shared/lib/version';
 import { AuthBackground } from './AuthBackground';
 import {
@@ -82,6 +83,8 @@ export function LoginPage() {
   const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
     useBrandingStore();
   const brandCustomised = brandMode === 'logo' || brandMode === 'text';
+  const partnerPack = usePartnerPack().data;
+  const partner = partnerPack?.active ? partnerPack.manifest : undefined;
   // Pull the workspace brand from the server so an invited user sees it on this
   // very first (pre-auth) screen, not just the browser that set it (issue #272).
   // Public endpoint, best-effort: the card paints instantly from localStorage
@@ -704,7 +707,30 @@ export function LoginPage() {
                 pinned to the far right edge which made the brand block
                 look off-centre relative to the form below). */}
             <div className="flex items-center gap-2">
-              {brandCustomised ? (
+              {partner ? (
+                <div
+                  data-testid="login-partner-brand"
+                  className="flex max-w-full items-center gap-3 rounded-xl border-l-4 bg-surface-elevated/70 px-3 py-2"
+                  style={{ borderLeftColor: partner.branding.primary_color }}
+                >
+                  {partner.branding.has_logo && (
+                    <img
+                      src={partnerLogoUrl(partner.slug)}
+                      alt={`${partner.partner_name} logo`}
+                      className="block h-14 w-20 shrink-0 object-contain"
+                      draggable={false}
+                    />
+                  )}
+                  <div className="min-w-0 text-left">
+                    <div className="text-base font-bold leading-tight text-content-primary">
+                      {partner.partner_name}
+                    </div>
+                    <div className="mt-1 text-[10px] leading-tight text-content-secondary">
+                      {partner.branding.powered_by_text}
+                    </div>
+                  </div>
+                </div>
+              ) : brandCustomised ? (
                 <div className="flex flex-col items-center">
                   {brandMode === 'logo' && brandLogo ? (
                     <img
@@ -736,7 +762,7 @@ export function LoginPage() {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2.5">
+                <div data-testid="login-default-brand" className="flex items-center gap-2.5">
                   <Logo size="md" animate />
                   <span
                     className="text-2xl font-medium text-content-primary whitespace-nowrap"
@@ -749,15 +775,17 @@ export function LoginPage() {
               {/* White-label trigger - same editor as the in-app sidebar
                   brand control, available pre-auth so a tenant can put
                   their own logo on the sign-in screen. */}
-              <button
-                type="button"
-                onClick={() => setBrandOpen(true)}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light bg-surface-elevated/60 text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/5 hover:text-oe-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-                title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-              >
-                <Pencil size={13} strokeWidth={2.25} />
-              </button>
+              {!partner && (
+                <button
+                  type="button"
+                  onClick={() => setBrandOpen(true)}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light bg-surface-elevated/60 text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/5 hover:text-oe-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                  aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
+                  title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
+                >
+                  <Pencil size={13} strokeWidth={2.25} />
+                </button>
+              )}
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
               {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}

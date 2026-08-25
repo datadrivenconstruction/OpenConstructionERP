@@ -1,0 +1,187 @@
+- generic [ref=e3]:
+  - generic:
+    - generic:
+      - generic:
+        - generic: Pos.
+        - generic: Description
+        - generic: Unit
+        - generic: Qty
+        - generic: Rate
+        - generic: Total
+        - generic: CG
+        - generic: "300"
+        - generic: Structure - Building Construction
+        - generic: "01.001"
+        - generic: Reinforced concrete C30/37, slab
+        - generic: m³
+        - generic: "86.40"
+        - generic: €295.00
+        - generic: "01.002"
+        - generic: Formwork base slab, smooth
+        - generic: "01.003"
+        - generic: Reinforcement BSt 500S, mesh
+        - generic: €22,602
+        - generic: "01.004"
+        - generic: €285.00
+        - generic: €44,460
+        - generic: "01.005"
+        - generic: 1,248
+        - generic: "330"
+        - generic: Subtotal CG 330
+        - generic: €162,222
+        - generic: "330"
+        - generic: "340"
+        - generic: Structure - Interior Walls
+        - generic: "02.001"
+        - generic: Masonry KS 24cm, load-bearing
+        - generic: m²
+        - generic: "890.00"
+        - generic: €68.00
+        - generic: "02.002"
+        - generic: Masonry KS 11.5cm, partition
+        - generic: m²
+        - generic: "620.00"
+        - generic: €29,760
+        - generic: Subtotal CG 340
+        - generic: €90,280
+        - generic: "340"
+        - generic: "400"
+        - generic: Building Services - HVAC
+        - generic: "04.001"
+        - generic: €28.50
+        - generic: "04.002"
+        - generic: Cable NYM-J 3×1.5
+        - generic: m
+        - generic: €4.80
+        - generic: "440"
+    - generic:
+      - generic:
+        - generic:
+          - img:
+            - generic: COST PER TRADE
+            - generic: KG300
+            - generic: KG330
+            - generic: KG340
+            - generic: KG400
+            - generic: KG420
+            - generic: KG440
+            - generic: KG500
+            - generic: KG530
+            - generic: KG540
+        - generic:
+          - img:
+            - generic: BOQ BREAKDOWN
+            - generic: \u20AC4.2M
+            - generic: total budget
+        - generic:
+          - img:
+            - generic: PROJECT KPIs
+            - generic:
+              - generic: SPI
+              - generic: "1.04"
+            - generic:
+              - generic: CPI
+              - generic: "0.97"
+            - generic:
+              - generic: EAC
+              - generic: €4.3M
+            - generic:
+              - generic: Variance
+              - generic: "-2.8%"
+            - generic:
+              - generic: Progress
+              - generic: 68%
+        - generic:
+          - img:
+            - generic: S-CURVE - PLANNED vs ACTUAL
+            - generic: Planned
+            - generic: Actual
+        - generic:
+          - img:
+            - generic: ELEVATION
+            - generic: 46.00 m
+        - generic:
+          - img:
+            - generic: SCHEDULE
+            - generic: Foundation
+            - generic: Structure
+            - generic: Facade
+            - generic: MEP
+            - generic: Finishing
+  - generic [ref=e4]:
+    - radiogroup "Theme" [ref=e5]:
+      - radio "Light" [ref=e6] [cursor=pointer]
+      - radio "Dark" [ref=e13] [cursor=pointer]
+      - radio "System" [checked] [ref=e16] [cursor=pointer]
+    - button "English" [ref=e20] [cursor=pointer]
+  - generic [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]: OpenConstructionERP
+        - button "Customize logo" [ref=e45] [cursor=pointer]
+      - paragraph [ref=e49]: Professional construction project workspace
+    - generic [ref=e51]:
+      - generic [ref=e52]: Open Source
+      - paragraph [ref=e57]: "The #1 open-source construction ERP"
+    - generic [ref=e58]:
+      - heading "Sign in" [level=1] [ref=e59]
+      - generic [ref=e60]:
+        - heading "Sign in" [level=2] [ref=e61]
+        - paragraph [ref=e62]: Enter your credentials to access your workspace
+      - form "Sign in" [ref=e63]:
+        - generic [ref=e65]:
+          - generic [ref=e66]: Email
+          - textbox "Email" [active] [ref=e68]:
+            - /placeholder: you@company.com
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]: Password
+            - link "Forgot password?" [ref=e72] [cursor=pointer]:
+              - /url: /forgot-password
+          - generic [ref=e73]:
+            - textbox "Password" [ref=e74]:
+              - /placeholder: Enter your password
+            - button "Show password" [ref=e75] [cursor=pointer]
+        - generic [ref=e80] [cursor=pointer]:
+          - checkbox "Remember me for 30 days" [ref=e81]
+          - generic [ref=e82]: Remember me for 30 days
+        - button "Sign in" [ref=e84] [cursor=pointer]
+      - paragraph [ref=e87]:
+        - text: Don't have an account?
+        - link "Create account" [ref=e88] [cursor=pointer]:
+          - /url: /register
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - button "Try demo (no signup)" [expanded] [ref=e92] [cursor=pointer]
+        - generic [ref=e98]:
+          - button "A Admin demo@openconstructionerp.com · Administrator" [ref=e99] [cursor=pointer]:
+            - generic [ref=e100]: A
+            - generic [ref=e101]:
+              - generic [ref=e102]: Admin
+              - generic [ref=e103]: demo@openconstructionerp.com · Administrator
+          - button "M Michael Carter manager@openconstructionerp.com · Manager" [ref=e106] [cursor=pointer]:
+            - generic [ref=e107]: M
+            - generic [ref=e108]:
+              - generic [ref=e109]: Michael Carter
+              - generic [ref=e110]: manager@openconstructionerp.com · Manager
+      - generic [ref=e113]:
+        - button "About the demo sign-in block" [ref=e114] [cursor=pointer]
+        - tooltip "Optional demo sign-in. It only appears while demo accounts are enabled, so an administrator can turn it off."
+    - generic [ref=e117]:
+      - link "GitHub - Source code" [ref=e118] [cursor=pointer]:
+        - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+        - generic [ref=e123]:
+          - generic [ref=e124]: GitHub
+          - generic [ref=e125]: Source code
+      - link "Community - Get help & discuss" [ref=e129] [cursor=pointer]:
+        - /url: https://t.me/datadrivenconstruction
+        - generic [ref=e136]:
+          - generic [ref=e137]: Community
+          - generic [ref=e138]: Get help & discuss
+    - generic [ref=e143]:
+      - link "OpenConstructionERP.com" [ref=e144] [cursor=pointer]:
+        - /url: https://OpenConstructionERP.com
+      - generic [ref=e145]: ·
+      - link "GitHub" [ref=e146] [cursor=pointer]:
+        - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+    - generic [ref=e147]: v15.8.0

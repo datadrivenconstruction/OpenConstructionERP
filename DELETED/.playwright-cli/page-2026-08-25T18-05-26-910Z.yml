@@ -1,0 +1,1484 @@
+- generic [ref=e322]:
+  - complementary [ref=e324]:
+    - generic [ref=e326]:
+      - link "OpenConstructionERP" [ref=e328] [cursor=pointer]:
+        - /url: https://openconstructionerp.com/?utm_source=app
+      - button "Customize branding" [ref=e337] [cursor=pointer]
+    - button "Collapse sidebar" [ref=e341] [cursor=pointer]
+    - button "Search" [ref=e345] [cursor=pointer]:
+      - generic [ref=e350]: ⌘K
+    - navigation "Main navigation" [ref=e351]:
+      - generic [ref=e352]:
+        - button "Collapse Overview" [expanded] [ref=e354] [cursor=pointer]:
+          - generic [ref=e355]: Overview
+        - list [ref=e360]:
+          - listitem [ref=e361]:
+            - link "Dashboard G D Pin Dashboard" [ref=e362] [cursor=pointer]:
+              - /url: /
+              - generic "Dashboard" [ref=e368]
+              - generic [ref=e369]: G D
+              - button "Pin Dashboard" [ref=e371]
+          - listitem [ref=e374]:
+            - link "Projects G P Pin Projects" [ref=e375] [cursor=pointer]:
+              - /url: /projects
+              - generic "Projects" [ref=e378]
+              - generic [ref=e379]: G P
+              - button "Pin Projects" [ref=e381]
+          - listitem [ref=e384]:
+            - link "Cases Pin Cases" [ref=e385] [cursor=pointer]:
+              - /url: /cases
+              - generic "Cases" [ref=e390]
+              - button "Pin Cases" [ref=e395]
+          - listitem [ref=e398]:
+            - link "Documents Pin Documents" [ref=e399] [cursor=pointer]:
+              - /url: /files
+              - generic "Documents" [ref=e402]
+              - button "Pin Documents" [ref=e407]
+      - generic [ref=e410]:
+        - button "Collapse Takeoff" [expanded] [ref=e412] [cursor=pointer]:
+          - generic [ref=e413]: Takeoff
+        - list [ref=e418]:
+          - listitem [ref=e419]:
+            - link "PDF Measurements Pin PDF Measurements" [ref=e420] [cursor=pointer]:
+              - /url: /takeoff?tab=measurements
+              - generic "PDF Measurements" [ref=e427]
+              - button "Pin PDF Measurements" [ref=e432]
+          - listitem [ref=e435]:
+            - link "DWG Takeoff Pin DWG Takeoff" [ref=e436] [cursor=pointer]:
+              - /url: /dwg-takeoff
+              - generic "DWG Takeoff" [ref=e444]
+              - button "Pin DWG Takeoff" [ref=e449]
+          - listitem [ref=e452]:
+            - link "BIM 3D Takeoff G M Pin BIM 3D Takeoff" [ref=e453] [cursor=pointer]:
+              - /url: /bim
+              - generic "BIM 3D Takeoff" [ref=e457]
+              - generic [ref=e458]: G M
+              - button "Pin BIM 3D Takeoff" [ref=e460]
+          - listitem [ref=e463]:
+            - link "Quantity Takeoff Pin Quantity Takeoff" [ref=e464] [cursor=pointer]:
+              - /url: /quantities
+              - generic "Quantity Takeoff" [ref=e471]
+              - button "Pin Quantity Takeoff" [ref=e476]
+      - generic [ref=e479]:
+        - button "Collapse Cost Data" [expanded] [ref=e481] [cursor=pointer]:
+          - generic [ref=e482]: Cost Data
+        - list [ref=e487]:
+          - listitem [ref=e488]:
+            - link "Cost Database G C Pin Cost Database" [ref=e489] [cursor=pointer]:
+              - /url: /costs
+              - generic "Cost Database" [ref=e494]
+              - generic [ref=e495]: G C
+              - button "Pin Cost Database" [ref=e497]
+          - listitem [ref=e500]:
+            - link "Resource Catalog Pin Resource Catalog" [ref=e501] [cursor=pointer]:
+              - /url: /catalog
+              - generic "Resource Catalog" [ref=e512]
+              - button "Pin Resource Catalog" [ref=e517]
+          - listitem [ref=e520]:
+            - link "Cost Explorer Pin Cost Explorer" [ref=e521] [cursor=pointer]:
+              - /url: /cost-explorer
+              - generic "Cost Explorer" [ref=e525]
+              - button "Pin Cost Explorer" [ref=e530]
+          - listitem [ref=e533]:
+            - link "Assemblies Pin Assemblies" [ref=e534] [cursor=pointer]:
+              - /url: /assemblies
+              - generic "Assemblies" [ref=e539]
+              - button "Pin Assemblies" [ref=e544]
+          - listitem [ref=e547]:
+            - link "Cost Match Pin Cost Match" [ref=e548] [cursor=pointer]:
+              - /url: /cost-match
+              - generic "Cost Match" [ref=e552]
+              - button "Pin Cost Match" [ref=e557]
+          - listitem [ref=e560]:
+            - link "Currencies Pin Currencies" [ref=e561] [cursor=pointer]:
+              - /url: /fx
+              - generic "Currencies" [ref=e565]
+              - button "Pin Currencies" [ref=e570]
+          - listitem [ref=e573]:
+            - link "Cost Benchmarks Pin Cost Benchmarks" [ref=e574] [cursor=pointer]:
+              - /url: /benchmarks
+              - generic "Cost Benchmarks" [ref=e577]
+              - button "Pin Cost Benchmarks" [ref=e582]
+      - generic [ref=e585]:
+        - button "Collapse Estimating" [expanded] [ref=e587] [cursor=pointer]:
+          - generic [ref=e588]: Estimating
+        - list [ref=e593]:
+          - listitem [ref=e594]:
+            - link "Bid Schedule G B Pin Bid Schedule" [ref=e595] [cursor=pointer]:
+              - /url: /boq
+              - generic "Bid Schedule" [ref=e598]
+              - generic [ref=e599]: G B
+              - button "Pin Bid Schedule" [ref=e601]
+          - listitem [ref=e604]:
+            - link "CAD-BIM Match → Cost beta Pin CAD-BIM Match → Cost" [ref=e605] [cursor=pointer]:
+              - /url: /match-elements
+              - generic "CAD-BIM Match → Cost" [ref=e609]
+              - generic [ref=e610]: beta
+              - button "Pin CAD-BIM Match → Cost" [ref=e615]
+          - listitem [ref=e618]:
+            - link "Estimation Dashboard Pin Estimation Dashboard" [ref=e619] [cursor=pointer]:
+              - /url: /project-intelligence
+              - generic "Estimation Dashboard" [ref=e632]
+              - button "Pin Estimation Dashboard" [ref=e637]
+          - listitem [ref=e640]:
+            - link "Conceptual Estimate Pin Conceptual Estimate" [ref=e641] [cursor=pointer]:
+              - /url: /rom-estimate
+              - generic "Conceptual Estimate" [ref=e645]
+              - button "Pin Conceptual Estimate" [ref=e650]
+          - listitem [ref=e653]:
+            - link "Methodologies Pin Methodologies" [ref=e654] [cursor=pointer]:
+              - /url: /methodologies
+              - generic "Methodologies" [ref=e656]
+              - button "Pin Methodologies" [ref=e661]
+      - generic [ref=e664]:
+        - button "Collapse Drawings & Files" [expanded] [ref=e666] [cursor=pointer]:
+          - generic [ref=e667]: Drawings & Files
+        - list [ref=e672]:
+          - listitem [ref=e673]:
+            - link "Drawing Sheets Pin Drawing Sheets" [ref=e674] [cursor=pointer]:
+              - /url: /sheets
+              - generic "Drawing Sheets" [ref=e678]
+              - button "Pin Drawing Sheets" [ref=e683]
+          - listitem [ref=e686]:
+            - link "Plan Room beta Pin Plan Room" [ref=e687] [cursor=pointer]:
+              - /url: /plan-room
+              - generic "Plan Room" [ref=e692]
+              - generic [ref=e693]: beta
+              - button "Pin Plan Room" [ref=e698]
+          - listitem [ref=e701]:
+            - link "Markups Pin Markups" [ref=e702] [cursor=pointer]:
+              - /url: /markups
+              - generic "Markups" [ref=e708]
+              - button "Pin Markups" [ref=e713]
+      - generic [ref=e716]:
+        - button "Collapse Reality Capture & 3D" [expanded] [ref=e718] [cursor=pointer]:
+          - generic [ref=e719]: Reality Capture & 3D
+        - list [ref=e724]:
+          - listitem [ref=e725]:
+            - link "Geo Hub beta Pin Geo Hub" [ref=e726] [cursor=pointer]:
+              - /url: /geo
+              - generic "Geo Hub" [ref=e730]
+              - generic [ref=e731]: beta
+              - button "Pin Geo Hub" [ref=e736]
+          - listitem [ref=e739]:
+            - link "Point Cloud beta Pin Point Cloud" [ref=e740] [cursor=pointer]:
+              - /url: /pointcloud
+              - generic "Point Cloud" [ref=e746]
+              - generic [ref=e747]: beta
+              - button "Pin Point Cloud" [ref=e752]
+          - listitem [ref=e755]:
+            - link "CAD-BIM BI Explorer Pin CAD-BIM BI Explorer" [ref=e756] [cursor=pointer]:
+              - /url: /data-explorer
+              - generic "CAD-BIM BI Explorer" [ref=e759]
+              - button "Pin CAD-BIM BI Explorer" [ref=e764]
+      - generic [ref=e767]:
+        - button "Collapse Model Coordination" [expanded] [ref=e769] [cursor=pointer]:
+          - generic [ref=e770]: Model Coordination
+        - list [ref=e775]:
+          - listitem [ref=e776]:
+            - link "Coordination Hub beta Pin Coordination Hub" [ref=e777] [cursor=pointer]:
+              - /url: /coordination
+              - generic "Coordination Hub" [ref=e783]
+              - generic [ref=e784]: beta
+              - button "Pin Coordination Hub" [ref=e789]
+          - listitem [ref=e792]:
+            - link "Model Review beta Pin Model Review" [ref=e793] [cursor=pointer]:
+              - /url: /model-review
+              - generic "Model Review" [ref=e801]
+              - generic [ref=e802]: beta
+              - button "Pin Model Review" [ref=e807]
+          - listitem [ref=e810]:
+            - link "BIM Federations Pin BIM Federations" [ref=e811] [cursor=pointer]:
+              - /url: /bim/federations
+              - generic "BIM Federations" [ref=e816]
+              - button "Pin BIM Federations" [ref=e821]
+          - listitem [ref=e824]:
+            - link "Clash Detection beta Pin Clash Detection" [ref=e825] [cursor=pointer]:
+              - /url: /clash
+              - generic "Clash Detection" [ref=e833]
+              - generic [ref=e834]: beta
+              - button "Pin Clash Detection" [ref=e839]
+          - listitem [ref=e842]:
+            - link "Model Issues beta Pin Model Issues" [ref=e843] [cursor=pointer]:
+              - /url: /bcf
+              - generic "Model Issues" [ref=e846]
+              - generic [ref=e847]: beta
+              - button "Pin Model Issues" [ref=e852]
+          - listitem [ref=e855]:
+            - link "BIM Rules Pin BIM Rules" [ref=e856] [cursor=pointer]:
+              - /url: /bim/rules?mode=requirements
+              - generic "BIM Rules" [ref=e858]
+              - button "Pin BIM Rules" [ref=e863]
+          - listitem [ref=e866]:
+            - link "EIR Matrix (ISO 19650) beta Pin EIR Matrix (ISO 19650)" [ref=e867] [cursor=pointer]:
+              - /url: /requirements/matrix
+              - generic "EIR Matrix (ISO 19650)" [ref=e872]
+              - generic [ref=e873]: beta
+              - button "Pin EIR Matrix (ISO 19650)" [ref=e878]
+      - generic [ref=e881]:
+        - button "Collapse Scheduling" [expanded] [ref=e883] [cursor=pointer]:
+          - generic [ref=e884]: Scheduling
+        - list [ref=e889]:
+          - listitem [ref=e890]:
+            - link "4D Schedule Pin 4D Schedule" [ref=e891] [cursor=pointer]:
+              - /url: /schedule
+              - generic "4D Schedule" [ref=e894]
+              - button "Pin 4D Schedule" [ref=e899]
+          - listitem [ref=e902]:
+            - link "Advanced Schedule Pin Advanced Schedule" [ref=e903] [cursor=pointer]:
+              - /url: /schedule-advanced
+              - generic "Advanced Schedule" [ref=e907]
+              - button "Pin Advanced Schedule" [ref=e912]
+          - listitem [ref=e915]:
+            - link "Portfolio Pin Portfolio" [ref=e916] [cursor=pointer]:
+              - /url: /portfolio
+              - generic "Portfolio" [ref=e922]
+              - button "Pin Portfolio" [ref=e927]
+          - listitem [ref=e930]:
+            - link "Takt Planning Pin Takt Planning" [ref=e931] [cursor=pointer]:
+              - /url: /takt
+              - generic "Takt Planning" [ref=e936]
+              - button "Pin Takt Planning" [ref=e941]
+          - listitem [ref=e944]:
+            - link "Tasks Pin Tasks" [ref=e945] [cursor=pointer]:
+              - /url: /tasks
+              - generic "Tasks" [ref=e949]
+              - button "Pin Tasks" [ref=e954]
+      - generic [ref=e957]:
+        - button "Collapse Cost Control & Risk" [expanded] [ref=e959] [cursor=pointer]:
+          - generic [ref=e960]: Cost Control & Risk
+        - list [ref=e965]:
+          - listitem [ref=e966]:
+            - link "5D Cost Model Pin 5D Cost Model" [ref=e967] [cursor=pointer]:
+              - /url: /5d
+              - generic "5D Cost Model" [ref=e971]
+              - button "Pin 5D Cost Model" [ref=e976]
+          - listitem [ref=e979]:
+            - link "Progress Pin Progress" [ref=e980] [cursor=pointer]:
+              - /url: /progress
+              - generic "Progress" [ref=e983]
+              - button "Pin Progress" [ref=e988]
+          - listitem [ref=e991]:
+            - link "Earned Value Pin Earned Value" [ref=e992] [cursor=pointer]:
+              - /url: /full-evm
+              - generic "Earned Value" [ref=e996]
+              - button "Pin Earned Value" [ref=e1001]
+          - listitem [ref=e1004]:
+            - link "Capacity Planning Pin Capacity Planning" [ref=e1005] [cursor=pointer]:
+              - /url: /portfolio/capacity
+              - generic "Capacity Planning" [ref=e1008]
+              - button "Pin Capacity Planning" [ref=e1013]
+          - listitem [ref=e1016]:
+            - link "Resource Leveling Pin Resource Leveling" [ref=e1017] [cursor=pointer]:
+              - /url: /portfolio/leveling
+              - generic "Resource Leveling" [ref=e1022]
+              - button "Pin Resource Leveling" [ref=e1027]
+          - listitem [ref=e1030]:
+            - link "Risk Register Pin Risk Register" [ref=e1031] [cursor=pointer]:
+              - /url: /risks
+              - generic "Risk Register" [ref=e1034]
+              - button "Pin Risk Register" [ref=e1039]
+          - listitem [ref=e1042]:
+            - link "Cost-Value Reconciliation Pin Cost-Value Reconciliation" [ref=e1043] [cursor=pointer]:
+              - /url: /cvr
+              - generic "Cost-Value Reconciliation" [ref=e1048]
+              - button "Pin Cost-Value Reconciliation" [ref=e1053]
+          - listitem [ref=e1056]:
+            - link "Post-calculation Pin Post-calculation" [ref=e1057] [cursor=pointer]:
+              - /url: /postcalc
+              - generic "Post-calculation" [ref=e1061]
+              - button "Pin Post-calculation" [ref=e1066]
+      - generic [ref=e1069]:
+        - button "Collapse Commercial" [expanded] [ref=e1071] [cursor=pointer]:
+          - generic [ref=e1072]: Commercial
+        - list [ref=e1077]:
+          - listitem [ref=e1078]:
+            - link "CRM Pin CRM" [ref=e1079] [cursor=pointer]:
+              - /url: /crm
+              - generic "CRM" [ref=e1083]
+              - button "Pin CRM" [ref=e1088]
+          - listitem [ref=e1091]:
+            - link "Contracts Pin Contracts" [ref=e1092] [cursor=pointer]:
+              - /url: /contracts
+              - generic "Contracts" [ref=e1096]
+              - button "Pin Contracts" [ref=e1101]
+          - listitem [ref=e1104]:
+            - link "Payment Clock Pin Payment Clock" [ref=e1105] [cursor=pointer]:
+              - /url: /payment-clock
+              - generic "Payment Clock" [ref=e1110]
+              - button "Pin Payment Clock" [ref=e1115]
+          - listitem [ref=e1118]:
+            - link "Withholding Tax Pin Withholding Tax" [ref=e1119] [cursor=pointer]:
+              - /url: /tax-withholding
+              - generic "Withholding Tax" [ref=e1124]
+              - button "Pin Withholding Tax" [ref=e1129]
+          - listitem [ref=e1132]:
+            - link "E-invoice Clearance Pin E-invoice Clearance" [ref=e1133] [cursor=pointer]:
+              - /url: /einvoice-clearance
+              - generic "E-invoice Clearance" [ref=e1137]
+              - button "Pin E-invoice Clearance" [ref=e1142]
+          - listitem [ref=e1145]:
+            - link "Subcontractor Directory Pin Subcontractor Directory" [ref=e1146] [cursor=pointer]:
+              - /url: /subcontractors
+              - generic "Subcontractor Directory" [ref=e1152]
+              - button "Pin Subcontractor Directory" [ref=e1157]
+      - generic [ref=e1160]:
+        - button "Collapse Procurement" [expanded] [ref=e1162] [cursor=pointer]:
+          - generic [ref=e1163]: Procurement
+        - list [ref=e1168]:
+          - listitem [ref=e1169]:
+            - link "Procurement Pin Procurement" [ref=e1170] [cursor=pointer]:
+              - /url: /procurement
+              - generic "Procurement" [ref=e1175]
+              - button "Pin Procurement" [ref=e1180]
+          - listitem [ref=e1183]:
+            - link "Bid Management Pin Bid Management" [ref=e1184] [cursor=pointer]:
+              - /url: /bid-management
+              - generic "Bid Management" [ref=e1189]
+              - button "Pin Bid Management" [ref=e1194]
+          - listitem [ref=e1197]:
+            - link "Tendering Pin Tendering" [ref=e1198] [cursor=pointer]:
+              - /url: /tendering
+              - generic "Tendering" [ref=e1202]
+              - button "Pin Tendering" [ref=e1207]
+          - listitem [ref=e1210]:
+            - link "Supplier Catalogs Pin Supplier Catalogs" [ref=e1211] [cursor=pointer]:
+              - /url: /supplier-catalogs
+              - generic "Supplier Catalogs" [ref=e1216]
+              - button "Pin Supplier Catalogs" [ref=e1221]
+      - generic [ref=e1224]:
+        - button "Collapse Estimate Detail" [expanded] [ref=e1226] [cursor=pointer]:
+          - generic [ref=e1227]: Estimate Detail
+        - list [ref=e1232]:
+          - listitem [ref=e1233]:
+            - link "Basis of Estimate Pin Basis of Estimate" [ref=e1234] [cursor=pointer]:
+              - /url: /estimate-basis
+              - generic "Basis of Estimate" [ref=e1238]
+              - button "Pin Basis of Estimate" [ref=e1243]
+          - listitem [ref=e1246]:
+            - link "General conditions Pin General conditions" [ref=e1247] [cursor=pointer]:
+              - /url: /preliminaries
+              - generic "General conditions" [ref=e1251]
+              - button "Pin General conditions" [ref=e1256]
+          - listitem [ref=e1259]:
+            - link "Allowances & Contingency Pin Allowances & Contingency" [ref=e1260] [cursor=pointer]:
+              - /url: /allowances
+              - generic "Allowances & Contingency" [ref=e1264]
+              - button "Pin Allowances & Contingency" [ref=e1269]
+          - listitem [ref=e1272]:
+            - link "Design Options Pin Design Options" [ref=e1273] [cursor=pointer]:
+              - /url: /design-options
+              - generic "Design Options" [ref=e1278]
+              - button "Pin Design Options" [ref=e1283]
+          - listitem [ref=e1286]:
+            - link "Formwork Pin Formwork" [ref=e1287] [cursor=pointer]:
+              - /url: /formwork
+              - generic "Formwork" [ref=e1298]
+              - button "Pin Formwork" [ref=e1303]
+      - generic [ref=e1306]:
+        - button "Collapse Change" [expanded] [ref=e1308] [cursor=pointer]:
+          - generic [ref=e1309]: Change
+        - list [ref=e1314]:
+          - listitem [ref=e1315]:
+            - link "Variations Pin Variations" [ref=e1316] [cursor=pointer]:
+              - /url: /variations
+              - generic "Variations" [ref=e1321]
+              - button "Pin Variations" [ref=e1326]
+          - listitem [ref=e1329]:
+            - link "Management of Change Pin Management of Change" [ref=e1330] [cursor=pointer]:
+              - /url: /moc
+              - generic "Management of Change" [ref=e1339]
+              - button "Pin Management of Change" [ref=e1344]
+          - listitem [ref=e1347]:
+            - link "Change Orders Pin Change Orders" [ref=e1348] [cursor=pointer]:
+              - /url: /changeorders
+              - generic "Change Orders" [ref=e1353]
+              - button "Pin Change Orders" [ref=e1358]
+          - listitem [ref=e1361]:
+            - link "Change Intelligence Pin Change Intelligence" [ref=e1362] [cursor=pointer]:
+              - /url: /change-intelligence
+              - generic "Change Intelligence" [ref=e1375]
+              - button "Pin Change Intelligence" [ref=e1380]
+          - listitem [ref=e1383]:
+            - link "Claims Evidence Pin Claims Evidence" [ref=e1384] [cursor=pointer]:
+              - /url: /claims-evidence
+              - generic "Claims Evidence" [ref=e1388]
+              - button "Pin Claims Evidence" [ref=e1393]
+          - listitem [ref=e1396]:
+            - link "Value Realized Pin Value Realized" [ref=e1397] [cursor=pointer]:
+              - /url: /value
+              - generic "Value Realized" [ref=e1401]
+              - button "Pin Value Realized" [ref=e1406]
+      - generic [ref=e1409]:
+        - button "Collapse Records & Capture" [expanded] [ref=e1411] [cursor=pointer]:
+          - generic [ref=e1412]: Records & Capture
+        - list [ref=e1417]:
+          - listitem [ref=e1418]:
+            - link "Phone Log Pin Phone Log" [ref=e1419] [cursor=pointer]:
+              - /url: /phone-log
+              - generic "Phone Log" [ref=e1422]
+              - button "Pin Phone Log" [ref=e1427]
+          - listitem [ref=e1430]:
+            - link "Document Connectors Pin Document Connectors" [ref=e1431] [cursor=pointer]:
+              - /url: /connectors
+              - generic "Document Connectors" [ref=e1434]
+              - button "Pin Document Connectors" [ref=e1439]
+          - listitem [ref=e1442]:
+            - link "Event Reconciliation Pin Event Reconciliation" [ref=e1443] [cursor=pointer]:
+              - /url: /reconciliation
+              - generic "Event Reconciliation" [ref=e1447]
+              - button "Pin Event Reconciliation" [ref=e1452]
+          - listitem [ref=e1455]:
+            - link "Inbound Capture Pin Inbound Capture" [ref=e1456] [cursor=pointer]:
+              - /url: /inbound
+              - generic "Inbound Capture" [ref=e1461]
+              - button "Pin Inbound Capture" [ref=e1466]
+          - listitem [ref=e1469]:
+            - link "Email Delay Scan Pin Email Delay Scan" [ref=e1470] [cursor=pointer]:
+              - /url: /inbound-email
+              - generic "Email Delay Scan" [ref=e1474]
+              - button "Pin Email Delay Scan" [ref=e1479]
+          - listitem [ref=e1482]:
+            - link "Find Records Pin Find Records" [ref=e1483] [cursor=pointer]:
+              - /url: /find
+              - generic "Find Records" [ref=e1489]
+              - button "Pin Find Records" [ref=e1494]
+          - listitem [ref=e1497]:
+            - link "Route Classifier Pin Route Classifier" [ref=e1498] [cursor=pointer]:
+              - /url: /project-route
+              - generic "Route Classifier" [ref=e1500]
+              - button "Pin Route Classifier" [ref=e1505]
+      - generic [ref=e1508]:
+        - button "Collapse Field Operations" [expanded] [ref=e1510] [cursor=pointer]:
+          - generic [ref=e1511]: Field Operations
+        - list [ref=e1516]:
+          - listitem [ref=e1517]:
+            - link "Daily Diary Pin Daily Diary" [ref=e1518] [cursor=pointer]:
+              - /url: /daily-diary
+              - generic "Daily Diary" [ref=e1521]
+              - button "Pin Daily Diary" [ref=e1526]
+          - listitem [ref=e1529]:
+            - link "Field Reports Pin Field Reports" [ref=e1530] [cursor=pointer]:
+              - /url: /field-reports
+              - generic "Field Reports" [ref=e1534]
+              - button "Pin Field Reports" [ref=e1539]
+          - listitem [ref=e1542]:
+            - link "Field Time Pin Field Time" [ref=e1543] [cursor=pointer]:
+              - /url: /field-time
+              - generic "Field Time" [ref=e1547]
+              - button "Pin Field Time" [ref=e1552]
+      - generic [ref=e1555]:
+        - button "Collapse On Site" [expanded] [ref=e1557] [cursor=pointer]:
+          - generic [ref=e1558]: On Site
+        - list [ref=e1563]:
+          - listitem [ref=e1564]:
+            - link "Site Mobilisation Pin Site Mobilisation" [ref=e1565] [cursor=pointer]:
+              - /url: /site-prep
+              - generic "Site Mobilisation" [ref=e1568]
+              - button "Pin Site Mobilisation" [ref=e1573]
+          - listitem [ref=e1576]:
+            - link "Service & Maintenance Pin Service & Maintenance" [ref=e1577] [cursor=pointer]:
+              - /url: /service
+              - generic "Service & Maintenance" [ref=e1580]
+              - button "Pin Service & Maintenance" [ref=e1585]
+          - listitem [ref=e1588]:
+            - link "Site Logistics Pin Site Logistics" [ref=e1589] [cursor=pointer]:
+              - /url: /site-logistics
+              - generic "Site Logistics" [ref=e1595]
+              - button "Pin Site Logistics" [ref=e1600]
+          - listitem [ref=e1603]:
+            - link "Site Inventory Pin Site Inventory" [ref=e1604] [cursor=pointer]:
+              - /url: /site-inventory
+              - generic "Site Inventory" [ref=e1608]
+              - button "Pin Site Inventory" [ref=e1613]
+          - listitem [ref=e1616]:
+            - link "Site Supervision Pin Site Supervision" [ref=e1617] [cursor=pointer]:
+              - /url: /site-supervision
+              - generic "Site Supervision" [ref=e1623]
+              - button "Pin Site Supervision" [ref=e1628]
+          - listitem [ref=e1631]:
+            - link "Client & Partner Portal Pin Client & Partner Portal" [ref=e1632] [cursor=pointer]:
+              - /url: /portal
+              - generic "Client & Partner Portal" [ref=e1636]
+              - button "Pin Client & Partner Portal" [ref=e1641]
+      - generic [ref=e1644]:
+        - button "Collapse Resources & Assets" [expanded] [ref=e1646] [cursor=pointer]:
+          - generic [ref=e1647]: Resources & Assets
+        - list [ref=e1652]:
+          - listitem [ref=e1653]:
+            - link "Equipment & Fleet Pin Equipment & Fleet" [ref=e1654] [cursor=pointer]:
+              - /url: /equipment
+              - generic "Equipment & Fleet" [ref=e1660]
+              - button "Pin Equipment & Fleet" [ref=e1665]
+          - listitem [ref=e1668]:
+            - link "Resources & Crew Pin Resources & Crew" [ref=e1669] [cursor=pointer]:
+              - /url: /resources
+              - generic "Resources & Crew" [ref=e1675]
+              - button "Pin Resources & Crew" [ref=e1680]
+          - listitem [ref=e1683]:
+            - link "Credentials Pin Credentials" [ref=e1684] [cursor=pointer]:
+              - /url: /credentials
+              - generic "Credentials" [ref=e1688]
+              - button "Pin Credentials" [ref=e1693]
+          - listitem [ref=e1696]:
+            - link "Payroll Pin Payroll" [ref=e1697] [cursor=pointer]:
+              - /url: /payroll
+              - generic "Payroll" [ref=e1701]
+              - button "Pin Payroll" [ref=e1706]
+          - listitem [ref=e1709]:
+            - link "Certified Payroll Pin Certified Payroll" [ref=e1710] [cursor=pointer]:
+              - /url: /certified-payroll
+              - generic "Certified Payroll" [ref=e1715]
+              - button "Pin Certified Payroll" [ref=e1720]
+          - listitem [ref=e1723]:
+            - link "Building Assets (FM) Pin Building Assets (FM)" [ref=e1724] [cursor=pointer]:
+              - /url: /assets
+              - generic "Building Assets (FM)" [ref=e1729]
+              - button "Pin Building Assets (FM)" [ref=e1734]
+          - listitem [ref=e1737]:
+            - link "Off-site / Prefab Pin Off-site / Prefab" [ref=e1738] [cursor=pointer]:
+              - /url: /prefab
+              - generic "Off-site / Prefab" [ref=e1741]
+              - button "Pin Off-site / Prefab" [ref=e1746]
+      - generic [ref=e1749]:
+        - button "Collapse Quality" [expanded] [ref=e1751] [cursor=pointer]:
+          - generic [ref=e1752]: Quality
+        - list [ref=e1757]:
+          - listitem [ref=e1758]:
+            - link "Issues Pin Issues" [ref=e1759] [cursor=pointer]:
+              - /url: /issues
+              - generic "Issues" [ref=e1763]
+              - button "Pin Issues" [ref=e1768]
+          - listitem [ref=e1771]:
+            - link "Validation Pin Validation" [ref=e1772] [cursor=pointer]:
+              - /url: /validation
+              - generic "Validation" [ref=e1776]
+              - button "Pin Validation" [ref=e1781]
+          - listitem [ref=e1784]:
+            - link "Inspections Pin Inspections" [ref=e1785] [cursor=pointer]:
+              - /url: /inspections
+              - generic "Inspections" [ref=e1790]
+              - button "Pin Inspections" [ref=e1795]
+          - listitem [ref=e1798]:
+            - link "Construction Control Pin Construction Control" [ref=e1799] [cursor=pointer]:
+              - /url: /construction-control
+              - generic "Construction Control" [ref=e1803]
+              - button "Pin Construction Control" [ref=e1808]
+          - listitem [ref=e1811]:
+            - link "NCRs Pin NCRs" [ref=e1812] [cursor=pointer]:
+              - /url: /ncr
+              - generic "NCRs" [ref=e1815]
+              - button "Pin NCRs" [ref=e1820]
+          - listitem [ref=e1823]:
+            - link "Punch List Pin Punch List" [ref=e1824] [cursor=pointer]:
+              - /url: /punchlist
+              - generic "Punch List" [ref=e1828]
+              - button "Pin Punch List" [ref=e1833]
+          - listitem [ref=e1836]:
+            - link "Deadlines Pin Deadlines" [ref=e1837] [cursor=pointer]:
+              - /url: /deadlines
+              - generic "Deadlines" [ref=e1845]
+              - button "Pin Deadlines" [ref=e1850]
+          - listitem [ref=e1853]:
+            - link "Review Authority Pin Review Authority" [ref=e1854] [cursor=pointer]:
+              - /url: /review-authority
+              - generic "Review Authority" [ref=e1859]
+              - button "Pin Review Authority" [ref=e1864]
+      - generic [ref=e1867]:
+        - button "Collapse Handover & Commissioning" [expanded] [ref=e1869] [cursor=pointer]:
+          - generic [ref=e1870]: Handover & Commissioning
+        - list [ref=e1875]:
+          - listitem [ref=e1876]:
+            - link "Commissioning Pin Commissioning" [ref=e1877] [cursor=pointer]:
+              - /url: /commissioning
+              - generic "Commissioning" [ref=e1882]
+              - button "Pin Commissioning" [ref=e1887]
+          - listitem [ref=e1890]:
+            - link "Handover & Closeout Pin Handover & Closeout" [ref=e1891] [cursor=pointer]:
+              - /url: /closeout
+              - generic "Handover & Closeout" [ref=e1897]
+              - button "Pin Handover & Closeout" [ref=e1902]
+          - listitem [ref=e1905]:
+            - link "Warranties & Defects Liability Pin Warranties & Defects Liability" [ref=e1906] [cursor=pointer]:
+              - /url: /defects-liability
+              - generic "Warranties & Defects Liability" [ref=e1909]
+              - button "Pin Warranties & Defects Liability" [ref=e1914]
+          - listitem [ref=e1917]:
+            - link "Forms & checklists Pin Forms & checklists" [ref=e1918] [cursor=pointer]:
+              - /url: /forms
+              - generic "Forms & checklists" [ref=e1922]
+              - button "Pin Forms & checklists" [ref=e1927]
+      - generic [ref=e1930]:
+        - button "Collapse Safety & ESG" [expanded] [ref=e1932] [cursor=pointer]:
+          - generic [ref=e1933]: Safety & ESG
+        - list [ref=e1938]:
+          - listitem [ref=e1939]:
+            - link "Safety Pin Safety" [ref=e1940] [cursor=pointer]:
+              - /url: /safety
+              - generic "Safety" [ref=e1946]
+              - button "Pin Safety" [ref=e1951]
+          - listitem [ref=e1954]:
+            - link "HSE Management Pin HSE Management" [ref=e1955] [cursor=pointer]:
+              - /url: /hse-advanced
+              - generic "HSE Management" [ref=e1958]
+              - button "Pin HSE Management" [ref=e1963]
+          - listitem [ref=e1966]:
+            - link "Temporary Works Pin Temporary Works" [ref=e1967] [cursor=pointer]:
+              - /url: /temporary-works
+              - generic "Temporary Works" [ref=e1973]
+              - button "Pin Temporary Works" [ref=e1978]
+          - listitem [ref=e1981]:
+            - link "Quality Management Pin Quality Management" [ref=e1982] [cursor=pointer]:
+              - /url: /qms
+              - generic "Quality Management" [ref=e1986]
+              - button "Pin Quality Management" [ref=e1991]
+      - generic [ref=e1994]:
+        - button "Collapse ESG & Carbon" [expanded] [ref=e1996] [cursor=pointer]:
+          - generic [ref=e1997]: ESG & Carbon
+        - list [ref=e2002]:
+          - listitem [ref=e2003]:
+            - link "Carbon & ESG Pin Carbon & ESG" [ref=e2004] [cursor=pointer]:
+              - /url: /carbon
+              - generic "Carbon & ESG" [ref=e2008]
+              - button "Pin Carbon & ESG" [ref=e2013]
+          - listitem [ref=e2016]:
+            - link "Sustainability Pin Sustainability" [ref=e2017] [cursor=pointer]:
+              - /url: /sustainability
+              - generic "Sustainability" [ref=e2021]
+              - button "Pin Sustainability" [ref=e2026]
+          - listitem [ref=e2029]:
+            - link "ESG Site Performance Pin ESG Site Performance" [ref=e2030] [cursor=pointer]:
+              - /url: /esg
+              - generic "ESG Site Performance" [ref=e2034]
+              - button "Pin ESG Site Performance" [ref=e2039]
+      - generic [ref=e2042]:
+        - button "Collapse Communication" [expanded] [ref=e2044] [cursor=pointer]:
+          - generic [ref=e2045]: Communication
+        - list [ref=e2050]:
+          - listitem [ref=e2051]:
+            - link "Contacts Pin Contacts" [ref=e2052] [cursor=pointer]:
+              - /url: /contacts
+              - generic "Contacts" [ref=e2058]
+              - button "Pin Contacts" [ref=e2063]
+          - listitem [ref=e2066]:
+            - link "Teams and visibility Pin Teams and visibility" [ref=e2067] [cursor=pointer]:
+              - /url: /teams
+              - generic "Teams and visibility" [ref=e2071]
+              - button "Pin Teams and visibility" [ref=e2076]
+          - listitem [ref=e2079]:
+            - link "Meetings Pin Meetings" [ref=e2080] [cursor=pointer]:
+              - /url: /meetings
+              - generic "Meetings" [ref=e2083]
+              - button "Pin Meetings" [ref=e2088]
+          - listitem [ref=e2091]:
+            - link "RFIs Pin RFIs" [ref=e2092] [cursor=pointer]:
+              - /url: /rfi
+              - generic "RFIs" [ref=e2096]
+              - button "Pin RFIs" [ref=e2101]
+          - listitem [ref=e2104]:
+            - link "Interface Register Pin Interface Register" [ref=e2105] [cursor=pointer]:
+              - /url: /interface-management
+              - generic "Interface Register" [ref=e2111]
+              - button "Pin Interface Register" [ref=e2116]
+          - listitem [ref=e2119]:
+            - link "Correspondence Pin Correspondence" [ref=e2120] [cursor=pointer]:
+              - /url: /correspondence
+              - generic "Correspondence" [ref=e2124]
+              - button "Pin Correspondence" [ref=e2129]
+          - listitem [ref=e2132]:
+            - link "Authority Submissions Pin Authority Submissions" [ref=e2133] [cursor=pointer]:
+              - /url: /authority-submissions
+              - generic "Authority Submissions" [ref=e2137]
+              - button "Pin Authority Submissions" [ref=e2142]
+          - listitem [ref=e2145]:
+            - link "Collaboration Pin Collaboration" [ref=e2146] [cursor=pointer]:
+              - /url: /collaboration
+              - generic "Collaboration" [ref=e2152]
+              - button "Pin Collaboration" [ref=e2157]
+      - generic [ref=e2160]:
+        - button "Collapse Documents" [expanded] [ref=e2162] [cursor=pointer]:
+          - generic [ref=e2163]: Documents
+        - list [ref=e2168]:
+          - listitem [ref=e2169]:
+            - link "Submittals Pin Submittals" [ref=e2170] [cursor=pointer]:
+              - /url: /submittals
+              - generic "Submittals" [ref=e2175]
+              - button "Pin Submittals" [ref=e2180]
+          - listitem [ref=e2183]:
+            - link "Transmittals Pin Transmittals" [ref=e2184] [cursor=pointer]:
+              - /url: /transmittals
+              - generic "Transmittals" [ref=e2188]
+              - button "Pin Transmittals" [ref=e2193]
+          - listitem [ref=e2196]:
+            - link "Common Data Environment Pin Common Data Environment" [ref=e2197] [cursor=pointer]:
+              - /url: /cde
+              - generic "Common Data Environment" [ref=e2202]
+              - button "Pin Common Data Environment" [ref=e2207]
+          - listitem [ref=e2210]:
+            - link "Source Data Pin Source Data" [ref=e2211] [cursor=pointer]:
+              - /url: /source-data
+              - generic "Source Data" [ref=e2216]
+              - button "Pin Source Data" [ref=e2221]
+          - listitem [ref=e2224]:
+            - link "E-Signatures Pin E-Signatures" [ref=e2225] [cursor=pointer]:
+              - /url: /signing
+              - generic "E-Signatures" [ref=e2231]
+              - button "Pin E-Signatures" [ref=e2236]
+          - listitem [ref=e2239]:
+            - link "Project Photos Pin Project Photos" [ref=e2240] [cursor=pointer]:
+              - /url: /photos
+              - generic "Project Photos" [ref=e2244]
+              - button "Pin Project Photos" [ref=e2249]
+      - generic [ref=e2252]:
+        - button "Collapse Real Estate" [expanded] [ref=e2254] [cursor=pointer]:
+          - generic [ref=e2255]: Real Estate
+        - list [ref=e2260]:
+          - listitem [ref=e2261]:
+            - link "Property Development Pin Property Development" [ref=e2262] [cursor=pointer]:
+              - /url: /property-dev
+              - generic "Property Development" [ref=e2267]
+              - button "Pin Property Development" [ref=e2272]
+          - listitem [ref=e2275]:
+            - link "Accommodation beta Pin Accommodation" [ref=e2276] [cursor=pointer]:
+              - /url: /accommodation
+              - generic "Accommodation" [ref=e2281]
+              - generic [ref=e2282]: beta
+              - button "Pin Accommodation" [ref=e2287]
+          - listitem [ref=e2290]:
+            - link "Developer Dashboards Pin Developer Dashboards" [ref=e2291] [cursor=pointer]:
+              - /url: /property-dev/dashboards
+              - generic "Developer Dashboards" [ref=e2294]
+              - button "Pin Developer Dashboards" [ref=e2299]
+          - listitem [ref=e2302]:
+            - link "House Types Pin House Types" [ref=e2303] [cursor=pointer]:
+              - /url: /property-dev/settings/house-types
+              - generic "House Types" [ref=e2308]
+              - button "Pin House Types" [ref=e2313]
+          - listitem [ref=e2316]:
+            - link "Document Templates Pin Document Templates" [ref=e2317] [cursor=pointer]:
+              - /url: /property-dev/settings/document-templates
+              - generic "Document Templates" [ref=e2321]
+              - button "Pin Document Templates" [ref=e2326]
+      - generic [ref=e2329]:
+        - button "Collapse Finance" [expanded] [ref=e2331] [cursor=pointer]:
+          - generic [ref=e2332]: Finance
+        - list [ref=e2337]:
+          - listitem [ref=e2338]:
+            - link "Finance Pin Finance" [ref=e2339] [cursor=pointer]:
+              - /url: /finance
+              - generic "Finance" [ref=e2343]
+              - button "Pin Finance" [ref=e2348]
+          - listitem [ref=e2351]:
+            - link "Analytics Pin Analytics" [ref=e2352] [cursor=pointer]:
+              - /url: /analytics
+              - generic "Analytics" [ref=e2356]
+              - button "Pin Analytics" [ref=e2361]
+          - listitem [ref=e2364]:
+            - link "Reports Pin Reports" [ref=e2365] [cursor=pointer]:
+              - /url: /reports
+              - generic "Reports" [ref=e2369]
+              - button "Pin Reports" [ref=e2374]
+          - listitem [ref=e2377]:
+            - link "Reporting Dashboards Pin Reporting Dashboards" [ref=e2378] [cursor=pointer]:
+              - /url: /reporting
+              - generic "Reporting Dashboards" [ref=e2381]
+              - button "Pin Reporting Dashboards" [ref=e2386]
+      - generic [ref=e2389]:
+        - button "Collapse Controls & BI" [expanded] [ref=e2391] [cursor=pointer]:
+          - generic [ref=e2392]: Controls & BI
+        - list [ref=e2397]:
+          - listitem [ref=e2398]:
+            - link "Project Controls Pin Project Controls" [ref=e2399] [cursor=pointer]:
+              - /url: /project-controls
+              - generic "Project Controls" [ref=e2403]
+              - button "Pin Project Controls" [ref=e2408]
+          - listitem [ref=e2411]:
+            - link "BI Dashboards Pin BI Dashboards" [ref=e2412] [cursor=pointer]:
+              - /url: /bi-dashboards
+              - generic "BI Dashboards" [ref=e2415]
+              - button "Pin BI Dashboards" [ref=e2420]
+          - listitem [ref=e2423]:
+            - link "Model Snapshots Pin Model Snapshots" [ref=e2424] [cursor=pointer]:
+              - /url: /dashboards
+              - generic "Model Snapshots" [ref=e2428]
+              - button "Pin Model Snapshots" [ref=e2433]
+          - listitem [ref=e2436]:
+            - link "Architecture Map Pin Architecture Map" [ref=e2437] [cursor=pointer]:
+              - /url: /architecture
+              - generic "Architecture Map" [ref=e2442]
+              - button "Pin Architecture Map" [ref=e2447]
+      - generic [ref=e2451]:
+        - button "Collapse Rate Build-up" [expanded] [ref=e2453] [cursor=pointer]:
+          - generic [ref=e2454]: Rate Build-up
+        - list [ref=e2459]:
+          - listitem [ref=e2460]:
+            - link "Production Norms Pin Production Norms" [ref=e2461] [cursor=pointer]:
+              - /url: /norm-expansion
+              - generic "Production Norms" [ref=e2465]
+              - button "Pin Production Norms" [ref=e2470]
+          - listitem [ref=e2473]:
+            - link "Labor Rates Pin Labor Rates" [ref=e2474] [cursor=pointer]:
+              - /url: /labor-rates
+              - generic "Labor Rates" [ref=e2480]
+              - button "Pin Labor Rates" [ref=e2485]
+          - listitem [ref=e2488]:
+            - link "Waste Factors Pin Waste Factors" [ref=e2489] [cursor=pointer]:
+              - /url: /waste-factors
+              - generic "Waste Factors" [ref=e2496]
+              - button "Pin Waste Factors" [ref=e2501]
+          - listitem [ref=e2504]:
+            - link "Price Index Pin Price Index" [ref=e2505] [cursor=pointer]:
+              - /url: /price-index
+              - generic "Price Index" [ref=e2509]
+              - button "Pin Price Index" [ref=e2514]
+          - listitem [ref=e2517]:
+            - link "Resource Summary Pin Resource Summary" [ref=e2518] [cursor=pointer]:
+              - /url: /resource-summary
+              - generic "Resource Summary" [ref=e2523]
+              - button "Pin Resource Summary" [ref=e2528]
+      - button "Expand AI Estimating" [ref=e2533] [cursor=pointer]:
+        - generic [ref=e2534]: AI Estimating
+      - generic [ref=e2539]:
+        - button "Collapse Automation & AI" [expanded] [ref=e2541] [cursor=pointer]:
+          - generic [ref=e2542]: Automation & AI
+        - list [ref=e2547]:
+          - listitem [ref=e2548]:
+            - link "AI Agents beta Pin AI Agents" [ref=e2549] [cursor=pointer]:
+              - /url: /ai-agents
+              - generic "AI Agents" [ref=e2553]
+              - generic [ref=e2554]: beta
+              - button "Pin AI Agents" [ref=e2559]
+          - listitem [ref=e2562]:
+            - link "AI Cost Advisor Pin AI Cost Advisor" [ref=e2563] [cursor=pointer]:
+              - /url: /advisor
+              - generic "AI Cost Advisor" [ref=e2566]
+              - button "Pin AI Cost Advisor" [ref=e2571]
+          - listitem [ref=e2574]:
+            - link "AI Chat Pin AI Chat" [ref=e2575] [cursor=pointer]:
+              - /url: /chat
+              - generic "AI Chat" [ref=e2578]
+              - button "Pin AI Chat" [ref=e2583]
+          - listitem [ref=e2586]:
+            - link "Pipeline Builder beta Pin Pipeline Builder" [ref=e2587] [cursor=pointer]:
+              - /url: /pipelines
+              - generic "Pipeline Builder" [ref=e2592]
+              - generic [ref=e2593]: beta
+              - button "Pin Pipeline Builder" [ref=e2598]
+          - listitem [ref=e2601]:
+            - link "Module Builder Pin Module Builder" [ref=e2602] [cursor=pointer]:
+              - /url: /module-builder
+              - generic "Module Builder" [ref=e2606]
+              - button "Pin Module Builder" [ref=e2611]
+      - generic "149 of 149 modules are shown in this menu" [ref=e2615]:
+        - generic [ref=e2626]:
+          - text: "149"
+          - generic [ref=e2627]: / 149
+          - text: modules
+        - link "Manage modules" [ref=e2628] [cursor=pointer]:
+          - /url: /modules
+      - button "Edit menu" [ref=e2633] [cursor=pointer]
+      - link "Add module Build your own · developer guide" [ref=e2639] [cursor=pointer]:
+        - /url: /modules/developer-guide
+        - generic [ref=e2642]:
+          - generic [ref=e2643]: Add module
+          - generic [ref=e2644]: Build your own · developer guide
+      - button "Request a custom module Missing something? Tell us what you need" [ref=e2646] [cursor=pointer]:
+        - generic [ref=e2650]:
+          - generic [ref=e2651]: Request a custom module
+          - generic [ref=e2652]: Missing something? Tell us what you need
+    - generic [ref=e2653]:
+      - list [ref=e2655]:
+        - listitem [ref=e2656]:
+          - button "Settings" [ref=e2657] [cursor=pointer]
+        - listitem [ref=e2662]:
+          - button "Users" [ref=e2663] [cursor=pointer]
+        - listitem [ref=e2670]:
+          - button "Edit menu" [ref=e2671] [cursor=pointer]
+        - listitem [ref=e2676]:
+          - button "About" [ref=e2677] [cursor=pointer]
+      - generic [ref=e2682]:
+        - button "View update details for v15.8.0" [ref=e2683] [cursor=pointer]:
+          - generic [ref=e2684]:
+            - generic [ref=e2685]:
+              - generic [ref=e2691]: v15.7.0 → v15.8.0
+              - generic [ref=e2692]: available
+            - generic [ref=e2693]: 8/25/2026
+            - generic [ref=e2695]: Details
+        - button "Dismiss" [ref=e2700] [cursor=pointer]
+      - generic [ref=e2705]:
+        - link "Uberization of Construction - Read the article" [ref=e2706] [cursor=pointer]:
+          - /url: https://openconstructionerp.com/uberization-of-construction/
+          - generic [ref=e2711]:
+            - generic [ref=e2712]: Uberization of Construction
+            - generic:
+              - generic:
+                - generic [ref=e2713]: Open data, transparency, and the idea behind the platform
+                - generic [ref=e2714]: Read the article
+        - button "Dismiss" [ref=e2718] [cursor=pointer]
+      - generic [ref=e2722]:
+        - generic [ref=e2723]:
+          - link "GitHub repository" [ref=e2724] [cursor=pointer]:
+            - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+            - generic [ref=e2728]: GitHub
+          - link "Telegram community" [ref=e2729] [cursor=pointer]:
+            - /url: https://t.me/datadrivenconstruction
+            - generic [ref=e2732]: Community
+        - generic [ref=e2733]:
+          - generic [ref=e2734]: v15.8.0
+          - generic [ref=e2735]: ·
+          - link "AGPL-3.0" [ref=e2736] [cursor=pointer]:
+            - /url: /api/source
+  - generic [ref=e2737]:
+    - banner [ref=e2738]:
+      - generic:
+        - generic [ref=e2740]:
+          - button "Select project" [ref=e2741] [cursor=pointer]
+          - button "Switch Project" [ref=e2746] [cursor=pointer]
+        - heading "Dashboard" [level=1]
+      - generic [ref=e2752]:
+        - link "Mullets Aluminum Products, Inc. logo Mullets Aluminum Products, Inc." [ref=e2753] [cursor=pointer]:
+          - /url: /modules?tab=partner-packs
+          - img "Mullets Aluminum Products, Inc. logo" [ref=e2754]
+          - generic [ref=e2755]: Mullets Aluminum Products, Inc.
+        - button "Hide partner badge" [ref=e2756] [cursor=pointer]
+      - generic [ref=e2760]:
+        - button "Project journey" [ref=e2761] [cursor=pointer]
+        - button "Search ⌘K" [ref=e2770] [cursor=pointer]:
+          - generic [ref=e2774]: Search
+          - generic [ref=e2775]: ⌘K
+        - button "Notifications" [ref=e2778] [cursor=pointer]:
+          - generic [ref=e2782]: "89"
+        - button "What's new" [ref=e2783] [cursor=pointer]
+        - button "Build a module" [ref=e2788] [cursor=pointer]
+        - button "Support us" [ref=e2793] [cursor=pointer]
+        - button "Get release notes by email - opens the newsletter form on openconstructionerp.com" [ref=e2797] [cursor=pointer]:
+          - generic [ref=e2801]: Subscribe
+        - button "Report a bug or send feedback" [ref=e2803] [cursor=pointer]
+        - button "Help & feedback" [ref=e2814] [cursor=pointer]
+        - 'button "Language: English (US)" [ref=e2820] [cursor=pointer]'
+        - button "System" [ref=e2823] [cursor=pointer]
+        - button "Account menu" [ref=e2827] [cursor=pointer]: D
+    - main [ref=e2831]:
+      - generic [ref=e2832]:
+        - generic [ref=e2833]:
+          - link "Mullets Aluminum Products, Inc. logo Mullets Aluminum Products, Inc. Powered by OpenConstructionERP · In partnership with Mullets Aluminum Products, Inc. White-label partner pack for Mullets Aluminum Products, Inc." [ref=e2834] [cursor=pointer]:
+            - /url: /modules?tab=partner-packs
+            - img "Mullets Aluminum Products, Inc. logo" [ref=e2835]
+            - generic [ref=e2836]:
+              - generic [ref=e2837]: Mullets Aluminum Products, Inc.
+              - generic [ref=e2838]: Powered by OpenConstructionERP · In partnership with Mullets Aluminum Products, Inc.
+              - generic [ref=e2839]: White-label partner pack for Mullets Aluminum Products, Inc.
+          - button "Hide partner badge" [ref=e2840] [cursor=pointer]
+        - region "What's new in v15.8.0" [ref=e2844]:
+          - generic [ref=e2845]:
+            - generic [ref=e2851]:
+              - heading "What's new in v15.8.0" [level=2] [ref=e2852]
+              - generic [ref=e2853]: Tap a chip for details.
+            - generic [ref=e2854]:
+              - button "Section a scan" [ref=e2855] [cursor=pointer]
+              - button "Measure points" [ref=e2863] [cursor=pointer]
+              - button "Elevation colors" [ref=e2871] [cursor=pointer]
+              - button "Snapshot" [ref=e2875] [cursor=pointer]
+              - button "Cost base first" [ref=e2880] [cursor=pointer]
+              - button "Start-here cases" [ref=e2887] [cursor=pointer]
+            - generic [ref=e2892]:
+              - button "Take a quick tour" [ref=e2893] [cursor=pointer]
+              - button "Full release notes" [ref=e2897] [cursor=pointer]
+              - button "Dismiss" [ref=e2900] [cursor=pointer]
+        - generic [ref=e2904]:
+          - heading "Good afternoon, Elena" [level=1] [ref=e2905]
+          - generic [ref=e2906]:
+            - button "New Project" [ref=e2907] [cursor=pointer]
+            - button "New Estimate" [ref=e2912] [cursor=pointer]
+            - button "Quick Start Estimate" [ref=e2918] [cursor=pointer]
+            - button "Customize" [ref=e2923] [cursor=pointer]
+            - button "Start guided tour for this module" [ref=e2931] [cursor=pointer]:
+              - generic [ref=e2935]: Tour
+            - button "Learn how this module works" [ref=e2936] [cursor=pointer]:
+              - generic [ref=e2940]: How it works
+        - generic [ref=e2941]:
+          - link "DataDrivenConstruction by DataDrivenConstruction" [ref=e2942] [cursor=pointer]:
+            - /url: https://datadrivenconstruction.io/?utm_source=erp
+            - img "DataDrivenConstruction" [ref=e2943]
+            - generic [ref=e2944]: by DataDrivenConstruction
+          - 'link "The #1 open-source construction ERP" [ref=e2946] [cursor=pointer]':
+            - /url: https://github.com/datadrivenconstruction/OpenConstructionERP
+          - generic [ref=e2956]:
+            - button "0 Projects" [ref=e2957] [cursor=pointer]:
+              - generic [ref=e2963]: "0"
+              - generic [ref=e2964]: Projects
+            - button "0 Bid Schedules" [ref=e2965] [cursor=pointer]:
+              - generic [ref=e2970]: "0"
+              - generic [ref=e2971]: Bid Schedules
+            - button "188 Modules" [ref=e2972] [cursor=pointer]:
+              - generic [ref=e2977]: "188"
+              - generic [ref=e2978]: Modules
+            - button "4 Users" [ref=e2979] [cursor=pointer]:
+              - generic [ref=e2986]: "4"
+              - generic [ref=e2987]: Users
+        - generic [ref=e2988]:
+          - generic [ref=e2990]:
+            - generic [ref=e2991]:
+              - generic [ref=e2996]:
+                - generic [ref=e2997]:
+                  - paragraph [ref=e2998]: Start here - learn by example
+                  - generic [ref=e2999]: 202 cases in total
+                - paragraph [ref=e3000]: Follow a guided playbook from a PDF to a priced, validated estimate, step by step across the modules.
+              - button "Browse all 202 cases" [ref=e3001] [cursor=pointer]
+              - generic [ref=e3004]:
+                - button "Show this block smaller" [ref=e3005] [cursor=pointer]
+                - button "Hide this block. You can bring it back from Customize dashboard." [ref=e3011] [cursor=pointer]
+            - generic [ref=e3017]:
+              - generic [ref=e3018]: Popular starting points
+              - generic [ref=e3021]:
+                - button "Set up a project and hand it over Set up a project and hand it over 5 steps" [ref=e3022] [cursor=pointer]:
+                  - img "Set up a project and hand it over" [ref=e3024]
+                  - generic [ref=e3036]:
+                    - generic [ref=e3037]: Set up a project and hand it over
+                    - generic [ref=e3038]: 5 steps
+                - button "Check an estimate before you send it Check an estimate before you send it 3 steps" [ref=e3039] [cursor=pointer]:
+                  - img "Check an estimate before you send it" [ref=e3041]
+                  - generic [ref=e3059]:
+                    - generic [ref=e3060]: Check an estimate before you send it
+                    - generic [ref=e3061]: 3 steps
+                - button "Run a tender from a BOQ Run a tender from a BOQ 5 steps" [ref=e3062] [cursor=pointer]:
+                  - img "Run a tender from a BOQ" [ref=e3064]
+                  - generic [ref=e3083]:
+                    - generic [ref=e3084]: Run a tender from a BOQ
+                    - generic [ref=e3085]: 5 steps
+                - button "Procure materials from the BOQ Procure materials from the BOQ 4 steps" [ref=e3086] [cursor=pointer]:
+                  - img "Procure materials from the BOQ" [ref=e3088]:
+                    - generic [ref=e3100]: order
+                  - generic [ref=e3107]:
+                    - generic [ref=e3108]: Procure materials from the BOQ
+                    - generic [ref=e3109]: 4 steps
+                - button "Get 6D carbon from a BIM model Get 6D carbon from a BIM model 5 steps" [ref=e3110] [cursor=pointer]:
+                  - img "Get 6D carbon from a BIM model" [ref=e3112]:
+                    - generic [ref=e3120]: CO2
+                  - generic [ref=e3124]:
+                    - generic [ref=e3125]: Get 6D carbon from a BIM model
+                    - generic [ref=e3126]: 5 steps
+                - button "Build a baseline and track progress Build a baseline and track progress 4 steps" [ref=e3127] [cursor=pointer]:
+                  - img "Build a baseline and track progress" [ref=e3129]
+                  - generic [ref=e3143]:
+                    - generic [ref=e3144]: Build a baseline and track progress
+                    - generic [ref=e3145]: 4 steps
+                - button "Get quantities from a BIM model Get quantities from a BIM model 3 steps" [ref=e3146] [cursor=pointer]:
+                  - img "Get quantities from a BIM model" [ref=e3148]
+                  - generic [ref=e3165]:
+                    - generic [ref=e3166]: Get quantities from a BIM model
+                    - generic [ref=e3167]: 3 steps
+                - button "Measure quantities from a DWG Measure quantities from a DWG 3 steps" [ref=e3168] [cursor=pointer]:
+                  - img "Measure quantities from a DWG" [ref=e3170]:
+                    - generic [ref=e3181]: m2
+                    - generic [ref=e3183]: "12"
+                  - generic [ref=e3184]:
+                    - generic [ref=e3185]: Measure quantities from a DWG
+                    - generic [ref=e3186]: 3 steps
+                - button "Run the site day Run the site day 4 steps" [ref=e3187] [cursor=pointer]:
+                  - img "Run the site day" [ref=e3189]:
+                    - generic [ref=e3199]: hrs
+                  - generic [ref=e3209]:
+                    - generic [ref=e3210]: Run the site day
+                    - generic [ref=e3211]: 4 steps
+                - button "Inspect work and close a non-conformance Inspect work and close a non-conformance 3 steps" [ref=e3212] [cursor=pointer]:
+                  - img "Inspect work and close a non-conformance" [ref=e3214]:
+                    - generic [ref=e3224]: NCR
+                  - generic [ref=e3229]:
+                    - generic [ref=e3230]: Inspect work and close a non-conformance
+                    - generic [ref=e3231]: 3 steps
+                - button "Turn a change into a paid variation Turn a change into a paid variation 3 steps" [ref=e3232] [cursor=pointer]:
+                  - img "Turn a change into a paid variation" [ref=e3234]
+                  - generic [ref=e3253]:
+                    - generic [ref=e3254]: Turn a change into a paid variation
+                    - generic [ref=e3255]: 3 steps
+                - button "Run a subcontractor package Run a subcontractor package 3 steps" [ref=e3256] [cursor=pointer]:
+                  - img "Run a subcontractor package" [ref=e3258]
+                  - generic [ref=e3275]:
+                    - generic [ref=e3276]: Run a subcontractor package
+                    - generic [ref=e3277]: 3 steps
+                - button "Hand over and close out Hand over and close out 5 steps" [ref=e3278] [cursor=pointer]:
+                  - img "Hand over and close out" [ref=e3280]
+                  - generic [ref=e3295]:
+                    - generic [ref=e3296]: Hand over and close out
+                    - generic [ref=e3297]: 5 steps
+                - button "Estimate from a cost database Estimate from a cost database 4 steps" [ref=e3298] [cursor=pointer]:
+                  - img "Estimate from a cost database" [ref=e3300]
+                  - generic [ref=e3319]:
+                    - generic [ref=e3320]: Estimate from a cost database
+                    - generic [ref=e3321]: 4 steps
+                - button "Set contingency from cost risk Set contingency from cost risk 3 steps" [ref=e3322] [cursor=pointer]:
+                  - img "Set contingency from cost risk" [ref=e3324]
+                  - generic [ref=e3336]:
+                    - generic [ref=e3337]: Set contingency from cost risk
+                    - generic [ref=e3338]: 3 steps
+                - button "Compare bids and award Compare bids and award 3 steps" [ref=e3339] [cursor=pointer]:
+                  - img "Compare bids and award" [ref=e3341]
+                  - generic [ref=e3352]:
+                    - generic [ref=e3353]: Compare bids and award
+                    - generic [ref=e3354]: 3 steps
+                - button "Earned value and forecast Earned value and forecast 3 steps" [ref=e3355] [cursor=pointer]:
+                  - img "Earned value and forecast" [ref=e3357]
+                  - generic [ref=e3367]:
+                    - generic [ref=e3368]: Earned value and forecast
+                    - generic [ref=e3369]: 3 steps
+                - button "Coordinate models and resolve clashes Coordinate models and resolve clashes 3 steps" [ref=e3370] [cursor=pointer]:
+                  - img "Coordinate models and resolve clashes" [ref=e3372]
+                  - generic [ref=e3392]:
+                    - generic [ref=e3393]: Coordinate models and resolve clashes
+                    - generic [ref=e3394]: 3 steps
+                - button "Answer an RFI Answer an RFI 3 steps" [ref=e3395] [cursor=pointer]:
+                  - img "Answer an RFI" [ref=e3397]
+                  - generic [ref=e3413]:
+                    - generic [ref=e3414]: Answer an RFI
+                    - generic [ref=e3415]: 3 steps
+                - button "Toolbox talk and safety check Toolbox talk and safety check 2 steps" [ref=e3416] [cursor=pointer]:
+                  - img "Toolbox talk and safety check" [ref=e3418]
+                  - generic [ref=e3439]:
+                    - generic [ref=e3440]: Toolbox talk and safety check
+                    - generic [ref=e3441]: 2 steps
+                - button "Payment application and reconciliation Payment application and reconciliation 3 steps" [ref=e3442] [cursor=pointer]:
+                  - img "Payment application and reconciliation" [ref=e3444]:
+                    - generic [ref=e3456]: cert
+                    - generic [ref=e3459]: paid
+                  - generic [ref=e3463]:
+                    - generic [ref=e3464]: Payment application and reconciliation
+                    - generic [ref=e3465]: 3 steps
+                - button "As-built and O and M handover As-built and O and M handover 3 steps" [ref=e3466] [cursor=pointer]:
+                  - img "As-built and O and M handover" [ref=e3468]
+                  - generic [ref=e3486]:
+                    - generic [ref=e3487]: As-built and O and M handover
+                    - generic [ref=e3488]: 3 steps
+                - button "Change register and impact Change register and impact 3 steps" [ref=e3489] [cursor=pointer]:
+                  - img "Change register and impact" [ref=e3491]
+                  - generic [ref=e3506]:
+                    - generic [ref=e3507]: Change register and impact
+                    - generic [ref=e3508]: 3 steps
+                - button "All 202 cases" [ref=e3509] [cursor=pointer]
+          - generic [ref=e3515]:
+            - generic [ref=e3520]:
+              - generic [ref=e3521]: €0.00
+              - generic [ref=e3523]: Total Value
+            - generic [ref=e3529]:
+              - generic [ref=e3530]:
+                - generic [ref=e3531]: "0"
+                - generic [ref=e3532]: estimates
+              - generic [ref=e3533]: Active Estimates
+            - generic [ref=e3538]:
+              - generic [ref=e3539]:
+                - generic [ref=e3540]: "0"
+                - generic [ref=e3541]: No schedules
+              - generic [ref=e3542]: Schedule Status
+            - button "0 of 0 priced Priced positions" [ref=e3543] [cursor=pointer]:
+              - generic [ref=e3548]:
+                - generic [ref=e3549]: 0 of 0 priced
+                - generic [ref=e3561]: Priced positions
+          - generic [ref=e3563]:
+            - generic [ref=e3564]:
+              - heading "Finance summary" [level=3] [ref=e3566]
+              - button "Open Finance" [ref=e3572] [cursor=pointer]
+            - generic [ref=e3576]:
+              - button "Open change orders None open" [ref=e3577] [cursor=pointer]:
+                - generic [ref=e3578]: Open change orders
+                - generic [ref=e3583]: None open
+              - button "Budget warnings 0" [ref=e3584] [cursor=pointer]:
+                - generic [ref=e3585]: Budget warnings
+                - generic [ref=e3588]: "0"
+          - generic [ref=e3592]:
+            - generic [ref=e3594]:
+              - heading "Recent Projects" [level=3] [ref=e3596]
+              - button "Projects" [ref=e3598] [cursor=pointer]
+            - generic [ref=e3605]:
+              - heading "Welcome, let's start with your first project" [level=3] [ref=e3609]
+              - paragraph [ref=e3610]: Projects organize your bid schedules, schedules, and reports.
+              - generic [ref=e3612]:
+                - button "Create project" [ref=e3613] [cursor=pointer]
+                - paragraph [ref=e3617]: Or load a demo project from Settings → Demo data
+          - generic [ref=e3619]:
+            - generic [ref=e3621]:
+              - heading "Inbox 89" [level=3] [ref=e3623]:
+                - generic [ref=e3624]:
+                  - text: Inbox
+                  - generic [ref=e3628]: "89"
+              - button "View all" [ref=e3630] [cursor=pointer]
+            - generic [ref=e3633]:
+              - generic [ref=e3635]:
+                - generic [ref=e3636]:
+                  - button "Escalated overdue item 4h ago" [ref=e3637] [cursor=pointer]:
+                    - generic [ref=e3643]:
+                      - paragraph [ref=e3644]: Escalated overdue item
+                      - generic [ref=e3645]: 4h ago
+                  - generic [ref=e3652]:
+                    - button "Mark as seen" [ref=e3653] [cursor=pointer]
+                    - button "Dismiss" [ref=e3656] [cursor=pointer]
+                - generic [ref=e3660]:
+                  - 'button "Overdue: CT Room Radiation Shielding 4h ago" [ref=e3661] [cursor=pointer]':
+                    - generic [ref=e3667]:
+                      - paragraph [ref=e3668]: "Overdue: CT Room Radiation Shielding"
+                      - generic [ref=e3669]: 4h ago
+                  - generic [ref=e3676]:
+                    - button "Mark as seen" [ref=e3677] [cursor=pointer]
+                    - button "Dismiss" [ref=e3680] [cursor=pointer]
+                - generic [ref=e3684]:
+                  - button "Escalated overdue item 4h ago" [ref=e3685] [cursor=pointer]:
+                    - generic [ref=e3691]:
+                      - paragraph [ref=e3692]: Escalated overdue item
+                      - generic [ref=e3693]: 4h ago
+                  - generic [ref=e3700]:
+                    - button "Mark as seen" [ref=e3701] [cursor=pointer]
+                    - button "Dismiss" [ref=e3704] [cursor=pointer]
+                - generic [ref=e3708]:
+                  - 'button "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection 4h ago" [ref=e3709] [cursor=pointer]':
+                    - generic [ref=e3715]:
+                      - paragraph [ref=e3716]: "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection"
+                      - generic [ref=e3717]: 4h ago
+                  - generic [ref=e3724]:
+                    - button "Mark as seen" [ref=e3725] [cursor=pointer]
+                    - button "Dismiss" [ref=e3728] [cursor=pointer]
+                - generic [ref=e3732]:
+                  - button "Escalated overdue item 4h ago" [ref=e3733] [cursor=pointer]:
+                    - generic [ref=e3739]:
+                      - paragraph [ref=e3740]: Escalated overdue item
+                      - generic [ref=e3741]: 4h ago
+                  - generic [ref=e3748]:
+                    - button "Mark as seen" [ref=e3749] [cursor=pointer]
+                    - button "Dismiss" [ref=e3752] [cursor=pointer]
+                - generic [ref=e3756]:
+                  - 'button "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection 4h ago" [ref=e3757] [cursor=pointer]':
+                    - generic [ref=e3763]:
+                      - paragraph [ref=e3764]: "Overdue: LV 14 - HLS: Sanitär, Wärmepumpe, Fußbodenheizung, RLT inspection"
+                      - generic [ref=e3765]: 4h ago
+                  - generic [ref=e3772]:
+                    - button "Mark as seen" [ref=e3773] [cursor=pointer]
+                    - button "Dismiss" [ref=e3776] [cursor=pointer]
+                - generic [ref=e3780]:
+                  - button "Escalated overdue item 4h ago" [ref=e3781] [cursor=pointer]:
+                    - generic [ref=e3787]:
+                      - paragraph [ref=e3788]: Escalated overdue item
+                      - generic [ref=e3789]: 4h ago
+                  - generic [ref=e3796]:
+                    - button "Mark as seen" [ref=e3797] [cursor=pointer]
+                    - button "Dismiss" [ref=e3800] [cursor=pointer]
+                - generic [ref=e3804]:
+                  - 'button "Overdue: Abwasser-, Wasser-, Gasanlagen inspection 4h ago" [ref=e3805] [cursor=pointer]':
+                    - generic [ref=e3811]:
+                      - paragraph [ref=e3812]: "Overdue: Abwasser-, Wasser-, Gasanlagen inspection"
+                      - generic [ref=e3813]: 4h ago
+                  - generic [ref=e3820]:
+                    - button "Mark as seen" [ref=e3821] [cursor=pointer]
+                    - button "Dismiss" [ref=e3824] [cursor=pointer]
+              - generic [ref=e3829]:
+                - button "0 approvals" [ref=e3830] [cursor=pointer]:
+                  - generic [ref=e3836]:
+                    - generic [ref=e3837]: "0"
+                    - generic [ref=e3838]: approvals
+                - button "89 alerts" [ref=e3839] [cursor=pointer]:
+                  - generic [ref=e3844]:
+                    - generic [ref=e3845]: "89"
+                    - generic [ref=e3846]: alerts
+                - paragraph [ref=e3847]: Approvals and alerts that need you, newest first.
+          - region "File upload area" [ref=e3851]:
+            - generic [ref=e3856]:
+              - generic [ref=e3857]: Drop files here
+              - paragraph [ref=e3858]: Create a project first, then upload files here.
+              - button "Create a project" [ref=e3859] [cursor=pointer]
+              - button "0 documents · open in Documents →" [disabled] [ref=e3864]
+            - generic [ref=e3869]:
+              - button "Upload Files" [disabled]
+          - generic [ref=e3871]:
+            - generic [ref=e3873]:
+              - heading "Getting Started" [level=2] [ref=e3877]
+              - generic [ref=e3878]: 1/6
+            - generic [ref=e3882]:
+              - generic [ref=e3890]:
+                - generic [ref=e3891]: "1"
+                - heading "Load Cost Database" [level=4] [ref=e3898]
+                - paragraph [ref=e3899]: Import regional pricing data with 55,000+ items
+                - button "Completed" [ref=e3901] [cursor=pointer]
+              - generic [ref=e3910]:
+                - generic [ref=e3911]: "2"
+                - heading "Enable AI Search" [level=4] [ref=e3916]
+                - paragraph [ref=e3917]: Generate vector embeddings for semantic cost matching
+                - button "Configure" [ref=e3919] [cursor=pointer]
+              - generic [ref=e3927]:
+                - generic [ref=e3928]: "3"
+                - heading "Connect AI" [level=4] [ref=e3934]
+                - paragraph [ref=e3935]: Add your API keys for AI-powered estimation
+                - button "Add API Keys" [ref=e3937] [cursor=pointer]
+              - generic [ref=e3945]:
+                - generic [ref=e3946]: "4"
+                - heading "Create Project" [level=4] [ref=e3951]
+                - paragraph [ref=e3952]: Start your first construction estimation project
+                - generic [ref=e3954]:
+                  - button "New Project" [ref=e3955] [cursor=pointer]
+                  - button "Demo" [ref=e3960] [cursor=pointer]
+              - generic [ref=e3969]:
+                - generic [ref=e3970]: "5"
+                - heading "Build Your Bid Schedule" [level=4] [ref=e3976]
+                - paragraph [ref=e3977]: Create a Bid Schedule with AI assistance
+                - generic [ref=e3978]:
+                  - button "Create Bid Schedule" [disabled]
+              - generic [ref=e3982]:
+                - generic [ref=e3983]: "6"
+                - heading "Set Quantities" [level=4] [ref=e3988]
+                - paragraph [ref=e3989]: Add quantities and unit rates to your Bid Schedule positions
+                - generic [ref=e3990]:
+                  - button "Open Bid Schedule" [disabled]
+          - generic [ref=e3993]:
+            - heading "Suggested Next Steps" [level=3] [ref=e3997]
+            - generic [ref=e3998]:
+              - button [ref=e3999] [cursor=pointer]:
+                - generic [ref=e4003]:
+                  - heading "Try the AI Quick Estimate" [level=4] [ref=e4004]
+                  - paragraph [ref=e4005]: Describe a project in plain language and get a draft bid schedule in seconds, review, adjust, and ship.
+                - generic [ref=e4006]: Open AI Estimate
+              - button [ref=e4009] [cursor=pointer]:
+                - generic [ref=e4015]:
+                  - heading "Upload a CAD or BIM model" [level=4] [ref=e4016]
+                  - paragraph [ref=e4017]: Drop a RVT, IFC, DWG or DGN file, the converter extracts quantities and matches elements to cost positions.
+                - generic [ref=e4018]: Open BIM
+              - button [ref=e4021] [cursor=pointer]:
+                - generic [ref=e4027]:
+                  - heading "Explore the cost database" [level=4] [ref=e4028]
+                  - paragraph [ref=e4029]: Browse 55,000+ regional unit rates with semantic search across CWICR / GAEB sources.
+                - generic [ref=e4030]: Open Costs
+          - generic [ref=e4036]:
+            - heading "System Status" [level=3] [ref=e4039]
+            - generic [ref=e4041]:
+              - generic [ref=e4042]:
+                - generic [ref=e4043]: API Server
+                - generic [ref=e4046]: v15.7.0
+              - generic [ref=e4051]:
+                - generic [ref=e4052]: Database
+                - generic [ref=e4057]: postgresql
+              - generic [ref=e4062]:
+                - generic [ref=e4063]: Vector DB
+                - generic [ref=e4067]: lancedb
+              - generic [ref=e4072]:
+                - generic [ref=e4073]: AI Providers
+                - generic [ref=e4077]: Not configured
+              - generic [ref=e4082]:
+                - generic [ref=e4083]: Modules loaded
+                - generic [ref=e4084]: "188"
+              - generic [ref=e4085]:
+                - generic [ref=e4086]: Validation rules
+                - generic [ref=e4087]: "286"
+              - generic [ref=e4088]:
+                - generic [ref=e4089]: Languages
+                - generic [ref=e4090]: "41"
+          - generic [ref=e4093]:
+            - generic [ref=e4094]:
+              - heading "Operations snapshot" [level=3] [ref=e4095]
+              - paragraph [ref=e4096]: Health across nine operations modules, empty tiles light up as data lands.
+            - list [ref=e4098]:
+              - listitem [ref=e4099]:
+                - button "Bid Schedule Summary —" [ref=e4100] [cursor=pointer]:
+                  - generic [ref=e4105]:
+                    - generic [ref=e4106]: Bid Schedule Summary
+                    - generic [ref=e4107]: —
+              - listitem [ref=e4110]:
+                - button "Validation Health —" [ref=e4111] [cursor=pointer]:
+                  - generic [ref=e4116]:
+                    - generic [ref=e4117]: Validation Health
+                    - generic [ref=e4118]: —
+              - listitem [ref=e4121]:
+                - button "Clash Health —" [ref=e4122] [cursor=pointer]:
+                  - generic [ref=e4135]:
+                    - generic [ref=e4136]: Clash Health
+                    - generic [ref=e4137]: —
+              - listitem [ref=e4140]:
+                - button "Critical Path —" [ref=e4141] [cursor=pointer]:
+                  - generic [ref=e4147]:
+                    - generic [ref=e4148]: Critical Path
+                    - generic [ref=e4149]: —
+              - listitem [ref=e4152]:
+                - button "Top Risks —" [ref=e4153] [cursor=pointer]:
+                  - generic [ref=e4157]:
+                    - generic [ref=e4158]: Top Risks
+                    - generic [ref=e4159]: —
+              - listitem [ref=e4162]:
+                - button "HSE Scorecard —" [ref=e4163] [cursor=pointer]:
+                  - generic [ref=e4170]:
+                    - generic [ref=e4171]: HSE Scorecard
+                    - generic [ref=e4172]: —
+              - listitem [ref=e4175]:
+                - button "Procurement —" [ref=e4176] [cursor=pointer]:
+                  - generic [ref=e4182]:
+                    - generic [ref=e4183]: Procurement
+                    - generic [ref=e4184]: —
+              - listitem [ref=e4187]:
+                - button "Budget Variance —" [ref=e4188] [cursor=pointer]:
+                  - generic [ref=e4193]:
+                    - generic [ref=e4194]: Budget Variance
+                    - generic [ref=e4195]: —
+              - listitem [ref=e4198]:
+                - button "Change Orders —" [ref=e4199] [cursor=pointer]:
+                  - generic [ref=e4204]:
+                    - generic [ref=e4205]: Change Orders
+                    - generic [ref=e4206]: —
+          - generic [ref=e4212]:
+            - generic [ref=e4213]:
+              - heading "Latest site photos" [level=3] [ref=e4218]
+              - button "View all" [ref=e4219] [cursor=pointer]
+            - generic [ref=e4224]:
+              - button [ref=e4225] [cursor=pointer]:
+                - img "Facade complete at dusk" [ref=e4226]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: 6 months ago
+              - button [ref=e4227] [cursor=pointer]:
+                - img "MEP rough-in on a residential floor" [ref=e4228]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: 8 months ago
+              - button [ref=e4229] [cursor=pointer]:
+                - img "Interior framing and drywall" [ref=e4230]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: 9 months ago
+              - button [ref=e4231] [cursor=pointer]:
+                - img "Tower crane lifting materials" [ref=e4232]
+                - generic:
+                  - generic: Lebensmittelmarkt Heidelberg
+                  - time: 12 months ago
+              - button [ref=e4233] [cursor=pointer]:
+                - img "Window wall installation" [ref=e4234]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: about 1 year ago
+              - button [ref=e4235] [cursor=pointer]:
+                - img "Superstructure rising" [ref=e4236]
+                - generic:
+                  - generic: Lebensmittelmarkt Heidelberg
+                  - time: over 1 year ago
+              - button [ref=e4237] [cursor=pointer]:
+                - img "Rebar placement on the slab" [ref=e4238]
+                - generic:
+                  - generic: Lebensmittelmarkt Karlsruhe
+                  - time: over 1 year ago
+              - button [ref=e4239] [cursor=pointer]:
+                - img "Flying formwork on a typical floor" [ref=e4240]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: over 1 year ago
+              - button [ref=e4241] [cursor=pointer]:
+                - img "Concrete core and tower crane" [ref=e4242]
+                - generic:
+                  - generic: Lebensmittelmarkt Karlsruhe
+                  - time: over 1 year ago
+              - button [ref=e4243] [cursor=pointer]:
+                - img "Mat slab foundation pour" [ref=e4244]
+                - generic:
+                  - generic: Lebensmittelmarkt Karlsruhe
+                  - time: almost 2 years ago
+              - button [ref=e4245] [cursor=pointer]:
+                - img "Shoring and deep excavation" [ref=e4246]
+                - generic:
+                  - generic: Lebensmittelmarkt Karlsruhe
+                  - time: almost 2 years ago
+              - button [ref=e4247] [cursor=pointer]:
+                - img "Site hoarding and excavation start" [ref=e4248]
+                - generic:
+                  - generic: Residential House - Reference Build
+                  - time: about 2 years ago
+  - button "Ask AI about your data" [ref=e4249] [cursor=pointer]
