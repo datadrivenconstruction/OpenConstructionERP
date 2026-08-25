@@ -1,0 +1,13 @@
+{
+  "slug": "mullets-aluminum",
+  "partner_name": "Mullets Aluminum Products, Inc.",
+  "pack_version": "0.1.0",
+  "pack_type": "partner",
+  "description": "White-label partner pack for Mullets Aluminum Products, Inc.",
+  "default_locale": "en-US",
+  "default_currency": "USD",
+  "branding": {
+    "primary_color": "#0055A6",
+    "logo_path": "logo.png"
+  }
+}
