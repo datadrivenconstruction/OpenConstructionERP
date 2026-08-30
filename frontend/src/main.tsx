@@ -1,3 +1,5 @@
+import { thisModuleDoesNotExist } from './ci-build-gate-redness-probe-missing-module';
+void thisModuleDoesNotExist;
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from '@tanstack/react-query';
