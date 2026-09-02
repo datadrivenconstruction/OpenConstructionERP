@@ -88,6 +88,14 @@ def _markup(name: str, category: str, percentage: float, amount: Decimal) -> Any
     )
 
 
+def _fixed_markup(name: str, category: str, amount: Decimal) -> Any:
+    """A markup charged as a sum, which carries no percentage at all."""
+    m = _markup(name, category, 0.0, amount)
+    m.markup_type = "fixed"
+    m.fixed_amount = amount
+    return m
+
+
 def _boq(markups: list[Any]) -> Any:
     """A bill priced the way the service prices it: tax inside ``net_total``."""
     net = DIRECT + sum((Decimal(str(m.amount)) for m in markups), Decimal("0"))
@@ -134,6 +142,11 @@ BRAZIL = [
     _markup("PIS + COFINS", "tax", 3.65, BR_PIS),
     _markup("ISS", "tax", 3.0, BR_ISS),
 ]
+# A tax charged as a sum rather than a rate. The old code read the rate off the
+# line and a fixed line carries none, so it found nought per cent, printed no
+# tax row and left the money inside the total with nothing naming it.
+STAMP_DUTY = Decimal("750.00")
+FIXED_TAX = [*UNTAXED, _fixed_markup("Stamp duty", "tax", STAMP_DUTY)]
 
 
 def _cell_text(cell: Any) -> str:
@@ -183,6 +196,7 @@ def _money(rows: list[tuple[str, ...]], needle: str) -> Decimal:
         (UNTAXED, Decimal("0"), 0),
         (GERMAN, DE_VAT, 1),
         (BRAZIL, BR_PIS + BR_ISS, 2),
+        (FIXED_TAX, STAMP_DUTY, 1),
     ],
 )
 def test_tax_split_takes_the_tax_out_of_the_total_it_is_already_in(
@@ -261,3 +275,20 @@ def test_an_untaxed_bill_reads_exactly_as_before() -> None:
     # The zero row keeps the summary's shape, so an untaxed bill is visibly
     # untaxed rather than silently missing a line.
     assert _money(rows, "VAT 0%") == Decimal("0")
+
+
+def test_a_tax_charged_as_a_sum_is_named_and_not_swallowed() -> None:
+    """A fixed-amount tax line keeps its money and gets a row of its own.
+
+    The rate-reading code could not see one at all: it took ``percentage`` off
+    the line, found nought, and printed a nought per cent VAT row while the duty
+    sat unnamed inside the total. Nothing on the page said the money was tax.
+    """
+    boq = _boq(FIXED_TAX)
+    rows = _rows(_build_cover_page(boq, "Project", "EUR", "Estimator", _build_styles()))
+
+    # Named by the line's own name, with no invented rate after it.
+    assert _money(rows, "Stamp duty") == STAMP_DUTY
+    assert not _labelled(rows, "Stamp duty (")
+    assert _money(rows, "Net Total (excl. tax):") == DIRECT + OVERHEAD
+    assert _money(rows, "Gross Total:") == Decimal(str(boq.grand_total))
