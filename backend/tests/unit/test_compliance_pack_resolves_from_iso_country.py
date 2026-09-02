@@ -85,10 +85,6 @@ def test_the_legacy_uk_tag_still_resolves() -> None:
     [
         # ── the "de" token, which matched any label containing those two
         # letters. Every one of these resolved to de_compliance before.
-        # A Spanish and a French preposition.
-        ("Ciudad de Mexico", "mx_compliance"),
-        ("Ciudad de México", "mx_compliance"),
-        ("Île-de-France", DEFAULT_PACK_ID),
         # Two American places given the German pack.
         ("Denver", DEFAULT_PACK_ID),
         ("Delaware", DEFAULT_PACK_ID),
@@ -98,7 +94,6 @@ def test_the_legacy_uk_tag_still_resolves() -> None:
         ("Nederland", DEFAULT_PACK_ID),
         ("Odesa", DEFAULT_PACK_ID),
         # ── the "us" token. Every one of these resolved to us_compliance.
-        ("Russia", DEFAULT_PACK_ID),
         ("Australia", DEFAULT_PACK_ID),
         ("Belarus", DEFAULT_PACK_ID),
         ("Cyprus", DEFAULT_PACK_ID),
@@ -108,6 +103,40 @@ def test_the_legacy_uk_tag_still_resolves() -> None:
 )
 def test_a_region_label_is_not_matched_by_substring(region: str, expected: str) -> None:
     assert suggest_pack_for_region(region) == expected
+
+
+@pytest.mark.parametrize(
+    ("region", "expected", "what_the_substring_bug_gave"),
+    [
+        # A Spanish and a French preposition, both of which used to be read as
+        # the German "de". These three carry the proof now that the labels
+        # above cannot: each one is claimed by a country pack, and the pack it
+        # is claimed by is not the one the substring defect handed it.
+        ("Ciudad de Mexico", "mx_compliance", "de_compliance"),
+        ("Ciudad de México", "mx_compliance", "de_compliance"),
+        ("Île-de-France", "fr_compliance", "de_compliance"),
+        # "Russia" contains "us" and used to enforce the American pack. It now
+        # resolves to the Russian one, by a whole-word match on "russia"
+        # rather than by a fragment of a different word.
+        ("Russia", "ru_compliance", "us_compliance"),
+    ],
+)
+def test_a_label_claimed_by_a_country_is_claimed_by_the_right_one(
+    region: str,
+    expected: str,
+    what_the_substring_bug_gave: str,
+) -> None:
+    """The right pack has to arrive by the right mechanism.
+
+    These four labels used to resolve to a pack that was wrong about the
+    country, because a two-letter token was matched inside a longer word. They
+    resolve to a pack now too, so a test that only asserted "not the default"
+    would pass on the old defect as well. Asserting the specific pack, and
+    naming the one the defect produced, is what makes this a regression test
+    rather than a restatement of current behaviour.
+    """
+    assert suggest_pack_for_region(region) == expected
+    assert suggest_pack_for_region(region) != what_the_substring_bug_gave
 
 
 @pytest.mark.parametrize("region", ["Houston", "Baden-Württemberg", "Baden-Wuerttemberg"])
@@ -155,10 +184,11 @@ def test_an_unknown_country_code_does_not_silently_borrow_the_region() -> None:
     """A country we have a code for but no pack for lands on the default.
 
     Not on whatever the region label happens to spell: a project that says it
-    is in Canada is not a German project because its region reads "Ontario, DE
-    region 4".
+    is in Italy is not a Mexican project because its region reads "Ciudad de
+    Mexico". This used to be written with Canada, which has a pack now; Italy
+    is the country that ships a demo and still has no rule set of its own.
     """
-    assert resolve_pack("CA", "Ciudad de Mexico") == DEFAULT_PACK_ID
+    assert resolve_pack("IT", "Ciudad de Mexico") == DEFAULT_PACK_ID
 
 
 # ── The empty string is unknown; "DE" is taken at face value ─────────────
@@ -197,16 +227,26 @@ def test_a_country_code_is_normalised_before_it_is_matched() -> None:
 # ── The gap this fix makes visible ───────────────────────────────────────
 
 
-@pytest.mark.parametrize("code", ["CA", "CN", "ES"])
+@pytest.mark.parametrize("code", ["IT", "JP", "TR"])
 def test_countries_with_no_pack_resolve_to_the_default(code: str) -> None:
     """Documents a gap rather than asserting a desired state.
 
     Resolving from the ISO column is correct and still gives these projects the
-    universal pack, because no Canadian, Chinese or Spanish pack is registered.
+    universal pack, because no Italian, Japanese or Turkish pack is registered.
     Two of the three already have validation rules written and registered -
-    GB/T 50500 for China, FIEBDC-3 for Spain. Those rules are selectable today
-    through a project's ``validation_rule_sets``; what no jurisdiction reaches
-    is the contract-signature gate, which is fed by packs alone.
+    "sekisan" for Japan, "birimfiyat" for Turkey. Those rules are selectable
+    today through a project's ``validation_rule_sets``; what no jurisdiction
+    reaches is the contract-signature gate, which is fed by packs alone. Italy
+    is the third kind: it ships a demo and has no rule set at all, so there is
+    nothing for a pack to point at and writing one would be a claim, not a
+    check.
+
+    This list used to read CA, CN, ES. All three now have packs, added after
+    confirming the three conditions below: their sets are registered
+    ("masterformat", "gbt50500", "bc3"), each set tests the jurisdiction's own
+    classification rather than only that some code exists, and a project in
+    those countries that cannot produce its national codes should not reach
+    signature unnoticed.
 
     THIS TEST IS MEANT TO GO RED when a pack is added. It is not an obstacle,
     it is the checklist. Before deleting a code from this list, confirm:

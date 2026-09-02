@@ -64,10 +64,19 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
     "uk_compliance": {
         "id": "uk_compliance",
         "name": "United Kingdom Compliance",
-        "description": "NRM measurement-rule compliance plus the universal quality baseline.",
+        "description": "NRM measurement-rule compliance plus the statutory declarations a UK "
+        "contract turns on - contract form, payment regime, retention, CDM 2015 duty holders, "
+        "the Building Safety Act higher-risk regime and VAT treatment - and the universal "
+        "quality baseline.",
         "jurisdiction": "GB",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
-        "rule_sets": ["boq_quality", "nrm"],
+        # ``uk_statutory`` was registered and shipped, and two surfaces already
+        # declared it (the London demo and the uk-jct pack), but no pack reached
+        # it, so the one gate whose whole subject is the contract - signature -
+        # ran the measurement rules and none of the statutory ones. All six are
+        # warnings, so adding them tells a signer what is undeclared without
+        # blocking on it.
+        "rule_sets": ["boq_quality", "nrm", "uk_statutory"],
     },
     "us_compliance": {
         "id": "us_compliance",
@@ -86,6 +95,113 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "jurisdiction": "MX",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "mexico"],
+    },
+    # ── Packs added because the rules were already there ───────────────────
+    #
+    # Each pack below points at a rule set the engine already registered and
+    # that nothing could reach. The rules were written, registered, declared by
+    # a demo or a country pack, and then never run by the contract gate,
+    # because the gate is fed by packs alone and no pack named the country. The
+    # user saw a pack id on the settings page either way, so the fallback was
+    # invisible: "no jurisdiction claimed this project" rendered exactly like
+    # "this project's jurisdiction is enforced".
+    #
+    # Nothing here is a new rule. A pack whose rule_sets were only the
+    # universal baseline under a national name is deliberately NOT written,
+    # because it would claim national checks the product does not have, which
+    # is worse than the honest fallback. Italy is the country that wanted one
+    # and did not get one; see the note under PACK_BY_COUNTRY.
+    "hu_compliance": {
+        "id": "hu_compliance",
+        "name": "Hungary Compliance",
+        "description": "Item codes from the Hungarian sectoral item orders, chapter "
+        "recognition, the material and fee (anyag / dij) split reconciling to the line "
+        "rate, and per-project item-number uniqueness, plus the universal quality baseline.",
+        "jurisdiction": "HU",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        # "hungary" is the ENGINE rule-set name. The Hungarian classification
+        # standard is spelled "tetelrend" and is a different namespace: it is
+        # the key an item code sits under inside a position's classification
+        # dict. Writing the classification name here would resolve to nothing,
+        # and the engine skips an unknown set without complaining.
+        "rule_sets": ["boq_quality", "hungary"],
+    },
+    "cn_compliance": {
+        "id": "cn_compliance",
+        "name": "China Compliance",
+        "description": "GB/T 50500 bill-of-quantities item codes, present and in the "
+        "9- or 12-digit national format, plus the universal quality baseline.",
+        "jurisdiction": "CN",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "gbt50500"],
+    },
+    "es_compliance": {
+        "id": "es_compliance",
+        "name": "Spain Compliance",
+        "description": "FIEBDC-3 (BC3) concept codes on every priced line, in the "
+        "hierarchical format the exchange format requires, plus the universal quality "
+        "baseline.",
+        "jurisdiction": "ES",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "bc3"],
+    },
+    "ru_compliance": {
+        "id": "ru_compliance",
+        "name": "Russia Compliance",
+        "description": "GESN/FER norm codes, the labour, plant and material breakdown a "
+        "cited norm consumes, labour hours, and the price level the estimate is stated "
+        "in, plus the universal quality baseline.",
+        "jurisdiction": "RU",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "gesn"],
+    },
+    "br_compliance": {
+        "id": "br_compliance",
+        "name": "Brazil Compliance",
+        "description": "SINAPI composition codes and ABNT NBR 12721 cost-group sections "
+        "(S1-S11), plus the universal quality baseline.",
+        "jurisdiction": "BR",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        # Two sets, because Brazil measures against two independent references:
+        # SINAPI is the price and composition base, NBR 12721 is the ABNT cost
+        # -group hierarchy. A bill can satisfy either without the other.
+        "rule_sets": ["boq_quality", "sinapi", "nbr"],
+    },
+    "in_compliance": {
+        "id": "in_compliance",
+        "name": "India Compliance",
+        "description": "CPWD/DSR item references and IS 1200 metric measurement units, "
+        "plus the universal quality baseline.",
+        "jurisdiction": "IN",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "cpwd"],
+    },
+    "fr_compliance": {
+        "id": "fr_compliance",
+        "name": "France Compliance",
+        "description": "DPGF lot allocation and pricing completeness across the decomposed "
+        "price schedule, plus the universal quality baseline.",
+        "jurisdiction": "FR",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "dpgf"],
+    },
+    "ca_compliance": {
+        "id": "ca_compliance",
+        "name": "Canada Compliance",
+        "description": "MasterFormat classification checks, the standard CSC co-publishes "
+        "for Canadian projects, plus the universal quality baseline.",
+        "jurisdiction": "CA",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        # Canada shares the American classification set rather than having one
+        # of its own, and that is a real answer rather than a stand-in:
+        # MasterFormat is co-published by CSI and CSC, both Canadian demos
+        # measure to it, and the Canadian country pack ships against it. What
+        # this pack does NOT carry is any Canada-specific statutory rule -
+        # nothing in the engine reads provincial holdback periods, lien
+        # deadlines or a CCDC contract form - so it enforces classification,
+        # not Canadian contract law. When those rules are written they belong
+        # in a "canada" set added here, not folded into masterformat.
+        "rule_sets": ["boq_quality", "masterformat"],
     },
 }
 
@@ -137,6 +253,25 @@ DEFAULT_PACK_ID = "universal"
 #: unknown. Note that ``currency`` in the same model deliberately defaults to
 #: '' with the comment "No EUR bias"; ``country_code`` got the same treatment
 #: only for rows written from here on.
+#:
+#: What is still NOT here, and why, so the next reader does not have to
+#: re-derive it. Two different situations that look identical from the
+#: settings page, since both render the universal pack:
+#:
+#: * No rule set in the engine is about the country at all, so the universal
+#:   pack is the honest answer. Italy is the notable one - it ships a demo and
+#:   a case page, and nothing in the engine reads a DEI or computo metrico
+#:   code. Also NL, PL, KR, AE, ZA, SA, AU and NZ.
+#: * A national rule set IS registered and no pack reaches it. That is a
+#:   backlog, not a decision: Japan ("sekisan", 2 rules) and Turkey
+#:   ("birimfiyat", 2 rules). Austria is a third, of a different shape - "AT"
+#:   resolves to the DACH pack below, which runs DIN 276 and GAEB but not the
+#:   registered "onorm" set, so an Austrian project is checked against German
+#:   standards and not its own.
+#:
+#: ``tests/unit/test_every_shipped_country_reaches_a_compliance_pack.py``
+#: holds that list as assertions rather than prose, and goes red when a
+#: country joins it without being named.
 PACK_BY_COUNTRY: dict[str, str] = {
     **{str(pack["jurisdiction"]): pack_id for pack_id, pack in RULE_PACKS.items() if pack.get("jurisdiction")},
     # Austria and Switzerland run the DACH pack; it is not a German-only pack.
@@ -173,6 +308,24 @@ PACK_BY_LABEL: dict[str, str] = {
     "usa": "us_compliance",
     "mexico": "mx_compliance",
     "méxico": "mx_compliance",
+    "hungary": "hu_compliance",
+    "magyarország": "hu_compliance",
+    "china": "cn_compliance",
+    "spain": "es_compliance",
+    "españa": "es_compliance",
+    "russia": "ru_compliance",
+    "russian federation": "ru_compliance",
+    "brazil": "br_compliance",
+    "brasil": "br_compliance",
+    "india": "in_compliance",
+    # "france" matches on token boundaries, so it also claims "Ile-de-France",
+    # which is correct and is the same string the old substring table got
+    # wrong in the other direction: "de" matched inside it and enforced the
+    # German pack. A whole-word "france" reaching the French pack is the right
+    # answer arriving by the right mechanism. "Indiana" cannot be claimed by
+    # "india" for the same reason - " india " is not inside " indiana ".
+    "france": "fr_compliance",
+    "canada": "ca_compliance",
 }
 
 
@@ -232,9 +385,9 @@ def suggest_pack_for_country(country_code: str | None) -> str | None:
     """Pack for an ISO 3166-1 alpha-2 ``country_code``, or ``None``.
 
     ``None`` means "this column gave no answer" and covers both a country with
-    no pack registered (Canada, China) and no usable country at all (the empty
-    string the demo path writes). Callers that need to tell those apart should
-    use :func:`resolve_pack`, which does.
+    no pack registered (Italy, the Netherlands, Poland) and no usable country
+    at all (the empty string the demo path writes). Callers that need to tell
+    those apart should use :func:`resolve_pack`, which does.
     """
     code = _normalise_country_code(country_code)
     if code is None:
@@ -283,9 +436,9 @@ def resolve_pack(country_code: str | None, region: str | None) -> str:
     """Resolve one default pack from the ISO country, then the region label.
 
     The ISO column decides whenever it holds a usable code, including when that
-    country has no pack registered: a project that declares itself Canadian
-    gets the universal pack, not whatever its free-text region happens to
-    spell. The region label is consulted only when no country is known at all.
+    country has no pack registered: a project that declares itself Italian gets
+    the universal pack, not whatever its free-text region happens to spell. The
+    region label is consulted only when no country is known at all.
 
     Used to seed a new project's default selection - never to override an
     explicit choice the caller made.
