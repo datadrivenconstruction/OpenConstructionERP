@@ -286,9 +286,17 @@ export const SUGGESTED_VAT_RATES: Record<string, number> = {
 };
 
 /**
- * Resolve VAT rate from the BOQ's `tax`-category markup row — single source
- * of truth, matches backend PDF/Excel export behavior. Returns 0 when no
- * tax markup exists; the editor footer renders "No VAT" in that case.
+ * Resolve a VAT rate from the BOQ's first percentage `tax`-category markup row.
+ * Returns 0 when no such row exists; the editor footer renders "No VAT" then.
+ *
+ * Display convenience, NOT the authority on what a bill is taxed. It reads one
+ * row, so a second tax line is invisible to it and a tax charged as a fixed sum
+ * carries no percentage to read at all. Both are ordinary: Brazil stacks two,
+ * and a stamp duty is a sum. The authority is `cost-breakdown.grand_total`.
+ *
+ * This comment used to claim it matched the backend PDF and Excel writers.
+ * It no longer does, and the correction runs the other way: the PDF stopped
+ * reading a rate off one row and now sums the amounts of every tax row.
  */
 export function getVatRateFromMarkups(markups: Markup[]): number {
   const tax = markups.find(

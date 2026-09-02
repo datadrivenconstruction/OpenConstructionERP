@@ -1134,10 +1134,17 @@ class BOQWithSections(BOQResponse):
     ``positions`` - ungrouped positions that have no parent (and are not sections).
     ``direct_cost`` - sum of all position totals (items only, not sections).
     ``markups`` - ordered list of markup lines with computed amounts.
-    ``net_total`` - direct_cost + sum of markup amounts.
-    ``tax_rate`` - VAT / sales-tax fraction applied to net_total (None = no tax).
-    ``tax_amount`` - net_total * tax_rate, ROUND_HALF_UP to 2 dp (0 when no tax).
-    ``grand_total`` - net_total + tax_amount.
+    ``net_total`` - direct_cost + sum of ALL active markup amounts, tax included,
+    because a consumption tax is stored as a markup row of category ``tax``.
+    ``grand_total`` - the same figure again; the service assigns net_total to it.
+    ``tax_rate`` / ``tax_amount`` - never populated by the service, so they hold
+    their defaults of ``None`` and ``0``. Kept for wire compatibility only.
+
+    This block used to read "net_total + tax_amount", describing a bill whose
+    net excluded tax. Nothing has ever computed that. The PDF writer implemented
+    the sentence instead of the value, added a rate on top of a total that
+    already carried it, and printed a gross the application never quotes. Read
+    the tax off the ``category == "tax"`` markup rows, which is where it lives.
 
     v3 §10 - money emitted as Decimal-as-string.
     """
