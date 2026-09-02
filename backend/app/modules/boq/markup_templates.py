@@ -1493,8 +1493,8 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # The interministerial General Specification for Building Works, known as
     # the Blue Book, which the Dekel price book states every item is subject to
     # including its methods of measurement; the Dekel price book itself
-    # (edition of March 2024) for what a unit rate contains; VAT under the
-    # instruction, see FINDING 1.
+    # (edition of March 2024) for what a unit rate contains; VAT at the
+    # standard rate in force, sourced on the tax line itself below.
     #
     # This stack has no ``profit`` line and that is the Israeli statement, not
     # an omission. The Dekel pricing assumptions say the rates in chapters 01
@@ -1559,13 +1559,27 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
             "apply_to": "direct_cost",
             "sort_order": 2,
         },
-        # 17.0 is the rate the brief instructs and the rate our own
-        # effective-dated table states. It has been superseded since
-        # 2025-01-01. See FINDING 1 before shipping this number.
+        # 18.0 since 2025-01-01, when Israel raised the standard rate from
+        # 17 under the 2025 Economic Arrangements Law.
+        #
+        # What stood here was 17.0, with a note saying our own
+        # effective-dated table stated the same. That was true and both
+        # were wrong: the seed carried the 17 window with no end date, so
+        # it read as the rate in force, and a note that checks one stale
+        # table against another agrees with itself. The seed now closes 17
+        # at 2024-12-31 and opens 18 the next day, and the methodology
+        # catalogue had said 18 all along.
+        #
+        # This line carries no date of its own, which is the part of the
+        # old note worth keeping. It is the percentage a newly seeded bill
+        # starts at, so it has to be the rate in force now. Bills already
+        # seeded keep what they were created with, and the question of what
+        # the rate was on a given date is answered by the effective-dated
+        # seed rather than here.
         {
             "name": "\u05de\u05e2\u05f4\u05de (VAT)",
             "category": "tax",
-            "percentage": "17.0",
+            "percentage": "18.0",
             "apply_to": "cumulative",
             "sort_order": 3,
         },
