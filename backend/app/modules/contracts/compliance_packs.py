@@ -56,7 +56,9 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "id": "de_compliance",
         "name": "Germany / DACH Compliance",
         "description": "DIN 276 cost-group structure and GAEB tender-format "
-        "checks plus the universal quality baseline.",
+        "checks plus the universal quality baseline. Covers Germany and "
+        "Switzerland, and a project tagged with the DACH region as a whole; "
+        "Austria adds ÖNORM on top of these through its own pack.",
         "jurisdiction": "DE",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "din276", "gaeb"],
@@ -203,6 +205,57 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         # in a "canada" set added here, not folded into masterformat.
         "rule_sets": ["boq_quality", "masterformat"],
     },
+    # ── One country was not missing a pack, it was given a neighbour's ─────
+    #
+    # Austria is a different defect from the eight above and needs saying
+    # plainly, because the fix revises a decision rather than filling a hole.
+    # "AT" used to resolve to the DACH pack. That pack is not wrong about
+    # Austria: DIN 276 cost groups and the GAEB tender format really are used
+    # there, which is why the mapping was written and why nothing looked
+    # broken. What it left out was "onorm", the set the engine registers for
+    # the Austrian standard, so an Austrian contract was measured entirely
+    # against German references and the settings page showed a national pack
+    # either way.
+    #
+    # This is the same shape as the bill that charged Austria Germany's 19
+    # percent VAT because the two share the DACH region, and it gets the same
+    # answer: a country is entitled to its own. The parallel extends to what
+    # is deliberately NOT done. That fix did not split the DACH region, since
+    # overheads and profit really are shared; this one does not drop the
+    # shared sets, since DIN 276 and GAEB really are read in Vienna. ÖNORM is
+    # added alongside them, not in place of them.
+    #
+    # Both ÖNORM rules are warnings, so this pack tells an Austrian signer
+    # what is undeclared without blocking on it, and no contract that could be
+    # signed before this pack existed becomes unsignable because of it.
+    "at_compliance": {
+        "id": "at_compliance",
+        "name": "Austria Compliance",
+        "description": "ÖNORM B 2063 position structure and description detail, alongside the "
+        "DIN 276 cost groups and the GAEB tender format an Austrian bill is also written "
+        "against, plus the universal quality baseline.",
+        "jurisdiction": "AT",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "din276", "gaeb", "onorm"],
+    },
+    "jp_compliance": {
+        "id": "jp_compliance",
+        "name": "Japan Compliance",
+        "description": "Sekisan item codes on every priced line and the metric units "
+        "Japanese measurement practice is stated in, plus the universal quality baseline.",
+        "jurisdiction": "JP",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "sekisan"],
+    },
+    "tr_compliance": {
+        "id": "tr_compliance",
+        "name": "Turkey Compliance",
+        "description": "Birim fiyat poz numbers on every priced line, in the published "
+        "unit-price format, plus the universal quality baseline.",
+        "jurisdiction": "TR",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "birimfiyat"],
+    },
 }
 
 #: Default pack every project falls back to when nothing else matches.
@@ -255,27 +308,37 @@ DEFAULT_PACK_ID = "universal"
 #: only for rows written from here on.
 #:
 #: What is still NOT here, and why, so the next reader does not have to
-#: re-derive it. Two different situations that look identical from the
-#: settings page, since both render the universal pack:
+#: re-derive it. One situation, where there used to be two, and it is the one
+#: the settings page cannot show: the universal pack renders exactly like a
+#: national one.
 #:
 #: * No rule set in the engine is about the country at all, so the universal
 #:   pack is the honest answer. Italy is the notable one - it ships a demo and
 #:   a case page, and nothing in the engine reads a DEI or computo metrico
 #:   code. Also NL, PL, KR, AE, ZA, SA, AU and NZ.
-#: * A national rule set IS registered and no pack reaches it. That is a
-#:   backlog, not a decision: Japan ("sekisan", 2 rules) and Turkey
-#:   ("birimfiyat", 2 rules). Austria is a third, of a different shape - "AT"
-#:   resolves to the DACH pack below, which runs DIN 276 and GAEB but not the
-#:   registered "onorm" set, so an Austrian project is checked against German
-#:   standards and not its own.
+#:
+#: The other used to read "a national rule set IS registered and no pack
+#: reaches it", and is now empty. Japan ("sekisan"), Turkey ("birimfiyat") and
+#: Austria ("onorm") were the three. Austria was the one worth spelling out,
+#: because it was not a country falling through to the baseline but a country
+#: resolving to the neighbours' pack, which no gate written on "did it reach a
+#: pack" can see, and which the settings page renders as national coverage.
 #:
 #: ``tests/unit/test_every_shipped_country_reaches_a_compliance_pack.py``
-#: holds that list as assertions rather than prose, and goes red when a
-#: country joins it without being named.
+#: holds all of this as assertions rather than prose. Its
+#: ``NO_NATIONAL_RULES_REGISTERED`` table is the list above and goes red when
+#: a country joins it without being named;
+#: ``NATIONAL_RULE_SET_BY_COUNTRY`` is the other and goes red when a country
+#: whose own rule set is registered resolves to a pack that does not run it.
 PACK_BY_COUNTRY: dict[str, str] = {
     **{str(pack["jurisdiction"]): pack_id for pack_id, pack in RULE_PACKS.items() if pack.get("jurisdiction")},
-    # Austria and Switzerland run the DACH pack; it is not a German-only pack.
-    "AT": "de_compliance",
+    # Switzerland runs the DACH pack; it is not a German-only pack. Austria
+    # used to sit on this line beside it and no longer does: it has "onorm" of
+    # its own, so it gets "at_compliance" from the comprehension above, which
+    # carries the DACH sets plus the Austrian one. Switzerland stays because
+    # no Swiss rule set is registered anywhere, which makes the DACH pack the
+    # honest answer for a Swiss project rather than a substituted one. The day
+    # a Swiss set is written, this line is the thing to revisit.
     "CH": "de_compliance",
 }
 
@@ -291,10 +354,17 @@ PACK_BY_LEGACY_CODE: dict[str, str] = {
 #: test suite gates that, because a two-letter key is what caused the defect
 #: this table replaced.
 PACK_BY_LABEL: dict[str, str] = {
+    # "dach" stays on the German pack. It is the one label here that is not a
+    # country, and a project that tags itself with the region as a whole has
+    # not said it is Austrian, so it gets the sets the three markets share.
     "dach": "de_compliance",
     "germany": "de_compliance",
     "deutschland": "de_compliance",
-    "austria": "de_compliance",
+    # "austria" moved off the German pack with the ISO code. A project that
+    # only ever typed its region was the one most exposed to the substitution,
+    # because it never had a country column to be read first.
+    "austria": "at_compliance",
+    "österreich": "at_compliance",
     "switzerland": "de_compliance",
     "united kingdom": "uk_compliance",
     "great britain": "uk_compliance",
@@ -326,6 +396,9 @@ PACK_BY_LABEL: dict[str, str] = {
     # "india" for the same reason - " india " is not inside " indiana ".
     "france": "fr_compliance",
     "canada": "ca_compliance",
+    "japan": "jp_compliance",
+    "turkey": "tr_compliance",
+    "türkiye": "tr_compliance",
 }
 
 

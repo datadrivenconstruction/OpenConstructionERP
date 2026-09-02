@@ -227,26 +227,23 @@ def test_a_country_code_is_normalised_before_it_is_matched() -> None:
 # ── The gap this fix makes visible ───────────────────────────────────────
 
 
-@pytest.mark.parametrize("code", ["IT", "JP", "TR"])
+@pytest.mark.parametrize("code", ["IT"])
 def test_countries_with_no_pack_resolve_to_the_default(code: str) -> None:
     """Documents a gap rather than asserting a desired state.
 
-    Resolving from the ISO column is correct and still gives these projects the
-    universal pack, because no Italian, Japanese or Turkish pack is registered.
-    Two of the three already have validation rules written and registered -
-    "sekisan" for Japan, "birimfiyat" for Turkey. Those rules are selectable
-    today through a project's ``validation_rule_sets``; what no jurisdiction
-    reaches is the contract-signature gate, which is fed by packs alone. Italy
-    is the third kind: it ships a demo and has no rule set at all, so there is
-    nothing for a pack to point at and writing one would be a claim, not a
-    check.
+    Resolving from the ISO column is correct and still gives an Italian project
+    the universal pack, because no Italian pack is registered and there is
+    nothing for one to point at: no rule set in the engine reads a DEI or
+    computo metrico code. Writing a pack here would be a claim, not a check.
 
-    This list used to read CA, CN, ES. All three now have packs, added after
-    confirming the three conditions below: their sets are registered
-    ("masterformat", "gbt50500", "bc3"), each set tests the jurisdiction's own
+    This list used to read CA, CN, ES, and then JP and TR alongside Italy.
+    All of them now have packs, added after confirming the three conditions
+    below: their sets are registered ("masterformat", "gbt50500", "bc3",
+    "sekisan", "birimfiyat"), each set tests the jurisdiction's own
     classification rather than only that some code exists, and a project in
     those countries that cannot produce its national codes should not reach
-    signature unnoticed.
+    signature unnoticed. Italy is the one kind that never satisfies the first
+    condition, which is why it is alone here rather than next in line.
 
     THIS TEST IS MEANT TO GO RED when a pack is added. It is not an obstacle,
     it is the checklist. Before deleting a code from this list, confirm:
