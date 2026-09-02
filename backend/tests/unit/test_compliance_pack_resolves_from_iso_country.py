@@ -249,8 +249,9 @@ def test_countries_with_no_pack_resolve_to_the_default(code: str) -> None:
     it is the checklist. Before deleting a code from this list, confirm:
 
     1. The pack's ``rule_sets`` name sets the engine actually registers.
-       ``ValidationEngine.has_rules(name)`` is the check; an unregistered set
-       does not run and must never read as "ran and passed".
+       ``rule_registry.has_rules(name)`` is the check, and it lives on the
+       registry rather than on the engine; an unregistered set does not run
+       and must never read as "ran and passed".
     2. Those rules test something the jurisdiction is about, not only that a
        classification code is present and shaped like a code. A gate that
        passes everything is worse than no gate, because an absent pack reads
