@@ -29,7 +29,7 @@ What each cohort is
 ``pre_v15_5_0``
     Seeded from the 70-row file, before ``combination`` existed. The heal adds
     that column filled with its server default, so every row reads ``national``
-    and no row carries a subdivision. This is the install missing eight of
+    and no row carries a subdivision. This is the install missing ten of
     Canada's ten sub-national rates.
 
 ``v15_9_1``
@@ -438,7 +438,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
             await session.execute(select(DataRepairLedger).where(DataRepairLedger.repair_id == REPAIR_ID))
         ).scalar_one()
     assert ledger.runs == 2, "the second boot has to be recorded, not skipped"
-    assert ledger.rows_changed_total == 8, "the second pass applied something after all"
+    assert ledger.rows_changed_total == 10, "the second pass applied something after all"
     assert len(await _deliveries(repair_factory)) == 10, "a delivery was recorded twice"
 
 
@@ -586,7 +586,7 @@ async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_
 
     Reading the newest would take that one row for the seed, date this install
     to today, and conclude that every rate added since is absent because
-    somebody removed it. The install would be refused all eight of the rates it
+    somebody removed it. The install would be refused all ten of the rates it
     is owed, for good, on the evidence of a row that has nothing to do with any
     of them. The oldest surviving shipped row is the seeder's own and it still
     says June.
@@ -737,7 +737,7 @@ async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
     async with repair_factory() as session:
         after = await snapshot_table(session, _TAX_TABLE)
 
-    assert len(after) == len(before) + 8, "the pass under test did not deliver, so the check below is vacuous"
+    assert len(after) == len(before) + 10, "the pass under test did not deliver, so the check below is vacuous"
     assert verify_additive_shape(repair, before, after) == ()
 
 
