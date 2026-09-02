@@ -488,6 +488,26 @@ jobs:
             exit 1
           fi
 
+          # The same question for the backend, which the two steps below now
+          # read. It needs its own counts because it is reached a different way:
+          # from inside backend/ with ruff discovering the config, rather than
+          # with --config from the root. A collapse there is just as quiet, since
+          # `ruff format --check .` over zero files prints "0 files already
+          # formatted" and exits 0.
+          b_lint=$( cd backend && ruff check --show-files . | wc -l ) || true
+          b_summary=$( cd backend && ruff format --check . 2>/dev/null | tail -1 ) || true
+          b_fmt=${b_summary%% *}
+          case "$b_fmt" in (''|*[!0-9]*) b_fmt=0 ;; esac
+          echo "backend lint step reads ${b_lint:-0} file(s), backend format step reads ${b_fmt:-0} file(s)"
+          if [ "${b_lint:-0}" -eq 0 ]; then
+            echo "::error::ruff check resolved zero Python files under backend, so the backend lint step would pass without opening anything"
+            exit 1
+          fi
+          if [ "${b_fmt:-0}" -eq 0 ]; then
+            echo "::error::ruff format resolved zero Python files under backend, so the backend formatting step would pass without opening anything"
+            exit 1
+          fi
+
       - name: Lint the Python outside the backend
         if: ${{ !cancelled() && steps.ruff.outcome == 'success' }}
         run: ruff check --config backend/pyproject.toml scripts tools
@@ -499,6 +519,37 @@ jobs:
       - name: Check the formatting of the Python outside the backend
         if: ${{ !cancelled() && steps.ruff.outcome == 'success' }}
         run: ruff format --check --config backend/pyproject.toml scripts tools
+
+      # The backend itself, which until now no lane that blocks anything read.
+      #
+      # The comment above lists what is uncovered and does not mention backend/,
+      # because the step below this one used to carry a line saying CI lints the
+      # backend by running ruff from inside backend/ in ci.yml. It does, and that
+      # is not the same as being covered: ci.yml gates nothing, and on main it is
+      # cancelled by the next push more often than it finishes, so a red ruff in
+      # the backend reddens nothing anybody reads. ci.yml also runs `ruff check`
+      # only, so backend formatting was checked by no workflow at all.
+      #
+      # Why these two steps cd into backend instead of appending the path to the
+      # two steps above. Those carry `--config backend/pyproject.toml`, and the
+      # exclude patterns inside that config are relative paths. Adding `backend`
+      # to such an invocation resolves `app/core/demo_packs/*-*.py` against the
+      # repository root, where it matches nothing, so the excluded demo packs get
+      # linted after all. Measured on this tree: appending the path turns a clean
+      # backend into "37 errors" and "30 files would be reformatted", every one of
+      # the thirty a demo pack the config deliberately exempts. Running from
+      # inside backend/ lets ruff discover the same config the way the pre-commit
+      # hook and the local gate do, and it is green: 4710 files already formatted,
+      # all checks passed.
+      - name: Lint the backend
+        if: ${{ !cancelled() && steps.ruff.outcome == 'success' }}
+        working-directory: backend
+        run: ruff check .
+
+      - name: Check the formatting of the backend
+        if: ${{ !cancelled() && steps.ruff.outcome == 'success' }}
+        working-directory: backend
+        run: ruff format --check .
 
       # Last in the job on purpose, and much the heaviest install here: the ruff
       # wheel above is one small download, this resolves the whole application.
