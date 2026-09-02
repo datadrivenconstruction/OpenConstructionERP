@@ -33,6 +33,7 @@ from fastapi import HTTPException, status
 if TYPE_CHECKING:
     from app.modules.boq.schemas import PositionLinksResponse
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -271,6 +272,7 @@ from app.modules.boq.markup_templates import (
 )
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES as DEFAULT_MARKUP_TEMPLATES
 from app.modules.i18n_foundation.repository import TaxConfigRepository
+from app.modules.i18n_foundation.tax_rules import TaxRuleError
 from app.modules.i18n_foundation.tax_rules import resolve as resolve_tax
 from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm
 
@@ -5622,6 +5624,13 @@ class BOQService:
             being every database that has not been seeded yet. None means the
             region's own line stands, which the caller records rather than
             leaving indistinguishable from a rate that was resolved.
+
+        Raises:
+            Nothing. A rate that cannot be read is not a reason a bill cannot
+            be seeded. The two ways that happens are told apart on the way
+            out, because they are not the same event: an absent seed is the
+            expected state of a fresh install, and a present-but-broken row is
+            a defect in somebody's data that nothing else would report.
         """
         if not country_code:
             return None
@@ -5635,13 +5644,35 @@ class BOQService:
         on_date = base_date.strip() if base_date and _ISO_DATE.fullmatch(base_date.strip()) else None
         try:
             configs = await TaxConfigRepository(self.session).list(country_code=country_code)
+        except SQLAlchemyError:
+            # The table could not be read at all, which is what an install
+            # missing the i18n tables looks like. Seeding a bill must not fail
+            # for that, the same fail-soft ``project_for_boq`` takes. An empty
+            # table does NOT arrive here: zero rows resolve to
+            # ``no_configuration`` and leave by the check below, which is the
+            # ordinary state of the ten priced countries the seed says nothing
+            # about.
+            logger.debug("Tax table unreadable for %s; the region's own VAT line stands", country_code)
+            return None
+        try:
             resolution = resolve_tax([tax_row_from_orm(c) for c in configs], country_code, on_date=on_date)
-        except Exception:
-            # Seeding a bill must not fail because the tax table could not be
-            # read, which is the same fail-soft ``project_for_boq`` takes and
-            # for the same reason. A missing table on a fresh database arrives
-            # here as well as an unreadable one.
-            logger.debug("Tax seed unreadable for %s; the region's own VAT line stands", country_code)
+        except TaxRuleError as exc:
+            # A row that is present and wrong, which is a different event from
+            # a row that is absent and must not be reported as one. ``resolve``
+            # raises this for a rate_pct that is not a number and for two rates
+            # that each claim to replace the federal one, both reachable
+            # because the column is text and rows predating these rules exist.
+            # The bill still seeds, because refusing to price a project is
+            # worse than pricing it off the regional stack, and the stored line
+            # says ``region_template`` either way - so this line at warning is
+            # the only thing that tells an operator their seed is broken rather
+            # than merely empty.
+            logger.warning(
+                "Tax seed for %s breaks rule %s (%s); the region's own VAT line stands",
+                country_code,
+                exc.code,
+                exc.message,
+            )
             return None
         if not resolution.resolved or resolution.combined_rate_pct is None:
             return None

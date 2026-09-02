@@ -42,6 +42,7 @@ returns.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from decimal import Decimal
 
@@ -436,4 +437,56 @@ async def test_a_quarter_label_in_base_date_does_not_pick_a_tax_window(pg_sessio
     assert Decimal(line.percentage) == Decimal("17"), (
         "a real ISO base date must still price the window in force then, or this test is "
         "only proving that base_date is ignored altogether"
+    )
+
+
+async def test_a_broken_seed_row_falls_back_loudly(pg_session, caplog) -> None:
+    """A row that is present and wrong is not the same event as one that is absent.
+
+    Both end at the region's line and both stamp ``region_template``, because
+    that is honestly where the number came from. What separates them is the
+    log: an unseeded install is the expected state of a fresh database and
+    says nothing, while a rate the resolver refuses is somebody's data defect
+    and has to name itself. Austria is the country to prove it on, because its
+    fallback is Germany's 19 against its own 20 - a number wrong enough to
+    matter and plausible enough that nobody would question it on sight.
+    """
+    await _install_tax_seed(pg_session)
+    austria = (
+        (
+            await pg_session.execute(
+                select(TaxConfiguration).where(
+                    TaxConfiguration.country_code == "AT",
+                    TaxConfiguration.is_default.is_(True),
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert len(austria) == 1, (
+        f"this test corrupts the rate Austria is billed at and needs exactly one row to carry it, found {len(austria)}"
+    )
+    assert austria[0].rate_pct == "20.0", "Austria's standard rate moved; corrupt the row that is still the one billed"
+    austria[0].rate_pct = "twenty"
+    await pg_session.flush()
+
+    boq = await _bill_for(pg_session, "AT")
+    with caplog.at_level(logging.WARNING, logger="app.modules.boq.service"):
+        created = await BOQService(pg_session).apply_default_markups(boq.id)
+    assert created, "a bill refused to seed because one tax row was unreadable"
+
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    template = [entry for entry in resolve_region_lines("DACH", vat_rate=None) if entry["category"] == "tax"][0]
+    assert Decimal(line.percentage) == Decimal(str(template["percentage"]))
+    assert line.metadata_.get("vat_rate_source") == "region_template"
+
+    warnings = [r for r in caplog.records if r.levelno >= logging.WARNING and "AT" in r.getMessage()]
+    assert warnings, (
+        "a bill was priced off its region's stack because Austria's tax rate does not parse, and "
+        "nothing said so: the stored line reads region_template exactly as an unseeded database "
+        "does, so this log line is the only place the two can be told apart"
+    )
+    assert "rate_not_numeric" in warnings[0].getMessage(), (
+        f"the warning must name which rule the row breaks, got {warnings[0].getMessage()!r}"
     )
