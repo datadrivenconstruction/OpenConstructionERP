@@ -29,6 +29,7 @@ __all__ = [
     "DEFAULT_MARKUP_TEMPLATES",
     "REGION_BY_COUNTRY",
     "NON_SINGLE_TAX_REGIONS",
+    "CONSTRUCTION_TIER_COUNTRIES",
     "resolve_region_lines",
     "region_lines_for_country",
     "region_key_for_country",
@@ -2627,6 +2628,36 @@ REGION_BY_COUNTRY: dict[str, str] = {
 # fails on any region with a tax-line count other than one that is not listed
 # here, so a fifteenth region with two levies has to state its reason before it
 # can ship rather than silently taking one country's rate twice.
+# Countries where construction is charged at a tier of its own, so the rate on
+# a bill of quantities is NOT the country's headline rate, and why.
+#
+# The distinction only became load-bearing when the bill started resolving a
+# country's rate from the effective-dated tax seed. That table answers "what is
+# this country's standard VAT rate", which is the right question almost
+# everywhere and the wrong one here: it returns China's headline 13, and a
+# Chinese bill of quantities is priced at 9. Taking the seed's answer would
+# replace a correct construction rate with a correct general one, which is the
+# worst shape a wrong number can have, because both figures are defensible and
+# only one of them is about building work.
+#
+# So these countries keep the rate written on their own regional stack, which
+# is where the construction tier is recorded. A per-project override still
+# wins, because a project that states its rate has answered the question
+# itself.
+#
+# ``tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py`` pins this set
+# in both directions: a country added here without a tier to justify it fails,
+# and a country whose bill stops matching its seed rate without being named
+# here fails too.
+CONSTRUCTION_TIER_COUNTRIES: dict[str, str] = {
+    "CN": (
+        "China's headline VAT rate is 13, which is what the seed's is_default row carries, and "
+        "construction and building services are charged at the 9 tier the seed carries as "
+        "VAT_RED. Both figures are right about different questions and 9 is the one a bill of "
+        "quantities asks"
+    ),
+}
+
 NON_SINGLE_TAX_REGIONS: dict[str, str] = {
     "CA": (
         "GST is federal at 5 and every province either replaces it with a harmonised HST or "

@@ -264,8 +264,21 @@ async def _safe_audit(
 # Re-exported under its own name so ``from app.modules.boq.service import
 # DEFAULT_MARKUP_TEMPLATES`` keeps resolving for the readers that predate the
 # move. The table itself lives in a module the methodology catalogue can import.
+from app.modules.boq.markup_templates import (
+    CONSTRUCTION_TIER_COUNTRIES,
+    region_key_for_country,
+    resolve_region_lines,
+)
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES as DEFAULT_MARKUP_TEMPLATES
-from app.modules.boq.markup_templates import region_key_for_country, resolve_region_lines
+from app.modules.i18n_foundation.repository import TaxConfigRepository
+from app.modules.i18n_foundation.tax_rules import resolve as resolve_tax
+from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm
+
+#: A full ISO date and nothing else. ``BOQ.base_date`` is a free-text column
+#: and the shipped demo packs fill it with ``"2026-Q1"`` and ``"2026-01"``, so
+#: what it holds has to be tested before it can be used as a date. See
+#: :meth:`BOQService._seeded_vat_rate`.
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 from app.modules.boq.models import (
     BOQ,
     BOQActivityLog,
@@ -5573,6 +5586,69 @@ class BOQService:
             logger.debug("project lookup failed for boq %s", boq_id, exc_info=True)
             return None
 
+    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None) -> str | None:
+        """The country's own standard VAT rate from the shipped tax seed.
+
+        The bill used to price a country with no project override off its
+        region's stack, which is a neighbour's rate wherever a region serves
+        more than one market: Austria was invoiced at Germany's 19, Switzerland
+        at 19 against its own 8.1, Saudi Arabia at the Gulf 5 against its own
+        15. The methodology catalogue has read the country's own rate all
+        along, so the two engines disagreed about the same project.
+
+        The in-force rule is not reimplemented here. ``resolve`` owns it,
+        including the part that is easy to get wrong: Israel ships two rows
+        both flagged ``is_default``, correct because only the rows in force on
+        the queried date are ever compared. Reading ``is_default`` directly
+        would pick between them by file order.
+
+        Args:
+            country_code: The project's ISO 3166-1 alpha-2 code, or None.
+            base_date: The bill's own base date, used only when it is a full
+                ISO date. The column is ``String(40)`` with no format
+                validation and the shipped demo packs put ``"2026-Q1"`` and
+                ``"2026-01"`` in it, which are not dates. Passing those through
+                would not fail - ``active_rows`` compares date strings, so
+                ``"2026-Q1"`` sorts after ``"2026-02-01"`` because ``"Q"`` is
+                above ``"0"`` while ``"2026-01"`` sorts before it. The two
+                shipped formats therefore select windows in opposite
+                directions, both silently. Anything that is not
+                ``YYYY-MM-DD`` is dropped and the resolver dates the bill
+                today.
+
+        Returns:
+            The rate as a decimal-string percentage, or None when the country
+            is unknown, has no row in force, or the table is empty - the last
+            being every database that has not been seeded yet. None means the
+            region's own line stands, which the caller records rather than
+            leaving indistinguishable from a rate that was resolved.
+        """
+        if not country_code:
+            return None
+        if country_code.upper() in CONSTRUCTION_TIER_COUNTRIES:
+            # The seed answers "what is this country's standard rate", which is
+            # not what a bill of quantities asks where construction has a tier
+            # of its own. China's headline rate is 13 and its construction rate
+            # is 9; the 9 is on the regional stack, so leaving it alone is the
+            # answer rather than a gap.
+            return None
+        on_date = base_date.strip() if base_date and _ISO_DATE.fullmatch(base_date.strip()) else None
+        try:
+            configs = await TaxConfigRepository(self.session).list(country_code=country_code)
+            resolution = resolve_tax([tax_row_from_orm(c) for c in configs], country_code, on_date=on_date)
+        except Exception:
+            # Seeding a bill must not fail because the tax table could not be
+            # read, which is the same fail-soft ``project_for_boq`` takes and
+            # for the same reason. A missing table on a fresh database arrives
+            # here as well as an unreadable one.
+            logger.debug("Tax seed unreadable for %s; the region's own VAT line stands", country_code)
+            return None
+        if not resolution.resolved or resolution.combined_rate_pct is None:
+            return None
+        # Explicitly against None: "0" is Kuwait's and Qatar's real answer and
+        # a truthiness test here would send both back to the Gulf region's 5.
+        return resolution.combined_rate_pct
+
     async def apply_default_markups(self, boq_id: uuid.UUID, region: str | None = None) -> list[BOQMarkup]:
         """Replace all markups on a BOQ with the default template for a region.
 
@@ -5621,7 +5697,7 @@ class BOQService:
             HTTPException 404 if BOQ not found.
             HTTPException 409 if the BOQ is locked.
         """
-        await self._ensure_not_locked(boq_id)
+        boq = await self._ensure_not_locked(boq_id)
 
         region_key = region.upper() if region else "DEFAULT"
 
@@ -5632,13 +5708,27 @@ class BOQService:
         # public signature stay compatible.
         # ``default_vat_rate`` is a decimal-string percentage (e.g. ``"21"``).
         project_vat_override: str | None = None
+        country_code: str | None = None
         project = await self.project_for_boq(boq_id)
         if project is not None:
             raw = getattr(project, "default_vat_rate", None)
             if raw is not None and str(raw).strip() != "":
                 project_vat_override = str(raw).strip()
+            country_code = getattr(project, "country_code", None)
             if region is None:
-                region_key = region_key_for_country(getattr(project, "country_code", None))
+                region_key = region_key_for_country(country_code)
+
+        # Where the VAT number comes from, in precedence order, and the answer
+        # is recorded on the line rather than only used. A region serves many
+        # countries - DACH prices Austria and Switzerland off Germany's stack -
+        # so the region's line is the last resort, not the default.
+        vat_rate = project_vat_override
+        rate_source = "project"
+        if vat_rate is None:
+            vat_rate = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None))
+            rate_source = "country_seed"
+        if vat_rate is None:
+            rate_source = "region_template"
 
         # Remove existing markups
         await self.markup_repo.delete_all_for_boq(boq_id)
@@ -5648,7 +5738,17 @@ class BOQService:
         # out here, because the methodology catalogue reads the same table and a
         # rule written twice is a rule that will be true in one place.
         new_markups: list[BOQMarkup] = []
-        for entry in resolve_region_lines(region_key, vat_rate=project_vat_override or None):
+        for entry in resolve_region_lines(region_key, vat_rate=vat_rate):
+            # ``vat_override`` keeps its existing meaning: this line's rate was
+            # replaced. ``vat_rate_source`` is added on tax lines only, and is
+            # read off the line rather than off the decision above, because a
+            # multi-levy region refuses the swap inside ``resolve_region_lines``
+            # and its lines keep the market's own rates whatever was resolved.
+            metadata: dict[str, object] = {}
+            if entry["vat_override"]:
+                metadata["vat_override"] = True
+            if entry["category"] == "tax":
+                metadata["vat_rate_source"] = rate_source if entry["vat_override"] else "region_template"
             markup = BOQMarkup(
                 boq_id=boq_id,
                 name=str(entry["name"]),
@@ -5659,7 +5759,7 @@ class BOQService:
                 apply_to=str(entry.get("apply_to", "direct_cost")),
                 sort_order=int(entry["sort_order"]),  # type: ignore[arg-type]
                 is_active=True,
-                metadata_={"vat_override": True} if entry["vat_override"] else {},
+                metadata_=metadata,
             )
             new_markups.append(markup)
 
