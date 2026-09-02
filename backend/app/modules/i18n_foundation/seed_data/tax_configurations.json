@@ -628,6 +628,36 @@
     "is_default": true
   },
   {
+    "country_code": "KW",
+    "tax_name": "No VAT levied",
+    "tax_name_translations": {
+      "en": "No VAT levied"
+    },
+    "tax_code": "NONE",
+    "rate_pct": "0.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": null,
+    "effective_to": null,
+    "is_default": true
+  },
+  {
+    "country_code": "QA",
+    "tax_name": "No VAT levied",
+    "tax_name_translations": {
+      "en": "No VAT levied"
+    },
+    "tax_code": "NONE",
+    "rate_pct": "0.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": null,
+    "effective_to": null,
+    "is_default": true
+  },
+  {
     "country_code": "CN",
     "tax_name": "VAT Standard",
     "tax_name_translations": {

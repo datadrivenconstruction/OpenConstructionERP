@@ -174,6 +174,16 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     ("CA", "RST_MB"): "2026-08-23",
     # Nigeria, v15.6.0.
     ("NG", "VAT"): "2026-08-24",
+    # Kuwait and Qatar. Both signed the 2016 GCC VAT framework and neither has
+    # implemented it: the UAE and Saudi Arabia started in 2018, Bahrain in 2019
+    # and Oman in 2021, while these two have repeatedly deferred. So the rate is
+    # zero, and it is zero because somebody established it rather than because
+    # nobody looked - which is the whole reason the rows exist. They are
+    # deliverable rather than anchoring because an install seeded before them
+    # holds no Gulf rate of its own and would otherwise price a Kuwaiti bill off
+    # the shared regional stack for the life of the install.
+    ("KW", "NONE"): "2026-09-02",
+    ("QA", "NONE"): "2026-09-02",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

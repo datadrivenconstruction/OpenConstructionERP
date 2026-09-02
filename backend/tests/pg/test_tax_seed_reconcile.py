@@ -83,6 +83,8 @@ _ADDED_AFTER_V15_4_0 = {
     ("NG", "VAT", "2020-02-01"),
     ("RO", "TVA_RED", "2025-08-01"),
     ("IL", "VAT", "2025-01-01"),
+    ("KW", "NONE", None),
+    ("QA", "NONE", None),
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -98,6 +100,8 @@ _RESTORED_TO_V15_4_0 = {
 _ADDED_AFTER_V15_9_1 = {
     ("RO", "TVA_RED", "2025-08-01"),
     ("IL", "VAT", "2025-01-01"),
+    ("KW", "NONE", None),
+    ("QA", "NONE", None),
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -118,7 +122,7 @@ _DIGEST_V15_9_1 = "ec4106ee3f0cadcd6fce5ca0ec95fe69d55b4e51d1b4b3283daa462542038
 
 _FIELDS = ("country_code", "tax_code", "rate_pct", "tax_type", "effective_from", "effective_to", "is_default")
 
-#: The eight rate lines a pre-v15.5.0 install is missing and must be given.
+#: The ten rate lines a pre-v15.5.0 install is missing and must be given.
 #: Nova Scotia is deliberately not among them - it already holds the 15 % row,
 #: so the 14 % one is a rate that changed rather than a rate never delivered.
 _EXPECTED_DELIVERY = {
@@ -130,6 +134,11 @@ _EXPECTED_DELIVERY = {
     "CA/QST_QC",
     "CA/RST_MB",
     "NG/VAT",
+    # Kuwait and Qatar levy no VAT, and saying so is a rate like any
+    # other: without these rows a Gulf project prices off the shared
+    # regional stack at 5 percent.
+    "KW/NONE",
+    "QA/NONE",
 }
 
 
@@ -347,7 +356,7 @@ async def test_a_pre_v15_5_install_is_given_the_provinces_it_never_received(repa
 
     reconcile = _outcome(report, REPAIR_ID)
     assert reconcile.status == "applied"
-    assert reconcile.rows_changed == 8, f"expected eight missing rates delivered, got {reconcile.rows_changed}"
+    assert reconcile.rows_changed == 10, f"expected ten missing rates delivered, got {reconcile.rows_changed}"
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
 
     lines = await _lines(repair_factory)
@@ -393,8 +402,8 @@ async def test_nova_scotia_is_not_this_repairs_to_deliver(repair_factory) -> Non
     deliveries = await _deliveries(repair_factory)
     assert "CA/HST_NS" not in deliveries, "the reconciler delivered a rate line that was already on file"
     assert deliveries == _EXPECTED_DELIVERY
-    assert _outcome(report, REPAIR_ID).rows_changed == 8, (
-        "the reconciler's own count moved, so it is doing something other than the eight rate lines it owns"
+    assert _outcome(report, REPAIR_ID).rows_changed == 10, (
+        "the reconciler's own count moved, so it is doing something other than the ten rate lines it owns"
     )
 
     async with repair_factory() as session:
@@ -416,7 +425,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
 
     first = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
-    assert first.rows_changed == 8
+    assert first.rows_changed == 10
     settled = await _count(repair_factory)
 
     second = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
@@ -430,7 +439,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
         ).scalar_one()
     assert ledger.runs == 2, "the second boot has to be recorded, not skipped"
     assert ledger.rows_changed_total == 8, "the second pass applied something after all"
-    assert len(await _deliveries(repair_factory)) == 8, "a delivery was recorded twice"
+    assert len(await _deliveries(repair_factory)) == 10, "a delivery was recorded twice"
 
 
 async def test_a_delivered_rate_the_customer_deletes_stays_deleted(repair_factory) -> None:
@@ -442,7 +451,7 @@ async def test_a_delivered_rate_the_customer_deletes_stays_deleted(repair_factor
     install.
     """
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
-    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == 8
+    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == 10
 
     async with repair_factory() as session:
         await session.execute(
@@ -481,17 +490,28 @@ async def test_a_v15_9_1_install_that_deleted_a_rate_does_not_get_it_back(repair
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == 0, "a rate deleted on a modern install was restored"
+    delivered = await _deliveries(repair_factory)
+    assert "NG/VAT" not in delivered, "a rate deleted on a modern install was restored"
     assert ("NG", "VAT") not in await _lines(repair_factory)
-    assert await _deliveries(repair_factory) == set()
+    # This cohort predates the two Gulf rate lines, so it is owed those and
+    # nothing else. Pinned rather than counted, so a future seed row cannot
+    # slip in here disguised as one of them.
+    assert delivered == {"KW/NONE", "QA/NONE"}
+    assert _outcome(report, REPAIR_ID).rows_changed == 2
 
 
-async def test_a_v15_9_1_install_is_left_alone(repair_factory) -> None:
-    """A cohort that already has every rate must come out of the pass unchanged.
+async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory) -> None:
+    """A modern cohort takes the lines it predates, and nothing else.
 
     Eleven of its rows break the subdivision constraint on the way in, which is
     what a database in this state really looks like, and this asserts that the
-    reconciler neither adds to it nor takes exception to it.
+    reconciler takes no exception to it.
+
+    This test asserted ``rows_changed == 0`` while every shipped line predated
+    the cohort. That is a property of where the file happened to be, not of the
+    repair, so it is now stated as the delivery set: the Gulf rows shipped
+    after v15.9.1 and are owed, and anything else appearing here is the
+    reconciler reaching further than it should.
     """
     await _install(repair_factory, v15_9_1(), "2026-08-25")
 
@@ -510,9 +530,9 @@ async def test_a_v15_9_1_install_is_left_alone(repair_factory) -> None:
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).status == "clean"
-    assert _outcome(report, REPAIR_ID).rows_changed == 0
-    assert await _deliveries(repair_factory) == set()
+    assert _outcome(report, REPAIR_ID).status == "applied"
+    assert _outcome(report, REPAIR_ID).rows_changed == 2
+    assert await _deliveries(repair_factory) == {"KW/NONE", "QA/NONE"}
 
     async with repair_factory() as session:
         still = (
@@ -611,7 +631,7 @@ async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == 8, (
+    assert _outcome(report, REPAIR_ID).rows_changed == 10, (
         "one shipped rate re-entered by hand withheld every rate this install was owed"
     )
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
@@ -662,7 +682,7 @@ async def test_a_country_that_typed_in_its_own_rate_is_not_given_a_second_one(re
     )
     assert ("NG", "VAT") not in await _lines(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == 7, (
+    assert _outcome(report, REPAIR_ID).rows_changed == 9, (
         "one country holding its own rate must not withhold the other seven rate lines"
     )
 
@@ -701,7 +721,7 @@ async def test_a_province_that_has_a_hand_entered_rate_is_not_charged_twice(repa
 
     quebec = await _resolve_in(repair_factory, "CA", "CA-QC")
     assert quebec.combined_rate_pct == "14.975", "one province holding its own rate withheld the others"
-    assert _outcome(report, REPAIR_ID).rows_changed == 7
+    assert _outcome(report, REPAIR_ID).rows_changed == 9
 
 
 async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
