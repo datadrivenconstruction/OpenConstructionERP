@@ -273,6 +273,40 @@ jobs:
       - name: Run payment clock module tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pytest tests/unit/test_payment_clock_module.py -q -p no:cacheprovider
+      # What a bill charges, and which pack a country reaches. Five test files
+      # were written for this and only two of them landed under tests/pg, where
+      # the whole tree runs in this job already. The other three went to
+      # tests/unit, which by this workflow's own account runs in no lane that
+      # blocks anything, so the guards on the arithmetic that decides money were
+      # sitting outside every population that gets read. That is the failure this
+      # repository keeps producing: not an absent gate, a gate whose population
+      # does not include the place the defect lives. Widening the existing lane is
+      # the fix; a second gate beside it would have been the mistake.
+      #
+      # The defect they cover was real and shipped. A bill took its VAT from its
+      # REGION rather than its country, so Austria and Switzerland were billed
+      # Germany's 19, Ireland was billed the United Kingdom's 20, Finland was
+      # billed 25 against a statutory 25.5, and Saudi Arabia, Kuwait and Qatar
+      # were all billed the Gulf template's 5 against 15, 0 and 0. Seven
+      # countries, none of which produced an error anywhere.
+      #
+      # The drift file is the one that earns its place over time. It compares the
+      # effective-dated tax seed against the methodology catalogue, which are two
+      # tables that answer the same question and are edited by different people
+      # for different reasons, and a divergence between them is invisible from
+      # inside either one. The pack files gate the other half: a country resolves
+      # to a compliance pack, and a country that has national rules but no pack
+      # that reaches them is named rather than left to be discovered. One of them
+      # is deliberately built to go red when a pack is added, which is a checklist
+      # and not an obstacle, so a red here means read the docstring, not silence
+      # the test. No database, about six seconds for all three.
+      - name: Run bill pricing and compliance pack coverage tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          pytest tests/unit/test_tax_tables_do_not_drift.py \
+            tests/unit/test_compliance_pack_resolves_from_iso_country.py \
+            tests/unit/test_every_shipped_country_reaches_a_compliance_pack.py \
+            -q -p no:cacheprovider
       # Documents that declare what language they are written in. The defect
       # class is a header stating something the bytes contradict, which is worse
       # than a missing translation because a receiver acts on it: an English
