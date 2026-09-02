@@ -631,7 +631,8 @@
     "country_code": "KW",
     "tax_name": "No VAT levied",
     "tax_name_translations": {
-      "en": "No VAT levied"
+      "en": "No VAT levied",
+      "ar": "لا تُفرض ضريبة القيمة المضافة"
     },
     "tax_code": "NONE",
     "rate_pct": "0.0",
@@ -646,7 +647,8 @@
     "country_code": "QA",
     "tax_name": "No VAT levied",
     "tax_name_translations": {
-      "en": "No VAT levied"
+      "en": "No VAT levied",
+      "ar": "لا تُفرض ضريبة القيمة المضافة"
     },
     "tax_code": "NONE",
     "rate_pct": "0.0",
