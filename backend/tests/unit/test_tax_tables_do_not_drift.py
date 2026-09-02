@@ -74,9 +74,13 @@ region serves exactly one. That split is what
 :data:`_SERVED_BY_A_SHARED_REGION` records, and it is why this file asks two
 different questions of the fifth table rather than one.
 
-Read the ``xfailed`` count before reading the passes. Seven countries are
-priced at a neighbour's rate today and
+Read the ``xfailed`` count before reading the passes. Seven countries carry a
+neighbour's rate on this table and
 ``test_no_country_is_priced_at_another_country_s_rate`` fails because of it.
+Since the bill resolves a country's own rate from the tax seed, that table is
+a fallback rather than the invoice, so the xfail records a latent wrong number
+rather than a live one. What a bill actually charges is measured in
+``tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py``.
 None of them is corrected here: no source settles which of the three tables
 is right for them, and a majority vote would replace a visible inconsistency
 with a confident wrong number that this very gate would then hold in place.
@@ -368,8 +372,17 @@ def _countries_by_region() -> dict[str, list[str]]:
     return {region: sorted(countries) for region, countries in out.items()}
 
 
-def _bill_rates_raw() -> dict[tuple[str, str], Decimal]:
-    """The VAT percentage a newly seeded bill charges, per country.
+def _table_rates_raw() -> dict[tuple[str, str], Decimal]:
+    """The VAT percentage the region-keyed fallback table holds, per country.
+
+    Reads ``DEFAULT_MARKUP_TEMPLATES`` and nothing else. That used to be the
+    same thing as what a bill charges, and since the bill began resolving a
+    country's own rate from the effective-dated tax seed it is not: this table
+    is now the LAST resort, reached by a country with no seed row and by a
+    database with no seed at all. So what follows measures the fallback, and
+    ``tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py`` measures the
+    bill. Neither substitutes for the other, and a green run here says nothing
+    about what a customer is invoiced.
 
     Regions named in ``NON_SINGLE_TAX_REGIONS`` are skipped, because there the
     stack carries two levies or none and no single number is the country's VAT
@@ -395,7 +408,7 @@ def _bill_rates_raw() -> dict[tuple[str, str], Decimal]:
     return out
 
 
-def _bill_rates() -> dict[tuple[str, str], Decimal]:
+def _table_rates() -> dict[tuple[str, str], Decimal]:
     """The bill rates that are a claim about their own country, and so comparable.
 
     Two subtractions, both accounted for by a test of their own rather than
@@ -405,7 +418,7 @@ def _bill_rates() -> dict[tuple[str, str], Decimal]:
     """
     return {
         key: value
-        for key, value in _bill_rates_raw().items()
+        for key, value in _table_rates_raw().items()
         if key[0] not in _CONSTRUCTION_TIER_DIVERGES and key[0] not in _SERVED_BY_A_SHARED_REGION
     }
 
@@ -531,7 +544,7 @@ def _tables() -> list[tuple[str, dict[tuple[str, str], Decimal]]]:
         (str(_YAML.relative_to(_BACKEND)), _yaml_rates()),
         (str(_SEED.relative_to(_BACKEND)), _seed_rates()),
         (str(_CATALOGUE.relative_to(_BACKEND)), _catalogue_rates()),
-        (str(_MARKUP.relative_to(_BACKEND)), _bill_rates()),
+        (str(_MARKUP.relative_to(_BACKEND)), _table_rates()),
     ]
 
 
@@ -709,7 +722,7 @@ def test_every_named_tier_exception_still_diverges() -> None:
     a customer is invoiced from.
     """
     seed = _seed_rates()
-    priced = {"the methodology catalogue": _catalogue_rates_raw(), "the bill table": _bill_rates_raw()}
+    priced = {"the methodology catalogue": _catalogue_rates_raw(), "the bill table": _table_rates_raw()}
 
     for country, reason in _CONSTRUCTION_TIER_DIVERGES.items():
         key = (country, "standard")
@@ -742,7 +755,7 @@ def test_the_bill_table_is_actually_being_read() -> None:
     table a customer is invoiced from, so a silent emptying of it would leave
     the check green about every table except the one that matters.
     """
-    rates = _bill_rates_raw()
+    rates = _table_rates_raw()
 
     assert len(rates) >= 40, f"the bill table returned only {len(rates)} rates; it has stopped being read"
 
@@ -765,7 +778,7 @@ def test_a_region_serving_one_country_prices_that_country_s_own_rate() -> None:
     own region, its own stack and its own tax line, and still priced at 17 for
     months after the rise, because nothing compared this file against anything.
     """
-    bill = _bill_rates_raw()
+    bill = _table_rates_raw()
     by_region = _countries_by_region()
     wrong: list[str] = []
     checked = 0
@@ -855,10 +868,14 @@ def test_the_countries_a_shared_region_misprices_are_exactly_the_named_set() -> 
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "Seven countries are priced at a neighbour's VAT rate. Nothing here is a guess and "
-        "nothing is corrected: no rate in any of the three tables can be shown right from a "
-        "source for these, and resolving a three-way disagreement by majority vote would put a "
-        "confident wrong number where a visible inconsistency is. strict=True, so the day the "
+        "Seven countries have a neighbour's VAT rate on the region-keyed fallback table. "
+        "Nothing here is a guess and nothing is corrected: no rate in any of the three tables "
+        "can be shown right from a source for these, and resolving a three-way disagreement by "
+        "majority vote would put a confident wrong number where a visible inconsistency is. "
+        "The exposure is now latent rather than live: a bill resolves the country's own rate "
+        "from the tax seed, so this table is reached only by a country with no seed row or a "
+        "database with no seed at all. It is still worth stating as unsatisfied, because those "
+        "two cases are real and the number would be wrong in both. strict=True, so the day the "
         "last one is fixed this XPASSes and forces _SERVED_BY_A_SHARED_REGION to be deleted "
         "rather than left behind excusing nothing."
     ),
@@ -895,9 +912,11 @@ def test_no_country_is_priced_at_another_country_s_rate() -> None:
     assert mispriced == {}, (
         f"{len(mispriced)} countries are priced at a rate that is not theirs:\n"
         + "\n".join(listing)
-        + "\nEach is a project seeded with no VAT override being invoiced at another country's "
-        "rate. Fixing this is a decision about whether regions get split or default_vat_rate "
-        "gets a country-derived default; it is not a decision about which table to copy."
+        + "\nEach is a fallback line carrying another country's rate. It reaches a bill only "
+        "where the tax seed cannot answer, which today means a country with no seed row or an "
+        "unseeded database; a seeded country is invoiced its own rate before this table is "
+        "consulted. Fixing this is a decision about splitting regions, not about which table "
+        "to copy."
     )
 
 
