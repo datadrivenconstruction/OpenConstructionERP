@@ -4800,9 +4800,16 @@ class BC3CodeRequired(ValidationRule):
 
     BC3 ties every partida back to a concept code (``~C`` record); a
     position without one cannot be exported back to FIEBDC-3 without
-    losing the original catalogue reference. Rule fires only when the
-    project's classification_standard is bc3 or region is ES / LATAM -
-    other regions can leave the field blank without penalty.
+    losing the original catalogue reference.
+
+    The rule does not guard on the project's classification standard or
+    region, whatever this docstring used to claim: it checks every leaf
+    position it is handed. Scope comes from selecting the ``bc3`` rule
+    set and from nowhere else, so a project that runs it outside Spain
+    gets an ERROR on every position with no concept code. That was
+    harmless while nothing reached the set; the Spanish compliance pack
+    now runs it at contract signature, and the next reader has to know
+    the rule does not scope itself.
     """
 
     rule_id = "bc3.code_required"
