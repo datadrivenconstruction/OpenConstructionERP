@@ -73,6 +73,13 @@ and Switzerland. So its number is a claim about a country only where a
 region serves exactly one. That split is what
 :data:`_SERVED_BY_A_SHARED_REGION` records, and it is why this file asks two
 different questions of the fifth table rather than one.
+
+Read the ``xfailed`` count before reading the passes. Seven countries are
+priced at a neighbour's rate today and
+``test_no_country_is_priced_at_another_country_s_rate`` fails because of it.
+None of them is corrected here: no source settles which of the three tables
+is right for them, and a majority vote would replace a visible inconsistency
+with a confident wrong number that this very gate would then hold in place.
 """
 
 from __future__ import annotations
@@ -843,6 +850,55 @@ def test_the_countries_a_shared_region_misprices_are_exactly_the_named_set() -> 
 
     for country, reason in _SERVED_BY_A_SHARED_REGION.items():
         assert reason.strip(), f"{country} is excused with an empty reason, which excuses nothing"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "Seven countries are priced at a neighbour's VAT rate. Nothing here is a guess and "
+        "nothing is corrected: no rate in any of the three tables can be shown right from a "
+        "source for these, and resolving a three-way disagreement by majority vote would put a "
+        "confident wrong number where a visible inconsistency is. strict=True, so the day the "
+        "last one is fixed this XPASSes and forces _SERVED_BY_A_SHARED_REGION to be deleted "
+        "rather than left behind excusing nothing."
+    ),
+)
+def test_no_country_is_priced_at_another_country_s_rate() -> None:
+    """The invariant the bill table does not satisfy, written down as a failure.
+
+    :data:`_SERVED_BY_A_SHARED_REGION` keeps the rest of this file green while
+    seven countries are mispriced, and a list of excuses is exactly where a
+    real defect goes to be forgotten. So the thing the platform ought to
+    satisfy is also stated as a test, and it fails.
+
+    ``xfail`` rather than a hard failure, and the difference is deliberate.
+    This file's own header argues that a gate which is always red teaches
+    everyone to ignore it, and the only gate that catches anything in this
+    project is the one somebody runs locally before pushing. An ``xfail``
+    reports as ``xfailed`` in the summary rather than as a pass, so the count
+    is visible on every run and cannot be mistaken for health, while a suite
+    somebody is willing to keep running stays runnable. It is one decorator
+    away from being a hard failure if that is the call.
+
+    What this does NOT do is decide who is right. Saudi Arabia is 5 here, 15
+    in the seed and 15 in the catalogue; two against one is not evidence, it
+    is a tally.
+    """
+    mispriced = _shared_region_mismatches()
+
+    listing = [
+        f"  {country}: the bill charges {region_rate}, the country's own rate is {own} "
+        f"({_SERVED_BY_A_SHARED_REGION.get(country, 'no reason recorded')})"
+        for country, (region_rate, own) in sorted(mispriced.items())
+    ]
+
+    assert mispriced == {}, (
+        f"{len(mispriced)} countries are priced at a rate that is not theirs:\n"
+        + "\n".join(listing)
+        + "\nEach is a project seeded with no VAT override being invoiced at another country's "
+        "rate. Fixing this is a decision about whether regions get split or default_vat_rate "
+        "gets a country-derived default; it is not a decision about which table to copy."
+    )
 
 
 def test_reintroducing_the_israeli_bill_defect_is_caught() -> None:
