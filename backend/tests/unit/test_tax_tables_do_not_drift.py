@@ -417,13 +417,32 @@ def _national_rate(country: str) -> Decimal | None:
 
 
 def _shared_region_mismatches() -> dict[str, tuple[Decimal, Decimal]]:
-    """Countries a multi-country region prices at somebody else's rate."""
+    """Countries a multi-country region prices at somebody else's rate.
+
+    The two exception lists own two different axes and a country can sit on
+    both, so this states which one wins. A country in
+    :data:`_CONSTRUCTION_TIER_DIVERGES` is skipped here, exactly as
+    :func:`test_a_region_serving_one_country_prices_that_country_s_own_rate`
+    skips it: its bill rate differs from the seed because construction is
+    charged on a different tier, and that is true whether or not it also shares
+    a region. Measuring it here as well would demand a
+    :data:`_SERVED_BY_A_SHARED_REGION` entry whose reason - that the number
+    belongs to a neighbour - would be the wrong explanation for a real
+    divergence, which is the failure the reason strings exist to prevent.
+
+    Not a live case: China is the only tier country and the CN region serves
+    only China. It is written down because the two arms disagreed about it
+    silently until they were compared, and the next tier country is the one
+    that would find out.
+    """
     out: dict[str, tuple[Decimal, Decimal]] = {}
     for region, countries in _countries_by_region().items():
         if len(countries) < 2 or region in NON_SINGLE_TAX_REGIONS:
             continue
         rate = Decimal(str(_region_tax_lines(region)[0]["percentage"])) / Decimal("100")
         for country in countries:
+            if country in _CONSTRUCTION_TIER_DIVERGES:
+                continue
             own = _national_rate(country)
             if own is not None and own != rate:
                 out[country] = (rate, own)
@@ -803,6 +822,9 @@ def test_the_countries_a_shared_region_misprices_are_exactly_the_named_set() -> 
     goes red with its name. Somebody splitting a region or correcting a rate
     removes one, and it goes red too, because an entry excusing a country that
     is now priced correctly would excuse the next real defect there in silence.
+
+    Countries on a construction tier are not measured here; see
+    :func:`_shared_region_mismatches` for which list owns which axis.
     """
     measured = _shared_region_mismatches()
 
