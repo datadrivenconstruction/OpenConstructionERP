@@ -36,6 +36,7 @@ from app.modules.rfq_bidding.constants import (
     BID_STATUS_LATE,
     BID_STATUS_RECEIVED,
     BID_STATUS_WITHDRAWN,
+    quote_gate_rule,
 )
 from app.modules.rfq_bidding.models import (
     RFQ,
@@ -85,6 +86,56 @@ _AWARD_ALLOWED_ROLES: frozenset[str] = frozenset({"admin", "manager", "owner"})
 # indistinguishable from a rule nobody calls.
 RFQ_ISSUE_RULE_SET = "rfq_issue"
 RFQ_AWARD_RULE_SET = "rfq_award"
+
+#: Non-answers a gate-override "reason" may not be. Mirrors the workflow
+#: module's GATE_REASON_JUNK (kept local: this module must not import
+#: register_workflow - the dependency runs the other way).
+_OVERRIDE_REASON_JUNK = frozenset(
+    {
+        "n/a",
+        "na",
+        "nil",
+        "none",
+        "no",
+        "-",
+        "--",
+        ".",
+        "x",
+        "xx",
+        "xxx",
+        "tbc",
+        "tba",
+        "later",
+        "asap",
+        "unknown",
+        "idk",
+        "no reason",
+        "because",
+        "override",
+        "force",
+        "test",
+        "ok",
+        "yes",
+    }
+)
+
+
+def _override_reason_bad(reason: str | None) -> str:
+    """ "" when the justification will still mean something later, else why not.
+
+    This cannot judge whether a reason is TRUE - only a person can. It
+    refuses the ways of writing nothing. The award is its own enforcement
+    point: a UI that skipped the compare screen must meet the same bar here.
+    """
+    text = " ".join(str(reason or "").split())
+    if not text:
+        return "It needs a reason."
+    if text.strip(" .-").lower() in _OVERRIDE_REASON_JUNK:
+        return f'"{text}" is not a reason - say what is actually happening.'
+    if len(text) < 12:
+        return f'"{text}" is too short to mean anything in six weeks - one plain sentence is enough.'
+    return ""
+
 
 # RFQ statuses in which the scope may still be edited. Once the package is out
 # with vendors, changing what they were asked to price behind their backs makes
@@ -150,7 +201,12 @@ class RFQService:
         self._reject_duplicate_line_numbers(rfq.lines)
         rfq = await self.rfqs.create(rfq)
         logger.info("RFQ created: %s (%s)", rfq.rfq_number, rfq.title[:50])
-        return rfq
+        # Serialisation walks ``bids`` (and ``lines``), and on a freshly
+        # flushed instance the never-touched ``bids`` collection is unloaded -
+        # pydantic's sync attribute access then trips MissingGreenlet and the
+        # router 500s AFTER the row exists. Re-read through the repository,
+        # whose populate_existing query runs both selectin loaders.
+        return await self.get_rfq(rfq.id)
 
     # ── Scope lines ─────────────────────────────────────────────────────────
 
@@ -296,6 +352,7 @@ class RFQService:
             fields["metadata_"] = (
                 merge_metadata(getattr(rfq, "metadata_", None), _incoming) if isinstance(_incoming, dict) else _incoming
             )
+            self._reject_lowering_the_estimate(rfq, fields["metadata_"])
 
         if fields:
             await self.rfqs.update(rfq_id, **fields)
@@ -308,6 +365,39 @@ class RFQService:
             )
         logger.info("RFQ updated: %s", rfq_id)
         return updated
+
+    @staticmethod
+    def _reject_lowering_the_estimate(rfq: RFQ, incoming: Any) -> None:
+        """The package value may be corrected upward, never downward.
+
+        The quote gate tiers off ``max(estimate, every standing price)``,
+        so on the face of it lowering the estimate looks harmless - the
+        quotes hold the line. They do not, in the one case that matters:
+        a $50,000 package with a single $2,900 quote against it. Drop the
+        estimate to $100 and the value becomes $2,900, which is under the
+        $3,000 tier, and the package awards on one price. That is exactly
+        the single-source award the gate exists to prevent, reached
+        through an endpoint that looks like an admin correction.
+
+        Raising it is always allowed: it can only ask for more quotes.
+        Editing a draft is free - nothing has been asked of anybody yet.
+        """
+        if not isinstance(incoming, dict) or rfq.status == "draft":
+            return
+        from app.core.money_text import parse_amount
+
+        was = parse_amount((rfq.metadata_ or {}).get("estimated_value"))
+        now = parse_amount(incoming.get("estimated_value"))
+        if was is None or now is None or now >= was:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"The package value cannot be reduced once the RFQ is out with suppliers "
+                f"({was:.2f} to {now:.2f}) - it decides how many quotes the award needs. "
+                f"Cancel and re-raise the package if the scope has genuinely shrunk."
+            ),
+        )
 
     async def delete_rfq(self, rfq_id: uuid.UUID) -> None:
         """Delete an RFQ and all its bids."""
@@ -773,7 +863,11 @@ class RFQService:
             len(data.adjustments),
             is_late,
         )
-        return bid
+        # Same serialisation trap as create_rfq: a collection never touched
+        # on the fresh instance (adjustments when none were sent, lines
+        # likewise) is unloaded, and pydantic's sync access MissingGreenlets.
+        # _reload_bid runs the repository's eager loaders.
+        return await self._reload_bid(bid.id)
 
     async def get_bid(self, bid_id: uuid.UUID) -> RFQBid:
         """Get bid by ID. Raises 404 if not found."""
@@ -1051,6 +1145,147 @@ class RFQService:
             )
         return award
 
+    # ── The quote gate ─────────────────────────────────────────────────────
+
+    @staticmethod
+    def _gate_dec(value: Any) -> Decimal:
+        try:
+            d = Decimal(str(value).replace(",", "").replace("$", "").strip())
+            return d if d > 0 else Decimal("0")
+        except Exception:  # noqa: BLE001 - any unparseable figure is zero, never a guess
+            return Decimal("0")
+
+    def quote_gate_status(self, rfq: RFQ) -> dict[str, Any]:
+        """How this package stands against the tiered quote rule.
+
+        Package value = the LARGEST of the buyer's estimate
+        (``rfq.metadata_["estimated_value"]``) and every standing bid - so
+        a package estimated at $2k that draws a $9k quote needs three
+        prices, not one. The quoted COUNT is distinct suppliers with a
+        price > 0 whose bid still stands (withdrawn / disqualified bids do
+        not count, and a supplier's question never becomes a bid at all -
+        the "a question is not a quote" rule holds by construction).
+        """
+        rule = quote_gate_rule()
+        standing = [b for b in rfq.bids if b.status not in (BID_STATUS_WITHDRAWN, BID_STATUS_DISQUALIFIED)]
+        prices = [self._gate_dec(b.bid_amount) for b in standing]
+        raw_estimate = (rfq.metadata_ or {}).get("estimated_value")
+        estimate = self._gate_dec(raw_estimate)
+        value = max([estimate, *prices], default=Decimal("0"))
+        counted = {str(b.bidder_contact_id) for b in standing if self._gate_dec(b.bid_amount) > 0}
+        required = 1
+        if value > Decimal(str(rule["over3"])):
+            required = int(rule["min3"])
+        elif value > Decimal(str(rule["over"])):
+            required = int(rule["min"])
+        # AN ESTIMATE WE CANNOT READ IS NOT AN ESTIMATE OF ZERO. Something
+        # was written in the box and it did not parse, so the package
+        # value is unknown - and unknown has to mean the top tier, not the
+        # bottom one. Written text with no standing price behind it was
+        # the exact shape that let a $50k package award on one quote.
+        from app.core.money_text import parse_amount
+
+        if str(raw_estimate or "").strip() and parse_amount(raw_estimate) is None:
+            required = max(required, int(rule["min3"]))
+        return {
+            "value": format(value, "f"),
+            "required": required,
+            "counted": len(counted),
+            "quoted_suppliers": sorted(counted),
+            "rule": {k: str(v) for k, v in rule.items()},
+            "passes": len(counted) >= required,
+        }
+
+    async def _award_confirmation_correspondence(
+        self,
+        *,
+        project_id: uuid.UUID,
+        rfq_number: str,
+        rfq_title: str,
+        bidder_contact_id: str,
+        amount: str,
+        currency: str,
+        po_number: str | None,
+        actor_id: str | None,
+    ) -> None:
+        """File an outgoing correspondence record for the award confirmation.
+
+        Best-effort by design: the award must never roll back because the
+        correspondence module is absent or unhappy. The record is the
+        register entry the confirmation email is written FROM - this module
+        sends nothing itself.
+        """
+        # A SAVEPOINT, or "best-effort" is a lie. Catching the exception is
+        # not enough: the failing flush has already put the session into a
+        # rolled-back state, so every later statement raises
+        # PendingRollbackError and the award this was meant to protect dies
+        # anyway - after the business has committed to a supplier. Seen for
+        # real on a foreign-key violation writing the confirmation row.
+        try:
+            async with self.session.begin_nested():
+                await self._write_award_confirmation(
+                    project_id=project_id,
+                    rfq_number=rfq_number,
+                    rfq_title=rfq_title,
+                    bidder_contact_id=bidder_contact_id,
+                    amount=amount,
+                    currency=currency,
+                    po_number=po_number,
+                    actor_id=actor_id,
+                )
+        except Exception:  # noqa: BLE001
+            logger.warning("Award confirmation correspondence skipped for %s", rfq_number, exc_info=True)
+
+    async def _write_award_confirmation(
+        self,
+        *,
+        project_id: uuid.UUID,
+        rfq_number: str,
+        rfq_title: str,
+        bidder_contact_id: Any,
+        amount: Any,
+        currency: str,
+        po_number: str | None,
+        actor_id: str | None,
+    ) -> None:
+        """The confirmation row itself. Called only inside a savepoint."""
+        from app.modules.correspondence.models import Correspondence
+        from app.modules.correspondence.repository import CorrespondenceRepository
+
+        repo = CorrespondenceRepository(self.session)
+        reference = await repo.next_reference_number(project_id)
+        po_bit = f" - PO {po_number}" if po_number else ""
+        row = Correspondence(
+            project_id=project_id,
+            reference_number=reference,
+            direction="outgoing",
+            subject=f"AWARD - {rfq_number}{po_bit} - {rfq_title}"[:500],
+            correspondence_type="email",
+            to_contact_ids=[str(bidder_contact_id)],
+            status="open",
+            notes=(
+                f"Order confirmation for {rfq_number} ({rfq_title}).\n"
+                f"Awarded value: {currency} {amount}"
+                + (f"\nOur PO #: {po_number}" if po_number else "")
+                + "\nThis register entry records the confirmation to be sent to the winning supplier."
+            ),
+            created_by=actor_id,
+            metadata_={"rfq_award": {"rfq_number": rfq_number, "po_number": po_number}},
+        )
+        self.session.add(row)
+        await self.session.flush()
+        from app.core.events import event_bus
+
+        event_bus.publish_detached(
+            "correspondence.created",
+            {
+                "project_id": str(project_id),
+                "correspondence_id": str(row.id),
+                "reference_number": reference,
+            },
+            source_module="rfq_bidding",
+        )
+
     async def award_bid(
         self,
         bid_id: uuid.UUID,
@@ -1058,6 +1293,8 @@ class RFQService:
         actor_id: str | None = None,
         actor_role: str | None = None,
         reason: str | None = None,
+        gate_override_reason: str | None = None,
+        po_number: str | None = None,
     ) -> RFQBid:
         """Award a bid and transition the RFQ to awarded status.
 
@@ -1123,6 +1360,54 @@ class RFQService:
                 detail=f"This quote was not comparable with the others and cannot be awarded: {reasons}",
             )
 
+        # ── The award reason is the justification on the file ─────────────
+        # Ported rail: an award without a written reason is refused outright.
+        # The comparison shows WHAT won; the reason records WHY - and it is
+        # what gets read years later when the decision is questioned.
+        if not (reason and reason.strip()):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "An award must record why this supplier won (e.g. 'Best price', "
+                    "'Only supplier who quoted'). The reason is the justification on the file."
+                ),
+            )
+
+        # ── The quote gate ────────────────────────────────────────────────
+        # Tiered minimum price-count off the package value. The award is an
+        # enforcement point in its own right - a UI that skipped the compare
+        # step must still be stopped here. Overriding requires a WRITTEN
+        # reason which lands on the award record; silent overrides do not
+        # exist.
+        gate = self.quote_gate_status(rfq)
+        if not gate["passes"]:
+            # The override reason is judged the way the workflow gates judge
+            # theirs: a non-answer ("x", "n/a") on the award file is a silent
+            # override wearing a costume. reason_rejected tells the UI to ask
+            # again rather than give up.
+            problem = _override_reason_bad(gate_override_reason)
+            if problem:
+                base = (
+                    f"The quote rule for a package of {gate['value']} requires "
+                    f"{gate['required']} written price(s); {gate['counted']} recorded. "
+                    "(A supplier asking a question does not count as a quote.)"
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "error": base if not (gate_override_reason or "").strip() else f"{base} {problem}",
+                        "gate": "quotes",
+                        "can_force": True,
+                        "reason_rejected": bool((gate_override_reason or "").strip()),
+                        "quote_gate": gate,
+                    },
+                )
+        if not gate["passes"]:
+            logger.warning(
+                "rfq.award_below_quote_rule %s",
+                {"rfq_id": str(rfq.id), "gate": gate, "override_reason": gate_override_reason},
+            )
+
         # Validate the field of bids the award is being taken from, before the
         # write expires the instance. The comparison that picked this bid has
         # already happened by now, so the point of the report is to say what
@@ -1168,9 +1453,52 @@ class RFQService:
             is_override=is_override,
             awarded_amount=candidate.normalised_amount or Decimal("0"),
             awarded_currency=comparison.basis_currency or bid_currency_local,
-            basis={**comparison.as_dict(), "awarded_bid_id": str(bid_id)},
+            basis={
+                **comparison.as_dict(),
+                "awarded_bid_id": str(bid_id),
+                "quote_gate": {
+                    **gate,
+                    "override_reason": (gate_override_reason or "").strip() or None,
+                },
+                "po_number": (po_number or "").strip() or None,
+            },
         )
-        await self.awards.create(award)
+        # The in-Python "already awarded?" check above only holds within one
+        # session. Two award requests racing in separate sessions both pass
+        # it, and the loser then violates uq_oe_rfq_award_rfq - which
+        # surfaced as an unexplained 500 on a screen where the user has just
+        # committed the business to a supplier. The constraint is the real
+        # rail; this turns it into the same 409 the single-session path
+        # gives, so the second person is told what happened.
+        from sqlalchemy.exc import IntegrityError
+
+        try:
+            if self.session is None:  # pure-logic tests drive the repos directly
+                await self.awards.create(award)
+            else:
+                # A savepoint, so the losing insert rolls back on its own
+                # without poisoning the session the 409 still has to travel out on.
+                async with self.session.begin_nested():
+                    await self.awards.create(award)
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This package has just been awarded by someone else - reload to see who won.",
+            ) from None
+
+        # File the order-confirmation register entry to the winner (the
+        # PO-confirmation email, as a correspondence record the comms layer
+        # can draft from). Best-effort.
+        await self._award_confirmation_correspondence(
+            project_id=project_id_local,
+            rfq_number=rfq_number_local,
+            rfq_title=rfq.title or "",
+            bidder_contact_id=bidder_contact_local,
+            amount=format(candidate.normalised_amount or Decimal("0"), "f"),
+            currency=comparison.basis_currency or bid_currency_local,
+            po_number=po_number,
+            actor_id=actor_id,
+        )
         if is_override:
             logger.warning(
                 "rfq.award_overrides_ranking %s",

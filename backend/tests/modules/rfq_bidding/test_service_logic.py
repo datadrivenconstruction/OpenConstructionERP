@@ -141,7 +141,9 @@ def _rfq(**overrides: Any) -> RFQ:
         "title": "Mechanical fit-out",
         "description": "Supply and install to levels 1-4",
         "scope_of_work": "Ductwork, AHU, commissioning",
-        "submission_deadline": (datetime.now(UTC) + timedelta(days=30)).isoformat(),
+        # Future-relative: a hardcoded date here rotted past and made every
+        # default-fixture submission read as late once the calendar caught up.
+        "submission_deadline": (datetime.now(UTC) + timedelta(days=14)).date().isoformat(),
         "currency_code": "EUR",
         "status": "published",
         "issued_to_contacts": ["alpha", "beta", "gamma"],
@@ -503,7 +505,7 @@ class TestAward:
         bid = _bid(rfq, currency_code="USD", bid_amount="800", exchange_rate=Decimal("0.9"))
         rfq.bids.append(bid)
         service = _service(rfq)
-        awarded = await service.award_bid(bid.id, actor_role="manager")
+        awarded = await service.award_bid(bid.id, actor_role="manager", reason="Only supplier who quoted")
         assert awarded.is_awarded is True
         award = service.awards.award  # type: ignore[attr-defined]
         assert award.awarded_amount == Decimal("720.0")
@@ -547,9 +549,9 @@ class TestAward:
         second = _bid(rfq, bidder_contact_id="beta", bid_amount="900")
         rfq.bids.extend([first, second])
         service = _service(rfq)
-        await service.award_bid(first.id, actor_role="manager")
+        await service.award_bid(first.id, actor_role="manager", reason="Best lead time")
         with pytest.raises(HTTPException) as exc:
-            await service.award_bid(second.id, actor_role="manager")
+            await service.award_bid(second.id, actor_role="manager", reason="Best price")
         assert exc.value.status_code == 409
 
     async def test_a_partial_quote_cannot_be_awarded_while_full_scope_is_required(self) -> None:
@@ -585,6 +587,148 @@ class TestAward:
             await service.get_award(rfq.id)
         assert exc.value.status_code == 404
 
-        await service.award_bid(bid.id, actor_role="admin")
+        await service.award_bid(bid.id, actor_role="admin", reason="Only supplier who quoted")
         award = await service.get_award(rfq.id)
         assert award.bid_id == bid.id
+
+
+# ── The quote gate ──────────────────────────────────────────────────────────
+
+
+class TestQuoteGate:
+    """Tiered quote minimums, enforced AT THE AWARD - the one door that
+    cannot be walked around by a UI that skipped the compare step."""
+
+    async def test_a_5k_package_with_one_quote_is_refused(self) -> None:
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="5000")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        with pytest.raises(HTTPException) as exc:
+            await service.award_bid(only.id, actor_role="manager", reason="Best price")
+        assert exc.value.status_code == 409
+        detail = exc.value.detail
+        assert detail["gate"] == "quotes"
+        assert detail["can_force"] is True
+        assert detail["quote_gate"]["required"] == 2
+        assert detail["quote_gate"]["counted"] == 1
+        assert "question does not count as a quote" in detail["error"]
+
+    async def test_the_override_needs_a_written_reason_and_lands_on_the_record(self) -> None:
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="5000")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        awarded = await service.award_bid(
+            only.id,
+            actor_role="manager",
+            reason="Only supplier who quoted",
+            gate_override_reason="Two suppliers declined in writing; program cannot wait",
+        )
+        assert awarded.is_awarded is True
+        award = service.awards.award  # type: ignore[attr-defined]
+        gate = award.basis["quote_gate"]
+        assert gate["passes"] is False
+        assert gate["override_reason"] == "Two suppliers declined in writing; program cannot wait"
+
+    async def test_a_junk_override_reason_is_refused_and_asked_again(self) -> None:
+        """ "x" on the award file is a silent override wearing a costume.
+
+        Found live 31 Aug: the gate accepted ANY non-empty override reason,
+        while the workflow gates had rejected junk since the 19 Aug pass -
+        one rail, two enforcement points, one of them decorative.
+        ``reason_rejected`` is what tells the UI to re-ask instead of
+        giving up.
+        """
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="5000")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        for junk in ("x", "n/a", "override", "too short"):
+            with pytest.raises(HTTPException) as exc:
+                await service.award_bid(
+                    only.id,
+                    actor_role="manager",
+                    reason="Best price",
+                    gate_override_reason=junk,
+                )
+            assert exc.value.status_code == 409
+            assert exc.value.detail["can_force"] is True
+            assert exc.value.detail["reason_rejected"] is True
+            assert junk in exc.value.detail["error"] or "reason" in exc.value.detail["error"]
+
+    async def test_a_9k_package_with_two_quotes_needs_three(self) -> None:
+        rfq = _rfq()
+        winner = _bid(rfq, bidder_contact_id="alpha", bid_amount="9000")
+        rfq.bids.append(winner)
+        rfq.bids.append(_bid(rfq, bidder_contact_id="beta", bid_amount="9500"))
+        service = _service(rfq)
+        with pytest.raises(HTTPException) as exc:
+            await service.award_bid(winner.id, actor_role="manager", reason="Best price")
+        assert exc.value.detail["quote_gate"]["required"] == 3
+
+    async def test_a_small_package_awards_on_a_single_quote(self) -> None:
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="1800")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        awarded = await service.award_bid(only.id, actor_role="manager", reason="Only supplier who quoted")
+        assert awarded.is_awarded is True
+        assert service.awards.award.basis["quote_gate"]["passes"] is True  # type: ignore[attr-defined]
+
+    async def test_withdrawn_and_disqualified_quotes_do_not_count(self) -> None:
+        rfq = _rfq()
+        winner = _bid(rfq, bidder_contact_id="alpha", bid_amount="5000")
+        rfq.bids.append(winner)
+        rfq.bids.append(_bid(rfq, bidder_contact_id="beta", bid_amount="5200", status="withdrawn"))
+        rfq.bids.append(_bid(rfq, bidder_contact_id="gamma", bid_amount="5100", status="disqualified"))
+        service = _service(rfq)
+        with pytest.raises(HTTPException) as exc:
+            await service.award_bid(winner.id, actor_role="manager", reason="Best price")
+        assert exc.value.detail["quote_gate"]["counted"] == 1
+
+    async def test_the_buyers_estimate_raises_the_bar_even_when_bids_are_small(self) -> None:
+        # Estimated $9,900 package that drew one cheap quote still needs three
+        # prices - the value at risk is the estimate, not the lone number.
+        rfq = _rfq(metadata_={"estimated_value": "9900"})
+        only = _bid(rfq, bid_amount="2500")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        with pytest.raises(HTTPException) as exc:
+            await service.award_bid(only.id, actor_role="manager", reason="Best price")
+        assert exc.value.detail["quote_gate"]["required"] == 3
+
+    async def test_an_award_without_a_reason_is_refused(self) -> None:
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="500")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        with pytest.raises(HTTPException) as exc:
+            await service.award_bid(only.id, actor_role="manager")
+        assert exc.value.status_code == 400
+        assert "justification on the file" in exc.value.detail
+
+    async def test_the_po_number_rides_the_award_record(self) -> None:
+        rfq = _rfq()
+        only = _bid(rfq, bid_amount="900")
+        rfq.bids.append(only)
+        service = _service(rfq)
+        await service.award_bid(only.id, actor_role="manager", reason="Only supplier who quoted", po_number="PO-88412")
+        assert service.awards.award.basis["po_number"] == "PO-88412"  # type: ignore[attr-defined]
+
+    def test_an_unreadable_gate_override_tightens_never_loosens(self, monkeypatch) -> None:
+        from app.modules.rfq_bidding.constants import quote_gate_rule
+
+        monkeypatch.setenv("OE_RFQ_MIN_QUOTES_OVER", "not-a-number")
+        rule = quote_gate_rule()
+        assert rule == {"over": 0.01, "min": 3, "over3": 0.01, "min3": 3}
+
+    def test_gate_env_overrides_apply(self, monkeypatch) -> None:
+        from app.modules.rfq_bidding.constants import quote_gate_rule
+
+        monkeypatch.setenv("OE_RFQ_MIN_QUOTES_OVER", "1000")
+        monkeypatch.setenv("OE_RFQ_MIN_QUOTES", "2")
+        monkeypatch.setenv("OE_RFQ_THREE_QUOTES_OVER", "5000")
+        monkeypatch.setenv("OE_RFQ_THREE_QUOTES_MIN", "4")
+        rule = quote_gate_rule()
+        assert (rule["over"], rule["min"], rule["over3"], rule["min3"]) == (1000.0, 2, 5000.0, 4)

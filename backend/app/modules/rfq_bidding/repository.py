@@ -153,8 +153,17 @@ class RFQBidRepository:
         self.session = session
 
     async def get(self, bid_id: uuid.UUID) -> RFQBid | None:
-        """Get bid by ID."""
-        return await self.session.get(RFQBid, bid_id)
+        """Get bid by ID, with its lines and adjustments loaded.
+
+        A real query with ``populate_existing`` rather than ``session.get``,
+        for the same reason as :meth:`RFQRepository.get`: ``session.get``
+        answers from the identity map, so a bid just created in this session
+        comes back with its never-touched ``lines``/``adjustments``
+        collections unloaded - and serialising it then trips MissingGreenlet
+        in pydantic's sync attribute access.
+        """
+        stmt = select(RFQBid).where(RFQBid.id == bid_id).execution_options(populate_existing=True)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
 
     async def list(
         self,

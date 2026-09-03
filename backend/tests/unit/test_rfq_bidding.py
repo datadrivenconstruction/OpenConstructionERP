@@ -97,7 +97,13 @@ async def test_full_workflow_create_submit_award_audit(session: AsyncSession) ->
     assert bid.is_awarded is False
 
     # 4. Buyer (manager role) awards the bid
-    awarded = await service.award_bid(bid_id, actor_id=actor_id, actor_role="manager", reason="Best price")
+    awarded = await service.award_bid(
+        bid_id,
+        actor_id=actor_id,
+        actor_role="manager",
+        reason="Best price",
+        gate_override_reason="Single-source test fixture",
+    )
     assert awarded.is_awarded is True
 
     # 5. RFQ status flipped to awarded
@@ -203,7 +209,9 @@ async def test_cannot_submit_bid_against_awarded_rfq(session: AsyncSession) -> N
         ),
     )
     first_bid_id = first_bid.id
-    await service.award_bid(first_bid_id, actor_role="admin")
+    await service.award_bid(
+        first_bid_id, actor_role="admin", reason="Best price", gate_override_reason="Single-source test fixture"
+    )
 
     # Now the RFQ is awarded — a second vendor cannot slip a bid in.
     with pytest.raises(Exception) as exc:
@@ -231,9 +239,13 @@ async def test_cannot_double_award(session: AsyncSession) -> None:
         BidCreate(rfq_id=rfq_id, bidder_contact_id="v2", bid_amount="950"),
     )
     b2_id = b2.id
-    await service.award_bid(b1_id, actor_role="manager")
+    await service.award_bid(
+        b1_id, actor_role="manager", reason="Best price", gate_override_reason="Single-source test fixture"
+    )
     with pytest.raises(Exception) as exc:
-        await service.award_bid(b2_id, actor_role="manager")
+        await service.award_bid(
+            b2_id, actor_role="manager", reason="Best price", gate_override_reason="Single-source test fixture"
+        )
     assert getattr(exc.value, "status_code", None) == 409
 
 
@@ -266,5 +278,7 @@ async def test_admin_role_can_award(session: AsyncSession) -> None:
         BidCreate(rfq_id=rfq_id, bidder_contact_id="v", bid_amount="100"),
     )
     bid_id = bid.id
-    awarded = await service.award_bid(bid_id, actor_role="admin")
+    awarded = await service.award_bid(
+        bid_id, actor_role="admin", reason="Best price", gate_override_reason="Single-source test fixture"
+    )
     assert awarded.is_awarded is True

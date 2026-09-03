@@ -682,21 +682,34 @@ class BidDecision(BaseModel):
 
 
 class BidAwardRequest(BaseModel):
-    """Optional context recorded with an award.
+    """Context recorded with an award.
 
-    The comparison itself is the primary record of why a quote won, so a reason
-    is not demanded here. It is demanded by nobody and read by everybody, which
-    is why the award record keeps it beside the ranked table it was taken from.
+    ``reason`` is REQUIRED by the service (400 without one) - it is the
+    justification on the file. ``gate_override_reason`` is demanded only
+    when awarding below the tiered quote rule; ``po_number`` rides onto the
+    award record and the confirmation correspondence.
     """
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     reason: str | None = Field(default=None, max_length=5_000)
+    gate_override_reason: str | None = Field(default=None, max_length=2_000)
+    po_number: str | None = Field(default=None, max_length=60)
 
     @field_validator("reason")
     @classmethod
     def _sanitize_reason(cls, v: str | None) -> str | None:
         return _reject_unsafe_string(v, "reason")
+
+    @field_validator("gate_override_reason")
+    @classmethod
+    def _sanitize_override(cls, v: str | None) -> str | None:
+        return _reject_unsafe_string(v, "gate_override_reason")
+
+    @field_validator("po_number")
+    @classmethod
+    def _sanitize_po(cls, v: str | None) -> str | None:
+        return _reject_unsafe_string(v, "po_number")
 
 
 # ── Comparison ──────────────────────────────────────────────────────────────
@@ -752,6 +765,11 @@ class ComparisonResponse(BaseModel):
     recommended_bid_id: str | None = None
     ranked: list[QuoteComparisonResponse] = Field(default_factory=list)
     excluded: list[QuoteComparisonResponse] = Field(default_factory=list)
+    #: The tiered quote rule as it stands for this package: value, required
+    #: count, quoted count, pass/fail. The SAME status the award enforces,
+    #: so the compare panel can never read green on a package the award
+    #: would refuse.
+    quote_gate: dict | None = None
 
 
 # ── Award record ────────────────────────────────────────────────────────────

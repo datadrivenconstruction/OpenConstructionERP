@@ -397,7 +397,12 @@ async def compare_rfq_bids(
     """
     await _verify_rfq_access(session, rfq_id, user_id, payload)
     rfq, result = await service.compare_bids(rfq_id)
-    return ComparisonResponse(rfq_id=rfq.id, rfq_number=rfq.rfq_number, **result.as_dict())
+    return ComparisonResponse(
+        rfq_id=rfq.id,
+        rfq_number=rfq.rfq_number,
+        quote_gate=service.quote_gate_status(rfq),
+        **result.as_dict(),
+    )
 
 
 @router.get(
@@ -627,5 +632,7 @@ async def award_bid(
         actor_id=user_id,
         actor_role=(payload.get("role") if isinstance(payload, dict) else None),
         reason=data.reason if data else None,
+        gate_override_reason=data.gate_override_reason if data else None,
+        po_number=data.po_number if data else None,
     )
     return RFQBidResponse.model_validate(bid)
