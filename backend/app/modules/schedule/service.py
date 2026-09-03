@@ -960,6 +960,8 @@ class ScheduleService:
             constraint_date=data.constraint_date,
             activity_code=activity_code,
             bim_element_ids=data.bim_element_ids,
+            cost_planned=data.cost_planned,
+            cost_actual=data.cost_actual,
             metadata_=data.metadata,
         )
         activity = await self.activity_repo.create(activity)

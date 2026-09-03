@@ -188,6 +188,9 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         constraint_date=getattr(activity, "constraint_date", None),
         activity_code=getattr(activity, "activity_code", None),
         bim_element_ids=getattr(activity, "bim_element_ids", None),
+        # Planned / actual cost (EVM inputs) - written via create/update
+        cost_planned=getattr(activity, "cost_planned", None),
+        cost_actual=getattr(activity, "cost_actual", None),
         # Per-activity work calendar (#348)
         calendar_id=getattr(activity, "calendar_id", None),
     )

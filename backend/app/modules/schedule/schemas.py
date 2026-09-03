@@ -271,6 +271,11 @@ class ActivityCreate(BaseModel):
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
+    # Planned / actual cost are what EVM (BAC, EV, AC) is built from. They were
+    # readable on the response but had no write path, so every activity carried
+    # a zero budget and the burn / EVM views could only ever say 0.
+    cost_planned: Decimal | None = Field(default=None, ge=0)
+    cost_actual: Decimal | None = Field(default=None, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -306,6 +311,8 @@ class ActivityUpdate(BaseModel):
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
+    cost_planned: Decimal | None = Field(default=None, ge=0)
+    cost_actual: Decimal | None = Field(default=None, ge=0)
     metadata: dict[str, Any] | None = None
 
     @model_validator(mode="after")
@@ -354,6 +361,11 @@ class ActivityResponse(BaseModel):
     constraint_date: str | None = None
     activity_code: str | None = None
     bim_element_ids: list[str] | None = None
+
+    # Planned / actual cost - the EVM inputs. Writable through create/update
+    # (see ActivityCreate/ActivityUpdate) and echoed back here.
+    cost_planned: Decimal | None = None
+    cost_actual: Decimal | None = None
 
     # Per-activity work calendar (schedule_advanced Calendar). Set via the
     # dedicated PUT /activities/{id}/calendar/ endpoint; exposed here so the
