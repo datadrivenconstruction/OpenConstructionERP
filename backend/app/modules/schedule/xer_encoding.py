@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Decode a Primavera P6 export whose code page the file never declares.
+"""Decode a P6 XER schedule export whose code page the file never declares.
 
 An ``.xer`` is written in the Windows ANSI code page of the machine that
 exported it and says so nowhere. The route used to try UTF-8 and then fall back
