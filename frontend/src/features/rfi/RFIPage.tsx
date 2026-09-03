@@ -74,6 +74,9 @@ import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildRFIInsights } from './rfiInsights';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
+import { useRegisterLinks } from '@/modules/comms-intelligence/useRegisterLinks';
+import { RegisterChip } from '@/modules/comms-intelligence/RegisterChip';
+import type { LinkedItem } from '@/modules/comms-intelligence/registers-api';
 
 // English fallbacks for the computed `rfi.status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1345,6 +1348,7 @@ const RFIRow = React.memo(function RFIRow({
   onCreateVariation,
   onCreateTask,
   creatingVariation = false,
+  registerLink,
 }: {
   rfi: RFI;
   viewerId: string | null;
@@ -1357,6 +1361,8 @@ const RFIRow = React.memo(function RFIRow({
   // True while a create-variation request is in flight (any row). Disables
   // the button so a double-click cannot mint two change orders.
   creatingVariation?: boolean;
+  /** The register item this RFI was raised from, when there is one. */
+  registerLink?: LinkedItem;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -1428,6 +1434,7 @@ const RFIRow = React.memo(function RFIRow({
         >
           #{rfi.rfi_number}
         </Link>
+        {registerLink && <RegisterChip item={registerLink} className="shrink-0" />}
 
         {/* Subject */}
         <span className="text-sm text-content-primary truncate flex-1 min-w-0">
@@ -1848,6 +1855,9 @@ export function RFIPage() {
 
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
   const projectName = projects.find((p) => p.id === projectId)?.name || '';
+  // Which of these RFIs were raised through the registers - one call for
+  // the page, keyed by RFI id, so each row can wear its REG-RFI chip.
+  const registerLinks = useRegisterLinks(projectId, 'rfi');
   // Genuinely-selected project (route param or shared context) — used for
   // the breadcrumb so the trail never shows a first-project guess.
   const selectedProjectId = routeProjectId || activeProjectId || '';
@@ -2596,6 +2606,7 @@ export function RFIPage() {
                     onCreateVariation={handleCreateVariation}
                     onCreateTask={setTaskSourceRfi}
                     creatingVariation={createVariationMut.isPending}
+                    registerLink={registerLinks.get(rfi.id)}
                   />
                 ))}
               </Card>
@@ -2614,7 +2625,12 @@ export function RFIPage() {
                   <Card key={rfi.id} className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="min-w-0 flex-1">
-                        <span className="text-xs font-mono text-content-tertiary">#{rfi.rfi_number}</span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs font-mono text-content-tertiary">#{rfi.rfi_number}</span>
+                          {registerLinks.get(rfi.id) && (
+                            <RegisterChip item={registerLinks.get(rfi.id) as LinkedItem} />
+                          )}
+                        </div>
                         <h4 className="text-sm font-semibold text-content-primary truncate">{rfi.subject}</h4>
                       </div>
                       <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>

@@ -92,6 +92,7 @@ import {
 import { bidManagementGuide } from './bidManagementGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildBidManagementInsights } from './bidManagementInsights';
+import { RegisterRfqStrip } from '@/modules/comms-intelligence/RegisterRfqStrip';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -536,7 +537,6 @@ export function BidManagementPage() {
     () => projects.find((p) => p.id === projectId),
     [projects, projectId],
   );
-
   const [tab, setTab] = useState<Tab>('packages');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -796,6 +796,8 @@ export function BidManagementPage() {
           </select>
         )}
       </div>
+
+      {tab === 'packages' && <RegisterRfqStrip projectId={projectId} />}
 
       <Card padding="none">
         {isLoading ? (

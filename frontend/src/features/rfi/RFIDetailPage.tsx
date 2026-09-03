@@ -70,6 +70,8 @@ import {
 } from './RFIPage';
 import { ApprovalInstanceCard } from '@/features/approval-routes';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { useRegisterLinks } from '@/modules/comms-intelligence/useRegisterLinks';
+import { RegisterChip } from '@/modules/comms-intelligence/RegisterChip';
 
 // English fallbacks for the computed `rfi.status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -275,6 +277,11 @@ export function RFIDetailPage() {
     queryFn: () => getRFI(rfiId as string),
     enabled: !!rfiId,
   });
+
+  // Was this RFI raised through the registers? Narrowed to this one id;
+  // an RFI created natively simply has no chip.
+  const registerLinks = useRegisterLinks(rfi?.project_id, 'rfi', rfiId ? [rfiId] : undefined);
+  const registerLink = rfiId ? registerLinks.get(rfiId) : undefined;
 
   // Lookup users so we can resolve raised_by / assigned_to / ball_in_court
   // to display names where possible. Falls back to the raw id when unknown.
@@ -601,6 +608,15 @@ export function RFIDetailPage() {
           <h1 className="text-2xl font-bold text-content-primary break-words">
             {rfi.subject}
           </h1>
+          {registerLink && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
+              <span>{t('rfi.raised_from_register', { defaultValue: 'Raised from register' })}</span>
+              <RegisterChip item={registerLink} />
+              {registerLink.title && (
+                <span className="truncate text-content-secondary">{registerLink.title}</span>
+              )}
+            </div>
+          )}
           <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
             <span className="inline-flex items-center gap-1">
               <Clock size={12} />

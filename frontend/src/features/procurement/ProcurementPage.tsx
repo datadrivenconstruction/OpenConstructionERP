@@ -56,6 +56,9 @@ import { POStatusPipeline } from './POStatusPipeline';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useRegisterLinks } from '@/modules/comms-intelligence/useRegisterLinks';
+import { RegisterChip } from '@/modules/comms-intelligence/RegisterChip';
+import type { LinkedItem } from '@/modules/comms-intelligence/registers-api';
 
 // English fallbacks for the computed `procurement.gr_status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -576,6 +579,9 @@ function PurchaseOrdersTab({
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
   const isManager = userRole === 'admin' || userRole === 'manager';
+  // Which POs were raised through the order register - one call for the
+  // page, keyed by PO id, so each row can wear its REG-ORD chip.
+  const registerLinks = useRegisterLinks(projectId, 'order');
 
   // 3-way match: rows hovered or focused fetch their match status on demand
   // (we never bulk-fetch on list load to avoid N×fetch on big projects).
@@ -1431,7 +1437,12 @@ function PurchaseOrdersTab({
                 onFocus={() => setMatchActive((m) => ({ ...m, [po.id]: true }))}
               >
                 <td className="px-4 py-3 font-mono text-xs text-content-primary">
-                  {po.po_number}
+                  <span className="inline-flex flex-wrap items-center gap-1.5">
+                    {po.po_number}
+                    {registerLinks.get(po.id) && (
+                      <RegisterChip item={registerLinks.get(po.id) as LinkedItem} />
+                    )}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-content-secondary">
                   <div className="flex flex-wrap items-center gap-1.5">

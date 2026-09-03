@@ -56,6 +56,12 @@ export interface Correspondence {
   attachments: string[];
   notes: string | null;
   created_by: string | null;
+  /**
+   * Free-form bag the server carries verbatim. A register send files
+   * itself here (`metadata.project_mail.register_item_id` / `ref` /
+   * `register_kind`) so the row can wear its register chip.
+   */
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

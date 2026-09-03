@@ -77,6 +77,8 @@ import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildCorrespondenceInsights } from './correspondenceInsights';
 import { fmtList } from '@/shared/lib/formatters';
+import { registerLinkFromMetadata } from '@/modules/comms-intelligence/useRegisterLinks';
+import { RegisterChip } from '@/modules/comms-intelligence/RegisterChip';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -998,6 +1000,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
   /** Open the "Create task" quick-create prefilled from this entry. */
   onCreateTask: (item: Correspondence) => void;
 }) {
+  const registerLink = registerLinkFromMetadata(item.metadata);
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -1052,6 +1055,9 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
         <span className="text-sm font-mono font-semibold text-content-secondary w-20 shrink-0">
           {item.reference_number}
         </span>
+        {/* A register send files itself with its item in metadata, so the
+            row can say which REG-… it went out for - no fetch needed. */}
+        {registerLink && <RegisterChip item={registerLink} className="shrink-0" />}
 
         {/* Subject */}
         <span className="text-sm text-content-primary truncate flex-1 min-w-0">
