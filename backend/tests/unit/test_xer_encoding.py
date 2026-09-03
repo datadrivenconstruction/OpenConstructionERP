@@ -16,6 +16,8 @@ valid UTF-8 has to stay UTF-8.
 
 from __future__ import annotations
 
+import itertools
+
 import pytest
 
 from app.modules.schedule.xer_encoding import decode_xer, sniff_code_page
@@ -221,6 +223,93 @@ def test_the_smallest_real_export_clears_the_floor() -> None:
     assert used == "cp1256"
     assert wbs in decoded, "the WBS name is where the old ladder put its first mojibake"
     assert task in decoded
+
+
+# ── A programme is a set of names, not one running sentence ────────────────
+#
+# The sweep above cuts contiguous windows out of one vocabulary line, and that
+# population converges: a long window is nearly the whole sentence, so the right
+# page wins because the sample grew rather than because the sniff worked. A real
+# export carries a set of DISTINCT short activity names whose letter mix never
+# converges, and on that population Hebrew was wrong 23 times in 792 while the
+# window sweep stayed green. The tests below use the second shape on purpose.
+#
+# Hebrew is the case that needed it. Two of its six most frequent letters sit on
+# the bytes Greek uses for iota and epsilon, so cp1253 scored on Hebrew text
+# with all six of its own letters and the lead fell under the margin.
+
+HEBREW_ACTIVITIES = [
+    "חפירה ליסודות",
+    "יציקת בטון מזוין",
+    "קירות מרתף",
+    "תבניות ופיגומים",
+    "איטום גגות",
+    "ריצוף וחיפוי",
+    "עבודות אינסטלציה",
+    "חשמל ותקשורת",
+    "טיח פנים וחוץ",
+    "הרכבת חלונות",
+]
+
+GREEK_ACTIVITIES = [
+    "Εκσκαφη θεμελιων",
+    "Σκυροδεμα οπλισμενο",
+    "Τοιχοι υπογειου",
+    "Στεγανωση δωματος",
+    "Δαπεδα και επενδυσεις",
+    "Υδραυλικες εργασιες",
+    "Ηλεκτρολογικα",
+    "Τοποθετηση κουφωματων",
+    "Ξυλοτυποι και ικριωματα",
+    "Επιχρισματα εσωτερικα",
+]
+
+
+def _programmes(names: list[str]) -> list[list[str]]:
+    """Every three-to-six name subset, which is the shape of a small programme."""
+    out: list[list[str]] = []
+    for size in (3, 4, 5, 6):
+        out.extend(list(combo) for combo in itertools.combinations(names, size))
+    return out
+
+
+@pytest.mark.parametrize(
+    ("names", "page"),
+    [
+        pytest.param(HEBREW_ACTIVITIES, "cp1255", id="hebrew-programmes"),
+        pytest.param(GREEK_ACTIVITIES, "cp1253", id="greek-programmes"),
+    ],
+)
+def test_no_programme_of_distinct_names_is_given_the_wrong_page(names: list[str], page: str) -> None:
+    """The property, on the population that can actually break it.
+
+    Greek is here as the control rather than as decoration: the change that
+    fixed Hebrew was to give it more letters, and the failure mode of giving it
+    too many is that Hebrew starts claiming Greek text instead. Measured, that
+    is not a hypothetical: at twelve letters Greek fell to 13 percent correct
+    with 56 wrong. So both directions have to be asserted or the next person to
+    extend a profile will only see half the trade.
+    """
+    programmes = _programmes(names)
+    assert len(programmes) > 700, f"only {len(programmes)} programmes, the population collapsed"
+
+    wrong: list[tuple[str, list[str]]] = []
+    named = 0
+    for programme in programmes:
+        got = sniff_code_page(_xer(programme).encode(page))
+        if got == page:
+            named += 1
+        elif got is not None:
+            wrong.append((got, programme))
+
+    assert not wrong, (
+        f"{len(wrong)} of {len(programmes)} programmes were given a page they were not written in: {wrong[:2]}"
+    )
+    # Declining everything would satisfy the assertion above, so the sniff also
+    # has to still be answering. The measured rates are 95 percent for Hebrew
+    # and 93 for Greek; the bar is set well under both so ordinary drift does
+    # not fail the suite, and a collapse to silence does.
+    assert named > len(programmes) * 0.7, f"only {named} of {len(programmes)} were named, the sniff has gone quiet"
 
 
 # ── MSPDI, the same defect reached by the opposite route ──────────────────────

@@ -69,6 +69,37 @@ it. Measured across the same 13039 windows, moving it from 32 to 28 changes the
 wrong-answer count not at all, both are zero, and recovers 1198 correct verdicts
 that 32 was throwing away.
 
+Why Hebrew carries ten letters and the others six
+-------------------------------------------------
+
+The six-letter profiles are not equally informative, and Hebrew's was the worst
+of the four by a wide margin. Two of its six most frequent letters occupy bytes
+that are also Greek's most frequent: yod is 0xE9, which is iota, and vav is
+0xE5, which is epsilon. Four more common Hebrew letters land on the remaining
+Greek four, bet on alpha, final nun on omicron, final mem on nu and pe on tau.
+So the Greek profile scored on Hebrew text with all six of its letters, and the
+lead cp1255 held over cp1253 fell under the margin.
+
+The population that shows this is not the one the earlier thresholds were
+calibrated on, and that is the lesson worth keeping. A sweep of contiguous
+windows cut from one running sentence converges, because a long window is nearly
+the whole sentence. A real export carries a set of distinct short activity
+names whose letter mix never converges. Measured over every three-to-six name
+subset of ten real Hebrew activity names, 792 files, the shipped profile named
+the right page for 62 percent of them, declined 35 percent, and named cp1253
+outright for 23 of them at 44 to 61 high bytes, which is far above any floor.
+Arabic, Russian and Greek were at 100 percent on the same population, so this
+was Hebrew alone.
+
+Extending every profile made it worse, not better, because Greek's own seventh
+through twelfth letters land on common Hebrew ones in turn; at ten letters each
+the wrong answers rose from 23 to 51. Extending only Hebrew works, because the
+letters it gains, resh, mem, shin and nun, sit on Greek letters that are rare in
+Greek: psi, xi, omega and pi. Twelve is too many, at which point Hebrew's own
+profile starts claiming Greek text and Greek collapses to 13 percent. Ten is
+where every one of the four reaches zero wrong answers, on this population and
+on the window population both.
+
 A Western file must never reach that scoring at all, and the guard is the shape
 of the high bytes rather than their count. Accented Latin letters arrive alone
 between ASCII, non-Latin scripts arrive in runs. Measured: the longest run in
@@ -93,13 +124,20 @@ import re
 
 __all__ = ["decode_xer", "sniff_code_page"]
 
-# Share of decoded characters that must be among a language's six most frequent
+# Share of decoded characters that must be among a language's most frequent
 # letters before its page is preferred, and the lead it must hold over the
-# runner-up. The observed spread was 0.49-0.53 for the right page against at
-# most 0.38 for the best wrong one, so both numbers sit well inside the gap
-# rather than on the edge of one sample.
+# runner-up. The margin was 0.05 and is 0.07 because of the Hebrew case below.
+# Unlike the other thresholds in this file this one does not sit in a gap, and
+# saying so matters: measured over 3157 correctly named files the right answer's
+# own margin runs all the way down to 0.019, so it overlaps the wrong answers
+# rather than sitting clear of them. The largest margin any wrong answer held
+# was 0.0645. 0.07 is placed just above that, and it costs 3.2 percent of the
+# right answers, which are declined instead of named. That is the trade this
+# module already takes everywhere else: declining sends a file to cp1252, which
+# is where it went before any of this existed, and naming the wrong page tells
+# the person importing something false about the file in their hands.
 _MIN_SCORE = 0.30
-_MIN_MARGIN = 0.05
+_MIN_MARGIN = 0.07
 
 # Share of high bytes that must sit in a run of three or more before the file is
 # treated as non-Latin at all. Observed: 0.00 for Western text, 0.98-1.00 for
@@ -121,7 +159,7 @@ _CANDIDATES: dict[str, str] = {
     "cp1256": "العيمن",  # Arabic
     "cp1251": "оеаинт",  # Russian
     "cp1253": "αοιεντ",  # Greek
-    "cp1255": "יולאהת",  # Hebrew
+    "cp1255": "יולאהתרמשנ",  # Hebrew, ten rather than six; see above
 }
 
 _HIGH_RUN = re.compile(rb"[\x80-\xff]+")
