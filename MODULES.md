@@ -6,7 +6,7 @@ map of every module that ships in the box.
 OpenConstructionERP is modular by design: every business feature (BOQ, BIM,
 takeoff, schedule, CDE, regional BOQ packs and more) is a self-contained
 module that can be enabled, disabled, installed, or replaced without touching
-the core. The current build loads 190 modules. You enable only the parts you
+the core. The current build loads 194 modules. You enable only the parts you
 need.
 
 This file is the single entry point. Deeper material lives alongside the code
@@ -16,7 +16,7 @@ it describes, and the links point there.
 
 ## 1. The module catalog
 
-All 190 modules that load in the current build, grouped by what they do for a
+All 194 modules that load in the current build, grouped by what they do for a
 construction team. The bold name is the module's display name; the code label
 is its backend folder under `backend/app/modules/`. The count is every directory
 under `backend/app/modules/` carrying a `manifest.py`, which is exactly what the
@@ -234,6 +234,10 @@ Talk, ask and decide around the work.
 - **Real-time collaboration locks** `collaboration_locks` - soft locks and presence so two people do not overwrite the same row.
 - **Meetings** `meetings` - agendas, attendees, action items and status.
 - **Requests for Information** `rfi` - RFI questions, responses and cost or schedule impact.
+- **Register Workflow** `register_workflow` - RFI / RFQ / order / variation registers with per-job references, server-enforced gates and routes, and side-by-side quote compare with an award gate.
+- **Comms Intelligence** `comms_intelligence` - classifies correspondence on the register, extracts prices, quote numbers and deadlines, and drafts replies; a person confirms every suggestion.
+- **Outlook Bridge** `outlook_bridge` - opens any register email as a signed Outlook draft or an editable .eml; sending stays human and no mailbox is read.
+- **Team Standup & Delivery Board** `team_standup` - the project team's daily entries (activities, blockers, attachments) and a stage-driven task board whose rails live server-side.
 - **Submittals** `submittals` - shop drawings, product data and samples with review and approval.
 - **Notifications** `notifications` - in-app notifications with per-user preferences.
 - **Contacts Directory** `contacts` - unified directory of clients, subcontractors, suppliers and consultants.

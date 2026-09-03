@@ -5,6 +5,64 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Work that one department asks another to do had nowhere to live. A project
+manager needing a switchboard built told the workshop by email or by
+spreadsheet, and from that moment the request existed only in an inbox: no
+reference, no stage, no hours against it, and no way for the person who asked
+to see where it had got to. Work requests gives each department its own intake
+with its own pipeline and its own typed fields - engineering, drafting,
+workshop, automation and hazardous area are seeded, and any of them can be
+reshaped without a developer. A request carries one or several request types at
+once, because a job that needs a functional design spec, PLC programming and
+SCADA screens is one request and not three, and it renders the union of those
+types' fields. It moves through stages, can be handed off to another department
+as a linked child, records hours quoted against hours logged and hours still to
+come, and answers the only question the requester actually has: whose court is
+the ball in. A department can be given a turnaround target, after which its
+late work says so rather than sitting quietly.
+
+The registers could raise a record but never remove one. Something raised by
+mistake stayed on the list beside real work, and the only remedy was a database
+delete. Now the record decides: an item nobody has seen can be deleted by the
+person who raised it, and an item that has been emailed, quoted, replied to or
+awarded can only be withdrawn, with a written reason, and it stays on the
+record marked as such. Permission does not buy the right to erase what
+happened - a manager and an administrator meet the same refusal.
+
+Every email this application generates carried a plain-text part reading "This
+message requires an HTML-capable mail client". Anyone whose client or gateway
+prefers plain text - a phone, a mail relay, a spam filter deciding whether the
+message is worth delivering - received that sentence instead of the request.
+The text half is now rendered from the same content as the HTML.
+
+A schedule activity had no way to carry its planned or actual cost. The field
+existed on the response and on the model, but neither create nor update would
+accept it, so earned-value analysis computed a budget at completion of zero for
+every programme ever built. The delivery work an activity depends on is also
+visible on it now: linked work requests and standup tasks appear against the
+activity they feed, and an activity whose delivery is late says so on the
+programme rather than only inside the module that owns it.
+
+The standup board learned to filter by person, client, deliverable, stage,
+priority and due window, to group by any of them, and to keep a task private to
+the people it concerns - enforced on the server, not hidden in the browser.
+Boards can differ per job, because a switchboard build and a site installation
+do not share a run of stages. Attendance and effort are reported for managers
+only; everyone can still see who is on site today, which is ordinary team
+awareness rather than management information.
+
+A client stopped being a line of text on a project and became a record: one
+client, many projects, a brand colour, and as many addresses as it has sites.
+
+Every list route these modules add answers with a page envelope rather than a
+bare array, so a caller holding the first two hundred rows can tell that it is
+holding the first two hundred rows. Where the query pages in the database the
+count comes from the same filters as the page; where the set is assembled whole
+the count is the set. The presence list is the one place the count is nothing
+but the length of the list already being read, because that route is deliberately
+readable by everyone and no figure about a colleague belongs on it.
 ## [16.6.0] - 2026-09-03
 
 A bill is priced by the country that owns the project. That reads like something

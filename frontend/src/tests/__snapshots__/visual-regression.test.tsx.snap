@@ -1318,73 +1318,6 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
       class="flex items-center flex-wrap gap-x-4 gap-y-2 pl-2 animate-stagger-in"
       style="animation-delay: 140ms;"
     >
-      <a
-        class="group/ddc inline-flex items-center gap-1.5 text-[11px] text-content-tertiary hover:text-content-secondary transition-colors"
-        href="https://datadrivenconstruction.io/?utm_source=erp"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <img
-          alt="DataDrivenConstruction"
-          class="h-3.5 w-auto opacity-60 group-hover/ddc:opacity-100 transition-opacity"
-          src="/brand/ddc-logo.webp"
-        />
-        <span
-          class="hidden sm:inline"
-        >
-          by DataDrivenConstruction
-        </span>
-      </a>
-      <span
-        aria-hidden="true"
-        class="h-3 w-px bg-border-light"
-      />
-      <a
-        class="group/oss inline-flex items-center gap-2 text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
-        href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <span
-          class="relative flex h-2 w-2 shrink-0"
-        >
-          <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-          />
-          <span
-            class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
-          />
-        </span>
-        <span>
-          Open-source construction ERP
-        </span>
-        <svg
-          class="lucide lucide-external-link text-content-quaternary group-hover/oss:text-oe-blue transition-colors"
-          fill="none"
-          height="11"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="11"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M15 3h6v6"
-          />
-          <path
-            d="M10 14 21 3"
-          />
-          <path
-            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-          />
-        </svg>
-      </a>
-      <span
-        aria-hidden="true"
-        class="h-3 w-px bg-border-light"
-      />
       <div
         class="flex flex-wrap items-center gap-2 animate-card-in"
         style="animation-delay: 40ms;"
@@ -5069,6 +5002,22 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             />
           </div>
         </div>
+      </div>
+      <div
+        class="h-full [&>*]:h-full lg:col-span-3"
+      >
+        <div
+          aria-hidden="true"
+          class="h-full min-h-[8rem] w-full animate-pulse rounded-2xl border border-border-subtle bg-surface-muted/40"
+        />
+      </div>
+      <div
+        class="h-full [&>*]:h-full lg:col-span-3"
+      >
+        <div
+          aria-hidden="true"
+          class="h-full min-h-[8rem] w-full animate-pulse rounded-2xl border border-border-subtle bg-surface-muted/40"
+        />
       </div>
       <div
         class="h-full [&>*]:h-full lg:col-span-3"

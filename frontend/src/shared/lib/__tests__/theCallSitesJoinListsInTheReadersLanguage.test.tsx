@@ -220,6 +220,15 @@ const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
   // The labels around it are hardcoded English, so the document is English by
   // construction and one localised separator would read as an accident.
   { file: 'features/boq/pdfReport.ts', sites: 1, why: 'English-only generated PDF' },
+  // A postal address writes its own separators; a list conjunction between
+  // the lines of one address would read as two addresses.
+  { file: 'features/projects/clients.ts', sites: 2, why: 'postal address line' },
+  // Both of these fill a text INPUT that is parsed back on save, so the
+  // separator is the field's syntax rather than prose the reader is meant
+  // to read. Writing "a, b and c" into the box would round-trip as a value
+  // called "b and c".
+  { file: 'modules/team-standup/engine/engine.ts', sites: 1, why: 'editable comma-separated field' },
+  { file: 'modules/work-requests/ManageDepartmentsPage.tsx', sites: 1, why: 'editable comma-separated field' },
 ];
 
 /** `.join(', ')` and `.join(", ")`, and neither `.join('; ')` nor `.join(',')`. */
@@ -262,7 +271,7 @@ describe('the rest of the product', () => {
     // root, or a regex that quietly stopped matching, returns an empty map and
     // every assertion after this one passes while checking nothing at all.
     expect(files.length).toBeGreaterThan(2000);
-    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(36);
+    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(40);
   });
 
   it('routes every list a reader sees through the helper, except the recorded ones', () => {

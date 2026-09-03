@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next';
 import { getLanguageByCode } from './i18n';
 import { initErrorLogger } from '@/shared/lib/errorLogger';
 import { installDesktopExternalLinks } from '@/shared/lib/desktop';
+import { PresenceBeacon } from '@/modules/team-standup/PresenceBeacon';
 
 // Lazy-loaded heavy pages — code-split into separate chunks
 const BOQEditorPage = lazy(() =>
@@ -785,6 +786,7 @@ function AppShell() {
   return (
     <RequireAuth>
       <ErrorBoundary scope="app">
+        <PresenceBeacon />
         <AppLayout title={title}>
           <Suspense fallback={<PageLoadingInline />}>
             <ErrorBoundary key={location.pathname}>

@@ -35988,6 +35988,9 @@ const resource = {
     "property_dev.doc_appearance.unsaved": "Unsaved changes. Existing PDFs are not re-rendered.",
     "property_dev.doc_appearance.load_failed": "Could not load the document appearance settings. Templates below are unaffected.",
     // --- /Property Development → Document appearance ---
+    "nav.work_requests": "Work requests",
+    "dashboard.layout.w_clients": "Clients",
+    "dashboard.layout.w_clients_desc": "Projects, active work and contract value per client",
   }
 } as { translation: Record<string, string> };
 
