@@ -34,7 +34,7 @@ from app.modules.projects.models import Project
 from app.modules.resources.models import Resource
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _CODES = ("01.10.010", "01.20.020", "03.30.030", "05.40.040")
 

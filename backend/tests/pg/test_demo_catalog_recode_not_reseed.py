@@ -38,7 +38,7 @@ from app.modules.catalog.seed import (
     seed_catalog,
 )
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _CURRENT_CODES = [row[0] for row in _RESOURCES]
 _ALL_CODES = set(_CURRENT_CODES) | set(_LEGACY_CODES)

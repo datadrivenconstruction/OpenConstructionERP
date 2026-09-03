@@ -43,7 +43,7 @@ from app.modules.takeoff.seed import seed_takeoff_demo
 from app.modules.takeoff.service import TakeoffService, recompute_measurement_value
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _FLAGSHIP_ID = uuid.UUID("f1a95000-0001-4a00-8b00-000000000001")
 _FRANKFURT = "Bürogebäude Frankfurt Europaviertel"

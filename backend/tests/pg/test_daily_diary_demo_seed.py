@@ -29,7 +29,7 @@ from app.modules.daily_diary.seed import seed_daily_diary_demo
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 
 async def _make_project(session, name: str) -> uuid.UUID:

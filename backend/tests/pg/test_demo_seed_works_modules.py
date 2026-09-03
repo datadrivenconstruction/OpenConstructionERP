@@ -47,7 +47,7 @@ from app.modules.temporary_works.seed import seed_temporary_works_demo
 from app.modules.temporary_works.service import TemporaryWorksService
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # The gate floor is three rows. The target is a register somebody keeps, so the
 # assertions are written against the target: a seeder quietly reduced to a

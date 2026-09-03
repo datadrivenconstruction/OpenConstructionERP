@@ -35,7 +35,7 @@ from sqlalchemy import func, select
 
 from app.modules.finance.models import ProjectBudget
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # (wbs_id, category). ``wbs_id`` is None for a line with no WBS reference,
 # which is the case the constraint cannot police.

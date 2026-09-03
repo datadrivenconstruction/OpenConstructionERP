@@ -42,7 +42,7 @@ from app.modules.equipment.models import EquipmentRental
 from app.modules.projects.models import Project
 from app.modules.resources.models import Resource
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # The Bengaluru pack is the largest multiplier the table carries, so it is the
 # one that finds a column too narrow. If this id ever leaves the packs the test

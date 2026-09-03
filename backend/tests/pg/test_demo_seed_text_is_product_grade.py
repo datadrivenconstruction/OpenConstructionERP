@@ -35,7 +35,7 @@ from sqlalchemy import select
 from app.database import Base
 from app.modules.projects.models import Project
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 
 # Columns where the token "DEMO" is domain vocabulary rather than a marker.

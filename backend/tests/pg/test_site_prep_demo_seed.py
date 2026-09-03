@@ -38,7 +38,7 @@ from app.modules.site_prep.seed import seed_site_prep_demo
 from app.modules.site_prep.service import SitePrepService
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # Five, so every stage in the seeder's rotation is exercised at least once.
 _PROJECT_COUNT = 5

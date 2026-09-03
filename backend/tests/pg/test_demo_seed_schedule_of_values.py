@@ -28,7 +28,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _DEMO_ID = "sov-gate-demo"
 

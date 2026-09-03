@@ -37,7 +37,7 @@ from app.modules.users.models import User
 from app.modules.variations.models import DayworkSheet, VariationOrder
 from app.modules.variations.repository import DayworkSheetRepository
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 
 async def _fixture(session) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:

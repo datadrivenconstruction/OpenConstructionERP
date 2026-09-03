@@ -59,7 +59,7 @@ from app.modules.projects.models import Project
 from app.modules.resources.models import Resource
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 WORK_DAY = date(2026, 6, 11)
 

@@ -40,7 +40,7 @@ from app.modules.einvoice_clearance.seed import seed_einvoice_clearance_demo
 from app.modules.finance.models import Invoice
 from app.modules.projects.models import Project
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _DEMO_ID = "office-frankfurt"
 _SETTINGS_LOGGER = "app.modules.finance.einvoice_settings_seed"

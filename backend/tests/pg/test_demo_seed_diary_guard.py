@@ -27,7 +27,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlalchemy import func, select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 #: Anchor for the synthetic window, so the dates a test writes are predictable.
 _BASE = datetime(2026, 8, 14, 8, 0, tzinfo=UTC)

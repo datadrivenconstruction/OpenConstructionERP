@@ -34,7 +34,7 @@ from sqlalchemy import select
 from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
 from app.modules.schedule.models import Activity, Schedule
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # The template the fixture is built from. Any template without its own explicit
 # activities will do; this one is picked because it is the smallest install.

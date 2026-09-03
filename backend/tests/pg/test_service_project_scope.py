@@ -27,7 +27,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 #: Anchor for the synthetic timeline, so "newest" is decided by the test.
 _BASE = datetime(2026, 8, 14, 9, 0, tzinfo=UTC)

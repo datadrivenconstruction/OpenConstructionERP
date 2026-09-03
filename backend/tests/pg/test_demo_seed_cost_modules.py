@@ -45,7 +45,7 @@ from app.modules.projects.models import Project
 from app.modules.users.models import User
 from app.modules.value.seed import seed_value_demo
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # Priced line items covering four trades, so the derivation has a real coverage
 # picture to draft inclusions from rather than the standard boilerplate alone.

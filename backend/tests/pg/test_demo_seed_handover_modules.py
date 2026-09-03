@@ -56,7 +56,7 @@ from app.modules.documents.models import Document
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # The documents a demo project carries. Named as the generated demo estate names
 # them, because the closeout seeder binds a slot to a document by what the

@@ -48,7 +48,7 @@ from app.modules.users.models import User
 from app.modules.validation.models import ValidationReport
 from app.modules.validation.seed import seed_validation_demo
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _RULE_SETS = ["boq_quality"]
 

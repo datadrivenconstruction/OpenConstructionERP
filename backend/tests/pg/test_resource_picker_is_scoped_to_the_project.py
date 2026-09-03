@@ -20,7 +20,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 
 async def _project(session, name: str) -> uuid.UUID:

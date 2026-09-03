@@ -32,7 +32,7 @@ from app.modules.finance.einvoice_settings_seed import seed_einvoice_settings_de
 from app.modules.finance.einvoice_settings_service import get_settings
 from app.modules.finance.models import Invoice
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 _DEMO_ID = "office-frankfurt"
 _SEED_LOGGER = "app.modules.finance.einvoice_settings_seed"

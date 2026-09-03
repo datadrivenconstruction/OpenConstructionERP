@@ -53,7 +53,7 @@ from app.modules.projects.models import Project
 from app.modules.subcontractors.models import Subcontractor
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # Statuses that mean the handshake is settled, mirroring the register core.
 _SETTLED = ("agreed", "closed")

@@ -25,7 +25,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 #: The showcase project this test impersonates. Frankfurt is the hero case:
 #: it is the only one whose lead notice also cites a change order, so it

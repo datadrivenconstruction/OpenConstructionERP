@@ -35,7 +35,7 @@ from app.modules.projects.models import Project
 from app.modules.safety.models import SafetyIncident
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 
 async def _make_project(session, name: str, *, incidents: int) -> uuid.UUID:

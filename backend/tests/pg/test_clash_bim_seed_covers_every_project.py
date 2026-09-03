@@ -34,7 +34,7 @@ from app.modules.clash.seed import seed_clash
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 # Every demo project carries a Revit model, an IFC model and a DWG drawing
 # (``seed_demo_assets`` attaches all three), so two is the smallest set that

@@ -30,7 +30,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 #: The showcase project this test impersonates: the case-5 hero, filmed in
 #: German, so the register has to come out in German too.

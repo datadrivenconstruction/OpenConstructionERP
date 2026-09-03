@@ -22,7 +22,7 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 from sqlalchemy import select
 
-pytestmark = pytest.mark.anyio
+pytestmark = pytest.mark.asyncio
 
 #: The showcase project this test impersonates. Frankfurt is the case-6 hero
 #: and sits in Hesse, so it also exercises the Land holiday set.
