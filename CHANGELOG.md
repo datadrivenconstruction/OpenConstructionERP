@@ -5,6 +5,66 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.6.0] - 2026-09-03
+
+A bill is priced by the country that owns the project. That reads like something
+that was already true, and it was not. The rate came from whichever table was
+nearest to hand, so a bill could be charged the VAT of the region it sat in
+rather than of its country, a project rate could be applied twice on a Brazilian
+bill, and the exported bill charged its tax a second time on top of a server
+total that already carried it. Israel was seeded at seventeen percent a year
+after the rise to eighteen, with a comment in the code stating the old figure as
+though it were the law. Kuwait and Qatar levy no VAT on construction and now say
+so, in their own languages rather than in English inside an otherwise translated
+table. A tax row that is present but broken no longer falls back as quietly as a
+missing one, because the quiet fallback is what let all of the above stay
+plausible for as long as it did.
+
+The exported bill stops calling a figure net when the tax is inside it. The
+GAEB export wrote the total including VAT under the TotalNet element, and Netto
+in a German exchange format is the figure before VAT, so a reader who trusted
+the label was short by the whole tax. The PDF exports were corrected for this
+once already and the GAEB path was never in that change; it now calls the same
+helper rather than carrying a second copy of the arithmetic, and there are
+tests with an actual tax line in them, which there were not before.
+
+The compliance gate names its rule packs. It held four names written by hand
+against sixteen packs in the registry, so twelve of them showed as a lowercase
+id with the underscores swapped for spaces, "mx compliance" sitting beside
+"Germany / DACH". The names were never missing, they are published by the
+catalogue endpoint the project settings screen already reads, so the hand
+written copy is gone and a seventeenth pack will arrive named.
+
+Twenty two more markets price with their own national method, and the six
+markets we sell a country pack or a demo for that had no method at all now have
+one. A price analysis opens in the shape its market reads, with all six sheets
+offered and the right one open. A bill takes its markup stack from the project's
+own country. Installing a country pack leaves the workspace knowing which
+country it is in, which is what makes every one of those choices resolvable
+later without asking again.
+
+Packs now reach the countries they were written for. Eight countries had
+national rules and no pack that delivered them, three countries resolved to a
+compliance pack belonging to somebody else, and sixteen country presets promised
+an example project during onboarding and installed nothing. A German take-off
+could not be measured under German rules, which is the kind of gap that only
+shows up when somebody tries to do the ordinary thing in their own market.
+
+Two gates that looked like gates were not. Nothing that blocks anything had ever
+linted the backend, so a lint failure there reddened only a lane that gets
+cancelled on main and nothing anyone reads. The tests that price a bill ran in
+no blocking lane either. Both now run where a failure stops something.
+
+The PostgreSQL lane is green again after failing 217 of 880 on every run. Two
+async plugins were claiming the same tests: pytest-asyncio takes every async
+test in the tree, and anyio's plugin takes anything carrying its marker, so 29
+files that carried both got their fixture from one plugin and their body from
+the other, and a database connection opened on one event loop was handed work
+from another. The marker was configuring nothing, because nothing in that suite
+imports anyio at all. Which plugin won was decided by the order the plugins load
+in a given environment, which is why the same commit was green on a laptop and
+red on the runner four times running.
+
 ## [16.5.0] - 2026-09-01
 
 An estimate can now be compared against its own outturn at the level it was

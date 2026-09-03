@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.6.0',
+    date: '2026-09-03',
+    tag: 'NEW',
+    summary:
+      'A bill is priced by the country that owns the project. The rate used to come from whichever table was nearest, so a bill could be charged the VAT of the region it sat in rather than of its country, a Brazilian bill could have the project rate applied twice, and an exported bill charged its tax a second time on a total that already carried it. Israel was priced at seventeen percent a year after the rise to eighteen. Kuwait and Qatar levy nothing on construction and now say so in their own languages rather than in English. Twenty two more markets price with their own national method, the six markets we sell a country pack or a demo for that had no method at all now have one, a price analysis opens in the shape its market reads with all six sheets offered, and a bill takes its markup stack from the country of the project itself. Installing a country pack leaves the workspace knowing which country it is in. Eight countries had national rules and no pack that delivered them, three resolved to a compliance pack belonging to somebody else, sixteen country presets promised an example project during onboarding and installed nothing, and a German take-off could not be measured under German rules. Backend linting and the tests that price a bill now run where a failure stops something, and the PostgreSQL test lane is green again after failing 217 of 880 on every run. The GAEB export stops labelling a tax inclusive figure TotalNet, which in a German exchange format means the total before VAT, and the compliance gate names all sixteen rule packs instead of the four it knew by hand.',
+  },
+  {
     version: '16.5.0',
     date: '2026-09-01',
     tag: 'NEW',
