@@ -5228,12 +5228,27 @@ def build_gaeb_xml(
     # ── BoQInfo / Totals (reconciliation), priced phase only ───────────────
     # The X84 schema places <Totals> as the last child of <BoQInfo> (the X83
     # schema forbids it - the request is unpriced). Total = sum of item ITs
-    # (direct cost); TotalNet = markup-inclusive net total, so a reader
-    # reconciles both the direct cost and the grand total from one block.
+    # (direct cost); TotalNet = the same total with the tax taken back out.
+    #
+    # TotalNet used to carry ``net_total`` unchanged, and this comment called
+    # that "the markup-inclusive net total" as though it were a choice. It is
+    # not one. ``net_total`` is the direct cost plus every active markup, and a
+    # VAT line is one markup among the others, so the figure is tax-inclusive:
+    # the field docstring in schemas.py says so, the editor screen says so by
+    # computing its own Net Total with the tax markups filtered out, and
+    # 906bd78cc already took the tax back out of the PDF exports for exactly
+    # this reason. GAEB is a German exchange format, Netto there excludes VAT,
+    # so a reader who trusted the label read a bill short by the whole tax.
+    # This is that same decision applied to the site the PDF fix did not reach,
+    # through the same helper rather than a second copy of the arithmetic,
+    # because it was two copies that disagreed which produced the defect.
     if is_priced:
+        from app.modules.boq.pdf_export import _tax_split
+
+        _, _, subtotal_excluding_tax, _ = _tax_split(boq_data)
         totals_el = ET.SubElement(boq_info, "Totals")
         ET.SubElement(totals_el, "Total").text = _fmt_price(boq_data.direct_cost)
-        ET.SubElement(totals_el, "TotalNet").text = _fmt_price(boq_data.net_total)
+        ET.SubElement(totals_el, "TotalNet").text = _fmt_price(subtotal_excluding_tax)
 
     # ── Serialize to XML string ───────────────────────────────────────────
     # The provenance line is an XML COMMENT - every conformant parser (and

@@ -436,3 +436,83 @@ def test_roundtrip_preserves_total_and_count() -> None:
 
     # The importer must not silently drop anything: no errors recorded.
     assert imported.errors == [], f"Importer reported errors: {imported.errors}"
+
+
+def _build_taxed_demo_boq() -> SimpleNamespace:
+    """The demo LV with German VAT added as a second, tax-category markup.
+
+    ``_build_demo_boq`` carries one overhead markup and no tax, which is why
+    every existing assertion about ``TotalNet`` passes whether or not the tax
+    is subtracted: there is no tax to subtract. A bill that is actually priced
+    in Germany carries both, and it is the only shape that can tell the two
+    readings of the field apart.
+    """
+    boq = _build_demo_boq()
+    overhead = boq.markups[0]
+    taxable = boq.direct_cost + overhead.amount
+    vat = (taxable * Decimal("0.19")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    boq.markups = [
+        overhead,
+        SimpleNamespace(
+            name="Umsatzsteuer",
+            markup_type="percentage",
+            category="tax",
+            percentage=19.0,
+            amount=vat,
+            is_active=True,
+        ),
+    ]
+    boq.net_total = taxable + vat
+    boq.grand_total = boq.net_total
+    return boq
+
+
+def test_totalnet_excludes_the_tax_that_net_total_already_carries() -> None:
+    """Netto in a German exchange format is the total before VAT.
+
+    ``net_total`` on the bill is the direct cost plus every active markup and a
+    VAT line is one of them, so writing that figure under ``TotalNet`` hands a
+    German reader a gross number under a net label. The same subtraction was
+    made for the PDF exports in 906bd78cc; this is the site that fix did not
+    reach.
+    """
+    boq = _build_taxed_demo_boq()
+    overhead, tax = boq.markups
+    xml = build_gaeb_xml(boq, project_name="XSD Demo", project_currency="EUR", gaeb_format="x84")
+    doc = etree.fromstring(xml.encode("utf-8"))
+    ns = {"g": doc.tag.split("}")[0].lstrip("{")}
+
+    total = Decimal(doc.findtext(".//g:BoQInfo/g:Totals/g:Total", namespaces=ns) or "0")
+    total_net = Decimal(doc.findtext(".//g:BoQInfo/g:Totals/g:TotalNet", namespaces=ns) or "0")
+
+    # Without a tax worth subtracting the two readings coincide and this test
+    # would pass on the defect it exists to catch.
+    assert tax.amount > 0, "the fixture carries no tax, so this test proves nothing"
+    assert boq.net_total != total_net, (
+        "TotalNet equals the tax-inclusive net_total, which is the defect: "
+        f"{total_net} was written under a label that means the total before tax"
+    )
+
+    assert total == _expected_direct()
+    assert total_net == _expected_direct() + overhead.amount
+    assert boq.net_total - total_net == tax.amount
+
+    # The tax money is subtracted from the label, not dropped from the file.
+    markup_totals = [Decimal((el.text or "0").strip()) for el in doc.findall(".//g:MarkupItem/g:IT", ns)]
+    assert tax.amount in markup_totals, f"the VAT line is missing from the export: {markup_totals}"
+
+
+def test_a_bill_with_no_tax_reads_the_same_under_both_labels() -> None:
+    """The subtraction must not move a bill that has no tax on it.
+
+    This is the other direction of the same gate. If the tax split ever starts
+    subtracting something that is not tax, this is what notices.
+    """
+    boq = _build_demo_boq()
+    assert all(m.category != "tax" for m in boq.markups), "fixture drifted and now carries a tax"
+    xml = build_gaeb_xml(boq, project_name="XSD Demo", project_currency="EUR", gaeb_format="x84")
+    doc = etree.fromstring(xml.encode("utf-8"))
+    ns = {"g": doc.tag.split("}")[0].lstrip("{")}
+
+    total_net = Decimal(doc.findtext(".//g:BoQInfo/g:Totals/g:TotalNet", namespaces=ns) or "0")
+    assert total_net == boq.net_total
