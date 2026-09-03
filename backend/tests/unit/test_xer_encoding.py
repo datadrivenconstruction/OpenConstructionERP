@@ -285,10 +285,12 @@ def test_no_programme_of_distinct_names_is_given_the_wrong_page(names: list[str]
 
     Greek is here as the control rather than as decoration: the change that
     fixed Hebrew was to give it more letters, and the failure mode of giving it
-    too many is that Hebrew starts claiming Greek text instead. Measured, that
-    is not a hypothetical: at twelve letters Greek fell to 13 percent correct
-    with 56 wrong. So both directions have to be asserted or the next person to
-    extend a profile will only see half the trade.
+    too many is that Hebrew starts claiming Greek text instead. Both directions
+    were run against this test rather than against a probe. Putting the old six
+    letter Hebrew profile back fails the Hebrew case with 23 of 792, and pushing
+    Hebrew on to twelve letters fails this Greek case with 19 of 792. A control
+    that has never been seen to fail is decoration, so those two numbers are the
+    reason the Greek row is here.
     """
     programmes = _programmes(names)
     assert len(programmes) > 700, f"only {len(programmes)} programmes, the population collapsed"
