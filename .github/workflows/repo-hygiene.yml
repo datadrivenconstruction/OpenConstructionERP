@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 68. They run on every push and pull request, grouped into three
+# Guards: 70. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
