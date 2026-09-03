@@ -443,6 +443,91 @@ jobs:
           esac
           rm -rf "$scratch"
 
+      # The step this pipeline was missing, and it is the last unmeasured piece
+      # of the desktop start.
+      #
+      # Everything above proves the frozen binary unpacks, imports the app
+      # package, finds its locales and its bundled UI, and can bring up a
+      # PostgreSQL cluster and create a schema. None of it starts the server.
+      # `init-db` imports each module's models and nothing else, so the whole of
+      # `create_app`, the startup event, the module loader over all modules with
+      # their routers and `on_startup` hooks, the data repairs and the
+      # PostgreSQL version check have never run on a frozen artifact on any
+      # platform. That is a large piece of code to ship untested, and the
+      # loader re-raises, so one failure inside it stops the process and the
+      # user sees the launcher give up rather than a degraded app.
+      #
+      # It starts twice on purpose. The first start is a first run and creates
+      # everything. The second reuses the same directory, which is what every
+      # start after an install actually is, and is the one shape CI has never
+      # had: the installer stops a running instance by killing the process
+      # tree, so a real second start is also a recovery from a crash-stopped
+      # cluster. A pass here means a person can open the application.
+      - name: Check the sidecar serves an answer on a cold start and a restart
+        shell: bash
+        timeout-minutes: 25
+        run: |
+          set -uo pipefail
+          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          chmod +x "$bin" 2>/dev/null || true
+          # Relative for the same reason the step above uses one: RUNNER_TEMP on
+          # Windows carries backslashes and handing one to bash fails a leg of
+          # the matrix for a reason unrelated to what is being checked.
+          scratch="oe-serve-check-data"
+          port=8799
+          rm -rf "$scratch"
+          mkdir -p "$scratch"
+
+          start_and_wait() {
+            label="$1"
+            log="serve-${label}.log"
+            "$bin" serve --host 127.0.0.1 --port "$port" --data-dir "$scratch" > "$log" 2>&1 &
+            pid=$!
+            # 300 s, which is well inside the launcher's own 240 s silence
+            # window plus the time a first run spends on initdb. A sidecar that
+            # dies reports at once, so the loop ends early on a dead process
+            # rather than waiting the budget out.
+            ok=0
+            for _ in $(seq 1 150); do
+              if ! kill -0 "$pid" 2>/dev/null; then
+                echo "the sidecar exited before it answered"
+                break
+              fi
+              body=$(curl -fsS --max-time 4 "http://127.0.0.1:${port}/api/health" 2>/dev/null) && { ok=1; break; }
+              sleep 2
+            done
+            if [ "$ok" -eq 1 ]; then
+              echo "OK (${label}): /api/health answered"
+              echo "$body" | head -c 800
+              echo ""
+            fi
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            if [ "$ok" -ne 1 ]; then
+              echo "=== the sidecar's own output, which carries the cause ==="
+              tail -n 200 "$log" || true
+              echo "=== PostgreSQL's log, if the cluster is what failed ==="
+              if [ -d "$scratch/pgdata/log" ]; then
+                for f in "$scratch/pgdata/log"/*; do
+                  echo "--- $f ---"
+                  tail -n 100 "$f" || true
+                done
+              else
+                echo "(no log at $scratch/pgdata/log)"
+              fi
+              echo "::error title=The desktop sidecar does not serve on ${{ matrix.os }} (${label})::serve never answered /api/health. On a user's machine this is the launcher stopping at 'Starting the application server'. The sidecar output above carries the cause, and it is the reason string the launcher would latch and show on its splash."
+              return 1
+            fi
+            return 0
+          }
+
+          start_and_wait "cold start" || exit 1
+          # Deliberately not cleaned between the two: reusing the directory is
+          # the whole point of the second start.
+          start_and_wait "restart over existing data" || exit 1
+
+          rm -rf "$scratch"
+
       # Printed on every macOS run, green or red, because it is the evidence for
       # the paragraph above. It describes the wrapper and the machine that built
       # it, which is useful context and is not the thing dyld compares at launch.
