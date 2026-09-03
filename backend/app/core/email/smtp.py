@@ -19,8 +19,11 @@ Configuration comes from ``app.config.Settings``:
 
 The backend builds a multipart/alternative message with both a plain-text
 and HTML part so inbox-provider scoring stays reasonable (pure-HTML
-emails are often flagged as spam).  The plain-text fallback is a very
-rough strip of HTML tags - good enough for receipts and resets.
+emails are often flagged as spam).  The plain part is ``message.text_body``
+whenever the caller rendered one from the structured content it already
+held; otherwise it is derived from the HTML by ``core.email.textify`` -
+block tags become line breaks, table cells are joined with " | " and
+every entity is decoded, so nobody reads ``&nbsp;`` or a stray tag.
 """
 
 from __future__ import annotations
@@ -36,18 +39,23 @@ from email.mime.text import MIMEText
 from app.config import Settings
 
 from .base import BackendName, DeliveryResult, EmailBackend, EmailMessage
+from .textify import html_to_text
 
 logger = logging.getLogger(__name__)
 
-_TAG_RE = re.compile(r"<[^>]+>")
 _WHITESPACE_RE = re.compile(r"\s+")
 
 
 def _html_to_text(html: str) -> str:
-    """Strip HTML tags for the plain-text MIME alternative."""
-    text = _TAG_RE.sub(" ", html)
-    text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-    return _WHITESPACE_RE.sub(" ", text).strip()
+    """One flat line of an HTML body - a subject-ish summary, not a body.
+
+    Kept for callers that want the whole thing on one line (logs, the
+    console backend's preview). The MIME part below uses the shared
+    converter directly, because a plain-text BODY needs its line breaks:
+    flattening a details table into one paragraph is how a supplier ended
+    up reading a request with no shape to it.
+    """
+    return _WHITESPACE_RE.sub(" ", html_to_text(html)).strip()
 
 
 class SmtpEmailBackend(EmailBackend):
@@ -109,7 +117,12 @@ class SmtpEmailBackend(EmailBackend):
         # message carries attachments we wrap that body in a multipart/mixed
         # envelope so MUAs render the text and offer the files for download.
         body = MIMEMultipart("alternative")
-        body.attach(MIMEText(_html_to_text(message.html_body), "plain", "utf-8"))
+        # THE PLAIN PART IS A REAL BODY. Where the caller rendered one
+        # from the structured content (register emails do - see
+        # outbound.build_register_email_text) that is what goes; the
+        # converted HTML is the fallback for everything else.
+        plain = message.text_body.strip() or html_to_text(message.html_body)
+        body.attach(MIMEText(plain, "plain", "utf-8"))
         body.attach(MIMEText(message.html_body, "html", "utf-8"))
 
         if message.attachments:

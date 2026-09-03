@@ -56,8 +56,12 @@ class EmailMessage:
             ``EmailMessage`` objects if you need to fan out, so per-recipient
             delivery status stays independent.
         subject: Pre-rendered subject line. Templates produce this.
-        html_body: Rendered HTML body. Plain-text is derived by the SMTP
-            backend when needed (strip tags + entities).
+        html_body: Rendered HTML body.
+        text_body: The text/plain alternative. Set it whenever the caller
+            still holds the structured content the HTML was built from -
+            a document rendered from its data reads better than one
+            recovered from its markup. Left empty the SMTP backend
+            derives one from ``html_body`` (``core.email.textify``).
         from_addr: Optional ``From:`` override. Falls back to
             ``settings.smtp_from`` in the SMTP backend.
         reply_to: Optional ``Reply-To:`` header.
@@ -74,6 +78,7 @@ class EmailMessage:
     to: str
     subject: str
     html_body: str
+    text_body: str = ""
     from_addr: str | None = None
     reply_to: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
