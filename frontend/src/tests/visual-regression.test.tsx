@@ -439,6 +439,25 @@ describe('Visual Regression - Input', () => {
     );
     expect(container).toMatchSnapshot();
   });
+
+  it('input with a suffix', () => {
+    const { container } = render(
+      <Input label="Amount" suffix={<span>EUR</span>} placeholder="0.00" />,
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('floating label over an icon', () => {
+    const { container } = render(
+      <Input label="Search" floatingLabel icon={<span>S</span>} />,
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('floating label with no icon', () => {
+    const { container } = render(<Input label="Client" floatingLabel />);
+    expect(container).toMatchSnapshot();
+  });
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
