@@ -35,9 +35,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.app_branding import (
     MAX_COMPANY_NAME,
+    merge_branding,
     read_branding,
     reset_branding,
-    write_branding,
 )
 from app.core.pdf_appearance import (
     DEFAULT_APPEARANCE,
@@ -63,14 +63,20 @@ class BrandingResponse(BaseModel):
     mode: str = "default"
     logo_data_url: str | None = None
     company_name: str = ""
+    #: Organisation profile - the company facts modules read instead of
+    #: hard-coding anyone's employer (see app_branding.DEFAULT_BRANDING).
+    org_name: str = ""
+    reference_prefix: str = ""
+    own_mail_domains: str = ""
 
 
 class BrandingUpdate(BaseModel):
     """Admin payload to set the workspace brand.
 
     All fields optional so the client can send just what changed; the server
-    sanitises and reconciles them (a logo wins; ``text`` needs a name) before
-    persisting, so the stored trio is always consistent.
+    merges over what is stored, then sanitises and reconciles (a logo wins;
+    ``text`` needs a name) before persisting, so the stored set is always
+    consistent.
     """
 
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -78,6 +84,9 @@ class BrandingUpdate(BaseModel):
     mode: str | None = None
     logo_data_url: str | None = None
     company_name: str | None = Field(default=None, max_length=MAX_COMPANY_NAME)
+    org_name: str | None = Field(default=None, max_length=200)
+    reference_prefix: str | None = Field(default=None, max_length=40)
+    own_mail_domains: str | None = Field(default=None, max_length=500)
 
 
 @router.get("/branding/", response_model=BrandingResponse)
@@ -99,8 +108,13 @@ async def get_branding() -> BrandingResponse:
     dependencies=[Depends(RequireRole("admin"))],
 )
 async def put_branding(body: BrandingUpdate) -> BrandingResponse:
-    """Admin: set the workspace brand so it persists for every browser and user."""
-    return BrandingResponse(**write_branding(body.model_dump()))
+    """Admin: set the workspace brand so it persists for every browser and user.
+
+    Merges over the stored branding first - the docstring above promises
+    "send just what changed", and without the merge a partial update (say,
+    only the organisation fields) silently wiped the stored logo.
+    """
+    return BrandingResponse(**merge_branding(body.model_dump(exclude_none=True)))
 
 
 @router.delete(

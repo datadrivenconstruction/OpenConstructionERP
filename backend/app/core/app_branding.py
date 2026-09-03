@@ -44,11 +44,27 @@ MAX_COMPANY_NAME = 60
 #: hostile payload cannot bloat the file or the public response without limit.
 MAX_LOGO_DATA_URL_CHARS = 4 * 1024 * 1024
 
+#: Organisation-field caps.
+MAX_ORG_NAME = 80
+MAX_REFERENCE_PREFIX = 8
+MAX_MAIL_DOMAINS = 300
+
 #: Shape returned when nothing has been customised.
 DEFAULT_BRANDING: dict[str, Any] = {
     "mode": "default",
     "logo_data_url": None,
     "company_name": "",
+    # ── Organisation profile ─────────────────────────────────────────
+    # The company facts other modules used to hard-code. Kept here so
+    # the CODE stays generic and each workspace supplies its own:
+    #   org_name         - full legal/trading name (email footers, PM org)
+    #   reference_prefix - the house token on minted references
+    #                      (<PREFIX>-RFI-24188-0001); A-Z/0-9 only
+    #   own_mail_domains - comma-separated; inbound mail FROM these
+    #                      domains is "somebody internal", not a reply
+    "org_name": "",
+    "reference_prefix": "",
+    "own_mail_domains": "",
 }
 
 
@@ -88,7 +104,35 @@ def sanitise(data: Any) -> dict[str, Any]:
     elif mode == "text" and not name:
         mode = "default"
 
-    return {"mode": mode, "logo_data_url": logo, "company_name": name}
+    org_name = data.get("org_name")
+    org_name = org_name.strip()[:MAX_ORG_NAME] if isinstance(org_name, str) else ""
+
+    # The prefix lands inside minted references and an inbound-matching
+    # regex, so it tightens hard: A-Z/0-9 only, uppercased, bounded.
+    prefix = data.get("reference_prefix")
+    prefix = prefix.strip().upper() if isinstance(prefix, str) else ""
+    prefix = "".join(c for c in prefix if c.isalnum())[:MAX_REFERENCE_PREFIX]
+
+    domains = data.get("own_mail_domains")
+    if isinstance(domains, str):
+        parts = []
+        for raw_part in domains.lower().split(","):
+            part = raw_part.strip().lstrip("@")
+            # A domain, not an essay: letters/digits/dots/hyphens with a dot.
+            if part and "." in part and all(c.isalnum() or c in ".-" for c in part):
+                parts.append(part)
+        domains = ",".join(parts)[:MAX_MAIL_DOMAINS]
+    else:
+        domains = ""
+
+    return {
+        "mode": mode,
+        "logo_data_url": logo,
+        "company_name": name,
+        "org_name": org_name,
+        "reference_prefix": prefix,
+        "own_mail_domains": domains,
+    }
 
 
 #: Process-local cache of the parsed branding, keyed by file path. A PDF export
@@ -178,6 +222,18 @@ def write_branding(payload: Any, data_dir: Path | None = None) -> dict[str, Any]
     return clean
 
 
+def merge_branding(update: Any, data_dir: Path | None = None) -> dict[str, Any]:
+    """Persist ``update`` merged over what is stored.
+
+    The admin editor sends just what changed (its docstring promises so),
+    and a raw ``write_branding`` of a partial payload would sanitise the
+    missing fields to their defaults - wiping the stored logo the moment
+    someone saved the organisation tab. Merge first, sanitise after.
+    """
+    merged = {**read_branding(data_dir), **(update if isinstance(update, dict) else {})}
+    return write_branding(merged, data_dir)
+
+
 def reset_branding(data_dir: Path | None = None) -> dict[str, Any]:
     """Clear any custom branding (remove the file). Returns the defaults."""
     path = branding_path(data_dir)
@@ -189,3 +245,33 @@ def reset_branding(data_dir: Path | None = None) -> dict[str, Any]:
         logger.warning("Could not remove branding at %s: %s", path, exc)
     _forget_branding(data_dir)
     return dict(DEFAULT_BRANDING)
+
+
+# ── Organisation accessors ─────────────────────────────────────────────
+# One resolution rule for every module that needs a company fact:
+# the workspace's stored branding wins, an environment variable covers
+# headless/scripted deployments, and the fallback is neutral - the code
+# itself never carries a company.
+
+import os as _os
+
+
+def org_reference_prefix(data_dir: Path | None = None) -> str:
+    """The house token on minted references (<PREFIX>-RFI-...)."""
+    stored = read_branding(data_dir).get("reference_prefix") or ""
+    return stored or _os.environ.get("OE_REGISTER_HOUSE", "").strip().upper() or "REG"
+
+
+def org_display_name(data_dir: Path | None = None) -> str:
+    """The organisation's name for email footers and mail headers."""
+    branding = read_branding(data_dir)
+    stored = branding.get("org_name") or branding.get("company_name") or ""
+    return stored or _os.environ.get("OE_PM_ORG", "").strip() or "Projects Team"
+
+
+def org_mail_domains(data_dir: Path | None = None) -> list[str]:
+    """Domains that count as 'our own' for inbound mail. May be empty -
+    then nothing is treated as internal until the workspace says so."""
+    stored = read_branding(data_dir).get("own_mail_domains") or ""
+    raw = stored or _os.environ.get("OE_OUTLOOK_OWN_DOMAINS", "")
+    return [d.strip().lower() for d in raw.split(",") if d.strip()]
