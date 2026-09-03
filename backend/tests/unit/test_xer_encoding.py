@@ -192,6 +192,37 @@ def test_no_short_name_in_any_language_is_assigned_the_wrong_page() -> None:
     assert not wrong, f"{len(wrong)} of {windows} names were given a page they were not written in: {wrong[:3]}"
 
 
+def test_the_smallest_real_export_clears_the_floor() -> None:
+    """The floor has to let a real file through, and a real file is small.
+
+    Two rows, one WBS name and one activity name, is not a contrived sample: it
+    is the shape a person actually reports. It carries 31 high bytes, and the
+    first version of the floor sat at 32, so it was declined by a single byte
+    and imported as exactly the mojibake this module exists to prevent. The
+    floor is calibrated between the largest measured wrong answer at 25 and this
+    file at 31, and this test is what stops it drifting upward again.
+    """
+    wbs = "الصالة المغطاة"
+    task = "حفر حتى منسوب التأسيس"
+    raw = (
+        "ERMHDR\t5.0\t2012-01-26\tProject\tadmin\tAdmin\tdbxDatabaseNoName\tProject Management\tEGP\n"
+        "%T\tPROJECT\n%F\tproj_id\tproj_short_name\n%R\t1\tHALL\n"
+        "%T\tPROJWBS\n%F\twbs_id\tproj_id\twbs_short_name\twbs_name\tparent_wbs_id\n"
+        f"%R\t10\t1\tHALL\t{wbs}\t\n"
+        "%T\tTASK\n%F\ttask_id\tproj_id\twbs_id\ttask_code\ttask_name\ttask_type\tstatus_code\n"
+        f"%R\t100\t1\t10\tA1000\t{task}\tTT_Task\tTK_NotStart\n%E\n"
+    ).encode("cp1256")
+
+    high = sum(1 for b in raw if b >= 0x80)
+    assert high == 31, f"the sample drifted to {high} high bytes and stopped pinning the boundary"
+
+    assert sniff_code_page(raw) == "cp1256"
+    decoded, used = decode_xer(raw)
+    assert used == "cp1256"
+    assert wbs in decoded, "the WBS name is where the old ladder put its first mojibake"
+    assert task in decoded
+
+
 # ── MSPDI, the same defect reached by the opposite route ──────────────────────
 #
 # The XER half of this file exists because a P6 export declares nothing. MSPDI

@@ -49,15 +49,25 @@ The scores above were calibrated on running text and none of them is aware of
 how small a sample it may be dividing. A schedule is mostly ASCII, so a file
 carrying one short activity name puts five or six high bytes on the table; every
 score is then a multiple of 0.2 and a lead of 0.2 clears the margin without
-meaning anything. Measured over 7476 name-shaped windows of the same
-construction vocabulary, the largest sample that still named the wrong page
-carried 25 high bytes, and the failure was not evenly spread: Hebrew lost 11 of
-its 33 whole-word names to Greek and Arabic. A real export carries hundreds of
-high bytes, so a floor between those two numbers costs nothing and removes the
-whole regime. Raising the margin instead was measured and rejected: it never
-reaches zero wrong answers at any value, and by 0.12 it has started throwing
-away correct verdicts on whole files, because Hebrew's own margin on a full
-export is 0.117.
+meaning anything. Measured over 13039 name-shaped windows of the same
+construction vocabulary, uncapped in length, the largest sample that still named
+the wrong page carried 25 high bytes, and the failure was not evenly spread:
+Hebrew lost 11 of its 33 whole-word names to Greek and Arabic. Raising the
+margin instead was measured and rejected: it never reaches zero wrong answers at
+any value, and by 0.12 it has started throwing away correct verdicts on whole
+files, because Hebrew's own margin on a full export is 0.117.
+
+The upper end of that gap is the part worth stating carefully, because the first
+version of this floor got it wrong. It was set from the smallest whole export in
+the test vocabulary, 60 high bytes, and placed at 32. But the smallest export a
+person actually has is far smaller than the smallest one in a test fixture: a
+two-row file with one WBS name and one activity name carries 31, and such a file
+was declined by one byte and imported as mojibake, which is the whole defect this
+module exists to fix. The gap that matters runs from 25, the largest measured
+wrong answer, to 31, the smallest real file, and the floor sits in the middle of
+it. Measured across the same 13039 windows, moving it from 32 to 28 changes the
+wrong-answer count not at all, both are zero, and recovers 1198 correct verdicts
+that 32 was throwing away.
 
 A Western file must never reach that scoring at all, and the guard is the shape
 of the high bytes rather than their count. Accented Latin letters arrive alone
@@ -98,11 +108,11 @@ _MIN_RUN_SHARE = 0.50
 
 # How many high bytes must be on the table before the vote may reach a verdict.
 # Below this the scores are too coarse to mean anything and the margin is
-# cleared by arithmetic rather than by evidence. Measured: the largest sample
-# that still named a wrong page carried 25 high bytes; the smallest whole export
-# in the same vocabulary carried 60. The floor sits between them, nearer the low
-# end, because declining costs a file only the answer it used to get anyway.
-_MIN_HIGH_BYTES = 32
+# cleared by arithmetic rather than by evidence. Measured over 13039 windows:
+# the largest sample that still named a wrong page carried 25 high bytes, and
+# the smallest two-row export a person can actually have carries 31. The floor
+# sits in the middle of that gap, with three bytes of headroom on each side.
+_MIN_HIGH_BYTES = 28
 
 # The six most frequent letters of each language, which is the whole of the
 # evidence this module weighs. Cyrillic and Greek carry their own alphabets;
