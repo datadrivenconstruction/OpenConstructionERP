@@ -111,7 +111,37 @@ jobs:
         # that hung instead of killing the job anonymously at the wall clock.
         # thread method because signal based timeouts are Unix-only and this
         # suite is expected to stay runnable on Windows developer machines.
-        run: pytest tests/pg -q -p no:cacheprovider --timeout=300 --timeout-method=thread
+        run: >-
+          pytest tests/pg -q -p no:cacheprovider --timeout=300 --timeout-method=thread
+          --ignore=tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py
+      # The bill pricing file runs in a process of its own, and this is
+      # isolation rather than a cure. Landed inside tests/pg it turned the lane
+      # from 871 passed to 217 failed and 663 passed, the same count on three
+      # consecutive runs, every one of the 217 the same RuntimeError about a
+      # future attached to a different loop. It is the only file added to
+      # tests/pg in that push and 871 plus its 9 is exactly 880, so the
+      # population it broke is the one it joined.
+      #
+      # What is NOT established: why. It does not reproduce on a Windows
+      # developer machine, not the file alone, not the file plus its first
+      # victim, not the first five files of the collection, and not the whole
+      # tree under this step's exact command including the timeout flags. So
+      # the mechanism is something the Linux runner does and this machine does
+      # not, and nobody has seen it fail where it can be debugged.
+      #
+      # A separate process cannot corrupt another process's event loop, so this
+      # restores the lane and keeps all nine tests, which is worth doing while
+      # the cause is open. It is not worth mistaking for a fix: whatever the
+      # file does, some other file may do next, and the next one may land in a
+      # suite that has no such step. The conftest for this lane already carries
+      # the same story once, in no_detached_subscribers, where one write path
+      # with a detached consumer read as 13 failures and 91 errors and only one
+      # was real. That comment and this one are the same defect twice.
+      - name: Run the bill pricing dialect tests in their own process
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: >-
+          pytest tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py
+          -q -p no:cacheprovider --timeout=300 --timeout-method=thread
       # Checks on what the demo seeder writes. Two families so far. Vocabulary:
       # the places where one list of allowed values is written down in a second
       # place that can drift from it. The seeder builds ORM rows directly, so
