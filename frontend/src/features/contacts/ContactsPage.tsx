@@ -1484,16 +1484,19 @@ export function ContactsPage() {
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [detailContact, setDetailContact] = useState<Contact | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<ContactType | ''>('');
-  const [countryFilter, setCountryFilter] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  // Deep link: /contacts?contactId=<id> (from a camp booking occupant or a
-  // correspondence party). Once the contact is in the loaded set we open its
-  // detail drawer, flash its card and clear the param. Unknown ids just clear
-  // the param and leave the directory untouched.
+  // Deep links. /contacts?contactId=<id> (from a camp booking occupant or a
+  // correspondence party) opens that contact once it is in the loaded set -
+  // see the effect below. /contacts?contact_type=client (from the dashboard
+  // Clients widget) opens the directory already narrowed to that type; an
+  // unknown type is ignored.
   const [searchParams, setSearchParams] = useSearchParams();
   const deepLinkContactId = searchParams.get('contactId');
+  const [typeFilter, setTypeFilter] = useState<ContactType | ''>(() => {
+    const wanted = searchParams.get('contact_type');
+    return wanted && (CONTACT_TYPES as string[]).includes(wanted) ? (wanted as ContactType) : '';
+  });
+  const [countryFilter, setCountryFilter] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [highlightContactId, setHighlightContactId] = useState<string | null>(null);
 
   // "n" shortcut → open new contact form

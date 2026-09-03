@@ -52,7 +52,9 @@ export interface Contact {
   // ``custom_properties`` is a per-module bucket dict. Modules
   // namespace under their own key, e.g.
   // ``{ "property_dev": { "preferred_contact_method": "email" } }``.
-  custom_properties?: Record<string, Record<string, unknown>>;
+  // A few cross-module scalars live at the top level too - the client
+  // ``brand_color`` (see features/projects/clients.ts) - hence `unknown`.
+  custom_properties?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   // Computed display helpers
@@ -171,6 +173,10 @@ export interface UpdateContactPayload {
   payment_terms_days?: string | null;
   prequalification_status?: PrequalificationStatus;
   notes?: string | null;
+  /** Merged into the stored dict key-by-key on the server; send the whole
+   *  object read-modify-written so a stale copy cannot drop another
+   *  module's bucket. */
+  custom_properties?: Record<string, unknown>;
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

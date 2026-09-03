@@ -41,6 +41,10 @@ import {
   Package,
   // Learn-by-example cases card, folded into the registry 2026-07-21
   GraduationCap,
+  // Clients rollup (one client, many projects)
+  Users,
+  // Department work requests (engineering, drafting, workshop, ...)
+  Wrench,
 } from 'lucide-react';
 
 export interface DashboardWidgetMeta {
@@ -150,6 +154,32 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_portfolio_desc',
     descDefault: 'Cross-project rollup for multi-project workspaces',
     icon: Layers,
+  },
+  // One client, many projects: per-client project count, active count and
+  // contract value, each row deep-linking to the projects list for that
+  // client. Half width - it is a short list beside the portfolio rollup.
+  {
+    id: 'clients',
+    labelKey: 'dashboard.layout.w_clients',
+    labelDefault: 'Clients',
+    descKey: 'dashboard.layout.w_clients_desc',
+    descDefault: 'Projects, active work and contract value per client',
+    icon: Users,
+    defaultSpan: 3,
+  },
+  // What each department (engineering, drafting, workshop, automation,
+  // hazardous area) is holding across the portfolio: open, overdue, back
+  // with the requester, due this week. Half width beside the clients list.
+  // Always renders - a deployment without the Work requests module gets a
+  // one-line "not available" rather than a vanished card.
+  {
+    id: 'department_requests',
+    labelKey: 'dashboard.layout.w_department_requests',
+    labelDefault: 'Department requests',
+    descKey: 'dashboard.layout.w_department_requests_desc',
+    descDefault: 'Open, overdue and due-this-week requests per department across your jobs',
+    icon: Wrench,
+    defaultSpan: 3,
   },
   {
     id: 'map',

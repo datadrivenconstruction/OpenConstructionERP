@@ -156,6 +156,11 @@ class ContactUpdate(BaseModel):
     name_translations: dict[str, Any] | None = None
     notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] | None = None
+    # Merged key-by-key into the stored dict (see service.update_contact), so
+    # a caller writing one top-level key - the client ``brand_color`` - keeps
+    # every module bucket it did not mention. Before this field existed the
+    # key was silently dropped by the model: 200 OK, nothing stored.
+    custom_properties: dict[str, Any] | None = None
 
 
 # ── Response ─────────────────────────────────────────────────────────────

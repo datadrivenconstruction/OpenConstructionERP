@@ -278,6 +278,23 @@ class ContactService:
             else:
                 fields["metadata_"] = incoming_meta
 
+        # Same shallow merge for custom_properties: a PATCH naming one key
+        # (the client brand colour) must not wipe another module's bucket.
+        # A value of None removes that key; a dict value replaces that
+        # bucket wholesale (a bucket is one module's own record).
+        if "custom_properties" in fields:
+            incoming_props = fields.pop("custom_properties")
+            if isinstance(incoming_props, dict):
+                merged_props = dict(contact.custom_properties or {})
+                for key, value in incoming_props.items():
+                    if value is None:
+                        merged_props.pop(key, None)
+                    else:
+                        merged_props[key] = value
+                fields["custom_properties"] = merged_props
+            elif incoming_props is None:
+                fields["custom_properties"] = {}
+
         # Validate and normalise email if being updated
         if "primary_email" in fields and fields["primary_email"] is not None:
             _validate_email_format(fields["primary_email"])
