@@ -37,20 +37,29 @@ import {
   previewComplianceGate,
   signContract,
   asComplianceGateError,
+  listComplianceRulePacks,
   type ComplianceGateReport,
+  type ComplianceRulePack,
   type ComplianceViolation,
 } from './api';
 
-/** Human-readable English fallback names for the shipped rule packs. */
-const PACK_LABELS: Record<string, string> = {
-  universal: 'Universal',
-  de_compliance: 'Germany / DACH',
-  uk_compliance: 'United Kingdom',
-  us_compliance: 'United States',
-};
-
-function packLabel(id: string): string {
-  return PACK_LABELS[id] ?? id.replace(/_/g, ' ');
+/**
+ * Name a rule pack from the catalogue the backend already publishes.
+ *
+ * This was a four entry map written by hand, against sixteen packs in the
+ * registry. The twelve it did not know fell through to the id with its
+ * underscores swapped for spaces, so a Mexican project showed a lowercase
+ * "mx compliance" next to "Germany / DACH" and nothing anywhere went red. The
+ * names exist and are served by GET /v1/contracts/compliance-rule-packs/,
+ * which the project settings screen has been reading all along, so the mirror
+ * is deleted rather than extended: a seventeenth pack arrives named without
+ * anybody editing this file.
+ *
+ * The id fallback stays for the moment before the catalogue resolves, and for
+ * a pack the gate reports that the catalogue does not list.
+ */
+function packLabel(id: string, names: Map<string, string>): string {
+  return names.get(id) ?? id.replace(/_/g, ' ');
 }
 
 interface ComplianceGateProps {
@@ -69,6 +78,15 @@ export function ComplianceGate({
 }: ComplianceGateProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+
+  // Same query key as the project settings screen, so the two share one cache
+  // entry and this modal usually opens with the names already in hand.
+  const packsQ = useQuery<ComplianceRulePack[]>({
+    queryKey: ['compliance-rule-packs'],
+    queryFn: listComplianceRulePacks,
+    staleTime: 60 * 60 * 1000,
+  });
+  const packNames = new Map((packsQ.data ?? []).map((p) => [p.id, p.name] as const));
   const addToast = useToastStore((s) => s.addToast);
 
   const gateQ = useQuery<ComplianceGateReport>({
@@ -283,7 +301,7 @@ export function ComplianceGate({
                 <div className="flex flex-wrap gap-1">
                   {report.rule_packs.map((p) => (
                     <Badge key={p} variant="blue">
-                      {packLabel(p)}
+                      {packLabel(p, packNames)}
                     </Badge>
                   ))}
                 </div>
