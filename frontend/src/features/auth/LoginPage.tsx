@@ -4,21 +4,15 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight, Pencil,
-  ShieldCheck, Zap, Brain, Info,
-  FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
-  BarChart3, Upload, FileCheck,
-  Box, Ruler, Layers,
-  PenTool, FolderOpen, ClipboardList,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Pencil,
   Sun, Moon, Monitor,
 } from 'lucide-react';
-import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
-import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
 import { APP_VERSION } from '@/shared/lib/version';
 import { loginFailureKindFromResponse } from './loginError';
 import { AuthBackground } from './AuthBackground';
@@ -104,18 +98,7 @@ export function LoginPage() {
     () => localStorage.getItem('oe_remember') === '1',
   );
   const [langOpen, setLangOpen] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const [brandOpen, setBrandOpen] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(true);
-  const [demoHint, setDemoHint] = useState(false);
-  const [demoLoading, setDemoLoading] = useState<string | null>(null);
-  // The demo sign-in is shown by DEFAULT and only hidden when the server
-  // explicitly reports demo is off (SEED_DEMO=false, or an admin turned it off
-  // in Settings). Starting true means a probe that fails or races the ~60s
-  // first-boot demo seeding can never leave the block hidden (see the effect
-  // below). This is deliberate: demo access is a headline feature of the open
-  // platform, so it should always be there on a fresh install.
-  const [demoEnabled, setDemoEnabled] = useState<boolean>(true);
   const langRef = useRef<HTMLDivElement>(null);
 
   // Desktop first-run: when running inside the Tauri shell with no stored
@@ -141,38 +124,6 @@ export function LoginPage() {
     setError('');
   }, []);
 
-  // Probe whether this server has demo turned OFF (public, no auth). The block
-  // is shown by default (see the state above); this effect only ever HIDES it,
-  // and only when the server explicitly reports `demo_enabled: false` - a
-  // production install with SEED_DEMO=false, or an admin who turned demo off in
-  // Settings. Older servers omit the field, which keeps the block shown. The
-  // very first probe on a fresh install can race the ~60s demo seeding, so a
-  // failed probe is retried a few times and NEVER hides the block on its own.
-  useEffect(() => {
-    let cancelled = false;
-    let attempts = 0;
-    const probe = async (): Promise<void> => {
-      attempts += 1;
-      try {
-        const res = await fetch('/api/v1/auth/first-run', {
-          headers: { Accept: 'application/json' },
-        });
-        if (!res.ok) throw new Error(`first-run probe HTTP ${res.status}`);
-        const status = (await res.json()) as FirstRunStatus;
-        if (!cancelled) setDemoEnabled(status.demo_enabled !== false);
-      } catch {
-        // Transient failure (server still booting / seeding). Retry, but leave
-        // the optimistic default in place so demo never vanishes on a hiccup.
-        if (!cancelled && attempts < 6) {
-          window.setTimeout(() => void probe(), 1500);
-        }
-      }
-    };
-    void probe();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // Desktop auto-bootstrap. Runs once on mount. On ANY failure it silently
   // falls back to the normal login form (clears `bootstrapping`); it never
@@ -278,62 +229,7 @@ export function LoginPage() {
     }
   };
 
-  // Mirrors the seeded demo accounts in backend/app/main.py::_seed_demo_account:
-  // every email here has to be one that seeder creates, and each name has to
-  // match that account's full_name. The admin tile shows the role word instead
-  // of the seeded person on purpose - that is what a first-time visitor scans
-  // for. No password is listed on purpose either: the seeder generates a fresh
-  // random one per install, so any literal printed here would be wrong on every
-  // install. The tiles sign in through /auth/demo-login/ instead.
-  const demoAccounts = [
-    { email: 'demo@openconstructionerp.com', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-[#7cd0ff]', letter: 'M' },
-  ];
 
-  const handleDemoLogin = async (demoEmail: string) => {
-    setDemoLoading(demoEmail);
-    setError('');
-    setEmail('');
-    setPassword('');
-    try {
-      // Password-less demo sign-in for the seeded showcase accounts. The
-      // backend seeder generates a fresh random password per install (BUG-D01)
-      // that the frontend cannot read, so this dedicated endpoint mints tokens
-      // from the demo email alone. When demo seeding is disabled the server
-      // returns 404 and we surface that message - we never fall back to
-      // registering the account, so a demo click cannot create one in
-      // production. The demo block is also hidden entirely in that config.
-      const res = await fetch('/api/v1/users/auth/demo-login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: demoEmail }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        const parsed = extractErrorMessageFromBody(data);
-        setError(parsed || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
-        return;
-      }
-      const data = await res.json();
-      setTokens(data.access_token, data.refresh_token, false, demoEmail);
-      navigate(nextPath, { replace: true });
-    } catch {
-      setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
-    } finally {
-      setDemoLoading(null);
-    }
-  };
-
-  /* Benefits list - reserved for future hero section layout
-  const benefits = [
-    { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
-    { icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10', title: t('login.benefit.open_source', '100% open source'), desc: t('login.benefit.open_source_desc', 'Transparent code. No vendor lock-in.') },
-    { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'International standards'), desc: t('login.benefit.standards_desc', '120,000+ cost items across 9 cost bases worldwide.') },
-    { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
-    { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
-    { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
-  ]; */
 
   // Desktop first-run: clean centered pending state while we silently sign in
   // to the local workspace. Falls back to the form on any failure (see effect).
@@ -437,9 +333,9 @@ export function LoginPage() {
       `}</style>
 
       {/* ── Ambient mesh blobs (LEFT half only) ─────────────────────────
-          Restrained palette - single faint sky blob behind the marketing
-          column so the headline / stats sit on a near-white field.
-          Dark mode keeps the original richer blob set for depth. */}
+          Restrained palette - single faint sky blob behind the form column
+          so the glass card sits on a near-white field. Dark mode keeps the
+          original richer blob set for depth. */}
       <div className="absolute inset-y-0 start-0 end-1/2 z-0 pointer-events-none overflow-hidden hidden lg:block">
         <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-sky-300/10 dark:bg-oe-blue/35 blur-[120px] animate-blob-slow-1 mix-blend-screen" />
         <div className="absolute bottom-[-18%] right-[2%] w-[400px] h-[400px] rounded-full bg-cyan-200/10 dark:bg-violet-500/35 blur-[110px] animate-blob-slow-4 mix-blend-screen hidden dark:block" />
@@ -489,213 +385,54 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* ── Right column on lg+: marketing & benefits.
+      {/* ── Right column on lg+: calm neutral brand panel.
           Order swap (lg:order-2) puts the form on the left so it's the
-          first thing the eye lands on - primary action priority. */}
-      <div className="hidden lg:flex relative z-10 lg:order-2 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6 overflow-hidden">
-        {/* Marketing column showcase - color lives here. Sky/cyan mesh +
-            slow-drifting orbs + faint noise grain. The form column on the
-            left stays a clean white field; this column carries the visual
-            weight. */}
-        <div className="absolute inset-0 pointer-events-none -z-10" aria-hidden>
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(ellipse 90% 70% at 70% 25%, rgba(14,165,233,0.16), transparent 65%),' +
-                'radial-gradient(ellipse 80% 60% at 25% 85%, rgba(56,189,248,0.12), transparent 65%),' +
-                'radial-gradient(ellipse 60% 50% at 90% 75%, rgba(125,211,252,0.10), transparent 65%)',
-            }}
-          />
-          <div
-            className="absolute inset-0 hidden dark:block"
-            style={{
-              background:
-                'radial-gradient(ellipse 80% 60% at 70% 20%, rgba(14,165,233,0.22), transparent 60%),' +
-                'radial-gradient(ellipse 70% 60% at 30% 90%, rgba(139,92,246,0.18), transparent 60%)',
-            }}
-          />
-          <div className="absolute top-[8%] right-[8%] w-[420px] h-[420px] rounded-full bg-sky-300/45 dark:bg-sky-500/35 blur-[100px] login-orb-a" />
-          <div className="absolute bottom-[6%] left-[10%] w-[360px] h-[360px] rounded-full bg-cyan-200/40 dark:bg-violet-500/30 blur-[100px] login-orb-b" />
-          <div className="absolute top-[42%] right-[34%] w-[280px] h-[280px] rounded-full bg-white/55 dark:bg-white/0 blur-[80px] login-orb-c" />
-          <div
-            className="absolute inset-0 opacity-[0.04] dark:opacity-[0.07] mix-blend-overlay"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-            }}
-          />
-        </div>
+          first thing the eye lands on - primary action priority. The
+          panel carries the product mark and a one-line tagline only; the
+          vendor marketing that used to live here (headline, stat tiles,
+          module honeycomb, value props) was removed. */}
+      <div className="hidden lg:flex relative z-10 lg:order-2 flex-col items-center justify-center px-12 py-6 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none -z-10 bg-gradient-to-br from-surface-secondary via-surface-secondary to-oe-blue/[0.04] dark:to-oe-blue/[0.08]" aria-hidden />
 
-        {/* Eyebrow pill */}
-        <div className="mb-5 animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-400/[0.1] px-3.5 py-1.5">
-            <span className="relative flex h-[6px] w-[6px]">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
-            </span>
-            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Open Source</span>
-          </span>
-        </div>
-
-        {/* Marketing headline - kept as h2 because the form panel below has the
-            authoritative h1 (visually hidden, always present in DOM). */}
-        <h2 className="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-[-0.025em] animate-stagger-in" style={{ animationDelay: '60ms' }}>
-          {t('login.hero_h_a', { defaultValue: 'The' })}{' '}
-          <span className="bg-gradient-to-r from-oe-blue to-sky-500 bg-clip-text text-transparent">#1</span>{' '}
-          {t('login.hero_h_b', { defaultValue: 'open-source workspace for' })}
-          <br />
-          <span className="bg-gradient-to-r from-oe-blue to-sky-500 bg-clip-text text-transparent">
-            {t('login.hero_h_c', { defaultValue: 'construction project management' })}
-          </span>
-        </h2>
-
-        {/* Subhead */}
-        <p className="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-[-0.008em] max-w-[420px] animate-stagger-in" style={{ animationDelay: '120ms' }}>
-          {t('login.hero_desc', { defaultValue: 'Plan, estimate, schedule, tender - every step of a project on one professional platform.' })}
-        </p>
-
-        {/* Stats row */}
-        <div className="mt-5 flex items-center gap-5 animate-stagger-in" style={{ animationDelay: '180ms' }}>
-          {[
-            { value: '120K+', label: t('login.stat_costs', { defaultValue: 'cost items' }) },
-            { value: String(SUPPORTED_LANGUAGES.length), label: t('login.stat_langs', { defaultValue: 'languages' }) },
-            { value: '47', label: t('login.stat_regions', { defaultValue: 'countries' }) },
-            { value: '6', label: t('login.stat_cad', { defaultValue: 'CAD formats' }) },
-            { value: '180+', label: t('login.stat_modules', { defaultValue: 'modules' }) },
-            { value: '28', label: t('login.stat_sections', { defaultValue: 'sections' }) },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-[22px] font-semibold text-content-primary tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-content-tertiary mt-0.5">{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="mt-5 mb-4 h-px bg-gradient-to-r from-black/[0.06] via-black/[0.1] dark:from-white/10 dark:via-white/[0.14] to-transparent animate-stagger-in" style={{ animationDelay: '220ms' }} />
-
-        {/* Module honeycomb - proper pointy-top hex grid where every cell
-            shares an edge with its neighbours. Layout is intentionally
-            wider on the top/bottom rows (6 cells) than on the middle
-            row (5 cells) so it reads as a real, naturally-extending
-            honeycomb. Every cell is a real module - no decorative
-            placeholders. Math:
-              hex width   = 88px (left vertex to right vertex)
-              hex height  = 100px (top vertex to bottom vertex)
-              row stride  = 75px (3/4 of height - pointy-top step)
-              column step = 88px (one hex width on the same row)
-              alternating rows are offset by 44px (half a hex) - that's
-              what makes the slanted edges meet exactly. */}
-        <div className="relative mt-1 mr-auto h-[280px] w-[560px] max-w-full overflow-hidden animate-stagger-in" style={{ animationDelay: '260ms' }}>
-          {([
-            // Top row (y = -75) - 6 cells, offset by 44.
-            { x: -220, y: -76, icon: ShieldCheck,     label: t('login.mod.local',     { defaultValue: 'Local' }) },
-            { x: -132, y: -76, icon: Brain,           label: t('login.mod.ai',       { defaultValue: 'AI' }) },
-            { x:  -44, y: -76, icon: Ruler,           label: t('login.mod.takeoff',  { defaultValue: 'Takeoff' }) },
-            { x:   44, y: -76, icon: PenTool,         label: t('login.mod.cad',      { defaultValue: 'CAD' }) },
-            { x:  132, y: -76, icon: Box,             label: t('login.mod.bim',      { defaultValue: 'BIM' }) },
-            { x:  220, y: -76, icon: TrendingUp,      label: t('login.mod.cost5d',   { defaultValue: '5D' }) },
-            // Mid row (y = 0) - 5 cells aligned on the same axis.
-            { x: -176, y:  0,  icon: Database,        label: t('login.mod.costs',    { defaultValue: 'Costs' }) },
-            { x:  -88, y:  0,  icon: FileSpreadsheet, label: t('common.boq') },
-            { x:    0, y:  0,  icon: Layers,          label: t('login.mod.core',     { defaultValue: 'Workspace' }), accent: true },
-            { x:   88, y:  0,  icon: CalendarClock,   label: t('login.mod.schedule', { defaultValue: 'Schedule' }) },
-            { x:  176, y:  0,  icon: BarChart3,       label: t('login.mod.tender',   { defaultValue: 'Tendering' }) },
-            // Bottom row (y = 75) - 6 cells, offset by 44.
-            { x: -220, y:  76, icon: Zap,             label: t('login.mod.realtime', { defaultValue: 'Realtime' }) },
-            { x: -132, y:  76, icon: Boxes,           label: t('login.mod.resources',{ defaultValue: 'Resources' }) },
-            { x:  -44, y:  76, icon: ClipboardList,   label: t('login.mod.tasks',    { defaultValue: 'Tasks' }) },
-            { x:   44, y:  76, icon: FileCheck,       label: t('login.mod.validate', { defaultValue: 'Validate' }) },
-            { x:  132, y:  76, icon: FolderOpen,      label: t('login.mod.files',    { defaultValue: 'Files' }) },
-            { x:  220, y:  76, icon: Upload,          label: t('login.mod.exports',  { defaultValue: 'Exports' }) },
-          ] as const).map((cell, idx) => {
-            const isAccent = 'accent' in cell && cell.accent === true;
-            const Icon = cell.icon;
-            return (
-              // Outer wrapper handles ABSOLUTE POSITIONING only - its
-              // transform is the hex-grid offset and must never be
-              // overridden by an animation. Animations live on the inner
-              // cell so they don't fight with our positioning maths.
-              <div
-                key={idx}
-                className="absolute top-1/2 left-1/2"
-                style={{
-                  transform: `translate(calc(-50% + ${cell.x}px), calc(-50% + ${cell.y}px))`,
-                }}
+        <div className="flex flex-col items-center text-center animate-stagger-in" style={{ animationDelay: '60ms' }}>
+          {brandCustomised ? (
+            brandMode === 'logo' && brandLogo ? (
+              <img
+                src={brandLogo}
+                alt={brandName || 'Custom logo'}
+                className="block max-h-24 w-auto max-w-[320px] object-contain"
+                draggable={false}
+              />
+            ) : (
+              <span
+                className="block max-w-[420px] truncate text-4xl font-extrabold text-content-primary leading-none"
+                style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+                title={brandName}
               >
-                <div
-                  className={`relative flex flex-col items-center justify-center w-[88px] animate-fade-in transition-transform duration-300 hover:scale-[1.05] ${
-                    isAccent ? 'text-white' : 'text-slate-900'
-                  }`}
-                  style={{
-                    animationDelay: `${280 + idx * 35}ms`,
-                    animationFillMode: 'both',
-                    // The height comes from the width, so the cell cannot
-                    // drift off the ratio the clip path is regular in.
-                    aspectRatio: HEX_PORTRAIT_ASPECT,
-                    clipPath: HEX_PORTRAIT_CLIP,
-                    background: isAccent
-                      ? 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 65%, #0369a1 100%)'
-                      : 'linear-gradient(180deg, rgba(255,255,255,0.97), rgba(244,250,255,0.82))',
-                    boxShadow: isAccent
-                      ? '0 18px 32px -12px rgba(14,165,233,0.55), inset 0 1px 0 rgba(255,255,255,0.35)'
-                      : '0 8px 18px -8px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(14,165,233,0.06)',
-                  }}
-                >
-                  <Icon
-                    size={isAccent ? 22 : 18}
-                    strokeWidth={isAccent ? 2 : 1.65}
-                    className={isAccent ? '' : 'text-oe-blue'}
-                  />
-                  <span
-                    className={`mt-[5px] text-[10px] font-semibold tracking-[-0.01em] ${
-                      isAccent ? 'text-white/95' : 'text-slate-800'
-                    }`}
-                  >
-                    {cell.label}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+                {brandName}
+              </span>
+            )
+          ) : (
+            <div className="flex items-center gap-3">
+              <Logo size="lg" />
+              <span
+                className="text-3xl font-medium text-content-primary whitespace-nowrap"
+                style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+              >
+                Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
+              </span>
+            </div>
+          )}
+          <p className="mt-4 text-base text-content-secondary">
+            {t('login.workspace_tagline', { defaultValue: 'Construction project workspace' })}
+          </p>
         </div>
 
-        {/* Value props - restored as a clean two-up grid with refined
-            typography (no boxed icon backgrounds, accent rule above each
-            title) so the marketing column lands on something concrete
-            after the honeycomb. */}
-        <div className="mt-2 flex flex-wrap items-start gap-x-5 gap-y-2 animate-stagger-in" style={{ animationDelay: '320ms' }}>
-          {[
-            { icon: ShieldCheck, title: t('login.feat_local_title', { defaultValue: 'Your data, your machine' }), desc: t('login.feat_local', { defaultValue: 'Nothing leaves your computer. Full ownership,\nzero cloud dependency.' }) },
-            { icon: Brain,       title: t('login.feat_ai_title',    { defaultValue: 'AI-assisted, human-confirmed' }), desc: t('login.feat_ai',    { defaultValue: 'Smart suggestions with confidence scores. You always have the final say.' }) },
-          ].map((feat) => {
-            const Icon = feat.icon;
-            return (
-              <div key={feat.title} className="relative pl-4 max-w-[210px]">
-                <span aria-hidden className="absolute left-0 top-1 h-[14px] w-[2px] rounded-full bg-gradient-to-b from-oe-blue to-sky-500/60" />
-                <div className="flex items-center gap-1.5">
-                  <Icon size={13} strokeWidth={1.8} className="text-oe-blue/85" />
-                  <span className="text-[12.5px] font-semibold tracking-[-0.01em] text-content-primary leading-tight">
-                    {feat.title}
-                  </span>
-                </div>
-                <p className="mt-1 text-[11.5px] leading-[1.55] text-content-tertiary tracking-[-0.005em] whitespace-pre-line">
-                  {feat.desc}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-4 space-y-1 animate-stagger-in" style={{ animationDelay: '380ms' }}>
-          <div className="flex items-center gap-2 text-[11px] text-content-quaternary/60">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-40"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">AGPL-3.0</a>
-            <span className="opacity-30">&middot;</span>
-            <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">OpenConstructionERP.com</a>
-          </div>
+        {/* Footer: licence link (AGPL-3.0 obligation) + running version. */}
+        <div className="absolute bottom-5 flex items-center gap-2 text-[11px] text-content-quaternary/70 animate-stagger-in" style={{ animationDelay: '200ms' }}>
+          <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">AGPL-3.0</a>
+          <span className="opacity-40">&middot;</span>
+          <span className="font-mono tabular-nums">v{APP_VERSION}</span>
         </div>
       </div>
 
@@ -787,21 +524,6 @@ export function LoginPage() {
             </p>
           </div>
 
-          {/* Open-source banner (mobile) */}
-          <div className="lg:hidden mb-4 animate-stagger-in" style={{ animationDelay: '100ms' }}>
-            <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
-              </div>
-              <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
-                {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
-              </p>
-            </div>
-          </div>
 
           {/* Form - premium multi-layer glass.
               login-glass-pro adds layered borders, a coloured ambient drop
@@ -884,147 +606,9 @@ export function LoginPage() {
             </div>
           </div>
 
-          {/* Demo Access - shown by default. Hidden only when the server
-              reports demo is off (SEED_DEMO=false, or an admin turned it off in
-              Settings), which flips demoEnabled to false in the effect above. */}
-          {demoEnabled && (
-          <div className="relative mt-3 animate-stagger-in" style={{ animationDelay: '500ms' }}>
-            <div className="login-glass-pro relative rounded-2xl overflow-hidden">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-6 top-0 h-px"
-                style={{
-                  background:
-                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
-                }}
-              />
-              <div className="relative flex w-full items-center">
-                <button
-                  type="button"
-                  onClick={() => setDemoOpen(!demoOpen)}
-                  aria-expanded={demoOpen}
-                  className="flex flex-1 items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-oe-blue hover:bg-oe-blue/[0.04] transition-all"
-                >
-                  <Zap size={14} className="text-oe-blue" />
-                  <span>{t('auth.try_demo', { defaultValue: 'Try demo (no signup)' })}</span>
-                  <ChevronDown size={14} className={`text-oe-blue/70 transition-transform duration-200 ${demoOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
 
-              {demoOpen && (
-                <div className="border-t border-border-light/60 px-3 py-2.5 space-y-1.5 animate-stagger-in">
-                  {demoAccounts.map((acct) => (
-                    <button
-                      key={acct.email}
-                      type="button"
-                      onClick={() => handleDemoLogin(acct.email)}
-                      disabled={demoLoading !== null}
-                      className="flex w-full items-center gap-3 rounded-xl border border-border-light/50 dark:border-white/10 bg-surface-secondary/50 dark:bg-white/[0.06] px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] dark:hover:bg-oe-blue/[0.14] hover:shadow-sm disabled:opacity-50 group"
-                    >
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
-                        {demoLoading === acct.email ? (
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
-                        ) : (
-                          acct.letter
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold text-content-primary">{acct.name}</div>
-                        <div className="text-[11px] text-content-tertiary dark:text-content-secondary truncate">{acct.email} · {acct.role}</div>
-                      </div>
-                      <ChevronDown size={15} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* Info affordance - kept OUTSIDE the overflow-hidden card above so
-                the hint popover is never clipped and always paints on top of the
-                demo accounts and the links below. Hover reveals it; click pins it
-                (touch / keyboard). Anchored to this relative wrapper at a fixed
-                top offset so it stays on the header row whether the demo list is
-                open or closed. */}
-            <div className="group absolute right-2 top-2 z-40">
-              <button
-                type="button"
-                aria-label={t('auth.demo_hint_aria', { defaultValue: 'About the demo sign-in block' })}
-                onClick={() => setDemoHint((v) => !v)}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-oe-blue/50 hover:text-oe-blue hover:bg-oe-blue/[0.08] transition-colors"
-              >
-                <Info size={14} />
-              </button>
-              <div
-                role="tooltip"
-                className={`pointer-events-none absolute right-0 top-full mt-2 w-64 rounded-xl border border-border bg-surface-elevated backdrop-blur-md px-3.5 py-2.5 text-left text-xs leading-relaxed text-content-primary shadow-2xl transition-opacity duration-150 ${demoHint ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-              >
-                {t('auth.demo_hint', {
-                  defaultValue:
-                    'Optional demo sign-in. It only appears while demo accounts are enabled, so an administrator can turn it off.',
-                })}
-              </div>
-            </div>
-          </div>
-          )}
-
-          {/* GitHub + Community - two primary entry points for the
-              open-source project (replaces the old single "Learn more"
-              link). Premium two-line cards with a tinted icon badge:
-              graphite for the source repo, oe-blue gradient for the
-              community hub. Mirrors the page's login-glass-pro language. */}
-          <div className="mt-4 grid grid-cols-2 gap-3 animate-stagger-in" style={{ animationDelay: '520ms' }}>
-            <a
-              href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${t('login.github', { defaultValue: 'GitHub' })} - ${t('login.github_sub', { defaultValue: 'Source code' })}`}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border-light/70 dark:border-white/15 bg-white/75 dark:bg-white/[0.07] backdrop-blur-sm px-3.5 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 dark:hover:bg-white/[0.12] dark:hover:border-white/25 hover:border-content-primary/25 hover:shadow-lg"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.06] dark:bg-white/10 text-content-primary transition-colors group-hover:bg-content-primary/10 dark:group-hover:bg-white/15">
-                <Github size={17} strokeWidth={1.9} />
-              </span>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
-                  {t('login.github', { defaultValue: 'GitHub' })}
-                </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
-                  {t('login.github_sub', { defaultValue: 'Source code' })}
-                </span>
-              </span>
-              <ArrowUpRight
-                size={15}
-                className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
-              />
-            </a>
-            <a
-              href="https://t.me/datadrivenconstruction"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${t('login.community', { defaultValue: 'Community' })} - ${t('login.community_sub', { defaultValue: 'Get help & discuss' })}`}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border-light/70 dark:border-white/15 bg-white/75 dark:bg-white/[0.07] backdrop-blur-sm px-3.5 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 dark:hover:bg-white/[0.12] dark:hover:border-white/25 hover:border-content-primary/25 hover:shadow-lg"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.06] dark:bg-white/10 text-content-primary transition-colors group-hover:bg-content-primary/10 dark:group-hover:bg-white/15">
-                <Users size={17} strokeWidth={1.9} />
-              </span>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
-                  {t('login.community', { defaultValue: 'Community' })}
-                </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
-                  {t('login.community_sub', { defaultValue: 'Get help & discuss' })}
-                </span>
-              </span>
-              <ArrowUpRight
-                size={15}
-                className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
-              />
-            </a>
-          </div>
           <div className="lg:hidden mt-2 text-center text-2xs text-content-quaternary">
-            <div className="flex items-center justify-center gap-3">
-              <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-              <span>·</span>
-              <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
-            </div>
+            <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
           </div>
           {/* Running build version - always visible so it's obvious which
               version is live on a fresh open. Matches the Sidebar / About
@@ -1038,149 +622,6 @@ export function LoginPage() {
       {/* ── White-label branding editor (pre-auth) ── */}
       {brandOpen && <BrandingEditorModal onClose={() => setBrandOpen(false)} />}
 
-      {/* ── About modal ── */}
-      {showInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowInfo(false)} />
-
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-2xl">
-            <button aria-label={t('common.close', { defaultValue: 'Close' })}
-              onClick={() => setShowInfo(false)}
-              className="sticky top-0 float-right m-3 p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors z-10 bg-surface-elevated/80 backdrop-blur-sm"
-            >
-              <X size={18} />
-            </button>
-
-            {/* Header */}
-            <div className="px-6 pt-5 pb-4 border-b border-border-light clear-both">
-              <LogoWithText size="sm" className="mb-3" />
-              <h3 className="text-base font-bold text-content-primary mb-2">
-                {t('about.title', 'Professional construction cost estimation - free and open source')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro', 'OpenConstructionERP is a modern platform for construction cost management. It covers the full estimation workflow - from creating a bill of quantities to tendering and bid comparison. Designed for professionals worldwide, it supports international standards and works in 24 languages.')}
-              </p>
-              <p className="mt-2 text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro2', 'Unlike traditional commercial solutions, OpenConstructionERP runs entirely on your computer. Your project data never leaves your machine - you have full ownership and control. The source code is open and auditable, so you always know exactly what the software does.')}
-              </p>
-            </div>
-
-            {/* What you can do */}
-            <div className="px-6 py-4">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
-                {t('about.capabilities_title', 'What you can do')}
-              </h3>
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  { icon: FileSpreadsheet, color: 'text-emerald-500 bg-emerald-500/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Works with regional classification systems or your own custom schema.') },
-                  { icon: Database, color: 'text-blue-500 bg-blue-500/10', title: t('about.cap.costs', 'Cost Databases'), desc: t('about.cap.costs_desc', '55,000+ cost items across 48 regional databases worldwide. Add your own rates, import from Excel, or build a custom database from scratch.') },
-                  { icon: CalendarClock, color: 'text-amber-500 bg-amber-500/10', title: t('about.cap.schedule', '4D Scheduling'), desc: t('about.cap.schedule_desc', 'Create project schedules with CPM critical path calculation, interactive Gantt charts, Monte Carlo risk analysis, resource assignment, and auto-generation of activities from your BOQ.') },
-                  { icon: TrendingUp, color: 'text-violet-500 bg-violet-500/10', title: t('about.cap.costmodel', '5D Cost Model'), desc: t('about.cap.costmodel_desc', 'Track budgets over time with Earned Value Management (SPI, CPI), S-curve visualization, cash flow projections, cost snapshots, and what-if scenario modeling for informed decision-making.') },
-                  { icon: Boxes, color: 'text-rose-500 bg-rose-500/10', title: t('about.cap.catalog', 'Resource Catalog'), desc: t('about.cap.catalog_desc', '7,000+ resources - materials, equipment, labor, operators, and utilities. Build reusable assemblies (composite rates) from catalog items and apply them directly to BOQ positions.') },
-                  { icon: BarChart3, color: 'text-cyan-500 bg-cyan-500/10', title: t('about.cap.tendering', 'Tendering & Bids'), desc: t('about.cap.tendering_desc', 'Create tender packages with scope and positions, distribute to subcontractors, collect and compare bids side-by-side in a price mirror, and make award decisions based on data.') },
-                  { icon: Upload, color: 'text-orange-500 bg-orange-500/10', title: t('about.cap.import', 'Import & Export'), desc: t('about.cap.import_desc', 'Full support for GAEB XML (X83), Excel, and CSV import/export. Generate professional PDF reports. Seamlessly integrate with your existing tools and workflows.') },
-                  { icon: FileCheck, color: 'text-teal-500 bg-teal-500/10', title: t('about.cap.validation', 'Quality Validation'), desc: t('about.cap.validation_desc', 'Built-in quality engine automatically checks for missing quantities, zero prices, duplicate positions, classification compliance, and rate anomalies - with a traffic-light dashboard.') },
-                ].map((cap, idx) => {
-                  const Icon = cap.icon;
-                  return (
-                    <div key={idx} className="rounded-lg border border-border-light/60 bg-surface-secondary/50 px-3 py-2.5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${cap.color}`}>
-                          <Icon size={13} />
-                        </div>
-                        <span className="text-xs font-semibold text-content-primary">{cap.title}</span>
-                      </div>
-                      <p className="text-2xs text-content-tertiary leading-relaxed pl-8">{cap.desc}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Why open source */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.why_title', 'Why open source matters')}
-              </h3>
-              <div className="space-y-2 text-[13px] text-content-secondary leading-relaxed">
-                <p>{t('about.why_1', 'Construction cost data is one of the most valuable assets a company owns. With proprietary software, your data is often locked inside formats you cannot control. If the vendor raises prices, changes terms, or discontinues the product - you may lose access to years of work.')}</p>
-                <p>{t('about.why_2', 'OpenConstructionERP takes a different approach. Your data is stored in open formats (SQLite, JSON, CSV) on your own hardware. You can export everything at any time. The source code is publicly auditable under AGPL-3.0, so there are no hidden data transfers, no telemetry, and no surprises.')}</p>
-                <p>{t('about.why_3', 'The platform is modular - install only what you need. Community modules extend functionality without bloating the core. And because it runs locally, it works offline and performs fast even with large projects.')}</p>
-              </div>
-            </div>
-
-            {/* Who is it for */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.who_title', 'Who is it for')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed mb-3">
-                {t('about.who_desc', 'OpenConstructionERP is designed for anyone involved in construction cost management - whether you work on residential projects or large-scale infrastructure, in-house or as a consultant.')}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  t('about.who.estimators', 'Cost estimators'),
-                  t('about.who.qsurveyor', 'Quantity surveyors'),
-                  t('about.who.pm', 'Project managers'),
-                  t('about.who.contractors', 'General contractors'),
-                  t('about.who.subs', 'Subcontractors'),
-                  t('about.who.architects', 'Architects & engineers'),
-                  t('about.who.developers', 'Real estate developers'),
-                  t('about.who.public', 'Public sector & municipalities'),
-                  t('about.who.students', 'Students & educators'),
-                  t('about.who.freelancers', 'Freelance consultants'),
-                ].map((role) => (
-                  <span key={role} className="inline-flex items-center rounded-full bg-oe-blue/10 px-2.5 py-1 text-2xs font-medium text-oe-blue">
-                    {role}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Key facts */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
-                {t('about.numbers_title', 'Platform in numbers')}
-              </h3>
-              <div className="grid grid-cols-4 gap-3 text-center">
-                {[
-                  { value: '120,441', label: t('about.stat.costs', 'Cost items') },
-                  { value: '48', label: t('about.stat.regions', 'Regional databases') },
-                  { value: String(SUPPORTED_LANGUAGES.length), label: t('about.stat.languages', 'Languages') },
-                  { value: '100%', label: t('about.stat.free', 'Free & open source') },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-lg bg-surface-secondary/50 py-2.5">
-                    <div className="text-lg font-bold text-oe-blue">{stat.value}</div>
-                    <div className="text-2xs text-content-tertiary">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* AI note */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.ai_title', 'About AI features')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.ai_desc', 'OpenConstructionERP includes optional AI-powered tools - quick estimation from text descriptions, smart cost suggestions, and BOQ chat assistant. These features require an API key from a provider of your choice (Anthropic, OpenAI, Google). AI is always opt-in: it only activates when you configure it, and you decide what data to send. Without an API key, all other features work fully offline.')}
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-border-light flex items-center justify-between">
-              <div className="flex items-center gap-3 text-2xs text-content-quaternary">
-                <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
-                <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-                <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
-              </div>
-              <Button variant="primary" size="sm" onClick={() => setShowInfo(false)}>
-                {t('about.close', 'Got it')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

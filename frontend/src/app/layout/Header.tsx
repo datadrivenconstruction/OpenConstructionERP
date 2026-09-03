@@ -15,7 +15,6 @@ import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from 
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
-import { ModuleBuilderButton } from '@/features/module-builder';
 import { apiGet } from '@/shared/lib/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import {
@@ -28,8 +27,6 @@ import { APP_VERSION, APP_BUILD_FINGERPRINT } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useI18nReady } from '@/shared/lib/useI18nReady';
 import { isTauri, openAppInBrowser, openLink } from '@/shared/lib/desktop';
-import { SupportUsButton } from './SupportUsButton';
-import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
 import { getRouteIcon } from './routeIcons';
 import { isModuleI18nKey } from '@/modules/_i18n';
@@ -323,10 +320,10 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   // memoization React applies to this render.
   useI18nReady();
   // A partner pack drives the centered co-brand chip only. The secondary
-  // header actions (search, Support, Subscribe) keep their full labelled
-  // form whether or not a pack is active, so the top bar looks the same for
-  // every operator. The chip sits in a flex-1 column that yields space, so it
-  // never has to push the action buttons into icon-only mode to fit.
+  // header actions keep their full labelled form whether or not a pack is
+  // active, so the top bar looks the same for every operator. The chip sits
+  // in a flex-1 column that yields space, so it never has to push the action
+  // buttons into icon-only mode to fit.
   // The co-brand strip is a partner's mark, so it belongs to a partner pack and
   // to nothing else. Measured against the packs this deployment ships: fourteen
   // country, four industry, zero partner - so on a stock install the header now
@@ -450,12 +447,10 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           (Upload + Language + User). Each zone has internal `gap-1`,
           dividers between zones are 1px hairlines.
 
-          SubscribeButton lives in Zone 3 next to HelpMenu (sized to
-          match the Support pill — same h-8 icon-with-label format on
-          desktop, icon-only on mobile). It used to sit absolutely
-          centred across the header but that created awkward visual
-          tension with the project switcher on the left; planted next
-          to Support/Help, the two CTAs read as a coherent cluster. */}
+          Vendor call-outs (Support us, Subscribe, Build a module) used to
+          sit in Zone 3; they were removed so the top bar carries only
+          working controls. The module builder is still reachable at its
+          own route (/module-builder). */}
       <div className="flex items-center gap-2 shrink-0">
         {/* ── Journey (orientation) ─────────────────────────────────
             Names the lifecycle phase the current screen belongs to and
@@ -505,19 +500,10 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Hairline divider between Zone 2 and Zone 3. */}
         <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
 
-        {/* ── Zone 3 (Notifications + Subscribe + Bug + Help) ──────
-            Order: NotificationBell · What's new · SupportUs · Subscribe · BugReport · Help.
-            The "ask the user for something" CTAs (Support / Subscribe) stay
-            adjacent; Bug + Help sit on the right edge so a user filing a
-            report doesn't have to scan past the marketing CTAs. */}
+        {/* ── Zone 3 (Notifications + What's new + Bug + Help) ──────
+            Order: NotificationBell · What's new · BugReport · Help. */}
         <NotificationBell />
         <HeaderNewsButton />
-        {/* Building a module is something you do from wherever you noticed the
-            platform was missing one, so it lives here rather than in the
-            sidebar. Renders nothing for anyone who may not install one. */}
-        <ModuleBuilderButton />
-        <SupportUsButton />
-        <SubscribeButton />
         <BugReportMenu />
         <HelpMenu />
 

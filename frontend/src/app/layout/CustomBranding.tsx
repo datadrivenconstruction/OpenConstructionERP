@@ -31,6 +31,7 @@ import clsx from 'clsx';
 import { Pencil, Upload, Trash2, X, Building2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { apiGet, apiPut } from '@/shared/lib/api';
 import { Logo } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -337,7 +338,7 @@ function BrandingEditor({
   onReset,
 }: EditorProps) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<'logo' | 'name'>(mode === 'text' ? 'name' : 'logo');
+  const [tab, setTab] = useState<'logo' | 'name' | 'org'>(mode === 'text' ? 'name' : 'logo');
   const [nameDraft, setNameDraft] = useState(companyName);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -390,7 +391,7 @@ function BrandingEditor({
             role="tablist"
             className="inline-flex rounded-lg bg-surface-secondary p-1"
           >
-            {(['logo', 'name'] as const).map((id) => (
+            {(['logo', 'name', 'org'] as const).map((id) => (
               <button
                 key={id}
                 role="tab"
@@ -406,7 +407,9 @@ function BrandingEditor({
               >
                 {id === 'logo'
                   ? t('branding.tab_logo', { defaultValue: 'Logo' })
-                  : t('branding.tab_name', { defaultValue: 'Company name' })}
+                  : id === 'name'
+                    ? t('branding.tab_name', { defaultValue: 'Company name' })
+                    : t('branding.tab_org', { defaultValue: 'Organisation' })}
               </button>
             ))}
           </div>
@@ -491,6 +494,8 @@ function BrandingEditor({
                 </div>
               )}
             </div>
+          ) : tab === 'org' ? (
+            <OrgSection />
           ) : (
             <form
               onSubmit={(e) => {
@@ -544,7 +549,7 @@ function BrandingEditor({
         </div>
 
         {/* Footer — reset is destructive so keep it secondary */}
-        {(mode === 'logo' || mode === 'text') && (
+        {tab !== 'org' && (mode === 'logo' || mode === 'text') && (
           <footer className="flex items-center justify-between px-5 py-3 border-t border-border-light bg-surface-secondary/20">
             <button
               type="button"
@@ -568,5 +573,149 @@ function BrandingEditor({
       </div>
     </div>,
     document.body,
+  );
+}
+
+/* ── Organisation profile ─────────────────────────────────────────────
+   The company facts modules read instead of hard-coding an employer:
+   the organisation's name (email footers, formal mail), the reference
+   prefix minted onto register/mail numbers, and the mail domains that
+   count as "our own". Saves independently of the visual brand - the
+   server merges, so changing these never touches the logo. */
+function OrgSection() {
+  const { t } = useTranslation();
+  const [orgName, setOrgName] = useState('');
+  const [prefix, setPrefix] = useState('');
+  const [domains, setDomains] = useState('');
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading');
+
+  useEffect(() => {
+    let alive = true;
+    apiGet<{ org_name?: string; reference_prefix?: string; own_mail_domains?: string }>('/v1/branding/')
+      .then((r) => {
+        if (!alive) return;
+        setOrgName(r?.org_name ?? '');
+        setPrefix(r?.reference_prefix ?? '');
+        setDomains(r?.own_mail_domains ?? '');
+        setPhase('ready');
+      })
+      .catch(() => {
+        if (alive) setPhase('ready');
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const fieldCls =
+    'w-full px-3 py-2 rounded-lg bg-surface-secondary border border-border-light focus:border-oe-blue focus:ring-2 focus:ring-oe-blue/20 focus:outline-none text-sm text-content-primary placeholder:text-content-tertiary';
+  const labelCls = 'block text-xs font-medium text-content-secondary mb-1.5';
+  const hintCls = 'text-[11px] text-content-tertiary mt-1';
+
+  if (phase === 'loading') {
+    return <p className="text-sm text-content-tertiary">{t('common.loading', { defaultValue: 'Loading...' })}</p>;
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        setPhase('saving');
+        apiPut('/v1/branding/', {
+          org_name: orgName,
+          reference_prefix: prefix,
+          own_mail_domains: domains,
+        })
+          .then(() => setPhase('saved'))
+          .catch(() => setPhase('error'));
+      }}
+      className="space-y-4"
+    >
+      <div>
+        <label htmlFor="branding-org-name" className={labelCls}>
+          {t('branding.org_name', { defaultValue: 'Organisation name' })}
+        </label>
+        <input
+          id="branding-org-name"
+          type="text"
+          value={orgName}
+          maxLength={80}
+          onChange={(e) => setOrgName(e.target.value)}
+          placeholder={t('branding.org_name_ph', { defaultValue: 'Acme Electrical Pty Ltd' })}
+          className={fieldCls}
+        />
+        <p className={hintCls}>
+          {t('branding.org_name_hint', {
+            defaultValue: 'Appears on formal mail and email footers.',
+          })}
+        </p>
+      </div>
+      <div>
+        <label htmlFor="branding-org-prefix" className={labelCls}>
+          {t('branding.org_prefix', { defaultValue: 'Reference prefix' })}
+        </label>
+        <input
+          id="branding-org-prefix"
+          type="text"
+          value={prefix}
+          maxLength={8}
+          onChange={(e) => setPrefix(e.target.value.toUpperCase())}
+          placeholder="ACME"
+          className={fieldCls}
+        />
+        <p className={hintCls}>
+          {t('branding.org_prefix_hint', {
+            defaultValue:
+              'Minted onto every register and mail number, e.g. ACME-RFI-24188-0001. Letters and digits only.',
+          })}
+        </p>
+      </div>
+      <div>
+        <label htmlFor="branding-org-domains" className={labelCls}>
+          {t('branding.org_domains', { defaultValue: 'Own email domains' })}
+        </label>
+        <input
+          id="branding-org-domains"
+          type="text"
+          value={domains}
+          maxLength={300}
+          onChange={(e) => setDomains(e.target.value)}
+          placeholder="acme.example, acme-group.example"
+          className={fieldCls}
+        />
+        <p className={hintCls}>
+          {t('branding.org_domains_hint', {
+            defaultValue:
+              'Inbound mail from these domains is treated as written by your own team, not as a supplier reply.',
+          })}
+        </p>
+      </div>
+      <button
+        type="submit"
+        disabled={phase === 'saving'}
+        className={clsx(
+          'w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+          phase === 'saving'
+            ? 'bg-surface-secondary text-content-tertiary cursor-not-allowed'
+            : 'bg-oe-blue text-white hover:bg-oe-blue/90',
+        )}
+      >
+        {phase === 'saving'
+          ? t('common.saving', { defaultValue: 'Saving...' })
+          : t('branding.org_save', { defaultValue: 'Save organisation' })}
+      </button>
+      {phase === 'saved' && (
+        <p className="text-xs text-green-600 dark:text-green-400">
+          {t('branding.org_saved', { defaultValue: 'Saved for the whole workspace.' })}
+        </p>
+      )}
+      {phase === 'error' && (
+        <p className="text-xs text-red-600 dark:text-red-400">
+          {t('branding.org_error', {
+            defaultValue: 'Could not save - only an admin can change these.',
+          })}
+        </p>
+      )}
+    </form>
   );
 }

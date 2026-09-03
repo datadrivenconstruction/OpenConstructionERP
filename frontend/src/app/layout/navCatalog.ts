@@ -260,11 +260,13 @@ export const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
-      { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
       { labelKey: 'nav.cost_explorer', to: '/cost-explorer', icon: Compass },
-      { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
       { labelKey: 'nav.cost_match', to: '/cost-match', icon: Link2 },
-      { labelKey: 'nav.fx', to: '/fx', icon: Wallet },
+      // Dropped for this workspace: Resource Catalog and Assemblies (generic
+      // construction reference data an electrical contractor never uses -
+      // their seed data was removed too) and FX (this deployment is
+      // single-currency AUD end to end). Routes still exist; only the
+      // menu rows are gone, so nothing breaks if a link is followed.
       { labelKey: 'nav.benchmarks', to: '/benchmarks', icon: BarChart3, moduleKey: 'cost-benchmark', advancedOnly: true },
     ],
   },

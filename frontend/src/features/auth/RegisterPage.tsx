@@ -469,23 +469,12 @@ export function RegisterPage() {
                   {t('auth.login', 'Sign in')}
                 </Link>
               </p>
-              <button
-                type="button"
-                onClick={() => navigate('/login')}
-                className="mt-2 block w-full text-center text-2xs text-oe-blue hover:text-oe-blue-hover hover:underline font-medium cursor-pointer transition-colors"
-              >
-                {t('auth.try_demo', 'Try demo account →')}
-              </button>
             </div>
           </div>
 
           {/* Mobile footer */}
           <div className="lg:hidden mt-3 text-center text-2xs text-content-quaternary">
-            <div className="flex items-center justify-center gap-3">
-              <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-              <span>·</span>
-              <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
-            </div>
+            <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
           </div>
         </div>
       </div>

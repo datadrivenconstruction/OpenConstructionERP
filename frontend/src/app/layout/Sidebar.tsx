@@ -15,7 +15,6 @@ import {
   Info,
   ChevronDown,
   ChevronRight,
-  Sparkles,
   X,
   ClipboardList,
   Users,
@@ -29,7 +28,6 @@ import {
   EyeOff,
   Pencil,
   Check,
-  Github,
   Loader2,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,7 +36,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { apiGet } from '@/shared/lib/api';
 import { UpdateNotification } from '@/shared/ui/UpdateChecker';
-import { ArticleNewsCard } from '@/shared/ui/ArticleNewsCard';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -54,7 +51,6 @@ import {
   SIDEBAR_WIDTH_FULL,
   SIDEBAR_WIDTH_ICON,
 } from '@/stores/useSidebarCollapseStore';
-import { RequestCustomModuleDialog } from '@/features/modules/RequestCustomModuleDialog';
 import {
   useActiveProjectProfile,
   buildModuleGate,
@@ -315,6 +311,126 @@ function writePinned(arr: string[]) {
   }
 }
 
+/** localStorage key for per-route click counts. Purely a client-side
+ *  convenience: the counts colour the most-travelled rows so a busy menu
+ *  reads at a glance. Never synced to the server. */
+const USAGE_KEY = 'oe_nav_usage';
+
+function readUsage(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(USAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed as Record<string, number>;
+    }
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
+function writeUsage(map: Record<string, number>) {
+  try {
+    localStorage.setItem(USAGE_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** How strongly a row is accented from its click history. */
+export type NavHeat = 'hot' | 'warm' | null;
+
+/** Rank routes by click count: the top 3 well-used routes go 'hot'
+ *  (orange accent), the next 5 'warm' (amber). A route needs at least
+ *  3 recorded visits before it earns any colour, so a fresh install -
+ *  or an accidental click - never lights anything up. */
+function computeHeat(usage: Record<string, number>): Record<string, NavHeat> {
+  const ranked = Object.entries(usage)
+    .filter(([, n]) => n >= 3)
+    .sort((a, b) => b[1] - a[1]);
+  const out: Record<string, NavHeat> = {};
+  ranked.slice(0, 3).forEach(([route]) => (out[route] = 'hot'));
+  ranked.slice(3, 8).forEach(([route]) => (out[route] = 'warm'));
+  return out;
+}
+
+/** localStorage key for MANUAL row colours assigned in Edit menu
+ *  (right-click a row). A manual colour outranks the automatic usage
+ *  heat; the special value 'none' suppresses colour on that row
+ *  entirely. */
+const NAV_COLORS_KEY = 'oe_nav_colors';
+
+/** The named accents a row can carry - the automatic tiers reuse the
+ *  same visual language. Literal class strings on purpose: Tailwind's
+ *  scanner must see them in source. */
+const ACCENT_CLASSES: Record<string, string> = {
+  hot: 'border-orange-500/80 bg-orange-500/[0.06] text-content-primary',
+  warm: 'border-amber-400/70 bg-amber-400/[0.05]',
+  orange: 'border-orange-500/80 bg-orange-500/[0.07] text-content-primary',
+  amber: 'border-amber-400/80 bg-amber-400/[0.07]',
+  blue: 'border-sky-500/70 bg-sky-500/[0.07]',
+  green: 'border-emerald-500/70 bg-emerald-500/[0.07]',
+  purple: 'border-violet-500/70 bg-violet-500/[0.07]',
+  red: 'border-rose-500/70 bg-rose-500/[0.07]',
+};
+
+/** Swatch colours for the edit-menu colour picker (right-click a row). */
+const ACCENT_SWATCHES: Record<string, string> = {
+  orange: '#f97316',
+  amber: '#fbbf24',
+  blue: '#0ea5e9',
+  green: '#10b981',
+  purple: '#8b5cf6',
+  red: '#f43f5e',
+};
+
+function readNavColors(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(NAV_COLORS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed as Record<string, string>;
+    }
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
+function writeNavColors(map: Record<string, string>) {
+  try {
+    localStorage.setItem(NAV_COLORS_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** localStorage key for the user's own ordering of the nav sections
+ *  (Edit menu up/down arrows). Ids missing from the saved list keep
+ *  their catalog order, after the ordered ones. */
+const GROUP_ORDER_KEY = 'oe_group_order';
+
+function readGroupOrder(): string[] {
+  try {
+    const raw = localStorage.getItem(GROUP_ORDER_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((g): g is string => typeof g === 'string');
+    }
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function writeGroupOrder(arr: string[]) {
+  try {
+    localStorage.setItem(GROUP_ORDER_KEY, JSON.stringify(arr));
+  } catch {
+    /* ignore */
+  }
+}
+
 // Stable data-testid map for the ProductTour spotlight. Tests + the
 // onboarding walk-through query the sidebar by these attributes
 // rather than by label, so they survive i18n changes. Only routes the
@@ -517,6 +633,70 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // pin/unpin via the small icon-button that appears on item hover.
   const [pinned, setPinned] = useState<string[]>(() => readPinned());
 
+  // Per-route click counts -> colour accents on the busiest rows.
+  const [usage, setUsage] = useState<Record<string, number>>(() => readUsage());
+  const heatByRoute = useMemo(() => computeHeat(usage), [usage]);
+  const recordNav = useCallback((route: string) => {
+    setUsage((prev) => {
+      const next = { ...prev, [route]: (prev[route] ?? 0) + 1 };
+      writeUsage(next);
+      return next;
+    });
+  }, []);
+
+  // Manual colour overrides (Edit menu, right-click a row). A manual
+  // colour outranks the usage heat; 'none' silences a row completely.
+  const [navColors, setNavColors] = useState<Record<string, string>>(() => readNavColors());
+  const setRowColor = useCallback((route: string, color: string | null) => {
+    setNavColors((prev) => {
+      const next = { ...prev };
+      if (color === null) delete next[route];
+      else next[route] = color;
+      writeNavColors(next);
+      return next;
+    });
+  }, []);
+  const accentFor = useCallback(
+    (route: string): string | null => {
+      const manual = navColors[route];
+      if (manual === 'none') return null;
+      if (manual && ACCENT_CLASSES[manual]) return manual;
+      const heat = heatByRoute[route];
+      return heat ?? null;
+    },
+    [navColors, heatByRoute],
+  );
+
+  // Right-click colour picker, only while the menu editor is open.
+  const [colorMenu, setColorMenu] = useState<{ x: number; y: number; route: string; label: string } | null>(null);
+  const openColorMenu = useCallback((route: string, label: string, x: number, y: number) => {
+    setColorMenu({ x, y, route, label });
+  }, []);
+
+  // User-chosen section order (Edit menu up/down). Sections the user has
+  // never moved keep their catalog order, after the ordered ones.
+  const [groupOrder, setGroupOrder] = useState<string[]>(() => readGroupOrder());
+  const orderedNavGroups = useMemo(() => {
+    if (groupOrder.length === 0) return navGroups;
+    const rank = new Map(groupOrder.map((id, i) => [id, i]));
+    return [...navGroups]
+      .map((g, catalogIdx) => ({ g, key: rank.has(g.id) ? rank.get(g.id)! : groupOrder.length + catalogIdx }))
+      .sort((a, b) => a.key - b.key)
+      .map((x) => x.g);
+  }, [groupOrder]);
+  const moveGroup = useCallback(
+    (groupId: string, dir: -1 | 1) => {
+      const ids = orderedNavGroups.map((g) => g.id);
+      const i = ids.indexOf(groupId);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= ids.length) return;
+      [ids[i], ids[j]] = [ids[j]!, ids[i]!];
+      writeGroupOrder(ids);
+      setGroupOrder(ids);
+    },
+    [orderedNavGroups],
+  );
+
   // ── Menu editor state ───────────────────────────────────────────────
   // `hiddenModules` is the *persisted* set — drives which rows are
   // filtered out of the rendered nav in normal mode. Persistence is
@@ -531,6 +711,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // module and hiding a section share one Save/Cancel gesture.
   const { hiddenModules, setHiddenModules } = useHiddenModules();
   const [editMode, setEditMode] = useState(false);
+  // Leaving the menu editor closes any open colour picker with it.
+  useEffect(() => {
+    if (!editMode) setColorMenu(null);
+  }, [editMode]);
   const [editingHidden, setEditingHidden] = useState<string[]>([]);
   const [editingHiddenGroups, setEditingHiddenGroups] = useState<string[]>([]);
 
@@ -661,11 +845,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdvanced, userRole, hiddenModules, hiddenGroups, enabledModules, isRouteBackendDisabled]);
 
-  // Custom-module request dialog — opens from the "Request a custom
-  // module" CTA at the bottom of the nav (below the "+ Add module"
-  // developer-guide tile). The dialog itself handles community vs
-  // bespoke routing.
-  const [customModuleOpen, setCustomModuleOpen] = useState(false);
 
   // Persist collapsed state to localStorage
   useEffect(() => {
@@ -817,7 +996,19 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // No active project / no profile / focus mode OFF → `gate.active` is
   // false and every row renders exactly as the flat default.
   const { profile: activeProfile } = useActiveProjectProfile();
-  const gate = buildModuleGate(activeProfile);
+  const rawGate = buildModuleGate(activeProfile);
+  // The sequence chips read as clutter to users who never asked for a
+  // guided journey - a menu full of numbered badges is what "lost its
+  // refinement" looks like. Numbering is now opt-in per browser
+  // (localStorage 'oe_journey_numbers' = '1'); the profile gate itself
+  // still works everywhere else it is used.
+  let journeyNumbersOn = false;
+  try {
+    journeyNumbersOn = localStorage.getItem('oe_journey_numbers') === '1';
+  } catch {
+    /* ignore */
+  }
+  const gate = journeyNumbersOn ? rawGate : { ...rawGate, active: false };
   // Running 1..N sequence assigned to project-needed rows as they
   // render top-to-bottom. Resets every render (component body re-runs),
   // so the numbers always read in visual order regardless of grouping.
@@ -1035,6 +1226,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     editMode={editMode}
                     isItemHidden={editingHidden.includes(item.to)}
                     onToggleHidden={toggleItemHidden}
+                    accent={accentFor(item.to)}
+                    onNavRecord={recordNav}
+                    onColorMenu={editMode ? openColorMenu : undefined}
                   />
                 </li>
               ))}
@@ -1049,7 +1243,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             reordering. Each row is only annotated: needed → sequence
             number; not needed → smaller + greyed; unconstrained → as
             default. Focus OFF / no profile → every row is default. */}
-        {navGroups.map((group) => {
+        {orderedNavGroups.map((group, orderIdx) => {
           // Hide entire group in simple mode if flagged
           if (group.hideInSimple && !isAdvanced) return null;
 
@@ -1155,6 +1349,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               editMode={editMode}
               isGroupHidden={editingHiddenGroups.includes(group.id)}
               onToggleGroupHidden={() => toggleGroupHidden(group.id)}
+              onMoveUp={orderIdx > 0 ? () => moveGroup(group.id, -1) : undefined}
+              onMoveDown={
+                orderIdx < orderedNavGroups.length - 1 ? () => moveGroup(group.id, 1) : undefined
+              }
             >
               <ul className="space-y-0.5">
                 {visibleItems.map((item, i) => {
@@ -1194,6 +1392,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                         editMode={editMode}
                         isItemHidden={editingHidden.includes(item.to)}
                         onToggleHidden={toggleItemHidden}
+                        accent={accentFor(item.to)}
+                        onNavRecord={recordNav}
+                        onColorMenu={editMode ? openColorMenu : undefined}
                       />
                     </li>
                   );
@@ -1347,56 +1548,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             )}
           </NavLink>
         </div>
-        {/* Request-a-custom-module CTA — second dashed tile, purple
-             accent, opens a popup instead of navigating. The popup
-             routes the request to two destinations depending on the
-             user's choice:
-               • "Could help others too"  → community / GitHub backlog
-                 → ends up in a future open-source release.
-               • "Only for my company"    → private / bespoke quote
-                 → DDC team replies with scope + price.
-             We keep this distinct from the developer-guide tile above
-             on purpose: contributors who want to build a module
-             themselves use the guide; users who want us to build it
-             for them use this dialog. */}
-        <div className={clsx('pt-1 pb-3', iconified ? 'px-0 flex justify-center' : 'px-3')}>
-          <button
-            type="button"
-            onClick={() => {
-              setCustomModuleOpen(true);
-              onClose?.();
-            }}
-            title={
-              iconified
-                ? t('nav.request_custom_module', { defaultValue: 'Request a custom module' })
-                : undefined
-            }
-            className={clsx(
-              'group flex items-center rounded-lg border border-dashed border-purple-400/40 bg-gradient-to-br from-purple-500/5 via-transparent to-purple-50/40 dark:from-purple-500/10 dark:via-transparent dark:to-slate-900/30 hover:border-purple-500 hover:from-purple-500/10 hover:shadow-sm transition-all text-left',
-              iconified ? 'h-9 w-9 justify-center' : 'w-full gap-2.5 px-2.5 py-2',
-            )}
-            aria-haspopup="dialog"
-            aria-expanded={customModuleOpen}
-          >
-            <span className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-              <Sparkles size={14} strokeWidth={2.25} />
-            </span>
-            {!iconified && (
-              <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-content-primary leading-tight">
-                  {t('nav.request_custom_module', {
-                    defaultValue: 'Request a custom module',
-                  })}
-                </span>
-                <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
-                  {t('nav.request_custom_module_hint', {
-                    defaultValue: 'Missing something? Tell us what you need',
-                  })}
-                </span>
-              </span>
-            )}
-          </button>
-        </div>
       </nav>
 
       {/* Admin / setup surfaces — rendered as a 2-column button grid
@@ -1472,97 +1623,24 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
         )}
 
-        {/* Featured article card - links out to the long-form article on the
-            uberization of construction and the idea behind the platform.
-            Hidden in icon-only mode (the title + subtitle need width). */}
-        {!iconified && (
-          <div className="mt-2">
-            <ArticleNewsCard />
-          </div>
-        )}
-
-        {/* Version + AGPL + GitHub link
-            Layout: GitHub icon (left) · version · AGPL link.
-            The GitHub link uses Lucide's Github mark — keeps the row aligned
-            with the rest of the sidebar's lucide icons and gives a clear
-            visual entry point to the source repo. */}
+        {/* Version + AGPL link. Vendor links (GitHub repo, Telegram
+            community, article promo card) were removed from the shell; the
+            licence link is an AGPL-3.0 obligation and stays, as does the
+            running version so a support conversation can name the build. */}
         {iconified ? (
-          // Icon-only footer: GitHub + Telegram stacked. The expand
-          // toggle lives on the floating edge-pill, not down here, so
-          // users see only one toggle entry-point — no duplicate UI.
-          <div className="pt-2 pb-1 flex flex-col items-center gap-1">
+          <div className="pt-2 pb-1 flex flex-col items-center">
             <a
-              href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+              href="/api/source"
               target="_blank"
               rel="noopener noreferrer"
-              title={`${t('sidebar.github_repo', { defaultValue: 'GitHub repository' })} (v${APP_VERSION})`}
-              aria-label={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all"
+              title={`AGPL-3.0 (v${APP_VERSION})`}
+              className="text-[9px] font-medium text-content-tertiary hover:text-content-secondary transition-colors"
             >
-              <Github size={13} strokeWidth={1.75} className="text-content-secondary" />
-            </a>
-            <a
-              href="https://t.me/datadrivenconstruction"
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t('sidebar.community_title', { defaultValue: 'Community' })}
-              aria-label={t('sidebar.telegram_community', { defaultValue: 'Telegram community' })}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px] text-content-secondary" aria-hidden>
-                <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z" />
-              </svg>
+              AGPL
             </a>
           </div>
         ) : (
-          // GitHub / Community / version row.
-          //
-          // The horizontal padding here MUST mirror AdminGrid's column geometry
-          // (the parent `<div>` already gives us `px-2`; AdminGrid's `<ul>` uses
-          // `grid-cols-2 gap-1` with no extra inner padding). Earlier this row
-          // wrapped its buttons in another `px-2`, which made each button
-          // ~8 px narrower than every admin tile above. The buttons are now
-          // siblings of the admin grid in the layout coordinate space:
-          // same outer `px-2`, same `gap-1` between the two cards.
           <div className="pb-2 pt-1 flex flex-col gap-1.5">
-            <div className="grid grid-cols-2 gap-1">
-              <a
-                href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-                aria-label={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-                className={clsx(
-                  'group flex h-8 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left transition-colors duration-fast ease-oe',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                  'border-border-light/60 bg-surface-primary text-content-secondary hover:bg-surface-secondary hover:text-content-primary hover:border-border-medium',
-                )}
-              >
-                <Github size={14} strokeWidth={1.75} aria-hidden className="shrink-0 text-content-secondary" />
-                <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
-                  GitHub
-                </span>
-              </a>
-              <a
-                href="https://t.me/datadrivenconstruction"
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t('sidebar.join_telegram', { defaultValue: 'Join the Telegram community' })}
-                aria-label={t('sidebar.telegram_community', { defaultValue: 'Telegram community' })}
-                className={clsx(
-                  'group flex h-8 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left transition-colors duration-fast ease-oe',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                  'border-border-light/60 bg-surface-primary text-content-secondary hover:bg-surface-secondary hover:text-content-primary hover:border-border-medium',
-                )}
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-[14px] w-[14px] shrink-0 text-content-secondary" aria-hidden>
-                  <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z" />
-                </svg>
-                <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
-                  {t('sidebar.community_title', { defaultValue: 'Community' })}
-                </span>
-              </a>
-            </div>
             <div className="flex items-center justify-center gap-1.5 min-w-0">
               <span className="text-2xs text-content-tertiary">v{APP_VERSION}</span>
               <span className="text-2xs text-content-quaternary/40">·</span>
@@ -1578,14 +1656,116 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
         )}
       </div>
-      {/* Mounted at the aside root so the dialog escapes any
-          z-index / overflow trap imposed by the inner nav scroller.
-          The dialog itself is full-screen modal (fixed inset-0) and
-          self-renders only when open=true. */}
-      <RequestCustomModuleDialog
-        open={customModuleOpen}
-        onClose={() => setCustomModuleOpen(false)}
-      />
+      {/* Edit-menu colour picker — opened by right-clicking a row while
+          the menu editor is on. Manual colour outranks the automatic
+          usage heat; the reset entries clear the click history that
+          drives the automatic tier. */}
+      {colorMenu && (
+        <>
+          <button
+            type="button"
+            aria-label={t('sidebar.close_color_menu', { defaultValue: 'Close colour menu' })}
+            className="fixed inset-0 z-[75] cursor-default"
+            onClick={() => setColorMenu(null)}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setColorMenu(null);
+            }}
+          />
+          <div
+            className="fixed z-[76] w-56 rounded-lg border border-border-light bg-surface-primary py-1 shadow-xl"
+            style={{
+              left: Math.min(colorMenu.x, window.innerWidth - 240),
+              top: Math.min(colorMenu.y, window.innerHeight - 300),
+            }}
+          >
+            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-content-tertiary truncate">
+              {colorMenu.label}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5">
+              {Object.entries(ACCENT_SWATCHES).map(([name, hex]) => (
+                <button
+                  key={name}
+                  type="button"
+                  title={name}
+                  aria-label={name}
+                  onClick={() => {
+                    setRowColor(colorMenu.route, name);
+                    setColorMenu(null);
+                  }}
+                  className={clsx(
+                    'h-5 w-5 rounded-full border-2 transition-transform hover:scale-110',
+                    navColors[colorMenu.route] === name ? 'border-content-primary' : 'border-transparent',
+                  )}
+                  style={{ backgroundColor: hex }}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-surface-secondary"
+              onClick={() => {
+                setRowColor(colorMenu.route, null);
+                setColorMenu(null);
+              }}
+            >
+              {t('sidebar.color_auto', { defaultValue: 'Automatic (by usage)' })}
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-surface-secondary"
+              onClick={() => {
+                setRowColor(colorMenu.route, 'none');
+                setColorMenu(null);
+              }}
+            >
+              {t('sidebar.color_none', { defaultValue: 'No colour' })}
+            </button>
+            <div className="my-1 border-t border-border-light" />
+            <button
+              type="button"
+              className="flex w-full items-center px-3 py-1.5 text-left text-sm hover:bg-surface-secondary"
+              onClick={() => {
+                setUsage((prev) => {
+                  const next = { ...prev };
+                  delete next[colorMenu.route];
+                  writeUsage(next);
+                  return next;
+                });
+                setColorMenu(null);
+              }}
+            >
+              {t('sidebar.reset_clicks_one', { defaultValue: 'Reset click history (this link)' })}
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center px-3 py-1.5 text-left text-sm text-rose-600 hover:bg-surface-secondary"
+              onClick={() => {
+                setUsage(() => {
+                  writeUsage({});
+                  return {};
+                });
+                setColorMenu(null);
+              }}
+            >
+              {t('sidebar.reset_clicks_all', { defaultValue: 'Reset click history (all links)' })}
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center px-3 py-1.5 text-left text-sm text-rose-600 hover:bg-surface-secondary"
+              onClick={() => {
+                setNavColors(() => {
+                  writeNavColors({});
+                  return {};
+                });
+                setColorMenu(null);
+              }}
+            >
+              {t('sidebar.reset_colors_all', { defaultValue: 'Clear all manual colours' })}
+            </button>
+          </div>
+        </>
+      )}
     </aside>
   );
 }
@@ -1600,6 +1780,8 @@ function NavGroupSection({
   editMode,
   isGroupHidden,
   onToggleGroupHidden,
+  onMoveUp,
+  onMoveDown,
 }: {
   label: string;
   description?: string;
@@ -1613,6 +1795,10 @@ function NavGroupSection({
   editMode?: boolean;
   isGroupHidden?: boolean;
   onToggleGroupHidden?: () => void;
+  /** Edit-menu section reordering: move this whole section one slot up or
+   *  down. Undefined at the ends of the list, so the arrow greys out. */
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }) {
   const { t } = useTranslation();
   // In icon-only mode there is no room for the group header chevron;
@@ -1682,6 +1868,40 @@ function NavGroupSection({
           aria-hidden
         />
       </button>
+      {editMode && (
+        <>
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!onMoveUp}
+            aria-label={t('sidebar.move_group_up', { defaultValue: 'Move {{label}} up', label })}
+            title={t('sidebar.move_group_up', { defaultValue: 'Move {{label}} up', label })}
+            className={clsx(
+              'flex h-6 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-150',
+              onMoveUp
+                ? 'text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10'
+                : 'text-content-quaternary/40 cursor-default',
+            )}
+          >
+            <ChevronDown size={12} strokeWidth={2} className="rotate-180" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!onMoveDown}
+            aria-label={t('sidebar.move_group_down', { defaultValue: 'Move {{label}} down', label })}
+            title={t('sidebar.move_group_down', { defaultValue: 'Move {{label}} down', label })}
+            className={clsx(
+              'flex h-6 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-150',
+              onMoveDown
+                ? 'text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10'
+                : 'text-content-quaternary/40 cursor-default',
+            )}
+          >
+            <ChevronDown size={12} strokeWidth={2} />
+          </button>
+        </>
+      )}
       {editMode && onToggleGroupHidden && (
         <button
           type="button"
@@ -1735,6 +1955,9 @@ function SidebarItem({
   editMode,
   isItemHidden,
   onToggleHidden,
+  accent,
+  onNavRecord,
+  onColorMenu,
 }: {
   item: NavItem;
   label: string;
@@ -1752,6 +1975,13 @@ function SidebarItem({
   editMode?: boolean;
   isItemHidden?: boolean;
   onToggleHidden?: (route: string) => void;
+  /** Colour accent on the row: an automatic usage tier ('hot'/'warm') or
+   *  a manually assigned colour name. Active state wins visually. */
+  accent?: string | null;
+  onNavRecord?: (route: string) => void;
+  /** Edit-menu colour picker: right-clicking the row opens it. Only
+   *  passed while the menu editor is open. */
+  onColorMenu?: (route: string, label: string, x: number, y: number) => void;
 }) {
   const { t } = useTranslation();
   const Icon = item.icon;
@@ -1808,7 +2038,10 @@ function SidebarItem({
       <NavLink
         to={item.to}
         end={item.to === '/' || hasQuery}
-        onClick={onClick}
+        onClick={() => {
+          onNavRecord?.(item.to);
+          onClick?.();
+        }}
         title={titleText}
         aria-label={label}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
@@ -1856,8 +2089,19 @@ function SidebarItem({
             onToggleHidden?.(item.to);
             return;
           }
+          onNavRecord?.(item.to);
           onClick?.();
         }}
+        onContextMenu={
+          onColorMenu
+            ? (e) => {
+                // Edit-menu colour picker — the browser menu would cover it.
+                e.preventDefault();
+                e.stopPropagation();
+                onColorMenu(item.to, label, e.clientX, e.clientY);
+              }
+            : undefined
+        }
         title={titleText}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
         {...(tourTestId ? { 'data-testid': tourTestId } : {})}
@@ -1879,6 +2123,11 @@ function SidebarItem({
               : active
                 ? 'font-semibold border-oe-blue bg-oe-blue/[0.14] text-oe-blue shadow-[inset_0_0_0_1px_rgba(0,122,255,0.06)] dark:bg-oe-blue/25'
                 : 'font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
+            // Colour accent — automatic usage tier or a manually assigned
+            // colour (Edit menu right-click). Rendered in edit mode too,
+            // so assigning a colour shows its effect immediately; only the
+            // blue active treatment outranks it.
+            !active && accent && ACCENT_CLASSES[accent],
             editMode && isItemHidden && 'opacity-50',
           );
         }}
@@ -1907,11 +2156,11 @@ function SidebarItem({
         ) : (
           <Icon size={compact ? 14 : 16} strokeWidth={isActive ? 2 : 1.75} className="shrink-0" />
         )}
-        {/* German compound words (Leistungsverzeichnisse, Element-Abnahme)
-            overflow a single 264px line, so labels may wrap onto a second
-            line instead of clipping mid-word. The title tooltip stays as
-            the safety net for labels that exceed even two lines. */}
-        <span className="min-w-0 line-clamp-2 break-words leading-snug" title={label}>
+        {/* One line, truncated. v16 let labels wrap to two lines (German
+            compound words), which turned an English menu ragged - rows of
+            uneven height read as unfinished. The title tooltip carries the
+            full label for anything that truncates. */}
+        <span className="min-w-0 truncate leading-snug" title={label}>
           {label}
         </span>
         {/* Right-edge cluster — kbd hint first, badges last, so the

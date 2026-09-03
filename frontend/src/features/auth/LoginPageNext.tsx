@@ -23,8 +23,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Zap,
-  ArrowUpRight,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown,
   Table2, Database, Layers, Box, Ruler, Sparkles,
   CalendarDays, ShieldCheck, BrainCircuit, Boxes,
 } from 'lucide-react';
@@ -75,11 +74,6 @@ export function LoginPageNext() {
     () => localStorage.getItem('oe_remember') === '1',
   );
   const [langOpen, setLangOpen] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(true);
-  const [demoLoading, setDemoLoading] = useState<string | null>(null);
-  // null = not probed yet; the demo block renders only once the server
-  // confirms demo accounts are available (see the first-run effect below).
-  const [demoEnabled, setDemoEnabled] = useState<boolean | null>(null);
   const langRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -90,30 +84,6 @@ export function LoginPageNext() {
     setEmail('');
     setPassword('');
     setError('');
-  }, []);
-
-  // Probe whether this server offers demo accounts (public, no auth). The
-  // demo block is shown only when the server confirms demo is enabled, so
-  // production installs (SEED_DEMO=false) never present a demo sign-in - and a
-  // click can never silently create a demo account. Older servers omit the
-  // field, which we treat as enabled. A probe failure leaves the block hidden.
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch('/api/v1/auth/first-run', {
-          headers: { Accept: 'application/json' },
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as { demo_enabled?: boolean };
-        if (!cancelled) setDemoEnabled(data.demo_enabled !== false);
-      } catch {
-        /* leave demoEnabled null -> demo block stays hidden */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
@@ -170,51 +140,6 @@ export function LoginPageNext() {
       setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Mirrors the seeded demo accounts in backend/app/main.py::_seed_demo_account:
-  // every email here has to be one that seeder creates, and each name has to
-  // match that account's full_name. The admin tile shows the role word instead
-  // of the seeded person on purpose - that is what a first-time visitor scans
-  // for. No password is listed on purpose either: the seeder generates a fresh
-  // random one per install, so any literal printed here would be wrong on every
-  // install. The tiles sign in through /auth/demo-login/ instead.
-  const demoAccounts = [
-    { email: 'demo@openconstructionerp.com', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
-  ];
-
-  const handleDemoLogin = async (demoEmail: string) => {
-    setDemoLoading(demoEmail);
-    setError('');
-    setEmail('');
-    setPassword('');
-    try {
-      // Password-less demo sign-in for the seeded showcase accounts only.
-      // When demo seeding is disabled the server returns 404 and we surface
-      // the message - we never fall back to registering the account, so a
-      // demo click cannot create one in production. The demo block is also
-      // hidden entirely in that configuration.
-      const res = await fetch('/api/v1/users/auth/demo-login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: demoEmail }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        const parsed = extractErrorMessageFromBody(data);
-        setError(parsed || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
-        return;
-      }
-      const data = await res.json();
-      setTokens(data.access_token, data.refresh_token, false, demoEmail);
-      navigate(nextPath, { replace: true });
-    } catch {
-      setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
-    } finally {
-      setDemoLoading(null);
     }
   };
 
@@ -701,55 +626,6 @@ export function LoginPageNext() {
                   {t('auth.login', 'Sign in')}
                 </Button>
               </form>
-
-              {/* Demo accounts - shown only when the server confirms demo
-                  accounts exist (SEED_DEMO on). Production installs hide it. */}
-              {demoEnabled === true && (
-              <div className="mt-6 animate-stagger-in" style={{ animationDelay: '260ms' }}>
-                <button
-                  type="button"
-                  onClick={() => setDemoOpen(!demoOpen)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-light bg-surface-primary px-4 py-2.5 text-sm text-content-secondary hover:text-oe-blue hover:border-oe-blue/40 transition-all"
-                >
-                  <Zap size={14} className="text-oe-blue" />
-                  <span className="font-semibold">{t('auth.demo_access', 'Demo Access')}</span>
-                  <ChevronDown
-                    size={14}
-                    className={`text-content-tertiary transition-transform duration-200 ${demoOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                {demoOpen && (
-                  <div className="mt-2 space-y-1.5 animate-stagger-in">
-                    {demoAccounts.map((acct) => (
-                      <button
-                        key={acct.email}
-                        type="button"
-                        onClick={() => handleDemoLogin(acct.email)}
-                        disabled={demoLoading !== null}
-                        className="oe-glass-lite group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left transition-all hover:translate-y-[-1px] hover:border-oe-blue/30 disabled:opacity-50"
-                      >
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
-                          {demoLoading === acct.email ? (
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                          ) : (
-                            acct.letter
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[13px] font-semibold text-content-primary dark:text-white">{acct.name}</div>
-                          <div className="text-[11px] text-content-tertiary truncate">{acct.email} · {acct.role}</div>
-                        </div>
-                        <ArrowUpRight size={15} className="text-content-quaternary group-hover:text-oe-blue transition-colors shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              )}
 
               {/* Footer */}
               <div className="mt-7 animate-stagger-in" style={{ animationDelay: '340ms' }}>
