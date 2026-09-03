@@ -18,7 +18,7 @@
 // the axis here is the correct one, and the divergence is on the other side.
 //
 // The images live under `frontend/public/assets/people/` and are addressed by
-// runtime path strings on purpose: 58 webp files as Vite imports would bloat
+// runtime path strings on purpose: 133 webp files as Vite imports would bloat
 // the module graph, while public-dir paths stay lazy and cacheable.
 //
 //   prf-*.webp  340x480 role portraits (the pooled cast)
@@ -118,13 +118,17 @@ export const ROLE_CAST: Record<CaseRole, string[]> = {
 };
 
 /**
- * Case slug -> bespoke photo path for the nine flagship cases that were shot
+ * Case slug -> bespoke photo path for the ten flagship cases that were shot
  * individually (`pbk-<case-slug>.webp` maps 1:1 to the case slug). A bespoke
  * photo always wins over the pooled role cast in `caseFaceFor`.
  *
  * The takeoff shot was framed for the retired PDF pricing case; the German
  * takeoff case inherited that route, so it inherits the photograph, filed
- * under its own slug to keep the 1:1 rule.
+ * under its own slug to keep the 1:1 rule. The retired case's own
+ * `pbk-price-from-pdf.webp` is still on disk and is reached from nowhere -
+ * eleven files against these ten entries. Deleting a shipped asset is the one
+ * irreversible step here and has not been taken; `caseFaces.test.ts` names it
+ * as retired so that the NEXT orphan fails instead of joining it quietly.
  */
 export const BESPOKE_CASE_PHOTOS: Record<string, string> = {
   'answer-an-rfi': `${PEOPLE_ASSETS_BASE}/pbk-answer-an-rfi.webp`,

@@ -418,6 +418,51 @@ describe('closed set - every path the module can ever return exists on disk', ()
     }
   });
 
+  /**
+   * `pbk-*` files on disk that no case points at and that stay there on
+   * purpose. Retiring a case retires its route, not its photograph: the
+   * marketing site's `put_case_face.py` records that deleting a shipped asset
+   * "earns its own decision" and declines to take it, so the file outlives the
+   * case until somebody does.
+   *
+   * The list is what makes the check below a gate rather than a shrug. Without
+   * a name to excuse, the disk half could only be written as "ignore whatever
+   * is unexpected", which passes on everything; with it, this one file is
+   * accounted for and the NEXT orphan fails.
+   */
+  const RETIRED_BESPOKE_PHOTOS = new Set(['pbk-price-from-pdf.webp']);
+
+  it('has no bespoke photo on disk that nothing points at', () => {
+    // The other direction of the check above. That one proves every entry
+    // names a file; this one proves every file has an entry, so a photo left
+    // behind by a rename, or shot for a case that never shipped, shows up here
+    // instead of sitting in the folder unread. The country half has had both
+    // directions since the manifest landed - this half had only one.
+    const claimed = new Set(Object.keys(BESPOKE_CASE_PHOTOS).map((slug) => `pbk-${slug}.webp`));
+    const orphans = [...filesOnDisk]
+      .filter((name) => name.startsWith('pbk-'))
+      .filter((name) => !claimed.has(name) && !RETIRED_BESPOKE_PHOTOS.has(name))
+      .sort();
+    expect(
+      orphans,
+      'pbk-*.webp on disk that no case claims - add the case, or retire the name in RETIRED_BESPOKE_PHOTOS',
+    ).toEqual([]);
+  });
+
+  it('keeps the retired list honest, so a name cannot excuse a file that is gone', () => {
+    // A retired entry whose file has since been deleted would sit here forever
+    // excusing nothing, and would hide the day somebody finally takes the
+    // delete decision. Both directions, same as the manifest.
+    for (const name of RETIRED_BESPOKE_PHOTOS) {
+      expect(filesOnDisk, `${name} is listed as retired but is not on disk`).toContain(name);
+      const slug = name.slice('pbk-'.length, -'.webp'.length);
+      expect(
+        Object.keys(BESPOKE_CASE_PHOTOS),
+        `${name} is listed as retired and also claimed by a case`,
+      ).not.toContain(slug);
+    }
+  });
+
   it('covers every company thumb and scene reachable from either id scheme', () => {
     const ids = [...COMPANY_TYPE_META.map((m) => m.id as string), ...backendPresetKeys()];
     for (const id of ids) {
