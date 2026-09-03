@@ -39,6 +39,19 @@ vi.mock('@/features/schedule-advanced/api', () => ({
   listCalendars: vi.fn(),
 }));
 
+// The shared setup stubs ``useNavigate`` with a throwaway spy, so a click-through
+// assertion needs its own handle on the navigate the component actually calls.
+const navigateSpy = vi.hoisted(() => vi.fn());
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => navigateSpy,
+    useParams: () => ({}),
+    useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  };
+});
+
 import { scheduleApi } from './api';
 import { listAssignmentsForActivity, listResources } from '@/features/resources/api';
 import { listCalendars } from '@/features/schedule-advanced/api';
@@ -234,5 +247,223 @@ describe('ActivityGrid', () => {
     renderGrid();
     expect(listAssignmentsForActivity).not.toHaveBeenCalled();
     expect(screen.getByTestId('grid-resources-a1').textContent).toBe('');
+  });
+});
+
+/* ── Delivery column (work-requests / team-standup integration) ─────────
+   The grid is handed a prebuilt index rather than fetching anything itself,
+   so these cases are about what it *renders* and where a chip *goes*. The
+   modules being absent is modelled the way the page models it: no `delivery`
+   prop at all, which is what `useDeliveryData` produces on a 404. */
+
+const REQ = {
+  id: 'req-1',
+  reference: 'WR-WKS-000001',
+  title: 'MCC-2 build',
+  project_id: 'p1',
+  department: 'workshop',
+  department_name: 'Workshop',
+  stage_name: 'Build',
+  status: 'in_progress',
+  quoted_hours: 180,
+  hours_logged: 70,
+  is_late: true,
+  days_late: 12,
+  schedule_activity_id: 'a1',
+};
+
+const TASK = {
+  id: 'task-1',
+  title: 'Chase the MCC-2 gear',
+  project_id: 'p1',
+  stage_id: 'doing',
+  waiting_on: 'Acme Holdings',
+};
+
+function deliveryProp(overrides = {}) {
+  return {
+    index: {
+      a1: {
+        requests: [REQ],
+        tasks: [TASK],
+        indirectTaskIds: new Set(),
+        quotedHours: 180,
+        loggedHours: 70,
+        lateRequests: 1,
+        lateTasks: 0,
+        blockedTasks: 1,
+        atRisk: true,
+      },
+      a2: {
+        requests: [],
+        tasks: [],
+        indirectTaskIds: new Set(),
+        quotedHours: 0,
+        loggedHours: 0,
+        lateRequests: 0,
+        lateTasks: 0,
+        blockedTasks: 0,
+        atRisk: false,
+      },
+    },
+    doneStages: new Set(['done']),
+    today: '2026-09-03',
+    departmentColour: () => '#7c3aed',
+    onOpenLinks: vi.fn(),
+    ...overrides,
+  };
+}
+
+describe('ActivityGrid delivery column', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('shows a chip per linked request and task on the right row', () => {
+    renderGrid({ delivery: deliveryProp() });
+    expect(screen.getByTestId('delivery-request-req-1')).toHaveTextContent('WR-WKS-000001');
+    expect(screen.getByTestId('delivery-task-task-1')).toHaveTextContent('Chase the MCC-2 gear');
+    // The activity with nothing attached gets the cell, not the chips.
+    expect(screen.getByTestId('delivery-cell-a2')).toBeInTheDocument();
+    expect(screen.queryByTestId('delivery-summary-a2')).not.toBeInTheDocument();
+  });
+
+  it('rolls hours and counts up on the activity', () => {
+    renderGrid({ delivery: deliveryProp() });
+    const summary = screen.getByTestId('delivery-summary-a1').textContent;
+    expect(summary).toContain('70/180 h');
+  });
+
+  it('flags the row when an attachment is late or blocked', () => {
+    renderGrid({ delivery: deliveryProp() });
+    expect(screen.getByTestId('grid-row-a1')).toHaveAttribute('data-delivery-risk', 'true');
+    expect(screen.getByTestId('grid-row-a2')).not.toHaveAttribute('data-delivery-risk');
+  });
+
+  it('opens the record a chip names', () => {
+    renderGrid({ delivery: deliveryProp() });
+    fireEvent.click(screen.getByTestId('delivery-request-req-1'));
+    expect(navigateSpy).toHaveBeenCalledWith('/work-requests/req-1');
+    fireEvent.click(screen.getByTestId('delivery-task-task-1'));
+    expect(navigateSpy).toHaveBeenCalledWith('/team-standup');
+  });
+
+  it('asks the page to open the link picker for that activity', () => {
+    const delivery = deliveryProp();
+    renderGrid({ delivery });
+    fireEvent.click(screen.getByTestId('delivery-link-a1'));
+    expect(delivery.onOpenLinks).toHaveBeenCalledWith('a1');
+  });
+
+  it('hides the whole column when neither module answered', () => {
+    renderGrid();
+    expect(screen.queryByText('Delivery')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('delivery-cell-a1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('col-grip-delivery')).not.toBeInTheDocument();
+    // And the grid it replaced still works exactly as before.
+    expect(screen.getByTestId('grid-row-a1')).toBeInTheDocument();
+  });
+});
+
+/* ── Resizable columns ─────────────────────────────────────────────────── */
+
+function colWidth(key) {
+  const col = document.querySelector('col[data-col="' + key + '"]');
+  return col ? parseInt(col.style.width, 10) : Number.NaN;
+}
+
+function dragGrip(key, by) {
+  const grip = screen.getByTestId('col-grip-' + key);
+  fireEvent.mouseDown(grip, { clientX: 100 });
+  fireEvent.mouseMove(document, { clientX: 100 + by });
+  fireEvent.mouseUp(document, { clientX: 100 + by });
+}
+
+describe('ActivityGrid column widths', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('starts every column at its default width', () => {
+    renderGrid();
+    expect(colWidth('name')).toBe(280);
+    expect(colWidth('wbs')).toBe(76);
+  });
+
+  it('resizes a column by dragging its grip', () => {
+    renderGrid();
+    dragGrip('name', 60);
+    expect(colWidth('name')).toBe(340);
+    // Its neighbours are untouched - a drag widens one column, not the table's
+    // idea of every column.
+    expect(colWidth('wbs')).toBe(76);
+  });
+
+  it('never lets a drag squeeze a column under its minimum', () => {
+    renderGrid();
+    dragGrip('wbs', -500);
+    expect(colWidth('wbs')).toBe(56);
+  });
+
+  it('shows a guideline while a drag is live and drops it on release', () => {
+    renderGrid();
+    const grip = screen.getByTestId('col-grip-name');
+    fireEvent.mouseDown(grip, { clientX: 100 });
+    fireEvent.mouseMove(document, { clientX: 180 });
+    expect(screen.getByTestId('col-resize-guide')).toBeInTheDocument();
+    fireEvent.mouseUp(document, { clientX: 180 });
+    expect(screen.queryByTestId('col-resize-guide')).not.toBeInTheDocument();
+  });
+
+  it('persists a width and restores it on the next mount', () => {
+    const first = renderGrid();
+    dragGrip('name', 60);
+    expect(window.localStorage.getItem('oe.schedule.grid-cols.s1')).toContain('340');
+    first.unmount();
+    renderGrid();
+    expect(colWidth('name')).toBe(340);
+  });
+
+  it('keeps one schedule’s widths out of another’s', () => {
+    const first = renderGrid();
+    dragGrip('name', 60);
+    first.unmount();
+    renderGrid({ scheduleId: 's2' });
+    expect(colWidth('name')).toBe(280);
+  });
+
+  it('auto-fits a column to its widest cell on a double-click', () => {
+    renderGrid();
+    dragGrip('wbs', 200);
+    expect(colWidth('wbs')).toBe(276);
+    fireEvent.doubleClick(screen.getByTestId('col-grip-wbs'));
+    // Back down to the floor: "01" and "02" need nothing like 276px.
+    expect(colWidth('wbs')).toBe(56);
+  });
+
+  it('offers reset and fit-all on a right-click of the header', () => {
+    renderGrid();
+    dragGrip('name', 60);
+    fireEvent.contextMenu(screen.getByTestId('activity-grid').querySelector('thead tr'));
+    expect(screen.getByTestId('col-header-menu')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('col-menu-reset'));
+    expect(colWidth('name')).toBe(280);
+    expect(window.localStorage.getItem('oe.schedule.grid-cols.s1')).toBeNull();
+  });
+
+  it('fits every column at once from the header menu', () => {
+    renderGrid();
+    dragGrip('wbs', 200);
+    fireEvent.contextMenu(screen.getByTestId('activity-grid').querySelector('thead tr'));
+    fireEvent.click(screen.getByTestId('col-menu-fit-all'));
+    expect(colWidth('wbs')).toBe(56);
+    expect(screen.queryByTestId('col-header-menu')).not.toBeInTheDocument();
+  });
+
+  it('gives the delivery column a grip of its own once it is shown', () => {
+    renderGrid({ delivery: deliveryProp() });
+    expect(colWidth('delivery')).toBe(210);
+    dragGrip('delivery', 40);
+    expect(colWidth('delivery')).toBe(250);
   });
 });

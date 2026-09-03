@@ -53,7 +53,11 @@ import { ScheduleCodesPanel } from './ScheduleCodesPanel';
 import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
-import { ActivityGrid } from './ActivityGrid';
+import { ActivityGrid, type GridDelivery } from './ActivityGrid';
+import { DeliveryLinkModal } from './DeliveryLinkModal';
+import { DeliveryRiskPanel } from './DeliveryRiskPanel';
+import { doneStageIds, emptyDelivery } from './delivery';
+import { useDeliveryData, useDeliveryWrites } from './useDelivery';
 import { WorkCalendarManager } from './WorkCalendarManager';
 import { scheduleGuide } from './scheduleGuide';
 import { fetchBIMModels } from '@/features/bim/api';
@@ -1380,6 +1384,43 @@ function ScheduleDetail({
     [ganttData, selectedActivityId],
   );
 
+  /* ── Delivery integration (work requests + standup tasks) ─────────────
+     Read-only apart from the explicit link/create actions in the modal.
+     Both source modules are optional: `enabled` is false when neither
+     answered, and every surface below simply does not render. */
+  const deliveryActivities = useMemo(
+    () => (ganttData?.activities ?? []).map((a) => ({ id: a.id, metadata: a.metadata })),
+    [ganttData],
+  );
+  const deliveryData = useDeliveryData(projectId, deliveryActivities);
+  const [deliveryActivityId, setDeliveryActivityId] = useState<string | null>(null);
+  const deliveryWrites = useDeliveryWrites(schedule.id, () => undefined);
+  const deliveryDoneStages = useMemo(
+    () => doneStageIds(deliveryData.board, projectId),
+    [deliveryData.board, projectId],
+  );
+  const deliveryActivity = useMemo(
+    () => ganttData?.activities.find((a) => a.id === deliveryActivityId) ?? null,
+    [ganttData, deliveryActivityId],
+  );
+  const gridDelivery = useMemo<GridDelivery | undefined>(
+    () =>
+      deliveryData.enabled
+        ? {
+            index: deliveryData.index,
+            doneStages: deliveryDoneStages,
+            today: deliveryData.today,
+            departmentColour: deliveryData.departmentColour,
+            onOpenLinks: setDeliveryActivityId,
+          }
+        : undefined,
+    [deliveryData, deliveryDoneStages],
+  );
+  const boardTasksForProject = useMemo(
+    () => (deliveryData.board?.tasks ?? []).filter((x) => x.project_id === projectId),
+    [deliveryData.board, projectId],
+  );
+
   // Filtered activities for the Gantt chart (Improvement #5)
   const filteredActivities = useMemo(() => {
     const activities = ganttData?.activities ?? [];
@@ -1688,6 +1729,19 @@ function ScheduleDetail({
             ))}
           </div>
 
+          {/* Activities whose linked delivery work is late or blocked. Renders
+              nothing when nothing is at risk, and nothing at all when neither
+              delivery module is installed. */}
+          {deliveryData.enabled && (
+            <DeliveryRiskPanel
+              index={deliveryData.index}
+              activities={ganttData?.activities ?? []}
+              doneStages={deliveryDoneStages}
+              today={deliveryData.today}
+              onSelectActivity={setDeliveryActivityId}
+            />
+          )}
+
           {/* Risk analysis card */}
           {riskResult && <RiskAnalysisCard data={riskResult} />}
 
@@ -1800,6 +1854,7 @@ function ScheduleDetail({
                   criticalActivityIds={criticalActivityIds}
                   onEditDependencies={(id) => setSelectedActivityId(id)}
                   onAddActivity={() => setShowAddActivity(true)}
+                  delivery={gridDelivery}
                 />
               ) : (
                 <GanttChart
@@ -1994,6 +2049,22 @@ function ScheduleDetail({
           </div>
         )}
       </Modal>
+
+      {/* Link work requests / standup tasks to an activity */}
+      {deliveryActivity && (
+        <DeliveryLinkModal
+          open
+          onClose={() => setDeliveryActivityId(null)}
+          activity={deliveryActivity}
+          projectId={projectId}
+          delivery={deliveryData.index[deliveryActivity.id] ?? emptyDelivery()}
+          requests={deliveryData.requests}
+          tasks={boardTasksForProject}
+          requestsAvailable={deliveryData.requestsAvailable}
+          standupAvailable={deliveryData.standupAvailable}
+          writes={deliveryWrites}
+        />
+      )}
 
       {/* Generate from BOQ Modal */}
       <Modal
