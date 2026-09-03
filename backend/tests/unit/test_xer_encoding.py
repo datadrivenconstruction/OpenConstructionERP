@@ -130,6 +130,68 @@ def test_the_sniff_names_the_page_and_not_merely_some_page(text: str, page: str)
     assert sniff_code_page(_xer([text]).encode(page)) == page
 
 
+# ── Too little evidence to have an opinion about ──────────────────────────────
+#
+# The tests above hand the sniff a whole vocabulary. The tests below hand it one
+# short activity name, which is the shape that carries almost no evidence, and
+# ask it to decline rather than guess. With five high bytes on the table every
+# score is a multiple of 0.2, so a meaningless lead clears the margin.
+#
+# Three of the four named a wrong page before the floor existed. Arabic did not:
+# its short names were already being declined, so that case pins the property
+# rather than catching the regression, and the sweep below is what covers Arabic.
+#
+# Declining is not a worse answer than the old one. cp1252 is where these files
+# already went, so the floor takes away a wrong claim rather than a right one.
+
+SHORT_NAMES = [
+    pytest.param("حفر حتى منسوب", "cp1256", id="arabic-short"),
+    pytest.param("Разработка грунта", "cp1251", id="russian-short"),
+    pytest.param("Εκσκαφη θεμελιων", "cp1253", id="greek-short"),
+    pytest.param("בטון מזוין", "cp1255", id="hebrew-short"),
+]
+
+
+@pytest.mark.parametrize(("text", "page"), SHORT_NAMES)
+def test_one_short_name_is_declined_rather_than_guessed(text: str, page: str) -> None:
+    """Silence is the only honest answer to two words, and the route puts the
+    page it used in front of the person importing, so a guess here is not an
+    internal detail: it is a false statement about the file they are holding."""
+    raw = _xer([text]).encode(page)
+    assert sniff_code_page(raw) is None
+    _decoded, used = decode_xer(raw)
+    assert used == "cp1252", "declining must fall to the Western default, not to a guess"
+
+
+def test_no_short_name_in_any_language_is_assigned_the_wrong_page() -> None:
+    """The property the floor exists for, rather than four examples of it.
+
+    Every window of two to thirty characters cut from the four vocabularies is a
+    name a schedule could plausibly carry, which is several thousand of them. The
+    sniff may decline any window it likes. It must never name a page the bytes
+    were not written in.
+
+    The control in the same loop is what keeps this from passing trivially: a
+    sniff broken into answering ``None`` to everything would satisfy the sweep
+    and fail the first assertion.
+    """
+    wrong: list[tuple[str, str, str]] = []
+    windows = 0
+    for text, page in [(ARABIC, "cp1256"), (RUSSIAN, "cp1251"), (GREEK, "cp1253"), (HEBREW, "cp1255")]:
+        assert sniff_code_page(_xer([text]).encode(page)) == page, "a whole export must still be named"
+        for start in range(len(text)):
+            for length in range(2, 31):
+                name = text[start : start + length].strip()
+                if len(name) < 2:
+                    continue
+                windows += 1
+                got = sniff_code_page(_xer([name]).encode(page))
+                if got is not None and got != page:
+                    wrong.append((page, got, name))
+    assert windows > 5000, f"the sweep collapsed to {windows} windows and stopped being a population"
+    assert not wrong, f"{len(wrong)} of {windows} names were given a page they were not written in: {wrong[:3]}"
+
+
 # ── MSPDI, the same defect reached by the opposite route ──────────────────────
 #
 # The XER half of this file exists because a P6 export declares nothing. MSPDI

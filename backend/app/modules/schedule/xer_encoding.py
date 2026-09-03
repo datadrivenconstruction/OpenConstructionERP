@@ -42,6 +42,23 @@ against Greek at 0.12. Six letters rather than the whole alphabet is the point:
 a set large enough to cover most of a script saturates and stops telling the two
 apart.
 
+How little evidence is too little
+---------------------------------
+
+The scores above were calibrated on running text and none of them is aware of
+how small a sample it may be dividing. A schedule is mostly ASCII, so a file
+carrying one short activity name puts five or six high bytes on the table; every
+score is then a multiple of 0.2 and a lead of 0.2 clears the margin without
+meaning anything. Measured over 7476 name-shaped windows of the same
+construction vocabulary, the largest sample that still named the wrong page
+carried 25 high bytes, and the failure was not evenly spread: Hebrew lost 11 of
+its 33 whole-word names to Greek and Arabic. A real export carries hundreds of
+high bytes, so a floor between those two numbers costs nothing and removes the
+whole regime. Raising the margin instead was measured and rejected: it never
+reaches zero wrong answers at any value, and by 0.12 it has started throwing
+away correct verdicts on whole files, because Hebrew's own margin on a full
+export is 0.117.
+
 A Western file must never reach that scoring at all, and the guard is the shape
 of the high bytes rather than their count. Accented Latin letters arrive alone
 between ASCII, non-Latin scripts arrive in runs. Measured: the longest run in
@@ -79,6 +96,14 @@ _MIN_MARGIN = 0.05
 # the four non-Latin scripts.
 _MIN_RUN_SHARE = 0.50
 
+# How many high bytes must be on the table before the vote may reach a verdict.
+# Below this the scores are too coarse to mean anything and the margin is
+# cleared by arithmetic rather than by evidence. Measured: the largest sample
+# that still named a wrong page carried 25 high bytes; the smallest whole export
+# in the same vocabulary carried 60. The floor sits between them, nearer the low
+# end, because declining costs a file only the answer it used to get anyway.
+_MIN_HIGH_BYTES = 32
+
 # The six most frequent letters of each language, which is the whole of the
 # evidence this module weighs. Cyrillic and Greek carry their own alphabets;
 # Arabic and Hebrew are unpointed, as construction schedules are written.
@@ -111,11 +136,12 @@ def sniff_code_page(raw: bytes) -> str | None:
 
     ``None`` means "no opinion", not "Western": the caller decides what to do
     with an absent answer, and today it falls back to cp1252. Returning a page
-    only on a clear lead is what keeps a Western file, a mostly-ASCII file and a
-    code page this module has never heard of out of the four-way vote.
+    only on a clear lead, and only when there is enough to have a lead about, is
+    what keeps a Western file, a file with one short non-Latin name and a code
+    page this module has never heard of out of the four-way vote.
     """
     total, run_share = _high_byte_run_share(raw)
-    if total == 0 or run_share < _MIN_RUN_SHARE:
+    if total < _MIN_HIGH_BYTES or run_share < _MIN_RUN_SHARE:
         return None
 
     high = bytes(b for b in raw if b >= 0x80)
