@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.7.0',
+    date: '2026-09-03',
+    tag: 'NEW',
+    summary:
+      'India reads its own numbers. A bill of quantities is grouped in lakh and crore rather than in thousands and millions, ten Indian cases ship with the case library in the four reference languages, and the demo stops pricing its tax with the labour welfare cess standing where GST belongs. A schedule exported from a machine that does not run in English now imports as what was exported: a P6 XER file declares no encoding anywhere in it and the reader ended its ladder in Latin-1, which accepts every byte and raises nothing, so Arabic, Russian, Greek and Hebrew activity names arrived as mojibake, were stored that way, and showed up on a Gantt chart weeks later. The same reader now declines to guess rather than naming a code page on almost no evidence, which it was doing for four hundred and sixty five of roughly seven and a half thousand name shaped samples, and falls to the Western default those files were already getting. An input with something at both ends keeps both of its paddings in Arabic, where the text used to run underneath the icon. Dragging a GAEB file onto the import area now does something instead of silently accepting it. And two checks that were passing without checking anything have been repaired, one satisfied by a route that served nobody and one rendering a single arrangement of a control that has three.',
+  },
+  {
     version: '16.6.0',
     date: '2026-09-03',
     tag: 'NEW',

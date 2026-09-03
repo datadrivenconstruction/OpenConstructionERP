@@ -5,6 +5,51 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [16.7.0] - 2026-09-03
+
+India reads its own numbers. A bill of quantities is grouped in lakh and crore
+rather than in thousands and millions, which is the grouping every Indian
+estimator writes by hand and then has to correct in an export. Ten Indian cases
+ship with the case library, carried in the four reference languages rather than
+in English with an Indian title on top. And the demo answered a question nobody
+asked: the labour welfare cess, which is a levy on the contract value, was
+standing where GST belonged, so an Indian demo priced its tax at one percent and
+looked deliberate about it.
+
+A schedule exported from a machine that does not run in English imports as what
+was exported. A P6 XER file declares no encoding anywhere in it, and the reader
+worked down a ladder that ended in Latin-1, which accepts every byte and raises
+nothing. So an Arabic, Russian, Greek or Hebrew activity name arrived as
+mojibake, was stored that way, and the only evidence was on a Gantt chart weeks
+later. The reader now weighs the file against the code pages those exports are
+actually written in, and an MSPDI file, which does declare its encoding, is
+handed to the parser as bytes so that the declaration can still be acted on.
+
+The same reader now declines to guess. Scoring letter frequency needs letters,
+and a schedule is mostly ASCII, so a file carrying two words of Arabic put five
+high bytes on the table and every score became a multiple of a fifth. A
+meaningless lead cleared the confidence margin by arithmetic, and the code page
+it named was reported to the importer as a fact. Across roughly seven and a half
+thousand name shaped samples the reader named a page the bytes were not written
+in for four hundred and sixty five of them. It now says nothing below a measured
+floor of evidence and falls to the Western default, which is where those files
+were already going, so declining costs a file only the answer it used to get
+anyway.
+
+An input with something at both ends keeps both of its paddings in Arabic. The
+control set its spacing in physical left and right, so in a right to left
+language the icon and the field's padding ended up on the same side and the text
+ran underneath the icon. Dragging a GAEB file onto the import area now does
+something: the drop zone accepted the file and gave no sign it had, so the
+obvious gesture looked broken and people used the file picker instead.
+
+Two checks that were passing without checking anything have been repaired. The
+tenant isolation tests for clash detection were satisfied by a route that served
+nobody, so they would have gone on passing after the route was removed, and the
+snapshot that guards the input control rendered only one of the three
+arrangements it has, so five of the eight direction classes in the change above
+had no test that could see them.
+
 ## [16.6.0] - 2026-09-03
 
 A bill is priced by the country that owns the project. That reads like something
