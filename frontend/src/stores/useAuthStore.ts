@@ -94,6 +94,23 @@ function getStoredRefreshToken(): string | null {
  */
 let refreshInFlight: Promise<string | null> | null = null;
 
+/**
+ * Tell the Team Standup attendance log about a sign-in / sign-out. Loaded
+ * lazily so this store never statically depends on a module, and every
+ * failure is swallowed - attendance is a by-product of auth, never a gate
+ * on it. `token` is the credential to send when the store has already
+ * cleared its own (logout).
+ */
+function emitSessionEvent(event: 'login' | 'logout', token?: string | null): void {
+  try {
+    void import('@/modules/team-standup/metricsApi')
+      .then((m) => m.sendSessionEvent(event, { token }))
+      .catch(() => undefined);
+  } catch {
+    // Dynamic import unavailable (test doubles, odd bundlers) -- ignore.
+  }
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   isAuthenticated: false,
@@ -106,6 +123,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // we can detect a genuine account switch (a different user signing in on the
     // same browser) versus a same-user token refresh.
     const previousEmail = localStorage.getItem(KEY_EMAIL);
+    // A token arriving while signed out is a sign-in; while signed in it is
+    // a refresh (or a re-auth) and must not count as another login.
+    const wasSignedIn = get().isAuthenticated;
     if (remember) {
       localStorage.setItem(KEY_REMEMBER, '1');
       localStorage.setItem(KEY_ACCESS, access);
@@ -142,9 +162,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       userFullName: null,
       userRole: decodeRoleFromToken(access),
     });
+    if (!wasSignedIn) emitSessionEvent('login', access);
   },
 
   logout: () => {
+    // Capture the credential before it is cleared so the sign-out can be
+    // logged as this user; the request itself is fire-and-forget.
+    const departingToken = get().accessToken;
+    if (departingToken) emitSessionEvent('logout', departingToken);
     localStorage.removeItem(KEY_ACCESS);
     localStorage.removeItem(KEY_REFRESH);
     localStorage.removeItem(KEY_REMEMBER);

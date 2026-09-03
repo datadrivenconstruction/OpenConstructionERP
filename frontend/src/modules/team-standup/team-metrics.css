@@ -1,0 +1,273 @@
+/* Team metrics dashboard - the standup board's visual language, scoped to
+ * .tm-root. Tokens are redeclared here (not inherited) so this page never
+ * depends on standup.css being loaded, and nothing leaks either way. */
+.tm-root {
+  --ground: #edf0f5; --surface: #ffffff; --surface-2: #f5f7fa; --surface-3: #eaeef3;
+  --ink: #18212c; --ink-2: #46525f; --muted: #77818d;
+  --hairline: #dbe2ea; --hairline-2: #e9eef4;
+  --accent: #1f5fd0; --accent-soft: #e7f0fd; --accent-line: #b6cef5;
+  --crit: #b3261e; --crit-soft: #fdeceb;
+  --chrome: #101720; --chrome-ink: #c9d3df; --chrome-line: #263140;
+  --shadow: 0 1px 2px rgba(20,32,48,.07), 0 1px 3px rgba(20,32,48,.05);
+  --shadow-lg: 0 12px 34px rgba(16,24,36,.20), 0 3px 10px rgba(16,24,36,.10);
+  --c-slate: #55616e;  --w-slate: #e9edf1;
+  --c-violet: #6136ad; --w-violet: #f0e9fb;
+  --c-indigo: #2f42a8; --w-indigo: #e8ebfc;
+  --c-blue: #1361c9;   --w-blue: #e4f0fe;
+  --c-cyan: #06657f;   --w-cyan: #e0f3f8;
+  --c-teal: #0a6f66;   --w-teal: #e0f4f1;
+  --c-green: #14713d;  --w-green: #e5f5eb;
+  --c-lime: #4f6a10;   --w-lime: #eef5da;
+  --c-amber: #8a5406;  --w-amber: #fdf1dc;
+  --c-orange: #a4470c; --w-orange: #fdeade;
+  --c-rose: #a52f5b;   --w-rose: #fce9ef;
+  --c-red: #a92c23;    --w-red: #fdeae8;
+
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+.dark .tm-root {
+  --ground: #0d1218; --surface: #151c25; --surface-2: #1b232e; --surface-3: #212b37;
+  --ink: #e7edf4; --ink-2: #b2becb; --muted: #8492a1;
+  --hairline: #29333f; --hairline-2: #212a35;
+  --accent: #6ea3f5; --accent-soft: #16253c; --accent-line: #2c4462;
+  --crit: #f28b82; --crit-soft: #331c1a;
+  --chrome: #060a0f; --chrome-ink: #98a5b3; --chrome-line: #1a222d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+  --shadow-lg: 0 12px 34px rgba(0,0,0,.55), 0 3px 10px rgba(0,0,0,.4);
+  --c-slate: #a4b1be;  --w-slate: #212a35;
+  --c-violet: #bda2f5; --w-violet: #251b3b;
+  --c-indigo: #9fadf7; --w-indigo: #191f42;
+  --c-blue: #74a8f8;   --w-blue: #14233c;
+  --c-cyan: #6ec6de;   --w-cyan: #10272f;
+  --c-teal: #64cbbf;   --w-teal: #0f2b28;
+  --c-green: #6dd39a;  --w-green: #112f1e;
+  --c-lime: #b6cd6b;   --w-lime: #232c12;
+  --c-amber: #e3ac4d;  --w-amber: #2c2316;
+  --c-orange: #ee9a63; --w-orange: #321f13;
+  --c-rose: #ef92b2;   --w-rose: #321722;
+  --c-red: #f08a80;    --w-red: #331917;
+}
+.tm-root * { box-sizing: border-box; }
+.tm-root .tm-wrap { max-width: 2080px; margin: 0 auto; padding: 20px 16px 72px; }
+
+/* Chrome bar + page head, as on the board. */
+.tm-root .tm-chrome {
+  background: var(--chrome); color: var(--chrome-ink); border-radius: 10px 10px 0 0;
+  padding: 13px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  border: 1px solid var(--chrome-line); border-bottom: none;
+}
+.tm-root .tm-chrome h1 { font-size: 15px; font-weight: 600; color: #fff; margin: 0; }
+.tm-root .tm-chrome .tm-sub { font-size: 12.5px; margin: 2px 0 0; }
+.tm-root .tm-chrome-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.tm-root .tm-ghost {
+  background: transparent; border: 1px solid var(--chrome-line); color: var(--chrome-ink);
+  border-radius: 6px; padding: 6px 12px; font: inherit; font-size: 12.5px; cursor: pointer;
+}
+.tm-root .tm-ghost:hover { border-color: #44576e; color: #fff; }
+.tm-root .tm-app {
+  background: var(--ground); border: 1px solid var(--hairline); border-radius: 0 0 10px 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 13px;
+}
+.tm-root .tm-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.tm-root .tm-head h2 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
+.tm-root .tm-head .tm-date { margin: 1px 0 0; font-size: 13px; color: var(--muted); }
+.tm-root .tm-controls { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* Window switch: a segmented control in the daynav's clothes. */
+.tm-root .tm-seg {
+  display: inline-flex; align-items: stretch; border: 1px solid var(--hairline);
+  border-radius: 8px; overflow: hidden; background: var(--surface);
+}
+.tm-root .tm-seg button {
+  border: 0; background: var(--surface); color: var(--ink-2); font: inherit; font-size: 12.5px;
+  padding: 6px 12px; cursor: pointer; font-family: 'IBM Plex Mono', monospace;
+}
+.tm-root .tm-seg button + button { border-left: 1px solid var(--hairline); }
+.tm-root .tm-seg button:hover { color: var(--accent); background: var(--accent-soft); }
+.tm-root .tm-seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
+
+/* Tiles. */
+.tm-root .tm-tile {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px;
+  box-shadow: var(--shadow); overflow: hidden; border-left: 4px solid var(--tint, var(--hairline));
+}
+.tm-root .tm-tile-head {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+  background: linear-gradient(90deg, var(--tint-wash, transparent) 0%, transparent 55%);
+  border-bottom: 1px solid var(--hairline-2);
+}
+.tm-root .tm-tile-head h3 { margin: 0; font-size: 14.5px; font-weight: 600; }
+.tm-root .tm-tile-head .tm-meta { font-size: 12.5px; color: var(--muted); }
+.tm-root .tm-tile-head .tm-spacer { margin-left: auto; }
+.tm-root .tm-tile-body { padding: 14px; display: flex; flex-direction: column; gap: 13px; }
+.tm-root .tm-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+/* Measured at 1280: the Jobs table needs 609px and a half-width tile
+ * gives it 411px, so it scrolled sideways inside its own tile. The two-up
+ * layout now waits until there is room for both. */
+@media (max-width: 1560px) { .tm-root .tm-grid2 { grid-template-columns: 1fr; } }
+
+.tm-root .tm-pip {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; border-radius: 999px;
+  padding: 1px 8px; white-space: nowrap; background: var(--tint-wash, var(--surface-3)); color: var(--tint, var(--ink-2));
+}
+
+/* Tables. */
+.tm-root .tm-tablewrap { overflow: auto; border: 1px solid var(--hairline); border-radius: 9px; background: var(--surface); }
+.tm-root table { border-collapse: separate; border-spacing: 0; width: 100%; background: var(--surface); }
+/* Column heads are sentence case on purpose. They used to be UPPERCASE
+ * with letter-spacing, which shouted four-word labels ("AVG DAYS TO
+ * CLOSE") and, because every head is nowrap, was also what pushed both
+ * tables past their tile at 1280. Uppercase is kept for the page's own
+ * section headers (the tile titles), not for content labels. */
+.tm-root thead th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0; color: var(--muted);
+  font-weight: 600; padding: 9px 11px; border-bottom: 1px solid var(--hairline); white-space: nowrap;
+  background: var(--surface-2); position: sticky; top: 0; z-index: 3;
+}
+.tm-root tbody td { padding: 8px 11px; border-bottom: 1px solid var(--hairline-2); vertical-align: middle; font-size: 13px; }
+.tm-root tbody tr:last-child td { border-bottom: 0; }
+.tm-root tbody tr:hover td { background: var(--surface-2); }
+.tm-root tbody tr.tm-hot { cursor: context-menu; }
+.tm-root td.tm-who { font-weight: 600; white-space: nowrap; color: var(--ink); }
+/* Numeric columns are narrow by nature; the 11px side padding of a text
+ * cell was what pushed the nine-column People table 43px past its tile at
+ * 1280 (measured). */
+.tm-root td.tm-num, .tm-root th.tm-num {
+  text-align: right; font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums;
+  padding-left: 8px; padding-right: 8px;
+}
+.tm-root td.tm-num.tm-zero { color: var(--muted); opacity: .7; }
+.tm-root td.tm-num.tm-crit { color: var(--crit); font-weight: 700; }
+.tm-root .tm-nowrap { white-space: nowrap; }
+.tm-root .tm-person { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.tm-root .tm-person .tm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-root .tm-av {
+  width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto; display: inline-flex; align-items: center;
+  justify-content: center; font-size: 10.5px; font-weight: 700; color: #fff; background: var(--tint, var(--c-slate));
+}
+.tm-root .tm-av.tm-av-sm { width: 22px; height: 22px; font-size: 9px; }
+.tm-root .tm-avs { display: flex; align-items: center; }
+.tm-root .tm-avs .tm-av { margin-left: -7px; border: 2px solid var(--surface); }
+.tm-root .tm-avs .tm-av:first-child { margin-left: 0; }
+
+.tm-root .tm-code {
+  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 600;
+  padding: 1px 7px; border-radius: 5px; background: var(--tint-wash, var(--surface-3)); color: var(--tint, var(--ink-2));
+  white-space: nowrap;
+}
+.tm-root .tm-jobname { color: var(--ink); font-weight: 500; }
+.tm-root td.tm-jobcell { min-width: 190px; max-width: 340px; }
+.tm-root .tm-code.tm-code-none {
+  background: transparent; border: 1px dashed var(--hairline); color: var(--muted); font-style: italic;
+}
+
+/* Bars - all CSS, no chart library. */
+.tm-root .tm-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--surface-3); min-width: 72px; }
+.tm-root .tm-bar > span { display: block; height: 100%; background: var(--seg, var(--accent)); min-width: 0; }
+.tm-root .tm-bar > span + span { border-left: 1px solid var(--surface); }
+.tm-root .tm-bar.tm-bar-solid > span { border-radius: 999px; }
+.tm-root .tm-barcell { display: flex; align-items: center; gap: 8px; min-width: 128px; }
+.tm-root .tm-barcell .tm-bar { flex: 1 1 auto; }
+.tm-root .tm-barcell .tm-dur { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-2); white-space: nowrap; min-width: 60px; text-align: right; }
+.tm-root .tm-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); }
+.tm-root .tm-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tm-root .tm-legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--seg, var(--accent)); display: inline-block; }
+.tm-root .tm-legend b { font-family: 'IBM Plex Mono', monospace; font-weight: 500; color: var(--muted); }
+
+.tm-root .tm-modrows { display: flex; flex-direction: column; gap: 8px; }
+.tm-root .tm-modrow { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 74px 44px; align-items: center; gap: 10px; }
+.tm-root .tm-modrow .tm-modname { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--ink); min-width: 0; }
+.tm-root .tm-modrow .tm-modname-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-root .tm-modrow .tm-share {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.tm-root .tm-modrow .tm-modname i { width: 10px; height: 10px; border-radius: 3px; background: var(--seg, var(--accent)); flex: 0 0 auto; }
+.tm-root .tm-modrow .tm-dur { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-2); text-align: right; }
+.tm-root .tm-modrow .tm-bar { height: 14px; }
+
+.tm-root .tm-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.tm-root .tm-chip {
+  border: 1px solid var(--hairline); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 2px 9px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.tm-root .tm-chip b { font-family: 'IBM Plex Mono', monospace; font-weight: 500; color: var(--muted); font-size: 11px; }
+
+/* Attendance - who was on, when. */
+.tm-root .tm-online {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--c-green); flex: 0 0 auto; display: inline-block;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px color-mix(in srgb, var(--c-green) 45%, transparent);
+  animation: tm-online-pulse 2.4s ease-in-out infinite;
+}
+@keyframes tm-online-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px color-mix(in srgb, var(--c-green) 45%, transparent); }
+  50% { box-shadow: 0 0 0 2px var(--surface), 0 0 0 5px color-mix(in srgb, var(--c-green) 18%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .tm-root .tm-online { animation: none; } }
+.tm-root .tm-pip.tm-pip-online { background: var(--w-green); color: var(--c-green); }
+.tm-root .tm-pip.tm-pip-online::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c-green); margin-right: 5px; vertical-align: 1px;
+}
+.tm-root table.tm-attendance td { white-space: nowrap; }
+.tm-root .tm-mono { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.tm-root td.tm-day { color: var(--ink-2); }
+.tm-root .tm-pill {
+  display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; white-space: nowrap;
+  background: var(--surface-3); color: var(--ink-2); letter-spacing: .02em;
+}
+.tm-root .tm-pill.tm-pill-on { background: var(--w-green); color: var(--c-green); }
+.tm-root .tm-pill.tm-pill-on::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--c-green); margin-right: 5px; vertical-align: 1px;
+}
+.tm-root .tm-btn-quiet.tm-btn-xs { padding: 3px 9px; font-size: 12px; }
+.tm-root .tm-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 310;
+  background: var(--chrome); color: #fff; border: 1px solid var(--chrome-line); border-radius: 8px;
+  padding: 8px 14px; font-size: 12.5px; box-shadow: var(--shadow-lg);
+}
+
+.tm-root .tm-hint { font-size: 12px; color: var(--muted); }
+.tm-root .tm-empty {
+  background: var(--surface-2); border: 1px dashed var(--hairline); border-radius: 9px; padding: 18px 16px;
+  color: var(--ink-2); font-size: 13px; display: flex; flex-direction: column; gap: 6px;
+}
+.tm-root .tm-empty b { color: var(--ink); }
+/* Managers-only panel: the same calm empty-state block, given room to
+ * read as a page rather than a warning. Not an error colour - nobody has
+ * done anything wrong by opening it. */
+.tm-root .tm-empty.tm-gate { padding: 26px 22px; max-width: 720px; gap: 10px; }
+.tm-root .tm-empty.tm-gate b { font-size: 15px; }
+.tm-root .tm-gate-actions { margin-top: 6px; }
+.tm-root .tm-error { background: var(--crit-soft); border: 1px solid color-mix(in srgb, var(--crit) 30%, transparent); color: var(--crit); border-radius: 9px; padding: 10px 14px; font-size: 13px; }
+.tm-root .tm-btn-quiet {
+  background: var(--surface); border: 1px solid var(--hairline); color: var(--ink-2); border-radius: 7px;
+  padding: 7px 14px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.tm-root .tm-btn-quiet:hover { border-color: var(--accent-line); color: var(--accent); background: var(--accent-soft); }
+
+/* Context menu, the board's .ctx. */
+.tm-root .tm-ctx {
+  position: fixed; z-index: 300; min-width: 224px; background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: 9px; box-shadow: var(--shadow-lg); padding: 5px; display: flex; flex-direction: column;
+}
+.tm-root .tm-ctx .tm-ctx-head { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: var(--muted); padding: 7px 10px 6px; border-bottom: 1px solid var(--hairline-2); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-root .tm-ctx button { background: none; border: 0; text-align: left; font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 6px; cursor: pointer; color: var(--ink-2); display: flex; align-items: center; gap: 9px; width: 100%; }
+.tm-root .tm-ctx button:hover { background: var(--accent-soft); color: var(--accent); }
+.tm-root .tm-ctx button .tm-k { margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--muted); }
+
+
+/* ── Keyboard focus ───────────────────────────────────────────────────
+ * Every interactive control on this page (the window segments, the two
+ * chrome buttons, the quiet buttons and every context-menu row) had a
+ * hover state and no focus state at all, so a keyboard reader could not
+ * see where they were. One ring, drawn outside the control so it never
+ * shifts layout. */
+.tm-root :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.tm-root .tm-chrome :focus-visible { outline-color: #7fb0ff; }
+.tm-root .tm-seg button:focus-visible { outline-offset: -2px; }
