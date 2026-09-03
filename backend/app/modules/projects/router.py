@@ -70,6 +70,7 @@ from app.modules.projects.member_schemas import (
     BulkAddProjectMembersRequest,
     BulkAddProjectMembersResponse,
     ProjectMemberResponse,
+    UpdateProjectMemberRoleRequest,
 )
 from app.modules.projects.module_presence import probe_project_modules
 from app.modules.projects.schemas import (
@@ -614,6 +615,36 @@ async def bulk_add_project_members_endpoint(
     for member in data.members:
         added.append(await add_project_member(session, project_id, member))
     return BulkAddProjectMembersResponse(added=added)
+
+
+@router.patch(
+    "/{project_id}/members/{member_user_id}/",
+    response_model=ProjectMemberResponse,
+    summary="Change a project member's role",
+    description="Set an existing member's role to another value from the "
+    "project-member whitelist. Owner-only, same gate as adding a member. "
+    "400 if the target is the project owner (ownership moves via transfer), "
+    "404 if they are not on the project.",
+)
+@router.patch(
+    "/{project_id}/members/{member_user_id}",
+    response_model=ProjectMemberResponse,
+    include_in_schema=False,
+)
+async def update_project_member_role_endpoint(
+    project_id: uuid.UUID,
+    member_user_id: uuid.UUID,
+    data: UpdateProjectMemberRoleRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectMemberResponse:
+    """Change a member's role. Guarded by the same owner check as add/remove."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+    from app.modules.projects.member_service import update_project_member_role
+
+    return await update_project_member_role(session, project_id, member_user_id, data)
 
 
 @router.delete(

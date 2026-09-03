@@ -30,6 +30,8 @@ export interface Project {
   classification_standard: string;
   currency: string;
   locale: string;
+  /** job number - register references are minted from it. */
+  project_code?: string | null;
   validation_rule_sets: string[];
   /** Item #27 — compliance rule packs enforced at workflow gates. */
   compliance_rule_packs?: string[];
@@ -56,6 +58,18 @@ export interface Project {
   default_vat_rate?: string | null;
   /** RFC 37 #93 — project-scoped custom units (synced across browsers). */
   custom_units?: string[];
+  /**
+   * Soft link to the client: the id of a contact with `contact_type =
+   * 'client'`. Rows written before the client picker existed may carry a
+   * free-text client name here instead - resolve through
+   * `features/projects/clients.ts` rather than reading it raw.
+   */
+  client_id?: string | null;
+  /** Contract value as a decimal string in the project's own currency. */
+  contract_value?: string | null;
+  budget_estimate?: string | null;
+  planned_start_date?: string | null;
+  planned_end_date?: string | null;
   created_at: string;
   updated_at: string;
 }

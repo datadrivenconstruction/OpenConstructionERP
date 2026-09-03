@@ -68,6 +68,8 @@ import {
   ScheduleStripWidget,
   ProjectWidgetsRollupProvider,
 } from './components/ProjectWidgets';
+import { RegistersWidget } from '@/modules/comms-intelligence/RegistersWidget';
+import { WorkRequestsWidget } from '@/modules/comms-intelligence/WorkRequestsWidget';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { apiGet, apiPatch, ApiError, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
 import clsx from 'clsx';
@@ -75,6 +77,9 @@ import { projectsApi, type Project } from './api';
 import { PhotosTab } from './PhotosTab';
 import { CompliancePage } from '@/features/compliance-docs/CompliancePage';
 import { TeamStrip } from './components/TeamStrip';
+import { TeamAvailabilityWidget } from './components/TeamAvailabilityWidget';
+import { ProjectProposalChip } from './components/ProjectProposalChip';
+import { ProjectJobNumberChip } from './components/ProjectJobNumberChip';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -1372,7 +1377,7 @@ export function ProjectDetailPage() {
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
 
   const updateMutation = useMutation({
-    mutationFn: (data: { name?: string; description?: string; region?: string; currency?: string }) =>
+    mutationFn: (data: { name?: string; description?: string; region?: string; currency?: string; project_code?: string }) =>
       projectsApi.update(projectId!, data),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
@@ -1704,16 +1709,67 @@ export function ProjectDetailPage() {
     }
   })();
 
+  /**
+   * The one inline job-number editor, shared by the breadcrumb chip and the
+   * "Job 25406" chip in the header block. Register references (REG-RFQ-<job>-
+   * 0001) are minted from this number, so it has to be fixable from the hub
+   * rather than only from Project Settings.
+   *
+   * Not a hook - this sits after the loading / 404 early returns, where a
+   * useCallback would break the rules of hooks.
+   */
+  const openJobNumberDialog = async () => {
+    const { ask } = await import('@/shared/ui/askDialog');
+    const answers = await ask({
+      title: t('projects.job_no_title', { defaultValue: 'Job Number' }),
+      note: t('projects.job_no_note', {
+        defaultValue:
+          'Register references are minted from this number, so it must match the job-management system.',
+      }),
+      fields: [
+        {
+          label: t('projects.job_no_label', { defaultValue: 'Job number' }),
+          value: project.project_code ?? '',
+          placeholder: 'e.g. 25406',
+        },
+      ],
+      okLabel: t('common.save', { defaultValue: 'Save' }),
+    });
+    const code = answers?.[0]?.trim();
+    if (code && code !== project.project_code) {
+      updateMutation.mutate({ project_code: code });
+    }
+  };
+
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Breadcrumb + Customize toggle */}
       <div className="flex items-start justify-between gap-3">
-        <Breadcrumb
-          items={[
-            { label: t('projects.title', 'Projects'), to: '/projects' },
-            { label: project.name },
-          ]}
-        />
+        <div className="flex items-center gap-2 min-w-0">
+          <Breadcrumb
+            items={[
+              { label: t('projects.title', 'Projects'), to: '/projects' },
+              { label: project.name },
+            ]}
+          />
+          {/* job number, editable in place - register references
+              (e.g. REG-RFQ-<job>-0001) are minted from it, so the dashboard
+              must show it and let it be fixed without a settings dive. */}
+          <button
+            type="button"
+            onClick={() => void openJobNumberDialog()}
+            title={t('projects.job_no_title', { defaultValue: 'Job Number' })}
+            className={
+              project.project_code
+                ? 'inline-flex shrink-0 items-center gap-1 rounded-full bg-oe-blue/10 px-2.5 py-0.5 text-xs font-semibold text-oe-blue hover:bg-oe-blue/20 transition-colors'
+                : 'inline-flex shrink-0 items-center gap-1 rounded-full border border-dashed border-amber-400 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-colors dark:bg-amber-950/30 dark:text-amber-300'
+            }
+          >
+            #{' '}
+            {project.project_code ??
+              t('projects.job_no_add', { defaultValue: 'Set Job Number' })}
+          </button>
+        </div>
         <Button
           variant={customizing ? 'primary' : 'ghost'}
           size="sm"
@@ -1911,6 +1967,24 @@ export function ProjectDetailPage() {
                   </p>
                 )}
                 <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {/* Job number, first in the chip row: every register and
+                      work-request reference on this project is minted from it,
+                      so it belongs beside the standard and the currency rather
+                      than only next to the breadcrumb. Monospace because it is
+                      an identifier people read digit by digit and quote into
+                      the job-management system. */}
+                  <ProjectJobNumberChip
+                    code={project.project_code}
+                    canManage={canManageProject}
+                    onChange={(next) =>
+                      updateMutation.mutate({ project_code: next })
+                    }
+                  />
+                  <ProjectProposalChip
+                    projectId={project.id}
+                    metadata={project.metadata}
+                    canManage={canManageProject}
+                  />
                   <Badge variant="blue" size="sm">
                     {standardLabels[project.classification_standard] ??
                       project.classification_standard}
@@ -1993,11 +2067,28 @@ export function ProjectDetailPage() {
           {!isWidgetHidden('rfi-inbox') && (
             <RFIInboxWidget projectId={projectId!} />
           )}
+          {!isWidgetHidden('registers') && (
+            <RegistersWidget projectId={projectId!} />
+          )}
+          {!isWidgetHidden('work-requests') && (
+            <WorkRequestsWidget projectId={projectId!} />
+          )}
           {!isWidgetHidden('change-orders') && (
             <ChangeOrdersPulseWidget projectId={projectId!} currency={currency ?? ''} />
           )}
           {!isWidgetHidden('variations') && (
             <VariationsWidget projectId={projectId!} currency={currency ?? ''} />
+          )}
+          {/* Fills the sixth cell of this 3-across section, which the five
+              commercial widgets above left empty. It is a `collab` widget by
+              category, but the hole is here and a team tile beside the
+              variations counter reads fine — "who is on it" next to "what it
+              is costing". */}
+          {!isWidgetHidden('team-availability') && (
+            <TeamAvailabilityWidget
+              projectId={projectId!}
+              canManage={canManageProject}
+            />
           )}
         </WidgetSection>
 

@@ -26,6 +26,7 @@ import {
   Map,
   CloudSun,
   Users,
+  UserCheck,
   Table2,
   CalendarClock,
   ClipboardList,
@@ -40,6 +41,8 @@ import {
   Receipt,
   GitBranch,
   AlertTriangle,
+  ListChecks,
+  Wrench,
 } from 'lucide-react';
 
 export type ProjectWidgetCategory =
@@ -120,12 +123,42 @@ export const PROJECT_WIDGETS: readonly ProjectWidgetMeta[] = [
     category: 'collab',
   },
   {
+    // The richer sibling of `team`: the strip says who is on the job, this
+    // tile says what each of them is carrying this week. Both can be on.
+    id: 'team-availability',
+    labelKey: 'project.widget.team-availability.title',
+    labelDefault: 'Project team',
+    descKey: 'project.widget.team-availability.description',
+    descDefault:
+      'Who is on this job, their role, and what they are carrying this week',
+    icon: UserCheck,
+    category: 'collab',
+  },
+  {
     id: 'rfi-inbox',
     labelKey: 'project.widget.rfi-inbox.title',
     labelDefault: 'RFI inbox',
     descKey: 'project.widget.rfi-inbox.description',
     descDefault: 'Five most recent open Requests for Information',
     icon: GitPullRequestArrow,
+    category: 'collab',
+  },
+  {
+    id: 'registers',
+    labelKey: 'project.widget.registers.title',
+    labelDefault: 'Registers',
+    descKey: 'project.widget.registers.description',
+    descDefault: 'Open RFIs, RFQs, orders and variations raised on this job',
+    icon: ListChecks,
+    category: 'collab',
+  },
+  {
+    id: 'work-requests',
+    labelKey: 'project.widget.work-requests.title',
+    labelDefault: 'Department requests',
+    descKey: 'project.widget.work-requests.description',
+    descDefault: 'Engineering, drafting, workshop, automation and hazardous-area requests raised on this job',
+    icon: Wrench,
     category: 'collab',
   },
   {

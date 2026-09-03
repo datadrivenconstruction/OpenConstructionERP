@@ -4,6 +4,7 @@ Covers the three endpoints registered on the ``oe_projects`` router:
 
     GET    /api/v1/projects/{project_id}/members/
     POST   /api/v1/projects/{project_id}/members/
+    PATCH  /api/v1/projects/{project_id}/members/{user_id}/
     DELETE /api/v1/projects/{project_id}/members/{user_id}/
 
 Test matrix:
@@ -35,6 +36,7 @@ from app.dependencies import (
     get_current_user_payload,
     get_session,
 )
+from app.modules.projects.member_schemas import PROJECT_MEMBER_ROLES
 from tests._pg import isolated_engine
 
 
@@ -265,3 +267,148 @@ async def test_non_owner_cannot_access_members(other_client: AsyncClient, seeded
 
     delete = await other_client.delete(f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/")
     assert delete.status_code == 403, delete.text
+
+    patch = await other_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/",
+        json={"role": "electrician"},
+    )
+    assert patch.status_code == 403, patch.text
+
+
+# ── Widened role whitelist ─────────────────────────────────────────────────
+#
+# The Team Strip used to offer three roles (estimator / viewer /
+# project_manager). A contracting business needs the trades and the commercial
+# roles as well, so the whitelist was widened. These tests pin BOTH halves of
+# that contract: every listed role is accepted, and anything outside the list
+# is still refused with a 422 rather than being written through to the
+# membership row.
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("role", [r for r in PROJECT_MEMBER_ROLES if r != "owner"])
+async def test_every_whitelisted_role_is_accepted(owner_client: AsyncClient, seeded_ids: dict[str, str], role: str):
+    """Each role in ``PROJECT_MEMBER_ROLES`` round-trips through add + list.
+
+    ``owner`` is excluded because it is not something you *assign*: it is
+    derived from ``Project.owner_id`` and the response's ``is_owner`` flag.
+    """
+    pid = seeded_ids["project_id"]
+    resp = await owner_client.post(
+        f"/api/v1/projects/{pid}/members/",
+        json={"user_id": seeded_ids["invitee_id"], "role": role},
+    )
+    assert resp.status_code == 201, resp.text
+    assert resp.json()["role"] == role
+
+    listing = await owner_client.get(f"/api/v1/projects/{pid}/members/")
+    stored = {m["user_id"]: m["role"] for m in listing.json()}
+    assert stored[seeded_ids["invitee_id"]] == role
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "role",
+    ["superuser", "Estimator", "project manager", "", "site_supervisor ; drop", "admin"],
+)
+async def test_unknown_role_is_refused(owner_client: AsyncClient, seeded_ids: dict[str, str], role: str):
+    """A role outside the whitelist is a 422 - the pattern is the only gate."""
+    pid = seeded_ids["project_id"]
+    resp = await owner_client.post(
+        f"/api/v1/projects/{pid}/members/",
+        json={"user_id": seeded_ids["invitee_id"], "role": role},
+    )
+    assert resp.status_code == 422, resp.text
+
+    # And nothing was written: the invitee is still not on the project.
+    listing = await owner_client.get(f"/api/v1/projects/{pid}/members/")
+    assert seeded_ids["invitee_id"] not in {m["user_id"] for m in listing.json()}
+
+
+@pytest.mark.asyncio
+async def test_bulk_invite_rejects_unknown_role(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """The mass-invite body reuses AddProjectMemberRequest, so it shares the gate."""
+    pid = seeded_ids["project_id"]
+    resp = await owner_client.post(
+        f"/api/v1/projects/{pid}/members/bulk/",
+        json={"members": [{"user_id": seeded_ids["invitee_id"], "role": "not_a_role"}]},
+    )
+    assert resp.status_code == 422, resp.text
+
+
+# ── Role change (PATCH) ────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_owner_can_change_member_role(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """A member added as an apprentice can be promoted to site supervisor."""
+    pid = seeded_ids["project_id"]
+    add = await owner_client.post(
+        f"/api/v1/projects/{pid}/members/",
+        json={"user_id": seeded_ids["invitee_id"], "role": "apprentice"},
+    )
+    assert add.status_code == 201, add.text
+
+    patch = await owner_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/",
+        json={"role": "site_supervisor"},
+    )
+    assert patch.status_code == 200, patch.text
+    assert patch.json()["role"] == "site_supervisor"
+
+    listing = await owner_client.get(f"/api/v1/projects/{pid}/members/")
+    stored = {m["user_id"]: m["role"] for m in listing.json()}
+    assert stored[seeded_ids["invitee_id"]] == "site_supervisor"
+
+
+@pytest.mark.asyncio
+async def test_change_role_rejects_unknown_role(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """PATCH validates against the same whitelist as POST."""
+    pid = seeded_ids["project_id"]
+    await owner_client.post(
+        f"/api/v1/projects/{pid}/members/",
+        json={"user_id": seeded_ids["invitee_id"], "role": "drafter"},
+    )
+    resp = await owner_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/",
+        json={"role": "grand_wizard"},
+    )
+    assert resp.status_code == 422, resp.text
+
+
+@pytest.mark.asyncio
+async def test_cannot_change_owner_role(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """The owner's role is pinned to ownership; PATCHing it is a 400."""
+    pid = seeded_ids["project_id"]
+    resp = await owner_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['owner_id']}/",
+        json={"role": "viewer"},
+    )
+    assert resp.status_code == 400, resp.text
+    assert "owner" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_cannot_hand_out_the_owner_role(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """`owner` is derived from Project.owner_id, so it cannot be assigned."""
+    pid = seeded_ids["project_id"]
+    await owner_client.post(
+        f"/api/v1/projects/{pid}/members/",
+        json={"user_id": seeded_ids["invitee_id"], "role": "engineer"},
+    )
+    resp = await owner_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/",
+        json={"role": "owner"},
+    )
+    assert resp.status_code == 400, resp.text
+
+
+@pytest.mark.asyncio
+async def test_change_role_of_non_member_is_404(owner_client: AsyncClient, seeded_ids: dict[str, str]):
+    """PATCHing somebody who was never added returns 404, not a silent create."""
+    pid = seeded_ids["project_id"]
+    resp = await owner_client.patch(
+        f"/api/v1/projects/{pid}/members/{seeded_ids['invitee_id']}/",
+        json={"role": "quality"},
+    )
+    assert resp.status_code == 404, resp.text

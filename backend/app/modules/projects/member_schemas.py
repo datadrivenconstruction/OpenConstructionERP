@@ -19,14 +19,65 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+#: Every role a project member may hold, in display order.
+#:
+#: The list is deliberately shaped for a construction / electrical-contracting
+#: business rather than a generic SaaS "member / viewer" pair: the people on a
+#: switchboard or automation job are engineers, drafters, workshop leads, site
+#: supervisors, sparkies and apprentices, and the commercial side is contracts
+#: admin, estimating and procurement. Client contacts and subcontractors are
+#: kept as first-class roles so an external party on the CDE is labelled
+#: honestly instead of being filed as a plain "member".
+#:
+#: The four historical values (``member``, ``lead``, ``owner``, ``viewer``) plus
+#: the two the Team Strip already offered (``estimator``, ``project_manager``)
+#: are all retained so existing membership rows keep validating - this list
+#: only ever grows.
+#: The comment groups mirror the optgroups the picker renders - see
+#: ``frontend/src/features/projects/components/projectRoles.ts``, which holds
+#: the same keys plus their display labels.
+PROJECT_MEMBER_ROLES: tuple[str, ...] = (
+    # Project
+    "owner",
+    "lead",
+    "member",
+    "project_manager",
+    # Engineering
+    "estimator",
+    "engineer",
+    "drafter",
+    "automation_engineer",
+    # Workshop & site
+    "workshop_lead",
+    "site_supervisor",
+    "electrician",
+    "apprentice",
+    # Commercial (incl. assurance)
+    "contracts_admin",
+    "hse",
+    "quality",
+    "procurement",
+    # External
+    "client_contact",
+    "subcontractor",
+    "viewer",
+)
+
+#: Regex the request schemas validate against. Built from the tuple above so
+#: the whitelist can never drift between the constant and the pattern.
+PROJECT_MEMBER_ROLE_PATTERN = r"^(" + "|".join(PROJECT_MEMBER_ROLES) + r")$"
+
 
 class ProjectMemberResponse(BaseModel):
     """A single project member.
 
     ``user_id`` is the canonical join key; ``email`` and ``full_name`` are
     pre-joined for the avatar tooltip + initials. ``role`` mirrors the team
-    membership role and accepts the broadened whitelist (``member`` / ``lead``
-    / ``owner`` / ``estimator`` / ``viewer`` / ``project_manager``).
+    membership role and accepts the whitelist in ``PROJECT_MEMBER_ROLES``.
+
+    The response deliberately does *not* re-validate ``role`` against that
+    whitelist: a legacy row carrying a role we no longer offer must still be
+    listable (and therefore fixable) rather than 500-ing the whole strip.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -45,10 +96,20 @@ class AddProjectMemberRequest(BaseModel):
     model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
     user_id: UUID
-    role: str = Field(
-        default="member",
-        pattern=r"^(member|lead|owner|estimator|viewer|project_manager)$",
-    )
+    role: str = Field(default="member", pattern=PROJECT_MEMBER_ROLE_PATTERN)
+
+
+class UpdateProjectMemberRoleRequest(BaseModel):
+    """Change an existing member's role on the project.
+
+    Separate from ``AddProjectMemberRequest`` because the user is identified by
+    the path (``/members/{user_id}/``), not the body - so sending a ``user_id``
+    here would create a second, contradictory source of truth.
+    """
+
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
+    role: str = Field(pattern=PROJECT_MEMBER_ROLE_PATTERN)
 
 
 class BulkAddProjectMembersRequest(BaseModel):

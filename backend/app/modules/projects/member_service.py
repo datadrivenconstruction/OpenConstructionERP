@@ -32,6 +32,7 @@ from app.core.validation.messages import translate
 from app.modules.projects.member_schemas import (
     AddProjectMemberRequest,
     ProjectMemberResponse,
+    UpdateProjectMemberRoleRequest,
 )
 from app.modules.projects.models import Project
 from app.modules.teams.models import Team, TeamMembership
@@ -167,6 +168,68 @@ async def add_project_member(
         full_name=user.full_name or "",
         role=membership.role,
         is_owner=(user.id == project.owner_id),
+        created_at=membership.created_at,
+    )
+
+
+async def update_project_member_role(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    user_id: uuid.UUID,
+    data: UpdateProjectMemberRoleRequest,
+) -> ProjectMemberResponse:
+    """Change an existing member's role on the project's default team.
+
+    The role whitelist is enforced by the request schema, so anything that
+    reaches here is already a known role. Two rules are enforced *here*
+    because the schema can't see the project:
+
+    * The project owner's row cannot be demoted - ownership is a property of
+      the project, not of the membership, so letting the role drift away from
+      ``owner`` would put the two out of sync. Ownership moves via the
+      transfer flow (same rule ``remove_project_member`` applies).
+    * ``owner`` cannot be handed to anyone else for the same reason.
+    """
+    project = await _load_project(session, project_id)
+    if project.owner_id == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot change the project owner's role. Transfer ownership first.",
+        )
+    if data.role == "owner":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The owner role is set by project ownership. Transfer ownership instead.",
+        )
+
+    team = await _get_or_create_default_team(session, project_id)
+    membership = (
+        await session.execute(
+            select(TeamMembership).where(
+                TeamMembership.team_id == team.id,
+                TeamMembership.user_id == user_id,
+            )
+        )
+    ).scalar_one_or_none()
+    if membership is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Membership not found",
+        )
+
+    membership.role = data.role
+    await session.flush()
+
+    user = (await session.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    if user is None:  # pragma: no cover - membership implies the user exists
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return ProjectMemberResponse(
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name or "",
+        role=membership.role,
+        is_owner=False,
         created_at=membership.created_at,
     )
 

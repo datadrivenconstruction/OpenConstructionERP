@@ -3,11 +3,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
-  FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ArchiveRestore, ExternalLink,
+  FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ArchiveRestore, ExternalLink, Hash,
   Search, ChevronDown, ArrowUpDown, Star, Map as MapIcon, CloudSun,
-  Building2, DollarSign, Euro, PoundSterling, Globe2, MapPin, Layers, AlertTriangle,
+  Building2, DollarSign, Euro, PoundSterling, Globe2, MapPin, Layers, AlertTriangle, Users,
+  Pencil, Palette, Filter, Replace, ChevronRight,
 } from 'lucide-react';
 import { formatDistanceToNowStrict, isValid as isValidDate, parseISO } from 'date-fns';
 import { Button, Card, Badge, EmptyState, Skeleton, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, FileTypeChips, ConfirmDialog, ModuleGuideButton, RecoveryCard, type LatLng } from '@/shared/ui';
@@ -25,6 +26,20 @@ import { projectsGuide } from './projectsGuide';
 import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } from './ProjectStatusBadge';
 import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import {
+  clientColor,
+  clientLabel,
+  findClient,
+  formatAddress,
+  primaryAddress,
+  useClientLookup,
+  type ClientLookup,
+} from './clients';
+import { ClientColorSwatch, type ClientColorSwatchHandle } from './ClientColorSwatch';
+import { ClientMenu, useClientMenu, type ClientMenuItem } from './ClientMenu';
+import { ClientEditorDialog } from './ClientEditorDialog';
+import { ClientPicker } from './ClientPicker';
+import type { Contact } from '@/features/contacts/api';
 
 interface ProjectBOQStats {
   projectId: string;
@@ -92,8 +107,54 @@ export function isProjectFilterActive(
   searchQuery: string,
   statusFilter: StatusFilter,
   regionFilter: string,
+  clientFilter = 'all',
 ): boolean {
-  return Boolean(searchQuery) || statusFilter !== 'all' || regionFilter !== 'all';
+  return (
+    Boolean(searchQuery) ||
+    statusFilter !== 'all' ||
+    regionFilter !== 'all' ||
+    clientFilter !== 'all'
+  );
+}
+
+/**
+ * Client-filter sentinel for projects with no client set. A project's
+ * `client_id` is a soft link (contact id, or a legacy free-text name), so
+ * the group/filter key is the raw trimmed value and this stands in for
+ * "nothing there".
+ */
+export const NO_CLIENT = '__none__';
+
+export function clientKeyOf(p: Pick<Project, 'client_id'>): string {
+  return (p.client_id ?? '').trim() || NO_CLIENT;
+}
+
+/**
+ * Group the projects of ONE page under their client, in the order they
+ * arrive (the list is already sorted client-major when grouping is on).
+ * `total` is the client's count across the whole filtered list, so a
+ * heading still says "3 projects" when pagination split the client.
+ */
+export function groupProjectsByClient<P extends Pick<Project, 'client_id'>>(
+  pageProjects: readonly P[],
+  allFiltered: readonly P[],
+): { key: string; projects: P[]; total: number }[] {
+  const totals = new Map<string, number>();
+  for (const p of allFiltered) {
+    const key = clientKeyOf(p);
+    totals.set(key, (totals.get(key) ?? 0) + 1);
+  }
+  const groups: { key: string; projects: P[]; total: number }[] = [];
+  for (const p of pageProjects) {
+    const key = clientKeyOf(p);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) {
+      last.projects.push(p);
+    } else {
+      groups.push({ key, projects: [p], total: totals.get(key) ?? 0 });
+    }
+  }
+  return groups;
 }
 
 // Region tags + colours are derived from actual project data — no
@@ -152,14 +213,108 @@ export function ProjectsPage() {
     status: 'all' as StatusFilter,
     region: 'all',
     sort: 'newest' as SortOption,
+    // Client filter key (see clientKeyOf) or 'all'. Persisted with the
+    // rest so the view a user narrowed to one client survives a reload.
+    client: 'all',
+    groupByClient: false,
   });
   const statusFilter = filters.status;
   const regionFilter = filters.region;
   const sortOption = filters.sort;
+  // A stored filter object from before these two keys existed has neither;
+  // fall back rather than trusting the shape in localStorage.
+  const clientFilter: string = filters.client ?? 'all';
+  const groupByClient: boolean = filters.groupByClient ?? false;
   const setStatusFilter = (v: StatusFilter) => setFilters((p) => ({ ...p, status: v }));
   const setRegionFilter = (v: string) => setFilters((p) => ({ ...p, region: v }));
   const setSortOption = (v: SortOption) => setFilters((p) => ({ ...p, sort: v }));
+  const setClientFilter = (v: string) => setFilters((p) => ({ ...p, client: v }));
+  const setGroupByClient = (v: boolean) => setFilters((p) => ({ ...p, groupByClient: v }));
   const [page, setPage] = useState(1);
+
+  // Deep link: /projects?client=<id> (from the dashboard Clients widget).
+  // Apply it to the persisted filter and drop the param, so a later filter
+  // change is not overridden by the URL on the next reload. An Archived-only
+  // view would hide the client's live work, so widen that one to All.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const wanted = searchParams.get('client');
+    if (!wanted) return;
+    setFilters((p) => ({
+      ...p,
+      client: wanted,
+      status: p.status === 'archived' ? 'all' : p.status,
+    }));
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('client');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams, setFilters]);
+
+  // Client directory - resolves each project's `client_id` to a name for
+  // the filter dropdown, the group headings and the card chip. One fetch
+  // for the page; every card reads the same map.
+  const { lookup: clientLookup } = useClientLookup();
+  const unknownClientLabel = t('projects.client_unknown', { defaultValue: 'Unknown client' });
+  const noClientLabel = t('projects.no_client', { defaultValue: 'No client' });
+  const clientNameOf = (key: string): string =>
+    key === NO_CLIENT ? noClientLabel : clientLabel(key, clientLookup, unknownClientLabel);
+
+  // Client editing from this page: one editor dialog (opened from a group
+  // header, a card chip or the picker), one context menu for the grouped
+  // view's headers, and the collapsed-group set for "Collapse group".
+  const [editingClient, setEditingClient] = useState<Contact | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(() => new Set());
+  const toggleGroup = (key: string) =>
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  const groupMenu = useClientMenu();
+  const [groupMenuKey, setGroupMenuKey] = useState<string | null>(null);
+  const groupSwatchRefs = React.useRef(new Map<string, ClientColorSwatchHandle>());
+  const groupMenuContact = groupMenuKey ? findClient(groupMenuKey, clientLookup) : undefined;
+  const groupMenuItems: ClientMenuItem[] = groupMenuKey
+    ? [
+        {
+          key: 'edit',
+          label: t('projects.client_menu.edit', { defaultValue: 'Edit client...' }),
+          icon: <Pencil size={13} />,
+          disabled: !groupMenuContact,
+          onSelect: () => setEditingClient(groupMenuContact ?? null),
+        },
+        {
+          key: 'colour',
+          label: t('projects.client_menu.set_colour', { defaultValue: 'Set colour...' }),
+          icon: <Palette size={13} />,
+          disabled: !groupMenuContact,
+          onSelect: () => groupSwatchRefs.current.get(groupMenuKey)?.open(),
+        },
+        {
+          key: 'contact',
+          label: t('projects.open_client_contact', { defaultValue: 'Open contact' }),
+          icon: <ExternalLink size={13} />,
+          // A dangling id has no contact to open.
+          disabled: !groupMenuContact,
+          onSelect: () => navigate(`/contacts?contactId=${encodeURIComponent(groupMenuKey)}`),
+        },
+        {
+          key: 'collapse',
+          label: collapsedGroups.has(groupMenuKey)
+            ? t('projects.client_menu.expand_group', { defaultValue: 'Expand group' })
+            : t('projects.client_menu.collapse_group', { defaultValue: 'Collapse group' }),
+          icon: collapsedGroups.has(groupMenuKey) ? <ChevronDown size={13} /> : <ChevronRight size={13} />,
+          separatorBefore: true,
+          onSelect: () => toggleGroup(groupMenuKey),
+        },
+      ]
+    : [];
 
   const {
     data: projects,
@@ -339,6 +494,12 @@ export function ProjectsPage() {
       list = list.filter((p) => p.region === regionFilter);
     }
 
+    // Client filter - exact key match (contact id or legacy name), or the
+    // NO_CLIENT sentinel for projects with nothing set.
+    if (clientFilter !== 'all') {
+      list = list.filter((p) => clientKeyOf(p) === clientFilter);
+    }
+
     // Sort — pinned first, then locale priority (en → de → others)
     // so the US and German demo projects anchor the top of the list,
     // then fall through to the user-selected sort option.
@@ -383,13 +544,38 @@ export function ProjectsPage() {
       }
     });
 
+    // Group by client: make the list client-major (busiest client first,
+    // then by name, unassigned last) while the sort above still orders the
+    // projects inside each client - Array.prototype.sort is stable.
+    if (groupByClient) {
+      const counts = new Map<string, number>();
+      for (const p of list) {
+        const key = clientKeyOf(p);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      // Order by what the heading will SAY, so a dangling id sorts under
+      // "Unknown client" rather than under its raw UUID.
+      const labelOf = (key: string) =>
+        key === NO_CLIENT ? '' : clientLabel(key, clientLookup, unknownClientLabel);
+      list.sort((a, b) => {
+        const ka = clientKeyOf(a);
+        const kb = clientKeyOf(b);
+        if (ka === kb) return 0;
+        if (ka === NO_CLIENT) return 1;
+        if (kb === NO_CLIENT) return -1;
+        const byCount = (counts.get(kb) ?? 0) - (counts.get(ka) ?? 0);
+        if (byCount !== 0) return byCount;
+        return labelOf(ka).localeCompare(labelOf(kb));
+      });
+    }
+
     return list;
-  }, [projects, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies]);
+  }, [projects, searchQuery, statusFilter, regionFilter, clientFilter, groupByClient, clientLookup, unknownClientLabel, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies]);
 
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, statusFilter, regionFilter, sortOption]);
+  }, [searchQuery, statusFilter, regionFilter, clientFilter, groupByClient, sortOption]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -403,7 +589,10 @@ export function ProjectsPage() {
   // the filter toolbar mounted when a filtered view (e.g. Archived) comes
   // back empty, so the user can always switch back to Active. Without this
   // guard an empty Archived view hid the toolbar and trapped the user (#284).
-  const hasActiveFilter = isProjectFilterActive(searchQuery, statusFilter, regionFilter);
+  const hasActiveFilter = isProjectFilterActive(searchQuery, statusFilter, regionFilter, clientFilter);
+
+  // The page's projects under their client headings (grouped view only).
+  const groupedPage = groupByClient ? groupProjectsByClient(paginatedProjects, filtered) : [];
 
   /* ── Stats ────────────────────────────────────────────────────────── */
 
@@ -520,6 +709,30 @@ export function ProjectsPage() {
     () => buildStatusFilterOptions((projects ?? []).map((p) => p.status)),
     [projects],
   );
+
+  // Client filter options - only clients that actually appear on the loaded
+  // projects (resolved to names through the directory), sorted by name, plus
+  // "No client" when any project has none. The current selection is always
+  // kept in the list so a persisted filter never renders as a blank select.
+  const availableClients = useMemo(() => {
+    const keys = new Set<string>();
+    let anyUnassigned = false;
+    for (const p of projects ?? []) {
+      const key = clientKeyOf(p);
+      if (key === NO_CLIENT) anyUnassigned = true;
+      else keys.add(key);
+    }
+    if (clientFilter !== 'all' && clientFilter !== NO_CLIENT) keys.add(clientFilter);
+    const rows = Array.from(keys)
+      .map((key) => ({ value: key, label: clientNameOf(key) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+    if (anyUnassigned || clientFilter === NO_CLIENT) {
+      rows.push({ value: NO_CLIENT, label: noClientLabel });
+    }
+    return rows;
+    // clientNameOf closes over the lookup + labels; those are the real deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects, clientFilter, clientLookup, unknownClientLabel, noClientLabel]);
 
   /* ── Sort labels ──────────────────────────────────────────────────── */
 
@@ -883,6 +1096,50 @@ export function ProjectsPage() {
               </div>
             </div>
 
+            {/* Client filter - clients present on the loaded projects. */}
+            <div className="relative">
+              <select
+                value={clientFilter}
+                onChange={(e) => setClientFilter(e.target.value)}
+                aria-label={t('a11y.projects.client_filter', {
+                  defaultValue: 'Filter projects by client',
+                })}
+                data-testid="projects-client-filter"
+                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
+              >
+                <option value="all">
+                  {t('projects.filter_all_clients', { defaultValue: 'All Clients' })}
+                </option>
+                {availableClients.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
+                <ChevronDown size={14} />
+              </div>
+            </div>
+
+            {/* Group by client toggle */}
+            <button
+              type="button"
+              onClick={() => setGroupByClient(!groupByClient)}
+              aria-pressed={groupByClient}
+              data-testid="projects-group-by-client"
+              title={t('projects.group_by_client_hint', {
+                defaultValue: 'Show projects under their client',
+              })}
+              className={`flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
+                groupByClient
+                  ? 'bg-oe-blue-subtle text-oe-blue-text'
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
+              }`}
+            >
+              <Users size={12} />
+              {t('projects.group_by_client', { defaultValue: 'By client' })}
+            </button>
+
             {/* Sort buttons */}
             <div className="flex items-center gap-1 shrink-0">
               {sortOptions.map((opt) => (
@@ -938,6 +1195,7 @@ export function ProjectsPage() {
               setSearchQuery('');
               setStatusFilter('active');
               setRegionFilter('all');
+              setClientFilter('all');
             },
           }}
         />
@@ -1004,18 +1262,148 @@ export function ProjectsPage() {
               </Button>
             </div>
           )}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {paginatedProjects.map((project, i) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                boqStats={boqStatsMap.get(project.id)}
-                fileTypes={fileTypesByProject?.[project.id] ?? []}
-                style={{ animationDelay: `${50 + i * 30}ms` }}
-                onDeleted={() => setStatusFilter('active')}
+          {groupByClient ? (
+            // Grouped view: one section per client on this page. The
+            // heading carries the client's count across the whole filtered
+            // list; the card chip is dropped since the heading names it.
+            <div className="space-y-6" data-testid="projects-grouped">
+              {groupedPage.map((group) => {
+                const groupContact = findClient(group.key, clientLookup);
+                const groupColor = clientColor(group.key, clientLookup);
+                const groupAddress = formatAddress(primaryAddress(groupContact));
+                const collapsed = collapsedGroups.has(group.key);
+                return (
+                <section key={group.key} aria-label={clientNameOf(group.key)}>
+                  <div
+                    className={`mb-3 flex items-center gap-2 border-b border-border-light pb-2 ${
+                      groupColor ? 'border-s-4 ps-3' : ''
+                    }`}
+                    style={groupColor ? { borderInlineStartColor: groupColor } : undefined}
+                    data-testid="projects-group-header"
+                    data-color={groupColor || undefined}
+                    data-collapsed={collapsed || undefined}
+                    onContextMenu={(e) => {
+                      setGroupMenuKey(group.key);
+                      groupMenu.openAt(e);
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(group.key)}
+                      aria-expanded={!collapsed}
+                      aria-label={
+                        collapsed
+                          ? t('projects.client_menu.expand_group', { defaultValue: 'Expand group' })
+                          : t('projects.client_menu.collapse_group', { defaultValue: 'Collapse group' })
+                      }
+                      data-testid="projects-group-toggle"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue transition-colors hover:ring-2 hover:ring-oe-blue/30"
+                      style={groupColor ? { backgroundColor: `${groupColor}1f`, color: groupColor } : undefined}
+                    >
+                      {collapsed ? <ChevronRight size={14} /> : <Users size={14} />}
+                    </button>
+                    {groupContact && (
+                      <ClientColorSwatch
+                        ref={(h) => {
+                          if (h) groupSwatchRefs.current.set(group.key, h);
+                          else groupSwatchRefs.current.delete(group.key);
+                        }}
+                        contact={groupContact}
+                        clientName={clientNameOf(group.key)}
+                        size="sm"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <h2
+                        className="truncate text-sm font-semibold text-content-primary"
+                        title={clientNameOf(group.key)}
+                      >
+                        {clientNameOf(group.key)}
+                      </h2>
+                      {groupAddress && (
+                        <p
+                          className="truncate text-[11px] text-content-tertiary"
+                          title={groupAddress}
+                          data-testid="projects-group-address"
+                        >
+                          {groupAddress}
+                        </p>
+                      )}
+                    </div>
+                    {groupContact && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingClient(groupContact)}
+                        aria-label={t('projects.client_menu.edit', { defaultValue: 'Edit client...' })}
+                        title={t('projects.client_menu.edit', { defaultValue: 'Edit client...' })}
+                        data-testid="projects-group-edit"
+                        className="shrink-0 rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    )}
+                    <Badge variant="neutral" size="sm">
+                      {t('projects.client_project_count', {
+                        defaultValue_one: '{{count}} project',
+                        defaultValue_other: '{{count}} projects',
+                        defaultValue: '{{count}} projects',
+                        count: group.total,
+                      })}
+                    </Badge>
+                    {groupContact && (
+                      <Link
+                        to={`/contacts?contactId=${encodeURIComponent(group.key)}`}
+                        className="ms-auto inline-flex items-center gap-1 text-2xs font-medium text-oe-blue hover:underline"
+                      >
+                        {t('projects.open_client_contact', { defaultValue: 'Open contact' })}
+                        <ExternalLink size={11} />
+                      </Link>
+                    )}
+                  </div>
+                  {!collapsed && (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.projects.map((project, i) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        boqStats={boqStatsMap.get(project.id)}
+                        fileTypes={fileTypesByProject?.[project.id] ?? []}
+                        style={{ animationDelay: `${50 + i * 30}ms` }}
+                        onDeleted={() => setStatusFilter('active')}
+                        onEditClient={setEditingClient}
+                        onFilterClient={setClientFilter}
+                      />
+                    ))}
+                  </div>
+                  )}
+                </section>
+                );
+              })}
+              <ClientMenu
+                anchor={groupMenu.anchor}
+                items={groupMenuItems}
+                onClose={groupMenu.close}
+                title={groupMenuKey ? clientNameOf(groupMenuKey) : undefined}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {paginatedProjects.map((project, i) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  clientLookup={clientLookup}
+                  boqStats={boqStatsMap.get(project.id)}
+                  fileTypes={fileTypesByProject?.[project.id] ?? []}
+                  style={{ animationDelay: `${50 + i * 30}ms` }}
+                  onDeleted={() => setStatusFilter('active')}
+                  onEditClient={setEditingClient}
+                  onFilterClient={setClientFilter}
+                />
+              ))}
+            </div>
+          )}
+          <ClientEditorDialog contact={editingClient} onClose={() => setEditingClient(null)} />
 
           {/* Pagination */}
           <div className="mt-6 flex flex-col items-center gap-3">
@@ -1107,25 +1495,96 @@ export function ProjectsPage() {
 
 function ProjectCard({
   project,
+  clientLookup,
   boqStats,
   fileTypes,
   style,
   onDeleted,
+  onEditClient,
+  onFilterClient,
 }: {
   project: Project;
+  /** Client directory for the card's client chip; omit to hide the chip
+   *  (the grouped view names the client in its heading instead). */
+  clientLookup?: ClientLookup;
   boqStats?: ProjectBOQStats;
   /** Uploaded file extensions for this project (e.g. ['rvt','dwg','pdf']). */
   fileTypes?: string[];
   style?: React.CSSProperties;
   onDeleted?: () => void;
+  /** Right-click on the client chip -> "Edit client..." opens the page's editor. */
+  onEditClient?: (contact: Contact) => void;
+  /** Right-click on the client chip -> "Filter to this client". */
+  onFilterClient?: (clientKey: string) => void;
 }) {
   const { t } = useTranslation();
+  const clientName = clientLookup
+    ? clientLabel(
+        project.client_id,
+        clientLookup,
+        t('projects.client_unknown', { defaultValue: 'Unknown client' }),
+      )
+    : '';
+  // Brand colour tints the chip (10% fill, 50% border, coloured text); no
+  // colour keeps the neutral chip exactly as before.
+  const clientHex = clientLookup ? clientColor(project.client_id, clientLookup) : '';
+  const clientContact = clientLookup ? findClient(project.client_id, clientLookup) : undefined;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+
+  // Client chip: right-click menu + "Change client" swaps the chip for the
+  // picker in place and PATCHes client_id on pick.
+  const chipMenu = useClientMenu();
+  const [changingClient, setChangingClient] = useState(false);
+  const clientMutation = useMutation({
+    mutationFn: (next: string) =>
+      apiPatch(`/v1/projects/${project.id}`, { client_id: next.trim() || null }),
+    onSuccess: () => {
+      setChangingClient(false);
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects-switcher'] });
+      addToast({
+        type: 'success',
+        title: t('projects.client_changed', { defaultValue: 'Client updated' }),
+      });
+    },
+    onError: (e: Error) => {
+      addToast({
+        type: 'error',
+        title: t('projects.client_change_failed', { defaultValue: 'Could not change the client' }),
+        message: e.message,
+      });
+    },
+  });
+  const chipItems: ClientMenuItem[] = [
+    {
+      key: 'edit',
+      label: t('projects.client_menu.edit', { defaultValue: 'Edit client...' }),
+      icon: <Pencil size={13} />,
+      disabled: !clientContact || !onEditClient,
+      onSelect: () => {
+        if (clientContact) onEditClient?.(clientContact);
+      },
+    },
+    {
+      key: 'change',
+      label: t('projects.client_menu.change', { defaultValue: 'Change client' }),
+      icon: <Replace size={13} />,
+      onSelect: () => setChangingClient(true),
+    },
+    {
+      key: 'filter',
+      label: t('projects.client_menu.filter', { defaultValue: 'Filter to this client' }),
+      icon: <Filter size={13} />,
+      separatorBefore: true,
+      disabled: !onFilterClient,
+      onSelect: () => onFilterClient?.(clientKeyOf(project)),
+    },
+  ];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -1148,6 +1607,51 @@ function ProjectCard({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [menuOpen]);
+
+  // job number, settable from the card - every register reference
+  // (e.g. REG-RFQ-<job>-0001) is minted off it, so it must be reachable
+  // without a trip into project settings.
+  const jobNoMutation = useMutation({
+    mutationFn: (code: string) => apiPatch(`/v1/projects/${project.id}`, { project_code: code }),
+    onSuccess: (_d, code) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects-switcher'] });
+      addToast({
+        type: 'success',
+        title: t('projects.job_no_set', {
+          defaultValue: 'Job number set to {{code}}',
+          code,
+        }),
+      });
+    },
+    onError: (e: Error) => {
+      addToast({
+        type: 'error',
+        title: t('projects.job_no_failed', { defaultValue: 'Could not set the job number' }),
+        message: e.message,
+      });
+    },
+  });
+  const askJobNumber = async () => {
+    const { ask } = await import('@/shared/ui/askDialog');
+    const answers = await ask({
+      title: t('projects.job_no_title', { defaultValue: 'Job Number' }),
+      note: t('projects.job_no_note', {
+        defaultValue:
+          'Register references are minted from this number, so it must match the job-management system.',
+      }),
+      fields: [
+        {
+          label: t('projects.job_no_label', { defaultValue: 'Job number' }),
+          value: project.project_code ?? '',
+          placeholder: 'e.g. 25406',
+        },
+      ],
+      okLabel: t('common.save', { defaultValue: 'Save' }),
+    });
+    const code = answers?.[0]?.trim();
+    if (code && code !== project.project_code) jobNoMutation.mutate(code);
+  };
 
   const deleteMutation = useMutation({
     mutationFn: () => apiDelete(`/v1/projects/${project.id}`),
@@ -1303,6 +1807,14 @@ function ProjectCard({
       className="group cursor-pointer relative animate-card-in overflow-hidden rounded-xl bg-gradient-to-b from-surface-elevated to-surface-primary hover:shadow-xl hover:border-oe-blue/40 focus-within:ring-2 focus-within:ring-oe-blue/30 motion-safe:transition-all"
       style={style}
       onClick={() => navigate(`/projects/${project.id}`)}
+      onContextMenu={(e) => {
+        // Right-click = the card's action menu (with "Set Job Number" in
+        // it), same as the ... button. The browser menu offers nothing
+        // useful on a project tile.
+        e.preventDefault();
+        e.stopPropagation();
+        setMenuOpen(true);
+      }}
     >
       {mapEnabled && (
         <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -1394,6 +1906,21 @@ function ProjectCard({
             </button>
             <button
               onClick={() => {
+                setMenuOpen(false);
+                void askJobNumber();
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <Hash size={14} />{' '}
+              {project.project_code
+                ? t('projects.job_no_edit', {
+                    defaultValue: 'Job number: {{code}}',
+                    code: project.project_code,
+                  })
+                : t('projects.job_no_add', { defaultValue: 'Set Job Number' })}
+            </button>
+            <button
+              onClick={() => {
                 duplicateMutation.mutate();
                 setMenuOpen(false);
               }}
@@ -1479,6 +2006,88 @@ function ProjectCard({
           </p>
         )}
         <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+          {clientLookup && changingClient && (
+            <div
+              className="w-full"
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === 'Escape') setChangingClient(false);
+              }}
+              data-testid="project-card-client-picker"
+            >
+              <ClientPicker
+                value=""
+                autoFocus
+                disabled={clientMutation.isPending}
+                onChange={(next) => {
+                  if (next) clientMutation.mutate(next);
+                }}
+                placeholder={t('projects.client_menu.change_placeholder', {
+                  defaultValue: 'Pick a new client (Esc to cancel)',
+                })}
+              />
+              <div className="mt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setChangingClient(false)}
+                  className="text-[11px] text-content-tertiary hover:text-content-primary"
+                >
+                  {t('common.cancel', { defaultValue: 'Cancel' })}
+                </button>
+                {project.client_id && (
+                  <button
+                    type="button"
+                    onClick={() => clientMutation.mutate('')}
+                    disabled={clientMutation.isPending}
+                    className="text-[11px] text-content-tertiary hover:text-semantic-error"
+                  >
+                    {t('projects.client_menu.unset', { defaultValue: 'Remove client' })}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          {clientName && !changingClient && (
+            <span
+              className={`inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium ${
+                clientHex
+                  ? 'border-transparent'
+                  : 'border-border-light bg-surface-secondary text-content-secondary'
+              }`}
+              style={
+                clientHex
+                  ? { backgroundColor: `${clientHex}1f`, borderColor: `${clientHex}80`, color: clientHex }
+                  : undefined
+              }
+              // The chip truncates long names, so the tooltip carries the
+              // full name as well as the address.
+              title={`${t('projects.client_owner', { defaultValue: 'Client / owner' })}: ${clientName}${
+                clientContact && formatAddress(primaryAddress(clientContact))
+                  ? ` · ${formatAddress(primaryAddress(clientContact))}`
+                  : ''
+              } (${t('projects.client_menu.right_click_hint', { defaultValue: 'right-click for options' })})`}
+              data-testid="project-card-client"
+              data-color={clientHex || undefined}
+              onContextMenu={chipMenu.openAt}
+            >
+              {clientHex ? (
+                <span
+                  aria-hidden
+                  className="inline-block h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: clientHex }}
+                />
+              ) : (
+                <Users size={11} strokeWidth={2.25} />
+              )}
+              <span className="max-w-[160px] truncate">{clientName}</span>
+            </span>
+          )}
+          {clientName && (
+            <ClientMenu anchor={chipMenu.anchor} items={chipItems} onClose={chipMenu.close} title={clientName} />
+          )}
           <span className="inline-flex items-center gap-1 rounded-full border border-oe-blue/20 bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue-text">
             <Building2 size={11} strokeWidth={2.25} />
             {standardLabels[project.classification_standard] ?? project.classification_standard}

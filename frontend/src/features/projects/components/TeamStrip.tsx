@@ -9,20 +9,31 @@
  * surfaces the full name + role. After 6 members an aggregate "+N more"
  * chip is rendered which opens a modal listing every member. The trailing
  * "+" button opens an Add Member modal that uses the existing
- * `UserSearchInput` to find users plus a role selector
- * (estimator / viewer / project_manager).
+ * `UserSearchInput` to find users plus a grouped role selector
+ * (see ``projectRoles.ts`` — twenty construction roles in five optgroups).
  *
- * Data flow: backed by GET/POST/DELETE /api/v1/projects/{id}/members/.
- * Add/remove mutations invalidate the ['project-members', projectId] query
- * key so the strip auto-refreshes.
+ * The member-list modal is also where an existing member's role is changed
+ * and where they are removed; both sit behind the same ``canManage`` flag
+ * (owner / admin), matching the backend's owner-only gate.
+ *
+ * Data flow: backed by GET/POST/PATCH/DELETE
+ * /api/v1/projects/{id}/members/. Every mutation invalidates the
+ * ['project-members', projectId] query key so the strip auto-refreshes.
  */
 
 import { useState, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X, Trash2, UserPlus } from 'lucide-react';
-import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { UserSearchInput } from '@/shared/ui/UserSearchInput';
+import {
+  ASSIGNABLE_PROJECT_ROLES,
+  groupedRoles,
+  roleLabel,
+  roleLabelKey,
+} from './projectRoles';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -34,16 +45,6 @@ export interface ProjectMember {
   is_owner: boolean;
   created_at?: string | null;
 }
-
-/**
- * Roles surfaced in the Add-Member modal. The backend accepts a wider
- * whitelist (see AddProjectMemberRequest); these are the user-facing labels.
- */
-const ROLE_CHOICES: readonly string[] = [
-  'estimator',
-  'viewer',
-  'project_manager',
-] as const;
 
 const MAX_VISIBLE_AVATARS = 6;
 
@@ -68,7 +69,7 @@ export function getInitials(member: Pick<ProjectMember, 'full_name' | 'email'>):
  * same colour. Hashing the email is stable across renders / sessions and
  * makes the strip visually distinguishable at a glance.
  */
-function colourForUser(member: Pick<ProjectMember, 'user_id' | 'email'>): string {
+export function colourForUser(member: Pick<ProjectMember, 'user_id' | 'email'>): string {
   const seed = member.user_id || member.email || '';
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
@@ -87,12 +88,12 @@ interface AvatarProps {
   className?: string;
 }
 
-function Avatar({ member, size = 32, className = '' }: AvatarProps) {
+export function Avatar({ member, size = 32, className = '' }: AvatarProps) {
   return (
     <div
       role="img"
-      aria-label={`${member.full_name || member.email} (${member.role})`}
-      title={`${member.full_name || member.email} - ${member.role}`}
+      aria-label={`${member.full_name || member.email} (${roleLabel(member.role)})`}
+      title={`${member.full_name || member.email} - ${roleLabel(member.role)}`}
       className={`inline-flex items-center justify-center rounded-full border-2 border-white text-white font-semibold select-none ${className}`}
       style={{
         width: size,
@@ -107,23 +108,104 @@ function Avatar({ member, size = 32, className = '' }: AvatarProps) {
   );
 }
 
+// ── Role picker ────────────────────────────────────────────────────────────
+
+export interface RolePickerProps {
+  value: string;
+  onChange: (role: string) => void;
+  id?: string;
+  disabled?: boolean;
+  className?: string;
+  'aria-label'?: string;
+  'data-testid'?: string;
+}
+
+/**
+ * The role `<select>`, grouped into optgroups (Project / Engineering /
+ * Workshop & site / Commercial / External).
+ *
+ * A flat list of twenty roles is a scroll-and-hunt; the optgroups let someone
+ * looking for "apprentice" go straight to the site block. A role that is on
+ * the member but not in the whitelist (a legacy row) is appended as an extra
+ * option so opening the picker never silently rewrites their role to the
+ * first entry in the list.
+ */
+export function RolePicker({
+  value,
+  onChange,
+  id,
+  disabled,
+  className,
+  'aria-label': ariaLabel,
+  'data-testid': testId = 'project-role-select',
+}: RolePickerProps) {
+  const { t } = useTranslation();
+  const groups = useMemo(() => groupedRoles(), []);
+  const isKnown = useMemo(
+    () => ASSIGNABLE_PROJECT_ROLES.some((r) => r.key === value),
+    [value],
+  );
+
+  return (
+    <select
+      id={id}
+      value={value}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onChange={(e) => onChange(e.target.value)}
+      data-testid={testId}
+      className={
+        className ??
+        'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue disabled:opacity-50'
+      }
+    >
+      {!isKnown && value ? (
+        <option value={value}>{roleLabel(value)}</option>
+      ) : null}
+      {groups.map((g) => (
+        <optgroup
+          key={g.key}
+          label={t(`projects.team.role_group.${g.key}`, {
+            defaultValue: g.label,
+          })}
+        >
+          {g.roles.map((r) => (
+            <option key={r.key} value={r.key}>
+              {t(roleLabelKey(r.key), { defaultValue: r.label })}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
 // ── Member list modal ──────────────────────────────────────────────────────
 
 interface MemberListModalProps {
   members: ProjectMember[];
   onClose: () => void;
   onRemove: (userId: string) => void;
+  onChangeRole: (userId: string, role: string) => void;
   canRemove: boolean;
+  /** Surfaced when the role change or removal is refused by the backend. */
+  errorMessage?: string;
 }
 
 function MemberListModal({
   members,
   onClose,
   onRemove,
+  onChangeRole,
   canRemove,
+  errorMessage,
 }: MemberListModalProps) {
   const { t } = useTranslation();
-  return (
+  // Portalled: this dialog is also opened from the Project-team tile, which
+  // sits inside an animated Card. A transformed ancestor becomes the
+  // containing block for `position: fixed`, which would trap the overlay
+  // inside one grid cell instead of covering the page.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -151,6 +233,15 @@ function MemberListModal({
             <X size={18} />
           </button>
         </div>
+        {errorMessage ? (
+          <p
+            role="alert"
+            className="px-4 pt-3 text-xs text-semantic-error"
+            data-testid="team-strip-manage-error"
+          >
+            {errorMessage}
+          </p>
+        ) : null}
         <ul className="overflow-y-auto divide-y divide-border-light">
           {members.map((m) => (
             <li
@@ -163,8 +254,10 @@ function MemberListModal({
                 <div className="text-sm font-medium text-content-primary truncate">
                   {m.full_name || m.email}
                 </div>
+                {/* The raw role key used to be printed here
+                    ("automation_engineer"); it goes through roleLabel now. */}
                 <div className="text-xs text-content-tertiary truncate">
-                  {m.email} · {m.role}
+                  {m.email} · {roleLabel(m.role)}
                   {m.is_owner ? (
                     <span className="ml-1 text-oe-blue">
                       ·{' '}
@@ -173,6 +266,22 @@ function MemberListModal({
                   ) : null}
                 </div>
               </div>
+              {/* The owner's role is pinned to project ownership (the backend
+                  400s on a change), so they get no picker — only a label. */}
+              {canRemove && !m.is_owner && (
+                <RolePicker
+                  value={m.role}
+                  onChange={(role) => {
+                    if (role !== m.role) onChangeRole(m.user_id, role);
+                  }}
+                  className="h-8 max-w-[11rem] rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                  aria-label={t('projects.team.change_role_for', {
+                    name: m.full_name || m.email,
+                    defaultValue: 'Role for {{name}}',
+                  })}
+                  data-testid="team-strip-role-picker"
+                />
+              )}
               {canRemove && !m.is_owner && (
                 <button
                   onClick={() => onRemove(m.user_id)}
@@ -189,20 +298,25 @@ function MemberListModal({
           ))}
         </ul>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 // ── Add member modal ───────────────────────────────────────────────────────
 
-interface AddMemberModalProps {
+export interface AddMemberModalProps {
   onClose: () => void;
   onSubmit: (userId: string, role: string) => void;
   isSubmitting: boolean;
   errorMessage?: string;
 }
 
-function AddMemberModal({
+/**
+ * Exported so the Project-team tile can offer the same "＋ Add member" flow
+ * without a second, drifting copy of the dialog.
+ */
+export function AddMemberModal({
   onClose,
   onSubmit,
   isSubmitting,
@@ -211,7 +325,10 @@ function AddMemberModal({
   const { t } = useTranslation();
   const [userId, setUserId] = useState<string>('');
   const [displayName, setDisplayName] = useState<string>('');
-  const [role, setRole] = useState<string>('estimator');
+  // Defaults to a plain team member rather than to whichever role happens to
+  // sit first in the list, so a distracted Add lands on the least privileged
+  // sensible role.
+  const [role, setRole] = useState<string>('member');
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -222,7 +339,8 @@ function AddMemberModal({
     [userId, role, onSubmit],
   );
 
-  return (
+  // Portalled for the same reason as the member-list dialog above.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -274,23 +392,12 @@ function AddMemberModal({
             >
               {t('projects.team.role_label', { defaultValue: 'Role' })}
             </label>
-            <select
+            <RolePicker
               id="team-strip-role-select"
               value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
-            >
-              {ROLE_CHOICES.map((r) => (
-                <option key={r} value={r}>
-                  {t(`projects.team.role.${r}`, {
-                    defaultValue:
-                      r === 'project_manager'
-                        ? 'Project manager'
-                        : r.charAt(0).toUpperCase() + r.slice(1),
-                  })}
-                </option>
-              ))}
-            </select>
+              onChange={setRole}
+              data-testid="team-strip-role-select"
+            />
           </div>
           {errorMessage ? (
             <p
@@ -322,7 +429,8 @@ function AddMemberModal({
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -346,6 +454,7 @@ export function TeamStrip({
   const [listOpen, setListOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [addError, setAddError] = useState<string | undefined>();
+  const [manageErrorText, setManageErrorText] = useState<string | undefined>();
 
   const { data: members = [], isLoading } = useQuery<ProjectMember[]>({
     queryKey: ['project-members', projectId],
@@ -378,14 +487,39 @@ export function TeamStrip({
     },
   });
 
+  // Both manage-mutations share one error slot: only one runs at a time from
+  // this modal, and a stale message from the other would be misleading.
+  const manageError = (err: unknown, fallback: string) =>
+    (err as { body?: { detail?: string } })?.body?.detail ??
+    (err instanceof Error ? err.message : fallback);
+
   const removeMutation = useMutation({
     mutationFn: (userId: string) =>
       apiDelete(`/v1/projects/${projectId}/members/${userId}/`),
     onSuccess: () => {
+      setManageErrorText(undefined);
       queryClient.invalidateQueries({
         queryKey: ['project-members', projectId],
       });
     },
+    onError: (err: unknown) =>
+      setManageErrorText(manageError(err, 'Failed to remove member')),
+  });
+
+  const roleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      apiPatch<ProjectMember>(
+        `/v1/projects/${projectId}/members/${userId}/`,
+        { role },
+      ),
+    onSuccess: () => {
+      setManageErrorText(undefined);
+      queryClient.invalidateQueries({
+        queryKey: ['project-members', projectId],
+      });
+    },
+    onError: (err: unknown) =>
+      setManageErrorText(manageError(err, 'Failed to change role')),
   });
 
   const visible = useMemo(
@@ -477,9 +611,14 @@ export function TeamStrip({
       {listOpen && (
         <MemberListModal
           members={members}
-          onClose={() => setListOpen(false)}
+          onClose={() => {
+            setListOpen(false);
+            setManageErrorText(undefined);
+          }}
           canRemove={canManage}
+          errorMessage={manageErrorText}
           onRemove={(userId) => removeMutation.mutate(userId)}
+          onChangeRole={(userId, role) => roleMutation.mutate({ userId, role })}
         />
       )}
       {addOpen && (

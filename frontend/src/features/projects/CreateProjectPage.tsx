@@ -29,6 +29,7 @@ import {
 import { useTelemetry } from '@/shared/lib/telemetry';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { ClientPicker } from './ClientPicker';
 
 // English fallbacks for the computed `project_wizard.activity_opt.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -575,7 +576,10 @@ export function CreateProjectModal({
   // "not provided" and is normalised to null/omitted in the payload.
   const [projectCode, setProjectCode] = useState('');
   const [projectType, setProjectType] = useState('');
-  const [clientName, setClientName] = useState('');
+  // The project's client: a `client` contact id picked (or minted) through
+  // ClientPicker, or a legacy free-text name on an older project. Stored
+  // in `client_id` as-is; see features/projects/clients.ts.
+  const [clientId, setClientId] = useState('');
   const [contractValue, setContractValue] = useState('');
   const [budgetEstimate, setBudgetEstimate] = useState('');
   const [plannedStart, setPlannedStart] = useState('');
@@ -636,7 +640,7 @@ export function CreateProjectModal({
       setAddressPostal('');
       setProjectCode('');
       setProjectType('');
-      setClientName('');
+      setClientId('');
       setContractValue('');
       setBudgetEstimate('');
       setPlannedStart('');
@@ -691,6 +695,9 @@ export function CreateProjectModal({
     if (!open || !isEdit || !editProject) return;
     if (prefilledFor === editProject.id) return;
     setForm(projectCoreForm(editProject, defaultCurrency));
+    // Client round-trips through edit mode: a contact id resolves to its
+    // name in the picker, a legacy free-text value shows as-is.
+    setClientId(editProject.client_id ?? '');
     if (editProfile) {
       setPreset(editProfile.profile.preset || 'custom');
       setActivity(editProfile.profile.activity ?? []);
@@ -758,6 +765,7 @@ export function CreateProjectModal({
     !!form.region ||
     !!form.currency ||
     !!form.classification_standard ||
+    clientId !== '' ||
     addressStreet !== '' || addressCity !== '' ||
     addressCountry !== '' || addressPostal !== '';
 
@@ -780,6 +788,18 @@ export function CreateProjectModal({
     if (!open) return;
     const onTab = (e: globalThis.KeyboardEvent) => {
       if (e.key !== 'Tab') return;
+      // The client editor dialog, its colour popover and the client
+      // context menu are portalled to <body> (outside dialogRef) and own
+      // focus while open - trapping Tab back into the wizard would make
+      // them unusable from the keyboard.
+      const active0 = document.activeElement as HTMLElement | null;
+      if (
+        active0?.closest(
+          '[data-client-editor-dialog], [data-testid="client-color-popover"], [role="menu"]',
+        )
+      ) {
+        return;
+      }
       // While the discard confirm is up it is itself a modal layer —
       // trap inside it so Tab can't reach the step controls behind it.
       const root =
@@ -872,7 +892,7 @@ export function CreateProjectModal({
         // so an untouched Quick-create form still posts a minimal body.
         project_code: projectCode.trim() || null,
         project_type: projectType.trim() || null,
-        client_id: clientName.trim() || null,
+        client_id: clientId.trim() || null,
         contract_value: contractValue.trim() || null,
         budget_estimate: budgetEstimate.trim() || null,
         planned_start_date: plannedStart.trim() || null,
@@ -885,20 +905,26 @@ export function CreateProjectModal({
       if (isEdit && editProjectId) {
         // Rebuild the baseline the wizard was seeded with, so the save carries
         // only what the user actually edited. See `projectCoreForm`.
+        const corePatch = onlyChangedFields(
+          {
+            name: data.name,
+            description: data.description,
+            region: data.region,
+            classification_standard: data.classification_standard,
+            currency: data.currency,
+            locale: data.locale,
+          },
+          form,
+          projectCoreForm(editProject, defaultCurrency),
+        );
+        // The client is not a core field, so it is compared on its own:
+        // sent only when the picker's value differs from what the project
+        // was loaded with (both normalised to null when empty).
+        const baseClient = editProject?.client_id?.trim() || null;
+        const nextClient = data.client_id ?? null;
         await projectsApi.update(
           editProjectId,
-          onlyChangedFields(
-            {
-              name: data.name,
-              description: data.description,
-              region: data.region,
-              classification_standard: data.classification_standard,
-              currency: data.currency,
-              locale: data.locale,
-            },
-            form,
-            projectCoreForm(editProject, defaultCurrency),
-          ),
+          nextClient !== baseClient ? { ...corePatch, client_id: nextClient } : corePatch,
         );
         await projectsApi.applyProfile(editProjectId, buildSpec());
         return { id: editProjectId } as Project;
@@ -1585,14 +1611,10 @@ export function CreateProjectModal({
                       text={t('projects.client_owner', { defaultValue: 'Client / owner' })}
                       optionalText={t('projects.create.optional_badge', { defaultValue: 'Optional' })}
                     />
-                    <input
+                    <ClientPicker
                       id="qc-client"
-                      type="text"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      maxLength={36}
-                      placeholder={t('projects.client_owner_placeholder', { defaultValue: 'Client or owner name' })}
-                      className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                      value={clientId}
+                      onChange={setClientId}
                     />
                   </div>
                   </div>
@@ -1814,6 +1836,27 @@ export function CreateProjectModal({
                   rows={3}
                   className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
                 />
+              </div>
+              {/* Client - the same picker Quick-create shows, so a project
+                  set up (or re-run) through the wizard is filed under a
+                  client too; edit mode prefills it from the project. */}
+              <div>
+                <OptionalLabel
+                  htmlFor="wz-client"
+                  text={t('projects.client_owner', { defaultValue: 'Client / owner' })}
+                  optionalText={t('projects.create.optional_badge', { defaultValue: 'Optional' })}
+                />
+                <ClientPicker
+                  id="wz-client"
+                  value={clientId}
+                  onChange={setClientId}
+                />
+                <p className="mt-1.5 text-[11px] text-content-tertiary">
+                  {t('projects.client_owner_hint', {
+                    defaultValue:
+                      'Pick a client from Contacts or add a new one - every project under the same client can then be seen together.',
+                  })}
+                </p>
               </div>
             </div>
           )}
