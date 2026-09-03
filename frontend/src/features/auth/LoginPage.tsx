@@ -440,7 +440,7 @@ export function LoginPage() {
           Restrained palette - single faint sky blob behind the marketing
           column so the headline / stats sit on a near-white field.
           Dark mode keeps the original richer blob set for depth. */}
-      <div className="absolute inset-y-0 left-0 right-1/2 z-0 pointer-events-none overflow-hidden hidden lg:block">
+      <div className="absolute inset-y-0 start-0 end-1/2 z-0 pointer-events-none overflow-hidden hidden lg:block">
         <div className="absolute top-[-12%] left-[-6%] w-[520px] h-[520px] rounded-full bg-sky-300/10 dark:bg-oe-blue/35 blur-[120px] animate-blob-slow-1 mix-blend-screen" />
         <div className="absolute bottom-[-18%] right-[2%] w-[400px] h-[400px] rounded-full bg-cyan-200/10 dark:bg-violet-500/35 blur-[110px] animate-blob-slow-4 mix-blend-screen hidden dark:block" />
       </div>
