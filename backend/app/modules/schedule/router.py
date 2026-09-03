@@ -1606,7 +1606,7 @@ async def delete_progress_update(
 
 
 def _parse_xer_tables(content: str) -> dict[str, list[dict[str, str]]]:
-    """Parse Primavera P6 XER tab-delimited format into table dictionaries.
+    """Parse the XER tab-delimited exchange format into table dictionaries.
 
     XER format uses:
       %T <TABLE_NAME>     - start of a table
@@ -1657,7 +1657,7 @@ async def import_xer(
     session: SessionDep = None,
     service: ScheduleService = Depends(_get_service),
 ) -> ImportResult:
-    """Import a Primavera P6 XER file into a schedule.
+    """Import an XER schedule export into a schedule.
 
     Parses TASK, TASKPRED, and CALENDAR tables from the XER format and creates
     activities and relationships in the target schedule.
