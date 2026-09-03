@@ -82,6 +82,15 @@ CI_ONLY_BY_DESIGN = {
         "Needs a built artifact. Step: 'Check the sidecar carries a usable embedded "
         "database', in desktop-release.yml, against a bundle no commit produces."
     ),
+    "check_locale_english_placeholder.py": (
+        "Too slow for a hook, measured at 2m07s over 42 locales and 1668990 compared "
+        "values. It resolves each value's English from the call site as well as en.ts, "
+        "so it reads the frontend tree and not only the locale files, and "
+        "pass_filenames: false would make it do all of that on any commit that touches "
+        "a locale. Its three siblings in .pre-commit-config.yaml are hooks because they "
+        "read the locale files alone. Nine seconds of hook accounting was already judged "
+        "too much here (673773c00); this is fourteen times that."
+    ),
 }
 
 # Invoked by a lane, declared by no hook, and carrying no reason on record. This
