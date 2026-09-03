@@ -1663,19 +1663,29 @@ async def import_xer(
     activities and relationships in the target schedule.
     """
     from app.modules.schedule.models import Activity, ScheduleRelationship
+    from app.modules.schedule.xer_encoding import decode_xer
 
     # Verify schedule exists
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
 
-    # Read and decode file
+    # Read and decode file. A P6 export carries no declaration of its code
+    # page, and the pair this used to be, utf-8 then latin-1, could not fail:
+    # latin-1 accepts every byte, so an Arabic, Russian, Greek or Hebrew
+    # export imported silently with every name turned to mojibake.
     raw = await file.read()
-    try:
-        content = raw.decode("utf-8")
-    except UnicodeDecodeError:
-        content = raw.decode("latin-1")
+    content, code_page = decode_xer(raw)
 
     tables = _parse_xer_tables(content)
     warnings: list[str] = []
+    if code_page not in ("utf-8", "utf-8-sig"):
+        # Said out loud rather than logged. The person importing is the only
+        # one who knows which machine exported the file, and a guess that
+        # reads Arabic out of an English programme is worth their attention
+        # while they can still re-export it.
+        warnings.append(
+            f"File carries no encoding declaration; read as {code_page}. "
+            "Check the activity names if this is not the code page of the machine that exported it."
+        )
 
     # ── Parse TASK table ──────────────────────────────────────────────────
     tasks = tables.get("TASK", [])
@@ -1899,13 +1909,16 @@ async def import_msp_xml(
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
 
     raw = await file.read()
-    try:
-        content = raw.decode("utf-8")
-    except UnicodeDecodeError:
-        content = raw.decode("latin-1")
 
     try:
-        root = safe_ET.fromstring(content)
+        # Parsed from bytes on purpose. MSPDI, unlike XER, states its own
+        # encoding in the XML declaration, and ElementTree honours that only
+        # when it is handed bytes; a str has already been decoded and the
+        # declaration can no longer be acted on, so it is silently ignored.
+        # This used to decode utf-8 then latin-1 first, which cannot fail and
+        # therefore turned a windows-1256 file into mojibake that parsed
+        # perfectly well.
+        root = safe_ET.fromstring(raw)
     except DefusedXmlException as e:
         # Hostile payload (XXE / billion-laughs / external DTD): defusedxml
         # raises EntitiesForbidden/DTDForbidden/ExternalReferenceForbidden,
