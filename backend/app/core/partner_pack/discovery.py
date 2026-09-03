@@ -539,10 +539,19 @@ def get_active_pack() -> PartnerPackManifest | None:
     never co-brands the app.
 
     Precedence:
-      1. in-app applied pack (``partner_pack_state.json`` in the ACTIVE
-         data dir - see ``state._resolve_state_dir``)
-      2. env ``OE_PARTNER_PACK=<slug>``
+      1. in-app applied pack (``pack_state.json`` in the ACTIVE data dir - see
+         ``state._resolve_state_dir``; ``partner_pack_state.json`` is the LEGACY
+         name and is still read when the current one is absent)
+      2. env ``OE_PACK=<slug>``, or its backward-compatible alias
+         ``OE_PARTNER_PACK``; ``OE_PACK`` wins if both are set
       3. None
+
+    The two names in step 1 and the alias in step 2 are worth stating because
+    this docstring used to name only the legacy file and only the alias. Anyone
+    debugging why a workspace is scoped looks for the file this text names, does
+    not find it, concludes nothing is applied, and goes looking for a bug in the
+    scoping instead of reading the record that is right there under the other
+    name.
 
     Cached per resolved state dir, so two instances resolving different data
     dirs never share an answer; ``reset_cache()`` is called by the apply

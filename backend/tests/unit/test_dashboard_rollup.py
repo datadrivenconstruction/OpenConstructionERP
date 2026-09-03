@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -347,6 +348,28 @@ class TestHSEScorecardAggregate:
 
 class TestPermissionFiltering:
     """accessible_projects filters by owner — IDOR-safe boundary."""
+
+    @pytest.fixture(autouse=True)
+    def _no_ambient_pack(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Point the pack state at an empty dir so the developer's own is not read.
+
+        ``accessible_projects`` calls ``scope_project_query``, which narrows the
+        listing to the active pack's projects. Without this, the active pack is
+        whatever the person running the tests last applied in the real app: the
+        record lives in ``~/.openestimate/pack_state.json`` and outlives any
+        checkout. On a machine with a pack applied these three tests see an empty
+        list and fail, while CI passes on a clean home directory. That is the
+        worst shape for a test to have, because the failure follows the developer
+        rather than the code, and the assertion it prints ("your own project is
+        not visible to you") points at the permission boundary rather than at the
+        pack scoping that actually did it.
+
+        Keying on a fresh ``tmp_path`` also sidesteps the ``lru_cache`` on the
+        resolver, which is keyed by state dir.
+        """
+        monkeypatch.setenv("OE_CLI_DATA_DIR", str(tmp_path))
+        monkeypatch.delenv("OE_PACK", raising=False)
+        monkeypatch.delenv("OE_PARTNER_PACK", raising=False)
 
     @pytest.mark.asyncio
     async def test_regular_user_sees_only_own_projects(self, session: AsyncSession) -> None:
