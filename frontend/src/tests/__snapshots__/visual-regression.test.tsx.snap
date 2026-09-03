@@ -7001,7 +7001,7 @@ exports[`Visual Regression - Input > input with icon 1`] = `
       class="relative group"
     >
       <div
-        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary transition-colors duration-fast ease-oe group-focus-within:text-oe-blue"
+        class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary transition-colors duration-fast ease-oe group-focus-within:text-oe-blue"
       >
         <span>
           S
@@ -7010,7 +7010,7 @@ exports[`Visual Regression - Input > input with icon 1`] = `
       <input
         aria-invalid="false"
         autocomplete="off"
-        class="h-9 w-full rounded-lg border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-normal ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue focus:shadow-[0_0_0_4px_rgba(0,113,227,0.08)] pl-10 border-border hover:border-content-tertiary"
+        class="h-9 w-full rounded-lg border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-normal ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue focus:shadow-[0_0_0_4px_rgba(0,113,227,0.08)] ps-10 border-border hover:border-content-tertiary"
         id="search"
         name="search"
         placeholder="Search..."
