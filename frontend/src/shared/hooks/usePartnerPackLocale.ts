@@ -18,15 +18,24 @@
  * pack whose extra file is not its default (india-cpwd ships ``hi`` under
  * ``default_locale: "en"``) still reaches the user who selects it.
  *
+ * A third thing rides along, and it is deliberately not keyed off the locale:
+ * which market's convention the workspace's NUMBERS are grouped in. That
+ * follows the pack's COUNTRY, because india-cpwd speaks English and still
+ * groups by lakh and crore, so a pack can need one answer for its words and
+ * another for its figures. See ``marketNumberLocale``.
+ *
  * Deactivation is handled by ``PartnerPackDeactivateDialog`` calling
- * ``resetPackLocale`` (reverts to English, drops the vocabulary and clears the
- * marker), so toggling a pack on then off leaves the language exactly where it
- * started.
+ * ``resetPackLocale`` (reverts to English, drops the vocabulary, clears the
+ * marker and the market), so toggling a pack on then off leaves the language
+ * and the grouping exactly where they started.
  */
 
 import { useEffect } from 'react';
 
 import i18n, { loadLocaleResource, normalizePackLocale } from '@/app/i18n';
+import { setMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
+import { packCountryCode } from '@/shared/lib/regionalPack';
+import { numberLocaleForCountry } from '@/stores/usePreferencesStore';
 
 import { revertPackVocabulary, syncPackVocabulary } from './partnerPackVocabulary';
 import { usePartnerPack } from './usePartnerPack';
@@ -47,6 +56,11 @@ export async function resetPackLocale(): Promise<void> {
   } catch {
     // localStorage unavailable (private browsing) — non-fatal.
   }
+  // The market's digit grouping goes with the pack that justified it. Nothing
+  // persists this tag, so leaving it set would keep an un-applied India pack's
+  // lakh grouping for the rest of the session with no control in the UI able
+  // to reach it.
+  setMarketNumberLocale(null);
   // Drop the pack's words before the language switch. Switching to English is
   // not enough on its own: a pack whose locale normalizes to ``en`` (uk-jct,
   // aus, nzs) merged its overlay straight onto the English bundle, and
@@ -112,5 +126,20 @@ export function usePartnerPackLocale(): void {
     return () => {
       i18n.off('languageChanged', onLanguageChanged);
     };
+  }, [manifest]);
+
+  // Third, independent concern: which market's convention the workspace's
+  // NUMBERS are grouped in, which is not the same question as which language
+  // its words are in. India is why the two had to come apart. The pack's UI
+  // language is English, so the effect above returns early on it, while the
+  // market still writes `47,65,79,722.78` where English writes
+  // `476,579,722.78`. Keying this off the pack's country rather than its
+  // locale is what lets one pack answer both questions differently.
+  //
+  // No early return and no marker: unlike the forced language, this is not a
+  // choice the user can make in the header, so there is nothing to fight, and
+  // an inactive pack has to clear it rather than leave the last market behind.
+  useEffect(() => {
+    setMarketNumberLocale(manifest ? numberLocaleForCountry(packCountryCode(manifest)) : null);
   }, [manifest]);
 }

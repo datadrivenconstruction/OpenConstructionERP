@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { usePreferencesStore } from './usePreferencesStore';
+import { adoptServerNumberFormat, usePreferencesStore } from './usePreferencesStore';
 import { apiGet } from '@/shared/lib/api';
 
 vi.mock('@/shared/lib/api', () => ({ apiGet: vi.fn() }));
@@ -212,6 +212,38 @@ describe('usePreferencesStore', () => {
       mockApiGet.mockResolvedValueOnce({ number_format: '12,34,567.89' });
       await usePreferencesStore.getState().hydrateFromServer();
       expect(usePreferencesStore.getState().numberLocale).toBe('auto');
+    });
+
+    // The guard above was inverted, and the two tests below are the half it
+    // got backwards. It refused the seeded pattern only for a browser sitting
+    // on `'auto'`, reading any other local value as proof that German had been
+    // CHOSEN. A local value is only proof that SOMETHING was chosen. Since the
+    // column is NOT NULL and holds the German pattern for every account nobody
+    // ever PATCHed, the seeded string arrives on every boot - so the guard
+    // protected the reader who never chose and overwrote every reader who did,
+    // silently, in favour of a language they had not picked.
+    //
+    // The tie-break is whether the local value AGREES with the seeded pattern,
+    // not whether one exists.
+    it('keeps every explicit choice that is not German against the seeded default', async () => {
+      for (const chosen of ['en-US', 'fr-FR', 'en-IN'] as const) {
+        usePreferencesStore.getState().setPreference('numberLocale', chosen);
+        mockApiGet.mockResolvedValueOnce({ number_format: '1.234,56' });
+        await usePreferencesStore.getState().hydrateFromServer();
+        expect(usePreferencesStore.getState().numberLocale).toBe(chosen);
+      }
+    });
+
+    it('adopts the seeded pattern only for the browser that already agrees with it', () => {
+      // Directly, because `hydrateFromServer` can only show the outcome and
+      // this is about the decision. `undefined` means "leave the local value
+      // alone"; German is the one local the seeded pattern may be adopted for,
+      // because it is the only one that agrees with it.
+      expect(adoptServerNumberFormat('1.234,56', 'auto')).toBeUndefined();
+      expect(adoptServerNumberFormat('1.234,56', 'en-US')).toBeUndefined();
+      expect(adoptServerNumberFormat('1.234,56', 'fr-FR')).toBeUndefined();
+      expect(adoptServerNumberFormat('1.234,56', 'en-IN')).toBeUndefined();
+      expect(adoptServerNumberFormat('1.234,56', 'de-DE')).toBe('de-DE');
     });
   });
 });

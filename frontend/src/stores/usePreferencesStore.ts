@@ -15,6 +15,7 @@
 import { create } from 'zustand';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale, useIntlLocale } from '@/shared/lib/intlLocale';
+import { getMarketNumberLocale, useMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
 
 const STORAGE_KEY = 'oe_preferences';
 
@@ -123,9 +124,19 @@ function persist(prefs: Preferences) {
  * This is the single resolver: a surface that renders a number reads the
  * preference through here, never straight off the store, so "which locale" has
  * one answer across the whole product rather than one answer per component.
+ *
+ * `'auto'` asks the market before it asks the UI language. Those are ordered
+ * that way because digit grouping belongs to the document rather than to
+ * whoever opened it: an Indian bill of quantities is grouped in lakh and crore
+ * for a German reviewer exactly as it is for the estimator who wrote it, and
+ * the alternative printed `476,579,722.78` on a document whose readers all
+ * write `47,65,79,722.78`. An explicit preference still outranks both, so a
+ * reader who went to regional settings and picked a format is never overruled
+ * by the market they are working in.
  */
 export function resolveNumberLocale(preference: NumberLocale): string {
-  return preference === 'auto' ? getIntlLocale() : preference;
+  if (preference !== 'auto') return preference;
+  return getMarketNumberLocale() ?? getIntlLocale();
 }
 
 /**
@@ -145,18 +156,26 @@ export function getNumberLocale(): string {
 }
 
 /**
- * `resolveNumberLocale` bound to both of the things it depends on.
+ * `resolveNumberLocale` bound to all three of the things it depends on.
  *
  * Reading the preference alone is not enough for a component: with `'auto'` the
  * answer also moves when the UI language moves, and the store has no idea that
  * happened. Subscribing to both is what makes a language switch reach the
  * numbers instead of leaving them in the previous language until an unrelated
  * prop re-renders them.
+ *
+ * The market is the third, and it needs the subscription for a reason the
+ * other two do not have: the pack manifest arrives over the network after
+ * first paint, so every amount on screen was formatted before the workspace
+ * knew which market it serves. Without this, an Indian workspace would show
+ * the Western grouping until something unrelated repainted it.
  */
 export function useNumberLocale(): string {
   const preference = usePreferencesStore((s) => s.numberLocale);
   const intlLocale = useIntlLocale();
-  return preference === 'auto' ? intlLocale : preference;
+  const marketLocale = useMarketNumberLocale();
+  if (preference !== 'auto') return preference;
+  return marketLocale ?? intlLocale;
 }
 
 /* ── Server hydration (issue #335) ────────────────────────────────────── */
@@ -218,6 +237,17 @@ const NUMBER_FORMAT_TO_LOCALE: Record<string, NumberLocale> = {
 };
 
 /**
+ * The locale the seeded account pattern would be read as, derived rather than
+ * written down so the two cannot drift apart.
+ *
+ * It is the only local value that AGREES with the seeded default, which is
+ * what `adoptServerNumberFormat` needs to tell "chose German" apart from
+ * "chose something, and the column still holds what the seed put there".
+ */
+const SEEDED_ACCOUNT_LOCALE: NumberLocale | undefined =
+  NUMBER_FORMAT_TO_LOCALE[LEGACY_ACCOUNT_NUMBER_FORMAT];
+
+/**
  * Every value `numberLocale` may hold, for validating what the server sends.
  *
  * Exported because the regional-settings picker builds its buttons from this
@@ -231,6 +261,35 @@ export const NUMBER_LOCALES: readonly NumberLocale[] = [
 ];
 
 /**
+ * The number locale a country's documents are grouped in, or `null`.
+ *
+ * A country earns an entry here only when its tag actually changes the
+ * grouping. India does: `en-IN` writes `47,65,79,722.78` where `en-US` writes
+ * `476,579,722.78`, and that lakh/crore grouping is what every estimator,
+ * contractor and auditor in that market reads. Germany and the United States
+ * do not, because the UI language already resolves to their own tags, and
+ * answering for them here would put a second opinion on top of a reader whose
+ * separators were already right.
+ *
+ * Measured before it was written, and the measurement is why the table has one
+ * row. Pakistan, Bangladesh, Sri Lanka and Nepal use the same lakh system in
+ * life, but `en-PK`, `en-BD`, `en-LK` and `en-NP` all resolve to plain `en` and
+ * group by threes, so there is no tag to map them onto and an entry would be a
+ * promise the engine cannot keep. Their answer is a different piece of work,
+ * not another line here.
+ *
+ * The return type is `NumberLocale`, so a tag that is not one of the values
+ * the store understands cannot be added to this table without the compiler
+ * saying so.
+ *
+ * @param country ISO 3166-1 alpha-2, any case; `null` when nothing says.
+ */
+export function numberLocaleForCountry(country: string | null | undefined): NumberLocale | null {
+  const cc = (country || '').trim().toLowerCase();
+  return cc === 'in' ? 'en-IN' : null;
+}
+
+/**
  * Read a server `number_format` in either of the two vocabularies the field
  * has been written in.
  *
@@ -242,16 +301,26 @@ export const NUMBER_LOCALES: readonly NumberLocale[] = [
  * account. Accepting both keeps the old pattern working and lets a saved
  * choice survive. An unknown value is skipped rather than forced in.
  *
- * The seeded pattern is refused unless this browser already carries an
- * explicit choice, exactly as `adoptServerDateFormat` refuses the seeded date
- * order. Without that, every account ever created read its numbers in German,
- * because the column defaulted to the German pattern for all of them and the
- * translator faithfully adopted it. `local` is what breaks the tie: the value
- * alone cannot say whether German was chosen or seeded, but a browser sitting
- * on `'auto'` has demonstrably never chosen anything.
+ * The seeded pattern is refused unless this browser AGREES with it, in the
+ * same spirit as `adoptServerDateFormat` refusing the seeded date order.
+ * Without that, every account ever created read its numbers in German, because
+ * the column defaulted to the German pattern for all of them and the
+ * translator faithfully adopted it. `local` is what breaks the tie: the server
+ * value alone cannot say whether German was chosen or seeded.
+ *
+ * The tie-break asks whether the local value agrees with the seeded pattern,
+ * not merely whether one exists. That distinction is the whole correctness of
+ * this function, and getting it wrong inverted it: the guard used to fire only
+ * for `'auto'`, which read every other local value as proof that German had
+ * been chosen when it was only proof that SOMETHING had been. Because the
+ * column is NOT NULL and still holds the seed for every account nobody ever
+ * PATCHed, the pattern arrives on every boot - so the old guard protected the
+ * reader who never chose and silently overwrote every reader who did. A
+ * browser holding `en-IN`, `en-US` or `fr-FR` was put back on German
+ * separators on the next sign-in, with nothing on screen to say why.
  */
 export function adoptServerNumberFormat(server: string, local: NumberLocale): NumberLocale | undefined {
-  if (server === LEGACY_ACCOUNT_NUMBER_FORMAT && local === 'auto') return undefined;
+  if (server === LEGACY_ACCOUNT_NUMBER_FORMAT && local !== SEEDED_ACCOUNT_LOCALE) return undefined;
   const mapped = NUMBER_FORMAT_TO_LOCALE[server];
   if (mapped) return mapped;
   return (NUMBER_LOCALES as readonly string[]).includes(server) ? (server as NumberLocale) : undefined;
