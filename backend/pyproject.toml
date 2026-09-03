@@ -716,7 +716,23 @@ asyncio_default_test_loop_scope = "session"
 # names: 5 pytest builtins, asyncio and anyio from auto-loaded plugins that
 # register through addinivalue_line, and the 5 declared below. Counted over
 # every tracked .py plus the untracked ones, 2026-08-30.
-addopts = ["--strict-markers"]
+#
+# -p no:anyio un-registers the second async plugin. It is here because the two
+# of them claimed the same tests: pytest-asyncio takes every async test under
+# asyncio_mode auto, anyio's plugin takes anything carrying pytest.mark.anyio,
+# and when one won the fixture while the other won the body, an asyncpg
+# connection opened on one event loop was handed a savepoint from another. Which
+# plugin won was decided by registration order in the installed environment
+# rather than by anything in the tree, so the suite was green here and 217
+# failures out of 880 on the runner, four runs running, same count each time.
+# The markers were corrected in 095e15533; this closes the door behind them.
+# Nothing uses anyio directly, measured rather than assumed: no import of it in
+# app or tests, no anyio_backend fixture, no remaining pytest.mark.anyio, and it
+# is not a declared dependency, it arrives under starlette and httpx. With the
+# plugin off, its marker is no longer registered, so --strict-markers above
+# turns any future pytest.mark.anyio into a collection error in every lane
+# instead of a silent split of the event loop.
+addopts = ["--strict-markers", "-p", "no:anyio"]
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
