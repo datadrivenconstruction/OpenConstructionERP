@@ -168,6 +168,10 @@ export default function GAEBExchangeModule() {
   // --- Import state ---
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
+  // The drop target had no dragover state: dragging a file over it changed
+  // nothing on screen, so the only feedback that a drop would work was the
+  // drop itself landing.
+  const [isDropTarget, setIsDropTarget] = useState(false);
   const [parsedPositions, setParsedPositions] = useState<GAEBPosition[] | null>(null);
   const [gaebProjectName, setGaebProjectName] = useState('');
   // Exchange phase (X81/X83/X84…) read from the file's own DP element, not
@@ -301,11 +305,25 @@ export default function GAEBExchangeModule() {
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
+      setIsDropTarget(false);
       const file = e.dataTransfer.files[0];
       if (file) handleFileSelect(file);
     },
     [handleFileSelect],
   );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDropTarget(true);
+  }, []);
+
+  // dragleave fires for every child the pointer crosses on its way across the
+  // zone, so the flag is only cleared once the pointer has left the zone's own
+  // box. Clearing on any dragleave makes the highlight flicker.
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+    setIsDropTarget(false);
+  }, []);
 
   const handleImport = useCallback(async () => {
     if (!importFile || !importTargetBoqId || !importProjectId) return;
@@ -552,11 +570,14 @@ export default function GAEBExchangeModule() {
           {/* File upload area */}
           <div
             onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
             className={`rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-              importFile
-                ? 'border-oe-blue/50 bg-oe-blue/5'
-                : 'border-border hover:border-oe-blue/30 hover:bg-surface-secondary/30'
+              isDropTarget
+                ? 'border-oe-blue bg-oe-blue/10'
+                : importFile
+                  ? 'border-oe-blue/50 bg-oe-blue/5'
+                  : 'border-border hover:border-oe-blue/30 hover:bg-surface-secondary/30'
             }`}
           >
             {importFile ? (
