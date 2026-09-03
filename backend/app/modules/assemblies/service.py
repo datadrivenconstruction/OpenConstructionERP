@@ -1509,6 +1509,30 @@ class AssemblyService:
                     "pct": float((ttl / subtotal) * Decimal("100")),
                 }
 
+        # Issue #457 - the norm the line was priced from.
+        #
+        # The position already carried ``assembly_id``, so the norm was
+        # reachable in two hops, assembly_id to the Assembly row to its
+        # ``norm_id``. Nothing made the second hop, and the second hop is the
+        # one that breaks: an assembly can be deleted or edited after the bill
+        # was priced from it, at which point the answer to "which norm
+        # predicted this line" changes retroactively or disappears. Provenance
+        # that has to be resolved through a mutable row is not provenance.
+        #
+        # Only an assembly actually built from a production norm carries these,
+        # so a hand-built assembly adds nothing and the key is absent rather
+        # than null. ``price_basis`` is deliberately NOT set to "norm" here: a
+        # norm fixes the composition of the work, while the money comes from
+        # labour and machine rate templates and material prices, so the price
+        # does not stand on the norm and saying it does would be half true.
+        # Unset keeps its documented meaning, that nobody has said.
+        assembly_metadata = dict(assembly.metadata_) if assembly.metadata_ else {}
+        norm_provenance: dict[str, str] = {}
+        if assembly_metadata.get("source") == "production_norm" and assembly_metadata.get("norm_id"):
+            norm_provenance["norm_id"] = str(assembly_metadata["norm_id"])
+            if assembly_metadata.get("work_key"):
+                norm_provenance["work_key"] = str(assembly_metadata["work_key"])
+
         position_data = PositionCreate(
             boq_id=data.boq_id,
             ordinal=ordinal,
@@ -1543,6 +1567,9 @@ class AssemblyService:
                 # parametric assembly / when values were supplied).
                 **({"parameters": assembly_parameters} if assembly_parameters else {}),
                 **({"parameter_values": parameter_values} if parameter_values else {}),
+                # Issue #457 - present only when the assembly was built from a
+                # production norm; see the note above the dict.
+                **norm_provenance,
             },
         )
 

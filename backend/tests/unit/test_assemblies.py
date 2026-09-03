@@ -407,6 +407,131 @@ async def test_apply_to_boq_same_currency_ok(session):
     assert "currency_mismatch" not in meta
 
 
+@pytest.mark.asyncio
+async def test_a_position_built_from_a_norm_says_which_norm(session):
+    """Issue #457: the norm identity has to survive onto the position itself.
+
+    It was reachable before this, through ``metadata["assembly_id"]`` to the
+    assembly row and then to the assembly's own ``norm_id``, and nothing made
+    that hop. The reason to copy rather than to resolve is that the middle of
+    those two hops is mutable: the assembly can be edited or deleted after a
+    bill was priced from it, and then the answer to which norm predicted this
+    line changes retroactively or stops existing.
+    """
+    svc = AssemblyService(session)
+    norm_id = str(uuid.uuid4())
+    asm = await svc.create_assembly(
+        AssemblyCreate(
+            code="ASM-NORM",
+            name="Norm built",
+            unit="m3",
+            currency="EUR",
+            metadata={
+                "source": "production_norm",
+                "norm_id": norm_id,
+                "work_key": "concrete.c25.pour",
+                # The rest of what build_assembly_from_norm writes, present so
+                # the assertion below is about selection rather than about a
+                # dict that happens to hold two keys.
+                "built_up_unit_rate": "184.20",
+                "labor_rate_source": "template",
+                "unpriced_count": 0,
+            },
+        ),
+        owner_id=str(OWNER_ID),
+    )
+    await svc.add_component(
+        asm.id,
+        ComponentCreate(unit="m3", description="concrete", factor=1.0, quantity=1.0, unit_cost=180.0),
+    )
+    from app.modules.boq.models import BOQ
+
+    boq = BOQ(project_id=PROJECT_ID, name="B-norm")
+    session.add(boq)
+    await session.flush()
+
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=3.0))
+    meta = getattr(pos, "metadata_", {}) or {}
+
+    assert meta["norm_id"] == norm_id
+    assert meta["work_key"] == "concrete.c25.pour"
+    # The first hop still works, so this is additive rather than a swap.
+    assert meta["assembly_id"] == str(asm.id)
+    # Only the identity travels. The assembly's build report stays on the
+    # assembly, where a later rebuild can correct it.
+    assert "built_up_unit_rate" not in meta
+    assert "labor_rate_source" not in meta
+    # A norm fixes the composition, not the money: the rates come from labour
+    # and machine templates and from material prices. Claiming the price stands
+    # on the norm would be half true, and unset means nobody has said.
+    assert getattr(pos, "price_basis", None) is None
+
+
+@pytest.mark.asyncio
+async def test_a_position_not_built_from_a_norm_is_silent_rather_than_null(session):
+    """The control, and the half that a one-sided test would miss.
+
+    A hand built assembly has no norm behind it. The keys must be absent, not
+    present and None: a reader asking whether this line came from a norm gets a
+    KeyError it can handle, rather than a null it has to guess the meaning of.
+    """
+    svc = AssemblyService(session)
+    asm = await svc.create_assembly(
+        AssemblyCreate(code="ASM-HAND", name="Hand built", unit="m3", currency="EUR"),
+        owner_id=str(OWNER_ID),
+    )
+    await svc.add_component(
+        asm.id,
+        ComponentCreate(unit="m3", description="concrete", factor=1.0, quantity=1.0, unit_cost=180.0),
+    )
+    from app.modules.boq.models import BOQ
+
+    boq = BOQ(project_id=PROJECT_ID, name="B-hand")
+    session.add(boq)
+    await session.flush()
+
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0))
+    meta = getattr(pos, "metadata_", {}) or {}
+
+    assert "norm_id" not in meta
+    assert "work_key" not in meta
+    assert meta["assembly_id"] == str(asm.id)
+
+
+@pytest.mark.asyncio
+async def test_an_assembly_that_only_claims_a_norm_carries_nothing(session):
+    """Metadata is a free form dict, so the guard has to be on both fields.
+
+    An assembly whose metadata says it came from a norm but names none is not
+    provenance, and writing ``norm_id`` as the string ``None`` would be worse
+    than writing nothing at all.
+    """
+    svc = AssemblyService(session)
+    asm = await svc.create_assembly(
+        AssemblyCreate(
+            code="ASM-CLAIM",
+            name="Claims a norm",
+            unit="m3",
+            currency="EUR",
+            metadata={"source": "production_norm"},
+        ),
+        owner_id=str(OWNER_ID),
+    )
+    await svc.add_component(
+        asm.id,
+        ComponentCreate(unit="m3", description="concrete", factor=1.0, quantity=1.0, unit_cost=180.0),
+    )
+    from app.modules.boq.models import BOQ
+
+    boq = BOQ(project_id=PROJECT_ID, name="B-claim")
+    session.add(boq)
+    await session.flush()
+
+    pos = await svc.apply_to_boq(asm.id, ApplyToBOQRequest(boq_id=boq.id, quantity=1.0))
+    meta = getattr(pos, "metadata_", {}) or {}
+    assert "norm_id" not in meta
+
+
 # ── ASM-009 / ASM-010 / ASM-011 — formula engine ─────────────────────────
 
 

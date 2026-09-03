@@ -29,8 +29,18 @@ Hours, and the denominator under them
 
 Booked hours are the half of the productivity question the platform can know.
 The other half, what the estimate predicted, lives in the norm the line was
-priced from, and nothing records which norm that was, so this module reports
-the measured side and does not invent the predicted one.
+priced from. This file used to say that nothing records which norm that was.
+That was wrong by one hop and stayed wrong long enough to be quoted as the
+reason the predicted side was left out: a position built by applying an
+assembly carries ``metadata["assembly_id"]``, and an assembly built from a
+production norm carries its ``norm_id``, so the norm was always reachable
+through the assembly row. What was missing was anybody making that hop, and a
+hop through a row that can be edited or deleted after the fact is not
+provenance anyway. A position now carries ``metadata["norm_id"]`` directly.
+
+This module still reports only the measured side. Reading the predicted side
+is a change to what it computes, not to what it can reach, and it is worth
+doing separately rather than folding into the row that already exists.
 
 Even the measured side has a trap in the denominator. Hours divided by the
 BILLED quantity on a half-built item reads better the less of the item is
