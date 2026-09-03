@@ -1,0 +1,457 @@
+/* DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+ *
+ * The structured workflow editor. Everything lives under .ci-wfe and
+ * reads the palette ci.css defines on .ci (--navy, --dim, --panel,
+ * --edge …), so it renders as the same product as the register it edits.
+ * Row anatomy mirrors the Team Standup configurators (.cfg / .grip / .mv):
+ * a rounded row with a colour bar on its left edge - navy for a step,
+ * red for a hold point, amber for a decision.
+ */
+
+.ci-wfe {
+  --wfe-step: var(--navy);
+  --wfe-gate: var(--red);
+  --wfe-route: var(--amber);
+
+  width: min(920px, 96vw);
+  max-height: min(92vh, 980px);
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 12px;
+  box-shadow: var(--sh);
+  overflow: hidden;
+}
+
+.ci-wfe .wfe-head {
+  padding: 16px 22px 12px;
+  border-bottom: 1px solid var(--edge);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ci-wfe .wfe-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.ci-wfe .wfe-head .ref {
+  font-weight: 700;
+  color: var(--amber);
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+}
+.ci-wfe .wfe-head .ttl {
+  color: var(--dim);
+  font-size: 12.5px;
+  flex: 1 1 200px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ci-wfe .wfe-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────── */
+
+.ci-wfe .sec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ci-wfe .sec-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin: 0 0 4px;
+}
+.ci-wfe .sec-h::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.25;
+}
+.ci-wfe .sec-h .cnt {
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ci-wfe .why {
+  font-size: 12px;
+  color: var(--dim);
+  margin: 0 0 4px;
+}
+.ci-wfe .empty {
+  font-size: 12.5px;
+  color: var(--dim);
+  padding: 10px 12px;
+  border: 1px dashed var(--edge2);
+  border-radius: 9px;
+}
+
+/* ── History rows (locked) ────────────────────────────────────────── */
+
+.ci-wfe .done-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  background: var(--panel2);
+  border: 1px solid var(--edge);
+  border-left: 5px solid var(--edge2);
+  color: var(--dim);
+  font-size: 12.5px;
+  min-width: 0;
+}
+.ci-wfe .done-row.gate { border-left-color: var(--wfe-gate); }
+.ci-wfe .done-row.route { border-left-color: var(--wfe-route); }
+.ci-wfe .done-row .tick {
+  flex: 0 0 18px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--green);
+}
+.ci-wfe .done-row.skip .tick { color: var(--dim); }
+.ci-wfe .done-row .nm {
+  flex: 1 1 160px;
+  min-width: 0;
+  color: var(--txt);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ci-wfe .done-row.skip .nm { text-decoration: line-through; color: var(--dim); }
+.ci-wfe .done-row .who {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  font-size: 11.5px;
+}
+.ci-wfe .done-row .retired {
+  flex: 1 1 100%;
+  font-size: 11.5px;
+  font-style: italic;
+  padding-left: 28px;
+  color: var(--red);
+}
+.ci-wfe .done-row.has-reason { flex-wrap: wrap; }
+.ci-wfe .showall {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 4px;
+  text-decoration: underline;
+}
+
+/* ── Type chip (shared by history + to-do) ────────────────────────── */
+
+.ci-wfe .tchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border: 1px solid var(--edge2);
+  color: var(--dim);
+  background: rgba(18, 41, 74, 0.03);
+  flex: 0 0 auto;
+}
+.ci-wfe .tchip.gate { color: var(--wfe-gate); border-color: rgba(196, 61, 51, 0.4); background: rgba(196, 61, 51, 0.07); }
+.ci-wfe .tchip.route { color: var(--wfe-route); border-color: rgba(232, 83, 34, 0.4); background: rgba(232, 83, 34, 0.07); }
+.ci-wfe .tchip.step { color: var(--wfe-step); border-color: rgba(18, 41, 74, 0.25); background: rgba(18, 41, 74, 0.05); }
+
+/* ── To-do rows (editable) ────────────────────────────────────────── */
+
+.ci-wfe .cfg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-left: 5px solid var(--rc, var(--edge2));
+  border-radius: 9px;
+  padding: 8px 10px;
+  transition: background-color 0.12s, border-color 0.12s, box-shadow 0.12s;
+  flex-wrap: wrap;
+}
+.ci-wfe .cfg.step { --rc: var(--wfe-step); }
+.ci-wfe .cfg.gate { --rc: var(--wfe-gate); }
+.ci-wfe .cfg.route { --rc: var(--wfe-route); }
+.ci-wfe .cfg:hover { border-color: var(--edge2); background: var(--panel2); }
+.ci-wfe .cfg.dragging { opacity: 0.4; }
+.ci-wfe .cfg.dropinto { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(232, 83, 34, 0.25); }
+.ci-wfe .cfg.retiring { background: rgba(196, 61, 51, 0.05); border-style: dashed; }
+
+.ci-wfe .cfg .main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.ci-wfe .grip {
+  color: var(--dim);
+  font-size: 15px;
+  cursor: grab;
+  flex: 0 0 auto;
+  padding: 0 2px;
+  user-select: none;
+}
+.ci-wfe .grip:active { cursor: grabbing; }
+.ci-wfe .cfg-move { display: flex; gap: 3px; flex: 0 0 auto; }
+.ci-wfe .mv {
+  border: 1px solid var(--edge2);
+  background: var(--panel);
+  color: var(--txt);
+  border-radius: 7px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+}
+.ci-wfe .mv:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); background: rgba(232, 83, 34, 0.07); }
+.ci-wfe .mv:disabled { opacity: 0.3; cursor: default; }
+.ci-wfe .mv.del:hover:not(:disabled) { border-color: var(--red); color: var(--red); background: rgba(196, 61, 51, 0.08); }
+
+/* Segmented type picker - only on a NEW row. */
+.ci-wfe .seg {
+  display: inline-flex;
+  border: 1px solid var(--edge2);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.ci-wfe .seg button {
+  background: var(--panel);
+  border: none;
+  border-right: 1px solid var(--edge);
+  color: var(--dim);
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ci-wfe .seg button:last-child { border-right: none; }
+.ci-wfe .seg button[aria-pressed='true'] { color: #fff; }
+.ci-wfe .seg button[aria-pressed='true'].step { background: var(--wfe-step); }
+.ci-wfe .seg button[aria-pressed='true'].gate { background: var(--wfe-gate); }
+.ci-wfe .seg button[aria-pressed='true'].route { background: var(--wfe-route); }
+.dark .ci-wfe .seg button[aria-pressed='true'].step { color: var(--panel); }
+
+.ci-wfe .cfg-name {
+  flex: 1 1 220px;
+  min-width: 140px;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+.ci-wfe .cfg-owner {
+  flex: 0 1 130px;
+  min-width: 90px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+.ci-wfe .cfg.retiring .cfg-name,
+.ci-wfe .cfg.retiring .cfg-owner {
+  text-decoration: line-through;
+  color: var(--dim);
+  background: transparent;
+}
+.ci-wfe .offnote {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 28px;
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+}
+.ci-wfe .undo {
+  background: none;
+  border: 1px solid var(--edge2);
+  border-radius: 7px;
+  padding: 2px 9px;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--txt);
+  cursor: pointer;
+}
+.ci-wfe .undo:hover { border-color: var(--amber); }
+
+/* Branches editor under a NEW decision. */
+.ci-wfe .branches {
+  flex: 1 1 100%;
+  margin-left: 28px;
+  padding: 8px 10px;
+  border: 1px dashed rgba(232, 83, 34, 0.45);
+  border-radius: 8px;
+  background: rgba(232, 83, 34, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ci-wfe .branches .lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--wfe-route);
+}
+.ci-wfe .branch {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ci-wfe .branch .b-label {
+  flex: 0 1 200px;
+  min-width: 120px;
+  padding: 5px 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.ci-wfe .branch .b-steps {
+  flex: 1 1 200px;
+  min-width: 140px;
+  padding: 5px 9px;
+  font-size: 12px;
+  min-height: 32px;
+  resize: vertical;
+  line-height: 1.4;
+}
+.ci-wfe .branch .mv { width: 26px; height: 26px; }
+.ci-wfe .addbranch {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--edge2);
+  border-radius: 7px;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--dim);
+  cursor: pointer;
+}
+.ci-wfe .addbranch:hover { border-color: var(--amber); color: var(--amber); }
+
+/* Shared "why are these coming off" field. */
+.ci-wfe .reason {
+  border: 1px solid rgba(196, 61, 51, 0.5);
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: rgba(196, 61, 51, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ci-wfe .reason .qlab { color: var(--red); }
+.ci-wfe .reason textarea {
+  width: 100%;
+  min-height: 56px;
+  font-size: 12.5px;
+}
+.ci-wfe .reason .hint { font-size: 11.5px; color: var(--dim); }
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+
+.ci-wfe .cfg-foot {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  position: relative;
+}
+.ci-wfe .cfg-foot .sp { flex: 1; }
+.ci-wfe .lib-wrap { position: relative; }
+.ci-wfe .lib-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 5;
+  min-width: 300px;
+  max-width: 440px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 10px;
+  box-shadow: var(--sh);
+  padding: 6px;
+}
+.ci-wfe .lib-pop .grp {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 6px 8px 2px;
+}
+.ci-wfe .lib-pop .grp.step { color: var(--wfe-step); }
+.ci-wfe .lib-pop .grp.gate { color: var(--wfe-gate); }
+.ci-wfe .lib-pop .grp.route { color: var(--wfe-route); }
+.ci-wfe .lib-pop button.opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--txt);
+  cursor: pointer;
+}
+.ci-wfe .lib-pop button.opt:hover { background: var(--panel3); }
+.ci-wfe .lib-pop button.opt .own { color: var(--dim); font-size: 11px; margin-left: auto; }
+
+.ci-wfe .wfe-actions {
+  padding: 12px 22px 16px;
+  border-top: 1px solid var(--edge);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ci-wfe .wfe-actions .sp { flex: 1; }
+.ci-wfe .err {
+  color: var(--red);
+  font-size: 12.5px;
+  font-weight: 600;
+  flex: 1 1 100%;
+}

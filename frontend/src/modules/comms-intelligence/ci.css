@@ -1,0 +1,1185 @@
+/* DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+ *
+ * The Correspondence workspace design system, scoped to .ci.
+ *
+ * Tokens, type scale, panels, inputs, badges, tables and the picker
+ * tints are taken from the the source app's own stylesheet so the rebuilt
+ * screens read as the same product rather than a lookalike. Scoped to
+ * one class so nothing here can leak into the rest of the ERP.
+ */
+
+.ci {
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --panel2: #f7f8fa;
+  --panel3: #f4f6f8;
+  --edge: #e2e8ed;
+  --edge2: #c9d3e0;
+  --txt: #1f2937;
+  --dim: #5b6878;
+  --amber: #e85322;
+  --amber2: #f06a3d;
+  --green: #2e9e5b;
+  --red: #c43d33;
+  --blue: #1d5a8a;
+  --navy: #12294a;
+  --navy2: #0c1d38;
+  --pale: #a9b9d2;
+  --r: 14px;
+  --r2: 10px;
+  --sh: 0 10px 26px rgba(18, 41, 74, 0.14);
+  --sh2: 0 2px 8px rgba(18, 41, 74, 0.08);
+
+  font: 13.5px/1.55 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  color: var(--txt);
+}
+
+/* The ERP runs a dark theme too; the register screens keep their light
+   paper because that is what the printed record looks like. Only the
+   surrounding chrome flips. */
+.dark .ci {
+  --bg: #131a26;
+  --panel: #1a2333;
+  --panel2: #202a3c;
+  --panel3: #243049;
+  --edge: #2b3648;
+  --edge2: #3a4761;
+  --txt: #e8ebf1;
+  --dim: #97a3b8;
+  --navy: #c8d6ef;
+  --navy2: #9fb3d6;
+  --pale: #7f8ea8;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────── */
+
+.ci .pcard {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--sh2);
+}
+.ci h3.ph {
+  font-size: 11.5px;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.ci h3.ph::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: currentColor;
+  flex: 0 0 auto;
+  opacity: 0.85;
+}
+.ci h3.ph::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+/* ── Tiles ────────────────────────────────────────────────────────── */
+
+.ci .tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ci .tile {
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border: 1px solid var(--edge);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--r);
+  padding: 13px 16px;
+  box-shadow: var(--sh2);
+  transition: transform 0.12s, border-color 0.12s;
+}
+.ci .tile:hover {
+  transform: translateY(-1px);
+  border-color: var(--edge2);
+}
+.ci .tile.bad { border-left-color: var(--red); }
+.ci .tile.good { border-left-color: #1e7a63; }
+.ci .tile b {
+  display: block;
+  font-size: 23px;
+  margin-bottom: 1px;
+  letter-spacing: 0.2px;
+  color: var(--navy);
+  font-weight: 700;
+}
+.ci .tile span {
+  color: var(--dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* ── Inputs & buttons ─────────────────────────────────────────────── */
+
+.ci input,
+.ci select,
+.ci textarea {
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  color: var(--txt);
+  padding: 8px 11px;
+  border-radius: 9px;
+  font: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.ci input:focus,
+.ci select:focus,
+.ci textarea:focus {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(232, 83, 34, 0.15);
+}
+.ci input.miss,
+.ci textarea.miss {
+  border-color: var(--red) !important;
+  background: #fdf3f4;
+}
+.ci .b {
+  background: var(--panel3);
+  border: 1px solid var(--edge2);
+  color: var(--txt);
+  padding: 8px 15px;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.12s, transform 0.08s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.ci .b:hover { border-color: var(--amber); }
+.ci .b:active { transform: translateY(1px); }
+.ci .b:disabled { opacity: 0.45; cursor: not-allowed; }
+.ci .b.pri {
+  background: linear-gradient(180deg, var(--amber2), var(--amber));
+  border-color: var(--amber);
+  color: #fff;
+  font-weight: 700;
+}
+.ci .b.pri:hover { filter: brightness(1.06); }
+.ci .b.dngr { border-color: rgba(196, 61, 51, 0.5); color: var(--red); }
+.ci .b.dngr:hover { border-color: var(--red); background: rgba(196, 61, 51, 0.08); }
+.ci .b.mini { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
+.ci .b.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+.ci .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ci .v { color: var(--dim); font-size: 12px; }
+
+/* ── Badges ───────────────────────────────────────────────────────── */
+
+.ci .badge {
+  border: 1px solid var(--edge2);
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--dim);
+  background: rgba(18, 41, 74, 0.03);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ci .b-red { border-color: #e5b8b4; color: #8e2f3c; background: #f8eaec; }
+.ci .b-amber { border-color: #e8c7a6; color: #9a5716; background: #fff1df; }
+.ci .b-green { border-color: #bbdcc8; color: #1f7a44; background: #eaf6ee; }
+
+/* ── Labels ───────────────────────────────────────────────────────── */
+
+.ci .qlab {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ci .req { color: var(--red); font-weight: 800; font-size: 13px; line-height: 1; }
+
+/* ── Tables ───────────────────────────────────────────────────────── */
+
+.ci table.t {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+.ci table.t td,
+.ci table.t th {
+  border-bottom: 1px solid var(--edge);
+  padding: 7px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+.ci table.t th {
+  color: var(--dim);
+  background: var(--panel);
+  font-weight: 600;
+  font-size: 12px;
+  border-bottom: 2px solid var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.ci table.t tr:hover td { background: rgba(18, 41, 74, 0.03); }
+
+/* Register table: the card column takes the slack and WRAPS. A 300-char
+   title with no spaces (a pasted reference string) otherwise sets the
+   table's width and the whole register scrolls sideways at every size. */
+.ci .qreg tr.qrow > td:first-child,
+.ci .qreg th:first-child { width: auto; min-width: 320px; overflow-wrap: anywhere; }
+/* The workflow column WRAPS: its badges plus the log button ran to ~400px
+   unbreakable, which at 1280px with the sidebar open forced the whole
+   register to scroll sideways. The badges keep their own nowrap. */
+.ci .qreg tr.qrow > td:nth-child(2),
+.ci .qreg th:nth-child(2) { width: 1%; min-width: 240px; }
+.ci .qreg tr.qrow > td:nth-child(2) .badge,
+.ci .qreg tr.qrow > td:nth-child(2) .qlogbtn { white-space: nowrap; }
+.ci .qreg tr.qrow > td:nth-child(3),
+.ci .qreg th:nth-child(3) { white-space: nowrap; width: 1%; }
+.ci .qreg tr.qrow > td:last-child,
+.ci .qreg th:last-child { white-space: nowrap; width: 1%; text-align: right; }
+.ci .qreg tr.qrow { cursor: pointer; }
+.ci .qreg tr.qrow.act > td {
+  background: #fff1df !important;
+  box-shadow: inset 0 -1px 0 var(--amber);
+}
+.ci .qreg tr.qrow.act > td:first-child {
+  box-shadow: inset 4px 0 0 var(--amber), inset 0 -1px 0 var(--amber);
+}
+.ci .qreg td.sub { padding: 0; background: var(--panel2); }
+
+/* ── Supplier picker ──────────────────────────────────────────────── */
+
+.ci .qtorow {
+  border: 1px solid var(--edge2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--panel);
+  margin-top: 10px;
+}
+.ci .picker { max-height: 230px; overflow: auto; border: 1px solid var(--edge); border-radius: 8px; }
+.ci .qfindrow { cursor: pointer; }
+.ci tr.r0 td { background: #fff7ec; }
+.ci tr.r1 td { background: #fffbf2; }
+.ci tr.r2 td { background: #f6f9fc; }
+.ci .qfindrow.sel > td { background: #ffe9ce !important; font-weight: 600; }
+.ci .qfindrow.sel > td:first-child { box-shadow: inset 4px 0 0 var(--amber); }
+
+.ci .qselchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--edge2);
+  border-radius: 8px;
+  padding: 4px 8px;
+  background: var(--panel);
+  margin: 2px 4px 2px 0;
+  font-size: 12.5px;
+}
+.ci .qselchip.on { border-color: var(--amber); background: #fff3e3; box-shadow: 0 0 0 2px #ffe0bc; }
+.ci .qsupc2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid var(--edge2);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  cursor: pointer;
+  background: var(--panel3);
+  color: var(--dim);
+}
+.ci .qsupc2.on { background: #fff1df; border-color: var(--amber); color: var(--txt); font-weight: 600; }
+
+/* ── Raise form grid ──────────────────────────────────────────────── */
+
+.ci .qgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 8px 18px;
+  margin-top: 8px;
+}
+.ci .qcell { display: flex; flex-direction: column; gap: 3px; }
+.ci .qcell.wide { grid-column: 1 / -1; }
+.ci .qcell textarea { min-height: 52px; }
+
+.ci .qpaste {
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 10px;
+  padding: 11px 13px;
+  min-height: 84px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  font: inherit;
+  width: 100%;
+  resize: vertical;
+}
+.ci .qpaste:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px #ffe9ce; }
+
+.ci .qdrop {
+  border: 2px dashed var(--edge2);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  color: var(--dim);
+  margin-top: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ci .qdrop.hot { border-color: var(--amber); color: var(--amber); background: #fff8ee; }
+
+/* ── Workflow steps ───────────────────────────────────────────────── */
+
+.ci .li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--edge);
+  font-size: 13px;
+}
+.ci .li:last-child { border-bottom: none; }
+.ci .li .stepno { flex: 0 0 22px; text-align: right; font-size: 11px; color: var(--dim); }
+.ci .li .nm { flex: 1 1 auto; min-width: 0; }
+.ci .li.done .nm { color: var(--dim); }
+.ci .li.cur {
+  background: #fff8ee;
+  border-left: 3px solid var(--amber);
+  padding-left: 9px;
+  margin-left: -12px;
+  border-radius: 0 8px 8px 0;
+}
+.ci .li.cur .nm { font-weight: 700; color: var(--navy); }
+.ci .li.lock { opacity: 0.45; }
+.ci .li.gateli { border-left: 3px solid #8e2f3c; padding-left: 7px; background: #fdf7f8; }
+.ci .li.routeli { border-left: 3px solid #1d5a8a; padding-left: 7px; background: #f5f9fc; }
+.ci .li .qsact { margin-left: auto; display: flex; gap: 6px; flex: 0 0 auto; align-items: center; }
+
+.ci .gatechip {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8e2f3c;
+  background: #f8eaec;
+  border: 1px solid #e3bfc5;
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+.ci .routechip {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #1d5a8a;
+  background: #e7f0f8;
+  border: 1px solid #bfd7e8;
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+/* ── Thread bubbles ───────────────────────────────────────────────── */
+
+.ci .qthread { display: flex; flex-direction: column; gap: 6px; max-height: 340px; overflow: auto; padding: 2px; }
+.ci .qthread .tmsg { border: 1px solid var(--edge2); border-radius: 10px; padding: 7px 10px; max-width: 88%; font-size: 12.5px; }
+.ci .qthread .tout { align-self: flex-end; background: #f4f7fa; border-left: 3px solid var(--navy); }
+.ci .qthread .tin { align-self: flex-start; background: #edf7ee; border-left: 3px solid #1e7a63; }
+
+/* ── Compare table ────────────────────────────────────────────────── */
+
+.ci .cmptbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.ci .cmptbl th {
+  background: var(--panel2);
+  border-bottom: 2px solid var(--navy);
+  padding: 8px 10px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--navy);
+  text-align: left;
+}
+.ci .cmptbl td { border-bottom: 1px solid var(--edge); padding: 7px 10px; vertical-align: middle; }
+.ci .cmptbl td.clab {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--dim);
+  background: var(--panel2);
+  white-space: nowrap;
+}
+.ci .cmptbl td.best { background: #edf7ee; }
+.ci .cmpbig { font-size: 16px; font-weight: 700; color: var(--navy); width: 100%; max-width: 190px; padding: 4px 7px; }
+.ci .cmpin { width: 100%; max-width: 230px; padding: 4px 7px; font-size: 12.5px; }
+
+/* ── Live preview: pinned, never moves while typing ───────────────── */
+
+.ci .qprevcol {
+  position: fixed;
+  top: 96px;
+  bottom: 14px;
+  right: 16px;
+  width: min(46vw, 540px);
+  display: flex;
+  flex-direction: column;
+  z-index: 35;
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: var(--sh);
+}
+.ci .qformcol.withprev { padding-right: calc(min(46vw, 540px) + 26px); }
+.ci .qprevbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding: 0 2px 6px;
+}
+.ci .qlive { flex: 1; width: 100%; min-height: 380px; border: 1px solid var(--edge); border-radius: 0 0 10px 10px; background: #eef1f5; }
+.ci .qmailhdr {
+  border: 1px solid var(--edge);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: var(--panel);
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.ci .qmailhdr .k {
+  display: inline-block;
+  min-width: 52px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.ci .qlivetab {
+  position: fixed;
+  right: 0;
+  top: 150px;
+  z-index: 36;
+  border: 1px solid var(--edge2);
+  border-right: 0;
+  border-radius: 10px 0 0 10px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+  box-shadow: var(--sh);
+}
+@media (max-width: 1150px) {
+  .ci .qprevcol { display: none; }
+  .ci .qformcol.withprev { padding-right: 0; }
+}
+
+/* ── Overlays ─────────────────────────────────────────────────────── */
+
+.ci-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 29, 56, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* ── The context menu ─────────────────────────────────────────────────
+   One renderer for every menu (ContextMenu.tsx), so a colour dot, a
+   heading, a note or a filter box behaves the same wherever it was
+   opened from. Mirrors the Team Standup board's `.ctx`.                */
+.ci-ctx {
+  position: fixed;
+  z-index: 79;
+  min-width: 224px;
+  max-width: min(420px, 94vw);
+  max-height: 78vh;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 9px;
+  box-shadow: var(--sh);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+}
+.ci-ctx .ctx-head {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--dim);
+  padding: 7px 10px 6px;
+  border-bottom: 1px solid var(--edge);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ci-ctx .ctx-group {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--pale);
+  padding: 6px 10px 2px;
+}
+.ci-ctx button {
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--txt);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+}
+.ci-ctx button:hover { background: #fff1df; color: var(--amber); }
+.ci-ctx button:disabled { opacity: 0.45; cursor: not-allowed; }
+.ci-ctx button:disabled:hover { background: none; color: var(--txt); }
+.ci-ctx button .mdot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.ci-ctx button .micon { width: 15px; height: 15px; flex: 0 0 auto; color: var(--dim); }
+.ci-ctx button .mlabel { flex: 0 1 auto; min-width: 0; }
+.ci-ctx button .mnote {
+  margin-left: auto;
+  padding-left: 14px;
+  color: var(--dim);
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  white-space: nowrap;
+  text-align: right;
+}
+.ci-ctx hr { border: 0; border-top: 1px solid var(--edge); margin: 4px 0; }
+.ci-ctx button.danger { color: var(--red); }
+.ci-ctx button.danger:hover { background: rgba(196, 61, 51, 0.08); color: var(--red); }
+.ci-ctx .menusearch { padding: 2px 4px 6px; }
+.ci-ctx .menusearch input {
+  width: 100%;
+  font: inherit;
+  font-size: 12.5px;
+  padding: 6px 9px;
+  border-radius: 6px;
+}
+.ci-ctx .menunone { padding: 10px; text-align: center; color: var(--dim); font-size: 12.5px; }
+.dark .ci-ctx button:hover { background: rgba(232, 83, 34, 0.14); }
+
+/* ── The dropdown button ──────────────────────────────────────────────
+   A button that opens a menu under itself, with the ▾ caret. "Add
+   link..." in ghost style when empty - the same words and the same look
+   as the standup task list, so it means one thing everywhere.         */
+.ci .pickbtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+  max-width: 100%;
+  border: 1px solid var(--edge2);
+  background: var(--panel);
+  color: var(--txt);
+  border-radius: 9px;
+  padding: 7px 28px 7px 11px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  min-height: 34px;
+  transition: border-color 0.12s;
+}
+.ci .pickbtn:hover { border-color: var(--amber); }
+.ci .pickbtn::after {
+  content: '\25BE';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--dim);
+}
+.ci .pickbtn .pdot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.ci .pickbtn .pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ci .pickbtn .ghost,
+.ci .ghost { color: var(--dim); opacity: 0.75; font-style: italic; }
+.ci .pickbtn:hover .ghost { color: var(--amber); opacity: 1; font-style: normal; }
+
+/* ── Link chips ───────────────────────────────────────────────────────
+   What an item is connected to: a small tinted type tag, the label,
+   and a remove control. Right-click for Open / Copy / Unlink.         */
+.ci .lchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--edge2);
+  border-radius: 8px;
+  padding: 3px 5px 3px 4px;
+  background: var(--panel);
+  margin: 2px 4px 2px 0;
+  font-size: 12.5px;
+  max-width: 100%;
+}
+.ci .lchip .ltag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 5px;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  flex: 0 0 auto;
+}
+.ci .lchip .ltag[data-type='item'] { color: #2f42a8; background: #e8ebfc; border-color: #c5ccf5; }
+.ci .lchip .ltag[data-type='cost_centre'] { color: #8a5406; background: #fdf1dc; border-color: #efd6a6; }
+.ci .lchip .ltag[data-type='deliverable'] { color: #0a6f66; background: #e0f4f1; border-color: #b4e0d9; }
+.ci .lchip .ltag[data-type='url'] { color: #06657f; background: #e0f3f8; border-color: #b3dde9; }
+.ci .lchip .llabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; }
+.ci .lchip .lx {
+  border: 0;
+  background: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.ci .lchip .lx:hover { color: var(--red); background: rgba(196, 61, 51, 0.08); }
+
+/* ── The record picker ────────────────────────────────────────────────
+   A reference on its own tells you nothing, so this shows what each
+   record actually is - title, party, status, the fields - before you
+   commit to linking it. Mirrors the standup's picker, in this palette. */
+.ci-pickscrim {
+  position: fixed;
+  inset: 0;
+  z-index: 81;
+  background: rgba(12, 29, 56, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+.ci .pickmodal {
+  background: var(--panel);
+  border: 1px solid var(--edge2);
+  border-radius: 12px;
+  box-shadow: var(--sh);
+  width: 100%;
+  max-width: min(1180px, 96vw);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ci .pickhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--edge);
+  background: var(--panel2);
+}
+.ci .pickhead h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--navy); }
+.ci .pickhead .mref {
+  font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ci .pickhead .x {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  color: var(--dim);
+  cursor: pointer;
+  padding: 0 4px;
+}
+.ci .pickhead .x:hover { color: var(--red); }
+.ci .pickbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--edge);
+  background: var(--panel2);
+}
+.ci .pickbar .grow { flex: 1 1 220px; min-width: 180px; }
+.ci .pickbar .sep { width: 1px; align-self: stretch; background: var(--edge2); margin: 0 2px; }
+.ci .chiprow { display: flex; flex-wrap: wrap; gap: 6px; }
+.ci .pchip {
+  border: 1px solid var(--edge2);
+  background: var(--panel);
+  color: var(--dim);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.ci .pchip:hover { border-color: var(--amber); color: var(--txt); }
+.ci .pchip .pdot { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; }
+.ci .pchip[aria-pressed='true'] { font-weight: 700; box-shadow: inset 0 0 0 1px currentColor; color: var(--navy); }
+.ci .pickbody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); min-height: 360px; }
+@media (max-width: 800px) {
+  .ci .pickbody { grid-template-columns: 1fr; }
+  .ci .pickview { border-left: 0 !important; border-top: 1px solid var(--edge); }
+}
+.ci .picklist { max-height: max(430px, 60vh); overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.ci .picklist .pnote { padding: 6px 10px; color: var(--dim); font-size: 12px; font-style: italic; }
+.ci .prow {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--panel);
+  user-select: none;
+}
+.ci .prow:hover { background: var(--panel2); }
+.ci .prow[aria-selected='true'] { border-color: var(--amber); background: #fff8ee; }
+.dark .ci .prow[aria-selected='true'] { background: rgba(232, 83, 34, 0.12); }
+.ci .ptag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  padding: 3px 0;
+  text-align: center;
+}
+.ci .prow .ptag { grid-row: 1 / span 3; align-self: start; margin-top: 1px; }
+.ci .prow .ptitle {
+  font-size: 13px;
+  color: var(--txt);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ci .prow .pdate {
+  font-size: 11px;
+  color: var(--dim);
+  font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  white-space: nowrap;
+}
+.ci .prow .pmeta {
+  grid-column: 2 / span 2;
+  font-size: 11px;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ci .prow .pmeta .ref { font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace; }
+.ci .prow .pmeta .st { color: var(--txt); }
+.ci .pickview {
+  border-left: 1px solid var(--edge);
+  padding: 0;
+  background: var(--panel2);
+  overflow-y: auto;
+  max-height: max(430px, 60vh);
+}
+.ci .pickview .pv-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--edge); background: var(--panel); }
+.ci .pickview .pv-head .ptag { display: inline-block; padding: 3px 8px; }
+.ci .pickview h4 { margin: 8px 0 3px; font-size: 15px; line-height: 1.3; color: var(--navy); }
+.ci .pickview .pv-ref {
+  font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--dim);
+}
+.ci .pickview .pv-main { padding: 14px 16px; }
+.ci .pickview dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 7px 12px;
+  font-size: 12.5px;
+  align-items: baseline;
+}
+.ci .pickview dt { color: var(--dim); }
+.ci .pickview dd { margin: 0; color: var(--txt); overflow-wrap: break-word; }
+.ci .pickview .pv-body {
+  margin-top: 14px;
+  padding: 11px 13px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 9px;
+  font-size: 12.5px;
+  color: var(--txt);
+  line-height: 1.55;
+}
+.ci .pickview .pv-body .k {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 8px;
+}
+.ci .pickview .pv-body .k:first-child { margin-top: 0; }
+.ci .pickview .pv-body .val { white-space: pre-wrap; word-break: break-word; }
+.ci .pv-empty { color: var(--dim); font-size: 13px; text-align: center; padding: 60px 20px; line-height: 1.6; }
+.ci .pickfoot {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--edge);
+  background: var(--panel2);
+}
+.ci .pickfoot .count { margin-right: auto; font-size: 12px; color: var(--dim); font-weight: 600; }
+
+/* ── Log-as-sent dialog ──────────────────────────────────────────────
+   One line per recipient, ticked by default, today's date already in.
+   The checkbox is drawn rather than native so it reads at a glance on a
+   dense list - the native one is invisible against these panels.       */
+.qbox.qlog { width: min(560px, 94vw); }
+.qbox.qlog header { display: flex; align-items: center; gap: 10px; }
+.qbox.qlog header .ref {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: #fff; background: var(--navy); border-radius: 5px; padding: 2px 6px;
+}
+.qbox.qlog header .x {
+  margin-left: auto; border: 0; background: none; cursor: pointer;
+  color: var(--dim); font-size: 15px; line-height: 1; padding: 4px;
+}
+.qbox.qlog .when {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px; border-bottom: 1px solid var(--edge); background: var(--bg);
+}
+.qbox.qlog .when label { font-size: 12px; color: var(--dim); font-weight: 600; }
+.qbox.qlog .when input { padding: 6px 8px; border: 1px solid var(--edge2); border-radius: 7px; }
+.qbox.qlog .when .warn { font-size: 11.5px; color: var(--amber); font-weight: 600; }
+
+.qbox.qlog .rows { max-height: 46vh; overflow-y: auto; padding: 6px 0; }
+.qbox.qlog .none { margin: 14px 16px; color: var(--dim); font-size: 12.5px; }
+.qbox.qlog .row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; cursor: pointer; border-bottom: 1px solid var(--bg);
+}
+.qbox.qlog .row:hover { background: var(--bg); }
+.qbox.qlog .row.done { cursor: default; opacity: .62; }
+.qbox.qlog .row input { position: absolute; opacity: 0; width: 0; height: 0; }
+.qbox.qlog .row .tick {
+  flex: 0 0 auto; width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid var(--edge2); background: #fff; position: relative;
+  transition: background .12s ease, border-color .12s ease;
+}
+.qbox.qlog .row input:checked + .tick { background: var(--navy); border-color: var(--navy); }
+.qbox.qlog .row input:checked + .tick::after {
+  content: ''; position: absolute; left: 5px; top: 1.5px;
+  width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.qbox.qlog .row input:focus-visible + .tick { outline: 2px solid var(--amber); outline-offset: 2px; }
+.qbox.qlog .row .who { display: flex; flex-direction: column; min-width: 0; }
+.qbox.qlog .row .who b { font-size: 13px; color: var(--txt); }
+.qbox.qlog .row .who .em { font-size: 11.5px; color: var(--dim); }
+.qbox.qlog .row .already {
+  margin-left: auto; font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--dim); white-space: nowrap;
+}
+.qbox.qlog .anyone { padding: 10px 16px; border-top: 1px solid var(--edge); }
+.qbox.qlog .anyone label { display: block; font-size: 12px; color: var(--dim); font-weight: 600; margin-bottom: 4px; }
+.qbox.qlog .anyone input { width: 100%; padding: 7px 9px; border: 1px solid var(--edge2); border-radius: 7px; }
+.qbox.qlog footer { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--edge); }
+.qbox.qlog footer .count { margin-right: auto; font-size: 12px; color: var(--dim); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qbox.qlog .row .tick { transition: none; }
+}
+
+/* ── Email tracking ──────────────────────────────────────────────────
+   State is carried by a chip as well as the word, so "overdue" is
+   findable by eye on a long list rather than by reading every row.     */
+.trk .trk-scroll { overflow-x: auto; }
+.trk-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.trk-tbl th {
+  text-align: left; font-size: 10px; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--dim); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--edge2);
+  white-space: nowrap;
+}
+.trk-tbl th.n, .trk-tbl td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.trk-tbl td { padding: 9px 10px; border-bottom: 1px solid var(--edge); vertical-align: top; }
+.trk-tbl tr:hover td { background: var(--bg); }
+.trk-tbl .ref {
+  font-size: 10px; font-weight: 700; letter-spacing: .6px; color: #fff;
+  background: var(--navy); border-radius: 5px; padding: 2px 6px; white-space: nowrap;
+}
+.trk-tbl .ttl { color: var(--dim); }
+.trk-tbl td .em { display: block; font-size: 11px; color: var(--dim); }
+.trk-tbl .dt { color: var(--dim); white-space: nowrap; }
+.trk-tbl .ch { color: var(--amber); font-weight: 700; }
+.trk-tbl .st {
+  display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid currentColor;
+}
+.trk-tbl .st.overdue  { color: #B02D14; background: rgba(176, 45, 20, .08); }
+.trk-tbl .st.chase    { color: var(--amber); background: rgba(232, 83, 34, .08); }
+.trk-tbl .st.waiting  { color: var(--dim); }
+.trk-tbl .st.not_asked{ color: var(--dim); border-style: dashed; }
+.trk-tbl .st.replied  { color: #1E5FA8; background: rgba(30, 95, 168, .08); }
+.trk-tbl .st.quoted   { color: #1E7A63; background: rgba(30, 122, 99, .10); }
+.trk .foot { margin: 10px 0 0; font-size: 11.5px; color: var(--dim); }
+
+
+/* ── The pasted-Excel grid ──────────────────────────────────────────
+   Named qxl*, NOT qgrid: `.qgrid` above is already the raise form's
+   field layout, and reusing it turned every form into a table.
+
+   Cells are borderless inputs inside a real table so the thing being
+   edited looks like the table the supplier will receive. The heading row
+   is styled the way the email renders it - bold, ruled underneath -
+   because that row IS the email's heading row, not a UI convention. */
+.ci .qxlwrap { margin-top: 2px; }
+.ci .qxlscroll {
+  overflow-x: auto;
+  border: 1px solid var(--edge2);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.ci table.qxl { border-collapse: collapse; width: 100%; margin: 0; }
+/* COLUMN LINES. Without a vertical rule you cannot see where one cell
+   ends and the next begins, so a wide "Description" and a narrow "Qty"
+   read as one smeared row and there is no way to tell what the supplier
+   will actually receive. Both axes are ruled, like a spreadsheet. */
+.ci table.qxl td {
+  padding: 0;
+  border-bottom: 1px solid var(--edge2);
+  border-right: 1px solid var(--edge2);
+  vertical-align: middle;
+}
+.ci table.qxl td:last-child { border-right: 0; }
+.ci table.qxl tr:last-child td { border-bottom: 0; }
+.ci table.qxl input {
+  width: 100%;
+  min-width: 110px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 12.5px;
+  box-shadow: none;
+}
+.ci table.qxl input:focus {
+  outline: none;
+  background: #fff7ec;
+  box-shadow: inset 0 0 0 2px var(--amber);
+}
+/* The whole column under the cursor, tinted - which column am I in is
+   the question a wide table makes hard to answer. */
+.ci table.qxl td.qxlhot { background: #fbfdff; }
+.ci table.qxl tr.head td.qxlhot { background: #eef4fb; }
+/* An empty cell says so rather than looking like a rendering fault. */
+.ci table.qxl input::placeholder { color: #c3ccd8; font-style: italic; }
+/* Column-letter strip: the handle you grab to delete or insert a column,
+   and the answer to "which column is which" on a scrolled table. */
+.ci table.qxl tr.cols td {
+  background: #eef2f7;
+  border-bottom: 1px solid var(--edge2);
+  text-align: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--dim);
+  padding: 2px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.ci table.qxl tr.cols td:hover { background: #ffe9ce; color: var(--navy); }
+.ci table.qxl tr.head input { font-weight: 700; color: var(--navy); }
+.ci table.qxl tr.head td { border-bottom: 2px solid var(--navy); background: #f6f9fc; }
+.ci table.qxl td.qxlno {
+  width: 26px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 10.5px;
+  background: #f6f9fc;
+  padding: 0 2px;
+}
+
+/* A reference that acts like the link it always looked like. Every
+   tracking row named an item and then left you to go and find it. */
+.ci .linkish {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--navy);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--edge2);
+}
+.ci .linkish:hover { text-decoration-color: var(--amber); }
+
+/* ── Foldable sections ──────────────────────────────────────────────
+   An expanded row is long: fields, workflow, drop zone, the whole
+   thread. As one wall it pushes the steps - the part worked from daily
+   - off the bottom of a laptop screen. */
+.ci .qfold { border-top: 1px solid var(--edge); margin-top: 8px; }
+.ci .qfold:first-child { border-top: 0; margin-top: 0; }
+.ci .qfoldhd { display: flex; align-items: center; gap: 6px; }
+.ci .qfoldbtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 7px 2px;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  color: var(--navy);
+}
+.ci .qfoldbtn:hover .qfoldttl { text-decoration: underline; text-underline-offset: 2px; }
+.ci .qfoldttl {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.ci .qfold.on .qfoldttl { color: var(--navy); }
+.ci .qfoldchev {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  color: var(--dim);
+  transition: transform 0.12s ease;
+}
+.ci .qfoldchev.open { transform: rotate(90deg); color: var(--amber); }
+.ci .qfoldact { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.ci .qfoldbody { padding-bottom: 8px; }
+
+/* A badge that goes somewhere says so under the cursor. */
+.ci .badge.clk { cursor: pointer; }
+.ci .badge.clk:hover { box-shadow: 0 0 0 2px #ffe9ce; }
+.ci td.clkcell { cursor: pointer; }
+.ci td.clkcell:hover { background: #fbfdff; }
+
+
+/* A thread row that opens says so under the cursor. */
+.ci .tmsg.topen { cursor: pointer; }
+.ci .tmsg.topen:hover { box-shadow: inset 0 0 0 2px #ffe9ce; }
+
+/* ── The conversation-log button ──────────────────────────────────────
+   Sits in the middle of every register row. Deliberately a BUTTON and
+   not another badge: the badges beside it are facts you can click, this
+   is the one action that opens the item's whole account, and it has to
+   read as the thing to press when somebody asks "what happened here?".
+   ------------------------------------------------------------------ */
+.ci .qlogbtn {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--navy);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.ci .qlogbtn:hover {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ── The conversation thread ──────────────────────────────────────────
+   Reads downwards, oldest first: what we sent, then what came back to
+   it, indented under it. The indent is the whole point - a reply that
+   sits level with the mail it answers is just another row in a list.
+   ------------------------------------------------------------------ */
+.ci .qthr { display: flex; flex-direction: column; gap: 8px; }
+.ci .qthr-x {
+  border: 1px solid var(--edge2);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.ci .qthr-h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 7px 10px;
+  background: rgba(12, 29, 56, 0.04);
+  border: 0;
+  border-bottom: 1px solid var(--edge2);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.ci .qthr-h:hover { background: rgba(12, 29, 56, 0.07); }
+.ci .qthr-b { padding: 9px 10px; }
+/* The reply, stepped in from our mail and marked down its left edge. */
+.ci .qthr-r {
+  margin: 9px 0 0 22px;
+  border: 1px solid var(--edge2);
+  border-left: 3px solid var(--green);
+  border-radius: 6px;
+  background: rgba(31, 122, 68, 0.04);
+}
+.ci .qthr-rh {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  border-bottom: 1px dashed var(--edge2);
+  font-size: 12.5px;
+}
