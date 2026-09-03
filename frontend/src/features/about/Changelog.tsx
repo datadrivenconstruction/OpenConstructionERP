@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.7.1',
+    date: '2026-09-03',
+    tag: 'NEW',
+    summary:
+      'A schedule import fix from the last release turned out to decline the very file it was written for. The reader will not name a code page until enough high bytes are on the table to mean anything, and that floor was set from the smallest file in the test vocabulary rather than from the smallest file a person actually has, so a two row export carrying one byte less than the floor was declined and went back to arriving as mojibake. Separately, a Hebrew schedule could be read as Greek: the reader tells the four non Latin code pages apart by counting the most frequent letters of each language, and two of the six Hebrew letters sit on the bytes Greek uses for iota and epsilon while four more land on alpha, omicron, nu and tau, so the Greek profile scored on Hebrew text with all six of its own letters. Hebrew was alone in this, and it stayed hidden because the thresholds had been calibrated on a population that cannot show it. And the desktop pipeline now starts the server it ships and waits for it to answer, twice, on a cold start and on a restart over an existing data directory. Every step before this built the installer, verified the binary was inside it and signed it, and nothing anywhere had ever run it. A bill line priced from a production norm now says which norm predicted it. The identity was recorded on the assembly and never copied onto the position, so an estimate built from norms could not be compared against the norms behind it. It is copied rather than resolved through the assembly on purpose, because that row can be edited or deleted after a bill was priced from it, and provenance that changes retroactively is not provenance.',
+  },
+  {
     version: '16.7.0',
     date: '2026-09-03',
     tag: 'NEW',

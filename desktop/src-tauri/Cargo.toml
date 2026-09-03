@@ -1,6 +1,6 @@
 [package]
 name = "openconstructionerp-desktop"
-version = "16.7.0"
+version = "16.7.1"
 description = "OpenConstructionERP Desktop, construction cost estimation and BOQ platform"
 authors = ["DataDrivenConstruction <info@datadrivenconstruction.io>"]
 edition = "2021"
