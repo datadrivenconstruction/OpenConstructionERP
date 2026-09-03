@@ -941,10 +941,30 @@ TEMPLATE = DemoTemplate(
     ],
     # CPWD-style markups: contractor overheads & profit folded into a single
     # tendered percentage above DSR; cess and GST carried separately.
+    #
+    # The cess is filed "other", not "tax", and that is load-bearing rather
+    # than tidy-up. It is a levy on the cost of construction under the Building
+    # and Other Construction Workers Welfare Cess Act 1996, not a consumption
+    # tax. The reader that stops at the first one is ``getVatRateFromMarkups``
+    # in ``frontend/src/features/boq/boqHelpers.ts``, which takes the first
+    # active percentage markup filed "tax" and returns it as the rate. Filed
+    # "tax" ahead of GST, the 1 percent cess won that lookup and the editor
+    # footer showed 1 percent on a works contract that carries 18.
+    #
+    # Name that reader and not the exports, which do the opposite. Deliberately
+    # so: ``_tax_split`` in ``boq/pdf_export.py`` sums every active tax row,
+    # a correction made for Brazil, which stacks two. A comment here blaming
+    # the PDF would read as stale to the next person and invite them to undo
+    # this line.
+    #
+    # The regional stack in ``boq/markup_templates.py`` has always filed this
+    # line "other", and the Argentine block there cites it by name as the
+    # precedent. The money is unchanged: a cascade takes its base from
+    # ``apply_to``, never from ``category``.
     markups=[
         ("Contractor Overheads & Profit (CP&OH)", 15.0, "overhead", "direct_cost"),
         ("Contingencies", 3.0, "contingency", "direct_cost"),
-        ("Building & Other Construction Workers Cess (1%)", 1.0, "tax", "direct_cost"),
+        ("Building & Other Construction Workers Cess (1%)", 1.0, "other", "direct_cost"),
         ("Goods & Services Tax (GST 18%)", 18.0, "tax", "cumulative"),
     ],
     total_months=24,

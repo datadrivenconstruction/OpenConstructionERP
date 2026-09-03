@@ -1049,10 +1049,15 @@ TEMPLATE = DemoTemplate(
     ],
     # CPWD-style markups: contractor overheads & profit above DSR; design
     # contingency, BOCW cess and GST carried as separate lines.
+    #
+    # The cess is filed "other" rather than "tax" for the reason written out in
+    # full over the same line in ``govt-building-delhi.py``: it is a levy on
+    # the cost of construction, not a consumption tax, and a reader asking this
+    # bill for its tax rate takes the first markup filed "tax" and stops.
     markups=[
         ("Contractor Overheads & Profit (CP&OH)", 14.0, "overhead", "direct_cost"),
         ("Design & Estimation Contingency", 4.0, "contingency", "direct_cost"),
-        ("Building & Other Construction Workers Cess (1%)", 1.0, "tax", "direct_cost"),
+        ("Building & Other Construction Workers Cess (1%)", 1.0, "other", "direct_cost"),
         ("Goods & Services Tax (GST 18%)", 18.0, "tax", "cumulative"),
     ],
     total_months=32,
