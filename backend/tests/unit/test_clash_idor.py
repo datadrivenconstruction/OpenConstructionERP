@@ -149,7 +149,7 @@ async def _seed_clash_result(session, run_id: uuid.UUID) -> uuid.UUID:
 async def test_list_runs_cross_project_returns_empty_not_others(app_factory, db_session):
     """Attacker lists runs on victim's project → 403 (IDOR guard denies)."""
     app = app_factory
-    _victim_id, victim_project = await _seed_user_and_project(db_session)
+    victim_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _attacker_project = await _seed_user_and_project(db_session)
     await _seed_clash_run(db_session, victim_project)
 
@@ -160,6 +160,20 @@ async def test_list_runs_cross_project_returns_empty_not_others(app_factory, db_
         # IDOR guard: non-owner gets 403
         assert resp.status_code in (403, 404), (
             f"Expected 403/404 for cross-project run list, got {resp.status_code}: {resp.text}"
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    # The positive half. The assertion above is satisfied just as well by a
+    # route that refuses everybody, which is the failure this file could not
+    # otherwise see: a path that started answering 404 to its owner too would
+    # leave it green. So the rightful owner has to get through on the same path.
+    _override_payload(app, victim_id, role="editor", perms=["clash.read"])
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            owner_resp = await client.get(f"/api/v1/clash/projects/{victim_project}/runs/")
+        assert owner_resp.status_code == 200, (
+            f"the owner must reach their own run list, got {owner_resp.status_code}: {owner_resp.text}"
         )
     finally:
         app.dependency_overrides.clear()
@@ -213,6 +227,18 @@ async def test_get_results_cross_project_denied(app_factory, db_session):
     finally:
         app.dependency_overrides.clear()
 
+    # The positive half: a results endpoint that answered 404 to everyone,
+    # owner included, would satisfy the assertion above without complaint.
+    _override_payload(app, victim_id, role="editor", perms=["clash.read"])
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            owner_resp = await client.get(f"/api/v1/clash/projects/{victim_project}/runs/{run_id}/results")
+        assert owner_resp.status_code == 200, (
+            f"the owner must reach their own results, got {owner_resp.status_code}: {owner_resp.text}"
+        )
+    finally:
+        app.dependency_overrides.clear()
+
 
 async def test_result_wrong_run_returns_404(app_factory, db_session):
     """GET results for a run that belongs to a different project → 404."""
@@ -250,11 +276,26 @@ async def test_patch_result_cross_project_denied(app_factory, db_session):
     finally:
         app.dependency_overrides.clear()
 
+    # The positive half: the same triage has to succeed for the owner, or a
+    # PATCH route that rejected everybody would read as a working IDOR guard.
+    _override_payload(app, victim_id, role="editor", perms=["clash.update"])
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            owner_resp = await client.patch(
+                f"/api/v1/clash/projects/{victim_project}/runs/{run_id}/results/{result_id}",
+                json={"status": "active"},
+            )
+        assert owner_resp.status_code == 200, (
+            f"the owner must be able to triage their own clash, got {owner_resp.status_code}: {owner_resp.text}"
+        )
+    finally:
+        app.dependency_overrides.clear()
+
 
 async def test_issues_list_cross_user_returns_404(app_factory, db_session):
     """GET /clash/issues?project_id=victim_project as attacker → 403/404."""
     app = app_factory
-    _victim_id, victim_project = await _seed_user_and_project(db_session)
+    victim_id, victim_project = await _seed_user_and_project(db_session)
     attacker_id, _attacker_project = await _seed_user_and_project(db_session)
 
     _override_payload(app, attacker_id, role="editor", perms=["clash.read"])
@@ -262,6 +303,18 @@ async def test_issues_list_cross_user_returns_404(app_factory, db_session):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.get(f"/api/v1/clash/issues?project_id={victim_project}")
         assert resp.status_code in (403, 404), f"Cross-user issues list should be denied, got {resp.status_code}"
+    finally:
+        app.dependency_overrides.clear()
+
+    # The positive half: an issues endpoint that scoped everyone out, owner
+    # included, satisfies the assertion above and serves nobody.
+    _override_payload(app, victim_id, role="editor", perms=["clash.read"])
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            owner_resp = await client.get(f"/api/v1/clash/issues?project_id={victim_project}")
+        assert owner_resp.status_code == 200, (
+            f"the owner must reach their own issue list, got {owner_resp.status_code}: {owner_resp.text}"
+        )
     finally:
         app.dependency_overrides.clear()
 
@@ -278,6 +331,19 @@ async def test_delete_run_cross_project_denied(app_factory, db_session):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.delete(f"/api/v1/clash/projects/{attacker_project}/runs/{run_id}")
         assert resp.status_code in (403, 404), f"Cross-project DELETE should be denied, got {resp.status_code}"
+    finally:
+        app.dependency_overrides.clear()
+
+    # The positive half, and it goes last because it consumes the run: a DELETE
+    # that refused everybody would pass the assertion above while the feature
+    # was gone. The route answers 204, so the check is on the exact code.
+    _override_payload(app, victim_id, role="editor", perms=["clash.delete"])
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            owner_resp = await client.delete(f"/api/v1/clash/projects/{victim_project}/runs/{run_id}")
+        assert owner_resp.status_code == 204, (
+            f"the owner must be able to delete their own run, got {owner_resp.status_code}: {owner_resp.text}"
+        )
     finally:
         app.dependency_overrides.clear()
 
