@@ -1,0 +1,1243 @@
+/* DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+ *
+ * Work Requests - the board, the planner grid and the stage stepper.
+ * Scoped to .wr. Colours come from the ERP's own tokens (var(--oe-*)) so
+ * the dark theme is automatic; the few local tokens below only name
+ * things the ERP has no word for.
+ */
+
+/* The tint tokens live on the root too: the context menu and the picker
+   are portalled to <body>, outside any `.wr`, and still wear tints. */
+:root {
+  --wr-tint-ink: #0b1220;
+  --wr-tint-mix: 66%;
+  --wr-tint-wash: 14%;
+  --wr-tint-edge: 35%;
+}
+.dark {
+  --wr-tint-ink: #ffffff;
+  --wr-tint-mix: 56%;
+  --wr-tint-wash: 24%;
+  --wr-tint-edge: 46%;
+}
+
+.wr {
+  --wr-ink: var(--oe-text-primary);
+  --wr-ink-2: var(--oe-text-secondary);
+  --wr-muted: var(--oe-text-tertiary);
+  --wr-panel: var(--oe-bg);
+  --wr-panel-2: var(--oe-bg-secondary);
+  --wr-panel-3: var(--oe-bg-tertiary);
+  --wr-line: var(--oe-border-light);
+  --wr-line-2: var(--oe-border);
+  --wr-accent: var(--oe-blue);
+  --wr-crit: var(--oe-error);
+  --wr-good: var(--oe-success);
+  --wr-warn: var(--oe-warning);
+  --wr-shadow: 0 1px 2px rgba(20, 32, 48, 0.07), 0 1px 3px rgba(20, 32, 48, 0.05);
+  /* What `tintStyle()` mixes a department / status colour towards. The
+     palette is mid-dark ink picked against white, so on the dark theme's
+     near-black panel it has to be lightened or the pills sit under 3:1. */
+  --wr-tint-ink: #0b1220;
+  --wr-tint-mix: 66%;
+  --wr-tint-wash: 14%;
+  --wr-tint-edge: 35%;
+  color: var(--wr-ink);
+}
+.dark .wr {
+  --wr-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --wr-tint-ink: #ffffff;
+  --wr-tint-mix: 56%;
+  --wr-tint-wash: 24%;
+  --wr-tint-edge: 46%;
+}
+
+/* ── Chips ───────────────────────────────────────────────────────── */
+
+.wr .wr-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--oe-font-mono, ui-monospace, Consolas, monospace);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+  line-height: 1.5;
+  cursor: pointer;
+  user-select: text;
+}
+.wr .wr-ref .dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; opacity: 0.8; }
+
+.wr .wr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.wr .wr-pill.you {
+  color: #fff;
+  background: var(--wr-accent);
+  border-color: var(--wr-accent);
+}
+
+.wr .wr-av {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--av, #55616e);
+  border: 2px solid var(--wr-panel);
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+.wr .wr-avs { display: inline-flex; align-items: center; }
+.wr .wr-avs .wr-av + .wr-av { margin-left: -7px; }
+
+.wr .wr-prio { font-weight: 800; font-size: 12px; line-height: 1; }
+.wr .wr-prio.urgent { color: var(--wr-crit); }
+.wr .wr-prio.high { color: var(--wr-warn); }
+.wr .wr-prio.low { color: var(--wr-muted); }
+
+/* ── Hours bar (CSS only) ───────────────────────────────────────── */
+
+.wr .wr-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--wr-panel-2);
+  border: 1px solid var(--wr-line);
+  overflow: hidden;
+  min-width: 60px;
+}
+.wr .wr-bar > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; }
+.wr .wr-bar > i.fc { background: color-mix(in srgb, var(--wr-accent) 35%, transparent); }
+.wr .wr-bar > i.lg { background: var(--wr-accent); }
+.wr .wr-bar.over > i.fc { background: color-mix(in srgb, var(--wr-crit) 35%, transparent); }
+.wr .wr-bar.over > i.lg { background: var(--wr-crit); }
+
+/* ── Department tabs / view switch ─────────────────────────────── */
+
+.wr .wr-tabs { display: flex; gap: 2px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid var(--wr-line-2); }
+.wr .wr-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wr-ink-2);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+}
+.wr .wr-tab:hover { background: var(--wr-panel-2); color: var(--wr-ink); }
+.wr .wr-tab[aria-selected='true'] { color: var(--wr-ink); font-weight: 600; border-bottom-color: var(--tab, var(--wr-accent)); }
+.wr .wr-tab .dot { width: 9px; height: 9px; border-radius: 3px; background: var(--tab, var(--wr-accent)); }
+.wr .wr-tab .n {
+  font-size: 10.5px;
+  font-weight: 700;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--wr-panel-2);
+  color: var(--wr-ink-2);
+  text-align: center;
+  border: 1px solid var(--wr-line);
+}
+.wr .wr-tab[aria-selected='true'] .n { background: var(--tab, var(--wr-accent)); color: #fff; border-color: transparent; }
+
+.wr .wr-seg { display: inline-flex; border: 1px solid var(--wr-line-2); border-radius: 8px; overflow: hidden; background: var(--wr-panel); }
+.wr .wr-seg button {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border: 0;
+  background: none;
+  color: var(--wr-ink-2);
+  cursor: pointer;
+  border-right: 1px solid var(--wr-line);
+}
+.wr .wr-seg button:last-child { border-right: 0; }
+.wr .wr-seg button[aria-pressed='true'] { background: var(--wr-accent); color: #fff; font-weight: 600; }
+.wr .wr-seg button:hover:not([aria-pressed='true']) { background: var(--wr-panel-2); color: var(--wr-ink); }
+
+/* ── Horizontal scroller with an affordance ─────────────────────── */
+
+/* The board and the stepper both run off the right at 1280. The fade and
+   the arrow only exist while there IS more that way: `.l` / `.r` are set
+   from a measurement, so a board of three columns wears nothing. */
+.wr .wr-hs { position: relative; min-width: 0; }
+.wr .wr-hs-in { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.wr .wr-hs::before,
+.wr .wr-hs::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 10px;
+  width: 34px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+.wr .wr-hs::before { left: 0; background: linear-gradient(to right, var(--wr-panel), transparent); }
+.wr .wr-hs::after { right: 0; background: linear-gradient(to left, var(--wr-panel), transparent); }
+.wr .wr-hs.l::before, .wr .wr-hs.r::after { opacity: 1; }
+
+.wr .wr-hs-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 999px;
+  background: var(--oe-bg-elevated, var(--wr-panel));
+  color: var(--wr-ink-2);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(16, 24, 36, 0.18);
+  z-index: 3;
+}
+.wr .wr-hs-btn.prev { left: 2px; }
+.wr .wr-hs-btn.next { right: 2px; }
+.wr .wr-hs.l .wr-hs-btn.prev, .wr .wr-hs.r .wr-hs-btn.next { display: inline-flex; }
+.wr .wr-hs-btn:hover { border-color: var(--wr-accent); color: var(--wr-accent); }
+.wr .wr-hs-btn:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+
+/* ── Board ──────────────────────────────────────────────────────── */
+
+.wr .wr-board { min-height: 320px; }
+.wr .wr-board .wr-hs-in { padding-bottom: 8px; }
+.wr .wr-board-cols { display: flex; gap: 10px; align-items: flex-start; }
+.wr .wr-col {
+  flex: 0 0 272px;
+  width: 272px;
+  background: var(--wr-panel-2);
+  border: 1px solid var(--wr-line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 260px);
+  min-height: 160px;
+}
+.wr .wr-col.hot { outline: 2px dashed var(--wr-accent); outline-offset: -2px; }
+.wr .wr-colhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--wr-line);
+  border-top: 3px solid var(--col, var(--wr-accent));
+  border-radius: 10px 10px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wr-ink);
+  background: var(--wr-panel);
+}
+.wr .wr-colhead .n { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--wr-muted); }
+.wr .wr-colhead .closes { font-size: 9.5px; font-weight: 700; color: var(--wr-muted); border: 1px dashed var(--wr-line-2); border-radius: 999px; padding: 0 6px; text-transform: none; letter-spacing: 0; }
+.wr .wr-colbody { padding: 8px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; }
+.wr .wr-colempty { color: var(--wr-muted); font-size: 12px; text-align: center; padding: 18px 8px; border: 1px dashed var(--wr-line-2); border-radius: 8px; }
+
+.wr .wr-card {
+  background: var(--wr-panel);
+  border: 1px solid var(--wr-line-2);
+  border-radius: 9px;
+  padding: 9px 10px 8px;
+  box-shadow: var(--wr-shadow);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  outline: none;
+}
+.wr .wr-card:hover { border-color: var(--wr-accent); }
+.wr .wr-card:focus-visible { box-shadow: 0 0 0 2px var(--wr-accent); }
+.wr .wr-card.dragging { opacity: 0.45; }
+.wr .wr-card .ttl { font-size: 13px; font-weight: 600; color: var(--wr-ink); line-height: 1.35; overflow-wrap: anywhere; }
+.wr .wr-card .job { font-size: 11.5px; color: var(--wr-ink-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.wr .wr-card .job b { font-family: var(--oe-font-mono, ui-monospace, monospace); font-weight: 600; }
+.wr .wr-card .foot { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: 11px; color: var(--wr-muted); }
+.wr .wr-card .foot .due { white-space: nowrap; }
+.wr .wr-card .foot .due.late { color: var(--wr-crit); font-weight: 700; }
+.wr .wr-card .foot .sp { margin-left: auto; }
+.wr .wr-card .hrs { display: flex; align-items: center; gap: 7px; font-size: 10.5px; color: var(--wr-muted); font-variant-numeric: tabular-nums; }
+.wr .wr-card .hrs .wr-bar { flex: 1; }
+
+/* ── List ───────────────────────────────────────────────────────── */
+
+.wr .wr-tablewrap { overflow-x: auto; border: 1px solid var(--wr-line); border-radius: 10px; background: var(--wr-panel); }
+.wr table.wr-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.wr table.wr-table th {
+  text-align: left;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wr-muted);
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--wr-line-2);
+  white-space: nowrap;
+  background: var(--wr-panel-2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  cursor: pointer;
+  user-select: none;
+}
+.wr table.wr-table th:hover { color: var(--wr-ink); }
+.wr table.wr-table th .arrow { margin-left: 4px; font-size: 9px; }
+.wr table.wr-table td { padding: 7px 10px; border-bottom: 1px solid var(--wr-line); vertical-align: middle; }
+.wr table.wr-table tr.row { cursor: pointer; }
+.wr table.wr-table tr.row:hover td { background: var(--wr-panel-3); }
+.wr table.wr-table tr.row.sel td { background: color-mix(in srgb, var(--wr-accent) 10%, transparent); }
+.wr table.wr-table td.n, .wr table.wr-table th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wr table.wr-table td .ttl { font-weight: 600; color: var(--wr-ink); overflow-wrap: anywhere; }
+.wr table.wr-table td.dim { color: var(--wr-muted); }
+.wr table.wr-table td .late { color: var(--wr-crit); font-weight: 700; }
+.wr .wr-dev.over { color: var(--wr-crit); font-weight: 700; }
+.wr .wr-dev.under { color: var(--wr-good); font-weight: 700; }
+
+/* ── Planner grid ───────────────────────────────────────────────── */
+
+/* No `scroll-behavior: smooth` here, and no `behavior: 'smooth'` in the
+   arrow handler: measured live, a smooth scroll on this element resolves
+   to NO movement at all (0 of a 474px range) while an instant one lands
+   exactly. An affordance that does nothing is worse than none. */
+.wr .wr-plan { overflow: auto; border: 1px solid var(--wr-line); border-radius: 10px; background: var(--wr-panel); max-height: calc(100vh - 250px); }
+.wr table.wr-grid { border-collapse: separate; border-spacing: 0; font-size: 12px; min-width: 100%; }
+.wr table.wr-grid th, .wr table.wr-grid td { border-bottom: 1px solid var(--wr-line); border-right: 1px solid var(--wr-line); padding: 0; }
+.wr table.wr-grid th { background: var(--wr-panel-2); color: var(--wr-muted); font-weight: 700; font-size: 10.5px; text-align: center; padding: 5px 4px; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+.wr table.wr-grid th.week { text-transform: uppercase; letter-spacing: 0.05em; border-left: 2px solid var(--wr-line-2); }
+.wr table.wr-grid th.day { top: 27px; }
+.wr table.wr-grid th.day .dow { opacity: 0.75; }
+/* A column that starts a month says which one - "30 | 02" alone read as
+   two days in the same month. A hairline echoes the break. */
+.wr table.wr-grid th.day .mo { display: block; font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wr-accent); line-height: 1.1; }
+.wr table.wr-grid th.day.mstart { border-left: 2px solid var(--wr-line-2); }
+.wr table.wr-grid th.day.today, .wr table.wr-grid td.today { background: color-mix(in srgb, var(--wr-accent) 8%, transparent); }
+.wr table.wr-grid th.first, .wr table.wr-grid td.first { position: sticky; left: 0; z-index: 3; background: var(--wr-panel); text-align: left; min-width: 260px; max-width: 320px; }
+.wr table.wr-grid th.first { z-index: 4; background: var(--wr-panel-2); }
+.wr table.wr-grid td.first { padding: 5px 9px; }
+.wr table.wr-grid td.first .ttl { font-weight: 600; color: var(--wr-ink); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.wr table.wr-grid td.first .sub { font-size: 11px; color: var(--wr-muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.wr table.wr-grid td.week-start { border-left: 2px solid var(--wr-line-2); }
+.wr table.wr-grid td.cell { width: 42px; min-width: 42px; text-align: center; }
+.wr table.wr-grid td.cell input {
+  width: 100%;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font: inherit;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--wr-ink);
+  outline: none;
+  box-sizing: border-box;
+}
+.wr table.wr-grid td.cell input:focus { background: color-mix(in srgb, var(--wr-accent) 14%, transparent); box-shadow: inset 0 0 0 2px var(--wr-accent); }
+.wr table.wr-grid td.cell.has { background: color-mix(in srgb, var(--wr-accent) 9%, transparent); font-weight: 600; }
+.wr table.wr-grid td.cell.saving input { color: var(--wr-muted); }
+.wr table.wr-grid td.tot, .wr table.wr-grid th.tot { text-align: right; padding: 4px 9px; white-space: nowrap; font-variant-numeric: tabular-nums; background: var(--wr-panel-2); position: sticky; right: 0; z-index: 2; border-left: 2px solid var(--wr-line-2); min-width: 120px; }
+.wr table.wr-grid th.tot { z-index: 4; }
+.wr table.wr-grid td.tot .vs { font-size: 10.5px; color: var(--wr-muted); }
+.wr table.wr-grid tr.cap td { background: var(--wr-panel-2); font-weight: 600; }
+.wr table.wr-grid tr.cap td.cell.over { background: color-mix(in srgb, var(--wr-crit) 16%, transparent); color: var(--wr-crit); }
+.wr table.wr-grid tr.cap td.cell .a { font-size: 10px; color: var(--wr-muted); display: block; line-height: 1; margin-top: -2px; padding-bottom: 3px; }
+.wr .wr-tog { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--wr-muted); cursor: pointer; }
+.wr .wr-tog input { accent-color: var(--wr-accent); }
+
+/* The paint preview: what the range WILL say, before a single PUT. */
+.wr table.wr-grid td.cell.ghost { background: color-mix(in srgb, var(--wr-accent) 22%, transparent); box-shadow: inset 0 0 0 1px var(--wr-accent); }
+.wr table.wr-grid td.cell.hot { background: color-mix(in srgb, var(--wr-good) 20%, transparent); box-shadow: inset 0 0 0 2px var(--wr-good); }
+/* While a paint or a tray drag is running the grid must not also pan
+   under the finger, and the cells must not select as text. */
+.wr .wr-plan.painting, .wr .wr-plan.dropping { touch-action: none; user-select: none; }
+.wr .wr-plan.painting td.cell input { pointer-events: none; }
+
+/* The affordance for a grid too wide for the window. The first and last
+   columns are sticky, so an overlaid fade and floating arrows would sit
+   UNDER them - the one place the reader is looking. Instead the arrows
+   are part of the two sticky header cells, and the sticky edges cast a
+   shadow over whatever is hidden behind them. */
+.wr .wr-plan th.first .hd, .wr .wr-plan th.tot .hd { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.wr .wr-gscroll {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 6px;
+  background: var(--wr-panel);
+  color: var(--wr-ink-2);
+  cursor: pointer;
+  padding: 0;
+}
+.wr .wr-plan.sl .wr-gscroll.prev, .wr .wr-plan.sr .wr-gscroll.next { display: inline-flex; }
+.wr .wr-gscroll:hover { border-color: var(--wr-accent); color: var(--wr-accent); }
+.wr .wr-gscroll:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+.wr .wr-plan.sl th.first, .wr .wr-plan.sl td.first { box-shadow: 6px 0 8px -6px rgba(20, 32, 48, 0.45); }
+.wr .wr-plan.sr th.tot, .wr .wr-plan.sr td.tot { box-shadow: -6px 0 8px -6px rgba(20, 32, 48, 0.45); }
+.dark .wr .wr-plan.sl th.first, .dark .wr .wr-plan.sl td.first { box-shadow: 6px 0 10px -6px rgba(0, 0, 0, 0.75); }
+.dark .wr .wr-plan.sr th.tot, .dark .wr .wr-plan.sr td.tot { box-shadow: -6px 0 10px -6px rgba(0, 0, 0, 0.75); }
+
+/* ── Month view ─────────────────────────────────────────────────── */
+
+.wr .wr-month { display: flex; flex-direction: column; gap: 8px; }
+.wr .wr-mhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wr .wr-mnav { display: inline-flex; align-items: center; gap: 6px; }
+.wr .wr-mlabel { font-size: 15px; font-weight: 700; color: var(--wr-ink); min-width: 150px; text-align: center; }
+.wr .wr-mnote { margin: 0; }
+
+/* One grid, seven columns: the weekday heads and every day cell are its
+   direct children, so nothing between them can knock a column out of
+   line. The 1px gap over a hairline background IS the rule between
+   cells - no borders to double up on. */
+.wr .wr-monthgrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--wr-line-2);
+  border: 1px solid var(--wr-line-2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.wr .wr-monthgrid.busy { opacity: 0.75; pointer-events: none; }
+.wr .wr-dow {
+  background: var(--wr-panel-2);
+  padding: 6px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wr-muted);
+  user-select: none;
+}
+/**
+ * Out-of-month has to RECEDE, and the ERP's own surface tokens cannot be
+ * asked to do it: measured live, `--oe-bg-tertiary` is #fbfbfd against a
+ * #ffffff page (a 1.5% difference nobody sees) and in the dark theme it
+ * is #1a1d2b against a #0f1117 page - LIGHTER than the days it is meant
+ * to sit behind. So the dimming is its own token, mixed towards the rule
+ * colour in the light theme and towards black in the dark one, which is
+ * the direction "further away" points in each.
+ */
+.wr { --wr-out: color-mix(in srgb, var(--wr-line) 55%, var(--wr-panel)); }
+.dark .wr { --wr-out: color-mix(in srgb, #000 45%, var(--wr-panel)); }
+
+.wr .wr-day { background: var(--wr-panel); min-height: 118px; padding: 5px 6px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.wr .wr-day.weekend { background: color-mix(in srgb, var(--wr-panel-2) 70%, var(--wr-panel)); }
+/* After `.weekend` on purpose: an out-of-month Saturday is out-of-month
+   first, and two tints stacked read as a third kind of day. */
+.wr .wr-day.out, .wr .wr-day.weekend.out { background: var(--wr-out); }
+.wr .wr-day.out .wr-dnum { color: color-mix(in srgb, var(--wr-muted) 55%, transparent); }
+.wr .wr-day.out .wr-ev { opacity: 0.65; }
+.wr .wr-day.today { box-shadow: inset 0 0 0 2px var(--wr-accent); }
+.wr .wr-day.over { background: color-mix(in srgb, var(--wr-accent) 12%, var(--wr-panel)); box-shadow: inset 0 0 0 2px var(--wr-accent); }
+.wr .wr-dnum { font-family: var(--oe-font-mono, ui-monospace, monospace); font-size: 11.5px; font-weight: 700; color: var(--wr-ink-2); }
+.wr .wr-day.today .wr-dnum { color: var(--wr-accent); }
+
+/* A chip: the department's colour as a left bar, the reference and title
+   on one ellipsised line, then who holds it. `--ev` is the only colour
+   anything here reads, so a department recoloured in Manage recolours
+   every chip it owns without another rule. */
+.wr .wr-ev {
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 2px 5px;
+  border-left: 3px solid var(--ev, var(--wr-line-2));
+  background: var(--wr-panel-2);
+  color: var(--wr-ink-2);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease;
+}
+.wr .wr-evh { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.wr .wr-evh b {
+  font-family: var(--oe-font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ev, var(--wr-ink-2));
+  /* The identity never shrinks: a half-printed reference is not a
+     shorter reference, it is a different one. */
+  flex: 0 0 auto;
+}
+.wr .wr-ev.over .wr-evh b { color: var(--wr-crit); }
+.wr .wr-evh .wr-avs { margin-left: auto; flex: 0 0 auto; }
+.wr .wr-ev:hover { box-shadow: inset 0 0 0 1px var(--wr-accent); }
+.wr .wr-ev:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+.wr .wr-ev[draggable='true'] { cursor: grab; }
+.wr .wr-ev.dragging { opacity: 0.4; }
+/* Overdue AND still open - a complete request that ran late is history,
+   not an alarm. */
+.wr .wr-ev.over { border-left-color: var(--wr-crit); color: var(--wr-crit); font-weight: 600; }
+.wr .wr-ev.done { opacity: 0.6; text-decoration: line-through; text-decoration-thickness: 1px; }
+.wr .wr-evt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.25; }
+/* Which date this is, in "Key dates" - the chip says so or it is a lie. */
+.wr .wr-evt .what {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ev, var(--wr-muted));
+  display: block;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wr .wr-ev .wr-pill { font-size: 9px; padding: 0 4px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wr .wr-ev .wr-av { width: 15px; height: 15px; font-size: 7px; }
+.wr .wr-ev .wr-avs { flex: 0 0 auto; }
+.wr .wr-ev .wr-hint { display: none; }
+.wr .wr-evmore {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--wr-accent);
+  background: color-mix(in srgb, var(--wr-accent) 12%, transparent);
+  border: 0;
+  border-radius: 999px;
+  padding: 1px 8px;
+  cursor: pointer;
+  align-self: flex-start;
+  font-family: inherit;
+}
+.wr .wr-evmore:hover { text-decoration: underline; }
+.wr .wr-evmore:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+
+/* The tray - dashed, because what is in it is not on the calendar yet. */
+.wr .wr-mtray { border: 1px dashed var(--wr-line-2); border-radius: 10px; padding: 7px 10px; background: var(--wr-panel-2); display: flex; flex-direction: column; gap: 6px; }
+.wr .wr-mtray-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wr .wr-mtray-h .lab { font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--wr-muted); }
+.wr .wr-mtray-h .n { font-family: var(--oe-font-mono, ui-monospace, monospace); font-size: 11px; color: var(--wr-ink-2); background: var(--wr-panel-3); border-radius: 5px; padding: 0 6px; }
+.wr .wr-mtray-b { display: flex; flex-wrap: wrap; gap: 6px; }
+.wr .wr-mtchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 340px;
+  font-size: 12px;
+  color: var(--wr-ink);
+  background: var(--wr-panel);
+  border: 1px solid var(--wr-line-2);
+  border-left: 3px solid var(--ev, var(--wr-line-2));
+  border-radius: 6px;
+  padding: 3px 8px 3px 7px;
+  cursor: grab;
+}
+.wr .wr-mtchip:not([draggable='true']) { cursor: pointer; }
+.wr .wr-mtchip:hover { border-color: var(--wr-accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--wr-accent) 40%, transparent); }
+.wr .wr-mtchip:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+.wr .wr-mtchip.dragging { opacity: 0.4; }
+.wr .wr-mtchip b { font-family: var(--oe-font-mono, ui-monospace, monospace); font-size: 10.5px; font-weight: 700; color: var(--ev, var(--wr-muted)); flex: 0 0 auto; }
+.wr .wr-mtchip .ttl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.wr .wr-mtchip .wr-av { width: 17px; height: 17px; font-size: 8px; }
+.wr .wr-mtchip .wr-hint { display: none; }
+
+@media (max-width: 1500px) {
+  /* Measured at 1280: a column is ~150px, and the ball pill truncated to
+     "with W" - a label that says nothing but still costs the width the
+     title wanted. Below this it goes; the tooltip, the board, the list
+     and the drawer all still say whose move it is. */
+  .wr .wr-ev .wr-pill { display: none; }
+}
+@media (max-width: 1100px) {
+  .wr .wr-day { min-height: 92px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wr .wr-ev { transition: none; }
+}
+
+/* ── Stage stepper ──────────────────────────────────────────────── */
+
+.wr .wr-steps .wr-hs-in { padding: 2px 0 4px; }
+/* The stepper fits on one row at every width the app is used at, so the
+   scroller is a fallback for a department with more stages than any
+   width holds. Its bare grey track ran the full width under the
+   chevrons and read as part of the control; the edge fades and the two
+   arrow buttons say "there is more" without it. */
+.wr .wr-steps .wr-hs-in { scrollbar-width: none; }
+.wr .wr-steps .wr-hs-in::-webkit-scrollbar { height: 0; width: 0; }
+.wr .wr-steps-in { display: flex; gap: 0; min-width: min-content; }
+/* The last step's right border sat under the edge fade; the fade stops
+   short of the stepper's own padding so nothing is clipped. */
+.wr .wr-steps.wr-hs::before, .wr .wr-steps.wr-hs::after { bottom: 6px; width: 26px; }
+/* Every stage name has to READ, in full, inside its own chevron.
+   `flex: 1 1 0` plus an explicit `min-width: 96px` was the whole bug: an
+   explicit min-width replaces a flex item's automatic min-content floor,
+   so eight stages in an 838px drawer were each squeezed to 96px and the
+   names were cut to "Drawings receiv" / "Materials ordere" / "Rea".
+   `min-width: min-content` puts the floor back at the item's own words,
+   `flex: 1 1 auto` still lets the chevrons share whatever width is
+   spare, and the label sits a little smaller than the rest of the drawer
+   so eight of them fit on one row at 1280 without shrinking to noise. */
+.wr .wr-step {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: min-content;
+  padding: 6px 11px 6px 17px;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.002em;
+  text-align: left;
+  border: 1px solid var(--wr-line-2);
+  border-right: 0;
+  background: var(--wr-panel-2);
+  color: var(--wr-muted);
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+  white-space: nowrap;
+}
+/* The name is its own element so a test can compare scrollWidth to
+   clientWidth and prove nothing is clipped. */
+.wr .wr-step .nm { display: block; white-space: nowrap; overflow: visible; }
+.wr .wr-step:first-child { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); padding-left: 11px; border-radius: 6px 0 0 6px; }
+.wr .wr-step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%); border-right: 1px solid var(--wr-line-2); border-radius: 0 6px 6px 0; }
+.wr .wr-step.done { background: color-mix(in srgb, var(--st) 22%, var(--wr-panel)); color: var(--wr-ink); }
+.wr .wr-step.cur { background: var(--st); color: #fff; }
+.wr .wr-step:hover:not(.cur) { background: color-mix(in srgb, var(--st) 40%, var(--wr-panel)); color: var(--wr-ink); }
+.wr .wr-step:disabled { cursor: not-allowed; opacity: 0.6; }
+.wr .wr-step .k { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em; opacity: 0.75; white-space: nowrap; }
+
+/* ── Detail sections ───────────────────────────────────────────── */
+
+.wr .wr-sec { border-top: 1px solid var(--wr-line); }
+.wr .wr-sechead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0 7px;
+  cursor: pointer;
+  user-select: none;
+}
+.wr .wr-sechead h3 { margin: 0; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wr-ink-2); }
+.wr .wr-sechead .n { font-size: 10.5px; color: var(--wr-muted); font-weight: 600; }
+.wr .wr-sechead .chev { width: 13px; height: 13px; color: var(--wr-muted); transition: transform 0.12s; }
+.wr .wr-sechead .chev.open { transform: rotate(90deg); }
+.wr .wr-sechead .right { margin-left: auto; display: flex; gap: 6px; }
+.wr .wr-secbody { padding: 0 0 12px; }
+
+/* Definition rows. FIELD labels are authored in sentence case ("Date the
+   factory receives drawings", "Tested by (date)") and were then
+   CSS-uppercased into "DATE THE FACTORY RECEIVES DRAWINGS" over three
+   lines of a 150px column - the transform both shouted and cost the
+   width. Uppercase is kept for SECTION headers (`.wr-sechead h3`), which
+   is where this app uses it; the labels themselves read as written, in a
+   column wide enough that no two-word label wraps. */
+.wr .wr-kv { display: grid; grid-template-columns: minmax(0, 176px) minmax(0, 1fr); gap: 7px 14px; font-size: 12.5px; align-items: center; }
+.wr .wr-kv .k {
+  color: var(--wr-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.35;
+  align-self: center;
+  overflow-wrap: break-word;
+}
+.wr .wr-kv .v { color: var(--wr-ink); min-width: 0; overflow-wrap: anywhere; }
+
+.wr .wr-inl {
+  font: inherit;
+  font-size: 12.5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--wr-ink);
+  border-radius: 6px;
+  padding: 3px 6px;
+  min-width: 90px;
+  max-width: 100%;
+}
+.wr .wr-inl:hover { border-color: var(--wr-line-2); background: var(--wr-panel-2); }
+.wr .wr-inl:focus { outline: none; border-color: var(--wr-accent); background: var(--wr-panel); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wr-accent) 25%, transparent); }
+.wr .wr-inl.empty { color: var(--wr-muted); font-style: italic; }
+
+.wr .wr-banner { display: flex; gap: 10px; align-items: flex-start; border: 1px solid; border-radius: 9px; padding: 9px 12px; font-size: 12.5px; }
+.wr .wr-banner.info { border-color: color-mix(in srgb, var(--wr-warn) 45%, transparent); background: color-mix(in srgb, var(--wr-warn) 10%, transparent); }
+.wr .wr-banner.ball { border-color: color-mix(in srgb, var(--wr-accent) 40%, transparent); background: color-mix(in srgb, var(--wr-accent) 8%, transparent); }
+.wr .wr-banner.err { border-color: color-mix(in srgb, var(--wr-crit) 45%, transparent); background: color-mix(in srgb, var(--wr-crit) 10%, transparent); color: var(--wr-crit); }
+.wr .wr-banner b { display: block; font-size: 12.5px; }
+
+.wr .wr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 8px;
+  padding: 3px 8px;
+  background: var(--wr-panel);
+  font-size: 12px;
+  color: var(--wr-ink);
+  cursor: pointer;
+  max-width: 100%;
+  min-width: 0;
+}
+.wr .wr-chip:hover { border-color: var(--wr-accent); }
+.wr .wr-chip .tag { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 5px; padding: 1px 6px; border: 1px solid; flex: 0 0 auto; }
+/* The label used to stop at a flat 280px, which truncated a perfectly
+   readable job name in the wide drawer and still overflowed a narrow one.
+   It now ellipsises against whatever room the chip actually has: the
+   chip is a flex item that may shrink (min-width:0 lets it), the label
+   is the part that gives, and the tag beside it never does. */
+.wr .wr-chip .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 0 1 auto; }
+
+.wr .wr-msg { border: 1px solid var(--wr-line-2); border-radius: 9px; padding: 7px 10px; font-size: 12.5px; background: var(--wr-panel); }
+.wr .wr-msg .who { font-size: 11px; color: var(--wr-muted); display: flex; gap: 8px; margin-bottom: 2px; }
+.wr .wr-msg .who b { color: var(--wr-ink-2); }
+.wr .wr-msg .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.wr .wr-msg.needs_info { border-left: 3px solid var(--wr-warn); background: color-mix(in srgb, var(--wr-warn) 8%, transparent); }
+.wr .wr-msg.answer { border-left: 3px solid var(--wr-good); background: color-mix(in srgb, var(--wr-good) 8%, transparent); }
+.wr .wr-msg.system { border-style: dashed; color: var(--wr-muted); font-size: 12px; }
+.wr .wr-msg .mention { color: var(--wr-accent); font-weight: 600; }
+
+.wr .wr-tl { position: relative; padding-left: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.wr .wr-tl::before { content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px; background: var(--wr-line-2); }
+.wr .wr-tl > div { position: relative; }
+.wr .wr-tl > div::before { content: ''; position: absolute; left: -15px; top: 5px; width: 8px; height: 8px; border-radius: 999px; background: var(--wr-accent); border: 2px solid var(--wr-panel); box-sizing: border-box; }
+.wr .wr-tl .when { font-size: 11px; color: var(--wr-muted); }
+
+/* ── Raise dialog ───────────────────────────────────────────────── */
+
+.wr .wr-deptcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.wr .wr-deptcard {
+  text-align: left;
+  font: inherit;
+  border: 1px solid var(--wr-line-2);
+  border-left: 4px solid var(--dc, var(--wr-accent));
+  background: var(--wr-panel);
+  border-radius: 9px;
+  padding: 9px 11px;
+  cursor: pointer;
+  color: var(--wr-ink);
+}
+.wr .wr-deptcard:hover { border-color: var(--dc, var(--wr-accent)); }
+.wr .wr-deptcard[aria-pressed='true'] { background: color-mix(in srgb, var(--dc, var(--wr-accent)) 12%, var(--wr-panel)); box-shadow: 0 0 0 1px var(--dc, var(--wr-accent)); }
+.wr .wr-deptcard b { display: block; font-size: 13px; }
+.wr .wr-deptcard span { display: block; font-size: 11px; color: var(--wr-muted); margin-top: 2px; line-height: 1.35; }
+
+.wr .wr-typechips { display: flex; flex-wrap: wrap; gap: 6px; }
+.wr .wr-typechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 999px;
+  padding: 4px 11px;
+  background: var(--wr-panel);
+  color: var(--wr-ink-2);
+  cursor: pointer;
+}
+.wr .wr-typechip:hover { border-color: var(--wr-accent); color: var(--wr-ink); }
+.wr .wr-typechip:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+.wr .wr-typechip[aria-pressed='true'] { background: var(--wr-accent); color: #fff; border-color: var(--wr-accent); font-weight: 600; }
+/* The tick says it is a multi-select before anyone clicks twice to find out. */
+.wr .wr-typechip .tick { font-size: 10px; font-weight: 700; opacity: 0.55; width: 9px; text-align: center; }
+.wr .wr-typechip[aria-pressed='true'] .tick { opacity: 1; }
+
+/* The primary type plus "+N" on a card or a table row. */
+.wr .wr-types { display: inline-flex; align-items: baseline; gap: 4px; min-width: 0; max-width: 100%; font-size: 11px; color: var(--wr-ink-2); }
+.wr .wr-types .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wr .wr-types .more {
+  flex: 0 0 auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 0 5px;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 999px;
+  color: var(--wr-muted);
+  cursor: help;
+}
+
+/* ── A modal footer that does not crowd itself ──────────────────── */
+
+/* Both selectors on purpose: the footer element carries `wr` AND
+   `wr-foot` (it is the module's scope root inside the shared modal's own
+   footer), so the descendant form alone matched nothing and the row
+   collapsed back to the flush right-aligned huddle it was meant to fix. */
+.wr.wr-foot, .wr .wr-foot { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+/* The server's refusal is a row of its own, and it wraps. */
+.wr .wr-foot-err { align-items: flex-start; }
+.wr .wr-foot-err span { overflow-wrap: anywhere; }
+.wr .wr-foot-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.wr .wr-foot-draft { margin-right: auto; }
+/* A rule, not a gap: "Save as draft" is a different kind of thing from
+   Cancel and Raise, which used to sit flush against it. */
+.wr .wr-foot-acts { display: flex; align-items: center; gap: 8px; padding-left: 14px; border-left: 1px solid var(--wr-line); }
+@media (max-width: 560px) {
+  .wr .wr-foot-acts { padding-left: 0; border-left: 0; }
+}
+
+.wr .wr-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 16px; }
+.wr .wr-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.wr .wr-field.wide { grid-column: 1 / -1; }
+.wr .wr-field label, .wr .wr-lab { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wr-ink-2); }
+.wr .wr-field .req { color: var(--wr-crit); }
+.wr .wr-field .err { font-size: 11px; color: var(--wr-crit); }
+.wr .wr-in {
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: var(--wr-panel);
+  color: var(--wr-ink);
+  width: 100%;
+  box-sizing: border-box;
+}
+.wr .wr-in:focus { outline: none; border-color: var(--wr-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wr-accent) 25%, transparent); }
+.wr .wr-in.miss { border-color: var(--wr-crit); }
+.wr textarea.wr-in { min-height: 64px; resize: vertical; }
+.wr .wr-disc { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(110px, 1fr) minmax(80px, 100px); gap: 6px 10px; align-items: center; font-size: 12.5px; }
+/* Column heads inside a section, not section heads: authored in sentence
+   case ("Cost centre", "Est. hours") and shown that way. Weight and the
+   muted colour make them heads; shouting them made a three-column table
+   the loudest thing under "Hours & cost". */
+.wr .wr-disc .h { font-size: 10.5px; font-weight: 700; color: var(--wr-muted); text-transform: none; letter-spacing: 0.01em; }
+
+/* ── Picker popover ─────────────────────────────────────────────── */
+
+.wr-pop {
+  position: fixed;
+  z-index: 80;
+  width: 300px;
+  max-height: 340px;
+  display: flex;
+  flex-direction: column;
+  background: var(--oe-bg-elevated, #fff);
+  border: 1px solid var(--oe-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 34px rgba(16, 24, 36, 0.2), 0 3px 10px rgba(16, 24, 36, 0.1);
+  padding: 6px;
+  color: var(--oe-text-primary);
+  font-size: 12.5px;
+}
+.wr-pop input { font: inherit; border: 1px solid var(--oe-border); border-radius: 7px; padding: 6px 9px; background: var(--oe-bg); color: var(--oe-text-primary); margin-bottom: 4px; }
+.wr-pop input:focus { outline: none; border-color: var(--oe-blue); }
+.wr-pop .list { overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.wr-pop .opt { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; color: inherit; width: 100%; }
+.wr-pop .opt:hover, .wr-pop .opt[aria-selected='true'] { background: color-mix(in srgb, var(--oe-blue) 12%, transparent); }
+.wr-pop .opt .sub { margin-left: auto; font-size: 11px; color: var(--oe-text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+.wr-pop .opt .tick { width: 14px; text-align: center; color: var(--oe-blue); font-weight: 700; }
+.wr-pop .none { padding: 10px; text-align: center; color: var(--oe-text-tertiary); }
+.wr-pop .foot { display: flex; justify-content: flex-end; gap: 6px; padding-top: 6px; border-top: 1px solid var(--oe-border-light); margin-top: 4px; }
+
+/* ── Empty / missing states ─────────────────────────────────────── */
+
+.wr .wr-empty { border: 1px dashed var(--wr-line-2); border-radius: 10px; padding: 26px 18px; text-align: center; color: var(--wr-muted); font-size: 13px; line-height: 1.55; }
+.wr .wr-empty b { display: block; color: var(--wr-ink); font-size: 14px; margin-bottom: 4px; }
+
+.wr .wr-hint { font-size: 11.5px; color: var(--wr-muted); }
+.wr .wr-mono { font-family: var(--oe-font-mono, ui-monospace, monospace); }
+.wr .wr-btn-quiet {
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid var(--wr-line-2);
+  background: var(--wr-panel);
+  color: var(--wr-ink-2);
+  border-radius: 7px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.wr .wr-btn-quiet:hover { border-color: var(--wr-accent); color: var(--wr-ink); }
+.wr .wr-btn-quiet:disabled { opacity: 0.5; cursor: not-allowed; }
+.wr .wr-btn-quiet.on { background: var(--wr-accent); color: #fff; border-color: var(--wr-accent); }
+/* Quiet buttons are the module's whole vocabulary, so the focus ring is
+   defined once here rather than left to the browser's default outline,
+   which vanished against the accent-filled `.on` variant. */
+.wr .wr-btn-quiet { display: inline-flex; align-items: center; gap: 5px; }
+.wr .wr-btn-quiet:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 1px; }
+.wr .wr-tab:focus-visible, .wr .wr-seg button:focus-visible, .wr .wr-deptcard:focus-visible, .wr .wr-step:focus-visible {
+  outline: 2px solid var(--wr-accent);
+  outline-offset: -2px;
+}
+
+/* ── Manage departments ─────────────────────────────────────────── */
+
+.wr .wr-manage { display: grid; grid-template-columns: minmax(190px, 230px) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 900px) {
+  .wr .wr-manage { grid-template-columns: minmax(0, 1fr); }
+  .wr .wr-manage-list { flex-direction: row; flex-wrap: wrap; }
+}
+.wr .wr-manage-list { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 8px; }
+.wr .wr-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--wr-ink-2);
+  cursor: pointer;
+  min-width: 0;
+}
+.wr .wr-manage-item:hover { background: var(--wr-panel-2); color: var(--wr-ink); }
+.wr .wr-manage-item:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: -2px; }
+.wr .wr-manage-item[aria-current='true'] { background: var(--wr-panel-2); border-color: var(--wr-line-2); color: var(--wr-ink); font-weight: 600; }
+.wr .wr-manage-item .sw { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.wr .wr-manage-item .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.wr .wr-manage-item .px { margin-left: auto; font-size: 10.5px; color: var(--wr-muted); flex: 0 0 auto; }
+
+.wr .wr-manage-body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.wr .wr-panel { border: 1px solid var(--wr-line); border-radius: 10px; background: var(--wr-panel); padding: 14px 16px; min-width: 0; }
+.wr .wr-panel-h {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wr-ink-2);
+}
+.wr .wr-panel-h .wr-hint { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.wr .wr-panel-foot { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--wr-line); flex-wrap: wrap; }
+
+.wr .wr-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.wr .wr-swatch { width: 24px; height: 24px; border-radius: 7px; border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14); cursor: pointer; padding: 0; }
+.wr .wr-swatch[aria-checked='true'] { border-color: var(--wr-ink); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
+.wr .wr-swatch:focus-visible { outline: 2px solid var(--wr-accent); outline-offset: 2px; }
+
+.wr .wr-types-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.wr .wr-type { border: 1px solid var(--wr-line); border-radius: 9px; padding: 7px 9px; background: var(--wr-panel-2); min-width: 0; }
+.wr .wr-type.off { opacity: 0.62; }
+.wr .wr-type-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.wr .wr-type-head .ord { display: inline-flex; flex-direction: column; gap: 1px; flex: 0 0 auto; }
+.wr .wr-type-head .ord .wr-btn-quiet { padding: 0 3px; line-height: 1; }
+.wr .wr-type-head .wr-inl { min-width: 140px; flex: 1 1 160px; font-weight: 600; }
+.wr .wr-type .wr-banner { margin-top: 8px; }
+
+.wr .wr-fields { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--wr-line-2); }
+.wr .wr-fields-grid {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(110px, 1.3fr) minmax(84px, 0.7fr) minmax(100px, 1fr) auto auto;
+  gap: 6px 8px;
+  align-items: center;
+}
+@media (max-width: 780px) {
+  /* Below this the six columns stopped being a table and started being a
+     squeeze; one field per row keeps every label readable. */
+  .wr .wr-fields-grid { grid-template-columns: minmax(0, 1fr); }
+  .wr .wr-fields-grid .h:not(:first-child) { display: none; }
+  .wr .wr-fields-grid .h:first-child { display: none; }
+}
+.wr .wr-fields-grid .h { font-size: 9.5px; font-weight: 700; color: var(--wr-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.wr .wr-fields-grid .wr-in { font-size: 12px; padding: 4px 7px; }
+.wr .wr-fields .err { font-size: 11px; color: var(--wr-crit); }
+
+.wr .wr-addtype { display: flex; align-items: flex-end; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--wr-line); flex-wrap: wrap; }
+.wr .wr-addtype .wr-field { flex: 1 1 240px; min-width: 0; }
+
+/* ── The "late" pill ─────────────────────────────────────────────────
+   Past the DEPARTMENT's own target date, which is a different promise
+   from the requester's due date (that one is the `.late` class on the
+   due cell). Solid rather than tinted so it reads as a flag on a card
+   already carrying three tinted pills. */
+.wr .wr-late {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 0 7px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 17px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: var(--wr-crit);
+  border: 1px solid var(--wr-crit);
+}
+
+/* ── Checklist ───────────────────────────────────────────────────── */
+.wr .wr-check { display: flex; flex-direction: column; gap: 2px; }
+.wr .wr-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.wr .wr-check-row:hover { background: var(--wr-panel-2); }
+.wr .wr-check-row input { margin-top: 2px; accent-color: var(--wr-accent); flex: 0 0 auto; }
+.wr .wr-check-row input:disabled { cursor: not-allowed; }
+.wr .wr-check-row .lbl { min-width: 0; overflow-wrap: anywhere; color: var(--wr-ink); }
+/* ONE signal for done. A ticked row used to be struck through AND greyed
+   AND carry a ticked box - three ways of saying the same thing, which
+   made a finished list look damaged. The box says it; the text just goes
+   quiet. */
+.wr .wr-check-row.done .lbl { color: var(--wr-muted); }
+/* "required" was a bordered, bold, uppercase red badge repeated down
+   five of eight rows, so the loudest thing in the section was the word
+   that is true of most of it. It is now a quiet marker: still red enough
+   to find, no longer a klaxon. */
+.wr .wr-check-row .req {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: color-mix(in srgb, var(--wr-crit) 80%, var(--wr-muted));
+  flex: 0 0 auto;
+}
+/* The same star the printed sheet marks required lines with, so paper and screen say it the same way. */
+.wr .wr-check-row .req::before { content: '*'; margin-right: 2px; font-weight: 700; }
+.wr .wr-check-row .by { margin-left: auto; font-size: 10.5px; color: var(--wr-muted); white-space: nowrap; flex: 0 0 auto; }
+
+/* ── Editing the checklist (manager, or the department's lead) ───── */
+.wr .wr-check-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.wr .wr-check.editing { gap: 4px; }
+.wr .wr-check-row.edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--wr-line-2);
+  background: var(--wr-panel);
+  cursor: grab;
+}
+.wr .wr-check-row.edit.dragging { opacity: 0.45; }
+.wr .wr-check-row.edit .grip { color: var(--wr-muted); display: inline-flex; flex: 0 0 auto; cursor: grab; }
+.wr .wr-check-row.edit .wr-inl { flex: 1 1 160px; min-width: 120px; border-color: var(--wr-line-2); }
+.wr .wr-check-row.edit .src {
+  font-size: 10px;
+  color: var(--wr-muted);
+  border: 1px dashed var(--wr-line-2);
+  border-radius: 5px;
+  padding: 0 5px;
+  flex: 0 0 auto;
+}
+.wr .wr-check-row .rowerr { flex: 1 0 100%; font-size: 11px; color: var(--wr-crit); }
+.wr .wr-btn-quiet.danger { color: var(--wr-crit); }
+.wr .wr-btn-quiet.danger:hover { border-color: var(--wr-crit); color: var(--wr-crit); }
+.wr .wr-check-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px dashed var(--wr-line-2);
+  border-radius: 7px;
+  color: var(--wr-muted);
+}
+.wr .wr-check-add .wr-inl { flex: 1 1 180px; min-width: 140px; }
+
+.wr .wr-check-prog { display: inline-flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
+.wr .wr-check-prog .wr-bar { width: 68px; }
+
+/* ── Bulk actions on the List ────────────────────────────────────── */
+.wr .wr-selcol { width: 30px; text-align: center; }
+.wr .wr-selcol input { accent-color: var(--wr-accent); cursor: pointer; }
+.wr table.wr-table tr.row.picked td { background: color-mix(in srgb, var(--wr-accent) 12%, transparent); }
+.wr .wr-bulkbar {
+  position: sticky;
+  bottom: 8px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--wr-line-2);
+  border-radius: 10px;
+  background: var(--wr-panel);
+  box-shadow: 0 6px 18px rgba(20, 32, 48, 0.14);
+}
+.dark .wr .wr-bulkbar { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.wr .wr-bulkbar .n { font-size: 12.5px; font-weight: 700; color: var(--wr-ink); white-space: nowrap; }
+.wr .wr-bulkbar .sp { margin-left: auto; }
+.wr .wr-bulkres { margin-top: 8px; }
+.wr .wr-bulkres ul { margin: 4px 0 0; padding-left: 16px; }
+
+/* ── Programme / estimate feeds ──────────────────────────────────── */
+.wr .wr-feeds { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* ══ The printable request sheet ═════════════════════════════════════
+   The sheet lives in the live tree (portalled to <body>) and is hidden
+   on screen; printing hides everything else instead. It is deliberately
+   NOT scoped to `.wr` - the portal is outside every `.wr` - and it
+   never reads a dark-mode token: a near-black panel prints as a solid
+   black rectangle with white text nobody can read. */
+.wr-print-root { display: none; }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
+  /* Everything the app draws, gone - including the drawer, the toasts,
+     any portalled menu, and the page behind them. `!important` beats the
+     inline `display` React writes on the drawer and the modals. */
+  body > *:not(.wr-print-root) { display: none !important; }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .wr-print-root {
+    display: block !important;
+    color-scheme: light;
+    color: #000;
+    background: #fff;
+    font-family: var(--oe-font-sans, ui-sans-serif, system-ui, sans-serif);
+  }
+  /* The app carries a GLOBAL print stylesheet that hides `aside, nav,
+     header, button:not(.print-visible)` outright - written for the
+     reporting tables, and measured live: it took the whole header block
+     (reference, title, job) off this sheet. The sheet uses plain divs so
+     it does not depend on this, but a future `<header>` inside it must
+     not silently vanish either. Higher specificity, so it wins. */
+  .wr-print-root header,
+  .wr-print-root nav,
+  .wr-print-root aside,
+  .wr-print-root footer,
+  .wr-print-root section,
+  .wr-print-root article { display: block !important; }
+  /* Same stylesheet forces `a { color: black }` and strips backgrounds -
+     both of which this sheet wants anyway - but it also sets
+     `@page { size: a4 landscape }`. Ours is declared later and wins;
+     stated again here so the intent survives a reordered import. */
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
+}
+
+/* The sheet's own layout, outside the media query so it can be inspected
+   (and tested) on screen as well as printed. */
+.wr-print-root .wrp {
+  color: #000;
+  background: #fff;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  max-width: 186mm;
+}
+.wr-print-root .wrp-head {
+  display: flex;
+  gap: 10mm;
+  align-items: flex-start;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 3mm;
+  margin-bottom: 4mm;
+}
+.wr-print-root .wrp-head-main { flex: 1 1 auto; min-width: 0; }
+.wr-print-root .wrp-head-side { flex: 0 0 76mm; }
+.wr-print-root .wrp-head .ref {
+  font-family: var(--oe-font-mono, ui-monospace, monospace);
+  font-size: 15pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.wr-print-root .wrp-head h1 { font-size: 13pt; font-weight: 700; margin: 1mm 0 1.5mm; line-height: 1.25; }
+.wr-print-root .wrp-head .sub { font-size: 9.5pt; }
+.wr-print-root .wrp-row { display: flex; gap: 3mm; align-items: baseline; padding: 0.6mm 0; break-inside: avoid; }
+.wr-print-root .wrp-row .k {
+  flex: 0 0 34mm;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #444;
+}
+.wr-print-root .wrp-row .v { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.wr-print-root .wrp-block { margin: 0 0 4mm; break-inside: avoid; }
+.wr-print-root .wrp-block.wide { break-inside: auto; }
+.wr-print-root .wrp-block h3 {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 0.5pt solid #999;
+  padding-bottom: 1mm;
+  margin: 0 0 1.5mm;
+  break-after: avoid;
+}
+/* Two columns of key/value, which is what a request sheet has always
+   been on paper; one column below the fold of a narrow print area. */
+.wr-print-root .wrp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }
+.wr-print-root .wrp-prose { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.wr-print-root .wrp-note { margin: 1.5mm 0 0; font-size: 8pt; color: #444; }
+.wr-print-root .wrp-list { margin: 0; padding-left: 5mm; }
+.wr-print-root .wrp-list li { padding: 0.4mm 0; overflow-wrap: anywhere; }
+.wr-print-root .wrp-check { list-style: none; margin: 0; padding: 0; }
+.wr-print-root .wrp-check li {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  padding: 1mm 0;
+  border-bottom: 0.25pt dotted #bbb;
+  break-inside: avoid;
+}
+.wr-print-root .wrp-check .box {
+  flex: 0 0 auto;
+  width: 4mm;
+  height: 4mm;
+  border: 0.8pt solid #000;
+  text-align: center;
+  line-height: 3.6mm;
+  font-weight: 700;
+}
+.wr-print-root .wrp-check .lbl { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.wr-print-root .wrp-check .lbl .req { color: #000; }
+.wr-print-root .wrp-check .by { flex: 0 0 auto; font-size: 8pt; color: #444; }
+.wr-print-root .wrp-sign { margin-top: 6mm; padding-top: 3mm; border-top: 0.5pt solid #999; break-inside: avoid; }
+.wr-print-root .wrp-signs { display: flex; gap: 8mm; align-items: flex-end; }
+.wr-print-root .wrp-signs .s { flex: 1 1 0; }
+.wr-print-root .wrp-signs .s.narrow { flex: 0 0 34mm; }
+.wr-print-root .wrp-signs .line { display: block; border-bottom: 0.8pt solid #000; height: 9mm; }
+.wr-print-root .wrp-signs .cap {
+  display: block;
+  margin-top: 1mm;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #444;
+}
