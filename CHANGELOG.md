@@ -5,30 +5,153 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [16.7.1] - 2026-09-03
+## [16.8.0] - 2026-09-04
+
+This release is about the first ten minutes with the product: downloading it,
+installing it, opening it a second time, and moving to a new version. Almost
+everything here was found by running the thing we ship rather than by reading
+the code that builds it. It also carries everything that was prepared as 16.7.1
+and never published.
+
+The desktop application carried a file that documented itself as the frozen
+entry point and was not the frozen entry point. Every guard in it, including the
+one that stops a frozen build from misreading the command lines Python's own
+multiprocessing sends its children, has been dead in every artifact we ever
+released, because the build freezes a different file. On macOS the second launch
+died: the resource tracker re-executed the application with an instruction to
+run, the argument parser saw a command it did not recognise, and the process
+aborted while the launcher sat on "Starting the application server". The guard
+now lives where the build actually enters, it understands the interpreter flags
+a frozen build can carry before that instruction, and a pipeline step asserts it
+with no network so the check cannot be settled by luck.
+
+Two more defects came out of the same root. Every installed copy signed its
+tokens with the secret that is printed in the public source, because the routine
+that exists to replace that literal stood down for anything calling itself a
+development environment, and the desktop launcher calls itself exactly that.
+Existing installs will be signed out once, on the launch that provisions a real
+secret, and the sessions being invalidated are the ones anybody could have
+minted. And the model that powers semantic search was built three times at once
+on a restart: the worker pool warmed one job per worker in the same instant
+against a lazy singleton with nothing guarding it, on the assumption that the
+model had already been loaded by a step that only runs when an environment
+variable nobody sets is set.
+
+Removing that did not stop the macOS crash, and being wrong about it in public
+is worth more than being quietly right later. The second launch went on dying,
+which said plainly that building the model three times was a real defect but not
+this one. So the next round measured instead of guessing. The encoder had been
+constructed without naming a device, and a library left to choose picks Metal on
+any Apple Silicon machine; the pool then ran several encode calls at once
+against that one model object, inside a frozen bundle, which is a combination we
+neither test nor need. A frozen build and the desktop sidecar now name the CPU,
+a server install is still free to use its own accelerator, and anyone who wants
+the accelerator on their own desktop build can ask for it. The pipeline now
+starts the binary it ships and prints the device it chose, on a cold start and
+on a restart over existing data, because not printing it is why this took two
+rounds instead of one.
+
+A start that failed before any of our code ran was reported as our server
+failing. The launcher latched the first plausible reason it could find, so a
+missing runtime, a port already taken and a genuine crash all reached the user
+as the same sentence about the application server.
+
+The Windows installer asked whether the word python resolved to something, which
+on a stock Windows is a stub that opens a store page and exits zero. It now asks
+whether there is a Python it can actually use. The Windows script a stranger runs
+first had no test coverage of any kind before this release and now has twenty two
+cases. The shell script still has none, which is better said here than found out
+later.
+
+That same installer then decided whether the product had come up by waiting for
+the word healthy and calling everything else a failure, and this release would
+have turned that into a lie. An enabled module that does not load now reports the
+installation as degraded, so a running, usable install would have announced itself
+as one that did not install, in the same release that made the state reachable. It
+now tells the three answers apart, and inside degraded it separates a module that
+did not load, where every page still works, from a database it cannot reach, where
+none do. The step that initialises the database was reading the exit code of a
+command that may never have run, because calling a missing executable raises rather
+than running and leaves the previous command's success standing, so a database that
+was never created was reported ready. And the shell installer never checked
+anything at all: it announced the application was running the moment the containers
+were created, which is well before anything serves. It waits now too, which is the
+harder of the two to have noticed, because a script that never reports a problem
+never looks wrong.
+
+A second person signing in on a shared Windows machine opened the first person's
+workspace. An installation whose migration history had forked refused to accept
+its own stamp and stayed refusing, on every upgrade, for good. The serve command
+built a database before checking whether it could run at all, so a machine that
+was never going to work spent a minute proving it. A module dropped into the
+runtime root could take the name of a module we ship and be loaded instead of
+it. Applying a regional pack could report success while recording nothing. And
+the health endpoint's count of loaded modules was counting the modules we had
+merely found, so a module that failed to load was reported as running.
+
+That last one is worth a sentence to anybody who watches that number. It counted
+every manifest that parsed, and it now counts the modules that actually loaded,
+with what was found and what is enabled reported separately beside it. So the
+figure can legitimately fall across this upgrade, and a fall is the old number
+having been wrong rather than a module having broken. A module that is enabled
+and did not load now reports the installation as degraded, which is a state it
+could not previously reach.
+
+The plain text half of every outgoing message kept the words on a link and threw
+the link away. Someone reading the password reset in a plain text client was
+told to press a button that is not there, with no address anywhere in the
+message and no way to reset a password. Every template we send puts its link in
+the same single call to action button, so there was no message that kept one,
+and the password reset is the one that cannot be sent without it.
+
+An activity accepted a planned cost and discarded it. The six fields that carry
+cost and progress rigour exist on the model and have been read and written by
+the schedule import and export all along, but none of them appeared on the
+create, update or response shapes of the API, which ignores what it does not
+declare. A client that posted a planned cost was answered with a success and an
+activity with no cost on it, and the earned value rollup then reported a budget
+at completion of zero with nothing anywhere reporting an error.
 
 A schedule import fix from the last release turned out to decline the very file
-it was written for. The reader will not name a code page until enough high
-bytes are on the table to mean anything, and that floor was set from the
-smallest file in the test vocabulary rather than from the smallest file a
-person actually has, so a two row export carrying one byte less than the floor
-was declined and went back to arriving as mojibake. Separately, a Hebrew
-schedule could be read as Greek: the reader tells the four non Latin code pages
-apart by counting the most frequent letters of each language, and two of the
-six Hebrew letters sit on the bytes Greek uses for iota and epsilon while four
-more land on alpha, omicron, nu and tau, so the Greek profile scored on Hebrew
-text with all six of its own letters. Hebrew was alone in this, and it stayed
-hidden because the thresholds had been calibrated on a population that cannot
-show it. And the desktop pipeline now starts the server it ships and waits for
-it to answer, twice, on a cold start and on a restart over an existing data
-directory. Every step before this built the installer, verified the binary was
-inside it and signed it, and nothing anywhere had ever run it. A bill line
-priced from a production norm now says which norm predicted it. The identity
-was recorded on the assembly and never copied onto the position, so an estimate
-built from norms could not be compared against the norms behind it. It is
-copied rather than resolved through the assembly on purpose, because that row
+it was written for. The reader will not name a code page until enough high bytes
+are on the table to mean anything, and that floor was set from the smallest file
+in the test vocabulary rather than from the smallest file a person actually has,
+so a two row export carrying one byte less than the floor was declined and went
+back to arriving as mojibake. Separately, a Hebrew schedule could be read as
+Greek. The reader tells the four non Latin code pages apart by counting the most
+frequent letters of each language, and Hebrew's six were the least informative of
+the four by a wide margin. Two of them, yod and vav, sit on the bytes Greek uses
+for iota and epsilon. The other four Greek letters, alpha, omicron, nu and tau,
+sit on four common Hebrew letters the Hebrew profile was not counting at all. So
+Greek scored on Hebrew text with every one of its six while Hebrew scored with
+two, and the lead Hebrew held fell under the margin. Hebrew now counts ten letters
+rather than six. Hebrew was alone in this, and it stayed hidden because the thresholds
+had been calibrated on a population that cannot show it.
+
+The desktop pipeline now starts the server it ships and waits for it to answer,
+on a cold start and on a restart over an existing data directory. Every step
+before this built the installer, verified the binary was inside it and signed
+it, and nothing anywhere had ever run it.
+
+A bill line priced from a production norm now says which norm predicted it. The
+identity was recorded on the assembly and never copied onto the position, so an
+estimate built from norms could not be compared against the norms behind it. It
+is copied rather than resolved through the assembly on purpose, because that row
 can be edited or deleted after a bill was priced from it, and provenance that
 changes retroactively is not provenance.
+
+On the language side, Uzbek had been offered to users for several days while
+being invisible to every test that iterates the locales, because the aggregator
+those tests read was never updated when the language was switched on. The file
+carried a comment instructing whoever switched it on to do exactly that, which
+is the argument for the test that now checks the two lists against each other in
+both directions instead. The ten Indian cases added in the last release now
+carry their own title and description in every offered language rather than
+falling back to English.
+
+In the estimate itself, exporting draft minutes downloaded the previous save
+while the screen showed the edits, and four links in the interface went nowhere,
+two of them on paths a person cannot avoid.
 
 ## [16.7.0] - 2026-09-03
 

@@ -2203,7 +2203,7 @@ dependencies = [
 
 [[package]]
 name = "openconstructionerp-desktop"
-version = "16.7.1"
+version = "16.8.0"
 dependencies = [
  "portpicker",
  "reqwest 0.12.28",
