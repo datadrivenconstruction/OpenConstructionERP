@@ -186,7 +186,25 @@ def test_system(api: API, suite: PlatformTestSuite) -> None:
     print("\n── 1. SYSTEM & INFRASTRUCTURE ──")
 
     r = api.get("/api/health")
-    check(suite, "GET /api/health", r, 200, must_have=["healthy"])
+    # Not must_have=["healthy"]. An enabled module that failed to load
+    # degrades the status, and that is a working platform with one feature
+    # missing, so requiring the literal word here would fail the whole run
+    # over something every other section below would still pass. The database
+    # is the half of degraded that means nothing works, and it is checked on
+    # its own line.
+    d = check(suite, "GET /api/health", r, 200, must_have=["status"])
+    if d:
+        status = d.get("status", "")
+        suite.add(
+            "Health status is healthy or degraded",
+            status in ("healthy", "degraded"),
+            detail=f"status={status}",
+        )
+        suite.add(
+            "Health reports a reachable database",
+            d.get("database") == "ok",
+            detail=f"database={d.get('database')}",
+        )
 
     r = api.get("/api/system/status")
     d = check(suite, "GET /api/system/status", r, 200, must_have=["api", "database"])

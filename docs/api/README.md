@@ -65,18 +65,44 @@ It returns a small JSON document you can poll from a load balancer or uptime mon
 ```json
 {
   "status": "healthy",
-  "version": "16.2.0",
+  "version": "16.8.0",
   "env": "development",
+  "instance_id": "0f3a1c8e",
+  "build": "DDC-a1b2c3d",
+  "signature": "...",
   "modules_discovered": 190,
   "modules_enabled": 190,
   "modules_loaded": 190,
+  "workspace_id": "...",
   "database": "ok",
   "alembic_head_matches": true,
   "uptime_seconds": 42
 }
 ```
 
-`status` is `healthy` when the process is up, the database answers, and the schema is at the latest migration. It drops to `degraded` if the database is unreachable or a migration is pending.
+`status` is `healthy` when the process is up and every module the operator
+enabled is loaded. Exactly two things drop it to `degraded`, and it is worth
+knowing which, because the two are not equally bad and the field does not say
+them apart. A database this process cannot reach leaves nothing usable. A
+module that is enabled and did not load leaves a working installation missing
+one feature, which is why it degrades at all: told healthy, somebody looking
+for that feature concludes their edition does not have it and stops. Read
+`database` alongside `status` to tell the two apart, and the boot log to find
+out which module is missing.
+
+A pending migration does NOT degrade the status, which is deliberate. The
+product never runs `alembic upgrade`; the schema moves through `create_all`
+and the boot heal, so the stamp falls behind on an ordinary correct upgrade as
+soon as a release adds a revision. Degrading on that lit the field permanently
+for every upgraded install, and an aggregate with a permanently active cause
+has stopped being a signal. `alembic_head_matches` is published as a fact
+instead: `true` at head, `false` behind it, `null` when this deployment cannot
+tell.
+
+If you are polling this from a load balancer or an uptime monitor, treat both
+`healthy` and `degraded` as up and alert on `database` separately. A check
+that requires the literal `healthy` will take a working installation out of
+rotation over a single missing module.
 
 ## Authentication
 
