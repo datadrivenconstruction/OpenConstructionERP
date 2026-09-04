@@ -209,7 +209,7 @@ install_docker() {
     health_delay=2
     health=""
     for _ in $(seq 1 "$health_attempts"); do
-        health=$(curl -fsS --max-time 2 "http://localhost:${OE_PORT}/api/health" 2>/dev/null | tr -d ' \n')
+        health=$(curl -fsS --max-time 2 "http://localhost:${OE_PORT}/api/health" 2>/dev/null | tr -d ' \n' || true)
         case "$health" in
             *'"status":"healthy"'*|*'"status":"degraded"'*) break ;;
             *) health="" ;;

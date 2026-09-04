@@ -36,10 +36,11 @@ on:
   push:
     branches: [main]
     paths:
-      # install.sh is deliberately absent. There is no harness for it yet, so
-      # listing it would start a run that proves nothing about the file that
-      # changed. Add it here in the same change that adds cases for it.
+      # install.sh was deliberately absent while it had no harness, because
+      # listing it would have started a run that proved nothing about the
+      # file that changed. It has one now, so it is listed here.
       - "scripts/install.ps1"
+      - "scripts/install.sh"
       - "scripts/tests/**"
       - ".github/workflows/installer-scripts.yml"
   # Push to main is the trigger that matters, because that is how this project
@@ -82,3 +83,43 @@ jobs:
       - name: Detection cases, PowerShell 7
         shell: pwsh
         run: .\scripts\tests\install-ps1-python-detection.tests.ps1
+
+      # The verdict the installer reaches from a health answer. Shipped one
+      # commit ahead of this line and run by nothing until now, which is the
+      # same gap the header describes: a test that exists and is never
+      # invoked reports exactly as much as no test at all.
+      - name: Health verdict cases, Windows PowerShell 5.1
+        shell: powershell
+        run: .\scripts\tests\install-ps1-health-verdict.tests.ps1
+
+      - name: Health verdict cases, PowerShell 7
+        shell: pwsh
+        run: .\scripts\tests\install-ps1-health-verdict.tests.ps1
+
+  # The shell installer, which is what a stranger on Linux or macOS runs.
+  # Its own job rather than a step on the Windows one, because the thing
+  # that broke was an interaction with set -euo pipefail, and that means
+  # nothing except under the shell the script actually runs in.
+  shell-installer:
+    name: Health poll (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both, because the documented way in is the same curl pipe on each
+        # and their bash and curl are not the same build.
+        os: [ubuntu-24.04, macos-15]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: The script still parses
+        run: bash -n scripts/install.sh
+
+      # Parsing is why the cases below are needed as well. The defect they
+      # guard against was syntactically perfect and ended the installer on
+      # the first unanswered request, which is every request before the
+      # service serves.
+      - name: Health poll cases
+        run: bash scripts/tests/install-sh-health-poll.sh
