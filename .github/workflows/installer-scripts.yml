@@ -1,0 +1,84 @@
+# The installer scripts, exercised.
+#
+# Why this exists. scripts/install.ps1 and scripts/install.sh are the first
+# things a stranger runs, before anything else in this product, and until this
+# lane nothing in the repository touched either of them. No workflow invoked
+# them by any name, and there were no PowerShell tests at all, so the two files
+# with the largest blast radius for a new user were the two least covered.
+#
+# The defect that prompted this had shipped. install.ps1 asked whether the name
+# `python` resolved to something, by running `python --version` and reading the
+# banner, rather than whether a Python 3.12 or newer was present. Those differ
+# in both directions: `python` can resolve to an unrelated virtual environment
+# that happens to be on PATH, and a perfectly good 3.12 can be present under
+# `py -3.12` alone, which is the ordinary state after the official Windows
+# installer, whose "Add python.exe to PATH" box is unchecked while the launcher
+# is always installed. A machine of the second kind was told no Python had been
+# found and made to download uv it did not need.
+#
+# What this proves, and what it does not. The job runs the detection harness,
+# which dot-sources the shipped script with its Main block removed. That proves
+# the branch the installer takes given a candidate list. It installs nothing, so
+# a green run here is not evidence that an installation works; a real end to end
+# install in CI is a larger thing and this is not it.
+#
+# It reports, it does not block. Measured on 2026-09-04: the main-protection
+# ruleset is active and carries deletion, non_fast_forward and
+# required_linear_history, and no required status checks at all. A red run here
+# stops no push, no tag and no release. What it buys is a failing check sitting
+# on the commit that broke the script, which is more than the nothing that was
+# there before, and it is the reason the header above says what the lane covers
+# rather than leaving a reader to assume it covers the install.
+
+name: Installer scripts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # install.sh is deliberately absent. There is no harness for it yet, so
+      # listing it would start a run that proves nothing about the file that
+      # changed. Add it here in the same change that adds cases for it.
+      - "scripts/install.ps1"
+      - "scripts/tests/**"
+      - ".github/workflows/installer-scripts.yml"
+  # Push to main is the trigger that matters, because that is how this project
+  # works: straight to main, no pull request. There is no pull_request trigger
+  # on purpose. We never take external pull requests, and a fork opening one
+  # would otherwise get our runner to execute a script out of the fork.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-scripts-${{ github.ref }}
+  # Not unconditional. Cancelling on main is how a lane goes quiet without ever
+  # going red: a cancelled run carries no conclusion, so nothing fails and the
+  # silence cannot be told apart from health. Branches still cancel, where a run
+  # several commits behind the tip is worth less than the minutes it costs.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  detection:
+    name: Python detection (windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Both shells, because they are different interpreters and the script has
+      # to survive whichever one a reader has. Windows PowerShell 5.1 is the
+      # first step because it is what a stranger actually has: the documented
+      # way in is `irm ... | iex` pasted into the terminal Windows ships, and
+      # install.ps1 carries code written for its .NET Framework host, such as
+      # RandomNumberGenerator.Create() in place of the Fill() that 5.1 does not
+      # have. pwsh is 7, which is what most CI examples assume.
+      - name: Detection cases, Windows PowerShell 5.1
+        shell: powershell
+        run: .\scripts\tests\install-ps1-python-detection.tests.ps1
+
+      - name: Detection cases, PowerShell 7
+        shell: pwsh
+        run: .\scripts\tests\install-ps1-python-detection.tests.ps1
