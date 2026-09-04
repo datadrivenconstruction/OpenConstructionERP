@@ -534,7 +534,8 @@ jobs:
 
       - name: Check the sidecar serves an answer on a cold start and a restart
         shell: bash
-        timeout-minutes: 25
+        # Three legs now rather than two, and the first one pays for initdb.
+        timeout-minutes: 35
         run: |
           set -uo pipefail
           bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
@@ -547,10 +548,23 @@ jobs:
           rm -rf "$scratch"
           mkdir -p "$scratch"
 
+          # Set by a caller that wants this leg to run with something turned
+          # off, and cleared by every caller that does not. Written as a
+          # variable rather than an argument because the point of the third
+          # leg is that it differs from the second in exactly one thing, and
+          # a reader has to be able to see that at the call site.
+          leg_env=""
+
           start_and_wait() {
             label="$1"
             log="serve-${label}.log"
-            "$bin" serve --host 127.0.0.1 --port "$port" --data-dir "$scratch" > "$log" 2>&1 &
+            if [ -n "$leg_env" ]; then
+              echo "(${label}) running with: $leg_env"
+              # shellcheck disable=SC2086
+              env $leg_env "$bin" serve --host 127.0.0.1 --port "$port" --data-dir "$scratch" > "$log" 2>&1 &
+            else
+              "$bin" serve --host 127.0.0.1 --port "$port" --data-dir "$scratch" > "$log" 2>&1 &
+            fi
             pid=$!
             # 300 s, which is well inside the launcher's own 240 s silence
             # window plus the time a first run spends on initdb. A sidecar that
@@ -594,6 +608,32 @@ jobs:
             if [ "$ok" -ne 1 ]; then
               echo "=== the sidecar's own output, which carries the cause ==="
               tail -n 200 "$log" || true
+              # A process that dies of SIGSEGV writes nothing to its own
+              # stdout about why, so the tail above cannot by construction
+              # carry the cause of a segfault. macOS does write it, to a
+              # separate .ips report naming the faulting thread and the
+              # library it died in. Print it. Two seconds because ReportCrash
+              # is asynchronous and the report is often not on disk yet when
+              # the shell notices the process is gone.
+              if [ "$RUNNER_OS" = "macOS" ]; then
+                sleep 5
+                echo "=== macOS crash reports, which name the faulting library ==="
+                found=0
+                for d in "$HOME/Library/Logs/DiagnosticReports" /Library/Logs/DiagnosticReports; do
+                  [ -d "$d" ] || continue
+                  for f in "$d"/openconstructionerp*; do
+                    [ -e "$f" ] || continue
+                    found=1
+                    echo "--- $f ---"
+                    head -c 12000 "$f" || true
+                    echo ""
+                  done
+                done
+                if [ "$found" -eq 0 ]; then
+                  echo "(no report matching openconstructionerp*; the directories hold:)"
+                  ls -la "$HOME/Library/Logs/DiagnosticReports" /Library/Logs/DiagnosticReports 2>/dev/null | head -n 40 || true
+                fi
+              fi
               echo "=== PostgreSQL's log, if the cluster is what failed ==="
               if [ -d "$scratch/pgdata/log" ]; then
                 for f in "$scratch/pgdata/log"/*; do
@@ -610,9 +650,50 @@ jobs:
           }
 
           start_and_wait "cold start" || exit 1
+
+          # What the machine looks like between the legs, because the two are
+          # less alike than the labels suggest. The comment below records that
+          # killing serve does not stop the embedded PostgreSQL it started, so
+          # the second leg is not a user relaunching the app, it is a second
+          # instance opening a data directory whose postmaster belongs to a
+          # process that no longer exists. If that, rather than anything in
+          # our code, is what the second leg dies of, it shows up here.
+          echo "=== between the legs ==="
+          ps ax -o pid,rss,command 2>/dev/null | grep -iE 'openconstructionerp|postgres' | grep -v grep | head -n 30 || echo "(no matching processes)"
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            vm_stat | head -n 6 || true
+          else
+            free -m 2>/dev/null | head -n 3 || true
+          fi
+
           # Deliberately not cleaned between the two: reusing the directory is
           # the whole point of the second start.
-          start_and_wait "restart over existing data" || exit 1
+          restart_ok=0
+          start_and_wait "restart over existing data" && restart_ok=1
+
+          # The bisect, and the reason the exit above was moved down here.
+          #
+          # This leg differs from the one before it in exactly one thing: the
+          # embedding worker pool is off. It runs whether or not that leg
+          # passed, because a leg that only runs when everything is already
+          # green answers a question nobody is asking. If this one serves
+          # while the one above dies, the failure is in the pool or in what it
+          # warms; if it dies too, the pool is innocent and the cause is
+          # somewhere neither of them has been looking. Either way the next
+          # round starts from a measurement instead of from a guess.
+          #
+          # Printed, never asserted: it must not be able to turn this step red
+          # on its own, or a knob nobody ships with becomes a release gate.
+          echo "=== bisect leg: the same restart with the embedding pool disabled ==="
+          leg_env="OE_VECTOR_POOL_WORKERS=0"
+          if start_and_wait "restart, pool disabled"; then
+            echo "BISECT: the restart serves with the pool disabled."
+          else
+            echo "BISECT: the restart fails with the pool disabled too."
+          fi
+          leg_env=""
+
+          [ "$restart_ok" -eq 1 ] || exit 1
 
           # The cleanup must never decide the verdict, and this is not defensive
           # tidiness, it is a measured failure. The first run of this step was
