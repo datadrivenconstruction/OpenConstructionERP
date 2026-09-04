@@ -196,7 +196,26 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
   });
 
   const exportMut = useMutation({
-    mutationFn: () => downloadMinutesPdf(meetingId),
+    mutationFn: async () => {
+      // Persist edits first, for the same reason issueMut does, and it is the
+      // same three lines. The PDF is rendered on the server from the saved
+      // row, and nothing here carried the typed text to it, so exporting a
+      // draft downloaded the last save while the screen showed the edits. The
+      // two disagreed and neither said so.
+      //
+      // Only while the draft is still editable. Once the minutes are issued
+      // every field is disabled and the issue itself persisted, so there is
+      // nothing left to send and a write would be a no-op against a row the
+      // user can no longer change.
+      if (minutes && !issued) {
+        const saved = await updateMinutes(meetingId, {
+          content: buildContent(minutes.content),
+          ...(nextDate ? { next_meeting_date: nextDate } : {}),
+        });
+        setMinutesData(saved);
+      }
+      return downloadMinutesPdf(meetingId);
+    },
     onError: (e: Error) =>
       addToast({
         type: 'error',
@@ -209,8 +228,15 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
     setAgenda((prev) => prev.map((item, i) => (i === idx ? { ...item, ...patch } : item)));
   };
 
+  // The export belongs in here now that it writes. It was left out while it
+  // was a bare download, which also meant a draft could be exported in the
+  // middle of a save and rendered from the row the save had not replaced yet.
   const busy =
-    genMut.isPending || saveMut.isPending || issueMut.isPending || distributeMut.isPending;
+    genMut.isPending ||
+    saveMut.isPending ||
+    issueMut.isPending ||
+    distributeMut.isPending ||
+    exportMut.isPending;
 
   const footer = (
     <div className="flex items-center justify-between gap-2 w-full flex-wrap">
@@ -220,7 +246,7 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
             variant="ghost"
             size="sm"
             onClick={() => exportMut.mutate()}
-            disabled={exportMut.isPending}
+            disabled={busy}
           >
             {exportMut.isPending ? (
               <Loader2 size={14} className="mr-1.5 animate-spin" />
