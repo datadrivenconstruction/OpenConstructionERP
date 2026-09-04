@@ -313,6 +313,30 @@ function Set-ImageTagPin {
     Set-Content -Path $Path -Value ($kept + "OE_IMAGE_TAG=$Tag") -Encoding ascii
 }
 
+function Get-HealthVerdict {
+    <#
+      .SYNOPSIS
+      Turn a health response, or the absence of one, into one of four verdicts.
+
+      Separated from the code that prints so that it can be exercised without a
+      Docker daemon, an install or a network. The branch this returns is the
+      whole of the decision; everything around it is wording.
+
+      Pass $null for "nothing ever answered". Anything that is neither healthy
+      nor degraded is treated the same way, because a status this script does
+      not recognise is not a status it should reassure anybody about.
+    #>
+    param($Health)
+
+    if ($null -eq $Health) { return "no-answer" }
+    if ($Health.status -eq "healthy") { return "healthy" }
+    if ($Health.status -ne "degraded") { return "no-answer" }
+    # Degraded covers two unlike things. A module that did not load leaves a
+    # usable product; a database the process cannot reach does not.
+    if ($Health.database -ne "ok") { return "database" }
+    return "degraded"
+}
+
 function Install-Docker {
     Write-Info "Installing via Docker..."
     New-Item -ItemType Directory -Force -Path $OE_INSTALL_DIR | Out-Null
@@ -364,25 +388,63 @@ function Install-Docker {
         & docker compose up -d
     } | Out-Null
 
-    # Wait for health check
-    Write-Info "Waiting for health check..."
-    $healthy = $false
-    for ($i = 0; $i -lt 30; $i++) {
+    # Wait for health check.
+    #
+    # Three outcomes rather than two, because the endpoint reports three and
+    # collapsing them loses the one a person can act on. It answers healthy,
+    # or degraded, or it never answers at all. Waiting only for the literal
+    # string healthy turns the middle case into the last one: a degraded
+    # install serves every page, and the loop below would nonetheless spin out
+    # its full budget and then report that the health check did not pass, which
+    # reads as "this did not install" for something that installed and works.
+    #
+    # That distinction stopped being theoretical in this release. A module that
+    # is enabled and fails to load now degrades the status, which is a state
+    # this endpoint could not previously reach, so the number of installs that
+    # answer degraded goes up precisely as this script starts calling them
+    # failures. The health endpoint's own comment says what such a person
+    # should do - restart or reinstall - and they can only do it if they are
+    # told which of the three happened.
+    #
+    # Degraded is reported against the database field rather than on its own,
+    # because the same word covers a missing module, where the product is
+    # usable, and a database the process cannot reach, where it is not.
+    $attempts = 30
+    $delaySeconds = 2
+    $health = $null
+    for ($i = 0; $i -lt $attempts; $i++) {
         try {
             $resp = Invoke-RestMethod -Uri "http://localhost:$OE_PORT/api/health" -TimeoutSec 2
-            if ($resp.status -eq "healthy") {
-                $healthy = $true
+            if ($resp.status -eq "healthy" -or $resp.status -eq "degraded") {
+                $health = $resp
                 break
             }
         } catch {}
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds $delaySeconds
     }
 
-    if ($healthy) {
-        Write-Ok "OpenConstructionERP is running at http://localhost:$OE_PORT"
-    } else {
-        Write-Warn "Service started but health check did not pass within 60s"
-        Write-Host "  Check logs: cd $OE_INSTALL_DIR; docker compose logs -f"
+    switch (Get-HealthVerdict $health) {
+        "healthy" {
+            Write-Ok "OpenConstructionERP is running at http://localhost:$OE_PORT"
+        }
+        "degraded" {
+            Write-Ok "OpenConstructionERP is running at http://localhost:$OE_PORT"
+            Write-Warn "Reporting degraded: $($health.modules_loaded) of $($health.modules_enabled) enabled modules loaded"
+            Write-Host "  The application is usable. A restart usually loads the rest."
+            Write-Host "  Which module is missing is in the log: cd $OE_INSTALL_DIR; docker compose logs -f"
+        }
+        "database" {
+            Write-Warn "OpenConstructionERP started but cannot reach its database"
+            Write-Host "  Check logs: cd $OE_INSTALL_DIR; docker compose logs -f"
+        }
+        default {
+            # The figure is derived rather than written down. It used to say 60s
+            # while the loop could take twice that, since each attempt can also
+            # spend its two second request timeout before sleeping.
+            $waited = $attempts * $delaySeconds
+            Write-Warn "Service started but health check did not answer within ${waited}s"
+            Write-Host "  Check logs: cd $OE_INSTALL_DIR; docker compose logs -f"
+        }
     }
     Write-Host ""
     Write-Host "Commands:"
@@ -473,11 +535,27 @@ function Install-Pip {
     } else {
         "$OE_INSTALL_DIR\venv\Scripts\openestimate.exe"
     }
-    & $cliExe init-db 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warn "init-db reported a non-zero exit code, continuing anyway..."
+    # The fallback branch above names a path without checking it, so this can
+    # be a file that is not there. That mattered more than it looks: calling a
+    # missing executable raises rather than running, $LASTEXITCODE is left
+    # holding whatever the previous native command set it to, and the previous
+    # one succeeded. So the -ne 0 test below used to pass on a database that
+    # was never initialised, and the script reported it ready.
+    #
+    # $LASTEXITCODE is only meaningful after something native actually ran, so
+    # the existence of the binary is established first and separately.
+    if (-not (Test-Path $cliExe)) {
+        Write-Warn "The command line tool is not where the install put it, so the database was not initialised"
+        Write-Host "  Expected: $cliExe"
+        Write-Host "  The first start will try again."
     } else {
-        Write-Ok "[4/5] Database ready"
+        $global:LASTEXITCODE = 0
+        & $cliExe init-db 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warn "init-db reported a non-zero exit code, continuing anyway..."
+        } else {
+            Write-Ok "[4/5] Database ready"
+        }
     }
 
     # 5. Put the command on PATH + create launchers

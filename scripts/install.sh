@@ -189,7 +189,56 @@ install_docker() {
     info "Starting OpenConstructionERP..."
     docker compose up -d
 
-    ok "OpenConstructionERP is running at http://localhost:${OE_PORT}"
+    # Wait for the application to answer, rather than announcing that it runs
+    # because compose accepted the command. `docker compose up -d` returns once
+    # the containers are created, which is well before anything serves, so the
+    # success line below was printed unverified: an install that never came up
+    # still said it was running, and the person had no reason to look further.
+    # The Windows script has polled this endpoint all along; this one did not
+    # poll it at all, which is the more embarrassing of the two failure modes
+    # because it is the one that never reports a problem.
+    #
+    # Three outcomes, because the endpoint reports three. Healthy. Degraded,
+    # which as of this release includes an enabled module that failed to load,
+    # and which is a usable installation. Or no answer, which is the only one
+    # of the three that means the install did not work.
+    #
+    # Read with grep rather than jq, which a stranger's machine need not have.
+    info "Waiting for health check..."
+    health_attempts=30
+    health_delay=2
+    health=""
+    for _ in $(seq 1 "$health_attempts"); do
+        health=$(curl -fsS --max-time 2 "http://localhost:${OE_PORT}/api/health" 2>/dev/null | tr -d ' \n')
+        case "$health" in
+            *'"status":"healthy"'*|*'"status":"degraded"'*) break ;;
+            *) health="" ;;
+        esac
+        sleep "$health_delay"
+    done
+
+    case "$health" in
+        *'"status":"healthy"'*)
+            ok "OpenConstructionERP is running at http://localhost:${OE_PORT}"
+            ;;
+        *'"status":"degraded"'*)
+            # The same word covers a missing module, where the product works,
+            # and a database the process cannot reach, where it does not.
+            if printf '%s' "$health" | grep -q '"database":"ok"'; then
+                ok "OpenConstructionERP is running at http://localhost:${OE_PORT}"
+                warn "Reporting degraded: not every enabled module loaded"
+                echo "  The application is usable. A restart usually loads the rest."
+                echo "  Which module is missing is in the log: cd ${OE_INSTALL_DIR} && docker compose logs -f"
+            else
+                warn "OpenConstructionERP started but cannot reach its database"
+                echo "  Check logs: cd ${OE_INSTALL_DIR} && docker compose logs -f"
+            fi
+            ;;
+        *)
+            warn "Service started but health check did not answer within $((health_attempts * health_delay))s"
+            echo "  Check logs: cd ${OE_INSTALL_DIR} && docker compose logs -f"
+            ;;
+    esac
     echo ""
     echo "Commands:"
     echo "  cd $OE_INSTALL_DIR && docker compose logs -f   # View logs"
