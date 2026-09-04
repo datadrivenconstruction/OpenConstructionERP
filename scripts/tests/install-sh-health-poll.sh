@@ -62,9 +62,14 @@ case "$block" in
     *) echo "the anchors no longer bracket the poll, refusing to guess"; exit 1 ;;
 esac
 
-# Shrink the budget so the closed-port case does not spend a real minute. The
-# shipped numbers are asserted separately below, against the file itself.
-subject=$(printf '%s\n' "$block" | sed 's/^    health_attempts=30$/    health_attempts=2/; s/^    health_delay=2$/    health_delay=0/')
+# Shrink the budget so the closed-port case does not spend a real minute. All
+# three shipped numbers are asserted separately below, against the file.
+# The three are shrunk to different values on purpose: with attempts 2, delay
+# 0 and timeout 1 the reported wait is 2s only if the message is computed
+# from attempts times delay plus timeout. Attempts times delay alone gives 0,
+# so the assertion below tells the two formulas apart, which it could not do
+# if the shrunk numbers happened to make them agree.
+subject=$(printf '%s\n' "$block" | sed 's/^    health_attempts=30$/    health_attempts=2/; s/^    health_delay=2$/    health_delay=0/; s/^    health_timeout=2$/    health_timeout=1/')
 
 tmp=$(mktemp -d)
 stub_pid=""
@@ -138,7 +143,14 @@ echo "nothing is listening"
 out=$(run_against 59999)
 assert_contains "the verdict is still reached" "$out" "did not answer"
 assert_contains "the loop does not abort the installer" "$out" "EXIT=0"
-assert_contains "the wait is derived rather than written down" "$out" "within 0s"
+# 2 attempts * (0 delay + 1 timeout). The old arithmetic left the timeout out
+# and would print 0s here, which is how a person waiting two real minutes was
+# told they had waited sixty seconds.
+assert_contains "the reported wait counts the request timeout" "$out" "within 2s"
+case "$out" in
+    *"within 0s"*) failed=$((failed + 1)); echo "  FAIL the wait ignores the request timeout" ;;
+    *) passed=$((passed + 1)); echo "  ok   the wait is not attempts times delay alone" ;;
+esac
 
 while IFS='|' read -r name body want; do
     [ -n "$name" ] || continue
@@ -157,6 +169,20 @@ a healthy install|{"status":"healthy","database":"ok"}|OpenConstructionERP is ru
 a degraded install whose database is reachable|{"status":"degraded","database":"ok"}|not every enabled module loaded
 a degraded install that cannot reach its database|{"status":"degraded","database":"error"}|cannot reach its database
 CASES
+
+echo ""
+echo "an answer that stopped arriving"
+# curl writes what it received before the connection died and -f does not
+# cover a body cut short, so the status can be present in a reply that never
+# finished. The Windows script rejects those bytes; this one used to accept
+# them and call the install healthy.
+if start_stub '{"status":"healthy","database":"ok","ver'; then
+    out=$(run_against "$(cat "$tmp/port")")
+    assert_contains "a truncated body is not reported as running" "$out" "did not answer"
+else
+    failed=$((failed + 1)); echo "  FAIL the stub never reported a port"
+fi
+stop_stub
 
 echo ""
 echo "an answer this script does not recognise"
@@ -178,8 +204,10 @@ assert_true "the verdict reads the database, not only the status" \
     "$(printf '%s\n' "$block" | grep -q '"database":"ok"' && echo yes || echo no)"
 assert_true "the wait loop stops on degraded, not only on healthy" \
     "$(printf '%s\n' "$block" | grep -q 'status":"degraded"' && echo yes || echo no)"
-assert_true "the file still polls thirty times at two seconds" \
-    "$(printf '%s\n' "$block" | grep -q 'health_attempts=30' && printf '%s\n' "$block" | grep -q 'health_delay=2' && echo yes || echo no)"
+assert_true "the file still polls thirty times at two seconds, timing out at two" \
+    "$(printf '%s\n' "$block" | grep -q 'health_attempts=30' && printf '%s\n' "$block" | grep -q 'health_delay=2' && printf '%s\n' "$block" | grep -q 'health_timeout=2' && echo yes || echo no)"
+assert_true "the request timeout is the named one, not a second literal" \
+    "$(printf '%s\n' "$block" | grep -q 'max-time "$health_timeout"' && echo yes || echo no)"
 assert_true "no message hard-codes the wait in seconds" \
     "$(grep -q 'within 60s' "$src" && echo no || echo yes)"
 

@@ -133,6 +133,25 @@ write_compose_secrets() {
     chmod 600 .env 2>/dev/null || true
 }
 
+# The other half of pin_image_tag below, and its absence was the defect. A
+# version was recorded when one was asked for and never removed when one was
+# not, so the .env outlived the run that wrote it: somebody who installed a
+# specific version once and later re-ran the one-liner to upgrade kept pulling
+# the version they pinned, because ${OE_IMAGE_TAG:-latest} found the old
+# value rather than falling back. The pull succeeded, the containers came up,
+# and the script said the installation was complete, which is the worst shape
+# a defect can take: everything reports success and the product is the wrong
+# version. Asking for latest has to mean latest, which means saying so must
+# undo a pin as well as decline to write one.
+unpin_image_tag() {
+    [ -f .env ] || return 0
+    grep -q '^OE_IMAGE_TAG=' .env || return 0
+    grep -v '^OE_IMAGE_TAG=' .env > .env.tmp || true
+    mv .env.tmp .env
+    chmod 600 .env 2>/dev/null || true
+    info "Removed a version pin left by an earlier install, this run takes the latest"
+}
+
 # Record a pinned version in the .env as well, where the two secrets are.
 # Exporting it would only reach this process, and the commands printed at the
 # end of the install are typed later in a fresh shell, where an exported
@@ -177,7 +196,11 @@ install_docker() {
     curl -fsSL "$OE_REPO/raw/$ref/docker-compose.quickstart.image.yml" -o docker-compose.override.yml
 
     write_compose_secrets
-    [ "$OE_VERSION" = "latest" ] || pin_image_tag "$OE_VERSION"
+    if [ "$OE_VERSION" = "latest" ]; then
+        unpin_image_tag
+    else
+        pin_image_tag "$OE_VERSION"
+    fi
 
     # Pulling is spelled out rather than left to `up`, the same way the
     # quickstart-image make target does it, so which artefact runs is stated
@@ -207,11 +230,23 @@ install_docker() {
     info "Waiting for health check..."
     health_attempts=30
     health_delay=2
+    # Named because the figure printed at the end is computed from it. An
+    # attempt that gets no answer spends the timeout before it sleeps, so a
+    # budget counted as attempts times delay understates the real wait by
+    # three times against a socket that accepts and never replies.
+    health_timeout=2
     health=""
     for _ in $(seq 1 "$health_attempts"); do
-        health=$(curl -fsS --max-time 2 "http://localhost:${OE_PORT}/api/health" 2>/dev/null | tr -d ' \n' || true)
+        health=$(curl -fsS --max-time "$health_timeout" "http://localhost:${OE_PORT}/api/health" 2>/dev/null | tr -d ' \n' || true)
+        # The closing brace is part of the test, not decoration. curl writes
+        # what it received before a connection died mid-body and -f does not
+        # cover that, so a truncated answer can carry the status and stop.
+        # Matching on the word alone reported a healthy install from a reply
+        # that never finished arriving, which the Windows script rejects,
+        # and two installers disagreeing about the same bytes is itself the
+        # finding. Requiring the brace makes them agree.
         case "$health" in
-            *'"status":"healthy"'*|*'"status":"degraded"'*) break ;;
+            *'"status":"healthy"'*'}'|*'"status":"degraded"'*'}') break ;;
             *) health="" ;;
         esac
         sleep "$health_delay"
@@ -235,7 +270,7 @@ install_docker() {
             fi
             ;;
         *)
-            warn "Service started but health check did not answer within $((health_attempts * health_delay))s"
+            warn "Service started but health check did not answer within $((health_attempts * (health_delay + health_timeout)))s"
             echo "  Check logs: cd ${OE_INSTALL_DIR} && docker compose logs -f"
             ;;
     esac

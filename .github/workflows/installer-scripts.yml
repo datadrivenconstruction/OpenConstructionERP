@@ -123,3 +123,10 @@ jobs:
       # service serves.
       - name: Health poll cases
         run: bash scripts/tests/install-sh-health-poll.sh
+
+      # The version pin, which is the other thing this script writes that
+      # outlives the run. It had no way to clear one, so an install that
+      # once asked for a version kept pulling it and still said it had
+      # completed.
+      - name: Version pin cases
+        run: bash scripts/tests/install-sh-version-pin.sh

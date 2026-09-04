@@ -313,6 +313,21 @@ function Set-ImageTagPin {
     Set-Content -Path $Path -Value ($kept + "OE_IMAGE_TAG=$Tag") -Encoding ascii
 }
 
+function Remove-ImageTagPin {
+    # The other half of Set-ImageTagPin. Writing a pin and never removing one
+    # meant the .env decided the version for every later run, so re-running
+    # the documented one-liner to upgrade pulled the version pinned the first
+    # time and announced a completed installation.
+    param([Parameter(Mandatory)] [string] $Path)
+
+    if (-not (Test-Path $Path)) { return }
+    $lines = @(Get-Content -Path $Path)
+    $kept = @($lines | Where-Object { $_ -notmatch '^OE_IMAGE_TAG=' })
+    if ($kept.Count -eq $lines.Count) { return }
+    Set-Content -Path $Path -Value $kept -Encoding ascii
+    Write-Warn "Removed a version pin left by an earlier install, this run takes the latest"
+}
+
 function Get-HealthVerdict {
     <#
       .SYNOPSIS
@@ -370,7 +385,13 @@ function Install-Docker {
 
     $envPath = Join-Path $OE_INSTALL_DIR ".env"
     Write-ComposeSecrets -Path $envPath
-    if ($OE_VERSION -ne "latest") {
+    # Asking for latest has to undo a pin, not merely decline to write one.
+    # The .env outlives the run that wrote it, so without this an install
+    # that once asked for a specific version keeps pulling it forever and
+    # still reports that the installation completed.
+    if ($OE_VERSION -eq "latest") {
+        Remove-ImageTagPin -Path $envPath
+    } else {
         Set-ImageTagPin -Path $envPath -Tag $OE_VERSION
     }
 
@@ -411,10 +432,13 @@ function Install-Docker {
     # usable, and a database the process cannot reach, where it is not.
     $attempts = 30
     $delaySeconds = 2
+    # Named, because the figure printed at the end is computed from it. An
+    # attempt that gets no answer spends this before it sleeps.
+    $timeoutSeconds = 2
     $health = $null
     for ($i = 0; $i -lt $attempts; $i++) {
         try {
-            $resp = Invoke-RestMethod -Uri "http://localhost:$OE_PORT/api/health" -TimeoutSec 2
+            $resp = Invoke-RestMethod -Uri "http://localhost:$OE_PORT/api/health" -TimeoutSec $timeoutSeconds
             if ($resp.status -eq "healthy" -or $resp.status -eq "degraded") {
                 $health = $resp
                 break
@@ -440,8 +464,11 @@ function Install-Docker {
         default {
             # The figure is derived rather than written down. It used to say 60s
             # while the loop could take twice that, since each attempt can also
-            # spend its two second request timeout before sleeping.
-            $waited = $attempts * $delaySeconds
+            # spend its request timeout before sleeping. The first correction
+            # here still left the timeout out of the arithmetic and so still
+            # understated the wait, by three times against a socket that
+            # accepts and never replies. Both terms are in it now.
+            $waited = $attempts * ($delaySeconds + $timeoutSeconds)
             Write-Warn "Service started but health check did not answer within ${waited}s"
             Write-Host "  Check logs: cd $OE_INSTALL_DIR; docker compose logs -f"
         }
