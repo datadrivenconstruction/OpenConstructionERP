@@ -555,9 +555,36 @@ jobs:
           # a reader has to be able to see that at the call site.
           leg_env=""
 
+          # Whether anything is listening, asked of the port itself rather than
+          # of the process table. The table reachable from this shell does not
+          # show native Windows processes at all, which is why the snapshot
+          # between the legs answered "(no matching processes)" in run
+          # 33860279598 while the cold-start server was alive and holding 8799.
+          port_held() {
+            (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null && { exec 3<&-; return 0; }
+            return 1
+          }
+
           start_and_wait() {
             label="$1"
             log="serve-${label}.log"
+            # Killing the previous leg returns as soon as the process is
+            # reaped, and the embedded PostgreSQL it started goes on shutting
+            # down after that, still holding the listening socket. The launcher
+            # never does this to a user: it stops the sidecar through
+            # /api/system/desktop-shutdown, which stops the cluster cleanly so
+            # the next start has no write-ahead log to replay. So this wait
+            # removes an artifact of the teardown in here, not a defect anybody
+            # can reach by closing the app. Windows lost this race in run
+            # 33860279598 and won it in 33851623420 with identical code.
+            for _ in $(seq 1 60); do
+              port_held "$port" || break
+              sleep 1
+            done
+            if port_held "$port"; then
+              echo "::error title=The serve check could not free port ${port} on ${{ matrix.os }} (${label})::Something was still listening on 127.0.0.1:${port} sixty seconds after the previous leg was stopped, so this leg could never bind it. That is this step's own teardown rather than the sidecar, and it should be read as a defect in the check."
+              return 1
+            fi
             if [ -n "$leg_env" ]; then
               echo "(${label}) running with: $leg_env"
               # shellcheck disable=SC2086
@@ -662,14 +689,28 @@ jobs:
           start_and_wait "cold start" || exit 1
 
           # What the machine looks like between the legs, because the two are
-          # less alike than the labels suggest. The comment below records that
-          # killing serve does not stop the embedded PostgreSQL it started, so
-          # the second leg is not a user relaunching the app, it is a second
-          # instance opening a data directory whose postmaster belongs to a
-          # process that no longer exists. If that, rather than anything in
-          # our code, is what the second leg dies of, it shows up here.
+          # less alike than the labels suggest. Killing serve does not stop the
+          # embedded PostgreSQL it started, so the second leg is not quite a
+          # user relaunching the app; it is a second instance opening a data
+          # directory whose postmaster belongs to a process that no longer
+          # exists. That theory was measured and retired on macos-latest in run
+          # 33851623420, where this snapshot found no leftover process and
+          # three and a half gigabytes free, and the leg died anyway. It is
+          # printed for the other platforms and for the next round.
           echo "=== between the legs ==="
-          ps ax -o pid,rss,command 2>/dev/null | grep -iE 'openconstructionerp|postgres' | grep -v grep | head -n 30 || echo "(no matching processes)"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            # ps in this shell lists only what this shell started, so it
+            # answered "(no matching processes)" in run 33860279598 while the
+            # cold-start server was alive and holding the port. Ask Windows.
+            tasklist 2>/dev/null | grep -iE 'openconstructionerp|postgres' | head -n 30 || echo "(nothing matching in tasklist)"
+          else
+            ps ax -o pid,rss,command 2>/dev/null | grep -iE 'openconstructionerp|postgres' | grep -v grep | head -n 30 || echo "(no matching processes)"
+          fi
+          if port_held "$port"; then
+            echo "port ${port} is still held here, so the next leg will wait for it"
+          else
+            echo "port ${port} is free"
+          fi
           if [ "$RUNNER_OS" = "macOS" ]; then
             vm_stat | head -n 6 || true
           else
@@ -698,8 +739,15 @@ jobs:
           leg_env="OE_VECTOR_POOL_WORKERS=0"
           if start_and_wait "restart, pool disabled"; then
             echo "BISECT: the restart serves with the pool disabled."
-          else
+          elif grep -q 'Loaded sentence-transformers model' "serve-restart, pool disabled.log" 2>/dev/null; then
             echo "BISECT: the restart fails with the pool disabled too."
+          else
+            # A leg that never reached the encoder cannot say anything about
+            # the pool, and saying it anyway is worse than silence. This branch
+            # exists because run 33860279598 printed the verdict above on
+            # windows-latest about a leg that had died binding a port the leg
+            # before it still held.
+            echo "BISECT: no verdict. This leg never loaded the encoder, so it exercised none of the path it was added to bisect."
           fi
           leg_env=""
 
