@@ -33,6 +33,19 @@ STATE_FILENAME = "pack_state.json"
 STATE_FILENAME_LEGACY = "partner_pack_state.json"
 
 
+class PackStateWriteError(OSError):
+    """The applied-pack record could not be written.
+
+    This file is the whole of "a pack is applied": ``get_active_pack`` reads it
+    and nothing else remembers the decision. So a write that does not land is
+    not a degraded apply, it is no apply at all, and the caller has to hear
+    about it. The write used to be logged and swallowed, which left
+    :func:`app.core.partner_pack.apply.apply_pack` returning ``applied: True``
+    for an installation where the pack was not active - the one report an admin
+    has no way to check without going to look for the file.
+    """
+
+
 def _resolve_state_dir(data_dir: Path | None = None) -> Path:
     """Resolve the directory that holds ``partner_pack_state.json``.
 
@@ -106,19 +119,44 @@ def load_applied_state(data_dir: Path | None = None) -> AppliedPackState | None:
 
 
 def save_applied_state(state: AppliedPackState, data_dir: Path | None = None) -> None:
-    """Persist the applied-pack record atomically."""
+    """Persist the applied-pack record atomically.
+
+    Args:
+        state: The record to write.
+        data_dir: Explicit state directory, or None to resolve it.
+
+    Raises:
+        PackStateWriteError: If the record could not be written, or was written
+            but does not read back. Raising is the point: the caller reports
+            the apply to a human, and this file is the only thing that makes an
+            apply real.
+    """
     resolved = _resolve_state_dir(data_dir)
-    resolved.mkdir(parents=True, exist_ok=True)
     path = resolved / STATE_FILENAME
     tmp = path.with_suffix(".tmp")
     try:
+        resolved.mkdir(parents=True, exist_ok=True)
         tmp.write_text(json.dumps(asdict(state), indent=2, ensure_ascii=False), encoding="utf-8")
         tmp.replace(path)
-        logger.info("Applied partner pack state saved: %s v%s", state.slug, state.pack_version)
-    except Exception:
+    except Exception as exc:
         logger.exception("Failed to save applied pack state to %s", path)
-        if tmp.exists():
+        try:
             tmp.unlink(missing_ok=True)
+        except Exception:  # noqa: BLE001 - cleanup of a failed write is best-effort
+            logger.debug("Could not remove the partial state file %s", tmp)
+        raise PackStateWriteError(f"Could not record the applied pack at {path}: {exc}") from exc
+
+    # Read back rather than trust the write. A silent no-op write is exactly
+    # the failure this function exists to stop being invisible, and the
+    # atomic-replace above can leave the old record in place on filesystems
+    # where the replace itself is the part that does not land.
+    written = load_applied_state(data_dir)
+    if written is None or written.slug != state.slug:
+        raise PackStateWriteError(
+            f"Recorded the applied pack at {path} but read back "
+            f"{written.slug if written else 'nothing'} instead of {state.slug!r}"
+        )
+    logger.info("Applied partner pack state saved: %s v%s", state.slug, state.pack_version)
 
 
 def clear_applied_state(data_dir: Path | None = None) -> None:

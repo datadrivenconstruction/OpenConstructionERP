@@ -36,6 +36,7 @@ from app.core.partner_pack.full_install import (
     full_install,
     full_install_stream,
 )
+from app.core.partner_pack.state import PackStateWriteError
 from app.dependencies import RequireRole
 
 _IMAGE_MEDIA_TYPES = {
@@ -126,6 +127,11 @@ async def apply(body: ApplyRequest, request: Request) -> dict[str, Any]:
         )
     except UnknownRuleSetError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
+    except PackStateWriteError as exc:
+        # The pack is not active and must not be reported as applied. 507 says
+        # what this almost always is - a data directory that is full or not
+        # writable - so the admin fixes the disk rather than the pack.
+        raise HTTPException(status_code=507, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 

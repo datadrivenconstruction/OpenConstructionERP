@@ -29,7 +29,15 @@ MANIFEST = PartnerPackManifest(
         "(INFONAVIT, FOVISSSTE, CONAVI), IMSS and NOM-031-STPS site safety, "
         "32 states, and MXN."
     ),
-    default_locale="es",
+    # Mexican Spanish, not Spanish. The platform registers and offers es-MX as
+    # its own UI language, and this pack ships an es-MX overlay of its own, so
+    # declaring the bare "es" booted a Mexican workspace into Iberian Spanish
+    # with es-MX sitting unused beside it - costo read as coste, cimbra as
+    # encofrado, estimacion de obra as certificacion de obra. The frontend
+    # resolver (matchSupportedLanguage in frontend/src/app/i18n.ts) already
+    # prefers a region subtag whenever one is offered; it was never given one
+    # to prefer, because the onboarding wizard activates this field verbatim.
+    default_locale="es-MX",
     additional_locales={
         "es-MX": "locales/es-MX.json",
     },

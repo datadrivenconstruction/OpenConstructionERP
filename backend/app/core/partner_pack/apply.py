@@ -469,6 +469,12 @@ async def apply_pack(
         UnknownRuleSetError: If the pack declares a validation rule set the
             engine does not register. Nothing is applied in that case: a pack
             whose rules would silently not run is not a pack we install.
+        PackStateWriteError: If the applied-pack record could not be written.
+            The modules this call enabled stay enabled - enabling is additive
+            and safe - but the pack is NOT active, so this must not come back
+            as ``applied: True``. It used to: the write was logged and
+            swallowed, and a full data disk turned "apply" into a report with
+            no installation behind it.
     """
     m = get_pack_by_slug(slug)
     if not m:
