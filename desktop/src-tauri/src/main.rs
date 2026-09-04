@@ -1090,6 +1090,129 @@ fn show_main_window(handle: &tauri::AppHandle) {
 /// simply attach to the healthy instance that is already there.
 const ATTACH_CANDIDATE_PORTS: [u16; 4] = [8000, 8080, 8732, 8765];
 
+/// File inside the data directory that carries that directory's identity.
+///
+/// The backend writes and reads the same name from the same directory
+/// (`_WORKSPACE_ID_FILENAME` in `backend/app/main.py`). Neither side can import
+/// anything from the other, so the name is the whole of the agreement between
+/// them and a rename here is a rename there.
+const WORKSPACE_ID_FILENAME: &str = "workspace_id.json";
+
+/// The data directory this launcher's backend works in.
+///
+/// Resolved the way the backend resolves it, because the point of resolving it
+/// is to arrive at the same folder. The sidecar is spawned without `--data-dir`
+/// and inherits this process's environment, so the CLI's `_default_data_dir`
+/// runs there with these same variables and the same precedence:
+/// `OE_DATA_DIR`, then `DATA_DIR`, then `OE_CLI_DATA_DIR`, then
+/// `~/.openestimate`. Reading only the last of those would be wrong on any
+/// machine that sets one of the first three: this launcher would compute one
+/// folder, its own backend another, and the two would refuse to recognise each
+/// other and start a second server on the first one's database.
+fn workspace_data_dir() -> Option<PathBuf> {
+    for var in ["OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR"] {
+        if let Ok(value) = std::env::var(var) {
+            if !value.trim().is_empty() {
+                return Some(PathBuf::from(value.trim()));
+            }
+        }
+    }
+    home_dir().map(|h| h.join(".openestimate"))
+}
+
+/// Pull a usable workspace id out of a health body, if it carries one.
+///
+/// Separate from the probe so the rule can be tested as a function. An empty
+/// string is not an identity: two installations that both published one would
+/// compare equal, which is the exact confusion this field exists to end.
+fn workspace_id_of(json: &serde_json::Value) -> Option<&str> {
+    json.get("workspace_id")
+        .and_then(|v| v.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+}
+
+/// Read the identity of our own data directory, writing one if there is none.
+///
+/// The launcher creates this file rather than waiting for a backend to, because
+/// it needs the answer before it probes and on a cold start no backend has run
+/// yet. That is safe rather than a hazard: both sides resolve the same
+/// directory, so whichever runs first writes the file and the other reads that
+/// same value back. Two ids can only differ when two directories differ, which
+/// is precisely the case that must not attach.
+///
+/// `create_new` is what makes concurrent starts agree. Writing a temporary file
+/// and renaming it over the target is the usual idiom and is the wrong one
+/// here: `std::fs::rename` replaces what it finds (`MOVEFILE_REPLACE_EXISTING`
+/// on Windows), so two launchers started together would each write an id and
+/// the loser would go on holding one that is no longer on disk, then refuse to
+/// attach to a backend that is in fact its own. `create_new` fails instead of
+/// replacing, and the loser re-reads the winner's value.
+///
+/// `None` means this launcher has no identity to compare with - no home
+/// directory, an unwritable data directory - and the caller must then attach to
+/// nothing at all. That is the safe direction: the cost of not attaching is a
+/// second backend, and the cost of attaching wrongly is one user reading
+/// another user's data.
+fn our_workspace_id() -> Option<String> {
+    let dir = workspace_data_dir()?;
+    let path = dir.join(WORKSPACE_ID_FILENAME);
+
+    if let Some(existing) = read_workspace_id_file(&path) {
+        return Some(existing);
+    }
+
+    let candidate = uuid::Uuid::new_v4().simple().to_string();
+    let body = format!("{{\n  \"workspace_id\": \"{candidate}\"\n}}\n");
+
+    if std::fs::create_dir_all(&dir).is_err() {
+        log_line("attach: this installation's data directory could not be created; will not attach to anything");
+        return None;
+    }
+
+    use std::io::Write;
+    match std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&path)
+    {
+        Ok(mut file) => match file.write_all(body.as_bytes()) {
+            Ok(()) => Some(candidate),
+            Err(e) => {
+                log_line(&format!(
+                    "attach: could not record this installation's identity ({e}); will not attach to anything"
+                ));
+                None
+            }
+        },
+        // Somebody wrote it between the read above and this create. Theirs is
+        // the identity of this directory; the candidate above was never used.
+        Err(ref e) if e.kind() == std::io::ErrorKind::AlreadyExists => read_workspace_id_file(&path),
+        Err(e) => {
+            log_line(&format!(
+                "attach: could not record this installation's identity ({e}); will not attach to anything"
+            ));
+            None
+        }
+    }
+}
+
+/// Read one workspace id off disk. Anything unreadable or malformed is absent.
+fn read_workspace_id_file(path: &std::path::Path) -> Option<String> {
+    let text = std::fs::read_to_string(path).ok()?;
+    let json: serde_json::Value = serde_json::from_str(&text).ok()?;
+    workspace_id_of(&json).map(str::to_string)
+}
+
+/// The first few characters of an id, for a log line that must not print it all.
+///
+/// Enough to tell two workspaces apart when reading the log, and not the value
+/// itself. The log lives in one user's home directory and the ids of other
+/// accounts on the machine have no business being written out there in full.
+fn id_prefix(id: &str) -> String {
+    id.chars().take(8).collect()
+}
+
 /// The faults that make a backend unusable, asked once for both callers.
 ///
 /// Two decisions in this launcher rest on one health body, and they used to
@@ -1182,7 +1305,11 @@ fn blocking_fault(json: &serde_json::Value) -> Option<String> {
 /// running one's data directory, and that price is paid whether the field that
 /// triggered it was right or not. The fix upstream removes the occasion, not
 /// the argument.
-async fn is_our_backend_healthy(client: &reqwest::Client, port: u16) -> bool {
+async fn is_our_backend_healthy(
+    client: &reqwest::Client,
+    port: u16,
+    our_workspace: &str,
+) -> bool {
     let url = format!("http://127.0.0.1:{port}/api/health");
     let resp = match client
         .get(&url)
@@ -1231,6 +1358,41 @@ async fn is_our_backend_healthy(client: &reqwest::Client, port: u16) -> bool {
     let version = json.get("version").and_then(|v| v.as_str()).unwrap_or("");
     let our_version = env!("CARGO_PKG_VERSION");
 
+    // Whose installation is this? Asked before anything else and answered with
+    // its own return, because a backend belonging to another workspace is not a
+    // candidate we found something wrong with, it is not a candidate at all.
+    //
+    // The Windows installer is per-machine and loopback there is not per
+    // session, so every backend any account on this computer is running answers
+    // on 127.0.0.1 to every other account. Each of those is our exact version -
+    // it is the same installed program - so the version test below passes, we
+    // attach, and the frontend bootstraps a desktop session against a backend
+    // holding somebody else's database. That was the whole of the defect: not a
+    // permissive endpoint, but a launcher pointing the window at a stranger.
+    //
+    // A candidate with no such field is an older build and is refused too. That
+    // adds no occasion of two servers on one data directory, because a build old
+    // enough to lack the field is old enough to fail the version test anyway.
+    match workspace_id_of(&json) {
+        Some(theirs) if theirs == our_workspace => {}
+        Some(theirs) => {
+            log_line(&format!(
+                "attach: rejected candidate on port {port}: the backend there belongs to a different \
+workspace (theirs {}..., ours {}...)",
+                id_prefix(theirs),
+                id_prefix(our_workspace)
+            ));
+            return false;
+        }
+        None => {
+            log_line(&format!(
+                "attach: rejected candidate on port {port}: the backend there does not say which \
+workspace it belongs to"
+            ));
+            return false;
+        }
+    }
+
     let version_ok = version == our_version;
     let fault = blocking_fault(&json);
 
@@ -1265,9 +1427,14 @@ async fn is_our_backend_healthy(client: &reqwest::Client, port: u16) -> bool {
 ///
 /// Returns the first port that responds as our backend, or ``None`` if none do
 /// (the normal cold-start case, where we then spawn our own sidecar).
-async fn find_existing_backend(client: &reqwest::Client) -> Option<u16> {
+///
+/// `our_workspace` is the identity of the data directory this launcher works
+/// in, resolved once by the caller. It is passed in rather than read here so
+/// that a launcher which cannot establish an identity at all never reaches this
+/// function: with nothing to compare against there is no port it may attach to.
+async fn find_existing_backend(client: &reqwest::Client, our_workspace: &str) -> Option<u16> {
     for port in ATTACH_CANDIDATE_PORTS {
-        if is_our_backend_healthy(client, port).await {
+        if is_our_backend_healthy(client, port, our_workspace).await {
             return Some(port);
         }
     }
@@ -1393,10 +1560,23 @@ fn resolve_backend_source(local_port: u16) -> BackendSource {
         }
     }
 
-    let attached_port = tauri::async_runtime::block_on(async {
-        let client = reqwest::Client::new();
-        find_existing_backend(&client).await
-    });
+    // Establish who we are before asking who is listening. A launcher with no
+    // identity of its own has nothing to compare a candidate against, so it
+    // probes nothing and starts its own server, which is the answer it would
+    // have reached anyway on a machine with no backend running.
+    let attached_port = match our_workspace_id() {
+        Some(our_workspace) => tauri::async_runtime::block_on(async {
+            let client = reqwest::Client::new();
+            find_existing_backend(&client, &our_workspace).await
+        }),
+        None => {
+            log_line(
+                "attach: this installation has no workspace identity, so no running backend can be \
+recognised as its own; starting a server instead",
+            );
+            None
+        }
+    };
 
     match attached_port {
         Some(existing) => {
@@ -3046,6 +3226,135 @@ fn show_startup_failure_dialog(_message: &str) {}
 mod tests {
     use super::*;
 
+    /// The identity of the data directory the tests below speak from.
+    ///
+    /// Shared by the fixtures and by the probe calls, because a launcher and
+    /// the backend it started read one file and therefore hold one value. Tests
+    /// that want the other case say so by naming a different id.
+    const TEST_WORKSPACE_ID: &str = "aaaaaaaabbbbbbbbccccccccdddddddd";
+
+    /// Two accounts on one machine run one installed program, so every field
+    /// the probe used to consult matches between them.
+    ///
+    /// This is the defect written as data. The two bodies below differ in
+    /// exactly one place, which is the field this change added, and everything
+    /// the launcher looked at before - version, status, database - is identical
+    /// because it is the same install answering from two home directories. A
+    /// rule that reads anything else cannot separate them.
+    #[test]
+    fn a_backend_from_another_account_is_not_a_candidate() {
+        let ours = TEST_WORKSPACE_ID;
+        let theirs = "11111111222222223333333344444444";
+
+        let body = |workspace: &str| {
+            serde_json::json!({
+                "status": "healthy",
+                "version": env!("CARGO_PKG_VERSION"),
+                "database": "ok",
+                "workspace_id": workspace,
+            })
+        };
+
+        assert_eq!(workspace_id_of(&body(ours)), Some(ours));
+        assert_ne!(workspace_id_of(&body(theirs)), Some(ours));
+        // The control: nothing else in those two bodies disagrees, so this
+        // field is the only thing standing between the two accounts.
+        assert_eq!(blocking_fault(&body(theirs)), None);
+        assert_eq!(
+            body(ours).get("version"),
+            body(theirs).get("version"),
+            "the two accounts run the same build, which is why version cannot decide this"
+        );
+    }
+
+    /// No identity published is refused, and so is an empty one.
+    ///
+    /// An older backend has no such field, and must not be attached to: we
+    /// cannot tell whose data directory it holds, and "cannot tell" has to mean
+    /// no. The empty string is the same answer for a different reason - two
+    /// installations that both published one would compare equal to each other.
+    #[test]
+    fn a_backend_that_names_no_workspace_is_refused() {
+        let older = serde_json::json!({"status": "healthy", "version": "16.7.1"});
+        assert_eq!(workspace_id_of(&older), None);
+
+        let blank = serde_json::json!({"workspace_id": "   "});
+        assert_eq!(workspace_id_of(&blank), None);
+
+        let wrong_type = serde_json::json!({"workspace_id": 12345});
+        assert_eq!(workspace_id_of(&wrong_type), None);
+    }
+
+    /// The first writer's identity is the directory's identity, for everyone.
+    ///
+    /// The launcher writes this file when it starts before any backend has.
+    /// Whoever arrives second has to read the first one's value rather than
+    /// install its own, or a launcher and the backend it just spawned would
+    /// hold two ids for one folder and refuse to recognise each other.
+    #[test]
+    fn an_identity_already_on_disk_is_read_rather_than_replaced() {
+        let dir = std::env::temp_dir().join(format!(
+            "oe-workspace-id-test-{}",
+            uuid::Uuid::new_v4().simple()
+        ));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join(WORKSPACE_ID_FILENAME);
+
+        std::fs::write(&path, "{\"workspace_id\": \"0123456789abcdef\"}\n").expect("plant an id");
+        assert_eq!(
+            read_workspace_id_file(&path),
+            Some("0123456789abcdef".to_string())
+        );
+
+        // A second create must not replace it. This is the assertion that fails
+        // if the write is ever changed to a rename, which replaces silently.
+        let clobbered = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path);
+        assert!(clobbered.is_err(), "create_new overwrote an existing id");
+        assert_eq!(
+            read_workspace_id_file(&path),
+            Some("0123456789abcdef".to_string())
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// A file that is not there, and one that is not readable as an identity.
+    ///
+    /// Both read as absent, and absent means this launcher writes one. What
+    /// must not happen is a half-value: an id that parses to nothing is not an
+    /// id that compares to something.
+    #[test]
+    fn an_unreadable_identity_file_reads_as_no_identity() {
+        let dir = std::env::temp_dir().join(format!(
+            "oe-workspace-id-missing-{}",
+            uuid::Uuid::new_v4().simple()
+        ));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join(WORKSPACE_ID_FILENAME);
+
+        assert_eq!(read_workspace_id_file(&path), None);
+
+        std::fs::write(&path, "not json at all").expect("write");
+        assert_eq!(read_workspace_id_file(&path), None);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// The log names enough of an id to be read, and not the id.
+    #[test]
+    fn a_logged_identity_is_a_prefix_and_not_the_value() {
+        let id = TEST_WORKSPACE_ID;
+        let shown = id_prefix(id);
+
+        assert_eq!(shown, "aaaaaaaa");
+        assert!(shown.len() < id.len(), "the log line carries the whole id");
+        assert_eq!(id_prefix("short"), "short");
+        assert_eq!(id_prefix(""), "");
+    }
+
     /// A named server is warned about, never refused, and only across a major.
     ///
     /// The three cases below are the whole rule, and the middle one is the one
@@ -3271,9 +3580,18 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         port
     }
 
-    /// A health body of our own version, so only the fault question can decide.
+    /// A health body of our own version AND our own workspace, so that only the
+    /// fault question is left for the probe to decide.
+    ///
+    /// The workspace id is here for the same reason the version is: a body
+    /// missing it is refused before any fault is looked at, and a test whose
+    /// fixtures are refused on identity would report the fault rule as working
+    /// while never reaching it.
     fn our_backend_saying(fields: &str) -> String {
-        format!(r#"{{"version":"{}",{fields}}}"#, env!("CARGO_PKG_VERSION"))
+        format!(
+            r#"{{"version":"{}","workspace_id":"{TEST_WORKSPACE_ID}",{fields}}}"#,
+            env!("CARGO_PKG_VERSION")
+        )
     }
 
     #[tokio::test]
@@ -3288,6 +3606,15 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         // somebody puts an independent check back inside it. The bodies all
         // carry our own version, because version equality is the one question
         // the attach probe asks and the startup judgement rightly does not.
+        //
+        // They now also carry our own workspace id, which is the second such
+        // question and the reason this loop is not the whole test any more. The
+        // agreement being asserted is agreement about faults, and it holds
+        // within one installation. Across two installations the two judgements
+        // are meant to disagree, and the case below the loop says so, because a
+        // reader who found only the loop would take this test as a promise that
+        // anything openable is attachable - which is precisely the promise that
+        // signed one user into another user's account.
         //
         // Writes a few lines to the launcher log, like every other call to the
         // attach probe. That is the probe being itself; there is nothing to
@@ -3309,13 +3636,28 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         for fields in bodies {
             let body = our_backend_saying(fields);
             let port = serve_one_health_body(body.clone()).await;
-            let attachable = is_our_backend_healthy(&client, port).await;
+            let attachable = is_our_backend_healthy(&client, port, TEST_WORKSPACE_ID).await;
             let openable = judged_ready(&body);
             assert_eq!(
                 attachable, openable,
                 "the two judgements disagree about this backend: {body}"
             );
         }
+
+        // The deliberate exception, over the same socket. A backend that
+        // belongs to another account on this machine is perfectly fit for the
+        // user who started it and must never be attached to by us. Its body is
+        // otherwise identical to the first case above - same version, same
+        // status, same fields - because it is the same installed program run by
+        // somebody else, which is why nothing but the identity can decide it.
+        let body =
+            our_backend_saying(r#""status":"healthy","database":"ok","frontend_dist_present":true"#);
+        let port = serve_one_health_body(body.clone()).await;
+        assert!(judged_ready(&body), "its own user can open it");
+        assert!(
+            !is_our_backend_healthy(&client, port, "11111111222222223333333344444444").await,
+            "attached to a backend holding another account's data"
+        );
     }
 
     #[tokio::test]
@@ -3324,15 +3666,20 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         // unfit for us, and the two answers must stay different. Reaching
         // agreement here would mean attaching to a stranger's backend and
         // serving our users its frontend and its schema.
+        //
+        // Its workspace id is ours on purpose. Without it the refusal would
+        // come from the identity test added since, and the version rule this
+        // test is named for would go unexercised while the test still passed.
         let client = reqwest::Client::new();
-        let body = r#"{"version":"0.0.1-not-ours","status":"healthy",
-            "database":"ok","frontend_dist_present":true}"#
-            .to_string();
+        let body = format!(
+            r#"{{"version":"0.0.1-not-ours","workspace_id":"{TEST_WORKSPACE_ID}","status":"healthy",
+            "database":"ok","frontend_dist_present":true}}"#
+        );
         let port = serve_one_health_body(body.clone()).await;
 
         assert!(judged_ready(&body), "its own users can still open it");
         assert!(
-            !is_our_backend_healthy(&client, port).await,
+            !is_our_backend_healthy(&client, port, TEST_WORKSPACE_ID).await,
             "we must not attach to a backend that is not our version"
         );
     }

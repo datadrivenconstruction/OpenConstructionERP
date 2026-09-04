@@ -707,6 +707,115 @@ def _persist_demo_credentials(creds: dict[str, str]) -> Path | None:
         return None
 
 
+#: The identity of a data directory, published by ``/api/health``.
+#:
+#: Read by the desktop launcher (``desktop/src-tauri/src/main.rs``) before it
+#: attaches to a backend that is already listening on loopback. A rename here is
+#: a rename there; the two sides share a file name and nothing else.
+_WORKSPACE_ID_FILENAME = "workspace_id.json"
+
+
+def _workspace_id_path() -> Path:
+    """Resolve the workspace-identity file in the active data dir.
+
+    Same resolution as the demo-backfill marker below, and for the same reason:
+    a ``serve --data-dir`` instance is a separate installation and must carry a
+    separate identity, which it does not if the path is computed any other way.
+    """
+    from app.core.partner_pack.state import _resolve_state_dir
+
+    return _resolve_state_dir() / _WORKSPACE_ID_FILENAME
+
+
+def _read_workspace_id(path: Path) -> str | None:
+    """Return the identity recorded at ``path``, or ``None`` if there is none.
+
+    Anything unreadable, unparseable or empty reads as absent. A caller that got
+    ``None`` here either writes the file or publishes no identity at all; there
+    is no third answer, and in particular no answer that is wrong.
+    """
+    import json as _json
+
+    try:
+        raw = _json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    value = raw.get("workspace_id") if isinstance(raw, dict) else None
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _resolve_workspace_id() -> str | None:
+    """The identity of the installation this process serves, or ``None``.
+
+    Which *data directory* is being served, as against which process is serving
+    it. ``_INSTANCE_ID`` answers the second question and cannot be made to
+    answer the first: it is a fresh uuid4 per process, so it differs across a
+    restart of one install exactly as it differs between two installs, which
+    makes it useless to anyone trying to tell those two cases apart. Hence a
+    second field rather than a reuse of that one.
+
+    Two properties are load bearing, and both are asserted in
+    ``tests/unit/test_a_second_user_on_one_machine_is_a_second_workspace.py``.
+
+    The value is opaque random bytes, never a path and never anything derived
+    from an account name. ``/api/health`` is unauthenticated on purpose, so on
+    any deployment whose port is reachable this value is readable by whoever can
+    reach it, and an id built out of the data directory would publish the disk
+    layout and the operating-system user of the machine serving it.
+
+    And it is persisted, so it survives a restart. A value regenerated per boot
+    would make a launcher refuse to attach to the backend it started itself, and
+    the cost of refusing is not "look elsewhere", it is a second server started
+    against the running one's data directory.
+
+    Created with ``O_EXCL`` rather than written to a temporary file and renamed
+    over. Renaming is the usual idiom here (``_write_demo_backfill_version``
+    below uses it) and is the wrong one for this file: rename replaces what it
+    finds, on POSIX and on Windows alike, so two processes starting together
+    would each write an id and the loser would be left holding one that is no
+    longer on disk. ``O_EXCL`` is create-if-absent in a single syscall, so the
+    first writer wins and every later one reads that same value back.
+
+    Returns ``None`` when the directory cannot be read or written - a read-only
+    mount, a full disk. That omits the field from the health body, which fails
+    closed: a launcher with no identity of its own attaches to nothing, and a
+    candidate that publishes none is refused. Never raises, because a container
+    healthcheck reads this endpoint and a 500 there is a worse outcome than an
+    installation that declines to be attached to.
+    """
+    import json as _json
+
+    try:
+        path = _workspace_id_path()
+    except Exception:  # noqa: BLE001 - an unresolvable data dir has no identity
+        logger.debug("Could not resolve the workspace id path", exc_info=True)
+        return None
+
+    existing = _read_workspace_id(path)
+    if existing:
+        return existing
+
+    candidate = secrets.token_hex(16)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = _json.dumps({"workspace_id": candidate}, indent=2) + "\n"
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        try:
+            os.write(fd, payload.encode("utf-8"))
+        finally:
+            os.close(fd)
+        return candidate
+    except FileExistsError:
+        # Somebody else got there between the read above and the create. Theirs
+        # is the identity of this directory; ours was never published.
+        return _read_workspace_id(path)
+    except OSError:
+        logger.debug("Could not establish the workspace id", exc_info=True)
+        return None
+
+
 _DEMO_BACKFILL_MARKER_FILENAME = "demo_backfill_marker.json"
 
 
@@ -1862,6 +1971,21 @@ def create_app() -> FastAPI:
             "modules_loaded": len(module_loader.list_modules()),
             "uptime_seconds": int(time.time() - _startup_time),
         }
+
+        # Which installation is answering, as against which process. The desktop
+        # installer is per-machine and loopback on Windows is not per-session, so
+        # a backend one account started answers this probe for every account
+        # logged into the same machine, and version equality above cannot tell
+        # those apart - it is the same install. This is what can. Read from disk
+        # on every request rather than memoised, because the property the
+        # launcher needs is that it survives a restart, and a value cached for
+        # the life of a process would be indistinguishable from instance_id
+        # under the test that checks it. Omitted, not empty, when the data
+        # directory yields no identity: an absent field refuses an attach, and
+        # an empty one would compare equal to another empty one.
+        _workspace_id = _resolve_workspace_id()
+        if _workspace_id:
+            result["workspace_id"] = _workspace_id
 
         # Database connectivity (fast ping)
         try:
