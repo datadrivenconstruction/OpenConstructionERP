@@ -93,21 +93,122 @@ function Test-Docker {
     }
 }
 
-function Test-Python312 {
-    # Must treat future major versions (Python 4.x) as satisfying "3.12+":
-    # the naive ``$major -ge 3 -and $minor -ge 12`` fails for 4.0-4.11
-    # because 4.0 < 3.12 component-wise. Use proper major/minor compare.
+# Every way a usable interpreter might be reachable, best first. An entry is
+# the argv prefix that runs it, not a name, because the launcher takes its
+# version selector as a separate argument.
+#
+# `py` leads the list and that is the whole point of it. The python.org
+# installer leaves "Add python.exe to PATH" unchecked by default and installs
+# the launcher unconditionally, so the person this script exists for - someone
+# who installed Python from python.org and changed nothing - has a working 3.12
+# that the bare name `python` does not reach. In the other direction, `python`
+# on PATH is frequently some unrelated tool's virtual environment that happens
+# to come first, which is the state of the machine this was written on: `python`
+# there is a 3.11.0 belonging to another application entirely.
+$OE_PYTHON_CANDIDATES = @(
+    @("py", "-3.12"),
+    @("py", "-3"),
+    @("python3.12"),
+    @("python3"),
+    @("python")
+)
+
+# Asked of the interpreter itself, so the answer is about the process that
+# would actually run and not about the name we used to reach it. Comparing
+# sys.version_info as a tuple is also what makes a future 4.0 satisfy "3.12 or
+# newer"; the banner-parsing check this replaces compared major and minor
+# separately, which reads 4.0 as older than 3.12.
+$OE_PYTHON_PROBE = "import sys; print('%d.%d.%d' % sys.version_info[:3]); sys.exit(0 if sys.version_info >= (3, 12) else 1)"
+
+function Get-PythonCandidate {
+    <#
+    .SYNOPSIS
+    Run one candidate and report what it is, or $null if it is not a Python.
+    #>
+    param([Parameter(Mandatory)] [string[]] $Candidate)
+
+    $exe = $Candidate[0]
+    if (-not (Get-Command $exe -ErrorAction SilentlyContinue)) { return $null }
+
+    $selector = @()
+    if ($Candidate.Count -gt 1) { $selector = $Candidate[1..($Candidate.Count - 1)] }
+
+    # Unwrap ErrorRecords the way Invoke-Native does, so a candidate that fails
+    # by writing to stderr - `py -3.12` with no 3.12 installed, or the Microsoft
+    # Store stub that Windows ships as `python` - is read as text rather than
+    # raised as an error mid-probe.
     try {
-        $ver = & python --version 2>&1
-        if ($ver -match "Python (\d+)\.(\d+)") {
-            $major = [int]$Matches[1]
-            $minor = [int]$Matches[2]
-            return ($major -gt 3) -or (($major -eq 3) -and ($minor -ge 12))
+        $lines = & $exe @selector -c $OE_PYTHON_PROBE 2>&1 | ForEach-Object {
+            if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.Exception.Message } else { [string]$_ }
         }
-        return $false
+        $code = $LASTEXITCODE
     } catch {
-        return $false
+        return $null
     }
+
+    # Only a line that is nothing but a version counts. Anything that did not
+    # print one is not an interpreter we can hold a conversation with, whatever
+    # it wrote and whatever it exited with.
+    $match = [regex]::Match(($lines -join "`n"), '(?m)^\s*(\d+\.\d+\.\d+)\s*$')
+    if (-not $match.Success) { return $null }
+
+    return [pscustomobject]@{
+        Display = ($Candidate -join " ")
+        Exe     = $exe
+        Args    = $selector
+        Version = $match.Groups[1].Value
+        Usable  = ($code -eq 0)
+    }
+}
+
+function Find-Python312 {
+    <#
+    .SYNOPSIS
+    The first candidate that reports 3.12 or newer, or $null if there is none.
+
+    .DESCRIPTION
+    Searched once and remembered, because the answer is used twice and each
+    probe starts a process. Candidates that ran but are too old are remembered
+    too, in $script:OE_PYTHON_REJECTED, so the failure can name them.
+    #>
+    if ($script:OE_PYTHON_SEARCHED) { return $script:OE_PYTHON_FOUND }
+    $script:OE_PYTHON_SEARCHED = $true
+    $script:OE_PYTHON_FOUND = $null
+    $script:OE_PYTHON_REJECTED = @()
+
+    foreach ($candidate in $OE_PYTHON_CANDIDATES) {
+        $report = Get-PythonCandidate -Candidate $candidate
+        if ($null -eq $report) { continue }
+        if ($report.Usable) {
+            $script:OE_PYTHON_FOUND = $report
+            return $report
+        }
+        $script:OE_PYTHON_REJECTED += "$($report.Display) is Python $($report.Version)"
+    }
+    return $null
+}
+
+function Test-Python312 {
+    return ($null -ne (Find-Python312))
+}
+
+function Write-NoPython312 {
+    <#
+    .SYNOPSIS
+    The one failure message, used whether nothing ran or everything was too old.
+
+    .DESCRIPTION
+    Both endings are the same ending: no interpreter was selected, the advice is
+    the same, and the caller exits 1. The only thing a too-old candidate adds is
+    a line naming it, because "Python 3.12+ is required" reads as "you have no
+    Python" to someone looking at a working `python` in the same terminal.
+    #>
+    Write-Err "Python 3.12+ is required."
+    foreach ($rejected in $script:OE_PYTHON_REJECTED) {
+        Write-Host "  Found, but too old: $rejected"
+    }
+    Write-Host "  Install from: https://www.python.org/downloads/"
+    Write-Host "  If you just installed it, open a new terminal and run this again."
 }
 
 function Test-Uv {
@@ -326,19 +427,25 @@ function Install-Pip {
 
     # 1. Verify Python
     Write-Info "[1/5] Checking Python 3.12+..."
-    if (-not (Test-Python312)) {
-        Write-Err "Python 3.12+ is required."
-        Write-Host "  Install from: https://www.python.org/downloads/"
+    $python = Find-Python312
+    if ($null -eq $python) {
+        Write-NoPython312
         exit 1
     }
-    $pyVer = & python --version 2>&1
-    Write-Ok "[1/5] Found $pyVer"
+    # Names the invocation as well as the version, because on a machine where
+    # `python` is something else the two are not the same fact.
+    Write-Ok "[1/5] Found Python $($python.Version) via '$($python.Display)'"
 
     # 2. Create venv
+    # Built with the interpreter that was actually selected. Spelling `python`
+    # here again would have quietly built the venv from a different one than the
+    # check approved - the check and the use have to name the same process.
     Write-Info "[2/5] Creating virtual environment at $OE_INSTALL_DIR\venv ..."
     New-Item -ItemType Directory -Force -Path $OE_INSTALL_DIR | Out-Null
     if (-not (Test-Path "$OE_INSTALL_DIR\venv\Scripts\python.exe")) {
-        & python -m venv "$OE_INSTALL_DIR\venv"
+        $pyExe = $python.Exe
+        $pyArgs = @($python.Args)
+        & $pyExe @pyArgs -m venv "$OE_INSTALL_DIR\venv"
         if ($LASTEXITCODE -ne 0) {
             Write-Err "Failed to create venv (exit $LASTEXITCODE)"
             exit 1
@@ -432,10 +539,18 @@ if (Test-Docker) {
     Write-Info "uv detected, installing as Python tool"
     Install-Uv
 } elseif (Test-Python312) {
-    Write-Info "Python 3.12+ detected, installing via pip"
+    $python = Find-Python312
+    Write-Info "Python $($python.Version) detected via '$($python.Display)', installing via pip"
     Install-Pip
 } else {
-    Write-Info "No Docker or Python found, installing uv first"
+    # Say which of the two it is. "No Python found" is a false sentence to read
+    # in a terminal where `python --version` answers, and it is the sentence
+    # this branch used to print for anyone whose Python was merely too old.
+    if ($script:OE_PYTHON_REJECTED.Count -gt 0) {
+        Write-Info "Found Python, but older than 3.12 ($($script:OE_PYTHON_REJECTED -join '; ')); installing uv first"
+    } else {
+        Write-Info "No Docker or Python found, installing uv first"
+    }
     Install-Uv
 }
 
