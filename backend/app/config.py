@@ -941,12 +941,31 @@ def _ensure_persistent_jwt_secret() -> None:
     """Auto-provision a strong, persistent JWT secret in non-dev deployments.
 
     Runs once, from :func:`get_settings`, before ``Settings`` reads the
-    environment. It is a no-op in development (the bundled dev default is
-    acceptable there and the app boots without ceremony) and whenever the
-    operator already supplied a real secret. Otherwise, in staging/production
-    it loads a previously persisted secret from the data dir - or generates one
-    and persists it (``chmod 600``) - and exports it as ``JWT_SECRET`` so the
-    app, and the strict production validator, see a strong value.
+    environment. It is a no-op for a source checkout running in development
+    (the bundled dev default is acceptable there and the app boots without
+    ceremony) and whenever the operator already supplied a real secret.
+    Otherwise it loads a previously persisted secret from the data dir - or
+    generates one and persists it (``chmod 600``) - and exports it as
+    ``JWT_SECRET`` so the app, and the strict production validator, see a
+    strong value.
+
+    A desktop build counts as "otherwise" even though it calls itself
+    development, and that clause is the whole reason this note exists. The
+    frozen sidecar is started by the CLI, which sets ``APP_ENV=development``
+    with no branch for a frozen build, so this function used to return on its
+    first line and leave ``JWT_SECRET`` as the literal the CLI had just put
+    there. That literal is in ``_JWT_KNOWN_WEAK_SECRETS`` above, for the reason
+    written there: anyone who can read the public repository can forge admin
+    tokens against a deployment that kept it. Every installed copy of the
+    desktop app was such a deployment, and they all shared the one key.
+
+    The environment stays as it is. Turning the frozen build into
+    ``production`` would fix this too, and would also disable the passwordless
+    demo sign-in and flip the takeoff privacy badge from "never leaves your
+    computer" to "processed on your server" - which on a desktop is the less
+    true of the two. So the fix is the secret alone, and ``desktop_mode()`` is
+    the predicate because it answers for both signals a shipped build carries,
+    ``sys.frozen`` and ``OE_DESKTOP``.
 
     This lets the published container boot with zero configuration while still
     signing tokens with a secret that is NOT the public repo default, and keeps
@@ -955,7 +974,7 @@ def _ensure_persistent_jwt_secret() -> None:
     data dir) it degrades to a per-process secret and logs a loud warning
     rather than refusing to start.
     """
-    if not _non_development_env():
+    if not _non_development_env() and not desktop_mode():
         return
     if _operator_supplied_jwt_secret() is not None:
         # The operator owns the secret - let Settings validate it as-is so a
