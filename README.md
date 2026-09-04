@@ -17,7 +17,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 <!-- Each badge row is one source line on purpose. A newline between two badges
      renders as a line break here, which stacks them into a single column. -->
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE) [![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green&v=10.10.0)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi&v=10.10.0)](https://pypi.org/project/openconstructionerp/) [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp) [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers) [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
-![Languages](https://img.shields.io/badge/languages-29-orange) ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/datadrivenconstruction/OpenConstructionERP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/datadrivenconstruction/OpenConstructionERP) [![CodeQL](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml/badge.svg)](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml) [![Signed releases](https://img.shields.io/badge/releases-Sigstore_signed-8250df)](SECURITY.md)
+![Languages](https://img.shields.io/badge/languages-42-orange) ![Cost Items](https://img.shields.io/badge/cost_items-120%2C000%2B-red) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/datadrivenconstruction/OpenConstructionERP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/datadrivenconstruction/OpenConstructionERP) [![CodeQL](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml/badge.svg)](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml) [![Signed releases](https://img.shields.io/badge/releases-Sigstore_signed-8250df)](SECURITY.md)
 
 <img src="docs/screenshots/hero-overview.png" alt="OpenConstructionERP - open-source construction ERP for BOQ, BIM takeoff, DWG/PDF quantification and 5D cost modeling" width="800" />
 
@@ -42,7 +42,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 <table>
 <tr>
 <td align="center" width="16.66%"><b>120K+</b><br/><sub>cost&nbsp;items</sub></td>
-<td align="center" width="16.66%"><b>41</b><br/><sub>languages</sub></td>
+<td align="center" width="16.66%"><b>42</b><br/><sub>languages</sub></td>
 <td align="center" width="16.66%"><b>47</b><br/><sub>countries</sub></td>
 <td align="center" width="16.66%"><b>6</b><br/><sub>CAD&nbsp;formats</sub></td>
 <td align="center" width="16.66%"><b>190</b><br/><sub>modules</sub></td>
@@ -77,8 +77,8 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/credit-card-dark.svg"><img src="docs/readme-icons/credit-card-light.svg" width="14" align="center" alt=""></picture> **Estimating & Costs**
 - [Bill of Quantities](#-bill-of-quantities-boq-management)
-- [Cost Databases & Catalog](#%EF%B8%8F-cost-databases--resource-catalog)
-- [CAD/BIM Takeoff & AI](#%EF%B8%8F-cadbim-takeoff--ai-estimation)
+- [Cost Databases & Catalog](#-cost-databases--resource-catalog)
+- [CAD/BIM Takeoff & AI](#-cadbim-takeoff--ai-estimation)
 
 </td>
 <td valign="top">
@@ -97,7 +97,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/globe-dark.svg"><img src="docs/readme-icons/globe-light.svg" width="14" align="center" alt=""></picture> **Visualization & Coordination**
 - [Geo Hub (3D Globe)](#-geo-hub-3d-globe)
 - [Coordination Hub & Clash AI](#-coordination-hub--clash-ai)
-- [PDF Markups & Annotations](#%EF%B8%8F-pdf-markups--annotations)
+- [PDF Markups & Annotations](#-pdf-markups--annotations)
 
 </td>
 <td valign="top">
@@ -105,7 +105,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/shield-check-dark.svg"><img src="docs/readme-icons/shield-check-light.svg" width="14" align="center" alt=""></picture> **Field & Quality**
 - [Daily Diary & HSE](#-daily-diary--hse)
 - [Punch List](#-punch-list)
-- [Validation Engine](#%EF%B8%8F-validation--compliance-engine)
+- [Validation Engine](#-validation--compliance-engine)
 
 </td>
 <td valign="top">
@@ -168,17 +168,17 @@ Construction cost estimation software is expensive, closed-source, and locked to
 |-------------|-------------|
 | **Free forever** | AGPL-3.0 license. No subscriptions, no per-seat fees, no vendor lock-in. |
 | **Your data, your server** | Self-hosted. Everything runs on your machine - nothing leaves your network. |
-| **41 languages** | Full UI translation: English, German, French, Spanish, Portuguese, Russian, Chinese, Arabic, Hindi, Japanese, Korean, and 30 more. |
+| **42 languages** | Full UI translation: English, German, French, Spanish, Portuguese, Russian, Chinese, Arabic, Hindi, Japanese, Korean, and 31 more. |
 | **30+ regional standards** | DIN 276, NRM 1/2, CSI MasterFormat, GAEB, ГЭСН, DPGF, GB/T 50500, CPWD, ÖNORM, Birim Fiyat, Sekisan, SINAPI, and more. |
 | **AI-powered** | Connect any LLM provider (Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek) for smart estimation. |
 | **120,000+ cost items** | Nine cost bases - global CWICR (repriced across 30 markets) plus eight national bases (China, Turkey, Brazil, Spain, Italy, Greece, Vietnam, Indonesia). |
 
 ### The whole platform in your language
 
-The entire UI ships in **41 languages**, including full right-to-left support for Arabic, Urdu, Persian and Hebrew. Switch language from any screen and every label, message and report follows.
+The entire UI ships in **42 languages**, including full right-to-left support for Arabic, Urdu, Persian and Hebrew. Switch language from any screen and every label, message and report follows.
 
 <p align="center">
-🇬🇧 English &nbsp;·&nbsp; 🇩🇪 Deutsch &nbsp;·&nbsp; 🇫🇷 Français &nbsp;·&nbsp; 🇪🇸 Español &nbsp;·&nbsp; 🇲🇽 Español (México) &nbsp;·&nbsp; 🇧🇷 Português &nbsp;·&nbsp; 🇷🇺 Русский &nbsp;·&nbsp; 🇨🇳 简体中文 &nbsp;·&nbsp; 🇸🇦 العربية &nbsp;·&nbsp; 🇮🇳 हिन्दी &nbsp;·&nbsp; 🇹🇷 Türkçe &nbsp;·&nbsp; 🇮🇹 Italiano &nbsp;·&nbsp; 🇳🇱 Nederlands &nbsp;·&nbsp; 🇵🇱 Polski &nbsp;·&nbsp; 🇨🇿 Čeština &nbsp;·&nbsp; 🇯🇵 日本語 &nbsp;·&nbsp; 🇰🇷 한국어 &nbsp;·&nbsp; 🇸🇪 Svenska &nbsp;·&nbsp; 🇳🇴 Norsk &nbsp;·&nbsp; 🇩🇰 Dansk &nbsp;·&nbsp; 🇫🇮 Suomi &nbsp;·&nbsp; 🇧🇬 Български &nbsp;·&nbsp; 🇭🇷 Hrvatski &nbsp;·&nbsp; 🇮🇩 Bahasa Indonesia &nbsp;·&nbsp; 🇷🇴 Română &nbsp;·&nbsp; 🇹🇭 ไทย &nbsp;·&nbsp; 🇻🇳 Tiếng Việt &nbsp;·&nbsp; 🇲🇳 Монгол &nbsp;·&nbsp; 🇰🇬 Кыргызча
+🇬🇧 English &nbsp;·&nbsp; 🇩🇪 Deutsch &nbsp;·&nbsp; 🇫🇷 Français &nbsp;·&nbsp; 🇪🇸 Español &nbsp;·&nbsp; 🇲🇽 Español (México) &nbsp;·&nbsp; 🇧🇷 Português &nbsp;·&nbsp; 🇷🇺 Русский &nbsp;·&nbsp; 🇨🇳 简体中文 &nbsp;·&nbsp; 🇸🇦 العربية &nbsp;·&nbsp; 🇮🇳 हिन्दी &nbsp;·&nbsp; 🇹🇷 Türkçe &nbsp;·&nbsp; 🇮🇹 Italiano &nbsp;·&nbsp; 🇳🇱 Nederlands &nbsp;·&nbsp; 🇵🇱 Polski &nbsp;·&nbsp; 🇨🇿 Čeština &nbsp;·&nbsp; 🇯🇵 日本語 &nbsp;·&nbsp; 🇰🇷 한국어 &nbsp;·&nbsp; 🇸🇪 Svenska &nbsp;·&nbsp; 🇳🇴 Norsk &nbsp;·&nbsp; 🇩🇰 Dansk &nbsp;·&nbsp; 🇫🇮 Suomi &nbsp;·&nbsp; 🇧🇬 Български &nbsp;·&nbsp; 🇭🇷 Hrvatski &nbsp;·&nbsp; 🇮🇩 Bahasa Indonesia &nbsp;·&nbsp; 🇷🇴 Română &nbsp;·&nbsp; 🇹🇭 ไทย &nbsp;·&nbsp; 🇻🇳 Tiếng Việt &nbsp;·&nbsp; 🇺🇦 Українська &nbsp;·&nbsp; 🇰🇬 Кыргызча
 </p>
 
 ### How It Compares
@@ -207,14 +207,14 @@ The entire UI ships in **41 languages**, including full right-to-left support fo
 <tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#9888; partial</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">~&#8364;500/mo</td><td align="center">~&#8364;300/mo</td><td align="center">~&#8364;200/mo</td><td align="center">~&#8364;30/mo</td></tr>
 <tr><td><b>AI estimation</b></td><td align="center">&#10004; 20 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>UI languages</b></td><td align="center"><b>41</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
+<tr><td><b>UI languages</b></td><td align="center"><b>42</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
 <tr><td><b>Regional standards</b></td><td align="center"><b>30+</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">-</td></tr>
 <tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">PDF only</td></tr>
 <tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Cost database included</b></td><td align="center">&#10004; 120K+ rates</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ priced</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Validation engine</b></td><td align="center">&#10004; 125 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Validation engine</b></td><td align="center">&#10004; 142 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>REST API</b></td><td align="center">&#10004; full</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Real-time collab</b></td><td align="center">&#10004; soft locks</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Open data export</b></td><td align="center">&#10004; GAEB · XLSX · JSON</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">PDF only</td></tr>
@@ -236,7 +236,7 @@ Each block below is a short GIF cut from the full walkthrough above - same order
 <tr>
 <td align="center" width="50%">
 <strong><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/person-dark.svg"><img src="docs/readme-icons/person-light.svg" width="14" align="center" alt=""></picture> 1 · Role-Based Onboarding</strong><br/>
-<em>Sign in as Admin / Estimator / Manager - the wizard pre-selects the right 17 of 180 modules for your role</em><br/><br/>
+<em>Sign in as Admin / Estimator / Manager - the wizard pre-selects the right 17 of 190 modules for your role</em><br/><br/>
 <img src="docs/gifs/07_Role_Based_Onboarding.gif" alt="Role-Based Onboarding" width="400" />
 </td>
 <td align="center" width="50%">
@@ -400,7 +400,7 @@ Build professional cost estimates with a powerful BOQ editor. The full lifecycle
 - **Resources & assemblies** - Link labor, materials, equipment to each position. Build reusable cost recipes
 - **Markups** - Overhead, profit, VAT, contingency - configure per project or use regional defaults
 - **Automatic calculations** - Quantity × unit rate = total. Section subtotals. Grand total with markups
-- **Validation** - 125 built-in rules check for missing quantities, zero prices, duplicate items, and compliance with DIN 276, NRM, MasterFormat
+- **Validation** - 142 built-in rules check for missing quantities, zero prices, duplicate items, and compliance with DIN 276, NRM, MasterFormat
 - **Export** - Download as Excel, CSV, PDF report, or GAEB XML (X83)
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/database-dark.svg"><img src="docs/readme-icons/database-light.svg" width="14" align="center" alt=""></picture> Cost Databases & Resource Catalog
@@ -499,7 +499,7 @@ Bottom-right floating chat on every page - talks to the entire ERP database thro
 
 <img src="docs/readme-diagrams/06-floating-chat-with-the.svg" alt="Floating chat with the diagram" width="900" />
 
-- **Always-on** - Mounted in `AppLayout`, available on every route (Dashboard, BOQ, BIM, Geo, PropDev, Accommodation, all 180 modules)
+- **Always-on** - Mounted in `AppLayout`, available on every route (Dashboard, BOQ, BIM, Geo, PropDev, Accommodation, all 190 modules)
 - **Real ERP access** - Reads/writes through tools, not LLM guesswork: `get_all_projects`, `get_project_summary`, `get_boq_items`, `get_schedule`, `get_validation_results`, `get_risk_register`, `search_cwicr_database`, `get_cost_model`, `compare_projects`, `run_validation`, `create_boq_item`, `search_boq_positions`, `search_documents`, `search_tasks`, `search_risks`, `search_bim_elements`, `search_anything`, `search_rfis`, `search_submittals`, `search_correspondence`
 - **Streamed responses** - Tool-call cards (risk register table, BOQ summary, etc.) render inline as the model produces them
 - **Provider-agnostic** - Anthropic / OpenAI / Gemini / Mistral / Groq / DeepSeek behind the same tool interface
@@ -625,7 +625,7 @@ Field-level reporting and safety tracking that holds up in court:
 
 Ensure your estimates meet regulatory standards before submission:
 
-- **125 built-in rules** across 29 rule sets - DIN 276, NRM, MasterFormat, GAEB, and universal BOQ quality checks. Modules register further rules as they load, so the number the running app reports is higher and depends on which modules are enabled
+- **142 built-in rules** across 31 rule sets - DIN 276, NRM, MasterFormat, GAEB, and universal BOQ quality checks. Modules register further rules as they load, so the number the running app reports is higher and depends on which modules are enabled
 - **Real-time validation** - Run checks with Ctrl+Shift+V. Each position gets a pass/warning/error indicator
 - **Quality score** - Overall BOQ quality percentage (0-100%) visible in the toolbar
 - **Drill-down** - Click any finding to jump directly to the affected BOQ position and fix it
@@ -635,7 +635,7 @@ Ensure your estimates meet regulatory standards before submission:
 
 Get productive in under 10 minutes:
 
-1. **Choose language** - Select from 41 languages. The entire UI switches instantly
+1. **Choose language** - Select from 42 languages. The entire UI switches instantly
 2. **Select region** - Determines default cost database, currency, and classification standard
 3. **Load cost database** - One-click import of CWICR pricing data for your region (55,000+ items)
 4. **Import resource catalog** - Materials, labor, equipment, and pre-built assemblies
@@ -878,7 +878,7 @@ env vars **before the first boot**:
 | AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
 | Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
 | CAD/BIM | [DDC cad2data](https://github.com/datadrivenconstruction) | RVT, IFC, DWG, DGN → structured quantities |
-| i18n | i18next + 43 locale files | 41 of them offered in the language picker; full RTL support (Arabic, Urdu, Persian, Hebrew), locale-aware formatting |
+| i18n | i18next + 43 locale files | 42 of them offered in the language picker; full RTL support (Arabic, Urdu, Persian, Hebrew), locale-aware formatting |
 
 ## Architecture
 
@@ -921,7 +921,7 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
 │  Takeoff · Tendering · Risk · Reports · Catalog  │
 │  Requirements · Markups · Punch List · BIM Hub   │
 │  PropDev · Geo Hub · Coordination · Clash AI     │
-│  Accommodation · Floating Chat · 25 widgets      │
+│  Accommodation · Floating Chat · 26 widgets      │
 ├──────────────────────────────────────────────────┤
 │  Database (PostgreSQL, embedded in dev)          │
 │  Vector DB (LanceDB / Qdrant)                    │
