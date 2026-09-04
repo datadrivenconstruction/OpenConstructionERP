@@ -104,7 +104,7 @@ def runtime_root_paths() -> list[Path]:
 def is_attached(directory: Path | None = None) -> bool:
     """Whether ``directory`` (default: the resolved runtime dir) is on the path."""
     target = (directory or runtime_modules_dir()).expanduser()
-    return any(_same_dir(Path(p), target) for p in _package_path())
+    return any(same_dir(Path(p), target) for p in _package_path())
 
 
 def attach_runtime_root(directory: Path | None = None, *, create: bool = True) -> Path | None:
@@ -140,7 +140,7 @@ def attach_runtime_root(directory: Path | None = None, *, create: bool = True) -
             return None
 
     path = _package_path()
-    if any(_same_dir(Path(p), target) for p in path):
+    if any(same_dir(Path(p), target) for p in path):
         return target
 
     path.append(str(target))
@@ -158,7 +158,7 @@ def detach_runtime_root(directory: Path) -> bool:
     target = directory.expanduser()
     path = _package_path()
     for index in range(len(path) - 1, 0, -1):
-        if _same_dir(Path(path[index]), target):
+        if same_dir(Path(path[index]), target):
             del path[index]
             logger.info("Runtime module root detached: %s", target)
             return True
@@ -209,7 +209,7 @@ def _report_shadowed(directory: Path) -> None:
         )
 
 
-def _same_dir(left: Path, right: Path) -> bool:
+def same_dir(left: Path, right: Path) -> bool:
     """Compare two directories as the filesystem would.
 
     ``Path.samefile`` is the honest comparison - it sees through symlinks, and

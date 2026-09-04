@@ -317,6 +317,40 @@ class TestUninstall:
         assert base not in app.openapi()["paths"], "the published schema still describes it"
 
     @pytest.mark.asyncio
+    async def test_it_stops_being_listed_and_counted(self, runtime_root: Path, app: FastAPI, pg_engine) -> None:
+        """The module registry has to let go of it too, not just the route table.
+
+        Disabling a module deliberately keeps its manifest, because that is what
+        a later enable reads back. Removing one has no such reader: the files
+        are gone. A manifest kept anyway is a module ``GET /api/v1/modules``
+        still lists, the health endpoint's ``modules_loaded`` still counts - it
+        is the length of that same list, not of the loaded ones - and the enable
+        route still accepts, since its 404 guard is a lookup in that registry.
+        Accepting is the one that hurts: the enable then walks into importlib
+        and raises ``ModuleNotFoundError``, which is not the ``ValueError`` the
+        route catches, so the caller gets a 500 where a 404 was the answer.
+        """
+        from app.core.module_loader import module_loader
+
+        module_name = f"oe_{KEY}"
+        await service.install(_spec(), app)
+        listed = {row["name"] for row in module_loader.list_modules()}
+        assert module_name in listed, "the freshly installed module was not listed"
+        counted_while_installed = len(module_loader.list_modules())
+
+        await service.uninstall(KEY, app, drop_data=True)
+
+        assert module_name not in {row["name"] for row in module_loader.list_modules()}
+        assert len(module_loader.list_modules()) == counted_while_installed - 1
+        # Population beside the verdict: what the registry holds is now what the
+        # loader has actually loaded plus whatever is switched off, and this key
+        # is in neither.
+        assert module_name not in module_loader.loaded_modules
+        # The guard both /modules/<name>/enable and /disable ask before doing
+        # anything. It has to say no now, so the caller gets a 404.
+        assert module_name not in module_loader._manifests
+
+    @pytest.mark.asyncio
     async def test_the_permissions_go_with_it(self, runtime_root: Path, app: FastAPI, pg_engine) -> None:
         """A module that is gone must stop granting anything.
 
