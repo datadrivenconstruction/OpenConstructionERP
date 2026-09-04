@@ -27834,6 +27834,7 @@ const resource = {
     "finance.summary_empty_title": "لا توجد بيانات مالية حتى الآن",
     "finance.total_manual": "تجاوز يدوي",
     "finance.total_recalculate": "إعادة الحساب من المجموع الفرعي + الضريبة",
+    "finance.total_mismatch": "يجب أن يساوي الإجمالي المجموع الفرعي زائد الضريبة",
     "forms.add_field": "إضافة حقل",
     "forms.add_option": "إضافة خيار",
     "forms.remove_photo": "إزالة الصورة",

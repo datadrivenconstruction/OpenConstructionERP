@@ -215,6 +215,86 @@ def _compute_invoice_total(subtotal: str, tax: str) -> str:
     return str(s + t)
 
 
+# The widest gap allowed between an invoice's own figures.
+#
+# Two cents, the same figure ``invoice_capture_logic.AMOUNT_TOLERANCE`` holds a
+# scanned document to, and deliberately so: a supplier invoice that passed the
+# capture review must not then be refused when it is booked. It covers rounding
+# and nothing else. Beyond it the numbers are telling two different stories
+# about the same document, and every receiver checks the arithmetic
+# (EN 16931 BR-CO-15), so a total that does not add up is not a preference
+# somebody expressed, it is a document that will be rejected downstream.
+INVOICE_AMOUNT_TOLERANCE = Decimal("0.02")
+
+
+def _line_sum_tolerance(line_count: int) -> Decimal:
+    """How far a set of line amounts may sit from the subtotal they make up.
+
+    A cent per line, because every line is rounded on its own and the error
+    accumulates, with the invoice-level tolerance as the floor for a document
+    of one or two lines.
+    """
+    return max(INVOICE_AMOUNT_TOLERANCE, Decimal("0.01") * line_count)
+
+
+def _refuse_inconsistent_amounts(
+    *,
+    subtotal: str,
+    tax: str,
+    total: str | None,
+    line_amounts: list[str] | None,
+) -> None:
+    """Refuse an invoice whose own figures disagree.
+
+    Issue #466. A total is a claim about the document, not a free-standing
+    number: it has to be the subtotal plus the tax, and the lines have to add
+    up to the subtotal they are lines of. This used to be enforced by quietly
+    overwriting whatever total the caller sent with ``subtotal + tax``, which
+    is why a client that had been posting a truncated total for weeks looked
+    healthy from the database side - the wrong figure never landed, and nothing
+    said it had arrived. Overwriting a number somebody typed is how a defect
+    like that stays invisible, so a disagreement is refused and named instead.
+
+    Args:
+        subtotal: the net figure being stored.
+        tax: the tax figure being stored.
+        total: the gross the caller asserts, or ``None`` to let it be derived.
+        line_amounts: the amounts of the line items being stored, or ``None``
+            when the caller is not touching the lines.
+
+    Raises:
+        HTTPException: 400, naming both figures, when they disagree by more
+            than the tolerance.
+    """
+    net = _parse_decimal(subtotal, "amount_subtotal")
+    vat = _parse_decimal(tax, "tax_amount")
+
+    if total is not None:
+        gross = _parse_decimal(total, "amount_total")
+        if abs(gross - (net + vat)) > INVOICE_AMOUNT_TOLERANCE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"amount_total ({gross}) must equal amount_subtotal + tax_amount "
+                    f"({net} + {vat} = {net + vat}). Leave amount_total out to have it computed."
+                ),
+            )
+
+    if line_amounts:
+        booked = sum(
+            (_parse_decimal(amount, "line_items.amount") for amount in line_amounts),
+            Decimal("0"),
+        )
+        if abs(booked - net) > _line_sum_tolerance(len(line_amounts)):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"The line items add up to {booked}, which is not the amount_subtotal "
+                    f"of {net}. Invoice lines are net amounts and have to make up the subtotal."
+                ),
+            )
+
+
 # ── Gap E: retainage withholding maths ───────────────────────────────────────
 
 
@@ -373,10 +453,25 @@ class FinanceService:
         self,
         data: InvoiceCreate,
         user_id: str | None = None,
+        *,
+        enforce_line_sum: bool = True,
     ) -> Invoice:
         """Create a new invoice with optional line items.
 
-        Automatically computes amount_total = amount_subtotal + tax_amount.
+        ``amount_total`` is computed as ``amount_subtotal + tax_amount`` when
+        the caller leaves it out. When the caller does send one it is kept, and
+        checked: a total that does not add up is refused rather than silently
+        replaced (issue #466, see :func:`_refuse_inconsistent_amounts`).
+
+        Args:
+            data: the invoice to create.
+            user_id: who is creating it, recorded as ``created_by``.
+            enforce_line_sum: whether the line items have to add up to the
+                subtotal. The one caller that turns this off is invoice
+                capture, whose lines are a best-effort reading of a scanned
+                document while the net comes from the document's own header,
+                and whose amounts are already checked by
+                ``invoice_capture_logic.validate_amounts`` before booking.
         """
         # Validate initial status
         if data.status not in _VALID_INVOICE_STATUSES:
@@ -413,8 +508,23 @@ class FinanceService:
         else:
             invoice_number = await self.invoices.next_invoice_number(data.project_id, data.invoice_direction)
 
-        # Server-side total computation: always override amount_total
-        computed_total = _compute_invoice_total(data.amount_subtotal, data.tax_amount)
+        # A total the caller asserted is kept and checked; one it left out is
+        # derived. Silently replacing an asserted total is what hid #466: the
+        # client had been posting a figure truncated at its own thousands
+        # separator, and because the server rebuilt the number on every write,
+        # the database looked right and nothing anywhere reported the client.
+        asserted_total = data.amount_total if "amount_total" in data.model_fields_set else None
+        _refuse_inconsistent_amounts(
+            subtotal=data.amount_subtotal,
+            tax=data.tax_amount,
+            total=asserted_total,
+            line_amounts=[item.amount for item in data.line_items] if enforce_line_sum else None,
+        )
+        computed_total = (
+            asserted_total
+            if asserted_total is not None
+            else _compute_invoice_total(data.amount_subtotal, data.tax_amount)
+        )
 
         invoice = Invoice(
             project_id=data.project_id,
@@ -523,14 +633,28 @@ class FinanceService:
                     ),
                 )
 
-        # Recompute total if subtotal or tax changed
-        new_subtotal = fields.get("amount_subtotal", invoice.amount_subtotal)
-        new_tax = fields.get("tax_amount", invoice.tax_amount)
-        if "amount_subtotal" in fields or "tax_amount" in fields:
-            fields["amount_total"] = _compute_invoice_total(
-                new_subtotal or invoice.amount_subtotal,
-                new_tax or invoice.tax_amount,
+        # The figures this write leaves the invoice with, whether they come
+        # from the patch or from the row it lands on.
+        new_subtotal = str(fields.get("amount_subtotal") or invoice.amount_subtotal)
+        new_tax = str(fields.get("tax_amount") or invoice.tax_amount)
+        asserted_total = fields.get("amount_total")
+        # Lines are only weighed when this patch replaces them. A patch that
+        # touches an unrelated field must not be refused because of lines it is
+        # not writing, and a claim-born invoice keeps its own breakdown.
+        patch_line_amounts = (
+            [str(getattr(item, "amount", "0")) for item in data.line_items] if data.line_items else None
+        )
+        if asserted_total is not None or patch_line_amounts:
+            _refuse_inconsistent_amounts(
+                subtotal=new_subtotal,
+                tax=new_tax,
+                total=asserted_total if asserted_total is None else str(asserted_total),
+                line_amounts=patch_line_amounts,
             )
+        # Recompute total only when nothing was asserted: an amount change that
+        # comes without a total still has to leave the invoice adding up.
+        if asserted_total is None and ("amount_subtotal" in fields or "tax_amount" in fields):
+            fields["amount_total"] = _compute_invoice_total(new_subtotal, new_tax)
 
         if fields:
             await self.invoices.update(invoice_id, **fields)

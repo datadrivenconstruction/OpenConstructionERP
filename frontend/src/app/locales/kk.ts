@@ -26908,6 +26908,7 @@ const resource = {
     "finance.summary_empty_title": "Әлі қаржылық дерек жоқ",
     "finance.total_manual": "Қолмен ауыстыру",
     "finance.total_recalculate": "Аралық қорытынды + салықтан қайта есептеу",
+    "finance.total_mismatch": "Жиыны аралық сома мен салықтың қосындысына тең болуы керек",
     "forms.add_field": "Өріс қосу",
     "forms.add_option": "Опция қосу",
     "forms.remove_photo": "Суретті өшіру",

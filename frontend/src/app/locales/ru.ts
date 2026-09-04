@@ -27795,6 +27795,7 @@ const resource = {
     "finance.summary_empty_title": "Финансовых данных еще нет",
     "finance.total_manual": "Ручное переопределение",
     "finance.total_recalculate": "Пересчитать из подитога + налог",
+    "finance.total_mismatch": "Итого должно равняться сумме промежуточного итога и налога",
     "forms.add_field": "Добавить поле",
     "forms.add_option": "Добавить опцию",
     "forms.remove_photo": "Удалить фото",

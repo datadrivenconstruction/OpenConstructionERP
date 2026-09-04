@@ -26924,6 +26924,7 @@ const resource = {
     "finance.summary_empty_title": "עדיין אין נתונים פיננסיים",
     "finance.total_manual": "עקיפה ידנית",
     "finance.total_recalculate": "חישוב מחדש מסכום ביניים + מס",
+    "finance.total_mismatch": "הסה\"כ חייב להיות שווה לסיכום הביניים בתוספת המס",
     "forms.add_field": "הוספת שדה",
     "forms.add_option": "הוספת אפשרות",
     "forms.remove_photo": "הסר תמונה",

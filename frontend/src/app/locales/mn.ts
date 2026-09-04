@@ -27159,6 +27159,7 @@ const resource = {
     "finance.summary_empty_title": "Санхүүгийн мэдээлэл байхгүй",
     "finance.total_manual": "Гарын өндөрлөл",
     "finance.total_recalculate": "Дэд нийт + татвараас дахин тооцоолох",
+    "finance.total_mismatch": "Нийт дүн нь дэд дүн болон татварын нийлбэртэй тэнцүү байх ёстой",
     "forms.add_field": "Талбар нэмэх",
     "forms.add_option": "Сонголт нэмэх",
     "forms.remove_photo": "Зургийг устгах",

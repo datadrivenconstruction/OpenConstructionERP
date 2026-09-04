@@ -26908,6 +26908,7 @@ const resource = {
     "finance.summary_empty_title": "এখনো কোনো আর্থিক ডেটা নেই",
     "finance.total_manual": "ম্যানুয়াল ওভাররাইড",
     "finance.total_recalculate": "সাবটোটাল + করে থেকে পুনর্গণনা করুন",
+    "finance.total_mismatch": "মোট অবশ্যই উপ-যোগফল এবং করের যোগফলের সমান হতে হবে",
     "forms.add_field": "ফিল্ড যোগ করুন",
     "forms.add_option": "অপশন যোগ করুন",
     "forms.remove_photo": "ছবি সরান",

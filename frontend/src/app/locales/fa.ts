@@ -26908,6 +26908,7 @@ const resource = {
     "finance.summary_empty_title": "هنوز داده مالی‌ای نیست",
     "finance.total_manual": "لغو دستی",
     "finance.total_recalculate": "محاسبه دوباره از جمع جزء + مالیات",
+    "finance.total_mismatch": "جمع کل باید برابر با جمع جزء به‌علاوه مالیات باشد",
     "forms.add_field": "افزودن فیلد",
     "forms.add_option": "افزودن گزینه",
     "forms.remove_photo": "حذف عکس",

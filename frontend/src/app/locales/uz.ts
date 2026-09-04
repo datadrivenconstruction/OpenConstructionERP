@@ -28111,6 +28111,7 @@ const resource = {
     "finance.summary_empty_title": "Hali moliyaviy maʼlumot yoʻq",
     "finance.total_manual": "Qoʻlda oʻzgartirish",
     "finance.total_recalculate": "Kichik jami + soliqdan qayta hisoblash",
+    "finance.total_mismatch": "Jami oraliq jami va soliq yig'indisiga teng bo'lishi kerak",
     "forms.add_field": "Maydon qoʻshish",
     "forms.add_option": "Variant qoʻshish",
     "forms.remove_photo": "Rasmni olib tashlash",

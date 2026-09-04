@@ -77,7 +77,7 @@ import { StatementsTab } from './StatementsTab';
 import { RetentionLedgerTab } from './RetentionLedgerTab';
 import { EInvoiceModal } from './EInvoiceModal';
 import { financeGuide } from './financeGuide';
-import { fmtList, fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
 
 // English fallbacks for the computed `finance.payment_status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1898,7 +1898,55 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
 /* ── Invoices Tab ─────────────────────────────────────────────────────── */
 
-function InvoicesTab({ projectId }: { projectId: string }) {
+/**
+ * The widest gap between a total a person typed and one the server will keep.
+ *
+ * A cent. Rounding a lump sum to a nicer figure is a real thing to want, and a
+ * cent of it is the only part that survives an invoice: subtotal + tax = total
+ * is the arithmetic every receiver checks (EN 16931 BR-CO-15), so a total that
+ * disagrees by more than rounding is not a preference, it is a document nobody
+ * downstream can accept. The server holds the same identity to twice this, so
+ * anything this form lets through is something the API will keep.
+ */
+const INVOICE_TOTAL_TOLERANCE = 0.01;
+
+/**
+ * The invoice form's three money fields, read as numbers.
+ *
+ * `Number` rather than `parseFloat` on purpose. `parseFloat` stops at the
+ * first character it cannot use and hands back what it has, so a grouped or
+ * comma-decimal string read as 9 or as 900 instead of failing, which is how
+ * issue #466 stayed silent. `Number('9,000.00')` is `NaN`, and a field that
+ * cannot be read is reported as unset rather than as a smaller number.
+ *
+ * A blank subtotal beside a typed total is filled from the total rather than
+ * sent as a zero: the server derives the stored total from subtotal + tax, so
+ * a zero subtotal stored a zero invoice next to a line item carrying the real
+ * figure.
+ */
+function readInvoiceAmounts(form: { subtotal: string; tax: string; amount: string }) {
+  const read = (raw: string): number | null => {
+    const text = (raw ?? '').trim();
+    if (text === '') return null;
+    const n = Number(text);
+    return Number.isFinite(n) ? n : null;
+  };
+  const tax = read(form.tax) ?? 0;
+  const typedSubtotal = read(form.subtotal);
+  const typedTotal = read(form.amount);
+  const subtotal = typedSubtotal ?? (typedTotal != null ? typedTotal - tax : 0);
+  const total = typedTotal ?? subtotal + tax;
+  return { subtotal, tax, total, typedSubtotal, typedTotal };
+}
+
+/**
+ * The invoice register and the create/edit form behind it.
+ *
+ * Exported so the money a person types into that form can be driven end to
+ * end in a test - typed, read back off the field, submitted - without
+ * mounting the whole Finance page around it.
+ */
+export function InvoicesTab({ projectId }: { projectId: string }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -2010,7 +2058,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     setAmountEditedManually(
       Number.isFinite(totalN) &&
         total.trim() !== '' &&
-        Math.abs(totalN - (subN + taxN)) > 0.005,
+        Math.abs(totalN - (subN + taxN)) > INVOICE_TOTAL_TOLERANCE,
     );
     setInvoiceErrors({});
     setEditingInvoice(inv);
@@ -2029,15 +2077,28 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     }
   }, [invoiceModalOpen]);
 
-  const canSubmitInvoice = !!invoiceForm.invoice_date && (parseFloat(invoiceForm.subtotal || '0') > 0 || parseFloat(invoiceForm.amount || '0') > 0);
+  const canSubmitInvoice =
+    !!invoiceForm.invoice_date && readInvoiceAmounts(invoiceForm).total > 0;
 
   const validateInvoice = (): boolean => {
     const e: Record<string, string> = {};
+    const { tax, total, typedSubtotal, typedTotal } = readInvoiceAmounts(invoiceForm);
     if (!invoiceForm.invoice_date) e.invoice_date = t('validation.required', { defaultValue: 'This field is required' });
     if (!invoiceForm.subtotal && !invoiceForm.amount) e.subtotal = t('validation.required', { defaultValue: 'This field is required' });
-    else {
-      const total = invoiceForm.amount ? parseFloat(invoiceForm.amount) : (parseFloat(invoiceForm.subtotal || '0') + parseFloat(invoiceForm.tax || '0'));
-      if (total <= 0) e.subtotal = t('validation.positive_number', { defaultValue: 'Must be a positive number' });
+    else if (total <= 0) e.subtotal = t('validation.positive_number', { defaultValue: 'Must be a positive number' });
+    // A hand-typed total that does not add up is named here rather than
+    // resolved in one direction or the other. Rewriting either figure would
+    // change a number a person typed without telling them, and dropping the
+    // typed total on the floor is what used to happen: the server rebuilt it
+    // from subtotal + tax, so the override never reached the invoice at all.
+    if (
+      typedSubtotal != null &&
+      typedTotal != null &&
+      Math.abs(typedTotal - (typedSubtotal + tax)) > INVOICE_TOTAL_TOLERANCE
+    ) {
+      e.amount = t('finance.total_mismatch', {
+        defaultValue: 'The total must equal the subtotal plus tax',
+      });
     }
     setInvoiceErrors(e);
     return Object.keys(e).length === 0;
@@ -2076,27 +2137,27 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   const createInvoiceMut = useMutation({
     mutationFn: (data: typeof invoiceForm) => {
-      const sub = parseFloat(data.subtotal || '0');
-      const tax = parseFloat(data.tax || '0');
-      const total = data.amount ? parseFloat(data.amount) : sub + tax;
+      const { subtotal: sub, tax, total } = readInvoiceAmounts(data);
       return apiPost('/v1/finance/', {
         project_id: projectId,
         contact_id: data.contact_id || undefined,
         invoice_direction: data.direction,
         invoice_date: data.invoice_date,
         due_date: data.due_date || undefined,
-        amount_subtotal: String(sub),
-        tax_amount: String(tax),
-        amount_total: String(total),
+        amount_subtotal: fmtNumberForInput(sub),
+        tax_amount: fmtNumberForInput(tax),
+        amount_total: fmtNumberForInput(total),
         // Send the chosen currency; empty string lets the backend
         // resolve the project currency (never hardcode EUR — task #217).
         currency_code: data.currency || projectCurrency || '',
         notes: data.description || undefined,
         status: 'draft',
-        // One net line for the billed figure (falls back to the total when
-        // only a total was typed), and the BT-10 routing id under
+        // One net line for the billed figure, and the BT-10 routing id under
         // metadata.einvoice - both read by the e-invoice check and export.
-        line_items: singleFormLine(data, sub > 0 ? sub : total),
+        // The line is the subtotal, never the gross: lines are net amounts and
+        // the server refuses a set of them that does not add up to the
+        // subtotal it is being asked to store.
+        line_items: singleFormLine(data, sub),
         metadata: invoiceMetadataWithBuyerReference(null, data.buyer_reference),
       });
     },
@@ -2121,9 +2182,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   // rejects an illegal jump, and the dropdown only offers legal next states.
   const updateInvoiceMut = useMutation({
     mutationFn: (data: { id: string; form: typeof invoiceForm; prevStatus: string }) => {
-      const sub = parseFloat(data.form.subtotal || '0');
-      const tax = parseFloat(data.form.tax || '0');
-      const total = data.form.amount ? parseFloat(data.form.amount) : sub + tax;
+      const { subtotal: sub, tax, total } = readInvoiceAmounts(data.form);
       // Normalise the backend's canonical 'sent' to the 'approved' label the
       // UI uses, so re-saving an approved invoice without touching the status
       // doesn't look like a no-op transition (approved -> sent).
@@ -2135,15 +2194,15 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       // kept in sync with the edited amounts.
       const existingLines = editingInvoice?.line_items ?? [];
       const lineItemsPatch =
-        existingLines.length <= 1 ? { line_items: singleFormLine(data.form, sub > 0 ? sub : total) } : {};
+        existingLines.length <= 1 ? { line_items: singleFormLine(data.form, sub) } : {};
       return apiPatch(`/v1/finance/${data.id}`, {
         contact_id: data.form.contact_id || null,
         invoice_direction: data.form.direction,
         invoice_date: data.form.invoice_date,
         due_date: data.form.due_date || null,
-        amount_subtotal: String(sub),
-        tax_amount: String(tax),
-        amount_total: String(total),
+        amount_subtotal: fmtNumberForInput(sub),
+        tax_amount: fmtNumberForInput(tax),
+        amount_total: fmtNumberForInput(total),
         currency_code: data.form.currency || projectCurrency || '',
         notes: data.form.description || null,
         // Merged over the stored object: PATCH replaces metadata wholesale,
@@ -3079,16 +3138,18 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   value={invoiceForm.subtotal}
                   onChange={(e) => {
                     const sub = e.target.value;
-                    const tax = invoiceForm.tax || '0';
-                    const total = fmtFixed(parseFloat(sub || '0') + parseFloat(tax), 2);
+                    const amounts = readInvoiceAmounts({ ...invoiceForm, subtotal: sub });
                     // Only auto-fill the total while the user hasn't taken it
                     // over manually; otherwise preserve their entered total.
+                    // Canonical form, because this lands back in a number
+                    // field and a grouped one empties it (#466).
+                    const total = fmtNumberForInput(amounts.subtotal + amounts.tax);
                     setInvoiceForm((f) => ({
                       ...f,
                       subtotal: sub,
                       ...(amountEditedManually ? {} : { amount: total }),
                     }));
-                    if (invoiceErrors.subtotal) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.subtotal; return next; });
+                    if (invoiceErrors.subtotal || invoiceErrors.amount) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.subtotal; delete next.amount; return next; });
                   }}
                   className={clsx(inputCls, 'pl-12', invoiceErrors.subtotal && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
                   placeholder="0.00"
@@ -3106,15 +3167,17 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   value={invoiceForm.tax}
                   onChange={(e) => {
                     const tax = e.target.value;
-                    const sub = invoiceForm.subtotal || '0';
-                    const total = fmtFixed(parseFloat(sub) + parseFloat(tax || '0'), 2);
+                    const amounts = readInvoiceAmounts({ ...invoiceForm, tax });
                     // Preserve a manually entered total; otherwise keep it in
-                    // sync with subtotal+tax.
+                    // sync with subtotal+tax, in the canonical form the field
+                    // itself accepts (#466).
+                    const total = fmtNumberForInput(amounts.subtotal + amounts.tax);
                     setInvoiceForm((f) => ({
                       ...f,
                       tax,
                       ...(amountEditedManually ? {} : { amount: total }),
                     }));
+                    if (invoiceErrors.amount) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.amount; return next; });
                   }}
                   className={clsx(inputCls, 'pl-12')}
                   placeholder="0.00"
@@ -3146,31 +3209,41 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                     aria-label={t('finance.total', { defaultValue: 'Total' })}
                     value={(() => {
                       if (amountEditedManually) return invoiceForm.amount;
-                      const sub = parseFloat(invoiceForm.subtotal || '0');
-                      const tax = parseFloat(invoiceForm.tax || '0');
-                      const total = (Number.isFinite(sub) ? sub : 0) + (Number.isFinite(tax) ? tax : 0);
-                      return fmtFixed(total, 2);
+                      const { subtotal, tax } = readInvoiceAmounts(invoiceForm);
+                      return fmtNumberForInput(subtotal + tax);
                     })()}
                     onChange={(e) => {
                       const v = e.target.value;
                       setAmountEditedManually(true);
                       setInvoiceForm((f) => ({ ...f, amount: v }));
+                      if (invoiceErrors.amount) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.amount; return next; });
                     }}
-                    className="h-9 w-36 rounded-lg border border-border bg-surface-primary px-3 text-right text-base font-bold tabular-nums text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                    className={clsx(
+                      'h-9 w-36 rounded-lg border bg-surface-primary px-3 text-right text-base font-bold tabular-nums text-content-primary focus:outline-none focus:ring-2',
+                      invoiceErrors.amount
+                        ? 'border-semantic-error focus:ring-red-300 focus:border-semantic-error'
+                        : 'border-border focus:ring-oe-blue/30 focus:border-oe-blue',
+                    )}
                     placeholder="0.00"
                   />
                 </div>
               </div>
+              {invoiceErrors.amount && (
+                <div className="mt-2 flex items-center justify-end">
+                  <span className="text-xs font-medium text-semantic-error">
+                    {invoiceErrors.amount}
+                  </span>
+                </div>
+              )}
               {amountEditedManually && (
                 <div className="mt-2 flex items-center justify-end">
                   <button
                     type="button"
                     onClick={() => {
-                      const sub = parseFloat(invoiceForm.subtotal || '0');
-                      const tax = parseFloat(invoiceForm.tax || '0');
-                      const total = fmtFixed((Number.isFinite(sub) ? sub : 0) + (Number.isFinite(tax) ? tax : 0), 2);
+                      const { subtotal, tax } = readInvoiceAmounts(invoiceForm);
                       setAmountEditedManually(false);
-                      setInvoiceForm((f) => ({ ...f, amount: total }));
+                      setInvoiceForm((f) => ({ ...f, amount: fmtNumberForInput(subtotal + tax) }));
+                      setInvoiceErrors((prev) => { const next = { ...prev }; delete next.amount; return next; });
                     }}
                     className="text-xs font-medium text-oe-blue hover:underline"
                   >

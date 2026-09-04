@@ -27635,6 +27635,7 @@ const resource = {
     "finance.summary_empty_title": "Ingen finansielle data endnu",
     "finance.total_manual": "Manuel tilsidesættelse",
     "finance.total_recalculate": "Genberegn fra subtotal + skat",
+    "finance.total_mismatch": "I alt skal svare til subtotal plus skat",
     "forms.add_field": "Tilføj felt",
     "forms.add_option": "Tilføj indstilling",
     "forms.remove_photo": "Fjern foto",

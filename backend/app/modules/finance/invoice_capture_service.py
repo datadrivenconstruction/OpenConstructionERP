@@ -494,6 +494,14 @@ class InvoiceCaptureService:
                 },
             ),
             user_id=user_id,
+            # The lines here are what the reader could make out of a scanned
+            # document, while the net is the figure the document states in its
+            # own header and the one a person approved. They do not have to add
+            # up, and refusing the booking because a line went unread would
+            # strand an approved invoice with its journal entry already posted.
+            # Net, tax and gross are checked against each other on the way in
+            # by ``logic.validate_amounts``.
+            enforce_line_sum=False,
         )
 
         sealed_at = _utcnow_iso()

@@ -28352,6 +28352,7 @@ const resource = {
     "finance.summary_empty_title": "Noch keine Finanzdaten",
     "finance.total_manual": "Manuell überschreiben",
     "finance.total_recalculate": "Aus Zwischensumme + Steuer neu berechnen",
+    "finance.total_mismatch": "Der Gesamtbetrag muss der Zwischensumme plus Steuer entsprechen",
     "forms.add_field": "Feld hinzufügen",
     "forms.add_option": "Option hinzufügen",
     "forms.remove_photo": "Foto entfernen",

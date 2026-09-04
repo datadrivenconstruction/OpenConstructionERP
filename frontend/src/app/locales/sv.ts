@@ -27592,6 +27592,7 @@ const resource = {
     "finance.summary_empty_title": "Ingen finansiell data än",
     "finance.total_manual": "Manuell åsidosättning",
     "finance.total_recalculate": "Beräkna om från delsumma + skatt",
+    "finance.total_mismatch": "Totalt måste vara lika med delsumma plus skatt",
     "forms.add_field": "Lägg till fält",
     "forms.add_option": "Lägg till alternativ",
     "forms.remove_photo": "Ta bort foto",

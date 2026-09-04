@@ -24652,6 +24652,7 @@ const resource = {
     "finance.inbox.tab": "Квитанциялар келген жер",
     "finance.total_manual": "Кол менен алмаштыруу",
     "finance.total_recalculate": "Жалпы сумма + салыктан кайра эсептөө",
+    "finance.total_mismatch": "Бардыгы аралык сумма менен салыктын суммасына барабар болушу керек",
     "finance.inbox.upload_failed": "Жүктөө ишке ашкан жок",
     "finance.inbox.captured": "Карап чыгуу үчүн эсеп-фактура алынды",
     "finance.inbox.filter_all": "Бардык статустар",

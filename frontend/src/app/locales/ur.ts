@@ -26908,6 +26908,7 @@ const resource = {
     "finance.summary_empty_title": "ابھی تک کوئی مالیاتی ڈیٹا نہیں",
     "finance.total_manual": "دستی override",
     "finance.total_recalculate": "Subtotal + ٹیکس سے دوبارہ شمار کریں",
+    "finance.total_mismatch": "کل، ذیلی کل جمع ٹیکس کے برابر ہونا چاہیے",
     "forms.add_field": "فیلڈ شامل کریں",
     "forms.add_option": "آپشن شامل کریں",
     "forms.remove_photo": "تصویر ہٹائیں",

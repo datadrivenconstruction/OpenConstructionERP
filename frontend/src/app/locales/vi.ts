@@ -27605,6 +27605,7 @@ const resource = {
     "finance.summary_empty_title": "Chưa có dữ liệu tài chính",
     "finance.total_manual": "Ghi đè thủ công",
     "finance.total_recalculate": "Tính toán lại từ tổng phụ + thuế",
+    "finance.total_mismatch": "Tổng cộng phải bằng tổng phụ cộng thuế",
     "forms.add_field": "Thêm trường",
     "forms.add_option": "Thêm tùy chọn",
     "forms.remove_photo": "Xóa ảnh",

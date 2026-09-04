@@ -25498,6 +25498,7 @@ const resource = {
     "finance.inbox.tab": "Invoice inbox",
     "finance.total_manual": "Manual override",
     "finance.total_recalculate": "Recalculate from subtotal + tax",
+    "finance.total_mismatch": "The total must equal the subtotal plus tax",
     "finance.inbox.upload_failed": "Upload failed",
     "finance.inbox.captured": "Invoice captured for review",
     "finance.inbox.filter_all": "All statuses",

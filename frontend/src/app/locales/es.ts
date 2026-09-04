@@ -27695,6 +27695,7 @@ const resource = {
     "finance.summary_empty_title": "Sin datos financieros aún",
     "finance.total_manual": "Anulación manual",
     "finance.total_recalculate": "Recalcular desde subtotal + impuesto",
+    "finance.total_mismatch": "El total debe ser igual al subtotal más el impuesto",
     "forms.add_field": "Agregar campo",
     "forms.add_option": "Agregar opción",
     "forms.remove_photo": "Quitar foto",

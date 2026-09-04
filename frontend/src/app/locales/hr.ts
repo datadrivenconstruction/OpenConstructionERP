@@ -27651,6 +27651,7 @@ const resource = {
     "finance.summary_empty_title": "Nema financijskih podataka",
     "finance.total_manual": "Ručno nadjačavanje",
     "finance.total_recalculate": "Ponovno izračunaj iz zbroja + porez",
+    "finance.total_mismatch": "Ukupno mora biti jednako zbroju međuzbroja i poreza",
     "forms.add_field": "Dodaj polje",
     "forms.add_option": "Dodaj opciju",
     "forms.remove_photo": "Ukloni fotografiju",

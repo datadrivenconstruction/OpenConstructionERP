@@ -27699,6 +27699,7 @@ const resource = {
     "finance.summary_empty_title": "Pas encore de données financières",
     "finance.total_manual": "Remplacement manuel",
     "finance.total_recalculate": "Recalculer à partir du sous-total + taxe",
+    "finance.total_mismatch": "Le total doit être égal au sous-total plus la TVA",
     "forms.add_field": "Ajouter un champ",
     "forms.add_option": "Ajouter une option",
     "forms.remove_photo": "Supprimer la photo",

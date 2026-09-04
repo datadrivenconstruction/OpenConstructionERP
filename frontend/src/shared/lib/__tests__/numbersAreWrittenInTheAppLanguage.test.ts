@@ -448,6 +448,11 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
     why: 'fmtPrecision handing a non-finite value back rather than inventing a zero for it. This is the replacement.',
   },
   {
+    file: 'shared/lib/formatters.ts',
+    snippet: "return Number.isFinite(value) ? value.toFixed(decimals) : '';",
+    why: 'fmtNumberForInput, the whole body of it. A field a person is editing takes one spelling and it is this one, so the absence of a locale here is the feature (#466).',
+  },
+  {
     file: 'modules/gaeb-exchange/data/gaebExport.ts',
     snippet: 'return value.toFixed(decimals);',
     why: 'Writes a decimal into GAEB XML 3.3, which is a data format with its own grammar, not a screen.',
@@ -647,7 +652,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Sixteen entries covering eighteen sites in ten files, against 139
+    // Seventeen entries covering nineteen sites in ten files, against 139
     // exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
@@ -666,6 +671,7 @@ describe('every number and date is written in the language the reader picked', (
       'features/dashboard/components/DashboardBackdrop.tsx :: const a2 = (0.06 * effIntensity).toFixed(3);',
       'shared/lib/formatters.ts :: if (!Number.isFinite(value)) return value.toFixed(decimals);',
       'shared/lib/formatters.ts :: if (!Number.isFinite(value)) return value.toPrecision(digits);',
+      "shared/lib/formatters.ts :: return Number.isFinite(value) ? value.toFixed(decimals) : '';",
       'modules/gaeb-exchange/data/gaebExport.ts :: return value.toFixed(decimals);',
       'features/takeoff/lib/takeoff-export.ts :: return n.toFixed(precision);',
       'features/geo-hub/utils.ts :: return `${sign}${Math.abs(value).toFixed(4)}°`;',

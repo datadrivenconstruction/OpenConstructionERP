@@ -27620,6 +27620,7 @@ const resource = {
     "finance.summary_empty_title": "Ei talousdata vielä",
     "finance.total_manual": "Manuaalinen ohitus",
     "finance.total_recalculate": "Laske uudelleen välisummasta + vero",
+    "finance.total_mismatch": "Yhteensä on oltava välisumma plus vero",
     "forms.add_field": "Lisää kenttä",
     "forms.add_option": "Lisää vaihtoehto",
     "forms.remove_photo": "Poista kuva",

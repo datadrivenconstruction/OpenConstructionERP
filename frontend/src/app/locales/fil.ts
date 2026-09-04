@@ -26908,6 +26908,7 @@ const resource = {
     "finance.summary_empty_title": "Wala pang datos ng pinansya",
     "finance.total_manual": "Manwal na override",
     "finance.total_recalculate": "Muling kalkulahin mula sa subtotal + buwis",
+    "finance.total_mismatch": "Ang kabuuan ay dapat kapantay ng sub-kabuuan kasama ang buwis",
     "forms.add_field": "Magdagdag ng field",
     "forms.add_option": "Magdagdag ng opsyon",
     "forms.remove_photo": "Alisin ang larawan",

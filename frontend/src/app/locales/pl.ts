@@ -27699,6 +27699,7 @@ const resource = {
     "finance.summary_empty_title": "Brak danych finansowych",
     "finance.total_manual": "Ręczne zastąpienie",
     "finance.total_recalculate": "Przelicz z sumy częściowej + podatek",
+    "finance.total_mismatch": "Razem musi być równe sumie częściowej powiększonej o podatek",
     "forms.add_field": "Dodaj pole",
     "forms.add_option": "Dodaj opcję",
     "forms.remove_photo": "Usuń zdjęcie",

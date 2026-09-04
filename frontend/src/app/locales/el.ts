@@ -26944,6 +26944,7 @@ const resource = {
     "finance.summary_empty_title": "Δεν υπάρχουν ακόμα οικονομικά δεδομένα",
     "finance.total_manual": "Χειροκίνητη παράκαμψη",
     "finance.total_recalculate": "Επανυπολογισμός από υποσύνολο + φόρο",
+    "finance.total_mismatch": "Το σύνολο πρέπει να ισούται με το υποσύνολο συν τον φόρο",
     "forms.add_field": "Προσθήκη πεδίου",
     "forms.add_option": "Προσθήκη επιλογής",
     "forms.remove_photo": "Αφαίρεση φωτογραφίας",

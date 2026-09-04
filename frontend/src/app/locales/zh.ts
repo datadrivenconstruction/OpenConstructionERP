@@ -27590,6 +27590,7 @@ const resource = {
     "finance.summary_empty_title": "还没有财务数据",
     "finance.total_manual": "手动覆盖",
     "finance.total_recalculate": "从小计 + 税重新计算",
+    "finance.total_mismatch": "合计必须等于小计加税额",
     "forms.add_field": "添加字段",
     "forms.add_option": "添加选项",
     "forms.remove_photo": "移除照片",

@@ -27598,6 +27598,7 @@ const resource = {
     "finance.summary_empty_title": "아직 재무 데이터가 없습니다",
     "finance.total_manual": "수동 무시",
     "finance.total_recalculate": "소계 + 세금에서 다시 계산",
+    "finance.total_mismatch": "합계는 소계와 세금의 합과 같아야 합니다",
     "forms.add_field": "필드 추가",
     "forms.add_option": "옵션 추가",
     "forms.remove_photo": "사진 제거",

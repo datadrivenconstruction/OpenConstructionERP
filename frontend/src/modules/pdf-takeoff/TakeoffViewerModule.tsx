@@ -84,7 +84,7 @@ import {
   type ConfidenceThresholds,
 } from '../../features/takeoff/lib/confidenceBand';
 import { apiGet, apiPost } from '../../shared/lib/api';
-import { formatFileSize, fmtFixed } from '../../shared/lib/formatters';
+import { formatFileSize, fmtFixed, fmtNumberForInput } from '../../shared/lib/formatters';
 import { convertBetween } from '../../shared/lib/unitConversion';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
 import {
@@ -9195,8 +9195,13 @@ export default function TakeoffViewerModule({
                               min={0}
                               max={89}
                               step={0.5}
-                              value={Number(
-                                fmtFixed(degreesFromSlopeFactor(selectedMeasurement.slopeFactor ?? 1), 1),
+                              // Rounded for the field without going through a
+                              // display formatter: a reader whose decimal mark
+                              // is a comma got "26,6" back, `Number` read that
+                              // as NaN and the pitch box came up empty (#466).
+                              value={fmtNumberForInput(
+                                degreesFromSlopeFactor(selectedMeasurement.slopeFactor ?? 1),
+                                1,
                               )}
                               onChange={(e) => {
                                 const deg = Number(e.target.value);

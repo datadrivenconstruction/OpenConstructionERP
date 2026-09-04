@@ -72,6 +72,34 @@ export function fmtFixed(value: number, decimals = 2): string {
 }
 
 /**
+ * A number written for a field a person is still editing, not for reading.
+ *
+ * `fmtFixed` and every other formatter in this module answer "how does this
+ * reader write a number", and the answer is a separator. That is right on a
+ * screen and wrong inside a control: `<input type="number">` accepts exactly
+ * one spelling, digits with a point, and silently empties itself when handed
+ * anything else. Issue #466 was a total that vanished from a thousand upwards
+ * because it had been grouped, and the same grouped string was what the form
+ * read back when it built the request, so `parseFloat` truncated the invoice
+ * at the separator. Under a comma-decimal reader the same call dropped the
+ * cents off every amount at any size.
+ *
+ * So an editable number stays in the canonical form, which has no locale and
+ * therefore cannot be right for one convention and wrong for the other. Where
+ * the same figure also has to be read, that is a second, read-only element
+ * formatted by the functions above.
+ *
+ * A non-finite value comes back as an empty field rather than as the text
+ * `NaN`, which is the one place this parts company with `fmtFixed`: there is
+ * no editing a NaN, the control empties itself on it anyway, and a blank field
+ * says "nothing here yet" where `NaN` says the software is confused. Still no
+ * invented zero, for the reason `fmtFixed` gives.
+ */
+export function fmtNumberForInput(value: number, decimals = 2): string {
+  return Number.isFinite(value) ? value.toFixed(decimals) : '';
+}
+
+/**
  * `toPrecision` with the reader's separators: a count of significant digits
  * rather than of decimal places.
  *

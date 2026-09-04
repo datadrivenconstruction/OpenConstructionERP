@@ -285,6 +285,259 @@ async def test_create_invoice_auto_totals_subtotal_plus_tax() -> None:
     assert Decimal(invoice.amount_total) == Decimal("59500.00")
 
 
+# ── An invoice has to add up (issue #466) ─────────────────────────────────
+#
+# The frontend had been posting a total truncated at its own thousands
+# separator - nine, where a person had typed nine thousand - and nobody found
+# out, because the service replaced whatever total arrived with subtotal + tax
+# on every write. The stored figure was right, the client was wrong, and the
+# overwrite is what kept the two apart. So a total the caller asserts is now
+# kept and checked, and so are the line items against the subtotal they are
+# lines of.
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_refuses_a_total_that_does_not_add_up() -> None:
+    from fastapi import HTTPException
+
+    service = _make_service()
+    with pytest.raises(HTTPException) as exc_info:
+        await service.create_invoice(
+            InvoiceCreate(
+                project_id=uuid.uuid4(),
+                invoice_direction="payable",
+                invoice_date="2026-04-01",
+                amount_subtotal="9000.00",
+                tax_amount="0",
+                # What `parseFloat('9,000.00')` returns.
+                amount_total="9",
+            )
+        )
+    assert exc_info.value.status_code == 400
+    assert "amount_total" in str(exc_info.value.detail)
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_keeps_a_total_the_caller_asserted() -> None:
+    """An asserted total that agrees is stored as sent, not rebuilt.
+
+    The distinction matters: rebuilding it is what made the broken client
+    invisible, and it is also what made the form's rounding override a no-op.
+    """
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="9000.00",
+            tax_amount="1710.00",
+            amount_total="10710.00",
+        )
+    )
+    assert Decimal(invoice.amount_total) == Decimal("10710.00")
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_allows_a_rounded_total_within_a_cent() -> None:
+    """A cent of rounding is a real thing to want and stays legal."""
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="receivable",
+            invoice_date="2026-04-01",
+            amount_subtotal="100.00",
+            tax_amount="19.005",
+            amount_total="119.00",
+        )
+    )
+    assert Decimal(invoice.amount_total) == Decimal("119.00")
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_refuses_line_items_that_miss_the_subtotal() -> None:
+    from fastapi import HTTPException
+
+    from app.modules.finance.schemas import InvoiceLineItemCreate
+
+    service = _make_service()
+    with pytest.raises(HTTPException) as exc_info:
+        await service.create_invoice(
+            InvoiceCreate(
+                project_id=uuid.uuid4(),
+                invoice_direction="payable",
+                invoice_date="2026-04-01",
+                amount_subtotal="9000.00",
+                tax_amount="0",
+                amount_total="9000.00",
+                line_items=[
+                    InvoiceLineItemCreate(
+                        description="Contract works",
+                        quantity="1",
+                        unit="lsum",
+                        unit_rate="9",
+                        amount="9",
+                    ),
+                ],
+            )
+        )
+    assert exc_info.value.status_code == 400
+    assert "line items" in str(exc_info.value.detail).lower()
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_line_items_may_round_a_cent_each() -> None:
+    """Three lines rounded to the cent still make up their subtotal."""
+    from app.modules.finance.schemas import InvoiceLineItemCreate
+
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="100.00",
+            tax_amount="0",
+            line_items=[
+                InvoiceLineItemCreate(
+                    description=f"Section {n}",
+                    quantity="1",
+                    unit="lsum",
+                    unit_rate="33.33",
+                    amount="33.33",
+                )
+                for n in range(3)
+            ],
+        )
+    )
+    assert Decimal(invoice.amount_total) == Decimal("100.00")
+
+
+@pytest.mark.asyncio
+async def test_capture_booking_may_book_lines_that_do_not_add_up() -> None:
+    """The one exemption, named rather than assumed.
+
+    Invoice capture reads its lines off a scanned document and its net off
+    that document's header, so a line the reader could not make out must not
+    strand an invoice whose journal entry has already posted. Every other
+    caller is held to the sum - the test above this one is that direction.
+    """
+    from app.modules.finance.schemas import InvoiceLineItemCreate
+
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="9000.00",
+            tax_amount="0",
+            amount_total="9000.00",
+            line_items=[
+                InvoiceLineItemCreate(
+                    description="The one line the reader could make out",
+                    quantity="1",
+                    unit="lsum",
+                    unit_rate="120.00",
+                    amount="120.00",
+                ),
+            ],
+        ),
+        enforce_line_sum=False,
+    )
+    assert Decimal(invoice.amount_total) == Decimal("9000.00")
+
+
+def test_invoice_tolerance_matches_the_one_capture_review_applies() -> None:
+    """Two validators, one number, on purpose.
+
+    A supplier invoice is held to `validate_amounts` when a person reviews it
+    and to `_refuse_inconsistent_amounts` when it is booked. If the booking
+    side were stricter, a document that passed review would be refused at the
+    end of the flow with its journal entry already written.
+    """
+    from app.modules.finance.invoice_capture_logic import AMOUNT_TOLERANCE
+    from app.modules.finance.service import INVOICE_AMOUNT_TOLERANCE
+
+    assert INVOICE_AMOUNT_TOLERANCE == AMOUNT_TOLERANCE
+
+
+@pytest.mark.asyncio
+async def test_update_invoice_refuses_a_total_that_does_not_add_up() -> None:
+    from fastapi import HTTPException
+
+    from app.modules.finance.schemas import InvoiceUpdate
+
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="1000",
+            tax_amount="190",
+        )
+    )
+    with pytest.raises(HTTPException) as exc_info:
+        await service.update_invoice(
+            invoice.id,
+            InvoiceUpdate(amount_subtotal="9000", tax_amount="0", amount_total="9"),
+        )
+    assert exc_info.value.status_code == 400
+    # The refused write left the row alone.
+    assert Decimal(invoice.amount_total) == Decimal("1190")
+
+
+@pytest.mark.asyncio
+async def test_update_invoice_without_a_total_still_derives_one() -> None:
+    """A patch that moves the amounts and says nothing about the total."""
+    from app.modules.finance.schemas import InvoiceUpdate
+
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="1000",
+            tax_amount="190",
+        )
+    )
+    updated = await service.update_invoice(
+        invoice.id,
+        InvoiceUpdate(amount_subtotal="2000", tax_amount="380"),
+    )
+    assert Decimal(updated.amount_total) == Decimal("2380")
+
+
+@pytest.mark.asyncio
+async def test_update_invoice_leaves_untouched_amounts_alone() -> None:
+    """A patch about something else is not weighed against the money.
+
+    An invoice raised from a progress claim carries its own breakdown, and a
+    note or a due date has to be editable without the lines being re-argued.
+    """
+    from app.modules.finance.schemas import InvoiceUpdate
+
+    service = _make_service()
+    invoice = await service.create_invoice(
+        InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="receivable",
+            invoice_date="2026-04-01",
+            amount_subtotal="1000",
+            tax_amount="190",
+        )
+    )
+    updated = await service.update_invoice(
+        invoice.id,
+        InvoiceUpdate(notes="Rebilled for the April period"),
+    )
+    assert updated.notes == "Rebilled for the April period"
+    assert Decimal(updated.amount_total) == Decimal("1190")
+
+
 # ── Payments ──────────────────────────────────────────────────────────────
 
 
@@ -876,6 +1129,10 @@ async def test_update_invoice_line_items_replace_logs_audit_row(
         await service.update_invoice(
             invoice.id,
             InvoiceUpdate(
+                # The subtotal moves with the lines. Replacing a 500 breakdown
+                # with a 450 one and leaving the subtotal at 500 is refused
+                # since #466 - the two would be describing different invoices.
+                amount_subtotal="450",
                 line_items=[
                     InvoiceLineItemCreate(
                         description="New only",

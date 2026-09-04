@@ -27620,6 +27620,7 @@ const resource = {
     "finance.summary_empty_title": "Nog geen financiële gegevens",
     "finance.total_manual": "Handmatig negeren",
     "finance.total_recalculate": "Herberekenen van subtotaal + belasting",
+    "finance.total_mismatch": "Totaal moet gelijk zijn aan subtotaal plus belasting",
     "forms.add_field": "Veld toevoegen",
     "forms.add_option": "Optie toevoegen",
     "forms.remove_photo": "Foto verwijderen",

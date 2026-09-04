@@ -27632,6 +27632,7 @@ const resource = {
     "finance.summary_empty_title": "Finantsandmeid pole veel",
     "finance.total_manual": "Käsitsi ülekirjutus",
     "finance.total_recalculate": "Arvuta uuesti vahesummast + maksust",
+    "finance.total_mismatch": "Kokku peab võrduma vahesumma pluss maksuga",
     "forms.add_field": "Lisa väli",
     "forms.add_option": "Lisa valik",
     "forms.remove_photo": "Eemalda foto",

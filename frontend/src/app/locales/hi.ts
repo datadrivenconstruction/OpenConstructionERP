@@ -27322,6 +27322,7 @@ const resource = {
     "finance.summary_empty_title": "अभी कोई आर्थिक डेटा नहीं",
     "finance.total_manual": "मैन्युअल ओवरराइड",
     "finance.total_recalculate": "सबटोटल + कर से पुनः गणना करें",
+    "finance.total_mismatch": "कुल, उपकुल और कर के योग के बराबर होना चाहिए",
     "forms.add_field": "फील्ड जोड़ें",
     "forms.add_option": "विकल्प जोड़ें",
     "forms.remove_photo": "फ़ोटो हटाएं",

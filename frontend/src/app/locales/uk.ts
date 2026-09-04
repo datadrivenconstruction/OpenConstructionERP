@@ -28150,6 +28150,7 @@ const resource = {
     "finance.summary_empty_title": "Поки немає фінансових даних",
     "finance.total_manual": "Ручне перевизначення",
     "finance.total_recalculate": "Перерахувати з проміжної суми + податку",
+    "finance.total_mismatch": "Разом має дорівнювати сумі проміжної суми та податку",
     "forms.add_field": "Додати поле",
     "forms.add_option": "Додати варіант",
     "forms.remove_photo": "Видалити фото",

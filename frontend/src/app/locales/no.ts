@@ -27461,6 +27461,7 @@ const resource = {
     "finance.summary_empty_title": "Ingen økonomiske data ennå",
     "finance.total_manual": "Manuell overstyring",
     "finance.total_recalculate": "Beregn på nytt fra delsum + skatt",
+    "finance.total_mismatch": "Totalt må være lik delsum pluss skatt",
     "forms.add_field": "Legg til felt",
     "forms.add_option": "Legg til alternativ",
     "forms.remove_photo": "Fjern bilde",

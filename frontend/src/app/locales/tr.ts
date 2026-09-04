@@ -27654,6 +27654,7 @@ const resource = {
     "finance.summary_empty_title": "Henüz finansal veri yok",
     "finance.total_manual": "Manuel geçersiz kılma",
     "finance.total_recalculate": "Alt toplam + vergiden yeniden hesapla",
+    "finance.total_mismatch": "Toplam, ara toplam artı vergiye eşit olmalıdır",
     "forms.add_field": "Alan ekle",
     "forms.add_option": "Seçenek ekle",
     "forms.remove_photo": "Fotoğrafı kaldır",

@@ -27695,6 +27695,7 @@ const resource = {
     "finance.summary_empty_title": "Zatím žádné finanční údaje",
     "finance.total_manual": "Ruční přepsání",
     "finance.total_recalculate": "Přepočítat z mezisoučtu + daň",
+    "finance.total_mismatch": "Celkem se musí rovnat mezisoučtu plus dani",
     "forms.add_field": "Přidat pole",
     "forms.add_option": "Přidat možnost",
     "forms.remove_photo": "Odebrat fotku",

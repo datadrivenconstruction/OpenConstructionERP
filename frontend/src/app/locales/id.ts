@@ -27595,6 +27595,7 @@ const resource = {
     "finance.summary_empty_title": "Belum ada data keuangan",
     "finance.total_manual": "Penggantian manual",
     "finance.total_recalculate": "Hitung ulang dari subtotal + pajak",
+    "finance.total_mismatch": "Total harus sama dengan subtotal ditambah pajak",
     "forms.add_field": "Tambah bidang",
     "forms.add_option": "Tambah opsi",
     "forms.remove_photo": "Hapus foto",

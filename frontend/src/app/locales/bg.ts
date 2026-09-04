@@ -27731,6 +27731,7 @@ const resource = {
     "finance.summary_empty_title": "Няма финансови данни до сега",
     "finance.total_manual": "Ръчно преоптоване",
     "finance.total_recalculate": "Преизчисляване от междинна сума + данък",
+    "finance.total_mismatch": "Общата сума трябва да е равна на междинната сума плюс данъка",
     "forms.add_field": "Добави поле",
     "forms.add_option": "Добави опция",
     "forms.remove_photo": "Премахване на снимката",

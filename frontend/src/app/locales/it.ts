@@ -27743,6 +27743,7 @@ const resource = {
     "finance.summary_empty_title": "Nessun dato finanziario ancora",
     "finance.total_manual": "Sostituzione manuale",
     "finance.total_recalculate": "Ricalcola dal subtotale + imposta",
+    "finance.total_mismatch": "Il totale deve essere uguale al subtotale più l'imposta",
     "forms.add_field": "Aggiungi campo",
     "forms.add_option": "Aggiungi opzione",
     "forms.remove_photo": "Rimuovi foto",

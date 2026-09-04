@@ -27637,6 +27637,7 @@ const resource = {
     "finance.summary_empty_title": "Niciun date financiare încă",
     "finance.total_manual": "Substituire manuală",
     "finance.total_recalculate": "Recalculare din subtotal + impozit",
+    "finance.total_mismatch": "Totalul trebuie să fie egal cu subtotalul plus TVA",
     "forms.add_field": "Adăugare câmp",
     "forms.add_option": "Adăugare opțiune",
     "forms.remove_photo": "Elimină fotografia",

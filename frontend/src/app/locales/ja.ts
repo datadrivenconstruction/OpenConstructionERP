@@ -27590,6 +27590,7 @@ const resource = {
     "finance.summary_empty_title": "財務データがまだありません",
     "finance.total_manual": "手動オーバーライド",
     "finance.total_recalculate": "小計+税金から再計算",
+    "finance.total_mismatch": "合計は小計と税の合計と一致する必要があります",
     "forms.add_field": "フィールドを追加",
     "forms.add_option": "オプションを追加",
     "forms.remove_photo": "写真を削除",

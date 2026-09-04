@@ -27596,6 +27596,7 @@ const resource = {
     "finance.summary_empty_title": "ยังไม่มีข้อมูลทางการเงิน",
     "finance.total_manual": "การแทนที่ด้วยตนเอง",
     "finance.total_recalculate": "คำนวณใหม่จากผลรวมย่อย + ภาษี",
+    "finance.total_mismatch": "ยอดรวมต้องเท่ากับยอดรวมย่อยบวกภาษี",
     "forms.add_field": "เพิ่มช่อง",
     "forms.add_option": "เพิ่มตัวเลือก",
     "forms.remove_photo": "ลบรูปภาพ",
