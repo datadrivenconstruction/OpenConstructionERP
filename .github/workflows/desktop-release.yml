@@ -526,7 +526,19 @@ jobs:
           # the whole point of the second start.
           start_and_wait "restart over existing data" || exit 1
 
-          rm -rf "$scratch"
+          # The cleanup must never decide the verdict, and this is not defensive
+          # tidiness, it is a measured failure. The first run of this step was
+          # green on ubuntu and red on both windows and macos, and the sidecar
+          # had answered /api/health on every one of the six starts. What failed
+          # was this line: killing the serve process does not stop the embedded
+          # PostgreSQL it started, so the cluster still holds files under
+          # $scratch, rm returns non-zero, and it is the last command in the
+          # block, so its status became the step's. The gate reported that the
+          # product does not serve while standing next to two healthy bodies it
+          # had just printed. Leave the directory to the runner, which is
+          # discarded either way, and end on something that states the verdict.
+          rm -rf "$scratch" 2>/dev/null || true
+          echo "OK: the sidecar served on a cold start and on a restart over its own data."
 
       # Printed on every macOS run, green or red, because it is the evidence for
       # the paragraph above. It describes the wrapper and the machine that built
@@ -658,6 +670,62 @@ jobs:
         with:
           ref: ${{ env.RELEASE_REF }}
 
+      # The counterpart, for the launcher, of "Check the sidecar runs and
+      # reports its version" in build-sidecar.
+      #
+      # That step ties the sidecar to the tag, and nothing tied this job's two
+      # version literals to anything. The installer's DisplayVersion comes from
+      # tauri.conf.json and the launcher's own CARGO_PKG_VERSION comes from
+      # Cargo.toml, so a release could carry one number on the installer, a
+      # second inside the binary and a third in the backend, and every check in
+      # this workflow would still be green.
+      #
+      # It is not a cosmetic mismatch. main.rs attaches to an already-running
+      # backend only when /api/health reports EXACTLY CARGO_PKG_VERSION
+      # (is_our_backend_healthy), and the sidecar reports the version in
+      # backend/pyproject.toml. Drift between those two files therefore makes
+      # the attach probe refuse forever and the launcher start a SECOND backend
+      # against the same ~/.openestimate/pgdata, which is the accident the
+      # attach path exists to prevent (see the comment above blocking_fault).
+      #
+      # scripts/check_version_sync.py does the reading, rather than a grep
+      # written here, because Cargo.toml carries a version literal for every
+      # dependency and Cargo.lock carries one for every resolved crate; that
+      # script anchors on the [package] table and this one would not. It proves
+      # the ten literals agree with each other, and the comparison below ties
+      # that agreed number to the tag being released.
+      #
+      # Only for a release ref, for the same reason the sidecar step gives: a
+      # sidecar-only dispatch from a branch has no version to be compared
+      # against.
+      - name: Check the launcher and the installer carry the version being released
+        shell: bash
+        run: |
+          set -uo pipefail
+          py=python3
+          command -v python3 >/dev/null 2>&1 || py=python
+          code=0
+          out=$("$py" scripts/check_version_sync.py 2>&1) || code=$?
+          echo "$out"
+          if [ "$code" -ne 0 ]; then
+            echo "::error title=The desktop version literals disagree with each other::check_version_sync.py exits ${code} at ${RELEASE_REF:-<empty>}. One of tauri.conf.json (the installer's DisplayVersion), Cargo.toml (the launcher's CARGO_PKG_VERSION) and backend/pyproject.toml (what /api/health reports) is not the others. A launcher whose CARGO_PKG_VERSION does not match its own sidecar refuses to attach and starts a second backend against the same data directory."
+            exit 1
+          fi
+          ref="${RELEASE_REF:-}"
+          case "$ref" in
+            v[0-9]*)
+              want="${ref#v}"
+              got=$("$py" -c "import json,sys;print(json.load(open('desktop/src-tauri/tauri.conf.json'))['version'])")
+              echo "tauri.conf.json says ${got}, the tag says ${want}"
+              if [ "$got" != "$want" ]; then
+                echo "::error title=The installer would carry a different version than the tag::desktop/src-tauri/tauri.conf.json is at ${got} and ${ref} is being released. Either this job checked out something other than ${ref}, or the tag moved after it was pushed, or the version was never bumped. The installer, its Add/Remove Programs entry and the version the splash screen reports on a startup failure would all name ${got}."
+                exit 1
+              fi
+              echo "OK: the installer and the launcher both carry ${want}." ;;
+            *)
+              echo "Not a release ref (${ref:-<empty>}), so the version is not compared against a tag." ;;
+          esac
+
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -680,6 +748,35 @@ jobs:
           cd frontend
           npm ci
           npm run build
+
+      # tauri.conf.json opens the window on "splash.html", and that one file is
+      # the launcher's entire channel for saying anything to a user. Every
+      # startup failure is reported by evaluating a call to failStage/setError
+      # inside it (report_fatal_stage, main.rs:671), each guarded by a typeof so
+      # a missing function is a silent no-op. The native MessageBox fallback is
+      # reached only when Tauri itself fails to build (main.rs:2763), so if the
+      # splash is not in the bundle the window paints nothing, the log is the
+      # only trace, and "the sidecar could not be started" is indistinguishable
+      # from a frozen app.
+      #
+      # It arrives by being in frontend/public, which Vite copies verbatim, so
+      # nothing names it between the frontend build and the bundle. Asserting it
+      # here costs nothing and turns a total silent failure into a red build.
+      - name: Check the frontend build carries the splash screen
+        shell: bash
+        run: |
+          set -uo pipefail
+          if [ ! -f frontend/dist/splash.html ]; then
+            echo "::error title=The bundle would carry no splash screen::frontend/dist/splash.html does not exist after the frontend build, and tauri.conf.json opens the main window on it. The app would show an empty window, and every startup failure the launcher reports would go nowhere: report_fatal_stage evaluates failStage/setError in this document and both calls are typeof-guarded. Check that frontend/public/splash.html is still there and that the Vite public directory is still being copied."
+            exit 1
+          fi
+          for fn in failStage setError setLogPath setAppVersion bootStage setAppUrl offerLaunchChoice offerLocalFallback; do
+            grep -q "function ${fn}(" frontend/dist/splash.html || {
+              echo "::error title=The splash screen no longer answers the launcher::frontend/dist/splash.html defines no ${fn}(), which main.rs calls through a typeof guard. The call would become a silent no-op rather than an error, so the failure it reports would reach nobody."
+              exit 1
+            }
+          done
+          echo "OK: the splash screen ships and still defines every function the launcher calls."
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
