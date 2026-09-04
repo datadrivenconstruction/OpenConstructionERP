@@ -612,10 +612,18 @@ jobs:
       # arrival orders included, were selected by nothing at all. It gets its
       # own step because it needs a database and takes about four minutes,
       # which is why it does not belong in the stub-repository money step below.
+      # The resync guard is named here beside its sibling and for the same
+      # reason. It holds the rule that a mirror posts the amount its variation
+      # order carries now rather than the one it carried when it was created,
+      # and it went red on the commit before this one with a superseded 7200
+      # reaching the project budget against a corrected 6800. A file in this
+      # directory that is named in no step runs only when a person runs it, so
+      # adding the file is the whole difference between a guard and a document.
       - name: Run the contract-sum double-post guard
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: >-
           pytest tests/integration/test_variation_mirror_contract_double_post.py
+          tests/integration/test_the_mirror_follows_its_variation_order.py
           -q -p no:cacheprovider --timeout=300 --timeout-method=thread
       - name: Run ungated money, permission and commercial delete guard tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}

@@ -477,6 +477,28 @@ def _normalise_ai_draft(
     }
 
 
+def mirrored_variation_order_id(order: ChangeOrder) -> str | None:
+    """The variation order this change order mirrors, if it mirrors one.
+
+    ``VariationsService.convert_vr_to_vo`` stamps ``variation_order_id`` into
+    the mirror's metadata JSON when it creates it, and that stamp is the only
+    thing separating a mirror from a change order somebody raised by hand.
+    Every guard and every price resolution below asks the question here so
+    they cannot end up asking it in slightly different ways.
+
+    Args:
+        order: The change order to inspect.
+
+    Returns:
+        The variation order id as stored, or ``None`` for a standalone order.
+    """
+    metadata = getattr(order, "metadata_", None)
+    if not isinstance(metadata, dict):
+        return None
+    variation_order_id = metadata.get("variation_order_id")
+    return str(variation_order_id) if variation_order_id else None
+
+
 def refuse_repricing_a_mirrored_order(order: ChangeOrder, fields: dict[str, Any]) -> None:
     """A change order mirrored from a variation is not a second price.
 
@@ -511,10 +533,7 @@ def refuse_repricing_a_mirrored_order(order: ChangeOrder, fields: dict[str, Any]
         HTTPException: 409 when the amount of a mirrored order is being changed
             here rather than on the variation it came from.
     """
-    metadata = getattr(order, "metadata_", None)
-    if not isinstance(metadata, dict):
-        return
-    variation_order_id = metadata.get("variation_order_id")
+    variation_order_id = mirrored_variation_order_id(order)
     if not variation_order_id:
         return
     if "cost_impact" not in fields:
@@ -525,6 +544,49 @@ def refuse_repricing_a_mirrored_order(order: ChangeOrder, fields: dict[str, Any]
             f"This change order mirrors variation order {variation_order_id}, so its amount is "
             f"set by the variation rather than here. Change it on the variation order and the "
             f"mirror follows."
+        ),
+    )
+
+
+def refuse_pricing_a_mirrored_order_through_its_lines(order: ChangeOrder) -> None:
+    """The mirror's amount is not editable by the line items either.
+
+    Issue #435. ``refuse_repricing_a_mirrored_order`` holds the amount against
+    a PATCH, but a PATCH is not the only thing that writes it: every line item
+    added, changed or deleted runs ``_recalculate_cost_impact``, which sets
+    ``cost_impact`` to the sum of the lines. A mirror that refuses
+    ``{"cost_impact": "9999"}`` would therefore arrive at 9999 through one
+    line item for 9999, and the amount the client agreed to would be gone with
+    the refusal still on the record. One door held and one door open is worse
+    than neither of them held, because a guarded-looking record is the one
+    nobody re-checks.
+
+    A variation is not left without a breakdown by this. The request prices
+    itself as a bill of quantities of its own (``BOQ.variation_request_id``)
+    with the whole BOQ engine behind it, and the variation order carries its
+    own cost-impact lines. This record is the mirror of that decision, not a
+    third place to take it.
+
+    A standalone change order is untouched: its lines are the only price it
+    has, and ``_recalculate_cost_impact`` remains how that price is arrived
+    at.
+
+    Args:
+        order: The change order whose line items are about to be written.
+
+    Raises:
+        HTTPException: 409 when a line item is written on a change order that
+            mirrors a variation order.
+    """
+    variation_order_id = mirrored_variation_order_id(order)
+    if not variation_order_id:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail=(
+            f"This change order mirrors variation order {variation_order_id}, and its line items "
+            f"would set its amount. Price the change on the variation request's own bill of "
+            f"quantities, or on the variation order's cost lines, and the mirror follows."
         ),
     )
 
@@ -1097,10 +1159,101 @@ class ChangeOrderService:
                 detail=(f"You cannot {action} a change order you submitted yourself (four-eyes principle)."),
             )
 
+    async def _resolve_mirrored_amount(self, order: ChangeOrder) -> tuple[str, dict[str, Any] | None]:
+        """Take a mirrored order's amount from the variation order it mirrors.
+
+        Issue #435. The 409 a user meets when they try to reprice a mirror
+        tells them to change the amount on the variation order because the
+        mirror follows, and nothing made it follow.
+        ``VariationsService.update_order`` writes the variation order and
+        stops, so an order corrected after promotion left its mirror holding
+        the superseded figure.
+
+        That is not only a stale reading. The two halves post to a contract
+        under one identity (``_contract_source_key``), so whichever is
+        approved first moves the money and the other stands down as already
+        posted. Link a mirror to a contract by hand - an ordinary thing to do,
+        and the only route a foreign-currency variation has - then correct the
+        order and approve the mirror, and the superseded amount is the one
+        that reaches the contract while the corrected one stands down. The
+        stand-down is recorded, so the wrong figure is at least auditable
+        afterwards, which is the most that can be said for it.
+
+        The variation order is where the price lives, so the mirror reads it
+        at the two moments that decide money rather than carrying a copy:
+        submission, which is the figure an approver is shown, and approval,
+        which is the figure that posts. Reading beats subscribing here because
+        a variation order update publishes no event to subscribe to, and a
+        value resolved from its source cannot drift between those two moments
+        the way a copy does.
+
+        Only the amount is resolved. The currency is left exactly as stored,
+        for the reason ``refuse_repricing_a_mirrored_order`` sets out at
+        length: correcting it on the mirror is what lets a foreign-currency
+        variation reach its contract at all.
+
+        A variation order that has been deleted leaves the copy as the only
+        figure there is, so it stands and the fact is logged rather than
+        raised: refusing to approve at that point would strand a change order
+        whose amount nobody can correct any more.
+
+        Args:
+            order: The change order about to move through its lifecycle.
+
+        Returns:
+            The amount to carry, and a record of the correction when the
+            stored amount was superseded - ``None`` when nothing moved, so a
+            caller can tell a resync from a no-op without comparing strings.
+        """
+        stored = str(order.cost_impact or "0")
+        variation_order_id = mirrored_variation_order_id(order)
+        if not variation_order_id:
+            return stored, None
+        try:
+            source_id = uuid.UUID(variation_order_id)
+        except (AttributeError, TypeError, ValueError):
+            logger.warning(
+                "Change order %s names variation order %r, which is not an id; keeping its own amount",
+                order.code,
+                variation_order_id,
+            )
+            return stored, None
+
+        from sqlalchemy import select
+
+        from app.modules.variations.models import VariationOrder
+
+        source = (
+            await self.session.execute(select(VariationOrder).where(VariationOrder.id == source_id))
+        ).scalar_one_or_none()
+        if source is None:
+            logger.warning(
+                "Change order %s mirrors variation order %s, which no longer exists; keeping its own amount",
+                order.code,
+                variation_order_id,
+            )
+            return stored, None
+
+        current = _round2(_dec(source.final_cost_impact))
+        if current == _round2(_dec(stored)):
+            return stored, None
+        return str(current), {
+            "variation_order_id": variation_order_id,
+            "from": stored,
+            "to": str(current),
+        }
+
     async def submit_order(self, order_id: uuid.UUID, user_id: str) -> ChangeOrder:
-        """Submit a change order for approval."""
+        """Submit a change order for approval.
+
+        A mirrored order takes its amount from the variation order it mirrors
+        on the way through (issue #435), so the figure put in front of an
+        approver is the one the variation currently carries rather than the
+        copy taken at promotion.
+        """
         order = await self.get_order(order_id)
         self._validate_transition(order.status, "submitted")
+        amount, mirror_resynced = await self._resolve_mirrored_amount(order)
         # Snapshot the from-status so the audit row records the
         # transition accurately even after update_fields() expires the
         # in-memory order.
@@ -1108,12 +1261,27 @@ class ChangeOrderService:
         code_snapshot = order.code
 
         now = datetime.now(UTC).isoformat()[:19]
-        await self.repo.update_fields(
-            order_id,
-            status="submitted",
-            submitted_by=user_id,
-            submitted_at=now,
-        )
+        written: dict[str, Any] = {
+            "status": "submitted",
+            "submitted_by": user_id,
+            "submitted_at": now,
+        }
+        audit_metadata: dict[str, Any] = {"code": code_snapshot}
+        if mirror_resynced is not None:
+            written["cost_impact"] = amount
+            # Recorded, not applied quietly: the amount an approver is about
+            # to be shown is no longer the one this record was created with,
+            # and that substitution is exactly the kind an audit has to be
+            # able to find afterwards.
+            audit_metadata["mirror_amount_resynced"] = mirror_resynced
+            logger.info(
+                "Change order %s takes %s from variation order %s on submission (was %s)",
+                code_snapshot,
+                mirror_resynced["to"],
+                mirror_resynced["variation_order_id"],
+                mirror_resynced["from"],
+            )
+        await self.repo.update_fields(order_id, **written)
         # Audit trail: every CO status transition writes an
         # ActivityLog row so dispute timelines (FIDIC, ISO 9001, SCL
         # Protocol) can be reproduced byte-for-byte. The session ties
@@ -1124,7 +1292,7 @@ class ChangeOrderService:
             order_id=order_id,
             from_status=from_status,
             to_status="submitted",
-            metadata={"code": code_snapshot},
+            metadata=audit_metadata,
         )
         await self.session.refresh(order)
 
@@ -1152,6 +1320,12 @@ class ChangeOrderService:
         refuse the single-step approval with HTTP 409 - silently bypassing
         the chain would let one user approve a CO that was supposed to
         require N signatures.
+
+        A mirrored order posts the amount its variation order carries now,
+        not the copy taken at promotion (issue #435). Everything downstream of
+        the approval - the project budget, the budget delta row, the bill
+        section, the event the contracts subscriber reads - is built from that
+        one figure, so the whole approval speaks with one number.
         """
         from decimal import Decimal, InvalidOperation
 
@@ -1204,7 +1378,11 @@ class ChangeOrderService:
         project_id_uuid: uuid.UUID = order.project_id
         project_id_s = str(project_id_uuid)
         code_s = order.code
-        cost_impact_s = order.cost_impact or "0"
+        # A mirror is priced by its variation order rather than by the copy it
+        # was created with, so the amount that posts is resolved here, before
+        # anything downstream reads it. A standalone order answers with its
+        # own stored figure and this is a no-op for it.
+        cost_impact_s, mirror_resynced = await self._resolve_mirrored_amount(order)
         currency_s = order.currency
         # Optional contract link stamped onto the CO's metadata JSON by the
         # create form (``metadata.contract_id``). Snapshot it here, before the
@@ -1222,24 +1400,35 @@ class ChangeOrderService:
 
         now = datetime.now(UTC).isoformat()[:19]
         from_status_snapshot = order.status
-        await self.repo.update_fields(
-            order_id,
-            status="approved",
-            approved_by=user_id,
-            approved_at=now,
-        )
+        written: dict[str, Any] = {
+            "status": "approved",
+            "approved_by": user_id,
+            "approved_at": now,
+        }
+        audit_metadata: dict[str, Any] = {
+            "code": code_s,
+            "cost_impact": str(cost_impact_s),
+            "currency": currency_s,
+            "via_chain": _from_chain,
+        }
+        if mirror_resynced is not None:
+            written["cost_impact"] = cost_impact_s
+            audit_metadata["mirror_amount_resynced"] = mirror_resynced
+            logger.info(
+                "Change order %s posts %s from variation order %s on approval (was %s)",
+                code_s,
+                mirror_resynced["to"],
+                mirror_resynced["variation_order_id"],
+                mirror_resynced["from"],
+            )
+        await self.repo.update_fields(order_id, **written)
         await _safe_audit(
             self.session,
             actor_id=user_id,
             order_id=order_id,
             from_status=from_status_snapshot,
             to_status="approved",
-            metadata={
-                "code": code_s,
-                "cost_impact": str(cost_impact_s),
-                "currency": currency_s,
-                "via_chain": _from_chain,
-            },
+            metadata=audit_metadata,
         )
 
         # Writeback: project.budget_estimate += cost_impact. Stored as string
@@ -1328,6 +1517,11 @@ class ChangeOrderService:
                 "contract_id": contract_id_s,
                 # None unless this CO mirrors a variation order.
                 "variation_order_id": variation_order_id_s,
+                # Set only when the mirror's stored amount was superseded by
+                # the variation order it mirrors, so a subscriber posting the
+                # money can see that the figure it is being handed is not the
+                # one the record was created with.
+                "mirror_amount_resynced": mirror_resynced,
                 "approved_by": user_id,
                 "project_budget_updated": project_updated,
                 "boq_applied": boq_result.get("applied", False),
@@ -1946,6 +2140,7 @@ class ChangeOrderService:
     ) -> ChangeOrderItem:
         """Add an item to a change order and recalculate cost impact."""
         order = await self.get_order(order_id)
+        refuse_pricing_a_mirrored_order_through_its_lines(order)
 
         # BUG-352: items are frozen once a CO leaves ``draft``. A submitted
         # CO represents a commitment already under review by the other
@@ -2004,6 +2199,7 @@ class ChangeOrderService:
     ) -> ChangeOrderItem:
         """Update an item and recalculate cost impact."""
         order = await self.get_order(order_id)
+        refuse_pricing_a_mirrored_order_through_its_lines(order)
 
         # BUG-352: items are frozen once a CO leaves ``draft``. A submitted
         # CO represents a commitment already under review by the other
@@ -2059,6 +2255,7 @@ class ChangeOrderService:
     async def delete_item(self, order_id: uuid.UUID, item_id: uuid.UUID) -> None:
         """Delete an item and recalculate cost impact."""
         order = await self.get_order(order_id)
+        refuse_pricing_a_mirrored_order_through_its_lines(order)
 
         # BUG-352: items are frozen once a CO leaves ``draft``. A submitted
         # CO represents a commitment already under review by the other
