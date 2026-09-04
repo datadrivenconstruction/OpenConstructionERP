@@ -692,6 +692,87 @@ fn report_fatal_stage(handle: &tauri::AppHandle, stage: &str, message: &str) {
     );
 }
 
+/// A pre-ready sidecar death the launcher can name more precisely than "the
+/// backend stopped unexpectedly".
+struct StartupFailure {
+    /// Checklist step to mark failed.
+    stage: &'static str,
+    /// What to show in place of the raw stderr tail.
+    message: String,
+}
+
+/// Name the onefile entry a bootloader extraction failure stopped on.
+///
+/// The bootloader reports the same failure twice and in two shapes, "Failed to
+/// extract <name>: decompression resulted in return code -1!" and then "Failed
+/// to extract entry: <name>". Only the first carries the name before the colon,
+/// so the literal word "entry" is skipped rather than reported as a filename.
+fn bootloader_failed_entry(tail: &str) -> Option<String> {
+    const MARKER: &str = "Failed to extract ";
+    for (idx, _) in tail.match_indices(MARKER) {
+        let rest = &tail[idx + MARKER.len()..];
+        let name = rest
+            .split(|c: char| c == ':' || c == '\n' || c == '\r' || c == '!')
+            .next()
+            .unwrap_or("")
+            .trim();
+        if name.is_empty() || name == "entry" {
+            continue;
+        }
+        return Some(name.to_string());
+    }
+    None
+}
+
+/// Recognise a PyInstaller onefile bootloader failure in the sidecar's stderr.
+///
+/// The sidecar is a onefile build (desktop/pyinstaller.spec), which means the
+/// bootloader unpacks the entire payload into the system temporary folder on
+/// every single launch, before the bundled Python interpreter is started and
+/// therefore before one line of this project's code runs. When that unpacking
+/// fails the process dies with no traceback, no "STAGE:" line and nothing the
+/// rest of this file knows how to read, so the launcher fell through to its last
+/// resort and showed the raw tail:
+///
+///   [PYI-16964:ERROR] Failed to extract cv2\cv2.pyd: decompression resulted in
+///   return code -1! [PYI-16964:ERROR] Failed to extract entry: cv2\cv2.pyd
+///
+/// which reads as an internal crash rather than as the environmental problem it
+/// is. Worse, that path attributed the death to the "server" step, so the one
+/// screen the user can send us said the application server had failed on a run
+/// where no server was ever reached - pointing the reader at startup code that
+/// had not executed. Reported against 16.5.0 on Windows 11 (issue 462).
+///
+/// Returns None for anything that is not a bootloader failure, which leaves
+/// every existing cause reported exactly as before.
+fn classify_bootloader_failure(tail: &str) -> Option<StartupFailure> {
+    if !tail.contains("[PYI-") {
+        return None;
+    }
+    let unpack_failed = tail.contains("Failed to extract")
+        || tail.contains("decompression resulted in return code")
+        || tail.contains("Failed to create temporary directory")
+        || tail.contains("Could not create temporary directory");
+    if !unpack_failed {
+        return None;
+    }
+    let on_entry = match bootloader_failed_entry(tail) {
+        Some(name) => format!(" It stopped while writing {name}."),
+        None => String::new(),
+    };
+    Some(StartupFailure {
+        // Not "server": the backend executable never got as far as running a
+        // server. This step is the one that owns having a working backend.
+        stage: "sidecar",
+        message: format!(
+            "The application could not unpack itself into this computer's temporary \
+folder.{on_entry} The whole program is unpacked there every time it starts, so this is \
+normally either antivirus software removing or locking the files while they are being \
+written, or too little free space on the drive that holds the temporary folder."
+        ),
+    })
+}
+
 /// Tell the user the backend is gone, in whatever page the window is showing.
 ///
 /// The splash reporting above is unusable once startup has succeeded. The
@@ -2454,11 +2535,19 @@ tools block newly installed programs; allow OpenConstructionERP and try again."
                             // the real reason startup failed.
                             let latched_cause = latched.lock().unwrap().clone();
                             let tb_cause = traceback.lock().unwrap().cause.clone();
-                            let core = if let Some(cause) = latched_cause.or(tb_cause) {
-                                format!("The backend could not finish starting: {cause}")
+                            let tail_now = stderr_buf.lock().unwrap().clone();
+                            // A onefile bootloader failure happens before the
+                            // bundled interpreter starts, so there is no latched
+                            // stage and no traceback that could outrank it, and
+                            // the text it leaves is unreadable. Name it first.
+                            let boot_failure = classify_bootloader_failure(&tail_now);
+                            let (fail_stage, core) = if let Some(f) = boot_failure {
+                                (f.stage, f.message)
+                            } else if let Some(cause) = latched_cause.or(tb_cause) {
+                                ("server", format!("The backend could not finish starting: {cause}"))
                             } else {
-                                let tail = stderr_buf.lock().unwrap().clone();
-                                if tail.trim().is_empty() {
+                                let tail = tail_now;
+                                let core = if tail.trim().is_empty() {
                                     format!(
                                         "The backend stopped unexpectedly (exit code {:?}) \
 before it finished starting.",
@@ -2482,7 +2571,8 @@ before it finished starting.",
                                     format!(
                                         "The backend stopped unexpectedly during startup: {shown}"
                                     )
-                                }
+                                };
+                                ("server", core)
                             };
                             // Always pair the cause with a clear next step.
                             // report_fatal_stage also surfaces the log path
@@ -2491,9 +2581,16 @@ before it finished starting.",
                                 "{core} Open the log file for the full details, and if \
 this keeps happening send it to info@datadrivenconstruction.io."
                             );
-                            // Attribute the failure to the server step so
-                            // the checklist shows a clear red mark.
-                            report_fatal_stage(&handle_evt, "server", &detail);
+                            // The database step was set active before the
+                            // process was spawned, and bootStage back-fills
+                            // earlier steps only for active/done, never for
+                            // failed. Marking an EARLIER step failed therefore
+                            // left that spinner turning next to the red mark,
+                            // which is what the screenshot on issue 462 shows.
+                            if fail_stage == "sidecar" {
+                                boot_stage(&handle_evt, "pg", "pending", "");
+                            }
+                            report_fatal_stage(&handle_evt, fail_stage, &detail);
                             // Record that the user now has the real
                             // reason, so the startup timeout does not
                             // replace it with a vaguer one later.
@@ -3232,6 +3329,71 @@ mod tests {
     /// the backend it started read one file and therefore hold one value. Tests
     /// that want the other case say so by naming a different id.
     const TEST_WORKSPACE_ID: &str = "aaaaaaaabbbbbbbbccccccccdddddddd";
+
+    /// The stderr the reporter's machine actually produced, transcribed from
+    /// the screenshot on issue 462 (16.5.0, Windows 11).
+    ///
+    /// Kept verbatim rather than paraphrased because every word of it is the
+    /// input the classifier has to survive: the doubled report, the trailing
+    /// "!", the backslash in the entry name and the PID embedded in the tag.
+    const ISSUE_462_STDERR: &str = "[PYI-16964:ERROR] Failed to extract cv2\\cv2.pyd: \
+decompression resulted in return code -1! [PYI-16964:ERROR] Failed to extract entry: cv2\\cv2.pyd";
+
+    /// A sidecar that died unpacking itself is not a server failure.
+    ///
+    /// This is the defect written as an assertion. The launcher hardcoded the
+    /// "server" step for every pre-ready death, so a bundle that never started
+    /// its interpreter reported that the application server had failed, and the
+    /// one artefact a user can send us named the wrong half of the program.
+    #[test]
+    fn a_bootloader_unpack_failure_is_not_blamed_on_the_server() {
+        let failure = classify_bootloader_failure(ISSUE_462_STDERR)
+            .expect("the bootloader's own extraction error must be recognised");
+
+        assert_ne!(
+            failure.stage, "server",
+            "no server code runs before the payload is unpacked"
+        );
+        assert_eq!(failure.stage, "sidecar");
+
+        // The raw bootloader text must not reach the user, and what replaces it
+        // has to name both the place and the two things they can act on.
+        let msg = &failure.message;
+        assert!(!msg.contains("[PYI-"), "raw bootloader noise leaked: {msg}");
+        assert!(!msg.contains("return code"), "raw bootloader noise leaked: {msg}");
+        assert!(msg.contains("temporary folder"), "must name where it failed: {msg}");
+        assert!(msg.contains("antivirus"), "must name the usual cause: {msg}");
+        assert!(msg.contains("free space"), "must name the other usual cause: {msg}");
+
+        // The entry it stopped on is the one detail that distinguishes two
+        // reports of this failure, so it has to survive into the message, and
+        // the literal word "entry" from the second line is not a filename.
+        assert!(msg.contains("cv2\\cv2.pyd"), "must name the entry: {msg}");
+        assert_eq!(bootloader_failed_entry(ISSUE_462_STDERR).as_deref(), Some("cv2\\cv2.pyd"));
+    }
+
+    /// Everything that is not a bootloader failure keeps its old reporting.
+    ///
+    /// The classifier sits in front of the latched-stage and traceback paths,
+    /// so a false positive here would silently replace a real diagnosis with a
+    /// guess about antivirus. A Python traceback mentioning an extract call is
+    /// the shape most likely to be misread, so it is the control.
+    #[test]
+    fn ordinary_backend_failures_are_left_alone() {
+        for tail in [
+            "",
+            "Traceback (most recent call last):\n  File \"app/cli.py\", line 8\n\
+RuntimeError: locale catalogue missing",
+            "psycopg2.OperationalError: could not connect to server",
+            "  File \"zipfile.py\", line 1: Failed to extract member from archive",
+            "STAGE:server:fail:port 8712 already in use",
+        ] {
+            assert!(
+                classify_bootloader_failure(tail).is_none(),
+                "must not claim a bootloader failure for: {tail}"
+            );
+        }
+    }
 
     /// Two accounts on one machine run one installed program, so every field
     /// the probe used to consult matches between them.
