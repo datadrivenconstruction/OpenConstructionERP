@@ -147,10 +147,46 @@ setup: ## First-time setup: install backend + frontend dependencies
 	@echo "  Frontend: http://localhost:5173 (Vite dev server)"
 
 # ─── Quickstart (single command) ──────────────────────────────────────────
+# The two secrets the quickstart stack will not start without, checked here
+# rather than left to compose. Compose does say which variable is missing, and
+# says it well, but it says it by exiting nonzero - and `quickstart` below turns
+# every nonzero exit into "the local build did not finish" and points at
+# `quickstart-image`. On a fresh clone with no .env that is the wrong sentence
+# twice over: nothing was built, and the remedy loads this same compose file, so
+# it stops on the identical `${POSTGRES_PASSWORD:?}` a moment later. The
+# stranger this path exists for got a wrong diagnosis followed by a second
+# failure that looked unrelated to the first.
+#
+# Both entry points depend on this, because both read docker-compose.quickstart.yml.
+#
+# The .env is looked up at $(CURDIR), not as a relative path. Compose resolves it
+# beside the compose file, and a recipe resolves a bare `.env` against whatever
+# directory make was called from, so `make -C /path/to/repo quickstart` would
+# have had this guard report two missing secrets that are sitting right there.
+quickstart-secrets:
+	@if [ -n "$$POSTGRES_PASSWORD" ] && [ -n "$$JWT_SECRET" ]; then exit 0; fi; \
+	if [ -f "$(CURDIR)/.env" ] \
+	   && grep -q '^POSTGRES_PASSWORD=..*' "$(CURDIR)/.env" \
+	   && grep -q '^JWT_SECRET=..*' "$(CURDIR)/.env"; then exit 0; fi; \
+	echo ""; \
+	echo "Nothing has started yet. The quickstart stack needs two secrets and"; \
+	echo "ships no defaults for them, so that no two installations share a"; \
+	echo "database password or a key that signs their sessions."; \
+	echo ""; \
+	echo "Write them once, into a .env beside this Makefile:"; \
+	echo ""; \
+	echo "  echo \"POSTGRES_PASSWORD=\$$(openssl rand -base64 24)\" >  .env"; \
+	echo "  echo \"JWT_SECRET=\$$(openssl rand -hex 32)\"           >> .env"; \
+	echo ""; \
+	echo "Then run this command again. On Windows PowerShell, where there is no"; \
+	echo "openssl and no make, README.md has the two-line equivalent."; \
+	echo ""; \
+	exit 1
+
 # Building is optional. A failed build used to end at a raw compose error,
 # which left people stuck on a step they never had to run, so the failure
 # path now names the published image instead.
-quickstart: ## Start OpenEstimate (PostgreSQL + App) — zero config
+quickstart: quickstart-secrets ## Start OpenEstimate (PostgreSQL + App) — needs a .env with two secrets
 	@$(DOCKER_COMPOSE) -f docker-compose.quickstart.yml up --build || $(MAKE) --no-print-directory quickstart-build-failed
 
 quickstart-build-failed:
@@ -169,7 +205,7 @@ quickstart-build-failed:
 # compose's build-versus-pull rules. See docker-compose.quickstart.image.yml.
 QUICKSTART_IMAGE_FILES = -f docker-compose.quickstart.yml -f docker-compose.quickstart.image.yml
 
-quickstart-image: ## Start quickstart from the published image (no local build)
+quickstart-image: quickstart-secrets ## Start quickstart from the published image (no local build)
 	$(DOCKER_COMPOSE) $(QUICKSTART_IMAGE_FILES) pull app
 	$(DOCKER_COMPOSE) $(QUICKSTART_IMAGE_FILES) up -d
 	@echo "  OpenConstructionERP: http://localhost:8080"

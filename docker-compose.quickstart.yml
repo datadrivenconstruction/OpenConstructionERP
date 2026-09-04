@@ -13,8 +13,14 @@
 #
 # Any real deployment SHOULD use docker-compose.prod.yml.
 #
-# Zero-config, all-in-one deployment. Just run:
+# All-in-one deployment: write the .env above, then run
 #   docker compose -f docker-compose.quickstart.yml up --build
+#
+# This block used to say "Zero-config, just run", contradicting the note at the
+# top of this same file fifteen lines earlier. It was true until the two secrets
+# stopped having defaults, and it is the half of the file a reader in a hurry
+# scrolls to, so it kept sending people to a command that stops on an
+# unset-variable error they had just been told about.
 #
 # This starts:
 #   - PostgreSQL 16 (data persisted in Docker volume, not exposed to host)

@@ -1087,6 +1087,50 @@ def run_preflight(
 
 
 # ── Commands ──────────────────────────────────────────────────────────────
+def _run_fatal_preflight(data_dir: Path, host: str, port: int) -> None:
+    """Run the blocking pre-flight checks, or exit 1 with a readable report.
+
+    Only the checks that are cheap and that can be answered without any of the
+    runtime environment ``_setup_env`` builds. Keeping the set to that is what
+    lets the caller run it first; see the note at the call site for why running
+    it first matters.
+
+    Args:
+        data_dir: The resolved data directory the server would use.
+        host: Interface the server would bind.
+        port: Port the server would bind.
+
+    Raises:
+        SystemExit: With code 1 when any check reports ``error``.
+    """
+    fatal_checks = [
+        check_python_version(),
+        check_data_dir(data_dir),
+        check_port_free(host, port),
+        *check_core_tabular_deps(),
+    ]
+    if not any(c.status == "error" for c in fatal_checks):
+        return
+
+    print(
+        _red(
+            _bold(
+                _u(
+                    "Cannot start OpenConstructionERP — pre-flight checks failed:",
+                    "Cannot start OpenConstructionERP - pre-flight checks failed:",
+                )
+            )
+        )
+    )
+    print()
+    for c in fatal_checks:
+        c.print()
+    print()
+    print(_dim("Run 'openconstructionerp doctor' for full diagnostics."))
+    print(_dim(f"Troubleshooting: {TROUBLESHOOTING_URL}"))
+    sys.exit(1)
+
+
 def cmd_serve(args: argparse.Namespace) -> None:
     """Start the OpenConstructionERP server."""
     data_dir = _data_dir_from_args(args)
@@ -1110,36 +1154,22 @@ def cmd_serve(args: argparse.Namespace) -> None:
         os.environ["SEED_DEMO"] = "true"
         write_demo_seed_choice(True, data_dir)
 
-    _setup_env(data_dir, args.host, args.port)
+    # The fatal preflight runs BEFORE _setup_env, and the order is the whole
+    # point. _setup_env boots the embedded PostgreSQL cluster, which on a first
+    # run means an initdb: about twenty seconds and forty megabytes under the
+    # data dir. Every one of these four checks is independent of it, and two of
+    # them describe conditions that make the boot pointless. Running them after
+    # meant a first-time user with something else on port 8080 - the single most
+    # common thing to be wrong on a machine we have never seen - waited out the
+    # whole initdb to be told about a conflict that costs microseconds to
+    # detect. Worse, check_data_dir never got to speak at all: _setup_env's own
+    # unguarded data_dir.mkdir() is three lines into the function, so an
+    # unwritable path raised FileNotFoundError there and the user got a pathlib
+    # traceback instead of the sentence naming --data-dir that this check exists
+    # to print.
+    _run_fatal_preflight(data_dir, args.host, args.port)
 
-    # Run only the fatal preflight checks before attempting to start.
-    # If a check fails hard, we stop here with a readable message instead
-    # of letting uvicorn crash with a stack trace.
-    fatal_checks = [
-        check_python_version(),
-        check_data_dir(data_dir),
-        check_port_free(args.host, args.port),
-        *check_core_tabular_deps(),
-    ]
-    blocking = [c for c in fatal_checks if c.status == "error"]
-    if blocking:
-        print(
-            _red(
-                _bold(
-                    _u(
-                        "Cannot start OpenConstructionERP \u2014 pre-flight checks failed:",
-                        "Cannot start OpenConstructionERP - pre-flight checks failed:",
-                    )
-                )
-            )
-        )
-        print()
-        for c in fatal_checks:
-            c.print()
-        print()
-        print(_dim("Run 'openconstructionerp doctor' for full diagnostics."))
-        print(_dim(f"Troubleshooting: {TROUBLESHOOTING_URL}"))
-        sys.exit(1)
+    _setup_env(data_dir, args.host, args.port)
 
     try:
         from app.config import get_settings
