@@ -76,19 +76,40 @@ It returns a small JSON document you can poll from a load balancer or uptime mon
   "workspace_id": "...",
   "database": "ok",
   "alembic_head_matches": true,
+  "schema_heal_failed": false,
+  "schema_matches_models": true,
+  "data_repairs_failed": false,
+  "data_repair_ledger_failed": false,
+  "frontend_dist_present": true,
   "uptime_seconds": 42
 }
 ```
 
-`status` is `healthy` when the process is up and every module the operator
-enabled is loaded. Exactly two things drop it to `degraded`, and it is worth
-knowing which, because the two are not equally bad and the field does not say
-them apart. A database this process cannot reach leaves nothing usable. A
-module that is enabled and did not load leaves a working installation missing
-one feature, which is why it degrades at all: told healthy, somebody looking
-for that feature concludes their edition does not have it and stops. Read
-`database` alongside `status` to tell the two apart, and the boot log to find
-out which module is missing.
+`status` is `healthy` when the process is up, the database answers, the schema
+and the boot-time data repairs landed, a servable frontend is present, and
+every module the operator enabled is loaded. Seven things drop it to
+`degraded`, they are not equally bad, and `status` does not say which one
+fired, so it is not enough to act on by itself. Each cause publishes its own
+field beside it, and those are what you read:
+
+`database` other than `ok` means this process cannot reach its database and
+nothing is usable. `frontend_dist_present` false means the API is up while
+every UI route answers 404. `schema_heal_failed` true, `schema_matches_models`
+false, `data_repairs_failed` true and `data_repair_ledger_failed` true each
+mean the database is behind the code running against it, in the schema or in
+the rows. And a module that is enabled and did not load leaves a working
+installation missing one feature, which is why it degrades at all: told
+healthy, somebody looking for that feature concludes their edition does not
+have it and stops. That one publishes no field of its own, it is
+`modules_enabled` above `modules_loaded`, and which module is missing is in
+the boot log.
+
+Watch the polarity, because it is not the same on every field. On
+`schema_heal_failed`, `data_repairs_failed` and `data_repair_ledger_failed`,
+`true` is the bad news; on `schema_matches_models` and `alembic_head_matches`
+it is `false`. On all five, `null` means this deployment could not tell and is
+not a fault, so alert on the exact value rather than on truthiness or a check
+would fire on every deployment whose database is not PostgreSQL.
 
 A pending migration does NOT degrade the status, which is deliberate. The
 product never runs `alembic upgrade`; the schema moves through `create_all`
@@ -100,7 +121,8 @@ instead: `true` at head, `false` behind it, `null` when this deployment cannot
 tell.
 
 If you are polling this from a load balancer or an uptime monitor, treat both
-`healthy` and `degraded` as up and alert on `database` separately. A check
+`healthy` and `degraded` as up and alert on `database` and
+`frontend_dist_present` separately. A check
 that requires the literal `healthy` will take a working installation out of
 rotation over a single missing module.
 

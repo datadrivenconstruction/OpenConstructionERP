@@ -97,10 +97,11 @@ where you start getting the one you asked for.
 The reference for the health endpoint described a status this release changed. It
 said a pending migration degrades it, which is deliberately untrue, and did not
 mention the cause that now fires. That page is written for somebody pointing a
-load balancer or an uptime monitor at us, so it says which two conditions degrade
-the status, that they are not equally serious, and that a check requiring the
-literal word healthy will take a working installation out of rotation over one
-missing module.
+load balancer or an uptime monitor at us, so it now names all seven conditions
+that degrade the status rather than the two it described, says which field each
+one publishes and which way that field reads, and says that a check requiring
+the literal word healthy will take a working installation out of rotation over
+one missing module.
 
 A second person signing in on a shared Windows machine opened the first person's
 workspace. An installation whose migration history had forked refused to accept
