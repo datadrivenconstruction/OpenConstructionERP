@@ -234,6 +234,58 @@ def get_embedder():
         return _load_embedder()
 
 
+def _resolve_device() -> str | None:
+    """Decide which torch device the encoder is built on.
+
+    ``None`` means say nothing and let sentence-transformers pick, which is what
+    happened everywhere before this function existed and is still what happens
+    on a normal server install.
+
+    A frozen build gets ``"cpu"``, and that is the whole point of this function.
+    Left to itself sentence-transformers selects the best accelerator it can
+    see, which on any Apple Silicon machine is Metal: the log of the run that
+    prompted this reads ``No device provided, using mps``. A frozen bundle
+    dispatching inference to Metal from several threads at once is a
+    combination we neither test nor need, and on macOS it does not survive.
+
+    Measured, desktop-release run 33851623420, macos-latest, the restart leg:
+    the encoder loads exactly once and successfully, the process then raises
+    SIGSEGV before the pool reports itself initialised, and the last line
+    before the crash is the multiprocessing resource tracker complaining about
+    a leaked semaphore. The same leg with ``OE_VECTOR_POOL_WORKERS=0`` serves
+    normally, which is the bisect that puts the fault in the pool or in what it
+    warms rather than in the model load. What the pool does immediately after
+    the load is run several encode calls at once against the one model object.
+
+    The accelerator buys little here in any case. This is a 384 dimensional
+    sentence encoder embedding short strings, and a desktop workspace is not
+    the machine anyone chose for throughput.
+
+    ``OE_VECTOR_DEVICE`` overrides both branches, so a person who wants Metal on
+    their own desktop build can ask for it, and so this can be measured from
+    both sides rather than only asserted.
+    """
+    import os
+    import sys
+
+    override = (os.environ.get("OE_VECTOR_DEVICE") or "").strip()
+    if override:
+        return override
+
+    if getattr(sys, "frozen", False):
+        return "cpu"
+
+    try:
+        from app.config import desktop_mode
+
+        if desktop_mode():
+            return "cpu"
+    except Exception:  # noqa: BLE001 - config is not worth a failed model load
+        pass
+
+    return None
+
+
 def _load_embedder():
     """Build the singleton. Only ever called with ``_embedder_load_lock`` held.
 
@@ -249,6 +301,7 @@ def _load_embedder():
         _embedder_tried = True
         return None
 
+    device = _resolve_device()
     primary, dim = _resolve_active_model()
     fallback_name = EMBEDDING_MODEL
     try:
@@ -264,13 +317,17 @@ def _load_embedder():
         # model rather than a directory on someone's disk.
         for source in _candidate_sources(candidate):
             try:
-                _embedder_instance = SentenceTransformer(source)
+                if device is None:
+                    _embedder_instance = SentenceTransformer(source)
+                else:
+                    _embedder_instance = SentenceTransformer(source, device=device)
                 _active_model_name = candidate
                 logger.info(
-                    "Loaded sentence-transformers model: %s from %s (~%dd)",
+                    "Loaded sentence-transformers model: %s from %s (~%dd) on device %s",
                     candidate,
                     source,
                     dim,
+                    device or "chosen by sentence-transformers",
                 )
                 return _embedder_instance
             except Exception as exc:

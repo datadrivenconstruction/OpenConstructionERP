@@ -602,7 +602,17 @@ jobs:
             # More than one load in a leg means the embedder singleton was
             # built concurrently. That is the defect fixed alongside this
             # step, and one is the only healthy answer.
+            #
+            # The device is printed because it was the answer the round before
+            # this one could not give. A frozen build left to choose for itself
+            # picks Metal on an Apple Silicon runner, and a frozen bundle
+            # running several encode calls at once against a Metal module is
+            # what this step was dying of. "cpu" is the only healthy answer in
+            # a frozen build, and a line saying "chosen by sentence-transformers"
+            # here means the frozen predicate stopped matching.
             echo "(${label}) encoder loads: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0), failed loads: $(grep -c 'Failed to load embedding model' "$log" 2>/dev/null || echo 0), pool: $(grep -h 'Embedding pool initialised' "$log" 2>/dev/null | tail -n 1 || echo 'never reported')"
+            device_line=$(sed -n 's/.*Loaded sentence-transformers model.* on device //p' "$log" 2>/dev/null | tail -n 1)
+            echo "(${label}) device: ${device_line:-not reported, the model never loaded on this leg}"
             kill "$pid" 2>/dev/null || true
             wait "$pid" 2>/dev/null || true
             if [ "$ok" -ne 1 ]; then
