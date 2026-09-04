@@ -961,6 +961,12 @@ class ScheduleService:
             activity_code=activity_code,
             bim_element_ids=data.bim_element_ids,
             metadata_=data.metadata,
+            cost_planned=data.cost_planned,
+            cost_actual=data.cost_actual,
+            percent_complete_type=data.percent_complete_type,
+            remaining_duration=data.remaining_duration,
+            budgeted_units=data.budgeted_units,
+            installed_units=data.installed_units,
         )
         activity = await self.activity_repo.create(activity)
         activity_id = activity.id  # snapshot before update_fields() expires the instance

@@ -242,7 +242,12 @@ class ActivityResource(BaseModel):
 
 
 class ActivityCreate(BaseModel):
-    """Create a new activity."""
+    """Create a new activity.
+
+    v3 §10 - ``cost_planned`` / ``cost_actual`` are money;
+    Decimal-as-string in JSON. ``budgeted_units`` / ``installed_units``
+    are quantities and travel the same way.
+    """
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
@@ -271,7 +276,32 @@ class ActivityCreate(BaseModel):
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
+    # ── Cost-loaded / progress-rigor columns ──────────────────────────────
+    # ``None`` means "not cost-loaded", which is what the nullable ORM columns
+    # already encode; the EVM rollup reads a missing amount as zero. Bounds
+    # mirror the work-order money pair. The unit quantities take ``ge=0`` only,
+    # matching ``progress_schemas.TypedProgressRequest``, which is the other
+    # writer of the same two columns.
+    cost_planned: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_actual: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    percent_complete_type: str = Field(default="physical", pattern=r"^(physical|duration|units)$")
+    remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
+    budgeted_units: Decimal | None = Field(default=None, ge=0)
+    installed_units: Decimal | None = Field(default=None, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
+    @classmethod
+    def _reject_non_finite(cls, v: Decimal | None) -> Decimal | None:
+        if v is None:
+            return None
+        if not v.is_finite():
+            raise ValueError("amount must be finite (no NaN / Infinity)")
+        return v
+
+    @field_serializer("cost_planned", "cost_actual", "budgeted_units", "installed_units", when_used="json")
+    def _ser_money(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
     @model_validator(mode="after")
     def _check_dates(self) -> "ActivityCreate":
@@ -280,7 +310,13 @@ class ActivityCreate(BaseModel):
 
 
 class ActivityUpdate(BaseModel):
-    """Partial update for an activity."""
+    """Partial update for an activity.
+
+    The cost and unit fields write the raw columns, the way ``progress_pct``
+    already does here. The percent-complete engine lives behind
+    ``PATCH /activities/{id}/typed-progress/``; that endpoint stays the place
+    that derives a percent from units and recomputes the remaining duration.
+    """
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
@@ -306,7 +342,27 @@ class ActivityUpdate(BaseModel):
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
     bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
+    # ── Cost-loaded / progress-rigor columns ──────────────────────────────
+    cost_planned: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    cost_actual: Decimal | None = Field(default=None, ge=0, le=Decimal("1e12"))
+    percent_complete_type: str | None = Field(default=None, pattern=r"^(physical|duration|units)$")
+    remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
+    budgeted_units: Decimal | None = Field(default=None, ge=0)
+    installed_units: Decimal | None = Field(default=None, ge=0)
     metadata: dict[str, Any] | None = None
+
+    @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
+    @classmethod
+    def _reject_non_finite(cls, v: Decimal | None) -> Decimal | None:
+        if v is None:
+            return None
+        if not v.is_finite():
+            raise ValueError("amount must be finite (no NaN / Infinity)")
+        return v
+
+    @field_serializer("cost_planned", "cost_actual", "budgeted_units", "installed_units", when_used="json")
+    def _ser_money(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
     @model_validator(mode="after")
     def _check_dates(self) -> "ActivityUpdate":
@@ -315,7 +371,11 @@ class ActivityUpdate(BaseModel):
 
 
 class ActivityResponse(BaseModel):
-    """Activity returned from the API."""
+    """Activity returned from the API.
+
+    v3 §10 - ``cost_planned`` / ``cost_actual`` are money;
+    Decimal-as-string in JSON, as are the two unit quantities.
+    """
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -359,6 +419,20 @@ class ActivityResponse(BaseModel):
     # dedicated PUT /activities/{id}/calendar/ endpoint; exposed here so the
     # grid can show and pick the activity's calendar. None -> schedule default.
     calendar_id: UUID | None = None
+
+    # ── Cost-loaded / progress-rigor columns ──────────────────────────────
+    # ``cost_planned`` is the activity's share of BAC, so a client that cannot
+    # read it back cannot tell a cost-loaded schedule from an empty one.
+    cost_planned: Decimal | None = None
+    cost_actual: Decimal | None = None
+    percent_complete_type: str = "physical"
+    remaining_duration: int | None = None
+    budgeted_units: Decimal | None = None
+    installed_units: Decimal | None = None
+
+    @field_serializer("cost_planned", "cost_actual", "budgeted_units", "installed_units", when_used="json")
+    def _ser_money(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
 
 class ActivityListResponse(BaseModel):

@@ -190,6 +190,15 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         bim_element_ids=getattr(activity, "bim_element_ids", None),
         # Per-activity work calendar (#348)
         calendar_id=getattr(activity, "calendar_id", None),
+        # Cost-loaded / progress-rigor columns. Built by hand like everything
+        # else here, so a field added to ActivityResponse alone would still
+        # come back null through every route that goes through this helper.
+        cost_planned=getattr(activity, "cost_planned", None),
+        cost_actual=getattr(activity, "cost_actual", None),
+        percent_complete_type=getattr(activity, "percent_complete_type", None) or "physical",
+        remaining_duration=getattr(activity, "remaining_duration", None),
+        budgeted_units=getattr(activity, "budgeted_units", None),
+        installed_units=getattr(activity, "installed_units", None),
     )
 
 
