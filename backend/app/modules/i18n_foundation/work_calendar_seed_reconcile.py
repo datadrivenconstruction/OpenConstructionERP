@@ -273,10 +273,16 @@ async def reconcile_shipped_work_calendars(session: AsyncSession) -> int:
         # No calendar at all, which is not the undatable database below but an
         # unseeded one: every WorkCalendar row carries a country, so an empty
         # set is an empty table. ``_seed_work_calendars`` writes the current
-        # file whenever this table is empty and it runs later in this same
-        # boot, so the calendars are not missing, they have not arrived yet.
-        # Warning here would tell a first-time user to add by hand what the
-        # boot is a few minutes away from adding for them.
+        # file whenever this table is empty, so the calendars are not missing,
+        # they have not arrived yet. Warning here would tell a first-time user
+        # to add by hand what the product is about to add for them.
+        #
+        # About to, rather than later in this boot, because this repair has two
+        # callers. Under ``serve`` the seeder does follow in the same boot, a
+        # few minutes behind, which is the first-run case this guard is for.
+        # Under ``init-db`` it does not, and the wait is until the next
+        # ``serve``. Silence is right either way: what makes the warning false
+        # is that the calendars are coming, not when.
         logger.debug(
             "Work calendar reconcile: the calendar table is empty, so this database has not been "
             "seeded yet and the seeder will write the current file later in this boot. Nothing to "

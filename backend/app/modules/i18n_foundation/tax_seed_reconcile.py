@@ -403,9 +403,16 @@ async def reconcile_shipped_tax_rows(session: AsyncSession) -> int:
     if not existing:
         # An empty table, which is not the undatable database below but an
         # unseeded one: ``_seed_tax_configurations`` writes the current file
-        # whenever this table is empty, and it runs later in this same boot, so
-        # every line is about to arrive. Warning here would tell a first-time
-        # user to add rates by hand minutes before the boot adds them.
+        # whenever this table is empty, so on an empty table every line is
+        # already on its way. Warning here would tell a first-time user to add
+        # rates by hand minutes before the product adds them.
+        #
+        # "On its way" rather than "later in this boot", because this repair has
+        # two callers. Under ``serve`` the seeder does follow in the same boot,
+        # a few minutes behind, which is the first-run case this guard is for.
+        # Under ``init-db`` it does not, and the wait is until the next
+        # ``serve`` instead. Silence is right either way: what makes the warning
+        # false is that the rows are coming, not when.
         #
         # On ``existing`` rather than ``on_file``, which is the same test only
         # by accident: a row with no tax code belongs to no rate line and is
