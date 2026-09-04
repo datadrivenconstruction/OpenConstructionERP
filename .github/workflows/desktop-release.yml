@@ -569,15 +569,26 @@ jobs:
               echo "OK (${label}): /api/health answered"
               echo "$body" | head -c 800
               echo ""
-              # Printed, not asserted. The encoder only loads when the model
-              # host is reachable, and a leg that did not load it did not
-              # exercise the multiprocessing path that killed this step on
-              # macos-latest in run 33834902654. Failing on it would make an
-              # unrelated network hiccup red; saying nothing would make the
-              # two cases look identical to whoever reads this log next. The
-              # step that asserts that path without a network is above.
-              echo "(${label}) encoder loads in this leg: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0)"
             fi
+            # Printed for both legs, and outside the success branch on
+            # purpose: it was inside it in run 33841183277, so the leg that
+            # died was the one leg whose counts nobody could see, and the
+            # three simultaneous loads that killed it had to be dug out of a
+            # 200-line tail. A failing leg is exactly when these numbers are
+            # worth having.
+            #
+            # Printed, not asserted. The encoder only loads when the model
+            # host is reachable, and a leg that did not load it did not
+            # exercise the multiprocessing path that killed this step on
+            # macos-latest in run 33834902654. Failing on it would make an
+            # unrelated network hiccup red; saying nothing would make the
+            # two cases look identical to whoever reads this log next. The
+            # step that asserts that path without a network is above.
+            #
+            # More than one load in a leg means the embedder singleton was
+            # built concurrently. That is the defect fixed alongside this
+            # step, and one is the only healthy answer.
+            echo "(${label}) encoder loads: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0), failed loads: $(grep -c 'Failed to load embedding model' "$log" 2>/dev/null || echo 0), pool: $(grep -h 'Embedding pool initialised' "$log" 2>/dev/null | tail -n 1 || echo 'never reported')"
             kill "$pid" 2>/dev/null || true
             wait "$pid" 2>/dev/null || true
             if [ "$ok" -ne 1 ]; then

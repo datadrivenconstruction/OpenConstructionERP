@@ -17,6 +17,7 @@ Usage:
 """
 
 import logging
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -62,6 +63,27 @@ GENERIC_FIELDS: tuple[str, ...] = (
 
 _embedder_instance: Any = None
 _embedder_tried: bool = False
+
+# Serialises the construction of the singleton above, and nothing else.
+#
+# ``get_embedder`` is reachable from several threads at once - the embedding
+# pool's worker threads, the default asyncio executor, any request handler that
+# needs a vector - and building the model takes seconds. Without this lock every
+# thread that arrives while the first one is still inside
+# ``SentenceTransformer(...)`` sees ``_embedder_instance is None`` and builds its
+# own copy. They all then assign to the same global, so all but the last are
+# dropped on the floor: the cost is paid, the memory is held until the garbage
+# collector gets to them, and the log shows one "Loaded" line per loser.
+#
+# Measured, macos-latest, desktop-release run 33841183277: three simultaneous
+# constructions, three "Loaded sentence-transformers model" lines 138 ms apart,
+# then SIGSEGV before the pool could report itself initialised. Three is
+# ``min(4, os.cpu_count())`` on that runner, which is the number of warm-up jobs
+# the embedding pool submits at startup.
+#
+# The fast path stays lock-free: once the singleton exists, callers return it
+# without touching the lock at all.
+_embedder_load_lock = threading.Lock()
 
 
 def _has_module(name: str) -> bool:
@@ -122,10 +144,13 @@ def reset_embedder() -> None:
     already answering. It gets picked up on the next restart instead.
     """
     global _embedder_instance, _embedder_tried, _active_model_name
-    if _embedder_instance is not None:
-        return
-    _embedder_tried = False
-    _active_model_name = None
+    # Under the same lock as the load, or a reset that lands while a load is
+    # running is undone by that load's own failure latch a second later.
+    with _embedder_load_lock:
+        if _embedder_instance is not None:
+            return
+        _embedder_tried = False
+        _active_model_name = None
 
 
 def _candidate_sources(name: str) -> list[str]:
@@ -190,13 +215,32 @@ def get_embedder():
     loop ~every second, burning ~10s of CPU per iteration and starving
     the match-elements request path of the GIL.
     """
-    global _embedder_instance, _embedder_tried, _active_model_name
     if _embedder_instance is not None:
         return _embedder_instance
     # Short-circuit: a prior call exhausted both candidate models.
     # Without this guard every caller pays the multi-second retry cost.
     if _embedder_tried:
         return None
+
+    with _embedder_load_lock:
+        # Both checks again, because the thread that held the lock while we
+        # waited for it has usually just answered the question. Repeating them
+        # is what turns N concurrent callers into one load; skipping them is
+        # what made a desktop build die on its second launch.
+        if _embedder_instance is not None:
+            return _embedder_instance
+        if _embedder_tried:
+            return None
+        return _load_embedder()
+
+
+def _load_embedder():
+    """Build the singleton. Only ever called with ``_embedder_load_lock`` held.
+
+    Split out of :func:`get_embedder` so the lock scope is one line and reads as
+    one: everything here writes the module globals and must not run twice.
+    """
+    global _embedder_instance, _embedder_tried, _active_model_name
 
     try:
         from sentence_transformers import SentenceTransformer

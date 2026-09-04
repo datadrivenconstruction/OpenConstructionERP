@@ -142,13 +142,33 @@ def init_pool() -> int:
         _pool_kind = kind
 
         # Warm the workers synchronously so the first user-facing
-        # request doesn't pay the cold-start cost. For the thread
-        # pool the parent process has already loaded the model (via
-        # ``maybe_preload_in_process``), so warmup is essentially
-        # free - we just exercise each worker once. For the process
-        # pool we need ``size * 2`` jobs because each worker has its
-        # own model that must be loaded + ONNX-compiled.
+        # request doesn't pay the cold-start cost. For the thread pool
+        # the workers share one model, so we load it here, in the
+        # caller's thread, and the jobs below then only exercise each
+        # worker once. For the process pool we need ``size * 2`` jobs
+        # because each worker has its own model that must be loaded +
+        # ONNX-compiled.
+        #
+        # That parent load used to be conditional: the comment here said
+        # the model was already loaded by ``maybe_preload_in_process``,
+        # which only runs under ``OE_VECTOR_PRELOAD=1`` and is off by
+        # default. So on a default startup the ``size`` jobs below were
+        # the first thing to ask for the model, they asked at the same
+        # instant, and each built its own copy. ``get_embedder`` now
+        # serialises that, and loading here means the serialisation has
+        # nothing to do: one thread asks, the workers all hit the warm
+        # singleton. It costs no extra work either - the jobs called
+        # ``get_embedder`` anyway, and it honours the same download lock,
+        # so a deployment with no encoder and downloads off gets the same
+        # fast "nothing to load" it gets today.
         warmup_started = time.monotonic()
+        if kind == "thread":
+            try:
+                from app.core.vector import get_embedder
+
+                get_embedder()
+            except Exception as exc:  # noqa: BLE001 - a pool is not worth a failed startup
+                logger.debug("Parent embedder warm before pool warmup failed: %s", exc)
         warmup_jobs = size * 2 if kind == "process" else size
         futures = [_pool.submit(encode_in_worker, ["warm"]) for _ in range(warmup_jobs)]
         for f in futures:
