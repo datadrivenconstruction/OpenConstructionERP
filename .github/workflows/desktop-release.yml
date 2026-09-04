@@ -463,6 +463,75 @@ jobs:
       # had: the installer stops a running instance by killing the process
       # tree, so a real second start is also a recovery from a crash-stopped
       # cluster. A pass here means a person can open the application.
+      # This one does not need the network, a database or a port, and that is
+      # the point of it. The defect it guards was found by the serve step
+      # below, but only because the encoder happened to download on that run:
+      # the cold start passed because the download failed and nothing reached
+      # multiprocessing, and the restart failed because it succeeded. A green
+      # serve step is therefore ambiguous on its own, and the ambiguity is
+      # settled by luck with a model host rather than by anything we control.
+      # So the mechanism is asserted directly and separately here, on every
+      # platform and every run.
+      #
+      # What is being asserted: multiprocessing starts its resource tracker as
+      # "<sys.executable> <interpreter flags> -c <code>", and in a frozen build
+      # sys.executable is our own binary. resource_tracker.py has no sys.frozen
+      # branch, unlike spawn.get_command_line, so this command line arrives
+      # whether or not freeze_support() is called. Measured on macos-latest in
+      # run 33834902654, our argparse answered it with "invalid choice" and the
+      # process died with Abort trap: 6 on the second launch of the app.
+      #
+      # The flag spellings below are not decoration. The flags are derived from
+      # the parent's sys.flags by subprocess._args_from_interpreter_flags, and
+      # a frozen build commonly runs with no_site, so a build that only handled
+      # a bare -c would pass a naive check here and still fail on a laptop.
+      - name: Check the sidecar answers the command lines multiprocessing sends it
+        shell: bash
+        run: |
+          set -uo pipefail
+          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          chmod +x "$bin" 2>/dev/null || true
+
+          code='import sys; sys.stdout.write("interpreter-answered\n")'
+          failed=0
+
+          probe() {
+            label="$1"
+            shift
+            out=$("$bin" "$@" 2>&1)
+            status=$?
+            if [ "$status" -eq 0 ] && printf '%s' "$out" | grep -q "interpreter-answered"; then
+              echo "OK (${label}): the binary ran the code it was handed"
+            else
+              echo "FAILED (${label}): exit ${status}"
+              printf '%s\n' "$out" | head -n 20
+              failed=1
+            fi
+          }
+
+          probe "-c"       -c "$code"
+          probe "-S -c"    -S -c "$code"
+          probe "-E -s -c" -E -s -c "$code"
+
+          # And the real thing, spelled exactly as the standard library spells
+          # it. It exits non-zero on purpose because file descriptor 0 is not
+          # the pipe a tracker expects, so what is checked is that the argument
+          # parser did not claim it.
+          out=$("$bin" -S -c "from multiprocessing.resource_tracker import main;main(0)" 2>&1)
+          if printf '%s' "$out" | grep -q "invalid choice"; then
+            echo "FAILED (resource tracker): the argument parser claimed the tracker's command line"
+            printf '%s\n' "$out" | head -n 20
+            failed=1
+          else
+            echo "OK (resource tracker): the argument parser left it alone"
+          fi
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error title=The desktop sidecar cannot host its own helper processes on ${{ matrix.os }}::The frozen binary does not answer the command lines multiprocessing uses to start a spawned child or a resource tracker. On a user's machine this is the app working on first launch and dying on the second, once anything in the encoder path creates a multiprocessing primitive. The guard is _answer_multiprocessing_re_execution in backend/app/cli.py, which is the script desktop/pyinstaller.spec freezes."
+            exit 1
+          fi
+          echo "OK: the sidecar answers as an interpreter when the standard library asks it to."
+
       - name: Check the sidecar serves an answer on a cold start and a restart
         shell: bash
         timeout-minutes: 25
@@ -500,6 +569,14 @@ jobs:
               echo "OK (${label}): /api/health answered"
               echo "$body" | head -c 800
               echo ""
+              # Printed, not asserted. The encoder only loads when the model
+              # host is reachable, and a leg that did not load it did not
+              # exercise the multiprocessing path that killed this step on
+              # macos-latest in run 33834902654. Failing on it would make an
+              # unrelated network hiccup red; saying nothing would make the
+              # two cases look identical to whoever reads this log next. The
+              # step that asserts that path without a network is above.
+              echo "(${label}) encoder loads in this leg: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0)"
             fi
             kill "$pid" 2>/dev/null || true
             wait "$pid" 2>/dev/null || true
