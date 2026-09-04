@@ -316,7 +316,12 @@ ENTITY_CATALOG: dict[str, CatalogEntity] = {
             "``risk_dispersion`` is the estimating standard deviation for "
             "the line as a fraction of its own amount, which is what a "
             "risk-adjusted margin needs and what confidence cannot give: "
-            "read it with weighted_avg weighted by amount. ``price_basis`` "
+            "read it with weighted_avg weighted by amount. ``currency`` is "
+            "the ISO code the money on this line is denominated in. It is "
+            "the owning project's, because neither the line nor the bill "
+            "has one of its own, so a portfolio reading can group a sum of "
+            "``amount`` by it or filter to a single code instead of adding "
+            "several currencies together. ``price_basis`` "
             "is what the price stands on, one of invoice, quotation, "
             "price_list, contract_rate, norm, historic, judgement - "
             "deliberately separate from ``source``, which records how the "
@@ -330,6 +335,7 @@ ENTITY_CATALOG: dict[str, CatalogEntity] = {
             "amount": KIND_NUMERIC,
             "confidence": KIND_NUMERIC,
             "risk_dispersion": KIND_NUMERIC,
+            "currency": KIND_TEXT,
             "price_basis": KIND_TEXT,
             "boq_id": KIND_UUID,
             "boq_name": KIND_TEXT,
@@ -575,17 +581,27 @@ class BoundEntity:
 
 def _bind_boq_position() -> BoundEntity:
     from app.modules.boq.models import BOQ, Position
+    from app.modules.projects.models import Project
 
     # quantity / unit_rate / total / confidence are String columns by
     # design (see Position's own comment). ``numeric_value`` is the
     # platform's tolerant coercion: a clean decimal converts, anything
     # else reads as 0 rather than aborting the statement the way a bare
     # ``::double precision`` would on one malformed legacy row.
+    #
+    # Two joins rather than one. The bill was always joined, for the project
+    # scoping; the project itself is joined for the currency, which is the
+    # only place the money on a line says what it is denominated in. Neither
+    # join can drop or duplicate a row: ``BOQ.project_id`` is NOT NULL and
+    # points at a primary key, so every position has exactly one of each. And
+    # the import is not a new dependency - ``oe_boq`` already declares
+    # ``depends=["oe_projects"]`` and its table carries the foreign key - so
+    # this cannot fail to import anywhere the positions themselves exist.
     return BoundEntity(
         model=Position,
         project_column=BOQ.project_id,
         period_column=Position.created_at,
-        joins=[(BOQ, Position.boq_id == BOQ.id)],
+        joins=[(BOQ, Position.boq_id == BOQ.id), (Project, BOQ.project_id == Project.id)],
         boq_column=Position.boq_id,
         fields={
             "quantity": BoundField(numeric_value(Position.quantity), KIND_NUMERIC),
@@ -610,6 +626,13 @@ def _bind_boq_position() -> BoundEntity:
                 KIND_NUMERIC,
                 nullable_source=Position.risk_dispersion,
             ),
+            # The project's column, and deliberately not a copy taken onto
+            # the line. A currency written per position would be a second
+            # place for it to be right, and the money it labels is already
+            # the project's money. NOT NULL, so no null source: an
+            # unconfigured project reads as the empty string, which is its
+            # own breakdown group rather than a missing one.
+            "currency": BoundField(Project.currency, KIND_TEXT),
             "price_basis": BoundField(
                 Position.price_basis,
                 KIND_TEXT,
