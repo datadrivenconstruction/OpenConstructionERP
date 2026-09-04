@@ -51,17 +51,22 @@ starts the binary it ships and prints the device it chose, on a cold start and
 on a restart over existing data, because not printing it is why this took two
 rounds instead of one.
 
-A start that failed before any of our code ran was reported as our server
-failing. The launcher latched the first plausible reason it could find, so a
-missing runtime, a port already taken and a genuine crash all reached the user
-as the same sentence about the application server.
+A start that failed before any of our code ran was reported as our server failing.
+Not because the launcher guessed, but because there was nothing to guess from: a
+death during unpacking emits no stage marker and no traceback, so it fell past
+every branch that reads one and reached the last resort, which describes the
+application server because that is the only thing the launcher knows it started.
+A genuine crash still reports its own reason and always did. That last resort now
+recognises the shapes a bootloader failure takes, and every cause that already
+reported something specific reports exactly what it did before.
 
 The Windows installer asked whether the word python resolved to something, which
 on a stock Windows is a stub that opens a store page and exits zero. It now asks
-whether there is a Python it can actually use. The Windows script a stranger runs
-first had no test coverage of any kind before this release and now has twenty two
-cases. The shell script still has none, which is better said here than found out
-later.
+whether there is a Python it can actually use. Neither script a stranger runs
+first had a single test before this release. The Windows one now has thirty three
+cases and the shell one twenty seven, and a lane runs all of them on every change
+to either, the shell cases on Linux and on macOS because what broke in them was an
+interaction with the shell rather than anything a Windows runner would meet.
 
 That same installer then decided whether the product had come up by waiting for
 the word healthy and calling everything else a failure, and this release would
@@ -78,6 +83,24 @@ anything at all: it announced the application was running the moment the contain
 were created, which is well before anything serves. It waits now too, which is the
 harder of the two to have noticed, because a script that never reports a problem
 never looks wrong.
+
+Upgrading by re-running the one-liner kept installing the version you had asked
+for the first time. Both installers record a requested version beside the two
+secrets and neither could remove one, and that file is read on every command run
+in its directory afterwards, so the first install decided the version for every
+install after it. The pull succeeded, the containers came up, and the script said
+the installation was complete. Asking for the latest version now clears a pin as
+well as declining to write one, and says that it did. If you pinned a version
+once and have been re-running the default command since, this is the release
+where you start getting the one you asked for.
+
+The reference for the health endpoint described a status this release changed. It
+said a pending migration degrades it, which is deliberately untrue, and did not
+mention the cause that now fires. That page is written for somebody pointing a
+load balancer or an uptime monitor at us, so it says which two conditions degrade
+the status, that they are not equally serious, and that a check requiring the
+literal word healthy will take a working installation out of rotation over one
+missing module.
 
 A second person signing in on a shared Windows machine opened the first person's
 workspace. An installation whose migration history had forked refused to accept
@@ -123,15 +146,19 @@ frequent letters of each language, and Hebrew's six were the least informative o
 the four by a wide margin. Two of them, yod and vav, sit on the bytes Greek uses
 for iota and epsilon. The other four Greek letters, alpha, omicron, nu and tau,
 sit on four common Hebrew letters the Hebrew profile was not counting at all. So
-Greek scored on Hebrew text with every one of its six while Hebrew scored with
-two, and the lead Hebrew held fell under the margin. Hebrew now counts ten letters
-rather than six. Hebrew was alone in this, and it stayed hidden because the thresholds
-had been calibrated on a population that cannot show it.
+the Greek profile scored on Hebrew text with all six of its letters, while the
+Hebrew profile was blind to four of the commonest letters in front of it, and the
+lead Hebrew held fell under the margin. Hebrew now counts ten letters rather than
+six. Hebrew was alone in this, and it stayed hidden because the thresholds had been
+calibrated on a population that cannot show it.
 
 The desktop pipeline now starts the server it ships and waits for it to answer,
-on a cold start and on a restart over an existing data directory. Every step
-before this built the installer, verified the binary was inside it and signed
-it, and nothing anywhere had ever run it.
+on a cold start and on a restart over an existing data directory. It already ran
+the frozen binary, to print its version, to run the doctor and to prepare a
+database, so the thing that had never run anywhere was the path those three do not
+touch: building the application, firing the startup event and loading the modules.
+That is the path a person meets on the first launch, and it was the one the
+pipeline could not have caught anything on.
 
 A bill line priced from a production norm now says which norm predicted it. The
 identity was recorded on the assembly and never copied onto the position, so an
@@ -148,6 +175,9 @@ is the argument for the test that now checks the two lists against each other in
 both directions instead. The ten Indian cases added in the last release now
 carry their own title and description in every offered language rather than
 falling back to English.
+
+A corrected variation order left its mirror posting the original amount, so the
+two sides of one change disagreed about what it cost.
 
 In the estimate itself, exporting draft minutes downloaded the previous save
 while the screen showed the edits, and four links in the interface went nowhere,
