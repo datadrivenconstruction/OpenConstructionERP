@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from datetime import UTC, datetime
 
 import pytest
@@ -65,6 +66,17 @@ from app.modules.i18n_foundation.tax_seed_reconcile import REPAIR_ID
 pytestmark = pytest.mark.asyncio
 
 _TAX_TABLE = "oe_i18n_tax_config"
+
+#: The reconciler's own logger. Named so the warning assertions below read only
+#: what this repair said: ``run_data_repairs`` runs every registered repair, and
+#: a neighbour's warning must not be able to satisfy or break them.
+_LOGGER = "app.modules.i18n_foundation.tax_seed_reconcile"
+
+
+def _warnings(caplog) -> list[str]:
+    """What the reconciler warned about, in order."""
+    return [r.getMessage() for r in caplog.records if r.name == _LOGGER and r.levelno >= logging.WARNING]
+
 
 #: Rows the seed file gained after the v15.4.0-era file, by
 #: ``(country, tax_code, effective_from)``. Written out rather than derived from
@@ -548,8 +560,14 @@ async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory)
     assert still == 0, "the labelling repairs left rows the constraint would refuse to validate"
 
 
-async def test_a_database_whose_seed_cannot_be_dated_is_given_nothing(repair_factory) -> None:
-    """No timestamp, no delivery. The one branch where the repair gives up on purpose."""
+async def test_a_database_whose_seed_cannot_be_dated_is_given_nothing(repair_factory, caplog) -> None:
+    """No timestamp, no delivery. The one branch where the repair gives up on purpose.
+
+    The warning is asserted rather than merely allowed. This is the population
+    the sentence about adding rates by hand is true of: the table holds a row,
+    so the seeder's own empty-table guard will not fill it, and nothing else is
+    coming. Silencing it here would take away the only notice this install gets.
+    """
     async with repair_factory() as session:
         session.add(
             TaxConfiguration(
@@ -568,11 +586,46 @@ async def test_a_database_whose_seed_cannot_be_dated_is_given_nothing(repair_fac
         )
         await session.commit()
 
-    report = await run_data_repairs(repair_factory)
+    with caplog.at_level(logging.WARNING, logger=_LOGGER):
+        report = await run_data_repairs(repair_factory)
 
     assert _outcome(report, REPAIR_ID).rows_changed == 0
     assert await _deliveries(repair_factory) == set()
     assert await _count(repair_factory) == 1
+    assert len(_warnings(caplog)) == 1, "the install that really has to be told by hand was not told"
+    assert "by hand" in _warnings(caplog)[0]
+
+
+async def test_an_unseeded_database_is_left_to_the_seeder_without_a_warning(repair_factory, caplog) -> None:
+    """The first boot, where this repair runs before the data it reconciles exists.
+
+    ``run_data_repairs`` is called from ``app.main`` well before
+    ``seed_i18n_data``, so on a fresh data directory the reconciler meets an
+    empty table. Read as a database whose seed cannot be dated, that produced a
+    warning telling the user to add the rates by hand, and roughly seven minutes
+    later the seeder wrote all eighty-odd of them. The sentence was not early,
+    it was false.
+
+    An empty table is what tells the two apart, and it is a sound signal rather
+    than a convenient one: ``_seed_tax_configurations`` fills this table
+    whenever it is empty, so an empty table always means the rows are on their
+    way, on a first boot and on any later one.
+    """
+    async with repair_factory() as session:
+        await session.execute(TaxConfiguration.__table__.delete())
+        await session.commit()
+    assert await _count(repair_factory) == 0, "this fixture is not the unseeded install it claims to be"
+
+    with caplog.at_level(logging.WARNING, logger=_LOGGER):
+        report = await run_data_repairs(repair_factory)
+
+    assert _warnings(caplog) == [], "a fresh install was told to add by hand what the seeder is about to write"
+    assert _outcome(report, REPAIR_ID).rows_changed == 0, "the reconciler wrote rates the seeder will write"
+    assert await _deliveries(repair_factory) == set(), (
+        "deliveries were recorded against a database that has not been seeded, which would make the "
+        "reconciler skip those rate lines for the life of the install"
+    )
+    assert await _count(repair_factory) == 0
 
 
 async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_factory) -> None:

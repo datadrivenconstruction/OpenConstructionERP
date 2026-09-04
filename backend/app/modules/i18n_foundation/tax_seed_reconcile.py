@@ -49,9 +49,19 @@ The residual gaps, stated rather than glossed
 Both are misses, never resurrections, and that asymmetry is deliberate: every
 uncertainty resolves to "leave it alone".
 
-* A database whose original seeded rows have all been deleted has no timestamp
-  to read, so nothing is delivered to it. Logged, and it stays broken until
-  somebody adds the rates by hand.
+* A database that still holds rows, but none of the originally seeded ones, has
+  no timestamp to read, so nothing is delivered to it. Logged, and it stays
+  broken until somebody adds the rates by hand.
+
+  A table emptied completely is a different database and not a gap at all.
+  ``_seed_tax_configurations`` fills this table whenever it is empty, so an
+  empty table means the rows are about to be written rather than that they are
+  missing - and on a first boot that is the ordinary state when this runs,
+  because the repair registry runs well ahead of ``seed_i18n_data`` in
+  ``app.main``. This repair is for an already-seeded database and declines to
+  say anything about one it can see has not been seeded, silently: the sentence
+  above, printed to somebody five minutes into their first install, tells them
+  to do by hand what the boot is about to do for them.
 * A fresh install of an OLD build, made after the rate shipped, reads as too
   young and is skipped. Rare - it needs somebody to install a superseded
   release for the first time - and the cost is that a fix does not arrive,
@@ -390,6 +400,23 @@ async def reconcile_shipped_tax_rows(session: AsyncSession) -> int:
         return 0
 
     existing, on_file, seeded_at = await _read_table(session)
+    if not existing:
+        # An empty table, which is not the undatable database below but an
+        # unseeded one: ``_seed_tax_configurations`` writes the current file
+        # whenever this table is empty, and it runs later in this same boot, so
+        # every line is about to arrive. Warning here would tell a first-time
+        # user to add rates by hand minutes before the boot adds them.
+        #
+        # On ``existing`` rather than ``on_file``, which is the same test only
+        # by accident: a row with no tax code belongs to no rate line and is
+        # left out of ``on_file``, so a table holding only such rows would read
+        # as empty here and is a seeded database like any other.
+        logger.debug(
+            "Tax seed reconcile: the tax table is empty, so this database has not been seeded yet "
+            "and the seeder will write the current file later in this boot. Nothing to reconcile."
+        )
+        return 0
+
     missing = [line for line in wanted if line not in on_file]
     if not missing:
         return 0

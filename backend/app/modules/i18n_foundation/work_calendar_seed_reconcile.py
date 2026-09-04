@@ -39,8 +39,13 @@ whole population that has been silently answering Monday-to-Friday for the Gulf.
 
 It does nothing on four kinds of install, three of them deliberate:
 
-* A fresh one. The seeder writes the current file, so there is nothing to add,
-  and this returns 0.
+* A fresh one, on either side of the seeder. Afterwards the table holds the
+  current file, so there is nothing to add. Before it the table is empty - and
+  on a first boot that is the ordinary case rather than a corner, because the
+  repair registry runs well ahead of ``seed_i18n_data`` in ``app.main``. An
+  empty table is not a database whose seed cannot be dated, it is one that has
+  not been seeded, and ``_seed_work_calendars`` fills it later in this same
+  boot. Either way this returns 0 and says nothing.
 * One that already has a calendar for the country. Somebody may have edited
   their Qatar week, and a reconciler that overwrites it is worse than the gap it
   closes. Their row stands, untouched, whatever it says.
@@ -48,10 +53,13 @@ It does nothing on four kinds of install, three of them deliberate:
   removed, that was a decision, and a boot-path repair does not get to reverse a
   decision. Told apart from the case above by dating the seed - see
   :func:`anchor_countries`.
-* One whose seed cannot be dated at all, because none of the calendars that date
-  it are left. Nothing is delivered and a warning says why, because the question
-  this repair has to answer is not "is the row missing" but "was it ever
-  delivered", and on that database there is no evidence either way.
+* One that holds calendars but none of the ones that date a seed, so when it
+  was seeded cannot be told. Nothing is delivered and a warning says why,
+  because the question this repair has to answer is not "is the row missing"
+  but "was it ever delivered", and on that database there is no evidence either
+  way. Holding calendars is what separates it from the empty table above: there
+  the seeder is about to answer, so telling the user to add the rows by hand
+  would be false.
 
 It also does not repair Saudi Arabia, and that is worth saying plainly because
 the paragraph above invites the opposite reading. An install seeded before
@@ -261,6 +269,21 @@ async def reconcile_shipped_work_calendars(session: AsyncSession) -> int:
         return 0
 
     on_file, seeded_at = await _read_table(session)
+    if not on_file:
+        # No calendar at all, which is not the undatable database below but an
+        # unseeded one: every WorkCalendar row carries a country, so an empty
+        # set is an empty table. ``_seed_work_calendars`` writes the current
+        # file whenever this table is empty and it runs later in this same
+        # boot, so the calendars are not missing, they have not arrived yet.
+        # Warning here would tell a first-time user to add by hand what the
+        # boot is a few minutes away from adding for them.
+        logger.debug(
+            "Work calendar reconcile: the calendar table is empty, so this database has not been "
+            "seeded yet and the seeder will write the current file later in this boot. Nothing to "
+            "reconcile."
+        )
+        return 0
+
     missing = [slot for slot in wanted if slot[0] not in on_file]
     if not missing:
         return 0

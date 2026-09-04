@@ -25,6 +25,7 @@ wrongly.
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 
 import pytest
@@ -55,6 +56,16 @@ _GULF = ("BH", "KW", "OM", "QA")
 
 #: Sunday through Thursday in ISO numbering.
 _GULF_WEEK = [7, 1, 2, 3, 4]
+
+#: The reconciler's own logger. Named so the warning assertions below read only
+#: what this repair said: ``run_data_repairs`` runs every registered repair, and
+#: a neighbour's warning must not be able to satisfy or break them.
+_LOGGER = "app.modules.i18n_foundation.work_calendar_seed_reconcile"
+
+
+def _warnings(caplog) -> list[str]:
+    """What the reconciler warned about, in order."""
+    return [r.getMessage() for r in caplog.records if r.name == _LOGGER and r.levelno >= logging.WARNING]
 
 
 def _shipped() -> list[dict]:
@@ -232,16 +243,57 @@ async def test_a_deleted_calendar_is_not_resurrected(repair_factory) -> None:
     assert await _countries(repair_factory) & set(_GULF) == set()
 
 
-async def test_an_install_whose_seed_cannot_be_dated_is_given_nothing(repair_factory) -> None:
-    """No anchoring calendar left means no evidence either way, so nothing moves."""
+async def test_an_install_whose_seed_cannot_be_dated_is_given_nothing(repair_factory, caplog) -> None:
+    """No anchoring calendar left means no evidence either way, so nothing moves.
+
+    The warning is asserted rather than merely allowed. This is the one
+    population the sentence about adding calendars by hand is true of - the
+    table holds rows, so the seeder will not fill it, and nothing else is coming
+    to close the gap. A change that silenced it here would take away the only
+    notice this install ever gets.
+    """
     late = {country for country, _ in CALENDAR_FIRST_SHIPPED}
     only_late = [row for row in _shipped() if row["country_code"] in late and row["country_code"] != "QA"]
     await _install(repair_factory, only_late, "2026-06-01")
 
-    report = await run_data_repairs(repair_factory)
+    with caplog.at_level(logging.WARNING, logger=_LOGGER):
+        report = await run_data_repairs(repair_factory)
 
     assert _outcome(report, REPAIR_ID).rows_changed == 0
     assert "QA" not in await _countries(repair_factory)
+    assert len(_warnings(caplog)) == 1, "the install that really has to be told by hand was not told"
+    assert "by hand" in _warnings(caplog)[0]
+
+
+async def test_an_unseeded_database_is_left_to_the_seeder_without_a_warning(repair_factory, caplog) -> None:
+    """The first boot, where this repair runs before the data it reconciles exists.
+
+    ``run_data_repairs`` is called from ``app.main`` well before
+    ``seed_i18n_data``, so on a fresh data directory the reconciler meets an
+    empty table. Read as a database whose seed cannot be dated, that produced a
+    warning telling the user to add the calendars by hand, and roughly seven
+    minutes later the seeder wrote all of them. The sentence was not early, it
+    was false.
+
+    An empty table is what tells the two apart, and it is a sound signal rather
+    than a convenient one: ``_seed_work_calendars`` fills this table whenever it
+    is empty, so an empty table always means the rows are on their way.
+    """
+    async with repair_factory() as session:
+        await session.execute(WorkCalendar.__table__.delete())
+        await session.commit()
+    assert await _count(repair_factory) == 0, "this fixture is not the unseeded install it claims to be"
+
+    with caplog.at_level(logging.WARNING, logger=_LOGGER):
+        report = await run_data_repairs(repair_factory)
+
+    assert _warnings(caplog) == [], "a fresh install was told to add by hand what the seeder is about to write"
+    assert _outcome(report, REPAIR_ID).rows_changed == 0, "the reconciler wrote calendars the seeder will write"
+    assert await _deliveries(repair_factory) == set(), (
+        "deliveries were recorded against a database that has not been seeded, which would make the "
+        "reconciler skip those calendars for the life of the install"
+    )
+    assert await _count(repair_factory) == 0
 
 
 async def test_a_current_install_is_given_nothing(repair_factory) -> None:
