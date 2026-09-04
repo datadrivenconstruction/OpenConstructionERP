@@ -50,6 +50,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
+import { useModuleStore } from '@/stores/useModuleStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
@@ -229,6 +230,10 @@ export function CarbonPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('inventory');
   const activeProjectId = useActiveProjectId();
+  // `/sustainability` comes from the sustainability plugin module. With the
+  // module off there is no such route, so the explainer link would land on
+  // the catch-all 404 rather than on per-BOQ carbon.
+  const isSustainabilityEnabled = useModuleStore((s) => s.isModuleEnabled('sustainability'));
   const [inventoryDrawerId, setInventoryDrawerId] = useState<string | null>(null);
   const [createInvOpen, setCreateInvOpen] = useState(false);
   const [createTargetOpen, setCreateTargetOpen] = useState(false);
@@ -327,12 +332,16 @@ export function CarbonPage() {
             : undefined
         }
         links={[
-          {
-            label: t('carbon.intro_link_sustainability', {
-              defaultValue: 'Per-BOQ carbon (Sustainability)',
-            }),
-            onClick: () => navigate('/sustainability'),
-          },
+          ...(isSustainabilityEnabled
+            ? [
+                {
+                  label: t('carbon.intro_link_sustainability', {
+                    defaultValue: 'Per-BOQ carbon (Sustainability)',
+                  }),
+                  onClick: () => navigate('/sustainability'),
+                },
+              ]
+            : []),
           {
             label: t('carbon.intro_link_boq', { defaultValue: 'Open BOQ editor' }),
             onClick: () => navigate('/boq'),

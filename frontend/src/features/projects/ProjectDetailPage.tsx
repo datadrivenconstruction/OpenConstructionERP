@@ -79,6 +79,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { useModuleStore } from '@/stores/useModuleStore';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { formatCurrency as formatMoney, toNum } from '@/shared/lib/money';
 
@@ -1336,6 +1337,10 @@ export function ProjectDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  // `/collaboration` is served only by the collaboration plugin module. With
+  // the module off the route does not exist and the button below would fall
+  // through to the catch-all 404, so the button goes with it.
+  const isCollaborationEnabled = useModuleStore((s) => s.isModuleEnabled('collaboration'));
 
   const [importTarget, setImportTarget] = useState<{
     boqId: string;
@@ -2755,15 +2760,17 @@ export function ProjectDetailPage() {
                         Collaboration hub resolves the active project, which
                         this page has already set). Sits beside Documents so
                         it reads as a peer destination. */}
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      className="w-full justify-start"
-                      icon={<MessagesSquare size={14} />}
-                      onClick={() => navigate('/collaboration')}
-                    >
-                      {t('projects.dash_discussion_link', { defaultValue: 'Discussion' })}
-                    </Button>
+                    {isCollaborationEnabled && (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        className="w-full justify-start"
+                        icon={<MessagesSquare size={14} />}
+                        onClick={() => navigate('/collaboration')}
+                      >
+                        {t('projects.dash_discussion_link', { defaultValue: 'Discussion' })}
+                      </Button>
+                    )}
                     <Button
                       variant="secondary"
                       size="md"

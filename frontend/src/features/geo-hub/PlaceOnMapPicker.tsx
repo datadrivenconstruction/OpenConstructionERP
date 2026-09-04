@@ -401,7 +401,7 @@ export function PlaceOnMapPicker({
               {t('geo_hub.place.add_model', { defaultValue: 'Add a BIM model' })}
             </Link>
             <Link
-              to={`/projects/${projectId}/documents`}
+              to={`/projects/${projectId}/files`}
               className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-primary px-3 py-1.5 text-xs font-semibold text-content-secondary transition hover:bg-surface-secondary"
             >
               <Plus size={13} />

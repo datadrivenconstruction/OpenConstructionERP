@@ -425,7 +425,7 @@ export function RegisterPage() {
                     </a>
                     {' '}{t('auth.and', 'and')}{' '}
                     <a
-                      href="/terms-of-service.html"
+                      href="/terms.html"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-oe-blue hover:underline font-medium"
