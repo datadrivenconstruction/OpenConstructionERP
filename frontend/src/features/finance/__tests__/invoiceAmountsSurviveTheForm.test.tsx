@@ -234,4 +234,27 @@ describe('#466 - an invoice is billed for the figure that was typed', () => {
     expect(harness.posted).toHaveLength(0);
     expect(await screen.findByText(/must equal the subtotal plus tax/i)).toBeInTheDocument();
   });
+
+  it('sends a document that adds up when only the tax field was filled', async () => {
+    readAs('en-US');
+    const user = await openTheInvoiceForm();
+
+    // Tax on its own is an odd thing to enter, and it is the one route through
+    // the form that no other test here drives. It used to reach the old
+    // `sub > 0 ? sub : total` fallback and post a line item for a figure the
+    // subtotal did not claim.
+    enter(moneyFields()[1] as HTMLInputElement, '9000');
+    await user.click(createButton());
+
+    await waitFor(() => expect(harness.posted).toHaveLength(1));
+    const body = harness.posted[0] as Record<string, unknown>;
+    // Degenerate but coherent, which is the property the server now enforces:
+    // subtotal plus tax is the total, and nothing claims to be a line of a
+    // subtotal of zero.
+    expect(Number(body.amount_subtotal) + Number(body.tax_amount)).toBeCloseTo(
+      Number(body.amount_total),
+      2,
+    );
+    expect(body.line_items).toHaveLength(0);
+  });
 });

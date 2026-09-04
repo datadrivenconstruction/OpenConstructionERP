@@ -414,6 +414,56 @@ async def test_create_invoice_line_items_may_round_a_cent_each() -> None:
     assert Decimal(invoice.amount_total) == Decimal("100.00")
 
 
+def test_line_sum_tolerance_is_a_cent_a_line_over_a_two_cent_floor() -> None:
+    """The rule in both of its regimes, because the floor rules a short invoice.
+
+    A cent a line is the per-line rounding accumulating. Below three lines that
+    figure is under the tolerance the invoice total itself gets, and a line
+    must not be held to a stricter figure than the document it makes up, so the
+    invoice-level tolerance is the floor. Above three lines the per-line term
+    takes over and grows with the document.
+    """
+    from app.modules.finance.service import INVOICE_AMOUNT_TOLERANCE, _line_sum_tolerance
+
+    assert _line_sum_tolerance(1) == INVOICE_AMOUNT_TOLERANCE
+    assert _line_sum_tolerance(2) == INVOICE_AMOUNT_TOLERANCE
+    assert _line_sum_tolerance(3) == Decimal("0.03")
+    assert _line_sum_tolerance(40) == Decimal("0.40")
+
+
+@pytest.mark.asyncio
+async def test_create_invoice_holds_one_line_to_the_floor_and_no_further() -> None:
+    """Two cents out on a single line passes, three does not."""
+    from fastapi import HTTPException
+
+    from app.modules.finance.schemas import InvoiceLineItemCreate
+
+    def _one_line_of(amount: str) -> InvoiceCreate:
+        return InvoiceCreate(
+            project_id=uuid.uuid4(),
+            invoice_direction="payable",
+            invoice_date="2026-04-01",
+            amount_subtotal="100.00",
+            tax_amount="0",
+            line_items=[
+                InvoiceLineItemCreate(
+                    description="Contract works",
+                    quantity="1",
+                    unit="lsum",
+                    unit_rate=amount,
+                    amount=amount,
+                )
+            ],
+        )
+
+    invoice = await _make_service().create_invoice(_one_line_of("99.98"))
+    assert Decimal(invoice.amount_total) == Decimal("100.00")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _make_service().create_invoice(_one_line_of("99.97"))
+    assert exc_info.value.status_code == 400
+
+
 @pytest.mark.asyncio
 async def test_capture_booking_may_book_lines_that_do_not_add_up() -> None:
     """The one exemption, named rather than assumed.
