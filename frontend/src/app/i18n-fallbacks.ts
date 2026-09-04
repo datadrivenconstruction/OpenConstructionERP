@@ -17,11 +17,16 @@
  * rather than a full locale, so iterating it would compare a deliberate 1579
  * key file against a 35243 key one. ``mn`` is listed although it does not
  * ship, so the Mongolian file keeps whatever test coverage it has while it
- * waits for a native-speaker pass. ``uz`` is deliberately absent for the same
- * reason it is commented out of ``SUPPORTED_LANGUAGES``: it is not offered
- * yet, and listing it here would put an unshipped locale in front of tests
- * that are meant to describe what users can actually select. Add it in the
- * same commit that uncomments it.
+ * waits for a native-speaker pass.
+ *
+ * This paragraph used to name ``uz`` as a third exception, absent because it
+ * was commented out of ``SUPPORTED_LANGUAGES``, and it told whoever uncommented
+ * it to add the import in the same commit. It was uncommented and the import
+ * was not added, so Uzbek shipped to users while being invisible to every test
+ * that iterates this object, which is the exact failure the Kyrgyz sentence
+ * above describes. A comment that records a rule cannot enforce it, so
+ * ``i18n-fallbacks.test.ts`` now checks the two lists against each other and
+ * names ``en-US`` and ``mn`` as the only two exceptions, in both directions.
  *
  * IMPORTANT: this file is intentionally NOT imported from runtime code.
  * The application boots from ``./locales/en`` and lazy-loads other
@@ -71,6 +76,7 @@ import fa from './locales/fa';
 import he from './locales/he';
 import el from './locales/el';
 import uk from './locales/uk';
+import uz from './locales/uz';
 
 export const fallbackResources = {
   en,
@@ -114,4 +120,5 @@ export const fallbackResources = {
   he,
   el,
   uk,
+  uz,
 };
