@@ -323,9 +323,12 @@ class TestUninstall:
         Disabling a module deliberately keeps its manifest, because that is what
         a later enable reads back. Removing one has no such reader: the files
         are gone. A manifest kept anyway is a module ``GET /api/v1/modules``
-        still lists, the health endpoint's ``modules_loaded`` still counts - it
-        is the length of that same list, not of the loaded ones - and the enable
-        route still accepts, since its 404 guard is a lookup in that registry.
+        still lists, the health endpoint's ``modules_discovered`` still counts,
+        and the enable route still accepts, since its 404 guard is a lookup in
+        that registry. ``modules_loaded`` used to be the length of that same
+        list rather than of the loaded ones, so it counted the ghost too; it now
+        counts what its name says, which narrows this defect without closing it,
+        because the registry entry is still there for the enable route to find.
         Accepting is the one that hurts: the enable then walks into importlib
         and raises ``ModuleNotFoundError``, which is not the ``ValueError`` the
         route catches, so the caller gets a 500 where a 404 was the answer.

@@ -1961,6 +1961,19 @@ def create_app() -> FastAPI:
         import os as _os
         from pathlib import Path as _Path
 
+        # Modules, and three numbers rather than one. ``modules_loaded`` was the
+        # length of ``list_modules()``, which iterates the manifests that
+        # parsed - so the field named for the loaded modules answered with the
+        # discovered figure, counting modules the operator had switched off and
+        # modules that never imported alike. Discovered, enabled and loaded move
+        # independently, and a reader handed only their sum cannot tell which of
+        # them dropped: a module switched off and a module that failed lower it
+        # by exactly the same one, and only the second is a fault.
+        #
+        # Every row carries the two flags these are counted from, so the three
+        # come out of one pass and cost nothing extra on an endpoint the desktop
+        # launcher polls twice a second.
+        _module_rows = module_loader.list_modules()
         result: dict[str, Any] = {
             "status": "healthy",
             "version": settings.app_version,
@@ -1968,9 +1981,45 @@ def create_app() -> FastAPI:
             "instance_id": _INSTANCE_ID,
             "build": f"DDC-{_BUILD_HASH}",
             "signature": build_provenance_tag(settings.app_version),
-            "modules_loaded": len(module_loader.list_modules()),
+            "modules_discovered": len(_module_rows),
+            "modules_enabled": sum(1 for _row in _module_rows if _row.get("enabled")),
+            "modules_loaded": sum(1 for _row in _module_rows if _row.get("loaded")),
             "uptime_seconds": int(time.time() - _startup_time),
         }
+
+        # A module the operator asked for that is not there. Counted per row and
+        # never as ``modules_enabled - modules_loaded``, because those are
+        # different claims: ``resolve_order`` recurses into a module's
+        # dependencies without asking whether the dependency is enabled, so a
+        # disabled module pulled in by an enabled one comes back loaded and not
+        # enabled, and one row of that shape cancels one row of this one. The
+        # subtraction then reads zero across an install that has lost a module.
+        #
+        # The state is reachable at runtime and not at boot: ``load_all``
+        # re-raises, so a module that cannot be imported at startup takes the
+        # process down and never answers this probe. ``enable_module`` is the
+        # path - it marks the manifest enabled and drops the name from the
+        # disabled set BEFORE importing the package, and an import that raises
+        # there leaves the registry holding a module that is enabled and absent
+        # until somebody restarts, with every endpoint it owns answering 404.
+        #
+        # It degrades the status, and it is the only module condition that does.
+        # Told healthy, a person looking for a feature that is missing concludes
+        # their edition does not include it and stops, which is the one wrong
+        # conclusion on offer; told degraded beside the two counts, they restart
+        # or reinstall, which is the fix. A disabled module is a choice and not a
+        # fault, and a count lower than the last release's is not knowable here -
+        # degrading on either would light this permanently, and an aggregate with
+        # a permanently active cause has stopped being a signal, exactly as the
+        # stale alembic stamp below did before it was made a fact. Which module
+        # is missing is not published, for the reason in this endpoint's
+        # docstring; it is in the boot log.
+        #
+        # Not closed by any of this: a manifest that fails to import is swallowed
+        # by ``_discover_in``, so the module leaves all three counts at once and
+        # nothing at runtime holds a baseline to notice against.
+        if any(_row.get("enabled") and not _row.get("loaded") for _row in _module_rows):
+            result["status"] = "degraded"
 
         # Which installation is answering, as against which process. The desktop
         # installer is per-machine and loopback on Windows is not per-session, so
