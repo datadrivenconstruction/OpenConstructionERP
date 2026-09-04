@@ -354,6 +354,34 @@ export const INVOICE_STATUS_ORDER = [
 ];
 
 /**
+ * Statuses from which the Mark Paid button is offered.
+ *
+ * This mirrors the set the pay endpoint accepts (`finance.service.pay_invoice`
+ * guards with `prior not in ("approved", "sent")`), because a button offered
+ * where the endpoint refuses produces a 400 nobody can act on, and a button
+ * withheld where it would succeed strands the invoice with no way forward.
+ *
+ * Both values are reached in normal use, so neither may be dropped. Since the
+ * v3033 FSM migration the Approve button writes 'sent'. 'approved' is not
+ * merely a legacy leftover: posting a capture from the invoice inbox creates
+ * its payable through `create_invoice(status="approved")`, so those rows land
+ * in 'approved' on a fully migrated database. Older rows can still carry it
+ * too, and the plain PATCH transition table accepts it as a target.
+ */
+const MARK_PAID_FROM = ['sent', 'approved'];
+
+/**
+ * True when a manager may mark this invoice paid.
+ *
+ * Exported (and pure) so the cross-layer invariant - the button appears for
+ * exactly the statuses the pay endpoint accepts - is unit-testable without
+ * mounting the page.
+ */
+export function canMarkPaid(status: string | null | undefined): boolean {
+  return MARK_PAID_FROM.includes(status ?? '');
+}
+
+/**
  * True when this invoice is one we issue rather than one we received.
  *
  * The e-invoice action only belongs on a receivable: the buyer is resolved from
@@ -2578,7 +2606,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                               {t('finance.approve', { defaultValue: 'Approve' })}
                             </Button>
                           )}
-                          {inv.status === 'approved' && isManager && (
+                          {canMarkPaid(inv.status) && isManager && (
                             <Button
                               variant="primary"
                               size="sm"
@@ -2678,7 +2706,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                       exposed only Edit, leaving status unreachable on phones). */}
                   {(inv.status === 'draft' ||
                     (inv.status === 'pending' && isManager) ||
-                    (inv.status === 'approved' && isManager)) && (
+                    (canMarkPaid(inv.status) && isManager)) && (
                     <div className="mt-3 flex flex-wrap justify-end gap-2">
                       {inv.status === 'draft' && (
                         <Button
@@ -2708,7 +2736,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                           {t('finance.approve', { defaultValue: 'Approve' })}
                         </Button>
                       )}
-                      {inv.status === 'approved' && isManager && (
+                      {canMarkPaid(inv.status) && isManager && (
                         <Button
                           variant="primary"
                           size="sm"
