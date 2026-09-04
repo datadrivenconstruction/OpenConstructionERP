@@ -19,15 +19,16 @@ Configuration comes from ``app.config.Settings``:
 
 The backend builds a multipart/alternative message with both a plain-text
 and HTML part so inbox-provider scoring stays reasonable (pure-HTML
-emails are often flagged as spam).  The plain-text fallback is a very
-rough strip of HTML tags - good enough for receipts and resets.
+emails are often flagged as spam).  The plain-text alternative is derived
+from the HTML body by ``html_text.html_to_text``, which keeps link targets
+- everything the recipient needs is in the text part, not only in the HTML
+one.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -36,18 +37,9 @@ from email.mime.text import MIMEText
 from app.config import Settings
 
 from .base import BackendName, DeliveryResult, EmailBackend, EmailMessage
+from .html_text import html_to_text as _html_to_text
 
 logger = logging.getLogger(__name__)
-
-_TAG_RE = re.compile(r"<[^>]+>")
-_WHITESPACE_RE = re.compile(r"\s+")
-
-
-def _html_to_text(html: str) -> str:
-    """Strip HTML tags for the plain-text MIME alternative."""
-    text = _TAG_RE.sub(" ", html)
-    text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-    return _WHITESPACE_RE.sub(" ", text).strip()
 
 
 class SmtpEmailBackend(EmailBackend):
