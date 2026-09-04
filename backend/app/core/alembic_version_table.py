@@ -247,9 +247,10 @@ def stamp_head_if_unstamped(sync_connection: Connection, *, refuse_when_populate
             one to take.
 
     Returns:
-        The head revision that was stamped, or None when the database was
-        already stamped, ``alembic.ini`` could not be located, or the stamp was
-        refused because the database is populated and unstamped.
+        The head revision that was stamped - every head, comma-joined, on a
+        forked tree - or None when the database was already stamped,
+        ``alembic.ini`` could not be located, or the stamp was refused because
+        the database is populated and unstamped.
     """
     from alembic.config import Config
     from alembic.runtime.migration import MigrationContext
@@ -277,4 +278,28 @@ def stamp_head_if_unstamped(sync_connection: Connection, *, refuse_when_populate
         return None
     script = ScriptDirectory.from_config(Config(str(ini)))
     mig_ctx.stamp(script, "heads")
-    return script.get_current_head()
+    # ``get_heads`` and not ``get_current_head``. The stamp above is already
+    # plural - it writes a row per head - while ``get_current_head`` raises
+    # ``CommandError`` outright on a tree with more than one, and it raises
+    # AFTER the rows are written. The caller runs this inside
+    # ``async with engine.begin()``, so that exception rolls the stamp back and
+    # the install ends the boot unstamped, logged as "stamp skipped
+    # (non-fatal)" - a stamp that succeeded, reported as one that did not
+    # happen, on a line that reads like nothing was lost.
+    #
+    # A fork is meant to be caught before it ships (scripts/check_migration_heads.py,
+    # Repo hygiene) and today the tree has exactly one head, so this is about
+    # what the failure costs if one ever gets through rather than about a live
+    # defect. It costs a lot. Every install created while the fork is out never
+    # records a revision; once the branches are merged those same databases hold
+    # ``oe_*`` tables and no stamp, which is the cohort
+    # :func:`database_is_populated_but_unstamped` identifies and this function
+    # then refuses to stamp - permanently, on every later boot. Losing the write
+    # here is what converts a packaging mistake into an install that can never
+    # be stamped by the boot path again.
+    #
+    # Joined rather than picked, because there is no basis for choosing one of
+    # two heads and the caller only logs this. ``or None`` keeps the documented
+    # contract for a tree with no revisions at all, where ``get_heads`` is empty
+    # and ``get_current_head`` answered None.
+    return ", ".join(script.get_heads()) or None
