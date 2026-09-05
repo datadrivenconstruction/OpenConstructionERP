@@ -170,15 +170,25 @@ PRESENCE_PROBES: tuple[Probe, ...] = (
     Probe("risk", _project_probe("oe_risk_register")),
     Probe("field_reports", _project_probe("oe_fieldreports_report")),
     Probe("daily_diary", _project_probe("oe_daily_diary_diary")),
-    # Equipment master table is global; we treat "has any project-scoped
-    # assignment / utilisation" as the presence signal - fall back to
-    # the equipment table itself if no assignment table exists. Many
-    # deployments populate equipment without project assignments; the
-    # cheap probe is the type table when it exists.
-    Probe("equipment", _project_probe("oe_equipment_equipment")),
+    # The fleet register (``oe_equipment_equipment``) is company-wide and has NO
+    # ``project_id`` column, and the Equipment page lists the whole fleet rather
+    # than a project slice. The old ``project_id = :pid`` probe raised "column
+    # does not exist" on every sweep, was swallowed, and read False forever -
+    # the same shape as the subcontractor directory below (issue #228).
+    Probe("equipment", _company_probe("oe_equipment_equipment"), scope="company"),
     Probe("resources", _project_probe("oe_resources_assignment")),
-    Probe("service", _project_probe("oe_service_ticket")),
-    Probe("portal", _project_probe("oe_portal_access_rule")),
+    # Service tickets hang off a contract and carry no ``project_id`` of their
+    # own; the contract is what links the work to a project, and that link is
+    # nullable because a company-wide service contract exists before it is
+    # struck against a delivery project. Probe the contract, project-linked OR
+    # global, like CRM below. The old ticket probe raised "column does not
+    # exist" and dimmed Service on every install.
+    Probe("service", _hybrid_probe("oe_service_contract"), scope="hybrid"),
+    # No portal table carries a ``project_id``: access rules are per portal user
+    # and per arbitrary resource. The portal register is its user list, which is
+    # what the Portal page opens on, so presence is company-wide "has the portal
+    # any invited user at all".
+    Probe("portal", _company_probe("oe_portal_user"), scope="company"),
     # ── Commercial ─────────────────────────────────────────────────────
     Probe("finance", _project_probe("oe_finance_invoice")),
     Probe("procurement", _project_probe("oe_procurement_po")),
@@ -226,8 +236,16 @@ PRESENCE_PROBES: tuple[Probe, ...] = (
     Probe("submittals", _project_probe("oe_submittals_submittal")),
     Probe("transmittals", _project_probe("oe_transmittals_transmittal")),
     Probe("correspondence", _project_probe("oe_correspondence_correspondence")),
-    # Assets module - best-effort: bim asset register sits under bim_hub.
-    Probe("assets", _project_probe("oe_bim_asset_register")),
+    # The asset register is a view over BIM elements flagged
+    # ``is_tracked_asset``, not a table of its own - ``oe_bim_asset_register``
+    # never existed, so this probe raised "relation does not exist" on every
+    # sweep. Elements reach a project through their model, hence the subquery;
+    # both sides are indexed and it is still one ``SELECT 1 ... LIMIT 1``.
+    Probe(
+        "assets",
+        "SELECT 1 FROM oe_bim_element WHERE is_tracked_asset "
+        "AND model_id IN (SELECT id FROM oe_bim_model WHERE project_id = :pid) LIMIT 1",  # noqa: S608
+    ),
     Probe("cde", _project_probe("oe_cde_container")),
     Probe("photos", _project_probe("oe_documents_photo")),
     Probe("markups", _project_probe("oe_markups_markup")),

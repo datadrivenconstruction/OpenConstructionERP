@@ -47,9 +47,11 @@ export function navToPresenceKey(to: string): string {
  *
  *  These surfaces hold data that lives above any single project:
  *   - company-wide registers (subcontractor directory, contacts,
- *     supplier catalogues) have no ``project_id`` at all;
- *   - hybrid modules (CRM opportunities) may hold global/unlinked rows
- *     that exist before a deal is tied to a delivery project.
+ *     supplier catalogues, the equipment fleet, the portal user list)
+ *     have no ``project_id`` at all;
+ *   - hybrid modules (CRM opportunities, service contracts) may hold
+ *     global/unlinked rows that exist before the record is tied to a
+ *     delivery project.
  *
  *  The backend already shapes their booleans correctly (company-wide /
  *  hybrid probes - see ``module_presence.py``). This set is a frontend
@@ -61,6 +63,9 @@ const NEVER_DIM_BY_PROJECT_KEYS: ReadonlySet<string> = new Set([
   'subcontractors',
   'contacts',
   'supplier_catalogs',
+  'equipment',
+  'portal',
+  'service',
 ]);
 
 export interface ModulePresenceResult {
