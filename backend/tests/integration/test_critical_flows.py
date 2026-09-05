@@ -173,7 +173,11 @@ class TestHealthAndSystem:
             ("data_repairs_failed", True),
             ("data_repair_ledger_failed", True),
         ):
-            assert data.get(flag) is not bad, f"{flag} is {data.get(flag)!r}: {data}"
+            # Presence first: ``data.get`` on a renamed or dropped key returns
+            # None, which is neither True nor False, so the check below would
+            # go quiet on exactly the payload change that should raise an alarm.
+            assert flag in data, f"{flag} is missing from the health payload: {data}"
+            assert data[flag] is not bad, f"{flag} is {data[flag]!r}: {data}"
         # An absent frontend build is the only cause left. Pinning it keeps the
         # remaining condition - a module the operator enabled that failed to
         # import - fatal here even though the payload does not publish which
