@@ -73,6 +73,22 @@ from app.core.demo_read_only import (
 from app.core.deployment_posture import build_data_security_posture
 from app.core.host_disclosure import without_host_fields
 from app.core.module_loader import module_loader
+
+# How many CHECK and FOREIGN KEY constraints in this schema have never been
+# verified against the rows that were already in the table when they arrived.
+# Imported rather than spelled here, and re-exported under this name because
+# that is where the test suite reads it: the sweep in that module is what drains
+# this population and ``/api/health`` counts what is left of it, and two
+# hand-kept copies of one predicate is how a green field ends up counting a
+# different set from the one the fix empties.
+#
+# Kept as a named constant, not a literal at the call site, because the call
+# site's failure is swallowed by design: a query that stopped parsing would
+# leave the health field at ``None`` on every boot, and ``None`` is a value that
+# field is supposed to have. The thing that would hide the breakage is exactly
+# the thing this constant exists to remove, so the statement is somewhere a test
+# can execute it.
+from app.core.postgres_migrator import UNVALIDATED_CONSTRAINTS_SQL
 from app.core.self_upgrade import (
     FROZEN_REFUSAL,
     claim_upgrade,
@@ -84,6 +100,8 @@ from app.core.self_upgrade import (
 from app.dependencies import OptionalUserPayload, RequireRole, get_current_user_id, rls_request_context
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from app.core.data_repairs import DataRepairReport
 
 logger = logging.getLogger(__name__)
@@ -211,6 +229,150 @@ def _expected_alembic_head(ini_path: os.PathLike[str] | str) -> str | None:
     # next call tries again instead of reporting a permanent unknown.
     _ALEMBIC_HEAD_CACHE = (key, head)
     return head
+
+
+#: The environment variable that asks a boot to pre-build the OpenAPI document.
+#: Named here so the boot and the test that pins the default read the same
+#: string; a gate whose spelling lives only at its call site is a gate that gets
+#: tested against a variable nobody sets.
+PRIME_OPENAPI_SCHEMA_ENV = "OE_PRIME_OPENAPI_SCHEMA"
+
+
+def should_prime_openapi_schema(
+    *,
+    fast_startup: bool,
+    openapi_url: str | None,
+    env: "Mapping[str, str] | None" = None,
+) -> bool:
+    """Should this boot build the OpenAPI document before anybody asks for it?
+
+    Off unless asked, and that is the answer this function exists to state
+    rather than bury. Building the document takes 73.0s on this stand for 2923
+    paths, and it is CPU-bound Python on a worker thread, which is not the same
+    as being out of the way: measured on a boot with the prime opted back in and
+    nothing else running, the first request to arrive after the port opened took
+    64.6s, and the two after it 2.3s and 2.2s, before latency settled at 0.15s.
+    The process is starved for most of the build and eases only at its end.
+
+    Its only consumers are ``/api/docs``, ``/api/redoc`` and
+    ``/api/openapi.json``, none of which a desktop user or a
+    ``openconstructionerp serve`` operator opens on the way in. So the old
+    default spent a minute of a core, in the window where somebody is watching a
+    splash screen, filling a cache that install would never read.
+
+    Nothing about the build changed. ``_custom_openapi`` still caches it, still
+    holds one builder at a time, and still rebuilds when the route table moves,
+    so the first visitor to the reference pages pays for it there instead - the
+    behaviour this deployment had before the prime existed. An operator who
+    serves those pages to other people sets the variable and gets the prime back
+    exactly as it was, including the starved minute; that is what opting in
+    buys, and it is worth buying only where the reference pages have readers.
+
+    Args:
+        fast_startup: Whether ``OE_TEST_FAST_STARTUP`` is on. The suite builds
+            this application repeatedly and has never wanted the document.
+        openapi_url: ``app.openapi_url``. ``None`` in production, where
+            BUG-394 keeps the route map off a public deployment and takes
+            ``/api/docs`` and ``/api/redoc`` with it, leaving the document
+            without a single consumer that could serve it.
+        env: The environment to read, for tests. Defaults to the real one.
+
+    Returns:
+        ``True`` only when an operator asked for it AND something in this
+        process could serve the result.
+    """
+    environ = os.environ if env is None else env
+    asked = environ.get(PRIME_OPENAPI_SCHEMA_ENV, "").strip().lower() in {"1", "true", "yes"}
+    return asked and not fast_startup and bool(openapi_url)
+
+
+#: The path the route-table warm-up asks for. It has to match nothing, because
+#: matching nothing is what forces the router to consider every route it holds.
+#: Named rather than spelled at the call site so the test that pins this can ask
+#: for the same thing the boot does.
+ROUTE_TABLE_WARMUP_PATH = "/__oe_route_table_warmup__"
+
+
+async def warm_route_table(app: FastAPI) -> float:
+    """Build the router's per-route state, and report how long it took.
+
+    FastAPI does not build a route's dependant tree, its response field or its
+    operation id when the route is registered. It builds them the first time a
+    request reaches route matching, for every route at once, under a lock -
+    ``_EffectiveRouteContext.from_api_route`` on each candidate, which compiles
+    a regex per operation id and runs ``get_dependant`` over every signature.
+    With ~190 module routers mounted that is a large one-off cost, and until
+    this existed it was paid inside the first request to arrive.
+
+    Measured on this stand, warm data directory, OpenAPI priming off: the first
+    request after boot took 32.1s and the second took 0.04s. The path did not
+    matter - ``GET /`` is a static ``index.html`` that touches no database and
+    no dependency, and it paid the full 32s exactly as ``/api/health`` did when
+    it happened to arrive first. The work runs on the event loop, so everything
+    else queued behind it: a health check issued at the same moment as that
+    first request answered 33.9s later, five times the desktop launcher's own
+    12s probe deadline. From outside, a port that accepts a connection and then
+    says nothing for half a minute is indistinguishable from a hung process,
+    which is precisely what a watchdog is built to kill.
+
+    Doing it here does not make the work cheaper and is not meant to. It moves
+    it to the one place where nobody is waiting on a socket: uvicorn binds the
+    listening socket only after the startup lifespan returns, so a client either
+    cannot connect yet - which every launcher and healthcheck already handles,
+    and which the boot log is narrating a step at a time - or connects to a
+    process that answers immediately.
+
+    The warm-up is a synthetic ASGI request rather than a call into FastAPI's
+    internals, so it exercises whatever the real first visitor would exercise
+    and keeps working if the private names behind it are renamed. It is aimed at
+    :data:`ROUTE_TABLE_WARMUP_PATH`, which matches nothing, because a request
+    that matches nothing is the one that forces every candidate to be built. It
+    is sent to ``app.router`` and not to ``app``: the middleware stack has
+    nothing to warm and would only put a fictitious request in the slow-request
+    log and the access log.
+
+    Args:
+        app: The application whose router to warm. Every router this process
+            will mount must be mounted already, or the ones that follow pay
+            their own share on the first request that arrives after them.
+
+    Returns:
+        Seconds spent. Never raises: a warm-up that fails leaves exactly the
+        behaviour that existed before it, which is that the first request pays.
+    """
+    started = time.perf_counter()
+
+    scope: dict[str, Any] = {
+        "type": "http",
+        "asgi": {"version": "3.0", "spec_version": "2.1"},
+        "http_version": "1.1",
+        "method": "GET",
+        "scheme": "http",
+        "path": ROUTE_TABLE_WARMUP_PATH,
+        "raw_path": ROUTE_TABLE_WARMUP_PATH.encode(),
+        "root_path": "",
+        "query_string": b"",
+        "headers": [],
+        "client": None,
+        "server": None,
+    }
+
+    async def _receive() -> dict[str, Any]:
+        return {"type": "http.disconnect"}
+
+    async def _send(message: dict[str, Any]) -> None:
+        # The 404 this produces is the point of the exercise, not a result
+        # anybody wants. Dropping it keeps the warm-up off the wire entirely.
+        return None
+
+    try:
+        await app.router(scope, _receive, _send)
+    except Exception:
+        # Never fail a boot over a warm-up. The cost simply goes back where it
+        # was, onto whoever knocks first.
+        logger.warning("Route table warm-up did not finish; the first request will pay for it", exc_info=True)
+
+    return time.perf_counter() - started
 
 
 def _database_target() -> str:
@@ -1479,6 +1641,63 @@ def create_app() -> FastAPI:
     app.state.schema_matches_models = None
     app.state.schema_divergent_columns = ()
 
+    # ── And whether that question was ever answered ──────────────────────
+    # The field above has three states and two of them were sharing a value.
+    # Its ``None`` said "never asked", and the check that fills it catches
+    # everything it can raise and leaves the field alone - so a diagnostic that
+    # crashed published exactly what a deployment with no PostgreSQL publishes,
+    # and no reader could tell "this database is not one I check" from "I tried
+    # to look and could not". That is the whole failure this file keeps finding
+    # in other shapes: an absent answer wearing a reassuring one's clothes.
+    #
+    # Three states of its own, polarity of the ``_failed`` fields beside it:
+    # ``True`` the check raised, ``False`` it ran to a verdict, ``None`` it was
+    # never reached. Read with ``is True``. It does not degrade the status - a
+    # diagnostic whose own bug takes it down says nothing about the deployment,
+    # and degrading on it would report our defects as the operator's.
+    app.state.schema_match_check_failed = None
+
+    # ── Constraints the boot could not get verified ──────────────────────
+    # The divergence check above asks about nullability and only about
+    # nullability, while the heal has two other ways to leave the database
+    # short of what the models declare: it adds every CHECK and FOREIGN KEY as
+    # ``NOT VALID``, and until the validation pass landed nothing ever ran
+    # ``VALIDATE CONSTRAINT``. So ``schema_matches_models`` could answer
+    # ``True`` on a database holding rows that violate a constraint the models
+    # declare - and worse than unverified, those rows are unwritable, because
+    # a CHECK is re-evaluated on every UPDATE of a row whatever column the
+    # update names. This says so.
+    #
+    # Published as a fact of its own and NOT folded into
+    # ``schema_matches_models``: one field answers one question, and this one
+    # is answered by a catalog column rather than by a model comparison.
+    #
+    # Three states: ``True`` every CHECK and FOREIGN KEY in this schema is
+    # validated, ``False`` at least one is not, ``None`` nobody asked. A
+    # determinable ``False`` degrades - see the endpoint for why that only
+    # became defensible once the boot started validating.
+    app.state.schema_constraints_validated = None
+
+    # ── Did this database arrive holding tables it never recorded ────────
+    # Asked before any DDL, because ``create_all`` makes it unanswerable, and
+    # until now the answer was a local variable that reached the stamp and
+    # nothing else. What that cost: this cohort records no revision, so
+    # ``alembic_head_matches`` publishes ``None`` for it, and ``None`` is what a
+    # desktop bundle carrying no migration tree publishes too - the one
+    # population that cannot vouch for its schema reads identical to the one
+    # that was never asked to.
+    #
+    # Three states: ``True`` it held application tables and named no revision,
+    # ``False`` it did not, ``None`` the question could not be put. It does NOT
+    # degrade, and the reason is a cohort the predicate cannot separate out:
+    # ``True`` is equally what an install gets whose schema ``create_all`` built
+    # correctly and whose stamp write then failed - that failure is caught and
+    # logged further down, and the boot after it sees tables with no revision
+    # and refuses the stamp, permanently. Degrading here would pin a current
+    # schema to degraded for the life of the database on the strength of one
+    # lost write.
+    app.state.arrived_populated_unstamped = None
+
     # ── Boot-time data-repair verdict ────────────────────────────────────
     # Same three states, for the same reason, about the other half of an
     # upgrade. The heal above moves the SCHEMA; it rewrites no rows, so a
@@ -2269,6 +2488,32 @@ def create_app() -> FastAPI:
             logger.warning("Alembic head check failed: %s", _exc)
             result["alembic_head_matches"] = None
 
+        # Why that answer is ``null`` here, which the field above cannot say.
+        # It goes ``null`` for three unrelated populations - no migration tree
+        # shipped, no revision ever recorded, the check itself blew up - and one
+        # of the three is a database that held application tables and named no
+        # revision when this process started. That cohort is the one whose
+        # schema nothing can vouch for: ``create_all`` builds the tables that
+        # are wholly absent and alters none of the ones already there, so it is
+        # left part-migrated, and the missing revision was the only thing that
+        # ever said so. The boot refuses to stamp it for exactly that reason.
+        # Until this key existed the refusal was recorded nowhere a reader could
+        # reach and the install answered ``null`` and ``healthy`` like any other.
+        #
+        # Three answers: ``true`` it arrived populated and unstamped, ``false``
+        # it did not, ``null`` the question could not be put - which includes
+        # every deployment whose database is not PostgreSQL, and the window
+        # before startup answers it. Read with ``is True``.
+        #
+        # It does not degrade, and the reason is worth stating rather than
+        # leaving as a choice: ``true`` is also what an install reports whose
+        # schema was built correctly and whose stamp write then failed, because
+        # the boot after that failure finds tables with no revision and cannot
+        # tell the two apart - and, having refused the stamp, will find the same
+        # thing on every boot afterwards. Degrading would hold a current schema
+        # at degraded for the life of the database over one lost write.
+        result["arrived_populated_unstamped"] = getattr(app.state, "arrived_populated_unstamped", None)
+
         # Did the boot-time schema heal finish? This is the one signal an
         # external-PostgreSQL operator has that their role cannot issue DDL.
         # Without it that install runs with a schema frozen at whichever release
@@ -2303,15 +2548,87 @@ def create_app() -> FastAPI:
         #
         # Three answers, and the polarity of ``alembic_head_matches`` rather
         # than of the two ``_failed`` fields: ``true`` they agree, ``false``
-        # they do not, ``null`` never asked, which over HTTP means a deployment
-        # whose database is not PostgreSQL or a check that could not run. Only
-        # a determinable ``false`` degrades. Which columns diverge is not
-        # published, for the same reason the heal's cause is not - see this
-        # endpoint's docstring - and is on ``app.state.schema_divergent_columns``
-        # and in the boot log.
+        # they do not, ``null`` nobody reached a verdict. Only a determinable
+        # ``false`` degrades. Which columns diverge is not published, for the
+        # same reason the heal's cause is not - see this endpoint's docstring -
+        # and is on ``app.state.schema_divergent_columns`` and in the boot log.
+        #
+        # What ``true`` does and does not claim, because the name is wider than
+        # the measurement: it is the answer to a nullability question and to no
+        # other. The heal has two further ways to leave the database short of
+        # the models, and the field beside this one covers one of them. The
+        # other it does not cover at all: a unique constraint is pre-flighted
+        # with a duplicate probe and skipped outright when the table already
+        # holds duplicates, which is the case where bad data is already in and
+        # nothing will stop more, and no runtime check in this process looks for
+        # it. Closing that means a declined-unique query living beside
+        # ``not_null_divergences`` in ``app.core.postgres_migrator``; it is not
+        # in this change, and until it lands ``true`` here is narrower than it
+        # reads.
         _schema_matches = getattr(app.state, "schema_matches_models", None)
         result["schema_matches_models"] = _schema_matches
         if _schema_matches is False:
+            result["status"] = "degraded"
+
+        # Whether anyone got as far as an answer above. The check that fills
+        # that field catches everything it can raise and deliberately leaves the
+        # field alone, so a crashed diagnostic published the same ``null`` a
+        # deployment with no PostgreSQL publishes, and the payload had no way to
+        # separate "not a database I check" from "I looked and could not tell".
+        # Those are not the same claim and a reader acts differently on each:
+        # the first is nothing to do, the second is a bug on this machine, in a
+        # check whose whole job is to notice the schema drifting.
+        #
+        # Three answers, polarity of the ``_failed`` fields: ``true`` the check
+        # raised, ``false`` it ran to a verdict, ``null`` it was never reached.
+        # Read with ``is True``. It does not degrade: a diagnostic that fails
+        # says nothing about the deployment, and reporting our own defect as the
+        # operator's fault would send them looking at a database that is fine.
+        # The cause is in the boot log, not here, for the reason in this
+        # endpoint's docstring.
+        result["schema_match_check_failed"] = getattr(app.state, "schema_match_check_failed", None)
+
+        # And the half of "does the schema match the models" that nullability
+        # cannot see. The heal adds every CHECK and FOREIGN KEY as ``NOT VALID``,
+        # and the boot now runs the validation scan it defers. What is left over
+        # is the set PostgreSQL was asked to verify and refused, which is a much
+        # narrower thing than this field used to report.
+        #
+        # Three answers, polarity of ``schema_matches_models``: ``true`` every
+        # CHECK and FOREIGN KEY in this schema is validated, ``false`` at least
+        # one is not, ``null`` nobody asked. It is published beside that field
+        # rather than folded into it - one field, one question - and a
+        # determinable ``false`` degrades.
+        #
+        # That degrade is new and it is only defensible because the validation
+        # pass exists; the two cannot be separated and a later reader must not
+        # remove one and keep the other. Before the pass, ``false`` was the
+        # standing state of every install the heal had ever added a constraint
+        # to, and it never cleared, so degrading on it would have lit a
+        # permanent cause across that whole population - which is how the stale
+        # alembic stamp stopped being a signal. After it, ``false`` means
+        # PostgreSQL was asked to verify a constraint and the rows refused, and
+        # that is not an unverified constraint but an unwritable row: a CHECK is
+        # re-evaluated on every UPDATE of a row whatever column the update
+        # names, so whichever screen edits that row answers 500 until somebody
+        # corrects it. An install carrying one is not healthy in any sense its
+        # operator would recognise. It is also actionable and it clears itself:
+        # correct the rows and the next start validates the constraint.
+        #
+        # And it is narrow. The pass runs after this boot's declared data
+        # repairs, so a ``false`` here is never a row the platform knows how to
+        # fix and has not got to yet - it is one only this deployment can answer
+        # for. That is what makes it worth an operator's morning.
+        #
+        # The cause it cannot separate out is a validation that could not run at
+        # all - a lock timeout on a busy table, a role without rights. That
+        # reads ``false`` too, and degrades too, on the argument that "this
+        # schema could not be verified" is worth an operator's attention on its
+        # own and that the case retries on the next boot rather than sticking.
+        # How many, and on which tables, is in the boot log.
+        _constraints_validated = getattr(app.state, "schema_constraints_validated", None)
+        result["schema_constraints_validated"] = _constraints_validated
+        if _constraints_validated is False:
             result["status"] = "degraded"
 
         # Did the boot-time data repairs run? The field above is about the
@@ -3596,7 +3913,7 @@ def create_app() -> FastAPI:
 
         report_email_config_at_startup(settings)
 
-        # Load translations (28 languages)
+        # Load translations (37 languages)
         _section("i18n")
         from app.core.i18n import load_translations
 
@@ -3724,12 +4041,22 @@ def create_app() -> FastAPI:
             # is unanswerable, so the answer has to be taken here and carried
             # down to the stamp. Defaults to False, so any failure to tell
             # leaves the previous behaviour exactly as it was.
+            #
+            # It is also carried onto ``app.state``, and that is not the same
+            # sentence. This was a local reaching the stamp and nothing else, so
+            # the one population that cannot vouch for its own schema published
+            # ``alembic_head_matches: null`` - indistinguishable from a desktop
+            # bundle that ships no migration tree - and called itself healthy.
+            # The local keeps the default on failure, which is what the stamp
+            # reads; ``app.state`` keeps its ``None``, because a question that
+            # could not be put has no answer and must not borrow ``False``.
             _arrived_populated_unstamped = False
             try:
                 from app.core.alembic_version_table import database_is_populated_but_unstamped
 
                 async with engine.connect() as conn:
                     _arrived_populated_unstamped = await conn.run_sync(database_is_populated_but_unstamped)
+                app.state.arrived_populated_unstamped = _arrived_populated_unstamped
                 if _arrived_populated_unstamped:
                     logger.warning(
                         "This database holds application tables but records no migration revision, so it "
@@ -3808,6 +4135,7 @@ def create_app() -> FastAPI:
                 _divergent = await not_null_divergences(engine, Base)
                 app.state.schema_divergent_columns = _divergent
                 app.state.schema_matches_models = not _divergent
+                app.state.schema_match_check_failed = False
                 if _divergent:
                     # Every name, not the first few. This line used to print
                     # ``_divergent[:5]``, which made a nine-column divergence
@@ -3827,10 +4155,14 @@ def create_app() -> FastAPI:
                         ", ".join(_divergent),
                     )
             except Exception as exc:  # noqa: BLE001
-                # A diagnostic must never be able to stop a boot. Leaving the
-                # field None says "could not tell", which is honest and does
-                # not degrade; claiming agreement here would be the one answer
-                # that is worse than no answer.
+                # A diagnostic must never be able to stop a boot, and claiming
+                # agreement here would be the one answer worse than no answer.
+                # But leaving ONLY the None was not honest either: that is the
+                # value a deployment with no PostgreSQL carries for its whole
+                # life, so a crashed check was published as "not applicable" and
+                # nobody could see that a check meant to run here had failed.
+                # The verdict stays unknown and the failure is now sayable.
+                app.state.schema_match_check_failed = True
                 logger.warning("Schema divergence check could not run: %s", exc)
 
             # The heal above adds oe_progress_entry.seq to a pre-v3258 table as
@@ -3982,6 +4314,113 @@ def create_app() -> FastAPI:
                     exc,
                     exc_info=True,
                 )
+
+            # The scan the heal deferred. Every CHECK and FOREIGN KEY it adds
+            # goes on ``NOT VALID``, which is the only way onto a populated table
+            # that cannot fail on the rows already there, and until this ran
+            # nothing ever validated one. That left more than an unverified
+            # constraint behind: ``NOT VALID`` exempts an existing row from the
+            # validation scan and from nothing afterwards, so a row that violates
+            # the constraint is refused by every later UPDATE of it, on any
+            # column - measured on oe_i18n_tax_config, where ``SET tax_name =
+            # tax_name || '!'`` comes back CheckViolation on a column the
+            # constraint does not mention. The screen editing that row answered
+            # 500 for the life of the install, on a deployment reporting healthy.
+            #
+            # Runs at the end of the schema work rather than beside the heal, for
+            # two separate reasons.
+            #
+            # Not inside the heal's transaction: that transaction spans the whole
+            # schema and holds ACCESS EXCLUSIVE from each ADD CONSTRAINT until it
+            # ends, so validating in there would put a table scan under that lock.
+            #
+            # And after the data repairs above rather than before them, which is
+            # the ordering that matters. The repairs exist to rewrite exactly the
+            # rows a constraint like this refuses: the shipped Canadian HST rows
+            # carry a sub-national ``combination`` with no ``subdivision_code``,
+            # because the seed wrote the one three days before the other column
+            # existed, and tax_subdivision_backfill corrects them on this same
+            # boot. Run ahead of that repair, the pass indicts a database the
+            # boot is about to fix, degrades it for one start and clears on the
+            # next, which is reporting our own defect as the operator's. Nothing
+            # is lost by asking last: an unvalidated constraint is enforced on
+            # every write either way, so validating late costs nothing a reader
+            # or a writer can observe.
+            #
+            # Non-fatal like its neighbours, and it repairs nothing itself. What
+            # a violating row should have contained instead is a question about
+            # this deployment's data, and a guess would be worse than the defect.
+            try:
+                from app.core.postgres_migrator import validate_pending_constraints
+
+                _validated, _refused = await validate_pending_constraints(engine)
+                if _validated:
+                    logger.info(
+                        "PostgreSQL schema: validated %d constraint(s) the heal had left unchecked "
+                        "against rows already in their tables",
+                        _validated,
+                    )
+                if _refused:
+                    logger.error(
+                        "PostgreSQL schema: %d constraint(s) could not be validated: %s. Rows already "
+                        "in those tables violate them, which makes those rows unwritable rather than "
+                        "merely unverified, and every request that edits one fails. Correct the rows "
+                        "and the next start clears this. /api/health reports "
+                        "schema_constraints_validated=false and degrades the status.",
+                        len(_refused),
+                        ", ".join(_refused),
+                    )
+            except Exception:
+                logger.warning("Constraint validation pass skipped (non-fatal)", exc_info=True)
+
+            # The standing state once the pass has done what it can, and the
+            # other half of a question the nullability check further up is blind
+            # to by construction: constraints that exist and have never been
+            # verified. Not a rediscovery of what the pass just reported. That
+            # return value describes one boot; this describes the database, which
+            # is what a reader needs. A constraint left here is one PostgreSQL
+            # was asked to verify and would not, either because rows violate it
+            # or because the statement could not run, and rows under a CHECK in
+            # the first case are unwritable rather than merely unverified.
+            #
+            # Asked as a standing question rather than read off the pass's return
+            # value for the same reason the divergence check above is: an install
+            # that took the constraint on an earlier release, on a boot whose log
+            # nobody kept, still has to answer for it. A boot where the pass is
+            # skipped or fails whole is exactly the boot whose in-memory result
+            # would be least worth trusting.
+            #
+            # It sits here rather than up with the divergence check it reads like,
+            # because it counts what the pass leaves behind. Moving one of the two
+            # without the other publishes the state of the database as it stood
+            # before this same boot corrected it.
+            #
+            # One catalog query, no model introspection: PostgreSQL records the
+            # answer itself in ``pg_constraint.convalidated``. Restricted to the
+            # current schema, and to the two constraint types the heal can leave
+            # unvalidated, which is the same population the pass drains - one
+            # predicate, defined once, in ``postgres_migrator``. Non-fatal like
+            # its neighbour, and its own failure leaves the field None rather
+            # than claiming everything is verified.
+            try:
+                from sqlalchemy import text as _pg_text
+
+                async with engine.connect() as conn:
+                    _unvalidated = (await conn.execute(_pg_text(UNVALIDATED_CONSTRAINTS_SQL))).scalar_one()
+                app.state.schema_constraints_validated = not _unvalidated
+                if _unvalidated:
+                    logger.warning(
+                        "Schema constraints: %d CHECK/FOREIGN KEY constraint(s) in this database are still "
+                        "NOT VALID after the validation pass, so rows already present when they were added "
+                        "do not satisfy them or could not be checked. Under a CHECK those rows cannot be "
+                        "written at all: PostgreSQL re-evaluates the constraint on every UPDATE of a row, "
+                        "whatever column the update touches. Correct them and the next start validates the "
+                        "constraint. /api/health reports schema_constraints_validated=false and degrades "
+                        "the status.",
+                        _unvalidated,
+                    )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Schema constraint validation check could not run: %s", exc)
 
             # Provision multi-tenant row-level security (opt-in). Runs after
             # create_all so every tenant table exists on both fresh and upgraded
@@ -4628,6 +5067,35 @@ def create_app() -> FastAPI:
         else:
             logger.info("Application started successfully")
 
+        # ── Build the route table before the port opens ──────────────────
+        # See :func:`warm_route_table` for what this pays for and why it is
+        # paid here. Short version: FastAPI builds each route's dependant tree
+        # on the first request that reaches matching, for every route at once,
+        # on the event loop. With ~190 module routers that measured 32.1s, and
+        # it was charged to whichever request arrived first - a static
+        # index.html or a health check, indifferently - while everything else
+        # queued behind it. Nothing about that cost is avoidable; what is
+        # avoidable is charging it to a user with an open socket in front of
+        # them.
+        #
+        # Logged either side, and not only for the operator. The desktop
+        # launcher gives up on a sidecar that has written nothing for four
+        # minutes (STARTUP_QUIET_TIMEOUT in desktop/src-tauri/src/main.rs), so
+        # a silent half-minute here is a step towards a watchdog killing a boot
+        # that is working. The line before the wait restarts that clock and
+        # names the step; the line after it reports what the step cost, because
+        # a number in the boot log is how the next person measures this without
+        # rebuilding the instrument.
+        #
+        # Skipped under OE_TEST_FAST_STARTUP for the same reason every other
+        # boot-time warm-up is: the suite builds this application over and over
+        # and pays the first-request cost only in the tests that send one.
+        if not _fast_startup:
+            logger.info("=== Routing ===")
+            logger.info("Building the route table (one-off, before the port opens)")
+            _warm_seconds = await warm_route_table(app)
+            logger.info("Route table ready in %.1fs", _warm_seconds)
+
         # ── Publish the OpenAPI document ─────────────────────────────────
         # Every router this process will ever mount is mounted by now, which
         # is why the prime is here and not in create_app(). How I know: the
@@ -4645,14 +5113,24 @@ def create_app() -> FastAPI:
         # The thread is worth being precise about, because this is CPU-bound
         # Python and a thread does not escape the GIL: it does not make the
         # build free, it makes it interruptible. Building on the event loop
-        # blocks every request for the whole 141s. Building on a thread leaves
-        # the loop scheduled against it, so requests are served throughout,
-        # just slower while it runs - measured on this stand, health answered
-        # in 17.1s, 0.7s and 2.2s during the build instead of not at all. A
-        # visitor who arrives before it finishes waits on the same lock rather
-        # than starting a second build. The task is parked on app.state
-        # because asyncio keeps only a weak reference to a bare task and would
-        # otherwise be free to collect it mid-build.
+        # blocks every request for the whole build. A visitor who arrives
+        # before it finishes waits on the same lock rather than starting a
+        # second build. The task is parked on app.state because asyncio keeps
+        # only a weak reference to a bare task and would otherwise be free to
+        # collect it mid-build.
+        #
+        # What the thread does NOT buy is a responsive process, and the line
+        # that used to stand here said it did: "requests are served throughout,
+        # just slower while it runs - health answered in 17.1s, 0.7s and 2.2s".
+        # Re-measured against a boot whose route table was already warm, so the
+        # build is the only thing running: the first request after the port
+        # opened took 64.6s of a 73.0s build, and the two after it 2.3s and
+        # 2.2s before latency came back to 0.15s. So the loop is starved
+        # outright for most of the build and eases only at the end, and 17.1s
+        # was a sample from that tail rather than the worst of it. The old
+        # figure is left quoted here rather than deleted because it is the
+        # premise this prime was justified on, and the correction is the reason
+        # the prime is now off by default.
         #
         # Runtime module toggles stay correct without help here: enabling or
         # disabling a module moves the route counter that _custom_openapi
@@ -4665,7 +5143,25 @@ def create_app() -> FastAPI:
         # spend the whole build on a 2 GB VPS to fill a cache nothing reads,
         # and spend it in the window where requests are already answering
         # slowly, which is how a healthcheck timeout turns into a restart loop.
-        if not _fast_startup and app.openapi_url:
+        #
+        # And it is now off unless somebody asks for it, which is a change of
+        # default and not a change of mechanism. Everything the paragraphs above
+        # say about the build is still true and still measured: 118.2s on a warm
+        # data directory before the route table was warmed at boot, 73.0s after
+        # it, 133.9s on a first run, 2923 paths every time. What the measurement
+        # added is who pays. The document has exactly three consumers -
+        # /api/docs, /api/redoc, /api/openapi.json - and none of them is on the
+        # startup path, so every desktop launch and every
+        # ``openconstructionerp serve`` was spending over a minute of a core, in
+        # the window where the user is staring at a splash screen, to fill a
+        # cache that install would never read.
+        #
+        # Whoever does open the reference pages pays the build on that request,
+        # cached and locked by _custom_openapi exactly as before, which is what
+        # this deployment did until the prime was added. An operator serving the
+        # documentation to other people can pre-pay it with
+        # OE_PRIME_OPENAPI_SCHEMA=1 and get the old behaviour back verbatim.
+        if should_prime_openapi_schema(fast_startup=_fast_startup, openapi_url=app.openapi_url):
 
             async def _prime_openapi_schema() -> None:
                 try:
