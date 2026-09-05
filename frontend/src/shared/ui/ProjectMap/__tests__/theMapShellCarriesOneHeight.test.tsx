@@ -36,7 +36,15 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ProjectMap } from '../ProjectMap';
 
-vi.mock('../streetThumbnail', () => ({ renderStreetThumbnail: vi.fn() }));
+// The card variant chains ``.then`` onto the result of this call inside an
+// effect, so a bare ``vi.fn()`` returns undefined and throws there, failing
+// the render rather than the assertion. Resolving to null is also the honest
+// value: it is what a real render answers when it cannot produce a snapshot,
+// and it leaves the card on its fallback image, which is the state whose
+// height this file is measuring.
+vi.mock('../streetThumbnail', () => ({
+  renderStreetThumbnail: vi.fn().mockResolvedValue(null),
+}));
 
 // The detail variant mounts these for real, and MapLibre's entry point does
 // not survive jsdom.
