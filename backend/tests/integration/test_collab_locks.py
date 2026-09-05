@@ -606,3 +606,116 @@ async def test_release_missing_lock_is_idempotent(collab_client: AsyncClient, al
         headers=_auth(alice),
     )
     assert rel.status_code == 204
+
+
+# ── Tenant gate ────────────────────────────────────────────────────────────
+
+
+@pytest_asyncio.fixture(scope="module")
+async def unreachable_entity_id(
+    collab_client: AsyncClient,
+    alice: dict[str, str],
+) -> str:
+    """A real BOQ position in a project Bob is deliberately not a member of.
+
+    Every other fixture here hands out entities both users can reach, which is
+    what the contention tests need. This one is the opposite: a genuine row
+    whose owning project Bob has no route to, so a refusal to lock it can only
+    have come from the tenant gate.
+    """
+    project_id = await _create_project(collab_client, _auth(alice))
+    boq_id = await _create_boq(collab_client, _auth(alice), project_id)
+    resp = await collab_client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "9010",
+            "description": "Screed 50mm, private project",
+            "unit": "m2",
+            "quantity": 40.0,
+            "unit_rate": 22.5,
+        },
+        headers=_auth(alice),
+    )
+    assert resp.status_code == 201, f"add position failed: {resp.text}"
+    return str(resp.json()["id"])
+
+
+@pytest.mark.asyncio
+async def test_tenant_gate_refuses_lock_on_unreachable_entity(
+    collab_client: AsyncClient,
+    alice: dict[str, str],
+    bob: dict[str, str],
+    new_entity_id: EntityFactory,
+    unreachable_entity_id: str,
+) -> None:
+    """Locking a row in a project the caller cannot reach is refused, both ways.
+
+    The gate this covers is the reason the whole file was rewritten: it maps a
+    lock target to its owning project and turns anything unreachable into a 404,
+    which is what a suite locking freshly minted UUIDs was hitting on every test.
+    Replacing those UUIDs with real positions removed the accidental coverage
+    along with the failures, and the gate is the module's only defence against
+    planting a lock on another tenant's row, so it needs a test that means to
+    exercise it. Bob is used rather than Alice because the first account to
+    register in a fresh database is made an admin, and an admin passes the
+    project check by bypass - Alice's role therefore depends on what else ran
+    in the process first, while Bob, registering second, is always a viewer.
+    """
+    # Positive control first, in the same request shape and by the same user:
+    # without it a 404 on the next call would also be what a broken endpoint,
+    # a lost token or a role Bob does not have looks like.
+    allowed = await collab_client.post(
+        "/api/v1/collaboration_locks/",
+        json={
+            "entity_type": "boq_position",
+            "entity_id": await new_entity_id(),
+            "ttl_seconds": 60,
+        },
+        headers=_auth(bob),
+    )
+    assert allowed.status_code == 201, allowed.text
+
+    blocked = await collab_client.post(
+        "/api/v1/collaboration_locks/",
+        json={
+            "entity_type": "boq_position",
+            "entity_id": unreachable_entity_id,
+            "ttl_seconds": 60,
+        },
+        headers=_auth(bob),
+    )
+    assert blocked.status_code == 404, blocked.text
+
+    # The read side is gated too: who holds a lock, and therefore who is
+    # editing what, is the other half of what the gate keeps inside a tenant.
+    peek = await collab_client.get(
+        "/api/v1/collaboration_locks/entity/",
+        params={"entity_type": "boq_position", "entity_id": unreachable_entity_id},
+        headers=_auth(bob),
+    )
+    assert peek.status_code == 404, peek.text
+
+    # A UUID that is no entity at all is refused by the same gate, one step
+    # earlier: nothing resolves, so there is no project to check.
+    nowhere = await collab_client.post(
+        "/api/v1/collaboration_locks/",
+        json={
+            "entity_type": "boq_position",
+            "entity_id": str(uuid.uuid4()),
+            "ttl_seconds": 60,
+        },
+        headers=_auth(bob),
+    )
+    assert nowhere.status_code == 404, nowhere.text
+
+    # Refused, not merely reported as refused: Alice owns the project, so she
+    # can see the entity is still free. A status code alone would not tell a
+    # rejected acquire apart from one that wrote the row and then complained.
+    owner_view = await collab_client.get(
+        "/api/v1/collaboration_locks/entity/",
+        params={"entity_type": "boq_position", "entity_id": unreachable_entity_id},
+        headers=_auth(alice),
+    )
+    assert owner_view.status_code == 200, owner_view.text
+    assert owner_view.json() is None
