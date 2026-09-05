@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 70. They run on every push and pull request, grouped into three
+# Guards: 72. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -117,6 +117,37 @@ jobs:
       - name: Check every release version literal agrees
         if: ${{ !cancelled() }}
         run: python scripts/check_version_sync.py
+
+      # A committed file importing a module that only exists as an untracked
+      # file in somebody's working tree. It imports fine on the disk it was
+      # written on and nowhere else, and this is the first machine that reads
+      # the commit rather than the disk, so this is where it has to be caught.
+      # Two instances were live in the tree on 2026-09-05; both authors
+      # committed the missing module before anything shipped, which is luck
+      # rather than a gate. Nothing else here looks at that seam: every other
+      # commit-scoped guard reads the commit and every build reads the disk,
+      # and the two agree right up until one file is committed without its
+      # neighbour.
+      #
+      # The self-test runs first and on its own fixture. It costs nothing and
+      # it is the difference between a green step that refuses a bad tree and a
+      # green step that has stopped reading: exit 2 says the check can no
+      # longer catch the defect it exists for, which is not the same failure as
+      # exit 1 and should not look like one. The scan itself parses every
+      # tracked Python file under backend/, about 4800 of them, and that parse
+      # is essentially the whole cost. No timing is quoted here on purpose: the
+      # only measurements taken were on a Windows workstation, where the same
+      # scan ran anywhere between 81 seconds and five minutes depending on
+      # nothing but how warm the file cache was. A number carried over from
+      # there would be a figure about a laptop wearing the clothes of a figure
+      # about this runner.
+      - name: Prove the untracked-import check still refuses
+        if: ${{ !cancelled() }}
+        run: python scripts/check_untracked_imports.py --self-test
+
+      - name: Check no tracked file imports a module git does not have
+        if: ${{ !cancelled() }}
+        run: python scripts/check_untracked_imports.py
 
       # desktop/src-tauri/windows/installer.nsi is a fork of the stock Tauri
       # NSIS template, and the single line it changes is what keeps an upgrade

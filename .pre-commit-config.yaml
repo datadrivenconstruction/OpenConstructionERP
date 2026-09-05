@@ -184,6 +184,27 @@ repos:
         language: system
         pass_filenames: false
 
+      # Refuse a commit whose Python imports a module the same commit does not
+      # carry. The module is usually right there on the author's disk, untracked,
+      # so everything imports and every test passes locally and the backend fails
+      # to start on the first machine that reads the commit instead of the disk.
+      #
+      # Scoped to the staged files on purpose, which is the half of the defect a
+      # commit hook can see: you are committing the importer. The other half - a
+      # module leaving the tree while files that import it stay - needs the whole
+      # tree, and that scan runs in .github/workflows/repo-hygiene.yml, where it
+      # can parse all 4800 files with nobody waiting on it.
+      #
+      # Worth knowing before relying on this: nothing here runs until somebody
+      # has run `pre-commit install` in their clone. A clone without it has no
+      # .git/hooks/pre-commit at all, and every hook in this file at the commit
+      # stage is inert - the file is the declared intent, not the enforcement.
+      - id: untracked-import-check
+        name: Block imports of modules the commit does not carry
+        entry: python scripts/check_untracked_imports.py --paths
+        language: system
+        files: ^backend/.*\.py$
+
       # Parse every tracked YAML and JSON file, as a category. check-yaml and
       # check-json above are the per-file version of this and are scoped to
       # whatever is staged; this one takes the whole tracked set from git, so a
