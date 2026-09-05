@@ -1,4 +1,4 @@
-"""Integration tests for the 4D module HTTP surface (Section 6 — MVP slice).
+"""Integration tests for the 4D module HTTP surface (Section 6, MVP slice).
 
 Stands up a minimal FastAPI app with the 4D v2 routers mounted plus the
 session/user dependencies overridden to point at a per-test throwaway
@@ -37,7 +37,7 @@ PROJECT_ID = uuid.uuid4()
 TEST_USER_ID = str(uuid.uuid4())
 
 # Every v2 route is gated by ``RequirePermission``, which resolves
-# ``get_current_user_payload`` — not ``get_current_user_id``. Overriding only
+# ``get_current_user_payload``, not ``get_current_user_id``. Overriding only
 # the latter leaves the permission dependency on the real bearer-token path,
 # so each request is rejected with 401 before the handler runs at all.
 #
@@ -241,7 +241,7 @@ async def test_create_eac_schedule_link_runs_dry_run(client: AsyncClient, schedu
 
 @pytest.mark.asyncio
 async def test_create_link_requires_rule_or_predicate(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
-    """Body must carry either rule_id or predicate_json — 422 otherwise."""
+    """Body must carry either rule_id or predicate_json, 422 otherwise."""
     _engine, factory = temp_engine_and_factory
     from app.modules.schedule.models import Activity
 
