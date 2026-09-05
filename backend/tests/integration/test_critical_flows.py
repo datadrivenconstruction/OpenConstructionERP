@@ -153,9 +153,36 @@ class TestHealthAndSystem:
         resp = await client.get("/api/health")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["status"] == "healthy"
-        assert "version" in data
-        assert "instance_id" in data
+        assert "version" in data, data
+        assert "instance_id" in data, data
+        # ``status`` aggregates deployment completeness, not liveness. A
+        # backend answering every request perfectly still reports "degraded"
+        # when no frontend build is present, and a backend test run has none
+        # by construction - ci-full.yml creates frontend/dist holding a
+        # .gitkeep and nothing else, purely so the wheel's force-include
+        # resolves. Requiring the literal "healthy" therefore measured how the
+        # job was provisioned rather than whether the endpoint works.
+        assert data["status"] in ("healthy", "degraded"), data
+        # Every degrade cause this environment CAN satisfy stays a hard
+        # failure, so relaxing the aggregate above hides nothing.
+        assert data.get("database") == "ok", data
+        for flag, bad in (
+            ("schema_heal_failed", True),
+            ("schema_matches_models", False),
+            ("schema_constraints_validated", False),
+            ("data_repairs_failed", True),
+            ("data_repair_ledger_failed", True),
+        ):
+            assert data.get(flag) is not bad, f"{flag} is {data.get(flag)!r}: {data}"
+        # An absent frontend build is the only cause left. Pinning it keeps the
+        # remaining condition - a module the operator enabled that failed to
+        # import - fatal here even though the payload does not publish which
+        # module it was, because that condition would degrade the status while
+        # this flag stayed True.
+        if data["status"] == "degraded":
+            assert data.get("frontend_dist_present") is False, (
+                f"health is degraded for a cause this environment does not explain: {data}"
+            )
 
     async def test_system_status_has_all_sections(self, client: AsyncClient) -> None:
         resp = await client.get("/api/system/status")
