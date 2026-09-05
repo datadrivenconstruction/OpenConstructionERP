@@ -268,7 +268,11 @@ def _untracked_in_archive(
     else:
         mapping = _wheel_source_map(root)
 
-    allowed_prefixes = tuple(ALLOWED_UNTRACKED_SOURCES)
+    # rstrip the slash so an entry written "frontend/dist/" still matches. This
+    # list is the one thing a future reader edits, and an allowance that
+    # silently does nothing would be the same shape as the bug this check exists
+    # to catch.
+    allowed_prefixes = tuple(p.rstrip("/") for p in ALLOWED_UNTRACKED_SOURCES)
     bad: list[tuple[str, str]] = []
     for name in names:
         if name.endswith("/"):
@@ -286,7 +290,7 @@ def _untracked_in_archive(
             continue
         if repo_path in tracked:
             continue
-        if repo_path in ALLOWED_UNTRACKED_SOURCES or repo_path.startswith(
+        if repo_path in allowed_prefixes or repo_path.startswith(
             tuple(p + "/" for p in allowed_prefixes)
         ):
             continue
@@ -295,10 +299,13 @@ def _untracked_in_archive(
 
 
 def _git_tracked() -> list[str]:
-    out = subprocess.run(
-        ["git", "ls-files"], capture_output=True, text=True, check=True
-    )
-    return out.stdout.splitlines()
+    # -z for the same reason as _git_tracked_set: core.quotePath defaults to
+    # true, so a non-ASCII path arrives as "backend/app/\320\272..." and the
+    # deny patterns would be matched against the escaped spelling rather than
+    # the real one. No tracked path is non-ASCII today, but this repo carries
+    # Cyrillic by policy and this is the mode that runs on every pre-commit.
+    out = subprocess.run(["git", "ls-files", "-z"], capture_output=True, check=True)
+    return [p for p in out.stdout.decode("utf-8").split("\0") if p]
 
 
 def _zip_names(path: str) -> list[str]:
