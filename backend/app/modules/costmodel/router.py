@@ -1029,6 +1029,8 @@ async def get_position_actuals(
                 cost_line_id=row.cost_line_id,
                 cost_line_code=row.cost_line_code,
                 on_cost_spine=row.on_cost_spine,
+                norm_id=row.norm_id,
+                norm_work_key=row.norm_work_key,
                 estimate_quantity=row.estimate_quantity,
                 estimate_unit_rate=row.estimate_unit_rate,
                 estimate_amount=row.estimate_amount,

@@ -856,6 +856,14 @@ class PositionActualsRow(BaseModel):
     cost_line_code: str = ""
     on_cost_spine: bool = False
 
+    #: The production norm this line was priced from, empty on a line that was
+    #: not (issue #457). Carried here so a reader looking at one item of work can
+    #: see which norm predicted it without going back to the bill. The
+    #: comparison across every line priced from the same norm is one grain up,
+    #: at ``GET /api/v1/postcalc/projects/{id}/norm-outturn``.
+    norm_id: str = ""
+    norm_work_key: str = ""
+
     estimate_quantity: Decimal = Decimal("0")
     estimate_unit_rate: Decimal = Decimal("0")
     estimate_amount: Decimal = Decimal("0")

@@ -36,11 +36,19 @@ assembly carries ``metadata["assembly_id"]``, and an assembly built from a
 production norm carries its ``norm_id``, so the norm was always reachable
 through the assembly row. What was missing was anybody making that hop, and a
 hop through a row that can be edited or deleted after the fact is not
-provenance anyway. A position now carries ``metadata["norm_id"]`` directly.
+provenance anyway. A position now carries its norm identity directly, on the
+``norm_id`` / ``norm_work_key`` columns (v3320), with the metadata keys still
+written beside them for readers that predate the columns.
 
-This module still reports only the measured side. Reading the predicted side
-is a change to what it computes, not to what it can reach, and it is worth
-doing separately rather than folding into the row that already exists.
+This module still computes only the measured side, and now CARRIES the identity
+of the predicted one: every row reports the norm its position was priced from,
+so a reader can put the two together without going back to the bill. The
+comparison itself - what a norm predicted against what the work booked against
+it really consumed - is one grain up from a position and lives in
+``app.modules.postcalc.norm_outturn``, which reads these rows. It is one grain
+up because a norm is reused across a bill: the question "did this norm hold" is
+answered by summing over every position priced from it, and a per-position row
+cannot answer it however much provenance it carries.
 
 Even the measured side has a trap in the denominator. Hours divided by the
 BILLED quantity on a half-built item reads better the less of the item is
@@ -125,6 +133,35 @@ def _to_decimal(raw: object) -> Decimal:
         return _ZERO
 
 
+def norm_provenance_of(pos: object) -> tuple[str, str]:
+    """The production norm a position was priced from, as ``(id, work_key)``.
+
+    Empty strings when the position was not priced from a norm, which is most
+    of a real bill.
+
+    Reads the column first and falls back to the metadata, and the fallback is
+    not belt and braces. The write side shipped on 2026-09-03 and the columns
+    arrived with v3320, so every bill priced from a norm between those two
+    moments holds the identity in ``metadata`` against a NULL column. The
+    migration copies those rows across, but a copy only reaches the rows that
+    exist when it runs: an older application binary pointed at this schema goes
+    on writing the metadata and not the column, and reading the column alone
+    would report that job as never having been estimated from a norm. Which is
+    the complaint this whole feature exists to answer, restated one layer down.
+    """
+    norm_id = getattr(pos, "norm_id", None)
+    work_key = getattr(pos, "norm_work_key", None) or ""
+    if norm_id is None:
+        metadata = getattr(pos, "metadata_", None)
+        if isinstance(metadata, dict):
+            norm_id = metadata.get("norm_id") or None
+            if norm_id is not None and not work_key:
+                work_key = metadata.get("work_key") or ""
+    if norm_id is None:
+        return "", ""
+    return str(norm_id), str(work_key)
+
+
 @dataclass(frozen=True)
 class PositionActuals:
     """One bill position with everything recorded against it.
@@ -142,6 +179,13 @@ class PositionActuals:
 
     cost_line_id: uuid.UUID | None = None
     cost_line_code: str = ""
+
+    #: The production norm this line was priced from, empty when it was not.
+    #: Reported as a string rather than a UUID because it is an identity being
+    #: passed through, and because the metadata fallback it may come from holds
+    #: whatever was written there.
+    norm_id: str = ""
+    norm_work_key: str = ""
 
     estimate_quantity: Decimal = _ZERO
     estimate_unit_rate: Decimal = _ZERO
@@ -271,6 +315,7 @@ def assemble_rows(
         )
         consumed_qty, consumed_amount = consumed.get(pos.id, (_ZERO, _ZERO))
         labour_hours, plant_hours = (booked_hours or {}).get(pos.id, (_ZERO, _ZERO))
+        norm_id, norm_work_key = norm_provenance_of(pos)
 
         rows.append(
             PositionActuals(
@@ -280,6 +325,8 @@ def assemble_rows(
                 unit=getattr(pos, "unit", "") or "",
                 cost_line_id=cost_line_id,
                 cost_line_code=cost_line_codes.get(key, ""),
+                norm_id=norm_id,
+                norm_work_key=norm_work_key,
                 estimate_quantity=_to_decimal(getattr(pos, "quantity", None)).quantize(_QTY_Q),
                 estimate_unit_rate=_to_decimal(getattr(pos, "unit_rate", None)),
                 estimate_amount=estimate_amount.quantize(_MONEY_Q),
@@ -430,7 +477,7 @@ async def build_position_actuals(
     boq_id: uuid.UUID | None = None,
     position_ids: list[uuid.UUID] | None = None,
     offset: int = 0,
-    limit: int = 200,
+    limit: int | None = 200,
 ) -> PositionActualsReport:
     """Assemble the report for a project, optionally narrowed to some positions.
 
@@ -439,6 +486,13 @@ async def build_position_actuals(
     orders, contracts, claims, progress, consumption and booked hours.
     Narrowing happens before the aggregates run, so a drawer asking about one
     position does not pay for the whole project.
+
+    ``limit=None`` returns every position of the project. It exists for a
+    caller that aggregates over the whole bill rather than displaying a page of
+    it: a rollup that took the default page would report a subtotal and call it
+    a total, and the shape of that error is a number that looks right. No
+    existing caller can reach it - the HTTP layer validates ``ge=1, le=500`` -
+    so the paged default is unchanged.
     """
     from app.modules.boq.repository import PositionRepository
     from app.modules.costmodel.repository import CostSpineRepository
@@ -459,7 +513,10 @@ async def build_position_actuals(
             positions = []
     else:
         positions = await position_repo.list_for_project(project_id)
-        positions = positions[offset : offset + limit]
+        if limit is not None:
+            positions = positions[offset : offset + limit]
+        elif offset:
+            positions = positions[offset:]
 
     report = PositionActualsReport()
     if not positions:

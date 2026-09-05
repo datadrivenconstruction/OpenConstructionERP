@@ -56,6 +56,11 @@ from app.modules.postcalc.model import (
     ProjectPostCalc,
     ResourceProductivity,
 )
+from app.modules.postcalc.norm_outturn import (
+    NormBaseline,
+    NormOutturnReport,
+    group_by_norm,
+)
 from app.modules.price_breakdown import ResourceKind, coerce_kind
 
 if TYPE_CHECKING:
@@ -746,6 +751,127 @@ class PostCalcService:
             tolerance=tolerance,
             min_confidence=min_confidence,
         )
+
+    async def norm_outturn(
+        self,
+        project_id: uuid.UUID,
+        *,
+        tolerance: Decimal = DEFAULT_TOLERANCE,
+    ) -> NormOutturnReport:
+        """Per production norm: what the estimate allowed against what it cost.
+
+        Issue #457. ``generate`` above answers this per bill line. This answers
+        it per norm, by rolling up every position of the project that was priced
+        from one, which is the grain the question is actually asked at: a norm is
+        reused across a bill, so whether it held is a fact about all of its
+        positions at once.
+
+        The measured side is read through
+        :func:`app.modules.costmodel.position_actuals.build_position_actuals`
+        rather than through this module's own loaders, and that is a deliberate
+        reuse rather than a shortcut. That function already crosses the two
+        spines the platform keeps apart - money keyed by cost line, physical
+        facts keyed by position - and already matches booked hours to positions
+        through ``FieldTimesheetLine.boq_position_id``, which is the direct link
+        and handles the reversal trap that the obvious ``status == 'approved'``
+        filter gets exactly backwards. Reimplementing either here would mean
+        reimplementing that trap.
+
+        It is asked for the whole bill, unpaged. A rollup that took the paged
+        default would report a subtotal in the shape of a total.
+
+        The predicted side is read live from the norm library, and a norm that
+        has been deleted since the bill was priced comes back with
+        ``norm_row_present`` False rather than dropping out of the report: the
+        identity was copied onto the position precisely so that deleting the
+        library entry could not erase the fact that the work was estimated from
+        it.
+
+        Returns:
+            A :class:`NormOutturnReport`. A project whose bill was never priced
+            from a norm returns an empty ``norms`` list with every position
+            counted under ``positions_without_norm``, which says "no norms here"
+            where an empty response would say nothing at all.
+        """
+        from app.modules.costmodel.position_actuals import build_position_actuals
+
+        # ``limit=None`` and not the paged default: this rolls the whole bill
+        # up, and a page of it would report a subtotal in the shape of a total.
+        report = await build_position_actuals(self.session, project_id, limit=None)
+
+        # The bill baseline: labour hours per position unit, from the resource
+        # split stored on the position when the assembly was applied. Read from
+        # the positions rather than from the report, because the split is the
+        # one thing a position-actuals row deliberately does not carry - it is
+        # estimate composition, not an actual.
+        #
+        # Both sides of this are the same unpaged ``list_for_project``, which is
+        # what makes the lookup below safe: every position of the project has an
+        # entry, so a missing key is impossible and the zero default can only
+        # mean "this position carries no labour split". Page either side and
+        # that stops being true - the rows past the page would silently take the
+        # zero and be reported as having no baseline rather than as unread.
+        positions = await self._load_positions(project_id)
+        bill_hours_per_unit = {
+            pos.id: _per_unit_hours(_resources_of({"metadata": pos.metadata_}), ResourceKind.LABOUR)
+            for pos in positions
+        }
+
+        norm_ids = {row.norm_id for row in report.rows if row.norm_id}
+        baselines = await self._load_norm_baselines(norm_ids)
+
+        return group_by_norm(
+            list(report.rows),
+            baselines=baselines,
+            bill_labour_hours_per_unit=bill_hours_per_unit,
+            currency=report.currency,
+            tolerance=tolerance,
+        )
+
+    async def _load_norm_baselines(self, norm_ids: set[str]) -> dict[str, NormBaseline]:
+        """Load the live library row for each norm id, skipping the ones that are gone.
+
+        Best-effort, like every other cross-module read in this service: without
+        the norm-expansion module the report still has its bill side and its
+        outturn side, and every norm reads as deleted, which is the honest thing
+        to say when the library cannot be consulted at all.
+
+        An id that does not parse as a UUID is dropped before the query rather
+        than passed to the driver: it can only have come from the metadata
+        fallback, where the value is free-form JSON somebody else wrote.
+        """
+        if not norm_ids:
+            return {}
+        try:
+            from sqlalchemy import select
+
+            from app.modules.norm_expansion.models import ProductionNorm
+
+            parsed: dict[uuid.UUID, str] = {}
+            for raw in norm_ids:
+                try:
+                    parsed[uuid.UUID(str(raw))] = raw
+                except (ValueError, AttributeError, TypeError):
+                    continue
+            if not parsed:
+                return {}
+
+            stmt = select(ProductionNorm).where(ProductionNorm.id.in_(sorted(parsed)))
+            norms = (await self.session.execute(stmt)).scalars().all()
+        except Exception:
+            logger.debug("Norm library unavailable while building the norm outturn", exc_info=True)
+            return {}
+
+        return {
+            parsed.get(norm.id, str(norm.id)): NormBaseline(
+                work_key=norm.work_key or "",
+                name=norm.name or "",
+                unit=norm.unit or "",
+                labour_hours_per_unit=_dec(norm.labor_hours_per_unit),
+                machine_hours_per_unit=_dec(norm.machine_hours_per_unit),
+            )
+            for norm in norms
+        }
 
     async def render_markdown(
         self,

@@ -884,6 +884,16 @@ class PositionResponse(BaseModel):
     # (linked instances) project-wide. None for instances / standalone.
     linked_instance_count: int | None = None
 
+    # ── Issue #457: the production norm this line was priced from ────────
+    # Read-only, and deliberately not on PositionCreate / PositionUpdate. The
+    # value is written at the storage boundary from the metadata the apply-an-
+    # assembly path already sets, so it records what actually priced the line.
+    # A client that could set it could claim a norm predicted a price it never
+    # saw, which is worse than no provenance at all. NULL on the great majority
+    # of a real bill, which is typed or imported and priced from no norm.
+    norm_id: UUID | None = None
+    norm_work_key: str | None = None
+
     # BUG-MATH04: response-side HTML strip. Position descriptions are the
     # most-rendered free-text field in the product (BOQ grid, exports,
     # AI-chat reuse). Even though input validators block dangerous tags,

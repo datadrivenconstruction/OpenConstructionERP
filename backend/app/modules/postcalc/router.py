@@ -1,18 +1,24 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 """Post-calculation API routes.
 
-Mounted at ``/api/v1/postcalc``. One read-only endpoint that reconciles a
-project's estimate against its site actuals into a planned-vs-actual productivity
-report:
+Mounted at ``/api/v1/postcalc``. Two read-only endpoints that reconcile a
+project's estimate against its site actuals, at the two grains the question is
+asked at:
 
     GET /projects/{project_id}/productivity?format=json|markdown
+    GET /projects/{project_id}/norm-outturn
 
-``format=json`` (default) returns the full structured report; ``format=markdown``
-returns the same numbers as an auditable Markdown document. Optional ``tolerance``
-(the on-plan band, default 0.05) and ``min_confidence`` (the installed-coverage
-floor for a feedback factor, default 0.10) tune the analysis. Reads need viewer
-access to the project, and access is verified first so a caller can never read the
-productivity of a project they cannot see.
+The first is per bill line. ``format=json`` (default) returns the full structured
+report; ``format=markdown`` returns the same numbers as an auditable Markdown
+document. Optional ``tolerance`` (the on-plan band, default 0.05) and
+``min_confidence`` (the installed-coverage floor for a feedback factor, default
+0.10) tune the analysis.
+
+The second is per production norm (issue #457), rolling up every position priced
+from one, which is the grain a norm library is corrected at.
+
+Reads need viewer access to the project, and access is verified first so a caller
+can never read the productivity of a project they cannot see.
 """
 
 from __future__ import annotations
@@ -75,4 +81,40 @@ async def get_productivity(
         )
 
     report = await service.generate(project_id, tolerance=tol, min_confidence=conf)
+    return report.to_dict()
+
+
+@router.get(
+    "/projects/{project_id}/norm-outturn",
+    response_model=None,
+    dependencies=[_READ],
+)
+async def get_norm_outturn(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    tolerance: float | None = Query(default=None, ge=0, le=1, description="On-plan band, e.g. 0.05 for 5%"),
+) -> dict:
+    """Per production norm: what the estimate allowed against what it cost.
+
+    The endpoint above answers this per bill line. This answers it per norm, by
+    rolling up every position of the project that was priced from one. That is
+    the grain an estimator corrects a norm library at: a norm is reused across a
+    bill, so whether it held is a fact about all of its positions together and
+    no single line answers it.
+
+    Two baselines come back for each norm and neither is called simply the
+    estimate. ``bill_*`` is what the priced line says, fixed when the bill was
+    priced and already carrying the bid and regional factors. ``norm_*`` is what
+    the library says today, read live and absent when the norm has since been
+    deleted. They agree on the day a bill is priced and drift afterwards, and
+    the drift is the interesting part.
+
+    Scoped to one project, because money is per project and is reported in that
+    project's base currency.
+    """
+    await verify_project_access(project_id, user_id, session)
+
+    tol = Decimal(str(tolerance)) if tolerance is not None else DEFAULT_TOLERANCE
+    report = await PostCalcService(session).norm_outturn(project_id, tolerance=tol)
     return report.to_dict()

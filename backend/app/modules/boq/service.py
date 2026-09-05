@@ -985,6 +985,12 @@ def _build_position_response(pos: Position) -> PositionResponse:
         reference_code=getattr(pos, "reference_code", None),
         link_role=getattr(pos, "link_role", None),
         link_group_id=getattr(pos, "link_group_id", None),
+        # Issue #457: the production norm this line was priced from, read-only.
+        # Written at the storage boundary from the metadata, not accepted from a
+        # client: it is provenance, and a caller that could set it could claim a
+        # norm predicted a price it never saw.
+        norm_id=getattr(pos, "norm_id", None),
+        norm_work_key=getattr(pos, "norm_work_key", None),
     )
 
 
@@ -1252,6 +1258,61 @@ def _coerce_uuid_or_none(value: object) -> uuid.UUID | None:
         return uuid.UUID(value.strip())
     except ValueError:
         return None
+
+
+def _norm_provenance_from_metadata(metadata: object) -> tuple[uuid.UUID | None, str | None]:
+    """Read the production-norm identity out of a position's metadata.
+
+    Issue #457. The path that applies an assembly to a bill already writes
+    ``norm_id`` and ``work_key`` into the metadata when the assembly was itself
+    built from a production norm. Lifting them onto their own columns here, at
+    the one storage boundary every create goes through, means the writer needs
+    no change and every writer benefits: an importer, a template expansion or a
+    module that has not been written yet all get the column for free as soon as
+    they put the identity in the metadata, which is the shape the platform
+    already agreed on.
+
+    Metadata is a free-form dict written by clients as well as by us, so a
+    malformed id is data rather than a programming error and comes back as None
+    instead of raising out of a create. The key is only returned when the id
+    resolved, so the two columns can never disagree about whether this row was
+    priced from a norm.
+    """
+    if not isinstance(metadata, dict):
+        return None, None
+    norm_id = _coerce_uuid_or_none(metadata.get("norm_id"))
+    if norm_id is None:
+        return None, None
+    raw_key = metadata.get("work_key")
+    work_key = raw_key.strip()[:120] if isinstance(raw_key, str) and raw_key.strip() else None
+    return norm_id, work_key
+
+
+def _norm_provenance_of_copy(source: object, metadata: object) -> tuple[uuid.UUID | None, str | None]:
+    """Norm provenance for a position copied from an existing one.
+
+    A copy of a line priced from a norm was priced from that same norm, so the
+    identity travels with the copy. It has to be lifted explicitly at every copy
+    site because these paths build the row field by field rather than going
+    through ``add_position``: without this a duplicated line, a linked instance,
+    a bill revision and a restored snapshot would each carry the identity in
+    their copied metadata against a NULL column. Nothing would look broken - the
+    read side coalesces column then metadata and answers correctly either way -
+    but the column would be silently incomplete on exactly the bills that have
+    been worked on most, and a GROUP BY over it would report a fraction of the
+    work as the whole of it.
+
+    The source's own columns come first because they are already normalised;
+    a row written before the column existed carries nothing there and its
+    copied metadata still answers.
+    """
+    norm_id = _coerce_uuid_or_none(getattr(source, "norm_id", None))
+    if norm_id is None:
+        return _norm_provenance_from_metadata(metadata)
+    raw_key = getattr(source, "norm_work_key", None)
+    if isinstance(raw_key, str) and raw_key.strip():
+        return norm_id, raw_key.strip()[:120]
+    return norm_id, _norm_provenance_from_metadata(metadata)[1]
 
 
 def _read_bands(metadata: object) -> list[tuple[Decimal | None, Decimal]]:
@@ -2157,6 +2218,9 @@ class BOQService:
         if link_group_id is not None:
             _root_meta["_link_src"] = str(source.id)
 
+        # Issue #457: a clone of a norm-priced line was priced from that norm.
+        _root_norm_id, _root_norm_key = _norm_provenance_of_copy(source, _root_meta)
+
         root = Position(
             boq_id=boq_id,
             parent_id=new_parent_id,
@@ -2183,6 +2247,8 @@ class BOQService:
             # Issue #347: carry the owning model so a duplicate resolves its BIM
             # links against the same model as the original.
             cad_model_id=getattr(source, "cad_model_id", None),
+            norm_id=_root_norm_id,
+            norm_work_key=_root_norm_key,
             validation_status="pending",
             metadata_=_root_meta,
             sort_order=max_order + 1,
@@ -2207,6 +2273,7 @@ class BOQService:
                 _child_meta = _copy_definition_metadata(child.metadata_)
                 if link_group_id is not None:
                     _child_meta["_link_src"] = str(child.id)
+                _child_norm_id, _child_norm_key = _norm_provenance_of_copy(child, _child_meta)
                 cloned_child = Position(
                     boq_id=boq_id,
                     parent_id=new_parent,
@@ -2224,6 +2291,8 @@ class BOQService:
                     cad_element_ids=(list(child.cad_element_ids) if child.cad_element_ids else []),
                     # Issue #347: carry the owning model onto the cloned child.
                     cad_model_id=getattr(child, "cad_model_id", None),
+                    norm_id=_child_norm_id,
+                    norm_work_key=_child_norm_key,
                     validation_status="pending",
                     metadata_=_child_meta,
                     sort_order=max_order,
@@ -2923,6 +2992,11 @@ class BOQService:
         # the position is always referenceable.
         resolved_reference_code = await self._resolve_create_reference_code(project_id, supplied_code or None)
 
+        # Issue #457 - lift the production-norm identity out of the metadata
+        # onto its own columns so a per-norm rollup can group by it instead of
+        # matching the serialised JSON by string shape.
+        norm_id, norm_work_key = _norm_provenance_from_metadata(merged_metadata)
+
         position = Position(
             boq_id=data.boq_id,
             parent_id=data.parent_id,
@@ -2940,6 +3014,8 @@ class BOQService:
             price_basis=data.price_basis,
             cad_element_ids=data.cad_element_ids,
             metadata_=merged_metadata,
+            norm_id=norm_id,
+            norm_work_key=norm_work_key,
             # BUG-B-013 (cost-item unit/currency) + BUG-B-014 (duplicate
             # content) both surface on the validation traffic-light.
             validation_status=("warnings" if (_cost_compat_warned or _dup_ordinal is not None) else "pending"),
@@ -3232,6 +3308,10 @@ class BOQService:
                 position_currency=currency_hint if isinstance(currency_hint, str) else None,
             )
 
+            # Issue #457, same derivation as the single-position create: the
+            # bulk path builds its rows directly rather than calling through it.
+            _bulk_norm_id, _bulk_norm_key = _norm_provenance_from_metadata(merged_metadata)
+
             new_positions.append(
                 Position(
                     boq_id=boq_id,
@@ -3246,6 +3326,8 @@ class BOQService:
                     source=data.source,
                     confidence=(str(data.confidence) if data.confidence is not None else None),
                     cad_element_ids=data.cad_element_ids,
+                    norm_id=_bulk_norm_id,
+                    norm_work_key=_bulk_norm_key,
                     metadata_=merged_metadata,
                     validation_status="warnings" if _bulk_cost_warned else "pending",
                     sort_order=max_order + offset,
@@ -5961,6 +6043,10 @@ class BOQService:
             # DELIBERATELY NOT carried: a revision instance must not follow
             # the original BOQ's master definition.
             pos_reference_code = getattr(pos, "reference_code", None)
+            # Issue #457: a revision of a bill is still priced from the same
+            # norms, and the revision is where the outturn comparison is most
+            # often read from.
+            pos_norm_id, pos_norm_work_key = _norm_provenance_of_copy(pos, pos_metadata)
 
             captured_positions.append({"id": pos_id, "parent_id": pos_parent_id})
 
@@ -5978,6 +6064,8 @@ class BOQService:
                 confidence=pos_confidence,
                 cad_element_ids=pos_cad_element_ids,
                 cad_model_id=pos_cad_model_id,
+                norm_id=pos_norm_id,
+                norm_work_key=pos_norm_work_key,
                 validation_status="pending",
                 reference_code=pos_reference_code,
                 metadata_=pos_metadata,
@@ -7939,6 +8027,10 @@ class BOQService:
         # be re-threaded in a second pass below.
         old_to_new: dict[str, Position] = {}
         for pdata in data.get("positions", []):
+            # Issue #457. Derived from the snapshot's metadata rather than
+            # added to what ``create_snapshot`` captures, which recovers the
+            # provenance from snapshots taken before the column existed too.
+            _snap_norm_id, _snap_norm_key = _norm_provenance_from_metadata(pdata.get("metadata"))
             pos = Position(
                 boq_id=boq_id,
                 ordinal=pdata["ordinal"],
@@ -7949,6 +8041,8 @@ class BOQService:
                 total=pdata.get("total", "0"),
                 classification=pdata.get("classification", {}),
                 source=pdata.get("source", "manual"),
+                norm_id=_snap_norm_id,
+                norm_work_key=_snap_norm_key,
                 metadata_=pdata.get("metadata", {}),
                 sort_order=pdata.get("sort_order", 0),
             )
