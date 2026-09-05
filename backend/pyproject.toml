@@ -405,15 +405,24 @@ packages = ["app", "openconstructionerp"]
 exclude = ["**/_*.md", "**/_*.txt", "**/__pycache__/**", "**/*.pyc"]
 
 # The twelve bundled demo site photos are real shipped seed assets, and the
-# package walk was dropping every one of them. .gitignore carries a global
-# ``*.jpg`` for dev screenshots and negates it for exactly this directory with
-# ``!backend/app/scripts/flagship_assets/site_photos/*.jpg``. Git honours that
-# negation, so all twelve are tracked and a CI checkout has them; hatchling's
-# VCS walker reads the same file and does NOT honour negation, so it dropped
-# the photos while ``captions.json`` survived by not matching the glob. The
-# result was a wheel that shipped the captions for twelve pictures it did not
-# carry, and a first run that logged sixty "photos seed: asset missing" lines
-# and left the demo galleries empty.
+# package walk was dropping every one of them. The repo-root .gitignore carries
+# a global ``*.jpg`` for dev screenshots and negates it for exactly this
+# directory. Git honours that negation, so all twelve are tracked and a CI
+# checkout has them; hatchling's VCS walker read the same file and does NOT
+# honour negation, so it dropped the photos while ``captions.json`` survived by
+# not matching the glob. The result was a wheel that shipped the captions for
+# twelve pictures it did not carry, and a first run that logged sixty "photos
+# seed: asset missing" lines and left the demo galleries empty.
+#
+# Since backend/.gitignore exists, that is no longer the live mechanism.
+# hatchling stops its upward search at the nearest .gitignore, so it now reads
+# backend/.gitignore and never sees the repo-root ``*.jpg`` at all, and the
+# photos would survive the walk on their own. This line stays anyway, for two
+# reasons: it costs nothing, and it keeps the wheel correct if anyone ever adds
+# an image rule to backend/.gitignore without knowing these twelve are cargo
+# rather than screenshots. Treat it as belt-and-braces, not as the load-bearing
+# part. The negation itself moved to backend/.gitignore with the rest of the
+# backend rules, where git still honours it.
 #
 # ``artifacts`` is hatchling's mechanism for exactly this: files the VCS
 # ignores that the build must ship anyway. Not force-include, which bypasses

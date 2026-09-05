@@ -98,6 +98,49 @@ jobs:
           cd backend
           python -m build --wheel --outdir ../dist/
 
+      - name: Check wheel fits under the PyPI file-size limit
+        shell: bash
+        run: |
+          python - <<'PY'
+          import glob, os, sys
+
+          # PyPI rejects any single file over 100 MiB, and it rejects it at
+          # upload, which here is after the tag is already public. Nothing
+          # asserted the size before, so the first release to cross the line
+          # would have found out the expensive way. This step runs immediately
+          # after the build and before anything is published.
+          #
+          # The number: the hard cap is 100 MiB = 104857600 bytes. A wheel built
+          # from a clean tree at 16.8.1 is about 85.8 MiB, and the trend across
+          # 16.1.0 to 16.8.0 was 85.4 MB to 88.2 MB in eight days, roughly
+          # 0.35 MB a day, driven by the bundled frontend and the regional packs.
+          # 95 MiB sits about 9 MiB above today's wheel and 5 MiB below the cap:
+          # at the observed rate that is roughly a month of warning, which is
+          # enough time to shrink something deliberately rather than in a panic
+          # on a tag that cannot be taken back.
+          #
+          # If this fails, do not just raise the number. Look at what grew first:
+          # `python -c "import zipfile,collections;..."` over the wheel usually
+          # shows one directory that doubled. Raising the limit past 100 MiB
+          # cannot work at all, so the headroom is the whole point of it.
+          LIMIT_MIB = 95
+          HARD_CAP_MIB = 100
+
+          whl = sorted(glob.glob("dist/*.whl"))
+          assert len(whl) == 1, f"expected exactly one wheel in dist/, found {whl}"
+          size = os.path.getsize(whl[0])
+          mib = size / 1048576
+          print(f"wheel {whl[0]} is {size:,} bytes ({mib:.1f} MiB)")
+          if mib > LIMIT_MIB:
+              sys.exit(
+                  f"ERROR: wheel is {mib:.1f} MiB, over the {LIMIT_MIB} MiB budget. "
+                  f"PyPI's hard limit is {HARD_CAP_MIB} MiB per file and it is enforced "
+                  f"at upload, after this tag is public. Find what grew and drop it; "
+                  f"raising the budget only moves the wall closer."
+              )
+          print(f"OK: {LIMIT_MIB - mib:.1f} MiB of headroom under the {LIMIT_MIB} MiB budget")
+          PY
+
       - name: Sanity check wheel
         shell: bash
         run: |

@@ -1,0 +1,106 @@
+# Ignore rules for the backend, which is also the Python project root.
+#
+# These lines used to live in the repo-root .gitignore written as
+# ``backend/<path>``. They worked for git and did nothing for the build, and
+# the gap shipped internal files to PyPI.
+#
+# hatchling resolves the project root from pyproject.toml, so for this package
+# the root is ``backend/``, not the repo root. Its VCS exclusion walks UP from
+# that root for the nearest .gitignore (builders/config.py:
+# ``locate_file(self.root, ".gitignore", boundary=".git")``), so with no file
+# here it reached the repo-root one. It then matched every pattern in it
+# against paths relative to ``backend/``. A line reading
+# ``backend/app/scripts/demo_seed_issues.md`` was therefore looked for at
+# ``backend/backend/app/scripts/demo_seed_issues.md`` and could never match.
+# All 43 repo-root lines beginning ``backend/`` were inert this way, and the
+# four paths that had files on disk rode into the wheel: the internal defect
+# log ``app/scripts/demo_seed_issues.md``, two ``seed_demo_v2*.py`` scripts,
+# and 495 entries of the stale ``app/_frontend_dist_prev/`` bundle, about 11
+# percent of the archive. Repo hygiene passed on that wheel because it matches
+# names, and none of those four names was on its denylist.
+#
+# Living here, the patterns are relative to the directory the build already
+# calls the project root, so git and hatchling read the same rule the same
+# way. Every line is anchored with a leading ``/`` so it means exactly what
+# ``backend/<path>`` meant at the repo root: bound to this directory, not
+# matched at any depth beneath it. Dropping the slash would widen the rules
+# and start ignoring real source, so keep it when adding a line.
+#
+# Add backend-specific ignores HERE, not in the repo-root file. A line written
+# as ``backend/...`` up there is still inert for the build.
+#
+# The durable backstop is scripts/check_repo_hygiene.py, which asks whether an
+# archive holds a file git does not track. That catches this whole class no
+# matter which ignore file a future leak escapes.
+
+# Dev / debug artefacts
+/audit_output.txt
+/data/bim_samples/
+/app/scripts/seed_demo_v*.py
+/app/scripts/seed_*school*.py
+/app/scripts/seed_*technical*.py
+/app/scripts/audit_*.py
+/app/scripts/demo_seed_issues.md
+
+# Bundled demo site photos are real shipped seed assets, not dev screenshots.
+# This negates the repo-root ``*.jpg``; a nested .gitignore overrides its
+# parent for paths beneath it, so the twelve stay tracked.
+!/app/scripts/flagship_assets/site_photos/*.jpg
+
+# QA test scripts (contain demo credentials)
+/qa_*.py
+/tmp_*.json
+
+# Backup files
+/data/dwg_uploads/
+/data/dwg_entities/
+/data/dwg_thumbnails/
+
+# Smoke-sweep E2E run artefacts (regenerable test output, not source).
+# ``/app/_frontend_dist/`` is the vendored frontend bundle. It is ignored for
+# git and still ships, because the wheel gets it through force-include, which
+# bypasses the file walk and its exclusions entirely.
+/_frontend_dist/
+/app/_frontend_dist/
+/*.log.err
+/*.log.out
+
+# Ad-hoc QA/test scripts that hit a hardcoded localhost, not real tests
+/qa_api_test.py
+/qa_ai_test.py
+/test_all_modules.py
+/test_final_qa.py
+/test_full.py
+/test_upload.dxf
+/tmp_api.json
+
+# Runtime QMS upload artifacts (smoke/demo attachments, not source)
+/uploads/qms/
+
+# Scratch dev/test output
+/.pytest_*.out
+/_dev_backend.err
+/*.err
+
+# Session scratch: working notes, probe dumps and stale bundles
+/_*.py
+/_*.txt
+/*_id.txt
+/markup_id_qa.txt
+/sess_id.txt
+/_qa_findings.json
+/_e2e_shots/
+/_flagship/
+/_pdfreport/
+/_report_pages/
+/app/_frontend_dist_prev/
+
+# Runtime user data
+/uploads/
+
+# Recurring session scratch (QA temp output)
+/_qa_tmp_*
+
+# Probe dumps left beside the seed scripts
+/app/scripts/_flagship_dump.txt
+/app/scripts/_snap_dump.txt
