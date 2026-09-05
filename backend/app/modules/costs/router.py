@@ -3235,7 +3235,15 @@ async def _enforce_item_catalog_ownership(
     await catalog_service.get_owned_catalog(item.catalog_id, owner_id=owner_id, is_admin=is_admin)
 
 
-@router.get("/{item_id}")
+# The ``:uuid`` convertor is load-bearing, do not drop it back to a bare
+# ``{item_id}``. Starlette matches routes in registration order, so an
+# unconstrained catch-all here swallows every later single-segment literal
+# route in this router - ``/base-catalog`` (registered ~1300 lines below) was
+# read as an item id, the UUID parse failed, and the caller got an opaque
+# ``400 {"error": "Invalid request"}`` from the path-param sanitiser in
+# app.main instead of the catalogue. Constraining the convertor makes the
+# literal routes win and turns a genuinely unknown path back into a 404.
+@router.get("/{item_id:uuid}")
 async def get_cost_item(
     item_id: uuid.UUID,
     user: OptionalUserPayload,
@@ -3305,7 +3313,8 @@ async def preview_mass_apply(
 
 
 @router.patch(
-    "/{item_id}",
+    # Same ``:uuid`` constraint as the read route above, for the same reason.
+    "/{item_id:uuid}",
     response_model=CostItemResponse,
     dependencies=[Depends(RequirePermission("costs.update"))],
 )
@@ -3334,7 +3343,8 @@ async def update_cost_item(
 
 
 @router.delete(
-    "/{item_id}",
+    # Same ``:uuid`` constraint as the read route above, for the same reason.
+    "/{item_id:uuid}",
     status_code=204,
     dependencies=[Depends(RequirePermission("costs.delete"))],
 )
