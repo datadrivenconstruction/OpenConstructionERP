@@ -4,7 +4,7 @@
 // Cases - the market a UI language speaks for, and the ordering that follows.
 //
 // A language is not a country, and this file exists to keep that sentence true
-// rather than to paper over it. Of the languages the product ships, five reach
+// rather than to paper over it. Of the languages the product ships, ten reach
 // a market the catalogue actually has cases for; the rest reach none, and the
 // honest answer for them is the order the catalogue already had.
 //
@@ -45,14 +45,17 @@ function normalizeLanguageTag(lang: string | null | undefined): string {
  * never drift apart. It also settles the sharp cases on its own:
  *
  *   - `es` declares `es`, so Spanish reaches the Spanish cases. `es-MX`,
- *     `es-CL` and `es-CO` declare `mx`, `cl` and `co`, none of which the
- *     catalogue has cases for, so they reach none. That is the point rather
- *     than a gap: the Spanish cases implement Spanish public procurement,
- *     FIEBDC-3 and Spanish site paperwork, and leading with them for a Mexican
- *     reader would not merely be unhelpful, it would name a law that does not
- *     apply where they work.
- *   - `pt` and `pt-BR` declare `pt` and `br`, neither of which has cases, so
- *     both reach none. The shape is the same as Spanish; only the counts
+ *     `es-CL` and `es-CO` declare `mx`, `cl` and `co`, and what each of them
+ *     reaches follows the catalogue rather than the language: Mexico has a
+ *     case of its own now, so `es-MX` leads with that, while `es-CL` and
+ *     `es-CO` still reach none. What none of the three reaches is Spain, and
+ *     that is the point rather than a gap: the Spanish cases implement Spanish
+ *     public procurement, FIEBDC-3 and Spanish site paperwork, and leading
+ *     with them for a Mexican reader would not merely be unhelpful, it would
+ *     name a law that does not apply where they work.
+ *   - `pt` and `pt-BR` declare `pt` and `br`. Brazil has a case and Portugal
+ *     does not, so the two have parted company: `pt-BR` reaches Brazil and
+ *     `pt` reaches none. The shape is the same as Spanish; only the counts
  *     differ.
  *   - `en` declares `gb` and `en-US` declares `us`, and the catalogue has both
  *     British and American cases, so the two English entries separate cleanly.

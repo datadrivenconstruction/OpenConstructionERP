@@ -4,15 +4,16 @@
 // Cases - the language-to-market default.
 //
 // Written against the REAL language registry and the REAL catalogue, not a
-// fixture, because the claim being made is about them: that `es-MX` reaches
-// no market and therefore is never led with Spanish cases naming Spanish law.
-// A fixture would let that claim stay true about the fixture while the shipped
-// registry says something else.
+// fixture, because the claim being made is about them: that `es-MX` is never
+// led with Spanish cases naming Spanish law. A fixture would let that claim
+// stay true about the fixture while the shipped registry says something else.
 //
-// The assertions below are properties rather than an inventory of which five
+// The assertions below are properties rather than an inventory of which
 // languages currently reach a market. Italy gaining its first case would break
 // an inventory and would not break a property, and the property is what has to
-// hold.
+// hold. Mexico and Brazil are the worked demonstration: both gained a case
+// after this suite was written, `es-MX` and `pt-BR` began reaching them with
+// no edit here or in the module under test, and nothing below had to change.
 
 import { describe, expect, it } from 'vitest';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
@@ -84,8 +85,9 @@ describe('homeMarketForLanguage', () => {
   it('does not hand Brazil the cases written for Portugal, or the reverse', () => {
     const pt = homeMarketForLanguage('pt', MARKETS);
     const ptBR = homeMarketForLanguage('pt-BR', MARKETS);
-    // Equal only when both are null, which is today's answer: neither market
-    // has cases. The day one of them does, they must part company.
+    // Equal only when both are null, which was the answer while neither market
+    // had cases. Brazil has one now and Portugal does not, so today they have
+    // already parted company, and they must stay parted if Portugal gains one.
     if (pt !== null || ptBR !== null) expect(pt).not.toBe(ptBR);
   });
 
