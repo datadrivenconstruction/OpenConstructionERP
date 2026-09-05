@@ -248,11 +248,17 @@ async function loadLocaleChunk(code: string): Promise<boolean> {
  * reveal.
  *
  * Both imports are awaited together rather than fired off, because
- * ``initialLocaleReady`` below is what ``main.tsx`` waits on before mounting: a
- * base chunk still in flight when that promise settles would paint the first frame
- * in English for exactly the keys this change is meant to fix. Each chunk keeps its
- * own error handling, so a failed base fetch costs the reader nothing they had
- * before — they still get the variant's own strings.
+ * ``initialLocaleReady`` below is what ``main.tsx`` waits on before mounting. That
+ * wait is not unbounded: ``main.tsx`` races it against ``LOCALE_MOUNT_CAP_MS``
+ * (2000 ms) and mounts on whichever lands first. So awaiting the base narrows the
+ * window rather than closing it — if the base chunk is still in flight when the
+ * cap fires, the first frame does show English for exactly the keys this change is
+ * meant to fix, and the explicit ``languageChanged`` emit below repaints it once
+ * the chunk lands. A flash, not a stuck page. Firing the base off unawaited would
+ * make that flash the ordinary case rather than the loaded-network one, which is
+ * the whole reason for the ``Promise.all``. Each chunk keeps its own error
+ * handling, so a failed base fetch costs the reader nothing they had before —
+ * they still get the variant's own strings.
  */
 export async function loadLocaleResource(code: string): Promise<void> {
   const base = code.includes('-') ? code.split('-')[0]! : null;
