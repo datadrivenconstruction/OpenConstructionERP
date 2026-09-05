@@ -155,6 +155,73 @@ def test_the_reported_phase_follows_whether_a_postmaster_is_there(
     )
 
 
+def test_a_bring_up_that_returns_at_once_says_nothing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A normal start must stay silent, or the visible boot checklist churns.
+
+    The property is one line, the wait that comes before the first report, and
+    it is exactly the line a later "why is the first report fifteen seconds
+    late?" edit would remove. The interval is deliberately left at its real
+    value here: that is the point being pinned.
+    """
+    from app.core import embedded_pg
+
+    emitted = _capture(monkeypatch)
+    monkeypatch.setattr(embedded_pg, "_postmaster_recovering", lambda _pgdata: True)
+    monkeypatch.setattr(embedded_pg, "_accepts_a_connection", lambda _pgdata: True)
+
+    fast = SimpleNamespace(get_server=lambda _pgdata: SimpleNamespace(name="fast-server"))
+    server, exc = embedded_pg._boot_once(fast, tmp_path, tmp_path, None, time.monotonic() + 30)
+
+    assert exc is None and server is not None
+    assert emitted == [], f"a boot with no wait in it must not report a wait: {emitted}"
+
+
+def test_the_heartbeat_stops_before_the_failure_handler_speaks(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The two heartbeats must not overlap when the bring-up call raises.
+
+    The existing recovery heartbeat lives in the handler for this exception, so
+    the wrapper has to be finished by the time that handler runs. It is, because
+    a context manager exits during propagation and ahead of the handler body,
+    and this is what holds that to be true rather than only asserted in a
+    comment.
+    """
+    from app.core import embedded_pg
+
+    emitted = _capture(monkeypatch)
+    monkeypatch.setattr(embedded_pg, "_RECOVERY_HEARTBEAT_SECONDS", 0.05)
+    # False on both readings: it decides the wrapper's phase text while the call
+    # blocks, and then it sends the handler down its fail-fast return.
+    monkeypatch.setattr(embedded_pg, "_postmaster_recovering", lambda _pgdata: False)
+
+    entered = threading.Event()
+    release = threading.Event()
+
+    def blocking_then_raising(_pgdata: str) -> object:
+        entered.set()
+        release.wait(_PATIENCE)
+        raise RuntimeError("pg_ctl gave up")
+
+    pgserver = SimpleNamespace(get_server=blocking_then_raising)
+    thread, result = _run_boot_once(embedded_pg, pgserver, tmp_path, time.monotonic() + _PATIENCE)
+
+    assert entered.wait(_PATIENCE)
+    assert _wait_until(lambda: len(emitted) >= 2), f"silent while blocked: {emitted}"
+    release.set()
+    thread.join(_PATIENCE)
+    assert not thread.is_alive()
+
+    server, exc = result["value"]
+    assert server is None and isinstance(exc, RuntimeError)
+
+    # The wrapper is stopped by the time the handler decided anything, so the
+    # count cannot move again on its own.
+    settled = len(emitted)
+    time.sleep(0.3)
+    assert len(emitted) == settled, f"the wrapper outlived the call it wrapped: {emitted[settled:]}"
+
+
 def test_a_bring_up_that_never_returns_stops_being_fed_at_the_deadline(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
