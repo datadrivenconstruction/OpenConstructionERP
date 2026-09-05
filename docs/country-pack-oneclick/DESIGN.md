@@ -3,19 +3,20 @@
 Status: DESIGN (2026-05-31). Owner: core. Supersedes the disconnected
 `frontend/src/features/onboarding/countryPacks.ts` hardcoded picker.
 
-## 1. Goal (founder intent, verbatim)
+## 1. Goal (founder intent)
 
-> "продумаем чтобы пользователь сразу мог выбрать страновой пак как опцию -
-> и тогда полностью всё бы устанавливалось для него и язык и все базы данных -
-> и простые и векторные и проекты 2 примера проектов из этой страны со всеми
-> данными"
+> Let the user pick a country pack as an option right at the start, and then
+> have everything install for them in one go: the language, all the databases,
+> the simple ones and the vector ones alike, and two example projects from that
+> country with all of their data.
 >
-> "не вижу тех паков которые мы создавали с компаниями партнёрами - почему их не видно"
+> I do not see the packs we built together with partner companies. Why are they
+> not showing up?
 >
-> "Авторить беспок-2й на каждую"
+> Author a bespoke template for each one.
 >
-> "нужно чтобы эти демо были проработаны через полностью все модули - чтобы
-> пользователь сразу видел как работать"
+> These demos need to be worked all the way through every module, so the user
+> sees straight away how to work with the platform.
 
 So: pick a country/partner pack in onboarding → **one click installs everything**:
 1. **Language** (locale) switched + activated.
@@ -58,7 +59,7 @@ unmaintainable. Fully-generic data would feel canned. **We do a hybrid:**
   local classification (DIN276 / NRM / MasterFormat / NBR / CPWD / SBC…),
   local currency, locale, address, and real local company names in
   `tender_companies`. This is authored per country and is where the national
-  character lives. (This is the "беспок" the founder asked for.)
+  character lives. (This is the bespoke part the founder asked for.)
 - **A generic, template-DERIVED module seeder** turns *any* template into full
   module coverage by generating realistic rows for every content module **from
   the template's own sections / companies / locale / currency**. Because it

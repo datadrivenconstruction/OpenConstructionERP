@@ -49,10 +49,10 @@ Existing modules vs. spec coverage (verified via two parallel codebase audits):
 | L4 | **`bge-m3`** is the embedding model (1024-dim dense + sparse). Loaded via `sentence-transformers` or via `infinity` server (CPU-tolerant). | Multilingual (50+ langs), open-source, dense + sparse out of the box, retrieval-tuned, runs on CPU for on-prem. |
 | L5 | **Tests first, every ticket.** Unit (pytest) + integration (httpx + real PG/Redis) + E2E (Playwright) + visual screenshot. No screenshot, no merge. | User mandate 2026-04-25. |
 | L6 | **i18n from day one** for every new user-facing string. 21 locales already supported by the stack. | `the architecture guide` §i18n + spec §0.6. |
-| L7 | **One PR = one logical change.** Wave names map to GitHub project columns; tickets map to PRs. | `the architecture guide` + spec §"Финальные принципы". |
+| L7 | **One PR = one logical change.** Wave names map to GitHub project columns; tickets map to PRs. | `the architecture guide` + spec §"Final principles". |
 | L8 | **Schema migrations are reversible.** Each ticket = one Alembic migration with `downgrade()` that survives `alembic downgrade base && alembic upgrade head` round-trip. | Spec §0.3, project convention. |
 | L9 | **Multi-tenancy via RLS.** PostgreSQL Row-Level Security policies are enabled for every new table that has `tenant_id`. | Spec §0.7 #2. Currently `tenant_id` columns exist but RLS is off. |
-| L10 | **Observability built-in.** Every new endpoint emits an OpenTelemetry span; every Celery task emits a `JobRun` row with structured outcome. | Spec §"Финальные принципы" #8. |
+| L10 | **Observability built-in.** Every new endpoint emits an OpenTelemetry span; every Celery task emits a `JobRun` row with structured outcome. | Spec §"Final principles" #8. |
 | L11 | **One EAC engine, four output modes.** No parallel engines for QTO, validation, clash, or issue. | EAC v2 spec §0.1; RFC 35 L11. |
 | L12 | **Rule definition is JSONB (`EacRuleDefinition` v2.0)** with a stable JSON Schema; code parses, never branches on shape. | RFC 35 L12. |
 | L13 | **DuckDB over canonical Parquet** is the rule-execution kernel — selectors and predicates compile to one query per rule. | RFC 35 L13; reuses existing `dashboards/duckdb_pool.py`. |
@@ -245,7 +245,7 @@ Largest gap (25 % → 100 %). Pure greenfield engine on top of canonical format.
 
 - **Files**: `validation/ids/{importer,exporter}.py`. Schema-driven: parse `IDS-1.0.xsd` once, generate dataclasses, map to/from EAC rules. **No `ifctester` runtime parsing of IFC** — only the IDS spec format itself.
 - **Tests first**: import 5 published IDS files (buildingSMART samples), export back, byte-compare canonicalised output. Lossless property check.
-- **Acceptance**: «импортируется IDS-файл → запускается валидация → результат корректен → экспорт в SARIF → SARIF загружается в standard CI/CD platforms».
+- **Acceptance**: an IDS file imports, validation runs against it, the result is correct, it exports to SARIF, and the SARIF loads into standard CI/CD platforms.
 
 ### W3.3 — Computed constraints + safe expression evaluator
 
@@ -429,7 +429,7 @@ Wave 1 and Wave EAC can run in parallel after Wave 0 (different code paths). Wav
 
 ## 13. Out of scope (explicit)
 
-- **Native Rust/C++ acceleration of any module.** Spec §"Финальные принципы" #1: "No premature optimization."
+- **Native Rust/C++ acceleration of any module.** Spec §"Final principles" #1: "No premature optimization."
 - **Air-gapped deployment automation.** On-prem mode (Wave 5) is supported via configuration; air-gapped install scripts are a separate RFC.
 - **Mobile-first redesign.** Existing UIs are desktop-optimised; mobile will follow the existing PWA approach.
 - **Multi-region GAEB extensions** (Austrian ÖNORM, Swiss SIA). Add as Wave 4.6+ after Germany is rock-solid.

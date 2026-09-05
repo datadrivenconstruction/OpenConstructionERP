@@ -251,7 +251,7 @@ only**; UI surfacing is Wave 2.
 **Quality bar:** Receipts are append-only, content-addressed by
 `prompt_hash + input_hash` so the same prompt+input never doubles up.
 
-## 4. Cross-cutting concerns (Часть 7 of NextTasks)
+## 4. Cross-cutting concerns (Part 7 of NextTasks)
 
 These rules apply to every Wave 1 (and beyond) PR:
 

@@ -15,7 +15,7 @@ Constraints from the user / existing platform:
 - Project-level configurability: each project picks the catalog language, optional classifier (DIN276 / NRM / MasterFormat / none), auto-link threshold, and manual-vs-auto mode.
 - Catalog stays in source language. Translation is one-way: element → catalog. We do not translate the 55k catalog rows.
 - No new heavy dependencies. Use `intfloat/multilingual-e5-small` (already in the project's `[vector]` extra) for embeddings, LanceDB (already in base) for ANN search.
-- Quality bar from the user: «максимально качественно ... не должно быть костылей или хардкода ... должно быть максимально рабочее и грамотный функционал который будет работать одинаково в разных модулях».
+- Quality bar set for this work: build it properly, no workarounds and no hardcoding, and the functionality has to be genuinely usable and behave the same way in every module that calls it.
 
 ## Decision
 
