@@ -24,6 +24,15 @@ import {
  * those go through the manager-gated /approve and /pay endpoints (and /pay
  * writes a binding ledger entry). These tests lock that invariant in.
  */
+/** Every line that rewrites the stored status into a different word for display. */
+function statusRelabelSites(source: string): number[] {
+  const hits: number[] = [];
+  source.split('\n').forEach((line, i) => {
+    if (/=== 'sent'\s*\?\s*'approved'/.test(line)) hits.push(i + 1);
+  });
+  return hits;
+}
+
 /** Every line that opens the e-invoice dialog, and which of them run unguarded. */
 function unguardedEInvoiceOpeners(source: string): { total: number; unguarded: number[] } {
   const lines = source.split('\n');
@@ -179,6 +188,35 @@ describe('invoice status dropdown options', () => {
     // pay_invoice accepts it. Dropping it would leave every inbox-posted
     // invoice with no way to be marked paid.
     expect(canMarkPaid('approved')).toBe(true);
+  });
+
+  it('shows the status the machine wrote, not a second word for it', () => {
+    // The edit modal used to rewrite the stored 'sent' into 'approved' before
+    // displaying it, so the same invoice read Sent in the table and Approved
+    // in the modal. The founder settled this: a person sees the state the
+    // machine actually writes, and approving writes 'sent'.
+    //
+    // Both rewrite sites have to go together. Dropping only the one that fills
+    // the form would leave the save path comparing a stored 'sent' against a
+    // relabelled 'approved', deciding the status had changed, and PATCHing
+    // sent -> sent, which the backend transition table does not allow.
+    const source = readFileSync(resolve(process.cwd(), PAGE_SOURCE), 'utf-8');
+    expect(statusRelabelSites(source)).toEqual([]);
+  });
+
+  it('would notice a relabel site (the scan above is falsifiable)', () => {
+    // A scan that has never come back dirty is not evidence.
+    const planted = ["const a = 1;", "status: inv.status === 'sent' ? 'approved' : inv.status,"].join('\n');
+    expect(statusRelabelSites(planted)).toEqual([2]);
+  });
+
+  it('leaves a sent invoice with no editable next step in the modal', () => {
+    // With the relabelling gone the form carries 'sent', and that value now
+    // reaches invoiceStatusOptions. It has to behave like 'approved' did:
+    // a single option, which the modal renders as read-only text rather than
+    // a dropdown that looks editable but offers nothing.
+    expect(invoiceStatusOptions('sent')).toEqual(['sent']);
+    expect(invoiceStatusOptions('approved')).toEqual(['approved']);
   });
 
   it('routes every Mark Paid site through the shared predicate', () => {

@@ -31,7 +31,7 @@ export const financeGuide: ModuleGuideContent = {
       titleDefault: 'Payable and receivable invoices',
       bodyKey: 'guide.finance.invoices.body',
       bodyDefault:
-        'The Invoices tab splits into payable (money you owe) and receivable (money owed to you). Create an invoice with its counterparty, dates, amount and line items, then move it through draft, pending, approved and paid. You can scan a paper invoice with the camera to prefill the form from the captured text.',
+        'The Invoices tab splits into payable (money you owe) and receivable (money owed to you). Create an invoice with its counterparty, dates, amount and line items, then move it through draft, pending, sent and paid. You can scan a paper invoice with the camera to prefill the form from the captured text.',
     },
     {
       icon: 'Send',

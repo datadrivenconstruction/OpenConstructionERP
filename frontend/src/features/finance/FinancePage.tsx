@@ -2045,9 +2045,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
       currency: inv.currency_code || inv.currency || projectCurrency || '',
       description: inv.notes ?? inv.description ?? '',
       buyer_reference: readBuyerReference(inv.metadata),
-      // The backend serialises the canonical 'sent' node; normalise it to the
-      // 'approved' label the UI uses so the dropdown shows the right option.
-      status: inv.status === 'sent' ? 'approved' : inv.status || 'draft',
+      // Shown exactly as stored. This used to rewrite 'sent' into 'approved'
+      // for display, which left the same invoice reading Sent in the table and
+      // Approved in this modal. A person sees the state the machine wrote, and
+      // approving writes 'sent'.
+      status: inv.status || 'draft',
     });
     // If the stored total differs from subtotal+tax, the invoice was saved
     // with a deliberate manual total - preserve that intent so editing the
@@ -2183,11 +2185,11 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   const updateInvoiceMut = useMutation({
     mutationFn: (data: { id: string; form: typeof invoiceForm; prevStatus: string }) => {
       const { subtotal: sub, tax, total } = readInvoiceAmounts(data.form);
-      // Normalise the backend's canonical 'sent' to the 'approved' label the
-      // UI uses, so re-saving an approved invoice without touching the status
-      // doesn't look like a no-op transition (approved -> sent).
-      const prev = data.prevStatus === 'sent' ? 'approved' : data.prevStatus;
-      const statusChanged = data.form.status !== prev;
+      // Compared against the stored status directly. The form no longer
+      // relabels 'sent', so relabelling here too would make a plain edit of a
+      // sent invoice look like a sent -> sent transition, which the backend
+      // table does not allow and would reject with a 400.
+      const statusChanged = data.form.status !== data.prevStatus;
       // A claim-born or imported invoice carries a real line breakdown;
       // replacing it with this form's single figure would destroy it. Only
       // the simple shape (no lines yet, or the one line this form wrote) is
