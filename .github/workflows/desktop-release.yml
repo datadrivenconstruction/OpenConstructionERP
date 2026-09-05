@@ -544,7 +544,8 @@ jobs:
           # Windows carries backslashes and handing one to bash fails a leg of
           # the matrix for a reason unrelated to what is being checked.
           scratch="oe-serve-check-data"
-          port=8799
+          port_base=8799
+          port=$port_base
           rm -rf "$scratch"
           mkdir -p "$scratch"
 
@@ -592,6 +593,22 @@ jobs:
           # the previous leg had not released, the step reported that the product
           # does not serve, and four installers did not ship for a release whose
           # cold start had just answered healthy.
+          # The first port from the base upward that nothing is listening on.
+          # Every leg calls this, so a leg whose predecessor refused to die
+          # steps over it instead of failing behind it.
+          next_free_port() {
+            p=$port_base
+            for _ in $(seq 1 40); do
+              if port_held "$p"; then
+                p=$((p + 1))
+              else
+                port=$p
+                return 0
+              fi
+            done
+            return 1
+          }
+
           stop_leg() {
             kill "$1" 2>/dev/null || true
             wait "$1" 2>/dev/null || true
@@ -602,7 +619,7 @@ jobs:
             for owner in $(port_owners "$port"); do
               echo "port $port is still held by pid $owner after the job was reaped, stopping that process tree"
               if [ "$RUNNER_OS" = "Windows" ]; then
-                taskkill //PID "$owner" //T //F 2>/dev/null || true
+                taskkill //PID "$owner" //T //F 2>&1 || echo "taskkill would not stop pid $owner"
               else
                 kill -9 "$owner" 2>/dev/null || true
               fi
@@ -623,18 +640,22 @@ jobs:
             # down after that, still holding the listening socket. The launcher
             # never does this to a user: it stops the sidecar through
             # /api/system/desktop-shutdown, which stops the cluster cleanly so
-            # the next start has no write-ahead log to replay. So this wait
-            # removes an artifact of the teardown in here, not a defect anybody
-            # can reach by closing the app. Windows lost this race in run
-            # 33860279598 and won it in 33851623420 with identical code.
-            for _ in $(seq 1 60); do
-              port_held "$port" || break
-              sleep 1
-            done
-            if port_held "$port"; then
-              echo "::error title=The serve check could not free port ${port} on ${{ matrix.os }} (${label})::Something was still listening on 127.0.0.1:${port} sixty seconds after the previous leg was stopped, so this leg could never bind it. That is this step's own teardown rather than the sidecar, and it should be read as a defect in the check."
+            # the next start has no write-ahead log to replay.
+            #
+            # So the wait that used to stand here removed an artifact of this
+            # teardown rather than a defect anybody can reach by closing the
+            # app, and it was also the one place every leg queued behind. In
+            # run 33980957412 the Windows server outlived kill, wait and a
+            # taskkill on its own pid, held 8799 to the end of the job, and
+            # took both restart legs with it. Four installers did not ship for
+            # a release whose cold start had just answered healthy on 190
+            # modules. A leg now takes the first port that is actually free, so
+            # an undead predecessor costs nothing.
+            if ! next_free_port; then
+              echo "::error title=The serve check found no free port on ${{ matrix.os }} (${label})::Every port from ${port_base} upward was already listening. That is a defect in this check, or a very unusual runner, rather than anything about the sidecar."
               return 1
             fi
+            echo "(${label}) using port ${port}"
             if [ -n "$leg_env" ]; then
               echo "(${label}) running with: $leg_env"
               # shellcheck disable=SC2086
@@ -690,7 +711,7 @@ jobs:
             echo "(${label}) encoder loads: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0), failed loads: $(grep -c 'Failed to load embedding model' "$log" 2>/dev/null || echo 0), pool: $(grep -h 'Embedding pool initialised' "$log" 2>/dev/null | tail -n 1 || echo 'never reported')"
             device_line=$(sed -n 's/.*Loaded sentence-transformers model.* on device //p' "$log" 2>/dev/null | tail -n 1)
             echo "(${label}) device: ${device_line:-not reported, the model never loaded on this leg}"
-            stop_leg "$pid"
+            stop_leg "$pid" || true
             if [ "$ok" -ne 1 ]; then
               echo "=== the sidecar's own output, which carries the cause ==="
               tail -n 200 "$log" || true
