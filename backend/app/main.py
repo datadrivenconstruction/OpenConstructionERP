@@ -1386,14 +1386,14 @@ def create_app() -> FastAPI:
             "name": "AGPL-3.0-or-later · DDC-CWICR-OE-2026",
             "url": "https://www.gnu.org/licenses/agpl-3.0.html",
         },
-        # Swagger UI is registered by hand further down instead of by FastAPI,
-        # so the page can load its CSS and JS from this install rather than
-        # from a CDN. Everything else about the route is unchanged - the
-        # replacement calls the same ``get_swagger_ui_html`` with the same
-        # arguments and only swaps the two asset URLs. ReDoc keeps the stock
-        # route and still needs outbound internet.
+        # Both reference pages are registered by hand further down instead of
+        # by FastAPI, so they can load their CSS and JS from this install
+        # rather than from a CDN. Everything else about the routes is
+        # unchanged - the replacements call the same ``get_swagger_ui_html``
+        # and ``get_redoc_html`` with the same arguments and only swap the
+        # asset URLs.
         docs_url=None,
-        redoc_url="/api/redoc" if not settings.is_production else None,
+        redoc_url=None,
         # Swagger UI draws whatever the document holds, and this document holds
         # 2923 paths, 3938 operations and 3601 component schemas. Left on the
         # stock settings the page expands every operation and the whole model
@@ -1587,22 +1587,31 @@ def create_app() -> FastAPI:
 
     app.openapi = _custom_openapi  # type: ignore[method-assign]
 
-    # ── Swagger UI, served from this install ─────────────────────────────
+    # ── The API reference pages, served from this install ────────────────
     # FastAPI's stock /api/docs pulls swagger-ui-bundle.js and swagger-ui.css
-    # from cdn.jsdelivr.net, so the page renders as an empty shell anywhere
-    # without outbound internet. A self-hosted VPS is what this platform is
-    # for and an air-gapped site is a normal deployment, so the two files ship
-    # in the wheel instead: 1.74 MB on disk, about 438 KB of the archive once
-    # deflated, and no new dependency. Pinned to swagger-ui-dist 5.32.15,
-    # because the stock template asks for "@5", which is a moving target.
-    _SWAGGER_DIR = Path(__file__).parent / "static" / "swagger"
-    _SWAGGER_ASSETS = {
-        "swagger-ui-bundle.js": "application/javascript",
-        "swagger-ui.css": "text/css",
+    # from cdn.jsdelivr.net, and its stock /api/redoc pulls
+    # redoc.standalone.js from the same place, so both pages render as an
+    # empty shell anywhere without outbound internet. A self-hosted VPS is
+    # what this platform is for and an air-gapped site is a normal deployment,
+    # so the files ship in the wheel instead: 2.84 MB on disk, about 765 KB of
+    # the archive once deflated, and no new dependency. Versions are pinned -
+    # swagger-ui-dist 5.32.15 and redoc 2.5.3 - because the stock templates
+    # ask for "@5" and "@2", which are moving targets.
+    #
+    # One route serves both pages, so "docs" in the asset path means the API
+    # reference rather than the Swagger page specifically. The subdirectory
+    # comes from the table rather than from the URL, which is what keeps the
+    # caller from choosing a directory.
+    _DOCS_DIR = Path(__file__).parent / "static"
+    _DOCS_ASSETS = {
+        "swagger-ui-bundle.js": ("swagger", "application/javascript"),
+        "swagger-ui.css": ("swagger", "text/css"),
+        "redoc.standalone.js": ("redoc", "application/javascript"),
     }
 
     if not settings.is_production:
         from fastapi import Request as _Request
+        from fastapi.openapi.docs import get_redoc_html as _get_redoc_html
         from fastapi.openapi.docs import get_swagger_ui_html as _get_swagger_ui_html
         from fastapi.openapi.docs import (
             get_swagger_ui_oauth2_redirect_html as _get_swagger_ui_oauth2_redirect_html,
@@ -1611,17 +1620,18 @@ def create_app() -> FastAPI:
         from fastapi.responses import HTMLResponse as _HTMLResponse
         from fastapi.responses import Response as _Response
 
-        async def _swagger_asset(req: _Request) -> _Response:
-            # Matched against the two names by hand rather than mounted as a
+        async def _docs_asset(req: _Request) -> _Response:
+            # Matched against the three names by hand rather than mounted as a
             # directory: a StaticFiles mount would put path traversal between
-            # the network and the installed package for the sake of two files.
+            # the network and the installed package for the sake of three files.
             # Returned rather than raised, so an unknown name stays a 404
             # instead of reaching the SPA handler and coming back as index.html.
-            media_type = _SWAGGER_ASSETS.get(req.path_params.get("filename", ""))
-            if media_type is None:
+            entry = _DOCS_ASSETS.get(req.path_params.get("filename", ""))
+            if entry is None:
                 return _Response(status_code=404)
+            subdir, media_type = entry
             return _FileResponse(
-                _SWAGGER_DIR / req.path_params["filename"],
+                _DOCS_DIR / subdir / req.path_params["filename"],
                 media_type=media_type,
                 # Version-pinned bytes that only change when the wheel does.
                 headers={"Cache-Control": "public, max-age=31536000, immutable"},
@@ -1647,16 +1657,37 @@ def create_app() -> FastAPI:
                 swagger_favicon_url=f"{root_path}/favicon.svg",
             )
 
+        async def _redoc_html(req: _Request) -> _HTMLResponse:
+            # Same shape as the Swagger replacement above, and the same
+            # root_path handling FastAPI's own ReDoc route does, so the page
+            # keeps working behind a prefix.
+            root_path = req.scope.get("root_path", "").rstrip("/")
+            return _get_redoc_html(
+                openapi_url=root_path + (app.openapi_url or "/api/openapi.json"),
+                title=f"{app.title} - ReDoc",
+                redoc_js_url=f"{root_path}/api/docs/assets/redoc.standalone.js",
+                # The stock default is fastapi.tiangolo.com.
+                redoc_favicon_url=f"{root_path}/favicon.svg",
+                # Dropped rather than vendored. The stock page also pulls a
+                # Montserrat and Roboto stylesheet from fonts.googleapis.com,
+                # which then pulls the faces themselves from fonts.gstatic.com;
+                # off, ReDoc falls back to the system sans-serif. Shipping the
+                # two families to keep the headings on brand would cost more
+                # than the application bundle does and buy a font.
+                with_google_fonts=False,
+            )
+
         async def _swagger_ui_redirect(req: _Request) -> _HTMLResponse:
             return _get_swagger_ui_oauth2_redirect_html()
 
         # ``add_route`` rather than ``@app.get``, because that is what FastAPI
-        # itself uses for these three and it is the difference between a plain
+        # itself uses for these four and it is the difference between a plain
         # Starlette route and one carrying the app-level dependencies declared
         # above. Documentation should not be running the read-only guard or
         # binding an RLS tenant, and the route it replaces never did.
-        app.add_route("/api/docs/assets/{filename}", _swagger_asset, methods=["GET"], include_in_schema=False)
+        app.add_route("/api/docs/assets/{filename}", _docs_asset, methods=["GET"], include_in_schema=False)
         app.add_route("/api/docs", _swagger_ui_html, methods=["GET"], include_in_schema=False)
+        app.add_route("/api/redoc", _redoc_html, methods=["GET"], include_in_schema=False)
         if app.swagger_ui_oauth2_redirect_url:
             # FastAPI registers this one inside the same block as its docs
             # route, so taking that route over means taking this one with it.

@@ -50,9 +50,9 @@ Then update the version above, and the one named in the comment beside
 URL the page names and checks the bytes, so a partial or failed download fails
 the suite rather than shipping a blank docs page.
 
-## Not covered
+## The other reference page
 
-`/api/redoc` still uses FastAPI's stock route and still loads
-`redoc.standalone.js` from the CDN, so it stays blank offline. Vendoring it
-costs roughly another megabyte, and it is not the page the boot banner points
-new operators at.
+`/api/redoc` used to be left out of this, on the grounds that vendoring it cost
+roughly another megabyte. Measured against the wheel rather than the disk it
+costs 326,708 bytes, less than these files do, so it is vendored too and lives
+in `../redoc`. One route, `/api/docs/assets/{filename}`, serves both pages.

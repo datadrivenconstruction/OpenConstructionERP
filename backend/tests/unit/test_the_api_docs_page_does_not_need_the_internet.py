@@ -1,32 +1,37 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``/api/docs`` has to render on an install with no way out to the internet.
+"""Both API reference pages have to render with no way out to the internet.
 
-FastAPI's stock docs route writes a page that loads ``swagger-ui-bundle.js``
-and ``swagger-ui.css`` from ``cdn.jsdelivr.net``, and its favicon from
-``fastapi.tiangolo.com``. On a machine with outbound access that is invisible.
-On an air-gapped site, or a VPS behind an egress firewall, the shell arrives,
-the browser cannot fetch the two files that turn it into Swagger UI, and the
-operator gets a blank page with no error to search for. Self-hosting is the
-premise of this platform rather than an edge case, so the assets ship in the
-wheel and the page points at this install.
+FastAPI's stock routes write pages that fetch their application code from
+``cdn.jsdelivr.net``: ``swagger-ui-bundle.js`` and ``swagger-ui.css`` for
+``/api/docs``, ``redoc.standalone.js`` for ``/api/redoc``. Both also take a
+favicon from ``fastapi.tiangolo.com``, and ReDoc additionally asks
+``fonts.googleapis.com`` for Montserrat and Roboto. On a machine with outbound
+access that is invisible. On an air-gapped site, or a VPS behind an egress
+firewall, the shell arrives, the browser cannot fetch the files that turn it
+into a reference, and the operator gets a blank page with no error to search
+for. Self-hosting is the premise of this platform rather than an edge case, so
+the assets ship in the wheel and the pages point at this install.
 
 The test that matters here is not "the HTML changed". It is that the URLs the
-page names are actually served, which is why every referenced asset is
+pages name are actually served, which is why every referenced asset is
 requested and its bytes checked. Asserting only on the absence of the CDN
 string would stay green if the vendored files were dropped from the package,
-and that failure mode - a page referring to two local files that are not
-there - looks exactly like the bug this replaced.
+and that failure mode - a page referring to local files that are not there -
+looks exactly like the bug this replaced.
 
-The page is also the one thing on the API surface a first-time operator is
-told to open: the boot banner prints ``/api/docs`` under "Open in your
-browser". A blank page there is the first impression.
+``/api/docs`` is also the one thing on the API surface a first-time operator is
+told to open: the boot banner prints it under "Open in your browser". A blank
+page there is the first impression.
 
-Deliberately not covered: ``/api/redoc``. It keeps FastAPI's stock route and
-still loads ``redoc.standalone.js`` from the same CDN, so it is still blank
-offline. Vendoring it costs roughly another megabyte in the wheel and it is
-not the page the banner advertises; the choice is recorded here rather than
-left for somebody to discover as a surprise.
+What this does not prove, said here rather than left for somebody to find in a
+network log: ReDoc's own bundle renders an ``<img>`` for the Redocly mark at
+``cdn.redoc.ly``. It is hidden by the component's ``onError`` handler, so the
+page is complete without it, but it is one request that leaves the machine and
+no assertion over the served HTML can see it. Suppressing it would mean
+writing the page by hand instead of calling ``get_redoc_html``, or editing a
+vendored bundle. Nothing else in either page reaches off the host, including
+fonts - the bundles carry their own styles.
 """
 
 from __future__ import annotations
@@ -40,7 +45,9 @@ from app.main import create_app
 
 #: Anything that would make the browser leave this host. ``//`` catches
 #: protocol-relative URLs, which are easy to miss and just as fatal offline.
-_EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*["'](?:https?:)?//""", re.IGNORECASE)
+#: ``spec-url`` is in here because it is the attribute ReDoc loads the whole
+#: document from, and it is on a custom element rather than on a ``script``.
+_EXTERNAL = re.compile(r"""(?:src|href|spec-url)\s*=\s*["'](?:https?:)?//""", re.IGNORECASE)
 
 
 @pytest.fixture(scope="module")
@@ -54,16 +61,26 @@ def client() -> TestClient:
     return TestClient(create_app())
 
 
-def test_the_docs_page_names_no_host_but_this_one(client: TestClient) -> None:
-    response = client.get("/api/docs")
+@pytest.mark.parametrize("path", ["/api/docs", "/api/redoc"])
+def test_a_reference_page_names_no_host_but_this_one(client: TestClient, path: str) -> None:
+    """No URL in either page leaves this machine, so no request can either.
+
+    This is the offline claim in the only form the server can make it: a page
+    that names nothing off-host needs nothing off-host to arrive. What the
+    browser does with the bytes afterwards is the asset test below, and the one
+    request neither test can see is in this module's docstring.
+    """
+    response = client.get(path)
 
     assert response.status_code == 200
     offenders = _EXTERNAL.findall(response.text)
-    assert not offenders, f"/api/docs still loads from another host: {offenders}"
-    # The two specific origins this replaced, named so a failure says which
-    # one came back rather than only that some URL is absolute.
+    assert not offenders, f"{path} still loads from another host: {offenders}"
+    # The specific origins this replaced, named so a failure says which one
+    # came back rather than only that some URL is absolute.
     assert "cdn.jsdelivr.net" not in response.text
     assert "fastapi.tiangolo.com" not in response.text
+    assert "fonts.googleapis.com" not in response.text
+    assert "fonts.gstatic.com" not in response.text
 
 
 def test_the_page_does_not_ask_the_browser_to_draw_every_operation(client: TestClient) -> None:
@@ -88,14 +105,16 @@ def test_the_page_does_not_ask_the_browser_to_draw_every_operation(client: TestC
 
 
 @pytest.mark.parametrize(
-    ("filename", "content_type", "signature"),
+    ("path", "filename", "content_type", "signature"),
     [
-        ("swagger-ui-bundle.js", "application/javascript", b"SwaggerUIBundle"),
-        ("swagger-ui.css", "text/css", b".swagger-ui"),
+        ("/api/docs", "swagger-ui-bundle.js", "application/javascript", b"SwaggerUIBundle"),
+        ("/api/docs", "swagger-ui.css", "text/css", b".swagger-ui"),
+        ("/api/redoc", "redoc.standalone.js", "application/javascript", b"Redoc"),
     ],
 )
-def test_every_asset_the_page_names_is_served(
+def test_every_asset_a_page_names_is_served(
     client: TestClient,
+    path: str,
     filename: str,
     content_type: str,
     signature: bytes,
@@ -104,10 +123,12 @@ def test_every_asset_the_page_names_is_served(
 
     The signature check is the point: a 200 carrying an HTML error page, or the
     SPA's ``index.html`` handed back by the catch-all, would satisfy a status
-    assertion and leave the page just as blank as the CDN did.
+    assertion and leave the page just as blank as the CDN did. It is also what
+    catches a half-finished download, which is the likely way a vendored file
+    goes wrong.
     """
-    page = client.get("/api/docs")
-    assert f"/api/docs/assets/{filename}" in page.text, f"the page no longer loads {filename}"
+    page = client.get(path)
+    assert f"/api/docs/assets/{filename}" in page.text, f"{path} no longer loads {filename}"
 
     response = client.get(f"/api/docs/assets/{filename}")
 
@@ -116,15 +137,18 @@ def test_every_asset_the_page_names_is_served(
     assert signature in response.content
 
 
-def test_the_asset_route_serves_nothing_but_those_two_files(client: TestClient) -> None:
+def test_the_asset_route_serves_nothing_but_the_files_in_its_table(client: TestClient) -> None:
     """The route matches names against a table instead of mounting a directory.
 
     A ``StaticFiles`` mount would have put path traversal between the network
-    and the installed package for the sake of two files. This asserts the
-    refusal in both shapes: a plain unknown name, and a traversal attempt.
+    and the installed package for the sake of three files. This asserts the
+    refusal in both shapes: a plain unknown name, and a traversal attempt. The
+    third shape is a name that is real but not ours - the table also decides
+    which directory a file is read from, so a caller cannot pick one.
     """
     assert client.get("/api/docs/assets/swagger-ui-bundle.js.map").status_code == 404
     assert client.get("/api/docs/assets/..%2F..%2Fmain.py").status_code == 404
+    assert client.get("/api/docs/assets/README.md").status_code == 404
 
 
 def _published_paths(app: object) -> set[str | None]:
@@ -151,7 +175,7 @@ def test_production_publishes_no_route_that_could_serve_the_schema(client: TestC
     # rename or a change of route class cannot turn the assertions below into
     # three true statements about a set that never held these paths anyway.
     reference = _published_paths(client.app)
-    assert {"/api/docs", "/api/docs/assets/{filename}"} <= reference
+    assert {"/api/docs", "/api/redoc", "/api/docs/assets/{filename}"} <= reference
 
     settings = get_settings()
     original = settings.app_env
