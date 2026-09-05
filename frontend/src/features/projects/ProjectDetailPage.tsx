@@ -654,7 +654,7 @@ function ProjectLocationPanel({ project }: { project: Project }) {
       className={clsx(
         'grid gap-3 items-stretch',
         mapEnabled && weatherEnabled
-          ? 'grid-cols-1 lg:grid-cols-[3fr_2fr]'
+          ? 'grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'
           : 'grid-cols-1',
       )}
     >
@@ -1786,7 +1786,7 @@ export function ProjectDetailPage() {
         className={clsx(
           'grid gap-3 items-stretch',
           !isWidgetHidden('project-info') && !isWidgetHidden('health-bar')
-            ? 'grid-cols-1 lg:grid-cols-[3fr_2fr]'
+            ? 'grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'
             : 'grid-cols-1',
         )}
       >

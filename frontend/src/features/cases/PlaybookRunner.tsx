@@ -300,7 +300,7 @@ function StepBlock({
       {/* Title + detail on the left, the data flow on the right. `items-start`
           keeps the In / Out cards' top aligned with the step title, and every
           left-column line shares one left edge. */}
-      <div className="grid gap-4 lg:grid-cols-[2fr_3fr] lg:items-start lg:gap-6">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
         <div className="min-w-0 space-y-3">
           <h3 className="text-base font-semibold leading-snug text-content-primary sm:text-lg">
             {title}

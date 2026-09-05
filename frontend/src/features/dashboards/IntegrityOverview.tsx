@@ -239,7 +239,7 @@ function IntegrityTable({ report, columns, expanded, onToggleRow }: IntegrityTab
       {/* Header row. */}
       <div
         role="row"
-        className="grid grid-cols-[1fr_120px_90px_90px_140px_1fr] items-center gap-2 border-b border-border-light px-2 py-1.5 text-content-secondary"
+        className="grid grid-cols-[minmax(0,1fr)_120px_90px_90px_140px_minmax(0,1fr)] items-center gap-2 border-b border-border-light px-2 py-1.5 text-content-secondary"
       >
         <div role="columnheader">
           {t('dashboards.integrity_col_name', { defaultValue: 'Column' })}
@@ -295,7 +295,7 @@ function IntegrityRow({ column, rowCount, isExpanded, onToggle }: IntegrityRowPr
         role="row"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="grid w-full grid-cols-[1fr_120px_90px_90px_140px_1fr] items-center gap-2 border-b border-border-light/60 px-2 py-1.5 text-left hover:bg-surface-secondary"
+        className="grid w-full grid-cols-[minmax(0,1fr)_120px_90px_90px_140px_minmax(0,1fr)] items-center gap-2 border-b border-border-light/60 px-2 py-1.5 text-left hover:bg-surface-secondary"
         data-testid={`integrity-row-button-${column.name}`}
       >
         <div role="cell" className="flex items-center gap-1.5 truncate">

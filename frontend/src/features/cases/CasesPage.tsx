@@ -1010,7 +1010,7 @@ function CasesList() {
                     whole screen of height for no gain. Eight company cards in
                     three columns and twelve role cards in four come out the
                     same three rows deep, so the two columns end level. */}
-                <div className="grid gap-x-5 gap-y-3 xl:grid-cols-[2fr_3fr]">
+                <div className="grid gap-x-5 gap-y-3 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                   {/* ── "I work as..." company-type selector ─────────────── */}
                   <div>
                     <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">

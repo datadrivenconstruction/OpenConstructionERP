@@ -2512,7 +2512,7 @@ function DashboardPageInner() {
             {/* Map (left) and sites list (right) share one fixed-height row on
                 desktop so the two columns always line up; both children fill it
                 (map via h-full, panel via its own h-full + internal scroll). */}
-            <div className="grid grid-cols-1 gap-3 lg:h-[19rem] lg:grid-cols-[1.5fr_1fr]">
+            <div className="grid grid-cols-1 gap-3 lg:h-[19rem] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
               <DashboardProjectsMap className="lg:h-full" projects={mapPins} />
               <DashboardSitesPanel projects={mapPins} />
             </div>

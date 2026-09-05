@@ -395,7 +395,7 @@ export function TranslationManager() {
         {/* Translation table */}
         <div className="overflow-hidden rounded-lg border border-border-light">
           {/* Table header */}
-          <div className="grid grid-cols-[2fr_2fr_2fr_auto] gap-0 bg-surface-secondary border-b border-border-light">
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_auto] gap-0 bg-surface-secondary border-b border-border-light">
             <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
               {t('settings.tm_col_key', { defaultValue: 'Key' })}
             </div>
@@ -420,7 +420,7 @@ export function TranslationManager() {
               visibleRows.map((row) => (
                 <div
                   key={row.key}
-                  className={`grid grid-cols-[2fr_2fr_2fr_auto] gap-0 border-b border-border-light last:border-b-0 hover:bg-surface-secondary/50 transition-colors ${
+                  className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)_auto] gap-0 border-b border-border-light last:border-b-0 hover:bg-surface-secondary/50 transition-colors ${
                     row.isCustom ? 'bg-oe-blue-subtle/30' : ''
                   }`}
                   data-testid={`tm-row-${row.key}`}

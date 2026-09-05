@@ -384,7 +384,7 @@ export function NewTransmittalWizard({
           })}
           columns={1}
         >
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-end">
             <div className="flex flex-col">
               <label className="text-xs text-content-secondary mb-1">
                 {t('files.transmittals.recipient_email', {

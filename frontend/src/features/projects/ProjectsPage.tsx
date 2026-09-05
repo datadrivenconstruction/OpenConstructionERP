@@ -15,6 +15,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { fmtNumber, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
 import { projectsApi, type Project } from './api';
 import { apiGet, apiPatch, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1266,7 +1267,12 @@ function ProjectCard({
   const modifiedDate = modifiedSource ? parseISO(modifiedSource) : null;
   const relativeModified =
     modifiedDate && isValidDate(modifiedDate)
-      ? formatDistanceToNowStrict(modifiedDate, { addSuffix: true })
+      ? formatDistanceToNowStrict(modifiedDate, {
+          addSuffix: true,
+          // Without `locale` date-fns answers in en-US, so this line stayed
+          // "3 hours ago" next to an absolute date that was already localised.
+          locale: getDateFnsLocale(),
+        })
       : null;
   const absoluteModified = modifiedDate && isValidDate(modifiedDate)
     ? modifiedDate.toLocaleDateString(getIntlLocale())

@@ -4910,7 +4910,7 @@ function CAPADetailDrawer({
           </p>
           <div className="space-y-2">
             {whys.map((w, i) => (
-              <div key={i} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-start">
+              <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-start">
                 <input
                   className={inputCls}
                   placeholder={t('hse_advanced.why_n', { defaultValue: 'Why #{{n}}?', n: i + 1 })}

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/shared/ui';
 import { fmtCompact, fmtNumber, getIntlLocale } from '@/shared/lib/formatters';
+import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
 
 export interface CompactProjectCardProps {
   id: string;
@@ -107,7 +108,12 @@ export function CompactProjectCard({
   const modifiedDate = modifiedSource ? parseISO(modifiedSource) : null;
   const relativeModified =
     modifiedDate && isValidDate(modifiedDate)
-      ? formatDistanceToNowStrict(modifiedDate, { addSuffix: true })
+      ? formatDistanceToNowStrict(modifiedDate, {
+          addSuffix: true,
+          // Without `locale` date-fns answers in en-US, so this line stayed
+          // "3 hours ago" next to an absolute date that was already localised.
+          locale: getDateFnsLocale(),
+        })
       : null;
   const absoluteModified =
     modifiedDate && isValidDate(modifiedDate)

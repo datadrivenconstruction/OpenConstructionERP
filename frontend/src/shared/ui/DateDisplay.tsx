@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
 import { getIntlLocale, formatDateWithPreference } from '../lib/formatters';
+import { getDateFnsLocale } from '../lib/dateFnsLocale';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 
 export interface DateDisplayProps {
@@ -73,7 +74,14 @@ export function DateDisplay({ value, format = 'date', className }: DateDisplayPr
   try {
     switch (format) {
       case 'relative':
-        formatted = formatDistanceToNow(dateObj, { addSuffix: true });
+        // `locale` is not optional in the way its signature suggests: omitting
+        // it does not mean "use the ambient language", it means en-US. The
+        // absolute branches below already pass `locale` to Intl, so leaving it
+        // off here was the one place this component answered in English.
+        formatted = formatDistanceToNow(dateObj, {
+          addSuffix: true,
+          locale: getDateFnsLocale(),
+        });
         break;
       case 'datetime':
         formatted = formatDateWithPreference(dateObj, locale, DATETIME_OPTIONS, datePref);

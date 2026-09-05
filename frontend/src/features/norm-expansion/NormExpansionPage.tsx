@@ -250,7 +250,7 @@ function ExpandPanel({ norms }: { norms: ProductionNorm[] }) {
         })}
       </p>
 
-      <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[2fr_1fr_auto]">
+      <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]">
         <div>
           <label className="mb-1 block text-xs font-medium text-content-secondary">
             {t('normExpansion.work_item', { defaultValue: 'Work item' })}

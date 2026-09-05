@@ -532,7 +532,7 @@ export function ProgressPage() {
           </div>
 
           {/* S-curve + per-period breakdown */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Card className="p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-oe-blue" />

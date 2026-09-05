@@ -169,7 +169,7 @@ export function ScheduleComparePanel({
             {t('schedule.compare.title', { defaultValue: 'Compare schedules' })}
           </h3>
         </div>
-        <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[1fr_auto_1fr_auto]">
+        <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]">
           <div>
             <label htmlFor="cmp-base" className={labelCls}>
               {t('schedule.compare.base', { defaultValue: 'Base (from)' })}

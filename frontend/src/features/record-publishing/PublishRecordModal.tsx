@@ -348,7 +348,7 @@ export function PublishRecordModal({
             {rows.map((row, idx) => (
               <div
                 key={idx}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-[1.4fr_1fr_auto_auto] sm:items-center"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto_auto] sm:items-center"
               >
                 <input
                   type="email"

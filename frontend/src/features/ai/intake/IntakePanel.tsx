@@ -300,7 +300,7 @@ export function IntakePanel({
         {error && <ErrorNote message={error} onRetry={() => void intake.refresh()} />}
 
         {/* Two-column body. */}
-        <div className="mt-4 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+        <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           {/* Left: dialogue / questionnaire. */}
           <div className="min-w-0">
             {round.isWorking && <WorkingSkeleton offline={offline} />}
