@@ -220,8 +220,18 @@ async def test_apply_endpoint_no_proposals_422(app_and_user, session):
 
 
 @pytest.mark.asyncio
-async def test_apply_endpoint_forbidden_project_403(app_and_user, session):
-    """Applying into a BOQ whose project the user cannot access is a 403."""
+async def test_apply_endpoint_unreachable_project_404(app_and_user, session):
+    """Applying into a BOQ whose project the user cannot access is a 404.
+
+    404 and not 403: ``verify_project_access`` answers "missing" and "denied"
+    identically so a caller cannot use the status code as an existence oracle
+    for project UUIDs, and every module that guards a project goes through it.
+    The run here is seeded unbound (``project_id=None``), so the endpoint takes
+    its fallback branch and verifies the chosen BOQ's own project - which is
+    why the body is "Project not found" and not "BOQ not found". Asserting the
+    detail pins that branch: a 404 arriving from the run-lookup or the
+    project-mismatch guard would be the right code for the wrong reason.
+    """
     app, user_id = app_and_user
 
     from app.modules.boq.schemas import BOQCreate
@@ -243,7 +253,8 @@ async def test_apply_endpoint_forbidden_project_403(app_and_user, session):
             f"/api/v1/ai-agents/runs/{run_id}/apply",
             json={"boq_id": str(boq.id)},
         )
-    assert res.status_code == 403, res.text
+    assert res.status_code == 404, res.text
+    assert res.json()["detail"] == "Project not found", res.text
 
 
 # ── Project-binding security: apply targets the RUN's project, never the
