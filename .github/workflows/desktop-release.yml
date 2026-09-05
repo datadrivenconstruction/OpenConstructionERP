@@ -616,6 +616,12 @@ jobs:
               port_held "$port" || return 0
               sleep 1
             done
+            # Best effort, and on windows-latest it is not effective at all.
+            # Run 33985026765 printed "taskkill would not stop pid 364" and the
+            # socket stayed open, which is only visible because this stopped
+            # discarding taskkill's stderr. Kept because it costs a second and
+            # may work off this runner, but nothing here depends on it: the
+            # next leg steps onto a free port either way.
             for owner in $(port_owners "$port"); do
               echo "port $port is still held by pid $owner after the job was reaped, stopping that process tree"
               if [ "$RUNNER_OS" = "Windows" ]; then
@@ -777,7 +783,7 @@ jobs:
             ps ax -o pid,rss,command 2>/dev/null | grep -iE 'openconstructionerp|postgres' | grep -v grep | head -n 30 || echo "(no matching processes)"
           fi
           if port_held "$port"; then
-            echo "port ${port} is still held here, so the next leg will wait for it"
+            echo "port ${port} is still held here. The next leg will step over it onto a free one, so this is a note about the runner rather than a problem for the check."
           else
             echo "port ${port} is free"
           fi
@@ -794,8 +800,12 @@ jobs:
 
           # The bisect, and the reason the exit above was moved down here.
           #
-          # This leg differs from the one before it in exactly one thing: the
-          # embedding worker pool is off. It runs whether or not that leg
+          # This leg differs from the one before it in one thing that matters:
+          # the embedding worker pool is off. It also lands on a different port,
+          # because each leg takes the first free one, but that is bookkeeping
+          # rather than part of what is being compared; all three legs open the
+          # same data directory and run 33985026765 confirmed it by reporting
+          # one workspace id across all of them. It runs whether or not that leg
           # passed, because a leg that only runs when everything is already
           # green answers a question nobody is asking. If this one serves
           # while the one above dies, the failure is in the pool or in what it
