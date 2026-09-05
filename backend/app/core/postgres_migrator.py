@@ -610,8 +610,20 @@ async def _heal_constraints(conn, table, existing_names: set[str], existing_col_
       log loudly, name the columns, and leave the table alone rather than raise.
     * Check and foreign-key constraints go on as ``NOT VALID``. PostgreSQL then
       enforces them for every new row without scanning the rows already there, so
-      an install with bad history keeps running and can be cleaned up later with
-      ``VALIDATE CONSTRAINT``.
+      the ``ALTER TABLE`` cannot fail on an install with bad history. The scan is
+      not skipped, only deferred: :func:`validate_pending_constraints` runs it
+      once this heal's transaction has committed and released its locks, and
+      once the boot's data repairs have had their turn at the rows.
+
+      That deferral used to be permanent, and the sentence here used to say such
+      an install "keeps running", which was true of the install and false of the
+      rows. ``NOT VALID`` exempts an existing row from the validation scan and
+      from nothing after it - PostgreSQL re-checks a CHECK constraint on every
+      UPDATE of the row, whatever column the update names - so a row that
+      violates one becomes unwritable rather than merely unverified, and the
+      install carries a patch of itself that answers 500 forever while reporting
+      ``status: healthy``. The validation pass is where that is now found and
+      said out loud.
 
     ``NOT NULL`` is deliberately not healed. It needs a backfill decision per
     column and it is the one that can destroy data.
@@ -804,3 +816,134 @@ async def _run_ddl(conn, sql: str, description: str) -> bool:
         return False
     logger.info("PostgreSQL migration: added %s", description)
     return True
+
+
+# The constraints this database carries that PostgreSQL has never verified
+# against the rows already in the table. One population, written once, because
+# two consumers read it and they must not be able to disagree: the sweep below
+# is what empties it, and ``/api/health`` counts what is left. A predicate
+# spelled out separately in each place is how a green field ends up counting a
+# different set from the one the fix drains.
+#
+# ``contype`` 'c' and 'f' are the only two kinds :func:`_heal_constraints` can
+# leave unvalidated - it adds uniques outright or not at all - and
+# ``convalidated`` is PostgreSQL's own record, so neither consumer needs to
+# introspect a model or scan a table to ask the question.
+_UNVALIDATED_CONSTRAINTS_FROM = (
+    "FROM pg_constraint c "
+    "JOIN pg_class t ON t.oid = c.conrelid "
+    "JOIN pg_namespace n ON n.oid = t.relnamespace "
+    "WHERE NOT c.convalidated AND c.contype IN ('c', 'f') "
+    "AND n.nspname = current_schema()"
+)
+
+#: How many of them there are. Imported by ``app.main`` for ``/api/health``.
+UNVALIDATED_CONSTRAINTS_SQL = f"SELECT count(*) {_UNVALIDATED_CONSTRAINTS_FROM}"
+
+#: Which ones, so the sweep can name them in DDL and in the log.
+_PENDING_CONSTRAINTS_SQL = f"SELECT c.conname, t.relname {_UNVALIDATED_CONSTRAINTS_FROM} ORDER BY t.relname, c.conname"
+
+
+async def validate_pending_constraints(engine: AsyncEngine) -> tuple[int, tuple[str, ...]]:
+    """Ask PostgreSQL to verify every CHECK and FOREIGN KEY still marked NOT VALID.
+
+    :func:`_heal_constraints` adds both kinds ``NOT VALID`` because that is the
+    only way onto a populated table that cannot fail on the rows already there.
+    Its docstring says such an install "keeps running and can be cleaned up later
+    with ``VALIDATE CONSTRAINT``". Nothing ever ran it, and "keeps running" was
+    not true of the rows in question.
+
+    ``NOT VALID`` exempts an existing row from the one-off validation scan. It
+    does not exempt it from anything afterwards. PostgreSQL re-evaluates every
+    CHECK constraint on any UPDATE of a row, whatever column the update names, so
+    a row that violates one is refused by every write to it from then on -
+    measured on ``oe_i18n_tax_config``, where ``SET tax_name = tax_name || '!'``
+    and even ``SET id = id`` come back ``CheckViolation`` on a column the
+    constraint does not mention. The screen that edits that row answers 500 for
+    the life of the install, on a deployment reporting ``status: healthy``. A
+    foreign key is narrower - its trigger fires only when the constrained columns
+    change - but a row orphaned before the key arrived can never be repointed.
+
+    So this runs the validation the heal deferred. On a database whose rows
+    conform, which is nearly all of them, the constraint becomes ordinary and the
+    question stops being asked on later boots. On one holding rows that do not,
+    PostgreSQL refuses and names the constraint, and that refusal is the only
+    place the unwritable rows are ever announced: it goes to the boot log with
+    the table, and to ``/api/health`` as ``schema_constraints_validated: false``.
+
+    Nothing is repaired here and nothing is dropped. Which rows are wrong, and
+    what they should have said instead, is a question about the deployment's data
+    that this function has nowhere to put an answer - a repair that guessed would
+    be worse than the defect. Correcting them is a declared
+    :mod:`app.core.data_repairs` repair or an operator's own UPDATE, and either
+    way the constraint gets validated and the signal clears itself.
+
+    Which is why where the caller puts this matters as much as that it calls it.
+    :mod:`app.main` runs it after the boot's data repairs, not beside the heal
+    that creates the constraints, because those repairs rewrite exactly the kind
+    of row a restored constraint refuses - the shipped Canadian tax rows carry a
+    sub-national ``combination`` and no ``subdivision_code``, and
+    ``tax_subdivision_backfill`` fills them in on the same boot. Called before
+    them, this refuses a constraint the boot is about to make valid, and the
+    install spends one start reporting a fault it does not have. Called after,
+    an operator's row is the only kind that can still be refused, which is the
+    only kind worth telling them about.
+
+    Deliberately outside :func:`postgres_auto_migrate`'s transaction. That one
+    holds a single ``engine.begin()`` across the whole schema, so every
+    ``ADD CONSTRAINT`` in it holds ACCESS EXCLUSIVE on its table until the heal
+    commits; validating in there would put a full table scan under that lock.
+    Here each constraint gets its own short transaction, taking only the SHARE
+    UPDATE EXCLUSIVE that ``VALIDATE`` itself needs and releasing it immediately,
+    so reads and writes carry on around it. Two workers racing to validate the
+    same constraint is harmless - the loser finds it validated or fails the
+    statement, and neither outcome changes the database.
+
+    ``lock_timeout`` bounds the wait for the lock, like the heal's. The scan
+    itself is not bounded: it happens once per constraint in the life of the
+    database, and abandoning it half way would leave exactly the state this
+    exists to end while making the health field say so for a reason that is not
+    the operator's.
+
+    Never raises. A boot must not fail over a diagnostic, and every install that
+    reaches this code is already running.
+
+    Args:
+        engine: The async SQLAlchemy engine (must be PostgreSQL).
+
+    Returns:
+        ``(validated, refused)`` - how many constraints were verified, and
+        ``table.constraint`` for each one PostgreSQL would not verify.
+    """
+    try:
+        async with engine.connect() as conn:
+            pending = (await conn.execute(text(_PENDING_CONSTRAINTS_SQL))).fetchall()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("PostgreSQL migration: could not list unvalidated constraints: %s", exc)
+        return 0, ()
+
+    validated = 0
+    refused: list[str] = []
+    for conname, relname in pending:
+        try:
+            async with engine.begin() as conn:
+                await conn.execute(text("SET LOCAL lock_timeout = '3s'"))
+                await conn.execute(text(f'ALTER TABLE "{relname}" VALIDATE CONSTRAINT "{conname}"'))
+        except Exception as exc:  # noqa: BLE001
+            refused.append(f"{relname}.{conname}")
+            logger.warning(
+                "PostgreSQL migration: constraint %s on %s could not be validated, so rows that were "
+                "already in that table when it was added do not satisfy it. Those rows are not merely "
+                "unverified: PostgreSQL re-checks a CHECK constraint on every UPDATE of a row whatever "
+                "column the update touches, so nothing can write them and whichever screen edits them "
+                "answers 500 until they are corrected. Correct them and the next start validates the "
+                "constraint. /api/health reports schema_constraints_validated=false. Cause: %s",
+                conname,
+                relname,
+                exc,
+            )
+            continue
+        validated += 1
+        logger.info("PostgreSQL migration: validated constraint %s on %s", conname, relname)
+
+    return validated, tuple(refused)
