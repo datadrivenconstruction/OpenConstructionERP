@@ -1255,13 +1255,25 @@ jobs:
     # token check and the IDOR job. The conclusion is unchanged, the cause is
     # not, and a wrong cause invites somebody to "fix the OOM" and expect this
     # job to become redundant.
-    # Recounted 2026-08-17 out of the commit: the include in vite.config.ts is
-    # src/**/*.test.{ts,tsx} plus tests/**/*.test.{ts,tsx}, which collects 587
-    # files under src and 2 under frontend/tests/pwa, so 589 in all. 34 are
-    # named below, so 555 of them gate nothing. Recount rather than trust that
+    # Recounted 2026-09-05 out of the commit: the include in vite.config.ts is
+    # src/**/*.test.{ts,tsx} plus tests/**/*.test.{ts,tsx}, which collects 697
+    # files under src and 4 under frontend/tests, so 701 in all. 39 are named
+    # below, so 662 of them gate nothing. Recount rather than trust that
     # sentence, and recount against that include rather than against the vitest
     # default: the default would also sweep up the Playwright specs, which this
     # job does not run and which were never part of this number.
+    #
+    # The previous recount, 2026-08-17, said 589 collected and 34 named. Both
+    # halves drifted again in nineteen days, the suite by 112 files and the list
+    # by 5, which is the third consecutive recount to find both numbers stale
+    # and is the argument for reading the count off the file rather than off
+    # this paragraph.
+    #
+    # Read the named list out of the job-level FRONTEND_TEST_FILES env value,
+    # parsed as YAML, and count the distinct entries in it. Scanning the whole
+    # workflow text for anything shaped like a test filename happens to agree
+    # today, but only by luck: it would also collect any test named in a comment
+    # anywhere in this file, and comments here do name test files.
     #
     # Count it out of the commit rather than out of a checkout. The 592 written
     # here earlier the same day was measured on a working tree carrying nine
