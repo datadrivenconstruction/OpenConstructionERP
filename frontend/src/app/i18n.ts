@@ -183,19 +183,21 @@ const moduleTranslations: Record<string, Record<string, Record<string, string>>>
 const loadedLocales = new Set<string>(['en']);
 
 /**
- * Load a per-locale resource chunk and merge it into i18next.
+ * Load and register exactly one locale chunk. Never throws.
  *
  * Vite turns the dynamic ``import(`./locales/${code}.ts`)`` literal into
  * one chunk per matching file under ``src/app/locales/``, so a French
  * user only downloads ``fr.ts`` (~50 KB gzip) instead of the previous
  * ~1.28 MB monolithic ``i18n-data`` chunk.
  *
- * Idempotent. Safe to call repeatedly. Failures are logged and treated
- * as non-fatal — i18next's ``fallbackLng: 'en'`` keeps the UI usable.
+ * Idempotent. Returns whether this call actually put a new bundle in the
+ * store, which is what tells the caller a re-render is worth emitting.
+ * Failures are logged and treated as non-fatal — i18next's fallback chain
+ * keeps the UI usable.
  */
-export async function loadLocaleResource(code: string): Promise<void> {
-  if (loadedLocales.has(code)) return;
-  if (!SUPPORTED_LANGUAGES.some((l) => l.code === code)) return;
+async function loadLocaleChunk(code: string): Promise<boolean> {
+  if (loadedLocales.has(code)) return false;
+  if (!SUPPORTED_LANGUAGES.some((l) => l.code === code)) return false;
   try {
     const mod = await import(`./locales/${code}.ts`);
     const resource = (mod.default ?? mod) as { translation: Record<string, string> };
@@ -207,19 +209,66 @@ export async function loadLocaleResource(code: string): Promise<void> {
     // translations for any locale loaded after init).
     i18n.addResourceBundle(code, 'translation', resource.translation, false, true);
     loadedLocales.add(code);
-    // Force every ``useTranslation`` subscriber to re-render with the
-    // freshly merged bundle. ``addResourceBundle`` already emits
-    // ``store#added``, but components mounted outside Suspense (Header,
-    // Sidebar) sometimes miss that event when StrictMode re-mounts them
-    // mid-flight. Explicitly re-emitting ``languageChanged`` is the
-    // signal react-i18next listens to unconditionally — every
-    // useTranslation hook re-resolves its t() and re-renders.
-    if (i18n.language === code) {
-      i18n.emit('languageChanged', code);
-    }
+    return true;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(`i18n: failed to load locale "${code}", falling back to English`, err);
+    return false;
+  }
+}
+
+/**
+ * Load a locale into i18next, together with the base language it falls back to.
+ *
+ * A regional variant carries only what its region words differently and leans on
+ * its base language for the rest — that is the whole point of ``fallbackLng``
+ * above. But ``fallbackLng`` only names a bundle; it does not fetch one. This
+ * function used to import ``code`` and nothing else, so for the four variants
+ * whose base is itself lazy the chain was configured and inert: an es-MX reader's
+ * lookup walked es-MX, then an ``es`` bucket that was never loaded, then landed on
+ * English. The ~2700 ``cases.*`` keys that ``es.ts`` has and ``es-MX.ts`` does not
+ * rendered in English with a complete Spanish translation sitting in a chunk
+ * nobody asked for. Same for es-CL, es-CO and pt-BR.
+ *
+ * ``en-US`` is why this went unnoticed: its base is ``en``, which ships in the main
+ * bundle and is in ``loadedLocales`` from the start, so the one variant with a test
+ * was also the one variant that worked.
+ *
+ * The base is derived from the code rather than special-cased per locale, so the
+ * next regional variant added to ``SUPPORTED_LANGUAGES`` is chained by existing
+ * code instead of by somebody remembering to copy a branch.
+ *
+ * Direction matters and is load-bearing: the two bundles go into *separate*
+ * per-language buckets, and i18next consults ``es-MX`` before ``es``. So every key
+ * the variant defines keeps winning, and only the keys it omits come from the base.
+ * It is a fallback, never a replacement — the variants exist because Mexican,
+ * Chilean, Colombian and Brazilian practice name things differently from Spain and
+ * Portugal (costo not coste, cimbra not encofrado), and overwriting that deliberate
+ * wording with the base language would be a regression that nothing on screen would
+ * reveal.
+ *
+ * Both imports are awaited together rather than fired off, because
+ * ``initialLocaleReady`` below is what ``main.tsx`` waits on before mounting: a
+ * base chunk still in flight when that promise settles would paint the first frame
+ * in English for exactly the keys this change is meant to fix. Each chunk keeps its
+ * own error handling, so a failed base fetch costs the reader nothing they had
+ * before — they still get the variant's own strings.
+ */
+export async function loadLocaleResource(code: string): Promise<void> {
+  const base = code.includes('-') ? code.split('-')[0]! : null;
+  const [variantAdded, baseAdded] = await Promise.all([
+    loadLocaleChunk(code),
+    base ? loadLocaleChunk(base) : Promise.resolve(false),
+  ]);
+  // Force every ``useTranslation`` subscriber to re-render with the
+  // freshly merged bundle. ``addResourceBundle`` already emits
+  // ``store#added``, but components mounted outside Suspense (Header,
+  // Sidebar) sometimes miss that event when StrictMode re-mounts them
+  // mid-flight. Explicitly re-emitting ``languageChanged`` is the
+  // signal react-i18next listens to unconditionally — every
+  // useTranslation hook re-resolves its t() and re-renders.
+  if ((variantAdded || baseAdded) && i18n.language === code) {
+    i18n.emit('languageChanged', code);
   }
 }
 
