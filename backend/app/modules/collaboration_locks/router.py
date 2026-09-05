@@ -329,6 +329,13 @@ async def acquire_lock(
     the current holder's name and remaining TTL so the frontend can
     render a meaningful toast.
     """
+    # Allowlist first, tenant gate second. An off-allowlist entity_type is a
+    # malformed request, not a tenancy question: the tenant gate cannot resolve
+    # a type it has no handler for, so letting it run first turns every
+    # unsupported type into a 404 and hides the 400 this module documents. The
+    # allowlist is a static, public product fact already published in the
+    # OpenAPI schema, so naming it leaks nothing about any row.
+    _reject_unknown_entity_type(data.entity_type)
     # Tenant gate: you may only lock a row in a project you can reach.
     # Prevents cross-tenant lock planting (DoS) on a foreign entity.
     await _verify_lock_entity_access(
@@ -404,6 +411,9 @@ async def get_entity_lock(
     service: CollabLockService = Depends(_get_service),
 ) -> CollabLockResponse | None:
     parsed = _parse_entity_id(entity_id)
+    # Same ordering as acquire: reject an unlockable type as a bad request
+    # before the tenant gate, which has no handler for it and would answer 404.
+    _reject_unknown_entity_type(entity_type)
     # Tenant gate: reading who holds the lock on an entity leaks the holder's
     # identity and edit activity, so it requires access to the entity's
     # project just like the lock itself.
