@@ -249,8 +249,8 @@ condition written against "Repo hygiene" matches nothing and fails silently rath
 erroring. This has misled people repeatedly.
 
 Backend style is `ruff format` and `ruff check`, and the version is pinned deliberately.
-`backend/pyproject.toml` requires `ruff==0.15.20` in its dev extra and `.pre-commit-config.yaml`
-holds the matching hook at `v0.15.20`. Both files carry a comment explaining why: the
+`backend/pyproject.toml` requires `ruff==0.16.6` in its dev extra and `.pre-commit-config.yaml`
+holds the matching hook at `v0.16.6`. Both files carry a comment explaining why: the
 `ruff format --check` gate compares against one formatter's exact output, so a different ruff
 reformats differently and fails on code that passed locally. If you bump one, bump both. Run
 `ruff format --check` before `ruff check`. The frontend has no automatic formatter, by decision,

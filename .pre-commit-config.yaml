@@ -15,7 +15,7 @@ repos:
       - id: detect-private-key
 
   # Python linting & formatting. Pinned to the same ruff the CI gate and
-  # backend/pyproject.toml dev extra use (ruff==0.15.20): the "ruff format
+  # backend/pyproject.toml dev extra use (ruff==0.16.6): the "ruff format
   # --check" gate compares against the formatter's exact output, so a hook on
   # an older ruff would reformat differently and fail CI on code that passed
   # locally. Bump this in lockstep with the pyproject pin.
@@ -38,7 +38,7 @@ repos:
   # trees get the config named explicitly, which is what the CI gate for them
   # does too.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.20
+    rev: v0.16.6
     hooks:
       - id: ruff
         name: ruff (backend, configuration discovered)

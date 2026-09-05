@@ -25,14 +25,37 @@ from app.modules.module_builder.spec import EntitySpec, FieldSpec, ModuleSpec, R
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 # Lint a generated tree with the same ruff the repo pins, found wherever it
-# happens to live. The interpreter running these tests has it: ruff==0.15.20 is
+# happens to live. The interpreter running these tests has it: ruff==0.16.6 is
 # a dev dependency, and pytest arrives from the same extra, so anything able to
 # collect this file can import it. Developers who follow the repo convention
 # reach for uvx instead, hence the second attempt.
 #
-# --isolated because the tree under test sits in a temp directory, so config
-# discovery would walk out of it into whatever happens to be above.
-_RUFF_ARGS = ("check", "--isolated", "--line-length", "120")
+# The config is named rather than discovered. The tree under test sits in a
+# temp directory, so discovery would walk out of it into whatever happens to be
+# above. --isolated used to stop that walk, but it judged generated code against
+# ruff's built-in defaults, and those move between releases: 0.16 enabled I, B
+# and RUF by default, and the same unchanged generator output went from clean to
+# fifteen findings. The defaults are also the wrong ruleset for this project,
+# in three ways that all read as false positives:
+#
+#   I001    without known-first-party = ["app"] isort files the generated
+#           `from app.modules.<key>...` imports as third-party and wants them
+#           merged into the sqlalchemy block, so a correct import layout is
+#           reported as unsorted.
+#   B008    the generated router declares `limit: int = Query(100, ...)`, which
+#           is how FastAPI parameters are written; pyproject ignores B008 for
+#           exactly that reason.
+#   RUF100  schemas.py carries `# noqa: F401` on its date and Decimal imports
+#           because whether they are used depends on the spec's field types.
+#           That suppression is load-bearing for a spec with no date and no
+#           money field and merely redundant for one that has both, so it
+#           cannot be deleted; the project simply never selects RUF.
+#
+# Naming backend/pyproject.toml holds generated modules to the standard the
+# platform holds its own code to, which is the only standard we own and the
+# only one that does not shift under us on a ruff upgrade.
+_RUFF_CONFIG = BACKEND_ROOT / "pyproject.toml"
+_RUFF_ARGS = ("check", "--config", str(_RUFF_CONFIG))
 
 
 def ruff_check(target: Path) -> subprocess.CompletedProcess[str]:
@@ -41,6 +64,10 @@ def ruff_check(target: Path) -> subprocess.CompletedProcess[str]:
     Never skips. A lint check that quietly opts out is exactly the one that
     lets the generator ship a module carrying an import nothing references.
     """
+    # Named config, so its absence is a broken harness rather than a lint
+    # result. Ruff would exit 2 for a config it cannot open, which reads as a
+    # confusing failure of whichever generated file happened to be under test.
+    assert _RUFF_CONFIG.is_file(), f"the ruff config the lint gate names is missing: {_RUFF_CONFIG}"
     installed = subprocess.run(
         [sys.executable, "-m", "ruff", *_RUFF_ARGS, str(target)],
         capture_output=True,
@@ -51,7 +78,7 @@ def ruff_check(target: Path) -> subprocess.CompletedProcess[str]:
         return installed
     try:
         return subprocess.run(
-            ["uvx", "ruff@0.15.20", *_RUFF_ARGS, str(target)],
+            ["uvx", "ruff@0.16.6", *_RUFF_ARGS, str(target)],
             capture_output=True,
             text=True,
             timeout=300,
@@ -394,6 +421,57 @@ class TestASpecThatUsesAlmostNothing:
         models = (written / "models.py").read_text(encoding="utf-8")
         assert "project_id" not in models
         assert "ForeignKey" not in models
+
+
+class TestTheLintGateItselfCanStillFail:
+    """Every ``test_ruff_accepts_it`` above asserts an exit code of zero.
+
+    That assert is worth nothing on its own: a mistyped config path, a ruff
+    that resolves no files, or a ruleset that quietly stopped selecting F would
+    each leave those tests green while checking nothing. It is equally worth
+    nothing if the gate drifts back to ruff's defaults, because then it fails
+    on generated code that is correct. So pin both directions.
+    """
+
+    def test_it_reports_a_plain_unused_import(self, tmp_path: Path) -> None:
+        """The gate is live: real breakage still fails it.
+
+        F401, deliberately, and not RUF100 or B008. The project config selects
+        F and exempts the other two, so only a rule the config actually turns
+        on proves the ruleset we apply is the one we think we apply.
+        """
+        offender = tmp_path / "unused_import.py"
+        offender.write_text("import json\n", encoding="utf-8")
+
+        result = ruff_check(offender)
+
+        assert result.returncode != 0, "ruff passed a plain unused import, so the lint gate is reading nothing"
+        assert "F401" in result.stdout, result.stdout + result.stderr
+
+    def test_it_reads_the_projects_own_ruleset_and_not_ruffs_defaults(self, tmp_path: Path) -> None:
+        """The gate is not over-tightened: it judges by pyproject, not defaults.
+
+        Every generated module imports from ``app``, and the layout below is
+        the one the generator emits: first-party separated from third-party.
+        That is correct only because pyproject sets
+        ``known-first-party = ["app"]``. Ruff's built-in defaults do not know
+        the name, file ``app`` as third-party, and demand it be merged into the
+        sqlalchemy block, so this file is I001 the moment the gate falls back
+        to ruff's own configuration.
+        """
+        sample = tmp_path / "first_party_layout.py"
+        sample.write_text(
+            "from sqlalchemy import Table\n"
+            "\n"
+            "from app.modules.site_notice.models import Notice\n"
+            "\n"
+            '__all__ = ["Notice", "Table"]\n',
+            encoding="utf-8",
+        )
+
+        result = ruff_check(sample)
+
+        assert result.returncode == 0, result.stdout + result.stderr
 
 
 class TestEveryGeneratedFileImports:
