@@ -224,6 +224,42 @@ def boot(data_dir: Path | str) -> bool:
         return False
 
     pgdata = Path(data_dir).expanduser() / "pgdata"
+
+    # Windows only: refuse a first initdb whose files Windows will not let it
+    # open, and say so with the number in it. See windows_path_limit_problem for
+    # what the reader is told today, which is that their installation may be
+    # corrupt and that they should download it again.
+    #
+    # Measured BEFORE the mkdir below rather than after. On a data directory over
+    # the limit that mkdir is the call that fails first, and it fails with "data
+    # dir unavailable", which is the same unactionable answer one layer up; a
+    # check placed after it would be dead code on exactly the machines it is
+    # written for.
+    #
+    # Only while the cluster still has to be created. A PG_VERSION that is
+    # already there is proof these paths were once short enough to work, and
+    # refusing to open a database that opened yesterday would be a worse bug than
+    # the one this fixes - so that case is logged and allowed through. It is not
+    # hypothetical: reinstalling into a deeper directory while keeping the data
+    # directory reaches it. "openconstructionerp doctor" runs the same
+    # measurement with no such gate, which is where that user finds it.
+    too_deep = windows_path_limit_problem(pgdata)
+    if too_deep is not None:
+        if (pgdata / "PG_VERSION").exists():
+            logger.warning("%s", too_deep.message)
+        else:
+            _fatal_detail = too_deep.message
+            # The stage detail carries both numbers, because on the desktop the
+            # launcher checklist is the only surface this reader has and the
+            # paragraph above goes to a log file they are not reading.
+            emit_stage(
+                "pg",
+                "fail",
+                f"{too_deep.directory} is {too_deep.length} characters long; Windows allows {too_deep.limit} here",
+            )
+            logger.error("%s", too_deep.message)
+            return False
+
     # Create the directory that HOLDS the cluster, and stop there: initdb makes
     # ``pgdata`` itself. It used to be created here too, and on Windows that is
     # what broke it. initdb re-executes itself under a restricted token (it drops
@@ -1078,6 +1114,195 @@ def _apply_ascii_locale_env() -> None:
     """
     for key, value in _ASCII_LOCALE_ENV.items():
         os.environ[key] = value
+
+
+#: Longest fully qualified path a program without long-path support can open.
+#:
+#: Windows' MAX_PATH is 260 *including* the terminating NUL, so 259 characters is
+#: the most a name can actually be. The machine-wide LongPathsEnabled registry
+#: switch does not lift this for the bundled PostgreSQL: that switch serves only
+#: processes whose manifest declares ``longPathAware``, and those binaries do not
+#: declare it. Observed with the switch already set to 1 on the reporting
+#: machine, which is why the message below says so instead of sending the reader
+#: to the registry to change something that is already changed.
+_WINDOWS_MAX_PATH = 259
+
+#: Subtrees of ``pginstall`` whose depth constrains where we may be installed.
+#:
+#: ``include/`` is deliberately absent. Its deepest entry is 74 characters
+#: (``include/postgresql/server/snowball/libstemmer/stem_ISO_8859_1_indonesian.h``)
+#: but those are C headers for building extensions against this server, and
+#: nothing at run time opens them, so counting them would refuse installs that
+#: work perfectly.
+_PGINSTALL_SUBTREES_IN_USE = ("bin", "lib", "share")
+
+#: Longest path, relative to ``pginstall``, of a file those subtrees hold.
+#:
+#: Walked out of the shipped tree rather than guessed, because what decides how
+#: deep the package may be installed is the deepest file underneath it, not the
+#: length of any one name. Today it is
+#: ``lib/postgresql/pgxs/src/test/isolation/pg_isolation_regress.exe`` at 63; the
+#: deepest one a running server truly opens is
+#: ``share/postgresql/timezone/America/Argentina/ComodRivadavia`` at 58, and
+#: ``initdb`` opens exactly that tree, because ``select_default_timezone()``
+#: scans it to identify the machine's zone.
+#:
+#: ``test_a_windows_install_too_deep_to_read_itself_is_named_before_initdb.py``
+#: re-derives this from the installed tree, so a PostgreSQL bump that ships a
+#: deeper file goes red there rather than silently widening the gap here.
+_PGINSTALL_LONGEST_RELATIVE = 63
+
+#: Longest path PostgreSQL creates below PGDATA, relative to PGDATA.
+#:
+#: A live 4860-file cluster from this application tops out at 32
+#: (``pg_logical/replorigin_checkpoint``). The longest form PostgreSQL can create
+#: there without replication slots or logical decoding, neither of which this
+#: application configures, is an archive-status marker,
+#: ``pg_wal/archive_status/<24-character segment name>.ready`` at 52. The larger
+#: of the two, so the number covers the life of the cluster and not just the
+#: moment initdb finishes.
+_PGDATA_LONGEST_RELATIVE = 52
+
+
+class PathTooLong(NamedTuple):
+    """A directory Windows is too shallow for the bundled PostgreSQL to use.
+
+    ``length`` and ``limit`` are kept apart from ``message`` so a caller can act
+    on the arithmetic without parsing prose, and so a later rewording of the
+    paragraph cannot quietly change what a test is checking.
+    """
+
+    directory: Path
+    length: int
+    limit: int
+    longest_relative: int
+    message: str
+
+
+def _measured_path_text(directory: Path) -> str:
+    """The spelling of *directory* whose length MAX_PATH is measured against.
+
+    ``Path.resolve()`` can hand back the extended-length form (``\\\\?\\C:\\...``)
+    for a path that is already long. Those four characters are a marker asking
+    the caller to switch the limit off, not part of the name, and the PostgreSQL
+    binaries do not understand it - so counting them would report a number four
+    larger than the one the user sees and than the one that actually failed.
+    """
+    text = str(directory)
+    return text[4:] if text.startswith("\\\\?\\") else text
+
+
+def _path_limit_problem(directory: Path, longest_relative: int, opening: str, fix: str) -> PathTooLong | None:
+    """Measure one directory against what Windows leaves room for underneath it.
+
+    The limit is not MAX_PATH. ``initdb`` is handed a directory and opens names
+    below it, so what has to fit is the directory, a separator, and the longest
+    of those names; the directory itself being under 259 characters proves
+    nothing. Returns ``None`` when there is room.
+    """
+    limit = _WINDOWS_MAX_PATH - 1 - longest_relative
+    text = _measured_path_text(directory)
+    if len(text) <= limit:
+        return None
+    message = (
+        f"{opening} The folder is {text}, which is {len(text)} characters long. "
+        f"{limit} is the most that fits, because Windows caps a full path at {_WINDOWS_MAX_PATH} "
+        f"characters and the longest name below that folder is {longest_relative} characters. "
+        f"{fix} "
+        f"The files are not missing and the download was not damaged, so reinstalling into the "
+        f"same place will report exactly this again. Turning on LongPathsEnabled in Windows does "
+        f"not help either: it applies only to programs that declare support for long paths, and "
+        f"the PostgreSQL binaries do not declare it."
+    )
+    return PathTooLong(
+        directory=directory,
+        length=len(text),
+        limit=limit,
+        longest_relative=longest_relative,
+        message=message,
+    )
+
+
+def _bundled_install_dir() -> Path | None:
+    """The ``pginstall`` directory holding the bundled PostgreSQL, or ``None``.
+
+    ``POSTGRES_BIN_PATH`` is ``pginstall/bin``, and everything those binaries
+    read at run time is a sibling of it. Fails open on an unimportable package or
+    a missing directory, the way :func:`_bundled_major` does: a check that cannot
+    locate our own installation has nothing to say about how deep it sits.
+    """
+    try:
+        from pixeltable_pgserver.utils import POSTGRES_BIN_PATH  # noqa: PLC0415
+    except Exception:  # noqa: BLE001
+        return None
+    install = Path(POSTGRES_BIN_PATH).parent
+    return install if install.is_dir() else None
+
+
+def path_limit_applies() -> bool:
+    """Whether the Windows MAX_PATH limit governs the bundled PostgreSQL here.
+
+    A function rather than ``os.name == "nt"`` spelled inline at each site, for
+    two reasons. The doctor check in the CLI needs the same answer to decide
+    whether to print a line at all, and one predicate keeps the two from drifting
+    apart. And it gives the tests a seam, so the measurement can be exercised on
+    the platforms our CI actually runs; patching ``os.name`` itself would work
+    and would lie to every other reader of it in the interpreter meanwhile.
+    """
+    return os.name == "nt"
+
+
+def windows_path_limit_problem(pgdata: Path | str) -> PathTooLong | None:
+    """Name the directory Windows is too shallow for, before initdb blames itself.
+
+    ``initdb`` is not given ``-L``; it derives its support directory from where
+    its own executable sits, so an installation deep enough to push
+    ``pginstall/share/postgresql`` past the limit cannot open its own files. What
+    it then prints is::
+
+        initdb: error: file ".../share/postgresql/postgres.bki" does not exist
+        initdb: hint: This might mean you have a corrupted installation or
+                identified the wrong directory with the invocation option -L.
+
+    The file is there, it is 944104 bytes, and any long-path-aware tool reads it.
+    Nothing downstream can tell that apart from a genuinely damaged wheel, so the
+    reader is told their installation may be corrupt and sent to
+    ``--force-reinstall``, which downloads 84 MB to land in the same directory and
+    fail the same way. Measuring the two directories first turns that into one
+    sentence with a number and a fix in it.
+
+    Windows only, by :func:`path_limit_applies`: every other platform this
+    application runs on allows paths in the thousands, so there is nothing here to
+    measure and a check that fired would only be wrong.
+
+    Returns the first problem found, install directory before data directory,
+    because a user with both would have to move the install anyway. ``None``
+    means no problem was found, including the cases where the installation cannot
+    be located at all.
+    """
+    if not path_limit_applies():
+        return None
+
+    install = _bundled_install_dir()
+    if install is not None:
+        problem = _path_limit_problem(
+            install,
+            _PGINSTALL_LONGEST_RELATIVE,
+            "The PostgreSQL that ships with this application sits too deep in the filesystem "
+            "for Windows to let it open its own files.",
+            "Install OpenConstructionERP somewhere shorter, for example C:\\OpenConstructionERP, and this goes away.",
+        )
+        if problem is not None:
+            return problem
+
+    return _path_limit_problem(
+        Path(pgdata),
+        _PGDATA_LONGEST_RELATIVE,
+        "The folder the local database lives in sits too deep in the filesystem for Windows to "
+        "let PostgreSQL open the files inside it.",
+        "Point the application at a shorter data directory with --data-dir (or the OE_DATA_DIR "
+        "environment variable), for example C:\\OpenConstructionERP\\data.",
+    )
 
 
 def _initdb_args(pgdata: Path) -> tuple[str, ...]:

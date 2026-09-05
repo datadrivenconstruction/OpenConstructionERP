@@ -548,6 +548,41 @@ def check_data_dir(data_dir: Path) -> Check:
         )
 
 
+def check_path_length(data_dir: Path) -> Check | None:
+    """Report a Windows install too deep for the bundled PostgreSQL to read itself.
+
+    ``None`` away from Windows, where paths run into the thousands and this line
+    would be noise in a report people read top to bottom. The platform answer
+    comes from ``embedded_pg`` rather than being spelled again here, so the
+    doctor and the boot refusal can never disagree about who they apply to.
+
+    Ungated on the cluster, unlike the refusal in
+    :func:`app.core.embedded_pg.boot`. That one goes quiet once the cluster
+    exists, because an existing cluster is proof the paths were once short enough
+    and refusing a database that opened yesterday would be the worse bug. Doctor
+    is where somebody looks after it stops working, and reinstalling into a
+    deeper directory while keeping the data directory lands exactly there, so
+    this one always measures.
+
+    Imported inside the function because this file keeps its top-level imports to
+    the standard library so the CLI starts fast.
+    """
+    from app.core.embedded_pg import path_limit_applies, windows_path_limit_problem
+
+    if not path_limit_applies():
+        return None
+
+    problem = windows_path_limit_problem(data_dir / "pgdata")
+    if problem is None:
+        return Check("Path length", "ok", "Windows can open the bundled PostgreSQL files")
+    return Check(
+        "Path length",
+        "error",
+        f"{problem.directory} is {problem.length} characters, and {problem.limit} is the maximum",
+        problem.message,
+    )
+
+
 def check_port_free(host: str, port: int) -> Check:
     """Verify nothing is already listening on the requested port."""
     try:
@@ -1173,6 +1208,10 @@ def run_preflight(
         check_locales_bundled(),
         check_env_overrides(),
     ]
+    # Windows only, and the check itself decides that: see check_path_length.
+    path_length = check_path_length(data_dir)
+    if path_length is not None:
+        checks.append(path_length)
     # Base tabular deps (pandas, pyarrow) are ERROR-level: the onboarding
     # load-cwicr endpoint hard-requires them. Run on every preflight so
     # `serve` also catches a broken install before uvicorn spins up.
