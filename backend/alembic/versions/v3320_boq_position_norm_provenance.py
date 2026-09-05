@@ -83,6 +83,7 @@ depends_on: Union[str, Sequence[str], None] = None
 TABLE = "oe_boq_position"
 
 # data-rewrite-ack: table=oe_boq_position growth=tenure rows=one per real item of work, so it tracks operational history and is large on a mature install - small on every demo box, which is why a size measured there would not answer anything; the acknowledged rewrite writes only rows priced from a production norm in the two days between the write side shipping on 2026-09-03 and this revision, which is near zero everywhere and exactly zero on an install that has never used the norm library, so the tuples written do not scale with the table even though the scan does, see #457
+# boot-repair: gap - the product never runs `alembic upgrade`, and the boot heal adds `norm_id` and `norm_work_key` nullable with no default and writes no rows, so on an ordinary upgraded install this copy does not run at all. What does not land is the column value on positions priced from a norm between the write side shipping on 2026-09-03 and this revision; those rows keep the identity in `metadata` with the column NULL. The read side coalesces column then metadata, so such a row is still answered correctly and the only thing it loses is being groupable by the column, which is also why no registry repair is proposed: a per-row copy that changes no answer is not worth running on every boot forever.
 
 
 def _has_table(insp: sa.engine.reflection.Inspector, table: str) -> bool:
