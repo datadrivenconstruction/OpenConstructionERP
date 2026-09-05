@@ -1,0 +1,275 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "NZ",
+  "note": "New Zealand is the clearest case in the family for why the document that states the value and the document that asks for the money are two slots and not one. The progress valuation is what the period is worth; the payment claim is the statutory document served under the Act, and serving it is what starts the clock. Naming the tax invoice as the payment document instead composed a true sentence about the wrong document, because the Act attaches to the claim and the invoice only follows it for GST.",
+  "slug": "serve-a-payment-claim-under-the-construction-contracts-act",
+  "order": 1280,
+  "region": "NZ",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "Clock",
+  "estMinutes": 12,
+  "title": "Serve a payment claim under the Construction Contracts Act",
+  "desc": "Measure the period against the schedule, serve the payment claim, watch the working days the payer has to answer with a payment schedule, raise the tax invoice for the scheduled amount and keep retentions where the Act requires them to be kept.",
+  "longDesc": "The Construction Contracts Act gives a payer a fixed number of working days to answer a payment claim with a payment schedule, and the consequence of not answering is not a penalty, it is that the claimed amount becomes payable. That is a strong remedy and it is available only to a claimant who can show the claim complied and when it was served. The second half of the regime is retentions: money withheld on a commercial construction contract is held on trust and has to be accounted for separately, which is a records question long before it is a cash question. Both halves are the same discipline, which is knowing what was served, when, and what came back.",
+  "slots": {
+    "priceLine": "schedule item",
+    "priceLinePlural": "schedule items",
+    "valuationDoc": "progress valuation",
+    "certifier": "Contract Administrator",
+    "excessTerm": "variation",
+    "retentionTerm": "retentions",
+    "payDoc": "payment claim",
+    "clockRegime": "the Construction Contracts Act",
+    "clockStart": "the day the payment claim is served",
+    "payDays": "20 working",
+    "escalationRoute": "give notice of intention to suspend and refer it to adjudication"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "schedule",
+          "label": "Contract schedule"
+        },
+        {
+          "key": "works",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per schedule item"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "claim",
+          "label": "Progress valuation for the period"
+        },
+        {
+          "key": "variations",
+          "label": "Variations flagged"
+        }
+      ]
+    },
+    {
+      "id": "retentions",
+      "spine": "adjust",
+      "icon": "Percent",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "cumulative",
+          "label": "Cumulative progress valuation"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments and retentions"
+        }
+      ],
+      "out": [
+        {
+          "key": "held",
+          "label": "Retentions held to date"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ],
+      "note": {
+        "why": "Retention money on a commercial construction contract is held on trust and has to be identifiable as such. A figure that exists only as a deduction line on a claim is not identifiable, and the party who needs it to be is the one who is not holding it."
+      }
+    },
+    {
+      "id": "serve",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "claim",
+          "label": "Progress valuation for the period"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ],
+      "out": [
+        {
+          "key": "served",
+          "label": "Payment claim served"
+        },
+        {
+          "key": "invoice",
+          "label": "Tax invoice issued"
+        }
+      ],
+      "note": {
+        "what": "The claim has to state that it is made under the Act and say how the amount was calculated. A claim that does neither is a request for money rather than a payment claim, and it carries none of the Act's consequences for ignoring it. The tax invoice follows for GST and is not the document the Act counts from."
+      }
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "served",
+          "label": "Payment claim served"
+        },
+        {
+          "key": "date",
+          "label": "Date of service"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ]
+    },
+    {
+      "id": "dates",
+      "spine": "deadlines",
+      "icon": "CalendarClock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Statutory regime on record"
+        }
+      ],
+      "out": [
+        {
+          "key": "schedule",
+          "label": "Date a payment schedule is due"
+        },
+        {
+          "key": "final",
+          "label": "Final date for payment"
+        }
+      ],
+      "note": {
+        "what": "Working days exclude weekends, public holidays and the year-end closedown the Act sets out, which is why a December claim does not answer on the same arithmetic as a June one."
+      }
+    },
+    {
+      "id": "watch",
+      "spine": "watch",
+      "icon": "AlertTriangle",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clocks",
+          "label": "Open clocks on the project"
+        },
+        {
+          "key": "finaldates",
+          "label": "Final dates for payment"
+        }
+      ],
+      "out": [
+        {
+          "key": "unanswered",
+          "label": "Claims answered by no payment schedule"
+        },
+        {
+          "key": "register",
+          "label": "Breach register rows"
+        }
+      ],
+      "note": {
+        "why": "A claim nobody answered is worth more than a claim answered badly, and it looks like nothing at all until somebody counts the days. That is the one reading on this screen that turns silence into an amount payable."
+      }
+    },
+    {
+      "id": "escalate",
+      "spine": "escalate",
+      "icon": "Gavel",
+      "module": "Documents",
+      "moduleKey": "nav.documents",
+      "to": "/projects/:projectId/files",
+      "in": [
+        {
+          "key": "passed",
+          "label": "Passed deadlines"
+        },
+        {
+          "key": "record",
+          "label": "Claims, schedules and service dates"
+        }
+      ],
+      "out": [
+        {
+          "key": "notice",
+          "label": "Notice of intention to suspend"
+        },
+        {
+          "key": "entitlement",
+          "label": "Entitlement preserved"
+        }
+      ]
+    }
+  ]
+}

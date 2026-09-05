@@ -1,0 +1,213 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "BR",
+  "note": "Brazil surfaces the measurement half plus the attestation that makes it payable. The distinctive step is not the arithmetic, it is that a public body cannot pay against a measurement nobody attested: the fiscal do contrato signs the boletim de medicao, the expense is liquidated, and only then does the nota fiscal have anything to attach to. So this layer surfaces register, measure, value, certify, invoice and reconcile, and leaves the clock steps to the regimes that count days rather than approvals.",
+  "slug": "attest-the-boletim-de-medicao-and-invoice-the-period",
+  "order": 1220,
+  "region": "BR",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "developer-client"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "ClipboardCheck",
+  "estMinutes": 12,
+  "title": "Attest the boletim de medicao and invoice the period",
+  "desc": "Measure the period against the planilha orcamentaria, price it at the contract rates, have the fiscal do contrato attest the boletim de medicao and raise the nota fiscal against the attested figure, so the expense can be liquidated instead of sitting in a queue nobody can explain.",
+  "longDesc": "In a Brazilian contract the money does not move because the work was done, it moves because the work was measured, attested and liquidated in that order, and each of those is a document with a name and a signatory. A nota fiscal issued ahead of the boletim de medicao it should reference is the single most common reason a payment stalls, because there is nothing for the accounts to match it to and the person who could fix it is not the person holding the invoice. Measured against the planilha item by item, the attestation is a signature on a figure both sides have already seen rather than a negotiation that starts when the invoice arrives.",
+  "slots": {
+    "priceLine": "item da planilha",
+    "priceLinePlural": "itens da planilha",
+    "valuationDoc": "boletim de medicao",
+    "certifier": "fiscal do contrato",
+    "excessTerm": "termo aditivo",
+    "retentionTerm": "retencao contratual",
+    "payDoc": "nota fiscal",
+    "clockRegime": "the contract payment terms under Lei 14.133",
+    "clockStart": "the attestation of the boletim de medicao",
+    "payDays": "30",
+    "escalationRoute": "file the requerimento administrativo and start the correcao monetaria running"
+  },
+  "steps": [
+    {
+      "id": "register",
+      "spine": "register",
+      "icon": "FileSignature",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/projects/:projectId/contracts",
+      "in": [
+        {
+          "key": "contrato",
+          "label": "Signed contrato"
+        },
+        {
+          "key": "planilha",
+          "label": "Planilha orcamentaria"
+        }
+      ],
+      "out": [
+        {
+          "key": "registered",
+          "label": "Contract on record"
+        },
+        {
+          "key": "terms",
+          "label": "Measurement and payment terms attached"
+        }
+      ]
+    },
+    {
+      "id": "medicao",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "planilha",
+          "label": "Planilha orcamentaria"
+        },
+        {
+          "key": "executed",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per item da planilha"
+        },
+        {
+          "key": "quantities",
+          "label": "Measured quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Measured quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract unit rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "valuation",
+          "label": "Boletim de medicao for the period"
+        },
+        {
+          "key": "aditivo",
+          "label": "Termo aditivo flagged"
+        }
+      ],
+      "note": {
+        "why": "Quantity measured beyond what the contract carries has to become a termo aditivo before it is measured, not after it is paid. A public body that pays for it the other way round is asking its own audit to find the difference."
+      }
+    },
+    {
+      "id": "atestar",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "boletim",
+          "label": "Boletim de medicao for the period"
+        },
+        {
+          "key": "fiscal",
+          "label": "Fiscal do contrato named for attestation"
+        }
+      ],
+      "out": [
+        {
+          "key": "attested",
+          "label": "Attested boletim de medicao"
+        },
+        {
+          "key": "date",
+          "label": "Attestation date on record"
+        }
+      ]
+    },
+    {
+      "id": "notafiscal",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "attested",
+          "label": "Attested boletim de medicao"
+        },
+        {
+          "key": "retencao",
+          "label": "Retencao and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "nf",
+          "label": "Nota fiscal issued"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ],
+      "note": {
+        "what": "Reference the attested boletim on the nota fiscal itself. The accounts match the two by that reference, and an invoice carrying no reference is one a clerk has to chase somebody to explain."
+      }
+    },
+    {
+      "id": "reconcile",
+      "spine": "reconcile",
+      "icon": "Scale",
+      "module": "Event Reconciliation",
+      "moduleKey": "nav.reconciliation",
+      "to": "/projects/:projectId/reconciliation",
+      "in": [
+        {
+          "key": "asked",
+          "label": "Amount invoiced"
+        },
+        {
+          "key": "attested",
+          "label": "Amount attested"
+        }
+      ],
+      "out": [
+        {
+          "key": "difference",
+          "label": "Difference carried forward"
+        },
+        {
+          "key": "aged",
+          "label": "Outstanding by age"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "AU",
+  "note": "Australia surfaces the whole arc from measurement to adjudication, because the statutory regime here attaches to the claim rather than to the certificate: serving the payment claim is what starts the clock, and the Superintendent's certificate sits inside that window rather than in front of it. The Act counts business days, so payDays carries the word and the sentence reads correctly without the spine knowing that some regimes count calendar days and some do not.",
+  "slug": "run-the-security-of-payment-clock-on-a-progress-claim",
+  "order": 1200,
+  "region": "AU",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "CalendarClock",
+  "estMinutes": 12,
+  "title": "Run the security of payment clock on a progress claim",
+  "desc": "Measure the period against the contract schedule, submit the progress claim to the Superintendent, serve it as a payment claim under the Security of Payment Act and let the module count the business days the respondent has, so a late payment is a dated record rather than a phone call.",
+  "longDesc": "The Australian security of payment regime is fast and it is unforgiving of the claimant who cannot say what was served and when. A payment claim starts a clock the respondent answers with a payment schedule; if no schedule comes, the claimed amount becomes the amount payable, and if a schedule comes short the difference goes to adjudication on a timetable measured in business days. All of that turns on dates, and dates are exactly what nobody can reconstruct three months later. Measured line by line, served on a recorded date and watched as it counts down, the claim is either paid or it is an adjudication application with its evidence already assembled.",
+  "slots": {
+    "priceLine": "claim item",
+    "priceLinePlural": "claim items",
+    "valuationDoc": "progress claim",
+    "certifier": "Superintendent",
+    "excessTerm": "variation",
+    "retentionTerm": "retention",
+    "payDoc": "payment claim",
+    "clockRegime": "the Security of Payment Act",
+    "clockStart": "the day the payment claim is served",
+    "payDays": "15 business",
+    "escalationRoute": "lodge an adjudication application under the Security of Payment Act"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "schedule",
+          "label": "Contract schedule of rates"
+        },
+        {
+          "key": "works",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per claim item"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "variations",
+          "label": "Variations flagged"
+        }
+      ]
+    },
+    {
+      "id": "certify",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "superintendent",
+          "label": "Superintendent named for certification"
+        }
+      ],
+      "out": [
+        {
+          "key": "certificate",
+          "label": "Progress certificate"
+        },
+        {
+          "key": "date",
+          "label": "Certification date on record"
+        }
+      ],
+      "note": {
+        "why": "The Superintendent certifies under the contract and the Act runs on its own timetable regardless, so a certificate that arrives late does not move the statutory dates. Recording both is what lets you see the two regimes disagree while there is still time to act on it."
+      }
+    },
+    {
+      "id": "serve",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "certificate",
+          "label": "Progress certificate"
+        },
+        {
+          "key": "retention",
+          "label": "Retention and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "claim",
+          "label": "Payment claim served"
+        },
+        {
+          "key": "reference",
+          "label": "Reference to the Act on the claim"
+        }
+      ],
+      "note": {
+        "what": "The claim must say on its face that it is made under the Act, because a document that does not is not a payment claim and starts no clock at all."
+      }
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "claim",
+          "label": "Payment claim served"
+        },
+        {
+          "key": "served",
+          "label": "Date of service"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ],
+      "note": {
+        "why": "Business days are not calendar days, and the state's public holidays move the answer. Counting them by hand is how a claimant arrives at adjudication one day out of time with a case that was otherwise good."
+      }
+    },
+    {
+      "id": "dates",
+      "spine": "deadlines",
+      "icon": "CalendarClock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Statutory regime on record"
+        }
+      ],
+      "out": [
+        {
+          "key": "schedule",
+          "label": "Date a payment schedule is due"
+        },
+        {
+          "key": "final",
+          "label": "Final date for payment"
+        }
+      ],
+      "note": {
+        "what": "Two dates matter here and only one of them is about money: the date a payment schedule is due, and the date payment is due. A respondent who lets the first pass without a schedule has agreed to the claimed amount."
+      }
+    },
+    {
+      "id": "adjudicate",
+      "spine": "escalate",
+      "icon": "Gavel",
+      "module": "Documents",
+      "moduleKey": "nav.documents",
+      "to": "/projects/:projectId/files",
+      "in": [
+        {
+          "key": "dates",
+          "label": "Passed deadlines"
+        },
+        {
+          "key": "record",
+          "label": "Claim, schedule and service dates"
+        }
+      ],
+      "out": [
+        {
+          "key": "application",
+          "label": "Adjudication application"
+        },
+        {
+          "key": "entitlement",
+          "label": "Entitlement preserved"
+        }
+      ]
+    }
+  ]
+}

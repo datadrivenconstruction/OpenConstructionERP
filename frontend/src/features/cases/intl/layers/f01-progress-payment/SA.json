@@ -1,0 +1,245 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "SA",
+  "note": "Saudi Arabia surfaces the widest window in the family, register through clock, because a government works contract here carries the advance payment guarantee, the retention and the interim payment certificate in one arc and none of them is optional. The Engineer certifies, the authority pays against the certificate, and the invoice is the last document rather than the first.",
+  "slug": "certify-the-interim-payment-and-invoice-the-authority",
+  "order": 1320,
+  "region": "SA",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "Landmark",
+  "estMinutes": 13,
+  "title": "Certify the interim payment and invoice the authority",
+  "desc": "Register the contract and its guarantees, measure the period against the bill, recover the advance payment and hold retention, get the Engineer to issue the interim payment certificate and invoice the authority against it under the procurement law's payment window.",
+  "longDesc": "On a government works contract the interim payment certificate is the document everything else hangs from. The advance payment is recovered through it, the retention is held on it, and the invoice that follows is only as good as the certificate behind it. The failure this arc is built to prevent is quiet and expensive: an invoice submitted against a certificate the Engineer has not issued sits in the authority's queue looking exactly like an invoice that is being processed, and the payment window everybody is relying on has not started at all. Certificate first, invoice second, with both dates recorded, is what makes a late payment a question with an answer.",
+  "slots": {
+    "priceLine": "BoQ item",
+    "priceLinePlural": "BoQ items",
+    "valuationDoc": "interim payment certificate",
+    "certifier": "Engineer",
+    "excessTerm": "variation order",
+    "retentionTerm": "retention",
+    "payDoc": "invoice",
+    "clockRegime": "the government procurement payment rules",
+    "clockStart": "the day the invoice is submitted against the issued certificate",
+    "payDays": "30",
+    "escalationRoute": "raise it with the contracting authority and refer it to the committee the law names"
+  },
+  "steps": [
+    {
+      "id": "register",
+      "spine": "register",
+      "icon": "FileSignature",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/projects/:projectId/contracts",
+      "in": [
+        {
+          "key": "contract",
+          "label": "Signed contract"
+        },
+        {
+          "key": "guarantees",
+          "label": "Advance payment and performance guarantees"
+        }
+      ],
+      "out": [
+        {
+          "key": "registered",
+          "label": "Contract on record"
+        },
+        {
+          "key": "terms",
+          "label": "Certification and payment terms attached"
+        }
+      ]
+    },
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "boq",
+          "label": "Contract bill of quantities"
+        },
+        {
+          "key": "works",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per BoQ item"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "variations",
+          "label": "Variation orders flagged"
+        }
+      ]
+    },
+    {
+      "id": "recover",
+      "spine": "adjust",
+      "icon": "Percent",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "cumulative",
+          "label": "Cumulative valuation"
+        },
+        {
+          "key": "advance",
+          "label": "Advance payment outstanding"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments and retention"
+        }
+      ],
+      "out": [
+        {
+          "key": "recovery",
+          "label": "Advance payment recovered this period"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ],
+      "note": {
+        "what": "The advance is recovered on the proportion the period earned and the guarantee is reduced as it is recovered, so the two figures are read together rather than tracked in separate places by separate people."
+      }
+    },
+    {
+      "id": "certify",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "engineer",
+          "label": "Engineer named for certification"
+        }
+      ],
+      "out": [
+        {
+          "key": "ipc",
+          "label": "Interim payment certificate issued"
+        },
+        {
+          "key": "date",
+          "label": "Certification date on record"
+        }
+      ]
+    },
+    {
+      "id": "invoice",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "ipc",
+          "label": "Interim payment certificate issued"
+        },
+        {
+          "key": "retention",
+          "label": "Retention and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "invoice",
+          "label": "Invoice submitted to the authority"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ]
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "invoice",
+          "label": "Invoice and its submission date"
+        },
+        {
+          "key": "ipc",
+          "label": "Certificate date"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ],
+      "note": {
+        "why": "The window runs from a compliant submission, so an invoice returned for a missing attachment has not started anything even though it left your office. Recording what was submitted with it is what makes that visible on the day rather than at the end of the month."
+      }
+    }
+  ]
+}

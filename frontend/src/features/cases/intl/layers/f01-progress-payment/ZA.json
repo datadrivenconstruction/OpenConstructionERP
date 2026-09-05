@@ -1,0 +1,266 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "ZA",
+  "note": "South Africa runs the shortest payment window in the family, which is why this layer surfaces the deadlines and the watch steps rather than stopping at the invoice. Seven calendar days from the certificate leaves no room for a certificate that was issued and not read, so the clock is opened on the certificate date rather than on the invoice date.",
+  "slug": "issue-the-interim-payment-certificate-and-get-paid-on-it",
+  "order": 1340,
+  "region": "ZA",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "CalendarClock",
+  "estMinutes": 12,
+  "title": "Issue the interim payment certificate and get paid on it",
+  "desc": "Measure the period against the bill, value it at the contract rates, hold retention, get the principal agent to issue the interim payment certificate and open the clock on the certificate date, because the window that follows it is measured in days rather than weeks.",
+  "longDesc": "The distinctive thing about this payment regime is how little time it leaves. The principal agent issues an interim payment certificate and the employer pays within a handful of calendar days of the certificate date, which means the certificate is the event that matters and the invoice is administration behind it. Firms that run the clock from their own invoice date consistently discover they were already late, because the days were counting while the paperwork moved internally. Opening the clock on the certificate, and watching it rather than filing it, is the whole difference between a payment that arrives and a default the contract has a remedy for.",
+  "slots": {
+    "priceLine": "bill item",
+    "priceLinePlural": "bill items",
+    "valuationDoc": "interim payment certificate",
+    "certifier": "principal agent",
+    "excessTerm": "contract instruction",
+    "retentionTerm": "retention",
+    "payDoc": "tax invoice",
+    "clockRegime": "the contract payment provisions",
+    "clockStart": "the date of the interim payment certificate",
+    "payDays": "7",
+    "escalationRoute": "give notice of default and refer the dispute to adjudication"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "bill",
+          "label": "Contract bill of quantities"
+        },
+        {
+          "key": "works",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per bill item"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "instructions",
+          "label": "Contract instructions flagged"
+        }
+      ]
+    },
+    {
+      "id": "retention",
+      "spine": "adjust",
+      "icon": "Percent",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "cumulative",
+          "label": "Cumulative valuation"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments and retention"
+        }
+      ],
+      "out": [
+        {
+          "key": "held",
+          "label": "Retention held to date"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ]
+    },
+    {
+      "id": "certify",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "agent",
+          "label": "Principal agent named for certification"
+        }
+      ],
+      "out": [
+        {
+          "key": "certificate",
+          "label": "Interim payment certificate issued"
+        },
+        {
+          "key": "date",
+          "label": "Certificate date on record"
+        }
+      ]
+    },
+    {
+      "id": "invoice",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "certificate",
+          "label": "Interim payment certificate issued"
+        },
+        {
+          "key": "retention",
+          "label": "Retention and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "invoice",
+          "label": "Tax invoice issued"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ]
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "certificate",
+          "label": "Certificate and its date"
+        },
+        {
+          "key": "amount",
+          "label": "Certified amount"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ],
+      "note": {
+        "why": "Opening it on your own invoice date rather than on the certificate date moves every deadline later and does it silently, which is the version of this mistake that never gets caught, because nothing looks overdue until the remedy has already expired."
+      }
+    },
+    {
+      "id": "dates",
+      "spine": "deadlines",
+      "icon": "CalendarClock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Chosen regime"
+        }
+      ],
+      "out": [
+        {
+          "key": "due",
+          "label": "Due date"
+        },
+        {
+          "key": "derivation",
+          "label": "Derivation you can quote"
+        }
+      ]
+    },
+    {
+      "id": "watch",
+      "spine": "watch",
+      "icon": "AlertTriangle",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clocks",
+          "label": "Open clocks on the project"
+        },
+        {
+          "key": "finaldates",
+          "label": "Final dates for payment"
+        }
+      ],
+      "out": [
+        {
+          "key": "overdue",
+          "label": "Overdue certificates flagged"
+        },
+        {
+          "key": "register",
+          "label": "Breach register rows"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "MX",
+  "note": "Mexico surfaces the measurement half plus the authorisation and the fiscal document, because here the invoice is not a letter you write, it is a CFDI the tax authority stamps, and it has to agree with the estimacion it is raised against. The amortizacion del anticipo rides on the adjust step, which is what a spine slot for the money held back from each payment is for.",
+  "slug": "authorise-the-estimacion-and-invoice-it-as-a-cfdi",
+  "order": 1260,
+  "region": "MX",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "developer-client"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "ReceiptText",
+  "estMinutes": 12,
+  "title": "Authorise the estimacion and invoice it as a CFDI",
+  "desc": "Measure the period concepto by concepto, value it against the precios unitarios, amortise the anticipo and hold the fondo de garantia, get the residente de obra to authorise the estimacion and raise the CFDI against the authorised figure.",
+  "longDesc": "An estimacion is not an invoice and the difference is the whole workflow. The estimacion is the measured, priced and authorised statement of the period; the CFDI is the fiscal document raised against it, and the tax authority will stamp a CFDI whose figures nobody authorised just as happily as one whose figures everybody agreed. That is how a contractor ends up holding a stamped invoice for an amount the client will not pay, with the correction living in a cancellation and a reissue rather than in a conversation. Authorised first and invoiced second, the two documents say the same number and the amortizacion del anticipo is visible on both.",
+  "slots": {
+    "priceLine": "concepto",
+    "priceLinePlural": "conceptos",
+    "valuationDoc": "estimacion",
+    "certifier": "residente de obra",
+    "excessTerm": "concepto extraordinario",
+    "retentionTerm": "fondo de garantia",
+    "payDoc": "CFDI",
+    "clockRegime": "the public works payment rules",
+    "clockStart": "the authorisation of the estimacion",
+    "payDays": "20",
+    "escalationRoute": "claim the gastos financieros the law provides for"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "catalogo",
+          "label": "Catalogo de conceptos"
+        },
+        {
+          "key": "executed",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per concepto"
+        },
+        {
+          "key": "volumenes",
+          "label": "Volumenes for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "volumenes",
+          "label": "Volumenes for the period"
+        },
+        {
+          "key": "precios",
+          "label": "Precios unitarios"
+        }
+      ],
+      "out": [
+        {
+          "key": "estimacion",
+          "label": "Estimacion for the period"
+        },
+        {
+          "key": "extraordinarios",
+          "label": "Conceptos extraordinarios flagged"
+        }
+      ]
+    },
+    {
+      "id": "amortize",
+      "spine": "adjust",
+      "icon": "Percent",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "estimacion",
+          "label": "Cumulative estimacion"
+        },
+        {
+          "key": "anticipo",
+          "label": "Anticipo outstanding"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments"
+        }
+      ],
+      "out": [
+        {
+          "key": "amortizacion",
+          "label": "Amortizacion del anticipo"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ],
+      "note": {
+        "what": "The anticipo is amortised on the same proportion the period earned, so an estimacion that measures more also repays more. Left to a fixed monthly figure it finishes the works still owing, and the last estimacion is the one that discovers it."
+      }
+    },
+    {
+      "id": "autorizar",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "estimacion",
+          "label": "Estimacion for the period"
+        },
+        {
+          "key": "residente",
+          "label": "Residente de obra named for authorisation"
+        }
+      ],
+      "out": [
+        {
+          "key": "authorised",
+          "label": "Authorised estimacion"
+        },
+        {
+          "key": "date",
+          "label": "Authorisation date on record"
+        }
+      ]
+    },
+    {
+      "id": "cfdi",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "authorised",
+          "label": "Authorised estimacion"
+        },
+        {
+          "key": "retenciones",
+          "label": "Retenciones and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "cfdi",
+          "label": "CFDI issued and stamped"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ],
+      "note": {
+        "what": "A stamped CFDI is corrected by cancelling it and issuing another, not by editing it, so the figure has to be right before it is stamped rather than after."
+      }
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "cfdi",
+          "label": "CFDI and its date"
+        },
+        {
+          "key": "authorised",
+          "label": "Authorisation date"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ]
+    },
+    {
+      "id": "reconcile",
+      "spine": "reconcile",
+      "icon": "Scale",
+      "module": "Event Reconciliation",
+      "moduleKey": "nav.reconciliation",
+      "to": "/projects/:projectId/reconciliation",
+      "in": [
+        {
+          "key": "asked",
+          "label": "Amount invoiced"
+        },
+        {
+          "key": "authorised",
+          "label": "Amount authorised"
+        }
+      ],
+      "out": [
+        {
+          "key": "difference",
+          "label": "Difference carried forward"
+        },
+        {
+          "key": "aged",
+          "label": "Outstanding by age"
+        }
+      ]
+    }
+  ]
+}

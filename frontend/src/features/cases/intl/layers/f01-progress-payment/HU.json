@@ -1,0 +1,244 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "HU",
+  "note": "Hungary hangs the whole period on one document: without a signed teljesitesigazolas there is no lawful invoice, and the dispute that follows a refused one has its own forum rather than the courts. So this layer surfaces register, measure, certify, invoice, clock, deadlines and escalate, and the escalation slot names the expert body rather than a letter.",
+  "slug": "get-the-teljesitesigazolas-signed-and-invoice-the-period",
+  "order": 1240,
+  "region": "HU",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "FileCheck2",
+  "estMinutes": 12,
+  "title": "Get the teljesitesigazolas signed and invoice the period",
+  "desc": "Register the contract, measure the period tetel by tetel, get the muszaki ellenor to sign the teljesitesigazolas, raise the szamla against it and let the module count the days the payment rules allow, so a refusal to certify is a dated fact with a forum rather than a stalemate.",
+  "longDesc": "Hungarian construction payment turns on the teljesitesigazolas, and the reason it matters is that the contractor cannot lawfully invoice without one. That gives the certifying party a great deal of leverage and creates the failure everybody in the chain recognises: work is finished, nobody disputes it was finished, and the certificate does not arrive. The law answers that with a dedicated expert body rather than a lawsuit, but the answer is only available to a contractor who can show what was submitted, when, and what came back. Kept as the period runs, that record is a filing. Reconstructed afterwards it is an argument.",
+  "slots": {
+    "priceLine": "tetel",
+    "priceLinePlural": "tetelek",
+    "valuationDoc": "teljesitesigazolas",
+    "certifier": "muszaki ellenor",
+    "excessTerm": "potmunka",
+    "retentionTerm": "visszatartas",
+    "payDoc": "szamla",
+    "clockRegime": "the Ptk. payment rules",
+    "clockStart": "the day the szamla is received",
+    "payDays": "30",
+    "escalationRoute": "take it to the Teljesitesigazolasi Szakertoi Szerv and preserve the claim"
+  },
+  "steps": [
+    {
+      "id": "register",
+      "spine": "register",
+      "icon": "FileSignature",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/projects/:projectId/contracts",
+      "in": [
+        {
+          "key": "szerzodes",
+          "label": "Signed vallalkozasi szerzodes"
+        },
+        {
+          "key": "koltsegvetes",
+          "label": "Priced koltsegvetes"
+        }
+      ],
+      "out": [
+        {
+          "key": "registered",
+          "label": "Contract on record"
+        },
+        {
+          "key": "terms",
+          "label": "Certification and payment terms attached"
+        }
+      ]
+    },
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "koltsegvetes",
+          "label": "Priced koltsegvetes"
+        },
+        {
+          "key": "executed",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per tetel"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ],
+      "note": {
+        "what": "Keep potmunka on its own tetel rather than inside an existing one. A certifier who has to decide the whole period in order to decide the extra will decide neither."
+      }
+    },
+    {
+      "id": "igazolas",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "ellenor",
+          "label": "Muszaki ellenor named for certification"
+        }
+      ],
+      "out": [
+        {
+          "key": "signed",
+          "label": "Signed teljesitesigazolas"
+        },
+        {
+          "key": "date",
+          "label": "Certification date on record"
+        }
+      ],
+      "note": {
+        "why": "A certificate that is refused and a certificate that has simply not arrived look identical from the contractor's side, and the remedies for them are different. Recording the submission date is what tells the two apart."
+      }
+    },
+    {
+      "id": "szamla",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "signed",
+          "label": "Signed teljesitesigazolas"
+        },
+        {
+          "key": "visszatartas",
+          "label": "Visszatartas and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "szamla",
+          "label": "Szamla issued"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ],
+      "note": {
+        "what": "Between businesses the domestic reverse charge usually applies to construction work, so the szamla carries the note and the customer accounts for the tax rather than the rate appearing on the invoice."
+      }
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "szamla",
+          "label": "Szamla and its date"
+        },
+        {
+          "key": "terms",
+          "label": "Contract payment terms"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "due",
+          "label": "Due date computed"
+        }
+      ]
+    },
+    {
+      "id": "dates",
+      "spine": "deadlines",
+      "icon": "CalendarClock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Chosen regime"
+        }
+      ],
+      "out": [
+        {
+          "key": "due",
+          "label": "Due date"
+        },
+        {
+          "key": "derivation",
+          "label": "Derivation you can quote"
+        }
+      ]
+    },
+    {
+      "id": "escalate",
+      "spine": "escalate",
+      "icon": "Gavel",
+      "module": "Documents",
+      "moduleKey": "nav.documents",
+      "to": "/projects/:projectId/files",
+      "in": [
+        {
+          "key": "passed",
+          "label": "Passed deadlines"
+        },
+        {
+          "key": "record",
+          "label": "Submissions and certification dates"
+        }
+      ],
+      "out": [
+        {
+          "key": "filing",
+          "label": "Expert body filing"
+        },
+        {
+          "key": "entitlement",
+          "label": "Entitlement preserved"
+        }
+      ]
+    }
+  ]
+}

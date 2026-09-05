@@ -1,0 +1,213 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "RU",
+  "note": "Russia splits the period across two forms rather than one, and the split is the point: the KS-2 act records what was accepted and the KS-3 certificate records what it is worth cumulatively. That maps onto the spine without a new sentence because the spine already separates the document that states the value from the document that asks for the money.",
+  "slug": "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate",
+  "order": 1300,
+  "region": "RU",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "developer-client"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "FileCheck2",
+  "estMinutes": 12,
+  "title": "Close the month with a KS-2 act and a KS-3 certificate",
+  "desc": "Measure the period against the smeta, expand the GESN norms into the resources they carry, get the KS-2 act signed by the client's technical supervisor and raise the KS-3 certificate against it, so the cumulative figure and the accepted figure never disagree.",
+  "longDesc": "The KS-2 and the KS-3 answer two different questions and a great deal of month-end argument comes from treating them as one document in two copies. The KS-2 is the act of acceptance: it lists what was executed, position by position, at the rates the smeta carries, and it is signed by the party who accepted it. The KS-3 is cumulative: it states the value of the works from the beginning of the contract to this period, which is what the payment is calculated from. A KS-3 that does not follow from the KS-2 acts behind it is a reconciliation nobody can complete, and it surfaces at the worst moment, when the contract closes and the totals have to agree.",
+  "slots": {
+    "priceLine": "smeta position",
+    "priceLinePlural": "smeta positions",
+    "valuationDoc": "KS-2 act",
+    "certifier": "client's technical supervisor",
+    "excessTerm": "additional works agreement",
+    "retentionTerm": "guarantee retention",
+    "payDoc": "KS-3 certificate",
+    "clockRegime": "the contract payment terms",
+    "clockStart": "the day the KS-2 act is signed",
+    "payDays": "7 working",
+    "escalationRoute": "send the pretenziya and start the contractual penalty running"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "smeta",
+          "label": "Approved smeta"
+        },
+        {
+          "key": "executed",
+          "label": "Work executed this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per smeta position"
+        },
+        {
+          "key": "volumes",
+          "label": "Executed volumes for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "volumes",
+          "label": "Executed volumes for the period"
+        },
+        {
+          "key": "norms",
+          "label": "GESN norms and smeta rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "act",
+          "label": "KS-2 act for the period"
+        },
+        {
+          "key": "additional",
+          "label": "Additional works flagged"
+        }
+      ],
+      "note": {
+        "what": "A norm-based rate carries the labour, machinery and materials behind it, so the act can be read back to the resources it claims rather than to a single figure. That is what makes a disagreement about one position a conversation about one norm."
+      }
+    },
+    {
+      "id": "sign",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "act",
+          "label": "KS-2 act for the period"
+        },
+        {
+          "key": "supervisor",
+          "label": "Technical supervisor named for acceptance"
+        }
+      ],
+      "out": [
+        {
+          "key": "signed",
+          "label": "Signed KS-2 act"
+        },
+        {
+          "key": "date",
+          "label": "Acceptance date on record"
+        }
+      ]
+    },
+    {
+      "id": "cumulative",
+      "spine": "adjust",
+      "icon": "Percent",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "signed",
+          "label": "Signed KS-2 acts to date"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments and guarantee retention"
+        }
+      ],
+      "out": [
+        {
+          "key": "cumulative",
+          "label": "Cumulative value of works"
+        },
+        {
+          "key": "net",
+          "label": "Net due for the period"
+        }
+      ]
+    },
+    {
+      "id": "ks3",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "cumulative",
+          "label": "Cumulative value of works"
+        },
+        {
+          "key": "retention",
+          "label": "Guarantee retention and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "ks3",
+          "label": "KS-3 certificate issued"
+        },
+        {
+          "key": "carried",
+          "label": "Amount carried into the accounts"
+        }
+      ]
+    },
+    {
+      "id": "reconcile",
+      "spine": "reconcile",
+      "icon": "Scale",
+      "module": "Event Reconciliation",
+      "moduleKey": "nav.reconciliation",
+      "to": "/projects/:projectId/reconciliation",
+      "in": [
+        {
+          "key": "asked",
+          "label": "Amount certified on the KS-3"
+        },
+        {
+          "key": "accepted",
+          "label": "Amount accepted on the KS-2 acts"
+        }
+      ],
+      "out": [
+        {
+          "key": "difference",
+          "label": "Difference carried forward"
+        },
+        {
+          "key": "aged",
+          "label": "Outstanding by age"
+        }
+      ],
+      "note": {
+        "why": "The two forms are reconciled at contract close whether or not anybody reconciled them monthly, and a year of small differences is not a month of arithmetic. Doing it every period is the same work spread over the time when it is still cheap to correct."
+      }
+    }
+  ]
+}
