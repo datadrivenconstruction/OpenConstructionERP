@@ -13,10 +13,11 @@ while it was working. These tests pin the repair: output is produced *while the
 blocking call is outstanding*, and it stops when the boot budget runs out so a
 call that never returns cannot be kept alive forever.
 
-Nothing here asserts a wall-clock duration. The first two tests hold
-``get_server()`` open on an event and assert that markers appeared before that
-event was released, which is the mechanism itself; the third asserts that the
-emission count cannot grow once the shared deadline has passed.
+Nothing here asserts a wall-clock duration. The tests that hold ``get_server()``
+open do it with an event, and assert that markers appeared before that event was
+released, which is the mechanism itself rather than a stopwatch reading. The two
+that check reporting has stopped assert that the emission count cannot grow
+again, which is likewise a property and not a duration.
 """
 
 from __future__ import annotations
@@ -176,9 +177,7 @@ def test_a_bring_up_that_returns_at_once_says_nothing(monkeypatch: pytest.Monkey
     assert emitted == [], f"a boot with no wait in it must not report a wait: {emitted}"
 
 
-def test_the_heartbeat_stops_before_the_failure_handler_speaks(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_the_heartbeat_stops_before_the_failure_handler_speaks(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """The two heartbeats must not overlap when the bring-up call raises.
 
     The existing recovery heartbeat lives in the handler for this exception, so
