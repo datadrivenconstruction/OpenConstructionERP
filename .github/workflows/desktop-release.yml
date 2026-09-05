@@ -101,12 +101,12 @@ jobs:
           ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"
@@ -1003,7 +1003,7 @@ jobs:
           esac
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"
@@ -1387,7 +1387,7 @@ jobs:
       # read, which under a gate is a red release caused by nothing.
       - name: Set up Python for the bundled sidecar census (macOS)
         if: runner.os == 'macOS'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -1674,7 +1674,7 @@ jobs:
           ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: "npm"
@@ -1912,7 +1912,7 @@ jobs:
 
       - name: Set up .NET 8
         if: steps.preflight.outputs.mode == 'sign'
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
 
