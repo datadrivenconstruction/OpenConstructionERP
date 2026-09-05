@@ -35,6 +35,7 @@ import hashlib as _hashlib
 import logging
 import os
 import secrets
+import threading
 import time
 import uuid
 import uuid as _instance_uuid
@@ -50,6 +51,8 @@ _INSTANCE_ID = str(_instance_uuid.uuid4())
 _BUILD_PEPPER = bytes(b ^ 0x55 for b in (b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"))
 _BUILD_HASH = _hashlib.sha256(_BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC
 from pathlib import Path
 
@@ -291,6 +294,107 @@ def should_prime_openapi_schema(
 #: Named rather than spelled at the call site so the test that pins this can ask
 #: for the same thing the boot does.
 ROUTE_TABLE_WARMUP_PATH = "/__oe_route_table_warmup__"
+
+#: How often the startup heartbeat repeats which phase the boot is in.
+#:
+#: Matches ``_RECOVERY_HEARTBEAT_SECONDS`` in ``app/core/embedded_pg.py``, which
+#: does the same job for the phase before this process configures logging. The
+#: two are deliberately the same number: together they are one claim, that no
+#: phase of a working boot is silent for longer than this.
+_BOOT_HEARTBEAT_SECONDS = 15.0
+
+#: How long a single startup phase may keep reporting itself before the
+#: heartbeat stops vouching for it.
+#:
+#: This is the part that keeps the repair from becoming a worse bug than the one
+#: it fixes. The desktop launcher gives up on a sidecar that has written nothing
+#: for four minutes, and that rule is the only thing that catches a boot wedged
+#: with no error to report; a heartbeat with no end would disable it outright.
+#:
+#: The budget is per phase and not per boot, because a boot that keeps reaching
+#: new phases is demonstrably working and should be waited for however long it
+#: takes. A phase that is still running after this long is not slow, it is
+#: stuck: the whole quiet-machine boot reaches the open port in about 143s, and
+#: the longest phase measured under load is the route-table build at 58.6s. So
+#: reporting stops, the launcher's own limit fires four minutes later, and the
+#: total stays well inside the twenty-minute ceiling the launcher enforces
+#: separately.
+_BOOT_PHASE_BUDGET_SECONDS = 600.0
+
+#: The startup phase running right now, and when it started.
+#:
+#: Written by :func:`_set_boot_phase` from the section headers the boot log
+#: already prints, so the heartbeat names the same step the operator reads
+#: rather than inventing a second vocabulary for it.
+_boot_phase: str = ""
+_boot_phase_started: float = 0.0
+
+
+def _set_boot_phase(name: str) -> None:
+    """Record which startup phase is running, and restart its clock."""
+    global _boot_phase, _boot_phase_started
+    _boot_phase = name
+    _boot_phase_started = time.monotonic()
+
+
+@contextmanager
+def _heartbeat_through_startup() -> Iterator[None]:
+    """Say which phase startup is in, for as long as startup is running.
+
+    The desktop launcher decides a backend has stopped when nothing has been
+    written for four minutes. It cannot use the listening port for this, because
+    uvicorn binds only after this lifespan returns, so for the whole of startup
+    the only evidence that anything is happening is what this process writes.
+
+    Several startup phases are long and internally silent. Building the route
+    table takes 32.1s on a quiet machine and 58.6s under load, and it writes one
+    line when it finishes; the module load, the migrations and first-run seeding
+    are the same shape. None of those is close to four minutes today, so this is
+    not a fix for a failure that is happening. It is the general form of one
+    that did happen, in the phase before this process configures logging: any
+    phase that outgrows the limit takes a working boot down with it, and the
+    honest requirement is that no phase is silent for longer than the interval,
+    not that the phases we have measured are short enough.
+
+    A thread, not an ``asyncio`` task, and the difference is not stylistic. The
+    route-table build runs on the event loop and does not yield: a health check
+    issued alongside it answered 33.9 seconds later, which is the measurement
+    that made it worth moving. Anything scheduled on the loop is therefore
+    starved for exactly the phase that most needs reporting, so the reporter has
+    to sit outside the loop entirely.
+
+    It reports and does not do: one log line every fifteen seconds adds no work
+    to the boot and does not delay the port by any amount. That is deliberate,
+    because the reason the route table moved here in the first place was to make
+    the first page fast.
+    """
+    stop = threading.Event()
+    _set_boot_phase("startup")
+
+    def tick() -> None:
+        while True:
+            # Read the interval each turn rather than binding it once, and wait
+            # on the event rather than sleeping, so startup finishing ends this
+            # at once instead of after one more full interval.
+            if stop.wait(_BOOT_HEARTBEAT_SECONDS):
+                return
+            elapsed = time.monotonic() - _boot_phase_started
+            # Over budget means stuck, and a stuck boot has to be allowed to
+            # look stuck. Skipping the turn rather than ending the thread is
+            # what lets a phase that does eventually move on be reported again,
+            # while a phase that never moves stays silent for good.
+            if elapsed >= _BOOT_PHASE_BUDGET_SECONDS:
+                continue
+            logger.info("Still working: %s (%ds so far)", _boot_phase or "startup", int(elapsed))
+
+    worker = threading.Thread(target=tick, name="oe-boot-heartbeat", daemon=True)
+    worker.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        # Bounded so a wedged reporter can never hold up the boot it reports on.
+        worker.join(timeout=5.0)
 
 
 async def warm_route_table(app: FastAPI) -> float:
@@ -3754,7 +3858,13 @@ def create_app() -> FastAPI:
         Makes it possible to scan a 60-line startup log and see at a glance
         where the server got stuck. Keeps output machine-readable because
         logger.info is still used.
+
+        Also the one place the startup heartbeat learns which phase it is in, so
+        a section header and the heartbeat can never name different steps. Every
+        header has to come through here for that to hold; a header written
+        inline would leave the heartbeat reporting the phase before it.
         """
+        _set_boot_phase(title)
         logger.info("=== %s ===", title)
 
     @app.on_event("startup")
@@ -3766,7 +3876,12 @@ def create_app() -> FastAPI:
         # the embedded-PostgreSQL shutdown noise that follows. uvicorn still
         # handles the re-raised error exactly as before.
         try:
-            await _startup_impl()
+            # Wraps the whole sequence rather than any one step in it, because
+            # the phase that goes quiet next is not one we get to choose. It
+            # names the phase it is in and stops vouching for one that has run
+            # past its budget; see _heartbeat_through_startup.
+            with _heartbeat_through_startup():
+                await _startup_impl()
         except Exception as exc:
             _emit_server_fail(exc)
             raise
@@ -5091,7 +5206,12 @@ def create_app() -> FastAPI:
         # boot-time warm-up is: the suite builds this application over and over
         # and pays the first-request cost only in the tests that send one.
         if not _fast_startup:
-            logger.info("=== Routing ===")
+            # Through _section rather than logged inline, so the startup
+            # heartbeat names this phase while it runs instead of still naming
+            # the one before it. This is the longest silent phase there is now
+            # that the database has its own heartbeat, so it is the phase the
+            # heartbeat most needs to be right about.
+            _section("Routing")
             logger.info("Building the route table (one-off, before the port opens)")
             _warm_seconds = await warm_route_table(app)
             logger.info("Route table ready in %.1fs", _warm_seconds)
