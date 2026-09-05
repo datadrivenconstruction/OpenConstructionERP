@@ -194,6 +194,25 @@ function snapSize(value: number, step: number, fallback: number): number {
   return Math.max(step, Math.round(value / step) * step);
 }
 
+/**
+ * Whether a caller-supplied class string sets ``height`` itself, in which case
+ * this component must not also emit its default. See ``heightClass``.
+ *
+ * ``min-h-`` and ``max-h-`` are deliberately NOT matches. They bound a height
+ * rather than setting one, and the detail variant pairs ``h-full`` with
+ * ``min-h-[20rem]`` on purpose, so treating those as a stated height would put
+ * the collapse back for the case that works today.
+ *
+ * A prefixed utility such as ``md:h-96`` is not a match either, and that is
+ * the safe direction: it sets a height only above its breakpoint, so standing
+ * the default down for it would leave the element with no height at all below
+ * one. Better to keep a default that a breakpoint utility then overrides.
+ */
+function hasOwnHeight(classes: string | undefined): boolean {
+  if (!classes) return false;
+  return classes.split(/\s+/).some((name) => /^h-\S/.test(name));
+}
+
 /** Web-Mercator lon → fractional tile X at the given zoom. */
 function lngToTileX(lng: number, z: number): number {
   return ((lng + 180) / 360) * 2 ** z;
@@ -333,9 +352,20 @@ export function ProjectMap({
   const isCard = variant === 'card';
   // detail variant defaults to ``h-full`` so the parent grid (e.g. the
   // project-detail Map+Weather panel) can stretch the map to match the
-  // height of its sibling. A custom ``className`` override still wins
-  // because tailwind's JIT utilities cascade after the default class.
-  const heightClass = isCard ? 'h-28' : 'h-full';
+  // height of its sibling.
+  //
+  // The default stands down when the caller states a height of its own, and
+  // that is load-bearing rather than tidy. This comment used to claim a
+  // custom ``className`` "still wins because tailwind's JIT utilities cascade
+  // after the default class", which is false: ``className`` is appended after
+  // ``heightClass`` on the element, but both names survive into the emitted
+  // stylesheet and the one Tailwind wrote LAST there decides, whatever order
+  // they sit in on the element. ``.h-full`` lands after ``.h-[32rem]``, so the
+  // project detail page asked for 32rem, got ``h-full`` against an
+  // auto-height grid parent, collapsed to 2px, and the ``overflow-hidden``
+  // above cropped a live 300px map canvas to a hairline. The map was mounted,
+  // painted and correct the whole time, and nobody could see it.
+  const heightClass = hasOwnHeight(className) ? undefined : isCard ? 'h-28' : 'h-full';
 
   // Ask for the street snapshot. Card variant only: the detail variant has
   // a live map already, and rendering a picture of one for it would be

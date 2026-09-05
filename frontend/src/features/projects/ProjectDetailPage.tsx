@@ -673,6 +673,13 @@ function ProjectLocationPanel({ project }: { project: Project }) {
             // to match the (now 3-row) weather block. When the map is
             // shown alone, fall back to a fixed height so it doesn't
             // collapse to zero.
+            //
+            // That fallback only reaches the element because ProjectMap
+            // stands its own ``h-full`` default down when this prop states a
+            // height. For a while it did not, both class names went out
+            // together, the stylesheet order picked ``h-full``, and this map
+            // was 2px tall against an auto-height parent while looking
+            // correct in the JSX. Do not reintroduce a default alongside it.
             weatherEnabled ? 'h-full min-h-[20rem]' : 'h-[32rem]',
           )}
         />
