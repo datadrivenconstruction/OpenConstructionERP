@@ -141,7 +141,10 @@ class BIMValidationService:
         Raises:
             ValueError: If the referenced BIM model does not exist.
         """
-        started = time.monotonic()
+        # perf_counter, not monotonic: monotonic steps by about 15.625 ms on
+        # Windows, which is coarser than a whole validation pass and reported
+        # short runs as a duration of exactly zero.
+        started = time.perf_counter()
 
         # 1. Load model + all elements
         model = await self.model_repo.get(model_id)
@@ -429,7 +432,7 @@ class BIMValidationService:
             # core ValidationReport.score (E-XMOD-015).
             score = compute_quality_score(passed_weight, total_weight, error_count)
 
-        duration_ms = round((time.monotonic() - started) * 1000, 2)
+        duration_ms = round((time.perf_counter() - started) * 1000, 2)
         logger.info(
             "BIM validation done: model=%s elements=%d rules=%d checks=%d passed=%d failed=%d warn=%d err=%d info=%d duration=%.1fms",
             model_id,

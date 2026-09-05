@@ -504,7 +504,12 @@ class ValidationEngine:
         """
         import time
 
-        start = time.monotonic()
+        # perf_counter, not monotonic: monotonic is backed by the interrupt
+        # timer on Windows and advances in steps of about 15.625 ms, so a pass
+        # over a few hundred in-memory rules finished between two identical
+        # readings and the report stored a duration of exactly 0 ms. The screen
+        # then printed "Duration: 0.0ms" as though the run had been measured.
+        start = time.perf_counter()
 
         context = ValidationContext(
             data=data,
@@ -559,7 +564,7 @@ class ValidationEngine:
                     )
                 )
 
-        report.duration_ms = round((time.monotonic() - start) * 1000, 2)
+        report.duration_ms = round((time.perf_counter() - start) * 1000, 2)
 
         logger.info(
             "Validation complete: %s (score=%s, errors=%d, warnings=%d, duration=%.1fms)",

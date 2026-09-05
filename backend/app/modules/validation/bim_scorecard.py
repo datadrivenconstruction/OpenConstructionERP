@@ -860,7 +860,10 @@ def build_bim_scorecard(
     Returns:
         A :class:`BIMScorecard`.
     """
-    started = time.monotonic()
+    # perf_counter, not monotonic: monotonic steps by about 15.625 ms on
+    # Windows, coarser than the scorecard build itself, so generated_ms came
+    # back as exactly zero for anything but a very large model.
+    started = time.perf_counter()
     facet_weights = dict(DEFAULT_FACET_WEIGHTS)
     if weights:
         facet_weights.update(weights)
@@ -881,7 +884,7 @@ def build_bim_scorecard(
             status="skipped",
             facets=facets,
             element_findings={},
-            generated_ms=round((time.monotonic() - started) * 1000, 2),
+            generated_ms=round((time.perf_counter() - started) * 1000, 2),
         )
 
     prop = property_completeness_facet(
@@ -920,7 +923,7 @@ def build_bim_scorecard(
         status=status,
         facets=facets,
         element_findings=element_findings,
-        generated_ms=round((time.monotonic() - started) * 1000, 2),
+        generated_ms=round((time.perf_counter() - started) * 1000, 2),
     )
 
 

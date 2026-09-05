@@ -80,7 +80,11 @@ interface ValidationReportData {
   unsupported_rule_sets?: string[];
   // How long the run took, or null when the report does not record it. A
   // stored report predating the field has no duration, and defaulting that to
-  // zero printed "Duration: 0.0ms" as though the run had been timed.
+  // zero printed "Duration: 0.0ms" as though the run had been timed. A stored
+  // zero has the same problem for a different reason and no fix can reach it:
+  // reports written before the timing clock was changed were measured with one
+  // that stepped about every 15.6ms on Windows, so a run shorter than a step
+  // was recorded as zero and stays zero when the report is reopened.
   duration_ms: number | null;
   results: ValidationResultItem[];
 }
@@ -404,6 +408,26 @@ function ScoreCircle({ score, errors }: { score: number; errors: number }) {
   );
 }
 
+/**
+ * How many decimals to print for a run duration in milliseconds.
+ *
+ * The backend rounds a measured duration to two decimals, so the smallest
+ * non-zero value it can put on the wire is 0.01ms. Printing that with one
+ * decimal produces "0.0ms", the very text an untimed run produces, so a short
+ * duration is shown with the digits the wire actually carries. Past 10ms the
+ * second decimal is noise and one reads better.
+ *
+ * This is not a way to hide a zero. Durations used to be measured with a clock
+ * that steps about every 15.6ms on Windows, so any run that finished inside one
+ * step differenced to exactly zero and nine of twenty five stored reports read
+ * "0.0ms". The clock was replaced, not the display: a zero is now rare and it
+ * means something, either a report measured before the fix or a run genuinely
+ * below five microseconds, and either way it is printed as it is.
+ */
+export function durationDecimals(ms: number): number {
+  return Math.abs(ms) < 10 ? 2 : 1;
+}
+
 function SummaryCard({ report }: { report: ValidationReportData }) {
   const { t } = useTranslation();
 
@@ -496,7 +520,7 @@ function SummaryCard({ report }: { report: ValidationReportData }) {
             <p className="mt-1 text-xs text-content-tertiary tabular-nums">
               {t('validation.duration_ms', {
                 defaultValue: 'Duration: {{ms}}ms',
-                ms: fmtFixed(report.duration_ms, 1),
+                ms: fmtFixed(report.duration_ms, durationDecimals(report.duration_ms)),
               })}
             </p>
           )}

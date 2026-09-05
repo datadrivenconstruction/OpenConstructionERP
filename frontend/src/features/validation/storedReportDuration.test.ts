@@ -12,7 +12,7 @@
 // guard: they fail if the old `?? 0` comes back, and they fail if the fix
 // overshoots into `|| null` and swallows a duration that genuinely was zero.
 import { describe, it, expect } from 'vitest';
-import { mapStoredReport } from './ValidationPage';
+import { durationDecimals, mapStoredReport } from './ValidationPage';
 
 type StoredMetadata = {
   duration_ms?: number;
@@ -54,6 +54,33 @@ describe('mapStoredReport duration', () => {
 
   it('keeps a measured zero, which is not the same as an unmeasured one', () => {
     expect(mapStoredReport(storedReport({ duration_ms: 0 })).duration_ms).toBe(0);
+  });
+});
+
+// The duration the backend sends is rounded to two decimals, so 0.01ms is the
+// smallest non-zero number that can reach this page. Printed with one decimal
+// it reads "0.0", the same text an untimed run produces, and the reader cannot
+// tell a measured sub-millisecond run from a failure to measure. A zero that is
+// genuinely zero still prints as zero: it is rare now, and it means the report
+// was written before the timing clock was fixed.
+// fmtFixed sets minimumFractionDigits and maximumFractionDigits to the same
+// number, so it always emits exactly the digits asked for and the question is
+// only how many to ask for. The separators it chooses are the reader's, so the
+// cases below are written against toFixed and stay true in every locale.
+describe('duration display precision', () => {
+  it('never renders a non-zero duration as zero', () => {
+    for (const ms of [0.01, 0.04, 0.09, 0.5, 9.99]) {
+      expect(Number(ms.toFixed(durationDecimals(ms)))).toBeGreaterThan(0);
+    }
+  });
+
+  it('drops to one decimal once the second one is noise', () => {
+    expect(durationDecimals(10)).toBe(1);
+    expect(durationDecimals(1578)).toBe(1);
+  });
+
+  it('still prints a real zero as zero rather than hiding it', () => {
+    expect((0).toFixed(durationDecimals(0))).toBe('0.00');
   });
 });
 

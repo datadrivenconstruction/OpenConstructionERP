@@ -150,7 +150,10 @@ async def validate_requirement_set_against_model(
     A model that exists elsewhere is refused in exactly the same words as one
     that does not exist at all, so the caller cannot tell the two apart.
     """
-    started = time.monotonic()
+    # perf_counter, not monotonic: monotonic steps by about 15.625 ms on
+    # Windows, which is coarser than the run being measured and reported it as
+    # a duration of exactly zero.
+    started = time.perf_counter()
 
     model_repo = BIMModelRepository(session)
     elem_repo = BIMElementRepository(session)
@@ -309,7 +312,7 @@ async def validate_requirement_set_against_model(
     else:
         status_value = "passed"
     score = (passed_count / total_checks) if total_checks else 1.0
-    duration_ms = round((time.monotonic() - started) * 1000, 2)
+    duration_ms = round((time.perf_counter() - started) * 1000, 2)
 
     user_uuid: uuid.UUID | None = None
     if user_id:
