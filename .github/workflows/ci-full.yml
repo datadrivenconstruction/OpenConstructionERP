@@ -4,6 +4,87 @@ name: CI Full Suite
 # ci.yml runs the unit tree only because the integration tree against a
 # service container does not fit the 60 minute job limit. This workflow
 # gives the integration tree a real budget and can also be started by hand.
+#
+# WHAT THIS LANE COVERS, AND WHAT NOTHING ELSE COVERS. It runs the whole
+# collected backend tree, and it is the ONLY lane that runs tests/integration
+# (232 files) and tests/modules (36 files) at all. If this workflow is not
+# producing a readable verdict, those two trees are untested everywhere. It also
+# runs that whole tree on the embedded PostgreSQL the desktop and self-hosted
+# builds ship, on Windows and macOS, which is the only coverage of the embedded
+# path on those two OSes.
+#
+# WHAT IT DOES NOT COVER. No frontend, no e2e, no lint, no version sync, no repo
+# hygiene, no desktop packaging. Those live in ci.yml, e2e-cross-os.yml,
+# repo-hygiene.yml and desktop-check.yml, and a green run here says nothing
+# about any of them.
+#
+# HOW TO TELL IT APART FROM ci-postgres.yml. Different tree, different trigger,
+# different standing. ci-postgres.yml runs tests/pg only, the PostgreSQL dialect
+# suite, on every push and pull request, and finishes in about twenty minutes;
+# it is one of the two lanes this project treats as authoritative and acts on.
+# This workflow runs everything, on a nightly cron, and is not in that set. Two
+# jobs here are called "Backend Full Suite (... embedded PG)" and ci-postgres.yml
+# also boots an embedded cluster, so the phrase "embedded PG" does not tell them
+# apart; the tree under test does.
+#
+# CHECK NAMES ARE JOB NAMES. The names a branch protection rule or a workflow
+# condition can match are the job names below: "Backend Full Suite" for the
+# roll-up gate, "Backend Full Suite (shard N/32)" for the 32 shards, and
+# "Backend Full Suite (<os>, embedded PG)" for the cross-OS pair. The gate's
+# name is a strict PREFIX of all 32 shard names, so a prefix or substring filter
+# matches 33 jobs where an exact match finds the one that means "everything
+# passed". The workflow name, "CI Full Suite", is not a check name at all: a
+# condition written against it can never be satisfied and reports nothing when
+# it is not, which is the failure this file is trying not to repeat.
+#
+# WHY IT IS STILL NIGHTLY RATHER THAN ON PUSH. Measured 2026-09-05 over the last
+# 40 runs on main: 40 completed, 0 cancelled, 0 successful, and not one of them
+# was a push event, because this workflow has never had a push trigger. So the
+# tree it guards had gone roughly a month without a green, and every red was
+# indistinguishable from the red before it. The obvious repair, a push trigger,
+# was measured and rejected on two grounds.
+#
+# First, the concurrency pool. On run 33951533720 exactly 20 of the 34 test jobs
+# started at 07:04:20 and the 21st only at 07:07:39, which puts this account's
+# ceiling at 20 concurrent jobs, measured rather than assumed. main takes 25 to
+# 50 pushes a day and ci.yml already fans out to about 20 jobs per push, so
+# adding 34 more per push would queue ci-postgres.yml, the lane that actually
+# blocks nothing but is actually read, behind this one. Runner minutes are not
+# the constraint; the repository is public and standard runners are free.
+# Slots are the constraint.
+#
+# Second, and this is the load-bearing reason: the tree is red for real and
+# heterogeneous defects, not for one environmental cause. Run 33951533720 had 11
+# of 34 test jobs red, and the failures across shards 1, 2 and 3 alone included
+# an unexpected keyword argument, several plain assertion mismatches, a
+# permission denial, an asyncpg session state error and a 422 on an invalid
+# UUID. A lane pointed at a tree in that state is born red and stays red until
+# those are fixed one by one. Folding it into ci-postgres.yml would therefore
+# turn the one lane this project trusts permanently red on the first push, which
+# spends working signal to expose broken signal. Putting it on push as a
+# separate lane would just create a second red lane nobody reads, which is the
+# situation this comment exists to describe.
+#
+# ON PICKING A CHEAPER SUBSET TO RUN PER PUSH. It cannot be done with the matrix
+# below. pytest-split partitions the COLLECTED tree by test count and is
+# pathless by design, as the note on the job explains, so no choice of --group
+# values corresponds to tests/integration or tests/modules; a handful of shards
+# is a random count-sample of the whole tree, not integration coverage. Any
+# per-push subset has to be a separate path-scoped job.
+#
+# HOW TO STOP THIS LANE GOING DARK AGAIN, IN ORDER. The gate job below now
+# writes the per-job verdicts into the run summary and raises an error
+# annotation naming the failing jobs, so one glance at a nightly says how many
+# shards are red and whether the shape moved since yesterday, instead of that
+# costing 34 log downloads. When the nightly has been green for, say, five
+# consecutive runs, the next step is to add a single push-triggered job here
+# that runs `pytest tests/integration tests/modules` against the same service
+# container, guarded by a concurrency group whose cancel-in-progress is
+# `${{ github.ref != 'refs/heads/main' }}`, matching ci.yml, because cancelling
+# on main produces absent verdicts rather than red ones and silence reads as
+# health. Do not add that job while the tree is red; a lane that is red on
+# arrival teaches everyone to ignore it, and then removing it is the only
+# honest option left.
 
 on:
   schedule:
@@ -82,11 +163,18 @@ jobs:
           # and a shard running the heavy tree does not; 256 gives 25600 slots
           # and stops the arithmetic depending on the spare.
           # PostgreSQL answers `out of shared memory` with `HINT: You might need
-          # to increase max_locks_per_transaction`, which is what the nightly has
-          # been reporting: on run 33245180634 it produced 29 of the 34 failures
-          # on shard 4, and every one of that shard's ERRORs was this and nothing
-          # else. It is a real ceiling, not a flaky one - the 2026-08-25 nightly
-          # hit the identical 29 on the same shard.
+          # to increase max_locks_per_transaction`, which is what the nightly was
+          # reporting when this was written: on run 33245180634 it produced 29 of
+          # the 34 failures on shard 4, and every one of that shard's ERRORs was
+          # this and nothing else. It was a real ceiling, not a flaky one - the
+          # 2026-08-25 nightly hit the identical 29 on the same shard.
+          #
+          # That symptom is GONE, remeasured 2026-09-05 on run 33951533720: shard
+          # 4 failed 1 test out of 1102, and the failures elsewhere in that run
+          # are ordinary product and test defects with no shared cause. Do not go
+          # looking for a lock storm today. The setting stays for the reason the
+          # paragraph above gives, which is the next per-test schema rebuild, and
+          # not because it is currently holding anything up.
           #
           # The population matters more than the count, because it is why these
           # cannot simply be listed as known failures: the victims are whichever
@@ -158,19 +246,143 @@ jobs:
 
   backend-full-gate:
     name: Backend Full Suite
-    # One stable status check that is green only when every shard passed, so
-    # the nightly still reads as a single pass/fail at a glance.
-    needs: [backend-full]
+    # One stable status check that is green only when every test job passed, so
+    # the nightly reads as a single pass/fail at a glance.
+    #
+    # It waits on the cross-OS pair as well as the shards. Until 2026-09-05 it
+    # waited on the shards alone, which left a hole worth naming: a run whose
+    # Windows or macOS job was red still published THIS check green. The run's
+    # own conclusion was red, but a named check is what a person scanning the
+    # branch or a protection rule reads, and it was saying the suite passed
+    # while two of the thirty-four test jobs were failing. The cost of closing
+    # it is that the check now lands when the slowest cross-OS job finishes
+    # rather than when the shards do, which on run 33951533720 was 2h17m instead
+    # of about 40 minutes. On a nightly nobody is waiting on that.
+    needs: [backend-full, backend-full-cross-os]
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      # Only to read this run's own job list in the summary step below.
+      actions: read
+      contents: read
     steps:
-      - name: Require all shards to pass
+      # The summary runs BEFORE the verdict step, and the order is load-bearing:
+      # a step with no `if:` carries an implicit success(), so putting the
+      # verdict first would turn this into a skipped step on exactly the runs
+      # worth summarising.
+      - name: Write the per-job verdicts into the run summary
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Why this step exists. This lane failed 40 of its last 40 runs on main
+        # and nobody triaged it, because finding out WHICH of the 34 test jobs
+        # were red, and whether that set had moved since the night before, meant
+        # opening the run and reading job tiles one at a time. Cheap enough
+        # once, not cheap enough nightly, so it went unread and a month of
+        # integration regressions accumulated behind a red that never changed
+        # appearance. This puts the shape of the failure on the run's own
+        # landing page and raises an error annotation naming the failing jobs.
+        #
+        # It must never fail the job. It reports no verdict of its own; the step
+        # below owns that. And when the API read comes back empty it says so
+        # rather than printing an empty failure list, because an empty list from
+        # a failed read is indistinguishable on the page from an empty list
+        # because everything passed.
         run: |
-          if [ "${{ needs.backend-full.result }}" != "success" ]; then
-            echo "Full-suite shards did not all pass: ${{ needs.backend-full.result }}"
-            exit 1
+          set -u
+          rows=$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+            --jq '.jobs[] | select(.name != "Backend Full Suite") | [(.conclusion // .status), .name] | @tsv') \
+            || rows=""
+
+          if [ -z "$rows" ]; then
+            {
+              echo "### Nightly full suite"
+              echo
+              echo "Could not read this run's job list, so there is no summary."
+              echo "This is NOT a statement that the suite passed. Read the job"
+              echo "tiles in the run itself."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning title=Nightly summary unavailable::Could not read this run's job list. Read the job tiles instead; this is not a pass."
+            exit 0
           fi
-          echo "All full-suite shards passed."
+
+          # The gate's own name is an exact-match exclusion above, deliberately.
+          # It is a strict prefix of all 32 shard names, so a prefix or
+          # substring filter here would drop 33 rows instead of 1.
+          total=$(printf '%s\n' "$rows" | wc -l | tr -d ' ')
+          passed=$(printf '%s\n' "$rows" | grep -c '^success' || true)
+          failed=$(printf '%s\n' "$rows" | grep -c '^failure' || true)
+          absent=$((total - passed - failed))
+
+          {
+            echo "### Nightly full suite"
+            echo
+            echo "Population: ${total} test jobs. ${passed} passed, ${failed} failed, ${absent} gave no verdict."
+            echo
+            echo "A job that was cancelled, skipped or is still running is counted"
+            echo "as no verdict, not as a pass and not as a failure."
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$failed" -gt 0 ]; then
+            {
+              echo "Failing jobs:"
+              echo
+              printf '%s\n' "$rows" | grep '^failure' | cut -f2- | sed 's/^/- /'
+              echo
+            } >> "$GITHUB_STEP_SUMMARY"
+            # A single delimiter character on purpose: paste treats -d as a
+            # cyclic LIST, so '; ' would alternate ';' and ' ' between names.
+            names=$(printf '%s\n' "$rows" | grep '^failure' | cut -f2- | paste -sd ';' -)
+            echo "::error title=Nightly full suite: ${failed} of ${total} test jobs failed::${names}"
+          fi
+
+          if [ "$absent" -gt 0 ]; then
+            {
+              echo "Jobs with no verdict:"
+              echo
+              # Keep the state on these rather than just the name: cancelled,
+              # skipped and in_progress mean different things and only the
+              # first two mean the run is over and told you nothing.
+              printf '%s\n' "$rows" | grep -v '^success' | grep -v '^failure' \
+                | sed 's/\t/: /' | sed 's/^/- /'
+              echo
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "Summary written for ${total} jobs."
+
+      - name: Require every shard and cross-OS job to pass
+        env:
+          SHARDS: ${{ needs.backend-full.result }}
+          CROSS_OS: ${{ needs.backend-full-cross-os.result }}
+        # `cancelled` and `skipped` are absent results, not failures, and the
+        # difference is the whole reason this file was rewritten: silence that
+        # reads as health is the thing to avoid. Both still exit non-zero,
+        # because "we did not find out" must never publish a green check, but
+        # the message says which of the two happened so a reader is not sent
+        # hunting for a test failure that was never run.
+        run: |
+          status=0
+          for pair in "shards:${SHARDS}" "cross-OS:${CROSS_OS}"; do
+            what=${pair%%:*}
+            result=${pair#*:}
+            case "$result" in
+              success)
+                echo "The ${what} jobs all passed."
+                ;;
+              failure)
+                echo "The ${what} jobs did not all pass: ${result}"
+                status=1
+                ;;
+              *)
+                echo "The ${what} jobs produced NO verdict: ${result}. Not a pass."
+                status=1
+                ;;
+            esac
+          done
+          exit "$status"
 
   backend-full-cross-os:
     name: Backend Full Suite (${{ matrix.os }}, embedded PG)
