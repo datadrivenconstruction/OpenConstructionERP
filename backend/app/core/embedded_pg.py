@@ -33,7 +33,10 @@ import os
 import socket
 import struct
 import subprocess
+import threading
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from types import ModuleType
 from typing import NamedTuple
@@ -498,6 +501,90 @@ def boot(data_dir: Path | str) -> bool:
     return True
 
 
+@contextmanager
+def _heartbeat_while_blocked(pgdata: Path, deadline: float) -> Iterator[None]:
+    """Keep reporting progress for as long as the wrapped call has not returned.
+
+    ``pgserver.get_server()`` is one call that can run for many minutes, and
+    while it runs this process writes nothing the desktop launcher can see. That
+    is not an oversight in the library: it reports each step it takes, but every
+    one of those reports is a ``logging`` call at INFO level, and the embedded
+    cluster is brought up *before* the application configures logging, so they
+    are handled by ``logging.lastResort``, which passes WARNING and above and
+    drops the rest. The result on a cluster replaying its write-ahead log is a
+    single call that is silent for as long as the replay takes.
+
+    The launcher gives up on a backend that has said nothing for four minutes,
+    so that silence is what killed a user's install while it was working. The
+    other long wait in this module, :func:`_wait_until_connectable`, already
+    reports itself for the same reason, but it is only reached once
+    ``get_server()`` has *raised*. This covers the call itself, which is the
+    window where the silence actually falls.
+
+    Two properties matter more than the message:
+
+    * The ticking runs on a separate thread and the wrapped call does not move.
+      ``pixeltable-pgserver`` shells out to ``pg_ctl`` and ``initdb`` from the
+      calling thread; running that off the main thread would risk turning a slow
+      start into a hard failure, and a slow start is exactly the case being
+      rescued here.
+    * It stops at ``deadline``, the same budget the whole bring-up shares. A
+      heartbeat with no end would defeat the launcher's quiet timeout outright,
+      which is a worse bug than the one it fixes: a start that genuinely never
+      finishes has to be given up on. When the budget is spent this goes quiet
+      again and the launcher's own limits take over.
+    """
+    started = time.monotonic()
+    stop = threading.Event()
+    probe_failed = False
+
+    def tick() -> None:
+        nonlocal probe_failed
+        while True:
+            # Read the interval each turn rather than binding it once, and wait
+            # on the event rather than sleeping, so the wrapped call returning
+            # ends this immediately instead of after one more full interval.
+            if stop.wait(_RECOVERY_HEARTBEAT_SECONDS):
+                return
+            now = time.monotonic()
+            if now >= deadline:
+                return
+            # Both numbers are measured, not estimated. No percentage is
+            # reported because none is known: neither this module nor the
+            # library can say how much of a replay is done.
+            waited = int(now - started)
+            left = max(int(deadline - now), 0)
+            try:
+                # The only phase question that can be answered from here, and
+                # it is answered by what is on disk rather than by guessing:
+                # either a live postmaster owns the data directory, in which
+                # case the database process is up and has not finished starting,
+                # or none does and this is still initdb or the launch itself.
+                phase = (
+                    "Waiting for the local database to finish starting up"
+                    if _postmaster_recovering(pgdata)
+                    else "Setting up the local database"
+                )
+            except Exception as exc:  # noqa: BLE001
+                # A heartbeat that dies quietly reproduces the bug it exists to
+                # prevent, so an unreadable pidfile costs the phase name and
+                # nothing else. Logged once; this runs every few seconds.
+                if not probe_failed:
+                    probe_failed = True
+                    logger.warning("cannot tell which start-up phase the cluster is in: %r", exc)
+                phase = "Starting the local database"
+            emit_stage("pg", "progress", f"{phase} ({waited}s so far, {left}s left)")
+
+    worker = threading.Thread(target=tick, name="oe-pg-boot-heartbeat", daemon=True)
+    worker.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        # Bounded so a wedged ticker can never hold up the boot it reports on.
+        worker.join(timeout=5.0)
+
+
 def _boot_once(
     pgserver: ModuleType,
     pgdata: Path,
@@ -520,13 +607,23 @@ def _boot_once(
       once so the caller can reset and retry, instead of blocking the whole
       recovery window on a cluster that never started - the old code's opaque
       multi-minute hang on exactly this class of transient failure.
+
+    The ``get_server()`` call itself is wrapped in
+    :func:`_heartbeat_while_blocked`, because the triage above only begins once
+    that call comes back and the call is free to take the entire budget first.
     """
     last_exc: Exception | None = None
     probe = 0
     while time.monotonic() < deadline:
         probe += 1
         try:
-            server = pgserver.get_server(str(pgdata))
+            # The call is silent on the stream the launcher watches and can run
+            # for minutes; the heartbeat is what stops a working start from
+            # being mistaken for a wedged one. It exits with the ``with`` block,
+            # so it is already stopped by the time the handler below emits its
+            # own marker and the two can never overlap.
+            with _heartbeat_while_blocked(resolved_pgdata, deadline):
+                server = pgserver.get_server(str(pgdata))
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
             # The first get_server() launches the postmaster, which keeps
