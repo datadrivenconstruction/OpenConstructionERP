@@ -1668,7 +1668,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <span
                   class="inline-flex shrink-0 items-center rounded-full bg-oe-blue/10 px-2 py-0.5 text-2xs font-semibold text-oe-blue ring-1 ring-inset ring-oe-blue/20"
                 >
-                  212 cases in total
+                  220 cases in total
                 </span>
               </div>
               <p
@@ -1681,7 +1681,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               class="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-oe-blue px-4 py-2.5 text-sm font-semibold text-content-inverse shadow-sm transition-all hover:bg-oe-blue-hover hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
               type="button"
             >
-              Browse all 212 cases
+              Browse all 220 cases
               <svg
                 aria-hidden="true"
                 class="lucide lucide-arrow-right transition-transform group-hover:translate-x-0.5"
@@ -4729,7 +4729,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               </button>
               <button
                 class="group relative isolate flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-oe-blue/40 bg-oe-blue/[0.05] px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/60 hover:bg-oe-blue/10 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Browse all 212 cases"
+                title="Browse all 220 cases"
                 type="button"
               >
                 <span
@@ -4759,7 +4759,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <span
                   class="text-xs font-semibold leading-snug text-oe-blue-text"
                 >
-                  All 212 cases
+                  All 220 cases
                 </span>
               </button>
             </div>
