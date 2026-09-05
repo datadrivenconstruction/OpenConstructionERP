@@ -330,7 +330,10 @@ async def test_quantity_only_patch_preserves_snapshot(shared_client: AsyncClient
     )
     assert patch_resp.status_code == 200, patch_resp.text
     patched = patch_resp.json()
-    assert patched["quantity"] == 25.0
+    # quantity/unit_rate/total cross the wire as plain decimal strings
+    # (PositionResponse, BUG-B-011), so compare numerically rather than
+    # against a literal whose decimal places track the serializer.
+    assert float(patched["quantity"]) == pytest.approx(25.0)
     # Total must scale: 25 * 185 = 4625
     assert float(patched["total"]) == pytest.approx(4625.0)
     # Snapshot must be byte-identical (stable label, rate, captured_at, source).

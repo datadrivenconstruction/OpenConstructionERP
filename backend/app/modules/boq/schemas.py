@@ -5,8 +5,11 @@
 Defines create, update, and response schemas for BOQs, positions, markups,
 structured (sectioned) BOQ responses, templates, and activity log entries.
 
-Numeric values (quantity, unit_rate, total) are exposed as floats in the API
-but stored as strings in SQLite-compatible models.
+Numeric values (quantity, unit_rate, total) are stored as strings in
+SQLite-compatible models and are exposed on ``PositionResponse`` as plain
+decimal strings, not floats - see the BUG-B-011 note on that schema for why.
+Schemas that carry a measurement with no money beside it may still type it as
+a float; each schema states which it uses.
 """
 
 from datetime import datetime
