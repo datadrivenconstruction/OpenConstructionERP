@@ -1386,8 +1386,24 @@ def create_app() -> FastAPI:
             "name": "AGPL-3.0-or-later · DDC-CWICR-OE-2026",
             "url": "https://www.gnu.org/licenses/agpl-3.0.html",
         },
-        docs_url="/api/docs" if not settings.is_production else None,
+        # Swagger UI is registered by hand further down instead of by FastAPI,
+        # so the page can load its CSS and JS from this install rather than
+        # from a CDN. Everything else about the route is unchanged - the
+        # replacement calls the same ``get_swagger_ui_html`` with the same
+        # arguments and only swaps the two asset URLs. ReDoc keeps the stock
+        # route and still needs outbound internet.
+        docs_url=None,
         redoc_url="/api/redoc" if not settings.is_production else None,
+        # Swagger UI draws whatever the document holds, and this document holds
+        # 2923 paths, 3938 operations and 3601 component schemas. Left on the
+        # stock settings the page expands every operation and the whole model
+        # list on load: measured in headless Chromium against this app, 130.5s
+        # from navigation to the first operation appearing, which is the "blank
+        # page" an operator actually experiences and is not something caching
+        # the schema on the server can fix. Collapsed, the browser lays out 365
+        # tag headers instead of 3938 operation bodies, and the models section
+        # is built when somebody asks for it rather than on every load.
+        swagger_ui_parameters={"docExpansion": "none", "defaultModelsExpandDepth": -1},
         # BUG-394: don't expose the full OpenAPI schema in production - it
         # hands attackers a route/parameter enumeration map of every endpoint,
         # including rarely-exercised admin surfaces. Dev still gets it for
@@ -1501,29 +1517,155 @@ def create_app() -> FastAPI:
     # are valid per the OpenAPI spec and ignored by every generator /
     # client (incl. openapi-typescript), so the API surface is unchanged.
     # The token bytes XOR-decode (key 0x55) to the authorship marker.
+    import threading as _threading
+
     from fastapi.openapi.utils import get_openapi as _get_openapi
 
+    # Building this document walks every mounted route and every model behind
+    # it, and with the module loader mounting ~190 routers that is not a small
+    # job: 2922 paths and 3601 component schemas, and 140.97s to assemble on
+    # the 16.8.0 stand, measured from the server's own slow-request log. It
+    # runs on the event loop, so the process answers nothing at all while it
+    # happens. The result was already cached here, but only lazily, by whoever
+    # asked for it first, which meant the first visitor to /api/docs after
+    # every restart paid the whole 141s and froze the app for everyone else
+    # meanwhile. Every later request was served from the cache in about half a
+    # second, so generation outweighed serialising the 6.75 MB body by roughly
+    # 235 to 1. The prime at the end of the startup lifespan fills the cache
+    # off the event loop so that first request is never the one that pays.
+    _openapi_build_lock = _threading.Lock()
+
+    def _routes_version() -> int | None:
+        """Return the router's route-table counter, or ``None`` if unavailable.
+
+        FastAPI keys its own schema cache on this counter and rebuilds when it
+        moves. Here that invalidation is load-bearing rather than decorative:
+        modules mount their routers during the startup lifespan, and
+        ``enable_module`` mounts one at runtime, long after boot. A cache keyed
+        on nothing but "is it populated" pins the first document forever, so a
+        module enabled later never appears in the docs at all.
+
+        Private FastAPI API, hence the getattr. If a future release drops it
+        this returns ``None`` on both sides of the comparison, which degrades
+        to "serve the cache until something clears it" - exactly what this
+        override did before, so the fallback is the old behaviour rather than
+        a new failure.
+        """
+        getter = getattr(app.router, "_get_routes_version", None)
+        return getter() if callable(getter) else None
+
     def _custom_openapi() -> dict[str, Any]:
-        if app.openapi_schema:
+        version = _routes_version()
+        if app.openapi_schema is not None and app._openapi_routes_version == version:
             return app.openapi_schema
-        schema = _get_openapi(
-            title=app.title,
-            version=app.version,
-            description=app.description,
-            routes=app.routes,
-            contact=app.contact,
-            license_info=app.license_info,
-        )
-        _oa_tok = bytes(
-            b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
-        ).decode("ascii")
-        schema.setdefault("info", {})
-        schema["info"]["x-ddc-origin"] = "OpenConstructionERP · DataDrivenConstruction · " + _oa_tok
-        schema["info"]["x-ddc-author"] = "Artem Boiko <info@datadrivenconstruction.io>"
-        app.openapi_schema = schema
-        return schema
+        # One builder at a time. The startup prime runs on a worker thread, so
+        # without this a request arriving mid-build starts a second, equally
+        # expensive build beside it: two 141s passes competing for the same
+        # core on a 2 GB VPS. Whoever loses the race re-checks under the lock
+        # and takes the document the winner just cached.
+        with _openapi_build_lock:
+            version = _routes_version()
+            if app.openapi_schema is not None and app._openapi_routes_version == version:
+                return app.openapi_schema
+            schema = _get_openapi(
+                title=app.title,
+                version=app.version,
+                description=app.description,
+                routes=app.routes,
+                contact=app.contact,
+                license_info=app.license_info,
+            )
+            _oa_tok = bytes(
+                b ^ 0x55 for b in b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+            ).decode("ascii")
+            schema.setdefault("info", {})
+            schema["info"]["x-ddc-origin"] = "OpenConstructionERP · DataDrivenConstruction · " + _oa_tok
+            schema["info"]["x-ddc-author"] = "Artem Boiko <info@datadrivenconstruction.io>"
+            app.openapi_schema = schema
+            app._openapi_routes_version = version
+            return schema
 
     app.openapi = _custom_openapi  # type: ignore[method-assign]
+
+    # ── Swagger UI, served from this install ─────────────────────────────
+    # FastAPI's stock /api/docs pulls swagger-ui-bundle.js and swagger-ui.css
+    # from cdn.jsdelivr.net, so the page renders as an empty shell anywhere
+    # without outbound internet. A self-hosted VPS is what this platform is
+    # for and an air-gapped site is a normal deployment, so the two files ship
+    # in the wheel instead: 1.74 MB on disk, about 438 KB of the archive once
+    # deflated, and no new dependency. Pinned to swagger-ui-dist 5.32.15,
+    # because the stock template asks for "@5", which is a moving target.
+    _SWAGGER_DIR = Path(__file__).parent / "static" / "swagger"
+    _SWAGGER_ASSETS = {
+        "swagger-ui-bundle.js": "application/javascript",
+        "swagger-ui.css": "text/css",
+    }
+
+    if not settings.is_production:
+        from fastapi import Request as _Request
+        from fastapi.openapi.docs import get_swagger_ui_html as _get_swagger_ui_html
+        from fastapi.openapi.docs import (
+            get_swagger_ui_oauth2_redirect_html as _get_swagger_ui_oauth2_redirect_html,
+        )
+        from fastapi.responses import FileResponse as _FileResponse
+        from fastapi.responses import HTMLResponse as _HTMLResponse
+        from fastapi.responses import Response as _Response
+
+        async def _swagger_asset(req: _Request) -> _Response:
+            # Matched against the two names by hand rather than mounted as a
+            # directory: a StaticFiles mount would put path traversal between
+            # the network and the installed package for the sake of two files.
+            # Returned rather than raised, so an unknown name stays a 404
+            # instead of reaching the SPA handler and coming back as index.html.
+            media_type = _SWAGGER_ASSETS.get(req.path_params.get("filename", ""))
+            if media_type is None:
+                return _Response(status_code=404)
+            return _FileResponse(
+                _SWAGGER_DIR / req.path_params["filename"],
+                media_type=media_type,
+                # Version-pinned bytes that only change when the wheel does.
+                headers={"Cache-Control": "public, max-age=31536000, immutable"},
+            )
+
+        async def _swagger_ui_html(req: _Request) -> _HTMLResponse:
+            # The same call FastAPI's own route makes, with the same root_path
+            # handling, differing only in where the two assets come from.
+            root_path = req.scope.get("root_path", "").rstrip("/")
+            oauth2_redirect_url = app.swagger_ui_oauth2_redirect_url
+            if oauth2_redirect_url:
+                oauth2_redirect_url = root_path + oauth2_redirect_url
+            return _get_swagger_ui_html(
+                openapi_url=root_path + (app.openapi_url or "/api/openapi.json"),
+                title=f"{app.title} - Swagger UI",
+                oauth2_redirect_url=oauth2_redirect_url,
+                init_oauth=app.swagger_ui_init_oauth,
+                swagger_ui_parameters=app.swagger_ui_parameters,
+                swagger_js_url=f"{root_path}/api/docs/assets/swagger-ui-bundle.js",
+                swagger_css_url=f"{root_path}/api/docs/assets/swagger-ui.css",
+                # The stock default is fastapi.tiangolo.com, a third outbound
+                # request on a page that is meant to work without a network.
+                swagger_favicon_url=f"{root_path}/favicon.svg",
+            )
+
+        async def _swagger_ui_redirect(req: _Request) -> _HTMLResponse:
+            return _get_swagger_ui_oauth2_redirect_html()
+
+        # ``add_route`` rather than ``@app.get``, because that is what FastAPI
+        # itself uses for these three and it is the difference between a plain
+        # Starlette route and one carrying the app-level dependencies declared
+        # above. Documentation should not be running the read-only guard or
+        # binding an RLS tenant, and the route it replaces never did.
+        app.add_route("/api/docs/assets/{filename}", _swagger_asset, methods=["GET"], include_in_schema=False)
+        app.add_route("/api/docs", _swagger_ui_html, methods=["GET"], include_in_schema=False)
+        if app.swagger_ui_oauth2_redirect_url:
+            # FastAPI registers this one inside the same block as its docs
+            # route, so taking that route over means taking this one with it.
+            app.add_route(
+                app.swagger_ui_oauth2_redirect_url,
+                _swagger_ui_redirect,
+                methods=["GET"],
+                include_in_schema=False,
+            )
 
     # ── Middleware ───────────────────────────────────────────────────────
     cors_origins = settings.cors_origins
@@ -4454,6 +4596,58 @@ def create_app() -> FastAPI:
             logger.info("Press Ctrl+C to stop. Docs: https://openconstructionerp.com/docs")
         else:
             logger.info("Application started successfully")
+
+        # ── Publish the OpenAPI document ─────────────────────────────────
+        # Every router this process will ever mount is mounted by now, which
+        # is why the prime is here and not in create_app(). How I know: the
+        # module loader runs inside this same handler, above, and the handful
+        # of alias mounts that follow it are the last include_router calls in
+        # the file. Priming from create_app() would cache a document built
+        # before ~190 module routers existed, and a schema that is missing
+        # most of the API is worse than a schema that is slow.
+        #
+        # Deliberately not awaited. Starlette accepts no requests until this
+        # handler returns, so awaiting a ~141s build would move the stall off
+        # the first docs visitor and onto every user of the app, including the
+        # health check.
+        #
+        # The thread is worth being precise about, because this is CPU-bound
+        # Python and a thread does not escape the GIL: it does not make the
+        # build free, it makes it interruptible. Building on the event loop
+        # blocks every request for the whole 141s. Building on a thread leaves
+        # the loop scheduled against it, so requests are served throughout,
+        # just slower while it runs - measured on this stand, health answered
+        # in 17.1s, 0.7s and 2.2s during the build instead of not at all. A
+        # visitor who arrives before it finishes waits on the same lock rather
+        # than starting a second build. The task is parked on app.state
+        # because asyncio keeps only a weak reference to a bare task and would
+        # otherwise be free to collect it mid-build.
+        #
+        # Runtime module toggles stay correct without help here: enabling or
+        # disabling a module moves the route counter that _custom_openapi
+        # checks, so the next request rebuilds rather than serving a document
+        # that describes the wrong set of modules.
+        if not _fast_startup:
+
+            async def _prime_openapi_schema() -> None:
+                try:
+                    started = time.perf_counter()
+                    schema = await asyncio.to_thread(app.openapi)
+                    logger.info(
+                        "OpenAPI schema cached: %d paths in %.1fs",
+                        len(schema.get("paths", {})),
+                        time.perf_counter() - started,
+                    )
+                except Exception:
+                    # Never fail a boot over the documentation. Without the
+                    # cache the first /api/docs visitor pays for the build,
+                    # which is exactly the old behaviour.
+                    logger.warning(
+                        "OpenAPI schema priming failed; the docs will build on first request",
+                        exc_info=True,
+                    )
+
+            app.state.openapi_prime_task = asyncio.create_task(_prime_openapi_schema())
 
         # NOTE: frontend static mounting moved to create_app() (below, before
         # the startup event runs). Registering the SPA 404 exception handler
