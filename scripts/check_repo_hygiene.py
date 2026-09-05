@@ -187,9 +187,7 @@ ALLOWED_ARCHIVE_PATTERNS = {
     ),
 }
 
-_ALLOWED_ARCHIVE_RX = [
-    (re.compile(p), why) for p, why in ALLOWED_ARCHIVE_PATTERNS.items()
-]
+_ALLOWED_ARCHIVE_RX = [(re.compile(p), why) for p, why in ALLOWED_ARCHIVE_PATTERNS.items()]
 
 
 def _offending(paths: list[str]) -> list[str]:
@@ -215,9 +213,7 @@ def _git_tracked_set(root: str) -> set[str]:
     # archive's own name and would read as untracked. This repo carries Cyrillic
     # by policy (locale values, GESN/FER fixtures, unit strings), so the quoted
     # form is not hypothetical.
-    out = subprocess.run(
-        ["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True
-    )
+    out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True)
     return {p for p in out.stdout.decode("utf-8").split("\0") if p}
 
 
@@ -253,18 +249,14 @@ def _to_repo_path(name: str, mapping: dict[str, str]) -> str | None:
     """
     best: str | None = None
     for dest in mapping:
-        if (name == dest or name.startswith(dest + "/")) and (
-            best is None or len(dest) > len(best)
-        ):
+        if (name == dest or name.startswith(dest + "/")) and (best is None or len(dest) > len(best)):
             best = dest
     if best is None:
         return None
     return mapping[best] + name[len(best) :]
 
 
-def _untracked_in_archive(
-    names: list[str], root: str, sdist_prefix: str | None
-) -> list[tuple[str, str]]:
+def _untracked_in_archive(names: list[str], root: str, sdist_prefix: str | None) -> list[tuple[str, str]]:
     """Return (archive path, repo path or reason) for members git does not track."""
     tracked = _git_tracked_set(root)
     if sdist_prefix is not None:
@@ -296,9 +288,7 @@ def _untracked_in_archive(
             continue
         if repo_path in tracked:
             continue
-        if repo_path in allowed_prefixes or repo_path.startswith(
-            tuple(p + "/" for p in allowed_prefixes)
-        ):
+        if repo_path in allowed_prefixes or repo_path.startswith(tuple(p + "/" for p in allowed_prefixes)):
             continue
         bad.append((name, f"built from {repo_path}, which git does not track"))
     return bad
