@@ -42,24 +42,26 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 const { ONLY_IN_ES, IN_BOTH, ES, ES_MX, EN } = vi.hoisted(() => {
   const onlyInEs = 'cases.__probe_only_in_es';
   const inBoth = 'cases.__probe_in_both';
-  return {
-    ONLY_IN_ES: onlyInEs,
-    IN_BOTH: inBoth,
-    /** Peninsular Spanish. Uses the Spain words for formwork and for cost. */
-    ES: {
-      [onlyInEs]: 'Encofrado y coste de la partida',
-      [inBoth]: 'Certificacion de obra',
-    },
-    /** Mexican Spanish. Names the shared item the way Mexican practice names it. */
-    ES_MX: {
-      [inBoth]: 'Estimacion de obra',
-    },
-    /** Final fallback. Only has to exist and be shaped right. */
-    EN: {
-      [onlyInEs]: 'Formwork and cost of the item',
-      [inBoth]: 'Payment certificate',
-    },
+  // Annotated rather than inferred. A bare object literal keyed by these two
+  // consts gets the narrow type `{ "cases.__probe_in_both": string }`, and then
+  // reading it back with a `string`-typed key is an implicit any that `tsc -b`
+  // rejects under strict mode. `Record<string, string>` is also the shape
+  // `addResourceBundle` is handed, so it is the honest annotation here.
+  /** Peninsular Spanish. Uses the Spain words for formwork and for cost. */
+  const es: Record<string, string> = {
+    [onlyInEs]: 'Encofrado y coste de la partida',
+    [inBoth]: 'Certificacion de obra',
   };
+  /** Mexican Spanish. Names the shared item the way Mexican practice names it. */
+  const esMx: Record<string, string> = {
+    [inBoth]: 'Estimacion de obra',
+  };
+  /** Final fallback. Only has to exist and be shaped right. */
+  const en: Record<string, string> = {
+    [onlyInEs]: 'Formwork and cost of the item',
+    [inBoth]: 'Payment certificate',
+  };
+  return { ONLY_IN_ES: onlyInEs, IN_BOTH: inBoth, ES: es, ES_MX: esMx, EN: en };
 });
 
 vi.mock('../locales/es.ts', () => ({ default: { translation: ES } }));
