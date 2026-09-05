@@ -565,6 +565,56 @@ jobs:
             return 1
           }
 
+          # The pid of whatever is listening, asked of the socket rather than of
+          # the process table or of an image name. netstat answers with the
+          # owning pid on Windows, which is the one thing bash cannot see there:
+          # the job it started is a shim and the native server outlives it.
+          port_owners() {
+            case "$RUNNER_OS" in
+              Windows)
+                netstat -ano 2>/dev/null | tr -d '\r' \
+                  | awk -v p=":$1\$" '$2 ~ p && $4 == "LISTENING" { print $5 }' \
+                  | sort -u
+                ;;
+              *)
+                lsof -t -i "@127.0.0.1:$1" -s TCP:LISTEN 2>/dev/null | sort -u
+                ;;
+            esac
+          }
+
+          # Stop a leg and do not return until its port is free, which is the
+          # only thing the next leg cares about. Reap the job first, since that
+          # is enough everywhere the runner is not Windows. Then, if the socket
+          # is still held, stop the process that holds it, by pid and with its
+          # children, never by image name.
+          #
+          # Run 33974544673 is why this exists. Both restart legs died on a port
+          # the previous leg had not released, the step reported that the product
+          # does not serve, and four installers did not ship for a release whose
+          # cold start had just answered healthy.
+          stop_leg() {
+            kill "$1" 2>/dev/null || true
+            wait "$1" 2>/dev/null || true
+            for _ in $(seq 1 20); do
+              port_held "$port" || return 0
+              sleep 1
+            done
+            for owner in $(port_owners "$port"); do
+              echo "port $port is still held by pid $owner after the job was reaped, stopping that process tree"
+              if [ "$RUNNER_OS" = "Windows" ]; then
+                taskkill //PID "$owner" //T //F 2>/dev/null || true
+              else
+                kill -9 "$owner" 2>/dev/null || true
+              fi
+            done
+            for _ in $(seq 1 30); do
+              port_held "$port" || return 0
+              sleep 1
+            done
+            echo "port $port is STILL held after a forced stop; the next leg will report it"
+            return 1
+          }
+
           start_and_wait() {
             label="$1"
             log="serve-${label}.log"
@@ -640,8 +690,7 @@ jobs:
             echo "(${label}) encoder loads: $(grep -c 'Loaded sentence-transformers model' "$log" 2>/dev/null || echo 0), failed loads: $(grep -c 'Failed to load embedding model' "$log" 2>/dev/null || echo 0), pool: $(grep -h 'Embedding pool initialised' "$log" 2>/dev/null | tail -n 1 || echo 'never reported')"
             device_line=$(sed -n 's/.*Loaded sentence-transformers model.* on device //p' "$log" 2>/dev/null | tail -n 1)
             echo "(${label}) device: ${device_line:-not reported, the model never loaded on this leg}"
-            kill "$pid" 2>/dev/null || true
-            wait "$pid" 2>/dev/null || true
+            stop_leg "$pid"
             if [ "$ok" -ne 1 ]; then
               echo "=== the sidecar's own output, which carries the cause ==="
               tail -n 200 "$log" || true
