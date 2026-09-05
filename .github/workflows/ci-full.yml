@@ -31,9 +31,10 @@ name: CI Full Suite
 # condition can match are the job names below: "Backend Full Suite" for the
 # roll-up gate, "Backend Full Suite (shard N/32)" for the 32 shards, and
 # "Backend Full Suite (<os>, embedded PG)" for the cross-OS pair. The gate's
-# name is a strict PREFIX of all 32 shard names, so a prefix or substring filter
-# matches 33 jobs where an exact match finds the one that means "everything
-# passed". The workflow name, "CI Full Suite", is not a check name at all: a
+# name is a strict PREFIX of all 34 test job names, the 32 shards and the
+# cross-OS pair alike, so a prefix or substring filter matches all 35 jobs in
+# the run where an exact match finds the one that means "everything passed".
+# The workflow name, "CI Full Suite", is not a check name at all: a
 # condition written against it can never be satisfied and reports nothing when
 # it is not, which is the failure this file is trying not to repeat.
 #
@@ -308,8 +309,9 @@ jobs:
           fi
 
           # The gate's own name is an exact-match exclusion above, deliberately.
-          # It is a strict prefix of all 32 shard names, so a prefix or
-          # substring filter here would drop 33 rows instead of 1.
+          # It is a strict prefix of all 34 test job names, the 32 shards and
+          # the cross-OS pair alike, so a prefix or substring filter here would
+          # drop every row instead of the one.
           total=$(printf '%s\n' "$rows" | wc -l | tr -d ' ')
           passed=$(printf '%s\n' "$rows" | grep -c '^success' || true)
           failed=$(printf '%s\n' "$rows" | grep -c '^failure' || true)
