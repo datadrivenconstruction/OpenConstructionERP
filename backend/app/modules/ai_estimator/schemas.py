@@ -578,7 +578,15 @@ class PreviewResourceRow(BaseModel):
 
 
 class PreviewPositionRow(BaseModel):
-    """One proposed BOQ position - confirmed:False until apply."""
+    """One proposed BOQ position.
+
+    ``confirmed`` mirrors the GROUP's review state - True once a human has
+    confirmed or overridden it - and NOT whether a position has been written.
+    Nothing in a preview has been written by definition, so the other reading
+    would make the field a constant. It is the flag apply() selects on, and
+    ``grand_total`` counts exactly the rows carrying it, so an unconfirmed row
+    is still listed for review but adds nothing to the headline total.
+    """
 
     group_id: uuid.UUID
     group_key: str

@@ -437,15 +437,19 @@ async def test_full_run_lifecycle_to_applied_boq(http_client, admin, monkeypatch
     preview = await http_client.get(f"/api/v1/ai-estimator/runs/{run_id}/preview", headers=h)
     assert preview.status_code == 200, preview.text
     pbody = preview.json()
-    assert pbody["can_apply"] is True
-    assert pbody["validation"] is not None
-    assert pbody["validation"]["status"] in ("passed", "warnings")
-    assert float(pbody["grand_total"]) == pytest.approx(1850.0)
-    assert pbody["currency"] == "EUR"
-    assert len(pbody["positions"]) == 1
+    assert pbody["can_apply"] is True, f"preview refused to apply: {pbody}"
+    assert pbody["validation"] is not None, f"preview carried no validation: {pbody}"
+    assert pbody["validation"]["status"] in ("passed", "warnings"), pbody["validation"]
+    assert float(pbody["grand_total"]) == pytest.approx(1850.0), pbody["grand_total"]
+    assert pbody["currency"] == "EUR", pbody["currency"]
+    assert len(pbody["positions"]) == 1, pbody["positions"]
     prow = pbody["positions"][0]
-    assert prow["confirmed"] is False  # preview, not yet written
-    assert len(prow["resources"]) == 2
+    # ``confirmed`` mirrors the GROUP's review state, not whether a position has
+    # been written - nothing in a preview has been. The group was confirmed a
+    # few lines above, and grand_total counts only confirmed rows, so the 1850
+    # asserted just now and a False here cannot both be right.
+    assert prow["confirmed"] is True, f"preview row should mirror the confirmed group: {prow}"
+    assert len(prow["resources"]) == 2, prow["resources"]
 
     # Apply -> writes the BOQ.
     apply = await http_client.post(
