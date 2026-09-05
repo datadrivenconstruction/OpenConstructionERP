@@ -203,6 +203,7 @@ from app.modules.boq.service import (
     MAX_NESTING_DEPTH,
     SECTION_UNITS,
     BOQService,
+    build_position_response,
     exportable_positions,
     resource_fx_factor,
 )
@@ -336,82 +337,30 @@ async def _log_activity(
         _log.debug("Activity log write failed (non-critical)", exc_info=True)
 
 
-_CONFIDENCE_LABELS = {"high": 0.9, "medium": 0.6, "med": 0.6, "low": 0.3}
-
-
-def _coerce_confidence(raw: object) -> float | None:
-    """Best-effort coerce a stored confidence value to float (0.0-1.0).
-
-    Some legacy / seed rows persisted ``confidence`` as a label
-    (``'high'``/``'medium'``/``'low'``) rather than the numeric 0–1
-    contract.  The PATCH endpoint must keep responding 200 for those
-    rows or the whole grid stops saving - so we map known labels to
-    representative floats and drop anything else to ``None``.
-    """
-    if raw is None or raw == "":
-        return None
-    if isinstance(raw, (int, float)):
-        return float(raw)
-    text = str(raw).strip().lower()
-    if text in _CONFIDENCE_LABELS:
-        return _CONFIDENCE_LABELS[text]
-    try:
-        return float(text)
-    except ValueError:
-        return None
-
-
 def _position_to_response(position: object) -> PositionResponse:
-    """Build a PositionResponse from a Position ORM object."""
-    # Issue #79: read back the CostItem linkage stored under
-    # ``metadata.cost_item_id``.  Older rows that pre-date the linkage
-    # simply return None.  We tolerate any non-UUID string defensively
-    # - bad data should not break the GET response.
-    raw_meta = getattr(position, "metadata_", None)  # type: ignore[attr-defined]
-    cost_item_id_val: uuid.UUID | None = None
-    if isinstance(raw_meta, dict):
-        raw_cid = raw_meta.get("cost_item_id")
-        if raw_cid:
-            try:
-                cost_item_id_val = uuid.UUID(str(raw_cid))
-            except (ValueError, TypeError):
-                cost_item_id_val = None
+    """Build a PositionResponse from a Position ORM object.
 
-    return PositionResponse(
-        id=position.id,  # type: ignore[attr-defined]
-        boq_id=position.boq_id,  # type: ignore[attr-defined]
-        parent_id=position.parent_id,  # type: ignore[attr-defined]
-        ordinal=position.ordinal,  # type: ignore[attr-defined]
-        description=position.description,  # type: ignore[attr-defined]
-        unit=position.unit,  # type: ignore[attr-defined]
-        # BUG-B-011: forward the exact stored decimal string; the schema
-        # now keeps it as Decimal and serialises a plain string, so a
-        # 999,999,999.99 × 999,999.99 total no longer loses its tail.
-        quantity=position.quantity,  # type: ignore[attr-defined]
-        unit_rate=position.unit_rate,  # type: ignore[attr-defined]
-        total=position.total,  # type: ignore[attr-defined]
-        classification=position.classification,  # type: ignore[attr-defined]
-        source=position.source,  # type: ignore[attr-defined]
-        confidence=_coerce_confidence(position.confidence),  # type: ignore[attr-defined]
-        cad_element_ids=position.cad_element_ids,  # type: ignore[attr-defined]
-        # Issue #347: owning BIM model of the linked elements (multi-model picker).
-        cad_model_id=getattr(position, "cad_model_id", None),
-        validation_status=position.validation_status,  # type: ignore[attr-defined]
-        metadata=position.metadata_,  # type: ignore[attr-defined]
-        sort_order=position.sort_order,  # type: ignore[attr-defined]
-        created_at=position.created_at,  # type: ignore[attr-defined]
-        updated_at=position.updated_at,  # type: ignore[attr-defined]
-        cost_item_id=cost_item_id_val,
-        # BUG-CONCURRENCY01: surface the row's optimistic-concurrency
-        # token so clients can echo it on the next PATCH.
-        version=int(getattr(position, "version", 0) or 0),  # type: ignore[attr-defined]
-        # Issue #127: reuse-group fields (read-only). ``linked_instance_count``
-        # needs a project-wide query so it is left None here and populated
-        # explicitly by the links endpoint / propagation paths.
-        reference_code=getattr(position, "reference_code", None),  # type: ignore[attr-defined]
-        link_role=getattr(position, "link_role", None),  # type: ignore[attr-defined]
-        link_group_id=getattr(position, "link_group_id", None),  # type: ignore[attr-defined]
-    )
+    Issue #457. This was a second builder that constructed the response itself,
+    and it and the service's builder had drifted apart in both directions: this
+    one alone set ``cost_item_id`` and ``version``, the service's alone set
+    ``risk_dispersion``, ``price_basis``, ``norm_id`` and ``norm_work_key``. So
+    ``GET /boqs/{boq_id}`` and ``GET /positions/{position_id}`` gave different
+    answers about the same row, and the norm provenance shipped answering null
+    on every endpoint a client would ask it from. It now delegates, and there is
+    one builder again: the union of what the two of them used to set.
+
+    Kept as a function rather than replaced at its thirteen call sites because
+    the router's name for it reads at those sites and because the router, not
+    the service, is where a response is a response.
+
+    Args:
+        position: The position to render, typed loosely because several call
+            sites pass rows built by importers rather than by the ORM.
+
+    Returns:
+        The position as the API returns it.
+    """
+    return build_position_response(position)  # type: ignore[arg-type]
 
 
 async def _position_to_response_with_links(

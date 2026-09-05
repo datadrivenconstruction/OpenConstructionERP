@@ -9,15 +9,22 @@ builds the row field by field instead of going through the single-create path.
 All of them copy ``metadata``, so before this the copy carried the norm identity
 in its metadata against a NULL ``norm_id`` column.
 
-Which is why these assertions are on the COLUMN and never on the report. The
-read side coalesces column then metadata, so a test that asked "does the
-comparison still answer for the copy" passes identically with the copy sites
-fixed and unfixed - it is measuring the fallback, not the fix. The column being
-NULL is invisible until somebody groups by it, and then it is invisible in the
-worst way: the query returns a number, and the number is a fraction of the work
-reported as the whole of it. The bills this would hit hardest are the ones that
-have been duplicated and revised most, which are the ones anybody actually wants
-an outturn comparison for.
+Which is why these assertions are on the COLUMN and never on a report built over
+it. There is no fallback on the read side - the position response and the
+outturn rollup both take the column and only the column - so a copy that lost it
+has lost the fact rather than a tidy duplicate of it. A report is the wrong
+place to assert that, because it brings joins and filters of its own: a baseline
+norm that has to still exist, rows carrying no norm counted and then ignored. It
+can go green or red for reasons that have nothing to do with whether the copy
+kept its norm. The column is the thing itself.
+
+What a NULL costs is worth being exact about, because it does not look like a
+fault from outside. The identity is still sitting in the copy's metadata where
+anybody reading the raw row can see it. It is the GROUP BY that breaks, and it
+breaks in the worst way: the query returns a number, and the number is a
+fraction of the work reported as the whole of it. The bills this would hit
+hardest are the ones that have been duplicated and revised most, which are the
+ones anybody actually wants an outturn comparison for.
 
 Run:
     cd backend

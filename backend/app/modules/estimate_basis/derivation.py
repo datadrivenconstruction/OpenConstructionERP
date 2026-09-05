@@ -402,7 +402,7 @@ AI_SOURCES: frozenset[str] = frozenset({"ai_takeoff", "cad_import_ai", "smart_im
 LOW_CONFIDENCE_THRESHOLD: Decimal = Decimal("0.7")
 
 # Word-shaped confidence values persisted by older seeds and importers. The BOQ
-# grid coerces the same three words (``boq.router._CONFIDENCE_LABELS``); the map
+# grid coerces the same three words (``boq.service._CONFIDENCE_LABELS``); the map
 # is repeated rather than imported because this engine is stdlib-only by
 # contract and must load without the app graph.
 _CONFIDENCE_WORDS: dict[str, Decimal] = {

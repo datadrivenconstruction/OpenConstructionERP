@@ -35,10 +35,13 @@ There IS a backfill, and it is of a different kind: the write side shipped on
 priced from a norm in between carries the identity in ``metadata`` with a NULL
 column. Those rows are copied across below. It is a copy of a value the row
 already holds, not an invention of one, so it cannot claim anything the row was
-not already claiming. The read side coalesces column then metadata anyway, so a
-row this backfill cannot reach - one written by an older application binary
-against this schema - is still answered correctly; the backfill is what keeps
-the column worth grouping by rather than what makes the feature work.
+not already claiming. This backfill is what makes the feature work for those
+rows, and nothing else does: the copy path coalesces column then metadata
+(``boq.service._norm_provenance_of_copy``, which is why a duplicated line keeps
+its norm), but the read path does not coalesce at all. Both readers, the
+position response and the outturn rollup, take the column and only the column.
+So a row this backfill cannot reach - one written by an older application binary
+against this schema - reads back null and is repaired only by being copied.
 
 Which is worth being precise about, because ``oe_boq_position`` is one of the
 five tables ``scripts/check_migration_data_rewrites.py`` names as the shape that

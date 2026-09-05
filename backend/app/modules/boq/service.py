@@ -946,8 +946,91 @@ def _leaf_total_base_with_resources(
     )
 
 
-def _build_position_response(pos: Position) -> PositionResponse:
-    """Build a PositionResponse from a Position ORM instance."""
+#: Word-shaped ``confidence`` values persisted by older seeds and importers,
+#: which the numeric 0-1 contract has no room for. Read back as representative
+#: floats rather than dropped, because a PATCH that answered 422 on one of these
+#: rows stopped the whole grid saving. ``estimate_basis.derivation`` folds the
+#: same three words and says why it repeats the map instead of importing it.
+_CONFIDENCE_LABELS: dict[str, float] = {"high": 0.9, "medium": 0.6, "med": 0.6, "low": 0.3}
+
+
+def _coerce_confidence(raw: object) -> float | None:
+    """Best-effort coerce a stored confidence value to a float in 0.0-1.0.
+
+    Args:
+        raw: Whatever the column holds - a number, a numeric string, one of the
+            legacy labels, or something unparseable.
+
+    Returns:
+        The confidence as a float, or None when the row claims none and when the
+        stored value cannot be read as one. Non-finite values come back None
+        too: NaN and Infinity are not JSON, and a response that carries them is
+        rejected by the client rather than merely wrong.
+    """
+    if raw is None or raw == "":
+        return None
+    if isinstance(raw, (int, float)):
+        value = float(raw)
+    else:
+        text = str(raw).strip().lower()
+        if text in _CONFIDENCE_LABELS:
+            return _CONFIDENCE_LABELS[text]
+        try:
+            value = float(text)
+        except ValueError:
+            return None
+    if value != value or value in (float("inf"), float("-inf")):
+        return None
+    return value
+
+
+def _cost_item_id_of(pos: object) -> uuid.UUID | None:
+    """Issue #79: the CostItem this line is linked to, from its metadata.
+
+    Args:
+        pos: A Position ORM instance, or any row-shaped object standing in for
+            one.
+
+    Returns:
+        The linked cost item id, or None for rows that pre-date the linkage.
+        A non-UUID string is data rather than a programming error - metadata is
+        written by clients too - so it reads as None instead of breaking a GET.
+    """
+    raw_meta = getattr(pos, "metadata_", None)
+    if not isinstance(raw_meta, dict):
+        return None
+    raw_cid = raw_meta.get("cost_item_id")
+    if not raw_cid:
+        return None
+    try:
+        return uuid.UUID(str(raw_cid))
+    except (ValueError, TypeError):
+        return None
+
+
+def build_position_response(pos: Position) -> PositionResponse:
+    """Build a PositionResponse from a Position ORM instance.
+
+    The single builder for this entity. It used to have a twin in the router,
+    and the twin is how issue #457 shipped half-done in v16.8.1: the whole-bill
+    read answered the norm provenance and every single-position read answered
+    null about the same row. Six fields had drifted, in both directions, so a
+    client's answer depended on which endpoint it asked. Adding a field here now
+    reaches every endpoint that returns a position.
+
+    ``linked_instance_count`` is the one thing deliberately left unset. It needs
+    a project-wide query per row, so the list paths do not pay for it and
+    ``router._position_to_response_with_links`` fills it in for the single-
+    position endpoints that can afford it.
+
+    Args:
+        pos: The position to render. Read with ``getattr`` throughout, because
+            this also runs over rows built by fixtures and by importers that
+            construct a Position without touching every column.
+
+    Returns:
+        The position as the API returns it, from any endpoint.
+    """
     return PositionResponse(
         id=pos.id,
         boq_id=pos.boq_id,
@@ -964,10 +1047,11 @@ def _build_position_response(pos: Position) -> PositionResponse:
         total=pos.total,
         classification=pos.classification,
         source=pos.source,
-        confidence=(_str_to_float(pos.confidence) if pos.confidence is not None else None),
-        # Issue #453. ``getattr`` because this converter also runs over rows
-        # built by fixtures and by importers that construct a Position without
-        # touching the estimating-judgement columns at all.
+        # Label-tolerant: a seed row storing "high" reads back 0.9 rather than
+        # the 0.0 a plain float coercion produced, which is what the single-
+        # position endpoints already answered for the same row.
+        confidence=_coerce_confidence(pos.confidence),
+        # Issue #453.
         risk_dispersion=(
             _str_to_float(pos.risk_dispersion) if getattr(pos, "risk_dispersion", None) is not None else None
         ),
@@ -981,6 +1065,12 @@ def _build_position_response(pos: Position) -> PositionResponse:
         sort_order=pos.sort_order,
         created_at=pos.created_at,
         updated_at=pos.updated_at,
+        # Issue #79: the CostItem linkage, read back out of the metadata the
+        # client sent it in.
+        cost_item_id=_cost_item_id_of(pos),
+        # BUG-CONCURRENCY01: the row's optimistic-concurrency token, so clients
+        # can echo it on the next PATCH.
+        version=int(getattr(pos, "version", 0) or 0),
         # Issue #127: surface the reuse-group fields read-only.
         reference_code=getattr(pos, "reference_code", None),
         link_role=getattr(pos, "link_role", None),
@@ -1296,11 +1386,12 @@ def _norm_provenance_of_copy(source: object, metadata: object) -> tuple[uuid.UUI
     site because these paths build the row field by field rather than going
     through ``add_position``: without this a duplicated line, a linked instance,
     a bill revision and a restored snapshot would each carry the identity in
-    their copied metadata against a NULL column. Nothing would look broken - the
-    read side coalesces column then metadata and answers correctly either way -
-    but the column would be silently incomplete on exactly the bills that have
-    been worked on most, and a GROUP BY over it would report a fraction of the
-    work as the whole of it.
+    their copied metadata against a NULL column. This coalesce is the only one
+    in the feature. The read side has none - both readers take the column and
+    only the column - so a copy that missed it would not merely be untidy: it
+    would report no norm at all, on exactly the bills that have been worked on
+    most, and a GROUP BY over the column would give a fraction of the work as
+    the whole of it.
 
     The source's own columns come first because they are already normalised;
     a row written before the column existed carries nothing there and its
@@ -6832,7 +6923,7 @@ class BOQService:
         position_responses = []
         position_count = 0
         for pos in positions:
-            position_responses.append(_build_position_response(pos))
+            position_responses.append(build_position_response(pos))
             if not _is_section(pos) and not is_empty_position(pos):
                 position_count += 1
 
@@ -6969,7 +7060,7 @@ class BOQService:
         for section_id, section_pos in section_map.items():
             child_responses: list[PositionResponse] = []
             for child in children_map.get(section_id, []):
-                child_responses.append(_build_position_response(child))
+                child_responses.append(build_position_response(child))
 
             rolled = _rolled(section_id, set())
             sections.append(
@@ -6990,7 +7081,7 @@ class BOQService:
         ungrouped_responses: list[PositionResponse] = []
         for pos in remaining_ungrouped:
             if not _is_section(pos):
-                ungrouped_responses.append(_build_position_response(pos))
+                ungrouped_responses.append(build_position_response(pos))
                 direct_cost += _leaf_total_base(pos)
 
         # Calculate markups
