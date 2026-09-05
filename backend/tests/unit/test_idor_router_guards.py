@@ -556,11 +556,13 @@ _NOT_ROUTER_GATED: dict[str, str] = {
     # so there is no owning project for verify_project_access to resolve.
     "takeoff.verify_converter": (
         "converter_id names an entry in the host's fixed _CONVERTER_META table, not a tenant row, "
-        "so there is no owning project to check. It also carries no auth dependency at all, which "
-        "is reported as a finding rather than fixed here."
+        "so there is no owning project to check. It is gated by RequirePermission('takeoff.read'), "
+        "because answering it spawns the converter binary."
     ),
     "takeoff.get_install_progress": (
-        "Reports install progress for a host converter binary. Same fixed converter table, no owning project."
+        "Reports install progress for a host converter binary. Same fixed converter table, no owning project. "
+        "Open to an anonymous caller by design, with the fields naming the host's own disk emptied for one, "
+        "see test_an_anonymous_caller_is_not_told_where_the_server_keeps_its_files.py."
     ),
     "takeoff.install_converter": (
         "Installs a converter binary on the host, gated by RequirePermission('takeoff.create'). "
