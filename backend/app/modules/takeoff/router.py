@@ -210,7 +210,8 @@ async def list_converters(verify: bool = False, user: OptionalUserPayload = None
             loads. Result is cached for 5 minutes so repeated calls are
             cheap. The default is ``false`` so the page-load list call
             stays fast (<50 ms); the BIM page polls with ``verify=true``
-            after install completes.
+            after install completes. Ignored for a caller who has not
+            signed in, see below.
         user: The caller, or ``None`` when there is no usable token. Resolving
             it costs an anonymous request nothing - no header, no database
             read - so the route's public contract is unchanged.
@@ -218,6 +219,17 @@ async def list_converters(verify: bool = False, user: OptionalUserPayload = None
     import asyncio
 
     from app.modules.boq.cad_import import find_converter, smoke_test_converter
+
+    # A smoke test is not a file stat. It launches the converter exe and waits
+    # up to 8 s for it, four of them on a full install. The per-converter
+    # verify route below asks for ``takeoff.read`` for that exact reason, and
+    # this flag is the same act under a query parameter, so an anonymous caller
+    # gets the listing with the smoke test declined rather than the request
+    # refused. It costs them nothing they could read anyway: the health prose
+    # is emptied for them further down, and ``health: "unknown"`` is what the
+    # default listing answers, a shape every reader already handles.
+    if user is None:
+        verify = False
 
     # Phase 1: cheap file-stat lookup for every converter (synchronous,
     # bounded by ~4 disk reads - sub-millisecond on a warm cache).
@@ -304,7 +316,8 @@ async def verify_converter(converter_id: str) -> dict[str, Any]:
     asks for. What this returns is health, so the bar is a read; what made it
     worth gating is that producing that health spawns the converter binary,
     and it used to do so for a caller who had not logged in. The listing at
-    ``/converters/`` stays open because it only stats files.
+    ``/converters/`` stays open because for a caller who has not signed in it
+    only stats files: it declines the smoke test rather than the request.
     """
     import asyncio
 

@@ -23,6 +23,13 @@ path back somewhere else in the body, which is the shape of at least three of
 the channels found in this sweep - the version check spelt it ``installed_path``,
 the listing spelt it ``path``, and the smoke test buried it in prose inside
 ``health_message``.
+
+One case here is not about the body at all. Producing that ``health_message``
+means launching the converter exe and waiting on it, which is the act the
+per-converter verify route asks a permission for, so the listing declines it
+for a caller who has not signed in rather than running it and emptying the
+output afterwards. That one is asserted by counting launches, because a body
+that has been redacted and a body that was never produced look alike.
 """
 
 from __future__ import annotations
@@ -74,6 +81,12 @@ if len(_ACCOUNT) >= 4:
     # Short logins ("ci", "u", "app") match half the English language; skip
     # them rather than assert something that would fail on unrelated prose.
     _HOST_PATH_SHAPES.append(re.compile(rf"\b{re.escape(_ACCOUNT)}\b"))
+
+# One of the shapes is conditional and the rest are not, so say out loud how
+# many always run. Otherwise this file passes identically on a machine where
+# the account shape was skipped, and a reader has no way to tell which of the
+# two things they are looking at.
+assert len(_HOST_PATH_SHAPES) >= 5, "the unconditional shapes are what carries this file"
 
 
 def host_path_strings(payload: Any, trail: str = "$") -> list[str]:
@@ -154,10 +167,16 @@ def a_smoke_test_that_names_the_folder(monkeypatch):
     This is the real shape: every failing branch of ``smoke_test_converter``
     writes ``exe_path.parent`` into ``message`` so the operator knows which
     folder to rebuild. Useful text, and not for an anonymous reader.
+
+    Returns the list of converters it was actually asked about, because whether
+    the smoke test runs at all is itself under test: running it launches the exe.
     """
     from app.modules.boq import cad_import
 
+    ran: list[str] = []
+
     def _health(extension: str, force: bool = False) -> dict[str, Any]:
+        ran.append(extension)
         return {
             "status": "failed",
             "message": (
@@ -169,6 +188,7 @@ def a_smoke_test_that_names_the_folder(monkeypatch):
         }
 
     monkeypatch.setattr(cad_import, "smoke_test_converter", _health)
+    return ran
 
 
 @pytest.fixture
@@ -295,9 +315,8 @@ async def test_a_failing_smoke_test_does_not_name_its_folder_to_an_anonymous_cal
     body = response.json()
 
     assert host_path_strings(body) == []
-    # The verdict survives even though the prose behind it does not.
-    assert all(row["health"] == "failed" for row in body["converters"])
-    assert all(row["suggested_actions"] for row in body["converters"])
+    # And the status check still answers the question it exists for.
+    assert all(row["installed"] for row in body["converters"])
 
 
 async def test_a_failing_smoke_test_still_names_its_folder_to_the_operator(
@@ -316,6 +335,34 @@ async def test_a_failing_smoke_test_still_names_its_folder_to_the_operator(
     body = response.json()
 
     assert host_path_strings(body), "the operator has to be told which folder to rebuild"
+
+
+async def test_an_anonymous_caller_cannot_make_the_server_launch_the_converter_binaries(
+    app_client,
+    auth_headers,
+    an_installed_converter,
+    a_smoke_test_that_names_the_folder,
+):
+    """``verify=true`` is the same act the per-converter route asks a permission for.
+
+    Both halves belong in one test. An anonymous ``verify=true`` must launch
+    nothing, and the only way to know that assertion means anything is to watch
+    the same fixture record launches for a caller who is allowed them.
+    """
+    _app, client = app_client
+    ran = a_smoke_test_that_names_the_folder
+
+    anonymous = await client.get("/api/v1/takeoff/converters/", params={"verify": "true"})
+    assert anonymous.status_code == 200, anonymous.text
+    assert ran == [], "an anonymous verify=true launched the converter exe"
+
+    operator = await client.get(
+        "/api/v1/takeoff/converters/",
+        params={"verify": "true"},
+        headers=auth_headers,
+    )
+    assert operator.status_code == 200, operator.text
+    assert ran, "the smoke test has to run for someone, or the assertion above proves nothing"
 
 
 # ── The version check ────────────────────────────────────────────────────
