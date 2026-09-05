@@ -251,11 +251,16 @@ def boot(data_dir: Path | str) -> bool:
             _fatal_detail = too_deep.message
             # The stage detail carries both numbers, because on the desktop the
             # launcher checklist is the only surface this reader has and the
-            # paragraph above goes to a log file they are not reading.
+            # paragraph above goes to a log file they are not reading. The
+            # numbers lead and the path trails, because the path is over 200
+            # characters by construction and the checklist line does not wrap:
+            # whichever half comes last is the half that runs off the edge, and
+            # a reader who can see only one half needs the one they can act on.
             emit_stage(
                 "pg",
                 "fail",
-                f"{too_deep.directory} is {too_deep.length} characters long; Windows allows {too_deep.limit} here",
+                f"path too long: {too_deep.length} characters, and {too_deep.limit} "
+                f"is the maximum here, for {too_deep.directory}",
             )
             logger.error("%s", too_deep.message)
             return False

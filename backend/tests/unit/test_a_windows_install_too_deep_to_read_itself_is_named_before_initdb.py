@@ -26,6 +26,7 @@ no-op and where nearly all of our CI runs.
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -42,6 +43,23 @@ class InitdbAttempted(Exception):
     raising here leaves the test with a named failure instead of a real cluster
     bring-up against a path the code was supposed to have measured first.
     """
+
+
+class AnOperatingSystemThatIsNotWindows:
+    """The real :mod:`os` with one attribute answered differently.
+
+    ``os.name`` cannot be patched in place. :class:`pathlib.Path` reads it on
+    every instantiation to choose which flavour to build, so a boot run under a
+    patched ``os.name`` would assemble POSIX paths on a Windows machine and fail
+    for a reason with nothing to do with what is being tested. Replacing the
+    module binding inside ``embedded_pg`` moves the platform for the code under
+    test and for nothing else.
+    """
+
+    name = "posix"
+
+    def __getattr__(self, attribute: str) -> object:
+        return getattr(os, attribute)
 
 
 def longest_relative_path(root: Path, subtrees: Sequence[str]) -> tuple[int, str]:
@@ -64,14 +82,12 @@ def longest_relative_path(root: Path, subtrees: Sequence[str]) -> tuple[int, str
     return len(longest), longest
 
 
-@pytest.fixture
-def on_a_windows_installed_too_deep(monkeypatch: pytest.MonkeyPatch) -> list[Path]:
-    """Put ``boot`` on a Windows whose installation is too deep, and record initdb.
+def record_initdb_instead_of_running_it(monkeypatch: pytest.MonkeyPatch) -> list[Path]:
+    """Stub the bring-up down to ``initdb`` and record every path that reaches it.
 
-    Returns the list every ``initdb`` attempt is appended to, which is the whole
-    point: the assertion this fixture exists to support is about what was NOT
-    run. ``_apply_ascii_locale_env`` is stubbed because it writes five variables
-    into ``os.environ`` and a boot that fails to refuse would reach it.
+    Everything except the platform gate, which the two callers disagree about
+    deliberately: the fixture below forces it on, and the test that owns the
+    no-op away from Windows leaves the real one in place.
     """
     attempts: list[Path] = []
 
@@ -81,11 +97,24 @@ def on_a_windows_installed_too_deep(monkeypatch: pytest.MonkeyPatch) -> list[Pat
 
     monkeypatch.setattr(embedded_pg, "_server", None)
     monkeypatch.setattr(embedded_pg, "_fatal_detail", None)
-    monkeypatch.setattr(embedded_pg, "path_limit_applies", lambda: True)
     monkeypatch.setattr(embedded_pg, "_bundled_install_dir", lambda: Path("C:\\" + "i" * 254))
     monkeypatch.setattr(embedded_pg, "_bundled_major", lambda: "16")
     monkeypatch.setattr(embedded_pg, "_apply_ascii_locale_env", lambda: None)
     monkeypatch.setattr(embedded_pg, "_pre_initialize_cluster", record_and_refuse_to_run)
+    return attempts
+
+
+@pytest.fixture
+def on_a_windows_installed_too_deep(monkeypatch: pytest.MonkeyPatch) -> list[Path]:
+    """Put ``boot`` on a Windows whose installation is too deep, and record initdb.
+
+    Returns the list every ``initdb`` attempt is appended to, which is the whole
+    point: the assertion this fixture exists to support is about what was NOT
+    run. ``_apply_ascii_locale_env`` is stubbed because it writes five variables
+    into ``os.environ`` and a boot that fails to refuse would reach it.
+    """
+    attempts = record_initdb_instead_of_running_it(monkeypatch)
+    monkeypatch.setattr(embedded_pg, "path_limit_applies", lambda: True)
     return attempts
 
 
@@ -275,6 +304,34 @@ def test_an_existing_cluster_is_not_refused_for_a_path_it_already_lives_with(
     assert problem is not None
     assert any(record.getMessage() == problem.message for record in caplog.records), (
         "the path length went unmentioned on a boot that let it through"
+    )
+
+
+def test_boot_does_not_refuse_where_the_limit_does_not_exist(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """The no-op on Linux and macOS, asserted through ``boot`` and the real gate.
+
+    Both tests above reach the refusal by forcing ``path_limit_applies`` to
+    ``True``, so neither would notice the guard being called without it. This one
+    leaves the real gate in place and moves the platform underneath it, which is
+    the only thing that gate reads. An installation far over the Windows limit is
+    therefore offered to a bring-up that must measure nothing and run initdb
+    anyway, which is what has to keep happening where nearly all of our CI runs.
+    """
+    attempts = record_initdb_instead_of_running_it(monkeypatch)
+    monkeypatch.setattr(embedded_pg, "os", AnOperatingSystemThatIsNotWindows())
+    assert embedded_pg.path_limit_applies() is False
+
+    with pytest.raises(InitdbAttempted):
+        embedded_pg.boot(tmp_path)
+
+    assert attempts == [(tmp_path / "pgdata").resolve()], (
+        "the bring-up refused to reach initdb on a platform that has no such path limit"
+    )
+    assert embedded_pg.last_fatal_detail() is None, (
+        "a path length was recorded as the reason a boot failed on a platform where it is not a reason"
     )
 
 
