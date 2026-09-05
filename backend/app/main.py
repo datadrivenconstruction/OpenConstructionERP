@@ -4627,7 +4627,14 @@ def create_app() -> FastAPI:
         # disabling a module moves the route counter that _custom_openapi
         # checks, so the next request rebuilds rather than serving a document
         # that describes the wrong set of modules.
-        if not _fast_startup:
+        # Only where something can actually serve the result. ``openapi_url``
+        # is None in production - BUG-394 keeps the route map off a public
+        # deployment - and /api/docs and /api/redoc go with it, so a production
+        # boot has no consumer for this document at all. Priming there would
+        # spend the whole build on a 2 GB VPS to fill a cache nothing reads,
+        # and spend it in the window where requests are already answering
+        # slowly, which is how a healthcheck timeout turns into a restart loop.
+        if not _fast_startup and app.openapi_url:
 
             async def _prime_openapi_schema() -> None:
                 try:

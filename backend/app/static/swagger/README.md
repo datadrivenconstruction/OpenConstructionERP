@@ -15,10 +15,20 @@ this platform rather than an edge case.
 Source: [swagger-ui-dist](https://www.npmjs.com/package/swagger-ui-dist),
 version **5.32.15**, Apache-2.0. Taken unmodified from the published package.
 
-Cost: 1.74 MB on disk, about 438 KB of the wheel once deflated. That is the
-whole price of the fix; nothing was added to `dependencies` for it, because a
-package would have brought its own release cadence and a great deal more than
-two files.
+Cost: 1,737,993 bytes on disk and 452,877 deflated, read back out of a built
+wheel rather than estimated. That is the whole price of the fix; nothing was
+added to `dependencies` for it, because a package would have brought its own
+release cadence and a great deal more than two files.
+
+The files reach the wheel through the ordinary `app` package walk, so they need
+no entry in the `force-include` map, and adding one would ship them twice and
+have PyPI reject the upload. That the walk really carries them is worth
+checking after any change to the ignore rules, because it is the walk that
+silently dropped the twelve site photos:
+
+```bash
+uv build --wheel && python -m zipfile -l dist/*.whl | grep swagger
+```
 
 ## Updating
 

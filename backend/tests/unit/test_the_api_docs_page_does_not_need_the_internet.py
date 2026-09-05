@@ -127,6 +127,47 @@ def test_the_asset_route_serves_nothing_but_those_two_files(client: TestClient) 
     assert client.get("/api/docs/assets/..%2F..%2Fmain.py").status_code == 404
 
 
+def _published_paths(app: object) -> set[str | None]:
+    return {getattr(route, "path", None) for route in app.routes}  # type: ignore[attr-defined]
+
+
+def test_production_publishes_no_route_that_could_serve_the_schema(client: TestClient) -> None:
+    """Nothing in a production process can hand out the OpenAPI document.
+
+    ``openapi_url`` is None there, and with no schema route there is no
+    ``/api/docs`` and no ``/api/redoc`` either. This is the fact the startup
+    prime relies on when it declines to run: building this document costs the
+    better part of three minutes of CPU, and on a production box that would buy
+    a cache with no reader, spent in the window where a health check is already
+    answering slowly enough to look like a hung process.
+
+    So this asserts the premise rather than the guard. If someone later decides
+    the reference should be published in production, the prime has to be
+    revisited in the same change, and this is what will say so.
+    """
+    from app.config import get_settings
+
+    # First the same question of the app the rest of this file uses, so a
+    # rename or a change of route class cannot turn the assertions below into
+    # three true statements about a set that never held these paths anyway.
+    reference = _published_paths(client.app)
+    assert {"/api/docs", "/api/docs/assets/{filename}"} <= reference
+
+    settings = get_settings()
+    original = settings.app_env
+    try:
+        settings.app_env = "production"
+        app = create_app()
+    finally:
+        settings.app_env = original
+
+    assert app.openapi_url is None
+    paths = _published_paths(app)
+    assert "/api/docs" not in paths
+    assert "/api/redoc" not in paths
+    assert "/api/docs/assets/{filename}" not in paths
+
+
 def test_the_schema_is_rebuilt_when_the_route_table_moves() -> None:
     """The cached schema must not outlive the routes it describes.
 
