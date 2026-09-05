@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.8.1',
+    date: '2026-09-05',
+    tag: 'FIX',
+    summary:
+      'Mostly money. An invoice total was written for a reader and read back as a number, so the field came up empty from a thousand upwards, nine thousand left the browser as nine, and a reader whose decimal mark is a comma lost the cents off every invoice at any size; nothing was stored wrong, because the server rebuilt the total on every write, which is also why weeks of truncated figures went unreported. A total you type yourself now reaches the invoice or is refused on screen for not adding up, and an approved invoice can be marked paid again, which the register had not offered since approving started writing sent. Equipment, Service, Portal and Assets reported themselves empty on every install no matter how much data they held, and the four failing probes behind that produced ninety one thousand server side errors in one seventy eight day log. A Windows installation too deep for the path limit is named as such before it is called corrupt, with the path, its length, the limit and the fix. Three status routes that answer without credentials stop naming the folder the server runs from, which on a default install is the home directory and the account name of the operator. The project header no longer clips in German and Russian, relative timestamps are translated in all forty two languages rather than silently English, and nineteen German strings have their diacritics back. A validation run no longer reports that it took no time on Windows. A bill priced from a production norm can be compared against what the job actually spent, one row per norm with what was predicted, what was installed and what was spent. A money KPI over bill lines can say which currency it is in and break down by it. And the health reference names all seven conditions that make an installation degraded, where it had named two and told the reader the wrong way to tell them apart.',
+  },
+  {
     version: '16.8.0',
     date: '2026-09-04',
     tag: 'NEW',
