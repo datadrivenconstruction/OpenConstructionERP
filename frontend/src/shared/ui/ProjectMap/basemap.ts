@@ -21,18 +21,35 @@
  * tiles remain off the table whatever they return: the OSMF Tile Usage
  * Policy forbids proxying and app use, and they enforce by User-Agent.
  *
- * TWO SHAPES. Interactive maps read vector tiles through the vendored style
- * below and draw the streets themselves, in the browser, on the GPU. That
- * covers every map a user pans and zooms.
+ * THREE SHAPES. First, interactive maps read vector tiles through the
+ * vendored style below and draw the streets themselves, in the browser, on
+ * the GPU. That covers every map a user pans and zooms.
  *
- * Two surfaces cannot consume vector data at all: the ``<img>`` card
- * thumbnail, which is a plain image tag, and the Cesium globe's imagery
- * provider, which wants raster XYZ. Those read shaded relief - Natural
- * Earth, public domain, proxied straight through. The visible consequence
- * is that a project card and the 3D globe show terrain rather than streets.
- * That is a deliberate downgrade in detail, taken because every keyless
- * raster street basemap has stopped being keyless, and a coarse honest tile
- * beats a detailed one with "API KEY REQUIRED" printed across it.
+ * Second, the card thumbnail. It cannot consume vector data - it is a plain
+ * ``<img>`` - but it no longer has to: ``./streetThumbnail`` renders this
+ * same vector style once into an offscreen MapLibre instance, reads the
+ * canvas as a data URL and destroys the context, so the card shows real
+ * street cartography from a still image with nothing left streaming. The
+ * card therefore normally shows streets and building footprints, and falls
+ * back to the relief tile below when the snapshot cannot be produced (no
+ * WebGL, a blocked style, a render that times out). Which of the two it is
+ * showing decides which credit it must carry, and both are exported from
+ * this file.
+ *
+ * Third, one surface still cannot consume vector data at all: the Cesium
+ * globe's imagery provider, which wants raster XYZ. It reads shaded relief -
+ * Natural Earth, public domain, proxied straight through - and so shows
+ * terrain rather than streets. That is a deliberate downgrade in detail,
+ * taken because every keyless raster street basemap has stopped being
+ * keyless, and a coarse honest tile beats a detailed one with "API KEY
+ * REQUIRED" printed across it. It is also what the card falls back to, so
+ * the relief source stays load-bearing rather than legacy.
+ *
+ * This paragraph used to state, as settled fact, that the card could not
+ * show streets and that this was a permanent property of an ``<img>``. It
+ * was read that way and believed. The claim was about the tile SOURCE, not
+ * about the tag: an image tag shows whatever bytes it is given, and the
+ * bytes can be rendered on this side.
  */
 
 /**
@@ -53,7 +70,8 @@ export const PROXY_TILE_BASE = '/api/v1/geo-hub/basemap';
 /**
  * Deepest zoom the relief source has. Asking past it returns a blank tile,
  * so raster consumers must clamp: Cesium via ``maximumLevel``, the card
- * thumbnail by requesting this zoom directly.
+ * thumbnail's relief FALLBACK by requesting this zoom directly. The card's
+ * normal picture is a vector snapshot and is not bound by this ceiling.
  */
 export const RELIEF_MAX_ZOOM = 6;
 
@@ -74,7 +92,8 @@ export const VECTOR_BASEMAP_STYLE_URL = basemapStyleUrl('liberty');
 /**
  * Plain-text credit for the raster relief tiles, for consumers that render
  * their own attribution chrome (the Cesium globe passes this straight to
- * ``UrlTemplateImageryProvider``).
+ * ``UrlTemplateImageryProvider``; the project card shows it whenever it is
+ * displaying the relief fallback rather than a vector snapshot).
  *
  * Natural Earth is public domain and asks for no attribution at all, so this
  * is a courtesy credit, not a licence obligation. It deliberately does NOT
@@ -102,3 +121,26 @@ export const TILE_ATTRIBUTION_HTML =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
   '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
   '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a>';
+
+/**
+ * The vector credit as plain text, for surfaces that render it as text
+ * rather than as markup.
+ *
+ * The project card is one: it shows a rendered snapshot inside a card that
+ * navigates on click, where an anchor is either a click target competing
+ * with the card or a link that looks like one and is not. Plain text in a
+ * small chip is the honest shape there, and the interactive map the card
+ * leads to carries the linked credit in full.
+ *
+ * DERIVED, not retyped, and derived from the VALUE rather than from this
+ * file's source text. Retyping is the exact defect the constant above
+ * exists to prevent, and slicing a constant out of module source is the
+ * defect the attribution test documents in its own history: a checkout
+ * with CRLF terminators broke the slice and the assertion silently began
+ * reading a different constant. Reading the value through the module
+ * system cannot drift from the value.
+ */
+export const TILE_ATTRIBUTION_TEXT = TILE_ATTRIBUTION_HTML.replace(/<[^>]*>/g, '')
+  .replace(/&copy;/g, '©')
+  .replace(/\s+/g, ' ')
+  .trim();

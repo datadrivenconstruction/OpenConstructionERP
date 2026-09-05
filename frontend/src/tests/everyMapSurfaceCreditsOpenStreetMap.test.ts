@@ -54,13 +54,28 @@
 // surface should be added here, but its absence must not be asserted, or
 // this gate turns into a ratchet that breaks on new work.
 //
+// ONE SURFACE IS DELIBERATELY NOT IN THE LIST, and saying so is cheaper
+// than letting the next reader wonder. `shared/ui/ProjectMap/streetThumbnail.ts`
+// renders the vector style into an offscreen map and reads the canvas as a
+// data URL. It draws no chrome at all, by design: a credit baked into a
+// cached bitmap is text nobody can select, follow or hear read out, and it
+// would double the one the consumer draws in the DOM. Adding it here would
+// force it to name a credit constant it does not render, which is exactly
+// the decorative mention rule 3 exists to reject. What it produces is
+// credited where it is shown, on the project card, and rule 6 below is the
+// assertion about that.
+//
 // Run: npx vitest run src/tests/everyMapSurfaceCreditsOpenStreetMap.test.ts
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { RELIEF_ATTRIBUTION, TILE_ATTRIBUTION_HTML } from '../shared/ui/ProjectMap/basemap';
+import {
+  RELIEF_ATTRIBUTION,
+  TILE_ATTRIBUTION_HTML,
+  TILE_ATTRIBUTION_TEXT,
+} from '../shared/ui/ProjectMap/basemap';
 
 const SRC = resolve(__dirname, '..');
 
@@ -78,9 +93,28 @@ const MAP_SURFACES = [
 /** The credit link itself. */
 const OSM_CREDIT = 'openstreetmap.org/copyright';
 
-/** The shared constants a surface may name instead of inlining the link. */
-const VECTOR_CREDIT_CONST = 'TILE_ATTRIBUTION_HTML';
+/**
+ * The shared constants a surface may name instead of inlining the link.
+ *
+ * Two spellings of the same credit. `_HTML` is for anything that renders
+ * markup, which is every MapLibre `AttributionControl`; `_TEXT` is the
+ * same value with the tags taken out, derived from it at module load, for
+ * a surface that shows the credit as text. The project card is the second
+ * kind: it is a still image inside a card that navigates on click, where
+ * an anchor either competes for the click or looks like a link and is not.
+ *
+ * Both are listed because rule 1 asks "does this file name the credit",
+ * and a surface that legitimately uses only the text form would otherwise
+ * be red on correct code.
+ */
+const VECTOR_CREDIT_CONSTS = ['TILE_ATTRIBUTION_HTML', 'TILE_ATTRIBUTION_TEXT'] as const;
+const VECTOR_CREDIT_CONST = VECTOR_CREDIT_CONSTS[0];
 const RELIEF_CREDIT_CONST = 'RELIEF_ATTRIBUTION';
+
+/** True when the source names the vector credit in either spelling. */
+function namesVectorCredit(text: string): boolean {
+  return VECTOR_CREDIT_CONSTS.some((name) => text.includes(name));
+}
 
 /**
  * Providers we do not serve tiles from any more. Matched on the host, not on
@@ -115,12 +149,12 @@ describe('every map surface credits OpenStreetMap', () => {
   });
 
   it.each(sources)('$rel shows the OpenStreetMap credit', ({ rel, text }) => {
-    const credits = text.includes(OSM_CREDIT) || text.includes(VECTOR_CREDIT_CONST);
+    const credits = text.includes(OSM_CREDIT) || namesVectorCredit(text);
     expect(
       credits,
       `${rel} renders a basemap but neither carries the ${OSM_CREDIT} link nor ` +
-        `imports ${VECTOR_CREDIT_CONST}. Tiles rendered from OSM data are a ` +
-        'Produced Work under ODbL and owe attribution.',
+        `imports one of ${VECTOR_CREDIT_CONSTS.join(' / ')}. Tiles rendered from ` +
+        'OSM data are a Produced Work under ODbL and owe attribution.',
     ).toBe(true);
   });
 
@@ -140,7 +174,7 @@ describe('every map surface credits OpenStreetMap', () => {
     if (attributionProps.length === 0) return;
     for (const line of attributionProps) {
       expect(
-        line.includes(OSM_CREDIT) || line.includes(VECTOR_CREDIT_CONST),
+        line.includes(OSM_CREDIT) || namesVectorCredit(line),
         `${rel} passes a customAttribution that does not credit OpenStreetMap: ${line.trim()}`,
       ).toBe(true);
     }
@@ -195,6 +229,29 @@ describe('every map surface credits OpenStreetMap', () => {
     }
   });
 
+  it('the plain-text vector credit says the same thing without the markup', () => {
+    expect(typeof TILE_ATTRIBUTION_TEXT, `${CREDIT_MODULE} does not export ${VECTOR_CREDIT_CONSTS[1]}`).toBe(
+      'string',
+    );
+    // Derived from the value, not retyped and not sliced out of the module
+    // source. Both alternatives are defects this file already carries the
+    // scars of: the retyped credit is why the constant exists at all, and
+    // the source slice is the CRLF bug described above.
+    expect(TILE_ATTRIBUTION_TEXT).toContain('OpenStreetMap');
+    expect(
+      /openfreemap|openmaptiles/i.test(TILE_ATTRIBUTION_TEXT),
+      'the text credit must also name whoever serves the tiles, not just OSM',
+    ).toBe(true);
+    expect(
+      TILE_ATTRIBUTION_TEXT.includes('<'),
+      'the text form still carries markup, so a surface rendering it as text ' +
+        'would print tags at the reader',
+    ).toBe(false);
+    for (const host of RETIRED_PROVIDERS) {
+      expect(TILE_ATTRIBUTION_TEXT, `the text credit still names ${host}`).not.toContain(host);
+    }
+  });
+
   it('the relief credit does not claim OpenStreetMap data', () => {
     expect(
       typeof RELIEF_ATTRIBUTION,
@@ -206,5 +263,39 @@ describe('every map surface credits OpenStreetMap', () => {
         'licence statement, the same defect as a stale credit, mirrored.',
     ).toBe(false);
     expect(RELIEF_ATTRIBUTION.toLowerCase()).toContain('natural earth');
+  });
+
+  // Rule 6. A surface that can show two different pictures needs both
+  // credits, and needs them reachable from the same file.
+  //
+  // The project card is the only one. It normally shows a snapshot of the
+  // vector style rendered offscreen, and it falls back to the relief tile
+  // when that cannot be produced - no WebGL, a blocked style, a render
+  // that misses its timeout. Those two pictures carry different data from
+  // different sources under different licences, and one credit cannot be
+  // right for both. Naming only one is not a formatting slip: the vector
+  // half is an ODbL obligation and the relief half is a courtesy credit,
+  // so getting it backwards is a false statement in one direction and a
+  // breach in the other.
+  //
+  // Source text rather than behaviour, like rules 1 to 4, because what
+  // this asks is how the component is written. WHICH credit is shown for
+  // WHICH picture is a runtime question, and it is asserted in both
+  // directions in
+  // src/shared/ui/ProjectMap/__tests__/projectCardShowsStreetsOrSaysItIsTerrain.test.tsx.
+  it('the project card names both credits, because it can show either picture', () => {
+    const card = sources.find((s) => s.rel === 'shared/ui/ProjectMap/ProjectMap.tsx');
+    expect(card, 'the card surface fell out of the list above').toBeDefined();
+    const text = card!.text;
+    expect(
+      namesVectorCredit(text),
+      'the card renders a vector snapshot and must name the vector credit',
+    ).toBe(true);
+    expect(
+      text.includes(RELIEF_CREDIT_CONST),
+      'the card falls back to the relief tile and must name the relief credit ' +
+        'for it, or a fallback picture ships under an OpenStreetMap credit it ' +
+        'has no OSM data to justify',
+    ).toBe(true);
   });
 });
