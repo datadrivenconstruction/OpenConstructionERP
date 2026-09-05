@@ -467,6 +467,11 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
     snippet: 'return `${sign}${Math.abs(value).toFixed(4)}°`;',
     why: 'Renders a coordinate in degrees, which keeps the universal convention for the same reason latitudes do.',
   },
+  {
+    file: 'shared/ui/ProjectMap/streetThumbnail.ts',
+    snippet: 'return v.toFixed(4);',
+    why: 'Rounds a latitude or longitude into the snapshot cache key, so two cards a few metres apart share one render. Compared as a string and never shown, and the geo-coordinate rule cannot see it because the line is the whole body of roundCoord.',
+  },
   ];
 /* FIXED-ALLOWED:END */
 
@@ -652,7 +657,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Seventeen entries covering nineteen sites in ten files, against 139
+    // Eighteen entries covering twenty sites in eleven files, against 139
     // exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
@@ -675,6 +680,7 @@ describe('every number and date is written in the language the reader picked', (
       'modules/gaeb-exchange/data/gaebExport.ts :: return value.toFixed(decimals);',
       'features/takeoff/lib/takeoff-export.ts :: return n.toFixed(precision);',
       'features/geo-hub/utils.ts :: return `${sign}${Math.abs(value).toFixed(4)}°`;',
+      'shared/ui/ProjectMap/streetThumbnail.ts :: return v.toFixed(4);',
     ]);
     expect(FIXED_ALLOWED.filter((a) => a.why.length < 20)).toEqual([]);
     const stale = FIXED_ALLOWED.filter(
