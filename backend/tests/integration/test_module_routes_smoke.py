@@ -34,21 +34,42 @@ async def client():
 
 @pytest_asyncio.fixture
 async def auth_headers(client):
-    """Register + login a fresh user so we can hit auth-gated routes."""
+    """Register + login a caller holding the rank the gated routes below need.
+
+    Registering is not enough on its own. Self-registration hands out admin only
+    to the very first account on a fresh install, and the nightly runs every
+    module against one shared database, so exactly one module wins that slot and
+    every module after it gets a viewer. It also leaves the account inactive
+    under the admin-approve registration mode, and login then answers the same
+    generic error as a wrong password. Both the finance and the projects routes
+    probed here register their create verb at editor, so a viewer is refused
+    before the route shape this file exists to check is reached at all.
+
+    Editor, not admin, so the requests below go through a real rank comparison
+    rather than the RequirePermission admin bypass.
+    """
+    email = "module-routes@smoke.io"
+    password = "ModuleRoutes123!"
     await client.post(
         "/api/v1/users/auth/register",
-        json={
-            "email": "module-routes@smoke.io",
-            "password": "ModuleRoutes123!",
-            "full_name": "Module Routes Tester",
-        },
+        json={"email": email, "password": password, "full_name": "Module Routes Tester"},
     )
+
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.users.models import User
+
+    async with async_session_factory() as s:
+        await s.execute(update(User).where(User.email == email).values(role="editor", is_active=True))
+        await s.commit()
+
     resp = await client.post(
         "/api/v1/users/auth/login",
-        json={"email": "module-routes@smoke.io", "password": "ModuleRoutes123!"},
+        json={"email": email, "password": password},
     )
-    token = resp.json().get("access_token", "")
-    return {"Authorization": f"Bearer {token}"}
+    assert resp.status_code == 200, resp.text
+    return {"Authorization": f"Bearer {resp.json()['access_token']}"}
 
 
 @pytest_asyncio.fixture

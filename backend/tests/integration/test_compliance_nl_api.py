@@ -40,7 +40,7 @@ async def temp_engine_and_factory():
         yield engine, factory
 
 
-_current_user_payload: dict[str, str] = {}
+_current_user_payload: dict[str, object] = {}
 
 
 @pytest_asyncio.fixture
@@ -61,7 +61,7 @@ async def app(temp_engine_and_factory) -> AsyncGenerator[FastAPI, None]:
                 await session.rollback()
                 raise
 
-    async def _override_payload() -> dict[str, str]:
+    async def _override_payload() -> dict[str, object]:
         return dict(_current_user_payload)
 
     app.dependency_overrides[get_session] = _override_session
@@ -87,10 +87,32 @@ def user_b() -> uuid.UUID:
     return uuid.uuid4()
 
 
-def _set_acting_user(user_id: uuid.UUID, tenant_id: str | None = None) -> None:
+def _set_acting_user(
+    user_id: uuid.UUID,
+    tenant_id: str | None = None,
+    *,
+    permissions: list[str] | None = None,
+) -> None:
+    """Point the auth override at a caller, optionally holding rule permissions.
+
+    The natural-language helpers are authenticated but ungated, so the default
+    caller carries no permissions at all and reaching them is what proves they
+    stay open to any signed-in user. Authoring a rule is a different matter:
+    v5.9.0 put the compile and delete verbs behind ``compliance.rule.create`` and
+    ``compliance.rule.delete`` at manager level, on the argument that a saved DSL
+    rule runs against project data and a read-only viewer must not be able to
+    register one. A test that saves a rule therefore has to ask for the
+    permission by name.
+
+    The permissions are listed rather than claiming ``role="manager"`` so the
+    check runs against this list instead of the shared permission registry,
+    whose contents depend on which modules happen to have been imported first.
+    """
     _current_user_payload.clear()
     _current_user_payload["sub"] = str(user_id)
     _current_user_payload["tenant_id"] = tenant_id or str(user_id)
+    if permissions:
+        _current_user_payload["permissions"] = list(permissions)
 
 
 # ── Tests ─────────────────────────────────────────────────────────────────
@@ -193,7 +215,7 @@ async def test_from_nl_to_compile_round_trip(
     user_a: uuid.UUID,
 ) -> None:
     """End-to-end: NL → DSL → compile/save should succeed."""
-    _set_acting_user(user_a)
+    _set_acting_user(user_a, permissions=["compliance.rule.create"])
 
     nl_resp = await client.post(
         "/api/v1/compliance/dsl/from-nl",

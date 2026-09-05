@@ -70,14 +70,14 @@ async def _activate_user(email: str) -> None:
         await s.commit()
 
 
-async def _promote_to_editor(client: AsyncClient, email: str, password: str) -> dict[str, str]:
+async def _promote_to_role(client: AsyncClient, email: str, password: str, role: str) -> dict[str, str]:
     from sqlalchemy import update
 
     from app.database import async_session_factory
     from app.modules.users.models import User
 
     async with async_session_factory() as s:
-        await s.execute(update(User).where(User.email == email.lower()).values(role="editor"))
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role))
         await s.commit()
 
     resp = await client.post(
@@ -120,18 +120,28 @@ async def _create_project(owner_user_id: str, name: str) -> str:
 
 @pytest_asyncio.fixture(scope="module")
 async def two_tenants(http_client):
-    # Tenant A owns the project under test and has to be able to create in it.
-    # Registration cannot be relied on for that: self-registration only hands out
-    # admin to the very first account on a fresh install, and every module in this
-    # job shares one database, so exactly one of them wins that slot and the rest
-    # get a viewer with no <module>.create permission. A was then refused 403 in
-    # its own project and the cross-tenant probe below never ran. Promote it the
-    # same way B is promoted. Editor, not admin, so A passes verify_project_access
-    # on the ownership branch a real tenant would use rather than an admin bypass.
+    # Tenant A owns the project under test and has to be able to run every verb
+    # these tests exercise in it. Registration cannot be relied on for that:
+    # self-registration only hands out admin to the very first account on a fresh
+    # install, and every module in this job shares one database, so exactly one of
+    # them wins that slot and the rest get a viewer with no <module>.create
+    # permission. A was then refused 403 in its own project and the cross-tenant
+    # probe below never ran.
+    #
+    # Manager rather than editor, because this module registers <module>.create at
+    # editor and <module>.delete one rank above it, and the delete tests below are
+    # A's as well. Pinning A at editor left those refused on a permission the
+    # product has required since the module shipped. Manager is still not admin, so
+    # A keeps passing verify_project_access on the ownership branch a real tenant
+    # would use rather than on the admin bypass, and RequirePermission still makes
+    # a real rank comparison instead of short-circuiting.
+    #
+    # B stays editor. It is the attacker in the isolation probe and has to reach
+    # the isolation check rather than be turned away by a role check first.
     a_uid, a_email, a_pw, _a_hdr = await _register_login(http_client, tenant="a")
-    a_hdr = await _promote_to_editor(http_client, a_email, a_pw)
+    a_hdr = await _promote_to_role(http_client, a_email, a_pw, "manager")
     b_uid, b_email, b_pw, _b_hdr = await _register_login(http_client, tenant="b")
-    b_hdr = await _promote_to_editor(http_client, b_email, b_pw)
+    b_hdr = await _promote_to_role(http_client, b_email, b_pw, "editor")
     a_project = await _create_project(a_uid, "A's project")
     b_project = await _create_project(b_uid, "B's project")
     return {
