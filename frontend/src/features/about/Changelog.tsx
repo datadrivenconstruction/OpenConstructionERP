@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.8.2',
+    date: '2026-09-05',
+    tag: 'FIX',
+    summary:
+      'The project list drew the wrong kind of map. Every card painted one static tile of shaded relief at zoom 6, which is as deep as that source goes and carries no streets at any zoom, so the picture was geographically correct and of no use to anybody: a person opening a project list wants roads, street names and building footprints, and got landform. Cards render the vendored vector style now, one offscreen context at a time for the whole grid, and at zoom 15 six European cities came back with 95 to 235 road segments and 12 to 46 building footprints each, against zero of either before. No tighter than that on purpose, because a card\'s coordinates often come from geocoding a city and a country, which answers with a centroid. The relief tile stays as the fallback, so a browser without WebGL still gets a picture rather than an empty box. A bill position answered a different norm depending on which endpoint you asked, because two builders made the same response object and only one knew about the fields that shipped in 16.8.1; they had drifted on six fields in both directions, so the whole bill read had also been reporting every row\'s concurrency token as zero. There is one builder now. The API reference page fetched itself from a content delivery network, so an install with no route out to the internet showed a white page with nothing in the console to search for; the renderer ships in the product now at a pinned version, with no new dependency and less on the wire than the API assets already there. A status check that answers without credentials could still launch four converter binaries and wait eight seconds for them, which it declines to do now while still answering everybody. Forty three ignore rules meant for the backend sat where the wheel build could not read them, so a locally built archive carried an internal defect log, two seeding scripts and a stale frontend bundle, about eleven percent of it; published releases build on clean runners and carried none of it. And 16.8.1 shipped with no desktop installers, because the check that opens the built application ran all three of its legs against one port while the Windows helper process survives every stop signal available to it. Each leg takes its own port now.',
+  },
+  {
     version: '16.8.1',
     date: '2026-09-05',
     tag: 'FIX',
