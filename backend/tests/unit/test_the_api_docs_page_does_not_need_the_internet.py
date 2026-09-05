@@ -14,11 +14,11 @@ for. Self-hosting is the premise of this platform rather than an edge case, so
 the assets ship in the wheel and the pages point at this install.
 
 The test that matters here is not "the HTML changed". It is that the URLs the
-pages name are actually served, which is why every referenced asset is
-requested and its bytes checked. Asserting only on the absence of the CDN
-string would stay green if the vendored files were dropped from the package,
-and that failure mode - a page referring to local files that are not there -
-looks exactly like the bug this replaced.
+pages name are actually served, which is why every vendored asset is requested
+and its bytes checked. Asserting only on the absence of the CDN string would
+stay green if the vendored files were dropped from the package, and that
+failure mode - a page referring to local files that are not there - looks
+exactly like the bug this replaced.
 
 ``/api/docs`` is also the one thing on the API surface a first-time operator is
 told to open: the boot banner prints it under "Open in your browser". A blank
@@ -105,11 +105,11 @@ def test_the_page_does_not_ask_the_browser_to_draw_every_operation(client: TestC
 
 
 @pytest.mark.parametrize(
-    ("path", "filename", "content_type", "signature"),
+    ("path", "filename", "content_type", "signature", "min_bytes"),
     [
-        ("/api/docs", "swagger-ui-bundle.js", "application/javascript", b"SwaggerUIBundle"),
-        ("/api/docs", "swagger-ui.css", "text/css", b".swagger-ui"),
-        ("/api/redoc", "redoc.standalone.js", "application/javascript", b"Redoc"),
+        ("/api/docs", "swagger-ui-bundle.js", "application/javascript", b"SwaggerUIBundle", 1_000_000),
+        ("/api/docs", "swagger-ui.css", "text/css", b".swagger-ui", 100_000),
+        ("/api/redoc", "redoc.standalone.js", "application/javascript", b"Redoc", 900_000),
     ],
 )
 def test_every_asset_a_page_names_is_served(
@@ -118,14 +118,26 @@ def test_every_asset_a_page_names_is_served(
     filename: str,
     content_type: str,
     signature: bytes,
+    min_bytes: int,
 ) -> None:
     """Fetch what the page asks for, and check it is the real library.
 
     The signature check is the point: a 200 carrying an HTML error page, or the
     SPA's ``index.html`` handed back by the catch-all, would satisfy a status
-    assertion and leave the page just as blank as the CDN did. It is also what
-    catches a half-finished download, which is the likely way a vendored file
-    goes wrong.
+    assertion and leave the page just as blank as the CDN did.
+
+    The size floor covers the other way a vendored file goes wrong. Every one
+    of these signatures sits in the first few hundred bytes - ``Redoc`` is in
+    the UMD wrapper on line one - so a download that died a third of the way
+    through carries the signature and renders nothing. The floors are well
+    under the real sizes because a checkout with ``core.autocrlf`` on grows
+    these files rather than shrinking them; they are here to catch a truncation,
+    not to pin a version.
+
+    Not covered here: the favicon each page names. It is checked for being a
+    local URL like everything else, but it is served by the frontend static
+    layer out of ``dist``, which a unit test has no business requiring to be
+    built.
     """
     page = client.get(path)
     assert f"/api/docs/assets/{filename}" in page.text, f"{path} no longer loads {filename}"
@@ -135,6 +147,7 @@ def test_every_asset_a_page_names_is_served(
     assert response.status_code == 200
     assert response.headers["content-type"].startswith(content_type)
     assert signature in response.content
+    assert len(response.content) >= min_bytes, f"{filename} is {len(response.content)} bytes, looks truncated"
 
 
 def test_the_asset_route_serves_nothing_but_the_files_in_its_table(client: TestClient) -> None:
