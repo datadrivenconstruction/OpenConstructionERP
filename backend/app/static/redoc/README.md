@@ -15,12 +15,23 @@ rather than an edge case.
 Source: [redoc](https://www.npmjs.com/package/redoc), version **2.5.3**,
 MIT. Taken unmodified from the published package.
 
-Cost: 1,099,998 bytes on disk and 326,708 deflated. That is less than the
-Swagger UI assets next door already cost, which is worth stating because the
-note this replaces put the price at "roughly another megabyte" and declined the
-fix on it. Both numbers were right about different things: a megabyte is the
-disk figure, and the 100 MiB ceiling the published wheel is measured against
-counts the deflated one. Nothing was added to `dependencies` for it.
+Cost: 1,099,998 bytes as published upstream, 326,708 of them once deflated.
+That is less than the Swagger UI assets next door already cost, which is worth
+stating because the note this replaces put the price at "roughly another
+megabyte" and declined the fix on it. Both numbers were right about different
+things: a megabyte is the disk figure, and the 100 MiB ceiling the published
+wheel is measured against counts the deflated one. Nothing was added to
+`dependencies` for it.
+
+Both figures are the bytes upstream ships. A checkout with `core.autocrlf=true`
+rewrites the newlines in this file and in the Swagger bundle beside it, so the
+on-disk size there is a little larger and neither is byte-identical to the
+published package. It costs nothing functionally, both pages render either way,
+but it means the sizes above should be read off a Linux checkout or off a built
+wheel. Marking the vendored bundles `-text` in `.gitattributes` would settle
+it; it is deliberately not done here, because changing that attribute on an
+already-tracked file makes it show up as modified in every existing working
+copy at once.
 
 There is no stylesheet to vendor. ReDoc carries its styles inside the bundle,
 and the stock page's other two outbound requests are dropped rather than
