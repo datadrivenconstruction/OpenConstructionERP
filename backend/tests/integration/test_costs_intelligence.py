@@ -26,6 +26,8 @@ import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 
+from tests.integration._auth_helpers import promote_to_admin  # noqa: E402
+
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 
@@ -120,10 +122,13 @@ async def app_instance():
 
             await s.commit()
 
-            # Expose the seeded ids on the app for the test functions.
+            # Expose the seeded ids on the app for the test functions. The
+            # ledger's ``project_id`` is deliberately not exposed: it is a bare
+            # UUID with no ``Project`` row behind it, which the read paths do
+            # not care about but the write path rejects (see
+            # ``owned_project_id``).
             app.state.test_item_busy_id = str(item_busy.id)
             app.state.test_item_idle_id = str(item_idle.id)
-            app.state.test_project_id = str(project_id)
 
         yield app
 
@@ -133,6 +138,61 @@ async def http_client(app_instance):
     transport = ASGITransport(app=app_instance)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+
+
+@pytest_asyncio.fixture(scope="module")
+async def auth_headers(http_client: AsyncClient) -> dict[str, str]:
+    """Register, promote and log in a caller, returning bearer auth headers.
+
+    ``POST record-usage`` is authenticated: the usage ledger feeds the shared,
+    cross-tenant certainty badge, so an anonymous writer could forge a rate's
+    "proven" status. The read endpoints in this file take an optional payload
+    and stay anonymous on purpose, so only the write path carries these.
+    """
+    unique = uuid.uuid4().hex[:8]
+    email = f"costs-intel-{unique}@test.io"
+    password = f"CostsIntel{unique}9!"
+
+    reg = await http_client.post(
+        "/api/v1/users/auth/register",
+        json={"email": email, "password": password, "full_name": "Cost Intelligence Tester"},
+    )
+    assert reg.status_code == 201, f"Registration failed: {reg.text}"
+
+    await promote_to_admin(email)
+
+    login = await http_client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
+    assert login.status_code == 200, f"Login failed: {login.text}"
+    return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+@pytest_asyncio.fixture(scope="module")
+async def owned_project_id(http_client: AsyncClient, auth_headers: dict[str, str]) -> str:
+    """A project that really exists and belongs to the authenticated caller.
+
+    ``record-usage`` runs the caller through ``verify_project_access`` before
+    it writes, and that helper answers 404 for a project nobody created just
+    as it does for one the caller may not see. ``CostItemUsage.project_id``
+    carries no foreign key, which is why the seeded ledger rows above get away
+    with an invented UUID and this one cannot.
+    """
+    me = await http_client.get("/api/v1/users/me/", headers=auth_headers)
+    assert me.status_code == 200, me.text
+
+    from app.database import async_session_factory
+    from app.modules.projects.models import Project
+
+    project_id = uuid.uuid4()
+    async with async_session_factory() as s:
+        s.add(
+            Project(
+                id=project_id,
+                name="Cost Intelligence Test Project",
+                owner_id=uuid.UUID(me.json()["id"]),
+            )
+        )
+        await s.commit()
+    return str(project_id)
 
 
 # ── Regional adjust ────────────────────────────────────────────────────────
@@ -235,18 +295,18 @@ async def test_certainty_unknown_item_404(http_client):
 
 
 @pytest.mark.asyncio
-async def test_record_usage_increments_frequency(http_client, app_instance):
+async def test_record_usage_increments_frequency(http_client, app_instance, auth_headers, owned_project_id):
     """POST record-usage on the IDLE item must bump frequency to ≥ 1."""
     item_id = app_instance.state.test_item_idle_id
-    project_id = app_instance.state.test_project_id
 
     resp = await http_client.post(
         f"/api/v1/costs/{item_id}/record-usage/",
         json={
-            "project_id": project_id,
+            "project_id": owned_project_id,
             "context": "boq",
             "unit_rate_at_use": 1.50,
         },
+        headers=auth_headers,
     )
     assert resp.status_code == 201, resp.text
     body = resp.json()
@@ -264,7 +324,13 @@ async def test_record_usage_increments_frequency(http_client, app_instance):
 
 
 @pytest.mark.asyncio
-async def test_record_usage_unknown_item_404(http_client):
+async def test_record_usage_unknown_item_404(http_client, auth_headers):
+    """An unknown cost item 404s even for a caller who is allowed to write.
+
+    The handler checks the cost item before it checks project access, so the
+    throwaway ``project_id`` below never gets that far - this stays a test
+    about the missing item, not about the missing project.
+    """
     bogus = uuid.uuid4()
     resp = await http_client.post(
         f"/api/v1/costs/{bogus}/record-usage/",
@@ -273,6 +339,7 @@ async def test_record_usage_unknown_item_404(http_client):
             "context": "boq",
             "unit_rate_at_use": 0.0,
         },
+        headers=auth_headers,
     )
     assert resp.status_code == 404, resp.text
 

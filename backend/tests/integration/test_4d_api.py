@@ -30,18 +30,41 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.dependencies import get_current_user_id, get_session
+from app.dependencies import get_current_user_id, get_current_user_payload, get_session
 from tests._pg import isolated_engine
 
 PROJECT_ID = uuid.uuid4()
 TEST_USER_ID = str(uuid.uuid4())
 
+# Every v2 route is gated by ``RequirePermission``, which resolves
+# ``get_current_user_payload`` — not ``get_current_user_id``. Overriding only
+# the latter leaves the permission dependency on the real bearer-token path,
+# so each request is rejected with 401 before the handler runs at all.
+#
+# The permissions are listed explicitly rather than claiming ``role="admin"``.
+# These routes are editor-level, an explicit list keeps the check honest
+# instead of taking the admin bypass, and it does not depend on which modules
+# happen to have populated the shared permission registry by import time.
+TEST_USER_PAYLOAD: dict[str, object] = {
+    "sub": TEST_USER_ID,
+    "role": "editor",
+    "permissions": ["schedule.read", "schedule.update"],
+}
+
 
 async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> None:
+    """Seed a project owned by the caller the auth overrides impersonate.
+
+    The routes run ``verify_project_access`` on the schedule's project, which
+    answers 404 for a project the caller does not own just as it does for one
+    that does not exist, so the owner has to be ``TEST_USER_ID`` itself rather
+    than an unrelated user row.
+    """
     from app.modules.projects.models import Project
     from app.modules.users.models import User
 
     owner = User(
+        id=uuid.UUID(TEST_USER_ID),
         email=f"owner-{uuid.uuid4().hex[:6]}@test.io",
         hashed_password="x",
         full_name="Owner",
@@ -95,8 +118,12 @@ async def app(temp_engine_and_factory) -> AsyncGenerator[FastAPI, None]:
     async def _override_user() -> str:
         return TEST_USER_ID
 
+    async def _override_payload() -> dict[str, object]:
+        return dict(TEST_USER_PAYLOAD)
+
     app.dependency_overrides[get_session] = _override_session
     app.dependency_overrides[get_current_user_id] = _override_user
+    app.dependency_overrides[get_current_user_payload] = _override_payload
 
     yield app
 
