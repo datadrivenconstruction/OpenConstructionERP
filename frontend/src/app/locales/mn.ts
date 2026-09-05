@@ -34615,6 +34615,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} зүйлс {{market}} ({{currency}}) руу үнэ тогтоосон",
     "costs.market_failed_title": "{{market}} руу үнэ тогтоож чадаагүй",
     "costs.base_loading_catalog": "Үнэ тогтоох суурь ачаалагдаж байна...",
+    "costs.base_catalog_failed": "Үнэ тогтоох суурийг ачаалж чадсангүй",
+    "costs.base_catalog_failed_hint": "Үнэ тогтоох суурийн жагсаалт серверээс ирдэг. Backend ажиллаж байгаа болон хүрч болохыг шалгаад дахин оролдоно уу.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Гуравны нэг өргөн (3 нэг эгнээнд)",
     "dashboard.layout.width_half": "Хагас өргөн (2 нэг эгнээнд)",

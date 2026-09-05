@@ -35465,6 +35465,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} Elemente neu bepreist in {{market}} ({{currency}})",
     "costs.market_failed_title": "Konnte nicht bepreist werden in {{market}}",
     "costs.base_loading_catalog": "Kostenbasen werden geladen...",
+    "costs.base_catalog_failed": "Kostenbasen konnten nicht geladen werden",
+    "costs.base_catalog_failed_hint": "Die Liste der Kostenbasen stammt vom Server. Prüfen Sie, ob das Backend läuft und erreichbar ist, und versuchen Sie es erneut.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Drittelbreite (3 pro Zeile)",
     "dashboard.layout.width_half": "Halbe Breite (2 pro Zeile)",

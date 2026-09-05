@@ -34809,6 +34809,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} kohdetta hinnoiteltu uudelleen {{market}} ({{currency}})",
     "costs.market_failed_title": "Ei voitu hinnoitella {{market}}",
     "costs.base_loading_catalog": "Ladataan kustannuspohjia...",
+    "costs.base_catalog_failed": "Kustannuspohjia ei voitu ladata",
+    "costs.base_catalog_failed_hint": "Kustannuspohjien luettelo tulee palvelimelta. Tarkista, että backend on käynnissä ja tavoitettavissa, ja yritä uudelleen.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Kolmannesleveys (3 per rivi)",
     "dashboard.layout.width_half": "Puolileveys (2 per rivi)",

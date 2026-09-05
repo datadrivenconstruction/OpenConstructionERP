@@ -34791,6 +34791,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} आइटम {{market}} ({{currency}}) में पुनर्मूल्यांकित",
     "costs.market_failed_title": "{{market}} में मूल्य निर्धारित नहीं किया जा सका",
     "costs.base_loading_catalog": "लागत आधार लोड हो रहे हैं...",
+    "costs.base_catalog_failed": "लागत आधार लोड नहीं किए जा सके",
+    "costs.base_catalog_failed_hint": "लागत आधारों की सूची सर्वर से आती है। जाँच लें कि बैकएंड चल रहा है और पहुँच योग्य है, फिर पुनः प्रयास करें।",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "तीसरा चौड़ाई (प्रति पंक्ति 3)",
     "dashboard.layout.width_half": "आधा चौड़ाई (प्रति पंक्ति 2)",

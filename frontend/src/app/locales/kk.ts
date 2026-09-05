@@ -34014,6 +34014,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} позиция {{market}} дегенге ({{currency}}) қайта бағаланды",
     "costs.market_failed_title": "{{market}} дегенге бағалау мүмкін болмады",
     "costs.base_loading_catalog": "Шығын базалары жүктелуде...",
+    "costs.base_catalog_failed": "Шығын базаларын жүктеу мүмкін болмады",
+    "costs.base_catalog_failed_hint": "Шығын базаларының тізімі серверден келеді. Backend іске қосылғанын және қолжетімді екенін тексеріп, қайта көріңіз.",
     "costs.regional_adjust.subtitle": "Сол мөлшерлемені басқа аймақта алдын ала қарау",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Үштен бір ені (қатарда 3)",

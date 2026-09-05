@@ -47,6 +47,7 @@ import {
 import { fetchCostCatalogs, type CostCatalog } from './api';
 import { ResourcePriceSheetPanel } from './ResourcePriceSheetPanel';
 import { BaseCatalogBrowser } from './BaseCatalogBrowser';
+import { BaseCatalogError } from './BaseCatalogError';
 import { useBaseCatalog, flattenVariants, type BaseVariant } from './baseCatalog';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -436,7 +437,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   // The whole loadable catalog (9 base families, 38 cost bases) with real
   // work-item counts, from the single-source backend registry. The browser
   // renders it; this component keeps the load/progress/toast logic.
-  const { data: baseCatalog } = useBaseCatalog();
+  const { data: baseCatalog, error: baseCatalogError, refetch: refetchBaseCatalog } = useBaseCatalog();
 
   // The timeout-recovery poll below can run for ~a minute after a slow import.
   // If the user navigates away from /costs/import during that window we must
@@ -730,6 +731,8 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           onSetActive={handleSetActive}
           elapsedSeconds={elapsed}
         />
+      ) : baseCatalogError ? (
+        <BaseCatalogError error={baseCatalogError} onRetry={() => void refetchBaseCatalog()} />
       ) : (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-content-tertiary">
           <Loader2 size={16} className="animate-spin" />

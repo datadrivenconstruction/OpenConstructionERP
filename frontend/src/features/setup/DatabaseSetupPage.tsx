@@ -18,6 +18,7 @@ import { apiGet, apiPost } from '@/shared/lib/api';
 import { reportBackgroundIndexFailure } from '@/features/costs/vectorIndex';
 import { useBaseCatalog, flattenVariants, type BaseVariant } from '@/features/costs/baseCatalog';
 import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
+import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -227,7 +228,7 @@ export function DatabaseSetupPage() {
   // work-item counts) comes from the single-source backend registry; the
   // shared <BaseCatalogBrowser> renders it and this page keeps the load,
   // progress and toast logic.
-  const { data: baseCatalog } = useBaseCatalog();
+  const { data: baseCatalog, error: baseCatalogError, refetch: refetchBaseCatalog } = useBaseCatalog();
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
   const [activeDb, setActiveDb] = useState<string | null>(() => getActiveDatabase());
@@ -674,6 +675,8 @@ export function DatabaseSetupPage() {
               onSetActive={handleSetActive}
               elapsedSeconds={elapsed}
             />
+          ) : baseCatalogError ? (
+            <BaseCatalogError error={baseCatalogError} onRetry={() => void refetchBaseCatalog()} />
           ) : (
             <div className="flex items-center justify-center gap-2 py-12 text-sm text-content-tertiary">
               <Loader2 size={16} className="animate-spin" />

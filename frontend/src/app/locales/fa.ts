@@ -34014,6 +34014,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} قلم دوباره در {{market}} ({{currency}}) قیمت‌گذاری شد",
     "costs.market_failed_title": "قیمت‌گذاری در {{market}} ممکن نشد",
     "costs.base_loading_catalog": "در حال بارگذاری پایگاه‌های هزینه...",
+    "costs.base_catalog_failed": "پایگاه‌های هزینه بارگذاری نشدند",
+    "costs.base_catalog_failed_hint": "فهرست پایگاه‌های هزینه از سرور دریافت می‌شود. بررسی کنید که بک‌اند در حال اجراست و در دسترس است، سپس دوباره تلاش کنید.",
     "costs.regional_adjust.subtitle": "پیش‌نمایش همان نرخ در منطقه دیگر",
     "daily_diary.badge_360": "۳۶۰",
     "dashboard.layout.width_third": "عرض یک‌سوم (۳ در هر ردیف)",

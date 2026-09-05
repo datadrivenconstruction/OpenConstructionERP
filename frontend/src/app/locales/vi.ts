@@ -34796,6 +34796,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} mục đã định giá lại vào {{market}} ({{currency}})",
     "costs.market_failed_title": "Không thể định giá vào {{market}}",
     "costs.base_loading_catalog": "Đang tải cơ sở chi phí...",
+    "costs.base_catalog_failed": "Không thể tải cơ sở chi phí",
+    "costs.base_catalog_failed_hint": "Danh sách cơ sở chi phí đến từ máy chủ. Kiểm tra xem backend có đang chạy và có thể truy cập được không, sau đó thử lại.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Rộng 1/3 (3 mỗi hàng)",
     "dashboard.layout.width_half": "Rộng 1/2 (2 mỗi hàng)",

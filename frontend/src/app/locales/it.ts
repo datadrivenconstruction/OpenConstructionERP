@@ -35015,6 +35015,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} articoli prezzati in {{market}} ({{currency}})",
     "costs.market_failed_title": "Impossibile prezzare in {{market}}",
     "costs.base_loading_catalog": "Caricamento basi di costo...",
+    "costs.base_catalog_failed": "Impossibile caricare le basi di costo",
+    "costs.base_catalog_failed_hint": "L'elenco delle basi di costo proviene dal server. Verificare che il backend sia in esecuzione e raggiungibile, quindi riprovare.",
     "costs.regional_adjust.subtitle": "Anteprima la stessa tariffa in una regione diversa",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Larghezza terza (3 per riga)",

@@ -82,8 +82,11 @@ export interface BaseCatalog {
 export function useBaseCatalog() {
   return useQuery({
     queryKey: ['costs', 'base-catalog'],
-    // Trailing slash is required: the slash-less form is shadowed by the
-    // costs router's GET /{item_id} route (it reads "base-catalog" as an id).
+    // Both slash forms work. The slash-less one used to be shadowed by the
+    // costs router's GET /{item_id} route, which read "base-catalog" as an id
+    // and answered 400; that route is now constrained to `{item_id:uuid}`.
+    // Kept on the slash form because the app runs with redirect_slashes=False
+    // and this is the form that has always been served.
     queryFn: () => apiGet<BaseCatalog>('/v1/costs/base-catalog/'),
     staleTime: 5 * 60 * 1000,
     retry: false,

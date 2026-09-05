@@ -34636,6 +34636,8 @@ const resource = {
     "contracts.retention_scope_col": "Smjer",
     "nav.progress": "Napredak",
     "costs.base_loading_catalog": "Učitavanje troškovnika...",
+    "costs.base_catalog_failed": "Troškovnici nisu mogli biti učitani",
+    "costs.base_catalog_failed_hint": "Popis troškovnika dolazi sa servera. Provjerite je li backend pokrenut i dostupan, a zatim pokušajte ponovno.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Širina od trećine (3 po redu)",
     "dashboard.layout.width_half": "Širina polovice (2 po redu)",

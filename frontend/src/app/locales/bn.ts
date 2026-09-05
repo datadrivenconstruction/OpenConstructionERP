@@ -34014,6 +34014,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}}টি আইটেম {{market}}-এ ({{currency}}) পুনরায় মূল্য নির্ধারিত হয়েছে",
     "costs.market_failed_title": "{{market}}-এ মূল্য নির্ধারণ করা যায়নি",
     "costs.base_loading_catalog": "কস্ট বেস লোড হচ্ছে...",
+    "costs.base_catalog_failed": "কস্ট বেস লোড করা যায়নি",
+    "costs.base_catalog_failed_hint": "কস্ট বেসের তালিকা সার্ভার থেকে আসে। ব্যাকএন্ড চালু আছে এবং সংযোগযোগ্য কিনা যাচাই করুন, তারপর আবার চেষ্টা করুন।",
     "costs.regional_adjust.subtitle": "একটি ভিন্ন অঞ্চলে একই রেট পূর্বরূপ দেখুন",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "এক-তৃতীয়াংশ প্রস্থ (প্রতি সারিতে 3টি)",

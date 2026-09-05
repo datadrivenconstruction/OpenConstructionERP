@@ -34908,6 +34908,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} položek oceněno do {{market}} ({{currency}})",
     "costs.market_failed_title": "Nelze ocenit do {{market}}",
     "costs.base_loading_catalog": "Načítání nákladových základen...",
+    "costs.base_catalog_failed": "Nákladové základny se nepodařilo načíst",
+    "costs.base_catalog_failed_hint": "Seznam nákladových základen pochází ze serveru. Zkontrolujte, zda backend běží a je dostupný, a zkuste to znovu.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Třetinová šířka (3 na řádek)",
     "dashboard.layout.width_half": "Poloviční šířka (2 na řádek)",

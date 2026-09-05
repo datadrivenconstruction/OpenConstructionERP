@@ -34862,6 +34862,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} アイテムが {{market}} ({{currency}}) に再価格設定されました",
     "costs.market_failed_title": "{{market}} に価格設定できませんでした",
     "costs.base_loading_catalog": "コストベースをロード中...",
+    "costs.base_catalog_failed": "コストベースを読み込めませんでした",
+    "costs.base_catalog_failed_hint": "コストベースの一覧はサーバーから取得されます。バックエンドが起動しており、到達可能であることを確認してから、再試行してください。",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "3分の1幅（1行あたり3つ）",
     "dashboard.layout.width_half": "2分の1幅（1行あたり2つ）",

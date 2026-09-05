@@ -34857,6 +34857,8 @@ const resource = {
     "costs.market_priced_msg": "{{market}}에 재가격 책정된 {{items}} 항목 ({{currency}})",
     "costs.market_failed_title": "{{market}}에 가격 책정 불가",
     "costs.base_loading_catalog": "비용 기준 로딩 중...",
+    "costs.base_catalog_failed": "비용 기준을 불러올 수 없습니다",
+    "costs.base_catalog_failed_hint": "비용 기준 목록은 서버에서 제공됩니다. 백엔드가 실행 중이고 접근 가능한지 확인한 후 다시 시도하세요.",
     "costs.regional_adjust.subtitle": "다른 지역에서 동일한 요율 미리 보기",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "세 번째 너비 (행당 3개)",

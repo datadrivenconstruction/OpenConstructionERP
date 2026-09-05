@@ -74,6 +74,7 @@ import { companyThumbFor } from '@/features/cases/caseFaces';
 import { apiGet, apiPost, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useBaseCatalog } from '@/features/costs/baseCatalog';
 import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
+import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
 import {
   ALL_MODULES,
   MODULE_GROUPS,
@@ -3968,7 +3969,7 @@ export function StepDataSetup({
   // The full base catalog (9 families, 38 cost bases) with real work-item
   // counts, shared with the import page and database setup. The browser has its
   // own search, so no local region filter is needed here.
-  const { data: baseCatalog } = useBaseCatalog();
+  const { data: baseCatalog, error: baseCatalogError, refetch: refetchBaseCatalog } = useBaseCatalog();
 
   return (
     <div className="flex flex-col items-center">
@@ -4018,6 +4019,8 @@ export function StepDataSetup({
                   loadingRegion={loadingDb ? selectedRegion : null}
                 />
               </div>
+            ) : baseCatalogError ? (
+              <BaseCatalogError error={baseCatalogError} onRetry={() => void refetchBaseCatalog()} />
             ) : (
               <div className="flex items-center justify-center gap-2 py-8 text-xs text-content-tertiary">
                 <Loader2 size={14} className="animate-spin" />

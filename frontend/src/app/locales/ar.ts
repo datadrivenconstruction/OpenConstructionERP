@@ -34980,6 +34980,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} عنصرًا مسعرًا في {{market}} ({{currency}})",
     "costs.market_failed_title": "تعذر التسعير في {{market}}",
     "costs.base_loading_catalog": "جارٍ تحميل قواعد التكلفة...",
+    "costs.base_catalog_failed": "تعذّر تحميل قواعد التكلفة",
+    "costs.base_catalog_failed_hint": "قائمة قواعد التكلفة تُجلب من الخادم. تحقق من أن الـ backend يعمل ويمكن الوصول إليه، ثم أعد المحاولة.",
     "costs.regional_adjust.subtitle": "معاينة نفس المعدل في منطقة مختلفة",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "عرض ثلث (3 في الصف)",

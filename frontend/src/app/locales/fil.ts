@@ -34014,6 +34014,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} item ang naipresyong muli sa {{market}} ({{currency}})",
     "costs.market_failed_title": "Hindi mapresyo sa {{market}}",
     "costs.base_loading_catalog": "Lino-load ang mga cost base...",
+    "costs.base_catalog_failed": "Hindi na-load ang mga cost base",
+    "costs.base_catalog_failed_hint": "Ang listahan ng mga cost base ay nanggagaling sa server. Tiyaking tumatakbo at naa-access ang backend, pagkatapos ay subukan muli.",
     "costs.regional_adjust.subtitle": "I-preview ang parehong rate sa ibang rehiyon",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Ikatlong lapad (3 kada hilera)",

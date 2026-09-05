@@ -34817,6 +34817,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} items opnieuw geprijsd in {{market}} ({{currency}})",
     "costs.market_failed_title": "Kon niet prijzen in {{market}}",
     "costs.base_loading_catalog": "Kostprijsbases laden...",
+    "costs.base_catalog_failed": "Kostprijsbases konden niet worden geladen",
+    "costs.base_catalog_failed_hint": "De lijst met kostprijsbases komt van de server. Controleer of de backend actief en bereikbaar is en probeer het opnieuw.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Een derde breedte (3 per rij)",
     "dashboard.layout.width_half": "Halve breedte (2 per rij)",

@@ -34810,6 +34810,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} articles re-tarifiés dans {{market}} ({{currency}})",
     "costs.market_failed_title": "Impossible de tarifier dans {{market}}",
     "costs.base_loading_catalog": "Chargement des bases de coûts...",
+    "costs.base_catalog_failed": "Impossible de charger les bases de coûts",
+    "costs.base_catalog_failed_hint": "La liste des bases de coûts provient du serveur. Vérifiez que le backend est en cours d'exécution et accessible, puis réessayez.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Largeur tiers (3 par ligne)",
     "dashboard.layout.width_half": "Largeur moitié (2 par ligne)",

@@ -34651,6 +34651,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} artículos valorados en {{market}} ({{currency}})",
     "costs.market_failed_title": "No se pudo valorar en {{market}}",
     "costs.base_loading_catalog": "Cargando bases de costo...",
+    "costs.base_catalog_failed": "No se pudieron cargar las bases de costo",
+    "costs.base_catalog_failed_hint": "La lista de bases de costo proviene del servidor. Verifique que el backend esté en ejecución y accesible, y vuelva a intentarlo.",
     "costs.regional_adjust.subtitle": "Previsualizar la misma tarifa en una región diferente",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Ancho de un tercio (3 por fila)",

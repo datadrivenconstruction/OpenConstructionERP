@@ -34738,6 +34738,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} kirjet ümberhinnastatud turul {{market}} ({{currency}})",
     "costs.market_failed_title": "Turul {{market}} ei õnnestunud hinnastada",
     "costs.base_loading_catalog": "Kuluandmebaaside laadimine...",
+    "costs.base_catalog_failed": "Kuluandmebaase ei õnnestunud laadida",
+    "costs.base_catalog_failed_hint": "Kuluandmebaaside loend pärineb serverist. Kontrollige, kas backend töötab ja on kättesaadav, ning proovige uuesti.",
     "costs.regional_adjust.subtitle": "Eelvaade samast hinnast teises piirkonnas",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Kolmandiklaius (3 real)",

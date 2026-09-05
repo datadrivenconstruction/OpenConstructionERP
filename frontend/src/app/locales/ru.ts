@@ -34988,6 +34988,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} предметов переоценено в {{market}} ({{currency}})",
     "costs.market_failed_title": "Не удалось оценить в {{market}}",
     "costs.base_loading_catalog": "Загрузка баз затрат...",
+    "costs.base_catalog_failed": "Не удалось загрузить базы затрат",
+    "costs.base_catalog_failed_hint": "Список баз затрат приходит с сервера. Проверьте, что бэкенд запущен и доступен, затем повторите попытку.",
     "costs.regional_adjust.subtitle": "Предварительный просмотр той же ставки в другом регионе",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Третья ширина (3 на ряд)",

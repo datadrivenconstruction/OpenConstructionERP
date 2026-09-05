@@ -34571,6 +34571,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} รายการกำหนดราคาใหม่ใน {{market}} ({{currency}})",
     "costs.market_failed_title": "ไม่สามารถกำหนดราคาใน {{market}} ได้",
     "costs.base_loading_catalog": "กำลังโหลดฐานต้นทุน...",
+    "costs.base_catalog_failed": "ไม่สามารถโหลดฐานต้นทุนได้",
+    "costs.base_catalog_failed_hint": "รายการฐานต้นทุนมาจากเซิร์ฟเวอร์ ตรวจสอบว่า backend กำลังทำงานและเข้าถึงได้ แล้วลองอีกครั้ง",
     "cvr.no_reports": "ยังไม่มีรายงาน CVR",
     "cvr.no_reports_desc": "สร้าง CVR รายเดือนแรกของคุณเพื่อกระทบยอดต้นทุนกับมูลค่าและคาดการณ์กำไรขั้นสุดท้าย",
     "daily_diary.badge_360": "360",

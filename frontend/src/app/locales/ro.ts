@@ -34798,6 +34798,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} articole re-prețuite în {{market}} ({{currency}})",
     "costs.market_failed_title": "Nu s-a putut stabili prețul în {{market}}",
     "costs.base_loading_catalog": "Se încarcă bazele de cost...",
+    "costs.base_catalog_failed": "Bazele de cost nu au putut fi încărcate",
+    "costs.base_catalog_failed_hint": "Lista bazelor de cost provine de la server. Verificați dacă backend-ul rulează și este accesibil, apoi încercați din nou.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Lățime o treime (3 pe rând)",
     "dashboard.layout.width_half": "Lățime jumătate (2 pe rând)",

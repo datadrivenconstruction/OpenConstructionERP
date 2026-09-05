@@ -34040,6 +34040,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} פריטים תומחרו מחדש ל-{{market}} ({{currency}})",
     "costs.market_failed_title": "לא ניתן היה לתמחר ל-{{market}}",
     "costs.base_loading_catalog": "טוען מאגרי עלות...",
+    "costs.base_catalog_failed": "לא ניתן היה לטעון את מאגרי העלות",
+    "costs.base_catalog_failed_hint": "רשימת מאגרי העלות מגיעה מהשרת. ודאו שה-Backend פועל וניתן לגישה, ולאחר מכן נסו שוב.",
     "costs.regional_adjust.subtitle": "תצוגה מקדימה של אותו שער באזור אחר",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "רוחב שליש (3 בשורה)",

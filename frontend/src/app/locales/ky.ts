@@ -22612,6 +22612,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} нерсе {{market}} рыногуна кайра бааланды ({{currency}})",
     "costs.market_failed_title": "{{market}} рыногуна баалоо мүмкүн болгон жок",
     "costs.base_loading_catalog": "Нарк базалары жүктөлүп жатат...",
+    "costs.base_catalog_failed": "Нарк базаларын жүктөө мүмкүн болбоду",
+    "costs.base_catalog_failed_hint": "Нарк базаларынын тизмеси серверден келет. Бэкенддин иштеп жатканын жана жеткиликтүү экенин текшерип, кайра аракет кылыңыз.",
     "costs.confirm_delete_region_title": "Аймактык нарк элементтерин өчүрүү керекпи?",
     "costs.import_templates_label": "Үлгүсүн жүктөп алыңыз:",
     "costs.import_template_minimal": "Минималдуу CSV (3 сап)",

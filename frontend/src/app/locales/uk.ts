@@ -35255,6 +35255,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} позицій переоцінено в {{market}} ({{currency}})",
     "costs.market_failed_title": "Не вдалося оцінити в {{market}}",
     "costs.base_loading_catalog": "Завантаження цінових баз...",
+    "costs.base_catalog_failed": "Не вдалося завантажити цінові бази",
+    "costs.base_catalog_failed_hint": "Список цінових баз надходить із сервера. Перевірте, що бекенд запущено і він доступний, а потім спробуйте ще раз.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Третина ширини (3 у рядку)",
     "dashboard.layout.width_half": "Половина ширини (2 у рядку)",

@@ -34050,6 +34050,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} στοιχεία επανατιμολογήθηκαν σε {{market}} ({{currency}})",
     "costs.market_failed_title": "Δεν ήταν δυνατή η τιμολόγηση σε {{market}}",
     "costs.base_loading_catalog": "Φόρτωση βάσεων κόστους...",
+    "costs.base_catalog_failed": "Δεν ήταν δυνατή η φόρτωση των βάσεων κόστους",
+    "costs.base_catalog_failed_hint": "Η λίστα βάσεων κόστους προέρχεται από τον διακομιστή. Ελέγξτε ότι το backend εκτελείται και είναι προσβάσιμο και δοκιμάστε ξανά.",
     "costs.regional_adjust.subtitle": "Προεπισκόπηση της ίδιας τιμής σε διαφορετική περιοχή",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Τρίτο πλάτος (3 ανά γραμμή)",

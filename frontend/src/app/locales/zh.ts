@@ -34742,6 +34742,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} 个项目已定价至 {{market}} ({{currency}})",
     "costs.market_failed_title": "无法定价至 {{market}}",
     "costs.base_loading_catalog": "正在加载成本基准...",
+    "costs.base_catalog_failed": "无法加载成本基准",
+    "costs.base_catalog_failed_hint": "成本基准列表来自服务器。请检查后端是否正在运行且可访问，然后重试。",
     "costs.regional_adjust.subtitle": "预览同一区域的不同费率",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "三分之一宽度（每行 3 个）",

@@ -34916,6 +34916,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} pozycji wycenionych na {{market}} ({{currency}})",
     "costs.market_failed_title": "Nie udało się wycenić na {{market}}",
     "costs.base_loading_catalog": "Ładowanie baz kosztowych...",
+    "costs.base_catalog_failed": "Nie udało się wczytać baz kosztowych",
+    "costs.base_catalog_failed_hint": "Lista baz kosztowych pochodzi z serwera. Sprawdź, czy backend działa i jest dostępny, a następnie spróbuj ponownie.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Szerokość trzecia (3 na wiersz)",
     "dashboard.layout.width_half": "Szerokość połowy (2 na wiersz)",

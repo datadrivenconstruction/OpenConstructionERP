@@ -34821,6 +34821,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} elementer priset inn i {{market}} ({{currency}})",
     "costs.market_failed_title": "Kunne ikke prise inn i {{market}}",
     "costs.base_loading_catalog": "Laster kostnadsbaser...",
+    "costs.base_catalog_failed": "Kostnadsbaser kunne ikke lastes",
+    "costs.base_catalog_failed_hint": "Listen over kostnadsbaser kommer fra serveren. Kontroller at backend kjører og er tilgjengelig, og prøv igjen.",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Tredjedels bredde (3 per rad)",
     "dashboard.layout.width_half": "Halv bredde (2 per rad)",

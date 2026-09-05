@@ -23492,6 +23492,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} items repriced into {{market}} ({{currency}})",
     "costs.market_failed_title": "Could not price into {{market}}",
     "costs.base_loading_catalog": "Loading cost bases...",
+    "costs.base_catalog_failed": "Cost bases could not be loaded",
+    "costs.base_catalog_failed_hint": "The list of cost bases comes from the server. Check that the backend is running and reachable, then try again.",
     "costs.confirm_delete_region_title": "Delete region cost items?",
     "costs.import_templates_label": "Download a template:",
     "costs.import_template_minimal": "Minimal CSV (3 rows)",

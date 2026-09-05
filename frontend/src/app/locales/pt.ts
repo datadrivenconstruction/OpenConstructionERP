@@ -34818,6 +34818,8 @@ const resource = {
     "costs.market_priced_msg": "{{items}} itens com preço em {{market}} ({{currency}})",
     "costs.market_failed_title": "Não foi possível precificar em {{market}}",
     "costs.base_loading_catalog": "A carregar bases de custo...",
+    "costs.base_catalog_failed": "Não foi possível carregar as bases de custo",
+    "costs.base_catalog_failed_hint": "A lista de bases de custo vem do servidor. Verifique se o backend está em execução e acessível e tente novamente.",
     "costs.regional_adjust.subtitle": "Pré-visualizar a mesma taxa numa região diferente",
     "daily_diary.badge_360": "360",
     "dashboard.layout.width_third": "Largura de terços (3 por linha)",
