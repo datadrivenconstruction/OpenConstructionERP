@@ -27,6 +27,7 @@ directly.
 
 from __future__ import annotations
 
+import locale
 import logging
 import os
 import socket
@@ -71,6 +72,19 @@ _FALSY = {"0", "false", "no", "off"}
 
 #: Support contact surfaced (in the log) when embedded PostgreSQL cannot start.
 _CONTACT_EMAIL = "info@datadrivenconstruction.io"
+
+#: Name of the logger ``pixeltable-pgserver`` writes everything through. Both of
+#: its emitters (``postgres_server`` and ``pgexec``) take this one name, so a
+#: filter here sees every record the library produces.
+_PGSERVER_LOGGER = "pixeltable_pgserver"
+
+#: Longest record this module lets ``pixeltable-pgserver`` put on our stream.
+#:
+#: Generous for any real message that library writes, and tiny beside the one it
+#: writes when a start fails: the entire contents of ``<pgdata>/log``, a file
+#: ``pg_ctl -l`` only ever appends to and nothing truncates. See
+#: :class:`_PgLogEchoCap` for what that costs a user.
+_PG_LOG_ECHO_LIMIT = 8000
 
 #: How often a slow crash recovery repeats that it is still recovering.
 #:
@@ -361,6 +375,14 @@ def boot(data_dir: Path | str) -> bool:
     _apply_ascii_locale_env()
     _pre_initialize_cluster(resolved_pgdata)
     _apply_server_settings(resolved_pgdata)
+
+    # Note how far the cluster's log had already grown, after the last step that
+    # can shrink it (_clear_incomplete_cluster empties the whole directory) and
+    # before the first that can grow it. pixeltable-pgserver logs the WHOLE of
+    # that file when pg_ctl fails, and the file is appended to for the life of
+    # the installation, so without this the launcher shows the user every start
+    # they have ever had, on every start. See _PgLogEchoCap.
+    _cap_pg_log_echo(resolved_pgdata)
 
     emit_stage("pg", "start", "Starting embedded PostgreSQL")
 
@@ -1873,6 +1895,176 @@ def _wait_until_connectable(pgdata: Path, deadline: float) -> bool:
     return False
 
 
+def _decode_pg_log(raw: bytes) -> str | None:
+    """Turn bytes of ``<pgdata>/log`` into the characters its readers see.
+
+    The codec is the one ``Path.read_text()`` uses with no encoding, because
+    that is what ``pixeltable-pgserver`` calls; UTF-8 is tried second for a
+    build running in UTF-8 mode. The newlines are normalised because on Windows
+    the postmaster's output lands in this file as CRLF while every text-mode
+    read of it hands back bare newlines, and two spellings of the same lines
+    never compare equal. ``None`` when nothing decodes it.
+    """
+    for encoding in (locale.getpreferredencoding(False), "utf-8"):
+        try:
+            decoded = raw.decode(encoding)
+        except (LookupError, UnicodeDecodeError):
+            continue
+        return decoded.replace("\r\n", "\n").replace("\r", "\n")
+    return None
+
+
+class _PgLogEchoCap(logging.Filter):
+    """Keep a boot's echo of ``<pgdata>/log`` down to the lines that boot wrote.
+
+    ``pixeltable-pgserver`` hands ``pg_ctl`` the cluster log with ``-l``, which
+    opens it for append, and when ``pg_ctl`` then fails or times out it logs the
+    WHOLE file: ``self.log.read_text()`` in ``ensure_postgres_running``. Nothing
+    truncates or rotates that file, so on the tenth start it replays nine earlier
+    starts, and on the hundredth it replays ninety-nine. The desktop launcher
+    pumps this process's output into ``desktop-launcher.log``, so what a user saw
+    on opening the application was every FATAL line their installation had ever
+    produced, stamped with the time it was re-read rather than the time it
+    happened.
+
+    That is expensive twice over. The user is alarmed by months of dead history,
+    and anyone reading the report counts those lines and reads a long-standing
+    installation as a badly broken one.
+
+    The cap is a filter rather than a rotation because the history has to stay
+    where it is. Support asks a user for that file, so deleting the oldest part
+    of it on a schedule trades one problem for a worse one. This only shortens
+    what reaches the stream: the boot records how large the file was before it
+    started, and an oversized record from that library has exactly that prefix
+    replaced by a line naming where it still lives. What remains is what this
+    boot produced, which is the part anyone diagnosing this boot needs.
+
+    Anything still over the limit after that is trimmed from the front, keeping
+    the tail, because the end of a PostgreSQL log is where it says why it
+    stopped.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._log: Path | None = None
+        self._baseline = 0
+        self._armed = False
+
+    def rebase(self, log: Path) -> None:
+        """Record how far the log had already grown before this boot appends to it."""
+        self._log = log
+        try:
+            self._baseline = log.stat().st_size
+            self._armed = True
+        except FileNotFoundError:
+            # A fresh cluster has no log at all yet. That is a definite answer
+            # rather than a missing one: this boot inherits nothing, so whatever
+            # the file holds afterwards is its own.
+            self._baseline = 0
+            self._armed = True
+        except OSError:
+            # The size is unknown. A baseline of zero would read as "the file
+            # was empty", and everything in it would then be claimed as this
+            # boot's own work. Decline to answer instead of answering wrongly.
+            self._baseline = 0
+            self._armed = False
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            message = record.getMessage()
+        except Exception:  # noqa: BLE001
+            # A record we cannot render is a record we cannot measure. Let the
+            # logging machinery deal with it exactly as it would without us.
+            return True
+        if len(message) <= _PG_LOG_ECHO_LIMIT:
+            return True
+        record.msg = self._condense(message)
+        # Clearing the args matters: the condensed text is already formatted, and
+        # a PostgreSQL line holding a per cent sign would otherwise be re-read as
+        # a format spec and raise inside the handler.
+        record.args = ()
+        return True
+
+    def _condense(self, message: str) -> str:
+        history = self._history()
+        if history and history in message:
+            inherited = history.count("\n")
+            message = message.replace(
+                history,
+                f"[{inherited} earlier lines, from runs before this one, left in {self._log}]\n",
+            )
+        if len(message) <= _PG_LOG_ECHO_LIMIT:
+            return message
+        kept = message[-_PG_LOG_ECHO_LIMIT:]
+        return f"[{len(message) - len(kept)} characters trimmed, the full log is at {self._log}]\n{kept}"
+
+    def _history(self) -> str:
+        """The log as it stood at :meth:`rebase`, spelled the way the library reads it.
+
+        The spelling is :func:`_decode_pg_log`'s job, and it decides whether the
+        prefix is found at all: get it wrong and the cap silently degrades from
+        stripping the history to merely trimming the echo.
+
+        A file now smaller than the baseline was replaced rather than appended
+        to, so none of what it holds was inherited and there is nothing to
+        strip. Saying so here keeps a caller from having to order its steps
+        around this.
+        """
+        if self._log is None or self._baseline <= 0:
+            return ""
+        try:
+            if self._log.stat().st_size < self._baseline:
+                return ""
+            with self._log.open("rb") as handle:
+                head = handle.read(self._baseline)
+        except OSError:
+            return ""
+        return _decode_pg_log(head) or ""
+
+    def appended_since_rebase(self, log: Path) -> str | None:
+        """What ``log`` has gained since :meth:`rebase`, or ``None`` when unknown.
+
+        ``None`` is "ask the file yourself": this cap is tracking a different
+        file, was never armed, could not measure the file when it was armed, or
+        the file has been replaced since. It is never "nothing was added", which
+        is the empty string and is a real answer about a real start.
+        """
+        if self._log != log or not self._armed:
+            return None
+        try:
+            if log.stat().st_size < self._baseline:
+                return None
+            with log.open("rb") as handle:
+                handle.seek(self._baseline)
+                fresh = handle.read()
+        except OSError:
+            return None
+        return _decode_pg_log(fresh)
+
+
+#: The single installed :class:`_PgLogEchoCap`. :func:`boot` can run more than
+#: once in a process (the CLI's commands, the tests), and a filter added per call
+#: would stack up copies that each re-scan the file.
+_pg_log_echo_cap: _PgLogEchoCap | None = None
+
+
+def _cap_pg_log_echo(pgdata: Path) -> _PgLogEchoCap:
+    """Arm the log-echo cap for the boot that is about to run, and return it.
+
+    Installing on the logger rather than on a handler is deliberate: :func:`boot`
+    runs before the application configures logging, so the library's records
+    reach the launcher through ``logging.lastResort``, which has no handler of
+    ours to attach to. A filter on the logger runs in ``Logger.handle``, before
+    any of that is decided.
+    """
+    global _pg_log_echo_cap
+    if _pg_log_echo_cap is None:
+        _pg_log_echo_cap = _PgLogEchoCap()
+        logging.getLogger(_PGSERVER_LOGGER).addFilter(_pg_log_echo_cap)
+    _pg_log_echo_cap.rebase(pgdata / "log")
+    return _pg_log_echo_cap
+
+
 def _launcher_log_path() -> Path:
     """Best-effort path to the desktop launcher log the STAGE markers land in.
 
@@ -1889,6 +2081,15 @@ def _pg_failure_detail(pgdata: Path, last_exc: Exception | None) -> str:
     Carries the REAL underlying error (exception type and its message, not just
     the class name) plus the tail of the PostgreSQL log, so the ``STAGE:pg:fail``
     marker the launcher shows names an actionable cause instead of an opaque one.
+
+    The tail is taken from what THIS start appended, not from the end of the
+    file. They are the same thing only when the start reached PostgreSQL: a
+    ``pg_ctl`` that fails before the postmaster writes a line leaves the last
+    three lines of the file belonging to some run months ago, and this string is
+    rendered on the failure screen as the cause of what is happening now. That
+    is the misreading this whole change is about, and it is worse here than in
+    the log, because this screen is the only thing a user whose window will not
+    paint can read. When the start added nothing, say so.
     """
     detail = "Could not start the local database"
     if last_exc is not None:
@@ -1900,10 +2101,22 @@ def _pg_failure_detail(pgdata: Path, last_exc: Exception | None) -> str:
     log = pgdata / "log"
     try:
         if log.exists():
-            tail = log.read_text(encoding="utf-8", errors="ignore").splitlines()[-3:]
+            cap = _pg_log_echo_cap
+            fresh = cap.appended_since_rebase(log) if cap is not None else None
+            if fresh is None:
+                # Nobody noted where this start began, so the whole file is all
+                # we can honestly offer. This is the pre-existing behaviour.
+                fresh = log.read_text(encoding="utf-8", errors="ignore")
+                empty_note = ""
+            else:
+                # Deliberately without the path: this goes on the launcher's
+                # failure screen, which already carries the log location, and a
+                # screen a user photographs for a report is the wrong place to
+                # spell out their home directory.
+                empty_note = " (this start wrote nothing to the postgres log)"
+            tail = fresh.splitlines()[-3:]
             joined = " ".join(line.strip() for line in tail if line.strip())
-            if joined:
-                detail += f" (postgres log: {joined})"
+            detail += f" (postgres log: {joined})" if joined else empty_note
     except OSError:
         pass
     return detail
