@@ -455,8 +455,8 @@ jobs:
       #
       # What this reads: 116 files, against 121 tracked .py under these two
       # directories. The seven-file difference is worth knowing about, because
-      # it is not an exclusion anybody wrote for ruff. `.gitignore` line 394
-      # carries `scripts/translate_mn_*.py`; git exempts a file it already
+      # it is not an exclusion anybody wrote for ruff. `.gitignore` carries
+      # `scripts/translate_mn_*.py`; git exempts a file it already
       # tracks from its own ignore rules, so those seven stay in the repository
       # and look perfectly normal, while ruff applies the same patterns with no
       # notion of an index and never opens them. A pattern meant to keep new
@@ -485,8 +485,12 @@ jobs:
       #   every file excluded        identical to the line above, and
       #                              --show-files agrees, so counting catches it
       # A typo was never the risk. A widened .gitignore pattern, a broadened
-      # exclude or a renamed directory is, and `.gitignore` line 394 already
-      # empties part of this scope by exactly that mechanism.
+      # exclude or a renamed directory is, and the `scripts/translate_mn_*.py`
+      # line in `.gitignore` already empties part of this scope by exactly that
+      # mechanism.
+      #
+      # Cited by pattern rather than by line number on purpose: the number was
+      # already 13 lines stale before anyone noticed, and .gitignore moves.
       #
       # Both halves are counted, not just the lint half, because the two have
       # separate exclude lists and this repository already sets one of them:
