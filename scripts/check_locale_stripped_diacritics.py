@@ -108,6 +108,7 @@ from __future__ import annotations
 import collections
 import json
 import re
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -270,18 +271,47 @@ RULES = (
 )
 
 
-def observe() -> tuple[dict[str, dict[str, dict[str, str]]], int, int]:
-    """Run both rules over every locale, reading each file once.
+def _untracked_locales() -> set[str]:
+    """Locale file names that are on disk but in no commit.
 
-    Returns the findings per rule, and the population they were drawn from, so
-    the verdict can be printed next to how much was examined to reach it. A
-    green line naming no denominator is how a narrowed run passes for a clean
-    one.
+    CI reads a checkout, so a file git does not track cannot reach it. Reading
+    such a file here makes the local verdict differ from the CI verdict for
+    reasons that have nothing to do with the code, which is how a guard teaches
+    people to ignore it: hu.ts alone accounted for 52 findings that CI never saw
+    once, while the one finding that mattered sat underneath them.
+    """
+    try:
+        done = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", str(LOCALES_DIR)],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            encoding="utf-8",
+            check=False,
+        )
+    except OSError:
+        return set()
+    if done.returncode != 0:
+        return set()
+    return {Path(line).name for line in done.stdout.split("\n") if line.strip().endswith(".ts")}
+
+
+def observe() -> tuple[dict[str, dict[str, dict[str, str]]], int, int, list[str]]:
+    """Run both rules over every tracked locale, reading each file once.
+
+    Returns the findings per rule, the population they were drawn from, and the
+    files skipped for not being in any commit, so the verdict can be printed
+    next to how much was examined to reach it. A green line naming no
+    denominator is how a narrowed run passes for a clean one.
     """
     out: dict[str, dict[str, dict[str, str]]] = {name: {} for name, _, _, _ in RULES}
     keys = 0
     files = 0
+    untracked = _untracked_locales()
+    skipped = []
     for path in sorted(LOCALES_DIR.glob("*.ts")):
+        if path.name in untracked:
+            skipped.append(path.name)
+            continue
         entries = _entries(path)
         keys += len(entries)
         files += 1
@@ -289,7 +319,7 @@ def observe() -> tuple[dict[str, dict[str, dict[str, str]]], int, int]:
             found = finder(entries)
             if found:
                 out[name][path.name] = dict(sorted(found.items()))
-    return out, keys, files
+    return out, keys, files, sorted(skipped)
 
 
 def main() -> int:
@@ -300,7 +330,10 @@ def main() -> int:
         )
         return 1
 
-    observed, keys, files = observe()
+    observed, keys, files, skipped = observe()
+    if skipped:
+        names = ", ".join(skipped)
+        print(f"not read, in no commit so CI never sees them: {names}")
 
     if "--update-baseline" in sys.argv:
         for name, _, path, _ in RULES:
