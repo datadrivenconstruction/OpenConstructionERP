@@ -1905,20 +1905,35 @@
     },
     "ru": {
       "cards": 212,
-      "missing": 523,
+      "missing": 1149,
       "gaps": {
         "attest-the-boletim-de-medicao-and-invoice-the-period": 45,
         "authorise-the-estimacion-and-invoice-it-as-a-cfdi": 53,
         "certify-the-interim-payment-and-invoice-the-authority": 53,
         "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate": 45,
+        "export-a-boq-to-fiebdc3": 28,
         "get-the-teljesitesigazolas-signed-and-invoice-the-period": 52,
+        "hand-over-a-cobie-facility-export": 28,
+        "issue-a-compliant-xrechnung": 49,
         "issue-the-interim-payment-certificate-and-get-paid-on-it": 59,
+        "keep-a-court-proof-bautagebuch": 46,
+        "maengel-abnahme-and-verjaehrung": 42,
+        "nachtrag-with-evidence-not-argument": 51,
         "reconcile-a-drawing-issue-against-the-index": 28,
         "review-ai-takeoff-proposals": 28,
         "run-the-security-of-payment-clock-on-a-progress-claim": 52,
+        "run-the-vob-payment-clock": 51,
         "see-every-field-mark-on-one-sheet": 28,
         "serve-a-payment-claim-under-the-construction-contracts-act": 59,
-        "turn-a-document-into-a-tracked-action": 21
+        "settle-a-period-in-process-and-get-it-signed": 32,
+        "soll-ist-control-on-a-running-site": 56,
+        "start-the-works-with-an-acta-de-replanteo": 33,
+        "take-off-in-metric-and-buy-in-imperial": 33,
+        "takeoff-quantities-from-a-pdf-plan": 49,
+        "turn-a-document-into-a-tracked-action": 21,
+        "value-the-month-and-certify-the-progress-payment": 44,
+        "walk-the-estimate-from-class-d-to-class-a": 35,
+        "win-a-gaeb-tender-from-lv-to-angebot": 49
       }
     },
     "sv": {
@@ -2420,20 +2435,35 @@
     },
     "zh": {
       "cards": 212,
-      "missing": 523,
+      "missing": 1149,
       "gaps": {
         "attest-the-boletim-de-medicao-and-invoice-the-period": 45,
         "authorise-the-estimacion-and-invoice-it-as-a-cfdi": 53,
         "certify-the-interim-payment-and-invoice-the-authority": 53,
         "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate": 45,
+        "export-a-boq-to-fiebdc3": 28,
         "get-the-teljesitesigazolas-signed-and-invoice-the-period": 52,
+        "hand-over-a-cobie-facility-export": 28,
+        "issue-a-compliant-xrechnung": 49,
         "issue-the-interim-payment-certificate-and-get-paid-on-it": 59,
+        "keep-a-court-proof-bautagebuch": 46,
+        "maengel-abnahme-and-verjaehrung": 42,
+        "nachtrag-with-evidence-not-argument": 51,
         "reconcile-a-drawing-issue-against-the-index": 28,
         "review-ai-takeoff-proposals": 28,
         "run-the-security-of-payment-clock-on-a-progress-claim": 52,
+        "run-the-vob-payment-clock": 51,
         "see-every-field-mark-on-one-sheet": 28,
         "serve-a-payment-claim-under-the-construction-contracts-act": 59,
-        "turn-a-document-into-a-tracked-action": 21
+        "settle-a-period-in-process-and-get-it-signed": 32,
+        "soll-ist-control-on-a-running-site": 56,
+        "start-the-works-with-an-acta-de-replanteo": 33,
+        "take-off-in-metric-and-buy-in-imperial": 33,
+        "takeoff-quantities-from-a-pdf-plan": 49,
+        "turn-a-document-into-a-tracked-action": 21,
+        "value-the-month-and-certify-the-progress-payment": 44,
+        "walk-the-estimate-from-class-d-to-class-a": 35,
+        "win-a-gaeb-tender-from-lv-to-angebot": 49
       }
     }
   }
