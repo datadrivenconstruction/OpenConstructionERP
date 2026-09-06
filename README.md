@@ -828,7 +828,7 @@ make dev
 # Terminal 2: cd frontend && npm run dev
 ```
 
-Open **http://localhost:5173** - for hacking on the codebase. Requires Python 3.12+ and Node.js 20+.
+Open **http://localhost:5173** - for hacking on the codebase. Requires Python 3.12+ and Node.js 22 or newer (CI and the Docker image build on 24).
 
 ### Demo Accounts
 

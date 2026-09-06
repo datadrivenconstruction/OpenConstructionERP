@@ -16,7 +16,7 @@ This is the web client for OpenConstructionERP, the open construction estimating
 
 ## Prerequisites
 
-- Node.js 18 or newer. Node 20 LTS is recommended.
+- Node.js 22 or newer. Node 24 LTS is what CI and the Docker image build with.
 - npm (bundled with Node.js).
 - A running backend if you want live data. See the backend README for how to start it. By default it is expected on `http://127.0.0.1:8000`.
 

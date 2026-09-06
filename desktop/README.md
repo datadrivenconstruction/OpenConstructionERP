@@ -18,7 +18,7 @@ You need three toolchains on the build machine.
 
 Rust stable with Cargo, plus the Tauri CLI. Install the same version the release workflow pins, `cargo install tauri-cli --version 2.11.4 --locked`, and keep the two in step whenever either moves. The version matters beyond reproducibility: the installer's own message translations ship inside the CLI rather than in this repository, so a different CLI produces an installer that speaks a different set of languages. The pin lives in `TAURI_CLI_VERSION` in `.github/workflows/desktop-release.yml`.
 
-Node.js (the workflow uses Node 20) for building the React frontend. The frontend is built and shipped inside the sidecar.
+Node.js (the workflow uses Node 24) for building the React frontend. The frontend is built and shipped inside the sidecar.
 
 Python 3.12 for building the sidecar with PyInstaller. Install the backend in editable mode first so all runtime dependencies are present: from `backend/`, run `pip install -e ".[dev]"`.
 

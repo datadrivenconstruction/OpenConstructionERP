@@ -106,7 +106,7 @@ To list your pack or get featured, contact info@datadrivenconstruction.io. A pac
 Have these ready before starting. If you can run the app locally, you already have everything you need.
 
 - **Python 3.12+**: backend runtime
-- **Node.js 20+**: frontend build
+- **Node.js 22+**: frontend build (CI builds on 24)
 - **Git**: clone and commit
 - **PostgreSQL 16 or SQLite**: SQLite is auto-created in dev
 - **An editor**: VS Code, Cursor, or anything with Python + TypeScript support

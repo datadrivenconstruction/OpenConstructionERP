@@ -192,7 +192,9 @@ CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port
 # tag is pinned to a minor instead of the floating `24-alpine`, which silently
 # changes the bundled npm underneath us. Two reports of the same build failure
 # months apart were not running the same installer, and there was no way to tell
-# from the Dockerfile.
+# from the Dockerfile. The setup-node steps in .github/workflows pin the same
+# major; when this line moves, they move with it, or CI tests one runtime and
+# the image ships another.
 FROM node:24.20-alpine AS frontend-build
 
 WORKDIR /build

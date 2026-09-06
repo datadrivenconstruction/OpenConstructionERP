@@ -60,9 +60,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          # Cesium 1.137+ requires Node 22; tsc-on-prebuild needs the full
-          # devDeps set, so the frontend job is locked to 22.
-          node-version: '22'
+          # The line the Docker image and the rest of CI build on. Cesium
+          # 1.137+ needs Node 22 or newer, so this can never drop below 22;
+          # tsc-on-prebuild needs the full devDeps set.
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 

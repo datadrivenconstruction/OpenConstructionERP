@@ -808,7 +808,7 @@ jobs:
           python-version: '3.12'
       - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
 
       # Two libraries, not the application's dependency tree. The guards below
       # need a parser and the translation runtime, and pinning both to the
