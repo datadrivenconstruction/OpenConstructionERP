@@ -10,10 +10,15 @@
 //      the report this work came from. So the click is asserted against a
 //      parent handler, not just against its own.
 //   2. Two states render the same. The deployment this was written on has
-//      eighteen packs on disk and `active_slug` null, so everything on it is
-//      "install" and a suite that checked each state against a fixed string
-//      would pass on a build where installed and available look identical.
-//      Every state below is asserted against another state's rendering.
+//      twenty servable packs on disk and `active_slug` null, so everything on
+//      it is "install" and a suite that checked each state against a fixed
+//      string would pass on a build where installed and available look
+//      identical. Every state below is asserted against another state's
+//      rendering.
+//   3. The fixture installs a pack no release ships. A checkout holds packs
+//      the community wheel force-includes deliberately incomplete, so a
+//      market can pass every test here and still resolve to nothing for
+//      every user. `INSTALLED` below is the wheel's list, not the tree's.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ComponentProps } from 'react';
@@ -45,8 +50,18 @@ function packOf(slug: string, country: string, name = slug) {
   };
 }
 
+/**
+ * The packs the community wheel force-includes, NOT the packs a checkout of
+ * this repository holds. backend/pyproject.toml names seventeen of the twenty
+ * servable ones, and the three it leaves out are held back for licensing:
+ * batimatech-ca and bimhessen-de under partnership agreements, doker-formwork
+ * for a named third party's logo.
+ *
+ * bimhessen-de stood in this list until the fixture was corrected, which made
+ * Germany the best covered market in the suite while being one of the two the
+ * shipped product cannot offer at all.
+ */
 const INSTALLED = [
-  packOf('bimhessen-de', 'DE', 'BIM Hessen'),
   packOf('uk-jct', 'GB', 'UK JCT'),
   packOf('us-california', 'US', 'California'),
   packOf('us-texas', 'US', 'Texas'),
@@ -64,8 +79,8 @@ function offers(activeSlug: string | null = null) {
 }
 
 const OFFER: CasePackOffer = {
-  slug: 'bimhessen-de',
-  name: 'BIM Hessen',
+  slug: 'uk-jct',
+  name: 'UK JCT',
   applied: false,
 };
 
@@ -90,12 +105,12 @@ beforeEach(() => {
 describe('useMarketPackOffers', () => {
   it('names the pack that serves each market the catalogue carries', () => {
     const map = offers();
-    expect(map.get('DE')?.slug).toBe('bimhessen-de');
     expect(map.get('GB')?.slug).toBe('uk-jct');
+    expect(map.get('US')?.slug).toBe('us-california');
     // Cases spell the market upper case and packs spell it lower case. Both
     // files are right; the lookup has to be done in the cases' spelling
     // because that is the value a card holds.
-    expect(map.get('DE')?.name).toBe('BIM Hessen');
+    expect(map.get('GB')?.name).toBe('UK JCT');
   });
 
   it('offers nothing for a market with no pack rather than the nearest one', () => {
@@ -105,9 +120,25 @@ describe('useMarketPackOffers', () => {
     const map = offers();
     expect(map.has('ES')).toBe(false);
     expect(map.has('CN')).toBe(false);
-    // Four packs, three markets: us-california and us-texas both declare US
+    // Three packs, two markets: us-california and us-texas both declare US
     // and a market is offered ONE pack, not a list. Seven markets go in.
-    expect(map.size).toBe(3);
+    expect(map.size).toBe(2);
+  });
+
+  it('offers nothing for DE and CA, whose packs are in no release', () => {
+    // Thirteen German and ten Canadian cases name standards that bimhessen-de
+    // and batimatech-ca carry, and the wheel force-includes neither, so on
+    // every released install both markets resolve to nothing. This is not the
+    // same absence as ES: a Spanish pack does not exist, whereas these two
+    // exist and are withheld, and a fixture that installs them hides the
+    // difference behind a green test.
+    const map = offers();
+    // Asserted beside a market that DOES resolve in the same call. An empty
+    // map from a hook that never answered satisfies an absence on its own,
+    // so the absence is only evidence next to a presence.
+    expect(map.get('GB')?.slug).toBe('uk-jct');
+    expect(map.has('DE')).toBe(false);
+    expect(map.has('CA')).toBe(false);
   });
 
   it('says nothing at all until the list of packs has arrived', () => {
@@ -143,11 +174,11 @@ describe('<CasePackStrip />', () => {
     mountInCard();
     const strip = screen.getByTestId('case-pack-strip');
     expect(strip.getAttribute('data-pack-state')).toBe('install');
-    expect(strip.getAttribute('data-pack-slug')).toBe('bimhessen-de');
+    expect(strip.getAttribute('data-pack-slug')).toBe('uk-jct');
     expect(strip.tagName).toBe('BUTTON');
     // "Set up" alone does not say what would be installed, and a card that
     // installs something unnamed is worse than one that installs nothing.
-    expect(strip.textContent).toContain('BIM Hessen');
+    expect(strip.textContent).toContain('UK JCT');
   });
 
   it('renders an applied pack differently from the same pack switched off', () => {
