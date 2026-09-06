@@ -1358,7 +1358,7 @@ const resource = {
     "prefab.insights.f_progress": "Өндүрүштүн жүрүшү",
     "prefab.insights.f_late": "Пландагы орнотуу күнү өтүп кеткен",
     "prefab.insights.f_installed": "Орнотулган",
-    "prefab.insights.k_units": "Блоктор",
+    "prefab.insights.k_units": "Бирдиктер",
     "prefab.insights.k_earned": "Аткарылган нарк",
     "prefab.insights.k_progress": "Өндүрүштүн орточо жүрүшү",
     "prefab.insights.k_late": "Пландагы орнотуу күнү өтүп кеткен",

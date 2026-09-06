@@ -1312,7 +1312,7 @@ const resource = {
     "prefab.insights.f_progress": "Ishlab chiqarish jarayoni",
     "prefab.insights.f_late": "Maqsadli oʻrnatish sanasidan oʻtgan",
     "prefab.insights.f_installed": "Oʻrnatilgan",
-    "prefab.insights.k_units": "Bloklar",
+    "prefab.insights.k_units": "Birliklar",
     "prefab.insights.k_earned": "Ishlab topilgan qiymat",
     "prefab.insights.k_progress": "Oʻrtacha ishlab chiqarish jarayoni",
     "prefab.insights.k_late": "Maqsadli oʻrnatish sanasidan oʻtgan",
