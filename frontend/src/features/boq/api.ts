@@ -334,6 +334,79 @@ export interface CreatePositionData {
   after_position_id?: string | null;
 }
 
+/**
+ * One take-off line: a signed, repeatable partial quantity with its arithmetic
+ * left visible.
+ *
+ * `formula` is what makes a measurement sheet a document rather than a number.
+ * REB 23.003 and OENORM A 2063 both exist because a checker has to be able to
+ * see how a quantity was arrived at, so the expression and the dimensions that
+ * fed it are stored beside the result instead of being collapsed into it.
+ *
+ * The panel writes `L`, `B` and `H` into `variables` and a product of exactly
+ * the ones the user filled in into `formula`, so a line measured by length
+ * alone reads `L` rather than `L * 1 * 1`. The server evaluates the expression
+ * itself, case-insensitively, and accepts anything its safe evaluator accepts,
+ * which is why a sheet written through the API with a formula of its own reads
+ * back here unchanged.
+ */
+export interface MeasurementLineInput {
+  description?: string;
+  formula: string;
+  variables?: Record<string, string | number>;
+  /** How many times this line repeats. The "units" column. */
+  factor?: string | number;
+  /** '+' adds, '-' deducts. Deductions are how openings and voids are measured. */
+  sign?: '+' | '-';
+  ref?: string;
+  unit?: string;
+}
+
+/** One line as the server hands it back, with its own quantity worked out. */
+export interface MeasurementLineResult extends MeasurementLineInput {
+  variables: Record<string, string>;
+  factor: string;
+  sign: '+' | '-';
+  unit: string;
+  /** The signed contribution of this line, already rounded by the preset. */
+  quantity: string;
+  /** Non-empty when this line's formula could not be evaluated. */
+  error: string;
+}
+
+/**
+ * A whole sheet: the lines, their total, and how that total compares with the
+ * quantity the position currently carries.
+ *
+ * Quantities arrive as strings because the server works in decimals and a
+ * round trip through a JavaScript number is exactly where a measured 0.1 + 0.2
+ * stops being 0.3. They are formatted for display and parsed only when one is
+ * about to be written back as the position's quantity.
+ */
+export interface MeasurementSheet {
+  item_ref: string;
+  description: string;
+  unit: string;
+  lines: MeasurementLineResult[];
+  total_quantity: string;
+  line_count: number;
+  has_errors: boolean;
+  /** Only on a read: false when the position has no saved sheet yet. */
+  stored?: boolean;
+  /**
+   * Only on a compute: how the measured total compares with the quantity the
+   * position carries right now. `matches` is true when they agree within
+   * `tolerance`, which the server sets and does not take from the caller.
+   */
+  reconciliation?: {
+    measured_quantity: string;
+    target_quantity: string;
+    difference: string;
+    tolerance: string;
+    matches: boolean;
+  };
+}
+
 export interface UpdatePositionData {
   ordinal?: string;
   description?: string;
@@ -1639,6 +1712,36 @@ export const boqApi = {
     apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions/`, data),
   updatePosition: (posId: string, data: UpdatePositionData) =>
     apiPatch<Position>(`/v1/boq/positions/${posId}`, data),
+
+  /**
+   * Work out a quantity from take-off lines without saving anything.
+   *
+   * The server evaluates each formula, totals the signed contributions and
+   * says how the total compares with the quantity the position holds today.
+   * Nothing is written: saving is a normal position PATCH carrying the new
+   * `quantity` and the lines under `metadata.measurement`, which is why there
+   * is no save endpoint to call here.
+   *
+   * `strict: false` is deliberate and is what makes this usable while typing.
+   * In strict mode one bad formula raises and the whole sheet returns nothing;
+   * non-strict keeps the bad line with its own error and a quantity of zero,
+   * so a typo in row four does not blank rows one to three.
+   *
+   * The preset is left to the server, which resolves it from the project's
+   * country: REB 23.003 in Germany, OENORM A 2063 in Austria, the neutral one
+   * everywhere else. Passing one from here would mean this panel deciding
+   * which market's rules a sheet is written under, which is the project's
+   * property and not the panel's.
+   */
+  computeMeasurement: (posId: string, body: { lines: MeasurementLineInput[]; unit?: string }) =>
+    apiPost<MeasurementSheet>(`/v1/boq/positions/${posId}/measurement/compute/`, {
+      ...body,
+      strict: false,
+    }),
+
+  /** Read the sheet saved on a position. `stored` is false when there is none. */
+  getMeasurement: (posId: string) =>
+    apiGet<MeasurementSheet>(`/v1/boq/positions/${posId}/measurement/`),
 
   /**
    * v3.12.0 Stream A — bulk update positions.

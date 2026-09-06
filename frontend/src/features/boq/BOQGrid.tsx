@@ -49,6 +49,7 @@ import {
   Variable,
   Calculator,
   Activity,
+  Ruler,
 } from 'lucide-react';
 
 import {
@@ -445,6 +446,13 @@ export interface BOQGridProps {
    */
   onShowPositionActuals?: (positionId: string) => void;
   /**
+   * Open the take-off sheet for a position: units, length, width, height,
+   * subtotals and a total, entered by hand with no drawing and no model.
+   * Optional for the same reason as the handler above, so a grid rendered
+   * outside the editor page does not have to know about it.
+   */
+  onShowMeasurement?: (positionId: string) => void;
+  /**
    * Position id the AI copilot is currently open on. When set (and the
    * position is visible), a full-width copilot row is injected directly under
    * that position. Null/undefined ⇒ no inline copilot row.
@@ -620,6 +628,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onOpenAICopilot,
   onPriceAnalysis,
   onShowPositionActuals,
+  onShowMeasurement,
   aiCopilotPositionId,
   renderInlineCopilot,
   onRepickResourceVariant,
@@ -3068,6 +3077,18 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   <CtxItem icon={<Activity size={14}/>}
                     label={t('boq.position_actuals')}
                     onClick={() => { onShowPositionActuals(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {/* Measure the quantity by hand: units, length, width, height,
+                    add or deduct, subtotals and a total. The engine and both
+                    endpoints have shipped for releases with nothing in the
+                    frontend calling them, so this was reachable only by a
+                    hand-written request. Label carries no defaultValue for the
+                    reason given above; the key is in en.ts. */}
+                {onShowMeasurement && (
+                  <CtxItem icon={<Ruler size={14}/>}
+                    label={t('boq.measurement.title')}
+                    onClick={() => { onShowMeasurement(d.id as string); closeContextMenu(); }}
                   />
                 )}
                 <CtxSeparator />

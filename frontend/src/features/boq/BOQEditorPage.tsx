@@ -65,6 +65,7 @@ import { ResourceSummary } from './ResourceSummary';
 import { CommentDrawer, type CommentEntry } from './CommentDrawer';
 import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
+import { MeasurementDrawer } from './MeasurementDrawer';
 import { SensitivityChart } from './SensitivityChart';
 import { CostRiskPanel } from './CostRiskPanel';
 import { MarkupPanel } from './MarkupPanel';
@@ -4597,6 +4598,12 @@ export function BOQEditorPage() {
    */
   const [actualsPositionId, setActualsPositionId] = useState<string | null>(null);
 
+  /** Take-off sheet state. The panel reads and computes on its own; this
+   *  page keeps the id because it owns the position mutation the sheet is
+   *  saved through, and a second mutation over the same cache would be one
+   *  writer too many. */
+  const [measurementPositionId, setMeasurementPositionId] = useState<string | null>(null);
+
   /** Comment drawer state */
   const [commentPositionId, setCommentPositionId] = useState<string | null>(null);
   const userEmail = useAuthStore((s) => s.userEmail) ?? '';
@@ -5017,6 +5024,7 @@ export function BOQEditorPage() {
           onOpenAICopilot={handleOpenAICopilot}
           onPriceAnalysis={setPriceAnalysisPositionId}
           onShowPositionActuals={setActualsPositionId}
+          onShowMeasurement={setMeasurementPositionId}
           aiCopilotPositionId={aiCopilotOpen ? aiCopilotPositionId : null}
           renderInlineCopilot={renderInlineCopilot}
           onAddManualResource={handleAddManualResource}
@@ -5630,6 +5638,40 @@ export function BOQEditorPage() {
             positionId={actualsPositionId}
             positionOrdinal={pos?.ordinal ?? ''}
             positionDescription={pos?.description ?? ''}
+          />
+        );
+      })()}
+
+      {/* ── Measurement sheet ───────────────────────────────────────────
+          Hand measurement with no drawing and no model: units, length, width,
+          height, add or deduct, subtotals and a total. Saving is a normal
+          position update carrying the new quantity and the lines under
+          `metadata.measurement`, which is what the backend documented and why
+          there is no save endpoint for the panel to call. It goes through this
+          page's own mutation rather than one of its own, so the grid's cache
+          is written by a single writer, exactly as the comment drawer does. */}
+      {measurementPositionId && (() => {
+        const pos = boq?.positions.find((p) => p.id === measurementPositionId);
+        if (!pos) return null;
+        return (
+          <MeasurementDrawer
+            position={pos}
+            readOnly={Boolean(boq?.is_locked)}
+            saving={updateMutation.isPending}
+            onClose={() => setMeasurementPositionId(null)}
+            onSave={(quantity, lines) => {
+              updateMutation.mutate({
+                id: pos.id,
+                data: {
+                  quantity,
+                  metadata: {
+                    ...pos.metadata,
+                    measurement: { unit: pos.unit, lines },
+                  },
+                },
+              });
+              setMeasurementPositionId(null);
+            }}
           />
         );
       })()}
