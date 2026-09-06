@@ -633,10 +633,14 @@ function emitPlaybook(family, spine, layer, pb) {
   L.push('');
   L.push('export default playbook;');
   L.push('');
-  /* The playbooks in this tree are CRLF. Build with \n throughout, since
-   * the chip blocks are multi-line strings, then convert once at the end so
-   * a diff against the committed file is content rather than line endings. */
-  return L.join('\n').replace(/\r?\n/g, '\r\n');
+  /* Plain newline joins. The committed playbooks are LF: git show HEAD:<path>
+   * has no CR before any newline, and there is no eol=crlf rule in
+   * .gitattributes. The CRLF this file appears to have in a Windows working
+   * tree is core.autocrlf re-adding the CR on checkout, not what is in the
+   * blob. Forcing CRLF here matched only that local re-conversion, so the
+   * check passed on a Windows machine and failed on every CI runner, which
+   * checks out the LF blob verbatim. */
+  return L.join('\n');
 }
 
 function wrap(text, width) {
@@ -789,7 +793,7 @@ function run(family, args) {
     for (const r of results) {
       const path = join(DATA_DIR, `${r.layer.slug}.playbook.ts`);
       const disk = existsSync(path) ? readFileSync(path, 'utf8') : '';
-      if (disk !== r.text) {
+      if (disk.replace(/\r\n/g, '\n') !== r.text) {
         drift++;
         console.error(`  drift: ${r.layer.slug}.playbook.ts differs from what ${family} composes`);
       }
@@ -810,7 +814,7 @@ function run(family, args) {
     if (args.only && !args.only.has(String(r.layer.jurisdiction).toUpperCase())) continue;
     const path = join(DATA_DIR, `${r.layer.slug}.playbook.ts`);
     const before = existsSync(path) ? readFileSync(path, 'utf8') : '';
-    const changed = before !== r.text;
+    const changed = before.replace(/\r\n/g, '\n') !== r.text;
     if (!args.dryRun && changed) writeFileSync(path, r.text, 'utf8');
     const steps = r.pb.steps.length;
     let sharedFields = 0;
