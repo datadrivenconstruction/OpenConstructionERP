@@ -1,7 +1,7 @@
 {
   "note": "Number of case keys each offered locale does not answer, per playbook, recorded so that the number can be seen to grow. The check fails when any playbook count in any locale is higher than recorded: a key the locale had and lost, or a case that shipped without its strings. Lower is always fine and --update records it; --update never raises a number and never removes a locale from card_complete, so the debt here only shrinks and any exception has to be a hand edit that shows in the diff. The numbers are measured from the committed blobs at measured_at and never from the working tree: a floor once banked from a dirty checkout recorded translations nobody had committed, and the gate failed every push for a regression that had not happened. Regional variants (es-MX, es-CL, es-CO, pt-BR) are counted through their base language, the way i18n.ts resolves them. card_complete lists the base locales whose catalogue text (title, description, and long description where the English has one) is complete for every playbook, and scripts/check_case_playbook_catalogue_locales.py holds those locales to it. A locale joins that list when --update finds it complete.",
   "updated": "2026-09-06",
-  "measured_at": "96dfa94ba245e37c5bb245094832aa11c30451ef",
+  "measured_at": "c939a58b4b3c8f8682e770ae0c1c14c17593bd51",
   "playbooks": 220,
   "references": 7037,
   "card_complete": [
@@ -545,10 +545,9 @@
     },
     "es-MX": {
       "cards": 220,
-      "missing": 394,
+      "missing": 344,
       "gaps": {
         "attest-the-boletim-de-medicao-and-invoice-the-period": 42,
-        "authorise-the-estimacion-and-invoice-it-as-a-cfdi": 50,
         "certify-the-interim-payment-and-invoice-the-authority": 50,
         "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate": 42,
         "get-the-teljesitesigazolas-signed-and-invoice-the-period": 49,
