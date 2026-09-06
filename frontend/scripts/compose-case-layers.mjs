@@ -121,6 +121,43 @@
  *   is, `--sharing` reports what is actually shared rather than what the
  *   design would allow, and the two numbers are not the same.
  *
+ * WHAT IS NOT A FAMILY
+ *   The taxonomy has thirty families and not all of them are workflows.
+ *   F11-indirect-tax-in-the-bill was picked deliberately as the one least
+ *   likely to decompose, and it does not. Its four pages ask four
+ *   different questions: which provincial tax is recoverable, whether the
+ *   licence subclass covers the scope, who accounts for the tax under a
+ *   reverse charge, and what stays outside the rate. They share a subject,
+ *   not a sequence, and a spine needs a sequence.
+ *
+ *   Measured rather than judged. Exactly one step is genuinely common,
+ *   "declare the base each charge is computed on", and it appears in three
+ *   of the four pages: the Canadian pricing page puts two parallel taxes
+ *   on one pre-tax subtotal, the Quebec page says 14.975 percent is two
+ *   rates on one base rather than one rate applied to the other's result,
+ *   and the Indian page points every markup and cess at its own base. One
+ *   shared step out of five is not a spine. F01 shares seven of eleven.
+ *
+ *   The reason it is not a family is more useful than the refusal. Its
+ *   content is a concern that rides on other families' steps, and the
+ *   layers already do this without being told to: the German, Spanish and
+ *   Hungarian F01 layers each attach the reverse charge as a note on the
+ *   same spine step, invoice. Three layers converged on one placement
+ *   independently. Building F11 as a family would have written that
+ *   content a fourth time, beside three copies that already work, and
+ *   increased the duplication it was meant to remove.
+ *
+ *   So the unit that wants reuse here is smaller than a spine: one step,
+ *   shared across families. One instance is a hypothesis, and it is not
+ *   built.
+ *
+ *   Do not try to predict this from the taxonomy. The obvious signal,
+ *   whether a family's name chains actions, sorts F11 with F01 and is
+ *   wrong. One differs-note of the thirty mentions a sequence, which is
+ *   how that note happens to be phrased rather than a fact about the
+ *   family. Decomposability was found by reading the pages, and --sharing
+ *   over a draft spine is the cheap way to check before committing to one.
+ *
  * Usage:
  *   node frontend/scripts/compose-case-layers.mjs --family f01-progress-payment
  *   node frontend/scripts/compose-case-layers.mjs --family f01-progress-payment --check
