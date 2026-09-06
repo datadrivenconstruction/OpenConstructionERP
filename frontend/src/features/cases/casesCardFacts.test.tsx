@@ -318,10 +318,14 @@ describe("the catalogue card names the case's audience and its span", () => {
   });
 
   it("keeps the card a single click target - no link or button was added", () => {
-    // The pin and edit controls are the only nested buttons a card may carry,
-    // and neither is mounted here (no pin project, shipped case). A link into
-    // the filtered list - which is what the public case pages put on their
-    // company cell - would steal the click the whole card exists to catch.
+    // The pin, the edit control and the regional-pack strip are the only
+    // nested buttons a card may carry, and none of the three is mounted here:
+    // no pin project, a shipped case, and no pack list because nothing in this
+    // file answers `/partner-pack/installed`. Each of them stops the click it
+    // catches (see casePackStrip.test.tsx for the strip's own proof). What is
+    // banned outright is a link into the filtered list - which is what the
+    // public case pages put on their company cell - because a link steals the
+    // click the whole card exists to catch and gives nothing back.
     expect(card.querySelectorAll("a")).toHaveLength(0);
     expect(card.querySelectorAll("button")).toHaveLength(0);
   });

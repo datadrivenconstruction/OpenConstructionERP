@@ -67,10 +67,18 @@ import { useNearViewport } from "@/shared/hooks/useNearViewport";
 import { useActiveProjectId } from "@/shared/hooks/useActiveProjectId";
 import { useProjectContextStore } from "@/stores/useProjectContextStore";
 import { projectsApi } from "@/features/projects/api";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { PartnerPackApplyDialog } from "@/features/modules/PartnerPackApplyDialog";
 import { PLAYBOOKS, getPlaybook } from "./playbooks";
 import { caseIdFromPlaybookId } from "./api";
 import { useAuthoredCases } from "./useCustomCases";
 import { PlaybookRunner } from "./PlaybookRunner";
+import { MarketPackPanel } from "./MarketPackPanel";
+import {
+  CasePackStrip,
+  useMarketPackOffers,
+  type CasePackOffer,
+} from "./CasePackStrip";
 import { useCasesStore } from "./useCasesStore";
 import { completedCount } from "./progress";
 import {
@@ -347,6 +355,21 @@ function CasesList() {
   const inRegion = useCallback(
     (p: Playbook) => activeRegion === "all" || p.region === activeRegion,
     [activeRegion],
+  );
+  // The pack that serves each of those markets, resolved once for the whole
+  // grid rather than per card: twelve cards mount per batch and every one of
+  // them would otherwise run the same match over the same list of packs.
+  const packOffers = useMarketPackOffers(regions);
+  // Applying a pack is admin-only in the backend (`RequireRole("admin")` on
+  // /apply and /full-install-stream), so the card says so rather than offering
+  // a button that would come back 403.
+  const canInstallPack = useAuthStore((s) => s.userRole) === "admin";
+  // ONE dialog for the whole grid. It is the same dialog the Modules page and
+  // the case page open - a dry run of what changes, an explicit confirm for
+  // the modules it would switch off, then a streamed install with named steps
+  // - and a copy of it per card would be twelve mounted previews of nothing.
+  const [packToInstall, setPackToInstall] = useState<CasePackOffer | null>(
+    null,
   );
   // The market the reader's UI language speaks for, when the catalogue has
   // cases for it. Five of the forty-two languages reach one; the rest reach
@@ -1457,6 +1480,15 @@ function CasesList() {
               {t("cases.region_selector.all", { defaultValue: "All markets" })}
             </button>
           </div>
+          {/* The pack that carries the standards the band above just promised.
+              The cards below each carry a one-line version of the same offer,
+              and this is the full one: what the pack sets, in which currency,
+              against which reference standards. It belongs on the market band
+              rather than only on the cards because the pack is a property of
+              the MARKET - thirteen German cases need one German pack between
+              them, not thirteen. Renders nothing for a market with no pack on
+              disk, which is every Spanish case today. */}
+          <MarketPackPanel region={activeRegion} className="relative mt-4" />
         </section>
       )}
 
@@ -1522,6 +1554,9 @@ function CasesList() {
                   roles={rolesByPlaybook.get(pb.id) ?? []}
                   face={facesByPlaybook.get(pb.id) ?? null}
                   done={bestDoneFor(pb)}
+                  pack={(pb.region && packOffers.get(pb.region)) || null}
+                  canInstallPack={canInstallPack}
+                  onActivatePack={setPackToInstall}
                   pinProjectId={pinProjectId}
                   pinned={pinProjectId ? pinnedIds.includes(pb.id) : false}
                   onOpen={() => navigate(`/cases/${pb.id}`)}
@@ -1565,6 +1600,17 @@ function CasesList() {
           )}
         </>
       )}
+
+      {/* The grid's one install dialog, opened by whichever card was pressed.
+          Mounted outside the grid so it survives the card scrolling out from
+          under it: the batches window, and a dialog owned by a card would be
+          unmounted mid-install by the reveal sentinel. */}
+      <PartnerPackApplyDialog
+        open={packToInstall !== null}
+        onClose={() => setPackToInstall(null)}
+        slug={packToInstall?.slug ?? ""}
+        partnerName={packToInstall?.name ?? ""}
+      />
     </div>
   );
 }
@@ -1590,6 +1636,15 @@ interface CaseCardProps {
   face: CaseFace | null;
   /** Furthest step reached across any run of this case. */
   done: number;
+  /** The regional pack this case's market needs, already resolved and named,
+   *  or null when the case names no market or the market has no pack on disk.
+   *  Resolved by the list so the card knows whether a strip will render before
+   *  it renders one - the hover panel's foot padding depends on the answer. */
+  pack: CasePackOffer | null;
+  /** Whether this reader may apply a pack at all (admin). */
+  canInstallPack: boolean;
+  /** Opens the grid's install dialog on this card's pack. */
+  onActivatePack: (pack: CasePackOffer) => void;
   /** The project the pin picker is scoped to ('' = none, hides the pin). */
   pinProjectId: string;
   /** Whether this case is pinned to `pinProjectId`. */
@@ -1617,6 +1672,9 @@ function CaseCard({
   roles,
   face,
   done,
+  pack,
+  canInstallPack,
+  onActivatePack,
   pinProjectId,
   pinned,
   onOpen,
@@ -2025,10 +2083,29 @@ function CaseCard({
         </div>
       </div>
 
+      {/* What this case's market needs installed, and the one press that starts
+          it. Only for a case whose market has a pack on disk; the rest of the
+          catalogue keeps exactly the card it had. Above the hover panel, like
+          the pin and the edit control, because a reader decides they want the
+          market's standards by reading that panel. */}
+      <CasePackStrip
+        pack={pack}
+        canInstall={canInstallPack}
+        onActivate={onActivatePack}
+      />
+
       {/* Hover / focus reveal: the fuller story surfaces over the whole card so
           the dense resting grid still explains itself at a glance. The panel is
           pointer-events-none so the card stays a single click target. */}
-      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-2 bg-gradient-to-t from-slate-950/95 via-slate-950/90 to-slate-950/80 p-3 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+      <div
+        className={clsx(
+          "pointer-events-none absolute inset-0 z-10 flex flex-col gap-2 bg-gradient-to-t from-slate-950/95 via-slate-950/90 to-slate-950/80 p-3 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none",
+          // The pack strip lies over the panel's foot. Without this the line
+          // the panel ends on - the one that says "Open" - is the line the
+          // strip covers.
+          pack && "pb-10",
+        )}
+      >
         <h4 className="line-clamp-2 text-xs font-semibold leading-snug text-white">
           {t(pb.titleKey, { defaultValue: pb.titleDefault })}
         </h4>
