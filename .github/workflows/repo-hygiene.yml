@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 74. They run on every push and pull request, grouped into three
+# Guards: 76. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -1165,15 +1165,18 @@ jobs:
         run: node scripts/check-tailwind-alpha-drop.mjs
         working-directory: frontend
 
-  # Alone deliberately, and it has to stay alone. This is the only guard that
-  # reads git history rather than the working tree, so it is the only one that
-  # needs fetch-depth: 0. Folding it into either job above would hand it the
-  # default shallow checkout, where it would scan the single commit it can see,
-  # find nothing, and pass - a green tick for a guard that had stopped running.
-  # A one-step job next to the two large ones looks like an oversight; it is not.
+  # Separate deliberately, and it has to stay separate. These are the guards
+  # that read git history rather than the working tree, so this is the only job
+  # that needs fetch-depth: 0. Folding one of them into either job above would
+  # hand it the default shallow checkout, where it would scan the single commit
+  # it can see, find nothing, and pass - a green tick for a guard that had
+  # stopped running. A short job next to the two large ones looks like an
+  # oversight; it is not.
   # (This said "two ten-step jobs" until 2026-08-29, which was true the day it
-  # was written and had not been true for a while. No number here now, because
-  # nothing recounts this one.)
+  # was written and had not been true for a while. It then said "alone" and
+  # "the only guard", which stopped being true on 2026-09-06 when the lost
+  # accent rule arrived and needed the same full history. No number here now,
+  # because nothing recounts this one.)
   commit-history:
     name: Commit history guards
     runs-on: ubuntu-latest
@@ -1253,3 +1256,18 @@ jobs:
       - name: Scan commit subjects for shell quoting artefacts
         if: ${{ !cancelled() }}
         run: python scripts/check_commit_subject.py
+
+      # The rule below reads two revisions of the same key, so it belongs here
+      # with the history guards and nowhere else. Its sibling in the locale job,
+      # check_locale_stripped_diacritics.py, reads only the working tree and
+      # judges a bare word by what the rest of the file spells. That is blind to
+      # two shapes: a value too short to reach its word count, and damage wide
+      # enough to supply its own second opinion. Ten Czech module names shipped
+      # through both on 2026-09-06 with their accents removed.
+      - name: Prove the lost accent rule can fail
+        if: ${{ !cancelled() }}
+        run: python scripts/check_locale_value_lost_diacritics.py --selftest
+
+      - name: Check no locale value lost the diacritics it used to carry
+        if: ${{ !cancelled() }}
+        run: python scripts/check_locale_value_lost_diacritics.py
