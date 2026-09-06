@@ -144,6 +144,11 @@
     "note": "bare symbol/punctuation glyph, not a word",
     "reason_category": "symbol"
   },
+  "boq.measurement.sign": {
+    "en_value": "+/-",
+    "note": "column head of the measurement sheet's add-or-deduct toggle: the two arithmetic signs, written the same way in every locale we ship including the Cyrillic, Arabic-script and CJK ones; the toggle's own option labels, boq.measurement.adds and boq.measurement.deducts, are translated keys beside it",
+    "reason_category": "symbol"
+  },
   "boq.provenance_cad_short": {
     "en_value": "CAD",
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated)",
