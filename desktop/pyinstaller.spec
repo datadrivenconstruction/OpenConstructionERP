@@ -436,6 +436,49 @@ pyz = PYZ(a.pure, cipher=block_cipher)
 # ID instead of none.
 codesign_identity = "-" if sys.platform == "darwin" else None
 
+# Unpack into a directory this application owns, rather than into the system
+# temporary folder.
+#
+# `_MEI` is PyInstaller's prefix for every program built with it, not a name of
+# ours, so by default our extractions sit in %TEMP% among other vendors'. That
+# is not only untidy. The launcher clears abandoned extractions at start
+# (sweep_orphaned_extractions in src-tauri/src/main.rs), and in the system
+# folder it would be deciding whether somebody else's abandoned directory is
+# safe to remove, which is a different question from whether the directory is
+# ours. Naming a root we created turns that judgement back into a fact.
+#
+# Under the local application data folder rather than in a folder of ours
+# inside %TEMP%, because Windows cleans %TEMP% on its own: Disk Cleanup and
+# Storage Sense remove temporary files that have not been touched for some
+# days, and Storage Sense runs by itself when the drive is nearly full. Only
+# the executables and libraries of a live extraction are held open; its data
+# files are not, so such a run finds them removable while a postmaster is still
+# serving out of the directory, and the postmaster then fails on the next file
+# it goes to read. Nothing cleans the application data folder except the
+# launcher's own sweep, which asks first. The price is that a user who moved
+# %TEMP% to another drive now gets the unpacking on the system drive.
+#
+# Windows only, and not for lack of trying elsewhere. The bootloader expands
+# environment variables in this string on Windows and documents that it does
+# NOT do so on POSIX, where `~` and `$HOME` are taken literally. Every path we
+# could name there would therefore be the same path for every user on the
+# machine, in a world-writable directory, which is a name somebody else can
+# create first. The system folder's own per-user handling is better than that,
+# so POSIX keeps it, and the launcher's sweep does not run there at all.
+#
+# Measured rather than assumed, with PyInstaller 6.21.0, the version the release
+# workflow pins: a one-file probe built with
+# `--runtime-tmpdir %LOCALAPPDATA%\OCE_probe462\deep\nested` printed a
+# `sys._MEIPASS` of `C:\Users\<name>\AppData\Local\OCE_probe462\deep\nested\_MEI314762`,
+# having expanded the variable and created the whole missing parent chain
+# itself, and removed the `_MEI` directory again on a clean exit, leaving the
+# empty chain behind.
+#
+# The launcher has to resolve the same directory to sweep it and to measure the
+# free space on it, so it carries this string as EXTRACTION_ROOT_SPEC_LITERAL
+# and a test in main.rs reads this file and fails if the two stop matching.
+_WINDOWS_RUNTIME_TMPDIR = r"%LOCALAPPDATA%\OpenConstructionERP\extract"
+
 # Build a SINGLE self-contained executable (onefile), not a onedir folder.
 # Tauri ships the sidecar as an externalBin, which must be one standalone file;
 # a onedir build (exe + a separate _internal/ folder) cannot be used that way,
@@ -457,7 +500,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
-    runtime_tmpdir=None,
+    runtime_tmpdir=(_WINDOWS_RUNTIME_TMPDIR if sys.platform == "win32" else None),
     console=True,  # Keep console for server logging
     disable_windowed_traceback=False,
     argv_emulation=False,

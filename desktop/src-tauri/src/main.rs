@@ -799,9 +799,10 @@ fn bootloader_failed_entry(tail: &str) -> Option<String> {
 /// Recognise a PyInstaller onefile bootloader failure in the sidecar's stderr.
 ///
 /// The sidecar is a onefile build (desktop/pyinstaller.spec), which means the
-/// bootloader unpacks the entire payload into the system temporary folder on
-/// every single launch, before the bundled Python interpreter is started and
-/// therefore before one line of this project's code runs. When that unpacking
+/// bootloader unpacks the entire payload into a temporary folder on every
+/// single launch (on Windows the one named by `EXTRACTION_ROOT_SPEC_LITERAL`),
+/// before the bundled Python interpreter is started and therefore before one
+/// line of this project's code runs. When that unpacking
 /// fails the process dies with no traceback, no "STAGE:" line and nothing the
 /// rest of this file knows how to read, so the launcher fell through to its last
 /// resort and showed the raw tail:
@@ -837,10 +838,10 @@ fn classify_bootloader_failure(tail: &str) -> Option<StartupFailure> {
         // server. This step is the one that owns having a working backend.
         stage: "sidecar",
         message: format!(
-            "The application could not unpack itself into this computer's temporary \
-folder.{on_entry} The whole program is unpacked there every time it starts, so this is \
+            "The application could not unpack itself into the temporary folder it \
+uses.{on_entry} The whole program is unpacked there every time it starts, so this is \
 normally either antivirus software removing or locking the files while they are being \
-written, or too little free space on the drive that holds the temporary folder."
+written, or too little free space on the drive that holds that temporary folder."
         ),
     })
 }
@@ -2333,6 +2334,875 @@ fn offer_local_fallback(handle: &tauri::AppHandle) {
     );
 }
 
+// ---------------------------------------------------------------------------
+// Temporary-folder housekeeping for the one-file sidecar.
+//
+// The shipped sidecar is a PyInstaller one-file bundle (desktop/pyinstaller.spec),
+// so every start unpacks the whole program into a fresh `_MEI` directory: numpy,
+// OpenCV, torch, sentence-transformers and a complete embedded PostgreSQL
+// install. The bootloader removes that directory again when its process exits
+// normally, and only then. `stop_backend` ends in a forced stop of the process
+// tree whenever the clean stop is refused or times out, and a killed bootloader
+// removes nothing, so every forced stop leaves a full extraction behind with
+// nobody left to clear it.
+//
+// The launcher log from one reported machine names 84 of them over two and a
+// half months, fifteen of its stops ended in the forced stop, and it had
+// already logged "[Errno 28] No space left on device" eleven days before it
+// stopped starting at all. What it showed the user in the end was the
+// bootloader failing to decompress, which names nothing anybody can act on.
+//
+// So the launcher clears up after itself here, before it starts a sidecar, and
+// refuses to start one at all when there is demonstrably no room to unpack it.
+//
+// Everything below is scoped to a directory this application owns, and that
+// scoping is what makes it defensible rather than merely careful. `_MEI` is
+// PyInstaller's prefix for every program built with it, so in the system
+// temporary folder the sweep would be judging other vendors' abandoned
+// directories, and the three guards it applies answer whether a directory is in
+// use, which is a different question from whether it is ours to remove. The spec
+// therefore unpacks into `EXTRACTION_ROOT_SPEC_LITERAL` and the sweep looks
+// nowhere else. Extractions left in `%TEMP%` by a version built before that
+// change are not swept and not counted; they stay until somebody deletes them.
+// ---------------------------------------------------------------------------
+
+/// Prefix the one-file bootloader gives every directory it unpacks into.
+const EXTRACTION_PREFIX: &str = "_MEI";
+
+/// The directory the sidecar unpacks itself into, exactly as the spec bakes it.
+///
+/// Paired with `runtime_tmpdir` in `desktop/pyinstaller.spec`, which writes this
+/// same string into the executable's options, and with a test that reads that
+/// file and fails when the two stop matching. Two copies of a path in two
+/// languages is not something a comment can hold together: if the launcher swept
+/// somewhere the bootloader does not unpack, the sweep would silently do nothing
+/// forever, and nothing else in the system would notice.
+///
+/// It is a Windows path carrying a Windows environment variable because Windows
+/// is the only platform whose bootloader expands one. See the spec for why POSIX
+/// keeps the system temporary folder instead.
+const EXTRACTION_ROOT_SPEC_LITERAL: &str = r"%LOCALAPPDATA%\OpenConstructionERP\extract";
+
+/// How long a directory must have been untouched before the sweep considers it.
+///
+/// The cheapest of the guards and the weakest: it says nothing about whether
+/// anything is using a directory, only that whatever wrote it stopped writing a
+/// while ago. It is here to keep the rest of the sweep away from an extraction
+/// that a second copy of the application is unpacking right now, whose files are
+/// being written while we look at them.
+const EXTRACTION_MINIMUM_AGE: Duration = Duration::from_secs(60 * 60);
+
+/// How long the whole sweep may run before it leaves the rest for next time.
+///
+/// Removing one extraction means removing thousands of files, and the log this
+/// was written from names 84 of them, so a sweep that insisted on finishing
+/// would hold the backend back for minutes. This is real time a user waits on a
+/// machine that has something to clear, which is why it is bounded at all;
+/// whatever is left is still there next time, and every start makes it smaller.
+const EXTRACTION_SWEEP_BUDGET: Duration = Duration::from_secs(90);
+
+/// Most files the sweep will look at inside one directory before giving up.
+///
+/// Not a performance guard so much as a refusal to answer a question we did not
+/// ask. A bundle this size unpacks to something on the order of ten thousand
+/// files, and a directory holding vastly more than that is not the shape we
+/// recognise. The safe answer for a shape we do not recognise is to leave it.
+const EXTRACTION_FILE_CAP: usize = 60_000;
+
+/// Roughly what one extraction costs on disk.
+///
+/// An estimate, and stated as one. The measured input is the shipped sidecar,
+/// 577,686,860 bytes of compressed archive in `desktop/src-tauri/binaries`; what
+/// it unpacks to is some multiple of that which nothing here measures. It is
+/// used to tell a user what the application is about to need, never to decide
+/// anything.
+const EXTRACTION_ESTIMATED_BYTES: u64 = 3 * 1024 * 1024 * 1024 / 2;
+
+/// Free space below which unpacking the sidecar cannot possibly succeed.
+///
+/// Deliberately far below what an extraction actually costs. Refusing to spawn
+/// is a new way for this launcher to stop a machine that would have worked, so
+/// the number that triggers a refusal has to be one where failure is certain
+/// rather than likely: the compressed archive alone is over 550 MB, and the
+/// bootloader writes more than that. Everything between here and
+/// `EXTRACTION_SPACE_COMFORT` is reported to the log and started anyway.
+const EXTRACTION_SPACE_FLOOR: u64 = 512 * 1024 * 1024;
+
+/// Free space below which the sweep and the log have something to say.
+///
+/// One extraction plus the room the embedded database wants for a checkpoint.
+/// Above this nothing is said at all.
+const EXTRACTION_SPACE_COMFORT: u64 = 3 * 1024 * 1024 * 1024;
+
+/// Expand `%NAME%` the way the Windows bootloader will expand it.
+///
+/// Pure, with the environment handed in, so the rule can be driven from a test
+/// without one. All or nothing on purpose: a name that is unset or empty gives
+/// no path at all rather than a half expanded one. Windows itself leaves an
+/// unknown `%NAME%` standing in the string, which would have the bootloader
+/// create a directory literally called `%LOCALAPPDATA%` beside itself, and a
+/// launcher that swept that name would be inventing a folder rather than finding
+/// one. Nothing we cannot resolve is anything we should touch.
+fn expand_windows_env(literal: &str, lookup: &dyn Fn(&str) -> Option<String>) -> Option<String> {
+    let parts: Vec<&str> = literal.split('%').collect();
+    // Balanced markers split into an odd number of parts: text, name, text, and
+    // so on. An even count means one `%` is unpaired.
+    if parts.len() % 2 == 0 {
+        return None;
+    }
+
+    let mut out = String::new();
+    for (index, part) in parts.iter().enumerate() {
+        if index % 2 == 0 {
+            out.push_str(part);
+            continue;
+        }
+        let value = lookup(part)?;
+        if value.trim().is_empty() {
+            return None;
+        }
+        out.push_str(&value);
+    }
+    Some(out)
+}
+
+/// The extraction root on this machine, if it can be resolved at all.
+///
+/// `None` is not a failure to report, it is an instruction to leave the disk
+/// alone: the sweep skips and the space check measures nothing.
+fn extraction_root() -> Option<PathBuf> {
+    if !cfg!(target_os = "windows") {
+        return None;
+    }
+    expand_windows_env(EXTRACTION_ROOT_SPEC_LITERAL, &|name| {
+        std::env::var(name).ok()
+    })
+    .map(PathBuf::from)
+}
+
+/// Where this build's sidecar will unpack itself, for anything that only needs
+/// to measure or to name the place.
+///
+/// The same directory the sweep works in on Windows. On POSIX the spec leaves
+/// the choice to the bootloader, which is the system temporary folder, so that
+/// is what gets measured and named there.
+fn extraction_dir() -> Option<PathBuf> {
+    if cfg!(target_os = "windows") {
+        extraction_root()
+    } else {
+        Some(std::env::temp_dir())
+    }
+}
+
+/// Create the extraction root before anybody asks a question about it.
+///
+/// The bootloader creates it on its own, including a missing parent chain, which
+/// was measured rather than assumed. This exists for the measurement that
+/// happens first: `GetDiskFreeSpaceExW` needs a directory that is already there,
+/// so on a machine that has never started this version the free-space check
+/// would otherwise measure nothing, decline to refuse anything, and be exactly
+/// as useful as not having been written. Failure is logged and not acted on;
+/// the sidecar may still be able to create it.
+fn ensure_extraction_root(dir: &std::path::Path) {
+    if let Err(e) = std::fs::create_dir_all(dir) {
+        log_line(&format!(
+            "extraction folder: could not create {}: {e}",
+            dir.display()
+        ));
+    }
+}
+
+/// One entry of the extraction root, as the sweep sees it.
+///
+/// Holds no path and no handle, so the rule below can be driven from a
+/// fabricated listing in a test rather than from a temporary folder full of
+/// real extractions.
+#[derive(Debug, Clone)]
+struct TempEntry {
+    /// The file name, not the path.
+    name: String,
+    is_dir: bool,
+    /// How long ago it was last written to, or None when that cannot be read.
+    age: Option<Duration>,
+    /// Whether some process still holds a file inside it open.
+    ///
+    /// False before the probe has run, which is why a listing on its own can
+    /// only ever produce a Keep. The driver asks the rule twice: once with what
+    /// the listing said, to find out whether the probe is worth paying for, and
+    /// once with what the probe found.
+    in_use: bool,
+}
+
+/// What the sweep decided about one entry, and why.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SweepVerdict {
+    Remove,
+    /// Not a file the one-file bootloader made, or not a directory at all.
+    KeepNotAnExtraction,
+    /// Young enough that a start happening right now could own it.
+    KeepTooYoung,
+    /// Its age could not be read, so nothing is known about it.
+    KeepAgeUnknown,
+    /// A live process holds a file inside it open.
+    KeepInUse,
+}
+
+/// Decide the fate of one entry of the temporary folder.
+///
+/// The whole rule, and pure, so the interesting cases can be written down as
+/// data. Note that the order is not decorative: everything cheap is asked first,
+/// because a temporary folder holds hundreds of entries that have nothing to do
+/// with us and walking one of them to answer a question the name already
+/// answered would be the slowest possible way to say no.
+fn sweep_verdict(entry: &TempEntry, minimum_age: Duration) -> SweepVerdict {
+    if !entry.is_dir || !is_extraction_name(&entry.name) {
+        return SweepVerdict::KeepNotAnExtraction;
+    }
+    match entry.age {
+        None => return SweepVerdict::KeepAgeUnknown,
+        Some(age) if age < minimum_age => return SweepVerdict::KeepTooYoung,
+        Some(_) => {}
+    }
+    if entry.in_use {
+        return SweepVerdict::KeepInUse;
+    }
+    SweepVerdict::Remove
+}
+
+/// `_MEI` followed by whatever the bootloader generated after it.
+///
+/// Nothing is read out of the suffix. On the machine this was written for it
+/// looks like a process id (`_MEI195482`) and it is not one: the bootloader
+/// generates it, and a process id would be reusable anyway, so the directory of
+/// a live process and the directory of a dead one are the same kind of string.
+/// The name says only that a PyInstaller bundle made this, which is why it is a
+/// filter here and never the guard.
+fn is_extraction_name(name: &str) -> bool {
+    match name.strip_prefix(EXTRACTION_PREFIX) {
+        Some(rest) => !rest.is_empty() && rest.chars().all(|c| c.is_ascii_alphanumeric()),
+        None => false,
+    }
+}
+
+/// What one walk of an extraction directory found.
+struct ExtractionScan {
+    /// Total size of every file below it, for the log line.
+    bytes: u64,
+    files: usize,
+    /// The files a process still running out of this directory would be holding
+    /// open: its executables, its libraries and its Python extension modules.
+    /// Executables first, because the one that matters here is a postmaster.
+    images: Vec<PathBuf>,
+    /// True when the walk stopped early, so every other field is incomplete.
+    truncated: bool,
+}
+
+/// Walk one extraction directory, without following anything out of it.
+fn scan_extraction(dir: &std::path::Path, cap: usize) -> ExtractionScan {
+    let mut scan = ExtractionScan {
+        bytes: 0,
+        files: 0,
+        images: Vec::new(),
+        truncated: false,
+    };
+    let mut stack = vec![dir.to_path_buf()];
+
+    while let Some(current) = stack.pop() {
+        let entries = match std::fs::read_dir(&current) {
+            Ok(entries) => entries,
+            // A directory we cannot even list is one we do not understand.
+            Err(_) => {
+                scan.truncated = true;
+                continue;
+            }
+        };
+        for entry in entries.flatten() {
+            if scan.files >= cap {
+                scan.truncated = true;
+                return scan;
+            }
+            let file_type = match entry.file_type() {
+                Ok(file_type) => file_type,
+                Err(_) => {
+                    scan.truncated = true;
+                    continue;
+                }
+            };
+            // Symlinks are counted and never followed: what one points at lives
+            // somewhere else and is not ours to remove or to judge.
+            if file_type.is_symlink() {
+                scan.files += 1;
+                continue;
+            }
+            if file_type.is_dir() {
+                stack.push(entry.path());
+                continue;
+            }
+            scan.files += 1;
+            if let Ok(meta) = entry.metadata() {
+                scan.bytes += meta.len();
+            }
+            let path = entry.path();
+            if image_rank(&path).is_some() {
+                scan.images.push(path);
+            }
+        }
+    }
+
+    scan.images.sort_by_key(|path| image_rank(path).unwrap_or(u8::MAX));
+    scan
+}
+
+/// How likely a file is to be the one a live holder is holding, or None.
+///
+/// These three extensions are the files Windows keeps open for the lifetime of
+/// a process that is running out of them, because they are mapped as images
+/// rather than merely read. Everything else in an extraction is data, which is
+/// opened and closed as it is needed and therefore says nothing when it opens.
+fn image_rank(path: &std::path::Path) -> Option<u8> {
+    let extension = path.extension()?.to_str()?.to_ascii_lowercase();
+    match extension.as_str() {
+        "exe" => Some(0),
+        "dll" => Some(1),
+        "pyd" => Some(2),
+        _ => None,
+    }
+}
+
+/// Whether one file is open in some process.
+///
+/// Windows refuses an open that asks for read access while denying it to
+/// everybody else when somebody already has the file open, so a failure here is
+/// the operating system saying the file is in use. Anything other than the file
+/// having vanished counts as in use, including a plain permission error: the
+/// question this answers is whether it is safe to delete the thing, and every
+/// answer we cannot read has to mean no.
+#[cfg(target_os = "windows")]
+fn file_is_held_open(path: &std::path::Path) -> bool {
+    use std::os::windows::fs::OpenOptionsExt;
+
+    match std::fs::OpenOptions::new()
+        .read(true)
+        .share_mode(0)
+        .open(path)
+    {
+        Ok(_) => false,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => false,
+        Err(_) => true,
+    }
+}
+
+/// POSIX has no mandatory locking, so an open here answers nothing.
+#[cfg(not(target_os = "windows"))]
+fn file_is_held_open(_path: &std::path::Path) -> bool {
+    true
+}
+
+/// Whether a live process is still running out of this extraction.
+///
+/// THE GUARD, and the reason this file gained a sweep rather than a call to
+/// remove a directory. An embedded PostgreSQL postmaster can outlive the
+/// extraction it was started from: the log this was written from shows one
+/// serving out of `_MEI195482` after that directory had lost files, escalating
+/// to FATAL on `timezonesets` and then to crash recovery on every start after.
+/// A sweep that deleted by age would have caused exactly that, and would have
+/// turned tidying up into a way to corrupt a database.
+///
+/// What it is blind to, in order of how much it matters:
+///
+///   - a process holding only data files open. Only executables, libraries and
+///     extension modules are probed, because those are the ones Windows keeps
+///     open for as long as the process runs. A program that had merely opened a
+///     configuration file inside an extraction would not be seen.
+///   - the moment between this answer and the removal that follows it. Nothing
+///     closes that window; `remove_extraction` narrows what it can cost by
+///     removing the probed files first, so a holder that appears in between
+///     stops the removal on the file it is holding rather than after the data
+///     around it has gone.
+///   - an extraction with no executable, library or extension module in it at
+///     all, which is answered "not in use". That is a directory half removed by
+///     an earlier interrupted sweep, and finishing it is the intent.
+///   - everything on POSIX, where there is no such signal to read. The sweep
+///     does not run there at all; see `sweep_extractions_in`.
+fn extraction_is_in_use(scan: &ExtractionScan) -> bool {
+    if !cfg!(target_os = "windows") {
+        return true;
+    }
+    scan.images.iter().any(|image| file_is_held_open(image))
+}
+
+/// Remove one extraction, the files a holder would be holding first.
+///
+/// The order is the whole safety of this function. `remove_dir_all` walks in
+/// whatever order the directory gives it, so on a directory that acquired a
+/// holder since it was probed it would remove the data files it can and fail on
+/// the executable it cannot, leaving a live process with its binaries and none
+/// of the files it reads later. That is not a hypothetical: it is what the log
+/// this change came from records happening to a postmaster and its
+/// `timezonesets`. Removing the probed files first means the first thing we
+/// touch is the thing such a process is holding, so the removal stops there with
+/// everything else still on the disk.
+fn remove_extraction(dir: &std::path::Path, scan: &ExtractionScan) -> std::io::Result<()> {
+    for image in &scan.images {
+        match std::fs::remove_file(image) {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(e) => return Err(e),
+        }
+    }
+    std::fs::remove_dir_all(dir)
+}
+
+/// What the embedded cluster's pidfile says about a postmaster being alive.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ClusterState {
+    /// A postmaster is running, or something we cannot rule out is.
+    Running,
+    /// No postmaster: no pidfile, or one naming a process that has gone.
+    Stopped,
+    /// The pidfile could not be read or made sense of.
+    Unknown,
+}
+
+/// Read `postmaster.pid` and decide whether a cluster is live.
+///
+/// The backend keeps its cluster at `<data dir>/pgdata` and PostgreSQL writes
+/// the postmaster's process id on the first line of `postmaster.pid` there. The
+/// same file is read the same way on the Python side, in `_read_pidfile_pid` and
+/// `_pid_alive` in `backend/app/core/embedded_pg.py`.
+///
+/// This asks only half of the question that module asks. It does not check
+/// whether the process holding that id is still the postmaster that wrote the
+/// file, because both answers point the same way here: uncertainty means live,
+/// live means the sweep does not run, and a sweep that does not run costs disk
+/// space rather than a database.
+fn cluster_state_of(pidfile: &std::path::Path) -> ClusterState {
+    let text = match std::fs::read_to_string(pidfile) {
+        Ok(text) => text,
+        Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => return ClusterState::Stopped,
+        Err(_) => return ClusterState::Unknown,
+    };
+    match text
+        .lines()
+        .next()
+        .map(str::trim)
+        .and_then(|line| line.parse::<u32>().ok())
+    {
+        Some(pid) if process_is_alive(pid) => ClusterState::Running,
+        Some(_) => ClusterState::Stopped,
+        None => ClusterState::Unknown,
+    }
+}
+
+/// The state of this installation's own embedded cluster.
+fn embedded_cluster_state() -> ClusterState {
+    match workspace_data_dir() {
+        Some(dir) => cluster_state_of(&dir.join("pgdata").join("postmaster.pid")),
+        None => ClusterState::Unknown,
+    }
+}
+
+/// Whether a process with this id currently exists.
+///
+/// Opening it is the direct answer. A refusal naming an invalid parameter is
+/// Windows saying there is no such process; a refusal naming access denied is
+/// Windows saying it exists and belongs to somebody else, which for this
+/// question is alive. Anything else unrecognised is alive as well, because the
+/// caller deletes files when told no.
+///
+/// Blind to process id reuse: a cluster that is long gone whose id now belongs
+/// to some other program reads as running, and the sweep then never runs on that
+/// machine until the id is free again. That direction costs disk space and
+/// nothing else, which is why it is not tightened here.
+#[cfg(target_os = "windows")]
+fn process_is_alive(pid: u32) -> bool {
+    use windows_sys::Win32::Foundation::{CloseHandle, ERROR_INVALID_PARAMETER};
+    use windows_sys::Win32::System::Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION};
+
+    if pid == 0 {
+        return false;
+    }
+    // SAFETY: OpenProcess takes an id by value and returns either a handle we
+    // close immediately or a null one; nothing here outlives the call.
+    unsafe {
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+        if handle.is_null() {
+            let code = std::io::Error::last_os_error().raw_os_error();
+            return code != Some(ERROR_INVALID_PARAMETER as i32);
+        }
+        CloseHandle(handle);
+        true
+    }
+}
+
+/// Not asked on POSIX: the sweep does not run there.
+#[cfg(not(target_os = "windows"))]
+fn process_is_alive(_pid: u32) -> bool {
+    true
+}
+
+/// What one sweep did.
+#[derive(Debug, Default, PartialEq, Eq)]
+struct SweepReport {
+    removed: usize,
+    bytes_freed: u64,
+    kept: usize,
+    /// Kept because something is still running out of them. Counted separately
+    /// because this is the number that says the guard did something.
+    kept_in_use: usize,
+    /// True when the budget ran out with entries still unexamined.
+    stopped_early: bool,
+    /// Set when nothing was examined at all, and why.
+    skipped: Option<&'static str>,
+}
+
+/// Remove the extractions that forced stops left behind in `root`.
+///
+/// Every input is a parameter so the whole thing can be driven over a fabricated
+/// root in a test, including the two that suspend it: a live cluster and a
+/// minimum age. It never discovers a directory of its own, which is what keeps
+/// the caller's ownership decision from being quietly widened here.
+///
+/// `on_first_removal` is called once, immediately before the first directory is
+/// removed, because that is the point at which this stops being instant and the
+/// user is owed a word about what their computer is doing.
+fn sweep_extractions_in(
+    root: &std::path::Path,
+    cluster: ClusterState,
+    minimum_age: Duration,
+    budget: Duration,
+    on_first_removal: &mut dyn FnMut(),
+) -> SweepReport {
+    let mut report = SweepReport::default();
+
+    // Not on POSIX. The guard that makes this safe is an exclusive open, and
+    // there is no such thing there: a POSIX process holds an inode, not a name,
+    // so nothing about an open file can be read off the filesystem and every
+    // directory would have to be judged by age alone. That is the rule that
+    // corrupts a database, so this simply does not run.
+    if !cfg!(target_os = "windows") {
+        report.skipped = Some("only Windows can be asked whether a file is in use");
+        return report;
+    }
+
+    match cluster {
+        ClusterState::Running => {
+            report.skipped = Some("an embedded database is running");
+            return report;
+        }
+        ClusterState::Unknown => {
+            report.skipped = Some("it is not known whether an embedded database is running");
+            return report;
+        }
+        ClusterState::Stopped => {}
+    }
+
+    let entries = match std::fs::read_dir(root) {
+        Ok(entries) => entries,
+        Err(_) => {
+            report.skipped = Some("the extraction folder could not be listed");
+            return report;
+        }
+    };
+
+    let deadline = Instant::now() + budget;
+    for entry in entries.flatten() {
+        if Instant::now() >= deadline {
+            report.stopped_early = true;
+            break;
+        }
+
+        let listed = TempEntry {
+            name: entry.file_name().to_string_lossy().to_string(),
+            is_dir: entry.file_type().map(|t| t.is_dir()).unwrap_or(false),
+            age: entry
+                .metadata()
+                .ok()
+                .and_then(|meta| meta.modified().ok())
+                .and_then(|written| std::time::SystemTime::now().duration_since(written).ok()),
+            in_use: false,
+        };
+
+        // What the listing knows. It can only ever say no from here, so a
+        // Remove at this point means no more than "worth paying to look".
+        if sweep_verdict(&listed, minimum_age) != SweepVerdict::Remove {
+            report.kept += 1;
+            continue;
+        }
+
+        let path = entry.path();
+        let scan = scan_extraction(&path, EXTRACTION_FILE_CAP);
+        if scan.truncated {
+            report.kept += 1;
+            log_line(&format!(
+                "extraction sweep: leaving {} alone, it could not be read in full",
+                listed.name
+            ));
+            continue;
+        }
+
+        let observed = TempEntry {
+            in_use: extraction_is_in_use(&scan),
+            ..listed
+        };
+        match sweep_verdict(&observed, minimum_age) {
+            SweepVerdict::Remove => {
+                if report.removed == 0 {
+                    on_first_removal();
+                }
+                match remove_extraction(&path, &scan) {
+                    Ok(()) => {
+                        report.removed += 1;
+                        report.bytes_freed += scan.bytes;
+                        log_line(&format!(
+                            "extraction sweep: removed {} ({}, {} files) left behind by an earlier run",
+                            observed.name,
+                            human_bytes(scan.bytes),
+                            scan.files
+                        ));
+                    }
+                    Err(e) => {
+                        // Including a file that was opened in the moment between
+                        // the probe and here. Nothing is retried and nothing is
+                        // escalated: whatever is left stays where it is.
+                        report.kept += 1;
+                        log_line(&format!(
+                            "extraction sweep: stopped removing {}: {e}",
+                            observed.name
+                        ));
+                    }
+                }
+            }
+            SweepVerdict::KeepInUse => {
+                report.kept += 1;
+                report.kept_in_use += 1;
+                log_line(&format!(
+                    "extraction sweep: leaving {} alone, a running program is still using it",
+                    observed.name
+                ));
+            }
+            _ => report.kept += 1,
+        }
+    }
+
+    report
+}
+
+/// Clear what earlier runs left behind, before this one adds to it.
+///
+/// Only ever inside the root this application unpacks into. A directory we did
+/// not create is not ours to judge, however confident the guards below are.
+fn sweep_orphaned_extractions(handle: &tauri::AppHandle) {
+    let root = match extraction_root() {
+        Some(root) => root,
+        None => {
+            log_line("extraction sweep: not run, this build unpacks somewhere it does not own");
+            return;
+        }
+    };
+    ensure_extraction_root(&root);
+
+    let mut announced = false;
+    let report = sweep_extractions_in(
+        &root,
+        embedded_cluster_state(),
+        EXTRACTION_MINIMUM_AGE,
+        EXTRACTION_SWEEP_BUDGET,
+        &mut || {
+            announced = true;
+            boot_stage(
+                handle,
+                "sidecar",
+                "active",
+                "Clearing files left by an earlier run",
+            );
+        },
+    );
+
+    match report.skipped {
+        Some(reason) => log_line(&format!("extraction sweep: not run, {reason}")),
+        None => log_line(&format!(
+            "extraction sweep: removed {} of {} directories in {}, reclaiming {}{}{}",
+            report.removed,
+            report.removed + report.kept,
+            root.display(),
+            human_bytes(report.bytes_freed),
+            if report.kept_in_use > 0 {
+                format!(", {} still in use", report.kept_in_use)
+            } else {
+                String::new()
+            },
+            if report.stopped_early {
+                ", stopped early and will continue next start"
+            } else {
+                ""
+            }
+        )),
+    }
+
+    if announced {
+        boot_stage(handle, "sidecar", "active", "Starting the backend");
+    }
+}
+
+/// Free bytes on the volume holding `path`, as far as this user may use them.
+///
+/// `lpFreeBytesAvailableToCaller` rather than the volume's own free total,
+/// because a quota is as real a limit as a full disk and the bootloader hits it
+/// the same way.
+#[cfg(target_os = "windows")]
+fn free_space_at(path: &std::path::Path) -> Option<u64> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
+
+    let wide: Vec<u16> = path
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+    let mut available: u64 = 0;
+    // SAFETY: `wide` is a NUL-terminated UTF-16 path that outlives the call, and
+    // the two totals we have no use for are documented as optional.
+    let ok = unsafe {
+        GetDiskFreeSpaceExW(
+            wide.as_ptr(),
+            &mut available,
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+        )
+    };
+    if ok == 0 {
+        None
+    } else {
+        Some(available)
+    }
+}
+
+/// Unmeasured elsewhere: no answer, and the caller carries on.
+#[cfg(not(target_os = "windows"))]
+fn free_space_at(_path: &std::path::Path) -> Option<u64> {
+    None
+}
+
+/// What the free-space measurement means for a sidecar about to be started.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SpaceVerdict {
+    /// Nothing was measured. Never a reason to refuse anything.
+    Unknown,
+    Enough,
+    /// Enough to try, and little enough to be worth a line in the log.
+    Tight,
+    /// Not enough to unpack into at all.
+    TooLittle,
+}
+
+/// Judge a free-space measurement. Pure, and the only place a refusal is decided.
+fn space_verdict(free: Option<u64>, floor: u64, comfort: u64) -> SpaceVerdict {
+    match free {
+        None => SpaceVerdict::Unknown,
+        Some(free) if free < floor => SpaceVerdict::TooLittle,
+        Some(free) if free < comfort => SpaceVerdict::Tight,
+        Some(_) => SpaceVerdict::Enough,
+    }
+}
+
+/// A byte count in the units a person reads, never in bytes.
+fn human_bytes(bytes: u64) -> String {
+    const KB: u64 = 1024;
+    const MB: u64 = 1024 * KB;
+    const GB: u64 = 1024 * MB;
+    if bytes >= GB {
+        format!("{:.1} GB", bytes as f64 / GB as f64)
+    } else if bytes >= MB {
+        format!("{} MB", bytes / MB)
+    } else {
+        format!("{} KB", bytes / KB)
+    }
+}
+
+/// What to tell a user whose temporary folder has no room in it.
+///
+/// Both numbers are in it on purpose. "Not enough disk space" is a sentence
+/// somebody can read twice and still not know what to do about, and the drive
+/// that matters is not always the one they would think to check: it is whichever
+/// one holds the temporary folder, which is why the folder is named.
+fn out_of_space_message(dir: &str, free: u64) -> String {
+    format!(
+        "There is not enough free space to start the application. It unpacks itself into \
+{dir} every time it starts, which needs about {}, and the drive holding that folder has \
+{} free. Free some space on that drive and start OpenConstructionERP again.",
+        human_bytes(EXTRACTION_ESTIMATED_BYTES),
+        human_bytes(free)
+    )
+}
+
+/// What the disk had to say, appended to a bootloader failure that has already
+/// been recognised.
+///
+/// `classify_bootloader_failure` names free space as one of two usual causes,
+/// which is as far as the text of the failure itself can take anyone. This is
+/// the measurement that decides between them, so the user is told which of the
+/// two they have rather than being handed both and left to guess.
+fn extraction_space_note(dir: &std::path::Path) -> String {
+    let free = match free_space_at(dir) {
+        Some(free) => free,
+        None => return String::new(),
+    };
+    match space_verdict(Some(free), EXTRACTION_SPACE_FLOOR, EXTRACTION_SPACE_COMFORT) {
+        SpaceVerdict::TooLittle | SpaceVerdict::Tight => format!(
+            " The drive holding {} has {} free and unpacking needs about {}, so this is a full \
+disk rather than antivirus software.",
+            dir.display(),
+            human_bytes(free),
+            human_bytes(EXTRACTION_ESTIMATED_BYTES)
+        ),
+        _ => format!(
+            " The drive holding {} has {} free.",
+            dir.display(),
+            human_bytes(free)
+        ),
+    }
+}
+
+/// Check there is room to unpack the sidecar, and say so when there is not.
+///
+/// Returns whether to go on and start it. Only a measured number refuses: a
+/// measurement that could not be taken is no reason to stop a machine that would
+/// have worked, and neither is a drive that is merely tight, which is reported
+/// to the log and started anyway.
+fn extraction_space_allows_a_sidecar(handle: &tauri::AppHandle) -> bool {
+    let dir = match extraction_dir() {
+        Some(dir) => dir,
+        None => return true,
+    };
+    // Before the measurement, not after: the drive is asked about a directory,
+    // and on a machine that has not started this version yet there is not one.
+    ensure_extraction_root(&dir);
+
+    let free = free_space_at(&dir);
+    match space_verdict(free, EXTRACTION_SPACE_FLOOR, EXTRACTION_SPACE_COMFORT) {
+        SpaceVerdict::TooLittle => {
+            let free = free.unwrap_or(0);
+            report_fatal_stage(
+                handle,
+                "sidecar",
+                &out_of_space_message(&dir.display().to_string(), free),
+            );
+            false
+        }
+        SpaceVerdict::Tight => {
+            log_line(&format!(
+                "extraction space: {} free at {}, unpacking needs about {}",
+                human_bytes(free.unwrap_or(0)),
+                dir.display(),
+                human_bytes(EXTRACTION_ESTIMATED_BYTES)
+            ));
+            true
+        }
+        SpaceVerdict::Enough | SpaceVerdict::Unknown => true,
+    }
+}
+
 /// Start a server locally, as a sidecar of this process, and open the app
 /// against it once it is healthy.
 ///
@@ -2447,35 +3317,50 @@ the application."
         }
     };
 
-    let (mut rx, child) = match sidecar_cmd.spawn() {
-        Ok(pair) => pair,
-        Err(e) => {
-            report_fatal_stage(
-                &handle,
-                "sidecar",
-                &format!(
-                    "The backend component could not be started ({e}). Some antivirus \
-tools block newly installed programs; allow OpenConstructionERP and try again."
-                ),
-            );
+    // Spawn and register under the one lock the exit path takes, and ask
+    // first whether the application is still going. This runs off the main
+    // thread now, behind a sweep of the extraction folder that can honestly
+    // take a minute, which is long enough for somebody to close the splash
+    // while it works. `stop_backend` sets `shutting_down` and then takes the
+    // child out of this slot, so holding the slot across the check and the
+    // spawn means it either finds the child, and stops it, or the check here
+    // finds the flag, and nothing is started. Without the lock a close that
+    // landed between the two would leave a backend and an embedded database
+    // running that nothing is left alive to shut down, which is the very
+    // thing the stop sequence in this file exists to prevent.
+    let (mut rx, backend_exited) = {
+        let state = handle.state::<AppState>();
+        let mut child_slot = state.backend_child.lock().unwrap();
+        if shutting_down.load(Ordering::SeqCst) {
+            log_line("the application is closing; not starting a backend");
             return;
         }
+        let (rx, child) = match sidecar_cmd.spawn() {
+            Ok(pair) => pair,
+            Err(e) => {
+                report_fatal_stage(
+                    &handle,
+                    "sidecar",
+                    &format!(
+                        "The backend component could not be started ({e}). Some antivirus \
+tools block newly installed programs; allow OpenConstructionERP and try again."
+                    ),
+                );
+                return;
+            }
+        };
+        log_line("sidecar spawned");
+        // Keep the child handle alive (and stoppable on exit). The port
+        // goes in beside it, because the clean stop is a request to the
+        // backend and a request needs an address; it is recorded HERE, on
+        // the spawn path only, so the exit path can never ask a backend we
+        // merely attached to to shut itself down.
+        *child_slot = Some(child);
+        *state.backend_port.lock().unwrap() = Some(port);
+        (rx, state.backend_exited.clone())
     };
-    log_line("sidecar spawned");
     boot_stage(&handle, "sidecar", "done", "");
     boot_stage(&handle, "pg", "active", "Starting the local database");
-
-    // Keep the child handle alive (and stoppable on exit). The port
-    // goes in beside it, because the clean stop is a request to the
-    // backend and a request needs an address; it is recorded HERE, on
-    // the spawn path only, so the exit path can never ask a backend we
-    // merely attached to to shut itself down.
-    let backend_exited = {
-        let state = handle.state::<AppState>();
-        *state.backend_child.lock().unwrap() = Some(child);
-        *state.backend_port.lock().unwrap() = Some(port);
-        state.backend_exited.clone()
-    };
 
     let backend_ready = Arc::new(AtomicBool::new(false));
     // Separate from readiness on purpose. Readiness means the backend
@@ -2614,7 +3499,15 @@ tools block newly installed programs; allow OpenConstructionERP and try again."
                             // the text it leaves is unreadable. Name it first.
                             let boot_failure = classify_bootloader_failure(&tail_now);
                             let (fail_stage, core) = if let Some(f) = boot_failure {
-                                (f.stage, f.message)
+                                // The text of the failure can name the two usual
+                                // causes and cannot choose between them. The disk
+                                // is the one of the two this launcher can measure,
+                                // so it measures it and tells the user which one
+                                // they have instead of handing them both.
+                                let note = extraction_dir()
+                                    .map(|dir| extraction_space_note(&dir))
+                                    .unwrap_or_default();
+                                (f.stage, format!("{}{note}", f.message))
                             } else if let Some(cause) = latched_cause.or(tb_cause) {
                                 ("server", format!("The backend could not finish starting: {cause}"))
                             } else {
@@ -2925,7 +3818,7 @@ fn main() {
             // Show the version from the first frame, not only once something has
             // failed, so a user who is merely puzzled can also read it off.
             report_app_version(&handle);
-            boot_stage(&handle, "sidecar", "active", "Locating the backend");
+            boot_stage(&handle, "sidecar", "active", "Starting the backend");
 
             // Ask, in the background, whether a newer release exists. Started
             // here rather than when a failure is reported because a failure can
@@ -3049,14 +3942,61 @@ fn main() {
                     attach_to_running_backend(handle, base_url, port, shutting_down, backend_lost);
                 }
                 BackendSource::StartLocally { base_url, port } => {
-                    start_local_backend(
-                        handle,
-                        base_url,
-                        port,
-                        bundled_converters,
-                        shutting_down,
-                        backend_lost,
-                    );
+                    // Three steps in one order: clear what earlier runs left in
+                    // the temporary folder, check what is left to unpack into,
+                    // and only then start the sidecar. The order is the point,
+                    // because the sweep is what makes the room the check is
+                    // about to measure.
+                    //
+                    // Off this thread, all of it. setup() runs before the event
+                    // loop starts pumping, so work done here is time with no
+                    // window painted, and the sweep is the one thing in this
+                    // file that can honestly take a minute: the log this was
+                    // written from names 84 extractions on a drive that had
+                    // run out of space. A launcher that went quiet for that long while
+                    // clearing up would be indistinguishable from the "I click
+                    // the icon and nothing happens" failure this whole file is
+                    // written against.
+                    let reporter = handle.clone();
+                    let start = move || {
+                        sweep_orphaned_extractions(&handle);
+                        if !extraction_space_allows_a_sidecar(&handle) {
+                            return;
+                        }
+                        // Nothing between here and the spawn used to be able
+                        // to take time, so the sidecar was always registered
+                        // before the event loop could deliver an exit. A sweep
+                        // that runs for a minute and a half is long enough for
+                        // somebody to close the splash while it works, so the
+                        // spawn now asks whether the application is still
+                        // going, under the lock the exit path takes; see
+                        // start_local_backend.
+                        start_local_backend(
+                            handle,
+                            base_url,
+                            port,
+                            bundled_converters,
+                            shutting_down,
+                            backend_lost,
+                        );
+                    };
+                    if let Err(e) = std::thread::Builder::new()
+                        .name("oe-backend-start".to_string())
+                        .spawn(start)
+                    {
+                        // The work went with the thread that could not be
+                        // started, so there is nothing left to run here. Say it
+                        // where the user can read it rather than leaving them
+                        // watching a spinner that has nothing behind it.
+                        report_fatal_stage(
+                            &reporter,
+                            "sidecar",
+                            &format!(
+                                "The backend could not be started ({e}). Close anything else \
+that is running and start OpenConstructionERP again."
+                            ),
+                        );
+                    }
                 }
                 BackendSource::Remote { base_url, source } => {
                     attach_to_remote_backend(
@@ -3130,7 +4070,42 @@ const BACKEND_STOP_WAIT: Duration = Duration::from_secs(5);
 /// cluster with a large checkpoint to write takes a few seconds over it. Those
 /// seconds are the entire point. Every one of them not spent here comes back on
 /// the next start as write-ahead-log replay, which is measured in minutes.
-const GRACEFUL_STOP_WAIT: Duration = Duration::from_secs(10);
+///
+/// The number comes from the budget the backend's own cluster gets rather than
+/// from what feels like a reasonable pause. On the way out the backend
+/// (`shutdown` in `backend/app/core/embedded_pg.py`) hands the cluster back to
+/// the library that booted it, and that library stops it with `pg_ctl -w stop`
+/// and no `-t`: a fast shutdown, waited on for pg_ctl's default of sixty
+/// seconds, after which the library terminates the postmaster itself and the
+/// backend goes on to exit. So a clean stop can legitimately take a minute, and
+/// stopping short of that is worse than not asking at all. At ten seconds,
+/// which is what this was, the launcher force killed every cluster whose
+/// checkpoint took longer than that, taking the write-ahead-log replay it was
+/// trying to avoid AND leaving the one-file loader no chance to remove the
+/// payload it had unpacked into the temporary folder. Ten seconds on top cover
+/// the signal delay, the connection drain and the engine disposal the backend
+/// does before it reaches pg_ctl at all, and the termination the library falls
+/// back to when pg_ctl gives up.
+///
+/// This is spent on the way out, on the main event loop, so it is time the user
+/// can see. It is not time they usually pay: `wait_until_exited` polls at 100 ms
+/// and returns the moment the process is gone, so a small cluster costs a
+/// fraction of a second and the full budget is only ever reached in the one case
+/// where the alternative is minutes of replay on the next start.
+const GRACEFUL_STOP_WAIT: Duration = Duration::from_secs(70);
+
+/// The clean-stop budget the backend's cluster gets before it is terminated.
+///
+/// `pg_ctl -w stop` with no `-t` is how `pixeltable-pgserver` stops the
+/// postmaster it started, and with `PGCTLTIMEOUT` set nowhere in the backend
+/// that waits pg_ctl's default of sixty seconds. Named here so the invariant
+/// that matters - the launcher must not give up before the backend has finished
+/// trying - is something a test can assert rather than something a reader has
+/// to notice. The `("fast", 20)` leg in the same Python module is a different
+/// path: it clears a mute postmaster found at START and says nothing about the
+/// one stopped on the way out.
+#[cfg(test)]
+const BACKEND_CLEAN_STOP_BUDGET: Duration = Duration::from_secs(60);
 
 /// How long the shutdown request itself may take to be answered.
 ///
@@ -3402,6 +4377,64 @@ mod tests {
     /// the backend it started read one file and therefore hold one value. Tests
     /// that want the other case say so by naming a different id.
     const TEST_WORKSPACE_ID: &str = "aaaaaaaabbbbbbbbccccccccdddddddd";
+
+    /// The launcher must not give up on a clean stop before the backend has.
+    ///
+    /// This is the defect as an assertion. At ten seconds the launcher force
+    /// killed a backend that was still inside the sixty second `pg_ctl -w stop`
+    /// it had itself been asked to perform, so the shutdown that existed to
+    /// avoid write-ahead-log replay caused it, and the forced stop denied the
+    /// one-file loader the chance to remove what it had unpacked. Any value at or
+    /// below the backend's own budget reintroduces both.
+    #[test]
+    fn the_launcher_waits_longer_than_the_backend_takes_to_stop_cleanly() {
+        assert!(
+            GRACEFUL_STOP_WAIT > BACKEND_CLEAN_STOP_BUDGET,
+            "GRACEFUL_STOP_WAIT ({GRACEFUL_STOP_WAIT:?}) must exceed the backend's own clean \
+stop budget ({BACKEND_CLEAN_STOP_BUDGET:?}, embedded_pg.py), or the launcher force kills a \
+cluster that is still shutting down cleanly"
+        );
+    }
+
+    /// A backend that ignores the request still has to die.
+    ///
+    /// The budget above is only safe because running out of it is not the end of
+    /// the sequence. `wait_until_exited` has to report the failure rather than
+    /// hang, so that `stop_backend` goes on to the forced stop; a version that
+    /// waited forever would turn every wedged backend into an application that
+    /// never closes.
+    #[test]
+    fn a_backend_that_never_exits_times_out_so_the_forced_stop_still_runs() {
+        let never = Arc::new(AtomicBool::new(false));
+        let started = Instant::now();
+
+        assert!(
+            !wait_until_exited(&never, Duration::from_millis(300)),
+            "a backend that never exits must be reported as still running"
+        );
+        assert!(
+            started.elapsed() >= Duration::from_millis(300),
+            "the budget must actually be spent before giving up"
+        );
+    }
+
+    /// And one that does exit is not waited on for the full budget.
+    #[test]
+    fn a_backend_that_exits_is_not_waited_on_any_longer() {
+        let exited = Arc::new(AtomicBool::new(false));
+        let flag = exited.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(50));
+            flag.store(true, Ordering::SeqCst);
+        });
+
+        let started = Instant::now();
+        assert!(wait_until_exited(&exited, Duration::from_secs(30)));
+        assert!(
+            started.elapsed() < Duration::from_secs(5),
+            "the wait must end when the process does, not when the budget does"
+        );
+    }
 
     /// The stderr the reporter's machine actually produced, transcribed from
     /// the screenshot on issue 462 (16.5.0, Windows 11).
@@ -4374,5 +5407,506 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         );
 
         let _ = std::fs::remove_dir_all(&base);
+    }
+
+    /// One line of a fabricated directory listing.
+    ///
+    /// The rule the sweep runs on takes nothing but this, which is what lets
+    /// every interesting case be written down here instead of being built out of
+    /// real extractions on a real disk.
+    fn listed(name: &str, hours_old: u64) -> TempEntry {
+        TempEntry {
+            name: name.to_string(),
+            is_dir: true,
+            age: Some(Duration::from_secs(hours_old * 60 * 60)),
+            in_use: false,
+        }
+    }
+
+    const AN_HOUR: Duration = Duration::from_secs(60 * 60);
+
+    /// A temporary directory of this test's own, removed by the caller.
+    fn fixture_dir(label: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "oe-{label}-{}",
+            uuid::Uuid::new_v4().simple()
+        ));
+        std::fs::create_dir_all(&dir).expect("a fixture directory");
+        dir
+    }
+
+    /// An abandoned extraction is the only thing the sweep will remove.
+    ///
+    /// Every other row is a way of saying no, and they are here together because
+    /// the danger in this feature is not a missed directory, it is a removed one.
+    #[test]
+    fn an_abandoned_extraction_is_the_only_thing_the_sweep_removes() {
+        assert_eq!(
+            sweep_verdict(&listed("_MEI195482", 5), AN_HOUR),
+            SweepVerdict::Remove
+        );
+
+        for (entry, expected, why) in [
+            (
+                TempEntry {
+                    is_dir: false,
+                    ..listed("_MEI195482", 5)
+                },
+                SweepVerdict::KeepNotAnExtraction,
+                "a file that happens to be named like one is not one",
+            ),
+            (
+                listed("chrome_installer.log", 5),
+                SweepVerdict::KeepNotAnExtraction,
+                "a temporary folder is full of other people's work",
+            ),
+            (
+                listed("_MEI", 5),
+                SweepVerdict::KeepNotAnExtraction,
+                "the prefix alone is not a name the bootloader generates",
+            ),
+            (
+                listed("_MEI195482", 0),
+                SweepVerdict::KeepTooYoung,
+                "a start happening right now owns a directory this new",
+            ),
+            (
+                TempEntry {
+                    age: None,
+                    ..listed("_MEI195482", 5)
+                },
+                SweepVerdict::KeepAgeUnknown,
+                "nothing is known about it, so nothing is done to it",
+            ),
+            (
+                TempEntry {
+                    in_use: true,
+                    ..listed("_MEI195482", 5)
+                },
+                SweepVerdict::KeepInUse,
+                "a live program is still running out of it",
+            ),
+        ] {
+            assert_eq!(
+                sweep_verdict(&entry, AN_HOUR),
+                expected,
+                "{why}: {:?}",
+                entry.name
+            );
+        }
+    }
+
+    /// Neither the name nor the age may carry this decision on its own.
+    ///
+    /// The directory in the report, `_MEI195482`, had a perfect name and was
+    /// hours old, and an embedded PostgreSQL was still serving out of it. Age
+    /// only ever grows, so a rule built on it says yes more confidently the
+    /// longer the process it would kill has been running.
+    #[test]
+    fn a_perfect_name_and_a_long_life_still_do_not_add_up_to_a_removal() {
+        for hours in [1, 24, 24 * 365] {
+            assert_eq!(
+                sweep_verdict(
+                    &TempEntry {
+                        in_use: true,
+                        ..listed("_MEI195482", hours)
+                    },
+                    AN_HOUR
+                ),
+                SweepVerdict::KeepInUse,
+                "{hours} hours old and still in use"
+            );
+        }
+    }
+
+    /// The reverse check, on the real sweep and not on the rule.
+    ///
+    /// A file held open the way a running program holds its own executable, in a
+    /// directory shaped like the one from the report, with a data file beside it
+    /// standing in for the `timezonesets` that a live postmaster went FATAL on
+    /// when its extraction lost files underneath it.
+    ///
+    /// The last two assertions are the ones that matter. Counting what was kept
+    /// proves the holder was noticed; only looking for the files proves that
+    /// nothing was taken on the way to noticing, which is the difference between
+    /// this sweep and the accident it exists to avoid.
+    #[cfg(windows)]
+    #[test]
+    fn an_extraction_a_program_is_still_running_out_of_survives_intact() {
+        use std::os::windows::fs::OpenOptionsExt;
+
+        let root = fixture_dir("sweep-live");
+        let extraction = root.join("_MEI195482");
+        let bin = extraction.join("pgserver").join("bin");
+        let share = extraction.join("pgserver").join("share").join("timezonesets");
+        std::fs::create_dir_all(&bin).expect("a fixture bin directory");
+        std::fs::create_dir_all(&share).expect("a fixture share directory");
+        let postgres = bin.join("postgres.exe");
+        let timezones = share.join("Default");
+        std::fs::write(&postgres, b"stands in for a postmaster").expect("a fixture executable");
+        std::fs::write(&timezones, b"@Default").expect("a fixture data file");
+        // Sorts before `pgserver`, so a removal that walked the directory in the
+        // order the filesystem hands it back would take this file before it ever
+        // reached the executable it cannot take. That is what makes the last
+        // assertion below a test of the removal order rather than of luck.
+        let library = extraction.join("base_library.zip");
+        std::fs::write(&library, b"stands in for the payload").expect("a fixture archive");
+
+        let held = std::fs::OpenOptions::new()
+            .read(true)
+            .share_mode(0)
+            .open(&postgres)
+            .expect("hold the executable open the way a running program does");
+
+        let report = sweep_extractions_in(
+            &root,
+            ClusterState::Stopped,
+            Duration::ZERO,
+            Duration::from_secs(30),
+            &mut || {},
+        );
+
+        assert!(postgres.exists(), "the held executable was removed");
+        assert!(
+            timezones.exists(),
+            "a data file the holder reads later was removed, which is the failure in the log"
+        );
+        assert!(
+            library.exists(),
+            "a file that sorts ahead of the held one was removed, so the removal order is \
+walking the directory rather than taking the held files first"
+        );
+        assert_eq!(report.removed, 0, "a directory in use was removed");
+        assert_eq!(report.kept_in_use, 1, "the file held open was not noticed");
+
+        drop(held);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// And an extraction nothing is using goes, with its neighbours left alone.
+    ///
+    /// The control for the test above: the same sweep, the same folder, and the
+    /// only thing that changed is that nothing holds the files.
+    #[cfg(windows)]
+    #[test]
+    fn an_extraction_nothing_is_using_is_removed_and_its_neighbours_are_not() {
+        let root = fixture_dir("sweep-orphan");
+        let orphan = root.join("_MEI700001");
+        std::fs::create_dir_all(orphan.join("numpy")).expect("a fixture package directory");
+        std::fs::write(orphan.join("numpy").join("_multiarray.pyd"), vec![0u8; 2048])
+            .expect("a fixture extension module");
+        std::fs::write(orphan.join("base_library.zip"), vec![0u8; 4096])
+            .expect("a fixture archive");
+
+        let stranger = root.join("chrome_BITS_1234");
+        std::fs::create_dir_all(&stranger).expect("a fixture stranger");
+        let not_ours = stranger.join("payload.bin");
+        std::fs::write(&not_ours, b"belongs to somebody else").expect("a fixture file");
+
+        let report = sweep_extractions_in(
+            &root,
+            ClusterState::Stopped,
+            Duration::ZERO,
+            Duration::from_secs(30),
+            &mut || {},
+        );
+
+        assert_eq!(report.removed, 1);
+        assert_eq!(report.bytes_freed, 2048 + 4096);
+        assert!(!orphan.exists(), "the abandoned extraction is still there");
+        assert!(not_ours.exists(), "a directory that is not ours was touched");
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A live cluster stops the sweep before it looks at anything.
+    ///
+    /// The one in the report was detached and had outlived the launcher that
+    /// started it, so it was not a child of anything this process could ask.
+    /// What it did leave is a pidfile in the data directory, which is the same
+    /// file the backend reads in `embedded_pg.py`.
+    #[cfg(windows)]
+    #[test]
+    fn a_running_cluster_suspends_the_sweep_entirely() {
+        let root = fixture_dir("sweep-cluster");
+        let orphan = root.join("_MEI700002");
+        std::fs::create_dir_all(&orphan).expect("a fixture extraction");
+        std::fs::write(orphan.join("base_library.zip"), b"payload").expect("a fixture file");
+
+        for state in [ClusterState::Running, ClusterState::Unknown] {
+            let report = sweep_extractions_in(
+                &root,
+                state,
+                Duration::ZERO,
+                Duration::from_secs(30),
+                &mut || {},
+            );
+            assert_eq!(report.removed, 0, "{state:?} swept anyway");
+            assert!(report.skipped.is_some(), "{state:?} did not say why it stopped");
+            assert!(orphan.exists(), "{state:?} removed a directory");
+        }
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A directory written minutes ago is left for a later run.
+    #[cfg(windows)]
+    #[test]
+    fn a_freshly_written_extraction_is_left_alone() {
+        let root = fixture_dir("sweep-young");
+        let fresh = root.join("_MEI700003");
+        std::fs::create_dir_all(&fresh).expect("a fixture extraction");
+        std::fs::write(fresh.join("base_library.zip"), b"payload").expect("a fixture file");
+
+        let report = sweep_extractions_in(
+            &root,
+            ClusterState::Stopped,
+            AN_HOUR,
+            Duration::from_secs(30),
+            &mut || {},
+        );
+
+        assert_eq!(report.removed, 0);
+        assert!(fresh.exists());
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The pidfile is what says whether a cluster is running, and an unreadable
+    /// one says nothing rather than saying no.
+    #[test]
+    fn the_pidfile_is_what_says_a_cluster_is_running() {
+        let dir = fixture_dir("pidfile");
+        let pidfile = dir.join("postmaster.pid");
+
+        assert_eq!(
+            cluster_state_of(&pidfile),
+            ClusterState::Stopped,
+            "no pidfile at all means no cluster"
+        );
+
+        // PostgreSQL writes the postmaster's process id on the first line and
+        // five more lines under it. This process is the one id known to be alive.
+        std::fs::write(
+            &pidfile,
+            format!("{}\n/data\n1750000000\n5432\n\n127.0.0.1\n", std::process::id()),
+        )
+        .expect("write a pidfile");
+        assert_eq!(cluster_state_of(&pidfile), ClusterState::Running);
+
+        std::fs::write(&pidfile, "\n").expect("write an empty pidfile");
+        assert_eq!(
+            cluster_state_of(&pidfile),
+            ClusterState::Unknown,
+            "a pidfile that cannot be read must not read as an absent one"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Only a measured number may refuse to start the backend.
+    ///
+    /// A refusal is a new way for this launcher to stop a machine that would
+    /// have worked, so a measurement that could not be taken has to mean carry
+    /// on, and so does a drive that is merely tight.
+    #[test]
+    fn only_a_measured_number_refuses_to_start_the_backend() {
+        assert_eq!(
+            space_verdict(None, EXTRACTION_SPACE_FLOOR, EXTRACTION_SPACE_COMFORT),
+            SpaceVerdict::Unknown
+        );
+        assert_eq!(
+            space_verdict(
+                Some(EXTRACTION_SPACE_FLOOR - 1),
+                EXTRACTION_SPACE_FLOOR,
+                EXTRACTION_SPACE_COMFORT
+            ),
+            SpaceVerdict::TooLittle
+        );
+        assert_eq!(
+            space_verdict(
+                Some(EXTRACTION_SPACE_FLOOR),
+                EXTRACTION_SPACE_FLOOR,
+                EXTRACTION_SPACE_COMFORT
+            ),
+            SpaceVerdict::Tight
+        );
+        assert_eq!(
+            space_verdict(
+                Some(EXTRACTION_SPACE_COMFORT),
+                EXTRACTION_SPACE_FLOOR,
+                EXTRACTION_SPACE_COMFORT
+            ),
+            SpaceVerdict::Enough
+        );
+    }
+
+    /// The refusal fires only where unpacking cannot succeed.
+    ///
+    /// The floor has to sit below what an extraction costs rather than near it.
+    /// A floor at the estimate would refuse to start on every machine inside the
+    /// band where the bootloader might still have managed, and this launcher
+    /// does not measure that band well enough to be right about it.
+    #[test]
+    fn the_refusal_sits_below_what_an_extraction_costs() {
+        assert!(
+            EXTRACTION_SPACE_FLOOR < EXTRACTION_ESTIMATED_BYTES,
+            "a refusal at or above the estimate stops machines that would have started"
+        );
+        assert!(
+            EXTRACTION_SPACE_COMFORT >= EXTRACTION_ESTIMATED_BYTES,
+            "there is no point warning about a drive that has room for an extraction"
+        );
+    }
+
+    /// The message names the number and the folder it is about.
+    ///
+    /// The folder because the drive that matters is not the one anybody would
+    /// think to check, it is whichever one holds the temporary folder, and the
+    /// number because "not enough disk space" can be read twice and still leave
+    /// somebody with nothing to do.
+    #[test]
+    fn the_out_of_space_message_carries_the_number_and_the_folder() {
+        let folder = "C:\\Users\\example\\AppData\\Local\\Temp";
+        let message = out_of_space_message(folder, 412 * 1024 * 1024);
+
+        assert!(message.contains("412 MB"), "{message}");
+        assert!(message.contains(folder), "{message}");
+        assert!(message.contains("1.5 GB"), "{message}");
+    }
+
+    /// Sizes are shown the way a person reads them.
+    #[test]
+    fn a_size_is_shown_in_the_units_somebody_can_act_on() {
+        assert_eq!(human_bytes(0), "0 KB");
+        assert_eq!(human_bytes(412 * 1024 * 1024), "412 MB");
+        assert_eq!(human_bytes(EXTRACTION_ESTIMATED_BYTES), "1.5 GB");
+    }
+
+    /// The bootloader failure now arrives with the measurement that settles it.
+    ///
+    /// `classify_bootloader_failure` names two usual causes and cannot choose
+    /// between them from the text, because the text does not contain the answer.
+    /// This is the half that does, and it has to attach without disturbing what
+    /// was already there.
+    #[cfg(windows)]
+    #[test]
+    fn a_bootloader_failure_is_paired_with_what_the_disk_actually_had() {
+        // The measurement is taken on a fixture, not on the real extraction
+        // root. All the note needs is a directory that exists on a drive, and
+        // creating the product's own folder here would leave one behind in the
+        // profile of everybody who runs this suite.
+        extraction_dir().expect("Windows resolves an extraction root");
+        let dir = fixture_dir("space-note");
+        let note = extraction_space_note(&dir);
+        assert!(
+            note.contains("free"),
+            "the note must say what was free: {note}"
+        );
+
+        let failure =
+            classify_bootloader_failure(ISSUE_462_STDERR).expect("still recognised as one");
+        let shown = format!("{}{note}", failure.message);
+        assert!(shown.contains("free space"), "{shown}");
+        assert!(!shown.contains("[PYI-"), "raw bootloader noise leaked: {shown}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// The launcher sweeps the folder the spec unpacks into, or it sweeps nothing.
+    ///
+    /// The two live in different languages and neither can read the other at
+    /// build time, so this reads the spec off disk and pairs them. Get it wrong
+    /// and nothing anywhere goes red: the bootloader would unpack into one
+    /// directory, the sweep would tidy another, and the only symptom would be a
+    /// disk filling up exactly as it did before this was written.
+    #[test]
+    fn the_sweep_looks_where_the_spec_unpacks() {
+        let spec = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("pyinstaller.spec");
+        let text = std::fs::read_to_string(&spec)
+            .unwrap_or_else(|e| panic!("the spec must be readable at {}: {e}", spec.display()));
+
+        // The whole assignment, closing quote included, rather than the path on
+        // its own. A substring match reads a spec that unpacks into
+        // `...\extraction` as agreeing with a launcher that sweeps
+        // `...\extract`, which is measured: it passed that mutation happily.
+        let assignment = format!("_WINDOWS_RUNTIME_TMPDIR = r\"{EXTRACTION_ROOT_SPEC_LITERAL}\"");
+        assert!(
+            text.contains(&assignment),
+            "desktop/pyinstaller.spec no longer sets {assignment}, so the sidecar unpacks \
+somewhere this launcher does not sweep"
+        );
+        assert!(
+            text.contains("runtime_tmpdir=(_WINDOWS_RUNTIME_TMPDIR"),
+            "the spec still holds the path but no longer hands it to the bootloader"
+        );
+    }
+
+    /// Anything the environment cannot answer gives no path at all.
+    ///
+    /// Windows leaves an unresolved `%NAME%` standing in the string, so the
+    /// dangerous failure here is not an error, it is a plausible looking path
+    /// with a literal `%LOCALAPPDATA%` in it. The sweep would then create and
+    /// tidy a folder of its own invention while the sidecar unpacked elsewhere.
+    #[test]
+    fn a_name_the_machine_cannot_answer_produces_no_path_at_all() {
+        let known = |name: &str| match name {
+            "LOCALAPPDATA" => Some(r"C:\Users\somebody\AppData\Local".to_string()),
+            "EMPTY" => Some("   ".to_string()),
+            _ => None,
+        };
+
+        assert_eq!(
+            expand_windows_env(EXTRACTION_ROOT_SPEC_LITERAL, &known).as_deref(),
+            Some(r"C:\Users\somebody\AppData\Local\OpenConstructionERP\extract")
+        );
+        assert_eq!(expand_windows_env(r"%NOT_SET%\extract", &known), None);
+        assert_eq!(expand_windows_env(r"%EMPTY%\extract", &known), None);
+        assert_eq!(expand_windows_env(r"%LOCALAPPDATA\extract", &known), None);
+        assert_eq!(
+            expand_windows_env(r"C:\fixed\path", &known).as_deref(),
+            Some(r"C:\fixed\path")
+        );
+    }
+
+    /// And on this machine it resolves to somewhere absolute that we own.
+    #[cfg(windows)]
+    #[test]
+    fn the_resolved_root_is_ours_and_absolute() {
+        let root = extraction_root().expect("Windows always has LOCALAPPDATA");
+        assert!(root.is_absolute(), "{}", root.display());
+        assert!(
+            root.ends_with("OpenConstructionERP/extract")
+                || root.ends_with(r"OpenConstructionERP\extract"),
+            "the root must be the one we own: {}",
+            root.display()
+        );
+        assert!(
+            !root.starts_with(std::env::temp_dir()),
+            "the whole point is that this is not the system temporary folder: {}",
+            root.display()
+        );
+    }
+
+    /// A sweep with no root to sweep does nothing, loudly enough to read.
+    ///
+    /// The unresolvable case is the one that must not improvise. There is no
+    /// fallback to the system temporary folder here on purpose: that folder is
+    /// full of other vendors' extractions, and a launcher that cannot say where
+    /// its own went has no business deleting anything.
+    #[test]
+    fn without_a_root_of_our_own_nothing_is_swept() {
+        let nowhere = fixture_dir("mei_absent_root").join("never_created");
+        let report = sweep_extractions_in(
+            &nowhere,
+            ClusterState::Stopped,
+            AN_HOUR,
+            Duration::from_secs(5),
+            &mut || panic!("nothing may be removed when there is nothing to sweep"),
+        );
+        assert_eq!(report.removed, 0);
+        assert!(report.skipped.is_some(), "a missing root must be reported");
     }
 }

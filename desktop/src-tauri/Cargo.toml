@@ -42,11 +42,22 @@ uuid = { version = "1", features = ["v4"] }
 # that requires an apartment, so the call is made on a thread that has one. Both
 # are features of a crate that is already a direct dependency, and cargo records
 # versions and edges rather than features, so neither changes Cargo.lock.
+#
+# The last three belong to the temporary-folder sweep. Win32_System_Threading
+# carries OpenProcess, which is how a pidfile is asked whether the postmaster it
+# names is still running, and Win32_Foundation carries CloseHandle and the error
+# code that distinguishes "no such process" from "not yours to look at".
+# Win32_Storage_FileSystem carries GetDiskFreeSpaceExW, which is where the number
+# in the out-of-space message comes from. Features again, so again no new
+# dependency and no change to Cargo.lock.
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.59", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Shell",
     "Win32_System_Com",
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Threading",
 ] }
 
 [features]
