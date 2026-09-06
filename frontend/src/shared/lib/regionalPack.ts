@@ -105,6 +105,23 @@ export function packSummary(description: string | null | undefined): string {
 }
 
 /**
+ * The market a case names, normalised, or `null` when it names none.
+ *
+ * Three spellings mean "this case belongs to no single market" and they have
+ * to collapse to one answer: absent, `xx`, which is a pack's own word for
+ * cross-region and which a case must never match against, and `all`. Every
+ * caller that asks "does this case have a market" has to agree with the
+ * resolver about the answer, because one of them offers a pack and the other
+ * explains why there is none, and the two disagreeing would put both on the
+ * same screen or neither.
+ */
+export function marketCode(region: string | null | undefined): string | null {
+  const wanted = region?.trim().toLowerCase();
+  if (!wanted || wanted === 'xx' || wanted === 'all') return null;
+  return wanted;
+}
+
+/**
  * A market's packs, split by whether one of them is the applied pack.
  *
  * Three states have to be told apart and the obvious source tells apart only
@@ -130,11 +147,8 @@ export function resolveMarketPacks<T extends RegionalPackFacts>(
   activeSlug: string | null | undefined,
   region: string | null | undefined,
 ): { packs: T[]; applied: T | null } {
-  const wanted = region?.trim().toLowerCase();
-  // `xx` is a pack's own word for "no single market" and can never be a
-  // market, so a case that somehow carried it must not match every
-  // cross-region pack at once.
-  if (!wanted || wanted === 'xx' || wanted === 'all') return { packs: [], applied: null };
+  const wanted = marketCode(region);
+  if (!wanted) return { packs: [], applied: null };
 
   const packs = installed.filter((p) => packCountryCode(p) === wanted);
   const applied = packs.find((p) => p.slug === activeSlug) ?? null;

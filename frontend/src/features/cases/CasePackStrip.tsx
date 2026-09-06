@@ -5,11 +5,23 @@
  *
  * `MarketPackPanel` put the same offer on the case PAGE, which answers the
  * question only for a reader who has already opened a case. The catalogue is
- * where a reader decides which market they work in: filter to Germany and
- * thirteen cards say they follow German standards, with nothing anywhere on
- * that screen saying that the German pack carrying those standards is on disk
- * and switched off. The install lived two screens away, under a name the
+ * where a reader decides which market they work in: filter to the United
+ * Kingdom and ten cards say they follow British standards, with nothing
+ * anywhere on that screen saying that the pack carrying those standards is on
+ * disk and switched off. The install lived two screens away, under a name the
  * reader had to carry there by eye.
+ *
+ * Germany was the example in this paragraph until it was measured against the
+ * artifact instead of the checkout, and it was the one market where the
+ * premise is false. A source tree carries twenty packs; the released wheel
+ * force-includes seventeen, and `bimhessen-de` and `batimatech-ca` are not
+ * among them. On the build a user installs there is no German and no Canadian
+ * pack to switch on, so this strip renders nothing for all twenty-three of
+ * those cards. Ten Spanish cases are in the same position for a different
+ * reason: no pack declares ES at all. Thirty-three of the eighty cases that
+ * name a market therefore have nothing to offer here, and the statement that
+ * says so lives in `MarketPackPanel`, where the catalogue makes it once for a
+ * filtered market rather than thirteen times over in a grid.
  *
  * The strip is deliberately thin. Thirteen cards each shouting the pack's full
  * description would be noise, so this is one line: what the case needs, and the

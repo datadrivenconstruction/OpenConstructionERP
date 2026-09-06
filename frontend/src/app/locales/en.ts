@@ -35959,6 +35959,7 @@ const resource = {
     "cases.regional_pack_needed": "Needs {{name}}",
     "cases.regional_pack_set_up": "Set up",
     "cases.regional_pack_setup_hint": "This case follows the standards of its market. Opens the pack that carries them, where you can switch it on.",
+    "cases.regional_pack_none_for_market": "No regional pack for {{market}} is installed here",
 
     // --- Property Development → Document appearance ---
     "common.left": "Left",

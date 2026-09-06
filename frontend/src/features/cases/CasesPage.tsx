@@ -739,10 +739,13 @@ function CasesList() {
 
               Country is a SHELF, not the catalogue's spine. Grouping the whole
               list by market was considered and rejected on the count: 140 of
-              202 cases carry no region, so a country grouping yields six
-              small labelled sections and one bucket holding 69% of the
+              220 cases carry no region, so a country grouping yields fifteen
+              small labelled sections and one bucket holding 64% of the
               catalogue under "everything else". (Counted from ./data; the
-              catalogue grows, so re-count before leaning on the figures.)
+              catalogue grows, so re-count before leaning on the figures. The
+              denominator read 202 for a while after eighteen cases landed,
+              every one of them carrying a market, which is why the numerator
+              did not move and the staleness did not show.)
               Those cases are universal on
               purpose (see the `region` doc in ./types.ts), so that bucket is
               the product rather than a backlog to be worked off.
@@ -1486,8 +1489,12 @@ function CasesList() {
               against which reference standards. It belongs on the market band
               rather than only on the cards because the pack is a property of
               the MARKET - thirteen German cases need one German pack between
-              them, not thirteen. Renders nothing for a market with no pack on
-              disk, which is every Spanish case today. */}
+              them, not thirteen. Where the market has no pack in this build,
+              the panel says so here once instead of thirteen cards each saying
+              nothing: the German and Canadian packs are in the source tree and
+              in no wheel, and no pack declares ES at all. "On disk" was the
+              wrong test and reading it as one is how the German market came to
+              show no install control anywhere. */}
           <MarketPackPanel region={activeRegion} className="relative mt-4" />
         </section>
       )}

@@ -23,10 +23,28 @@
  * column, which is the space the step strip leaves empty, so the two blocks of
  * that row end level instead of one trailing 76px above the other.
  *
- * Not every case has one. Ten shipped cases carry ES and no Spanish pack
- * exists on disk, and for those this renders nothing rather than shrugging or
- * offering a plausible neighbour - German standards under a Spanish case would
- * be worse than silence.
+ * Not every case has one, and the panel says so rather than vanishing.
+ * Thirty-three of the eighty cases that name a market resolve no pack on a
+ * released install: ten carry ES and no pack declares that country at all,
+ * while thirteen German and ten Canadian cases point at packs that exist in
+ * the source tree and are deliberately not distributed. Rendering nothing is
+ * why a reader who filters the catalogue to Germany finds no install control
+ * anywhere, on a build where thirteen cards each announce that German
+ * standards apply: nothing on the screen separates "this case needs no pack"
+ * from "the pack for your market is not in this build". What is still refused
+ * is a plausible neighbour - German standards under a Spanish case would be
+ * worse than either silence or a plain statement.
+ *
+ * The absence is only claimed once the server has answered. While the
+ * installed list is in flight `data` is undefined and every market resolves to
+ * nothing, so a panel that read `packs.length === 0` alone would put a false
+ * line on every case page for as long as the request takes.
+ *
+ * The link is admin-only for the same reason the activate button is disabled
+ * for everyone else: `/modules?tab=packs` carries the upload and rescan
+ * controls, both `RequirePermission("admin")` server-side and both rendering
+ * nothing for a viewer. Sending a viewer there would offer an action that
+ * screen cannot give them.
  *
  * Every string here already existed in all locales before this component did.
  * `cases.regional_pack_for_market` in particular was left unread when the chip
@@ -41,9 +59,11 @@ import { useTranslation } from 'react-i18next';
 
 import { PartnerPackApplyDialog } from '@/features/modules/PartnerPackApplyDialog';
 import { useInstalledPacks } from '@/shared/hooks/usePartnerPack';
-import { packNameSlug, packSummary, resolveMarketPacks } from '@/shared/lib/regionalPack';
+import { marketCode, packNameSlug, packSummary, resolveMarketPacks } from '@/shared/lib/regionalPack';
 import { Badge, Button, PackEmblem } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
+
+import { regionDisplayName } from './regions';
 
 export interface MarketPackPanelProps {
   /** ISO 3166-1 alpha-2 for the case's market. Cases spell it upper case. */
@@ -52,7 +72,7 @@ export interface MarketPackPanelProps {
 }
 
 export function MarketPackPanel({ region, className = '' }: MarketPackPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data } = useInstalledPacks();
   const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
   const [applyOpen, setApplyOpen] = useState(false);
@@ -62,7 +82,51 @@ export function MarketPackPanel({ region, className = '' }: MarketPackPanelProps
     [data, region],
   );
 
-  if (packs.length === 0) return null;
+  if (packs.length === 0) {
+    const market = marketCode(region);
+    // A case that names no market is not missing anything: most of the
+    // catalogue is deliberately universal, and a line about packs on all of
+    // them would be noise. `data` guards the other half: no answer yet, or a
+    // failed request, is not evidence of an absence.
+    if (!market || !data) return null;
+
+    const marketName = regionDisplayName(market.toUpperCase(), i18n.language);
+    const headline = t('cases.regional_pack_none_for_market', {
+      defaultValue: 'No regional pack for {{market}} is installed here',
+      market: marketName,
+    });
+
+    return (
+      <section
+        data-testid="market-pack-panel"
+        data-pack-state="none"
+        data-market={market}
+        aria-label={headline}
+        className={['rounded-xl border border-border bg-surface-secondary p-3', className].join(' ')}
+      >
+        <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+          {headline}
+        </p>
+
+        <p className="mt-1 text-xs leading-relaxed text-content-secondary">
+          {t('dashboard.regional_pack_none_body', {
+            defaultValue:
+              'A regional pack sets up one market\u2019s prices, tax rules and standards for you, so you do not have to enter them by hand.',
+          })}
+        </p>
+
+        {isAdmin && (
+          <Link
+            to="/modules?tab=packs"
+            className="mt-2.5 inline-flex items-center gap-1 text-2xs font-medium text-oe-blue-text underline-offset-2 hover:underline"
+          >
+            <ExternalLink size={12} />
+            {t('dashboard.regional_pack_choose', { defaultValue: 'Install a country pack' })}
+          </Link>
+        )}
+      </section>
+    );
+  }
 
   // The applied pack when there is one, otherwise the first that serves this
   // market. Several can: us-california, us-costdata and us-texas all declare
