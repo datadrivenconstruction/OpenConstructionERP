@@ -935,6 +935,11 @@ jobs:
     # tagName v15.0.0), but nothing except the default state of a checkbox was
     # preventing it. startsWith also refuses a tag box holding a branch name,
     # which is the same mistake typed by hand rather than left unticked.
+    #
+    # Since the move to tauri-action 1.x the action cannot open a release from
+    # here at all: the release is looked up by id in "Find the release" below,
+    # and a branch name finds none. The guard stays because it stops the job
+    # before the frontend build rather than after it.
     if: github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')
     runs-on: ${{ matrix.os }}
     # Windows 27.8 to 33.2 min, macOS 26.4 to 52.9, Linux 26.5 once the rpm is
@@ -1266,72 +1271,53 @@ jobs:
           $totalMb = [math]::Round(((Get-ChildItem -Recurse -File $destRoot | Measure-Object -Property Length -Sum).Sum) / 1MB, 2)
           Write-Host "Bundled IFC converter: IfcExporter.exe = $sizeMb MB, total resource = $totalMb MB (was $beforeMb MB before the graphical-only prune)"
 
+      # tauri-action 1.x manages the release page whenever it is handed a
+      # tagName. It fails when releaseDraft is true and the release is already
+      # published (it was true here, on three steps), and on a published
+      # release it rewrites the name and body with its own inputs, where a step
+      # without a releaseBody lands as an empty body. release.yml owns the page:
+      # it publishes the release with the CHANGELOG notes before any installer
+      # exists, 46 minutes to four hours ahead on the six releases before this
+      # note, and the steps below only have files to attach. The release is taken
+      # by id, the one path through the action that touches nothing but assets.
+      # Polled rather than read once, because both workflows start from the
+      # same tag push and nothing orders them.
+      - name: Find the release release.yml published for this tag
+        id: release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          for attempt in $(seq 1 20); do
+            id=$(gh release view "$RELEASE_REF" --repo "${{ github.repository }}" --json databaseId --jq .databaseId 2>/dev/null || true)
+            if [ -n "${id:-}" ]; then
+              echo "Release ${RELEASE_REF} is release id ${id}."
+              echo "id=${id}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "No release for ${RELEASE_REF} yet (attempt ${attempt} of 20), waiting 30 seconds."
+            sleep 30
+          done
+          echo "::error title=No release for ${RELEASE_REF}::release.yml has not published a release for this tag after ten minutes, so there is nothing to attach the installers to. Its usual failure is a missing CHANGELOG.md section for the version. Add the section and move the tag so both workflows run again, or dispatch this workflow with the tag input once the release exists."
+          exit 1
+
+      # tauri-action 1.x also names the macOS archive with the version,
+      # OpenConstructionERP_<version>_aarch64.app.tar.gz where 0.x left the
+      # version out. Every reader of that file, here, in the app's update
+      # notice and on the download page, matches the suffix, so nothing cares.
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: desktop
           # Run the pinned CLI instead of whichever one the action resolves.
           tauriScript: npx --yes @tauri-apps/cli@${{ env.TAURI_CLI_VERSION }}
-          # Empty on Windows and macOS, "--bundles deb,appimage" on Linux.
+          # Per OS from the matrix: nsis on Windows, empty on macOS, deb on Linux.
           args: ${{ matrix.bundles }}
-          tagName: ${{ env.RELEASE_REF }}
-          releaseName: "OpenConstructionERP ${{ env.RELEASE_REF }}"
-          releaseBody: |
-            ## OpenConstructionERP ${{ env.RELEASE_REF }}
-
-            A real native desktop app. No Python, no pip, no Docker, and no database to set up. Download one file, run it, and you are ready.
-
-            ### Download
-
-            | Platform | File | Notes |
-            | --- | --- | --- |
-            | Windows | `.exe` installer, 64-bit | The web view runtime is inside the installer, so setup needs no internet |
-            | macOS | `.dmg`, Apple Silicon | Drag the app to Applications, then see "Opening on macOS" below |
-            | Linux | `.deb`, `.rpm` or `.AppImage`, 64-bit | `.deb` for Debian and Ubuntu, `.rpm` for Fedora and openSUSE, `.AppImage` runs anywhere |
-
-            The files are attached below under Assets. You can also always get the newest build at https://openconstructionerp.com/download which detects your operating system for you.
-
-            ### Opening on macOS
-
-            This build is ad-hoc signed but not yet notarized by Apple. On the first launch macOS may say the app is "damaged" or block it. The app is fine: macOS quarantines anything downloaded from the web. After you drag the app into Applications, open Terminal and run this once:
-
-            ```
-            xattr -dr com.apple.quarantine /Applications/OpenConstructionERP.app
-            ```
-
-            Then open the app normally. On macOS Sequoia you may also need to approve it once under System Settings, Privacy and Security. You only do this once.
-
-            ### Prefer the command line?
-
-            pip (needs Python 3.12 or later):
-
-            ```
-            pip install --upgrade openconstructionerp
-            openconstructionerp
-            ```
-
-            Docker. The published image carries the application but no database, and the app is PostgreSQL only, so the image needs the small compose stack around it. A bare `docker run` of it stops at the first check with "DATABASE_URL is not set". These lines fetch the stack, write the two secrets it will not start without, and bring it up:
-
-            ```
-            curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/docker-compose.quickstart.yml       -o docker-compose.yml
-            curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/docker-compose.quickstart.image.yml -o docker-compose.override.yml
-            echo "POSTGRES_PASSWORD=$(openssl rand -base64 24)" >  .env
-            echo "JWT_SECRET=$(openssl rand -hex 32)"           >> .env
-            docker compose pull app
-            docker compose up -d
-            ```
-
-            The app then answers on http://localhost:8080. Windows has no `openssl` by default, so on PowerShell write the same two secrets with .NET instead, as the Quick Start in the README shows.
-
-            ### Good to know
-
-            The first launch takes 40 to 90 seconds because the app sets up its local database the first time. A loading screen explains the wait, and every launch after that is fast. All your data stays on your own computer. The app is open source under AGPL-3.0. A demo account is ready to explore: demo@openconstructionerp.com / DemoPass1234!
-
-            Docs: https://openconstructionerp.com/docs  .  Report an issue: https://github.com/datadrivenconstruction/OpenConstructionERP/issues
-          releaseDraft: true
-          prerelease: false
+          # By id, not by tagName: see "Find the release" above.
+          releaseId: ${{ steps.release.outputs.id }}
 
       # The AppImage, on its own, and allowed to fail.
       #
@@ -1356,19 +1342,15 @@ jobs:
       - name: Bundle the AppImage
         if: matrix.os == 'ubuntu-22.04'
         continue-on-error: true
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: desktop
           tauriScript: npx --yes @tauri-apps/cli@${{ env.TAURI_CLI_VERSION }}
           args: --bundles appimage
-          # No releaseBody here. The step above already wrote it, and this one
-          # has only an asset to add.
-          tagName: ${{ env.RELEASE_REF }}
-          releaseName: "OpenConstructionERP ${{ env.RELEASE_REF }}"
-          releaseDraft: true
-          prerelease: false
+          # The same release as the step above; this one only has an asset to add.
+          releaseId: ${{ steps.release.outputs.id }}
 
       - name: Say whether the AppImage was produced
         if: matrix.os == 'ubuntu-22.04'
@@ -1692,7 +1674,8 @@ jobs:
     name: Build Linux RPM
     needs: build-sidecar
     # Same condition as build-tauri, and for the same reason: this job also
-    # passes a tagName to tauri-action, so it can also open a release.
+    # attaches a package to the tag's release, and a run started from a branch
+    # has no release to find.
     if: github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')
     runs-on: ubuntu-22.04
     # Twice the v15.0.0 payload at the measured rate, plus the half hour the
@@ -1734,8 +1717,29 @@ jobs:
       - name: Make sidecar executable
         run: chmod +x desktop/src-tauri/binaries/*
 
+      # Same lookup as in build-tauri, for the same reason: see the note there.
+      - name: Find the release release.yml published for this tag
+        id: release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          for attempt in $(seq 1 20); do
+            id=$(gh release view "$RELEASE_REF" --repo "${{ github.repository }}" --json databaseId --jq .databaseId 2>/dev/null || true)
+            if [ -n "${id:-}" ]; then
+              echo "Release ${RELEASE_REF} is release id ${id}."
+              echo "id=${id}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "No release for ${RELEASE_REF} yet (attempt ${attempt} of 20), waiting 30 seconds."
+            sleep 30
+          done
+          echo "::error title=No release for ${RELEASE_REF}::release.yml has not published a release for this tag after ten minutes, so there is nothing to attach the rpm to. See the same step in build-tauri."
+          exit 1
+
       - name: Build the rpm
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -1743,13 +1747,9 @@ jobs:
           # Run the pinned CLI instead of whichever one the action resolves.
           tauriScript: npx --yes @tauri-apps/cli@${{ env.TAURI_CLI_VERSION }}
           args: --bundles rpm
-          # No releaseBody here. The release already exists by the time this
-          # finishes and carries the notes release.yml wrote from the
-          # changelog; this job only has an asset to add to it.
-          tagName: ${{ env.RELEASE_REF }}
-          releaseName: "OpenConstructionERP ${{ env.RELEASE_REF }}"
-          releaseDraft: true
-          prerelease: false
+          # The release carries the notes release.yml wrote from the changelog;
+          # this job only has an asset to add to it, so it takes the release by id.
+          releaseId: ${{ steps.release.outputs.id }}
 
       - name: Say how long the rpm took
         if: always()
@@ -1767,13 +1767,15 @@ jobs:
 
   # Authenticode code signing for the Windows installers.
   #
-  # The tauri-action above uploads the Windows .exe (NSIS) to the
-  # release as a draft, so the assets are never visible to users until the
-  # founder publishes the release by hand. This job runs on the Windows
-  # runner after the build, signs each Windows installer with the founder's
-  # certificate held in Azure Key Vault, and re-uploads the signed files
-  # over the unsigned ones. By the time the draft is published the binaries
-  # users download are the signed binaries.
+  # The tauri-action above attaches the Windows .exe (NSIS) to the release
+  # release.yml has already published, so an unsigned installer is public from
+  # the moment it lands. This job runs on the Windows runner after the build,
+  # signs each Windows installer with the founder's certificate held in Azure
+  # Key Vault, and re-uploads the signed files over the unsigned ones; until it
+  # has, the file on the release page is the unsigned one. This used to say
+  # the release was a draft until the founder published it by hand. It was
+  # not: release.yml publishes the page before the first installer is built,
+  # measured over the six releases before this note.
   #
   # The private key never leaves the Key Vault HSM, so signing calls out to
   # Azure Key Vault through AzureSignTool. The maintainer must set these

@@ -92,7 +92,7 @@ Some but not all five set: the job fails and names the missing ones. AzureSignTo
 
 Only when all five are present does the job install .NET and AzureSignTool, download the installers from the tag's release, sign each one, verify each signature with `signtool verify /pa`, and re-upload the signed files over the unsigned ones. Every one of those steps can fail the job. In particular, a download that returns no installers is a failure rather than a quiet "nothing to sign", verification failing is a failure, and `signtool` being absent from the runner is a failure, because "nothing checked these signatures" and "these signatures are good" must not look the same from the run page.
 
-The release is still a draft while this runs, so the assets users eventually download are the signed ones.
+The release is already published while this runs, since release.yml publishes it before any installer is built, so the unsigned installer is downloadable until the signed one replaces it.
 
 One value in the workflow may need changing when the certificate arrives. The timestamp authority is currently the literal `http://timestamp.globalsign.com/tsa/r6advanced1`, on the `-tr` flag of the `azuresigntool sign` call. If the certificate comes from a CA other than GlobalSign, point that at the issuing CA's RFC 3161 timestamp server instead. A timestamp is what keeps signatures valid after the certificate expires, so do not remove the flag.
 
