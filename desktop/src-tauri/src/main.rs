@@ -2884,6 +2884,7 @@ fn main() {
             open_log_file,
             open_app_in_browser,
             open_external_url,
+            reveal_path_in_os,
             get_app_url,
             get_server_choice,
             set_server_choice,
@@ -3777,7 +3778,6 @@ other explanation"
     }
 
     /// Parse a health body the way both judgements do, for the tests below.
-            reveal_path_in_os,
     fn body(json: &str) -> serde_json::Value {
         serde_json::from_str(json).expect("the test body has to be valid JSON")
     }
@@ -4310,7 +4310,6 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
             );
         }
     }
-}
 
     /// What a reveal request is allowed to open.
     ///
@@ -4376,3 +4375,4 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
 
         let _ = std::fs::remove_dir_all(&base);
     }
+}
