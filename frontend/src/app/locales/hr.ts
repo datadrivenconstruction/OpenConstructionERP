@@ -13056,7 +13056,7 @@ const resource = {
     "boq.shortcut_export": "Izvezi",
     "boq.shortcut_f1": "F1",
     "boq.shortcut_import": "Uvezi",
-    "boq.shortcut_lock": "Zaključati / Unlock Procjena",
+    "boq.shortcut_lock": "Zaključati / Unlock Troškovnik",
     "boq.shortcut_new_position": "Novi Stavka",
     "boq.shortcut_paste_excel": "Zalijepi od Excel",
     "boq.shortcut_redo": "Ponovi",
