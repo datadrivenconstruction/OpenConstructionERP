@@ -32,8 +32,15 @@ function pack(slug: string, country: string, partnerName: string): InstalledPart
 }
 
 /**
- * The fifteen packs backend/pyproject.toml force-includes into the community
- * wheel — NOT the eighteen a checkout of this repository holds.
+ * The seventeen packs backend/pyproject.toml force-includes into the
+ * community wheel, NOT the twenty a checkout of this repository serves.
+ *
+ * Twenty and not twenty-one, which is the number of directories under packs/.
+ * aus-nzs carries DEPRECATED.txt under src/ and has no manifest.py at all, so
+ * the loader never registers it and it is absent from a checkout as much as
+ * from a release. Counting directories and counting servable packs give
+ * different answers, and two readers reached seventeen by different routes
+ * before that was written down here.
  *
  * The three missing ones are the whole point of this fixture. batimatech-ca
  * and bimhessen-de are excluded under partnership agreements and
@@ -41,17 +48,26 @@ function pack(slug: string, country: string, partnerName: string): InstalledPart
  * curated-preset branch on every real install while resolving to a real pack
  * in the tree the tests run from. Feeding this list is the only way the
  * preset branch is ever executed.
+ *
+ * Keep this list equal to the force-include block. It stood at fifteen while
+ * the wheel shipped seventeen, and both packs it had lost, hungary-hu and
+ * russia-gesn, serve markets the case catalogue carries.
  */
 const WHEEL_PACKS: InstalledPartnerPack[] = [
   pack('aus', 'AU', 'Australia Construction Pack'),
   pack('brazil-sinapi', 'BR', 'Brazil Construction Pack'),
   pack('china-gbt50500', 'CN', 'China Construction Pack'),
+  pack('hungary-hu', 'HU', 'Hungary Construction Pack'),
   pack('india-cpwd', 'IN', 'India Construction Pack'),
   pack('mexico-mx', 'MX', 'Mexico Construction Pack'),
   pack('modular-prefab', 'XX', 'Modular & Prefab Pack'),
   pack('nzs', 'NZ', 'New Zealand Construction Pack'),
   pack('renewables-epc', 'XX', 'Renewables EPC Pack'),
-  pack('retail-grocery-dach', '', 'Discount Grocery Retail (DACH)'),
+  // Declares XX, no single market. Its locale is a bare 'de' with no
+  // region subtag, so before it named a country the fallback yielded
+  // null and it matched nothing at all.
+  pack('retail-grocery-dach', 'XX', 'Discount Grocery Retail (DACH)'),
+  pack('russia-gesn', 'RU', 'Russia Construction Pack'),
   pack('saudi-vision2030', 'SA', 'Saudi Vision 2030 Pack'),
   pack('south-africa', 'ZA', 'South Africa Construction Pack'),
   pack('uk-jct', 'GB', 'UK Construction Pack'),
@@ -121,6 +137,29 @@ describe('resolveCountryOffer, on the packs the wheel ships', () => {
       kind: 'pack',
       pack: expect.objectContaining({ slug: 'uk-jct' }),
     });
+  });
+
+  it('offers the Hungarian and Russian packs, which the wheel does ship', () => {
+    expect(resolveCountryOffer('hu', WHEEL_PACKS)).toEqual({
+      kind: 'pack',
+      pack: expect.objectContaining({ slug: 'hungary-hu' }),
+    });
+    expect(resolveCountryOffer('ru', WHEEL_PACKS)).toEqual({
+      kind: 'pack',
+      pack: expect.objectContaining({ slug: 'russia-gesn' }),
+    });
+
+    // Asserted against their own absence, which is how this fixture lost
+    // them once already. The two failure modes are not equally visible:
+    // Hungary has no curated preset, so a missing hungary-hu falls to null
+    // and offers nothing, while Russia has one, so a missing russia-gesn
+    // falls to a preset. A plausible confident answer is the harder of the
+    // two to notice, and it is the one that looks like success.
+    const without = WHEEL_PACKS.filter(
+      (p) => p.slug !== 'hungary-hu' && p.slug !== 'russia-gesn',
+    );
+    expect(resolveCountryOffer('hu', without)).toBeNull();
+    expect(resolveCountryOffer('ru', without)?.kind).toBe('preset');
   });
 
   it('answers null rather than defaulting to the United States', () => {
