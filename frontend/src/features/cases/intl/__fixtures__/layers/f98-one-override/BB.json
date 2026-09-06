@@ -1,0 +1,31 @@
+{
+  "family": "f98-one-override",
+  "jurisdiction": "BB",
+  "slug": "fixture-one-override-bb",
+  "order": 2,
+  "region": "BB",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor"
+  ],
+  "roles": [
+    "quantity-surveyor"
+  ],
+  "icon": "Ruler",
+  "estMinutes": 5,
+  "title": "Fixture BB",
+  "desc": "Fixture layer BB.",
+  "slots": {
+    "thing": "gadget"
+  },
+  "steps": [
+    {
+      "id": "one",
+      "spine": "one"
+    },
+    {
+      "id": "two",
+      "spine": "two"
+    }
+  ]
+}

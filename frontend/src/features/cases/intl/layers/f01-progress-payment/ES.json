@@ -1,0 +1,186 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "ES",
+  "note": "Spain surfaces the application half of the arc: measure, value, certify, invoice, and the day the clock starts. The payment clock registry ships no Spanish row, so the regime named here is the European late-payment one that Ley 3/2004 implements, which is a slot value rather than a rewritten sentence.",
+  "slug": "certify-the-month-against-the-mediciones",
+  "order": 1145,
+  "region": "ES",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "cost-consultant",
+    "developer-client"
+  ],
+  "roles": [
+    "quantity-surveyor",
+    "commercial-manager",
+    "site-manager"
+  ],
+  "icon": "Percent",
+  "estMinutes": 18,
+  "title": "Certify the month against the mediciones",
+  "desc": "Measure what was executed against each partida, value it at the contract rates, get the certificación approved by the dirección facultativa, invoice against the approved figure and start the payment clock on the right day.",
+  "longDesc": "A certificación is a measurement before it is a payment. The valuation follows from what was executed against each partida of the contract bill, at the rates the contract fixed, and the month's certificación is the difference between this cumulative figure and the last one. Two habits decide whether it goes through in a week or in six. Measure against the partidas rather than against a percentage of the job, because a single project-level percent is impossible to check and therefore impossible to approve quickly. And treat an exceso de medición as what it is: a quantity that has outgrown the contract, needing an order behind it before it is certified, not a bigger number quietly added to the same line.",
+  "slots": {
+    "priceLine": "partida",
+    "priceLinePlural": "partidas",
+    "valuationDoc": "certificación",
+    "certifier": "dirección facultativa",
+    "excessTerm": "exceso de medición",
+    "retentionTerm": "retención",
+    "payDoc": "invoice",
+    "clockRegime": "Ley 3/2004",
+    "clockStart": "the invoice date",
+    "payDays": "30",
+    "escalationRoute": "claim the late-payment interest Ley 3/2004 provides for"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "in": [
+        {
+          "key": "works",
+          "label": "Works executed this period"
+        },
+        {
+          "key": "positions",
+          "label": "Contract bill positions"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percent complete per partida"
+        },
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "Calculator",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "quantities",
+          "label": "Earned quantities for the period"
+        },
+        {
+          "key": "rates",
+          "label": "Contract unit rates"
+        }
+      ],
+      "out": [
+        {
+          "key": "valuation",
+          "label": "Valuation by capitulo"
+        },
+        {
+          "key": "excess",
+          "label": "Excesos de medición flagged"
+        }
+      ]
+    },
+    {
+      "id": "approve",
+      "spine": "certify",
+      "icon": "Stamp",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "in": [
+        {
+          "key": "valuation",
+          "label": "Valuation for the period"
+        },
+        {
+          "key": "approver",
+          "label": "Direccion facultativa named for approval"
+        }
+      ],
+      "out": [
+        {
+          "key": "approved",
+          "label": "Approved certificación"
+        },
+        {
+          "key": "date",
+          "label": "Approval date on record"
+        }
+      ]
+    },
+    {
+      "id": "invoice",
+      "spine": "invoice",
+      "icon": "ReceiptEuro",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "approved",
+          "label": "Approved certificación"
+        },
+        {
+          "key": "retention",
+          "label": "Retention and deductions"
+        }
+      ],
+      "out": [
+        {
+          "key": "invoice",
+          "label": "Invoice against the certificación"
+        },
+        {
+          "key": "ledger",
+          "label": "Amount carried into the accounts"
+        }
+      ],
+      "note": {
+        "what": "Between businesses the invoice usually carries inversión del sujeto pasivo rather than a rate, so the customer accounts for the tax and the invoice has to say so on its face."
+      }
+    },
+    {
+      "id": "clock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "invoice",
+          "label": "Issued invoice and its date"
+        },
+        {
+          "key": "terms",
+          "label": "Contract payment terms"
+        }
+      ],
+      "out": [
+        {
+          "key": "due",
+          "label": "Final date for payment"
+        },
+        {
+          "key": "interest",
+          "label": "Interest rate basis if it is late"
+        }
+      ],
+      "note": {
+        "what": "Thirty days between businesses by default, extendable to sixty by express agreement and no further unless the term is not grossly unfair. On a public contract read the periods the LCSP fixes against the date it gives you.",
+        "why": "Interest runs at the European Central Bank reference rate plus eight points from the day it is missed. Late payment is normal in this market and interest is almost never claimed, which is precisely why it keeps happening."
+      }
+    }
+  ]
+}

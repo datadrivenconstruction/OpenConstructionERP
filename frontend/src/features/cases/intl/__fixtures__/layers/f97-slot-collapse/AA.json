@@ -1,0 +1,29 @@
+{
+  "jurisdiction": "AA",
+  "family": "f97-slot-collapse",
+  "slug": "slot-collapse-aa",
+  "order": 1,
+  "region": "global",
+  "category": "billing",
+  "companyTypes": [
+    "contractor"
+  ],
+  "roles": [
+    "qs"
+  ],
+  "icon": "FileText",
+  "estMinutes": 5,
+  "title": "Slot collapse AA",
+  "desc": "Fixture.",
+  "longDesc": "Fixture.",
+  "slots": {
+    "payDoc": "interim application",
+    "valuationDoc": "interim application"
+  },
+  "steps": [
+    {
+      "id": "only",
+      "spine": "only"
+    }
+  ]
+}

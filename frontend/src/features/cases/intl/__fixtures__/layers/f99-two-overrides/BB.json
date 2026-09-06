@@ -1,0 +1,12 @@
+{
+  "family": "f99-two-overrides", "jurisdiction": "BB",
+  "slug": "fixture-two-overrides-bb", "order": 2, "region": "BB",
+  "category": "commercial", "companyTypes": ["general-contractor"], "roles": ["quantity-surveyor"],
+  "icon": "Ruler", "estMinutes": 5,
+  "title": "Fixture BB", "desc": "Fixture layer BB.",
+  "slots": { "thing": "gadget" },
+  "steps": [
+    { "id": "one", "spine": "one" },
+    { "id": "two", "spine": "two", "override": { "what": "In BB the second thing is also done completely differently." } }
+  ]
+}

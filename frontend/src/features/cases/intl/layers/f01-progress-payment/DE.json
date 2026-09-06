@@ -1,0 +1,255 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "DE",
+  "note": "Germany surfaces the clock half of the same arc: it starts where the invoice is raised and follows the money out. It shares invoice, clock and reconcile with the other layers and adds register, deadlines, watch and escalate, which is what a spine covering the whole arc is for. The 21-day interim window under paragraph 16 VOB/B is a slot value, not a different sentence.",
+  "slug": "run-the-vob-payment-clock",
+  "order": 1053,
+  "region": "DE",
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "contract-administrator",
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "CalendarClock",
+  "estMinutes": 12,
+  "title": "Run the VOB/B payment clock",
+  "desc": "Register the contract, raise each Abschlagsrechnung against it, open a payment clock over the invoice and let the module count the days paragraph 16 VOB/B gives the client, so an overdue payment is a dated record rather than a feeling.",
+  "longDesc": "Money has a clock under VOB/B. An interim invoice falls due within 21 calendar days of the client receiving the verifiable statement of work, and the final invoice runs on its own longer window of 30 days, which the module carries as a second regime because they are two different clocks. A firm that does not track the chain - invoice out, period running, due, in default - is lending its client money at no charge and finds out months later, when the dates it would need are scattered across three inboxes.",
+  "slots": {
+    "priceLine": "Position",
+    "priceLinePlural": "Positionen",
+    "valuationDoc": "verifiable statement of work",
+    "certifier": "client's appointed reviewer",
+    "excessTerm": "Nachtrag",
+    "retentionTerm": "Sicherheitseinbehalt",
+    "payDoc": "Abschlagsrechnung",
+    "clockRegime": "paragraph 16 VOB/B",
+    "clockStart": "the client receiving the verifiable statement",
+    "payDays": "21",
+    "escalationRoute": "send the Mahnung and start default interest running"
+  },
+  "steps": [
+    {
+      "id": "contract",
+      "spine": "register",
+      "icon": "FileSignature",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/projects/:projectId/contracts",
+      "in": [
+        {
+          "key": "bauvertrag",
+          "label": "Signed Bauvertrag"
+        },
+        {
+          "key": "schedule",
+          "label": "Priced schedule of values"
+        }
+      ],
+      "out": [
+        {
+          "key": "registered",
+          "label": "Registered contract"
+        },
+        {
+          "key": "retention",
+          "label": "Retention terms on record"
+        }
+      ]
+    },
+    {
+      "id": "claim",
+      "spine": "invoice",
+      "icon": "Calculator",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/projects/:projectId/contracts",
+      "in": [
+        {
+          "key": "contract",
+          "label": "Registered contract"
+        },
+        {
+          "key": "measured",
+          "label": "Work measured this period"
+        }
+      ],
+      "out": [
+        {
+          "key": "invoice",
+          "label": "Abschlagsrechnung"
+        },
+        {
+          "key": "net",
+          "label": "Net sum applied for"
+        }
+      ],
+      "note": {
+        "what": "Between businesses in construction the tax is usually accounted for by the customer under the reverse charge, so the invoice carries the note and not a rate."
+      }
+    },
+    {
+      "id": "openclock",
+      "spine": "clock",
+      "icon": "Scale",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "invoice",
+          "label": "Abschlagsrechnung"
+        },
+        {
+          "key": "receipt",
+          "label": "Date the client received it"
+        },
+        {
+          "key": "amount",
+          "label": "Sum applied for"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Statutory regime on record"
+        }
+      ],
+      "note": {
+        "why": "The period runs from receipt, not from the day you printed the invoice. Entering the posting date moves every deadline in your own favour and leaves you holding a date you cannot prove on the one occasion it has to be proved."
+      }
+    },
+    {
+      "id": "dates",
+      "spine": "deadlines",
+      "icon": "CalendarClock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "regime",
+          "label": "Chosen regime"
+        }
+      ],
+      "out": [
+        {
+          "key": "due",
+          "label": "Due date"
+        },
+        {
+          "key": "final",
+          "label": "Final date for payment"
+        },
+        {
+          "key": "derivation",
+          "label": "Derivation you can quote"
+        }
+      ],
+      "note": {
+        "why": "On a VOB/B clock the two notice rows stay empty, because VOB/B sets no payment notice and no pay-less notice, so there is nothing to serve and nothing to chase, only the money and the date it stops being on time."
+      }
+    },
+    {
+      "id": "watch",
+      "spine": "watch",
+      "icon": "AlertTriangle",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "clocks",
+          "label": "Open clocks on the project"
+        },
+        {
+          "key": "finaldates",
+          "label": "Final dates for payment"
+        }
+      ],
+      "out": [
+        {
+          "key": "overdue",
+          "label": "Overdue invoices flagged"
+        },
+        {
+          "key": "register",
+          "label": "Breach register rows"
+        }
+      ],
+      "note": {
+        "why": "The statutory interest is due as of right and starts running the moment the date passes, without having to be claimed separately, so the only thing standing between you and it is a record that says when."
+      }
+    },
+    {
+      "id": "receivable",
+      "spine": "reconcile",
+      "icon": "Banknote",
+      "module": "Finance",
+      "moduleKey": "finance.title",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "claim",
+          "label": "Certified progress claim"
+        },
+        {
+          "key": "overdue",
+          "label": "Overdue clocks"
+        }
+      ],
+      "out": [
+        {
+          "key": "invoice",
+          "label": "Receivable on the books"
+        },
+        {
+          "key": "total",
+          "label": "Overdue total in the cash picture"
+        }
+      ]
+    },
+    {
+      "id": "escalate",
+      "spine": "escalate",
+      "icon": "Send",
+      "module": "Documents",
+      "moduleKey": "nav.documents",
+      "to": "/projects/:projectId/files",
+      "in": [
+        {
+          "key": "reading",
+          "label": "Clock reading"
+        },
+        {
+          "key": "invoice",
+          "label": "Abschlagsrechnung"
+        }
+      ],
+      "out": [
+        {
+          "key": "letter",
+          "label": "Nachfrist letter on file"
+        },
+        {
+          "key": "record",
+          "label": "Escalation record"
+        }
+      ]
+    }
+  ]
+}

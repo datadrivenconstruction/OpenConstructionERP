@@ -1,0 +1,196 @@
+{
+  "family": "f01-progress-payment",
+  "jurisdiction": "XX",
+  "note": "The country-neutral member of the family. It fills the same slots with the vocabulary a reader in no particular country would use, which is what makes it a layer rather than a special case.",
+  "slug": "prepare-an-interim-payment-application",
+  "order": 267,
+  "category": "commercial",
+  "companyTypes": [
+    "general-contractor",
+    "subcontractor",
+    "cost-consultant"
+  ],
+  "roles": [
+    "commercial-manager",
+    "quantity-surveyor"
+  ],
+  "icon": "ReceiptText",
+  "estMinutes": 10,
+  "title": "Prepare an interim payment application",
+  "desc": "Build the monthly interim application: measure the work done to date, value it against the contract sum plus agreed variations, apply retention, and issue the application with its backup so it certifies in full.",
+  "slots": {
+    "priceLine": "bill item",
+    "priceLinePlural": "bill items",
+    "valuationDoc": "interim valuation",
+    "certifier": "contract administrator",
+    "excessTerm": "variation",
+    "retentionTerm": "retention",
+    "payDoc": "interim application",
+    "clockRegime": "the contract's payment terms",
+    "clockStart": "the application date",
+    "payDays": "30",
+    "escalationRoute": "follow the escalation route the contract sets out"
+  },
+  "steps": [
+    {
+      "id": "measure",
+      "spine": "measure",
+      "icon": "Ruler",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "in": [
+        {
+          "key": "boq",
+          "label": "BOQ lines"
+        },
+        {
+          "key": "works",
+          "label": "Work in place"
+        },
+        {
+          "key": "cutoff",
+          "label": "Cut-off date"
+        }
+      ],
+      "out": [
+        {
+          "key": "percent",
+          "label": "Percentage complete"
+        },
+        {
+          "key": "measured",
+          "label": "Measured quantities"
+        }
+      ]
+    },
+    {
+      "id": "value",
+      "spine": "value",
+      "icon": "TrendingUp",
+      "module": "Value Realized",
+      "moduleKey": "nav.value",
+      "to": "/projects/:projectId/value",
+      "in": [
+        {
+          "key": "measured",
+          "label": "Measured work"
+        },
+        {
+          "key": "sum",
+          "label": "Contract sum"
+        },
+        {
+          "key": "variations",
+          "label": "Agreed variations"
+        }
+      ],
+      "out": [
+        {
+          "key": "gross",
+          "label": "Gross value earned"
+        },
+        {
+          "key": "breakdown",
+          "label": "Value breakdown"
+        }
+      ]
+    },
+    {
+      "id": "retention",
+      "spine": "adjust",
+      "icon": "Calculator",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "in": [
+        {
+          "key": "gross",
+          "label": "Gross value earned"
+        },
+        {
+          "key": "rate",
+          "label": "Retention rate"
+        },
+        {
+          "key": "previous",
+          "label": "Previous payments"
+        }
+      ],
+      "out": [
+        {
+          "key": "retention",
+          "label": "Retention held"
+        },
+        {
+          "key": "net",
+          "label": "Net sum due"
+        }
+      ]
+    },
+    {
+      "id": "issue",
+      "spine": "invoice",
+      "icon": "ReceiptText",
+      "module": "Reports",
+      "moduleKey": "nav.reports",
+      "to": "/reports",
+      "in": [
+        {
+          "key": "net",
+          "label": "Net sum due"
+        },
+        {
+          "key": "breakdown",
+          "label": "Measured breakdown"
+        },
+        {
+          "key": "retention",
+          "label": "Retention calculation"
+        }
+      ],
+      "out": [
+        {
+          "key": "application",
+          "label": "Submitted application"
+        },
+        {
+          "key": "backup",
+          "label": "Backup pack"
+        }
+      ]
+    },
+    {
+      "id": "reconcile",
+      "spine": "reconcile",
+      "icon": "Scale",
+      "module": "Event Reconciliation",
+      "moduleKey": "nav.reconciliation",
+      "to": "/projects/:projectId/reconciliation",
+      "in": [
+        {
+          "key": "applied",
+          "label": "Submitted application"
+        },
+        {
+          "key": "certificate",
+          "label": "Payment certificate"
+        },
+        {
+          "key": "backup",
+          "label": "Measure and backup"
+        }
+      ],
+      "out": [
+        {
+          "key": "reconciliation",
+          "label": "Reconciliation statement"
+        },
+        {
+          "key": "cuts",
+          "label": "Cut-back lines"
+        }
+      ]
+    }
+  ]
+}

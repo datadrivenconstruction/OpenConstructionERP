@@ -1,0 +1,22 @@
+{
+  "family": "f97-slot-collapse",
+  "title": "Slot collapse fixture",
+  "keyRoot": "cases.f97",
+  "slots": {
+    "payDoc": "the pay document",
+    "valuationDoc": "the valuation document"
+  },
+  "steps": {
+    "only": {
+      "title": "Raise the {payDoc}",
+      "what": "Raise the {payDoc} against the approved {valuationDoc}.",
+      "why": "Because the {payDoc} and the {valuationDoc} are different things.",
+      "module": "Billing",
+      "moduleKey": "modules.billing",
+      "to": "/billing",
+      "icon": "FileText",
+      "in": [],
+      "out": []
+    }
+  }
+}

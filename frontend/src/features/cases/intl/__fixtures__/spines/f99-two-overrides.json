@@ -1,0 +1,22 @@
+{
+  "family": "f99-two-overrides",
+  "name": "Gate fixture, two countries override the same step",
+  "note": "Exists so the override gate can be seen firing. Not a real family.",
+  "slots": { "thing": "The local word for the thing" },
+  "steps": {
+    "one": {
+      "title": "Do the first thing to the {thing}",
+      "what": "Take the {thing} and do the first thing to it.",
+      "why": "Because the first thing has to happen first.",
+      "module": "BOQ", "moduleKey": "boq.title", "to": "/boq", "icon": "Ruler",
+      "in": ["A {thing}"], "out": ["A handled {thing}"]
+    },
+    "two": {
+      "title": "Do the second thing",
+      "what": "Then do the second thing to the {thing}.",
+      "why": "Because the second thing has to happen second.",
+      "module": "Finance", "moduleKey": "nav.finance", "to": "/finance", "icon": "Scale",
+      "in": ["A handled {thing}"], "out": ["A finished {thing}"]
+    }
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "family": "f01-progress-payment",
+  "name": "Progress payment",
+  "keyRoot": "cases.f01",
+  "note": "The shared workflow behind every country's interim payment case. A layer surfaces a contiguous window of these steps in its own order and fills the slots. Slot values are proper nouns and numbers, identical in every language, so a spine sentence is translated once for all countries. A layer that needs a spine sentence rewritten has found a spine bug: widen the sentence with a slot instead, and if a second layer needs the same rewrite the build fails and says so.",
+  "slots": {
+    "priceLine": "What one priced row of the contract bill is called",
+    "priceLinePlural": "Plural of priceLine",
+    "valuationDoc": "The document that states the value of the period",
+    "certifier": "Who has to approve the valuation before it can be invoiced",
+    "excessTerm": "A quantity measured past what the contract carries",
+    "retentionTerm": "Money held back from each payment against defects",
+    "payDoc": "The document that actually asks for the money",
+    "clockRegime": "The statutory or contractual regime that sets the payment deadlines",
+    "clockStart": "The event the payment clock starts counting from",
+    "payDays": "Days from clockStart to the payment becoming due",
+    "escalationRoute": "What you do when the clock runs out"
+  },
+  "steps": {
+    "register": {
+      "title": "Register the contract and its payment regime",
+      "what": "Record the contract, its {clockRegime} payment regime and the dates it turns on, so every later step reads the same terms instead of somebody's memory of them.",
+      "why": "A payment regime that lives in a PDF nobody opens is a regime that gets applied differently by each person who applies it. Registered once, the deadlines below are computed rather than argued about.",
+      "module": "Contracts",
+      "moduleKey": "nav.contracts",
+      "to": "/contracts",
+      "icon": "FileSignature",
+      "in": [
+        "Signed contract",
+        "Payment terms"
+      ],
+      "out": [
+        "Contract on record",
+        "{clockRegime} regime attached"
+      ]
+    },
+    "measure": {
+      "title": "Measure the period {priceLine} by {priceLine}",
+      "what": "Record what was executed against each {priceLine} for the period as a percentage of its contract quantity. The earned quantity follows from that percentage and the design quantity, and the earned amount from the same percentage and the position total, so one honest number per line produces the whole valuation.",
+      "why": "A {valuationDoc} built from a single project percentage cannot be checked and therefore cannot be approved without a conversation. Measured line by line, the disagreement is about one {priceLine} rather than about the whole month, and the rest of the money moves while that one is settled.",
+      "module": "Progress",
+      "moduleKey": "nav.progress",
+      "to": "/progress",
+      "icon": "Ruler",
+      "in": [
+        "Works executed this period",
+        "Contract bill positions"
+      ],
+      "out": [
+        "Percent complete per {priceLine}",
+        "Earned quantities for the period"
+      ]
+    },
+    "value": {
+      "title": "Value it at the contract rates",
+      "what": "Read the valuation back against the bill and check the rates it used are the contract rates. Where a {priceLine} has been measured past the quantity the contract carries, deal with it as a change to the position with an order behind it rather than as a larger figure on the same line.",
+      "why": "An {excessTerm} certified quietly is one the client can refuse at the final account, months after the work was built and paid for down the chain. Raising it as a change while it is small is the only version of that conversation where you are not asking to be paid for work already done.",
+      "module": "BOQ",
+      "moduleKey": "boq.title",
+      "to": "/projects/:projectId/boq",
+      "icon": "Calculator",
+      "in": [
+        "Earned quantities for the period",
+        "Contract unit rates"
+      ],
+      "out": [
+        "Valuation for the period",
+        "{excessTerm} flagged"
+      ]
+    },
+    "adjust": {
+      "title": "Apply {retentionTerm} and previous payments",
+      "what": "Take the cumulative valuation, subtract what has already been certified, and apply {retentionTerm} at the contract percentage. The figure that leaves this step is the one the {payDoc} is raised for, and the backup behind it is the measure that produced it.",
+      "why": "Interim payments are cumulative, so the month's money is a difference between two totals rather than a total of its own. Computing it from the cumulative figure is what stops a line being paid twice or dropped entirely when a period is re-measured.",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "icon": "Percent",
+      "in": [
+        "Cumulative valuation",
+        "Previous payments and {retentionTerm}"
+      ],
+      "out": [
+        "Net due for the period",
+        "{retentionTerm} held to date"
+      ]
+    },
+    "certify": {
+      "title": "Get it approved by the people who have to approve it",
+      "what": "Route the {valuationDoc} to the {certifier}, and to whoever the contract adds after them. Keep the approval date, because the {payDoc} follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+      "why": "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
+      "module": "Approval routes",
+      "moduleKey": "approvalRoutes.title",
+      "to": "/approval-routes",
+      "icon": "Stamp",
+      "in": [
+        "Valuation for the period",
+        "{certifier} named for approval"
+      ],
+      "out": [
+        "Approved {valuationDoc}",
+        "Approval date on record"
+      ]
+    },
+    "invoice": {
+      "title": "Issue the {payDoc} against the approved figure",
+      "what": "Raise the {payDoc} against the approved {valuationDoc}, carrying {retentionTerm} and any deduction the contract provides for, and reference the {valuationDoc} on it.",
+      "why": "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the {valuationDoc} also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "icon": "ReceiptEuro",
+      "in": [
+        "Approved {valuationDoc}",
+        "{retentionTerm} and deductions"
+      ],
+      "out": [
+        "{payDoc} issued",
+        "Amount carried into the accounts"
+      ]
+    },
+    "clock": {
+      "title": "Open the payment clock on the right day",
+      "what": "Open a clock over the {payDoc} starting from {clockStart}, under {clockRegime}. Payment falls due {payDays} days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+      "why": "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on {clockStart} once makes the whole chain checkable.",
+      "module": "Payment Clock",
+      "moduleKey": "paymentClock.title",
+      "to": "/payment-clock",
+      "icon": "Clock",
+      "in": [
+        "{payDoc} and its date",
+        "Contract payment terms"
+      ],
+      "out": [
+        "Clock open on the {payDoc}",
+        "Due date computed"
+      ]
+    },
+    "deadlines": {
+      "title": "Read the dates the regime computes",
+      "what": "Read back the dates {clockRegime} produces from {clockStart}. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted.",
+      "why": "Deadlines that are typed in are deadlines that are typed in wrong, and a payment regime has more of them than anyone holds in their head. A derivation you can read out loud is what turns a phone call about a late payment into a quotable line.",
+      "module": "Payment Clock",
+      "moduleKey": "paymentClock.title",
+      "to": "/payment-clock",
+      "icon": "CalendarClock",
+      "in": [
+        "Clock open on the {payDoc}",
+        "{clockRegime} regime"
+      ],
+      "out": [
+        "Due date and late date",
+        "Notices the contract requires"
+      ]
+    },
+    "watch": {
+      "title": "Watch the clock count each deadline down",
+      "what": "Come back to the list as the month runs. It says how many clocks the project carries and how many are past their final date, badges the overdue ones and fills the breach register underneath. Open an overdue one and the findings name the sum outstanding, the days it has run past the final date and the rate interest runs at.",
+      "why": "Reading a clock is what writes its register, so a quiet register on a project nobody opens is telling you about the reading and not about the payments. Nobody misses a deadline on purpose; they miss it because the day it mattered looked like every other day.",
+      "module": "Payment Clock",
+      "moduleKey": "paymentClock.title",
+      "to": "/payment-clock",
+      "icon": "BellRing",
+      "in": [
+        "Open clocks across the project",
+        "Today's date"
+      ],
+      "out": [
+        "Deadlines approaching",
+        "Deadlines passed"
+      ]
+    },
+    "reconcile": {
+      "title": "Reconcile what was certified against what was asked",
+      "what": "Put the approved figure next to the figure you asked for and carry the difference forward. What is unpaid, and how long it has been unpaid, belongs in the accounts as a number rather than in a conversation.",
+      "why": "The gap between applied and certified is the health of the commercial relationship expressed as money, and it is only visible if somebody puts the two numbers side by side every period. Cumulatively it is also the single best predictor of a final account fight.",
+      "module": "Finance",
+      "moduleKey": "nav.finance",
+      "to": "/projects/:projectId/finance",
+      "icon": "Scale",
+      "in": [
+        "Amount asked for",
+        "Amount approved"
+      ],
+      "out": [
+        "Difference carried forward",
+        "Outstanding by age"
+      ]
+    },
+    "escalate": {
+      "title": "Escalate with the record already assembled",
+      "what": "When the clock has run out, {escalationRoute}. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
+      "why": "The difference between a claim that is paid and one that is argued about is almost never the merits. It is whether the dates and the documents were kept as the work happened, because reconstructing them afterwards is expensive and looks exactly like inventing them.",
+      "module": "Documents",
+      "moduleKey": "nav.documents",
+      "to": "/documents",
+      "icon": "FileWarning",
+      "in": [
+        "Passed deadlines",
+        "Documents and approval dates"
+      ],
+      "out": [
+        "Escalation pack",
+        "Entitlement preserved"
+      ]
+    }
+  }
+}

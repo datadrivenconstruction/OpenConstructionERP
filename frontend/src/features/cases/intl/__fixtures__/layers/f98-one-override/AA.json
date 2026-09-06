@@ -1,0 +1,12 @@
+{
+  "family": "f98-one-override", "jurisdiction": "AA",
+  "slug": "fixture-one-override-aa", "order": 1, "region": "AA",
+  "category": "commercial", "companyTypes": ["general-contractor"], "roles": ["quantity-surveyor"],
+  "icon": "Ruler", "estMinutes": 5,
+  "title": "Fixture AA", "desc": "Fixture layer AA.",
+  "slots": { "thing": "widget" },
+  "steps": [
+    { "id": "one", "spine": "one" },
+    { "id": "two", "spine": "two", "override": { "what": "In AA the second thing is done completely differently." } }
+  ]
+}

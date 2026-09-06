@@ -1,0 +1,29 @@
+{
+  "jurisdiction": "BB",
+  "family": "f97-slot-collapse",
+  "slug": "slot-collapse-bb",
+  "order": 1,
+  "region": "global",
+  "category": "billing",
+  "companyTypes": [
+    "contractor"
+  ],
+  "roles": [
+    "qs"
+  ],
+  "icon": "FileText",
+  "estMinutes": 5,
+  "title": "Slot collapse BB",
+  "desc": "Fixture.",
+  "longDesc": "Fixture.",
+  "slots": {
+    "payDoc": "invoice",
+    "valuationDoc": "certificate"
+  },
+  "steps": [
+    {
+      "id": "only",
+      "spine": "only"
+    }
+  ]
+}
