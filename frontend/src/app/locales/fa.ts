@@ -39253,6 +39253,7 @@ const resource = {
     "cases.regional_pack_needed": "به {{name}} نیاز دارد",
     "cases.regional_pack_set_up": "راه‌اندازی",
     "cases.regional_pack_setup_hint": "این سناریو از استانداردهای بازار خود پیروی می‌کند. بسته‌ای را که آن‌ها را دارد باز می‌کند، جایی که می‌توانید آن را فعال کنید.",
+    "cases.regional_pack_none_for_market": "هیچ بسته منطقه‌ای برای {{market}} در اینجا نصب نشده است",
 
     // --- Property Development → Document appearance ---
     "common.left": "چپ",

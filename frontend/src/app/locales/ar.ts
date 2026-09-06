@@ -41164,6 +41164,7 @@ const resource = {
     "cases.regional_pack_needed": "يتطلب {{name}}",
     "cases.regional_pack_set_up": "إعداد",
     "cases.regional_pack_setup_hint": "تتبع هذه الحالة معايير سوقها. يفتح الحزمة التي تحملها، حيث يمكنك تفعيلها.",
+    "cases.regional_pack_none_for_market": "لا توجد هنا حزمة إقليمية مثبّتة لـ {{market}}",
 
     // --- Property Development → Document appearance ---
     "common.left": "يسار",

@@ -40235,6 +40235,7 @@ const resource = {
     "cases.regional_pack_needed": "Richiede {{name}}",
     "cases.regional_pack_set_up": "Configura",
     "cases.regional_pack_setup_hint": "Questo caso segue gli standard del suo mercato. Apre il pacchetto che li porta, dove puoi attivarlo.",
+    "cases.regional_pack_none_for_market": "Qui non è installato alcun pacchetto regionale per {{market}}",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.desc": "Scomponi una voce del prezzario nel materiale, nella manodopera e nei macchinari che consuma davvero, valorizzali con le tue tariffe, mantieni utile e spese generali come percentuale visibile, e salva il risultato come composizione che puoi difendere e riutilizzare.",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.title": "Scomporre una voce di prezzario in manodopera, materiale e macchinari",
     "cases.apply_the_price_variation_formula_on_a_public_contract.desc": "Registra la clausola di revisione prezzi con le sue componenti, i pesi e la data base, carica la serie di indici che richiama, calcola l'adeguamento sul lavoro eseguito nel periodo, fatturalo e tieni il calcolo in una forma che un verificatore possa rifare.",

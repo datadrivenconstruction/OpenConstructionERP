@@ -39273,6 +39273,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}} درکار ہے",
     "cases.regional_pack_set_up": "سیٹ اپ کریں",
     "cases.regional_pack_setup_hint": "یہ کیس اپنی مارکیٹ کے معیارات کی پیروی کرتا ہے۔ وہ پیکج کھولتا ہے جو انہیں لاتا ہے، جہاں آپ اسے فعال کر سکتے ہیں۔",
+    "cases.regional_pack_none_for_market": "{{market}} کے لیے یہاں کوئی علاقائی پیکج انسٹال نہیں ہے",
 
     // --- Property Development → Document appearance ---
     "common.left": "بائیں",

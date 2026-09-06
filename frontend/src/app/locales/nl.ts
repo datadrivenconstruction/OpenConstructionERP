@@ -40154,6 +40154,7 @@ const resource = {
     "cases.regional_pack_needed": "Vereist {{name}}",
     "cases.regional_pack_set_up": "Instellen",
     "cases.regional_pack_setup_hint": "Deze case volgt de normen van zijn markt. Opent het pakket dat deze bevat, waar u het kunt inschakelen.",
+    "cases.regional_pack_none_for_market": "Hier is geen regiopakket voor {{market}} geïnstalleerd",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.desc": "Splits een tarievenlijstpost op in het materiaal, de arbeid en het materieel die ze verbruikt, prijs dit met uw eigen tarieven, houd winst en overhead als zichtbaar percentage, en bewaar het resultaat als een samenstelling die u kunt verdedigen en hergebruiken.",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.title": "Een tariefpost uit de tarievenlijst opsplitsen in arbeid, materiaal en materieel",
     "cases.apply_the_price_variation_formula_on_a_public_contract.desc": "Leg de escalatieclausule vast met haar componenten, wegingen en basisdatum, laad de indexreeks die ze noemt, bereken de aanpassing op het werk dat in de periode is uitgevoerd, factureer ze en houd de berekening zo dat een controleur ze kan naregelen.",

@@ -41097,6 +41097,7 @@ const resource = {
     "cases.regional_pack_needed": "需要 {{name}}",
     "cases.regional_pack_set_up": "设置",
     "cases.regional_pack_setup_hint": "此案例遵循其市场的标准。打开携带这些标准的数据包，您可以在其中启用它。",
+    "cases.regional_pack_none_for_market": "这里没有安装 {{market}} 的区域数据包",
 
     // --- Property Development → Document appearance ---
     "common.left": "居左",

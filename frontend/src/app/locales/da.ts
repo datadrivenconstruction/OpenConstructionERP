@@ -39294,6 +39294,7 @@ const resource = {
     "cases.regional_pack_needed": "Kræver {{name}}",
     "cases.regional_pack_set_up": "Opsæt",
     "cases.regional_pack_setup_hint": "Denne case følger standarderne for sit marked. Åbner pakken, der indeholder dem, hvor du kan slå den til.",
+    "cases.regional_pack_none_for_market": "Ingen regional pakke for {{market}} er installeret her",
 
     // --- Property Development → Document appearance ---
     "common.left": "Venstre",

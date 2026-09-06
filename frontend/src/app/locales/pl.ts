@@ -40344,6 +40344,7 @@ const resource = {
     "cases.regional_pack_needed": "Wymaga {{name}}",
     "cases.regional_pack_set_up": "Skonfiguruj",
     "cases.regional_pack_setup_hint": "Ten scenariusz stosuje się do standardów swojego rynku. Otwiera pakiet, który je zawiera, gdzie można go włączyć.",
+    "cases.regional_pack_none_for_market": "Dla {{market}} nie zainstalowano tutaj żadnego pakietu regionalnego",
 
     // --- Property Development → Document appearance ---
     "common.left": "Do lewej",

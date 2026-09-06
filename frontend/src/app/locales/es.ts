@@ -41988,6 +41988,7 @@ const resource = {
     "cases.regional_pack_needed": "Requiere {{name}}",
     "cases.regional_pack_set_up": "Configurar",
     "cases.regional_pack_setup_hint": "Este caso sigue los estándares de su mercado. Abre el paquete que los aporta, donde puede activarlo.",
+    "cases.regional_pack_none_for_market": "Aquí no hay ningún paquete regional instalado para {{market}}",
 
     // --- Property Development → Document appearance ---
     "common.left": "Izquierda",

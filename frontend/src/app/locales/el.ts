@@ -39273,6 +39273,7 @@ const resource = {
     "cases.regional_pack_needed": "Απαιτεί {{name}}",
     "cases.regional_pack_set_up": "Ρύθμιση",
     "cases.regional_pack_setup_hint": "Αυτή η περίπτωση ακολουθεί τα πρότυπα της αγοράς της. Ανοίγει το πακέτο που τα περιέχει, όπου μπορείτε να το ενεργοποιήσετε.",
+    "cases.regional_pack_none_for_market": "Δεν υπάρχει εγκατεστημένο περιφερειακό πακέτο για {{market}} εδώ",
 
     // --- Property Development → Document appearance ---
     "common.left": "Αριστερά",

@@ -39273,6 +39273,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}} প্রয়োজন",
     "cases.regional_pack_set_up": "সেট আপ করুন",
     "cases.regional_pack_setup_hint": "এই কেসটি তার বাজারের মানদণ্ড অনুসরণ করে। যে প্যাক এগুলো বহন করে সেটি খোলে, যেখানে আপনি এটি চালু করতে পারেন।",
+    "cases.regional_pack_none_for_market": "এখানে {{market}}-এর জন্য কোনো আঞ্চলিক প্যাক ইনস্টল করা হয়নি",
 
     // --- Property Development → Document appearance ---
     "common.left": "বাঁয়ে",

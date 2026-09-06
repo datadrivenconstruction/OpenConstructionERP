@@ -39236,6 +39236,7 @@ const resource = {
     "cases.regional_pack_needed": "Vajab paketti {{name}}",
     "cases.regional_pack_set_up": "Seadista",
     "cases.regional_pack_setup_hint": "See juhtum järgib oma turu standardeid. Avab paketi, mis need kannab, kus saad selle sisse lülitada.",
+    "cases.regional_pack_none_for_market": "Turul {{market}} regionaalpaketti pole paigaldatud",
 
     // --- Property Development → Document appearance ---
     "common.left": "Vasakule",

@@ -39909,6 +39909,7 @@ const resource = {
     "cases.regional_pack_needed": "Kräver {{name}}",
     "cases.regional_pack_set_up": "Konfigurera",
     "cases.regional_pack_setup_hint": "Det här fallet följer standarderna för sin marknad. Öppnar paketet som innehåller dem, där du kan slå på det.",
+    "cases.regional_pack_none_for_market": "Inget regionpaket för {{market}} är installerat här",
 
     // --- Property Development → Document appearance ---
     "common.left": "Vänster",

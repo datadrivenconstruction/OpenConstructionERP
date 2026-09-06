@@ -40080,6 +40080,7 @@ const resource = {
     "cases.regional_pack_needed": "Vyžaduje {{name}}",
     "cases.regional_pack_set_up": "Nastavit",
     "cases.regional_pack_setup_hint": "Tento případ se řídí standardy svého trhu. Otevře balíček, který je přináší, kde jej můžete zapnout.",
+    "cases.regional_pack_none_for_market": "Pro {{market}} zde není nainstalován žádný regionální balíček",
 
     // --- Property Development → Document appearance ---
     "common.left": "Vlevo",

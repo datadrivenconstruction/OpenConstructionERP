@@ -40755,6 +40755,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}}が必要です",
     "cases.regional_pack_set_up": "設定する",
     "cases.regional_pack_setup_hint": "このケースはその市場の基準に従います。それらを含むパックを開き、そこで有効化できます。",
+    "cases.regional_pack_none_for_market": "{{market}}向けの地域パックはここにインストールされていません",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.desc": "単価表の項目を実際に消費する材料・労務・機械に分解し、自社の単価で価格を付け、利益と諸経費を目に見える割合として残し、その結果を防御でき再利用できる歩掛りとして保存する。",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.title": "単価表の単価を労務・材料・機械費に分解する",
     "cases.apply_the_price_variation_formula_on_a_public_contract.desc": "エスカレーション条項をその構成要素、ウェイトおよび基準日とともに記録し、条項が指定する指数系列を読み込み、期間中に実施した工事に対する調整額を計算し、それを請求し、検査者が再計算できる形で計算過程を残す。",

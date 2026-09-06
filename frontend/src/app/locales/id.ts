@@ -39222,6 +39222,7 @@ const resource = {
     "cases.regional_pack_needed": "Membutuhkan {{name}}",
     "cases.regional_pack_set_up": "Siapkan",
     "cases.regional_pack_setup_hint": "Kasus ini mengikuti standar pasarnya. Membuka paket yang membawa standar tersebut, tempat Anda dapat mengaktifkannya.",
+    "cases.regional_pack_none_for_market": "Tidak ada paket regional untuk {{market}} yang terinstal di sini",
 
     // --- Property Development → Document appearance ---
     "common.left": "Kiri",

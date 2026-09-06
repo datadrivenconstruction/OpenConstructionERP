@@ -38311,6 +38311,7 @@ const resource = {
     "dashboard.regional_pack_choose": "Instala un paquete de país",
     "dashboard.regional_pack_manage": "Cambia o agrega un paquete de país",
     "cases.regional_pack_for_market": "Paquete regional: {{names}}",
+    "cases.regional_pack_none_for_market": "Aquí no hay ningún paquete regional instalado para {{market}}",
     "onboarding.ready_pack_other_markets": "O empieza desde una plantilla de mercado",
     "onboarding.ready_pack_set_up_here": "Configurar esto por mí",
     "modules.pp_name_aus": "Paquete de Construcción de Australia",

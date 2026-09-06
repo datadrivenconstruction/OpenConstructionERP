@@ -39335,6 +39335,7 @@ const resource = {
     "cases.regional_pack_needed": "דורש את {{name}}",
     "cases.regional_pack_set_up": "הגדרה",
     "cases.regional_pack_setup_hint": "תרחיש זה עוקב אחר התקנים של השוק שלו. פותח את החבילה שמביאה אותם, שם ניתן להפעיל אותה.",
+    "cases.regional_pack_none_for_market": "אין כאן חבילת אזור מותקנת עבור {{market}}",
 
     // --- Property Development → Document appearance ---
     "common.left": "שמאל",

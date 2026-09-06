@@ -39277,6 +39277,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}} की आवश्यकता है",
     "cases.regional_pack_set_up": "सेट अप करें",
     "cases.regional_pack_setup_hint": "यह केस अपने बाज़ार के मानकों का पालन करता है। वह पैक खोलता है जो इन्हें लाता है, जहाँ आप इसे चालू कर सकते हैं।",
+    "cases.regional_pack_none_for_market": "यहाँ {{market}} के लिए कोई क्षेत्रीय पैक स्थापित नहीं है",
 
     // --- Property Development → Document appearance ---
     "common.left": "बाएँ",

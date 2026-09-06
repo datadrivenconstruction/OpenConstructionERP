@@ -39253,6 +39253,7 @@ const resource = {
     "cases.regional_pack_needed": "Kailangan ang {{name}}",
     "cases.regional_pack_set_up": "I-set up",
     "cases.regional_pack_setup_hint": "Sinusunod ng case na ito ang mga pamantayan ng kanyang market. Binubuksan ang pack na nagdadala ng mga ito, kung saan puwede mo itong i-on.",
+    "cases.regional_pack_none_for_market": "Walang na-install na regional pack para sa {{market}} dito",
 
     // --- Property Development → Document appearance ---
     "common.left": "Kaliwa",

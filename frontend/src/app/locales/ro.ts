@@ -39383,6 +39383,7 @@ const resource = {
     "cases.regional_pack_needed": "Necesită {{name}}",
     "cases.regional_pack_set_up": "Configurează",
     "cases.regional_pack_setup_hint": "Acest caz respectă standardele pieței sale. Deschide pachetul care le conține, unde îl poți activa.",
+    "cases.regional_pack_none_for_market": "Aici nu este instalat niciun pachet regional pentru {{market}}",
 
     // --- Property Development → Document appearance ---
     "common.left": "Stânga",

@@ -41970,6 +41970,7 @@ const resource = {
     "cases.regional_pack_needed": "Benötigt {{name}}",
     "cases.regional_pack_set_up": "Einrichten",
     "cases.regional_pack_setup_hint": "Dieses Fallbeispiel folgt den Standards seines Marktes. Öffnet das Paket, das sie enthält, wo Sie es aktivieren können.",
+    "cases.regional_pack_none_for_market": "Für {{market}} ist hier kein regionales Paket installiert",
 
     // --- Property Development → Document appearance ---
     "common.left": "Links",

@@ -41388,6 +41388,7 @@ const resource = {
     "cases.regional_pack_needed": "Требуется {{name}}",
     "cases.regional_pack_set_up": "Настроить",
     "cases.regional_pack_setup_hint": "Этот кейс следует стандартам своего рынка. Открывает пакет, который их несёт, где его можно включить.",
+    "cases.regional_pack_none_for_market": "Для {{market}} здесь не установлен региональный пакет",
 
     // --- Property Development → Document appearance ---
     "common.left": "Слева",

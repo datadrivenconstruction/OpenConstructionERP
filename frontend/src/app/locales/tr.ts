@@ -40173,6 +40173,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}} gerektirir",
     "cases.regional_pack_set_up": "Ayarla",
     "cases.regional_pack_setup_hint": "Bu vaka, kendi pazarının standartlarını izler. Bunları taşıyan paketi açar; buradan etkinleştirebilirsiniz.",
+    "cases.regional_pack_none_for_market": "{{market}} için burada bölgesel paket kurulu değil",
 
     // --- Property Development → Document appearance ---
     "common.left": "Sol",

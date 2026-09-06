@@ -39278,6 +39278,7 @@ const resource = {
     "cases.regional_pack_needed": "Vaatii paketin {{name}}",
     "cases.regional_pack_set_up": "Määritä",
     "cases.regional_pack_setup_hint": "Tämä tapaus noudattaa markkina-alueensa standardeja. Avaa paketin, joka sisältää ne ja jossa voit ottaa sen käyttöön.",
+    "cases.regional_pack_none_for_market": "Markkinalla {{market}} ei ole asennettua alueellista pakettia",
 
     // --- Property Development → Document appearance ---
     "common.left": "Vasen",

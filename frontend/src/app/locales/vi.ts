@@ -39252,6 +39252,7 @@ const resource = {
     "cases.regional_pack_needed": "Cần {{name}}",
     "cases.regional_pack_set_up": "Thiết lập",
     "cases.regional_pack_setup_hint": "Trường hợp này tuân theo tiêu chuẩn của thị trường của nó. Mở gói mang các tiêu chuẩn đó, nơi bạn có thể bật nó lên.",
+    "cases.regional_pack_none_for_market": "Không có gói khu vực nào cho {{market}} được cài đặt ở đây",
 
     // --- Property Development → Document appearance ---
     "common.left": "Trái",

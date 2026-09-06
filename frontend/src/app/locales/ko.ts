@@ -39841,6 +39841,7 @@ const resource = {
     "cases.regional_pack_needed": "{{name}} 필요",
     "cases.regional_pack_set_up": "설정하기",
     "cases.regional_pack_setup_hint": "이 사례는 해당 시장의 표준을 따릅니다. 그 표준을 담은 팩을 열며, 여기서 활성화할 수 있습니다.",
+    "cases.regional_pack_none_for_market": "{{market}}용 지역 팩이 여기에 설치되어 있지 않습니다",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.desc": "단가표 항목을 실제로 소요되는 자재, 노무, 장비로 분해하고, 자체 단가로 가격을 매기고, 이윤과 일반관리비를 눈에 보이는 비율로 유지하며, 그 결과를 방어 가능하고 재사용 가능한 품셈으로 저장합니다.",
     "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.title": "표준단가표의 단가를 노무·자재·장비로 분해하기",
     "cases.apply_the_price_variation_formula_on_a_public_contract.desc": "에스컬레이션 조항을 구성 요소, 가중치, 기준일과 함께 기록하고, 조항이 지정한 지수 시리즈를 불러오고, 해당 기간에 시행된 공사에 대한 조정액을 계산하고, 이를 청구하며, 검사자가 다시 계산할 수 있게 산출 근거를 남깁니다.",

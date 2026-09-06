@@ -39244,6 +39244,7 @@ const resource = {
     "cases.regional_pack_needed": "ต้องใช้ {{name}}",
     "cases.regional_pack_set_up": "ตั้งค่า",
     "cases.regional_pack_setup_hint": "กรณีนี้เป็นไปตามมาตรฐานของตลาดของมัน เปิดแพ็กที่มีมาตรฐานเหล่านั้น ซึ่งคุณสามารถเปิดใช้งานได้ที่นั่น",
+    "cases.regional_pack_none_for_market": "ยังไม่มีการติดตั้งแพ็กภูมิภาคสำหรับ {{market}} ที่นี่",
 
     // --- Property Development → Document appearance ---
     "common.left": "ซ้าย",

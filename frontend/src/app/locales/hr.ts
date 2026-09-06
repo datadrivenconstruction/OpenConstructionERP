@@ -39373,6 +39373,7 @@ const resource = {
     "cases.regional_pack_needed": "Zahtijeva {{name}}",
     "cases.regional_pack_set_up": "Postavi",
     "cases.regional_pack_setup_hint": "Ovaj slučaj slijedi standarde svog tržišta. Otvara paket koji ih nosi, gdje ga možete uključiti.",
+    "cases.regional_pack_none_for_market": "Za {{market}} ovdje nije instaliran regionalni paket",
 
     // --- Property Development → Document appearance ---
     "common.left": "Lijevo",
