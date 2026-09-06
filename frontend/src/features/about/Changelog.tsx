@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.8.3',
+    date: '2026-09-06',
+    tag: 'FIX',
+    summary:
+      'A case page named a market and then said nothing about the pack that carries its standards. Filtering the catalogue to Germany gave thirteen cards each announcing that German standards apply, with nothing on that screen to act on, because the control that installs a regional pack sat only inside a case a reader had already opened. Each card whose market has a pack now carries a one line strip, and the market band carries the full offer once a market is selected, since a pack is a property of the market rather than of thirteen separate cards. It opens the same dialog the modules page already opens, so there is one install path and not a second one, and pressing the strip applies nothing. Thirty three of the eighty cases that name a market resolve no pack on a released install and used to render nothing at all, which could not be reproduced from a checkout: the source tree carries twenty packs and the wheel ships seventeen, so Germany and Canada resolve a pack while developing and resolve nothing on the build a user installs. That is stated in words now and linked to the module registry, where uploading a pack is a real route rather than a dead end, and only once the server has answered, since a panel keyed on an empty result would put a false line on every case page while the request is in flight. A pack that ships in the community wheel reached no market at all, because a manifest that names no country falls back to the region of its locale and this one carries a bare locale with nothing to take. And a country case used to be a whole page written again, so nine countries meant nine copies of one workflow; the workflow is written once now, with a country supplying a small file of the steps it surfaces and its own words for them.',
+  },
+  {
     version: '16.8.2',
     date: '2026-09-05',
     tag: 'FIX',
