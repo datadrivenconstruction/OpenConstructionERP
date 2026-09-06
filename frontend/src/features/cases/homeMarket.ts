@@ -21,8 +21,12 @@
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 
 /** A language tag as i18next writes it: lower-case base, upper-case region
- *  subtag, at most two parts. Anything unparseable comes back empty. */
-function normalizeLanguageTag(lang: string | null | undefined): string {
+ *  subtag, at most two parts. Anything unparseable comes back empty.
+ *
+ *  Exported for `marketCases.ts`, which reads the same tag through the same
+ *  rule so its nearest-market table and this file's registry lookup can never
+ *  disagree about what `EN-us` or ` de ` means. */
+export function normalizeLanguageTag(lang: string | null | undefined): string {
   if (!lang) return '';
   const parts = lang.trim().split('-');
   const base = (parts[0] ?? '').toLowerCase();

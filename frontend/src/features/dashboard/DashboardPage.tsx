@@ -130,6 +130,9 @@ const PunchListQualityCard = lazy(() =>
 const RegionalPackCard = lazy(() =>
   import('./RegionalPackCard').then((m) => ({ default: m.RegionalPackCard })),
 );
+const DashboardMarketCasesCard = lazy(() =>
+  import('./DashboardMarketCasesCard').then((m) => ({ default: m.DashboardMarketCasesCard })),
+);
 
 /**
  * Widget ids whose card self-hides internally (renders `null` when its module
@@ -2610,6 +2613,10 @@ function DashboardPageInner() {
     // case it most needs to speak up in, so a self-hiding version would go
     // silent exactly where it is needed.
     regional_pack: <RegionalPackCard />,
+    // Same rule: never in WIDGET_NULL_FALLBACK. It waits for the pack answer
+    // so the market it leads with is decided once, and the grid's skeleton
+    // stands in meanwhile rather than a card that flips.
+    cases_market: <DashboardMarketCasesCard />,
 
     weather_site: <WeatherSiteWidget projects={projects} />,
     labour_cost: <LabourCostWidget />,
