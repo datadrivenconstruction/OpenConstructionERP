@@ -11,6 +11,11 @@
       "commands": { "allow": ["open_app_in_browser"] }
     },
     {
+      "identifier": "allow-reveal-path-in-os",
+      "description": "Show a file from this workspace in the operating system's file manager. The caller names a path, and the command opens the FOLDER that holds it rather than the file, so nothing here launches a program by extension. The path is canonicalised and must resolve inside the data folder this launcher's own backend stores files in, so a page cannot name a system folder or a network share. It reports nothing back about the machine beyond whether the folder was opened.",
+      "commands": { "allow": ["reveal_path_in_os"] }
+    },
+    {
       "identifier": "allow-open-log-file",
       "description": "Open the launcher's own diagnostic log in the default handler. The path is resolved by the launcher and cannot be supplied by the caller.",
       "commands": { "allow": ["open_log_file"] }

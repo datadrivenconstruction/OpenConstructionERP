@@ -13589,6 +13589,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "نرخ",
     "boq.compare_ct_changed": "تغییریافته",
     "boq.compare_ct_unchanged": "بدون تغییر",
+    "desktop.reveal_failed": "باز کردن آن پوشه ممکن نشد",
     "boq.model_link_action": "پیوند مدل…",
     "boq.model_link_aggregation": "تجمیع",
     "boq.model_link_agg_sum": "مجموع",

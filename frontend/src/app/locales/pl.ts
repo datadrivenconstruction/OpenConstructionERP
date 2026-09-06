@@ -14103,6 +14103,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "CJ",
     "boq.compare_ct_changed": "Zmienione",
     "boq.compare_ct_unchanged": "Bez zmian",
+    "desktop.reveal_failed": "Nie udało się otworzyć tego folderu",
     "boq.model_link_action": "Powiązanie z modelem…",
     "boq.model_link_aggregation": "Agregacja",
     "boq.model_link_agg_sum": "Suma",

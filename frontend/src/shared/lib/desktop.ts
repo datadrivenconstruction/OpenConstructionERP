@@ -186,6 +186,75 @@ function reportLinkNotOpened(url: string): void {
 }
 
 /**
+ * Show a file from the workspace in the operating system's file manager.
+ *
+ * Desktop only, and it reaches the native `reveal_path_in_os` command through
+ * the same `withGlobalTauri` invoke bridge as everything else here rather than
+ * `@tauri-apps/plugin-shell`, which is not in the bundle: importing it at
+ * runtime in the built webview throws, so a call made that way dies before it
+ * reaches the shell at all.
+ *
+ * The command opens the FOLDER holding the file, not the file, and refuses any
+ * path that does not resolve inside this installation's data folder. Both rules
+ * live in Rust rather than here, because a rule the page states is not a rule
+ * the page is held to, and because deciding whether a path names a file needs
+ * the filesystem: the regular expression this used to use guessed from the
+ * extension, and it gets a folder called `2026.09` wrong in one direction and a
+ * file with no extension wrong in the other.
+ *
+ * A false is put on screen, for the same reason `reportLinkNotOpened` exists.
+ * The access control list can refuse this before it runs, and a refusal that
+ * only reaches the console is indistinguishable to the user from a dead button.
+ * That is precisely what happened here: the refusal text travelled to us inside
+ * a bug report because it never appeared anywhere the person could see it.
+ */
+export async function revealPathInOS(path: string): Promise<boolean> {
+  if (!isTauri || !path) return false;
+  const invoke = getTauriInvoke();
+  if (!invoke) {
+    reportRevealFailed(path);
+    return false;
+  }
+  try {
+    await invoke('reveal_path_in_os', { path });
+    return true;
+  } catch (err) {
+    console.warn('reveal_path_in_os failed:', err);
+    reportRevealFailed(path, typeof err === 'string' ? err : undefined);
+    return false;
+  }
+}
+
+/**
+ * Put a reveal that did not happen in front of the user, with the path.
+ *
+ * The native command answers with a finished sentence, so it is shown as it
+ * stands rather than replaced by a generic warning: the difference between
+ * "That file is not on this computer" and "Only files inside this workspace can
+ * be shown" is the difference between a user knowing what to do next and not.
+ * The path is the fallback message and is always what the action copies,
+ * because pasting it into a file manager is the whole of the recovery.
+ */
+function reportRevealFailed(path: string, reason?: string): void {
+  useToastStore.getState().addToast(
+    {
+      type: 'warning',
+      title: i18next.t('desktop.reveal_failed', {
+        defaultValue: 'Could not open that folder',
+      }),
+      message: reason || path,
+      action: {
+        label: i18next.t('common.copy', { defaultValue: 'Copy' }),
+        onClick: () => {
+          void navigator.clipboard?.writeText(path);
+        },
+      },
+    },
+    { duration: 12_000 },
+  );
+}
+
+/**
  * Which server the desktop launcher has this window pointed at.
  *
  * `source` arrives as a finished English phrase from the launcher rather than

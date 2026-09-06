@@ -13596,6 +13596,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "מחיר יחידה",
     "boq.compare_ct_changed": "השתנה",
     "boq.compare_ct_unchanged": "ללא שינוי",
+    "desktop.reveal_failed": "לא ניתן היה לפתוח את התיקייה הזו",
     "boq.model_link_action": "קישור למודל…",
     "boq.model_link_aggregation": "צבירה",
     "boq.model_link_agg_sum": "סכום",

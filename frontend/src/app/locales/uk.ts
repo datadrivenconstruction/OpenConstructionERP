@@ -14241,6 +14241,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Розцінка",
     "boq.compare_ct_changed": "Змінено",
     "boq.compare_ct_unchanged": "Без змін",
+    "desktop.reveal_failed": "Не вдалося відкрити цю папку",
     "boq.model_link_action": "Зв'язок з моделлю…",
     "boq.model_link_aggregation": "Агрегація",
     "boq.model_link_agg_sum": "Сума",

@@ -14027,6 +14027,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Tarif",
     "boq.compare_ct_changed": "Modificat",
     "boq.compare_ct_unchanged": "Nemodificat",
+    "desktop.reveal_failed": "Dosarul nu a putut fi deschis",
     "boq.model_link_action": "Legătură model…",
     "boq.model_link_aggregation": "Agregare",
     "boq.model_link_agg_sum": "Sumă",

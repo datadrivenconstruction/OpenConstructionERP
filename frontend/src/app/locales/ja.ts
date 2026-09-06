@@ -14061,6 +14061,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "単価",
     "boq.compare_ct_changed": "変更",
     "boq.compare_ct_unchanged": "変更なし",
+    "desktop.reveal_failed": "そのフォルダを開けませんでした",
     "boq.model_link_action": "モデルにリンク…",
     "boq.model_link_aggregation": "集計方法",
     "boq.model_link_agg_sum": "合計",

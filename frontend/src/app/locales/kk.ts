@@ -13589,6 +13589,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Баға",
     "boq.compare_ct_changed": "Өзгертілді",
     "boq.compare_ct_unchanged": "Өзгермеген",
+    "desktop.reveal_failed": "Ол қалтаны ашу мүмкін болмады",
     "boq.model_link_action": "Модель байланысы…",
     "boq.model_link_aggregation": "Агрегация",
     "boq.model_link_agg_sum": "Қосынды",

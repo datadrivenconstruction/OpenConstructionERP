@@ -366,6 +366,78 @@ fn open_external_url(url: String) -> Result<(), String> {
     open_with_os_default(target).map_err(|e| format!("Could not open the link: {e}"))
 }
 
+/// Decide which folder, if any, a reveal request may open.
+///
+/// Separated from the command so the rule can be tested without a webview, an
+/// app handle or a real click. It takes the two paths already resolved by the
+/// caller and answers with the directory to hand the opener, or with the reason
+/// it will not.
+///
+/// Two bounds, and both are about what a page may reach rather than what a user
+/// may see. The target has to sit inside this workspace, so a page cannot ask
+/// the operating system to open `C:\\Windows` or a network share by naming it.
+/// And what comes back is always a DIRECTORY: a file is answered with its
+/// parent, so the file manager shows the file in place instead of the shell
+/// launching it with whatever program claims its extension. That second rule is
+/// why an executable dropped into the workspace is not a way for a page to run
+/// code.
+///
+/// `starts_with` here is `Path::starts_with`, which compares whole components
+/// rather than characters, so a sibling folder whose name merely begins with
+/// the workspace's name is outside and is refused.
+fn folder_to_reveal(root: &std::path::Path, target: &std::path::Path) -> Result<PathBuf, String> {
+    if !target.starts_with(root) {
+        return Err("Only files inside this workspace can be shown".to_string());
+    }
+    if target.is_dir() {
+        return Ok(target.to_path_buf());
+    }
+    match target.parent() {
+        Some(parent) if parent.starts_with(root) => Ok(parent.to_path_buf()),
+        _ => Err("That file has no folder inside this workspace".to_string()),
+    }
+}
+
+/// Show a file from this workspace in the operating system's file manager.
+///
+/// The file manager's "Open in OS" button used to reach for the shell plugin's
+/// own `open` command. The application window is a remote origin governed by
+/// `capabilities/app-window.json`, which grants no shell plugin permission at
+/// all, so every click was refused by the access control list before it ran.
+/// The frontend caught the rejection, wrote it to the console and returned
+/// false, and the button did nothing with nothing on screen to say why; the
+/// refusal text is what a user's bug report carried instead.
+///
+/// Granting `shell:allow-open` to the application window would have made the
+/// click work by handing page content an opener whose destination the page
+/// chooses, which the capability's own description names as the thing to think
+/// hardest about before adding. This is the narrow command instead. The caller
+/// names a path and this decides whether it is one we will show, by the rule in
+/// `folder_to_reveal`.
+///
+/// Both paths are canonicalised first, which is what makes the rule mean
+/// anything: `..` segments, symbolic links and the short names Windows still
+/// hands out all collapse before the comparison, so a path that spells its way
+/// out of the workspace is judged on what it resolves to rather than on how it
+/// is written.
+#[tauri::command]
+fn reveal_path_in_os(path: String) -> Result<(), String> {
+    let raw = path.trim();
+    if raw.is_empty() {
+        return Err("There is no path to show".to_string());
+    }
+
+    let root = workspace_data_dir().ok_or("This installation has no data folder")?;
+    let root = std::fs::canonicalize(&root)
+        .map_err(|_| "This installation's data folder could not be found".to_string())?;
+    let target = std::fs::canonicalize(PathBuf::from(raw))
+        .map_err(|_| "That file is not on this computer".to_string())?;
+
+    let folder = folder_to_reveal(&root, &target)?;
+    open_with_os_default(&folder.to_string_lossy())
+        .map_err(|e| format!("Could not open the folder: {e}"))
+}
+
 /// Combine the resolved local base URL with a caller-supplied app path.
 ///
 /// Only same-origin paths are honoured: the path must start with a single "/"
@@ -3705,6 +3777,7 @@ other explanation"
     }
 
     /// Parse a health body the way both judgements do, for the tests below.
+            reveal_path_in_os,
     fn body(json: &str) -> serde_json::Value {
         serde_json::from_str(json).expect("the test body has to be valid JSON")
     }
@@ -4229,7 +4302,7 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
             }
         }
 
-        for command in ["open_external_url", "open_app_in_browser"] {
+        for command in ["open_external_url", "open_app_in_browser", "reveal_path_in_os"] {
             assert!(
                 granted.contains(command),
                 "the application page calls {command} to put a link in front of the user, and \
@@ -4238,3 +4311,68 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         }
     }
 }
+
+    /// What a reveal request is allowed to open.
+    ///
+    /// The rule is what stands between a page naming a path and the operating
+    /// system being asked to open it, so it is tested on the two answers that
+    /// matter rather than on the happy one alone: a path inside the workspace
+    /// resolves to a folder, and a path outside it resolves to a refusal.
+    ///
+    /// Real directories are created for this. `folder_to_reveal` asks the
+    /// filesystem whether the target is a directory, so a test built out of
+    /// invented paths would exercise a different branch than a user does and
+    /// would keep passing while the real one broke.
+    #[test]
+    fn a_reveal_only_ever_opens_a_folder_inside_the_workspace() {
+        let base = std::env::temp_dir().join(format!("oe-reveal-{}", uuid::Uuid::new_v4().simple()));
+        let root = base.join("workspace");
+        let inner = root.join("files").join("project");
+        std::fs::create_dir_all(&inner).expect("the test needs a workspace on disk");
+        let outside = base.join("elsewhere");
+        std::fs::create_dir_all(&outside).expect("the test needs a folder outside it");
+
+        let file = inner.join("drawing.pdf");
+        std::fs::write(&file, b"x").expect("the test needs a file to reveal");
+        let stray = outside.join("secret.txt");
+        std::fs::write(&stray, b"x").expect("the test needs a file outside the workspace");
+
+        let root_c = std::fs::canonicalize(&root).expect("the workspace resolves");
+        let file_c = std::fs::canonicalize(&file).expect("the file resolves");
+        let inner_c = std::fs::canonicalize(&inner).expect("the folder resolves");
+        let stray_c = std::fs::canonicalize(&stray).expect("the stray file resolves");
+
+        // A file inside the workspace is answered with its folder, never itself,
+        // which is what keeps the shell from launching it by extension.
+        assert_eq!(
+            folder_to_reveal(&root_c, &file_c).expect("a file in the workspace can be shown"),
+            inner_c,
+            "a file must be shown by opening the folder that holds it"
+        );
+
+        // A folder inside the workspace is itself.
+        assert_eq!(
+            folder_to_reveal(&root_c, &inner_c).expect("a folder in the workspace can be shown"),
+            inner_c
+        );
+
+        // Anything outside is refused, and the workspace root itself is inside.
+        assert!(
+            folder_to_reveal(&root_c, &stray_c).is_err(),
+            "a path outside the workspace must be refused"
+        );
+        assert!(folder_to_reveal(&root_c, &root_c).is_ok(), "the workspace itself is inside it");
+
+        // A sibling whose name merely begins with the workspace's name is
+        // outside. This is the case a string prefix gets wrong and
+        // Path::starts_with gets right, so it is asserted rather than assumed.
+        let sibling = base.join("workspace-backup");
+        std::fs::create_dir_all(&sibling).expect("the test needs a lookalike sibling");
+        let sibling_c = std::fs::canonicalize(&sibling).expect("the sibling resolves");
+        assert!(
+            folder_to_reveal(&root_c, &sibling_c).is_err(),
+            "a folder whose name only starts with the workspace's name is not in it"
+        );
+
+        let _ = std::fs::remove_dir_all(&base);
+    }

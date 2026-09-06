@@ -14005,6 +14005,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Sazba",
     "boq.compare_ct_changed": "Změněno",
     "boq.compare_ct_unchanged": "Beze změny",
+    "desktop.reveal_failed": "Nepodařilo se otevřít tuto složku",
     "boq.model_link_action": "Model odkaz…",
     "boq.model_link_aggregation": "Agregace",
     "boq.model_link_agg_sum": "Součet",

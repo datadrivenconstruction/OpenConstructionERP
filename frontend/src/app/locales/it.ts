@@ -13537,6 +13537,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "PU",
     "boq.compare_ct_changed": "Modificate",
     "boq.compare_ct_unchanged": "Invariate",
+    "desktop.reveal_failed": "Impossibile aprire quella cartella",
     "boq.model_link_action": "Collegamento modello…",
     "boq.model_link_aggregation": "Aggregazione",
     "boq.model_link_agg_sum": "Somma",

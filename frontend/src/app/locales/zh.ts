@@ -14061,6 +14061,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "单价",
     "boq.compare_ct_changed": "已变更",
     "boq.compare_ct_unchanged": "未变更",
+    "desktop.reveal_failed": "无法打开该文件夹",
     "boq.model_link_action": "关联模型…",
     "boq.model_link_aggregation": "聚合方式",
     "boq.model_link_agg_sum": "求和",

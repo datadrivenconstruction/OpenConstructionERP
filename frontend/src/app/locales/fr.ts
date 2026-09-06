@@ -13274,6 +13274,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "PU",
     "boq.compare_ct_changed": "Modifiés",
     "boq.compare_ct_unchanged": "Inchangés",
+    "desktop.reveal_failed": "Impossible d'ouvrir ce dossier",
     "boq.model_link_action": "Lien modèle…",
     "boq.model_link_aggregation": "Agrégation",
     "boq.model_link_agg_sum": "Somme",

@@ -8550,6 +8550,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Pris",
     "boq.compare_ct_changed": "Ändrad",
     "boq.compare_ct_unchanged": "Oförändrad",
+    "desktop.reveal_failed": "Kunde inte öppna mappen",
     "boq.model_link_action": "Modellänk…",
     "boq.model_link_aggregation": "Aggregering",
     "boq.model_link_agg_sum": "Summa",

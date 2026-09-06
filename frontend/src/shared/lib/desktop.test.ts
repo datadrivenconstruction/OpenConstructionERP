@@ -192,3 +192,99 @@ describe('a link that the shell refuses to open', () => {
     expect(await toastsRaised()).toHaveLength(0);
   });
 });
+
+const FILE_PATH = 'C:\\Users\\someone\\.openestimate\\files\\project\\drawing.pdf';
+
+/**
+ * The file manager's "Open in OS" button, which was refused and said nothing.
+ *
+ * It called the shell plugin's own `open`. The application window is bound to
+ * the `app-window` capability, which grants no shell plugin permission at all,
+ * so every click was rejected by the access control list before it ran; the
+ * catch wrote the refusal to the console and returned false, and the button
+ * did nothing with nothing on screen. The refusal text reached us in a user's
+ * bug report, which is the only place it was ever visible.
+ *
+ * These pin both halves of the fix: the call goes to the granted first-party
+ * command, and a refusal is put in front of the person who clicked.
+ */
+describe('revealing a file in the OS file manager', () => {
+  it('asks the granted command, not the shell plugin the window may not call', async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined);
+    const { revealPathInOS } = await loadDesktop({ core: { invoke } });
+
+    const ok = await revealPathInOS(FILE_PATH);
+
+    expect(ok).toBe(true);
+    expect(invoke).toHaveBeenCalledWith('reveal_path_in_os', { path: FILE_PATH });
+    // The name matters more than the call: plugin:shell|open is exactly what
+    // the capability refuses, and reaching for it again is the whole bug.
+    expect(invoke).not.toHaveBeenCalledWith('plugin:shell|open', expect.anything());
+    expect(await toastsRaised()).toHaveLength(0);
+  });
+
+  it('puts a refusal on screen rather than only on the console', async () => {
+    const invoke = vi
+      .fn()
+      .mockRejectedValue('Command plugin:shell|open not allowed by ACL');
+    const { revealPathInOS } = await loadDesktop({ core: { invoke } });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const ok = await revealPathInOS(FILE_PATH);
+    await settle();
+
+    expect(ok).toBe(false);
+    const raised = await toastsRaised();
+    expect(raised).toHaveLength(1);
+    expect(raised[0]).toMatchObject({ type: 'warning' });
+  });
+
+  it('shows the reason the native command gave, not a generic warning', async () => {
+    // "Only files inside this workspace can be shown" and "That file is not on
+    // this computer" ask the reader to do different things, so the sentence is
+    // passed through rather than replaced.
+    const reason = 'Only files inside this workspace can be shown';
+    const invoke = vi.fn().mockRejectedValue(reason);
+    const { revealPathInOS } = await loadDesktop({ core: { invoke } });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await revealPathInOS(FILE_PATH);
+    await settle();
+
+    expect((await toastsRaised())[0]).toMatchObject({ message: reason });
+  });
+
+  it('offers the path for copying, so the click is recoverable', async () => {
+    const invoke = vi.fn().mockRejectedValue('nope');
+    const { revealPathInOS } = await loadDesktop({ core: { invoke } });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+
+    await revealPathInOS(FILE_PATH);
+    await settle();
+
+    const action = (await toastsRaised())[0]?.action;
+    expect(action).toBeDefined();
+    action?.onClick();
+    expect(writeText).toHaveBeenCalledWith(FILE_PATH);
+  });
+
+  it('reports a missing bridge too, which used to return false in silence', async () => {
+    const { revealPathInOS } = await loadDesktop({});
+
+    expect(await revealPathInOS(FILE_PATH)).toBe(false);
+    await settle();
+
+    expect(await toastsRaised()).toHaveLength(1);
+  });
+
+  it('does nothing in the web build, where there is no OS file manager to reach', async () => {
+    const { revealPathInOS } = await loadDesktop(undefined);
+
+    expect(await revealPathInOS(FILE_PATH)).toBe(false);
+    await settle();
+
+    expect(await toastsRaised()).toHaveLength(0);
+  });
+});

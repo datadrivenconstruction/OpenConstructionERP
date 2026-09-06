@@ -6,42 +6,28 @@
  * native finder, or copy text to the clipboard. In a browser build these
  * fall back to no-ops (or `navigator.clipboard.writeText`).
  *
- * We dynamic-import the Tauri APIs so the web bundle never resolves them
- * at build time.
+ * The reveal goes through the invoke bridge in shared/lib/desktop, not
+ * through @tauri-apps/plugin-shell. This module used to dynamic-import that
+ * package so the web bundle would never resolve it at build time, which
+ * worked in the sense that the bundle stayed clean and failed in the sense
+ * that the desktop build has no copy of it to resolve either.
  */
 
 // Desktop runtime detection now lives in shared/lib so non-file-manager code
 // (auth bootstrap, onboarding) can reuse it without importing across feature
 // boundaries. Re-export here so this module's existing consumers keep working.
-import { isTauri } from '@/shared/lib/desktop';
+import { isTauri, revealPathInOS } from '@/shared/lib/desktop';
 
 export { isTauri };
 
 export async function openInOSFinder(path: string): Promise<boolean> {
-  if (!path) return false;
-  if (isTauri) {
-    try {
-      // Plugin is only present in Tauri builds — we resolve it dynamically
-      // through a variable so tsc doesn't try to type-check the missing
-      // module, and cast the result because the web bundle has no
-      // @tauri-apps/plugin-shell dep.
-      const tauriPluginShell = '@tauri-apps/plugin-shell';
-      const mod = (await import(/* @vite-ignore */ tauriPluginShell)) as {
-        open: (target: string) => Promise<void>;
-      };
-      // openPath would open the file itself; we want the *containing folder*.
-      // Cross-platform "reveal" needs the parent directory, so we strip the
-      // trailing segment if it looks like a file.
-      const isFile = /\.[a-z0-9]{1,8}$/i.test(path);
-      const target = isFile ? path.replace(/[\\/][^\\/]+$/, '') : path;
-      await mod.open(target);
-      return true;
-    } catch (err) {
-      // Plugin might not be enabled in this build — fall through.
-      console.warn('Tauri shell open failed:', err);
-    }
-  }
-  return false;
+  // Kept under the file manager's own name because its consumers call it, but
+  // the work and the failure reporting live in shared/lib/desktop beside the
+  // outbound-link opener. Both reach native commands through the same bridge,
+  // and keeping one of them somewhere else is how the two drifted: this one was
+  // still calling the shell plugin long after the other had written down, in
+  // its own comment, why that cannot work in the built webview.
+  return revealPathInOS(path);
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {

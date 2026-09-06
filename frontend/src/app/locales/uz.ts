@@ -14220,6 +14220,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Stavka",
     "boq.compare_ct_changed": "Oʻzgargan",
     "boq.compare_ct_unchanged": "Oʻzgarmagan",
+    "desktop.reveal_failed": "Bu papkani ochib boʻlmadi",
     "boq.model_link_action": "Model havolasi…",
     "boq.model_link_aggregation": "Jamlash",
     "boq.model_link_agg_sum": "Yigʻindi",

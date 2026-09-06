@@ -14313,6 +14313,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Hind",
     "boq.compare_ct_changed": "Muudetud",
     "boq.compare_ct_unchanged": "Muutumata",
+    "desktop.reveal_failed": "Kausta ei õnnestunud avada",
     "boq.model_link_action": "Mudeli seos…",
     "boq.model_link_aggregation": "Agregeerimine",
     "boq.model_link_agg_sum": "Summa",

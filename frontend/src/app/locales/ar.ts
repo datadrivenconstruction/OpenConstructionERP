@@ -14435,6 +14435,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "سعر الوحدة",
     "boq.compare_ct_changed": "متغير",
     "boq.compare_ct_unchanged": "بدون تغيير",
+    "desktop.reveal_failed": "تعذر فتح ذلك المجلد",
     "boq.model_link_action": "ربط بالنموذج…",
     "boq.model_link_aggregation": "التجميع",
     "boq.model_link_agg_sum": "المجموع",

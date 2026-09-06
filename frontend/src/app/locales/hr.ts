@@ -13978,6 +13978,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Stopa",
     "boq.compare_ct_changed": "Promijenjeno",
     "boq.compare_ct_unchanged": "Nepromijenjeno",
+    "desktop.reveal_failed": "Mapu nije moguće otvoriti",
     "boq.model_link_action": "Model poveznica…",
     "boq.model_link_aggregation": "Agregacija",
     "boq.model_link_agg_sum": "Zbroj",

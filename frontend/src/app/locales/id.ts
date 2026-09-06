@@ -14018,6 +14018,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Harga satuan",
     "boq.compare_ct_changed": "Berubah",
     "boq.compare_ct_unchanged": "Tidak berubah",
+    "desktop.reveal_failed": "Tidak dapat membuka folder itu",
     "boq.model_link_action": "Tautan model…",
     "boq.model_link_aggregation": "Agregasi",
     "boq.model_link_agg_sum": "Jumlah",

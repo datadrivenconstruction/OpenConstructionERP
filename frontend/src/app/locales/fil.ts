@@ -13588,6 +13588,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Taripa",
     "boq.compare_ct_changed": "Nagbago",
     "boq.compare_ct_unchanged": "Hindi nagbago",
+    "desktop.reveal_failed": "Hindi mabuksan ang folder na iyon",
     "boq.model_link_action": "Koneksyon sa Modelo…",
     "boq.model_link_aggregation": "Pagsasama-sama",
     "boq.model_link_agg_sum": "Kabuuan",

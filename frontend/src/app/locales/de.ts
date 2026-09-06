@@ -14353,6 +14353,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "EP",
     "boq.compare_ct_changed": "Geändert",
     "boq.compare_ct_unchanged": "Unverändert",
+    "desktop.reveal_failed": "Ordner konnte nicht geöffnet werden",
     "boq.model_link_action": "Modellverknüpfung…",
     "boq.model_link_aggregation": "Aggregation",
     "boq.model_link_agg_sum": "Summe",

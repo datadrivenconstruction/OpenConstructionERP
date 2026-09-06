@@ -13588,6 +13588,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "রেট",
     "boq.compare_ct_changed": "পরিবর্তিত",
     "boq.compare_ct_unchanged": "অপরিবর্তিত",
+    "desktop.reveal_failed": "সেই ফোল্ডার খোলা যায়নি",
     "boq.model_link_action": "মডেল লিংক…",
     "boq.model_link_aggregation": "একত্রীকরণ",
     "boq.model_link_agg_sum": "যোগফল",

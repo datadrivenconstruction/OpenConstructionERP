@@ -14086,6 +14086,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "दर",
     "boq.compare_ct_changed": "परिवर्तित",
     "boq.compare_ct_unchanged": "अपरिवर्तित",
+    "desktop.reveal_failed": "वह फ़ोल्डर नहीं खोला जा सका",
     "boq.model_link_action": "मॉडल से लिंक…",
     "boq.model_link_aggregation": "एकीकरण",
     "boq.model_link_agg_sum": "योग",

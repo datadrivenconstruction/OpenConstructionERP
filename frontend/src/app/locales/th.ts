@@ -14060,6 +14060,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "ราคา/หน่วย",
     "boq.compare_ct_changed": "เปลี่ยนแปลง",
     "boq.compare_ct_unchanged": "ไม่เปลี่ยนแปลง",
+    "desktop.reveal_failed": "ไม่สามารถเปิดโฟลเดอร์นั้นได้",
     "boq.model_link_action": "ลิงก์โมเดล…",
     "boq.model_link_aggregation": "การรวมข้อมูล",
     "boq.model_link_agg_sum": "ผลรวม",

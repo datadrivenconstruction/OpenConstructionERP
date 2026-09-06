@@ -13345,6 +13345,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "PU",
     "boq.compare_ct_changed": "Alterados",
     "boq.compare_ct_unchanged": "Inalterados",
+    "desktop.reveal_failed": "Não foi possível abrir essa pasta",
     "boq.model_link_action": "Vínculo ao modelo…",
     "boq.model_link_aggregation": "Agregação",
     "boq.model_link_agg_sum": "Soma",

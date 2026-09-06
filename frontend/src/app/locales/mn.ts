@@ -14073,6 +14073,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Үнэ",
     "boq.compare_ct_changed": "Өөрчлөгдсөн",
     "boq.compare_ct_unchanged": "Өөрчлөгдөөгүй",
+    "desktop.reveal_failed": "Тухайн хавтсыг нээж чадсангүй",
     "boq.model_link_action": "Моделтой холбох…",
     "boq.model_link_aggregation": "Нэгтгэх",
     "boq.model_link_agg_sum": "Нийлбэр",

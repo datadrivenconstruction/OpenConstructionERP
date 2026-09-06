@@ -3515,6 +3515,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Баасы",
     "boq.compare_ct_changed": "Өзгөрдү",
     "boq.compare_ct_unchanged": "Өзгөрүүсүз",
+    "desktop.reveal_failed": "Ал папканы ачуу мүмкүн болбоду",
     "boq.model_link_action": "Модель байланышы…",
     "boq.model_link_aggregation": "Топтоо",
     "boq.model_link_agg_sum": "Сумма",

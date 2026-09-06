@@ -14203,6 +14203,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Разценка",
     "boq.compare_ct_changed": "Променени",
     "boq.compare_ct_unchanged": "Непроменени",
+    "desktop.reveal_failed": "Папката не можа да се отвори",
     "boq.model_link_action": "Връзка с модел…",
     "boq.model_link_aggregation": "Агрегиране",
     "boq.model_link_agg_sum": "Сума",

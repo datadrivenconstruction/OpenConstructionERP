@@ -13318,6 +13318,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "EP",
     "boq.compare_ct_changed": "Gewijzigd",
     "boq.compare_ct_unchanged": "Ongewijzigd",
+    "desktop.reveal_failed": "Kon die map niet openen",
     "boq.model_link_action": "Modelkoppeling…",
     "boq.model_link_aggregation": "Aggregatie",
     "boq.model_link_agg_sum": "Som",

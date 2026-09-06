@@ -14019,6 +14019,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Đơn giá",
     "boq.compare_ct_changed": "Đã thay đổi",
     "boq.compare_ct_unchanged": "Không đổi",
+    "desktop.reveal_failed": "Không thể mở thư mục đó",
     "boq.model_link_action": "Liên kết mô hình…",
     "boq.model_link_aggregation": "Tổng hợp",
     "boq.model_link_agg_sum": "Tổng",

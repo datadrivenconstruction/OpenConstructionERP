@@ -14061,6 +14061,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "단가",
     "boq.compare_ct_changed": "변경됨",
     "boq.compare_ct_unchanged": "변경 없음",
+    "desktop.reveal_failed": "해당 폴더를 열 수 없습니다",
     "boq.model_link_action": "모델 링크…",
     "boq.model_link_aggregation": "집계",
     "boq.model_link_agg_sum": "합계",

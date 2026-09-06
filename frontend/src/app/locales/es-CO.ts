@@ -13882,6 +13882,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "PU",
     "boq.compare_ct_changed": "Modificadas",
     "boq.compare_ct_unchanged": "Sin cambios",
+    "desktop.reveal_failed": "No se pudo abrir esa carpeta",
     "boq.model_link_action": "Vínculo al modelo…",
     "boq.model_link_aggregation": "Agregación",
     "boq.model_link_agg_sum": "Suma",

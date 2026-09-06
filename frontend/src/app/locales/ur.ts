@@ -13589,6 +13589,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "ریٹ",
     "boq.compare_ct_changed": "تبدیل شدہ",
     "boq.compare_ct_unchanged": "غیر تبدیل شدہ",
+    "desktop.reveal_failed": "وہ فولڈر نہیں کھل سکا",
     "boq.model_link_action": "ماڈل لنک…",
     "boq.model_link_aggregation": "مجموعیت",
     "boq.model_link_agg_sum": "مجموعہ",

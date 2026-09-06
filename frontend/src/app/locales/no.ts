@@ -8518,6 +8518,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Pris",
     "boq.compare_ct_changed": "Endret",
     "boq.compare_ct_unchanged": "Uendret",
+    "desktop.reveal_failed": "Kunne ikke åpne mappen",
     "boq.model_link_action": "Modellkobling...",
     "boq.model_link_aggregation": "Aggregering",
     "boq.model_link_agg_sum": "Sum",

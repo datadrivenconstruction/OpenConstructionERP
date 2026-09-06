@@ -14673,6 +14673,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Цена",
     "boq.compare_ct_changed": "Изменено",
     "boq.compare_ct_unchanged": "Без изменений",
+    "desktop.reveal_failed": "Не удалось открыть эту папку",
     "boq.model_link_action": "Связь с моделью…",
     "boq.model_link_aggregation": "Агрегация",
     "boq.model_link_agg_sum": "Сумма",

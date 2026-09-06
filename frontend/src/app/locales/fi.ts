@@ -14041,6 +14041,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Hinta",
     "boq.compare_ct_changed": "Muuttunut",
     "boq.compare_ct_unchanged": "Muuttumaton",
+    "desktop.reveal_failed": "Kansion avaaminen epäonnistui",
     "boq.model_link_action": "Mallilinkki…",
     "boq.model_link_aggregation": "Yhdistäminen",
     "boq.model_link_agg_sum": "Summa",

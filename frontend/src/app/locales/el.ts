@@ -13625,6 +13625,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Τιμή",
     "boq.compare_ct_changed": "Άλλαξε",
     "boq.compare_ct_unchanged": "Αμετάβλητο",
+    "desktop.reveal_failed": "Δεν ήταν δυνατό το άνοιγμα αυτού του φακέλου",
     "boq.model_link_action": "Σύνδεση μοντέλου…",
     "boq.model_link_aggregation": "Συγκέντρωση",
     "boq.model_link_agg_sum": "Άθροισμα",

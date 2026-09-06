@@ -3472,6 +3472,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Rate",
     "boq.compare_ct_changed": "Changed",
     "boq.compare_ct_unchanged": "Unchanged",
+    "desktop.reveal_failed": "Could not open that folder",
     "boq.model_link_action": "Model link…",
     "boq.model_link_aggregation": "Aggregation",
     "boq.model_link_agg_sum": "Sum",

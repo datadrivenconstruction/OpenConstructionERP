@@ -14077,6 +14077,7 @@ const resource = {
     "boq.compare_ct_rate_changed": "Birim fiyat",
     "boq.compare_ct_changed": "Değişti",
     "boq.compare_ct_unchanged": "Değişmedi",
+    "desktop.reveal_failed": "O klasör açılamadı",
     "boq.model_link_action": "Model bağlantısı…",
     "boq.model_link_aggregation": "Toplulaştırma",
     "boq.model_link_agg_sum": "Toplam",
