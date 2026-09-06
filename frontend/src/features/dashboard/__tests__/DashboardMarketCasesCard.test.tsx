@@ -146,7 +146,7 @@ beforeEach(() => {
   packs.current = { active: false };
   packs.installed = { installed: [], active_slug: null };
   useDashboardLayoutStore.setState({ order: [], hidden: [], spans: {} });
-  useCasesStore.setState({ region: null });
+  useCasesStore.setState({ region: 'all' });
 });
 
 describe('DashboardMarketCasesCard, the market it leads with', () => {
@@ -239,7 +239,7 @@ describe('DashboardMarketCasesCard, the other markets', () => {
 
     // Pressing a chip is looking, not choosing: a reader who opens the
     // catalogue next must find all 220 cases, not the ones they glanced at.
-    expect(useCasesStore.getState().region).toBeNull();
+    expect(useCasesStore.getState().region).toBe('all');
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
