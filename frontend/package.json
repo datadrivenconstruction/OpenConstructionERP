@@ -19,6 +19,8 @@
     "lint:tailwind": "node scripts/check_tailwind_conflicts.cjs",
     "lint:rtl": "node scripts/check_rtl_side_collapse.cjs",
     "lint:unicode": "node -e \"const{execFileSync}=require('child_process');const py=process.platform==='win32'?'python':'python3';try{execFileSync(py,['scripts/check_zero_width.py','frontend/src'],{cwd:'..',stdio:'inherit'})}catch(e){process.exit(e.status||1)}\"",
+    "lint:case-drift": "node scripts/check-case-translation-drift.mjs --ratchet",
+    "lint:case-coverage": "node scripts/check-case-coverage.mjs",
     "typecheck": "node --max-old-space-size=9216 ./node_modules/typescript/bin/tsc --noEmit && npm run typecheck:e2e",
     "typecheck:e2e": "node --max-old-space-size=9216 ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.e2e.json && node --max-old-space-size=9216 ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.e2e-root.json && node --max-old-space-size=9216 ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.configs.json",
     "api:generate": "openapi-typescript http://localhost:8000/api/openapi.json -o src/shared/lib/api-types.ts"

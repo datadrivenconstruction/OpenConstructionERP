@@ -1030,6 +1030,32 @@ jobs:
         if: ${{ !cancelled() }}
         run: python scripts/check_case_playbook_catalogue_locales.py
 
+      # The gate above holds the finished languages to the catalogue text:
+      # title, description and long description. Nothing held anyone to the
+      # step text, which is where the gap is. 220 playbooks name 7037 keys
+      # and most offered locales do not answer about 3000 of them, a number
+      # that grew with every new case because no gate could see it grow: the
+      # orphan gate reads literal t() calls and here the key is a variable,
+      # and the drift check skips a key that was never translated. This
+      # ratchet records, per locale and per playbook, what each locale does
+      # not answer, and fails when any count is higher than recorded, which
+      # is a key a locale had and lost or a case that shipped without its
+      # strings. --update only ever lowers a number, so the floor moves one
+      # way. It also owns the card_complete list the gate above reads, and
+      # promotes a language into it the day the language gets there.
+      #
+      # The proof step runs first, for the reason the render guard's does: a
+      # ratchet that had stopped firing would report a clean tree.
+      - name: Prove the case coverage ratchet can fail
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-coverage.mjs --selftest
+        working-directory: frontend
+
+      - name: Check no case answers fewer translated keys than the manifest records
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-coverage.mjs
+        working-directory: frontend
+
       - name: Prove the payment application sense gate can fail
         if: ${{ !cancelled() }}
         run: python scripts/check_payment_application_sense.py --selftest

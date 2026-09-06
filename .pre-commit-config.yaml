@@ -531,7 +531,20 @@ repos:
         entry: python scripts/check_case_playbook_catalogue_locales.py
         language: system
         pass_filenames: false
-        files: ^(frontend/src/features/cases/data/.*\.playbook\.ts|frontend/src/app/locales/.*\.ts|scripts/check_case_playbook_catalogue_locales\.py)$
+        files: ^(frontend/src/features/cases/data/.*\.playbook\.ts|frontend/src/app/locales/.*\.ts|frontend/src/features/cases/case-coverage-manifest\.json|scripts/check_case_playbook_catalogue_locales\.py)$
+
+      # The hook above holds the finished languages to the catalogue text.
+      # This one holds every offered language to the step text it already
+      # answers: a floor per locale and per playbook that only moves down,
+      # so a case cannot ship without its strings and a locale cannot lose
+      # a key it had. The manifest is in the pattern because the floor is
+      # part of the check.
+      - id: case-coverage-ratchet
+        name: Gate a case that answers fewer translated keys than the manifest records
+        entry: node frontend/scripts/check-case-coverage.mjs
+        language: system
+        pass_filenames: false
+        files: ^(frontend/src/features/cases/data/.*\.playbook\.ts|frontend/src/app/locales/.*\.ts|frontend/src/app/i18n\.ts|frontend/src/features/cases/case-coverage-manifest\.json|frontend/scripts/check-case-coverage\.mjs)$
 
       # "Payment application" here is a claim for work done, and seventeen
       # locales had it as a phone app. That class of fix does not stay fixed: a

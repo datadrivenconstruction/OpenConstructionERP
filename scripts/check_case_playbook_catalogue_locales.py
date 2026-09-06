@@ -17,9 +17,13 @@ commit.
 So this gate does not ask for every language. Requiring thirty one translations
 before a playbook may land would stop the case library growing, and the library
 growing is the point. It asks only that the languages which are *already*
-finished stay finished. Those are listed in REFERENCE_LOCALES below, and the
-list is meant to grow: when a language reaches full catalogue coverage, add it
-here and it can never quietly regress afterwards.
+finished stay finished. Those are the ``card_complete`` list in
+``frontend/src/features/cases/case-coverage-manifest.json``, and the list grows
+by itself: ``frontend/scripts/check-case-coverage.mjs --update`` promotes a
+language the day it reaches full catalogue coverage and never takes one out, so
+a language that got there can never quietly regress afterwards. The list used to
+be a constant here; the step-level ratchet in that script is this gate's sibling
+and needs the same list, and two copies of it would have drifted apart.
 
 Scope is the catalogue only, meaning the title, the one line description and the
 long description. Those are what a reader sees in the case list before opening
@@ -44,10 +48,7 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(REPO, "frontend", "src", "features", "cases", "data")
 LOCALES = os.path.join(REPO, "frontend", "src", "app", "locales")
-
-# Languages at full catalogue coverage. Add a language here once it reaches
-# parity; never remove one to make a red gate green.
-REFERENCE_LOCALES = ("de", "es", "fr", "pt")
+MANIFEST = os.path.join(REPO, "frontend", "src", "features", "cases", "case-coverage-manifest.json")
 
 _Q = '"'
 _BS = chr(92)
@@ -74,6 +75,27 @@ def playbook_keys(data_dir: str) -> dict[str, set[str]]:
         if keys:
             out[os.path.basename(path)] = keys
     return out
+
+
+def reference_locales(manifest_path: str = MANIFEST) -> tuple[str, ...]:
+    """The finished languages, as check-case-coverage.mjs last recorded them.
+
+    Read from the manifest rather than held here so that there is one list. A
+    manifest without the list is a broken tree and not a clean one, so this
+    stops rather than falling back to a guess about which languages are done.
+    """
+    try:
+        with open(manifest_path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"cannot read card_complete from {manifest_path}: {exc}") from exc
+    locales = tuple(data.get("card_complete") or ())
+    if not locales:
+        raise SystemExit(
+            f"{manifest_path} lists no card_complete locale; "
+            "record one with: node frontend/scripts/check-case-coverage.mjs --update"
+        )
+    return locales
 
 
 def locale_keys(path: str) -> set[str]:
@@ -152,14 +174,15 @@ def main() -> int:
     if args.selftest:
         return selftest()
 
-    problems = check(DATA, LOCALES, REFERENCE_LOCALES)
+    reference = reference_locales()
+    problems = check(DATA, LOCALES, reference)
     if args.json:
         print(json.dumps({"missing": problems}, indent=1))
         return 1 if problems else 0
 
     total = len(playbook_keys(DATA))
     if not problems:
-        print(f"Every one of the {total} case playbooks has its catalogue text in {', '.join(REFERENCE_LOCALES)}.")
+        print(f"Every one of the {total} case playbooks has its catalogue text in {', '.join(reference)}.")
         return 0
 
     print(f"{len(problems)} catalogue strings are missing from a finished language.\n")
@@ -169,10 +192,10 @@ def main() -> int:
         print(f"  ... and {len(problems) - 60} more")
     print(
         "\nA playbook added without these renders English to everyone who reads "
-        f"{' or '.join(REFERENCE_LOCALES)}, and nothing else reports it.\n"
+        f"{' or '.join(reference)}, and nothing else reports it.\n"
         "Translate the catalogue strings, or if a language genuinely is not "
-        "finished, take it out of REFERENCE_LOCALES deliberately rather than to "
-        "clear this message."
+        "finished, take it out of card_complete in the manifest by hand and "
+        "deliberately, rather than to clear this message."
     )
     return 1
 

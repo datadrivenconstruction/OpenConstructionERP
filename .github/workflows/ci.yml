@@ -639,6 +639,33 @@ jobs:
         if: ${{ !cancelled() }}
         run: node ../scripts/check_e2e_spec_coverage.mjs
 
+      - name: Prove the case coverage ratchet can fail
+        # A gate only ever seen passing is indistinguishable from one that
+        # cannot fail. This builds playbooks and locales in memory, loses a
+        # key, ships a case without strings, and fails if the check stays
+        # quiet on any of it.
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-coverage.mjs --selftest
+
+      - name: Check no case answers fewer translated keys than the manifest records
+        # A case playbook names its strings by key and carries the English
+        # inline, so a key no locale answers renders English in that locale
+        # and nothing else reports it: the orphan gate reads literal t()
+        # calls and here the key is a variable off a data row, and the drift
+        # check (run by caseTranslationDrift.test.ts in the step above) skips
+        # a key that was never translated because it cannot have gone stale.
+        # This counts what every offered locale still does not answer, per
+        # playbook, against a committed floor that --update can only lower.
+        # Measured on 2026-09-06 over 220 playbooks, 7037 keys and 40 locales,
+        # so it pins the debt where it stands rather than clearing it.
+        #
+        # Last in the job and under !cancelled() on purpose: a missing
+        # translation must not skip the build and the tests, and a failed
+        # build must not hide a missing translation. On all three OSes for
+        # the reason the two steps above give: it reads the tree by path.
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-coverage.mjs
+
   backend-cross-os:
     name: Backend CI (${{ matrix.os }}, embedded PG, shard ${{ matrix.shard }}/3)
     # GitHub Actions service containers are Linux-only, so the Windows and macOS
