@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '16.9.0',
+    date: '2026-09-06',
+    tag: 'NEW',
+    summary:
+      'The dashboard now leads with the cases written for the country the reader works in. Eighty of the 220 guided cases name a market, and nothing on the front page used to say so: a site manager in Germany opened seventeen tiles of which none was necessarily German, while thirteen German cases sat in the catalogue behind a market row they had to know to look for. The card decides which market to lead with in three steps and says which one answered. An applied regional pack goes first, because switching a pack on says more about where somebody works than the language their software is in. Then the country the language registry declares, through the same helper the catalogue orders itself by, so the hub and the dashboard can never disagree about what a language means. Then, only for a language whose own country has no cases, the nearest market its readers work to, offered as a suggestion and worded as one: a reader in Chile meets the Spanish cases under a heading that says cases by market rather than cases for your market. Every other market sits below as chips that switch the list in place, and pressing one is looking rather than choosing, so it does not narrow the catalogue opened next. A quantity can also be measured by hand now, with no drawing and no model. A bill position carries a measurement sheet where each line has a description, how many times it repeats, up to three dimensions and a plus or minus; the sheet compares its total against the position and applying it writes the total in, keeping the lines so the number can be traced. The engine behind it had shipped several releases ago and nothing in the interface had ever called it. The case catalogue also speaks far more of its languages: card strings for the newest market cases went into thirty locales, the ten Indian cases were finished in Bengali, and the card tier is genuinely complete in twenty nine languages, with a ratchet that fails the build if a locale ever answers less. Two desktop faults are fixed, showing a file in its folder, which had been registered inside the test module rather than the handler list, and the unpacked copies a forced stop used to leave behind.',
+  },
+  {
     version: '16.8.3',
     date: '2026-09-06',
     tag: 'FIX',
