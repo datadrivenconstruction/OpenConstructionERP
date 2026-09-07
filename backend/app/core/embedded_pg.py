@@ -253,17 +253,49 @@ def boot(data_dir: Path | str) -> bool:
     # check placed after it would be dead code on exactly the machines it is
     # written for.
     #
-    # Only while the cluster still has to be created. A PG_VERSION that is
-    # already there is proof these paths were once short enough to work, and
-    # refusing to open a database that opened yesterday would be a worse bug than
-    # the one this fixes - so that case is logged and allowed through. It is not
-    # hypothetical: reinstalling into a deeper directory while keeping the data
-    # directory reaches it. "openconstructionerp doctor" runs the same
+    # Only while the cluster still has to be created, and PG_VERSION is how that
+    # is read. Worth stating why, because the obvious reason is the wrong one and
+    # was written here before: "the paths were once short enough to work" is
+    # evidence about the DATA directory, and this same gate also lets through a
+    # problem measured on the INSTALL directory, which a deeper reinstall can
+    # have changed underneath a data directory that never moved.
+    #
+    # What actually licenses it is that the deep names are needed to CREATE the
+    # cluster. initdb derives its support directory from its own executable and
+    # scans the whole timezone tree to identify the machine's zone, which is
+    # where _PGINSTALL_LONGEST_RELATIVE comes from; a postmaster attaching to a
+    # cluster that exists opens neither. So PG_VERSION reads as "initdb is not
+    # about to run", and that is a statement about the install directory too.
+    #
+    # Kept as a warning rather than tightened into a refusal because a machine
+    # measured at 211 characters, over the 195 quoted at it, booted through
+    # migration to healthy. Refusing it would break a working install to make the
+    # arithmetic look tidy. Refusing to open a database that opened yesterday
+    # would be a worse bug than the one this fixes.
+    #
+    # It is not hypothetical: reinstalling into a deeper directory while keeping
+    # the data directory reaches it. "openconstructionerp doctor" runs the same
     # measurement with no such gate, which is where that user finds it.
     too_deep = windows_path_limit_problem(pgdata)
     if too_deep is not None:
         if (pgdata / "PG_VERSION").exists():
             logger.warning("%s", too_deep.message)
+            # Say which of the two outcomes this is and what decided it. Both
+            # branches used to emit this identical paragraph, so the length and
+            # the limit in it read as the whole rule - and they are not the rule.
+            # Three installs measured on one Windows machine: 213 characters
+            # refused, 207 refused, 211 started and ran. All three were over the
+            # same 195, and what separated them was this PG_VERSION, not their
+            # length. A reader who is shown only the arithmetic concludes the
+            # arithmetic is broken, or shortens 213 to 207 and gets the same
+            # refusal for the same reason they were never told.
+            logger.warning(
+                "Starting anyway: the local database in %s already exists, so it is not being "
+                "created now and creating it is the step that needs those names to fit. The same "
+                "path becomes a refusal if this data directory is ever recreated, on a new machine "
+                "or after deleting it, so the folder above is still worth shortening.",
+                pgdata,
+            )
         else:
             _fatal_detail = too_deep.message
             # The stage detail carries both numbers, because on the desktop the
@@ -273,11 +305,14 @@ def boot(data_dir: Path | str) -> bool:
             # characters by construction and the checklist line does not wrap:
             # whichever half comes last is the half that runs off the edge, and
             # a reader who can see only one half needs the one they can act on.
+            #
+            # It names creating the database rather than calling the number a
+            # maximum, because the branch above starts on paths over it.
             emit_stage(
                 "pg",
                 "fail",
-                f"path too long: {too_deep.length} characters, and {too_deep.limit} "
-                f"is the maximum here, for {too_deep.directory}",
+                f"path too long to create the local database: {too_deep.length} characters, and "
+                f"{too_deep.limit} is the most that fits, for {too_deep.directory}",
             )
             logger.error("%s", too_deep.message)
             return False
@@ -1323,6 +1358,14 @@ def _path_limit_problem(directory: Path, longest_relative: int, opening: str, fi
     below it, so what has to fit is the directory, a separator, and the longest
     of those names; the directory itself being under 259 characters proves
     nothing. Returns ``None`` when there is room.
+
+    The message says what needs the room rather than declaring the number an
+    unconditional maximum, because :func:`boot` does not treat it as one: a
+    cluster that already exists is started on a path over this limit instead of
+    being refused. Wording it as "the most that fits" was the flat assertion two
+    readers checked it against, and on the machine that boots at 211 characters
+    with 195 quoted at it, the number reads as simply wrong. The caller that
+    knows which of the two outcomes it is taking says so in its own sentence.
     """
     limit = _WINDOWS_MAX_PATH - 1 - longest_relative
     text = _measured_path_text(directory)
@@ -1330,8 +1373,9 @@ def _path_limit_problem(directory: Path, longest_relative: int, opening: str, fi
         return None
     message = (
         f"{opening} The folder is {text}, which is {len(text)} characters long. "
-        f"{limit} is the most that fits, because Windows caps a full path at {_WINDOWS_MAX_PATH} "
-        f"characters and the longest name below that folder is {longest_relative} characters. "
+        f"Fitting everything PostgreSQL keeps under that folder needs it to be {limit} characters "
+        f"or shorter, because Windows caps a full path at {_WINDOWS_MAX_PATH} characters and the "
+        f"longest name below that folder is {longest_relative} characters. "
         f"{fix} "
         f"The files are not missing and the download was not damaged, so reinstalling into the "
         f"same place will report exactly this again. Turning on LongPathsEnabled in Windows does "
@@ -1399,27 +1443,18 @@ def windows_path_limit_problem(pgdata: Path | str) -> PathTooLong | None:
     application runs on allows paths in the thousands, so there is nothing here to
     measure and a check that fired would only be wrong.
 
-    Returns the first problem found, install directory before data directory,
-    because a user with both would have to move the install anyway. ``None``
-    means no problem was found, including the cases where the installation cannot
-    be located at all.
+    Returns the install directory's problem before the data directory's, because
+    a user with both would have to move the install anyway. When both are too
+    long the returned message names the data directory as well, rather than
+    sending the reader off to move the install and then refusing them a second
+    time with a different number once they are back. ``None`` means no problem
+    was found, including the cases where the installation cannot be located at
+    all.
     """
     if not path_limit_applies():
         return None
 
-    install = _bundled_install_dir()
-    if install is not None:
-        problem = _path_limit_problem(
-            install,
-            _PGINSTALL_LONGEST_RELATIVE,
-            "The PostgreSQL that ships with this application sits too deep in the filesystem "
-            "for Windows to let it open its own files.",
-            "Install OpenConstructionERP somewhere shorter, for example C:\\OpenConstructionERP, and this goes away.",
-        )
-        if problem is not None:
-            return problem
-
-    return _path_limit_problem(
+    data_problem = _path_limit_problem(
         Path(pgdata),
         _PGDATA_LONGEST_RELATIVE,
         "The folder the local database lives in sits too deep in the filesystem for Windows to "
@@ -1427,6 +1462,29 @@ def windows_path_limit_problem(pgdata: Path | str) -> PathTooLong | None:
         "Point the application at a shorter data directory with --data-dir (or the OE_DATA_DIR "
         "environment variable), for example C:\\OpenConstructionERP\\data.",
     )
+
+    install = _bundled_install_dir()
+    if install is not None:
+        install_problem = _path_limit_problem(
+            install,
+            _PGINSTALL_LONGEST_RELATIVE,
+            "The PostgreSQL that ships with this application sits too deep in the filesystem "
+            "for Windows to let it open its own files.",
+            "Install OpenConstructionERP somewhere shorter, for example C:\\OpenConstructionERP, and this goes away.",
+        )
+        if install_problem is not None:
+            if data_problem is None:
+                return install_problem
+            return install_problem._replace(
+                message=(
+                    f"{install_problem.message} The data directory is too deep as well: "
+                    f"{_measured_path_text(data_problem.directory)} is {data_problem.length} characters "
+                    f"and needs to be {data_problem.limit} or shorter, so moving only the installation "
+                    f"leaves this refusal in place."
+                )
+            )
+
+    return data_problem
 
 
 def _initdb_args(pgdata: Path) -> tuple[str, ...]:

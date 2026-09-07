@@ -557,12 +557,12 @@ def check_path_length(data_dir: Path) -> Check | None:
     doctor and the boot refusal can never disagree about who they apply to.
 
     Ungated on the cluster, unlike the refusal in
-    :func:`app.core.embedded_pg.boot`. That one goes quiet once the cluster
-    exists, because an existing cluster is proof the paths were once short enough
-    and refusing a database that opened yesterday would be the worse bug. Doctor
-    is where somebody looks after it stops working, and reinstalling into a
-    deeper directory while keeping the data directory lands exactly there, so
-    this one always measures.
+    :func:`app.core.embedded_pg.boot`. That one drops to a warning once the
+    cluster exists, because creating the cluster is the step that needs the
+    deepest names and an existing one is not about to be created again. Doctor is
+    where somebody looks after it stops working, and reinstalling into a deeper
+    directory while keeping the data directory lands exactly there, so this one
+    always measures.
 
     Imported inside the function because this file keeps its top-level imports to
     the standard library so the CLI starts fast.
@@ -578,7 +578,8 @@ def check_path_length(data_dir: Path) -> Check | None:
     return Check(
         "Path length",
         "error",
-        f"{problem.directory} is {problem.length} characters, and {problem.limit} is the maximum",
+        f"{problem.directory} is {problem.length} characters, and creating the local database "
+        f"needs {problem.limit} or shorter",
         problem.message,
     )
 

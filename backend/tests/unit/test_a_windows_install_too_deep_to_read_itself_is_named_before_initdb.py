@@ -118,6 +118,62 @@ def on_a_windows_installed_too_deep(monkeypatch: pytest.MonkeyPatch) -> list[Pat
     return attempts
 
 
+#: The longest ``pginstall`` path that leaves room for the files under it.
+#:
+#: Derived here rather than written as 195, so the boundary tests below follow a
+#: change to either constant instead of quietly measuring the wrong side of it.
+INSTALL_LIMIT = embedded_pg._WINDOWS_MAX_PATH - 1 - embedded_pg._PGINSTALL_LONGEST_RELATIVE
+
+
+def an_install_directory_of(length: int) -> Path:
+    """A synthetic ``pginstall`` path of exactly *length* characters.
+
+    Never created on disk: what is under test is arithmetic and a branch, and a
+    real directory of this depth cannot be made by the API that would have to
+    make it.
+    """
+    directory = Path("C:\\" + "i" * (length - len("C:\\")))
+    assert len(str(directory)) == length, "the synthetic path is not the length the case asked for"
+    return directory
+
+
+def a_data_directory(tmp_path: Path, *, with_cluster: bool) -> Path:
+    """The path ``boot`` will use, with or without the ``PG_VERSION`` that gates it.
+
+    The version written matches the ``_bundled_major`` stub, so the version
+    conflict check further down ``boot`` stays out of the way of what is measured
+    here.
+    """
+    pgdata = tmp_path / "pgdata"
+    if with_cluster:
+        pgdata.mkdir()
+        (pgdata / "PG_VERSION").write_text("16\n", encoding="utf-8")
+    return pgdata
+
+
+@pytest.fixture
+def on_windows_installed_at(monkeypatch: pytest.MonkeyPatch):
+    """Boot on Windows with the install depth chosen per case, recording initdb.
+
+    Separate from ``on_a_windows_installed_too_deep``, which pins one path 62
+    characters over the limit. That is the depth at which every branch looks the
+    same, so it cannot show which input decides between them.
+
+    A fixture rather than a helper called inside the test body because ``boot``
+    early-returns ``True`` while ``_server`` is set and keeps ``_fatal_detail`` at
+    module scope. Both are reset by ``record_initdb_instead_of_running_it``, and
+    parametrised cases get that reset once each only if it runs per case.
+    """
+    attempts = record_initdb_instead_of_running_it(monkeypatch)
+    monkeypatch.setattr(embedded_pg, "path_limit_applies", lambda: True)
+
+    def install_at(length: int) -> list[Path]:
+        monkeypatch.setattr(embedded_pg, "_bundled_install_dir", lambda: an_install_directory_of(length))
+        return attempts
+
+    return install_at
+
+
 # ── The constants, re-derived from what actually ships ───────────────────────
 
 
@@ -333,6 +389,141 @@ def test_boot_does_not_refuse_where_the_limit_does_not_exist(
     assert embedded_pg.last_fatal_detail() is None, (
         "a path length was recorded as the reason a boot failed on a platform where it is not a reason"
     )
+
+
+# ── Which input actually picks the branch ────────────────────────────────────
+
+
+@pytest.mark.parametrize("cluster_exists", [False, True], ids=["fresh", "cluster on disk"])
+@pytest.mark.parametrize("install_length", [INSTALL_LIMIT, INSTALL_LIMIT + 1], ids=["at the limit", "one over"])
+def test_the_outcome_at_the_boundary_turns_on_the_cluster_and_not_on_the_length(
+    on_windows_installed_at,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    install_length: int,
+    cluster_exists: bool,
+) -> None:
+    """Both inputs, both sides of the boundary, in one table.
+
+    Measured on one Windows machine across three real installs: 213 characters
+    refused, 207 refused, 211 started and ran to healthy. All three were over the
+    same limit, and the message quoted that limit as though it were the rule -
+    which made 195 look wrong to the reader at 211, and made shortening 213 to
+    207 look like a fix.
+
+    The other tests around this one pin a path 62 characters over, where refusing
+    and warning cannot be told apart by anything, so they would pass whichever
+    input the branch read. This one moves each input by one step. Length moves the
+    limit boundary and nothing else; the cluster moves the outcome.
+    """
+    attempts = on_windows_installed_at(install_length)
+    pgdata = a_data_directory(tmp_path, with_cluster=cluster_exists)
+    caplog.set_level(logging.INFO, logger=embedded_pg.__name__)
+
+    over_the_limit = install_length > INSTALL_LIMIT
+    should_refuse = over_the_limit and not cluster_exists
+
+    if should_refuse:
+        assert embedded_pg.boot(tmp_path) is False
+        assert attempts == [], "the bring-up ran initdb on an install it had measured as too deep"
+    else:
+        with pytest.raises(InitdbAttempted):
+            embedded_pg.boot(tmp_path)
+        assert attempts == [pgdata.resolve()], (
+            f"an install of {install_length} characters was refused with cluster_exists="
+            f"{cluster_exists}, where the same code accepts it in the neighbouring case"
+        )
+
+    measured = [record.getMessage() for record in caplog.records if "characters long" in record.getMessage()]
+    failures = [record.getMessage() for record in caplog.records if record.getMessage().startswith("STAGE:pg:fail")]
+    problem = embedded_pg.windows_path_limit_problem(pgdata)
+
+    if not over_the_limit:
+        assert problem is None, (
+            f"{install_length} characters is exactly the limit, so the deepest file under it lands on "
+            f"character {embedded_pg._WINDOWS_MAX_PATH} and still fits"
+        )
+        assert measured == [] and failures == []
+        assert embedded_pg.last_fatal_detail() is None
+        return
+
+    assert problem is not None
+    assert measured, "a boot that measured the path over the limit said nothing about it"
+
+    if should_refuse:
+        assert embedded_pg.last_fatal_detail() == problem.message
+        assert len(failures) == 1, f"expected one STAGE:pg:fail marker, got {failures}"
+        assert str(problem.length) in failures[0] and str(problem.limit) in failures[0]
+        assert "create the local database" in failures[0], (
+            "the checklist line quotes a limit without saying what needs the room, which is the "
+            "reading that makes a neighbouring machine over the same limit look like a contradiction"
+        )
+    else:
+        assert embedded_pg.last_fatal_detail() is None
+        assert failures == [], "a cluster that already exists was refused for the depth of the install"
+        warnings = [record.getMessage() for record in caplog.records if record.levelno == logging.WARNING]
+        assert problem.message in warnings
+        assert any("already exists" in warning for warning in warnings), (
+            "the boot that let a path over the limit through never named what let it through, so "
+            "the length and the limit read as the whole rule"
+        )
+
+
+@pytest.mark.parametrize("install_length", [207, 211, 213])
+def test_no_length_over_the_limit_is_special_on_a_machine_with_no_cluster_yet(
+    on_windows_installed_at, tmp_path: Path, install_length: int
+) -> None:
+    """The three lengths measured in the field, held to one answer.
+
+    211 booting was not a property of 211. Written against the reported numbers
+    rather than against the limit so that a change which lets one of them through
+    on its length has to come here and say so.
+    """
+    attempts = on_windows_installed_at(install_length)
+    assert install_length > INSTALL_LIMIT, "the reported lengths no longer straddle the limit under test"
+
+    assert embedded_pg.boot(tmp_path) is False
+    assert attempts == []
+    assert embedded_pg.last_fatal_detail() is not None
+
+
+@pytest.mark.parametrize("install_length", [207, 211, 213])
+def test_the_same_three_lengths_all_start_once_the_cluster_is_there(
+    on_windows_installed_at, tmp_path: Path, install_length: int
+) -> None:
+    """The other half of the pair above, which is what makes the pair mean anything."""
+    attempts = on_windows_installed_at(install_length)
+    pgdata = a_data_directory(tmp_path, with_cluster=True)
+
+    with pytest.raises(InitdbAttempted):
+        embedded_pg.boot(tmp_path)
+    assert attempts == [pgdata.resolve()]
+    assert embedded_pg.last_fatal_detail() is None
+
+
+def test_moving_only_the_installation_is_not_the_advice_when_the_data_directory_is_deep_too(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Advice that leaves a second refusal waiting is advice that does not work.
+
+    The install problem is still the one returned, because a user with both has
+    to move the install anyway. Returning it alone sent them to do exactly that
+    and then refused them a second time with a different number and a different
+    directory.
+    """
+    deep_install = an_install_directory_of(INSTALL_LIMIT + 1)
+    data_limit = embedded_pg._WINDOWS_MAX_PATH - 1 - embedded_pg._PGDATA_LONGEST_RELATIVE
+    deep_data = Path("C:\\" + "d" * (data_limit + 1 - len("C:\\")))
+
+    monkeypatch.setattr(embedded_pg, "path_limit_applies", lambda: True)
+    monkeypatch.setattr(embedded_pg, "_bundled_install_dir", lambda: deep_install)
+
+    problem = embedded_pg.windows_path_limit_problem(deep_data)
+    assert problem is not None
+    assert problem.directory == deep_install
+    assert problem.longest_relative == embedded_pg._PGINSTALL_LONGEST_RELATIVE
+    assert str(deep_data) in problem.message, "the second directory that will refuse them went unnamed"
+    assert str(data_limit) in problem.message
 
 
 # ── What doctor does with it ─────────────────────────────────────────────────
