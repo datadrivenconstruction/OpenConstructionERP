@@ -255,7 +255,7 @@ jobs:
           # silent skips are the failure to guard against. It reads the version
           # from node_modules/pdfjs-dist/package.json and returns doing nothing
           # if that is missing, and it does `if (!existsSync(dir)) continue` over
-          # the wasm and iccs directories. Both are correct for 6.1.200, where
+          # the wasm and iccs directories. Both are correct for 6.2.108, where
           # those directories sit at the package root. A future pdfjs that moves
           # them under build/ or legacy/ trips the second guard, emits zero
           # files, logs nothing and fails no test, because pdfjs.test.ts mocks
