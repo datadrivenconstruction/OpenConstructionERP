@@ -4537,6 +4537,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Delete this compliance document?",
     "compliance.status.active": "Active",
+    "compliance.status.not_yet_effective": "Not yet in effect",
     "compliance.status.expiring_soon": "Expiring soon",
     "compliance.status.expired": "Expired",
     "compliance.status.cancelled": "Cancelled",
