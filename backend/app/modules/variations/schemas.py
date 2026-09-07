@@ -184,6 +184,10 @@ class VariationRequestResponse(BaseModel):
     # having to reconstruct any of it from the bill as it stands now.
     submitted_boq_id: UUID | None = None
     submitted_boq_total: Decimal | None = None
+    #: The bill as it stood at submission, as a snapshot in the bill's own
+    #: version history. NULL for a request with no bill and for one
+    #: submitted before the snapshot was taken.
+    submitted_boq_snapshot_id: UUID | None = None
     agreed_cost_impact: Decimal | None = None
     agreed_basis: str = ""
     agreed_variance_note: str = ""

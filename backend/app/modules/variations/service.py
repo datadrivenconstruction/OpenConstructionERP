@@ -1498,17 +1498,44 @@ class VariationsService:
             )
         return vr
 
-    async def _freeze_submitted_pricing_state(self, vr_id: uuid.UUID) -> dict[str, Any]:
-        """Which bill, and at what total, was put in front of the approver.
+    @staticmethod
+    def _actor_uuid(user_id: str | None) -> uuid.UUID | None:
+        """The actor as the UUID a ``created_by`` column takes, or None.
+
+        Actors reach this service as strings, and not every string is an id:
+        a script or a test may name itself. A name is recorded as nobody
+        rather than refused, because who pressed submit is already in the
+        activity log and the snapshot must not fail to be written over it.
+        """
+        try:
+            return uuid.UUID(str(user_id)) if user_id else None
+        except ValueError:
+            return None
+
+    async def _freeze_submitted_pricing_state(
+        self,
+        vr: VariationRequest,
+        user_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Which bill, at what total, and made of which lines, was put in front of the approver.
 
         Read once, at submission, and never recomputed. The bill can go on
         being revised after it is submitted - that is the normal way a
         variation gets negotiated - so a total read later answers a
         different question from the one the record has to answer.
 
+        The total is the right thing to agree against and the wrong thing to
+        defend a price with: once the bill has moved, nothing says which
+        lines, at which quantities and rates, the frozen figure was made of.
+        So submission also writes a point-in-time copy of the bill into its
+        own version history (``BOQService.create_snapshot``, the same copy
+        the editor's history panel lists) and records which one. The copy
+        is named after the request so a reader of that history can tell it
+        from a snapshot somebody took by hand.
+
         A request with no bill of its own is priced by its headline figure
-        alone, which is a legitimate way to run a small variation, and both
-        columns stay NULL to say so.
+        alone, which is a legitimate way to run a small variation, and all
+        three columns stay NULL to say so.
 
         A request whose revision chain has forked is refused rather than
         recorded as NULL. It HAS a bill and we cannot say which one, so
@@ -1516,18 +1543,29 @@ class VariationsService:
         that has two, and that is the one answer that is worse than an
         error message.
         """
-        boq, reason = await self.resolve_request_boq(vr_id)
+        boq, reason = await self.resolve_request_boq(vr.id)
         if boq is None:
             if reason == "no_active_boq":
-                return {"submitted_boq_id": None, "submitted_boq_total": None}
+                return {
+                    "submitted_boq_id": None,
+                    "submitted_boq_total": None,
+                    "submitted_boq_snapshot_id": None,
+                }
             raise self._request_boq_refusal(reason)
 
         from app.modules.boq.service import BOQService
 
-        breakdown = (await BOQService(self.session).compute_boq_totals([boq.id])).get(boq.id, {})
+        boq_service = BOQService(self.session)
+        breakdown = (await boq_service.compute_boq_totals([boq.id])).get(boq.id, {})
+        snapshot = await boq_service.create_snapshot(
+            boq.id,
+            name=f"{vr.code}: as submitted for approval"[:255],
+            user_id=self._actor_uuid(user_id),
+        )
         return {
             "submitted_boq_id": boq.id,
             "submitted_boq_total": _money(breakdown.get("grand_total")),
+            "submitted_boq_snapshot_id": snapshot.id,
         }
 
     def _record_agreed_value(
@@ -1602,7 +1640,9 @@ class VariationsService:
         (Issue #435) as well as the status.
 
         Submitting freezes which pricing state was put in front of the
-        approver. Approving records what was actually agreed and why it is
+        approver, and keeps a copy of the bill as it stood, so the frozen
+        total has lines behind it after the bill has been revised. Approving
+        records what was actually agreed and why it is
         that number, which is the half that was missing: without it the
         agreed value is whatever figure happened to be on the request, and a
         negotiated amount cannot be told from a stale headline.
@@ -1624,7 +1664,7 @@ class VariationsService:
         fields: dict[str, Any] = {"status": to_status}
         if to_status == "submitted":
             fields["submitted_at"] = _now_iso()
-            fields.update(await self._freeze_submitted_pricing_state(vr_id))
+            fields.update(await self._freeze_submitted_pricing_state(vr, user_id=user_id))
         if to_status in {"approved", "rejected"}:
             fields["decision_at"] = _now_iso()
             fields["decided_by"] = user_id

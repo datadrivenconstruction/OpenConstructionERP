@@ -108,6 +108,8 @@ import {
   getVariationRequestBOQ,
   createVariationRequestBOQ,
   adoptVariationRequestBOQ,
+  type ApproveVRPayload,
+  type CreateVariationBOQPayload,
   type VariationBOQ,
   type Notice,
   type NoticeStatus,
@@ -120,21 +122,19 @@ import {
   type ExtensionOfTimeClaim,
   type EotStatus,
 } from './api';
+import {
+  approvalBaseline,
+  approvalBlockReason,
+  buildApprovalPayload,
+  type ApprovalMode,
+} from './approvalDecision';
+import { VariationSourcePicker } from './VariationSourcePicker';
 import { variationsGuide } from './variationsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildVariationsInsights, classLabel, statusLabel, urgencyLabel } from './variationsInsights';
 
 const VARIATIONS_TAB_IDS = ['notices', 'requests', 'orders', 'daywork', 'eot'] as const;
 type Tab = (typeof VARIATIONS_TAB_IDS)[number];
-
-/** A row currently being edited — carries its tab so the modal can prefill
- *  and PATCH the right sub-entity. */
-type EditTarget =
-  | { kind: 'notices'; row: Notice }
-  | { kind: 'requests'; row: VariationRequest }
-  | { kind: 'orders'; row: VariationOrder }
-  | { kind: 'daywork'; row: DayworkSheet }
-  | { kind: 'eot'; row: ExtensionOfTimeClaim };
 
 const isTab = (value: string | null): value is Tab =>
   (VARIATIONS_TAB_IDS as readonly string[]).includes(value ?? '');
@@ -172,6 +172,15 @@ function selectionFromUrl(tab: string | null, id: string | null): Selection {
       return { kind: 'eot', id };
   }
 }
+
+/** A row currently being edited — carries its tab so the modal can prefill
+ *  and PATCH the right sub-entity. */
+type EditTarget =
+  | { kind: 'notices'; row: Notice }
+  | { kind: 'requests'; row: VariationRequest }
+  | { kind: 'orders'; row: VariationOrder }
+  | { kind: 'daywork'; row: DayworkSheet }
+  | { kind: 'eot'; row: ExtensionOfTimeClaim };
 
 const NOTICE_VARIANT: Record<NoticeStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
   issued: 'blue',
@@ -1740,14 +1749,20 @@ function PricedScope({
   const qc = useQueryClient();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const boqQ = useQuery<VariationBOQ>({
     queryKey: ['variations', 'request-boq', request.id],
     queryFn: () => getVariationRequestBOQ(request.id),
   });
 
+  // The payload is the whole point of this mutation. It used to be called with
+  // no argument, so the endpoint that seeds a bill from named contract lines
+  // and estimating positions was reachable only over the API and every bill
+  // opened from the product had no provenance at all.
   const openMut = useMutation({
-    mutationFn: () => createVariationRequestBOQ(request.id),
+    mutationFn: (payload: CreateVariationBOQPayload) =>
+      createVariationRequestBOQ(request.id, payload),
     onSuccess: (boq) => {
       qc.invalidateQueries({ queryKey: ['variations'] });
       addToast({
@@ -1803,14 +1818,22 @@ function PricedScope({
                 'Price this variation on a bill of its own, holding only the scope it changes and separate from the project estimate.',
             })}
           </p>
-          <Button
-            variant="secondary"
-            icon={<Calculator size={14} />}
-            onClick={() => openMut.mutate()}
-            loading={openMut.isPending}
-          >
-            {t('variations.open_variation_boq', { defaultValue: 'Open a bill' })}
-          </Button>
+          {pickerOpen ? (
+            <VariationSourcePicker
+              projectId={request.project_id}
+              busy={openMut.isPending}
+              onOpen={(payload) => openMut.mutate(payload)}
+              onCancel={() => setPickerOpen(false)}
+            />
+          ) : (
+            <Button
+              variant="secondary"
+              icon={<Calculator size={14} />}
+              onClick={() => setPickerOpen(true)}
+            >
+              {t('variations.open_variation_boq', { defaultValue: 'Open a bill' })}
+            </Button>
+          )}
         </div>
       )}
 
@@ -1896,6 +1919,381 @@ function PricedScope({
   );
 }
 
+type Translate = ReturnType<typeof useTranslation>['t'];
+
+/** The label a recorded `agreed_basis` reads as on screen. */
+function agreedBasisLabel(basis: string, t: Translate): string {
+  if (basis === 'negotiated') {
+    return t('variations.agreed_basis_negotiated', { defaultValue: 'Negotiated' });
+  }
+  if (basis === 'priced_boq') {
+    return t('variations.agreed_basis_priced_boq', { defaultValue: 'Priced bill' });
+  }
+  if (basis === 'headline_estimate') {
+    return t('variations.agreed_basis_headline', { defaultValue: 'Headline estimate' });
+  }
+  return basis;
+}
+
+/** What a decided request was agreed at, and on what footing (Issue #435).
+ *
+ * Shown after the decision because the agreed amount is a different fact from
+ * the estimate the request was raised with, and until now the screen showed
+ * only the estimate. A reader looking at an approved variation could not tell
+ * whether the figure carried forward was priced, negotiated or simply the
+ * headline nobody revisited.
+ */
+export function AgreedValueCard({
+  request,
+  currency,
+}: {
+  request: VariationRequest;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+  if (!request.agreed_basis) return null;
+
+  return (
+    <Card padding="sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+        {t('variations.agreed_value', { defaultValue: 'Agreed value' })}
+      </p>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <Field
+          label={t('variations.agreed_amount', { defaultValue: 'Agreed amount' })}
+          value={
+            request.agreed_cost_impact === null ? (
+              '—'
+            ) : (
+              <MoneyDisplay
+                amount={Number(request.agreed_cost_impact)}
+                currency={request.currency || currency}
+              />
+            )
+          }
+        />
+        <Field
+          label={t('variations.agreed_basis', { defaultValue: 'Basis' })}
+          value={agreedBasisLabel(request.agreed_basis, t)}
+        />
+        <Field
+          label={t('variations.submitted_boq_total', {
+            defaultValue: 'Submitted bill total',
+          })}
+          value={
+            request.submitted_boq_total === null ? (
+              t('variations.no_submitted_bill', { defaultValue: 'No bill submitted' })
+            ) : (
+              <MoneyDisplay
+                amount={Number(request.submitted_boq_total)}
+                currency={request.currency || currency}
+              />
+            )
+          }
+        />
+      </div>
+      {request.agreed_variance_note && (
+        <div className="mt-2">
+          <p className="text-xs uppercase tracking-wide text-content-tertiary">
+            {t('variations.agreed_variance_note', { defaultValue: 'What was negotiated' })}
+          </p>
+          <p className="mt-0.5 text-sm whitespace-pre-wrap">{request.agreed_variance_note}</p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/** The approval itself, as two acts rather than one button (Issue #435).
+ *
+ * A quantity surveyor either accepts the pricing state that was submitted or
+ * agrees a different figure with the other side. The second is the case the
+ * reporter's example turns on - a variation claimed at 12,000, priced at 7,500
+ * and settled at 7,200 - and it was unreachable from the product: the screen
+ * posted the decision notes and nothing else, so every approval was recorded
+ * as the submitted total on a priced-bill basis.
+ *
+ * The reason is required exactly where the figure departs from what was
+ * submitted, and not when the two agree. An unexplained departure is the one
+ * part of the decision nobody can reconstruct from the record afterwards.
+ */
+export function ApprovalDecisionPanel({
+  request,
+  currency,
+  approving,
+  rejecting,
+  onApprove,
+  onReject,
+}: {
+  request: VariationRequest;
+  currency: string;
+  approving: boolean;
+  rejecting: boolean;
+  onApprove: (payload: ApproveVRPayload) => void;
+  onReject: (decisionNotes?: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [mode, setMode] = useState<ApprovalMode>('as_submitted');
+  const [agreedAmount, setAgreedAmount] = useState('');
+  const [varianceNote, setVarianceNote] = useState('');
+  const [decisionNotes, setDecisionNotes] = useState('');
+
+  const baseline = approvalBaseline(request);
+  const draft = { mode, agreedAmount, varianceNote, decisionNotes };
+  const blockReason = approvalBlockReason(draft, baseline);
+
+  return (
+    <Card padding="sm" className="w-full">
+      <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+        {t('variations.decision', { defaultValue: 'Decision' })}
+      </p>
+      <div className="space-y-2">
+        <Field
+          label={
+            baseline.source === 'submitted_boq'
+              ? t('variations.submitted_boq_total', { defaultValue: 'Submitted bill total' })
+              : t('variations.headline_estimate', { defaultValue: 'Headline estimate' })
+          }
+          value={
+            baseline.amount === null ? (
+              '—'
+            ) : (
+              <MoneyDisplay
+                amount={baseline.amount}
+                currency={request.currency || currency}
+              />
+            )
+          }
+        />
+
+        <div className="space-y-1">
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="radio"
+              className="mt-1"
+              name={`approval-mode-${request.id}`}
+              checked={mode === 'as_submitted'}
+              onChange={() => setMode('as_submitted')}
+            />
+            <span>
+              {t('variations.approve_as_submitted', {
+                defaultValue: 'Approve the amount that was submitted',
+              })}
+            </span>
+          </label>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="radio"
+              className="mt-1"
+              name={`approval-mode-${request.id}`}
+              checked={mode === 'negotiated'}
+              onChange={() => setMode('negotiated')}
+            />
+            <span>
+              {t('variations.approve_negotiated', {
+                defaultValue: 'Approve a negotiated amount',
+              })}
+            </span>
+          </label>
+        </div>
+
+        {mode === 'negotiated' && (
+          <div className="space-y-2 rounded-lg border border-border-light p-2">
+            <div>
+              <label
+                htmlFor={`agreed-amount-${request.id}`}
+                className="text-xs uppercase tracking-wide text-content-tertiary"
+              >
+                {t('variations.agreed_amount', { defaultValue: 'Agreed amount' })}
+              </label>
+              <input
+                id={`agreed-amount-${request.id}`}
+                type="number"
+                step="0.01"
+                value={agreedAmount}
+                onChange={(e) => setAgreedAmount(e.target.value)}
+                className={clsx(inputCls, 'mt-0.5')}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor={`variance-note-${request.id}`}
+                className="text-xs uppercase tracking-wide text-content-tertiary"
+              >
+                {t('variations.agreed_variance_note', { defaultValue: 'What was negotiated' })}
+              </label>
+              <textarea
+                id={`variance-note-${request.id}`}
+                rows={2}
+                value={varianceNote}
+                onChange={(e) => setVarianceNote(e.target.value)}
+                placeholder={t('variations.agreed_variance_note_placeholder', {
+                  defaultValue: 'Why the agreed amount differs from what was submitted…',
+                })}
+                className={clsx(inputCls, 'mt-0.5 h-auto py-2')}
+              />
+            </div>
+            {blockReason && (
+              <p className="flex items-start gap-1.5 text-xs text-content-secondary">
+                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                {blockReason === 'amount_missing'
+                  ? t('variations.agreed_amount_required', {
+                      defaultValue:
+                        'Type the amount that was agreed, or approve the submitted amount instead.',
+                    })
+                  : t('variations.agreed_variance_required', {
+                      defaultValue:
+                        'This differs from the amount that was submitted, so the approval needs a reason. The gap between the two figures is the part nobody can reconstruct later.',
+                    })}
+              </p>
+            )}
+          </div>
+        )}
+
+        <textarea
+          rows={2}
+          value={decisionNotes}
+          onChange={(e) => setDecisionNotes(e.target.value)}
+          placeholder={t('variations.decision_notes_placeholder', {
+            defaultValue: 'Decision notes…',
+          })}
+          className={clsx(inputCls, 'h-auto py-2')}
+        />
+        <div className="flex gap-2">
+          <Button
+            variant="primary"
+            icon={<CheckCircle2 size={14} />}
+            disabled={blockReason !== null}
+            onClick={() => onApprove(buildApprovalPayload(draft))}
+            loading={approving}
+          >
+            {t('variations.approve', { defaultValue: 'Approve' })}
+          </Button>
+          <Button
+            variant="danger"
+            icon={<XCircle size={14} />}
+            onClick={() => onReject(decisionNotes.trim() || undefined)}
+            loading={rejecting}
+          >
+            {t('variations.reject', { defaultValue: 'Reject' })}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** Promotion, with the contract the resulting order amends (Issue #435).
+ *
+ * `affected_contract_id` has been accepted on the promotion since August and
+ * nothing named it, so every order promoted from this screen was created
+ * unattached and could never post to a contract. Completing an order that
+ * names one is what moves the contract sum, so leaving it out quietly
+ * disconnects the variation from the money it is supposed to move.
+ *
+ * The default comes from the bill rather than from a guess: where every
+ * schedule-of-values line the variation is priced against belongs to one
+ * contract, that is the contract it amends, and the surveyor confirms rather
+ * than looks it up.
+ */
+export function PromoteToOrderCard({
+  request,
+  projectId,
+  contractId,
+  onContractIdChange,
+  onPromote,
+  promoting,
+}: {
+  request: VariationRequest;
+  projectId: string;
+  contractId: string;
+  onContractIdChange: (value: string) => void;
+  onPromote: () => void;
+  promoting: boolean;
+}) {
+  const { t } = useTranslation();
+
+  const contractsQ = useQuery({
+    queryKey: ['variations', 'promote-contracts', projectId],
+    queryFn: () => listContracts({ project_id: projectId, limit: 200 }),
+    enabled: Boolean(projectId),
+  });
+
+  const boqQ = useQuery<VariationBOQ>({
+    queryKey: ['variations', 'request-boq', request.id],
+    queryFn: () => getVariationRequestBOQ(request.id),
+  });
+
+  // The contract the priced scope traces back to, when the traces agree on
+  // one. Two contracts in one bill is a real situation and the answer there
+  // is to make the reader choose, not to pick the first one.
+  const tracedContractId = useMemo(() => {
+    const ids = new Set(
+      (boqQ.data?.traces ?? [])
+        .map((trace) => trace.contract_id)
+        .filter((id): id is string => Boolean(id)),
+    );
+    return ids.size === 1 ? [...ids][0] : '';
+  }, [boqQ.data]);
+
+  useEffect(() => {
+    if (tracedContractId && !contractId) onContractIdChange(tracedContractId);
+  }, [tracedContractId, contractId, onContractIdChange]);
+
+  const contracts = contractsQ.data?.items ?? [];
+
+  return (
+    <Card padding="sm" className="w-full">
+      <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+        {t('variations.promote_to_order', { defaultValue: 'Promote to order' })}
+      </p>
+      <div className="space-y-2">
+        <div>
+          <label
+            htmlFor={`affected-contract-${request.id}`}
+            className="text-xs uppercase tracking-wide text-content-tertiary"
+          >
+            {t('variations.affected_contract', {
+              defaultValue: 'Contract this order amends',
+            })}
+          </label>
+          <select
+            id={`affected-contract-${request.id}`}
+            value={contractId}
+            onChange={(e) => onContractIdChange(e.target.value)}
+            className={clsx(inputCls, 'mt-0.5')}
+          >
+            <option value="">
+              {t('variations.affected_contract_none', {
+                defaultValue: 'Not linked to a contract',
+              })}
+            </option>
+            {contracts.map((contract) => (
+              <option key={contract.id} value={contract.id}>
+                {[contract.code, contract.title].filter(Boolean).join(' - ') || contract.id}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="text-xs text-content-secondary">
+          {t('variations.affected_contract_hint', {
+            defaultValue:
+              'Completing an order that names a contract is what moves the contract sum. An order left unlinked never posts to one.',
+          })}
+        </p>
+        <Button
+          variant="primary"
+          icon={<ArrowRight size={14} />}
+          onClick={onPromote}
+          loading={promoting}
+        >
+          {t('variations.convert_to_vo', { defaultValue: 'Convert to Order' })}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function DetailDrawer({
   selected,
   projectId,
@@ -1936,6 +2334,7 @@ export function DetailDrawer({
   // Read once, here, rather than inside the pill's onClick: narrowing a
   // nullable property does not survive into a callback, and a plain const does.
   const linkedChangeOrderId = order?.reference_change_order_id ?? null;
+  const linkedContractId = order?.affected_contract_id ?? null;
 
   const chainNotice = request
     ? notices.find((n) => n.id === request.notice_id) ?? null
@@ -1985,27 +2384,41 @@ export function DetailDrawer({
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
   const [decisionNotes, setDecisionNotes] = useState('');
+  // The request's approval carries an agreed amount and the reason for it, so
+  // its payload is built by the decision panel that collected them rather than
+  // read off a single shared notes box. The EoT decision below still uses
+  // `decisionNotes`, which is why that state stays here.
   const approveMut = useMutation({
-    mutationFn: () => approveVR(selected.id, decisionNotes.trim() || undefined),
+    mutationFn: (payload: ApproveVRPayload) => approveVR(selected.id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['variations'] });
-      setDecisionNotes('');
       addToast({ type: 'success', title: t('variations.vr_approved', { defaultValue: 'Request approved' }) });
     },
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
   const rejectMut = useMutation({
-    mutationFn: () => rejectVR(selected.id, decisionNotes.trim() || undefined),
+    mutationFn: (notes: string | undefined) => rejectVR(selected.id, notes),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['variations'] });
-      setDecisionNotes('');
       addToast({ type: 'success', title: t('variations.vr_rejected', { defaultValue: 'Request rejected' }) });
     },
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
+  // The contract a promoted order lands on. Nothing set it, so an order made
+  // through this screen reached no contract and never posted to one - the
+  // third of the three fields the API accepts and the screen left empty.
+  const [promoteContractId, setPromoteContractId] = useState('');
   const convertMut = useMutation({
     mutationFn: () =>
-      convertVRToVO(selected.id, request ? { currency: request.currency || currency } : {}),
+      convertVRToVO(
+        selected.id,
+        request
+          ? {
+              currency: request.currency || currency,
+              ...(promoteContractId ? { affected_contract_id: promoteContractId } : {}),
+            }
+          : {},
+      ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['variations'] });
       addToast({ type: 'success', title: t('variations.converted', { defaultValue: 'Converted to order' }) });
@@ -2297,6 +2710,7 @@ export function DetailDrawer({
                   <p className="text-sm whitespace-pre-wrap">{request.decision_notes}</p>
                 </Card>
               )}
+              <AgreedValueCard request={request} currency={currency} />
               <PricedScope request={request} currency={currency} />
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border-light">
                 {request.status === 'draft' && (
@@ -2310,51 +2724,24 @@ export function DetailDrawer({
                   </Button>
                 )}
                 {(request.status === 'submitted' || request.status === 'under_review') && (
-                  <Card padding="sm" className="w-full">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
-                      {t('variations.decision', { defaultValue: 'Decision' })}
-                    </p>
-                    <div className="space-y-2">
-                      <textarea
-                        rows={2}
-                        value={decisionNotes}
-                        onChange={(e) => setDecisionNotes(e.target.value)}
-                        placeholder={t('variations.decision_notes_placeholder', {
-                          defaultValue: 'Decision notes…',
-                        })}
-                        className={clsx(inputCls, 'h-auto py-2')}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          variant="primary"
-                          icon={<CheckCircle2 size={14} />}
-                          onClick={() => approveMut.mutate()}
-                          loading={approveMut.isPending}
-                        >
-                          {t('variations.approve', { defaultValue: 'Approve' })}
-                        </Button>
-                        <Button
-  const linkedContractId = order?.affected_contract_id ?? null;
-                          variant="danger"
-                          icon={<XCircle size={14} />}
-                          onClick={() => rejectMut.mutate()}
-                          loading={rejectMut.isPending}
-                        >
-                          {t('variations.reject', { defaultValue: 'Reject' })}
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
+                  <ApprovalDecisionPanel
+                    request={request}
+                    currency={currency}
+                    approving={approveMut.isPending}
+                    rejecting={rejectMut.isPending}
+                    onApprove={(payload) => approveMut.mutate(payload)}
+                    onReject={(notes) => rejectMut.mutate(notes)}
+                  />
                 )}
                 {request.status === 'approved' && (
-                  <Button
-                    variant="primary"
-                    icon={<ArrowRight size={14} />}
-                    onClick={() => convertMut.mutate()}
-                    loading={convertMut.isPending}
-                  >
-                    {t('variations.convert_to_vo', { defaultValue: 'Convert to Order' })}
-                  </Button>
+                  <PromoteToOrderCard
+                    request={request}
+                    projectId={projectId}
+                    contractId={promoteContractId}
+                    onContractIdChange={setPromoteContractId}
+                    onPromote={() => convertMut.mutate()}
+                    promoting={convertMut.isPending}
+                  />
                 )}
               </div>
             </>

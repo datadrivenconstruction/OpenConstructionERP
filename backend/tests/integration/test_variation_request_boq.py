@@ -404,6 +404,160 @@ class TestTraceability:
         assert excinfo.value.detail["error"] == "source_position_not_in_project"
 
 
+# ── What the screen actually sends ──────────────────────────────────────────
+
+
+class TestTheBodyTheScreenSends:
+    """The two bodies the variations page posts, before and after Issue #435.
+
+    Everything above tests the endpoint. These test the call, because the call
+    is where the defect was: the page opened every variation bill with an empty
+    body, so the only writer of the trace table was unreachable from the
+    product and `variations.boq_lines_are_traced` reported that correctly on
+    every line a surveyor then typed.
+    """
+
+    @staticmethod
+    async def _add_line(
+        session: AsyncSession,
+        contract: Contract,
+        *,
+        code: str,
+        description: str,
+        unit: str = "m3",
+        quantity: str = "10",
+        unit_rate: str = "300",
+    ) -> ContractLine:
+        """A further schedule-of-values line on an existing contract."""
+        line = ContractLine(
+            contract_id=contract.id,
+            code=code,
+            description=description,
+            unit=unit,
+            quantity=Decimal(quantity),
+            unit_rate=Decimal(unit_rate),
+            total_value=Decimal(quantity) * Decimal(unit_rate),
+        )
+        session.add(line)
+        await session.flush()
+        return line
+
+    @pytest.mark.asyncio
+    async def test_the_empty_body_leaves_every_line_untraced(self, session: AsyncSession) -> None:
+        """The body the page used to send, priced the way a surveyor prices it.
+
+        An empty bill is not itself the finding: the finding arrives when the
+        scope is typed into it, because there was no moment at which any of it
+        could acquire provenance.
+        """
+        project = await _make_project(session)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+
+        boq = await service.create_request_boq(request.id, VariationBOQCreate())
+        for index, description in enumerate(("Retaining wall extension", "Additional drainage"), start=1):
+            session.add(
+                Position(
+                    boq_id=boq.id,
+                    ordinal=f"{index * 10:04d}",
+                    description=description,
+                    unit="m3",
+                    quantity="10",
+                    unit_rate="300",
+                    total="3000",
+                    classification={},
+                    source="manual",
+                    cad_element_ids=[],
+                    sort_order=index,
+                )
+            )
+        await session.flush()
+
+        view = await service.get_request_boq_view(request.id)
+
+        assert view["traces"] == []
+        # The denominator, printed next to the verdict on purpose: the rule
+        # below is failing over two priced lines rather than passing over none.
+        assert view["position_count"] == 2
+        flagged = [check for check in view["checks"] if check["rule_id"] == "variations.boq_lines_are_traced"]
+        assert len(flagged) == 2
+        assert all(check["passed"] is False for check in flagged)
+
+    @pytest.mark.asyncio
+    async def test_naming_the_contract_lines_traces_every_line_of_the_bill(self, session: AsyncSession) -> None:
+        """The body the page sends now, over the same priced scope."""
+        project = await _make_project(session)
+        contract, first = await _make_contract_line(session, project)
+        second = await self._add_line(
+            session,
+            contract,
+            code="SOV-030",
+            description="Additional drainage",
+        )
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+
+        boq = await service.create_request_boq(
+            request.id,
+            VariationBOQCreate(
+                source_contract_lines=[
+                    VariationBOQSourceContractLine(contract_line_id=first.id, quantity=Decimal("10")),
+                    VariationBOQSourceContractLine(contract_line_id=second.id),
+                ]
+            ),
+        )
+
+        view = await service.get_request_boq_view(request.id)
+
+        assert boq.id == view["boq_id"]
+        assert len(view["traces"]) == 2
+        assert {trace.contract_line_id for trace in view["traces"]} == {first.id, second.id}
+        assert {trace.contract_id for trace in view["traces"]} == {contract.id}
+        # Same population as the test above, so the two verdicts are comparable.
+        assert view["position_count"] == 2
+        flagged = [check for check in view["checks"] if check["rule_id"] == "variations.boq_lines_are_traced"]
+        assert flagged == []
+
+    @pytest.mark.asyncio
+    async def test_a_line_with_no_unit_is_not_a_line_the_rule_ever_judges(self, session: AsyncSession) -> None:
+        """Why the count has to be read next to the verdict.
+
+        The rule skips a line carrying no unit, because a row with no unit is a
+        heading rather than money, and the bill view counts priced lines the
+        same way. So a bill whose lines all lack units reports no findings while
+        tracing nothing at all, and "no findings" and "everything traced" are
+        the same output. A schedule-of-values line whose unit is NULL seeds
+        exactly such a row, which is why the picker warns about one.
+        """
+        project = await _make_project(session)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+
+        boq = await service.create_request_boq(request.id, VariationBOQCreate())
+        session.add(
+            Position(
+                boq_id=boq.id,
+                ordinal="0010",
+                description="Provisional sum, to be measured",
+                unit="",
+                quantity="1",
+                unit_rate="5000",
+                total="5000",
+                classification={},
+                source="manual",
+                cad_element_ids=[],
+                sort_order=1,
+            )
+        )
+        await session.flush()
+
+        view = await service.get_request_boq_view(request.id)
+
+        assert view["traces"] == []
+        assert view["position_count"] == 0
+        assert [check for check in view["checks"] if check["rule_id"] == "variations.boq_lines_are_traced"] == []
+
+
 # ── The variation bill stays out of the project's own reckoning ─────────────
 
 

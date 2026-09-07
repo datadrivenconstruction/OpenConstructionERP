@@ -117,6 +117,15 @@ class VariationRequest(Base):
     # the approver was looking at, not what the bill says today.
     submitted_boq_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     submitted_boq_total: Mapped[Decimal | None] = mapped_column(MoneyType(), nullable=True)
+    #: The bill as it stood at submission, kept as a snapshot in the bill's
+    #: own version history (``oe_boq_snapshot``). The total above says what
+    #: figure the approver was given; this says which lines, at which
+    #: quantities and rates, made that figure up - and it stays readable
+    #: after the bill has been revised, which is the normal way a variation
+    #: gets negotiated. NULL when there was no bill to submit. No FK, like
+    #: ``submitted_boq_id``: the record of what was submitted must not stop
+    #: the bill it describes from being deleted.
+    submitted_boq_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     #: The commercial amount actually approved. NULL until a decision is
     #: taken, and NULL on every request decided before this existed: putting
     #: a figure there for them would be putting a decision in somebody's

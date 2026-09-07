@@ -92,6 +92,20 @@ export interface VariationRequest {
   decision_at: string | null;
   decision_notes: string;
   decided_by: string | null;
+  /** The bill that was in front of the approver, frozen at submission. */
+  submitted_boq_id: string | null;
+  /**
+   * What that bill priced at, read once at submission and never recomputed.
+   * Null when the request carries no bill of its own, which is a different
+   * statement from a bill that prices at nothing.
+   */
+  submitted_boq_total: string | null;
+  /** What was actually agreed. Null until somebody has decided. */
+  agreed_cost_impact: string | null;
+  /** 'negotiated' | 'priced_boq' | 'headline_estimate', or '' when undecided. */
+  agreed_basis: string;
+  /** Why the agreed amount departs from the pricing state it was agreed against. */
+  agreed_variance_note: string;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -336,13 +350,40 @@ export function submitVR(id: string): Promise<VariationRequest> {
   return apiPost<VariationRequest>(`/v1/variations/variation-requests/${id}/submit`, {});
 }
 
+/**
+ * What one approval decides, in the shape the approve route reads.
+ *
+ * The wire name of the money is `decided_amount`, not `agreed_cost_impact`:
+ * the latter is what the server writes down and serves back, and sending it
+ * as the request key is accepted with a 200 and silently dropped, which
+ * records the bill total as the agreed value and looks exactly like success.
+ */
+export interface ApproveVRPayload {
+  decision_notes?: string;
+  /**
+   * The amount actually agreed, when it is not simply the pricing state that
+   * was submitted. Sent as the string the approver typed so the server parses
+   * the decimal they saw rather than a float that has been through binary.
+   * Left out entirely to approve on the submitted pricing state, which the
+   * server then records as `priced_boq` or `headline_estimate`.
+   */
+  decided_amount?: string;
+  /**
+   * Why the agreed amount departs from the submitted bill total. The server
+   * refuses a departure without one, because the gap between the two figures
+   * is the only part of the decision nobody can reconstruct afterwards.
+   */
+  agreed_variance_note?: string;
+}
+
 export function approveVR(
   id: string,
-  decision_notes?: string,
+  payload: ApproveVRPayload = {},
 ): Promise<VariationRequest> {
-  return apiPost<VariationRequest>(`/v1/variations/variation-requests/${id}/approve`, {
-    decision_notes,
-  });
+  return apiPost<VariationRequest>(
+    `/v1/variations/variation-requests/${id}/approve`,
+    payload,
+  );
 }
 
 export function rejectVR(

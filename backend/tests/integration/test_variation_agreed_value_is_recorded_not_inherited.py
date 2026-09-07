@@ -13,12 +13,16 @@ order of magnitude, so a variation agreed at a negotiated 7,200 and one that
 silently inherited a stale 12,000 produce records that look the same and flow
 downstream identically. The point of these tests is that they no longer can.
 
-Four claims:
+Five claims:
 
 * Submitting freezes WHICH pricing state was submitted, and freezing means
   frozen: the bill goes on being revised afterwards, which is the normal way a
   variation gets negotiated, and a total read later answers a different
   question from the one the record has to answer.
+* Submitting also keeps the bill as it stood, as a snapshot in the bill's own
+  version history, so the frozen total still has lines behind it once the
+  bill has moved on. A total is what gets agreed against; only the lines can
+  defend it.
 * Approving records what was agreed AND why it is that number. "The agreed
   value happens to equal the bill total" and "nobody ever really decided" must
   not be the same record.
@@ -49,7 +53,8 @@ import app.modules.changeorders.models  # noqa: F401
 import app.modules.contracts.models  # noqa: F401
 import app.modules.projects.models  # noqa: F401
 import app.modules.variations.models  # noqa: F401
-from app.modules.boq.models import BOQ, Position
+from app.modules.boq.models import BOQ, BOQSnapshot, Position
+from app.modules.boq.service import BOQService
 from app.modules.changeorders.models import ChangeOrder
 from app.modules.changeorders.schemas import ChangeOrderUpdate
 from app.modules.changeorders.service import ChangeOrderService
@@ -185,6 +190,111 @@ class TestSubmittingFreezesThePricingState:
 
         approved = await service.transition_variation_request(request.id, "approved", user_id=ACTOR)
         assert approved.submitted_boq_total == Decimal("7500.00")
+
+
+class TestSubmittingKeepsTheBillAsItStood:
+    """The lines behind the frozen total, kept where the bill keeps its history.
+
+    ``submitted_boq_total`` says what figure the approver was given. Once the
+    bill has been revised, nothing else said which lines made that figure up,
+    so a price could be agreed against the record but not defended from it.
+    Submission now writes a snapshot into the bill's own version history, the
+    same copy the editor's history panel lists, and the request names it.
+    """
+
+    @pytest.mark.asyncio
+    async def test_submission_writes_a_snapshot_of_the_bill_and_names_it(self, session: AsyncSession) -> None:
+        project = await _make_project(session)
+        source = await _make_source_position(session, project)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+        await _price_the_variation(session, service, request, source, quantity="30")
+
+        submitted = await service.transition_variation_request(request.id, "submitted", user_id=ACTOR)
+
+        assert submitted.submitted_boq_snapshot_id is not None
+        snapshot = await session.get(BOQSnapshot, submitted.submitted_boq_snapshot_id)
+        assert snapshot is not None
+        assert snapshot.boq_id == submitted.submitted_boq_id
+        # Named after the request, so a reader of the bill's history can tell
+        # it from a copy somebody took by hand, and stamped with who submitted.
+        assert request.code in snapshot.name
+        assert snapshot.created_by == uuid.UUID(ACTOR)
+        lines = snapshot.snapshot_data["positions"]
+        assert [(Decimal(line["quantity"]), Decimal(line["unit_rate"])) for line in lines] == [
+            (Decimal("30"), Decimal("250")),
+        ]
+        # The lines add up to the total frozen beside them: one pricing state,
+        # recorded twice, in two forms that agree.
+        assert sum(Decimal(line["total"]) for line in lines) == submitted.submitted_boq_total
+
+    @pytest.mark.asyncio
+    async def test_revising_the_bill_afterwards_leaves_the_snapshot_as_it_was(self, session: AsyncSession) -> None:
+        # The claim the snapshot exists for, and the same revision the frozen
+        # total is tested against above: 30 m3 submitted, re-measured to 20
+        # during negotiation. The live bill says 20; the record of what was
+        # submitted still says 30.
+        project = await _make_project(session)
+        source = await _make_source_position(session, project)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+        await _price_the_variation(session, service, request, source, quantity="30")
+        submitted = await service.transition_variation_request(request.id, "submitted", user_id=ACTOR)
+        snapshot_id = submitted.submitted_boq_snapshot_id
+        assert snapshot_id is not None
+
+        line = (await service.get_request_boq_view(request.id))["traces"][0]
+        position = await session.get(Position, line.position_id)
+        assert position is not None
+        position.quantity = "20"
+        position.total = "5000"
+        await session.flush()
+
+        # The live bill moved, which is the control: a snapshot that agreed
+        # with the bill here would be a view of it, not a copy.
+        assert (await service.get_request_boq_view(request.id))["grand_total"] == Decimal("5000.00")
+        kept = await session.get(BOQSnapshot, snapshot_id)
+        assert kept is not None
+        await session.refresh(kept)
+        assert [Decimal(line["quantity"]) for line in kept.snapshot_data["positions"]] == [Decimal("30")]
+        # And it sits in the bill's own history, where the editor lists it,
+        # rather than in a store of this module's own.
+        boq, _reason = await service.resolve_request_boq(request.id)
+        assert boq is not None
+        history = await BOQService(session).list_snapshots(boq.id)
+        assert [snap.id for snap in history] == [snapshot_id]
+
+    @pytest.mark.asyncio
+    async def test_a_request_with_no_bill_has_nothing_to_keep(self, session: AsyncSession) -> None:
+        project = await _make_project(session)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+
+        submitted = await service.transition_variation_request(request.id, "submitted", user_id=ACTOR)
+
+        assert submitted.status == "submitted"
+        assert submitted.submitted_boq_snapshot_id is None
+
+    @pytest.mark.asyncio
+    async def test_an_actor_that_is_not_an_id_is_recorded_as_nobody_rather_than_refused(
+        self, session: AsyncSession
+    ) -> None:
+        # Actors reach the service as strings and a script may name itself.
+        # The snapshot's author column takes a user id; a name is not one, and
+        # the submission must not fail over who pressed the button when the
+        # activity log already has that.
+        project = await _make_project(session)
+        source = await _make_source_position(session, project)
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+        await _price_the_variation(session, service, request, source, quantity="30")
+
+        submitted = await service.transition_variation_request(request.id, "submitted", user_id="nightly-import")
+
+        assert submitted.submitted_boq_snapshot_id is not None
+        snapshot = await session.get(BOQSnapshot, submitted.submitted_boq_snapshot_id)
+        assert snapshot is not None
+        assert snapshot.created_by is None
 
 
 class TestApprovingRecordsWhatWasAgreedAndWhy:
