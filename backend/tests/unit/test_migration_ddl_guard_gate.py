@@ -17,6 +17,16 @@ the name ``op``, so
 was invisible to it: wrong verb and wrong receiver. That is the exact shape of
 the revision whose replay was measured dying with DuplicateColumn on
 ``rejected_by``. ``test_a_batch_receiver_is_not_invisible`` is that shape.
+
+Which path this gate protects, stated so nobody has to infer it. Nothing in
+``backend/app`` runs ``alembic upgrade``: it reads ``ScriptDirectory`` to learn
+the head and configures a ``MigrationContext`` to stamp, and that is all. The
+schema moves at boot through the auto-migrator plus ``create_all``, which
+``app/main.py`` calls a decision rather than an oversight. So the DuplicateColumn
+is reachable by ``make migrate`` and by an operator typing ``alembic upgrade
+head``, which ``postgres_migrator.py`` and ``main.py`` both name as the fallback
+when the boot heal cannot do the work. It is the operator path, not the product
+path, and a release note should say so.
 """
 
 from __future__ import annotations
