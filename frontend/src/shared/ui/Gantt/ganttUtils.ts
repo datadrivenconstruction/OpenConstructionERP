@@ -166,6 +166,11 @@ export function generateTimeHeaders(
     }
 
     // Bottom row: one cell per week, labeled "W1", "W2", etc.
+    // Monday here is deliberate and must not follow the reader's locale.
+    // These are ISO-8601 week numbers, the vocabulary a planner and a site
+    // team share when they agree a task lands in W17. A week number that
+    // started on a different day per language would make "W17" name a
+    // different span for two people reading the same programme.
     const d = new Date(startDate);
     // Advance to next Monday
     const dow = d.getDay();

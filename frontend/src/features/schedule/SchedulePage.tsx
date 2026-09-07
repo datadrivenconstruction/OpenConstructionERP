@@ -532,7 +532,11 @@ function GanttChart({
         current.setDate(current.getDate() + 1);
       }
     } else if (zoomLevel === 'week') {
-      // One marker per week (advance to next Monday)
+      // One marker per week (advance to next Monday). Monday is deliberate
+      // and stays independent of the reader's locale, for the same reason as
+      // the ISO week columns in `Gantt/ganttUtils`: these gridlines sit under
+      // a programme whose weeks are ISO weeks, and rotating them per language
+      // would put the same task in two different weeks for two readers.
       const dayOfWeek = current.getDay();
       const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
       current.setDate(current.getDate() + daysUntilMonday);
