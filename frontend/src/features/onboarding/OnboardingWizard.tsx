@@ -146,17 +146,28 @@ function packDisplayName(t: TFunction, pack: InstalledPartnerPack): string {
   });
 }
 
+// Every value here is a global-market catalogue, never a national norm base. A
+// language is not a country: `es` serves both the Spain and Mexico packs and
+// `sv` also answers for no/da/fi, so this map cannot name one country's own
+// norm system without recommending it to speakers elsewhere. That is why `pt`
+// picks PT_SAOPAULO over BR_NATIONAL, `it` IT_ROME over IT_TOSCANA and `id`
+// ID_JAKARTA over ID_NATIONAL. `zh` and `tr` were the only two that broke the
+// rule: cdf7391c1 rewrote them to ZH_CHINA and TR_NATIONAL alongside the mirror
+// rename, so the language step recommended one base while the country pack for
+// the same market installed another, and which one a user got depended on the
+// step they came through. Held by test_country_preset_regions_resolve.py, which
+// takes an exception only if it is recorded there with a reason.
 const LANG_TO_REGION: Record<string, string> = {
   de: 'DE_BERLIN',
   fr: 'FR_PARIS',
   es: 'SP_BARCELONA',
   pt: 'PT_SAOPAULO',
   ru: 'RU_STPETERSBURG',
-  zh: 'ZH_CHINA',
+  zh: 'ZH_SHANGHAI',
   ar: 'AR_DUBAI',
   hi: 'HI_MUMBAI',
   en: 'USA_USD',
-  tr: 'TR_NATIONAL',
+  tr: 'TR_ISTANBUL',
   it: 'IT_ROME',
   ja: 'JA_TOKYO',
   ko: 'KO_SEOUL',

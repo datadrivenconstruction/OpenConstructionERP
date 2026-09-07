@@ -92,6 +92,24 @@ MIRRORS: tuple[tuple[str, Path, str, re.Pattern[str]], ...] = (
 # stamped on a user's own items, not a published base.
 NOT_A_LOADABLE_BASE = frozenset({"CUSTOM"})
 
+ONBOARDING_WIZARD_TSX = _FRONTEND / "features" / "onboarding" / "OnboardingWizard.tsx"
+
+# Languages allowed to recommend a national norm base rather than a global
+# market catalogue. Empty, and adding to it is a product decision that has to be
+# written down here with its reason, not made by editing the map alone.
+LANGUAGES_ON_A_NATIONAL_BASE: dict[str, str] = {}
+
+_LANG_ENTRY = re.compile(r"^\s+(?P<lang>[a-z]{2}):\s*'(?P<region>[A-Z0-9_]+)',", re.M)
+
+
+def _lang_to_region() -> dict[str, str]:
+    """Parse the wizard's language -> recommended base map."""
+    block = _read_block(ONBOARDING_WIZARD_TSX, "LANG_TO_REGION")
+    found = {m.group("lang"): m.group("region") for m in _LANG_ENTRY.finditer(block)}
+    if not found:
+        pytest.fail(f"parsed no entries out of LANG_TO_REGION in {ONBOARDING_WIZARD_TSX.name}; the shape changed")
+    return found
+
 
 def _read_block(path: Path, const_name: str) -> str:
     """The source of one array/record literal, from its name to its closing line."""
@@ -192,6 +210,54 @@ def test_the_two_conflated_pairs_are_four_separate_bases() -> None:
             f"{market_id} and {national_id} now read the same work items, so they are one base "
             f"after all and the aliasing this file forbids would be correct"
         )
+
+
+def test_the_language_map_recommends_bases_that_exist() -> None:
+    """The wizard's other route into a cost base, held to the same registry."""
+    known = _registry_regions()
+    unresolved = sorted((lang, region) for lang, region in _lang_to_region().items() if region not in known)
+    assert not unresolved, f"LANG_TO_REGION recommends {len(unresolved)} base(s) the registry cannot load: {unresolved}"
+
+
+def test_no_language_recommends_a_national_norm_base() -> None:
+    """The split this file exists to stop, in its second and quieter form.
+
+    A user reaches a cost base two ways: the country pack, and the language
+    step. Both used to name China and Turkiye, and after ``cdf7391c1`` they
+    named different bases for the same market, so which catalogue a user got
+    depended on which step they came through.
+
+    Deliberately NOT asserting that the language map equals the country map. A
+    language is not a country: ``es`` serves both the Spain and Mexico packs,
+    and ``sv`` also answers for Norwegian, Danish and Finnish, so equality would
+    be the wrong rule and would go red on entries that are correct. What is
+    asserted is the rule the map actually follows for all of its entries - a
+    language names a global-market catalogue, never one country's own norm
+    system, because recommending the Chinese Dinge base to every zh speaker is
+    a different claim from repricing the global base into China. Pointing a
+    language at a national base stays possible; it just has to be written into
+    ``LANGUAGES_ON_A_NATIONAL_BASE`` with a reason first.
+    """
+    offenders = {
+        lang: region
+        for lang, region in _lang_to_region().items()
+        if base_registry.is_national_region(region) and lang not in LANGUAGES_ON_A_NATIONAL_BASE
+    }
+    assert not offenders, (
+        f"{sorted(offenders.items())} recommend a national norm base. Either point the language at that "
+        f"market's global catalogue, or record the decision in LANGUAGES_ON_A_NATIONAL_BASE with its reason."
+    )
+
+
+def test_a_recorded_language_exception_is_a_real_one() -> None:
+    """Keep the exception list honest: no stale entries, no empty reasons."""
+    langs = _lang_to_region()
+    for lang, reason in LANGUAGES_ON_A_NATIONAL_BASE.items():
+        assert lang in langs, f"LANGUAGES_ON_A_NATIONAL_BASE names '{lang}', which LANG_TO_REGION no longer has"
+        assert base_registry.is_national_region(langs[lang]), (
+            f"'{lang}' now points at {langs[lang]}, which is not a national base, so its exception is stale"
+        )
+        assert reason.strip(), f"the exception for '{lang}' carries no reason"
 
 
 def test_the_excluded_advisor_list_is_still_a_different_vocabulary() -> None:
