@@ -64,6 +64,7 @@ import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { apiGet, getErrorMessage, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { todayLocalISO, isoDateFromLocal, nowLocalISO } from '@/shared/lib/dates';
+import { useWeekStartsOn } from '@/shared/lib/weekStart';
 import { projectsApi } from '@/features/projects/api';
 import {
   listDiaries,
@@ -698,7 +699,10 @@ function DiariesCalendar({
 
   const daysCount = daysInMonth(year, month);
   const firstWeekday = new Date(year, month, 1).getDay(); // 0=Sun
-  const offset = (firstWeekday + 6) % 7; // ISO Mon=0
+  // Leading blank cells before the 1st. This was `(firstWeekday + 6) % 7`,
+  // an ISO Monday baked in, which drew the same grid for every language.
+  const weekStartsOn = useWeekStartsOn();
+  const offset = (firstWeekday - weekStartsOn + 7) % 7;
   const maxIso = maxDiaryIso();
 
   const prevMonth = () => {
@@ -770,7 +774,16 @@ function DiariesCalendar({
     }
   };
 
-  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Column headers, rotated to match `offset` above so the labels and the
+  // cells cannot drift apart. Indexed from Sunday because `getDay()` and
+  // `weekStartsOn` are. These strings are still English for every language,
+  // which is a pre-existing gap in this feature and not one this rotation
+  // introduces or is able to close.
+  const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekdays = Array.from(
+    { length: 7 },
+    (_, i) => WEEKDAY_LABELS[(i + weekStartsOn) % 7] ?? '',
+  );
 
   return (
     <Card padding="md">

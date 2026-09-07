@@ -64,6 +64,7 @@ import {
   isToday as dfIsToday,
 } from 'date-fns';
 import { useDateFnsLocale } from '@/shared/lib/dateFnsLocale';
+import { useWeekStartsOn, type WeekStartsOn } from '@/shared/lib/weekStart';
 
 import {
   Button,
@@ -126,18 +127,29 @@ const STATE_BLOCK_CLASS: Record<BookingStatus, string> = {
  * Compute the inclusive list of dates rendered in the grid given the
  * current view + anchor date.
  *
- * - Week: 7 days starting Monday.
+ * - Week: 7 days starting on the reader's first weekday.
  * - Month: full weeks bracketing the anchor month (always 35 or 42 days,
  *   includes leading + trailing greyed-out days from neighbour months).
+ *
+ * `weekStartsOn` used to be hardcoded to Monday here, which drew a
+ * Monday-first camp calendar for all 42 offered languages. A booking is a
+ * per-night cell and nothing in this feature prices or books by the week, so
+ * there was no operational week to preserve, only an unstated default. The
+ * range also bounds the fetch window, so the grid and the query rotate
+ * together and stay consistent.
  */
-function computeRange(view: CalendarView, anchor: Date): { start: Date; end: Date } {
+function computeRange(
+  view: CalendarView,
+  anchor: Date,
+  weekStartsOn: WeekStartsOn,
+): { start: Date; end: Date } {
   if (view === 'week') {
-    const start = startOfWeek(anchor, { weekStartsOn: 1 });
+    const start = startOfWeek(anchor, { weekStartsOn });
     const end = addDays(start, 6);
     return { start, end };
   }
-  const start = startOfWeek(startOfMonth(anchor), { weekStartsOn: 1 });
-  const end = endOfWeek(endOfMonth(anchor), { weekStartsOn: 1 });
+  const start = startOfWeek(startOfMonth(anchor), { weekStartsOn });
+  const end = endOfWeek(endOfMonth(anchor), { weekStartsOn });
   return { start, end };
 }
 
@@ -339,9 +351,10 @@ export function AccommodationCalendar({
     if (scopedAccommodationId) setFilterId(scopedAccommodationId);
   }, [scopedAccommodationId]);
 
+  const weekStartsOn = useWeekStartsOn();
   const { start: viewStart, end: viewEnd } = useMemo(
-    () => computeRange(view, anchor),
-    [view, anchor],
+    () => computeRange(view, anchor, weekStartsOn),
+    [view, anchor, weekStartsOn],
   );
 
   // List of accommodations — used both for the filter dropdown (when

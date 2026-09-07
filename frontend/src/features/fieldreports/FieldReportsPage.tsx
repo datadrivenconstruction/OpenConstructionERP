@@ -57,6 +57,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { todayLocalISO } from '@/shared/lib/dates';
+import { useWeekStartsOn, type WeekStartsOn } from '@/shared/lib/weekStart';
 import {
   fetchFieldReports,
   fetchFieldReportSummary,
@@ -169,35 +170,6 @@ function todayStr(): string {
   return todayLocalISO();
 }
 
-/* ── Week start (locale-aware) ─────────────────────────────────────────── */
-
-// Returns the first day of the week for the active locale: 0 = Sunday,
-// 1 = Monday. Uses Intl.Locale.weekInfo where supported (Chromium/modern
-// engines) and falls back to a small region map so DACH/EU users (the
-// stated primary market) get Monday-first calendars while US/CA keep
-// Sunday-first. Defaults to Monday — the ISO-8601 / most-of-the-world norm.
-function localeWeekStart(locale: string | undefined): 0 | 1 {
-  const lc = locale || 'en';
-  try {
-    const info = (new Intl.Locale(lc) as unknown as { weekInfo?: { firstDay?: number } })
-      .weekInfo;
-    if (info?.firstDay != null) {
-      // Intl reports 1=Mon … 7=Sun; we only distinguish Sun vs Mon start.
-      return info.firstDay === 7 ? 0 : 1;
-    }
-  } catch {
-    /* Intl.Locale.weekInfo not available — fall through to the region map. */
-  }
-  const norm = lc.toLowerCase();
-  const lang = norm.split('-')[0] ?? '';
-  // Languages/regions that conventionally start the week on Sunday.
-  const sundayFirstLangs = ['ja', 'ko', 'he', 'ar'];
-  const sundayFirstLocales = ['en-us', 'en-ca', 'es-mx', 'zh-cn'];
-  if (sundayFirstLangs.includes(lang)) return 0;
-  if (sundayFirstLocales.includes(norm)) return 0;
-  return 1;
-}
-
 const WEEKDAYS: ReadonlyArray<{ key: string; label: string }> = [
   { key: 'sun', label: 'Sun' },
   { key: 'mon', label: 'Mon' },
@@ -208,10 +180,10 @@ const WEEKDAYS: ReadonlyArray<{ key: string; label: string }> = [
   { key: 'sat', label: 'Sat' },
 ];
 
-// Rotated weekday headers for a given week start (0=Sun, 1=Mon). Returns a
-// 7-element array — never indexes a tuple by an unprovable number, so it
-// stays clean under noUncheckedIndexedAccess.
-function rotatedWeekdays(weekStart: 0 | 1): Array<{ key: string; label: string }> {
+// Rotated weekday headers for a given week start (0=Sun through 6=Sat).
+// Returns a 7-element array, never indexing a tuple by an unprovable number,
+// so it stays clean under noUncheckedIndexedAccess.
+function rotatedWeekdays(weekStart: WeekStartsOn): Array<{ key: string; label: string }> {
   const out: Array<{ key: string; label: string }> = [];
   for (let i = 0; i < 7; i++) {
     const entry = WEEKDAYS[(i + weekStart) % 7];
@@ -237,9 +209,9 @@ function totalWorkforce(workforce: WorkforceEntry[]): { workers: number; hours: 
    ══════════════════════════════════════════════════════════════════════════ */
 
 export function FieldReportsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const weekStart = localeWeekStart(i18n.language);
+  const weekStart = useWeekStartsOn();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -424,8 +396,9 @@ export function FieldReportsPage() {
   const calendarDays = useMemo(() => {
     const firstDay = new Date(calYear, calMonth - 1, 1);
     // Leading blank cells before day 1, rotated for the locale's week start
-    // (0 = Sunday, 1 = Monday). For a Monday-first calendar, Sunday (getDay()
-    // === 0) sits at the end of the week, so it needs 6 leading cells.
+    // (0 = Sunday through 6 = Saturday). For a Monday-first calendar, Sunday
+    // (getDay() === 0) sits at the end of the week, so it needs 6 leading
+    // cells. The arithmetic is general over all seven starts.
     const startDow = (firstDay.getDay() - weekStart + 7) % 7;
     const daysInMonth = new Date(calYear, calMonth, 0).getDate();
 
