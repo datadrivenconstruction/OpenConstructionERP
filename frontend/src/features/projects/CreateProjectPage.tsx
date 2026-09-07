@@ -163,9 +163,17 @@ const REGION_TO_PACK: Record<string, string> = {
 // short 'gbt' for China, which the backend spells 'gb50500'. They are removed
 // rather than added to the known set because "we don't render it yet" is the
 // true statement about them, and a picker is not the place to promise
-// otherwise. The label maps on the reading screens still name all three, which
-// is the right asymmetry: stop writing a value that cannot resolve, keep
-// naming one that is already stored.
+// otherwise.
+//
+// This comment used to add that "the label maps on the reading screens still
+// name all three, which is the right asymmetry". Measured 2026-09-07: that
+// half is false. The only reader of CLASSIFICATION_STANDARD_LABELS is the
+// section-path renderer at match_elements/service.py:3450, and it indexes the
+// map by a standard drawn from classification_order(), whose members are
+// KNOWN_CLASSIFICATION_STANDARDS. A label outside the known set is therefore
+// reachable by no reader at all, so the three names buy nothing today and no
+// stored code is named by them. Removing the options was still right; the
+// asymmetry it was justified with does not exist.
 const STANDARD_GROUPS: OptionGroup[] = [
   {
     group: 'Common Standards',

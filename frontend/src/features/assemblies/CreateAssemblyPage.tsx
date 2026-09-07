@@ -24,12 +24,25 @@ const CATEGORIES = [
   { value: 'general', key: 'assemblies.cat_general', defaultLabel: 'General' },
 ];
 
+// The value picked here becomes a KEY in the template's `classification`
+// dict (see the submit handler below), so it must be a standard something
+// downstream can read back. Two consumers read that dict: the library page,
+// which badges the codes, and the BOQ section-path renderer in
+// match_elements, which walks `classification_order()` and can only find a
+// key that is in KNOWN_CLASSIFICATION_STANDARDS on the backend.
+//
+// UniFormat and Uniclass were offered here and are in neither. Picking one
+// stored the code and then no reader anywhere could name it: the library
+// guard renders only the keys badged below, and the BOQ renderer never looks
+// the key up, so the estimator's own input vanished with no error. That is
+// the same defect CreateProjectPage.tsx fixed on the project standards
+// picker; this mirror was missed. Being in CLASSIFICATION_STANDARD_LABELS is
+// not enough - a label exists so a stored code can be named, and 18 standards
+// have one while only 13 are honoured.
 const STANDARDS = [
   { value: 'din276', key: 'assemblies.std_din276', defaultLabel: 'DIN 276' },
   { value: 'nrm', key: 'assemblies.std_nrm', defaultLabel: 'NRM' },
   { value: 'masterformat', key: 'assemblies.std_masterformat', defaultLabel: 'MasterFormat' },
-  { value: 'uniformat', key: 'assemblies.std_uniformat', defaultLabel: 'UniFormat' },
-  { value: 'uniclass', key: 'assemblies.std_uniclass', defaultLabel: 'Uniclass' },
 ];
 
 /* -- Modal ---------------------------------------------------------------- */

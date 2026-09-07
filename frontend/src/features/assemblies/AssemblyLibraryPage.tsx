@@ -241,8 +241,12 @@ function TemplateCard({
   const { t } = useTranslation();
   const badgeColor = CATEGORY_BADGE[template.category] ?? 'neutral';
 
+  // The three the create form offers and the BOQ side honours. NRM was
+  // offered by the picker and badged by nothing, so a template classified
+  // against it looked unclassified everywhere it was read back.
   const din = template.classification?.din276;
   const mf = template.classification?.masterformat;
+  const nrm = template.classification?.nrm;
 
   return (
     <Card
@@ -266,6 +270,11 @@ function TemplateCard({
           {mf && (
             <Badge variant="neutral" size="sm">
               {`MF ${mf}`}
+            </Badge>
+          )}
+          {nrm && (
+            <Badge variant="purple" size="sm">
+              {`NRM ${nrm}`}
             </Badge>
           )}
         </div>
@@ -572,7 +581,8 @@ function TemplateDrawer({
 
           {/* Classification */}
           {(template.classification?.din276 ||
-            template.classification?.masterformat) && (
+            template.classification?.masterformat ||
+            template.classification?.nrm) && (
             <section>
               <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 {t('assemblies.library.classification', 'Classification')}
@@ -584,6 +594,11 @@ function TemplateDrawer({
                 {template.classification.masterformat && (
                   <Badge variant="neutral">
                     {`MasterFormat · ${template.classification.masterformat}`}
+                  </Badge>
+                )}
+                {template.classification.nrm && (
+                  <Badge variant="purple">
+                    {`NRM · ${template.classification.nrm}`}
                   </Badge>
                 )}
               </div>

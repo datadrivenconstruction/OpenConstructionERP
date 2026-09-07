@@ -76,13 +76,34 @@ to catch.
 
 Five standards carry a display label and no country:
 ``gaeb``, ``omniclass``, ``onorm``, ``uniclass`` and ``uniformat``. They are
-outside ``KNOWN_CLASSIFICATION_STANDARDS`` and so outside this gate's
-population, which is the right scope: a standard no country reads cannot be
-mis-attributed to one. ``onorm`` is named here because it is the one that reads
-like an omission rather than a choice. OENORM is Austria's real standard, it has
-a label, and Austria resolves to ``din276``. Whether Austria should read it is a
-product decision about the registry, not something a test can settle, and it is
-recorded here so the next reader finds a decision rather than an oversight.
+outside ``KNOWN_CLASSIFICATION_STANDARDS`` and so outside the country-mapping
+assertions, which is the right scope: a standard no country reads cannot be
+mis-attributed to one.
+
+``onorm`` used to be named here as the one that "reads like an omission rather
+than a choice", on the grounds that OENORM is Austria's standard while Austria
+resolves to ``din276``. Measured 2026-09-07, it reads like a choice:
+
+* The OENORM rules the product ships are B 2063, the LV position-format
+  standard - ordinals ``XX.XX.XXXXA`` plus a description-length floor
+  (``ONORMPositionFormat`` in ``validation/rules/__init__.py``). B 2063 is a
+  tender-document structure, the Austrian counterpart of GAEB, and not a
+  cost-group hierarchy. B 1801-1 is the cost-group standard and it appears
+  nowhere in the tree.
+* Austria already runs those rules. ``boq.router._build_rule_sets`` carries
+  ``COUNTRY_RULES["AT"] = ["gaeb", "onorm"]``, keyed on the country rather than
+  on the classification standard, so an Austrian BOQ is validated against
+  B 2063 today without any registry entry.
+* Mapping ``AT`` to ``onorm`` would change no section path. The renderer walks
+  ``classification_order()`` and takes the first standard the CostItem carries
+  a code for, and no shipped cost row carries an ``onorm`` key, so the answer
+  would still be the ``din276`` code the DACH rows do carry. The mapping alone
+  would change only what the product claims.
+
+So ``onorm`` sits with ``gaeb``: an exchange-format vocabulary living in a
+cost-breakdown registry, country-less because it is not a breakdown. Whether
+Austria should get B 1801-1 cost groups is a live product question, and it
+needs a code table and seeded codes rather than a line in the map.
 
 **Would anyone know if a project fell to the default?**
 
@@ -660,8 +681,15 @@ def test_the_five_unmapped_standards_are_labelled_and_unreachable_on_purpose() -
     assert unmapped == ["gaeb", "omniclass", "onorm", "uniclass", "uniformat"], (
         f"the set of labelled-but-countryless standards is now {unmapped}. If one gained a country "
         "it must also gain a picker row; if one was added, decide deliberately whether any country "
-        "reads it. onorm is the one to look at twice: OENORM is Austria's real standard and Austria "
-        "resolves to din276."
+        "reads it.\n"
+        "onorm and gaeb are not omissions. Both name tender-document formats rather than cost-group "
+        "hierarchies - OENORM B 2063 is the Austrian counterpart of GAEB - and both are already "
+        "reachable as validation rule packs through boq.router._build_rule_sets, which keys "
+        "COUNTRY_RULES['AT'] = ['gaeb', 'onorm'] off the country. Mapping AT to onorm here would "
+        "change no section path, because no shipped cost row carries an onorm code and the renderer "
+        "would fall through to the din276 code the DACH rows do carry; it would change only what the "
+        "product claims. Austria reading OENORM B 1801-1 cost groups needs that code table shipped "
+        "first."
     )
 
 
@@ -698,3 +726,313 @@ def test_the_gate_is_actually_watching_the_alias_table(monkeypatch: pytest.Monke
         "emptying REGION_ALIAS_TO_COUNTRY left every picker option resolving, so this gate is not "
         "reading the alias table and would stay green through the original defect"
     )
+
+
+# ── Every standards picker the app ships, not only the project one ────────
+#
+# ``test_every_shipped_standard_option_is_one_the_registry_can_resolve`` above
+# reads ``STANDARD_GROUPS`` and nothing else, so its population is one file.
+# That is how the defect survived being fixed. When UniFormat, Uniclass and
+# OmniClass were removed from the project picker for writing values
+# ``resolve_standard`` drops, nobody looked at the other surfaces that offer a
+# classification standard, and two of them went on shipping UniFormat and
+# Uniclass. A gate scoped to one mirror is silent about the others by
+# construction, and the repair is to widen this population rather than to add a
+# second gate that would drift from this one.
+#
+# Swept 2026-09-07 across ``frontend/src`` for any option list offering
+# ``masterformat`` as a value. Exactly three files carry one and all three are
+# named below. A fourth picker added tomorrow is invisible here until somebody
+# adds the row, which is the same shape of gap, so the sweep is recorded:
+#
+#     git grep -ln "value: 'masterformat'" -- frontend/src
+STANDARD_PICKERS: dict[str, tuple[Path, str]] = {
+    "CreateProjectPage.STANDARD_GROUPS": (PICKER, "const STANDARD_GROUPS"),
+    "QuickEstimatePage.STANDARDS": (
+        REPO_ROOT / "frontend" / "src" / "features" / "ai" / "QuickEstimatePage.tsx",
+        "const STANDARDS",
+    ),
+    "CreateAssemblyPage.STANDARDS": (
+        REPO_ROOT / "frontend" / "src" / "features" / "assemblies" / "CreateAssemblyPage.tsx",
+        "const STANDARDS",
+    ),
+}
+
+#: How many real options each picker ships, so a parse that quietly stops
+#: matching cannot pass over a shrunken population. Pinned rather than derived:
+#: the cross-check below catches a regex that drops *some* options, and this
+#: catches one that reads the wrong literal entirely and still finds a coherent
+#: handful. Changing a picker means changing the number here, deliberately.
+STANDARD_PICKER_OPTION_COUNTS: dict[str, int] = {
+    "CreateProjectPage.STANDARD_GROUPS": 13,
+    "QuickEstimatePage.STANDARDS": 4,
+    "CreateAssemblyPage.STANDARDS": 3,
+}
+
+#: Options a picker ships that ``resolve_standard`` does not honour, each named
+#: with why that is right for its surface. Keyed by (picker, value) rather than
+#: by picker, so waiving one option never blinds the gate to the next one added
+#: to the same file.
+STANDARD_PICKER_OPTIONS_NOT_HONOURED: dict[tuple[str, str], str] = {
+    ("QuickEstimatePage.STANDARDS", "uniformat"): (
+        "This picker does not write project.classification_standard and never reaches "
+        "resolve_standard. Its value is posted as the free-text 'standard' field on the quick / "
+        "photo / file estimate endpoints, sanitised to 64 characters and interpolated into the LLM "
+        "prompt ('Classification standard: {standard}' in app.modules.ai.prompts), so it steers "
+        "what the model returns rather than selecting a renderer. The codes that come back are "
+        "displayed without a whitelist - QuickEstimatePage.tsx renders "
+        "Object.entries(item.classification) - so a UniFormat answer is readable end to end on this "
+        "surface. It is the one classification-standard option in the app that is honest while "
+        "sitting outside KNOWN_CLASSIFICATION_STANDARDS, and it stays in the population so a value "
+        "added beside it later still has to be justified."
+    ),
+}
+
+#: Value-only, because the three pickers disagree about the rest of the option
+#: shape: the project page ships ``{value, label}``, the quick-estimate page
+#: ``{value, labelKey, fallback}`` and the assembly form ``{value, key,
+#: defaultLabel}``. ``_OPTION_RE`` above requires ``label:`` and so matches
+#: nothing in two of the three, which is exactly the empty population this file
+#: warns about; the wider gate reads values and leaves labels to the narrower
+#: test that genuinely needs them.
+_VALUE_RE = re.compile(r"""value:\s*(['"])(.*?)\1""")
+
+
+def _block_from_source(source: str, marker: str, where: str) -> str:
+    """Slice one option-group literal out of already-read source text.
+
+    Takes text rather than a path so the negative controls below can feed it a
+    synthetic literal. A gate whose red state can only be produced by editing a
+    shipped file is one nobody dares prove, and this checkout is shared.
+
+    The slice starts at the array literal rather than at the ``const``, because
+    a TypeScript annotation can itself declare a ``value:`` key:
+    ``QuickEstimatePage`` types its list as
+    ``Array<{ value: string; label?: string; ... }>``. Slicing from the ``const``
+    put that annotation in the block, and the cross-check in
+    :func:`_assert_value_parse_is_complete` then reported the parse as dropping
+    an option it had never been offered. The annotation is not an option.
+
+    Args:
+        source: The file contents.
+        marker: The ``const`` declaration to slice from.
+        where: Human name of the picker, used in the failure messages.
+
+    Returns:
+        The array literal's text, from its opening bracket to its closing one.
+    """
+    assert marker in source, (
+        f"{where} no longer declares {marker!r}. If the options moved to a shared module, re-point "
+        "STANDARD_PICKERS at it; do not copy the values into this file."
+    )
+    declaration = source.index(marker)
+    opening = source.find("= [", declaration)
+    assert opening != -1, (
+        f"{where}: found {marker!r} but no '= [' after it, so the option array cannot be located and "
+        "the population would be whatever the rest of the file happens to contain."
+    )
+    end = source.find("\n];", opening)
+    assert end != -1, (
+        f"{where}: found {marker!r} but no closing bracket after it, so the literal cannot be "
+        "sliced and the population would run on into the next declaration."
+    )
+    return source[opening:end]
+
+
+def _values_in_source(block: str) -> list[str]:
+    """Every option value in one picker literal, in file order."""
+    return [m.group(2) for m in _VALUE_RE.finditer(block)]
+
+
+def _real_values(block: str) -> list[str]:
+    """Option values that name a standard.
+
+    Drops the free-text escape hatch and the empty value the quick-estimate
+    page ships for its "Auto-detect" row, neither of which is a standard.
+    """
+    return [v for v in _values_in_source(block) if v and v != FREE_TEXT_OPTION]
+
+
+def _assert_value_parse_is_complete(where: str, block: str) -> list[str]:
+    """Cross-check a value parse against the block's own ``value:`` count.
+
+    Args:
+        where: Human name of the picker, used in the failure messages.
+        block: The literal's text.
+
+    Returns:
+        Every parsed value, including the free-text and empty ones.
+    """
+    parsed = _values_in_source(block)
+    declared = len(re.findall(r"\bvalue:", block))
+
+    assert declared, (
+        f"{where}: the sliced block contains no 'value:' key at all, so the population is empty and "
+        "every assertion over it would pass while measuring nothing."
+    )
+    assert len(parsed) == declared, (
+        f"{where}: the value regex found {len(parsed)} options but the block declares {declared} "
+        f"'value:' keys, so the parse is dropping options and a dropped option is never checked.\n"
+        f"parsed: {parsed}"
+    )
+    return parsed
+
+
+def _picker_values(name: str) -> list[str]:
+    """Real option values one named picker ships."""
+    path, marker = STANDARD_PICKERS[name]
+    assert path.is_file(), (
+        f"{name} is not at {path}. This gate reads the shipped pages as its population and cannot "
+        "fall back to a copy, because a copy is what it exists to prevent."
+    )
+    block = _block_from_source(path.read_text(encoding="utf-8"), marker, name)
+    _assert_value_parse_is_complete(name, block)
+    return _real_values(block)
+
+
+def _standards_inventory() -> dict[str, list[str]]:
+    """Every standards picker in the app and the values it offers."""
+    return {name: _picker_values(name) for name in STANDARD_PICKERS}
+
+
+@pytest.mark.parametrize("name", sorted(STANDARD_PICKERS))
+def test_a_standards_picker_ships_the_population_this_gate_expects(name: str) -> None:
+    """The denominator is asserted before anything is asserted over it.
+
+    A narrowed population cannot fake the denominator: if a picker loses
+    options, or the parse starts reading a different literal, this goes red
+    naming both numbers instead of passing over the smaller set.
+    """
+    values = _picker_values(name)
+    expected = STANDARD_PICKER_OPTION_COUNTS[name]
+    assert len(values) == expected, (
+        f"{name} ships {len(values)} real standard options, not the {expected} this gate records.\n"
+        f"  offered: {values}\n"
+        "If the picker legitimately gained or lost a row, update STANDARD_PICKER_OPTION_COUNTS. Do "
+        "not delete the assertion: it is what stops a silently shrinking population from passing."
+    )
+
+
+def test_every_standards_picker_in_the_app_offers_only_values_the_product_honours() -> None:
+    """The mirrors must agree with the registry, and there are three of them.
+
+    ``resolve_standard`` accepts an explicit standard only when it is in
+    ``KNOWN_CLASSIFICATION_STANDARDS``, which is 13 of the 18 slugs carrying a
+    display label. An option outside that set writes a value the product then
+    ignores, falling through to the region and to DIN 276 with no error and
+    nothing a user could see.
+
+    Measured 2026-09-07, before the fix this test ships with:
+    ``CreateAssemblyPage`` offered UniFormat and Uniclass, and the value it
+    writes becomes a *key* in the template's ``classification`` dict, where no
+    reader could reach it. The library page badged only ``din276`` and
+    ``masterformat``, and the BOQ section-path renderer only ever looks up keys
+    that ``classification_order()`` returns. An estimator classified a template
+    against UniFormat and the code disappeared with no error anywhere.
+    """
+    inventory = _standards_inventory()
+    population = sum(len(v) for v in inventory.values())
+
+    offenders: list[str] = []
+    for name, values in sorted(inventory.items()):
+        for value in values:
+            if value in KNOWN_CLASSIFICATION_STANDARDS:
+                continue
+            if (name, value) in STANDARD_PICKER_OPTIONS_NOT_HONOURED:
+                continue
+            labelled = (
+                " (carries a display label, which is not enough)" if value in CLASSIFICATION_STANDARD_LABELS else ""
+            )
+            offenders.append(f"  {name}: {value!r}{labelled}")
+
+    assert offenders == [], (
+        f"population: {population} options across {len(inventory)} pickers "
+        + ", ".join(f"{n}={len(v)}" for n, v in sorted(inventory.items()))
+        + f"; honoured set {len(KNOWN_CLASSIFICATION_STANDARDS)} of "
+        f"{len(CLASSIFICATION_STANDARD_LABELS)} labelled.\n"
+        "these options are offered and not honoured:\n" + "\n".join(offenders) + "\n"
+        f"Writing one stores a standard the product ignores, falling through to "
+        f"{DEFAULT_CLASSIFICATION_STANDARD!r}, or - where the value becomes a classification dict "
+        "key - stores a code no reader can name. Close it by removing the option, by mapping a "
+        "country to the standard so it enters KNOWN_CLASSIFICATION_STANDARDS, or by naming the "
+        "(picker, value) pair in STANDARD_PICKER_OPTIONS_NOT_HONOURED with the reason its surface "
+        "is different."
+    )
+
+
+def test_no_picker_waiver_names_an_option_that_is_no_longer_offered() -> None:
+    """A stale waiver is a waiver nobody reads."""
+    inventory = _standards_inventory()
+    problems: list[str] = []
+    for (name, value), reason in sorted(STANDARD_PICKER_OPTIONS_NOT_HONOURED.items()):
+        if name not in inventory:
+            problems.append(f"  ({name}, {value}): no such picker in STANDARD_PICKERS")
+        elif value not in inventory[name]:
+            problems.append(f"  ({name}, {value}): the picker no longer offers this option")
+        elif value in KNOWN_CLASSIFICATION_STANDARDS:
+            problems.append(f"  ({name}, {value}): now honoured by resolve_standard, so the waiver is dead text")
+        if len(reason.strip()) < 20:
+            problems.append(f"  ({name}, {value}): carries no usable reason")
+    assert problems == [], "these picker waivers no longer describe anything:\n" + "\n".join(problems)
+
+
+# ── Negative controls for the widened gate ────────────────────────────────
+#
+# Both directions, and neither touches a shipped file: 28 agents share this
+# checkout, and a control that has to edit a real page to go red is one nobody
+# runs.
+
+
+def test_the_widened_gate_goes_red_when_a_mirror_drifts() -> None:
+    """A picker offering a labelled-but-unhonoured value must be caught.
+
+    The defect itself, reconstructed: OmniClass carries a display label and no
+    country, so it reads as selectable and resolves to nothing.
+    """
+    drifted = (
+        "const STANDARDS = [\n"
+        "  { value: 'din276', label: 'DIN 276' },\n"
+        "  { value: 'omniclass', label: 'OmniClass' },\n"
+        "];"
+    )
+    values = _real_values(_block_from_source(drifted, "const STANDARDS", "synthetic"))
+
+    assert values == ["din276", "omniclass"], f"the control's own parse is broken: {values}"
+    assert "omniclass" in CLASSIFICATION_STANDARD_LABELS, (
+        "omniclass no longer carries a display label, so this control no longer reconstructs the "
+        "defect; pick another labelled-but-unhonoured slug"
+    )
+    unhonoured = [v for v in values if v not in KNOWN_CLASSIFICATION_STANDARDS]
+    assert unhonoured == ["omniclass"], (
+        "a picker offering OmniClass was not flagged as unhonoured, so the gate above would stay "
+        f"green through the exact defect it exists to catch: {unhonoured}"
+    )
+
+
+def test_the_widened_gate_goes_red_when_its_own_parse_finds_nothing() -> None:
+    """An empty parse must fail loudly rather than pass over no options.
+
+    The failure this file was built around is a green gate with an empty
+    population, so the parse has to be hostile to its own silence.
+    """
+    empty = "const STANDARDS = [\n  { name: 'din276', label: 'DIN 276' },\n];"
+    block = _block_from_source(empty, "const STANDARDS", "synthetic")
+
+    assert _values_in_source(block) == [], "the control block was supposed to carry no 'value:' key"
+    with pytest.raises(AssertionError, match="no 'value:' key at all"):
+        _assert_value_parse_is_complete("synthetic", block)
+
+
+def test_the_widened_gate_goes_red_when_the_parse_drops_options() -> None:
+    """A parse that reads some options and misses others must also fail.
+
+    Distinct from the empty case: a regex matching most of a list while
+    skipping the one option that is wrong leaves a plausible non-empty
+    population and still misses the defect.
+    """
+    partial = "const STANDARDS = [\n  { value: 'din276' },\n  { value: `omniclass` },\n];"
+    block = _block_from_source(partial, "const STANDARDS", "synthetic")
+
+    assert _values_in_source(block) == ["din276"], "the backtick option was supposed to escape the value regex"
+    with pytest.raises(AssertionError, match="dropping options"):
+        _assert_value_parse_is_complete("synthetic", block)
