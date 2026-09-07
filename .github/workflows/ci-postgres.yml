@@ -1255,19 +1255,23 @@ jobs:
     # token check and the IDOR job. The conclusion is unchanged, the cause is
     # not, and a wrong cause invites somebody to "fix the OOM" and expect this
     # job to become redundant.
-    # Recounted 2026-09-05 out of the commit: the include in vite.config.ts is
-    # src/**/*.test.{ts,tsx} plus tests/**/*.test.{ts,tsx}, which collects 697
-    # files under src and 4 under frontend/tests, so 701 in all. 39 are named
-    # below, so 662 of them gate nothing. Recount rather than trust that
+    # Recounted 2026-09-07 out of the commit: the include in vite.config.ts is
+    # src/**/*.test.{ts,tsx} plus tests/**/*.test.{ts,tsx}, which collects 710
+    # files under src and 4 under frontend/tests, so 714 in all. 40 are named
+    # below, so 674 of them gate nothing. Recount rather than trust that
     # sentence, and recount against that include rather than against the vitest
     # default: the default would also sweep up the Playwright specs, which this
     # job does not run and which were never part of this number.
     #
-    # The previous recount, 2026-08-17, said 589 collected and 34 named. Both
+    # The previous recount, 2026-09-05, said 701 collected and 39 named. The
+    # suite grew by thirteen files in two days while the list grew by one, which
+    # is the fourth consecutive recount to find the sentence stale rather than
+    # to confirm it.
+    #
+    # The recount before that, 2026-08-17, said 589 collected and 34 named. Both
     # halves drifted again in nineteen days, the suite by 112 files and the list
-    # by 5, which is the third consecutive recount to find both numbers stale
-    # and is the argument for reading the count off the file rather than off
-    # this paragraph.
+    # by 5, which is the argument for reading the count off the file rather than
+    # off this paragraph.
     #
     # Read the named list out of the job-level FRONTEND_TEST_FILES env value,
     # parsed as YAML, and count the distinct entries in it. Scanning the whole
@@ -1387,6 +1391,7 @@ jobs:
         src/features/field-time/workingTime.test.ts
         src/features/file-manager/SheetsIndexPage.test.tsx
         src/features/file-manager/sheetsInsights.test.ts
+        src/features/geo-hub/__tests__/cropPolygonPositionsAreNeverMutatedAfterConstruction.test.tsx
         src/features/integrations/calendarFeed.test.ts
         src/features/module-builder/api.test.ts
         src/features/module-builder/draft.test.ts
