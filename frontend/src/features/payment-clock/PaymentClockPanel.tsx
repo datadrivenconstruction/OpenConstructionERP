@@ -25,6 +25,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { fmtDate } from '@/shared/lib/formatters';
 import { formatCurrency } from '@/shared/lib/money';
 import { getErrorMessage } from '@/shared/lib/api';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -463,7 +464,7 @@ function NewClockForm({
         regime_code: regimeCode,
         reference,
         application_date: applicationDate,
-        applied_amount: appliedAmount,
+        applied_amount: toDecimalPayloadString(appliedAmount),
         currency: currency.toUpperCase(),
       }),
     onSuccess: onDone,

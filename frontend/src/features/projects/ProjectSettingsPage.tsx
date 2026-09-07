@@ -44,20 +44,22 @@ import {
   type ComplianceRulePack,
 } from '../contracts/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Decimal-string validator. Accepts "1.5", "1200.50", "0.01". Rejects empty,
- *  zero, negative, NaN, non-numeric. We keep the stored shape as a string to
- *  preserve precision (matches RFC 37 §3.1). */
+/** Decimal-string validator. Accepts "1.5", "1200.50", "0.01" and the same
+ *  amounts written the way most of the countries we ship a language for write
+ *  them - "1,5" and "1.200,50". Rejects empty, zero, negative, non-numeric.
+ *  The dot-only regexp this replaced turned a German or Brazilian rate into
+ *  "FX rate must be a positive number" on input that was perfectly correct.
+ *  We keep the stored shape as a string to preserve precision (matches
+ *  RFC 37 §3.1). */
 function isPositiveDecimalString(value: string): boolean {
-  if (!value || !value.trim()) return false;
-  const trimmed = value.trim();
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) return false;
-  const n = Number(trimmed);
-  return Number.isFinite(n) && n > 0;
+  const n = parseDecimalInput(value);
+  return n !== null && n > 0;
 }
 
 /** Build a flat list `{value, label}` from the grouped CURRENCY_GROUPS so we
@@ -151,7 +153,7 @@ function FxRateModal({
     }
     onSave({
       code: effectiveCode,
-      rate: rate.trim(),
+      rate: toDecimalPayloadString(rate),
       label: resolvedLabel || null,
     });
   };
@@ -277,8 +279,8 @@ function FxRateModal({
              * 1415 ARS" would silently get 1 ARS = 1415 USD. Showing
              * both directions catches the inversion before save. */}
             {rateLooksValid && effectiveCode && baseCurrency && !isSameAsBase && (() => {
-              const rateNum = parseFloat(rate);
-              if (!Number.isFinite(rateNum) || rateNum <= 0) return null;
+              const rateNum = parseDecimalInput(rate);
+              if (rateNum === null || rateNum <= 0) return null;
               const inverseRate = 1 / rateNum;
               const fmt = (n: number) =>
                 n >= 1000 || n < 0.001
@@ -313,8 +315,8 @@ function FxRateModal({
              * it as unusual. Soft, non-blocking: exotic or fast-moving rates
              * stay valid, and unknown currencies skip the check entirely. */}
             {rateLooksValid && effectiveCode && baseCurrency && !isSameAsBase && (() => {
-              const rateNum = parseFloat(rate);
-              if (!Number.isFinite(rateNum) || rateNum <= 0) return null;
+              const rateNum = parseDecimalInput(rate);
+              if (rateNum === null || rateNum <= 0) return null;
               const expected = getFxRate(effectiveCode, baseCurrency, ratesVsUsd);
               if (!expected || !Number.isFinite(expected) || expected <= 0) return null;
               const offBy = Math.max(rateNum / expected, expected / rateNum);
@@ -716,7 +718,10 @@ export function ProjectSettingsPage() {
       updateMutation.mutate({ default_vat_rate: null } as Partial<Project>);
       return;
     }
-    if (!/^\d+(\.\d+)?$/.test(trimmed)) {
+    // A dot-only regexp rejected "19,5" - the spelling a German, French,
+    // Spanish, Italian or Brazilian user types for a perfectly valid rate.
+    const parsed = parseDecimalInput(trimmed);
+    if (parsed === null || parsed < 0) {
       addToast({
         type: 'error',
         title: t('project.settings.vat.invalid', {
@@ -725,7 +730,9 @@ export function ProjectSettingsPage() {
       });
       return;
     }
-    updateMutation.mutate({ default_vat_rate: trimmed } as Partial<Project>);
+    updateMutation.mutate({
+      default_vat_rate: toDecimalPayloadString(trimmed),
+    } as Partial<Project>);
   };
 
   const handleAddUnit = (e: FormEvent) => {

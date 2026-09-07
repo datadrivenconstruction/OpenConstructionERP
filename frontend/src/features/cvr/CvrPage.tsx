@@ -75,6 +75,7 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildCvrInsights } from './cvrInsights';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 interface Project {
   id: string;
@@ -201,11 +202,11 @@ function AddLineForm({
       createCvrLine(reportId, {
         cost_code: form.cost_code,
         description: form.description,
-        cost_to_date: form.cost_to_date || '0',
-        value_to_date: form.value_to_date || '0',
-        accruals: form.accruals || '0',
-        forecast_cost: form.forecast_cost || '0',
-        forecast_value: form.forecast_value || '0',
+        cost_to_date: toDecimalPayloadString(form.cost_to_date),
+        value_to_date: toDecimalPayloadString(form.value_to_date),
+        accruals: toDecimalPayloadString(form.accruals),
+        forecast_cost: toDecimalPayloadString(form.forecast_cost),
+        forecast_value: toDecimalPayloadString(form.forecast_value),
       }),
     onSuccess: () => {
       setForm({ ...EMPTY_LINE });
@@ -904,11 +905,11 @@ function EditLineDrawer({
       updateCvrLine(line.id, {
         cost_code: form.cost_code,
         description: form.description,
-        cost_to_date: form.cost_to_date || '0',
-        value_to_date: form.value_to_date || '0',
-        accruals: form.accruals || '0',
-        forecast_cost: form.forecast_cost || '0',
-        forecast_value: form.forecast_value || '0',
+        cost_to_date: toDecimalPayloadString(form.cost_to_date),
+        value_to_date: toDecimalPayloadString(form.value_to_date),
+        accruals: toDecimalPayloadString(form.accruals),
+        forecast_cost: toDecimalPayloadString(form.forecast_cost),
+        forecast_value: toDecimalPayloadString(form.forecast_value),
       }),
     onSuccess: () => {
       onSaved();
@@ -998,8 +999,8 @@ function CashflowPointForm({
       createCashflowPoint({
         project_id: projectId,
         period,
-        cash_in: cashIn || '0',
-        cash_out: cashOut || '0',
+        cash_in: toDecimalPayloadString(cashIn),
+        cash_out: toDecimalPayloadString(cashOut),
         currency: defaultCurrency || undefined,
       }),
     onSuccess: () => {
@@ -1042,7 +1043,10 @@ function CashflowPointsTable({
 
   const updateMut = useMutation({
     mutationFn: (vars: { id: string; cash_in: string; cash_out: string }) =>
-      updateCashflowPoint(vars.id, { cash_in: vars.cash_in || '0', cash_out: vars.cash_out || '0' }),
+      updateCashflowPoint(vars.id, {
+        cash_in: toDecimalPayloadString(vars.cash_in),
+        cash_out: toDecimalPayloadString(vars.cash_out),
+      }),
     onSuccess: () => {
       setEditId(null);
       onChanged();
@@ -1212,8 +1216,8 @@ function PaymentApplicationsSection({
         project_id: projectId,
         period,
         application_number: number || undefined,
-        gross_value: gross || '0',
-        retention: retention || '0',
+        gross_value: toDecimalPayloadString(gross),
+        retention: toDecimalPayloadString(retention),
         currency: defaultCurrency || undefined,
       }),
     onSuccess: () => {

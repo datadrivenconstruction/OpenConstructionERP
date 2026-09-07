@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { ApiError, apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { toNum } from '@/shared/lib/money';
+import { normalizeDecimalSeparators, parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 /**
  * API client and pure editor helpers for the labor & crew rate build-up.
@@ -177,20 +178,24 @@ export function newCrewMember(trade = '', count = 1, all_in_rate = ''): CrewRowI
   return { key: nextKey('cm'), trade, count, all_in_rate };
 }
 
-const DECIMAL_RE = /^-?\d*\.?\d+$/;
-
 /**
  * Sanitise a money / percentage text input into a Decimal-safe string.
  *
- * An exact decimal string is passed through verbatim so precision is never
- * lost. Blank collapses to `'0'`; anything unparseable is coerced through the
- * shared {@link toNum} guard (never NaN) so the backend always receives a
- * valid Decimal literal.
+ * The amount is passed through as an exact decimal string so precision is
+ * never lost. Blank collapses to `'0'`; anything unparseable does too, so the
+ * backend always receives a valid Decimal literal and never NaN.
+ *
+ * The separator handling is {@link parseDecimalInput}'s, not `Number`'s. This
+ * used to test the raw text against a dot-only regexp and fall through to
+ * `toNum`, which is `Number` plus a zero guard - so a base hourly wage typed
+ * as `30,50` reached the compute request as `'0'` and quietly zeroed every
+ * derived rate. `laborRates.test.ts` asserted that zero as correct.
  */
 export function normalizeAmount(value: string): string {
   const s = (value ?? '').trim();
   if (s === '') return '0';
-  return DECIMAL_RE.test(s) ? s : String(toNum(s));
+  if (parseDecimalInput(s) === null) return '0';
+  return normalizeDecimalSeparators(s);
 }
 
 /** Clamp a headcount to a non-negative integer. */

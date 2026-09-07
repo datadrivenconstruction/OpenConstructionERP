@@ -20,6 +20,7 @@ import { Button, Badge, Card, CardHeader, EmptyState, ErrorState, Input, PageHea
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { getResourceStatement } from '@/features/resource-summary/api';
 import {
   listFactors,
@@ -78,7 +79,7 @@ function WasteFactorsContent() {
       createFactor({
         category: newCategory.trim(),
         label: newLabel.trim(),
-        factor: newFactor.trim(),
+        factor: toDecimalPayloadString(newFactor),
         note: newNote.trim() || null,
       }),
     onSuccess: () => {
@@ -115,8 +116,9 @@ function WasteFactorsContent() {
   });
 
   // A stored factor must be at least 1 (a factor below 1 would drop quantity).
-  const factorValid = newFactor.trim() !== '' && Number(newFactor) >= 1;
-  const factorTooLow = newFactor.trim() !== '' && Number(newFactor) < 1;
+  const parsedFactor = parseDecimalInput(newFactor);
+  const factorValid = parsedFactor !== null && parsedFactor >= 1;
+  const factorTooLow = parsedFactor !== null && parsedFactor < 1;
 
   // ── Quick-apply panel state ────────────────────────────────────────────
   const [applyText, setApplyText] = useState('');

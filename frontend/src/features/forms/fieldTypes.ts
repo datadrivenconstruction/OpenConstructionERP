@@ -31,6 +31,7 @@ import type {
   FormFieldDef,
   TemplateCategory,
 } from './api';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 export interface FieldTypeMeta {
   type: FieldType;
@@ -507,15 +508,14 @@ function evalNode(node: FNode, vars: Record<string, number>): number {
 export function isNumericAnswer(value: AnswerValue): boolean {
   if (typeof value === 'boolean' || value == null) return false;
   if (typeof value === 'number') return Number.isFinite(value);
-  if (typeof value === 'string') return value.trim() !== '' && Number.isFinite(Number(value.trim().replace(',', '.')));
+  if (typeof value === 'string') return parseDecimalInput(value) !== null;
   return false;
 }
 
 function toNumber(value: AnswerValue): number | null {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
-    const n = Number(value.trim().replace(',', '.'));
-    return Number.isFinite(n) ? n : null;
+    return parseDecimalInput(value);
   }
   return null;
 }
@@ -693,7 +693,7 @@ function applyOp(op: ConditionOp, field: FormFieldDef, left: AnswerValue, value:
 }
 
 function normToken(value: unknown): string {
-  const n = typeof value === 'number' ? value : Number(String(value).trim().replace(',', '.'));
+  const n = typeof value === 'number' ? value : (parseDecimalInput(String(value)) ?? NaN);
   if (typeof value !== 'boolean' && String(value).trim() !== '' && Number.isFinite(n)) return `n:${n}`;
   return `s:${String(value).trim()}`;
 }

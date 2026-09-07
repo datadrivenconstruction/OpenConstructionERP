@@ -92,6 +92,7 @@ import { mocGuide } from './mocGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildMocInsights } from './mocInsights';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 // English fallbacks for the computed `moc.action_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -967,7 +968,7 @@ function AddImpactModal({
                 severity,
                 description,
                 mitigation,
-                cost_impact: cost || '0',
+                cost_impact: toDecimalPayloadString(cost),
                 schedule_delta_days: days ? Number.parseInt(days, 10) : 0,
               })
             }
@@ -1654,7 +1655,7 @@ export function MoCPage() {
         description: form.description,
         change_category: form.change_category,
         risk_level: form.risk_level,
-        cost_impact: form.cost_impact || '0',
+        cost_impact: toDecimalPayloadString(form.cost_impact),
         currency: form.currency,
         schedule_delta_days: form.schedule_delta_days ? Number.parseInt(form.schedule_delta_days, 10) : 0,
       };

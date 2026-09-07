@@ -73,7 +73,18 @@ describe('normalizeAmount', () => {
 
   it('sanitises unparseable input to 0 (never NaN)', () => {
     expect(normalizeAmount('abc')).toBe('0');
-    expect(normalizeAmount('1,5')).toBe('0');
+    expect(normalizeAmount('12.34.56')).toBe('0');
+  });
+
+  // '1,5' used to be asserted here as '0'. It is not unparseable input, it is
+  // one and a half written the way most of the countries this product ships a
+  // language for write it, and zeroing it silently zeroed every rate computed
+  // from the base wage.
+  it('reads a decimal comma as a decimal, not as garbage', () => {
+    expect(normalizeAmount('1,5')).toBe('1.5');
+    expect(normalizeAmount('30,50')).toBe('30.50');
+    expect(normalizeAmount('1.234,56')).toBe('1234.56');
+    expect(normalizeAmount('1,234.56')).toBe('1234.56');
   });
 });
 

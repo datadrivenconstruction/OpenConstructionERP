@@ -23,14 +23,15 @@ import {
   type PortalAgreementSummary,
 } from './api';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
 /** Parse a free-typed money string into a Number for the live summary only. */
 function toNumber(v: string): number {
-  const n = Number.parseFloat(v.replace(',', '.'));
-  return Number.isFinite(n) && n > 0 ? n : 0;
+  const n = parseDecimalInput(v);
+  return n !== null && n > 0 ? n : 0;
 }
 
 function money(n: number, currency: string): string {
@@ -87,7 +88,7 @@ export function PaymentApplicationForm({
         .map((l) => ({
           work_package_id: l.work_package_id,
           // Send the raw string so the backend Decimal stays exact.
-          claimed_amount: l.claimed_amount.replace(',', '.'),
+          claimed_amount: toDecimalPayloadString(l.claimed_amount),
         }));
       return submitMyPaymentApplication({
         agreement_id: agreementId,

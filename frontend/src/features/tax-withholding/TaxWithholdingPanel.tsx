@@ -39,6 +39,7 @@ import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { formatCurrency } from '@/shared/lib/money';
 import { getErrorMessage } from '@/shared/lib/api';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 
 import {
@@ -178,9 +179,9 @@ function PreviewSection({
     mutationFn: () =>
       previewDeduction({
         regime_id: regimeId,
-        gross_amount: grossAmount,
-        qualifying_materials: materials || '0',
-        vat_amount: vat || '0',
+        gross_amount: toDecimalPayloadString(grossAmount),
+        qualifying_materials: toDecimalPayloadString(materials),
+        vat_amount: toDecimalPayloadString(vat),
         currency_code: currency.toUpperCase(),
         band_code: bandCode,
         party_status_id: partyStatusId || null,

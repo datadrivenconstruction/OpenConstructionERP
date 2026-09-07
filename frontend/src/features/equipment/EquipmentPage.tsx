@@ -87,6 +87,7 @@ import { equipmentGuide } from './equipmentGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildEquipmentInsights } from './equipmentInsights';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 // English fallbacks for the computed `equipment.ownership_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1471,8 +1472,7 @@ function MeterReadingModal({
     try {
       const toNumOpt = (v: string): number | undefined => {
         if (v.trim() === '') return undefined;
-        const n = Number(v.replace(',', '.'));
-        return Number.isFinite(n) ? n : undefined;
+        return parseDecimalInput(v) ?? undefined;
       };
       await recordTelemetry(equipmentId, {
         recorded_at: new Date(recordedAt).toISOString(),
@@ -2398,8 +2398,7 @@ function _toPayload(
     v.trim() === '' ? undefined : v.trim();
   const toOptNum = (v: string): number | undefined => {
     if (v.trim() === '') return undefined;
-    const n = Number(v.replace(',', '.'));
-    return Number.isFinite(n) ? n : undefined;
+    return parseDecimalInput(v) ?? undefined;
   };
   return {
     code: form.code.trim(),

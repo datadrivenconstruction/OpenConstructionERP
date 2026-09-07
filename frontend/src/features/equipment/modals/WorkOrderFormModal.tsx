@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { Button } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import {
   createWorkOrder,
   updateWorkOrder,
@@ -81,8 +82,8 @@ export function buildWorkOrderPatch(
   if (form.cost !== base.cost) {
     // An unparseable cost is left out rather than sent as NaN, which would be
     // serialised as null and wipe a figure the user never meant to clear.
-    const parsed = form.cost.trim() === '' ? undefined : Number(form.cost.replace(',', '.'));
-    if (Number.isFinite(parsed)) payload.cost = parsed;
+    const parsed = form.cost.trim() === '' ? null : parseDecimalInput(form.cost);
+    if (parsed !== null) payload.cost = parsed;
   }
   if (form.currency !== base.currency) payload.currency = form.currency.trim() || undefined;
   return payload;
@@ -136,7 +137,7 @@ export function WorkOrderFormModal({
     setError(null);
     setBusy(true);
     try {
-      const costNum = cost.trim() === '' ? undefined : Number(cost.replace(',', '.'));
+      const costNum = cost.trim() === '' ? null : parseDecimalInput(cost);
       if (isEdit && existing) {
         const payload = buildWorkOrderPatch(
           { scheduledFor, status, technicianId, workSummary, cost, currency },
@@ -157,7 +158,7 @@ export function WorkOrderFormModal({
           status,
           technician_id: technicianId.trim() || null,
           work_summary: workSummary.trim() || null,
-          cost: Number.isFinite(costNum) ? costNum : undefined,
+          cost: costNum ?? undefined,
           currency: currency.trim() || undefined,
         };
         await createWorkOrder(payload);

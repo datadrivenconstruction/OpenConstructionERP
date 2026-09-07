@@ -26,6 +26,7 @@ import {
   type CalibrationUnit,
 } from '../lib/calibration';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 /** Which step the dialog is currently showing. Driven by the parent
  *  (it knows when a click has landed). Step 0 = not open. */
@@ -100,8 +101,8 @@ export function CalibrationDialog({
   if (step === 0) return null;
 
   const handleSubmit = () => {
-    const v = parseFloat(lengthInput.replace(',', '.'));
-    if (!Number.isFinite(v) || v <= 0) {
+    const v = parseDecimalInput(lengthInput);
+    if (v === null || v <= 0) {
       setError(
         t('dwg_takeoff.cal_error_length', {
           defaultValue: 'Enter a positive real-world length.',

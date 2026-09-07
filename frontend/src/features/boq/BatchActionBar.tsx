@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Ruler, X, ChevronDown, Percent, Hash, Tag, Replace, Equal } from 'lucide-react';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { getUnitsForLocale } from './boqHelpers';
 
 const UNITS = getUnitsForLocale();
@@ -98,11 +99,14 @@ export function BatchActionBar({
   useFocusTrap(factorPanelRef, !!factorDialog);
   useFocusTrap(classPanelRef, !!classDialog);
 
-  // Set-value input validity. Number() (not parseFloat) so '1.2.3', '--' and
-  // 'abc' are rejected as NaN rather than silently truncated. Drives both the
-  // Apply button and the inline error, so invalid input never just no-ops.
-  const setValueParsed = setValueDialog ? Number(setValueDialog.value.replace(',', '.')) : NaN;
-  const setValueValid = Number.isFinite(setValueParsed) && setValueParsed >= 0;
+  // Set-value input validity. parseDecimalInput (not parseFloat) so '1.2.3',
+  // '--' and 'abc' are rejected rather than silently truncated. Drives both
+  // the Apply button and the inline error, so invalid input never just
+  // no-ops. It replaces a `.replace(',', '.')`, which read `48,60` correctly
+  // but turned `1.234,56` into `1.234.56` and rejected it - String.replace
+  // with a string pattern only swaps the FIRST match.
+  const setValueParsed = setValueDialog ? parseDecimalInput(setValueDialog.value) : null;
+  const setValueValid = setValueParsed !== null && setValueParsed >= 0;
 
   // Close unit dropdown on outside click
   useEffect(() => {
@@ -156,8 +160,8 @@ export function BatchActionBar({
 
   const handleConfirmFactor = () => {
     if (!factorDialog || !onBatchFactor) return;
-    const parsed = parseFloat(factorDialog.value.replace(',', '.'));
-    if (!Number.isFinite(parsed) || parsed <= 0) return;
+    const parsed = parseDecimalInput(factorDialog.value);
+    if (parsed === null || parsed <= 0) return;
     onBatchFactor(selectedIds, factorDialog.kind, parsed);
     setFactorDialog(null);
   };
@@ -183,7 +187,9 @@ export function BatchActionBar({
   };
 
   const handleConfirmSetValue = () => {
-    if (!setValueDialog || !onBatchSetValue || !setValueValid) return;
+    // Null-check the parsed value itself rather than the derived boolean so
+    // the narrowing reaches the call below.
+    if (!setValueDialog || !onBatchSetValue || setValueParsed === null || !setValueValid) return;
     onBatchSetValue(selectedIds, setValueDialog.field, setValueParsed);
     setSetValueDialog(null);
   };

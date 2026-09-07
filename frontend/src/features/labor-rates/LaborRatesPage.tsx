@@ -16,6 +16,7 @@ import {
 
 import { Button, ConfirmDialog } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -309,7 +310,10 @@ export function LaborRatesPage() {
   // width and a percentage label, never a money figure, so Number() is safe
   // here (the authoritative Decimals still come from the backend everywhere a
   // currency value is shown via formatCurrency).
-  const baseNum = Number(breakdown?.base_wage ?? baseWage);
+  // The backend figure is already a dot-decimal string; the fallback is the
+  // raw text the user is still typing, so it needs the locale-aware parse.
+  const baseNum =
+    breakdown?.base_wage != null ? Number(breakdown.base_wage) : (parseDecimalInput(baseWage) ?? 0);
   const allInNum = Number(allInRate);
   const burdenPct =
     baseNum > 0 && allInNum > 0 ? ((allInNum - baseNum) / baseNum) * 100 : null;

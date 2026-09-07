@@ -22,6 +22,7 @@ import { boqApi } from './api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 export interface ScenarioDialogProps {
   boqId: string;
@@ -74,9 +75,8 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
 
   const mutation = useMutation({
     mutationFn: () => {
-      const parsed = parseFloat(pct.replace(',', '.'));
-      const hasDelta = Number.isFinite(parsed) && parsed !== 0;
-      const rate_factor = hasDelta ? 1 + parsed / 100 : undefined;
+      const parsed = parseDecimalInput(pct);
+      const rate_factor = parsed !== null && parsed !== 0 ? 1 + parsed / 100 : undefined;
       return boqApi.createScenario(boqId, {
         name: name.trim() || baseName,
         rate_factor,
@@ -103,13 +103,13 @@ export function ScenarioDialog({ boqId, baseName, isOpen, onClose, onCreated }: 
 
   if (!isOpen) return null;
 
-  const parsedPct = parseFloat(pct.replace(',', '.'));
-  const factor = 1 + parsedPct / 100;
+  const parsedPct = parseDecimalInput(pct);
+  const factor = parsedPct === null ? 1 : 1 + parsedPct / 100;
   // Mirror the backend rule (rate_factor must be > 0): a percentage <= -100
   // would zero or negate every rate. Catch it client-side so the user sees why
   // instead of a backend 422, and never sees a "multiplied by 0.0000" preview.
-  const pctInvalid = Number.isFinite(parsedPct) && factor <= 0;
-  const showsPreview = Number.isFinite(parsedPct) && parsedPct !== 0;
+  const pctInvalid = parsedPct !== null && factor <= 0;
+  const showsPreview = parsedPct !== null && parsedPct !== 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

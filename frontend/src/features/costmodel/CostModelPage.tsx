@@ -51,6 +51,7 @@ import { BudgetLineThresholdEditor, parseThreshold } from './BudgetLineThreshold
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { formatCompactCurrency, formatCurrency as fmtMoney } from '@/shared/lib/money';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1027,8 +1028,8 @@ function BudgetLinesEditor({
       // An empty input must not coerce to 0 - recording 0% is a real write
       // that wipes the line's earned value.
       if (progressPct.trim() === '') return;
-      const pct = Number(progressPct.replace(',', '.'));
-      if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
+      const pct = parseDecimalInput(progressPct);
+      if (pct === null || pct < 0 || pct > 100) {
         addToast({
           type: 'error',
           title: t('costmodel.progress_pct_invalid', {

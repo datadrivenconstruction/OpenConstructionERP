@@ -16,7 +16,7 @@ import {
 } from '../boqHelpers';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import { unitColumnValueSetter } from './cellEditors';
-import { parseDecimalInput } from './parseDecimal';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import {
   buildFormulaContext,
   evaluateFormulaStrict,

@@ -17,7 +17,7 @@ import type { ICellEditorParams } from 'ag-grid-community';
 import { AutocompleteInput } from '../AutocompleteInput';
 import type { CostAutocompleteItem, Position } from '../api';
 import { getUnitsForLocale, saveCustomUnit } from '../boqHelpers';
-import { parseDecimalInput } from './parseDecimal';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import {

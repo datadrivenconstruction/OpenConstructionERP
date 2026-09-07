@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { Button } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import {
   createDamageReport,
   updateDamageReport,
@@ -77,9 +78,8 @@ export function buildDamageReportPatch(
   if (form.repairCost !== base.repairCost) {
     // An unparseable figure is left out rather than sent as NaN, which would be
     // serialised as null and wipe a cost the user never meant to clear.
-    const parsed =
-      form.repairCost.trim() === '' ? undefined : Number(form.repairCost.replace(',', '.'));
-    if (Number.isFinite(parsed)) payload.repair_cost_estimate = parsed;
+    const parsed = form.repairCost.trim() === '' ? null : parseDecimalInput(form.repairCost);
+    if (parsed !== null) payload.repair_cost_estimate = parsed;
   }
   if (form.currency !== base.currency) payload.currency = form.currency.trim() || undefined;
   if (form.statusValue !== base.statusValue) payload.status = form.statusValue;
@@ -133,10 +133,7 @@ export function DamageReportFormModal({
     setError(null);
     setBusy(true);
     try {
-      const costNum =
-        repairCost.trim() === ''
-          ? undefined
-          : Number(repairCost.replace(',', '.'));
+      const costNum = repairCost.trim() === '' ? null : parseDecimalInput(repairCost);
       if (isEdit && existing) {
         const payload = buildDamageReportPatch(
           { occurredAt, severity, description, repairCost, currency, statusValue },
@@ -155,7 +152,7 @@ export function DamageReportFormModal({
           reported_at: occurredAt,
           severity,
           description,
-          repair_cost_estimate: Number.isFinite(costNum) ? costNum : undefined,
+          repair_cost_estimate: costNum ?? undefined,
           currency: currency.trim() || undefined,
         };
         await createDamageReport(payload);

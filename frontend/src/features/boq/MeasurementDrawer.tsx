@@ -38,7 +38,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { SideDrawer } from '@/shared/ui';
 import { boqApi } from './api';
 import type { MeasurementLineInput, MeasurementLineResult, MeasurementSheet, Position } from './api';
-import { normalizeDecimalSeparators, parseDecimalInput } from './grid/parseDecimal';
+import { normalizeDecimalSeparators, parseDecimalInput } from '@/shared/lib/parseDecimal';
 
 /** One row as it is typed. Everything is a string: a half-typed "3." is not a number yet. */
 interface Row {

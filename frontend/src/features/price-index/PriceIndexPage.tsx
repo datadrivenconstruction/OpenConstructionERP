@@ -35,6 +35,7 @@ import { Button, Badge, Card, CardHeader, EmptyState, ErrorState, Input, PageHea
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import type { Project } from '@/features/projects/api';
 import {
   listSeries,
@@ -151,7 +152,10 @@ function PriceIndexContent() {
 
   const addPointMut = useMutation({
     mutationFn: () =>
-      addPoint(selectedSeriesId as string, { period: newPeriod.trim(), factor: newPointFactor.trim() }),
+      addPoint(selectedSeriesId as string, {
+        period: newPeriod.trim(),
+        factor: toDecimalPayloadString(newPointFactor),
+      }),
     onSuccess: () => {
       if (selectedSeriesId) queryClient.invalidateQueries({ queryKey: QK.seriesDetail(selectedSeriesId) });
       queryClient.invalidateQueries({ queryKey: QK.series });
@@ -180,7 +184,7 @@ function PriceIndexContent() {
       createLocationFactor({
         region_code: newRegionCode.trim(),
         label: newRegionLabel.trim(),
-        factor: newRegionFactor.trim(),
+        factor: toDecimalPayloadString(newRegionFactor),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QK.locations });
@@ -222,8 +226,10 @@ function PriceIndexContent() {
   const seriesDetail = seriesDetailQ.data;
   const points = seriesDetail?.points ?? [];
 
-  const pointFactorValid = newPointFactor.trim() !== '' && Number(newPointFactor) > 0;
-  const regionFactorValid = newRegionFactor.trim() !== '' && Number(newRegionFactor) > 0;
+  const parsedPointFactor = parseDecimalInput(newPointFactor);
+  const parsedRegionFactor = parseDecimalInput(newRegionFactor);
+  const pointFactorValid = parsedPointFactor !== null && parsedPointFactor > 0;
+  const regionFactorValid = parsedRegionFactor !== null && parsedRegionFactor > 0;
 
   if (seriesListQ.isError) {
     return (

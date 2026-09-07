@@ -29,6 +29,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { EstimateRollupCard } from '@/features/estimate-rollup';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildAllowancesInsights } from './allowancesInsights';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import {
   ALLOWANCE_TYPES,
   ALLOWANCE_TYPE_DEFAULT_LABELS,
@@ -140,7 +141,7 @@ function AddAllowanceForm({
       createAllowance(projectId, {
         label,
         allowance_type: type,
-        held_amount: held || '0',
+        held_amount: toDecimalPayloadString(held),
         currency: currency || undefined,
       }),
     onSuccess: () => {
@@ -250,7 +251,7 @@ function DrawdownForm({
   const [note, setNote] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => createDrawdown(allowance.id, { amount: amount || '0', note: note || undefined }),
+    mutationFn: () => createDrawdown(allowance.id, { amount: toDecimalPayloadString(amount), note: note || undefined }),
     onSuccess: () => {
       onDone();
       addToast({ type: 'success', title: t('allowances.drawdown_added', { defaultValue: 'Drawdown recorded' }) });

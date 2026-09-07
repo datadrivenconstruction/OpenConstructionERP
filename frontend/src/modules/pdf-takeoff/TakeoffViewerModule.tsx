@@ -214,6 +214,7 @@ import {
 } from '../../features/takeoff/lib/takeoff-display-units';
 import { ElementCostMatchPanel } from '@/features/match';
 import { openLink } from '@/shared/lib/desktop';
+import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 // Type-only: the scale-source vocabulary is a closed set owned by the backend
 // contract, so the viewer reuses it instead of restating it as a bare string.
 import type { ScaleSource } from '@/features/takeoff/api';
@@ -4356,18 +4357,19 @@ export default function TakeoffViewerModule({
         if (ftEmpty && inEmpty) {
           meters = undefined;
         } else {
-          const ft = parseFloat(draft.ft);
-          const inch = parseFloat(draft.in);
-          const combined =
-            toMeters(Number.isFinite(ft) ? ft : 0, 'ft') +
-            toMeters(Number.isFinite(inch) ? inch : 0, 'in');
+          // parseDecimalInput, not parseFloat: this is a typed field, and
+          // parseFloat('1,5') is 1 - a third of the width, stored with no
+          // error shown anywhere.
+          const ft = parseDecimalInput(draft.ft);
+          const inch = parseDecimalInput(draft.in);
+          const combined = toMeters(ft ?? 0, 'ft') + toMeters(inch ?? 0, 'in');
           meters = combined > 0 ? combined : undefined;
         }
       } else if (draft.m.trim() === '') {
         meters = undefined;
       } else {
-        const v = parseFloat(draft.m);
-        meters = Number.isFinite(v) && v > 0 ? toMeters(v, 'm') : undefined;
+        const v = parseDecimalInput(draft.m);
+        meters = v !== null && v > 0 ? toMeters(v, 'm') : undefined;
       }
       updateSelectedMeasurement(
         meters === undefined

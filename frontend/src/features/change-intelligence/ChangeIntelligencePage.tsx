@@ -106,6 +106,7 @@ import {
 } from './api';
 import { changeIntelligenceGuide } from './change_intelligenceGuide';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
@@ -639,34 +640,38 @@ const BACK_CHARGE_STATUSES = ['proposed', 'agreed', 'disputed', 'recovered', 'wa
 const FORM_INPUT_CLASS =
   'w-full rounded-md border border-border-light bg-surface-primary p-2 text-sm focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30';
 
-// A money string is valid when blank (treated as 0) or a finite, non-negative
-// number. The value is kept and sent as a string (the lossless-Decimal
-// convention); Number() is used only to validate, never to round-trip the
-// amount.
+// A money string is valid when blank (treated as 0) or a non-negative number.
+// The value is kept and sent as a string (the lossless-Decimal convention);
+// the parse is used only to validate, never to round-trip the amount.
+// parseDecimalInput, not Number: this is typed by a person, and Number('1,5')
+// is NaN, so the old check called a correct German amount invalid.
 function isValidMoney(raw: string): boolean {
   const trimmed = raw.trim();
   if (trimmed === '') return true;
-  const n = Number(trimmed);
-  return Number.isFinite(n) && n >= 0;
+  const n = parseDecimalInput(trimmed);
+  return n !== null && n >= 0;
 }
 
-// A chargeable percent is a whole number in [0, 100] in the UI; it is converted
-// to a [0, 1] fraction string before being sent. A percent is a ratio, not
-// money, so Number() is safe here.
+// A chargeable percent is a number in [0, 100] in the UI; it is converted to a
+// [0, 1] fraction string before being sent. Being a ratio rather than money
+// does not make Number() safe: the separator is what breaks, and an
+// apportionment of 12,5 percent is written that way across most of Europe.
 function isValidPercent(raw: string): boolean {
   const trimmed = raw.trim();
   if (trimmed === '') return true;
-  const n = Number(trimmed);
-  return Number.isFinite(n) && n >= 0 && n <= 100;
+  const n = parseDecimalInput(trimmed);
+  return n !== null && n >= 0 && n <= 100;
 }
 
-// Convert a whole-number percent string (UI) to a [0, 1] fraction string (wire).
-// Blank means "all of it" (1). The ratio is divided, not money, so Number is
-// safe; the result is a plain decimal string for the Decimal field.
+// Convert a percent string (UI) to a [0, 1] fraction string (wire). Blank means
+// "all of it" (1). The result is a plain decimal string for the Decimal field.
+// An unparseable entry yields '0' rather than 'NaN', which the server rejects
+// with a type error instead of the apportionment message the user needs.
 function percentToFraction(raw: string): string {
   const trimmed = raw.trim();
   if (trimmed === '') return '1';
-  return String(Number(trimmed) / 100);
+  const n = parseDecimalInput(trimmed);
+  return n === null ? '0' : String(n / 100);
 }
 
 // Convert a [0, 1] fraction string (wire) back to a whole-number percent string
@@ -757,14 +762,14 @@ function BackChargeFormModal({
         if (description !== (editing.description ?? '')) patch.description = description.trim();
         if (basis !== (editing.basis ?? '')) patch.basis = basis.trim();
         if (grossAmount !== (editing.gross_amount ?? '')) {
-          patch.gross_amount = grossAmount.trim() || '0';
+          patch.gross_amount = toDecimalPayloadString(grossAmount);
         }
         if (chargeablePct !== fractionToPercent(editing.chargeable_pct)) {
           patch.chargeable_pct = percentToFraction(chargeablePct);
         }
         if (status !== (editing.status || 'proposed')) patch.status = status;
         if (recoveredAmount !== (editing.recovered_amount ?? '')) {
-          patch.recovered_amount = recoveredAmount.trim() || '0';
+          patch.recovered_amount = toDecimalPayloadString(recoveredAmount);
         }
         return updateBackCharge(projectId, editing.id, patch);
       }
@@ -773,7 +778,7 @@ function BackChargeFormModal({
         responsible_party: responsibleParty.trim(),
         description: description.trim(),
         basis: basis.trim(),
-        gross_amount: grossAmount.trim() || '0',
+        gross_amount: toDecimalPayloadString(grossAmount),
         chargeable_pct: percentToFraction(chargeablePct),
         currency: currency.trim(),
         status,
@@ -1295,7 +1300,7 @@ function ApportionmentFormModal({
 
   const chargeable = backCharge ? Number(backCharge.chargeable_amount) : 0;
   const currency = backCharge?.currency;
-  const sumPct = rows.reduce((acc, r) => acc + (Number.isFinite(Number(r.pct)) ? Number(r.pct) : 0), 0);
+  const sumPct = rows.reduce((acc, r) => acc + (parseDecimalInput(r.pct) ?? 0), 0);
   const sumValid = Math.abs(sumPct - 100) < 0.01;
   const allPctValid = rows.every((r) => r.pct.trim() !== '' && isValidPercent(r.pct));
   const allPartiesValid = rows.every((r) => r.party.trim() !== '');
@@ -1385,9 +1390,9 @@ function ApportionmentFormModal({
 
           <ul className="space-y-2">
             {rows.map((r, i) => {
-              const rowPct = Number(r.pct);
+              const rowPct = parseDecimalInput(r.pct);
               const preview =
-                chargeable > 0 && Number.isFinite(rowPct) ? fmtFixed((chargeable * rowPct) / 100, 2) : '0';
+                chargeable > 0 && rowPct !== null ? fmtFixed((chargeable * rowPct) / 100, 2) : '0';
               return (
                 <li key={r.key} className="flex items-end gap-2">
                   <WideModalField
