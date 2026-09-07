@@ -82,9 +82,7 @@ def test_no_english_one_form_singularises_the_noun_in_a_partitive() -> None:
     # whole set can be satisfied by narrowing the set instead of fixing the tree.
     pairs = {key[: -len("_one")]: key for key in entries if key.endswith("_one")}
     partitive_pairs = {
-        stem: one
-        for stem, one in pairs.items()
-        if f"{stem}_other" in entries and _PARTITIVE_HEAD.search(entries[one])
+        stem: one for stem, one in pairs.items() if f"{stem}_other" in entries and _PARTITIVE_HEAD.search(entries[one])
     }
     offenders = {
         one: found
