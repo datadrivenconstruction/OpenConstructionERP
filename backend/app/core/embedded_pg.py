@@ -1463,8 +1463,9 @@ def windows_path_limit_problem(pgdata: Path | str) -> PathTooLong | None:
         _PGDATA_LONGEST_RELATIVE,
         "The folder the local database lives in sits too deep in the filesystem for Windows to "
         "let PostgreSQL open the files inside it.",
-        "Point the application at a shorter data directory with --data-dir (or the OE_DATA_DIR "
-        "environment variable), for example C:\\OpenConstructionERP\\data.",
+        "Start the application with a shorter data directory, for example "
+        "openconstructionerp serve --data-dir C:\\OpenConstructionERP\\data, or set the "
+        "OE_DATA_DIR environment variable to that path.",
     )
 
     install = _bundled_install_dir()

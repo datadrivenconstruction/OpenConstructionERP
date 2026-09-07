@@ -88,9 +88,11 @@ openconstructionerp serve --port 9000 --data-dir /var/lib/oce
 
 # Or via environment:
 DATABASE_URL=postgresql+asyncpg://user:pass@host/db   # Use an external PostgreSQL instead of the embedded one
-OE_CLI_PORT=9000                                       # Change the port
-OE_CLI_DATA_DIR=/var/lib/oce                           # Change the data location
+OE_DATA_DIR=/var/lib/oce                              # Change the data location
 ```
+
+The port has no environment variable. It is chosen only by `serve --port`, so a
+service definition or a launcher script has to put it on the command line.
 
 ## Development
 

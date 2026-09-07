@@ -554,14 +554,17 @@ git clone https://github.com/DataDrivenConstruction/openconstructionerp
 cd openconstructionerp
 
 # 2. Editable install of the core + your pack
-pip install -e .
+# The distribution lives in backend/, there is no pyproject.toml at the clone root.
+pip install -e backend
 pip install -e packs/your-pack
 
 # 3. Activate it
 export OE_PARTNER_PACK=your-pack   # PowerShell: $env:OE_PARTNER_PACK="your-pack"
 
-# 4. Run the backend
-openconstructionerp serve --reload
+# 4. Run the backend with autoreload. Autoreload is a uvicorn flag, not one of
+#    ours: the CLI has no --reload, and it serves on 8080 rather than 8000.
+cd backend
+uvicorn app.main:create_app --factory --reload --port 8000
 # Expect log line: "Active partner pack (env-selected): your-pack"
 
 # 5. Hit the API

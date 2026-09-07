@@ -544,7 +544,12 @@ def check_data_dir(data_dir: Path) -> Check:
             "Data directory",
             "error",
             f"cannot write to {data_dir}: {exc}",
-            f"Use --data-dir to pick a writable path, e.g. --data-dir {Path.home() / 'openconstructionerp-data'}",
+            # Names the command and not only the flag. A hint that says "use
+            # --data-dir" is read as a command line, and typed as one it is
+            # `openconstructionerp --data-dir ...`, which exits 2: the flag is
+            # declared on the subcommands, never on the top-level parser.
+            f"Start with a writable path, e.g. openconstructionerp serve "
+            f"--data-dir {Path.home() / 'openconstructionerp-data'}",
         )
 
 
@@ -599,7 +604,8 @@ def check_port_free(host: str, port: int) -> Check:
                         "Port available",
                         "error",
                         f"port {port} on {host} is already in use",
-                        f"Stop the other process or use --port {port + 1}",
+                        f"Stop the other process, or start on another port with "
+                        f"openconstructionerp serve --port {port + 1}",
                     )
                 except (OSError, ConnectionRefusedError):
                     pass
@@ -612,7 +618,8 @@ def check_port_free(host: str, port: int) -> Check:
                         "Port available",
                         "error",
                         f"port {port} on {host} is already in use ({exc})",
-                        f"Stop the other process or use --port {port + 1}",
+                        f"Stop the other process, or start on another port with "
+                        f"openconstructionerp serve --port {port + 1}",
                     )
         return Check("Port available", "ok", f"port {port} is free")
     except Exception as exc:

@@ -141,13 +141,13 @@ ss -tlnp | grep -E ':(8080|8000)\b'
 sudo lsof -iTCP:8080 -sTCP:LISTEN
 ```
 
-Run on a different port:
+Run on a different port. `--port` belongs to the `serve` subcommand, so name it:
 
 ```bash
-openconstructionerp --port 9090
-# or via env var
-OE_PORT=9090 openconstructionerp
+openconstructionerp serve --port 9090
 ```
+
+The bare `openconstructionerp` command takes no flags of its own, and there is no environment variable for the port. `OE_PORT` is read by the one-line installer scripts (`scripts/install.sh`, `scripts/install.ps1`), which use it to build exactly the `serve --port` line above; the application itself never looks at it.
 
 ---
 
@@ -164,13 +164,14 @@ After=network.target
 Type=simple
 User=oe
 WorkingDirectory=/home/oe
-ExecStart=/home/oe/openconstructionerp-venv/bin/openconstructionerp
+ExecStart=/home/oe/openconstructionerp-venv/bin/openconstructionerp serve --host 0.0.0.0 --port 8080
 Restart=on-failure
-Environment=OE_PORT=8080
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+The host and the port go on the command line, because nothing in the application reads them from the environment. `--host 0.0.0.0` is what makes the service reachable from another machine; the default is `127.0.0.1`, which is what you want instead when a reverse proxy on the same host is the only client.
 
 ```bash
 sudo systemctl daemon-reload
@@ -264,7 +265,7 @@ ls -l /usr/bin/IfcExporter        # should exist and be > 1 KB
 | `Could not find a version that satisfies the requirement` | Python <3.12 | Install python3.12 (section 2) |
 | Long compile output, then a `gcc` error | Source build, missing headers | Install apt packages (section 3) |
 | `ModuleNotFoundError` after install | Wrong venv active | Re-run `source ~/openconstructionerp-venv/bin/activate` |
-| `Address already in use` | Port 8080 taken | `ss -tlnp \| grep 8080` then `--port 9090` (section 5) |
+| `Address already in use` | Port 8080 taken | `ss -tlnp \| grep 8080`, then `openconstructionerp serve --port 9090` (section 5) |
 | `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
 | BIM converter install "signal timed out", stuck on placeholder geometry | A slow link aborted an older build's blocking download | Fixed in 8.8.0+: the install now runs in the background, resumes, and unpacks without root or dpkg. Retry **Settings -> BIM Converters -> Install**; only if it still fails, install from the terminal (section 7) |
 
