@@ -124,7 +124,7 @@ dependencies = [
     # numeric-looking string column now infers as "string" not "numeric"),
     # which the dashboards integrity detector and its tests were written
     # against. Revisit and lift the cap when adopting pandas 3 deliberately.
-    "pandas>=2.2.0,<3",
+    "pandas>=2.2.0,<4",
     "pyarrow>=23.0.1,<26",
     "trimesh>=4.0.0",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
