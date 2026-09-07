@@ -467,6 +467,14 @@ def test_the_outcome_at_the_boundary_turns_on_the_cluster_and_not_on_the_length(
             "the boot that let a path over the limit through never named what let it through, so "
             "the length and the limit read as the whole rule"
         )
+        # Asserted here rather than against the string on its own, because this
+        # is the arm that makes it false: the paragraph is being logged on a boot
+        # that goes on to start, so whatever it says about the number has to hold
+        # while the code is ignoring it.
+        assert "is the maximum" not in problem.message, (
+            "the shared paragraph calls the limit a maximum on a boot that proceeds past it, which "
+            "is what made a working machine over the same number look like a contradiction"
+        )
 
 
 @pytest.mark.parametrize("install_length", [207, 211, 213])
@@ -549,6 +557,12 @@ def test_doctor_reports_the_measurement_with_no_cluster_gate(monkeypatch: pytest
     problem = embedded_pg.windows_path_limit_problem(pgdata)
     assert problem is not None
     assert check.hint == problem.message
+    # This cluster exists, so the boot beside it is starting on the very path
+    # doctor is reporting. The summary may say the depth is a problem, which it
+    # is, but not that the number is a ceiling nothing gets past.
+    assert "is the maximum" not in check.message, (
+        "doctor calls the limit a maximum for a machine whose boot proceeds past it"
+    )
 
     names = [c.name for c in run_preflight("127.0.0.1", 8931, tmp_path, verbose=False)]
     assert check.name in names, "doctor measured the path length and then did not report it"

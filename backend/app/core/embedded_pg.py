@@ -263,9 +263,13 @@ def boot(data_dir: Path | str) -> bool:
     # What actually licenses it is that the deep names are needed to CREATE the
     # cluster. initdb derives its support directory from its own executable and
     # scans the whole timezone tree to identify the machine's zone, which is
-    # where _PGINSTALL_LONGEST_RELATIVE comes from; a postmaster attaching to a
-    # cluster that exists opens neither. So PG_VERSION reads as "initdb is not
-    # about to run", and that is a statement about the install directory too.
+    # where _PGINSTALL_LONGEST_RELATIVE comes from. A postmaster attaching to a
+    # cluster that exists does neither: it opens no bki, and it reads only the
+    # one zone file its configuration names rather than walking the tree. Not
+    # "opens nothing deep" - a zone with a long enough name is still a way for
+    # this to bite after creation, which is why the branch below stays a warning
+    # and not silence. So PG_VERSION reads as "initdb is not about to run", and
+    # that is a statement about the install directory too.
     #
     # Kept as a warning rather than tightened into a refusal because a machine
     # measured at 211 characters, over the 195 quoted at it, booted through
