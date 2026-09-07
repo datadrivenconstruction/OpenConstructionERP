@@ -726,6 +726,16 @@ def _holidays_jp(year: int) -> set[date]:
     Includes Golden Week cluster and special 2026 holidays.
     Substitution rule: when a holiday falls on Sunday, the next Monday
     is a substitute holiday.
+
+    Four holidays move under the Happy Monday System and are computed as an
+    n-th Monday rather than a fixed date: Coming of Age Day, Marine Day,
+    Respect for the Aged Day and Sports Day. Because they can never land on a
+    Sunday, the substitution rule above never fires for them.
+
+    Known limitation: the one-off moves for the 2020 Olympics, which shifted
+    Marine Day, Sports Day and Mountain Day in 2020 and again in 2021, are not
+    modelled. Those two years therefore return the standing rule rather than
+    the dates actually observed.
     """
 
     def _sub(d: date) -> set[date]:
@@ -746,7 +756,7 @@ def _holidays_jp(year: int) -> set[date]:
         _nth_weekday(year, 7, 0, 3),  # Marine Day - 3rd Monday July
         date(year, 8, 11),  # Mountain Day (山の日)
         _nth_weekday(year, 9, 0, 3),  # Respect for the Aged Day - 3rd Monday Sep
-        date(year, 10, 14),  # Sports Day (スポーツの日) - 2nd Monday Oct (approx)
+        _nth_weekday(year, 10, 0, 2),  # Sports Day - 2nd Monday Oct
         date(year, 11, 3),  # Culture Day (文化の日)
         date(year, 11, 23),  # Labour Thanksgiving Day (勤労感謝の日)
     ]:
