@@ -75,11 +75,15 @@ Sources (cited in commit message, summarised here for reference):
   effective 1 Jan 2026. It was raised from 20 %, and the 10 % reduced class
   (food, medicine, children's goods, books) was retained unchanged, so only
   the standard rate moved. Construction work is standard-rated.
-  (НК РФ ст. 164 as amended with effect from 2026-01-01. Unlike the Romanian
-  entry above, this figure has NOT been reconciled against a published tax
-  summary read on a stated date - no such source is on file in this repo. It
-  is pending review by a Russian cost engineer, the same standing caveat
-  packs/russia-gesn records in its manifest ``review_status``.)
+  (Federal Tax Service of Russia, "Taxes 2026", https://www.nalog.gov.ru/new2026/,
+  read 2026-09-07. It gives the standard rate as "20% -> 22%" applying to sales
+  of goods, works and services from 1 January 2026, and lists 10 % among the
+  rates that did not change while 20/120 becomes 22/122. The instrument that
+  page implements is Federal Law No. 425-FZ of 28 November 2025, official
+  publication number 0001202511280017; that identity is taken from the state
+  publication portal's index record and not from the law text, which did not
+  load. The figure remains pending review by a Russian cost engineer, the same
+  standing caveat packs/russia-gesn records in its manifest ``review_status``.)
 - ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
   (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
   Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)

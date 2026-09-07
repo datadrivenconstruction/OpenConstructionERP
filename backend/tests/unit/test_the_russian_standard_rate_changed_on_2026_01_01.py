@@ -5,7 +5,8 @@
 The defect this pins
 --------------------
 Russia raised standard VAT from 20 % to 22 % with effect from 2026-01-01
-(НК РФ ст. 164 as amended). The seed file went on shipping a single window at
+(Tax Code article 164 as amended, sourced below). The seed file went on
+shipping a single window at
 20 % dated from 2019-01-01 with no ``effective_to``, so every Russian document
 dated in 2026 was priced two points low, and had been for the eight months
 between the change and the commit that added this file.
@@ -26,6 +27,57 @@ Read against the shipped file, not a fixture
 The rows come from ``seed_data/tax_configurations.json`` itself. A hand-built
 fixture would let this file go green while the shipped data stayed wrong, which
 is the vacuous pass the whole exercise is about.
+
+Where the rate comes from
+-------------------------
+Not from anything already in this repository. The repository said 20 in five
+places, consistently, and that consistency was the thing under suspicion rather
+than evidence about Russian law. Grepping the Romanian rows teaches the file
+format and nothing else.
+
+* Federal Tax Service of Russia, "Taxes 2026", https://www.nalog.gov.ru/new2026/
+  (read 2026-09-07). It gives the standard rate as "20% -> 22%" and states that
+  the tax at those rates applies to sales of goods, works and services from
+  1 January 2026. The calculation rate moves with it, 20/120 becoming 22/122
+  and 16.67 becoming 18.03.
+* The instrument that page implements is Federal Law No. 425-FZ of 28 November
+  2025, amending parts one and two of the Tax Code, official publication number
+  0001202511280017 on the state publication portal at publication.pravo.gov.ru.
+  That identity is taken from the portal's index record. The law text itself
+  did not load, so nothing here is quoted from it and the rate above rests on
+  the tax service page.
+
+The reduced rate did not move
+-----------------------------
+Sourced rather than inferred from the headline rate, because a reform that
+raises the standard rate is under no obligation to leave the reduced one alone.
+The same tax service page enumerates the 2026 rate changes and lists 22, 22/122
+and 18.03 as changed while listing 10 as unchanged. Corroboration from that
+same page, so not a second source: the 10/110 calculation rate stays as it is
+while 20/120 becomes 22/122, which it could not do if the 10 had moved.
+``test_the_reduced_rate_did_not_change`` below holds the shipped row to that.
+
+Which date the resolver is handed, and why that is still open
+-------------------------------------------------------------
+A dated window is only as good as the date it is queried with.
+``BOQService.apply_default_markups`` passes ``BOQ.base_date`` into
+``_seeded_vat_rate``, which forwards it to ``resolve`` as ``on_date`` when and
+only when it fullmatches ``YYYY-MM-DD``; anything else is dropped and the bill
+is dated today. But ``base_date`` is documented in ``boq/schemas.py`` as the
+price level reference, the date the unit rates are indexed to, while the tax
+service wording keys the new rate on realisation of the works from 1 January
+2026 whatever date the contract carries. Those are two different axes. A
+Russian bill indexed to 2025 prices for works performed in 2026 therefore
+resolves at 20 where the works attract 22.
+
+The exposure is one sided and narrow. The shipped demo packs put "2026-Q1" and
+"2026-01" in that column, neither of which is an ISO date, so they are dropped
+and land on today, which is currently the right answer by accident of the
+fallback. It bites only a bill carrying a real past ISO date, and the number it
+produces is a seeded suggestion that both the project's ``default_vat_rate``
+and the bill's own ``tax_rate`` override. Which date a bill of quantities is
+taxed on is a product decision and not a data repair, so it is recorded here
+and left alone.
 """
 
 from __future__ import annotations
