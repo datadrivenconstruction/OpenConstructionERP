@@ -417,11 +417,22 @@ packages = ["app", "openconstructionerp"]
 # its own docstring calls it a manual one-off.
 #
 # showcase_geometry/ is 3.05 MiB and its reader seed_showcase_geometry() has no
-# caller anywhere in the repo. That is a bug rather than a justification: the
-# function was written to close #168, the 404 geometry_missing, and was never
-# wired into boot. Excluding the bytes from the wheel does not make the bug
-# worse, because the code that would read them never runs today. If #168 is
-# ever wired up, delete the matching line here in the same change.
+# caller anywhere in the repo. This line first said that was a live bug against
+# issue #168, the 404 geometry_missing. Measured since, and it is not: #168 is
+# closed and was fixed by a different route in 5.9.0. seed_flagship.py writes
+# the real geometry blob and marks a model ready only when the blob saved, and
+# the bim_hub router became status aware, so it now returns geometry_missing
+# only when a model really is ready with its blob gone, and the honest
+# geometry_absent otherwise. Users do not hit the original 404 through this path.
+#
+# So this function is dead code paired with dead data, not an unfinished repair.
+# The dataset it would populate comes from showcase_snapshot.json.gz through
+# seed_showcase_from_snapshot, which is equally unwired, so the rows it would
+# attach geometry to are never created on a live install either. Resurrecting
+# the localised showcase means wiring BOTH into boot beside install_demo_project
+# and install_flagship, and that is a product decision rather than a bug fix.
+# Deleting both files is the lower risk option. Until one of those happens, keep
+# the bytes out of the wheel and the sources in the tree.
 #
 # These are excluded from the WHEEL, not deleted from the repo. They are
 # showcase raw material and the input for whoever fixes #168.
