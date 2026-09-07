@@ -162,6 +162,24 @@ class TestCountryRegistry:
                 dated = [p.effective_date for p in phases if p.is_dated]
                 assert dated == sorted(dated), (code, obligation)
 
+    def test_a_country_with_a_reporting_obligation_admits_to_performing_reporting(self):
+        # The two halves are written in different places on the entry - the acts
+        # in additional_regimes, the dates in commencement - so they can drift
+        # apart silently. France is currently the only row carrying both, and a
+        # later row could file report phases while still calling itself a pure
+        # network country, which is exactly the misclassification this registry
+        # was corrected for.
+        for code, entry in regimes.COUNTRY_REGIMES.items():
+            has_report_phase = any(p.obligation == regimes.OBLIGATION_REPORT for p in entry.commencement)
+            if has_report_phase:
+                assert regimes.REGIME_REPORTING in entry.regimes, code
+        fr = regimes.COUNTRY_REGIMES["FR"]
+        assert fr.regime_class == regimes.REGIME_HYBRID
+        # The deciding act is unchanged, so a French document still ends up
+        # delivered rather than reported. The reporting leg is an obligation
+        # alongside the routing and not the thing the submission resolves to.
+        assert TERMINAL_SUCCESS[fr.regime] == "delivered"
+
     def test_a_cancellation_rule_says_which_kind_of_rule_it_is(self):
         # Mexico's deadline is the fiscal year of issue, which is a calendar and
         # not a window: the same count of days is weeks for a December invoice
