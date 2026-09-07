@@ -125,7 +125,14 @@ class TestGetVatRateRussia:
     """Russia NDS rates."""
 
     def test_ru_standard(self) -> None:
-        assert get_vat_rate("RU", "standard") == Decimal("0.20")
+        """22 % since 2026-01-01, raised from 20 %.
+
+        This table carries no effective dates, so it can only state the rate in
+        force now. The dated windows are in the tax seed, and
+        ``test_the_russian_standard_rate_changed_on_2026_01_01`` is what asserts
+        that a document dated before 2026 is still charged 20.
+        """
+        assert get_vat_rate("RU", "standard") == Decimal("0.22")
 
     def test_ru_reduced(self) -> None:
         assert get_vat_rate("RU", "reduced") == Decimal("0.10")

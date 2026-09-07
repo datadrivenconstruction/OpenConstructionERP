@@ -200,8 +200,16 @@ def test_ru_escrow_flag_exposed_in_metadata() -> None:
     assert meta.get("escrow_required") is True
 
 
-def test_ru_vat_standard_20pct() -> None:
-    assert compute_vat(Decimal("1000000"), "RU") == Decimal("200000.00")
+def test_ru_vat_standard_22pct() -> None:
+    """The rate in force now, 22 % since 2026-01-01.
+
+    Called with no ``effective_on``, so it asks for today. The 20 % that
+    applied from 2019 until the end of 2025 is asserted beside it, because a
+    rate change edited in place rather than added as a window would pass the
+    first line and fail the second.
+    """
+    assert compute_vat(Decimal("1000000"), "RU") == Decimal("220000.00")
+    assert compute_vat(Decimal("1000000"), "RU", effective_on=date(2025, 6, 1)) == Decimal("200000.00")
 
 
 # ── 6. SG — BSD progressive bands + ABSD ────────────────────────────────
@@ -712,6 +720,7 @@ def test_a_dated_single_mapping_refuses_the_day_before_it_opens(
         ("RU", "standard", date(1993, 1, 1), "28000.00", "20000.00"),
         ("RU", "standard", date(2004, 1, 1), "20000.00", "18000.00"),
         ("RU", "standard", date(2019, 1, 1), "18000.00", "20000.00"),
+        ("RU", "standard", date(2026, 1, 1), "20000.00", "22000.00"),
         ("SA", "standard", date(2020, 7, 1), "5000.00", "15000.00"),
     ],
     ids=[
@@ -723,6 +732,7 @@ def test_a_dated_single_mapping_refuses_the_day_before_it_opens(
         "ru-cut-from-the-opening-28",
         "ru-cut-to-18",
         "ru-back-to-20",
+        "ru-raised-to-22",
         "sa-tripled",
     ],
 )
