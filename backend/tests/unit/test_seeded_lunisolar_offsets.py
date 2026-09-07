@@ -44,6 +44,46 @@ It is also blind to a MISSING festival: a row that simply omits Dragon Boat cont
 no offset and no offender. ``test_a_row_that_lost_its_anchor_is_an_offender`` closes the
 half of that which is checkable - a rule-bearing festival with no anchor to measure from
 is reported rather than skipped - but an absent festival is not detectable here at all.
+
+INDIA, added after the same shape shipped there. The Indian row carried five wrong
+lunisolar dates for 2026, including a Holi thirteen days out and a Diwali two. This file
+existed for exactly that defect and did not see it, because ``_OFFSET_RULES`` named only
+Dragon Boat, Mid-Autumn and Chuseok, so the Indian row contributed no offset at all. A
+gate whose population excludes the place the defect lives reads clean without lying, and
+widening it is worth more than a second file that would have the same blind spot in a
+different direction.
+
+India needs one departure from the shape above: its row states no lunar new year, so the
+anchor is Holi, the Phalguna full moon. That would ordinarily make the Indian half fully
+vulnerable to blind spot 1, a uniformly shifted row, since every Indian offset is measured
+from a date in the same row. It does not, because Holi and Diwali are ALSO pinned
+absolutely against ``_HINDU_HOLIDAYS`` in ``app/core/calendar.py``, which is a genuine
+second source in the tree rather than more arithmetic on the row. So for India the anchor
+is held still and the offsets are held to it, and blind spot 1 is closed rather than
+documented. See ``test_indias_anchor_is_pinned_to_the_engines_curated_table``.
+
+The Indian bands are tithi arithmetic, in the same spirit as the four-lunar-month
+reasoning above. Maha Shivaratri is the chaturdashi before a new moon and Holi the
+following full moon plus a day, which is sixteen tithis and change. Dussehra, Diwali and
+Guru Nanak Jayanti sit seven, eight and eight lunar months on, less the tithis back to
+their own day, and each carries a second band for the leap-month year that inserts a whole
+lunar month. 2026 is such a year, which is why the shipped row reads 230, 249 and 265
+rather than 201, 221 and 235.
+
+3. A THIRD BLIND SPOT, measured rather than feared, and the reason the Indian half is two
+   mechanisms instead of one. Bands cannot resolve a one or two day slip, because the real
+   year-to-year variation is itself one or two days: a tithi runs 21.5 to 26.1 hours, so
+   the same festival legitimately lands 201 days out one year and 202 the next. Replaying
+   the five wrong dates that shipped, with the anchor put back to its correct value, the
+   bands report two of them, Maha Shivaratri at 6 days and Ram Navami at 29. Dussehra,
+   Diwali and Guru Nanak Jayanti were out by one, two and three days and every one of them
+   sits inside its band. Diwali is caught anyway by the absolute check below, which is what
+   that check is for. Dussehra and Guru Nanak Jayanti are NOT caught by anything here, and
+   the honest reason is that ``_HINDU_HOLIDAYS`` curates only Holi and Diwali, so those two
+   festivals have no second source in the tree to be pinned against. Closing that means
+   sourcing them, not tightening a band onto three samples.
+   ``test_a_small_indian_slip_escapes_the_bands_and_needs_the_absolute_check`` pins this
+   division of labour so a later reader cannot mistake a clean run for full cover.
 """
 
 from __future__ import annotations
@@ -56,6 +96,8 @@ from typing import Any
 
 import pytest
 
+from app.core.calendar import _HINDU_HOLIDAYS
+
 _BACKEND = Path(__file__).resolve().parents[2]
 _SEED = _BACKEND / "app" / "modules" / "i18n_foundation" / "seed_data" / "work_calendars.json"
 
@@ -63,14 +105,28 @@ _SEED = _BACKEND / "app" / "modules" / "i18n_foundation" / "seed_data" / "work_c
 # Day 2" do not answer for "Lunar New Year". This is the anchor the offsets measure from.
 _ANCHOR_NAMES = ("Chinese New Year Day 1", "Lunar New Year")
 
-# Festival name -> the bands its offset from lunar 1/1 may fall in. The second band on
-# the 8/15 festivals is the leap-month year, which inserts a whole lunar month between
-# the two. Chuseok is the Korean name for the same lunar day as Mid-Autumn.
+# Rows whose anchor is not a lunar new year. India states none, so its offsets are
+# measured from Holi, which is held still by the absolute check against _HINDU_HOLIDAYS.
+_ANCHOR_NAMES_BY_COUNTRY: dict[str, tuple[str, ...]] = {"IN": ("Holi",)}
+
+# Festival name -> the bands its offset from the row's anchor may fall in. The second band
+# is the leap-month year, which inserts a whole lunar month. Chuseok is the Korean name for
+# the same lunar day as Mid-Autumn. The Indian offsets are measured from Holi and one of
+# them is negative, because Maha Shivaratri precedes it.
 _OFFSET_RULES: dict[str, tuple[tuple[int, int], ...]] = {
     "Dragon Boat Festival": ((120, 124),),
     "Mid-Autumn Festival": ((219, 222), (249, 252)),
     "Chuseok": ((219, 222), (249, 252)),
+    "Maha Shivaratri": ((-18, -15),),
+    "Ram Navami": ((21, 25),),
+    "Dussehra": ((198, 204), (227, 233)),
+    "Diwali": ((218, 224), (247, 253)),
+    "Guru Nanak Jayanti": ((232, 238), (262, 268)),
 }
+
+# The two Indian festivals the engine curates itself, and so the two that can be pinned to
+# an absolute date rather than to another date in the same row.
+_CURATED_IN_FESTIVALS = ("Holi", "Diwali")
 
 # Qingming is a solar term, so it gets a calendar bound rather than an offset.
 _SOLAR_TERM_BOUNDS = {"Qingming Festival": ((4, 4), (4, 6))}
@@ -89,9 +145,11 @@ _EXEMPT: dict[tuple[str, str], str] = {
 
 # Floors. Two rather than one: a file that parsed but lost its festival names would clear
 # a row count while contributing no offset to inspect, which is how a check like this goes
-# quietly blind. Small numbers on purpose - only two seeded rows carry a lunar new year.
-_MIN_ROWS_WITH_ANCHOR = 2
-_MIN_OFFSETS_CHECKED = 3
+# quietly blind. Raised from 2 and 3 when India joined, because a floor left at the old
+# population would have let the Indian row fall back out without failing anything, which is
+# the same silence that let the defect ship in the first place.
+_MIN_ROWS_WITH_ANCHOR = 3
+_MIN_OFFSETS_CHECKED = 8
 
 
 def _seed_rows() -> list[dict[str, Any]]:
@@ -104,15 +162,21 @@ def _as_date(text: str) -> date:
     return date(year, month, day)
 
 
-def _anchor_of(row: dict[str, Any]) -> date | None:
-    """Return the row's stated lunar new year, or None when it declares none.
+def _anchor_of(row: dict[str, Any]) -> tuple[date, str] | None:
+    """Return the row's anchor date and the name it was found under, or None.
 
     Deliberately NOT the earliest date of the Spring Festival block: an observed block
     opens on New Year's Eve, one day earlier, and would inflate every offset by one.
+
+    The name travels with the date because the anchor is no longer always a lunar new
+    year, and an offender line that says which date it measured from is the difference
+    between a reader trusting the number and having to rederive it.
     """
+    wanted = _ANCHOR_NAMES_BY_COUNTRY.get(row.get("country_code", ""), _ANCHOR_NAMES)
     for exception in row.get("exceptions", []):
-        if exception.get("name", {}).get("en") in _ANCHOR_NAMES:
-            return _as_date(exception["date"])
+        name = exception.get("name", {}).get("en")
+        if name in wanted:
+            return _as_date(exception["date"]), name
     return None
 
 
@@ -131,19 +195,21 @@ def _survey_offsets(rows: list[dict[str, Any]]) -> tuple[int, int, list[str]]:
 
     for row in rows:
         country = row.get("country_code", "??")
-        anchor = _anchor_of(row)
+        found = _anchor_of(row)
+        wanted = _ANCHOR_NAMES_BY_COUNTRY.get(country, _ANCHOR_NAMES)
         rule_bearing = [e for e in row.get("exceptions", []) if e.get("name", {}).get("en") in _OFFSET_RULES]
 
-        if anchor is None:
+        if found is None:
             # Not every row is lunisolar. Only complain when one carries a festival that
             # needs an anchor, so a missing anchor is reported instead of silently skipped.
             for exception in rule_bearing:
                 offenders.append(
                     f"{country} declares {exception['name']['en']} on {exception['date']} but states no "
-                    f"lunar new year, so the offset cannot be measured. Expected one of {_ANCHOR_NAMES}."
+                    f"lunar new year, so the offset cannot be measured. Expected one of {wanted}."
                 )
             continue
 
+        anchor, anchor_name = found
         anchored += 1
         for exception in rule_bearing:
             name = exception["name"]["en"]
@@ -152,12 +218,12 @@ def _survey_offsets(rows: list[dict[str, Any]]) -> tuple[int, int, list[str]]:
             checked += 1
             if any(low <= offset <= high for low, high in bands):
                 continue
-            readable = " or ".join(f"{low}-{high}" for low, high in bands)
+            readable = " or ".join(f"{low} to {high}" for low, high in bands)
             offenders.append(
-                f"{country} puts {name} on {exception['date']}, {offset} days after its own lunar new year "
-                f"({anchor.isoformat()}). A lunisolar festival sits {readable} days out, so this date does "
-                f"not belong to this row's year. Carrying last year's date forward and bumping only the "
-                f"year lands exactly here."
+                f"{country} puts {name} on {exception['date']}, {offset} days from its own row's "
+                f"{anchor_name} ({anchor.isoformat()}). A lunisolar festival sits {readable} days out, so "
+                f"this date does not belong to this row's year. Carrying last year's date forward and "
+                f"bumping only the year lands exactly here."
             )
 
     return anchored, checked, offenders
@@ -197,6 +263,34 @@ def test_the_offset_survey_actually_surveyed_something() -> None:
     assert checked >= _MIN_OFFSETS_CHECKED, (
         f"only {checked} festival offsets were measured, expected at least {_MIN_OFFSETS_CHECKED}. "
         f"A shrinking population is how a check like this goes quietly blind."
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("festival", _CURATED_IN_FESTIVALS)
+def test_indias_anchor_is_pinned_to_the_engines_curated_table(festival: str) -> None:
+    """The one place this file gets an absolute date instead of a relative one.
+
+    Every other assertion here is arithmetic on a row against itself, so a uniformly
+    shifted row passes: that is blind spot 1 in the module docstring. India escapes it
+    because ``_HINDU_HOLIDAYS`` in ``app/core/calendar.py`` is a second source in the tree
+    for the same two festivals, maintained separately and pinned by its own test. Holi is
+    also the anchor every other Indian offset is measured from, so pinning it holds the
+    whole Indian block still rather than just one date.
+
+    This is the assertion that was missing. The shipped row read 2026-03-17 for Holi
+    against the table's 2026-03-04, and nothing compared them.
+    """
+    india = next(row for row in _seed_rows() if row["country_code"] == "IN")
+    seeded = _as_date(next(e for e in india["exceptions"] if e["name"]["en"] == festival)["date"])
+    month, day = _HINDU_HOLIDAYS[seeded.year][festival.lower()]
+    curated = date(seeded.year, month, day)
+
+    assert seeded == curated, (
+        f"IN puts {festival} on {seeded.isoformat()} and _HINDU_HOLIDAYS puts it on "
+        f"{curated.isoformat()}, {abs((seeded - curated).days)} days apart. These are two sources for "
+        f"one date, so a caller reaching the seed and a caller reaching the engine get different "
+        f"answers for the same calendar."
     )
 
 
@@ -261,7 +355,64 @@ def test_a_copy_forward_is_caught() -> None:
     assert len(_unexempt(after)) == len(_unexempt(before)) + 1, (
         f"planting one defect should add exactly one offender: {_unexempt(after)}"
     )
-    assert "103 days after its own lunar new year" in planted[0], planted[0]
+    assert "103 days from its own row's Chinese New Year Day 1" in planted[0], planted[0]
+
+
+@pytest.mark.unit
+def test_a_gross_indian_slip_is_caught() -> None:
+    """The same control for the row this file used not to look at.
+
+    Planted with a date that actually shipped, so this fails if the Indian half is ever
+    narrowed back out of ``_OFFSET_RULES``. Ram Navami rather than Diwali on purpose: it
+    was 7 days out, which is larger than the bands' tolerance, and
+    ``test_a_small_indian_slip_escapes_the_bands_and_needs_the_absolute_check`` covers the
+    case that is not.
+    """
+    rows = copy.deepcopy(_seed_rows())
+    _, _, before = _survey_offsets(rows)
+    assert not [line for line in _unexempt(before) if line.startswith("IN ")], (
+        f"IN already offends, so planting a defect measures nothing: {before}"
+    )
+
+    india = next(row for row in rows if row["country_code"] == "IN")
+    ram_navami = next(e for e in india["exceptions"] if e["name"]["en"] == "Ram Navami")
+    ram_navami["date"] = "2026-04-02"  # the date that shipped, a Krishna Pratipada
+
+    _, _, after = _survey_offsets(rows)
+    planted = [line for line in _unexempt(after) if line.startswith("IN ") and "Ram Navami" in line]
+    assert len(planted) == 1, f"expected exactly the one planted offender, got: {planted}"
+    assert "29 days from its own row's Holi" in planted[0], planted[0]
+
+
+@pytest.mark.unit
+def test_a_small_indian_slip_escapes_the_bands_and_needs_the_absolute_check() -> None:
+    """Pins blind spot 3: bands cannot resolve a slip smaller than the real variation.
+
+    Diwali shipped on 2026-11-10 against a true 2026-11-08. Measured from a correct Holi
+    that is 251 days, and the leap-month band runs 247 to 253, so the survey reports
+    nothing. This is not a hole to be plugged by narrowing the band, which would then fail
+    on a legitimate year; it is why the absolute check against ``_HINDU_HOLIDAYS`` exists.
+
+    Asserting the negative deliberately. If someone later tightens the bands until this
+    starts being reported, this test fails and makes them justify the new width against a
+    real year rather than against the one defect they had in mind.
+    """
+    rows = copy.deepcopy(_seed_rows())
+    india = next(row for row in rows if row["country_code"] == "IN")
+    diwali = next(e for e in india["exceptions"] if e["name"]["en"] == "Diwali")
+    holi = _as_date(next(e for e in india["exceptions"] if e["name"]["en"] == "Holi")["date"])
+    diwali["date"] = "2026-11-10"  # the date that shipped, two days off the new moon
+
+    _, _, after = _survey_offsets(rows)
+    assert not [line for line in _unexempt(after) if "Diwali" in line], (
+        "the bands now report a two-day slip. If that is deliberate, check the new width against "
+        "a legitimate year before keeping it, because real variation is of the same size."
+    )
+    assert (_as_date(diwali["date"]) - holi).days == 251
+
+    # The half that does catch it, asserted here so the pair is visible in one place.
+    month, day = _HINDU_HOLIDAYS[2026]["diwali"]
+    assert _as_date(diwali["date"]) != date(2026, month, day)
 
 
 @pytest.mark.unit
@@ -293,7 +444,9 @@ def test_anchoring_on_the_block_start_would_shift_every_offset() -> None:
     band edge, long after anybody remembered the anchor was chosen carelessly.
     """
     china = next(row for row in _seed_rows() if row["country_code"] == "CN")
-    stated = _anchor_of(china)
+    found = _anchor_of(china)
+    assert found is not None
+    stated, _ = found
     assert stated == date(2026, 2, 17)
 
     block = [e for e in china["exceptions"] if e["name"]["en"].startswith("Chinese New Year")]

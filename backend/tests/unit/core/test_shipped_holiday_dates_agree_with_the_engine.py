@@ -1,20 +1,20 @@
-"""The holidays we ship as data and the holidays we compute must be one answer.
+"""Japan's Sports Day moves with the Happy Monday System, and must be computed.
 
-``work_calendars.json`` and ``app.core.calendar`` are two independently edited
-sources for the same fact, and nothing bound them together. Both defects this
-module pins were invisible for that reason:
+``_holidays_jp`` hardcoded 14 October under a comment that stated the
+second-Monday rule the code did not implement. The seed file shipped the correct
+date all along, so the engine and the data disagreed in every year 14 October is
+not itself a Monday, which is 11 of 2026 to 2037, and nothing compared them.
 
-* Sports Day was hardcoded to 14 October in ``_holidays_jp`` while the seed file
-  shipped the correct second Monday. The engine and the data disagreed every
-  year in which 14 October is not itself a Monday, and no test compared them.
-* India's seeded Holi and Diwali for 2026 were 13 and 2 days away from the
-  curated ``_HINDU_HOLIDAYS`` rows the engine serves, so the same calendar
-  answered differently depending on which source the caller reached.
+Scope. Only Japan is here. The lunisolar half of the same problem, India's
+seeded festivals disagreeing with the engine's curated table, belongs in
+``tests/unit/test_seeded_lunisolar_offsets.py``, which already owns seeded
+festival dates and was widened to cover India rather than duplicated here. A
+Happy Monday holiday is not lunisolar and has no offset to measure, so it would
+not have fitted that file's shape.
 
 ``test_seeded_work_week_survives_its_year`` says in its own docstring that it
-deliberately asserts no holidays. This module is the other half of that split,
-and it asserts only the countries whose data has been checked against an
-external almanac, because a wider sweep would pin dates nobody has verified.
+deliberately asserts no holidays at all. This module is part of the other half
+of that split.
 
 The Monday rule is recomputed here by walking October rather than by calling
 ``_nth_weekday``. Reusing the engine's own helper to check the engine would pass
@@ -29,7 +29,7 @@ from pathlib import Path
 
 import pytest
 
-from app.core.calendar import _HINDU_HOLIDAYS, _get_holidays
+from app.core.calendar import _get_holidays
 
 SEED_PATH = (
     Path(__file__).resolve().parents[3] / "app" / "modules" / "i18n_foundation" / "seed_data" / "work_calendars.json"
@@ -94,26 +94,11 @@ def test_the_hardcoded_sports_day_would_have_been_wrong_in_most_of_these_years()
 
 
 def test_japans_seeded_sports_day_matches_the_engine() -> None:
-    """The shipped 2026 row and the computed 2026 answer are the same date."""
+    """The shipped 2026 row and the computed 2026 answer are the same date.
+
+    This is the assertion that was missing. The seed said 2026-10-12 and the
+    engine said 2026-10-14, and no test put the two side by side.
+    """
     seeded = _seed_rows("JP")["Sports Day"]
     assert seeded == _second_monday_of_october(2026) == date(2026, 10, 12)
     assert seeded in _get_holidays("JP", 2026)
-
-
-@pytest.mark.parametrize("festival", ["Holi", "Diwali"])
-def test_indias_seeded_lunisolar_dates_match_the_curated_table(festival: str) -> None:
-    """The seed file and ``_HINDU_HOLIDAYS`` are one calendar, not two.
-
-    These are the only two Indian festivals the engine itself computes, so they
-    are the only two where a seed row can be checked against something in the
-    tree rather than against a date this test would have to assert on its own.
-    """
-    month, day = _HINDU_HOLIDAYS[2026][festival.lower()]
-    curated = date(2026, month, day)
-    seeded = _seed_rows("IN")[festival]
-
-    assert seeded == curated, (
-        f"{festival} 2026 is {seeded} in work_calendars.json and {curated} in "
-        f"_HINDU_HOLIDAYS, a gap of {abs((seeded - curated).days)} days"
-    )
-    assert seeded in _get_holidays("IN", 2026)
