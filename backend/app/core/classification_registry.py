@@ -317,7 +317,7 @@ REGION_ALIAS_TO_COUNTRY: Mapping[str, str] = MappingProxyType(
         # Two of them cover members that genuinely disagree, and the
         # anchor is a decision rather than a lookup. Both are named with
         # their reason in
-        # ``test_every_shipped_region_option_reaches_a_standard.py`` so
+        # ``test_every_shipped_picker_option_reaches_the_registry.py`` so
         # the decision stays readable: WestAfrica anchors on Nigeria (NRM)
         # while Senegal, Ivory Coast and Cameroon read UNTEC, and
         # SoutheastAsia anchors on Indonesia (MasterFormat) while Malaysia
