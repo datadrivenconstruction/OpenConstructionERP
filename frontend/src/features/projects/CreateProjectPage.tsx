@@ -180,15 +180,23 @@ const STANDARD_GROUPS: OptionGroup[] = [
   {
     // The rest of what the backend resolves. These were reachable server-side
     // and unreachable from here, so an estimator in Russia, Spain, France,
-    // Austria, Brazil, Japan, Korea or Turkey could not name their own
+    // Italy, Brazil, Japan, Korea or Turkey could not name their own
     // standard on a project. The list is hand-written because the picker needs
     // a country beside the name and the registry has no opinion about wording.
+    // Because it is hand-written, the country beside the name can drift from
+    // the country the registry maps, and did: VOCI read "(Austria)" here while
+    // COUNTRY_TO_STANDARD has only ever resolved it for IT. Austria resolves to
+    // din276, which this list already offers under "Germany / DACH", so an
+    // Austrian was being handed the Italian standard under their own country's
+    // name while their real entry sat two rows up. Checked once across all
+    // thirteen country-bearing options: VOCI was the only one whose country
+    // disagreed with the registry.
     group: 'National Standards',
     options: [
       { value: 'gesn', label: 'GESN / FER (Russia, CIS)' },
       { value: 'bc3', label: 'BC3 (Spain)' },
       { value: 'untec', label: 'UNTEC (France)' },
-      { value: 'voci', label: 'VOCI (Austria)' },
+      { value: 'voci', label: 'VOCI (Italy)' },
       { value: 'sinapi', label: 'SINAPI (Brazil)' },
       { value: 'sekisan', label: 'Sekisan (Japan)' },
       { value: 'kbim', label: 'KBIM (South Korea)' },
