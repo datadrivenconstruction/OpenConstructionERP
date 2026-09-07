@@ -18,9 +18,13 @@ classification standard a project's section paths render against
 (:func:`resolve_standard`) and the country validation rule packs a BOQ import
 runs (``boq.router._build_rule_sets``). Both read the same normaliser.
 
-The region strings it is handed come from ``project.region``, which is written
-by the region picker in
-``frontend/src/features/projects/CreateProjectPage.tsx``. That picker speaks
+The region strings it is handed come from ``project.region``, which the region
+picker in ``frontend/src/features/projects/CreateProjectPage.tsx`` writes, and
+so does anything else that calls the API: ``ProjectCreate.region`` is a plain
+``str`` of at most 100 characters and its validator strips whitespace and
+nothing else, on purpose (A-PROJ-02, so any market can be named). The picker is
+therefore the population this file can enumerate, not the population that can
+reach the resolver. That picker speaks
 neither ISO codes nor the macro names the alias table already carried. It ships
 prose and glued CamelCase: ``Russia``, ``Brazil``, ``GulfStates``. Four of its
 thirty shipped options resolved. The other twenty-six normalised to ``None``,
@@ -79,6 +83,16 @@ like an omission rather than a choice. OENORM is Austria's real standard, it has
 a label, and Austria resolves to ``din276``. Whether Austria should read it is a
 product decision about the registry, not something a test can settle, and it is
 recorded here so the next reader finds a decision rather than an oversight.
+
+**Would anyone know if a project fell to the default?**
+
+No, unless they are reading logs. ``_report_default`` emits one WARNING naming
+the region, deduplicated per process and capped at 512 distinct strings, and
+nothing in ``app`` reads ``StandardResolution.matched`` or ``.source``. There is
+no API field, no operator view and nothing a user sees, so the only signal that
+a project is being classified against a fallback is a log line nobody has a
+reason to open. That is why the check has to happen here: afterwards there is
+nothing to notice.
 """
 
 from __future__ import annotations
