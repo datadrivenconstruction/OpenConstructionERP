@@ -429,6 +429,12 @@
           "markdownDescription": "Open the launcher's own diagnostic log in the default handler. The path is resolved by the launcher and cannot be supplied by the caller."
         },
         {
+          "description": "Show a file from this workspace in the operating system's file manager. The caller names a path, and the command opens the FOLDER that holds it rather than the file, so nothing here launches a program by extension. The path is canonicalised and must resolve inside the data folder this launcher's own backend stores files in, so a page cannot name a system folder or a network share. It reports nothing back about the machine beyond whether the folder was opened.",
+          "type": "string",
+          "const": "allow-reveal-path-in-os",
+          "markdownDescription": "Show a file from this workspace in the operating system's file manager. The caller names a path, and the command opens the FOLDER that holds it rather than the file, so nothing here launches a program by extension. The path is canonicalised and must resolve inside the data folder this launcher's own backend stores files in, so a page cannot name a system folder or a network share. It reports nothing back about the machine beyond whether the folder was opened."
+        },
+        {
           "description": "Save which application server the launcher should use from the next start, or clear that choice. The address is validated by the launcher before it is stored, and the setting is only ever read while starting, so this cannot repoint a running window. This is the one permission here that changes what the application does on the next run rather than what it does now, and it is deliberately NOT granted to a server whose address a user typed in: see capabilities/app-window.json.",
           "type": "string",
           "const": "allow-set-server-choice",

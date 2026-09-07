@@ -97,6 +97,11 @@ frontend/stats.html
 *.log
 logs/
 
+# Process id files a dev or build script leaves behind. `frontend/build.pid`
+# outlived its build and sat untracked at the top of the tree, which is the
+# shape of file a wide `git add` sweeps into somebody else's commit.
+*.pid
+
 # Generated
 # backend/locales/ — kept tracked: stub locales ship with the wheel,
 # auto-generation now happens on top of tracked baselines so new
