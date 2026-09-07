@@ -14,6 +14,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
+import { changeOrderDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeChainLinks';
 import clsx from 'clsx';
 import {
   Replace,
@@ -91,8 +92,8 @@ import {
 import { mocGuide } from './mocGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildMocInsights } from './mocInsights';
-import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 // English fallbacks for the computed `moc.action_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1206,35 +1207,44 @@ const MoCRow = React.memo(function MoCRow({
             </div>
           )}
 
-          {/* Linked commercial records */}
-          {(entry.variation_request_id || entry.variation_order_id || entry.change_order_id) && (
-            <div className="flex flex-wrap items-center gap-2">
-              {(entry.variation_request_id || entry.variation_order_id) && (
-                <button
-                  className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/variations');
-                  }}
-                >
-                  <Link2 size={12} />
-                  {t('moc.linked_variation', { defaultValue: 'Linked variation' })}
-                </button>
-              )}
-              {entry.change_order_id && (
-                <button
-                  className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/changeorders');
-                  }}
-                >
-                  <Link2 size={12} />
-                  {t('moc.linked_change_order', { defaultValue: 'Linked change order' })}
-                </button>
-              )}
-            </div>
-          )}
+          {/* Linked commercial records. Each pill lands on the record itself
+              (Issue #435): the bare register was the destination before, which
+              left the reader to find by hand the record this entry already
+              names. The variation pill prefers the order, the contractual
+              record, and falls back to the request while no order exists. */}
+          {(() => {
+            const variationLink = linkedVariationDeepLink(entry);
+            const changeOrderId = entry.change_order_id;
+            if (!variationLink && !changeOrderId) return null;
+            return (
+              <div className="flex flex-wrap items-center gap-2">
+                {variationLink && (
+                  <button
+                    className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(variationLink);
+                    }}
+                  >
+                    <Link2 size={12} />
+                    {t('moc.linked_variation', { defaultValue: 'Linked variation' })}
+                  </button>
+                )}
+                {changeOrderId && (
+                  <button
+                    className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(changeOrderDeepLink(changeOrderId));
+                    }}
+                  >
+                    <Link2 size={12} />
+                    {t('moc.linked_change_order', { defaultValue: 'Linked change order' })}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Claims evidence: how provable this change is from the record, and
               the reconciled evidence thread around it (deferred behind a button).

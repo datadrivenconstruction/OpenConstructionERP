@@ -45,6 +45,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { listContracts } from '@/features/contracts/api';
+import { contractDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeChainLinks';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { ApprovalTimeline } from './ApprovalTimeline';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
@@ -1828,11 +1829,14 @@ function DetailView({
           variation_request_id?: string;
           contract_id?: string;
         };
-        const fromVariation =
-          meta.origin === 'variations.convert_vr_to_vo' &&
-          (meta.variation_order_id || meta.variation_request_id);
+        // The variation this order mirrors, as the record itself (Issue
+        // #435): the order where one exists, the request while it does not.
+        // The bare variations register was the destination before, which
+        // threw away the id that decided whether to draw the pill.
+        const variationLink =
+          meta.origin === 'variations.convert_vr_to_vo' ? linkedVariationDeepLink(meta) : null;
         const linkedContractId = meta.contract_id || '';
-        if (poIds.length === 0 && rfiIds.length === 0 && !fromVariation && !linkedContractId) {
+        if (poIds.length === 0 && rfiIds.length === 0 && !variationLink && !linkedContractId) {
           return null;
         }
         const chipCls =
@@ -1843,11 +1847,11 @@ function DetailView({
               {t('changeorders.related_records', { defaultValue: 'Related' })}
             </h3>
             <div className="flex flex-wrap items-center gap-2">
-              {fromVariation && (
+              {variationLink && (
                 <button
                   type="button"
                   className={chipCls}
-                  onClick={() => navigate('/variations')}
+                  onClick={() => navigate(variationLink)}
                   title={t('changeorders.from_variation_hint', {
                     defaultValue: 'Open the variation order this change order was created from',
                   })}
@@ -1860,7 +1864,7 @@ function DetailView({
                 <button
                   type="button"
                   className={chipCls}
-                  onClick={() => navigate('/contracts')}
+                  onClick={() => navigate(contractDeepLink(linkedContractId))}
                   title={linkedContractId}
                 >
                   <FileText size={12} />

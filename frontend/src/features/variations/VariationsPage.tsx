@@ -51,7 +51,13 @@ import {
   WideModalSection,
   WideModalField,
 } from '@/shared/ui/WideModal';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { listContracts } from '../contracts/api';
+import {
+  changeOrderDeepLink,
+  contractDeepLink,
+  variationBoqDeepLink,
+} from '@/shared/lib/changeChainLinks';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -129,6 +135,43 @@ type EditTarget =
   | { kind: 'orders'; row: VariationOrder }
   | { kind: 'daywork'; row: DayworkSheet }
   | { kind: 'eot'; row: ExtensionOfTimeClaim };
+
+const isTab = (value: string | null): value is Tab =>
+  (VARIATIONS_TAB_IDS as readonly string[]).includes(value ?? '');
+
+/** The record whose drawer is open, keyed by the tab it lives on. */
+type Selection =
+  | { kind: 'notices'; id: string }
+  | { kind: 'requests'; id: string }
+  | { kind: 'orders'; id: string }
+  | { kind: 'daywork'; id: string }
+  | { kind: 'eot'; id: string }
+  | null;
+
+/** The selection a deep link asks for, or none.
+ *
+ * A change order's "From variation" pill, a management-of-change entry's
+ * "Linked variation" pill and their kin land here as
+ * `/variations?tab=<kind>&highlight=<id>` (Issue #435). Both halves are
+ * needed: a request id and an order id look the same, so a highlight with no
+ * tab would be an id this page has to guess the kind of, and a tab this page
+ * does not have is a link nothing here can honour.
+ */
+function selectionFromUrl(tab: string | null, id: string | null): Selection {
+  if (!id || !isTab(tab)) return null;
+  switch (tab) {
+    case 'notices':
+      return { kind: 'notices', id };
+    case 'requests':
+      return { kind: 'requests', id };
+    case 'orders':
+      return { kind: 'orders', id };
+    case 'daywork':
+      return { kind: 'daywork', id };
+    case 'eot':
+      return { kind: 'eot', id };
+  }
+}
 
 const NOTICE_VARIANT: Record<NoticeStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
   issued: 'blue',
@@ -395,7 +438,15 @@ export function VariationsPage() {
   const prefsCurrency = usePreferencesStore((s) => s.currency);
   const currency = currentProject?.currency || prefsCurrency;
 
-  const [tab, setTab] = useState<Tab>('notices');
+  // Deep-link consumer (Issue #435). Both params are read once, on mount:
+  // they are a starting point, not a lock, so the tab strip and the drawer's
+  // close button work as they always did. Closing the drawer drops the
+  // highlight so a later remount does not re-open the record the user just
+  // closed.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightedTab = searchParams.get('tab');
+  const highlightedId = searchParams.get('highlight');
+  const [tab, setTab] = useState<Tab>(isTab(highlightedTab) ? highlightedTab : 'notices');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   /* Both of these narrow every tab, and the status one is sent to the
@@ -417,14 +468,22 @@ export function VariationsPage() {
     },
     orientation: 'horizontal',
   });
-  const [selected, setSelected] = useState<
-    | { kind: 'notices'; id: string }
-    | { kind: 'requests'; id: string }
-    | { kind: 'orders'; id: string }
-    | { kind: 'daywork'; id: string }
-    | { kind: 'eot'; id: string }
-    | null
-  >(null);
+  const [selected, setSelected] = useState<Selection>(() =>
+    selectionFromUrl(highlightedTab, highlightedId),
+  );
+  const closeDetail = () => {
+    setSelected(null);
+    if (highlightedId) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('highlight');
+          return next;
+        },
+        { replace: true },
+      );
+    }
+  };
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
 
@@ -971,7 +1030,7 @@ export function VariationsPage() {
           daywork={dayworkQ.data?.items ?? []}
           eot={eotQ.data?.items ?? []}
           currency={currency}
-          onClose={() => setSelected(null)}
+          onClose={closeDetail}
         />
       )}
 
@@ -1650,28 +1709,14 @@ function WorkflowStepper({
   );
 }
 
-/** Where a Variation Order's linked change order lives.
+/** Where the other records of the change chain live.
  *
- * The drawer already holds the id it uses to decide whether to render the
- * pill; navigating to the bare `/changeorders` list threw that id away and
- * left the user to find the record by hand. `?highlight=<id>` is the house
- * convention for list screens (`/boq/:id?highlight=`, `/inspections`,
- * `/subcontractors`), and the change-order register reads it.
+ * The destinations are defined once in `@/shared/lib/changeChainLinks`, so
+ * the change-order and management-of-change pages reach them without pulling
+ * this page into their bundle chunks. Re-exported here for the callers that
+ * learned the two names on this module.
  */
-export function changeOrderDeepLink(changeOrderId: string): string {
-  return `/changeorders?highlight=${encodeURIComponent(changeOrderId)}`;
-}
-
-/** Where a variation request's own bill of quantities is edited.
- *
- * A variation bill is an ordinary bill, so it is edited in the ordinary BOQ
- * editor at `/boq/:boqId` - positions, assemblies, markups, revisions and
- * every export work on it unchanged. That is the whole argument for making it
- * a real bill instead of a second, thinner pricing screen inside this module.
- */
-export function variationBoqDeepLink(boqId: string): string {
-  return `/boq/${encodeURIComponent(boqId)}`;
-}
+export { changeOrderDeepLink, variationBoqDeepLink };
 
 /** The priced scope of one variation request, inside the request drawer.
  *
@@ -2289,6 +2334,7 @@ export function DetailDrawer({
                           {t('variations.approve', { defaultValue: 'Approve' })}
                         </Button>
                         <Button
+  const linkedContractId = order?.affected_contract_id ?? null;
                           variant="danger"
                           icon={<XCircle size={14} />}
                           onClick={() => rejectMut.mutate()}
@@ -2385,16 +2431,14 @@ export function DetailDrawer({
                       {t('variations.linked_change_order', { defaultValue: 'Change order' })}
                     </button>
                   )}
-                  {/* Still the bare register: /contracts has no single-record
-                      route and ContractsPage reads only ?counterparty=, so a
-                      ?highlight= here would be a link nothing consumes - which
-                      looks fixed and is not. Deep-link it once that page
-                      selects a contract from the URL. */}
-                  {order.affected_contract_id && (
+                  {/* The contract register reads ?highlight= since Issue #435's
+                      navigation pass, so this lands on the contract the order
+                      amends rather than on the register it lives in. */}
+                  {linkedContractId && (
                     <button
                       type="button"
                       className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-blue-100 transition-colors"
-                      onClick={() => navigate('/contracts')}
+                      onClick={() => navigate(contractDeepLink(linkedContractId))}
                     >
                       <ArrowRight size={12} />
                       {t('variations.linked_contract', { defaultValue: 'Contract' })}

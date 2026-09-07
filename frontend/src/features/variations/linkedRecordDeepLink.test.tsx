@@ -12,12 +12,10 @@
 // change order pill must navigate to that change order. `?highlight=<id>` is
 // the house convention for list screens and ChangeOrdersPage now reads it.
 //
-// The contract pill is asserted too, in its current shape. `/contracts` has no
-// single-record route and ContractsPage reads only `?counterparty=`, so the
-// bare list is the honest destination until that page can select a contract
-// from the URL - and a test that pins it says which of the two pills is still
-// waiting for its other half, rather than leaving the difference to look like
-// an oversight.
+// The contract pill was pinned to the bare register here for as long as the
+// contract page could not select a contract from the URL. It reads
+// `?highlight=` now (Issue #435, the navigation pass), so the pill carries the
+// contract id the same way, and the assertion moved with it.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -114,11 +112,12 @@ describe('variation order linked-record deep links', () => {
     expect(screen.queryByText('Contract')).toBeNull();
   });
 
-  it('still sends the contract pill to the register, which has no record route', () => {
+  it('carries the contract id into the contract register', () => {
     renderDrawer(ORDER);
 
     fireEvent.click(screen.getByText('Contract'));
 
-    expect(navigateSpy).toHaveBeenCalledWith('/contracts');
+    expect(navigateSpy).toHaveBeenCalledWith('/contracts?highlight=ct-7');
+    expect(navigateSpy).not.toHaveBeenCalledWith('/contracts');
   });
 });

@@ -506,7 +506,27 @@ export function ContractsPage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<ContractType | ''>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
+  // Deep-link consumer (Issue #435): a variation order's "Contract" pill and
+  // a change order's "Applies to contract" pill land here as
+  // /contracts?highlight=<id>, so the register opens on that contract's
+  // drawer instead of on a list the reader then searches by hand. Read once,
+  // on mount, the way ?counterparty= is above: a starting point, not a lock.
+  // Closing the drawer drops the param so a later remount does not re-open
+  // the contract the user just closed.
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(
+    searchParams.get('highlight'),
+  );
+  const closeDetail = () => {
+    setSelectedContractId(null);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('highlight');
+        return next;
+      },
+      { replace: true },
+    );
+  };
   const [createOpen, setCreateOpen] = useState(false);
   const [newClaimOpen, setNewClaimOpen] = useState(false);
 
@@ -928,7 +948,7 @@ export function ContractsPage() {
         <ContractDetailDrawer
           contractId={selectedContractId}
           contracts={contracts}
-          onClose={() => setSelectedContractId(null)}
+          onClose={closeDetail}
         />
       )}
 
