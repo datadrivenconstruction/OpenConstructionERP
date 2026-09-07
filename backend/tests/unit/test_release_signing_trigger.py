@@ -301,6 +301,18 @@ def test_the_confirmation_compares_hashes_and_not_only_names(workflow: dict) -> 
         "'The manifest is wrong' without the pair is a finding nobody can act on."
     )
 
+    # The comparison skips an asset the manifest does not name, on the grounds
+    # that the coverage check above has already refused for it. That is an
+    # invariant about the order of two checks in one script, and it is the kind
+    # that survives a reordering silently: the digest loop would go on
+    # comparing what it could and report a clean count while a whole asset went
+    # unmentioned by either half.
+    assert script.index("does not cover:") < script.index("release serves"), (
+        "the digest comparison now runs before the coverage refusal. It skips assets the manifest "
+        "does not name because that refusal is supposed to have happened first, so in this order "
+        "an uncovered asset is dropped by one check and never reached by the other."
+    )
+
 
 def test_the_confirmation_cannot_pass_by_comparing_nothing(workflow: dict) -> None:
     """A gate that measured nothing must not read like a gate that was satisfied.
