@@ -424,8 +424,17 @@ jurisdictions:
         - { rate: 0.20, effective_from: "1993-01-01" }
         - { rate: 0.18, effective_from: "2004-01-01" }
         - { rate: 0.20, effective_from: "2019-01-01" }
-        # Raised to 22 % on 2026-01-01. The 10 % reduced class was retained
+        # Raised to 22 % on 2026-01-01 by Federal Law No. 425-FZ of
+        # 28 November 2025, which amends article 164 of the Tax Code and is in
+        # force from 1 January 2026. The 10 % reduced class was retained
         # unchanged by the same amendment, which is why nothing below moves.
+        # Source read for both halves of that: Federal Tax Service, "Taxes
+        # 2026", https://www.nalog.gov.ru/new2026/ (read 2026-09-07), which
+        # gives the standard rate as 20 % to 22 % applying to sales from
+        # 1 January 2026 and lists 10 % among the rates that did not change.
+        # This table has no per-row source field and none was added; the
+        # header above already names FNS RU as a source for this country, and
+        # the full citation with its caveats lives in app/core/tax.py.
         - { rate: 0.22, effective_from: "2026-01-01" }
       exempt:
         applies_to:

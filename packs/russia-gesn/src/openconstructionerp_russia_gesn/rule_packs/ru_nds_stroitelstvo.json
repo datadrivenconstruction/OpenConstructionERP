@@ -8,7 +8,7 @@
     "reporting",
     "tendering"
   ],
-  "review_status": "Drawn from public sources. Pending review by a Russian cost engineer before it is relied on for a contract.",
+  "review_status": "The 22 percent standard rate below is taken from Federal Law No. 425-FZ of 28 November 2025, which amends article 164 of the Tax Code with effect from 1 January 2026, as stated by the Federal Tax Service on its Taxes 2026 page at https://www.nalog.gov.ru/new2026/ (read 2026-09-07). The same page lists the 10 percent reduced class among the rates that did not change. The rest of this pack is drawn from public sources and is pending review by a Russian cost engineer before it is relied on for a contract.",
   "description": "VAT sits at the very bottom of the summary estimate, applied once to everything above it including the reserve for unforeseen costs. It is the last line and never a per-item field, which matters when an estimate is imported from a jurisdiction that carries tax per line: folding the same tax into the rates and into the summary is the way a Russian bill ends up quoting a price nobody agreed to.",
   "rates": {
     "standard": 22,
