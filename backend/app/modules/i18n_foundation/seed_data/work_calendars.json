@@ -513,8 +513,8 @@
       {"date": "2026-07-20", "name": {"en": "Marine Day", "ja": "海の日"}, "type": "public_holiday"},
       {"date": "2026-08-11", "name": {"en": "Mountain Day", "ja": "山の日"}, "type": "public_holiday"},
       {"date": "2026-09-21", "name": {"en": "Respect for the Aged Day", "ja": "敬老の日"}, "type": "public_holiday"},
-      {"date": "2026-09-22", "name": {"en": "Autumnal Equinox Day", "ja": "秋分の日"}, "type": "public_holiday"},
-      {"date": "2026-09-23", "name": {"en": "Citizen's Holiday", "ja": "国民の休日"}, "type": "public_holiday"},
+      {"date": "2026-09-22", "name": {"en": "Citizen's Holiday", "ja": "国民の休日"}, "type": "public_holiday"},
+      {"date": "2026-09-23", "name": {"en": "Autumnal Equinox Day", "ja": "秋分の日"}, "type": "public_holiday"},
       {"date": "2026-10-12", "name": {"en": "Sports Day", "ja": "スポーツの日"}, "type": "public_holiday"},
       {"date": "2026-11-03", "name": {"en": "Culture Day", "ja": "文化の日"}, "type": "public_holiday"},
       {"date": "2026-11-23", "name": {"en": "Labour Thanksgiving Day", "ja": "勤労感謝の日"}, "type": "public_holiday"}
