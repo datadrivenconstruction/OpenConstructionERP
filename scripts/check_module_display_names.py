@@ -21,7 +21,7 @@ does not look for a gap in the locale files. It starts from the modules, which
 are the thing that actually exists, and asks of each one whether the name it
 shows can be translated at all.
 
-Three ways that fails, all blocking:
+Four ways that fails, all blocking:
 
   1. A module whose name has no `modules.catalog.<name>` key. Nothing can
      translate it, and it will render English forever without any gate
@@ -33,6 +33,22 @@ Three ways that fails, all blocking:
      calls Project Files whose manifest said Document Management. Translators
      work from the locale value and backend logs print the manifest one, so a
      drift here means the product is quietly using two names for one thing.
+  4. A manifest this guard cannot read the two fields out of. That is a
+     failure and not a skip, because a manifest the guard cannot read still
+     ships: `module_loader` imports the file and checks `isinstance`, so it
+     never looks at how the call is written.
+
+That fourth one is why the manifests are parsed rather than matched. The reader
+used to be two line-anchored regexes and it dropped every manifest they missed,
+on the stated grounds that the loader would refuse such a manifest anyway. The
+loader does no such thing, and the layout that defeats the anchors is one our
+own formatter produces: a `ModuleManifest(...)` call whose last argument has no
+trailing comma is collapsed onto one line if it fits in 120 characters, and
+then `display_name` sits mid-line where a start-of-line anchor cannot match. A
+module that fell out of the reader was never asked for a
+`modules.catalog.<name>` key, rendered English in all 40 languages, and took
+nothing red with it, because the count in the verdict was taken after the drop
+and so came out looking merely smaller.
 
 Run from the repo root:
 
@@ -41,9 +57,11 @@ Run from the repo root:
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import re
 import sys
+from typing import NamedTuple
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MODULES = ROOT / "backend" / "app" / "modules"
@@ -51,10 +69,26 @@ EN_LOCALE = ROOT / "frontend" / "src" / "app" / "locales" / "en.ts"
 
 KEY_PREFIX = "modules.catalog."
 
-DISPLAY_RE = re.compile(r'^\s*display_name\s*=\s*"([^"]*)"', re.M)
-NAME_RE = re.compile(r'^\s*name\s*=\s*"([^"]*)"', re.M)
+MANIFEST_GLOB = "*/manifest.py"
+MANIFEST_CLASS = "ModuleManifest"
+
 # "key": "value", where either may contain escaped quotes
 PAIR_RE = re.compile(r'"((?:[^"\\]|\\.)+)"\s*:\s*"((?:[^"\\]|\\.)*)"')
+
+
+class ManifestRead(NamedTuple):
+    """One `manifest.py` on disk and the two fields this guard needs from it.
+
+    Every manifest found gets an entry, including the ones nothing could be
+    read out of, which carry `None`. Keeping them in the list is the point:
+    the population the verdict reports is then the population on disk, and a
+    manifest the reader cannot handle has to be answered for instead of
+    quietly shrinking the denominator.
+    """
+
+    path: pathlib.Path
+    name: str | None
+    display_name: str | None
 
 
 def locale_key(module_name: str) -> str:
@@ -67,17 +101,58 @@ def locale_key(module_name: str) -> str:
     return KEY_PREFIX + module_name.removeprefix("oe_")
 
 
-def read_manifests() -> list[tuple[str, str, pathlib.Path]]:
-    out: list[tuple[str, str, pathlib.Path]] = []
-    for manifest in sorted(MODULES.glob("*/manifest.py")):
-        text = manifest.read_text(encoding="utf-8")
-        name = NAME_RE.search(text)
-        display = DISPLAY_RE.search(text)
-        if not name or not display:
-            # A manifest without either is a different problem and the loader
-            # will refuse it; not this guard's business to duplicate that.
+def _string_argument(node: ast.expr | None) -> str | None:
+    """The value of a plain string literal argument, or None for anything else.
+
+    Adjacent string literals are one `Constant` by the time they reach here, so
+    a wrapped description still reads. A value built at runtime - an f-string,
+    a concatenation, a reference to a constant - does not, and returning None
+    for it makes the manifest a named failure rather than a guess.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _manifest_call(tree: ast.Module) -> ast.Call | None:
+    """The `ModuleManifest(...)` call in a parsed manifest, if there is one."""
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
             continue
-        out.append((name.group(1), display.group(1), manifest))
+        func = node.func
+        if isinstance(func, ast.Attribute) and func.attr == MANIFEST_CLASS:
+            return node
+        if isinstance(func, ast.Name) and func.id == MANIFEST_CLASS:
+            return node
+    return None
+
+
+def read_manifests() -> list[ManifestRead]:
+    """Every manifest under `MODULES`, parsed, one entry per file on disk.
+
+    Parsed and not matched: quoting and line layout are invisible to the
+    module loader, which imports the file, so they must be invisible here too
+    or the guard's population stops being the product's.
+    """
+    out: list[ManifestRead] = []
+    for manifest in sorted(MODULES.glob(MANIFEST_GLOB)):
+        try:
+            tree = ast.parse(manifest.read_text(encoding="utf-8"))
+        except SyntaxError:
+            out.append(ManifestRead(manifest, None, None))
+            continue
+        call = _manifest_call(tree)
+        if call is None:
+            out.append(ManifestRead(manifest, None, None))
+            continue
+        arguments = {keyword.arg: keyword.value for keyword in call.keywords if keyword.arg}
+        out.append(
+            ManifestRead(
+                manifest,
+                _string_argument(arguments.get("name")),
+                _string_argument(arguments.get("display_name")),
+            ),
+        )
     return out
 
 
@@ -87,10 +162,42 @@ def read_english() -> dict[str, str]:
 
 
 def main() -> int:
-    modules = read_manifests()
-    if not modules:
+    manifests = read_manifests()
+    on_disk = len(list(MODULES.glob(MANIFEST_GLOB)))
+    if not manifests:
         print(f"no manifests found under {MODULES}", file=sys.stderr)
         return 1
+
+    # The same glob the reader walked, counted again. A reader that starts
+    # dropping manifests would otherwise report a smaller number rather than a
+    # wrong one, and a smaller number reads as fine.
+    if len(manifests) != on_disk:
+        print(
+            f"\nread {len(manifests)} manifests but {on_disk} exist under {MODULES}. "
+            "The reader is skipping files, so every check below runs on a short population.",
+            file=sys.stderr,
+        )
+        return 1
+
+    unparsed = [m for m in manifests if not m.name or not m.display_name]
+    if unparsed:
+        print(f"\n{len(unparsed)} manifests do not spell out both name and display_name:", file=sys.stderr)
+        for entry in unparsed:
+            missing = ", ".join(
+                field for field, value in (("name", entry.name), ("display_name", entry.display_name)) if not value
+            )
+            print(f"  {entry.path.relative_to(ROOT).as_posix()}  cannot read: {missing}", file=sys.stderr)
+        print(
+            "\nThe module loader imports the manifest and checks isinstance, so a module whose\n"
+            "fields this guard cannot read still loads and still shows its name to users. Write\n"
+            "both as plain string literals in the ModuleManifest call. Reporting it here rather\n"
+            "than skipping the file is deliberate: a skipped manifest is never asked for a\n"
+            f"{KEY_PREFIX}<name> key and renders English in every language with nothing red.",
+            file=sys.stderr,
+        )
+        return 1
+
+    modules = [(m.name, m.display_name, m.path) for m in manifests]
 
     english = read_english()
     catalog = {k: v for k, v in english.items() if k.startswith(KEY_PREFIX)}
@@ -161,8 +268,9 @@ def main() -> int:
         return 1
 
     print(
-        f"module display names: {len(modules)} modules, every name reachable as "
-        f"{KEY_PREFIX}<name>, no drift, no orphans"
+        f"module display names: {len(modules)} of {on_disk} manifests under "
+        f"{MODULES.relative_to(ROOT).as_posix()} read, {len(catalog)} catalog keys, "
+        f"every name reachable as {KEY_PREFIX}<name>, no drift, no orphans"
     )
     return 0
 
