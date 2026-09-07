@@ -53,6 +53,7 @@ import {
 } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage, type Page } from '@/shared/lib/api';
+import { compareNames } from '@/shared/lib/collator';
 import {
   listResources,
   resourceHistogram,
@@ -246,7 +247,7 @@ function HistogramTab({ projectId }: { projectId: string }) {
       .sort((a, b) => {
         const byKind = (order[a.resource_type] ?? 9) - (order[b.resource_type] ?? 9);
         if (byKind !== 0) return byKind;
-        return a.name.localeCompare(b.name);
+        return compareNames(a.name, b.name);
       })
       .map((r) => ({
         value: r.id,
@@ -775,7 +776,9 @@ function PreviewResult({
       ...Object.keys(preview.peak_before),
       ...Object.keys(preview.peak_after),
     ]);
-    return Array.from(names).sort();
+    // These are resource names, not keys: a bare sort would order them by
+    // UTF-16 code unit and push every accented name to the bottom.
+    return Array.from(names).sort(compareNames);
   }, [preview.peak_before, preview.peak_after]);
 
   return (

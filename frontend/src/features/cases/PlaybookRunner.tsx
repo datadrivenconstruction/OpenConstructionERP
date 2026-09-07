@@ -78,6 +78,7 @@ import { CaseCompanyHive } from "./CompanyHive";
 import { MarketPackPanel } from "./MarketPackPanel";
 import { FlowGlyph, flowGlyphFor, type FlowGlyphKind } from "./flowGlyphs";
 import { normalizeCaseRoute } from "./playbookModules";
+import { compareNames } from '@/shared/lib/collator';
 
 /** Returns true for seeded sample projects (they carry `metadata.demo_id`). */
 function isDemoProject(p: Project): boolean {
@@ -706,7 +707,7 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
       const ad = isDemoProject(a) ? 0 : 1;
       const bd = isDemoProject(b) ? 0 : 1;
       if (ad !== bd) return ad - bd;
-      return a.name.localeCompare(b.name);
+      return compareNames(a.name, b.name);
     });
   }, [projects]);
 

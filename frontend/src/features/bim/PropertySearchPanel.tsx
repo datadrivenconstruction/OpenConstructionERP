@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Loader2, X } from 'lucide-react';
+import { compareNames } from '@/shared/lib/collator';
 import {
   fetchBIMDataframeSchema,
   queryBIMDataframe,
@@ -147,7 +148,7 @@ export default function PropertySearchPanel({
    *  1000+ columns) are kept manageable by alphabetising — the user will
    *  scan, not page through. */
   const sortedColumns = useMemo(
-    () => [...schema].sort((a, b) => a.name.localeCompare(b.name)),
+    () => [...schema].sort((a, b) => compareNames(a.name, b.name)),
     [schema],
   );
 

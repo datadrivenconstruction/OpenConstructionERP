@@ -102,6 +102,8 @@ import { resourcesGuide } from './resourcesGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildResourcesInsights } from './resourcesInsights';
 import { fmtPercent } from '@/shared/lib/formatters';
+import { compareNames } from '@/shared/lib/collator';
+import { useWeekStartsOn, type WeekStartsOn } from '@/shared/lib/weekStart';
 
 type Tab = 'resources' | 'requests' | 'assignments';
 
@@ -155,7 +157,7 @@ function resourceSelectOptions(t: TFn, list: Resource[]): SearchableSelectOption
   return [...list]
     .sort((a, b) => {
       const byKind = (order[a.resource_type] ?? 9) - (order[b.resource_type] ?? 9);
-      return byKind !== 0 ? byKind : a.name.localeCompare(b.name);
+      return byKind !== 0 ? byKind : compareNames(a.name, b.name);
     })
     .map((r) => ({
       value: r.id,

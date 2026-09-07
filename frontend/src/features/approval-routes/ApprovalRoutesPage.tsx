@@ -49,6 +49,7 @@ import { kindLabel } from './labels';
 import { RouteEditor } from './RouteEditor';
 import { RouteSimulateDrawer } from './RouteSimulateDrawer';
 import type { ApprovalRoute, InstanceStatus } from './types';
+import { compareNames } from '@/shared/lib/collator';
 
 type TabId = 'routes' | 'instances' | 'analytics';
 
@@ -320,7 +321,7 @@ export function ApprovalRoutesPage() {
                     </thead>
                     <tbody className="divide-y divide-border-light">
                       {rows
-                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .sort((a, b) => compareNames(a.name, b.name))
                         .map((r) => (
                           <tr key={r.id}>
                             <td className="px-3 py-2.5">

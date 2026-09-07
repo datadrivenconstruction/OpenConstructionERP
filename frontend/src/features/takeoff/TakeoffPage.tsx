@@ -47,6 +47,7 @@ import { takeoffApi, type TakeoffDocumentResponse } from './api';
 import { canonicalizeUnit } from './lib/units';
 import { aiApi } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
+import { compareNames } from '@/shared/lib/collator';
 
 const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
@@ -858,7 +859,7 @@ function TakeoffDocFilmstrip({
       const aPin = pinned.has(a.id) ? 1 : 0;
       const bPin = pinned.has(b.id) ? 1 : 0;
       if (aPin !== bPin) return bPin - aPin;
-      if (sortBy === 'name') return a.filename.localeCompare(b.filename);
+      if (sortBy === 'name') return compareNames(a.filename, b.filename);
       if (sortBy === 'size') return b.size_bytes - a.size_bytes;
       // 'recent' — newest uploaded_at first.
       const at = new Date(a.uploaded_at || 0).getTime();

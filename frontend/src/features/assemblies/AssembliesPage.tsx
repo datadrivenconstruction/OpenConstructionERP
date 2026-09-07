@@ -15,6 +15,7 @@ import { Button, Card, Badge, DismissibleInfo, IntroRichText, EmptyState, Skelet
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { fmtList, getIntlLocale } from '@/shared/lib/formatters';
+import { useNameCollator } from '@/shared/lib/collator';
 import { unitLabel } from '@/shared/lib/unitLabels';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { useToastStore } from '@/stores/useToastStore';
@@ -232,6 +233,11 @@ export function AssembliesPage() {
     };
   }, [statsData, allForBanner]);
 
+  // Assembly names are user data; the name column orders them in this
+  // reader's language. `code` stays on a plain compare because it is an
+  // identifier, not something a reader alphabetises.
+  const compareNames = useNameCollator();
+
   // Sort + unused filter (FE-side over the current page slice).
   const items = useMemo(() => {
     let raw = data?.items ?? [];
@@ -239,7 +245,7 @@ export function AssembliesPage() {
     const dir = sortDir === 'asc' ? 1 : -1;
     const cmp = (a: Assembly, b: Assembly) => {
       switch (sortKey) {
-        case 'name': return a.name.localeCompare(b.name) * dir;
+        case 'name': return compareNames(a.name, b.name) * dir;
         case 'code': return a.code.localeCompare(b.code) * dir;
         case 'total_rate': return ((a.total_rate ?? 0) - (b.total_rate ?? 0)) * dir;
         case 'usage_count': return ((a.usage_count ?? 0) - (b.usage_count ?? 0)) * dir;
@@ -250,7 +256,7 @@ export function AssembliesPage() {
       }
     };
     return [...raw].sort(cmp);
-  }, [data, sortKey, sortDir, onlyUnused]);
+  }, [data, sortKey, sortDir, onlyUnused, compareNames]);
 
   // Multi-select helpers — selection survives filtering/paging (set of ids).
   const allOnPageSelected = items.length > 0 && items.every((a) => selected.has(a.id));

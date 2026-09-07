@@ -116,6 +116,7 @@ import {
 } from './api';
 import { formatCurrency } from '@/shared/lib/money';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { compareNames } from '@/shared/lib/collator';
 
 const RULE_TYPES: PricingRuleType[] = [
   'early_bird',
@@ -709,7 +710,7 @@ function buildConflictGroups(rules: PricingRule[]): Map<string, ConflictGroup> {
       const pa = a.priority ?? 100;
       const pb = b.priority ?? 100;
       if (pa !== pb) return pa - pb;
-      return (a.name || '').localeCompare(b.name || '');
+      return compareNames(a.name, b.name);
     });
     const winner = sorted[0]!;
     const reasons: string[] = [];
@@ -2167,7 +2168,7 @@ function QuoteHistoryTab({ devId }: { devId: string }): JSX.Element {
         sorted.sort((a, b) => num(b) - num(a));
         break;
       case 'buyer_asc':
-        sorted.sort((a, b) => buyerName(a).localeCompare(buyerName(b)));
+        sorted.sort((a, b) => compareNames(buyerName(a), buyerName(b)));
         break;
     }
     return sorted;

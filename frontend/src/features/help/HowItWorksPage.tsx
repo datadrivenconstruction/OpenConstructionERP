@@ -89,6 +89,7 @@ import {
   type ModuleExplanation,
 } from './moduleExplanations';
 import { useHelpOrderStore, type HelpSortMode } from './useHelpOrderStore';
+import { useNameCollator } from '@/shared/lib/collator';
 
 /* ── Icon resolution ────────────────────────────────────────────────────── */
 
@@ -359,11 +360,16 @@ export function HowItWorksPage() {
   // `groups` comes back in the canonical lifecycle order. Re-order the sections
   // per the user's chosen sort mode: keep lifecycle as-is, sort alphabetically
   // by the localized section label, or follow the saved custom order.
+  const compareNames = useNameCollator();
   const groups = useMemo(() => groupByCategory(filtered), [filtered]);
   const orderedGroups = useMemo(() => {
     if (mode === 'alphabetical') {
+      // These labels are already translated, so "alphabetical" means the
+      // alphabet of the language they are written in - the one the reader
+      // picked, which is not necessarily the browser's.
       return [...groups].sort((a, b) =>
-        t(a.category.labelKey, { defaultValue: a.category.labelDefault }).localeCompare(
+        compareNames(
+          t(a.category.labelKey, { defaultValue: a.category.labelDefault }),
           t(b.category.labelKey, { defaultValue: b.category.labelDefault }),
         ),
       );
@@ -376,7 +382,7 @@ export function HowItWorksPage() {
       );
     }
     return groups;
-  }, [groups, mode, customOrder, t]);
+  }, [groups, mode, customOrder, t, compareNames]);
 
   const toggle = (id: string) =>
     setExpanded((prev) => {

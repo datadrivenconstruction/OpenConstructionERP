@@ -27,6 +27,7 @@ import { takeoffApi } from '../takeoff/api';
 import { documentsGuide } from './documentsGuide';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useNameCollator } from '@/shared/lib/collator';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -614,6 +615,8 @@ export function DocumentsPage() {
     [],
   );
 
+  const compareNames = useNameCollator();
+
   const sortedDocuments = useMemo(() => {
     const docs = documents ?? [];
     // Group by name to compute version counts for the revision filter
@@ -648,7 +651,7 @@ export function DocumentsPage() {
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          return compareNames(a.name, b.name);
         case 'size':
           return b.file_size - a.file_size;
         case 'date':
@@ -656,7 +659,7 @@ export function DocumentsPage() {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [documents, sortBy, fileTypeFilter, revisionFilter, classifyFileType]);
+  }, [documents, sortBy, fileTypeFilter, revisionFilter, classifyFileType, compareNames]);
 
   /* ── Stats ──────────────────────────────────────────────────────────── */
 

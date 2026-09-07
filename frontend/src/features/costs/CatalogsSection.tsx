@@ -28,6 +28,7 @@ import { extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { COMMON_CURRENCIES } from '@/features/boq/boqHelpers';
+import { useNameCollator } from '@/shared/lib/collator';
 import {
   createCostCatalog,
   deleteCostCatalog,
@@ -518,9 +519,11 @@ export function CatalogsSection({
     staleTime: 60_000,
   });
 
+  const compareNames = useNameCollator();
+
   const sorted = useMemo(
-    () => [...(catalogs ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
-    [catalogs],
+    () => [...(catalogs ?? [])].sort((a, b) => compareNames(a.name, b.name)),
+    [catalogs, compareNames],
   );
 
   // If the selected catalog disappears (deleted elsewhere), clear the filter.

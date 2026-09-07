@@ -8,6 +8,7 @@
  * component tree. No imports from React or the API client here.
  */
 import type { InboxItem, InboxKind, InboxSeverity } from './api';
+import { compareNames } from '@/shared/lib/collator';
 
 /** Severity rank - higher sorts first when timestamps tie. */
 export const SEVERITY_RANK: Record<InboxSeverity, number> = {
@@ -120,7 +121,7 @@ export function distinctInboxProjects(
     }
   }
   return Array.from(byId, ([id, name]) => ({ id, name })).sort((a, b) =>
-    a.name.localeCompare(b.name),
+    compareNames(a.name, b.name),
   );
 }
 

@@ -31,6 +31,7 @@ import { ModuleGuideButton } from '@/shared/ui';
 import { useGlobalFileSearch } from './hooks';
 import { fileDistributionGuide } from './fileDistributionGuide';
 import type { SearchHit, SearchHitKind } from './types';
+import { compareNames } from '@/shared/lib/collator';
 
 const RECENT_SEARCHES_KEY = 'oe_files_search_recent_v1';
 const RECENT_MAX = 6;
@@ -129,11 +130,11 @@ export function GlobalSearchPage() {
     const list = [...rawHits];
     if (sort === 'name_asc') {
       list.sort((a, b) =>
-        (a.canonical_name ?? '').localeCompare(b.canonical_name ?? ''),
+        compareNames(a.canonical_name, b.canonical_name),
       );
     } else if (sort === 'project_asc') {
       list.sort((a, b) =>
-        (a.project_name ?? '').localeCompare(b.project_name ?? ''),
+        compareNames(a.project_name, b.project_name),
       );
     }
     return list;

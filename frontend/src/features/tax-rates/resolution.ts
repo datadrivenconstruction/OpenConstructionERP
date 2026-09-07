@@ -18,6 +18,7 @@
  */
 
 import type { TaxRateComponent, TaxResolution } from './api';
+import { compareNames } from '@/shared/lib/collator';
 
 /**
  * What the screen should show. One of these is a number; the rest are not,
@@ -165,7 +166,7 @@ export function offerableSubdivisions(
     byCode.set(code, { code, label: code, inRegistry: false });
   }
 
-  return [...byCode.values()].sort((a, b) => a.label.localeCompare(b.label));
+  return [...byCode.values()].sort((a, b) => compareNames(a.label, b.label));
 }
 
 /**

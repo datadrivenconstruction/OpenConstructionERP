@@ -10,6 +10,7 @@
 import type { Measurement } from './takeoff-types';
 import { effectiveQuantity } from './takeoff-quantity';
 import { formatCountQuantity, formatQuantity } from './measurement-format';
+import { compareNames } from '@/shared/lib/collator';
 
 /** Tool types that shouldn't be counted in legend totals. */
 export const ANNOTATION_TYPES = new Set([
@@ -99,7 +100,7 @@ export function computeGroupSummaries(
   }
 
   // Stable, predictable ordering for the legend: by name.
-  summaries.sort((a, b) => a.name.localeCompare(b.name));
+  summaries.sort((a, b) => compareNames(a.name, b.name));
   return summaries;
 }
 

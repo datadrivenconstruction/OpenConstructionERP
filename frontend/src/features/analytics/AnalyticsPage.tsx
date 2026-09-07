@@ -29,6 +29,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { analyticsGuide } from './analyticsGuide';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { compareNames } from '@/shared/lib/collator';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -135,7 +136,7 @@ export function AnalyticsPage() {
     return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortField === 'name') {
-        cmp = a.name.localeCompare(b.name);
+        cmp = compareNames(a.name, b.name);
       } else {
         cmp = (a[sortField] ?? 0) - (b[sortField] ?? 0);
       }

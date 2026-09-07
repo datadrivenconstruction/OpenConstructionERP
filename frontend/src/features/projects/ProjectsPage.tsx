@@ -15,6 +15,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { fmtNumber, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { useNameCollator } from '@/shared/lib/collator';
 import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
 import { projectsApi, type Project } from './api';
 import { apiGet, apiPatch, apiPost, apiDelete } from '@/shared/lib/api';
@@ -300,6 +301,11 @@ export function ProjectsPage() {
 
   const pinnedIds = useProjectContextStore((s) => s.pinnedProjectIds);
 
+  // Project names are user data in whatever language the site works in, so
+  // "Name A-Z" has to order them the way THIS reader's language does, not the
+  // way the browser's locale happens to.
+  const compareNames = useNameCollator();
+
   // Whether the user's projects span more than one currency. Used to guard
   // the "Value" sort (cross-currency ordering is apples-to-oranges, since
   // there is no cross-project rate table) and to label the stat cards.
@@ -359,7 +365,7 @@ export function ProjectsPage() {
 
       switch (sortOption) {
         case 'name_asc':
-          return a.name.localeCompare(b.name);
+          return compareNames(a.name, b.name);
         case 'newest':
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'oldest':
@@ -385,7 +391,7 @@ export function ProjectsPage() {
     });
 
     return list;
-  }, [projects, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies]);
+  }, [projects, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies, compareNames]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -509,8 +515,8 @@ export function ProjectsPage() {
     if (!projects) return ['all'];
     const set = new Set<string>();
     for (const p of projects) if (p.region) set.add(p.region);
-    return ['all', ...Array.from(set).sort()];
-  }, [projects]);
+    return ['all', ...Array.from(set).sort(compareNames)];
+  }, [projects, compareNames]);
 
   // Available status filter values - the curated recommended set UNION any
   // distinct statuses actually present on the fetched projects (mirrors the

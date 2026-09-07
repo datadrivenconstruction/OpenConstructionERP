@@ -29,6 +29,7 @@
 import type { Markup, MarkupType } from './api';
 import type { DwgAnnotation, DwgDrawing } from '@/features/dwg-takeoff/api';
 import type { MeasurementResponse } from '@/features/takeoff/api';
+import { compareNames } from '@/shared/lib/collator';
 
 /* ── Source discriminators ───────────────────────────────────────────── */
 
@@ -283,6 +284,6 @@ export function summarise(items: ReadonlyArray<UnifiedMarkup>): UnifiedSummary {
   }
   const files = Array.from(fileMap.entries())
     .map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => compareNames(a.name, b.name));
   return { total: items.length, bySource, byType, files };
 }

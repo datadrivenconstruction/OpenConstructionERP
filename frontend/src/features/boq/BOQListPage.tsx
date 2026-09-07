@@ -14,6 +14,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet } from '@/shared/lib/api';
 import { fmtCompact, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
+import { useNameCollator } from '@/shared/lib/collator';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
 import { resourceAwareTotalInBase, getCurrencyCode } from './boqHelpers';
@@ -651,6 +652,10 @@ export function BOQListPage() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
+  // Estimate names are user data, so the name column has to order them the
+  // way this reader's language does rather than by UTF-16 code unit.
+  const compareNames = useNameCollator();
+
       list = list.filter(
         (b) =>
           b.name.toLowerCase().includes(q) ||
@@ -668,7 +673,7 @@ export function BOQListPage() {
     list.sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
-        case 'name': cmp = a.name.localeCompare(b.name); break;
+        case 'name': cmp = compareNames(a.name, b.name); break;
         case 'total': cmp = a.grandTotal - b.grandTotal; break;
         case 'positions': cmp = a.positionCount - b.positionCount; break;
         case 'date': cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime(); break;
@@ -677,7 +682,7 @@ export function BOQListPage() {
     });
 
     return list;
-  }, [allBoqs, searchQuery, statusFilter, projectFilter, sortField, sortAsc]);
+  }, [allBoqs, searchQuery, statusFilter, projectFilter, sortField, sortAsc, compareNames]);
 
   const isFiltered = !!(searchQuery || statusFilter || projectFilter);
 

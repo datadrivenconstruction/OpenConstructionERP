@@ -30,6 +30,7 @@ import {
 import { Button, Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { compareNames } from '@/shared/lib/collator';
 import {
   ComplianceDashboard,
   ComplianceRuleResult,
@@ -160,7 +161,7 @@ export function CompliancePage({
         results,
       }))
       .sort((a, b) => {
-        if (a.passed === b.passed) return a.ruleName.localeCompare(b.ruleName);
+        if (a.passed === b.passed) return compareNames(a.ruleName, b.ruleName);
         return a.passed ? 1 : -1;
       });
   }, [dashboardQuery.data]);

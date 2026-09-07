@@ -18,6 +18,7 @@
 // as information rather than as a refusal.
 
 import { PLAYBOOKS } from './playbooks';
+import { compareNames } from '@/shared/lib/collator';
 
 export interface StepTarget {
   /** The in-app path, e.g. `/boq`. */
@@ -60,7 +61,7 @@ function buildCatalogue(): StepTarget[] {
     }
   }
   return [...byPath.values()].sort(
-    (a, b) => b.uses - a.uses || a.label.localeCompare(b.label),
+    (a, b) => b.uses - a.uses || compareNames(a.label, b.label),
   );
 }
 

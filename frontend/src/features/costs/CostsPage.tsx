@@ -63,6 +63,7 @@ import { CostCategoryTree } from '@/features/boq/CostCategoryTree';
 import { fetchCategoryTree, type CategoryTreeNode } from '@/features/boq/api';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { compareNames } from '@/shared/lib/collator';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -895,7 +896,7 @@ export function CostsPage() {
       let cmp = 0;
       if (sortField === 'code') cmp = a.code.localeCompare(b.code);
       else if (sortField === 'rate') cmp = a.rate - b.rate;
-      else if (sortField === 'description') cmp = a.description.localeCompare(b.description);
+      else if (sortField === 'description') cmp = compareNames(a.description, b.description);
       return sortDir === 'desc' ? -cmp : cmp;
     });
   }, [items, sortField, sortDir]);

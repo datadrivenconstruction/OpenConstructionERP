@@ -25,6 +25,7 @@ import {
   num,
 } from './_shared';
 import { fmtPercent } from '@/shared/lib/formatters';
+import { compareNames } from '@/shared/lib/collator';
 
 interface BrokerPerformanceWidgetProps {
   since?: string;
@@ -64,7 +65,7 @@ export function BrokerPerformanceWidget({
     arr.sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1;
       if (sortKey === 'broker_name') {
-        return a.broker_name.localeCompare(b.broker_name) * dir;
+        return compareNames(a.broker_name, b.broker_name) * dir;
       }
       if (sortKey === 'gmv') {
         return (maxAmount(a.gmv) - maxAmount(b.gmv)) * dir;

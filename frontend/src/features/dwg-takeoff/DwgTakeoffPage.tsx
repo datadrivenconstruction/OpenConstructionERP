@@ -172,6 +172,7 @@ import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
 import LinkActivityToDwgModal from './LinkActivityToDwgModal';
 import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
 import { fmtFixed, fmtPrecision } from '@/shared/lib/formatters';
+import { compareNames } from '@/shared/lib/collator';
 // boqApi / Position import removed - BOQ picker now handled via ElementInfoPopover callback
 
 /** The stores "Open from project files" reads in this module. The documents
@@ -273,7 +274,7 @@ function extractLayers(
       visible: true,
       entity_count: count,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => compareNames(a.name, b.name));
 }
 
 /** Convert a DxfEntity into the shared ElementInfoPopover payload shape.
@@ -1530,7 +1531,7 @@ export function DwgTakeoffPage() {
       const byName = new Map(prev.map((l) => [l.name, l]));
       for (const l of fetchedLayers) byName.set(l.name, l);
       const merged = Array.from(byName.values()).sort((a, b) =>
-        a.name.localeCompare(b.name),
+        compareNames(a.name, b.name),
       );
       // Skip the state write when nothing changed to avoid a render loop.
       if (

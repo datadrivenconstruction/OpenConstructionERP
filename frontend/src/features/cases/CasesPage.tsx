@@ -133,6 +133,7 @@ import type {
 import { regionDisplayName } from "./regions";
 import { homeMarketFirst, homeMarketForLanguage } from "./homeMarket";
 import { countCasesByMarket, orderMarkets } from "./marketCases";
+import { compareNames } from '@/shared/lib/collator';
 
 export function CasesPage() {
   const { playbookId } = useParams<{ playbookId?: string }>();
@@ -251,7 +252,7 @@ function CasesList() {
     staleTime: 5 * 60_000,
   });
   const sortedProjects = useMemo(
-    () => [...(projects ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    () => [...(projects ?? [])].sort((a, b) => compareNames(a.name, b.name)),
     [projects],
   );
   const pinnedIds = useMemo(

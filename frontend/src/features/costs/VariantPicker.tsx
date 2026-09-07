@@ -31,6 +31,7 @@ import { Badge, Button, KvList, Kv, QtyTile } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
 import type { CostVariant, VariantStats } from './api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useNameCollator } from '@/shared/lib/collator';
 
 /* ── Props ────────────────────────────────────────────────────────────── */
 
@@ -255,6 +256,8 @@ export function VariantPicker({
 
   /* ── Display rows: filter then sort. Each row carries its original
    *      index so clicking any row updates `selectedIdx` correctly. ── */
+  const compareNames = useNameCollator();
+
   const displayRows = useMemo(() => {
     const q = query.trim().toLowerCase();
     const indexed = variants.map((v, originalIdx) => ({ v, originalIdx }));
@@ -270,7 +273,7 @@ export function VariantPicker({
         sorted.sort((a, b) => b.v.price - a.v.price);
         break;
       case 'label':
-        sorted.sort((a, b) => a.v.label.localeCompare(b.v.label));
+        sorted.sort((a, b) => compareNames(a.v.label, b.v.label));
         break;
       case 'default':
       default:
@@ -278,7 +281,7 @@ export function VariantPicker({
         break;
     }
     return sorted;
-  }, [variants, query, sortMode]);
+  }, [variants, query, sortMode, compareNames]);
 
   /* ── Groups: cluster the FILTERED+SORTED display rows by their
    *      group_localized || group key. Preserves the order of first

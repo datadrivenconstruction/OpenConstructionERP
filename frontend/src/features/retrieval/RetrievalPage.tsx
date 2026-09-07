@@ -49,6 +49,7 @@ import {
 } from './savedSearches';
 import type { RetrievalQuery, RetrievalResult, SavedSearch } from './types';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
+import { compareNames } from '@/shared/lib/collator';
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 type SortMode = 'relevance' | 'date' | 'type';
@@ -147,7 +148,7 @@ function sortResults(
     });
     return copy;
   }
-  copy.sort((a, b) => typeLabel(a.record_type).localeCompare(typeLabel(b.record_type)));
+  copy.sort((a, b) => compareNames(typeLabel(a.record_type), typeLabel(b.record_type)));
   return copy;
 }
 

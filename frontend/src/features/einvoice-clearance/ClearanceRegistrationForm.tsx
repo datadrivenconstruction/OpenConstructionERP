@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
+import { compareNames } from '@/shared/lib/collator';
 
 import type { ClearanceMeta, ClearanceProfile, CountryRegime, ProfileWriteBody } from './api';
 
@@ -76,7 +77,7 @@ export function ClearanceRegistrationForm({
       byRegime.set(entry.regime, list);
     }
     for (const list of byRegime.values()) {
-      list.sort((a, b) => a.label.localeCompare(b.label));
+      list.sort((a, b) => compareNames(a.label, b.label));
     }
     return [...byRegime.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [countries]);
