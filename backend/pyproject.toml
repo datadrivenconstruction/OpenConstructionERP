@@ -73,7 +73,7 @@ dependencies = [
     # with no Docker, plus the async/sync drivers it speaks through. PostgreSQL
     # is the only supported relational backend (external PG via DATABASE_URL or
     # the embedded cluster); there is no SQLite fallback anymore.
-    "pixeltable-pgserver>=0.5.1,<0.6",
+    "pixeltable-pgserver>=0.5.1,<0.7",
     "asyncpg>=0.30.0",
     "psycopg2-binary>=2.9.10",
     "alembic>=1.14.0,<2",
