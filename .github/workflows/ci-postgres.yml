@@ -1679,11 +1679,12 @@ jobs:
       # to HEAD is empty, so the healer has nothing to do and the leg's value is
       # entirely in the stamp assertion, which means check 4 of
       # verify_upgrade_from_previous_release.py has to learn that this cohort
-      # reads false rather than true. It requires head_matches is True at line
-      # 330 today and would fail the new leg on a correct product. So the cost
-      # is one matrix dimension plus a per-cohort branch in check 4, not a new
-      # job. Not done here: widening the gate was the task, and changing what
-      # the verifier asserts about a shipped behaviour is a separate decision.
+      # reads false rather than true. Its branch for a database that arrived
+      # carrying a revision asserts head_matches is True, so it would fail the
+      # new leg on a correct product. The cost is therefore one matrix
+      # dimension plus a per-cohort branch in check 4, not a new job. Not done
+      # here: widening the DDL gate was the task, and changing what the
+      # verifier asserts about a shipped behaviour is a separate decision.
       OE_UPGRADE_FROM_VERSION: "15.3.1"
       OE_UPGRADE_AGED_STATE: ${{ github.workspace }}/aged-database-state.json
       DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_upgrade
