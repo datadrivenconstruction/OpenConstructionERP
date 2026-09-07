@@ -582,3 +582,108 @@ jobs:
           fi
 
           echo "The manifest covers every asset on ${TAG}."
+
+          # Coverage is not correctness. Everything above asks whether each
+          # asset is named in the manifest. None of it asks whether the hash
+          # written beside the name is the hash of the bytes the release now
+          # serves, and those two come apart whenever an asset is replaced
+          # after the manifest was written.
+          #
+          # That is not a hypothetical here, it is the normal shape of a
+          # release. Two runs of this workflow share one release on purpose,
+          # and `gh release upload --clobber` replaces an asset in place, so
+          # the name survives and the bytes do not. On v17.0.2 the dispatched
+          # run wrote a manifest naming the SBOM it had just attached, the
+          # workflow_run run regenerated that SBOM and clobbered it, and for
+          # the 63 seconds until the second manifest landed the release served
+          # a SHA256SUMS that misdescribed two of its own assets. Every check
+          # above was green throughout, because the file was still named.
+          #
+          # The window closes on its own only when the second run finishes. A
+          # run that dies between the two uploads leaves the release wrong
+          # permanently, and this job - which runs on `always()` - would have
+          # reported a manifest with full coverage and gone green over it.
+          #
+          # No download. GitHub reports its own sha256 for every asset, so the
+          # comparison is against what the release serves rather than against
+          # anything this run happens to hold.
+          if ! gh api "repos/${{ github.repository }}/releases/tags/${TAG}" \
+                 --jq '.assets[] | "\(.digest)\t\(.name)"' > digests.tsv 2>digests.err; then
+            reason=$(tr '\n' ' ' < digests.err)
+            echo "::error::Could not read the asset digests on ${TAG}, so this run cannot say whether the manifest describes them: ${reason}"
+            exit 1
+          fi
+
+          # Counted rather than assumed, and printed next to the verdict. An
+          # asset whose digest GitHub does not report cannot be compared, and a
+          # gate that quietly compares nothing reads exactly like a gate that
+          # compared everything and was satisfied.
+          compared=0
+          unmeasured=""
+          wrong=""
+          while IFS="$(printf '\t')" read -r digest name; do
+            [ -n "$name" ] || continue
+            case "$name" in
+              SHA256SUMS|SHA256SUMS.sig|SHA256SUMS.pem) continue ;;
+            esac
+            published=${digest#sha256:}
+            if [ -z "$published" ] || [ "$published" = "null" ]; then
+              unmeasured="${unmeasured} ${name}"
+              continue
+            fi
+            stated=$(sed -E 's/^([0-9a-f]+)[ ]+[* ]?(.*)$/\1\t\2/' manifest/SHA256SUMS \
+                     | awk -F'\t' -v n="$name" '$2 == n { print $1; exit }')
+            if [ -z "$stated" ]; then
+              # Already reported as uncovered above; nothing to add here.
+              continue
+            fi
+            compared=$((compared + 1))
+            if [ "$stated" != "$published" ]; then
+              wrong="${wrong}
+          ${name}
+            SHA256SUMS says  ${stated}
+            release serves   ${published}"
+            fi
+          done < digests.tsv
+
+          echo "Compared ${compared} of the manifest's entries against the digests the release reports."
+
+          if [ -n "$unmeasured" ]; then
+            echo "::warning title=Some assets report no digest::Could not compare:${unmeasured}"
+          fi
+
+          if [ "$compared" -eq 0 ]; then
+            echo "::error::Not one asset on ${TAG} could be compared against the manifest, so this job confirmed nothing about what the signature covers."
+            {
+              echo "### \`${TAG}\`: the manifest was not checked against the release"
+              echo
+              echo "No asset reported a digest, so every hash in \`SHA256SUMS\` went uncompared."
+              echo "This is not evidence that the manifest is correct. It is the absence of the"
+              echo "measurement, and it is red for that reason rather than for a finding."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          if [ -n "$wrong" ]; then
+            echo "::error::The signature on ${TAG} covers hashes that do not match the published bytes."
+            printf '%s\n' "$wrong"
+            {
+              echo "### \`${TAG}\` carries a signed manifest that misdescribes its own assets"
+              echo
+              echo "These assets are named in \`SHA256SUMS\` with a hash that is not the hash of"
+              echo "what the release serves, so \`sha256sum -c SHA256SUMS\` fails for anyone who"
+              echo "downloads them:"
+              echo
+              echo '```'
+              printf '%s\n' "$wrong"
+              echo '```'
+              echo
+              echo "This is worse than an unsigned release: the signature verifies, so the manifest"
+              echo "reads as authoritative while it is wrong. The cause is an asset replaced after"
+              echo "the manifest was written. Re-run this workflow against \`${TAG}\` to rebuild the"
+              echo "manifest over the bytes now published."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "Every hash in the manifest matches the bytes ${TAG} serves."

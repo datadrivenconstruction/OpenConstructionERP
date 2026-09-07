@@ -89,6 +89,108 @@ jobs:
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Both generators stamp the moment they ran into the document they emit,
+      # so generating the same SBOM from the same tag twice produces two files
+      # that differ. That matters because this workflow runs twice per release
+      # by design - see the header of release-signing.yml - and the second run
+      # clobbers the first run's asset on a release whose SHA256SUMS was
+      # computed over the first. On v17.0.2 that left the release serving a
+      # manifest that misdescribed both SBOMs until the second manifest landed
+      # a minute later.
+      #
+      # Two fields vary and only two. `components` and `dependencies` came back
+      # byte-identical across both v17.0.2 runs, 141 and 141 for the backend and
+      # 899 and 1022 for the frontend, and the whole difference was
+      # `metadata.timestamp` and `serialNumber`. The second one is worth naming
+      # because it hides: it is a fresh UUID per generation, and two UUIDs are
+      # the same length, so a file whose only visible difference is a timestamp
+      # can still be 174222 bytes in both runs and hash differently for a
+      # reason a byte count cannot show.
+      #
+      # Neither field is dropped. A component list with no date and no identity
+      # is worse to consume than one whose date and identity are derived from
+      # the release rather than from the clock. The timestamp becomes the tag's
+      # own commit date, which is still an honest answer to when this inventory
+      # is from because the checkout above is at the tag, and the serial number
+      # becomes a UUIDv5 over the release and the filename, which is stable for
+      # the same release and distinct between releases.
+      #
+      # Done here rather than with a generator flag on purpose: neither
+      # cyclonedx-bom nor @cyclonedx/cyclonedx-npm is pinned in the install step
+      # above, so a flag that exists today is not a thing this file can rely on
+      # next month. Rewriting the emitted JSON does not care which version
+      # emitted it. Done inline rather than as a script in scripts/ because the
+      # checkout is at `inputs.tag`, so a script added to main today does not
+      # exist in the tree of a tag cut before today, which is every tag this
+      # will first run against.
+      - name: Pin the varying fields so a regenerated SBOM is byte-identical
+        env:
+          TAG: ${{ inputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - "$TAG" "$REPO" sbom-backend.cdx.json sbom-frontend.cdx.json <<'PY'
+          import json
+          import subprocess
+          import sys
+          import uuid
+
+          tag, repo = sys.argv[1], sys.argv[2]
+          stamp = subprocess.run(
+              ["git", "log", "-1", "--format=%cI"],
+              capture_output=True,
+              text=True,
+              check=True,
+          ).stdout.strip()
+
+          for path in sys.argv[3:]:
+              with open(path, "rb") as handle:
+                  doc = json.loads(handle.read().decode("utf-8"))
+              # json.loads preserves key order and json.dumps writes it back in
+              # that order, so the re-serialisation is itself deterministic.
+              doc["serialNumber"] = "urn:uuid:{}".format(
+                  uuid.uuid5(uuid.NAMESPACE_URL, f"https://github.com/{repo}/releases/{tag}#{path}")
+              )
+              doc.setdefault("metadata", {})["timestamp"] = stamp
+              with open(path, "w", encoding="utf-8", newline="\n") as handle:
+                  json.dump(doc, handle, indent=2, ensure_ascii=False)
+                  handle.write("\n")
+              print(f"{path}: timestamp {stamp}, serial {doc['serialNumber']}")
+          PY
+
+      # Whether the pinning above actually made the file reproducible is a
+      # measurement, not a claim, and the release is where it can be taken: on
+      # the second run of a release the first run's SBOM is already published
+      # with a hash recorded against it. Equal hashes mean the regeneration was
+      # a no-op. Unequal means the dependency resolution genuinely moved
+      # between the two runs, which is legitimate - `pip install` resolves from
+      # PyPI at the moment it runs - and is not a reason to stop a release,
+      # because the signing job downstream recomputes the manifest over
+      # whatever is published. So this reports rather than refuses, and says
+      # which of the two it saw.
+      - name: Say whether this regeneration changed anything
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -uo pipefail
+          if ! gh api "repos/${{ github.repository }}/releases/tags/${TAG}" \
+                 --jq '.assets[] | "\(.name)\t\(.digest)"' > published.tsv 2>/dev/null; then
+            echo "Could not read the release's assets, so nothing to compare against yet."
+            exit 0
+          fi
+          for f in sbom-backend.cdx.json sbom-frontend.cdx.json; do
+            here=$(sha256sum "$f" | cut -d' ' -f1)
+            there=$(awk -F'\t' -v n="$f" '$1 == n { sub(/^sha256:/, "", $2); print $2; exit }' published.tsv)
+            if [ -z "$there" ]; then
+              echo "${f}: not on the release yet, this run is the first to attach it."
+            elif [ "$here" = "$there" ]; then
+              echo "${f}: identical to the copy already published (${here}). Regeneration was a no-op."
+            else
+              echo "::warning title=${f} changed between runs::The dependency resolution moved: published ${there}, generated ${here}. The manifest will be rebuilt over the new bytes."
+            fi
+          done
+
       - name: Aggregate THIRD_PARTY_LICENSES.md
         run: |
           {
@@ -312,14 +414,43 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: |
           gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null
-          for f in THIRD_PARTY_LICENSES.md sbom-backend.cdx.json sbom-frontend.cdx.json; do
+
+          # --clobber deletes the asset before uploading the replacement, so it
+          # changes the asset id and there is a moment when the name resolves to
+          # nothing. That is what killed the dispatched run on v15.6.0, which is
+          # the incident the header of release-signing.yml is written around.
+          # Replacing a file with the same bytes it already has buys none of
+          # that risk and nothing else either, so with the fields pinned above
+          # the second run of a release now leaves the release alone.
+          #
+          # Read once. One call answers for every file, and asking per file
+          # would race with itself across the loop.
+          gh api "repos/${{ github.repository }}/releases/tags/${TAG}" \
+            --jq '.assets[] | "\(.name)\t\(.digest)"' > published.tsv 2>/dev/null || : > published.tsv
+
+          upload() {
+            f="$1"
+            name=$(basename "$f")
+            here=$(sha256sum "$f" | cut -d' ' -f1)
+            there=$(awk -F'\t' -v n="$name" '$1 == n { sub(/^sha256:/, "", $2); print $2; exit }' published.tsv)
+            # Only an equality decides to skip. A digest GitHub did not report
+            # is not evidence of anything, and the safe reading of "no answer"
+            # is to publish.
+            if [ -n "$there" ] && [ "$there" = "$here" ]; then
+              echo "${name}: already on the release with these exact bytes, not clobbering it."
+              return 0
+            fi
             gh release upload "$TAG" "$f" --repo "${{ github.repository }}" --clobber
+          }
+
+          for f in THIRD_PARTY_LICENSES.md sbom-backend.cdx.json sbom-frontend.cdx.json; do
+            upload "$f"
           done
           # The LGPL manifest, and whatever source it managed to fetch. Globbed
           # rather than named, because which archives exist depends on what
           # upstream published for the pinned versions.
-          gh release upload "$TAG" LGPL-SOURCES.md --repo "${{ github.repository }}" --clobber
+          upload LGPL-SOURCES.md
           for f in lgpl-source/*; do
             [ -e "$f" ] || continue
-            gh release upload "$TAG" "$f" --repo "${{ github.repository }}" --clobber
+            upload "$f"
           done

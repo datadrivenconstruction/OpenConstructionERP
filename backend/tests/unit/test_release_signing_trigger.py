@@ -31,6 +31,7 @@ import pytest
 import yaml
 
 WORKFLOW = Path(__file__).resolve().parents[3] / ".github" / "workflows" / "release-signing.yml"
+SBOM_WORKFLOW = Path(__file__).resolve().parents[3] / ".github" / "workflows" / "sbom-and-licenses.yml"
 
 #: The formats Desktop Release produces, and whether the release has to carry
 #: one before it is worth signing. The rpm is the odd one out on purpose:
@@ -262,4 +263,114 @@ def test_the_confirmation_still_reports_when_nothing_was_signed(workflow: dict) 
         f"release is short a platform, and re-running Desktop Release is the repair) from a "
         f"wiring failure (the repair is in this workflow). One message for both is how the "
         f"first gets diagnosed as the second."
+    )
+
+
+# ── The manifest against the bytes ───────────────────────────────────────────
+
+
+def confirm_script(workflow: dict) -> str:
+    return "\n".join(step.get("run") or "" for step in job(workflow, "confirm")["steps"])
+
+
+def test_the_confirmation_compares_hashes_and_not_only_names(workflow: dict) -> None:
+    """Coverage and correctness are different questions about the same manifest.
+
+    v17.0.2 was published with a ``SHA256SUMS`` that named all twelve of its
+    assets and stated the wrong hash for two of them. Two runs of this workflow
+    share one release on purpose, ``gh release upload --clobber`` replaces an
+    asset in place, and the second run regenerated both SBOMs after the first
+    run's manifest had been written and signed over them. The name survived and
+    the bytes did not, so every check in this job passed while
+    ``sha256sum -c SHA256SUMS`` would have failed for anyone downloading it.
+
+    The window closed when the second manifest landed a minute later. A run
+    that dies between those two uploads does not close it at all, and this job
+    runs on ``always()``, so it would have reported a fully covered manifest
+    and gone green over a release that was permanently wrong.
+    """
+    script = confirm_script(workflow)
+
+    assert ".digest" in script, (
+        "the confirmation no longer reads the digests GitHub reports for each asset, so it is "
+        "back to asking only whether every asset is named in SHA256SUMS. A name survives an "
+        "asset being replaced; the hash beside it does not."
+    )
+    assert "release serves" in script, (
+        "the confirmation reads the digests but no longer reports the two hashes side by side. "
+        "'The manifest is wrong' without the pair is a finding nobody can act on."
+    )
+
+
+def test_the_confirmation_cannot_pass_by_comparing_nothing(workflow: dict) -> None:
+    """A gate that measured nothing must not read like a gate that was satisfied.
+
+    Every asset is compared through a digest GitHub reports, and an asset it
+    reports no digest for cannot be compared at all. If that ever becomes all
+    of them, the loop finds no mismatch and the obvious code path says so in
+    exactly the words it uses when the manifest is correct.
+    """
+    script = confirm_script(workflow)
+
+    assert '"$compared" -eq 0' in script, (
+        "nothing in the confirmation refuses when it compared zero assets. An empty comparison "
+        "produces no mismatch, and no mismatch is the same output as a manifest that checked out."
+    )
+    assert "Compared ${compared}" in script, (
+        "the confirmation does not print how many entries it compared next to its verdict. The "
+        "count is what separates 'every hash matches' from 'no hash was looked at'."
+    )
+
+
+# ── The SBOM the manifest is written over ────────────────────────────────────
+
+
+@pytest.fixture(scope="module")
+def sbom_workflow() -> dict:
+    assert SBOM_WORKFLOW.is_file(), f"the SBOM workflow is not at {SBOM_WORKFLOW}"
+    return yaml.safe_load(SBOM_WORKFLOW.read_text(encoding="utf-8"))
+
+
+def test_the_sbom_pins_both_fields_that_vary_between_generations(sbom_workflow: dict) -> None:
+    """Removing the race is better than narrowing it.
+
+    Both generators stamp the moment they ran into the document, so the same
+    tag inventoried twice produces two files that differ and the second one
+    clobbers the first. Two fields carry the whole difference. The timestamp is
+    the obvious one. ``serialNumber`` is the one that hides: it is a fresh UUID
+    per generation, and two UUIDs are the same length, so the v17.0.2 pair were
+    both 174222 bytes with the same 141 components and still hashed apart.
+
+    Pinning the timestamp alone would leave the file irreproducible for a
+    reason a byte count cannot show, which is why both are named here.
+    """
+    script = "\n".join(step.get("run") or "" for step in sbom_workflow["jobs"]["generate"]["steps"])
+
+    for field in ("serialNumber", "metadata"):
+        assert field in script, (
+            f"nothing in the SBOM job pins {field!r}. A regenerated SBOM then differs from the "
+            f"published one, and the second of the two runs per release clobbers an asset the "
+            f"first run's SHA256SUMS was computed and signed over."
+        )
+    assert "timestamp" in script, (
+        "nothing in the SBOM job pins the generation timestamp, which is the field that made "
+        "v17.0.2's two SBOMs differ."
+    )
+
+
+def test_the_sbom_does_not_clobber_an_asset_it_would_not_change(sbom_workflow: dict) -> None:
+    """``--clobber`` deletes before it uploads, so it is never free.
+
+    It changes the asset id and there is a moment when the name resolves to
+    nothing, which is what killed the dispatched run on v15.6.0. With the
+    fields above pinned, the second run of a release regenerates a file
+    identical to the published one, and replacing it buys that risk for no
+    change at all.
+    """
+    script = "\n".join(step.get("run") or "" for step in sbom_workflow["jobs"]["generate"]["steps"])
+
+    assert "not clobbering it" in script, (
+        "the attach step uploads unconditionally again. Pinning the varying fields makes the "
+        "second run's SBOM identical to the published one; re-uploading it anyway reintroduces "
+        "the delete-then-upload window for a file whose bytes did not move."
     )
