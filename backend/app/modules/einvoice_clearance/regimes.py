@@ -479,7 +479,20 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         en16931_profile="facturx",
         profile_fields=("network_participant_id",),
         document_fields=("service_code",),
+        # France does two acts, not one. The document is routed to the buyer
+        # over a network, which is what decides the terminal state and is why
+        # the deciding act is still network exchange; separately, transaction
+        # and payment data are reported to the DGFiP, which no amount of routing
+        # state describes. Calling France a pure network country was the
+        # taxonomy's own worked example of "no authority at all", and it was
+        # wrong about the country it used to explain itself.
+        additional_regimes=(REGIME_REPORTING,),
         correction_mechanism="credit note",
+        notes=(
+            "The reporting leg is an obligation of its own and not a byproduct of the routing. "
+            "Its commencement dates are not stated here because they had not been sourced when "
+            "this row was corrected, and an uncited date is one nobody can recheck."
+        ),
     ),
     "NL": CountryRegime(
         country="NL",
