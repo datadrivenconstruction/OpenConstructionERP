@@ -589,8 +589,8 @@ async def file_estimate(
 ) -> EstimateJobResponse:
     """Generate a BOQ estimate from any uploaded file using AI.
 
-    Supports: PDF, Excel (.xlsx/.xls), CSV, CAD/BIM (.rvt, .ifc, .dwg, .dgn),
-    and images (JPEG, PNG, WebP, GIF).
+    Accepted extensions: .pdf, .xlsx, .xls, .csv, .rvt, .rfa, .ifc, .dwg,
+    .dgn, .jpg, .jpeg, .png, .webp, .gif, .tiff, .bmp
 
     The file is analysed based on its extension:
     - **PDF**: Text and tables extracted, sent to AI for BOQ generation

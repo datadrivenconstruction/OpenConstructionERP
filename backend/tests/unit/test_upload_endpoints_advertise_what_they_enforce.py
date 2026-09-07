@@ -103,6 +103,12 @@ CONTRACTS: tuple[UploadContract, ...] = (
         max_mb=lambda mod: int(mod._CUSTOM_TEMPLATE_MAX_MB),
     ),
     UploadContract(
+        label="AI file estimate",
+        module="app.modules.ai.router",
+        path="/file-estimate/",
+        enforced=lambda mod: _undotted(mod._EXT_CATEGORY),
+    ),
+    UploadContract(
         label="AI photo estimate",
         module="app.modules.ai.router",
         path="/photo-estimate/",
