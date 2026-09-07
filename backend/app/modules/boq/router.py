@@ -6974,6 +6974,18 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
 
 # ── Smart import endpoint ────────────────────────────────────────────────────
 
+# The extensions the smart-import dispatch below really handles, grouped by the
+# extractor that reads each one. The refusal message joins the union instead of
+# restating it: it used to be a hand-written list that had lost xls, jpeg and
+# bmp, so three formats this endpoint happily accepts were named as unsupported
+# to whoever uploaded something else.
+_SMART_IMPORT_EXCEL_EXTS: tuple[str, ...] = ("xlsx", "xls")
+_SMART_IMPORT_IMAGE_EXTS: tuple[str, ...] = ("jpg", "jpeg", "png", "tiff", "bmp")
+_SMART_IMPORT_CAD_EXTS: tuple[str, ...] = ("rvt", "ifc", "dwg", "dgn")
+_SMART_IMPORT_EXTS: frozenset[str] = frozenset(
+    _SMART_IMPORT_EXCEL_EXTS + ("csv", "pdf") + _SMART_IMPORT_IMAGE_EXTS + _SMART_IMPORT_CAD_EXTS
+)
+
 
 @router.post(
     "/boqs/{boq_id}/import/smart/",
@@ -6987,7 +6999,10 @@ async def smart_import(
     response: Response,
     file: UploadFile = File(
         ...,
-        description="Any document file (Excel, CSV, PDF, image, or CAD/BIM: .rvt, .ifc, .dwg, .dgn)",
+        description=(
+            "Any document file (Excel, CSV, PDF, image, or CAD/BIM). Accepted extensions: "
+            ".xlsx, .xls, .csv, .pdf, .jpg, .jpeg, .png, .tiff, .bmp, .rvt, .ifc, .dwg, .dgn"
+        ),
     ),
     service: BOQService = Depends(_get_service),
     session: SessionDep = None,  # type: ignore[assignment]
@@ -7002,9 +7017,10 @@ async def smart_import(
         supported for backwards compatibility but emits a
         ``Deprecation: true`` response header.
 
-    Accepts Excel (.xlsx), CSV (.csv), PDF (.pdf), image files
-    (.jpg, .jpeg, .png, .tiff, .bmp), and CAD/BIM files
-    (.rvt, .ifc, .dwg, .dgn). For structured Excel/CSV with
+    Accepted extensions: .xlsx, .xls, .csv, .pdf, .jpg, .jpeg, .png, .tiff,
+    .bmp, .rvt, .ifc, .dwg, .dgn
+
+    For structured Excel/CSV with
     recognisable column headers, performs a direct import. For CAD/BIM
     files, runs a DDC converter to extract element data. Otherwise,
     sends the extracted text (or image) to the user's configured AI
@@ -7045,7 +7061,7 @@ async def smart_import(
     # No upload size cap - per product policy.
 
     # ── 1. Extract text/data based on file type ────────────────────────
-    if ext in ("xlsx", "xls"):
+    if ext in _SMART_IMPORT_EXCEL_EXTS:
         # BUG-UPLOAD01b: smart-import path used to skip the xlsx-bomb
         # guard that import_boq_excel calls - same DoS surface via this
         # endpoint. Apply the same defence here before parsing.
@@ -7057,14 +7073,14 @@ async def smart_import(
         extracted = _extract_from_csv_for_smart(content)
     elif ext == "pdf":
         extracted = _extract_from_pdf(content)
-    elif ext in ("jpg", "jpeg", "png", "tiff", "bmp"):
+    elif ext in _SMART_IMPORT_IMAGE_EXTS:
         extracted = _extract_from_image(content, ext)
-    elif ext in ("rvt", "ifc", "dwg", "dgn"):
+    elif ext in _SMART_IMPORT_CAD_EXTS:
         extracted = await _extract_from_cad(content, ext, file.filename or f"model.{ext}")
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(f"Unsupported file type: .{ext}. Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn."),
+            detail=(f"Unsupported file type: .{ext}. Supported: {', '.join(sorted(_SMART_IMPORT_EXTS))}."),
         )
 
     # ── 1b. Handle missing CAD converter (return early) ────────────────

@@ -436,8 +436,13 @@ async def photo_estimate(
     2. Estimate quantities based on visible elements
     3. Generate a BOQ with realistic unit prices
 
-    Accepted formats: JPEG, PNG, WebP, GIF. Max size: 10 MB.
+    Accepted formats: JPEG, PNG, WebP, GIF. No upload size cap is enforced.
     """
+    # This docstring used to promise a 10 MB maximum a few lines above the
+    # comment that says there is no cap, so the published contract refused
+    # nothing it advertised as refused. Sizes named here are checked against
+    # the enforcing constant by
+    # ``tests/unit/test_upload_endpoints_advertise_what_they_enforce.py``.
     response.headers["X-RateLimit-Remaining"] = str(remaining)
     # Validate file type
     content_type = file.content_type or ""

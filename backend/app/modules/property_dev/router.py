@@ -5251,7 +5251,9 @@ async def upload_custom_document_template(
 ) -> dict[str, Any]:
     """Upload a tenant-owned custom document template.
 
-    Accepts .docx / .html / .htm / .pdf / .odt / .md / .txt up to 10 MB.
+    Accepted extensions: .docx, .html, .htm, .pdf, .odt, .md, .txt, .xlsx
+    Maximum size: 50 MB.
+
     The file lands in ``uploads/property_dev/custom_templates/`` with a
     UUID-prefixed basename so two uploads with the same original
     filename don't collide. Metadata is persisted to

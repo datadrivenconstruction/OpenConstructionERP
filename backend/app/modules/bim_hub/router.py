@@ -2146,7 +2146,19 @@ async def _generate_pdf_in_background(
         logger.exception("PDF generation failed for model %s: %s", model_id, exc)
 
 
-@router.post("/upload-cad/", status_code=201)
+@router.post(
+    "/upload-cad/",
+    status_code=201,
+    responses={
+        202: {
+            "description": (
+                "The upload is stored but the converter binary for this format is not installed on "
+                "this server. The body carries status='converter_required', the model id of the saved "
+                "placeholder and an install endpoint; Retry-After and Link headers point at both."
+            ),
+        },
+    },
+)
 async def upload_cad_file(
     background_tasks: BackgroundTasks,
     project_id: str = Query(..., description="Project UUID"),
@@ -2160,7 +2172,14 @@ async def upload_cad_file(
             " or 'complete' (all RVT parameters, ~1000+ columns, slowest)"
         ),
     ),
-    file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
+    file: UploadFile = File(
+        ...,
+        description=(
+            "Raw CAD upload. Accepted extensions: .rvt, .ifc, .dwg, .dgn. Geometry-only mesh files "
+            "are read in the browser by the BIM Hub 3D uploader and posted back as GLB, so they are "
+            "refused here."
+        ),
+    ),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
@@ -2171,8 +2190,25 @@ async def upload_cad_file(
     and a BIMModel record is created with status="processing". A real CAD converter
     service would pick it up asynchronously; for now the model stays in processing state.
 
-    Accepted extensions: .rvt, .ifc, .dwg, .dgn, .fbx, .obj, .3ds
+    Accepted extensions: .rvt, .ifc, .dwg, .dgn
+
+    Geometry-only mesh files (OBJ, STL, PLY, DAE, glTF/GLB, FBX, 3DS, LWO, USD)
+    are refused with a 400 that points at the BIM Hub 3D uploader, which reads
+    them in the browser and posts a normalized GLB back through the ordinary
+    data + geometry upload.
+
+    Returns 201 once the model row exists. When the format needs an external
+    converter that is not installed, the upload is still stored and the answer
+    is 202 with ``status="converter_required"``.
     """
+    # The two descriptions above and the constant below reach three different
+    # readers - the Swagger UI, the refusal message and the handler - and they
+    # drifted apart once already: the published metadata went on naming FBX,
+    # OBJ and 3DS for months after the handler stopped accepting them, so an
+    # API consumer who read the contract got a 400 on every upload. The 202
+    # branch was undeclared in the same way. Both sides are now compared by
+    # ``tests/unit/test_upload_endpoints_advertise_what_they_enforce.py``;
+    # edit the prose and the constant in the same commit or it goes red.
     # --- Verify project access (IDOR guard) ---
     try:
         project_uuid = uuid.UUID(project_id)

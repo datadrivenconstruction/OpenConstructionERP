@@ -2377,7 +2377,10 @@ _SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "dgn", "rfa", "dxf"}
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_extract(
-    file: UploadFile = File(..., description="CAD/BIM file (.rvt, .ifc, .dwg, .dgn)"),
+    file: UploadFile = File(
+        ...,
+        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf, .dgn",
+    ),
 ) -> dict[str, Any]:
     """Extract grouped quantity tables from a CAD/BIM file.
 
@@ -2644,7 +2647,10 @@ class CadGroupRequest(BaseModel):
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_columns(
-    file: UploadFile = File(..., description="CAD/BIM file (.rvt, .ifc, .dwg, .dgn)"),
+    file: UploadFile = File(
+        ...,
+        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf, .dgn",
+    ),
     session: SessionDep = None,  # type: ignore[assignment]
     user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> dict[str, Any]:
