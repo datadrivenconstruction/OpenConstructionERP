@@ -13712,6 +13712,7 @@ const resource = {
     "settings.number_format": "Talformat",
     "settings.number_format_preview": "Beløb i hele appen vises nu som {{example}}",
     "settings.paper_size": "Papirstørrelse",
+    "settings.paper_size_auto": "Automatisk",
     "settings.preferences_error": "Kunne ikke gemme præferencer",
     "settings.preferences_saved": "Præferencer gemt",
     "settings.regional_subtitle": "Formater, enheder og lokaliseringspræferencer",

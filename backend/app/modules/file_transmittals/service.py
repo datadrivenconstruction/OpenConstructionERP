@@ -5,6 +5,14 @@
 Holds the create/send lifecycle, the cover-sheet generator (PDF via
 ``reportlab`` when available, plain-text TXT fallback otherwise) and
 the ack-token mint/verify flow used by the public ACK endpoint.
+
+The cover sheet used to be laid out on US Letter for the whole world. It was
+the only document in the tree fixed at Letter that is not about the United
+States - the AIA payment application next door is a US form and is right to be
+- so a German or Japanese recipient got a sheet their printer tray does not
+hold, from a module that has nothing to do with the US. The size now comes from
+:mod:`app.core.paper_size`, which reads the sender's Settings preference and
+falls back to the project's country.
 """
 
 from __future__ import annotations
@@ -90,18 +98,26 @@ def _build_cover_text(transmittal: FileTransmittal) -> bytes:
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
-def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
+def _build_cover_pdf(
+    transmittal: FileTransmittal,
+    pagesize: tuple[float, float],
+) -> bytes | None:
     """Render a PDF cover sheet via ``reportlab``, or ``None`` if unavailable.
 
     The PDF is intentionally minimal: title, header table, body lines.
     Falls back to ``None`` (and the caller writes the plain-text version)
     on any failure so the send path never crashes on a layout error.
+
+    ``pagesize`` is ``(width, height)`` in points, from
+    :func:`TransmittalService.cover_page_size`. It is a required argument
+    rather than one defaulting to a size, so a new call site has to decide
+    where its paper comes from instead of inheriting a hard-coded sheet - which
+    is how this generator came to print Letter for the whole world.
     """
     try:
         from io import BytesIO
 
         from reportlab.lib import colors
-        from reportlab.lib.pagesizes import LETTER
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.units import inch
         from reportlab.platypus import (
@@ -125,7 +141,7 @@ def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
         buf = BytesIO()
         doc = SimpleDocTemplate(
             buf,
-            pagesize=LETTER,
+            pagesize=pagesize,
             leftMargin=0.75 * inch,
             rightMargin=0.75 * inch,
             topMargin=0.75 * inch,
@@ -133,6 +149,21 @@ def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
             title=f"Transmittal {transmittal.number}",
             author="OpenConstructionERP",
         )
+        # The three tables below were drawn in inches against the 7.0in content
+        # box US Letter leaves at 0.75in margins, and the widest of them is
+        # 6.9in. A4's content box is 6.77in, so those literals would have drawn
+        # 0.13in past the right margin the moment this sheet stopped being
+        # Letter - silently, because reportlab draws a too-wide table rather
+        # than refusing it. The design is kept in the inches a reader can check
+        # against the sheet and scaled to whatever frame the resolved size
+        # gives, so the proportions survive and nothing leaves the page.
+        design_width = 7.0 * inch
+
+        def cols(*widths_in: float) -> list[float]:
+            """The design's column widths in points, scaled to this frame."""
+            scale = doc.width / design_width
+            return [w * inch * scale for w in widths_in]
+
         styles = getSampleStyleSheet()
         styles["Title"].fontName = BOLD_FONT
         styles["Heading3"].fontName = BOLD_FONT
@@ -154,7 +185,7 @@ def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
         ]
         if transmittal.notes:
             header_rows.append(["Notes", transmittal.notes])
-        tbl = Table(header_rows, colWidths=[1.2 * inch, 5.5 * inch])
+        tbl = Table(header_rows, colWidths=cols(1.2, 5.5))
         tbl.setStyle(
             TableStyle(
                 [
@@ -190,7 +221,7 @@ def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
                 )
             items_tbl = Table(
                 data,
-                colWidths=[0.4 * inch, 1.1 * inch, 4.7 * inch, 0.7 * inch],
+                colWidths=cols(0.4, 1.1, 4.7, 0.7),
             )
             items_tbl.setStyle(
                 TableStyle(
@@ -221,7 +252,7 @@ def _build_cover_pdf(transmittal: FileTransmittal) -> bytes | None:
                 r_data.append([r.email, r.display_name or "", r.role or ""])
             r_tbl = Table(
                 r_data,
-                colWidths=[2.7 * inch, 2.2 * inch, 2.0 * inch],
+                colWidths=cols(2.7, 2.2, 2.0),
             )
             r_tbl.setStyle(
                 TableStyle(
@@ -255,6 +286,47 @@ class TransmittalService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+
+    # ── Paper ──────────────────────────────────────────────────────────
+
+    async def cover_page_size(self, transmittal: FileTransmittal) -> tuple[float, float]:
+        """The sheet this transmittal's cover is laid out on, in points.
+
+        Two inputs, in this order of precedence, resolved by
+        :func:`app.core.paper_size.resolve_paper_size`: the sender's Settings
+        preference, and - when that is the unset ``"auto"`` - the country the
+        project states.
+
+        **The sender and not the reader**, which is the decision worth
+        recording. A cover sheet is stored once at send time and handed back
+        unchanged to everyone who downloads it afterwards, including recipients
+        who have no account here at all, so a size read from whoever is asking
+        would make one document render two ways and would change under a
+        regenerate. The sender is the person who produced it and is the one the
+        preference belongs to.
+
+        Never raises. A project or user row that cannot be read leaves the
+        argument ``None``, which resolves to the platform default, on the same
+        reasoning the rest of this generator is written on: a document a
+        recipient is waiting for must not be lost to a lookup.
+        """
+        from app.core.paper_size import resolve_paper_size
+        from app.modules.projects.models import Project
+        from app.modules.users.models import User
+
+        preference: str | None = None
+        country_code: str | None = None
+        try:
+            country_code = (
+                await self.session.execute(select(Project.country_code).where(Project.id == transmittal.project_id))
+            ).scalar_one_or_none()
+            if transmittal.sender_id is not None:
+                preference = (
+                    await self.session.execute(select(User.paper_size).where(User.id == transmittal.sender_id))
+                ).scalar_one_or_none()
+        except Exception:  # noqa: BLE001 - fall back to the platform default, never break a cover sheet
+            logger.debug("Could not resolve the cover sheet paper size; using the default", exc_info=True)
+        return resolve_paper_size(preference, country_code)
 
     # ── Read ───────────────────────────────────────────────────────────
 
@@ -484,7 +556,7 @@ class TransmittalService:
         transmittal = await self.get(transmittal.id)
 
         # Generate cover sheet (PDF preferred, TXT fallback).
-        pdf_bytes = _build_cover_pdf(transmittal)
+        pdf_bytes = _build_cover_pdf(transmittal, await self.cover_page_size(transmittal))
         if pdf_bytes is not None:
             cover_bytes = pdf_bytes
             ext = "pdf"
@@ -557,7 +629,7 @@ class TransmittalService:
                     transmittal_id,
                 )
         # Fall back to live regeneration.
-        pdf = _build_cover_pdf(transmittal)
+        pdf = _build_cover_pdf(transmittal, await self.cover_page_size(transmittal))
         if pdf is not None:
             return pdf, "application/pdf"
         return _build_cover_text(transmittal), "text/plain; charset=utf-8"

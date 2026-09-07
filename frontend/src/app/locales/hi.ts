@@ -11100,6 +11100,7 @@ const resource = {
     "settings.number_format": "संख्या प्रारूप",
     "settings.number_format_preview": "पूरे ऐप में राशियाँ अब {{example}} के रूप में दिखती हैं",
     "settings.paper_size": "कागज़ का आकार",
+    "settings.paper_size_auto": "स्वचालित",
     "settings.preferences_error": "प्राथमिकताएँ सहेजने में विफल",
     "settings.preferences_saved": "प्राथमिकताएँ सहेजी गईं",
     "settings.regional_subtitle": "प्रारूप, इकाइयाँ और स्थानीयकरण प्राथमिकताएँ",

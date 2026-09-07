@@ -11114,6 +11114,7 @@ const resource = {
     "settings.number_format": "Formát čísla",
     "settings.number_format_preview": "Částky v celé aplikaci se nyní zobrazují jako {{example}}",
     "settings.paper_size": "Formát papíru",
+    "settings.paper_size_auto": "Automaticky",
     "settings.preferences_error": "Uložení předvoleb selhalo",
     "settings.preferences_saved": "Předvolby uloženy",
     "settings.regional_subtitle": "Formáty, jednotky a předvolby lokalizace",

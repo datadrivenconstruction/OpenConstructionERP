@@ -10084,6 +10084,7 @@ const resource = {
     "settings.number_format": "Getalnotatie",
     "settings.number_format_preview": "Bedragen in de hele app worden nu weergegeven als {{example}}",
     "settings.paper_size": "Papierformaat",
+    "settings.paper_size_auto": "Automatisch",
     "settings.preferences_error": "Opslaan van voorkeuren mislukt",
     "settings.preferences_saved": "Voorkeuren opgeslagen",
     "settings.regional_subtitle": "Notaties, eenheden en lokalisatievoorkeuren",

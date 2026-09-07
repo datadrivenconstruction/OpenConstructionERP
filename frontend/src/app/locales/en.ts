@@ -9740,6 +9740,7 @@ const resource = {
     "settings.number_format": "Number Format",
     "settings.number_format_preview": "Amounts across the app now read {{example}}",
     "settings.paper_size": "Paper Size",
+    "settings.paper_size_auto": "Automatic",
     "settings.preferences_error": "Failed to save preferences",
     "settings.preferences_saved": "Preferences saved",
     "settings.regional_subtitle": "Formats, units, and localization preferences",

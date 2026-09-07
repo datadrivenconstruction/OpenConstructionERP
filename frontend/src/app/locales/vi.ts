@@ -11669,6 +11669,7 @@ const resource = {
     "settings.number_format": "Định dạng số",
     "settings.number_format_preview": "Số tiền trong toàn bộ ứng dụng giờ hiển thị dạng {{example}}",
     "settings.paper_size": "Khổ giấy",
+    "settings.paper_size_auto": "Tự động",
     "settings.preferences_error": "Không thể lưu tùy chọn",
     "settings.preferences_saved": "Đã lưu tùy chọn",
     "settings.regional_subtitle": "Định dạng, đơn vị và tùy chọn bản địa hóa",

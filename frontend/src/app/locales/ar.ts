@@ -13827,6 +13827,7 @@ const resource = {
     "settings.number_format": "صيغة الأرقام",
     "settings.number_format_preview": "المبالغ في التطبيق تظهر الآن بالشكل {{example}}",
     "settings.paper_size": "حجم الورق",
+    "settings.paper_size_auto": "تلقائي",
     "settings.preferences_error": "فشل حفظ التفضيلات",
     "settings.preferences_saved": "تم حفظ التفضيلات",
     "settings.profile_error": "تعذّر تحميل الملف الشخصي",

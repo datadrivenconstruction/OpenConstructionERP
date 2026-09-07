@@ -69,6 +69,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.demo_seed import resolve_data_dir
+from app.core.paper_size import PAPER_SIZES as _PAPER_SIZES
 
 logger = logging.getLogger(__name__)
 
@@ -77,11 +78,16 @@ APPEARANCE_FILENAME = "pdf_appearance.json"
 
 #: Page sizes offered, in points, as reportlab spells them. A4 is the default
 #: because the platform ships metric first; Letter and Legal cover the US.
-PAGE_SIZES: dict[str, tuple[float, float]] = {
-    "A4": (595.27, 841.89),
-    "LETTER": (612.0, 792.0),
-    "LEGAL": (612.0, 1008.0),
-}
+#:
+#: The dimensions are taken from :data:`app.core.paper_size.PAPER_SIZES` rather
+#: than written again here. That module resolves the per-user Settings
+#: preference and this one is the per-workspace appearance, so the two settings
+#: are separate on purpose - but "A4" has to measure the same in both, and two
+#: literal copies of the same three pairs is how it stops doing so. The
+#: selection is still this module's own: A3 exists there and is deliberately
+#: not offered here, because the workspace appearance is a look and a drawing
+#: size is not part of one.
+PAGE_SIZES: dict[str, tuple[float, float]] = {name: _PAPER_SIZES[name] for name in ("A4", "LETTER", "LEGAL")}
 
 #: Where the header logo sits. The default is ``left`` because that is where
 #: :func:`app.core.pdf_branding.branded_header_footer` has always drawn it, and

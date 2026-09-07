@@ -9968,6 +9968,7 @@ const resource = {
     "settings.number_format": "Formato numérico",
     "settings.number_format_preview": "Os valores em todo o aplicativo agora são exibidos como {{example}}",
     "settings.paper_size": "Tamanho do papel",
+    "settings.paper_size_auto": "Automático",
     "settings.preferences_error": "Falha ao salvar preferências",
     "settings.preferences_saved": "Preferências salvas",
     "settings.regional_subtitle": "Formatos, unidades e preferências de localização",

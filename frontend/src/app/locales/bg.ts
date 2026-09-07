@@ -11188,6 +11188,7 @@ const resource = {
     "settings.number_format": "Формат на числата",
     "settings.number_format_preview": "Сумите в приложението вече се изписват като {{example}}",
     "settings.paper_size": "Размер на хартията",
+    "settings.paper_size_auto": "Автоматично",
     "settings.preferences_error": "Неуспешно запазване на предпочитанията",
     "settings.preferences_saved": "Предпочитанията са запазени",
     "settings.regional_subtitle": "Формати, единици и предпочитания за локализация",

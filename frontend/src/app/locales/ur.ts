@@ -12985,6 +12985,7 @@ const resource = {
     "settings.number_format": "نمبر فارمیٹ",
     "settings.number_format_preview": "ایپ میں تمام رقوم اب {{example}} کی صورت میں دکھائی جاتی ہیں",
     "settings.paper_size": "کاغذ کا سائز",
+    "settings.paper_size_auto": "خودکار",
     "settings.preferences_error": "ترجیحات محفوظ کرنا ناکام رہا",
     "settings.preferences_saved": "ترجیحات محفوظ ہو گئیں",
     "settings.profile_error": "پروفائل لوڈ نہیں ہو سکی",

@@ -11036,6 +11036,7 @@ const resource = {
     "settings.number_format": "Numeromuoto",
     "settings.number_format_preview": "Summat näkyvät koko sovelluksessa nyt muodossa {{example}}",
     "settings.paper_size": "Paperikoko",
+    "settings.paper_size_auto": "Automaattinen",
     "settings.preferences_error": "Asetusten tallennus epäonnistui",
     "settings.preferences_saved": "Asetukset tallennettu",
     "settings.regional_subtitle": "Muodot, yksiköt ja paikannusasetukset",

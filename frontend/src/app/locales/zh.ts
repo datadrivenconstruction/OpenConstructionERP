@@ -11096,6 +11096,7 @@ const resource = {
     "settings.number_format": "数字格式",
     "settings.number_format_preview": "应用中的金额现在显示为 {{example}}",
     "settings.paper_size": "纸张尺寸",
+    "settings.paper_size_auto": "自动",
     "settings.preferences_error": "偏好设置保存失败",
     "settings.preferences_saved": "偏好设置已保存",
     "settings.regional_subtitle": "格式、单位和本地化偏好",

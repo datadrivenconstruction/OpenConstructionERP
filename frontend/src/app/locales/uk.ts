@@ -11049,6 +11049,7 @@ const resource = {
     "settings.number_format": "Формат чисел",
     "settings.number_format_preview": "Суми в усьому застосунку тепер відображаються як {{example}}",
     "settings.paper_size": "Розмір паперу",
+    "settings.paper_size_auto": "Автоматично",
     "settings.preferences_error": "Не вдалося зберегти налаштування",
     "settings.preferences_saved": "Налаштування збережено",
     "settings.regional_subtitle": "Формати, одиниці виміру та налаштування локалізації",

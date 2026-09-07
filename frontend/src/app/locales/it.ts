@@ -10198,6 +10198,7 @@ const resource = {
     "settings.number_format": "Formato numero",
     "settings.number_format_preview": "Gli importi in tutta l'app ora sono visualizzati come {{example}}",
     "settings.paper_size": "Formato carta",
+    "settings.paper_size_auto": "Automatico",
     "settings.preferences_error": "Impossibile salvare le preferenze",
     "settings.preferences_saved": "Preferenze salvate",
     "settings.regional_subtitle": "Formati, unità e preferenze di localizzazione",

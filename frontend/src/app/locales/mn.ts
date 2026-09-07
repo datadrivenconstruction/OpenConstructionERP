@@ -13372,6 +13372,7 @@ const resource = {
     "settings.number_format": "Тооны формат",
     "settings.number_format_preview": "Аппликейшн даяарх дүнг одоо {{example}} хэлбэрээр харуулна",
     "settings.paper_size": "Цаасны хэмжээ",
+    "settings.paper_size_auto": "Автомат",
     "settings.preferences_error": "хадгалах тохиргоо амжилтгүй",
     "settings.preferences_saved": "Тохиргоо хадгалагдлаа",
     "settings.profile_error": "ачаалах profile чадсангүй",

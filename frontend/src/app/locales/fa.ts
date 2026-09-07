@@ -12985,6 +12985,7 @@ const resource = {
     "settings.number_format": "قالب عدد",
     "settings.number_format_preview": "مبالغ در سراسر برنامه اکنون به صورت {{example}} نمایش داده می‌شوند",
     "settings.paper_size": "اندازه کاغذ",
+    "settings.paper_size_auto": "خودکار",
     "settings.preferences_error": "ذخیره تنظیمات ترجیحی ناموفق بود",
     "settings.preferences_saved": "تنظیمات ترجیحی ذخیره شد",
     "settings.profile_error": "بارگذاری نمایه ممکن نشد",

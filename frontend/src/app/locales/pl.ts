@@ -11114,6 +11114,7 @@ const resource = {
     "settings.number_format": "Format liczb",
     "settings.number_format_preview": "Kwoty w całej aplikacji są teraz wyświetlane jako {{example}}",
     "settings.paper_size": "Rozmiar papieru",
+    "settings.paper_size_auto": "Automatycznie",
     "settings.preferences_error": "Nie udało się zapisać preferencji",
     "settings.preferences_saved": "Preferencje zapisane",
     "settings.regional_subtitle": "Formaty, jednostki i preferencje lokalizacji",

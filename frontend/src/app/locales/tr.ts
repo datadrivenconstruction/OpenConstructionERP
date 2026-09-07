@@ -11126,6 +11126,7 @@ const resource = {
     "settings.number_format": "Sayı Biçimi",
     "settings.number_format_preview": "Uygulamadaki tutarlar artık {{example}} şeklinde gösterilir",
     "settings.paper_size": "Kağıt Boyutu",
+    "settings.paper_size_auto": "Otomatik",
     "settings.preferences_error": "Tercihler kaydedilemedi",
     "settings.preferences_saved": "Tercihler kaydedildi",
     "settings.regional_subtitle": "Biçimler, birimler ve yerelleştirme tercihleri",

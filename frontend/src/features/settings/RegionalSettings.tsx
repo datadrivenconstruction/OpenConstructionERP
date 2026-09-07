@@ -6,6 +6,13 @@
  * Shows timezone, measurement system, paper size, date format, number format,
  * and currency. Changes are persisted to the backend via PATCH and updated
  * in the local preferences store for immediate UI effect.
+ *
+ * Paper size is read on the server, not here: `app/core/paper_size.py` turns
+ * the stored value into the sheet a generated document is laid out on, and
+ * 'auto' there means "follow the project's country" rather than "follow the
+ * interface language". The language would be the wrong source - our own `en`
+ * entry declares country `gb`, so an American reading the product in English
+ * would be handed A4 by a resolver that asked it.
  */
 
 import { useState, useMemo, useCallback } from 'react';
@@ -61,12 +68,17 @@ const TIMEZONES = [
   'America/Sao_Paulo',
 ] as const;
 
+// 'auto' is added in the component so its label can be translated; the four
+// explicit sizes are shown as their own dimensions, which need no translation.
 const PAPER_SIZES = [
   { value: 'A4', label: 'A4 (210 x 297 mm)' },
   { value: 'A3', label: 'A3 (297 x 420 mm)' },
   { value: 'Letter', label: 'Letter (8.5 x 11 in)' },
   { value: 'Legal', label: 'Legal (8.5 x 14 in)' },
 ] as const;
+
+/** The unset paper size, matching `AUTO` in `app/core/paper_size.py`. */
+const PAPER_SIZE_AUTO = 'auto';
 
 // 'auto' is added in the component so its label can be translated; the three
 // explicit orders are shown as their own example, which needs no translation.
@@ -348,7 +360,14 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
   // Local state — seeded from backend, falls back to store
   const timezone = prefs?.timezone ?? 'UTC';
   const measurementSystem = (prefs?.measurement_system as MeasurementSystem) ?? storeMeasurement;
-  const paperSize = prefs?.paper_size ?? 'A4';
+  // Do NOT substitute 'A4' for a missing value, which is what this line used
+  // to do. The account default is now 'auto' (follow the project's country),
+  // and A4 is one of the four real choices below, so substituting it lit the
+  // A4 button for every account that had never chosen - the same defect the
+  // Number Format row above was fixed for. An unreachable value lights no
+  // button, which is the honest rendering of a stored value this toggle has no
+  // button for.
+  const paperSize = prefs?.paper_size ?? PAPER_SIZE_AUTO;
   // Read the date format from the store, not from the raw account field. The
   // account column is free-form and NOT NULL: it can hold an order this toggle
   // has no button for (the regional packs ship DD/MM/YYYY and YYYY/MM/DD), and
@@ -563,7 +582,13 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
             </label>
             <ToggleGroup
               value={paperSize}
-              options={PAPER_SIZES.map((p) => ({ value: p.value, label: p.label }))}
+              options={[
+                {
+                  value: PAPER_SIZE_AUTO,
+                  label: t('settings.paper_size_auto', { defaultValue: 'Automatic' }),
+                },
+                ...PAPER_SIZES.map((p) => ({ value: p.value, label: p.label })),
+              ]}
               onChange={(val) => handleChange('paper_size', val)}
             />
           </div>

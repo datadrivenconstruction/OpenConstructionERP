@@ -13015,6 +13015,7 @@ const resource = {
     "settings.number_format": "Μορφή Αριθμών",
     "settings.number_format_preview": "Τα ποσά σε όλη την εφαρμογή εμφανίζονται πλέον ως {{example}}",
     "settings.paper_size": "Μέγεθος Χαρτιού",
+    "settings.paper_size_auto": "Αυτόματα",
     "settings.preferences_error": "Αποτυχία αποθήκευσης προτιμήσεων",
     "settings.preferences_saved": "Οι προτιμήσεις αποθηκεύτηκαν",
     "settings.profile_error": "Δεν ήταν δυνατή η φόρτωση του προφίλ",

@@ -9684,6 +9684,7 @@ const resource = {
     "settings.number_format": "Сан форматы",
     "settings.number_format_preview": "Колдонмодогу суммалар эми {{example}} түрүндө көрсөтүлөт",
     "settings.paper_size": "Кагаз өлчөмү",
+    "settings.paper_size_auto": "Автоматтык",
     "settings.preferences_error": "Тандоолорду сактоо мүмкүн болбоду",
     "settings.preferences_saved": "Тандоолор сакталды",
     "settings.regional_subtitle": "Форматтар, бирдиктер жана локалдаштыруу тандоолору",

@@ -13624,6 +13624,7 @@ const resource = {
     "settings.number_format": "Tallformat",
     "settings.number_format_preview": "Beløp i hele appen vises nå som {{example}}",
     "settings.paper_size": "Papirstørrelse",
+    "settings.paper_size_auto": "Automatisk",
     "settings.preferences_error": "Kunne ikke lagre preferanser",
     "settings.preferences_saved": "Preferanser lagret",
     "settings.regional_subtitle": "Formater, enheter og lokaliseringspreferanser",

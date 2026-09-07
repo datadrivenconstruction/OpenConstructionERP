@@ -13703,6 +13703,7 @@ const resource = {
     "settings.number_format": "Arvuvorming",
     "settings.number_format_preview": "Summasid kuvatakse kogu rakenduses nüüd kujul {{example}}",
     "settings.paper_size": "Paberi formaat",
+    "settings.paper_size_auto": "Automaatne",
     "settings.preferences_error": "Eelistuste salvestamine ebaõnnestus",
     "settings.preferences_saved": "Eelistused salvestatud",
     "settings.profile_error": "Profiili laadimine ebaõnnestus",

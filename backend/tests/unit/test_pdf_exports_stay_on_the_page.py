@@ -31,9 +31,11 @@ import re
 
 import pypdf
 import pytest
-from reportlab.lib.units import cm
+from reportlab.lib.units import cm, inch
 
+from app.core.paper_size import PAPER_SIZES
 from app.modules.bi_dashboards.report_builder import build_pdf_report
+from app.modules.file_transmittals.service import _build_cover_pdf
 from app.modules.property_dev.service import _render_regulator_pdf
 
 # The margins each generator passes to SimpleDocTemplate. Named here because the
@@ -41,6 +43,7 @@ from app.modules.property_dev.service import _render_regulator_pdf
 # text printed into the margin.
 DASHBOARD_MARGIN = 1 * cm
 REGULATOR_MARGIN = 2 * cm
+TRANSMITTAL_MARGIN = 0.75 * inch
 
 # Below this a column holds about seven characters at the size these tables draw
 # at. The number is stated here rather than imported so that the test carries its
@@ -372,3 +375,78 @@ def test_a_report_whose_columns_already_fitted_keeps_every_one_of_them() -> None
     assert "Showing" not in text, f"a report that fitted was truncated anyway: {text[:300]}"
     edges = _column_edges(pdf_bytes)
     assert len(edges) - 1 == 20, f"20 columns fitted at their own widths and {len(edges) - 1} were drawn"
+
+
+# ── A generator that stopped being one page size ──────────────────────────
+
+
+def _transmittal_cover(pagesize: tuple[float, float]) -> bytes:
+    """A sent transmittal's cover sheet, laid out on ``pagesize``."""
+    import uuid
+    from datetime import UTC, datetime
+
+    from app.modules.file_transmittals.models import (
+        FileTransmittal,
+        FileTransmittalItem,
+        FileTransmittalRecipient,
+    )
+
+    transmittal = FileTransmittal(
+        id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
+        number="TR-2026-0041",
+        subject="Issue for construction - ground floor",
+        reason_code="for_construction",
+        sent_at=datetime(2026, 3, 14, 9, 30, tzinfo=UTC),
+        status="sent",
+        notes=LONG_VALUE,
+    )
+    transmittal.items = [
+        FileTransmittalItem(
+            file_kind="drawing",
+            file_id="file-1",
+            file_version_snapshot="C",
+            canonical_name_snapshot=("ARC-BLD-A-DR-2401-Ground floor general arrangement and setting out-Rev-C.pdf"),
+            sort_order=0,
+        )
+    ]
+    transmittal.recipients = [
+        FileTransmittalRecipient(email="site.manager@example.com", display_name="Site Manager", role="contractor")
+    ]
+    pdf = _build_cover_pdf(transmittal, pagesize)
+    assert pdf is not None, "the cover sheet fell back to text, so there is nothing to measure"
+    return pdf
+
+
+@pytest.mark.parametrize("size", ["A4", "LETTER", "LEGAL", "A3"])
+def test_a_transmittal_cover_fits_whichever_sheet_it_was_given(size: str) -> None:
+    """This generator was fixed at US Letter and its tables were drawn in inches.
+
+    That was self-consistent while there was only ever one sheet: the widest of
+    the three tables is 6.9in against the 7.0in content box Letter leaves at
+    0.75in margins. It stops being self-consistent the moment the sheet follows
+    the reader, because A4's content box is 6.768in - so those same literals
+    draw 9.6pt past the right margin, and reportlab draws a table that does not
+    fit rather than refusing it. The widths are scaled to the frame now, and
+    this is the assertion that says so on the page rather than in the source.
+    """
+    _assert_inside_the_frame(_transmittal_cover(PAPER_SIZES[size]), TRANSMITTAL_MARGIN, f"transmittal cover on {size}")
+
+
+def test_a_transmittal_cover_is_not_stretched_to_whatever_sheet_it_was_given() -> None:
+    """The opposite mistake, which the scaling could have introduced.
+
+    Dividing the frame between the columns puts every column on the page and
+    would pass the test above on every sheet, while quietly widening a cover
+    that already fitted. The design leaves 0.1in of its 7.0in unused, so a
+    cover that fills its frame to the edge has been stretched rather than
+    scaled, and the slack has to survive in proportion on the wider sheets too.
+    """
+    for size in ("A4", "LETTER", "A3"):
+        pdf_bytes = _transmittal_cover(PAPER_SIZES[size])
+        _ink, _origins, sheet_width = _page_geometry(pdf_bytes)
+        slack = _assert_inside_the_frame(pdf_bytes, TRANSMITTAL_MARGIN, f"transmittal cover on {size}")
+        frame = sheet_width - 2 * TRANSMITTAL_MARGIN
+        assert slack > frame * 0.005, (
+            f"the cover on {size} fills its frame to within {slack:.1f}pt, so it was stretched"
+        )

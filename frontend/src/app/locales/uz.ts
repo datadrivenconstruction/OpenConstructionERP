@@ -11063,6 +11063,7 @@ const resource = {
     "settings.modules_link_title": "Modullar",
     "settings.number_format": "Raqam formati",
     "settings.paper_size": "Qogʻoz oʻlchami",
+    "settings.paper_size_auto": "Avtomatik",
     "settings.preferences_error": "Sozlamalarni saqlab boʻlmadi",
     "settings.preferences_saved": "Sozlamalar saqlandi",
     "settings.regional_subtitle": "Formatlar, birliklar va lokalizatsiya sozlamalari",

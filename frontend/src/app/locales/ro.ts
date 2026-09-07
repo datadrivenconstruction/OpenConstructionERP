@@ -11612,6 +11612,7 @@ const resource = {
     "settings.number_format": "Format număr",
     "settings.number_format_preview": "Sumele din întreaga aplicație se afișează acum ca {{example}}",
     "settings.paper_size": "Dimensiunea hârtiei",
+    "settings.paper_size_auto": "Automat",
     "settings.preferences_error": "Salvarea preferințelor a eșuat",
     "settings.preferences_saved": "Preferințe salvate",
     "settings.regional_subtitle": "Formate, unități și preferințe de localizare",

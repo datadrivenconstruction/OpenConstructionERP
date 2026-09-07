@@ -11702,6 +11702,7 @@ const resource = {
     "settings.number_format": "รูปแบบตัวเลข",
     "settings.number_format_preview": "จำนวนเงินทั้งแอปจะแสดงเป็น {{example}}",
     "settings.paper_size": "ขนาดกระดาษ",
+    "settings.paper_size_auto": "อัตโนมัติ",
     "settings.preferences_error": "บันทึกการตั้งค่าล้มเหลว",
     "settings.preferences_saved": "บันทึกการตั้งค่าแล้ว",
     "settings.regional_subtitle": "รูปแบบ หน่วย และการตั้งค่าภาษาท้องถิ่น",

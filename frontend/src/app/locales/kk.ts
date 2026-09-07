@@ -12985,6 +12985,7 @@ const resource = {
     "settings.number_format": "Сан Пішімі",
     "settings.number_format_preview": "Қолданбадағы сомалар енді {{example}} түрінде көрсетіледі",
     "settings.paper_size": "Қағаз Өлшемі",
+    "settings.paper_size_auto": "Автоматты",
     "settings.preferences_error": "Баптауларды сақтау сәтсіз аяқталды",
     "settings.preferences_saved": "Баптаулар сақталды",
     "settings.profile_error": "Профильді жүктеу мүмкін болмады",

@@ -11286,6 +11286,7 @@ const resource = {
     "settings.number_format": "Формат числа",
     "settings.number_format_preview": "Суммы во всём приложении теперь отображаются как {{example}}",
     "settings.paper_size": "Формат бумаги",
+    "settings.paper_size_auto": "Автоматически",
     "settings.preferences_error": "Не удалось сохранить настройки",
     "settings.preferences_saved": "Настройки сохранены",
     "settings.regional_subtitle": "Форматы, единицы измерения и параметры локализации",

@@ -10042,6 +10042,7 @@ const resource = {
     "settings.number_format": "Format numérique",
     "settings.number_format_preview": "Les montants dans toute l'application s'affichent désormais ainsi : {{example}}",
     "settings.paper_size": "Format de papier",
+    "settings.paper_size_auto": "Automatique",
     "settings.preferences_error": "Échec de l'enregistrement des préférences",
     "settings.preferences_saved": "Préférences enregistrées",
     "settings.regional_subtitle": "Formats, unités et préférences de localisation",

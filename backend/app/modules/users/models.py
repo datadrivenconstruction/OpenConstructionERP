@@ -52,7 +52,17 @@ class User(Base):
     measurement_system: Mapped[str] = mapped_column(
         String(20), nullable=False, default="metric", server_default="metric"
     )
-    paper_size: Mapped[str] = mapped_column(String(10), nullable=False, default="A4", server_default="A4")
+    # "auto" means the paper size follows the country of the project the
+    # document belongs to, resolved by app.core.paper_size. The old default of
+    # "A4" was not a neutral start: it is a real choice a European user makes
+    # on purpose, so "nobody chose" and "chose A4" were the same row and no
+    # generator could have told a US account apart from a German one even once
+    # it started reading this column. server_default stays "A4" for the reason
+    # spelled out under date_format below - changing it alters the table DDL
+    # and needs a migration for no functional gain, because ORM inserts always
+    # supply the Python-side default. Accounts created before this still carry
+    # "A4" and keep rendering A4, which is what they rendered yesterday.
+    paper_size: Mapped[str] = mapped_column(String(10), nullable=False, default="auto", server_default="A4")
     # "auto" means numbers follow the interface language, the same neutral
     # start the date_format below already takes. The old default handed every
     # new account in the world German grouping, and because the column is

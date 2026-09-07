@@ -12978,6 +12978,7 @@ const resource = {
     "settings.number_format": "Format ng Numero",
     "settings.number_format_preview": "Ang mga halaga sa buong app ay ipinapakita na bilang {{example}}",
     "settings.paper_size": "Sukat ng Papel",
+    "settings.paper_size_auto": "Awtomatiko",
     "settings.preferences_error": "Hindi na-save ang mga preference",
     "settings.preferences_saved": "Na-save ang mga preference",
     "settings.profile_error": "Hindi ma-load ang profile",

@@ -10089,6 +10089,7 @@ const resource = {
     "settings.number_format": "Formato numérico",
     "settings.number_format_preview": "Los importes de toda la aplicación se muestran ahora como {{example}}",
     "settings.paper_size": "Tamaño de papel",
+    "settings.paper_size_auto": "Automático",
     "settings.preferences_error": "Error al guardar preferencias",
     "settings.preferences_saved": "Preferencias guardadas",
     "settings.regional_subtitle": "Formatos, unidades y preferencias de localización",

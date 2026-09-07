@@ -11573,6 +11573,7 @@ const resource = {
     "settings.number_format": "Format broja",
     "settings.number_format_preview": "Iznosi u cijeloj aplikaciji sada se prikazuju kao {{example}}",
     "settings.paper_size": "Format papira",
+    "settings.paper_size_auto": "Automatski",
     "settings.preferences_error": "Spremanje preferencija nije uspjelo",
     "settings.preferences_saved": "Preferencije spremljene",
     "settings.regional_subtitle": "Formati, jedinice i preferencije lokalizacije",

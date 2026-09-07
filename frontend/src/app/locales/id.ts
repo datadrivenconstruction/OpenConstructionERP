@@ -11669,6 +11669,7 @@ const resource = {
     "settings.number_format": "Format Angka",
     "settings.number_format_preview": "Nilai di seluruh aplikasi kini ditampilkan sebagai {{example}}",
     "settings.paper_size": "Ukuran Kertas",
+    "settings.paper_size_auto": "Otomatis",
     "settings.preferences_error": "Gagal menyimpan preferensi",
     "settings.preferences_saved": "Preferensi disimpan",
     "settings.regional_subtitle": "Format, satuan, dan preferensi lokalisasi",

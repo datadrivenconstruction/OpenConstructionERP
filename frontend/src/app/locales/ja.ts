@@ -11055,6 +11055,7 @@ const resource = {
     "settings.number_format": "数値フォーマット",
     "settings.number_format_preview": "アプリ全体の金額は{{example}}の形式で表示されます",
     "settings.paper_size": "用紙サイズ",
+    "settings.paper_size_auto": "自動",
     "settings.preferences_error": "設定の保存に失敗しました",
     "settings.preferences_saved": "設定を保存しました",
     "settings.regional_subtitle": "フォーマット、単位、ローカライゼーションの設定",

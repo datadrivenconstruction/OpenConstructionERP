@@ -11161,6 +11161,7 @@ const resource = {
     "settings.number_format": "Zahlenformat",
     "settings.number_format_preview": "Beträge werden in der gesamten App jetzt als {{example}} angezeigt",
     "settings.paper_size": "Papierformat",
+    "settings.paper_size_auto": "Automatisch",
     "settings.preferences_error": "Einstellungen konnten nicht gespeichert werden",
     "settings.preferences_saved": "Einstellungen gespeichert",
     "settings.regional_subtitle": "Formate, Einheiten und Lokalisierungseinstellungen",

@@ -11073,6 +11073,7 @@ const resource = {
     "settings.number_format": "숫자 형식",
     "settings.number_format_preview": "앱 전체의 금액이 이제 {{example}} 형식으로 표시됩니다",
     "settings.paper_size": "용지 크기",
+    "settings.paper_size_auto": "자동",
     "settings.preferences_error": "환경설정 저장에 실패했습니다",
     "settings.preferences_saved": "환경설정을 저장했습니다",
     "settings.regional_subtitle": "형식, 단위, 현지화 환경설정",

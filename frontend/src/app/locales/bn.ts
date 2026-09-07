@@ -12978,6 +12978,7 @@ const resource = {
     "settings.number_format": "সংখ্যার ফরম্যাট",
     "settings.number_format_preview": "অ্যাপের সব অঙ্ক এখন {{example}} হিসেবে দেখানো হয়",
     "settings.paper_size": "কাগজের আকার",
+    "settings.paper_size_auto": "স্বয়ংক্রিয়",
     "settings.preferences_error": "পছন্দসমূহ সংরক্ষণ ব্যর্থ হয়েছে",
     "settings.preferences_saved": "পছন্দসমূহ সংরক্ষিত হয়েছে",
     "settings.profile_error": "প্রোফাইল লোড করা যায়নি",

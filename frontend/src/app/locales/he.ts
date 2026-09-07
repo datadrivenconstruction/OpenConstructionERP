@@ -12992,6 +12992,7 @@ const resource = {
     "settings.number_format": "פורמט מספרים",
     "settings.number_format_preview": "הסכומים בכל האפליקציה מוצגים כעת כך: {{example}}",
     "settings.paper_size": "גודל נייר",
+    "settings.paper_size_auto": "אוטומטי",
     "settings.preferences_error": "שמירת ההעדפות נכשלה",
     "settings.preferences_saved": "ההעדפות נשמרו",
     "settings.profile_error": "לא ניתן היה לטעון את הפרופיל",
