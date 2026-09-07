@@ -106,7 +106,7 @@ across price variants and converted per market, not transcribed figures.
 | Base / region | Source publication | Basis |
 |---|---|---|
 | Global CWICR (the 11 market catalogues and `cwicr_*.csv`) | GESN / FER / TER norm structure (CIS) | **PENDING, see note below** |
-| `ZH_SHANGHAI` | China, Beijing 2012 + Bole 2022 construction quota (Dinge) | Official government tariff |
+| `ZH_CHINA` | China, Beijing 2012 + Bole 2022 construction quota (Dinge) | Official government tariff |
 | `TR_NATIONAL` | Turkiye, CSB national unit prices (Birim Fiyat) | Official publication, FSEK Art. 31 |
 | `BR_NATIONAL` | Brazil, SINAPI analytical compositions (CAIXA/IBGE) | Open data, Decreto 7.983/2013 |
 | `ES_ANDALUCIA` | Spain, Base de Costes de la Construccion de Andalucia (BCCA 2023) | Open institutional publication |

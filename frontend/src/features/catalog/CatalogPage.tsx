@@ -169,11 +169,11 @@ const CWICR_REGIONS: CWICRRegionInfo[] = [
   { id: 'BG_SOFIA', name: 'Bulgaria', flagId: 'bg', currency: 'BGN' },
   { id: 'HR_ZAGREB', name: 'Croatia', flagId: 'hr', currency: 'EUR' },
   { id: 'SV_STOCKHOLM', name: 'Sweden', flagId: 'se', currency: 'SEK' },
-  { id: 'TR_NATIONAL', name: 'Türkiye', flagId: 'tr', currency: 'TRY' },
+  { id: 'TR_ISTANBUL', name: 'Türkiye', flagId: 'tr', currency: 'TRY' },
   { id: 'AR_DUBAI', name: 'Middle East', flagId: 'ae', currency: 'AED' },
   { id: 'ZA_JOHANNESBURG', name: 'South Africa', flagId: 'za', currency: 'ZAR' },
   { id: 'NG_LAGOS', name: 'Nigeria', flagId: 'ng', currency: 'NGN' },
-  { id: 'ZH_CHINA', name: 'China', flagId: 'cn', currency: 'CNY' },
+  { id: 'ZH_SHANGHAI', name: 'China', flagId: 'cn', currency: 'CNY' },
   { id: 'JA_TOKYO', name: 'Japan', flagId: 'jp', currency: 'JPY' },
   { id: 'KO_SEOUL', name: 'South Korea', flagId: 'kr', currency: 'KRW' },
   { id: 'HI_MUMBAI', name: 'India', flagId: 'in', currency: 'INR' },
@@ -186,6 +186,8 @@ const CWICR_REGIONS: CWICRRegionInfo[] = [
   // four priced, coded bases have a browsable resource catalog; the two
   // coefficient bases (Vietnam, Indonesia) are served by the resource
   // price-sheet feature and appear here for base recognition.
+  { id: 'ZH_CHINA', name: 'China (Dinge)', flagId: 'cn', currency: 'CNY' },
+  { id: 'TR_NATIONAL', name: 'Türkiye (Birim Fiyat)', flagId: 'tr', currency: 'TRY' },
   { id: 'BR_NATIONAL', name: 'Brazil (SINAPI)', flagId: 'br', currency: 'BRL' },
   { id: 'ES_ANDALUCIA', name: 'Spain (BCCA)', flagId: 'es', currency: 'EUR' },
   { id: 'IT_TOSCANA', name: 'Italy (Toscana)', flagId: 'it', currency: 'EUR' },

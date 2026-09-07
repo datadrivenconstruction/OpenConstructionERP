@@ -681,8 +681,41 @@ export function CostsPage() {
   // the user explicitly chose "All regions" or a catalog chip. Any
   // user-driven choice (including '') also sets the latch.
   const regionAutoPickDone = useRef(false);
+  // Separate one-shot for the heal below. It has to be able to fire while a
+  // region IS selected, which is the one case the auto-pick deliberately skips.
+  const regionHealDone = useRef(false);
+  // Whether THIS mount carried ?region=..., captured once because the one-shot
+  // effect above strips the param. A deep link from /setup/databases can name a
+  // region whose import has not landed yet, and healing that away under the
+  // user would undo the very navigation they just made.
+  const hadRegionDeepLink = useRef(regionFromUrl !== '');
 
   useEffect(() => {
+    // Drop a persisted active region the backend does not actually have. Such
+    // an id filters every list to nothing and explains none of it: no error, no
+    // empty state, just a catalogue that looks like it has no matching items.
+    // This is not hypothetical. Until this commit the store rewrote
+    // ZH_SHANGHAI to ZH_CHINA and TR_ISTANBUL to TR_NATIONAL on read AND on
+    // write, so every browser that ran the China or Turkiye country pack has a
+    // stored id whose rows were never installed, and deleting the alias alone
+    // would leave those browsers exactly as broken as before. Clearing re-arms
+    // the auto-pick below, which then lands on a base the user really has.
+    // 'CUSTOM' is exempt: it is a real scope the user can choose and it is
+    // absent from /regions/ whenever they happen to have no own items.
+    if (
+      !regionHealDone.current &&
+      !hadRegionDeepLink.current &&
+      activeRegion &&
+      activeRegion !== 'CUSTOM' &&
+      Array.isArray(loadedRegions) &&
+      loadedRegions.length > 0 &&
+      !loadedRegions.includes(activeRegion)
+    ) {
+      regionHealDone.current = true;
+      if (region === activeRegion) setRegion('');
+      setActiveRegion('');
+      return;
+    }
     if (regionAutoPickDone.current) return;
     if (region) return;
     if (regionFromUrl) return;
@@ -697,8 +730,11 @@ export function CostsPage() {
     regionAutoPickDone.current = true;
     setRegion(first);
     setActiveRegion(first);
+  // `activeRegion` and `region` are dependencies so the pass that clears a
+  // stale region is followed by one that picks a live one; both one-shot refs
+  // stop that from becoming a loop.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadedRegions, userCatalogs, catalogId]);
+  }, [loadedRegions, userCatalogs, catalogId, activeRegion, region]);
 
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
