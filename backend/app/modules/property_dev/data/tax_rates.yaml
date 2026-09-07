@@ -424,6 +424,9 @@ jurisdictions:
         - { rate: 0.20, effective_from: "1993-01-01" }
         - { rate: 0.18, effective_from: "2004-01-01" }
         - { rate: 0.20, effective_from: "2019-01-01" }
+        # Raised to 22 % on 2026-01-01. The 10 % reduced class was retained
+        # unchanged by the same amendment, which is why nothing below moves.
+        - { rate: 0.22, effective_from: "2026-01-01" }
       exempt:
         applies_to:
           - "residential.transfer_between_individuals"

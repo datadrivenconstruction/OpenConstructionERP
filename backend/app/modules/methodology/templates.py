@@ -1186,7 +1186,12 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         name="Russia",
         country_code="RU",
         currency="RUB",
-        vat="20",
+        # 22 % since 1 January 2026, up from 20 %; the dated windows are in
+        # seed_data/tax_configurations.json. As with Romania above, editing
+        # this literal changes what a *new* installation of the template
+        # carries. Project methodologies already cloned from it keep their own
+        # ``vat_rate`` column and are not healed by this line.
+        vat="22",
         overhead="16",
         profit="7",
         tax_label="NDS",

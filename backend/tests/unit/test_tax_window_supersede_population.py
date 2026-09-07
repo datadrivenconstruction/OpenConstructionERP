@@ -65,7 +65,37 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #:
 #: The population growing also moved ``EARLIEST_SUPERSEDED_FROM`` from
 #: 2025-04-01 to 2025-01-01, because Israel's rise predates Nova Scotia's cut.
-EXPECTED_POPULATION = {("CA", "HST_NS"), ("IL", "VAT")}
+#:
+#: ``RU/NDS`` was added on 2026-09-07, and this test failing is what it was
+#: supposed to do. What was looked at before updating it:
+#:
+#: * Russia raised standard VAT from 20 % to 22 % with effect from
+#:   2026-01-01 (НК РФ ст. 164 as amended). The seed file had gone on
+#:   shipping one open window at 20 % dated from 2019-01-01, so every
+#:   Russian document dated in 2026 was priced two points low for the eight
+#:   months between the change and this commit. The 20 % window is closed at
+#:   2025-12-31 and the 22 % one added beside it, so a bill priced before
+#:   2026 still prices at 20.
+#: * What the repair will therefore do to installs in the field: close the
+#:   open 20 % row and insert the 22 % one, on the same argument as Nova
+#:   Scotia's and Israel's.
+#: * The flag stays still, and here that is a constraint rather than a
+#:   convenience. Both Russian windows ship ``is_default`` true, the Israeli
+#:   way and not the Romanian way, and they *must*: Russia's ``NDS_RED``
+#:   reduced row is open-ended from 2004-01-01, so it is in force alongside
+#:   every standard window. Unflagging the closed 20 % row the way Romania
+#:   unflags its 19 % one would leave a 2025 query looking at two unflagged
+#:   country-wide rows, which ``_country_wide_standard`` cannot choose
+#:   between; ``_is_earlier_period`` does not rescue it either, because that
+#:   needs exactly one row in force. Russia would answer
+#:   ``default_rate_not_in_force`` for every date from 2019 to 2025 - no rate
+#:   at all, not a wrong one. So the repair's predicate matches without
+#:   ``also_updates`` gaining anything, and the assertion that it stays empty
+#:   still holds.
+#: * ``EARLIEST_SUPERSEDED_FROM`` does not move. It is derived from
+#:   ``windows[1:]``, the superseding windows only, and 2026-01-01 is later
+#:   than Israel's 2025-01-01.
+EXPECTED_POPULATION = {("CA", "HST_NS"), ("IL", "VAT"), ("RU", "NDS")}
 
 
 def test_the_repair_will_touch_exactly_these_rate_lines() -> None:

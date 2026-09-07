@@ -109,7 +109,11 @@ PACK_CONFIG: dict[str, Any] = {
             "name": "НДС - Стандартная ставка",
             "name_en": "VAT - Standard Rate",
             "type": "vat",
-            "rate_pct": "20",
+            # 22 % since 2026-01-01. Display only: this dict is returned
+            # verbatim by GET /api/v1/russia_pack/config/ and nothing prices
+            # from it. The rate a document is charged comes from the dated
+            # rows in i18n_foundation/seed_data/tax_configurations.json.
+            "rate_pct": "22",
         },
         {
             "code": "RU_NDS_REDUCED",
@@ -149,7 +153,8 @@ PACK_CONFIG: dict[str, Any] = {
     # ── НДС / VAT rates (Wave 25) ────────────────────────────────────────────
     "vat_rates": {
         "RU": {
-            "standard": Decimal("0.20"),
+            # 22 % since 2026-01-01; display only, see the note above.
+            "standard": Decimal("0.22"),
             "reduced": Decimal("0.10"),
             "zero": Decimal("0.00"),
         },

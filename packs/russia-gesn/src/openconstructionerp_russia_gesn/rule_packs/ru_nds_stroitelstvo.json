@@ -11,8 +11,8 @@
   "review_status": "Drawn from public sources. Pending review by a Russian cost engineer before it is relied on for a contract.",
   "description": "VAT sits at the very bottom of the summary estimate, applied once to everything above it including the reserve for unforeseen costs. It is the last line and never a per-item field, which matters when an estimate is imported from a jurisdiction that carries tax per line: folding the same tax into the rates and into the summary is the way a Russian bill ends up quoting a price nobody agreed to.",
   "rates": {
-    "standard": 20,
-    "note": "The standard rate has been 20 percent since 2019. A contractor on a simplified tax regime does not charge it, and an estimate for such a contractor carries a compensation line for the VAT it pays on its own purchases rather than a VAT line."
+    "standard": 22,
+    "note": "The standard rate is 22 percent from 1 January 2026, raised from the 20 percent that had applied since 2019. This field carries only the rate in force now; a document dated before 2026 is charged 20 and the dated windows for that live in the platform tax seed. A contractor on a simplified tax regime does not charge it, and an estimate for such a contractor carries a compensation line for the VAT it pays on its own purchases rather than a VAT line."
   },
   "currency": {
     "code": "RUB",

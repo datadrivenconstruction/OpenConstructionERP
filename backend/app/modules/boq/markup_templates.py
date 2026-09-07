@@ -554,7 +554,13 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
         {
             "name": "\u041d\u0414\u0421",
             "category": "tax",
-            "percentage": "20.0",
+            # 22 % since 2026-01-01, up from 20 %. Only the rate moves here:
+            # this stack's step order, its apply_to and its overhead, profit
+            # and contingency figures are untouched. This table is the last
+            # resort, reached by a country with no seed row or a database with
+            # no seed at all, and it has no date axis, so it can only state
+            # the rate in force now.
+            "percentage": "22.0",
             "apply_to": "cumulative",
             "sort_order": 3,
         },

@@ -1006,6 +1006,22 @@
     "combination": "national",
     "subdivision_code": null,
     "effective_from": "2019-01-01",
+    "effective_to": "2025-12-31",
+    "is_default": true
+  },
+  {
+    "country_code": "RU",
+    "tax_name": "VAT Standard (NDS)",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "ru": "НДС основная ставка"
+    },
+    "tax_code": "NDS",
+    "rate_pct": "22.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2026-01-01",
     "effective_to": null,
     "is_default": true
   },

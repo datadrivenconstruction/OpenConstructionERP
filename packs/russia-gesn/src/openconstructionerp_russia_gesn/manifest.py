@@ -109,7 +109,7 @@ MANIFEST = PartnerPackManifest(
             "Градостроительный кодекс РФ, статья 8.3 (сметные нормативы и сметные цены)",
             "Постановление Правительства РФ от 05.03.2007 № 145 (проверка достоверности сметной стоимости)",
         ],
-        "vat_standard_rate": 20,
+        "vat_standard_rate": 22,
         "currency_decimals": 2,
         "review_status": (
             "The norm code shape and the resource decomposition are derived "

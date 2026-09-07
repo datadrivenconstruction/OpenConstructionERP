@@ -71,8 +71,15 @@ Sources (cited in commit message, summarised here for reference):
   building materials are standard-rated; the 11 % band does not cover them.
   (PwC Worldwide Tax Summaries - Romania, and European Commission "Your
   Europe" VAT rules and rates, both read 2026-08-26)
-- RU: НК РФ ст. 164 - standard 20 %, reduced 10 %, zero 0 %
-  (FNS Russia 2026)
+- RU: НК РФ ст. 164 - standard 22 %, reduced 10 %, zero 0 %, the standard rate
+  effective 1 Jan 2026. It was raised from 20 %, and the 10 % reduced class
+  (food, medicine, children's goods, books) was retained unchanged, so only
+  the standard rate moved. Construction work is standard-rated.
+  (НК РФ ст. 164 as amended with effect from 2026-01-01. Unlike the Romanian
+  entry above, this figure has NOT been reconciled against a published tax
+  summary read on a stated date - no such source is on file in this repo. It
+  is pending review by a Russian cost engineer, the same standing caveat
+  packs/russia-gesn records in its manifest ``review_status``.)
 - ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
   (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
   Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)
@@ -163,7 +170,10 @@ _RAW: dict[str, dict[str, str]] = {
     # that a Romanian pack exists or that Romanian VAT flows through here.
     "RO": {"standard": "0.21", "reduced": "0.11", "zero": "0.00"},
     # ── Russia / CIS ──────────────────────────────────────────────────────
-    "RU": {"standard": "0.20", "reduced": "0.10", "zero": "0.00"},
+    # Standard rate 22 % since 2026-01-01, up from 20 %. This table carries no
+    # effective dates, so it states only what is in force now; the dated
+    # history lives in the tax seed and in property_dev/data/tax_rates.yaml.
+    "RU": {"standard": "0.22", "reduced": "0.10", "zero": "0.00"},
     # ── Africa ────────────────────────────────────────────────────────────
     # ZA = South Africa (VAT Act 89 of 1991, SARS). Standard 15 % since
     # 1 Apr 2018. No reduced tier; basic foodstuffs and exports are zero-rated.
