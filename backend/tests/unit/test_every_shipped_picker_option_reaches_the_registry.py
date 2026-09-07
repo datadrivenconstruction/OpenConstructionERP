@@ -1,6 +1,14 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every region the product offers must name a country the registry knows.
+"""Every option the project create page offers must reach the registry.
+
+``frontend/src/features/projects/CreateProjectPage.tsx`` holds two hand-written
+mirrors of ``app.core.classification_registry``, and both have shipped a defect
+of the same shape. The region picker writes strings the registry could not read.
+The standards picker writes values the registry reads and names a country beside
+each one that the registry has an opinion about. This file covers both, because
+they share a file, a failure mode and a parse, and splitting them would leave
+the second gate as something for somebody to write later.
 
 **The defect this file exists to prevent.**
 
@@ -44,20 +52,51 @@ country, or it is named below with a reason. It cannot assert the country is the
 anchor is recorded in :data:`MACRO_OPTION_ANCHORS` with what it costs, and the
 anchor is asserted, so a silent re-anchoring is red even though the option would
 still "resolve".
+
+**The second mirror: the standards picker.**
+
+``STANDARD_GROUPS`` in the same file names a country beside each standard, and
+the wording is hand-written because the registry has no opinion about wording.
+So the country beside the name can drift from the country the registry maps, and
+did: VOCI was offered as "VOCI (Austria)" while ``COUNTRY_TO_STANDARD`` has only
+ever resolved it for IT. An Austrian who picked the one row carrying their own
+country's name wrote the Italian standard onto their project, and an Italian
+scanning the list for Italy found nothing. That was fixed by hand and checked
+once by hand; this half of the file is what makes the check repeat.
+
+The country names in those labels are read against
+``i18n_foundation/seed_data/countries.json``, the product's own 198-row country
+registry, rather than a name-to-code table written here. A table written here
+would be a third mirror of the same data, which is the defect this file exists
+to catch.
+
+Five standards carry a display label and no country:
+``gaeb``, ``omniclass``, ``onorm``, ``uniclass`` and ``uniformat``. They are
+outside ``KNOWN_CLASSIFICATION_STANDARDS`` and so outside this gate's
+population, which is the right scope: a standard no country reads cannot be
+mis-attributed to one. ``onorm`` is named here because it is the one that reads
+like an omission rather than a choice. OENORM is Austria's real standard, it has
+a label, and Austria resolves to ``din276``. Whether Austria should read it is a
+product decision about the registry, not something a test can settle, and it is
+recorded here so the next reader finds a decision rather than an oversight.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from types import MappingProxyType
 
 import pytest
 
+import app
 from app.core import classification_registry
 from app.core.classification_registry import (
+    CLASSIFICATION_STANDARD_LABELS,
     COUNTRY_TO_STANDARD,
     DEFAULT_CLASSIFICATION_STANDARD,
+    KNOWN_CLASSIFICATION_STANDARDS,
     normalise_region,
     resolve_standard,
     standard_for_country,
@@ -65,6 +104,12 @@ from app.core.classification_registry import (
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PICKER = REPO_ROOT / "frontend" / "src" / "features" / "projects" / "CreateProjectPage.tsx"
+
+#: The product's own country registry, 198 rows, resolved from the imported
+#: package rather than a path guess. Read for ``name_en`` so the standards
+#: labels are checked against a country list the product ships rather than one
+#: written in this file.
+COUNTRIES_JSON = Path(app.__file__).resolve().parent / "modules" / "i18n_foundation" / "seed_data" / "countries.json"
 
 #: The picker's free-text escape hatch. It is a UI mode rather than a region and
 #: never reaches the backend as itself: the page substitutes the typed text
@@ -145,8 +190,12 @@ MACRO_OPTION_ANCHORS: dict[str, tuple[str, str]] = {
 _OPTION_RE = re.compile(r"""\{\s*value:\s*(['"])(.*?)\1\s*,\s*label:\s*(['"])(.*?)\3\s*\}""")
 
 
-def _picker_block() -> str:
-    """The REGION_GROUPS literal, as text.
+def _picker_block(declaration: str) -> str:
+    """One option-group literal from the create page, as text.
+
+    Args:
+        declaration: The ``const`` name to read, ``REGION_GROUPS`` or
+            ``STANDARD_GROUPS``.
 
     Raises:
         AssertionError: The picker file or the literal is not where this gate
@@ -154,27 +203,76 @@ def _picker_block() -> str:
             cannot find its population must never be allowed to pass empty.
     """
     assert PICKER.is_file(), (
-        f"the project region picker is not at {PICKER}. This gate reads the shipped picker as its "
+        f"the project create page is not at {PICKER}. This gate reads the shipped page as its "
         "population and cannot fall back to a copy, because a copy is what it exists to prevent. "
-        "Re-point PICKER at the file that now defines REGION_GROUPS."
+        f"Re-point PICKER at the file that now defines {declaration}."
     )
     source = PICKER.read_text(encoding="utf-8")
-    marker = "const REGION_GROUPS"
+    marker = f"const {declaration}"
     assert marker in source, (
-        f"{PICKER.name} no longer declares {marker}. If the region options moved to a shared "
-        "module, re-point this gate at it; do not copy the values here."
+        f"{PICKER.name} no longer declares {marker}. If the options moved to a shared module, "
+        "re-point this gate at it; do not copy the values here."
     )
     start = source.index(marker)
     return source[start : source.index("\n];", start)]
 
 
-def _shipped_options() -> list[tuple[str, str]]:
-    """Every ``{value, label}`` pair the region picker ships, in file order.
+def _options_in(declaration: str) -> list[tuple[str, str]]:
+    """Every ``{value, label}`` pair in one option-group literal, in file order.
+
+    Args:
+        declaration: The ``const`` name to read.
 
     Returns:
         Pairs of option value and human label.
     """
-    return [(m.group(2), m.group(4)) for m in _OPTION_RE.finditer(_picker_block())]
+    return [(m.group(2), m.group(4)) for m in _OPTION_RE.finditer(_picker_block(declaration))]
+
+
+def _assert_parse_is_complete(declaration: str) -> list[tuple[str, str]]:
+    """Cross-check one literal's parse two independent ways, and return it.
+
+    A regex that matches nothing yields an empty population, and every
+    ``for option in population`` assertion over it then passes while measuring
+    nothing. So the count of parsed pairs is checked against a count taken a
+    different way - occurrences of the ``value:`` key - and the free-text option
+    is asserted present, since it is the one value both literals are guaranteed
+    to carry.
+
+    Args:
+        declaration: The ``const`` name to read.
+
+    Returns:
+        The parsed pairs.
+    """
+    block = _picker_block(declaration)
+    parsed = _options_in(declaration)
+    declared = len(re.findall(r"\bvalue:", block))
+
+    assert parsed, (
+        f"the option regex matched nothing in the {declaration} block. The picker's quoting or "
+        "option shape has changed; fix the pattern, because an empty population passes every other "
+        "assertion in this file."
+    )
+    assert len(parsed) == declared, (
+        f"the option regex found {len(parsed)} options in {declaration} but the block declares "
+        f"{declared} 'value:' keys. The parse is dropping options, and a dropped option is one this "
+        f"gate never checks.\nparsed: {[v for v, _ in parsed]}"
+    )
+    assert FREE_TEXT_OPTION in {v for v, _ in parsed}, (
+        f"{FREE_TEXT_OPTION!r} is missing from the parsed {declaration} options. It is the picker's "
+        "free-text escape hatch and has always shipped; its absence means the parse is reading the "
+        "wrong block, or the picker changed in a way this gate has not caught up with."
+    )
+    assert len(parsed) == len({v for v, _ in parsed}), (
+        f"{declaration} ships a duplicate option value: {[v for v, _ in parsed]}"
+    )
+    return parsed
+
+
+def _shipped_options() -> list[tuple[str, str]]:
+    """Every ``{value, label}`` pair the region picker ships, in file order."""
+    return _options_in("REGION_GROUPS")
 
 
 def _population() -> list[tuple[str, str]]:
@@ -185,37 +283,10 @@ def _population() -> list[tuple[str, str]]:
 # ── The population, cross-checked before anything is asserted over it ─────
 
 
-def test_the_picker_parse_finds_every_option_the_file_declares() -> None:
-    """Cross-check the population two independent ways before trusting it.
-
-    A regex that matches nothing yields an empty population, and every
-    ``for option in population`` assertion below then passes while measuring
-    nothing. So the count of parsed pairs is checked against a count taken a
-    different way - occurrences of the ``value:`` key - and the free-text option
-    is asserted present, since it is the one value guaranteed to be in the list.
-    """
-    block = _picker_block()
-    parsed = _shipped_options()
-    declared = len(re.findall(r"\bvalue:", block))
-
-    assert parsed, (
-        "the option regex matched nothing in the REGION_GROUPS block. The picker's quoting or "
-        "option shape has changed; fix the pattern, because an empty population passes every other "
-        "assertion in this file."
-    )
-    assert len(parsed) == declared, (
-        f"the option regex found {len(parsed)} options but the block declares {declared} 'value:' "
-        "keys. The parse is dropping options, and a dropped option is one this gate never checks.\n"
-        f"parsed: {[v for v, _ in parsed]}"
-    )
-    assert FREE_TEXT_OPTION in {v for v, _ in parsed}, (
-        f"{FREE_TEXT_OPTION!r} is missing from the parsed options. It is the picker's free-text "
-        "escape hatch and has always shipped; its absence means the parse is reading the wrong "
-        "block, or the picker changed in a way this gate has not caught up with."
-    )
-    assert len(parsed) == len({v for v, _ in parsed}), (
-        f"the picker ships a duplicate option value: {[v for v, _ in parsed]}"
-    )
+@pytest.mark.parametrize("declaration", ["REGION_GROUPS", "STANDARD_GROUPS"])
+def test_the_picker_parse_finds_every_option_the_file_declares(declaration: str) -> None:
+    """Cross-check both populations two independent ways before trusting them."""
+    _assert_parse_is_complete(declaration)
 
 
 # ── The gate ──────────────────────────────────────────────────────────────
@@ -385,6 +456,198 @@ def test_a_resolved_region_also_reaches_its_country_validation_rule_pack() -> No
         f"these picker regions reach no country rule pack: {missing}. A BOQ imported into such a "
         "project is validated against the generic rules only, and the country rules the market "
         "requires never run."
+    )
+
+
+# ── The second mirror: the standards picker ───────────────────────────────
+
+#: Tokens that appear in a standards label beside the country names and name no
+#: single country. Named rather than skipped, because a token the resolver
+#: cannot read is exactly the shape that let "Austria" sit beside VOCI: silence
+#: from an instrument is indistinguishable from agreement.
+STANDARD_LABEL_TOKENS_THAT_NAME_NO_COUNTRY: dict[str, str] = {
+    "CIS": (
+        "A bloc rather than a country, and the registry maps all five of its construction markets "
+        "to GESN individually (RU, UA, BY, KZ, MN). The label says CIS because a Kazakh estimator "
+        "would not otherwise recognise the row as theirs, and there is nothing for it to resolve "
+        "to that would say more than the countries already do."
+    ),
+}
+
+_PARENTHESISED = re.compile(r"\(([^)]*)\)")
+
+
+def _country_tokens(label: str) -> list[str]:
+    """The country names a standards label claims, in order.
+
+    The convention in the shipped labels is a parenthesised tail listing the
+    countries the standard is read in, separated by a slash or a comma:
+    ``"MasterFormat (US / Canada)"``, ``"GESN / FER (Russia, CIS)"``. Text
+    before the parenthesis is the standard's own name and never a country, which
+    matters because ``"NRM 1/2"`` and ``"GESN / FER"`` both carry the separator.
+
+    Args:
+        label: The option label as shipped.
+
+    Returns:
+        The trimmed tokens, empty when the label names no country.
+    """
+    return [
+        piece.strip() for group in _PARENTHESISED.findall(label) for piece in re.split(r"[/,]", group) if piece.strip()
+    ]
+
+
+def _country_name_to_iso() -> dict[str, str]:
+    """English country name to alpha-2, from the product's shipped registry.
+
+    Raises:
+        AssertionError: The registry is missing or implausibly small. An empty
+            mapping would make every label token unresolvable and the whole
+            standards half of this file would then measure nothing.
+    """
+    assert COUNTRIES_JSON.is_file(), (
+        f"the shipped country registry is not at {COUNTRIES_JSON}. This gate reads it so the "
+        "standards labels are checked against a country list the product ships; do not replace it "
+        "with a name-to-code table written in this file, which would be a third mirror of the same "
+        "data."
+    )
+    rows = json.loads(COUNTRIES_JSON.read_text(encoding="utf-8"))
+    mapping = {row["name_en"].upper(): row["iso_code"].upper() for row in rows if row.get("name_en")}
+    assert len(mapping) > 150, (
+        f"the shipped country registry resolved {len(mapping)} names, which is too few to be the "
+        "real list. Every label token would fall through as unresolvable and this half of the file "
+        "would pass over an empty population."
+    )
+    return mapping
+
+
+def _iso_for_label_token(token: str) -> str | None:
+    """The country a standards-label token names, or ``None``.
+
+    Tried through the product's own resolvers in order: ``normalise_region``,
+    which knows the aliases and macro names, then the shipped country registry's
+    English names, which knows the spellings the resolver deliberately does not
+    chase.
+    """
+    return normalise_region(token) or _country_name_to_iso().get(token.upper())
+
+
+def test_every_shipped_standard_option_is_one_the_registry_can_resolve() -> None:
+    """A value outside the known set is written and then dropped on the floor.
+
+    ``resolve_standard`` accepts an explicit standard only when it is in
+    ``KNOWN_CLASSIFICATION_STANDARDS``. An option carrying a value that is
+    merely labelled writes it onto the project and then falls through to the
+    region and to DIN 276, with no error and nothing a user could see. Three
+    options - UniFormat, Uniclass and OmniClass - and a short ``gbt`` for China
+    once did exactly that.
+    """
+    offenders = sorted(
+        f"{value!r} ({label})"
+        for value, label in _options_in("STANDARD_GROUPS")
+        if value != FREE_TEXT_OPTION and value not in KNOWN_CLASSIFICATION_STANDARDS
+    )
+    assert offenders == [], (
+        f"the standards picker offers {offenders}, which resolve_standard does not accept. Writing "
+        "one onto a project stores a standard the product then ignores, falling through to the "
+        f"region and to {DEFAULT_CLASSIFICATION_STANDARD!r}. Being in "
+        "CLASSIFICATION_STANDARD_LABELS is not enough: a standard has a label so a CostItem encoded "
+        "against it can be named, and it is known only if the product renders a section path for it."
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "label"),
+    [o for o in _options_in("STANDARD_GROUPS") if o[0] != FREE_TEXT_OPTION and _country_tokens(o[1])],
+)
+def test_a_standards_label_names_the_country_the_registry_maps(value: str, label: str) -> None:
+    """The country beside the name must be one that reads that standard.
+
+    The label is hand-written and the registry has no opinion about wording, so
+    the two can drift, and did: "VOCI (Austria)" while ``COUNTRY_TO_STANDARD``
+    resolves VOCI only for IT. An Austrian picking the one row carrying their
+    country's name wrote the Italian standard onto their project, and neither
+    side was internally inconsistent, so nothing anywhere went red.
+    """
+    problems: list[str] = []
+    for token in _country_tokens(label):
+        iso = _iso_for_label_token(token)
+        if iso is None:
+            if token in STANDARD_LABEL_TOKENS_THAT_NAME_NO_COUNTRY:
+                continue
+            problems.append(
+                f"  {token!r} names no country the product knows. Neither normalise_region nor the "
+                "shipped country registry resolves it, so nobody can check what it claims. Spell it "
+                "the way the country registry does, or name it in "
+                "STANDARD_LABEL_TOKENS_THAT_NAME_NO_COUNTRY with the reason it is not a country."
+            )
+            continue
+        actual = standard_for_country(iso)
+        if actual != value:
+            problems.append(
+                f"  {token!r} resolves to {iso}, and the registry maps {iso} to {actual!r}, not "
+                f"{value!r}. An estimator in {token} who picks the row carrying their own country's "
+                f"name writes {value!r} onto their project while their real standard is {actual!r}."
+            )
+
+    assert problems == [], (
+        f"the standards option {value!r} ({label}) names a country the registry disagrees with:\n" + "\n".join(problems)
+    )
+
+
+def test_every_standard_a_country_reads_is_offered_by_the_picker() -> None:
+    """The other direction: a standard nobody can select from the page.
+
+    The picker's own comment records this half of the defect. GESN, BC3, UNTEC,
+    VOCI, SINAPI, Sekisan, KBIM and Birim Fiyat were all resolvable server-side
+    and absent from the page, so an estimator in any of those countries could
+    not name their own standard on a project. A standard added to
+    ``COUNTRY_TO_STANDARD`` tomorrow is unreachable the same way until someone
+    adds the row, and nothing but this would say so.
+
+    The five standards that carry a label and no country - gaeb, omniclass,
+    onorm, uniclass, uniformat - are outside ``KNOWN_CLASSIFICATION_STANDARDS``
+    and so outside this assertion by construction, not by waiver.
+    """
+    offered = {value for value, _ in _options_in("STANDARD_GROUPS")}
+    missing = sorted(s for s in KNOWN_CLASSIFICATION_STANDARDS if s not in offered)
+    assert missing == [], (
+        f"the registry resolves {missing} for at least one country and the standards picker offers "
+        "no row for them, so an estimator in that country cannot name their own standard. Add the "
+        "option with the country beside it, the way the rest of the group is written."
+    )
+
+
+def test_no_declared_label_token_has_quietly_become_resolvable() -> None:
+    """A stale waiver is a waiver nobody reads."""
+    stale = sorted(
+        f"{token!r} now resolves to {_iso_for_label_token(token)!r}"
+        for token in STANDARD_LABEL_TOKENS_THAT_NAME_NO_COUNTRY
+        if _iso_for_label_token(token) is not None
+    )
+    assert stale == [], f"these declarations are dead text and should be deleted: {stale}"
+    thin = sorted(
+        token for token, reason in STANDARD_LABEL_TOKENS_THAT_NAME_NO_COUNTRY.items() if len(reason.strip()) < 20
+    )
+    assert thin == [], f"these declarations carry no usable reason: {thin}"
+
+
+def test_the_five_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> None:
+    """Pin the scope decision so it is a decision and not an omission.
+
+    Five standards carry a display label so a CostItem encoded against them can
+    be named, and no country resolves to them, so the picker does not offer them
+    and the assertions above do not reach them. If a country is ever mapped to
+    one, it enters ``KNOWN_CLASSIFICATION_STANDARDS`` and the completeness test
+    above starts requiring a picker row for it, which is the intended behaviour
+    and the reason this is asserted rather than described in a comment.
+    """
+    unmapped = sorted(set(CLASSIFICATION_STANDARD_LABELS) - set(KNOWN_CLASSIFICATION_STANDARDS))
+    assert unmapped == ["gaeb", "omniclass", "onorm", "uniclass", "uniformat"], (
+        f"the set of labelled-but-countryless standards is now {unmapped}. If one gained a country "
+        "it must also gain a picker row; if one was added, decide deliberately whether any country "
+        "reads it. onorm is the one to look at twice: OENORM is Austria's real standard and Austria "
+        "resolves to din276."
     )
 
 
