@@ -25,7 +25,13 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from app.modules.einvoice_clearance.models import DOCUMENT_STATUSES, EVENT_TYPES
-from app.modules.einvoice_clearance.regimes import REGIMES, SUPPORTED_COUNTRIES
+from app.modules.einvoice_clearance.regimes import (
+    LEGAL_STATUSES,
+    OBLIGATIONS,
+    REGIME_CLASSES,
+    REGIMES,
+    SUPPORTED_COUNTRIES,
+)
 
 # Kept in step with the model tuples by ``test_einvoice_clearance_module.py``.
 # The tuple is what the state machine moves between and this is what the API
@@ -348,8 +354,32 @@ class EventResponse(BaseModel):
     created_at: datetime
 
 
+class CommencementPhaseResponse(BaseModel):
+    """One wave of one obligation, with the source the date was read from.
+
+    The provenance travels to the client. A commencement date is something a
+    business plans around, and one arriving without a citation cannot be checked
+    against the authority that set it.
+    """
+
+    obligation: str
+    effective_date: str = ""
+    scope: str = ""
+    threshold: str = ""
+    legal_status: str = ""
+    source_url: str = ""
+    read_date: str = ""
+    notes: str = ""
+
+
 class CountryRegimeResponse(BaseModel):
-    """One country's regime as the meta endpoint reports it."""
+    """One country's regime as the meta endpoint reports it.
+
+    Everything below ``notes`` was added after the first clients shipped, so all
+    of it is defaulted: a reader written against the older shape sees the same
+    keys with the same meanings, and a country that states no commencement
+    serialises exactly as it did before the field existed.
+    """
 
     country: str
     regime: str
@@ -364,6 +394,15 @@ class CountryRegimeResponse(BaseModel):
     is_cancellable: bool
     correction_mechanism: str
     notes: str
+    # ``regime`` names the act that decides the terminal state; this names the
+    # class the country belongs to, which is ``hybrid`` when it performs more
+    # than one act. Both are reported because they answer different questions.
+    regime_class: str = ""
+    is_hybrid: bool = False
+    additional_regimes: list[str] = Field(default_factory=list)
+    cancellation_basis: str = ""
+    scope: str = ""
+    commencement: list[CommencementPhaseResponse] = Field(default_factory=list)
 
 
 class AdapterResponse(BaseModel):
@@ -378,6 +417,12 @@ class MetaResponse(BaseModel):
     """The vocabularies the UI needs to render this module."""
 
     regimes: list[str] = Field(default_factory=lambda: list(REGIMES))
+    # The three acts plus ``hybrid``. Separate from ``regimes`` because a filter
+    # offering "hybrid" as a fourth act would ask the API for a terminal state
+    # that does not exist.
+    regime_classes: list[str] = Field(default_factory=lambda: list(REGIME_CLASSES))
+    obligations: list[str] = Field(default_factory=lambda: list(OBLIGATIONS))
+    legal_statuses: list[str] = Field(default_factory=lambda: list(LEGAL_STATUSES))
     statuses: list[str] = Field(default_factory=lambda: list(STATUSES))
     event_types: list[str] = Field(default_factory=lambda: list(EVENTS))
     countries: list[CountryRegimeResponse] = Field(default_factory=list)
@@ -392,6 +437,7 @@ __all__ = [
     "AdapterResponse",
     "CancelRequest",
     "ClearanceFinding",
+    "CommencementPhaseResponse",
     "CountryRegimeResponse",
     "DocumentCreateRequest",
     "DocumentResponse",
