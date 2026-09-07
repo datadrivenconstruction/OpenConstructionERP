@@ -469,6 +469,11 @@ def _prose_rejection(text: str, parser: argparse.ArgumentParser) -> str | None:
     tail = text[match.end() :]
     tokens = tail.replace("'", " ").replace("`", " ").split()
     subcommands = _subparsers(parser).choices  # type: ignore[union-attr]
+    # The first word after the program name has to be a subcommand. Without this
+    # a future hint reading "run openconstructionerp start" would pass, because
+    # the flag loop below has nothing to complain about when there are no flags.
+    if tokens and not tokens[0].startswith("-") and tokens[0] not in subcommands:
+        return f"`openconstructionerp {tokens[0]}` is not a subcommand"
     chain = []
     target = parser
     for token in tokens:

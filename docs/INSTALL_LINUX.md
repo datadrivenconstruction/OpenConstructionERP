@@ -147,7 +147,7 @@ Run on a different port. `--port` belongs to the `serve` subcommand, so name it:
 openconstructionerp serve --port 9090
 ```
 
-The bare `openconstructionerp` command takes no flags of its own, and there is no environment variable for the port. `OE_PORT` is read by the one-line installer scripts (`scripts/install.sh`, `scripts/install.ps1`), which use it to build exactly the `serve --port` line above; the application itself never looks at it.
+The bare `openconstructionerp` command takes no flags of its own, and there is no environment variable for the port. `OE_PORT` does appear elsewhere, which is what makes it misleading here: the one-line installer scripts (`scripts/install.sh`, `scripts/install.ps1`) read it to build exactly the `serve --port` line above, and `docker-compose.quickstart.yml` reads it as the host side of its port mapping. On a pip install the application itself never looks at it.
 
 ---
 
