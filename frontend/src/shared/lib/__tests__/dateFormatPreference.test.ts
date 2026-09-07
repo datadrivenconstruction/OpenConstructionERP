@@ -16,6 +16,8 @@
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
 import i18next from 'i18next';
 import { formatDateWithPreference, fmtDate, getIntlLocale } from '../formatters';
+import { LOCALE_MAP } from '../intlLocale';
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { usePreferencesStore, type DateFormat } from '@/stores/usePreferencesStore';
 
 vi.mock('@/shared/lib/api', () => ({ apiGet: vi.fn() }));
@@ -170,5 +172,68 @@ describe('each supported preference value renders its own order', () => {
     usePreferencesStore.getState().setPreference('dateFormat', 'YYYY-MM-DD');
     setLanguage('de');
     expect(fmtDate('2026-03-14')).toBe('2026-03-14');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The one language 'auto' does not follow.
+//
+// Kyrgyz orders a date year, day, month. Spelled out that is idiomatic
+// (`2026-ж., 3-ноябрь`); in digits it prints `2026-03-11` for 3 November and
+// every reader takes it for ISO, so the day and the month swap silently. These
+// assertions have to fail in BOTH directions: red if the exception is reverted,
+// and red if it spreads to a words-based format or to any other language.
+// ---------------------------------------------------------------------------
+
+describe('Kyrgyz is the single all-numeric exception to the auto path', () => {
+  /** 3 November 2026: day and month are both <= 12, so the order is ambiguous. */
+  const AMBIGUOUS = new Date('2026-11-03T12:00:00Z');
+  const NUMERIC_UTC: Intl.DateTimeFormatOptions = { ...NUMERIC_DATE_OPTIONS, timeZone: 'UTC' };
+  const WORDS_UTC: Intl.DateTimeFormatOptions = { ...DATE_OPTIONS, timeZone: 'UTC' };
+
+  it('renders an all-numeric Kyrgyz date day-first instead of year-day-month', () => {
+    expect(formatDateWithPreference(AMBIGUOUS, 'ky', NUMERIC_UTC, 'auto')).toBe('03.11.2026');
+  });
+
+  it('is a correction, not a restatement: the language on its own gets this wrong', () => {
+    // Guards the premise. If a future ICU ships a day-first Kyrgyz short
+    // pattern, this fails and the exception above should be deleted rather
+    // than kept as a no-op that nobody can tell is dead.
+    expect(new Intl.DateTimeFormat('ky', NUMERIC_UTC).format(AMBIGUOUS)).toBe('2026-03-11');
+  });
+
+  it('leaves the words-based Kyrgyz date exactly as the language writes it', () => {
+    // `2026-ж., 3-ноябрь` is correct and unambiguous. The exception must not
+    // reach it, which is the whole reason it keys on a numeric month.
+    expect(formatDateWithPreference(AMBIGUOUS, 'ky', WORDS_UTC, 'auto')).toBe(
+      new Intl.DateTimeFormat('ky', WORDS_UTC).format(AMBIGUOUS),
+    );
+  });
+
+  it('does not leak into any other language on the numeric path', () => {
+    for (const locale of [...LOCALES, 'kk', 'uz', 'ru-KG', 'en-GB', 'th']) {
+      expect(formatDateWithPreference(AMBIGUOUS, locale, NUMERIC_UTC, 'auto'), locale).toBe(
+        new Intl.DateTimeFormat(locale, NUMERIC_UTC).format(AMBIGUOUS),
+      );
+    }
+  });
+
+  it('still lets an explicit preference win, so the escape hatch is intact', () => {
+    expect(formatDateWithPreference(AMBIGUOUS, 'ky', NUMERIC_UTC, 'YYYY-MM-DD')).toBe('2026-11-03');
+  });
+
+  it('is an exception of exactly one across every offered language', () => {
+    // The population, printed beside the verdict. A gate whose denominator is
+    // not the whole set can be satisfied by narrowing the set instead.
+    const unreadable = SUPPORTED_LANGUAGES.filter(({ code }) => {
+      const tag = LOCALE_MAP[code] ?? code;
+      const order = new Intl.DateTimeFormat(tag, NUMERIC_UTC)
+        .formatToParts(AMBIGUOUS)
+        .filter((p) => p.type !== 'literal')
+        .map((p) => p.type.charAt(0))
+        .join('');
+      return !['dmy', 'mdy', 'ymd'].includes(order);
+    }).map((entry) => entry.code);
+    expect(unreadable).toEqual(['ky']);
   });
 });

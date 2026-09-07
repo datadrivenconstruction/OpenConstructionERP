@@ -13,8 +13,14 @@
 import { useSyncExternalStore } from 'react';
 import i18next from 'i18next';
 
-/** i18next language code → Intl BCP-47 locale tag */
-const LOCALE_MAP: Record<string, string> = {
+/**
+ * i18next language code → Intl BCP-47 locale tag.
+ *
+ * Exported so a test can audit THIS map rather than a second copy of it. A
+ * census that reconstructs the mapping it is checking proves the two copies
+ * agree, not that the shipped one is right.
+ */
+export const LOCALE_MAP: Record<string, string> = {
   de: 'de-DE',
   da: 'da-DK',
   cs: 'cs-CZ',
