@@ -69,8 +69,12 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #: ``RU/NDS`` was added on 2026-09-07, and this test failing is what it was
 #: supposed to do. What was looked at before updating it:
 #:
-#: * Russia raised standard VAT from 20 % to 22 % with effect from
-#:   2026-01-01 (НК РФ ст. 164 as amended). The seed file had gone on
+#: * Russia raised standard VAT from 20 % to 22 % by Federal Law No. 425-FZ,
+#:   signed 28 November 2025, amending article 164 of the Tax Code, in force
+#:   from 2026-01-01. Source read for that: Federal Tax Service, "Taxes
+#:   2026", https://www.nalog.gov.ru/new2026/ (read 2026-09-07), which gives
+#:   the rate as 20 % to 22 % applying to sales of goods, works and services
+#:   from 1 January 2026. The seed file had gone on
 #:   shipping one open window at 20 % dated from 2019-01-01, so every
 #:   Russian document dated in 2026 was priced two points low for the eight
 #:   months between the change and this commit. The 20 % window is closed at

@@ -50,8 +50,8 @@ So the population is derived from the shipped file rather than written out, and
 returns. The mechanism is general; the set of rate lines it will touch is not
 allowed to grow without somebody saying so.
 
-That set is two lines now, ``CA/HST_NS`` and ``IL/VAT``, and the second one is
-what the generality was bought for. Israel raised standard VAT from 17 % to
+That set is three lines now, ``CA/HST_NS``, ``IL/VAT`` and ``RU/NDS``, and the
+second one is what the generality was bought for. Israel raised standard VAT from 17 % to
 18 % on 2025-01-01 and the seed file went on shipping 17 as the rate in force,
 which is the same defect as Nova Scotia's in a second country. It was found by
 reading, not by a red test, because no gate compared the seeded rate against
@@ -60,6 +60,23 @@ said 18 the whole time. ``tests/unit/test_tax_tables_do_not_drift.py`` compares
 them now. Closing the Israeli window here needed no new code at all: the pair
 went into the seed file and this repair picked it up, which is what "the
 generality buys the next one" was a promise about.
+
+``RU/NDS`` is the third, added 2026-09-07, and it is the statutory fact written
+down where the rows are rewritten rather than only where they are shipped.
+Russia raised standard VAT from 20 % to 22 % by Federal Law No. 425-FZ, signed
+28 November 2025, amending article 164 of the Tax Code, in force from
+1 January 2026. Source read for that: Federal Tax Service, "Taxes 2026",
+https://www.nalog.gov.ru/new2026/ (read 2026-09-07), which gives the rate as
+20 % to 22 % applying to sales of goods, works and services from 1 January 2026
+and lists the 10 % reduced class among the rates that did not change, which is
+why ``NDS_RED`` is untouched. The seed had gone on shipping one open window at
+20 % dated from 2019-01-01, so this repair closes that window at 2025-12-31 on
+installs in the field and inserts the 22 % one beside it. Both Russian windows
+keep ``is_default`` true, the Israeli way, and there the flag standing still is
+a constraint rather than a convenience: see the note in
+``tests/unit/test_tax_window_supersede_population.py`` for why unflagging the
+closed window would leave Russia with no resolvable rate at all from 2019 to
+2025.
 
 Recognising our own row, and the limit of it
 --------------------------------------------
