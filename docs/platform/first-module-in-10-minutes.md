@@ -240,7 +240,7 @@ class SiteLogEntryHasNoteRule(ValidationRule):
 
 
 def register_site_log_rules() -> None:
-    rule_registry.register(SiteLogEntryHasNoteRule(), ["site_log", "project_completeness"])
+    rule_registry.register(SiteLogEntryHasNoteRule(), ["site_log"])
     logger.debug("Registered site_log validation rules")
 
 
@@ -249,8 +249,16 @@ register_site_log_rules()
 ```
 
 This is the exact shape used by `backend/app/modules/carbon/validators.py`. The
-rule now belongs to two rule sets, its own `site_log` set and the shared
-`project_completeness` set, so a project completeness check picks it up too.
+rule belongs to the `site_log` set, which is the set it is about, and anyone who
+asks for that set gets it.
+
+A rule can be registered into more than one set, and the second name is worth
+thinking about before you write it. A set that no rule implements comes back
+from the engine in `unsupported_rule_sets` and the dashboard shows it under
+"not implemented (did not run)". Your one rule is enough to make that whole set
+resolve, and then the same dashboard shows it as a check that ran and found
+nothing, which is a stronger claim than your module can make. Add your rule to
+a set you would be willing to answer for, and leave the rest visibly empty.
 
 ## Step 6: register permissions
 

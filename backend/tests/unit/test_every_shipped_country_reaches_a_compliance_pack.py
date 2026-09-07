@@ -114,10 +114,11 @@ NON_JURISDICTION_RULE_SETS: dict[str, str] = {
         "trade pack with no country, so no jurisdiction should reach it."
     ),
     "project_completeness": (
-        "Registered by the carbon module's validators, not by "
-        "register_builtin_rules. A cross-cutting completeness set the demo "
-        "path runs directly; it names no jurisdiction and blocking a contract "
-        "signature on it would be a different decision from this one."
+        "No rule implements it. Twenty two demo templates declare it and the "
+        "engine reports it as unsupported, which is how the dashboard draws it "
+        "as a check that did not run. It names no jurisdiction either, so "
+        "reaching it from a country's contract-signature gate would be a "
+        "different decision from this one."
     ),
 }
 

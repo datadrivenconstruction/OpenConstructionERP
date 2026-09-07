@@ -474,9 +474,9 @@ teach identifiers that were never rule sets at all.
 | `hungary` | Hungarian item orders, material and fee split (HU) |
 
 Modules add more. Anything with a `validators.py` registers its own sets when it
-loads, `formwork` and `carbon_6d` and `project_completeness` among them, and
-several of them register additional rules into sets that already exist. So the
-list an installation actually has is longer than the one above and depends on
+loads, `formwork` and `carbon_6d` among them, and several of them register
+additional rules into sets that already exist. So the list an installation
+actually has is longer than the one above and depends on
 which modules are enabled. Read it from the installation rather than from here
 when it matters, and note that no rule count is published in this table for the
 same reason: the number changes with what is loaded, so it would describe the

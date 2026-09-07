@@ -166,8 +166,8 @@ severity (error, warning, or info), and a category (structure, completeness,
 consistency, compliance, quality, custom, or diagnostic, the last being an engine or
 infrastructure failure rather than a compliance finding). Rules are grouped into named
 rule sets
-such as `din276`, `gaeb`, `nrm`, `masterformat`, `boq_quality`, `bim_compliance`, and
-`project_completeness`, plus regional sets. The engine runs the selected rule sets over
+such as `din276`, `gaeb`, `nrm`, `masterformat`, `boq_quality`, and `bim_compliance`,
+plus regional sets. The engine runs the selected rule sets over
 the data and returns a `ValidationReport` with an overall status, a severity-weighted
 quality score from 0.0 to 1.0, and one result per checked element that links back to its
 source, whether that is a BOQ position, a drawing area, or a cost item. The UI shows the

@@ -29,6 +29,10 @@ default unit lane is not. The check itself needs no database.
 from __future__ import annotations
 
 import ast
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -288,11 +292,11 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "app" / "scripts"
 
 #: Rule sets a demo asks for that the engine does not register.
 #:
-#: ``project_completeness`` is declared by fifteen demo templates and no rule
+#: ``project_completeness`` is declared by twenty two demo templates and no rule
 #: registers into it. Requesting it prints "Validation requested unimplemented
 #: rule set(s): project_completeness (no rules registered)" and the run
-#: continues, so fifteen dashboards promise a completeness check and show
-#: nothing. Whether that set gets written or the fifteen declarations get
+#: continues, so twenty two dashboards promise a completeness check and show
+#: nothing. Whether that set gets written or the declarations get
 #: dropped is a product decision and not this test's to make, so it is named
 #: here rather than hidden by a wildcard: a new pack cannot quietly join it,
 #: and ``test_the_allowlist_still_describes_the_tree`` fails the day it is
@@ -454,4 +458,142 @@ def test_the_hungarian_demos_ask_for_the_rule_set_that_exists() -> None:
     assert not (hungarian_demos & set(declared.get("tetelrend", []))), (
         "a Hungarian demo names tetelrend as a rule set again. That is the "
         "classification standard; the rules register under hungary."
+    )
+
+
+# ── The registry a dashboard actually runs against ─────────────────────────
+#
+# Everything above asks a registry that only ``register_builtin_rules`` has
+# filled. That is not the registry the product runs. The module loader imports
+# every module's ``validators.py`` at boot, and those imports register rules of
+# their own, some of them into sets they do not own. So the allowlist above can
+# be green while the shipped software disagrees with it, and the population is
+# the reason: the check never loaded the half of the tree where the
+# disagreement lives.
+#
+# It was not hypothetical. The carbon module registered its 6D coverage rule
+# into ``project_completeness`` as a second set alongside ``carbon_6d``. At
+# runtime that made the set resolve to a rule, so ``resolve_rule_sets`` put it
+# in the supported bucket, the report stopped listing it as unimplemented, and
+# the twenty two demo dashboards that ask for it showed completeness as a check
+# that ran and found nothing. The rule itself returns no results unless the
+# data carries BIM element counts, which a BOQ demo never does, so there was
+# nothing on screen to contradict the clean bill either.
+#
+# The sweep runs in a subprocess on purpose. Importing forty two validator
+# modules mutates the process-global registry for every test that follows it,
+# and a registry that grows on import answers differently depending on the
+# order tests happen to run in.
+
+_SWEEP_SOURCE = """
+import importlib
+import json
+import pathlib
+import sys
+
+import app
+from app.core.validation.engine import rule_registry
+from app.core.validation.rules import register_builtin_rules
+
+register_builtin_rules()
+modules_dir = pathlib.Path(app.__file__).resolve().parent / "modules"
+paths = sorted(modules_dir.glob("*/validators.py"))
+failures = {}
+imported = 0
+for path in paths:
+    name = "app.modules." + path.parent.name + ".validators"
+    try:
+        importlib.import_module(name)
+        imported += 1
+    except Exception as exc:
+        failures[name] = type(exc).__name__ + ": " + str(exc)
+print(
+    json.dumps(
+        {
+            "app_file": app.__file__,
+            "on_disk": len(paths),
+            "imported": imported,
+            "failures": failures,
+            "sets": sorted(rule_registry.list_rule_sets()),
+            "members": {
+                wanted: [rule.rule_id for rule in rule_registry.get_rules_for_sets([wanted])]
+                for wanted in sys.argv[1:]
+            },
+        }
+    )
+)
+"""
+
+
+@pytest.fixture(scope="module")
+def boot_registry() -> dict:
+    """Registry contents after the built-in rules and every module validator.
+
+    Answers in a fresh interpreter, and reports what it managed to load so the
+    caller can refuse a verdict taken over a collapsed population.
+    """
+    env = dict(os.environ)
+    backend_root = str(Path(__file__).resolve().parents[2])
+    env["PYTHONPATH"] = os.pathsep.join([backend_root, env["PYTHONPATH"]]) if env.get("PYTHONPATH") else backend_root
+    # Settings refuse to construct without a PostgreSQL URL and nine validator
+    # modules import them. The sweep imports, it never connects, so a
+    # placeholder is enough and keeps the population complete on a machine
+    # where the variable is unset.
+    if not env.get("DATABASE_URL", "").startswith("postgres"):
+        env["DATABASE_URL"] = "postgresql+asyncpg://gate:gate@127.0.0.1:5432/gate"
+
+    proc = subprocess.run(
+        [sys.executable, "-c", _SWEEP_SOURCE, *sorted(_UNREGISTERED_DEMO_RULE_SETS)],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=backend_root,
+        check=False,
+        timeout=600,
+    )
+    assert proc.returncode == 0, f"the sweep subprocess failed:\n{proc.stdout}\n{proc.stderr}"
+    return json.loads(proc.stdout.strip().splitlines()[-1])
+
+
+def test_the_sweep_loaded_the_tree_and_every_validator_in_it(boot_registry: dict) -> None:
+    """The population is asserted next to the verdict below, not assumed.
+
+    Two ways this sweep can lie and both are silent. It can import ``app`` from
+    an installed copy rather than from the tree, and it can lose a validator
+    module to an unrelated import error, which would take that module's
+    registrations out of the check without taking anything red with them.
+    """
+    print(f"\nPOPULATION: app imported from {boot_registry['app_file']}")
+    assert str(Path(__file__).resolve().parents[2]) in boot_registry["app_file"], (
+        "the sweep imported app from outside this tree, so it measured some "
+        f"other copy of the software: {boot_registry['app_file']}"
+    )
+
+    on_disk, imported = boot_registry["on_disk"], boot_registry["imported"]
+    print(f"POPULATION: {imported} of {on_disk} module validators imported, {len(boot_registry['sets'])} rule sets")
+    assert on_disk >= 40, f"only {on_disk} validator modules found, so this sweep checks almost nothing"
+    assert imported == on_disk, (
+        f"{on_disk - imported} of {on_disk} validator modules did not import, so their "
+        f"registrations are missing from the verdict below: {boot_registry['failures']}"
+    )
+
+
+def test_the_allowlist_still_describes_the_running_software(boot_registry: dict) -> None:
+    """The allowlist above, re-asked of the registry the product boots with.
+
+    Same assertion as ``test_the_allowlist_still_describes_the_tree``, over the
+    population that test cannot see. A module that tags a demo-declared set as
+    a second home for one of its own rules turns "not implemented" into "ran
+    and found nothing" on every dashboard that asks for the set, and until this
+    ran there was nowhere that could go red.
+    """
+    members = {name: rules for name, rules in boot_registry["members"].items() if rules}
+    assert not members, (
+        "these rule sets are on _UNREGISTERED_DEMO_RULE_SETS, and with the module "
+        "validators loaded they resolve to rules, so the engine reports them as "
+        "supported and every dashboard that asks for one shows a check that ran "
+        "and found nothing: "
+        + "; ".join(f"{name} <- {', '.join(rules)}" for name, rules in sorted(members.items()))
+        + ". Either the set is implemented, in which case it leaves the allowlist, "
+        "or the rule belongs to its own set and should not be registered into this one."
     )

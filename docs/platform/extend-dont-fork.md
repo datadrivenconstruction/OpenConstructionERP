@@ -140,11 +140,14 @@ short version:
 ```python
 from app.core.validation.engine import rule_registry
 # ... define a ValidationRule subclass ...
-rule_registry.register(MyRule(), ["my_set", "project_completeness"])
+rule_registry.register(MyRule(), ["my_set", "boq_quality"])
 ```
 
-Registering into an existing shared set such as `project_completeness` extends a
-built-in check with your rule, again without touching core.
+Registering into an existing set such as `boq_quality` extends a built-in check
+with your rule, again without touching core. Pick a set your rule really answers
+for. A set nothing implements is reported as unsupported and drawn on the
+dashboard as a check that did not run, and a single rule registered into it
+turns that honest gap into a check that ran and found nothing.
 
 ## The payoff
 

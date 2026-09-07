@@ -366,13 +366,19 @@ class Carbon6DCoverageRule(ValidationRule):
         ...
 
 def register_carbon_validation_rules() -> None:
-    rule_registry.register(Carbon6DCoverageRule(), ["carbon_6d", "project_completeness"])
+    rule_registry.register(Carbon6DCoverageRule(), ["carbon_6d"])
 
 # Side-effect registration on import (module-loader autodiscovery contract).
 register_carbon_validation_rules()
 ```
 
 The [tutorial](./first-module-in-10-minutes.md) adds a rule this way.
+
+Register a rule into the set it is about, and no others. A set that no rule
+implements is reported to the caller as unsupported and shown on the dashboard
+as a check that did not run, which is the truth. Adding one unrelated rule to
+it makes the whole set resolve, so the same dashboard shows it as a check that
+ran and found nothing.
 
 ## How modules reach the marketplace
 

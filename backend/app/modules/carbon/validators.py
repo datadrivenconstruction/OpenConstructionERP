@@ -172,8 +172,24 @@ class Carbon6DCoverageRule(ValidationRule):
 
 
 def register_carbon_validation_rules() -> None:
-    """Register the carbon module's validation rules with the global registry."""
-    rule_registry.register(Carbon6DCoverageRule(), ["carbon_6d", "project_completeness"])
+    """Register the carbon module's validation rules with the global registry.
+
+    ``carbon_6d`` and nothing else. This rule used to be registered into
+    ``project_completeness`` as well, which is a set no rule implements and
+    twenty two demo templates ask for. One rule was enough to make the set
+    resolve, so ``resolve_rule_sets`` bucketed it as supported, it left
+    ``unsupported_rule_sets``, and the dashboard stopped listing it under "not
+    implemented (did not run)". What it showed instead was a completeness check
+    that ran and found nothing, because this rule returns no results at all
+    unless the data carries BIM element counts and a BOQ demo never does.
+
+    ``RuleRegistry.has_rules`` states the invariant that broke: a set that
+    resolves to nothing must never read as "ran and passed", it simply did not
+    run. A rule registers into the set it is about, so a set nobody has written
+    stays visibly empty instead of being answered by a rule from another
+    concern.
+    """
+    rule_registry.register(Carbon6DCoverageRule(), ["carbon_6d"])
     logger.debug("Registered carbon validation rules")
 
 
