@@ -139,25 +139,22 @@ GUARD_MARKERS = (
 
 # Revisions that are unguarded, are known to be unguarded, and have shipped.
 #
-# These are not exempt because they are safe. The first is the revision whose
-# replay was measured failing with DuplicateColumn, and the second adds a unique
-# constraint to a table it does not create. They are listed because editing a
-# migration that has already shipped is a decision about the product rather than
-# a cleanup, and that decision is owned elsewhere. The gate names them so the
-# debt is visible in the source instead of absent from it.
+# EMPTY, AND THAT IS THE POINT. The gate is green because the tree is clean, not
+# because anything is excused. It briefly held the two revisions this gate was
+# widened to catch, 24f9595e16d0 and 85f7cfa6eecf; both were then guarded and the
+# replay that used to die on DuplicateColumn was measured completing, so they
+# came off the list rather than living on it.
+#
+# The mechanism stays here so the next person who needs it finds it instead of
+# inventing a second one. Add a filename mapped to a one-line reason, and only
+# for a revision that has already shipped, because editing a shipped migration is
+# a decision about the product rather than a cleanup. A revision that has not
+# shipped gets a guard, not an entry.
 #
 # The list is self-policing: an entry whose file has gained a guard, has stopped
 # doing additive DDL, or has disappeared is itself reported as a failure, so it
-# cannot rot into a permanent hole.
-KNOWN_UNGUARDED = {
-    "24f9595e16d0_add_co_rejected_fields.py": (
-        "batch.add_column on oe_changeorders_order; replay measured failing with "
-        "DuplicateColumn on rejected_by"
-    ),
-    "85f7cfa6eecf_co_unique_project_code.py": (
-        "batch.create_unique_constraint uq_changeorders_project_code on a table it does not create"
-    ),
-}
+# cannot rot into a permanent hole. Prefer emptying it to growing it.
+KNOWN_UNGUARDED: dict[str, str] = {}
 
 
 @dataclass
@@ -229,12 +226,23 @@ def scan(entries: list[tuple[str, str]]) -> Scan:
     return result
 
 
-def stale_exemptions(entries: list[tuple[str, str]], result: Scan) -> list[str]:
-    """Entries in KNOWN_UNGUARDED that no longer describe the tree."""
+def stale_exemptions(
+    entries: list[tuple[str, str]],
+    result: Scan,
+    known: dict[str, str] | None = None,
+) -> list[str]:
+    """Entries in KNOWN_UNGUARDED that no longer describe the tree.
+
+    ``known`` is injectable so this stays testable in both directions while the
+    real list is empty. A rot check that can only be exercised when the list has
+    entries stops being exercised the moment the list is cleaned out, which is
+    exactly when it starts to matter again.
+    """
+    known = KNOWN_UNGUARDED if known is None else known
     present = {name for name, _ in entries}
     still_unguarded = {name for name, _ in result.unguarded}
     stale = []
-    for name in sorted(KNOWN_UNGUARDED):
+    for name in sorted(known):
         if name not in present:
             stale.append(
                 f"{name}: listed as known-unguarded but no such revision exists"
@@ -336,7 +344,14 @@ def main() -> int:
             "        inspector = sa.inspect(bind)\n"
             '        if not _has_column(inspector, "oe_your_table", "your_column"):\n'
             "            op.add_column(...)\n\n"
-            "Raw SQL may write IF NOT EXISTS instead.\n",
+            "Raw SQL may write IF NOT EXISTS instead.\n\n"
+            "If you do not recognise the revision named above, it is probably not yours.\n"
+            "This gate reads the versions directory on DISK, not the git index, so in a\n"
+            "tree several sessions write to at once it sees another session's untracked\n"
+            "work in progress. That is deliberate: an unguarded revision breaks the same\n"
+            "upgrade whether or not it has been committed yet, and a gate that only looked\n"
+            "at committed files would go green until the moment it was too late to matter.\n"
+            "Tell whoever owns the file rather than guarding it for them.\n",
             file=sys.stderr,
         )
         failed = True

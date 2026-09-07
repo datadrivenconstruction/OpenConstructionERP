@@ -206,16 +206,26 @@ def test_the_gate_examines_every_revision_file_on_disk() -> None:
     )
 
 
-def test_the_committed_tree_carries_no_unguarded_revision_beyond_the_named_ones() -> None:
-    """Deliberately not pinned to a count.
+def test_no_revision_in_the_tree_is_unguarded() -> None:
+    """The whole point, over the tree that ships.
 
-    The two grandfathered revisions are named in ``KNOWN_UNGUARDED`` rather than
-    counted here, so that fixing one of them turns this green rather than red.
+    Not pinned to a count and not written against the exemption list, so that a
+    revision gaining a guard turns this greener rather than redder.
     """
     result = gate.scan(gate.read_versions())
-    unexpected = [name for name, _ in result.unguarded if name not in gate.KNOWN_UNGUARDED]
+    unguarded = [name for name, _ in result.unguarded]
 
-    assert unexpected == [], f"new unguarded revisions: {unexpected}"
+    assert unguarded == [], f"unguarded revisions: {unguarded}"
+
+
+def test_the_exemption_list_is_empty() -> None:
+    """Green because the tree is clean, not because anything is excused.
+
+    This is the assertion that keeps the allowlist from becoming the easy answer
+    to a red gate. Adding a name here has to be a deliberate act that fails this
+    test and makes someone justify it, rather than a quiet edit nobody sees.
+    """
+    assert gate.KNOWN_UNGUARDED == {}, f"revisions excused rather than guarded: {sorted(gate.KNOWN_UNGUARDED)}"
 
 
 def test_the_exemption_list_cannot_rot() -> None:
@@ -231,32 +241,36 @@ def test_the_exemption_list_cannot_rot() -> None:
 
 
 def test_a_stale_exemption_is_reported() -> None:
-    """The other direction: prove the rot check can go red."""
-    fixed = next(iter(gate.KNOWN_UNGUARDED))
-    # Every exemption has to be present, or the others report as missing rather
-    # than as fixed and the assertion below stops being about this one.
-    entries = [
-        (
-            name,
-            _HEADER
-            + (_PROBE if name == fixed else "def upgrade():\n")
-            + '    op.add_column("oe_t", sa.Column("c", sa.String()))\n',
-        )
-        for name in gate.KNOWN_UNGUARDED
-    ]
+    """The other direction: prove the rot check can go red.
+
+    Driven through an injected list rather than the real one, which is empty. A
+    rot check exercised only when the list has entries stops being exercised the
+    moment the list is cleaned out, which is when it starts to matter again.
+    """
+    known = {"v9002_was_fixed.py": "guarded since"}
+    entries = [("v9002_was_fixed.py", _HEADER + _PROBE + '    op.add_column("oe_t", sa.Column("c", sa.String()))\n')]
     result = gate.scan(entries)
 
-    stale = gate.stale_exemptions(entries, result)
+    stale = gate.stale_exemptions(entries, result, known)
 
     assert len(stale) == 1
-    assert stale[0].startswith(fixed)
+    assert stale[0].startswith("v9002_was_fixed.py")
     assert "guarded now" in stale[0]
 
 
 def test_a_missing_exemption_is_reported() -> None:
-    result = gate.scan([])
+    known = {"v9003_deleted.py": "no longer present"}
 
-    stale = gate.stale_exemptions([], result)
+    stale = gate.stale_exemptions([], gate.scan([]), known)
 
-    assert len(stale) == len(gate.KNOWN_UNGUARDED)
-    assert all("no such revision" in line for line in stale)
+    assert len(stale) == 1
+    assert "no such revision" in stale[0]
+
+
+def test_an_exemption_that_still_describes_the_tree_is_not_reported() -> None:
+    """The green direction for the rot check, so it is not a one-way alarm."""
+    known = {"v9004_still_bad.py": "still unguarded"}
+    entries = [("v9004_still_bad.py", _HEADER + _UNGUARDED["add_column"])]
+    result = gate.scan(entries)
+
+    assert gate.stale_exemptions(entries, result, known) == []
