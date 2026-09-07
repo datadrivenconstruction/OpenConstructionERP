@@ -2084,7 +2084,7 @@ export function ContactsPage() {
             about a set nobody asked about. */}
         {contactsPage && <TruncationNotice page={contactsPage} className="mb-3" />}
         {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="p-4">
                 <div className="flex items-center gap-2.5">
@@ -2152,7 +2152,14 @@ export function ContactsPage() {
                 count: filtered.length,
               })}
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* grid-cols-1 at the base width is not cosmetic. Without it there
+                is no grid-template-columns below sm, so the implicit single
+                track is auto-sized and takes the cards' min-content instead of
+                the container: measured 704.719px inside a 360px column, which
+                scrolled the page to 720px at 390. grid-cols-1 resolves to
+                minmax(0, 1fr), which caps the track and lets the truncating
+                fields inside each card do their job. */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((contact) => (
                 <ContactCard
                   key={contact.id}

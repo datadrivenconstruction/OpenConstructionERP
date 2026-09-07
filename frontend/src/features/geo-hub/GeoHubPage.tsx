@@ -947,7 +947,11 @@ export function GeoHubPage() {
       <BetaBanner moduleKey="geo-hub" className="mt-3" />
       <header
         className={[
-          'flex items-center gap-4 border-b border-border bg-surface-primary',
+          // flex-wrap: the picker cluster on the right is 811px wide, so on a
+          // phone this single nowrap row scrolled the page to 949px. Wrapping
+          // only engages when the row cannot fit, so the desktop single-line
+          // header is untouched.
+          'flex flex-wrap items-center gap-4 border-b border-border bg-surface-primary',
           'px-5 py-3',
         ].join(' ')}
       >
@@ -979,7 +983,9 @@ export function GeoHubPage() {
               'Drag to rotate · scroll to zoom · click a project pin to open. Click a project in the left list to fly the camera.',
           })}
         </p>
-        <div className="ml-auto flex items-center gap-2">
+        {/* max-w-full + flex-wrap so the four pickers stack onto extra rows on
+            a narrow screen instead of running off the side of the page. */}
+        <div className="ml-auto flex max-w-full flex-wrap items-center gap-2">
           <EngineModePicker current={engine} onChange={setEngine} />
           {/* The 3D globe carries Cesium's projection picker; the 2D map
               carries the basemap picker (streets / minimal / paper). */}

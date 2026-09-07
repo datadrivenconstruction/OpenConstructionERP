@@ -82,7 +82,14 @@ export function tabIds(prefix: string) {
 
 const VARIANT_CLASSES: Record<TabBarVariant, { container: string }> = {
   underline: {
-    container: 'flex items-stretch border-b border-border-light',
+    // overflow-x-auto: the strip is one nowrap row, so a register with many
+    // tabs pushed the whole page sideways on a phone - /finance reached 909px
+    // of page scroll at a 390px viewport with 8 tabs, and change intelligence
+    // reached 1672px with 16. Scrolling the strip is the usual mobile answer
+    // and it costs nothing when the tabs already fit, which is every desktop
+    // width we ship. Only this variant is scoped; pill and segmented lay out
+    // differently and were not measured.
+    container: 'flex items-stretch overflow-x-auto border-b border-border-light',
   },
   pill: {
     container: 'flex items-center gap-1 p-1 rounded-lg bg-surface-secondary',

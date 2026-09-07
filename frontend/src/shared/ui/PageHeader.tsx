@@ -65,7 +65,15 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
       ) : (
         <div className="min-w-0 flex-1" aria-hidden />
       )}
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
+      {/* max-w-full: shrink-0 keeps the buttons from being squeezed while they
+          share the row with the subtitle, but it also meant this box was never
+          narrowed to the container, so its own flex-wrap could never fire. On a
+          390px viewport the seven action buttons laid out in one 668px line and
+          scrolled the whole page sideways. The cap is inert whenever the row
+          fits, so wide layouts are unchanged. */}
+      {actions && (
+        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{actions}</div>
+      )}
     </div>
   );
 }
