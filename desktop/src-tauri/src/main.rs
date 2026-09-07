@@ -1772,6 +1772,7 @@ enum StartupOutcome {
 }
 
 /// Why the startup wait gave up.
+#[derive(Debug, PartialEq, Eq)]
 enum TimeoutKind {
     /// The backend went quiet: nothing on stdout or stderr for a long time,
     /// which means the step it was on is not progressing.
@@ -1779,6 +1780,10 @@ enum TimeoutKind {
     /// The backend kept talking and still never became ready, so the absolute
     /// ceiling ran out.
     TookTooLong,
+    /// The backend never wrote a single line, so it never got as far as running
+    /// its own code. On Windows that is the one-file bootloader still unpacking
+    /// the program, which is a phase that writes nothing at all.
+    NeverSpoke,
 }
 
 /// What the sidecar's output pump knows about the backend's progress.
@@ -1789,20 +1794,22 @@ enum TimeoutKind {
 ///   backend still doing something", which is the question a timeout should
 ///   actually ask. Reading only STAGE markers would not answer it - migrations,
 ///   the module load and first-run seeding emit no markers at all, and a
-///   recovering database emits one and then works in silence.
+///   recovering database emits one and then works in silence. It is `None`
+///   until the first line arrives, because before that there is no silence to
+///   measure: the sidecar has not begun to run.
 /// * `last_stage` remembers WHICH step the backend last named, so that when the
 ///   wait does give up it can say what the backend was busy with instead of
 ///   only that it was slow.
 #[derive(Clone)]
 struct BootProgress {
-    last_output: Arc<Mutex<Instant>>,
+    last_output: Arc<Mutex<Option<Instant>>>,
     last_stage: Arc<Mutex<Option<(String, String)>>>,
 }
 
 impl BootProgress {
     fn new() -> Self {
         Self {
-            last_output: Arc::new(Mutex::new(Instant::now())),
+            last_output: Arc::new(Mutex::new(None)),
             last_stage: Arc::new(Mutex::new(None)),
         }
     }
@@ -1810,7 +1817,7 @@ impl BootProgress {
     /// Record that the sidecar wrote something, whatever it was.
     fn saw_output(&self) {
         if let Ok(mut slot) = self.last_output.lock() {
-            *slot = Instant::now();
+            *slot = Some(Instant::now());
         }
     }
 
@@ -1821,15 +1828,21 @@ impl BootProgress {
         }
     }
 
-    /// How long the sidecar has said nothing at all.
+    /// How long the sidecar has said nothing at all, or `None` when it has
+    /// never said anything.
+    ///
+    /// The two are different states and the caller has to be able to tell them
+    /// apart. A backend that spoke and then stopped can be judged; a sidecar
+    /// that has not spoken yet has not started, and there is nothing about it
+    /// to judge.
     ///
     /// A poisoned lock reports zero rather than a huge silence: the timeout
     /// this feeds must never fire because a mutex broke.
-    fn quiet_for(&self) -> Duration {
-        self.last_output
-            .lock()
-            .map(|slot| slot.elapsed())
-            .unwrap_or_else(|_| Duration::from_secs(0))
+    fn quiet_for(&self) -> Option<Duration> {
+        match self.last_output.lock() {
+            Ok(slot) => slot.map(|at| at.elapsed()),
+            Err(_) => Some(Duration::from_secs(0)),
+        }
     }
 
     /// The last step the sidecar named, if it named one.
@@ -1908,7 +1921,55 @@ fn judge_health(body: &str) -> HealthProbe {
 /// so the backend that this limit abandons is one that really has stopped.
 /// Abandoning a working backend is strictly worse than waiting longer for a
 /// broken one, so when in doubt this number goes up, not down.
+///
+/// It applies only once the sidecar has written its first line. See
+/// `startup_give_up` for why, and for what is left guarding the phase before
+/// that.
 const STARTUP_QUIET_TIMEOUT: Duration = Duration::from_secs(240);
+
+/// Decide whether the startup wait has run out, from the only two facts it has.
+///
+/// Pure, so the three ways a start can be abandoned can be written down as data
+/// rather than reproduced by waiting minutes in front of a real backend.
+///
+/// The rule that matters is the first one. Silence is only evidence about a
+/// process that has spoken. On Windows the sidecar is a one-file bundle, so
+/// every launch unpacks the whole program, embedded PostgreSQL included, before
+/// a single line of this project's code runs, and the bootloader writes nothing
+/// while it does that. Counting that phase as silence measured the disk and
+/// called it a wedged backend: an unpack has been measured at 302 seconds on a
+/// published build, against a 240 second limit, so a slow or nearly full drive
+/// was enough to have a start that was working perfectly abandoned two minutes
+/// short. The launcher then reported it as the backend having stopped
+/// responding, which sent both the user and us looking at the wrong thing.
+///
+/// Nothing is lost by not judging that phase. A bundle that cannot unpack says
+/// so on stderr and the sidecar exits, which the termination handler reports at
+/// once and by name; a sidecar that dies for any other reason is reported the
+/// same way. What is left for the ceiling is the case where the unpacking is
+/// merely slow, and for that the honest answer is to wait and then say plainly
+/// that the program never got as far as starting.
+fn startup_give_up(
+    quiet_for: Option<Duration>,
+    elapsed: Duration,
+    ceiling: Duration,
+) -> Option<TimeoutKind> {
+    // No `unwrap_or(elapsed)` here, and that is the whole fix: silence since
+    // launch is not silence, it is a process that has not started talking yet.
+    if let Some(quiet) = quiet_for {
+        if quiet >= STARTUP_QUIET_TIMEOUT {
+            return Some(TimeoutKind::WentQuiet(quiet));
+        }
+    }
+    if elapsed >= ceiling {
+        return Some(if quiet_for.is_none() {
+            TimeoutKind::NeverSpoke
+        } else {
+            TimeoutKind::TookTooLong
+        });
+    }
+    None
+}
 
 /// Wait for the backend to become fit to open.
 ///
@@ -1925,16 +1986,16 @@ async fn wait_for_backend(
     let client = reqwest::Client::new();
     let url = format!("http://127.0.0.1:{port}/api/health");
     let start = Instant::now();
+    let ceiling = Duration::from_secs(timeout_secs);
     let mut progress_shown = false;
     let mut broken_since: Option<Instant> = None;
     let mut broken_logged = false;
 
-    while start.elapsed().as_secs() < timeout_secs {
+    loop {
         // Checked before the probe, so a backend that has gone quiet is given
         // up on at the quiet limit rather than one poll later.
-        let quiet_for = progress.quiet_for();
-        if quiet_for >= STARTUP_QUIET_TIMEOUT {
-            return StartupOutcome::TimedOut(TimeoutKind::WentQuiet(quiet_for));
+        if let Some(kind) = startup_give_up(progress.quiet_for(), start.elapsed(), ceiling) {
+            return StartupOutcome::TimedOut(kind);
         }
 
         let probe = match client.get(&url).timeout(HEALTH_PROBE_TIMEOUT).send().await {
@@ -1977,7 +2038,6 @@ async fn wait_for_backend(
 
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
     }
-    StartupOutcome::TimedOut(TimeoutKind::TookTooLong)
 }
 
 /// A fresh secret for the backend's shutdown endpoint, one per run of the app.
@@ -2006,6 +2066,20 @@ fn startup_timeout_message(stage: Option<&(String, String)>, kind: &TimeoutKind)
     let tail = "Please close this window and try again. If the problem persists, please send the \
 log file to info@datadrivenconstruction.io.";
 
+    // Said before anything is asked about the stage, because this is the one
+    // case where there cannot be a stage: nothing was ever reported. It is a
+    // different fault from a slow start and it has a different remedy, so it
+    // gets its own words rather than the generic ones below.
+    let never_spoke = format!(
+        "The application never finished unpacking itself, so its backend never started. The \
+whole program is unpacked every time it starts, before any of it runs, and on a slow or nearly \
+full drive that can take longer than the application waits. Freeing space on the drive usually \
+fixes it. {tail}"
+    );
+    if matches!(kind, TimeoutKind::NeverSpoke) {
+        return never_spoke;
+    }
+
     let Some((id, detail)) = stage else {
         // Nothing was ever reported, so there is no step to name and the old
         // wording is still the honest one.
@@ -2028,6 +2102,10 @@ for {} minutes.{note} {tail}",
         TimeoutKind::TookTooLong => format!(
             "The application backend is still {step} and did not finish in time.{note} {tail}"
         ),
+        // Answered above, before the stage was asked for. Repeated rather than
+        // made a panic: nothing in this file may die on a case it thinks
+        // impossible, because a panic here takes the window with it.
+        TimeoutKind::NeverSpoke => never_spoke,
     }
 }
 
@@ -3718,6 +3796,16 @@ info@datadrivenconstruction.io."
                             .map(|(id, _)| id.as_str())
                             .unwrap_or("none"),
                     )),
+                    // The distinction this line exists to record: the sidecar
+                    // never wrote anything, so it never got past unpacking
+                    // itself and none of its own code ever ran. Everything a
+                    // log reader would otherwise reach for here - the last
+                    // stage, the last stderr - is empty for a reason, and
+                    // without this line that emptiness reads as a launcher
+                    // that lost track of a backend.
+                    TimeoutKind::NeverSpoke => log_line(
+                        "backend never wrote a line; it did not get past unpacking itself",
+                    ),
                 }
                 // Only say "slow" when nothing better has been said. The
                 // termination handler above names the real cause the
@@ -5118,19 +5206,98 @@ Content-Length: {}\r\nConnection: close\r\n\r\n{}",
         assert_eq!(detail, "Starting embedded PostgreSQL");
 
         std::thread::sleep(Duration::from_millis(60));
+        // Not "sixty milliseconds of silence". A sidecar that has written
+        // nothing is not a quiet sidecar, it is one that has not started, and
+        // the clock this feeds must not be able to run against it. The
+        // assertion here used to be that the silence had already accumulated,
+        // which is what let the unpacking phase be counted as a fault.
         assert!(
-            progress.quiet_for() >= Duration::from_millis(50),
-            "silence has to accumulate while nothing is written"
+            progress.quiet_for().is_none(),
+            "nothing has been written yet, so there is no silence to measure"
+        );
+
+        progress.saw_output();
+        std::thread::sleep(Duration::from_millis(60));
+        assert!(
+            progress.quiet_for().expect("the sidecar has spoken now") >= Duration::from_millis(50),
+            "silence has to accumulate once the sidecar has written something"
         );
 
         progress.saw_output();
         assert!(
-            progress.quiet_for() < Duration::from_millis(50),
+            progress.quiet_for().expect("still speaking") < Duration::from_millis(50),
             "any line at all has to reset the silence"
         );
         // Output is not a stage: what the backend was doing is still the last
         // step it named.
         assert_eq!(progress.stage().expect("still latched").0, "pg");
+    }
+
+    #[test]
+    fn a_sidecar_that_has_not_spoken_yet_is_not_a_sidecar_that_went_quiet() {
+        // The reported defect, as data. On Windows the one-file bootloader
+        // unpacks the whole program before any of our code runs and writes
+        // nothing while it does, and an unpack has been measured at 302
+        // seconds on a published build. Judged as silence that is 302 seconds
+        // of a backend that has "stopped responding", against a limit of 240,
+        // so the launcher killed a start that was working.
+        let ceiling = Duration::from_secs(1200);
+        assert_eq!(
+            startup_give_up(None, Duration::from_secs(302), ceiling),
+            None,
+            "a start that has written nothing is unpacking, not wedged"
+        );
+
+        // The limit still does its job the moment there is something to
+        // measure it against.
+        assert_eq!(
+            startup_give_up(
+                Some(STARTUP_QUIET_TIMEOUT),
+                Duration::from_secs(600),
+                ceiling
+            ),
+            Some(TimeoutKind::WentQuiet(STARTUP_QUIET_TIMEOUT)),
+            "a backend that spoke and then stopped is still abandoned"
+        );
+        assert_eq!(
+            startup_give_up(Some(Duration::from_secs(1)), Duration::from_secs(30), ceiling),
+            None,
+            "a backend that is talking is left alone"
+        );
+
+        // The ceiling is what bounds the phase no longer being judged, and the
+        // two ways of reaching it are told apart, because they are different
+        // faults with different remedies and the log has to say which happened.
+        assert_eq!(
+            startup_give_up(None, ceiling, ceiling),
+            Some(TimeoutKind::NeverSpoke),
+            "an unpack that never finishes is still given up on, by name"
+        );
+        assert_eq!(
+            startup_give_up(Some(Duration::from_secs(1)), ceiling, ceiling),
+            Some(TimeoutKind::TookTooLong),
+            "a backend that talked all the way to the ceiling is slow, not absent"
+        );
+    }
+
+    #[test]
+    fn the_timeout_message_separates_a_slow_start_from_one_that_never_began() {
+        // The launcher promised to say which of the two it was. A sidecar that
+        // never wrote anything has no stage to name, so the generic wording
+        // would tell the user only that they had waited, which is the one
+        // thing they already knew.
+        let message = startup_timeout_message(None, &TimeoutKind::NeverSpoke);
+        assert!(message.contains("unpacking"), "got: {message}");
+        assert!(message.contains("drive"), "got: {message}");
+        assert!(
+            !message.contains("stopped responding"),
+            "nothing was ever responding, got: {message}"
+        );
+        // Holds even if a stage somehow was reported: the words belong to the
+        // kind of timeout, not to what may or may not be latched beside it.
+        let stage = ("pg".to_string(), "Starting the local database".to_string());
+        let with_stage = startup_timeout_message(Some(&stage), &TimeoutKind::NeverSpoke);
+        assert_eq!(with_stage, message);
     }
 
     #[test]
