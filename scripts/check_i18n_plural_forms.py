@@ -38,6 +38,16 @@ Three things worth knowing about how it counts.
     A gate that misses a case is repairable; one that cries wolf on 500
     ordinary keys gets switched off, and then it catches nothing at all.
 
+    One narrowness was not deliberate and has been removed. The option scan
+    required a colon after `count`, so it saw `{ count: n }` and was blind
+    to the ES6 shorthand `{ defaultValue: ..., count }`, which is neither a
+    spread nor a variable and so was not the limitation named above. It hid
+    exactly sixteen rows of the same class the baseline already tracks, on
+    `assemblies.bulk_delete_title` and `assemblies.bulk_tag_title`, leaving
+    the gate green over half of a symmetric pair while reporting the other
+    half. A blind spot that splits a pair is worse than one that drops both,
+    because the half it does report reads as the whole population.
+
   * A group is only judged where the language already answers it. A key
     absent from a locale entirely is the orphan guard's business, not this
     one, and reporting it here would fail two gates for one cause and make
@@ -88,6 +98,7 @@ CATEGORIES: dict[str, tuple[str, ...]] = {
     "he": ("one", "two", "other"),
     "hi": ("one", "other"),
     "hr": ("one", "few", "other"),
+    "hu": ("one", "other"),
     "id": ("other",),
     "it": ("one", "many", "other"),
     "ja": ("other",),
@@ -121,7 +132,10 @@ _SUFFIXES = ("zero", "one", "two", "few", "many", "other")
 _KEY_LINE = re.compile(r'^\s*"([A-Za-z0-9_.\-]+)"\s*:', re.MULTILINE)
 _ANY_T_KEY = re.compile(r"""\bt\(\s*(['"])([A-Za-z0-9_][A-Za-z0-9_.\-]*)\1""")
 _CALL_HEAD = re.compile(r"""\bt\(\s*(['"])([A-Za-z0-9_][A-Za-z0-9_.\-]*)\1\s*,\s*\{""")
-_COUNT_OPTION = re.compile(r"(^|[{,\s])count\s*:")
+#: `count` as an options key, in both spellings JavaScript allows: `count: n`
+#: and the ES6 shorthand `count` closed by a comma or the options brace. The
+#: left guard keeps `itemCount` and `countdown` out.
+_COUNT_OPTION = re.compile(r"(^|[{,\s])count\s*(?::|[,}]|$)")
 
 
 def _options_body(text: str, brace_index: int) -> str | None:
