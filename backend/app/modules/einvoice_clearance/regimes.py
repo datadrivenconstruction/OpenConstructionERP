@@ -432,11 +432,49 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         document_format="sii_es",
         profile_fields=("tax_registration_id",),
         document_fields=("nif_issuer",),
-        # SII wants the record within four calendar days of issue; the same
-        # window is what an annulment record is expected inside.
+        # Four days is SII's window and describes SII alone, on a row whose
+        # platform names two obligations. Verifactu is a set of integrity rules
+        # for invoicing software and has no equivalent window at all, so a
+        # reader who takes this number as "Spain's window" has been told SII's
+        # answer to a question about the wrong obligation. Splitting the row is
+        # the real fix and is more than a data change.
         cancellation_window_days=4,
         correction_mechanism="annulment record, then a corrected record",
-        notes="The invoice is valid on issue. Late reporting is a penalty, not an invalid invoice.",
+        scope=(
+            "SII is in force for larger taxpayers and reports invoice records within days of issue. Verifactu "
+            "is a separate obligation on invoicing software, and it has not commenced for anyone yet."
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2027-01-01",
+                scope="Verifactu, contribuyentes del Impuesto sobre Sociedades",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://www.fiscal-impuestos.com/aplazamiento-entrada-vigor-Verifactu-2027",
+                read_date="2026-09-07",
+                notes=(
+                    "Postponed by one year by Real Decreto-ley 15/2025. The widely republished 2026-01-01 date "
+                    "is superseded and is still printed by at least one major public source."
+                ),
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2027-07-01",
+                scope="Verifactu, remaining companies and autonomos",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://www.fiscal-impuestos.com/aplazamiento-entrada-vigor-Verifactu-2027",
+                read_date="2026-09-07",
+                notes="Postponed by one year by Real Decreto-ley 15/2025. The superseded date was 2026-07-01.",
+            ),
+        ),
+        notes=(
+            "The invoice is valid on issue. Late reporting is a penalty, not an invalid invoice. "
+            "Two caveats a reader should carry. The two dates above rest on a specialist tax commentary site "
+            "that names the instrument; the official AEAT page confirms that an extension exists but prints no "
+            "dates and cites different instruments, so the official source corroborates the direction of the "
+            "change and not the numbers. And SII's own commencement is not recorded here at all, because no "
+            "source to hand covers it, so this row states when Verifactu starts and not when SII did."
+        ),
     ),
     "HU": CountryRegime(
         country="HU",
@@ -460,20 +498,60 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         country="DE",
         regime=REGIME_NETWORK,
         platform="XRechnung / Peppol",
-        label="Germany - XRechnung into the public sector over Peppol",
+        label="Germany - domestic B2B e-invoicing, and XRechnung into the public sector over Peppol",
         identifier_label="transmission id",
         document_format="xrechnung_3_0",
         en16931_profile="xrechnung",
         profile_fields=("network_participant_id",),
         document_fields=("buyer_reference",),
         correction_mechanism="credit note",
-        notes="The Leitweg-ID travels as the buyer reference (BT-10) and public-sector receivers reject without it.",
+        scope=(
+            "Every domestic company must already be able to receive a B2B electronic invoice, with no "
+            "turnover threshold. The duty to issue one is the part that is still phasing in, by "
+            "prior-year turnover."
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_RECEIVE,
+                effective_date="2025-01-01",
+                scope="Domestic B2B, all companies",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+                read_date="2026-09-07",
+                notes="No threshold. The receiving duty landed on everyone at once.",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2027-01-01",
+                scope="Domestic B2B, larger companies",
+                threshold="EUR 800000 prior-year turnover",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+                read_date="2026-09-07",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2028-01-01",
+                scope="Domestic B2B, all remaining companies",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+                read_date="2026-09-07",
+            ),
+        ),
+        notes=(
+            "The Leitweg-ID travels as the buyer reference (BT-10) and public-sector receivers reject without it. "
+            "Germany has no reporting leg: the source above states there is no real-time reporting system, which "
+            "is why this stays a network country and does not become a hybrid one. The label said public sector "
+            "only until the domestic B2B receiving duty had been in force for over a year. Both future phases are "
+            "recorded as enacted on the European Commission's characterisation of the timetable, not on a reading "
+            "of the German statute itself."
+        ),
     ),
     "FR": CountryRegime(
         country="FR",
         regime=REGIME_NETWORK,
-        platform="Chorus Pro / Peppol",
-        label="France - Chorus Pro for the public sector",
+        platform="plateforme agreee / Chorus Pro",
+        label="France - domestic B2B through an accredited platform, Chorus Pro for the public sector",
         identifier_label="transmission id",
         document_format="facturx_1_0",
         en16931_profile="facturx",
@@ -488,10 +566,59 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         # wrong about the country it used to explain itself.
         additional_regimes=(REGIME_REPORTING,),
         correction_mechanism="credit note",
+        scope=(
+            "Every company, whatever its size, must already be able to receive. Issuing and the e-reporting "
+            "duty reached large and mid-size companies at the same moment and reach the smaller ones a year "
+            "later."
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_RECEIVE,
+                effective_date="2026-09-01",
+                scope="Domestic B2B, all companies regardless of size",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+                read_date="2026-09-07",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2026-09-01",
+                scope="Domestic B2B, grandes entreprises and ETI",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+                read_date="2026-09-07",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2027-09-01",
+                scope="Domestic B2B, PME and TPE",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+                read_date="2026-09-07",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_REPORT,
+                effective_date="2026-09-01",
+                scope="Transaction and payment data to the DGFiP, grandes entreprises and ETI",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+                read_date="2026-09-07",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_REPORT,
+                effective_date="2027-09-01",
+                scope="Transaction and payment data to the DGFiP, PME and TPE",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+                read_date="2026-09-07",
+            ),
+        ),
         notes=(
-            "The reporting leg is an obligation of its own and not a byproduct of the routing. "
-            "Its commencement dates are not stated here because they had not been sourced when "
-            "this row was corrected, and an uncited date is one nobody can recheck."
+            "The reporting leg is an obligation of its own and not a byproduct of the routing, which is what "
+            "makes France hybrid rather than a network country. Chorus Pro is the public-sector path only; the "
+            "domestic B2B document travels through an accredited platform, so the row named the smaller half of "
+            "the country's arrangement until this was corrected. Corroborated against the European Commission's "
+            "France page, read on the same day."
         ),
     ),
     "NL": CountryRegime(
