@@ -42,7 +42,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 
 from app.core.pdf_fonts import pdf_font_for_text
-from app.modules.einvoice.cii import EInvoice, build_cii_xml
+from app.modules.einvoice.cii import EInvoice, Party, build_cii_xml
 from app.modules.einvoice.pdf_translations import (
     DEFAULT_PDF_LOCALE,
     fmt_date,
@@ -63,6 +63,28 @@ _CONFORMANCE = {
     "facturx": "EN 16931",
     "xrechnung": "XRECHNUNG",
 }
+
+
+def party_address_lines(p: Party) -> list[str]:
+    """The address block of one party, as the readable page should print it.
+
+    The page carried the post code and the city and nothing else, so BT-35 and
+    BT-50 reached the receiver's software inside the embedded CII and never
+    reached the person reading the page. A hybrid invoice is one document in two
+    representations, and the two stated different addresses for the same party
+    on every invoice this product has issued, in every country.
+
+    A field the party does not answer produces no line, which is what keeps the
+    invoices that carry no street byte-identical to the pages they were before.
+
+    Args:
+        p: the seller or buyer trade party.
+
+    Returns:
+        The address lines, top to bottom, with nothing empty in them.
+    """
+    lines = [p.line1, " ".join(x for x in (p.postcode, p.city) if x)]
+    return [text.strip() for text in lines if text and text.strip()]
 
 
 def _readable_pdf(inv: EInvoice, locale: str = DEFAULT_PDF_LOCALE) -> bytes:
@@ -169,32 +191,47 @@ def _readable_pdf(inv: EInvoice, locale: str = DEFAULT_PDF_LOCALE) -> bytes:
     # block from there to the right margin, and the description column to the
     # quantity figure at left + 95mm. Those are the three strings a party can
     # make arbitrarily long, so each is clipped at the offset that follows it.
-    line(y - 5 * mm, fit(inv.seller.name, base="Helvetica", size=9, budget=90 * mm))
-    seller_loc = " ".join(x for x in (inv.seller.postcode, inv.seller.city) if x)
-    if seller_loc:
-        line(y - 10 * mm, seller_loc)
+    seller_budget = 90 * mm
+    sy = y - 5 * mm
+    line(sy, fit(inv.seller.name, base="Helvetica", size=9, budget=seller_budget))
+    for text in party_address_lines(inv.seller):
+        sy -= 5 * mm
+        line(sy, fit(text, base="Helvetica", size=9, budget=seller_budget))
     if inv.seller.vat_id:
-        line(y - 15 * mm, tr(locale, "vat_id", value=inv.seller.vat_id))
+        sy -= 5 * mm
+        line(sy, tr(locale, "vat_id", value=inv.seller.vat_id))
 
     c.setFont("Helvetica-Bold", 9)
     put(left + 90 * mm, y, tr(locale, "bill_to"), base="Helvetica-Bold", size=9)
     c.setFont("Helvetica", 9)
     buyer_budget = (width - 20 * mm) - (left + 90 * mm)
+    by = y - 5 * mm
     put(
         left + 90 * mm,
-        y - 5 * mm,
+        by,
         fit(inv.buyer.name, base="Helvetica", size=9, budget=buyer_budget),
         base="Helvetica",
         size=9,
     )
-    buyer_loc = " ".join(x for x in (inv.buyer.postcode, inv.buyer.city) if x)
-    if buyer_loc:
-        put(left + 90 * mm, y - 10 * mm, buyer_loc, base="Helvetica", size=9)
+    for text in party_address_lines(inv.buyer):
+        by -= 5 * mm
+        put(
+            left + 90 * mm,
+            by,
+            fit(text, base="Helvetica", size=9, budget=buyer_budget),
+            base="Helvetica",
+            size=9,
+        )
     if inv.buyer_reference:
-        put(left + 90 * mm, y - 15 * mm, tr(locale, "ref", value=inv.buyer_reference), base="Helvetica", size=9)
+        by -= 5 * mm
+        put(left + 90 * mm, by, tr(locale, "ref", value=inv.buyer_reference), base="Helvetica", size=9)
 
-    # Line table header
-    ty = y - 30 * mm
+    # Line table header. The party blocks used to be three lines each and the
+    # header sat at a fixed offset below them; an address is as many lines as
+    # its country writes, so the header takes whichever is lower, its old place
+    # or one line under the deeper of the two blocks. A party that answers what
+    # it answered before puts the header back exactly where it was.
+    ty = min(y - 30 * mm, min(sy, by) - 5 * mm)
     c.setFont("Helvetica-Bold", 8)
     put(left, ty, tr(locale, "th_description"), base="Helvetica-Bold", size=8)
     put(left + 95 * mm, ty, tr(locale, "th_qty"), base="Helvetica-Bold", size=8, align_right=True)
