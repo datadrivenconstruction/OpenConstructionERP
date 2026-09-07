@@ -1657,6 +1657,33 @@ jobs:
       #     that older revision, the stamp helper returns early because a
       #     revision is present, and nothing ever advances it. Read that red as
       #     "the stamp does not move on upgrade", which is true.
+      #
+      # WHICH COHORT THIS LANE COVERS, stated plainly because the pin decides it
+      # and the pin is easy to read as a version choice rather than a scope
+      # choice. There are three cohorts and this lane exercises exactly one.
+      #   COVERED - arrives with NO revision recorded, because the wheel it came
+      #     from shipped no alembic.ini. The current code stamps it at head on
+      #     boot and alembic_head_matches reads true afterwards. That is the
+      #     15.3.1 cohort, and it is the whole of what this job proves.
+      #   NOT COVERED - arrives already stamped at an OLDER revision, which is
+      #     every install from 15.4.0 onward. Nothing advances that stamp, so
+      #     alembic_head_matches reads false in perpetuity, and the replay an
+      #     operator would run by hand to fix it is the case the migration DDL
+      #     guard exists for. No lane exercises it today.
+      #   NOT COVERED - arrives populated and unstamped. The stamp is refused
+      #     deliberately; see stamp_head_if_unstamped.
+      #
+      # Cost of adding the stamped cohort, measured rather than guessed, so the
+      # decision can be made on a number: a second matrix leg over the same
+      # steps with the pin at the newest release. The schema delta from 15.4.0
+      # to HEAD is empty, so the healer has nothing to do and the leg's value is
+      # entirely in the stamp assertion, which means check 4 of
+      # verify_upgrade_from_previous_release.py has to learn that this cohort
+      # reads false rather than true. It requires head_matches is True at line
+      # 330 today and would fail the new leg on a correct product. So the cost
+      # is one matrix dimension plus a per-cohort branch in check 4, not a new
+      # job. Not done here: widening the gate was the task, and changing what
+      # the verifier asserts about a shipped behaviour is a separate decision.
       OE_UPGRADE_FROM_VERSION: "15.3.1"
       OE_UPGRADE_AGED_STATE: ${{ github.workspace }}/aged-database-state.json
       DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/openconstructionerp_upgrade

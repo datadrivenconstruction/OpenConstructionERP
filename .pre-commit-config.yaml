@@ -360,18 +360,25 @@ repos:
         files: ^frontend/src/app/locales/.*\.ts$
 
       # The boot heal runs create_all before anything reads alembic_version, so
-      # every table in the model metadata already exists by the time an operator
-      # runs `alembic upgrade head` by hand. An unguarded op.create_table then
-      # hits DuplicateTable, and because PostgreSQL runs DDL inside a
-      # transaction the failure rolls back the WHOLE run: alembic_version does
-      # not move and every later revision is skipped along with its backfills.
-      # Reported from an install stuck 26 revisions behind across four releases.
-      # 169 of the 173 revisions that create tables already asked an inspector
-      # first, which is exactly the kind of near-universal convention nobody
-      # notices breaking.
-      - id: migration-create-table-guarded
-        name: Block a migration that creates a table without checking for it
-        entry: python scripts/check_migration_create_table_guarded.py
+      # the whole of the model metadata already exists by the time an operator
+      # runs `alembic upgrade head` by hand. Unguarded additive DDL then hits
+      # DuplicateTable, DuplicateColumn or DuplicateObject, and because
+      # PostgreSQL runs DDL inside a transaction the failure rolls back the
+      # WHOLE run: alembic_version does not move and every later revision is
+      # skipped along with its backfills. Reported from an install stuck 26
+      # revisions behind across four releases, and reproduced directly by
+      # replaying the chain over a booted database, which died on
+      # DuplicateColumn for oe_changeorders_order.rejected_by.
+      #
+      # This used to check op.create_table alone, with a matcher that also
+      # required the receiver to be literally `op`. The rejected_by failure got
+      # through both halves: it is add_column, and it is written as
+      # `batch.add_column` inside batch_alter_table, which 60 revisions use. The
+      # gate is receiver-blind now and covers every additive verb the tree
+      # actually uses, raw op.execute DDL included.
+      - id: migration-ddl-guarded
+        name: Block a migration that adds schema without checking for it
+        entry: python scripts/check_migration_ddl_guarded.py
         language: system
         pass_filenames: false
         files: ^backend/alembic/versions/.*\.py$

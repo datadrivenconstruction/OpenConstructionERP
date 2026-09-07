@@ -1094,14 +1094,18 @@ jobs:
         if: ${{ !cancelled() }}
         run: python scripts/check_locale_mojibake.py
 
-      # A revision that creates a table without asking whether it is already
-      # there cannot run on any install this application has booted, because the
-      # boot heal's create_all built that table first. The upgrade dies on
-      # DuplicateTable, PostgreSQL rolls the whole transaction back, and every
-      # revision behind it is skipped in silence along with its backfills.
-      - name: Check migrations guard create_table against an existing table
+      # A revision that adds schema without asking whether it is already there
+      # cannot run on any install this application has booted, because the boot
+      # heal's create_all built that schema first. The upgrade dies on
+      # DuplicateTable, DuplicateColumn or DuplicateObject, PostgreSQL rolls the
+      # whole transaction back, and every revision behind it is skipped in
+      # silence along with its backfills. Widened from create_table alone after
+      # a replay over a booted database died on DuplicateColumn for
+      # oe_changeorders_order.rejected_by, a call the old gate could not see
+      # because it was written as batch.add_column rather than op.create_table.
+      - name: Check migrations guard additive DDL against an existing schema
         if: ${{ !cancelled() }}
-        run: python scripts/check_migration_create_table_guarded.py
+        run: python scripts/check_migration_ddl_guarded.py
 
       # A class like `bg-oe-blue-subtle/60` names a colour token that cannot
       # take an alpha modifier, and Tailwind's answer to that is to emit

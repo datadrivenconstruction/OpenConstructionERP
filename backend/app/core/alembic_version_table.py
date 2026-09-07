@@ -246,6 +246,16 @@ def stamp_head_if_unstamped(sync_connection: Connection, *, refuse_when_populate
             the repair for this cohort is undecided the reversible branch is the
             one to take.
 
+            Nothing about the migration DDL guard changes this, and it is worth
+            saying because the guard makes a replay over an existing schema
+            survivable and that reads like an invitation to stamp the refused
+            cohort automatically. It is not one. A guarded chain being safe to
+            REPLAY is not the same claim as the database being AT head, and
+            stamping asserts the second. The refusal stays a refusal until
+            somebody decides what the repair for this cohort is; the guard
+            makes running the migrations a better answer, not an unnecessary
+            one.
+
     Returns:
         The head revision that was stamped - every head, comma-joined, on a
         forked tree - or None when the database was already stamped,
