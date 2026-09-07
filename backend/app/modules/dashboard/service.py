@@ -1459,22 +1459,41 @@ async def compute_project_compliance_summary(
     session: AsyncSession,
     projects: list[Project],
 ) -> dict[str, Any]:
-    """Compliance-doc bucket counts: active / expiring / expired.
+    """Compliance-doc bucket counts: active / not_yet_effective / expiring / expired.
 
     Mirrors ``GET /v1/compliance-docs/?project_id=X``. The model already
-    persists a derived ``status`` column so we just bucket by that, with
-    a manual ``expires_at`` re-check (the persisted value can be stale
-    until the next write).
+    persists a derived ``status`` column, but this widget re-derives on
+    the fly so the tiles reflect today's date even if a row was last
+    written months ago.
+
+    That re-derivation has to read BOTH ends of the validity window. It
+    used to compare only ``expires_at``, which put a document whose cover
+    starts in the future - next year's policy, a renewed licence, a bond
+    effective on a later date - straight into the ``active`` tile from
+    the day it was uploaded. The register and the tiles then agreed that
+    the project was covered during the interval before cover began.
+
+    ``not_yet_effective`` is counted as its own bucket rather than folded
+    into an existing one so the four counts still sum to the row count;
+    dropping those docs would make a project's cover look smaller than
+    what is on file, which is a different wrong answer.
     """
     from app.modules.compliance_docs.models import ComplianceDoc  # noqa: PLC0415
 
     project_ids = [p.id for p in projects]
     if not project_ids:
-        return {"active": 0, "expiring": 0, "expired": 0, "items": []}
+        return {
+            "active": 0,
+            "not_yet_effective": 0,
+            "expiring": 0,
+            "expired": 0,
+            "items": [],
+        }
 
     stmt = select(
         ComplianceDoc.id,
         ComplianceDoc.status,
+        ComplianceDoc.effective_date,
         ComplianceDoc.expires_at,
         ComplianceDoc.doc_type,
     ).where(ComplianceDoc.project_id.in_(project_ids))
@@ -1483,16 +1502,19 @@ async def compute_project_compliance_summary(
     now = datetime.now(UTC).date()
     in30 = now + timedelta(days=30)
 
-    counts = {"active": 0, "expiring": 0, "expired": 0}
+    counts = {"active": 0, "not_yet_effective": 0, "expiring": 0, "expired": 0}
     items: list[dict[str, Any]] = []
-    for doc_id, status_, expires_at, doc_type in rows:
-        # Trust the persisted status when present, but re-derive on the
-        # fly so the dashboard reflects today's date even if the row was
-        # last written months ago.
+    for doc_id, status_, effective_date, expires_at, doc_type in rows:
         bucket: str
         try:
             if expires_at and expires_at < now:
                 bucket = "expired"
+            elif effective_date and now < effective_date:
+                # Cover has not started. A missing effective_date is left
+                # to the end-only rules below - "no start recorded" is a
+                # different claim from "starts in the future" and must
+                # not be silently promoted into one.
+                bucket = "not_yet_effective"
             elif expires_at and expires_at < in30:
                 bucket = "expiring"
             else:
@@ -1505,6 +1527,7 @@ async def compute_project_compliance_summary(
             {
                 "id": str(doc_id),
                 "status": status_,
+                "effective_date": (effective_date.isoformat() if effective_date is not None else None),
                 "expires_at": (expires_at.isoformat() if expires_at is not None else None),
                 "doc_type": doc_type,
             },

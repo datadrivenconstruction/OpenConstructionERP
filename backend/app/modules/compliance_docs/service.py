@@ -41,18 +41,41 @@ def recompute_status(
     notify_days_before: int,
     *,
     current_status: str | None = None,
+    effective_date: _date | None = None,
 ) -> str:
     """Derive ``status`` from the date window.
 
     Pure function so unit tests can drive it without a session.
 
-    Rules:
+    The window has two ends and both are read. A document whose cover
+    has not started yet is NOT live cover: a policy uploaded in advance
+    (next year's public liability, a renewed licence, a bond effective
+    on a future date) must not answer "are we covered right now" with
+    yes. Reading only ``expires_at`` reported exactly that.
+
+    Rules, in order:
         - If the caller has explicitly marked the document ``cancelled``
           or ``void``, preserve that - those are terminal manual states
           and must never auto-flip back to ``active``.
         - ``today > expires_at``  → ``expired``.
+        - ``today < effective_date`` → ``not_yet_effective``.
         - ``today + notify_days_before >= expires_at`` → ``expiring_soon``.
         - Otherwise → ``active``.
+
+    Two orderings in that ladder are deliberate:
+
+        - ``expired`` is tested before ``not_yet_effective``. The write
+          paths enforce ``expires_at >= effective_date``, so the two can
+          never both be true and the order cannot matter for any row the
+          API produced. It matters only for a row that violates the
+          invariant (a direct DB write, or a legacy row predating the
+          check), and for such a row "expired" is the reading that still
+          denies cover.
+        - ``not_yet_effective`` is tested before ``expiring_soon``. Cover
+          that starts next month and runs for two weeks is inside the
+          reminder window on the day it is created, and calling that
+          "expiring soon" would put a document on the renewals list
+          before it has been in force for a single day.
 
     Args:
         today: The reference date (usually :func:`datetime.now().date()`).
@@ -61,12 +84,24 @@ def recompute_status(
             "expiring soon".
         current_status: Existing stored status; ``cancelled``/``void``
             are preserved.
+        effective_date: When cover starts. ``None`` means the caller
+            recorded no start bound at all, which is NOT the same claim
+            as "starts in the future": an absent start date cannot place
+            the document on either side of today, so the ladder falls
+            through to the end-only rules rather than guessing. Every
+            row the table can hold has one (the column is ``NOT NULL``
+            in the create-table migration, so no back-filled nullable
+            column exists in the wild); the parameter is optional so
+            this stays a total function for callers outside the ORM.
     """
     if current_status in _TERMINAL_STATUSES:
         return current_status  # type: ignore[return-value]
 
     if today > expires_at:
         return "expired"
+
+    if effective_date is not None and today < effective_date:
+        return "not_yet_effective"
 
     # Inclusive on both sides - exactly ``notify_days_before`` days out
     # already counts as "expiring soon" so reminders aren't silently
@@ -189,6 +224,7 @@ class ComplianceDocService:
             today=self._today(),
             expires_at=data.expires_at,
             notify_days_before=data.notify_days_before,
+            effective_date=data.effective_date,
         )
 
         doc = ComplianceDoc(
@@ -307,6 +343,7 @@ class ComplianceDocService:
                     doc.notify_days_before,
                 ),
                 current_status=doc.status,
+                effective_date=new_effective,
             )
 
         # Audit: track who applied the patch inside ``metadata_`` so we

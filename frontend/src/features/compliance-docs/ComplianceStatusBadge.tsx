@@ -10,6 +10,8 @@ const STATUS_TO_VARIANT: Record<
   'success' | 'warning' | 'error' | 'neutral'
 > = {
   active: 'success',
+  // Not an error and not cover: neutral, so it never reads as live green.
+  not_yet_effective: 'neutral',
   expiring_soon: 'warning',
   expired: 'error',
   cancelled: 'neutral',
@@ -18,6 +20,7 @@ const STATUS_TO_VARIANT: Record<
 
 const STATUS_LABEL_FALLBACK: Record<ComplianceStatus, string> = {
   active: 'Active',
+  not_yet_effective: 'Not yet in effect',
   expiring_soon: 'Expiring soon',
   expired: 'Expired',
   cancelled: 'Cancelled',

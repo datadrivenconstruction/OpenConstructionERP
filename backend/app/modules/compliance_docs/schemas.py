@@ -31,6 +31,7 @@ DOC_TYPES: tuple[str, ...] = (
 
 STATUSES: tuple[str, ...] = (
     "active",
+    "not_yet_effective",
     "expiring_soon",
     "expired",
     "cancelled",

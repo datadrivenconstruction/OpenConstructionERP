@@ -21,6 +21,9 @@ export type ComplianceDocType = (typeof COMPLIANCE_DOC_TYPES)[number];
 
 export const COMPLIANCE_STATUSES = [
   'active',
+  // Uploaded ahead of time: effective_date is still in the future, so the
+  // document is on file but is not live cover yet.
+  'not_yet_effective',
   'expiring_soon',
   'expired',
   'cancelled',

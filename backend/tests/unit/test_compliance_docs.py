@@ -210,6 +210,207 @@ def test_recompute_status_preserves_terminal_manual_states() -> None:
     )
 
 
+# ── Two-ended validity window ────────────────────────────────────────────
+#
+# The ladder used to read only ``expires_at``. A document uploaded ahead of
+# time - next year's public liability policy, a renewed licence, a bond
+# effective on a future date - was persisted ``active`` on the day it was
+# created, so the register and the dashboard tiles both answered "are we
+# covered right now" with yes for the whole interval before cover started.
+#
+# Every assertion below is two-sided on purpose: each names the status it
+# expects AND rules out the status the other direction would produce. A
+# suite that only asserted the new state would pass just as happily if the
+# ladder were broken the opposite way and returned ``not_yet_effective``
+# for every document.
+
+
+def test_recompute_status_cover_starting_in_the_future_is_not_active() -> None:
+    """The reported defect: cover that has not started is not live cover."""
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    status = recompute_status(
+        today,
+        today + timedelta(days=485),  # expires 2027-12-31
+        notify_days_before=30,
+        effective_date=today + timedelta(days=116),  # starts 2027-01-01
+    )
+    assert status == "not_yet_effective"
+    assert status != "active"
+
+
+def test_recompute_status_cover_in_force_today_is_active() -> None:
+    """The other direction: a policy already running must stay ``active``."""
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    status = recompute_status(
+        today,
+        today + timedelta(days=200),
+        notify_days_before=30,
+        effective_date=today - timedelta(days=30),
+    )
+    assert status == "active"
+    assert status != "not_yet_effective"
+
+
+def test_recompute_status_expired_cover_is_still_expired_with_a_start_date() -> None:
+    """Passing the start date must not disturb the expiry end of the ladder."""
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    status = recompute_status(
+        today,
+        today - timedelta(days=1),
+        notify_days_before=30,
+        effective_date=today - timedelta(days=400),
+    )
+    assert status == "expired"
+    assert status != "not_yet_effective"
+
+
+def test_recompute_status_absent_effective_date_is_not_read_as_future() -> None:
+    """``None`` means "no start recorded", which is not "starts later".
+
+    An absent start date cannot place the document on either side of
+    today, so the end-only rules decide and every one of them stays
+    reachable. Collapsing the two meanings would hand back a confident
+    ``not_yet_effective`` for a document nobody said anything about.
+    """
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+
+    far = recompute_status(today, today + timedelta(days=200), notify_days_before=30, effective_date=None)
+    near = recompute_status(today, today + timedelta(days=10), notify_days_before=30, effective_date=None)
+    past = recompute_status(today, today - timedelta(days=1), notify_days_before=30, effective_date=None)
+
+    assert (far, near, past) == ("active", "expiring_soon", "expired")
+    assert "not_yet_effective" not in (far, near, past)
+
+    # Omitting the argument entirely must behave exactly like ``None`` -
+    # the four pure tests above this section call it that way.
+    assert recompute_status(today, today + timedelta(days=200), notify_days_before=30) == far
+
+
+def test_recompute_status_boundary_day_on_which_cover_begins() -> None:
+    """Both sides of the start boundary, so an off-by-one fails either way."""
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    expires = today + timedelta(days=365)
+
+    def _status(effective_offset: int) -> str:
+        return recompute_status(
+            today,
+            expires,
+            notify_days_before=30,
+            effective_date=today + timedelta(days=effective_offset),
+        )
+
+    # Day before cover begins - still not in effect.
+    assert _status(1) == "not_yet_effective"
+    # The day cover begins - in force, inclusive.
+    assert _status(0) == "active"
+    # Day after - unambiguously in force.
+    assert _status(-1) == "active"
+
+
+def test_recompute_status_not_yet_effective_beats_expiring_soon() -> None:
+    """Short future cover must not land on the renewals list before it starts.
+
+    Cover running from +10d to +25d is inside a 30-day reminder window
+    today, so the end-only ladder would call it ``expiring_soon`` and put
+    it in front of whoever chases renewals - a document that has not been
+    in force for a single day.
+    """
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    status = recompute_status(
+        today,
+        today + timedelta(days=25),
+        notify_days_before=30,
+        effective_date=today + timedelta(days=10),
+    )
+    assert status == "not_yet_effective"
+    assert status != "expiring_soon"
+
+
+def test_recompute_status_terminal_states_outrank_a_future_start() -> None:
+    """A cancelled doc stays cancelled even if its window starts later."""
+    today = datetime(2026, 9, 7, tzinfo=UTC).date()
+    for terminal in ("cancelled", "void"):
+        assert (
+            recompute_status(
+                today,
+                today + timedelta(days=400),
+                notify_days_before=30,
+                current_status=terminal,
+                effective_date=today + timedelta(days=100),
+            )
+            == terminal
+        )
+
+
+# ── The two call sites actually pass the start date ──────────────────────
+#
+# The pure function passing proves nothing about whether ``create_doc``
+# and ``update_doc`` were wired to hand it ``effective_date``. Before the
+# fix both called ``recompute_status`` without it, so these two persist a
+# status the pure tests above would have said was impossible.
+
+
+def test_create_doc_persists_not_yet_effective() -> None:
+    svc = _make_service()
+    today = datetime.now(UTC).date()
+
+    doc = asyncio.run(
+        svc.create_doc(
+            ComplianceDocCreate(
+                project_id=uuid.uuid4(),
+                doc_type="insurance_general_liability",
+                name="Public liability - next policy year",
+                effective_date=today + timedelta(days=116),
+                expires_at=today + timedelta(days=485),
+                notify_days_before=30,
+            ),
+        ),
+    )
+
+    assert doc.status == "not_yet_effective"
+    # And it is what got stored, not just what was returned.
+    assert svc.repo.rows[doc.id].status == "not_yet_effective"
+
+
+def test_update_doc_recomputes_status_when_the_start_date_moves() -> None:
+    """Moving ``effective_date`` across today must flip the status both ways."""
+    svc = _make_service()
+    today = datetime.now(UTC).date()
+
+    doc = asyncio.run(
+        svc.create_doc(
+            ComplianceDocCreate(
+                project_id=uuid.uuid4(),
+                doc_type="bond_performance",
+                name="Performance bond - Section 4",
+                effective_date=today - timedelta(days=10),
+                expires_at=today + timedelta(days=300),
+                notify_days_before=30,
+            ),
+        ),
+    )
+    assert doc.status == "active"
+
+    # Push the start into the future: cover is no longer live.
+    pushed = asyncio.run(
+        svc.update_doc(
+            doc.id,
+            ComplianceDocUpdate(effective_date=today + timedelta(days=60)),
+        ),
+    )
+    assert pushed.status == "not_yet_effective"
+
+    # Pull it back into the past: cover is live again. Without this half
+    # the test would pass on a ladder stuck at ``not_yet_effective``.
+    pulled = asyncio.run(
+        svc.update_doc(
+            doc.id,
+            ComplianceDocUpdate(effective_date=today - timedelta(days=1)),
+        ),
+    )
+    assert pulled.status == "active"
+
+
 # ── Create + state transition + event publish ────────────────────────────
 
 

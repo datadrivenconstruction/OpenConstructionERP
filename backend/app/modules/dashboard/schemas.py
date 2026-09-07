@@ -359,12 +359,21 @@ class ProjectQualityNCRPayload(_Widget):
 class ProjectComplianceItem(BaseModel):
     id: str
     status: str | None
+    # Both ends of the validity window. ``effective_date`` is what tells
+    # a reader that a document in the register is not live cover yet;
+    # without it the row is indistinguishable from one already in force.
+    effective_date: str | None = None
     expires_at: str | None
     doc_type: str | None
 
 
 class ProjectComplianceSummaryPayload(_Widget):
     active: int
+    # Cover that starts in the future. Defaulted so a cached payload
+    # written before this bucket existed still validates; the widget
+    # counts it separately rather than folding it into ``active``,
+    # which reported unstarted cover as live.
+    not_yet_effective: int = 0
     expiring: int
     expired: int
     items: list[ProjectComplianceItem]
