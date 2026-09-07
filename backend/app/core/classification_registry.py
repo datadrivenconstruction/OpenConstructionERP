@@ -267,6 +267,78 @@ REGION_ALIAS_TO_COUNTRY: Mapping[str, str] = MappingProxyType(
         # pack rather than a standard the renderer knows.
         "FRANCE": "FR",
         "UNITED_STATES": "US",
+        # ── The project region picker's vocabulary ────────────────────
+        #
+        # The second source of region strings, and the one that reaches
+        # this module most often: ``REGION_GROUPS`` in
+        # ``frontend/src/features/projects/CreateProjectPage.tsx``, whose
+        # values a user writes into ``project.region`` every time a
+        # project is created. It speaks neither ISO codes nor the macro
+        # names above; it ships prose and glued CamelCase, so "Russia",
+        # "Brazil" and "GulfStates" all matched nothing and every project
+        # created through it outside DACH, the UK, France and the US was
+        # classified against DIN 276 and picked up no country rule pack,
+        # because ``boq.router._resolve_rule_sets`` reads the same
+        # normaliser. Four of the thirty shipped options resolved.
+        #
+        # Teaching the resolver rather than changing the picker is what
+        # repairs the rows already in the database: a project stored as
+        # "Russia" last year starts resolving to GESN on its next read,
+        # with no migration and nothing to backfill.
+        #
+        # Kept in this table rather than a picker-specific one on purpose.
+        # An alias carries only a country, so it cannot hold a standard
+        # of its own and drift from ``COUNTRY_TO_STANDARD``, which is the
+        # drift this module was built to end.
+        "SPAIN": "ES",
+        "ITALY": "IT",
+        "NETHERLANDS": "NL",
+        "POLAND": "PL",
+        "CZECH": "CZ",
+        "TURKEY": "TR",
+        "RUSSIA": "RU",
+        "CANADA": "CA",
+        "BRAZIL": "BR",
+        "MEXICO": "MX",
+        "CHINA": "CN",
+        "JAPAN": "JP",
+        "KOREA": "KR",
+        "INDIA": "IN",
+        "SOUTHAFRICA": "ZA",
+        "AUSTRALIA": "AU",
+        "NEWZEALAND": "NZ",
+        # The picker's macro options, anchored the same way the macro
+        # names above are: on a member country whose standard the whole
+        # option can live with. Where the members agree the anchor is
+        # merely a spelling - every Nordic state reads DIN 276, every
+        # North African one MasterFormat, every East African one NRM - so
+        # the choice of anchor changes no answer.
+        #
+        # Two of them cover members that genuinely disagree, and the
+        # anchor is a decision rather than a lookup. Both are named with
+        # their reason in
+        # ``test_every_shipped_region_option_reaches_a_standard.py`` so
+        # the decision stays readable: WestAfrica anchors on Nigeria (NRM)
+        # while Senegal, Ivory Coast and Cameroon read UNTEC, and
+        # SoutheastAsia anchors on Indonesia (MasterFormat) while Malaysia
+        # and Singapore read NRM. Anchoring is still strictly better than
+        # the alternative, which is not neutrality but DIN 276: a Lagos or
+        # a Jakarta project silently classified against German cost
+        # groups. A user who needs the other answer names the standard
+        # explicitly, which wins over the region.
+        "NORDICS": "SE",
+        "LATINAMERICA": "MX",
+        "MIDDLEEAST": "AE",
+        "GULFSTATES": "AE",
+        "NORTHAFRICA": "EG",
+        "EASTAFRICA": "KE",
+        "WESTAFRICA": "NG",
+        "SOUTHEASTASIA": "ID",
+        # "INTL" is deliberately absent. It is the picker's
+        # "International / Multi-region" option, it names no country, and
+        # DIN 276 by fall-through is as good an answer as any other
+        # guess. It is the one option that is meant to default, and the
+        # gate names it as such.
     }
 )
 
