@@ -207,7 +207,7 @@ jobs:
         run: |
           ls -lh dist/
           python - <<'PY'
-          import os, re, zipfile
+          import json, os, re, zipfile
 
           # This check used to ask whether any member's name contained the
           # string "_frontend_dist". It could not fail. The build hook creates
@@ -241,6 +241,45 @@ jobs:
           assert len(revisions) > 100, f'wheel {whl} carries only {len(revisions)} migration revisions'
           locales = [f for f in files if f.startswith('locales/') and f.endswith('.json')]
           assert len(locales) >= 20, f'wheel {whl} carries only {len(locales)} locale files'
+
+          # The PDF.js decoders, which this step is structurally unable to see by
+          # the mechanism above. Everything before this line is reached by
+          # scraping src= and href= out of index.html, and these files are never
+          # named in markup: the viewer builds their URLs at runtime from
+          # PDFJS_ASSET_ROOT (frontend/src/shared/lib/pdfjs.ts:53) and passes
+          # them as wasmUrl and iccUrl parameters. So a wheel carrying none of
+          # them passes every assertion above and then draws a blank page for
+          # exactly the scanned drawings a takeoff receives most often.
+          #
+          # The emitting side is frontend/vite.config.ts:102-159, and its two
+          # silent skips are the failure to guard against. It reads the version
+          # from node_modules/pdfjs-dist/package.json and returns doing nothing
+          # if that is missing, and it does `if (!existsSync(dir)) continue` over
+          # the wasm and iccs directories. Both are correct for 6.1.200, where
+          # those directories sit at the package root. A future pdfjs that moves
+          # them under build/ or legacy/ trips the second guard, emits zero
+          # files, logs nothing and fails no test, because pdfjs.test.ts mocks
+          # the library and fabricates the version rather than reading it.
+          #
+          # This asks the same source of truth the plugin asks, so the two cannot
+          # disagree about which version directory to expect.
+          with open('frontend/node_modules/pdfjs-dist/package.json', encoding='utf-8') as fh:
+              pdfjs_version = json.load(fh)['version']
+          root = f'app/_frontend_dist/assets/pdfjs/{pdfjs_version}/'
+          wasm = [f for f in files if f.startswith(root + 'wasm/')]
+          iccs = [f for f in files if f.startswith(root + 'iccs/')]
+          assert wasm, (
+              f'wheel {whl} carries no PDF.js wasm decoders under {root}wasm/. The viewer builds '
+              f'that path at runtime from the installed pdfjs version, so nothing in index.html '
+              f'names it and no other check here can see it missing. Scanned drawings using JBIG2 '
+              f'or JPEG 2000 would render blank. Check the wasm/iccs directory layout of '
+              f'pdfjs-dist {pdfjs_version} against the plugin in frontend/vite.config.ts.'
+          )
+          assert iccs, (
+              f'wheel {whl} carries no PDF.js ICC profile under {root}iccs/, so CMYK colour in '
+              f'scanned drawings has no profile to resolve against. Same cause as the wasm case.'
+          )
+          print(f'OK: {len(wasm)} wasm and {len(iccs)} icc file(s) at pdfjs {pdfjs_version}')
 
           # The community packs, which for the whole life of the project reached
           # no user at all: the tree was never packaged, and discovery resolved
