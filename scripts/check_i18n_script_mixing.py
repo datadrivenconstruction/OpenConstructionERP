@@ -109,6 +109,7 @@ SCRIPTS: dict[str, tuple[str, ...]] = {
     "he": ("hebrew",),
     "hi": ("devanagari",),
     "hr": (),
+    "hu": (),
     "id": (),
     "it": (),
     "ja": ("kana", "han"),
