@@ -22,10 +22,16 @@ asserted against a value that belongs to nobody.
 
 Sources
 ~~~~~~~
-Every format below was checked against the authority that issues it, cited per
-case. The EU block follows the VAT identification number structure published by
-the European Commission for VIES, which is what the ``EU VAT (xx)`` standard
-names in the table refer to.
+Each case names the authority that issues the identifier. The EU block follows
+the VAT identification number structure the European Commission publishes for
+VIES, which is what the ``EU VAT (xx)`` standard names in the table refer to;
+that table was read in secondary documentation reproducing it, because the
+Commission serves its own copy from script and it could not be fetched
+directly. The non-EU cases were checked one by one against the national
+authority named beside them. One case, the GB ``GD`` and ``HA`` series, is
+covered only by the shape the product's own pattern declares: the variant
+formats for government departments and health authorities are documented as
+existing, but the two letters plus three digits were not confirmed from HMRC.
 
 Synthetic values
 ~~~~~~~~~~~~~~~~
@@ -351,8 +357,10 @@ _NON_EU_CASES: tuple[TaxIdCase, ...] = (
         written=("GB 123456789012", "123456789012"),
         refused=("GB12345678901",),
     ),
-    # GB: government departments carry GD and a 3-digit number; health
-    # authorities carry HA. Both are printed after the GB prefix.
+    # GB: HMRC documents variant formats for government departments and health
+    # authorities without publishing their shape where it could be read here.
+    # These two cases therefore assert only the shape the product's own pattern
+    # declares, GD or HA plus 3 digits, rather than a confirmed written form.
     TaxIdCase(
         country="GB",
         standard="GB VRN",
@@ -560,11 +568,16 @@ def test_the_form_a_country_writes_its_number_in_is_accepted(case: TaxIdCase, sp
 
 @pytest.mark.parametrize("case", [pytest.param(c, id=f"{c.country}-{c.canonical}") for c in _CASES])
 def test_every_spelling_of_one_number_is_stored_as_the_same_value(case: TaxIdCase):
-    """The same company entered twice has to be the same number.
+    """One number, however it was written, comes back as one canonical value.
 
-    ``(country, tax_id)`` carries a unique constraint and a read-then-write
-    duplicate guard, so two spellings that normalise apart are two suppliers as
-    far as the rest of the product is concerned.
+    What this pins is the validation endpoint's answer, and only that. It is
+    worth being exact about the limit, because the obvious next sentence is
+    wrong: ``create_subcontractor`` stores ``data.tax_id`` as it was typed and
+    ``find_by_tax_id`` compares that column for exact equality, so the unique
+    index on ``(country, tax_id)`` guards the raw string and the canonical form
+    computed here is never written. Two spellings of one number are two rows
+    today whatever this returns. Normalising on the write path is what would
+    change that, and it is not something a test may decide.
     """
     stored = {validate_tax_id(case.country, spelling).tax_id_normalised for spelling in case.written}
     assert stored == {case.canonical}
