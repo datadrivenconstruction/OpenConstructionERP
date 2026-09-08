@@ -109,9 +109,9 @@ const playbook: Playbook = {
       whyKey: "cases.keep_gst_tds_and_labour_cess_out_of_the_rate.step.markups.why",
       whyDefault:
         "Order matters here in money terms, not only in presentation. A cess charged on a base that already includes tax, or a tax charged on a base that leaves out the profit, produces a total that is wrong in a way nobody notices until a department checks the arithmetic. Declaring the base per line makes the stack readable and re-runnable.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "deduction",

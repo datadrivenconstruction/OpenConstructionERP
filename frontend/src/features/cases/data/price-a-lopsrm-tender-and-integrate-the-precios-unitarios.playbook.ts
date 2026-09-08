@@ -243,13 +243,13 @@ const playbook: Playbook = {
       titleDefault: "Cascade indirectos, financiamiento, utilidad and cargos adicionales",
       whatKey: "cases.price_a_lopsrm_tender_and_integrate_the_precios_unitarios.step.cascade.what",
       whatDefault:
-        "Apply the four charges in the order the reglamento of the LOPSRM fixes and on the base each one is applied to: indirectos on the costo directo, covering oficinas centrales and oficinas de campo; financiamiento on the costo directo plus indirectos, from the gap between spending the money and being paid it; utilidad on the accumulated cost; cargos adicionales on the lot, which on a federal contract is where the cinco al millar inspection fee sits. Keep IVA off the unit price entirely.",
+        "In the bill's Markups & Overheads panel, apply the four charges in the order the reglamento of the LOPSRM fixes and on the base each one is applied to: indirectos on the costo directo, covering oficinas centrales and oficinas de campo; financiamiento on the costo directo plus indirectos, from the gap between spending the money and being paid it; utilidad on the accumulated cost; cargos adicionales on the lot, which on a federal contract is where the cinco al millar inspection fee sits. Keep IVA off the unit price entirely.",
       whyKey: "cases.price_a_lopsrm_tender_and_integrate_the_precios_unitarios.step.cascade.why",
       whyDefault:
         "The order is not a convention, it is what the integration means, and applying utilidad to the costo directo alone or folding the cinco al millar into indirectos produces a different total from the one the convocante will compute. Each percentage also has to be supported: the financiamiento comes from a cash flow against the programme, so it moves when the anticipo or the payment period moves, and a figure typed straight in cannot answer why.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "validate",

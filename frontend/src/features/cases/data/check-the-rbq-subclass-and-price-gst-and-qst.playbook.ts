@@ -119,9 +119,9 @@ const playbook: Playbook = {
       whyKey: "cases.check_the_rbq_subclass_and_price_gst_and_qst.step.tax.why",
       whyDefault:
         "The two taxes are parallel, not stacked, and 14.975 percent is the sum of two rates on one base rather than one rate applied to the other's result. Compounding them adds half a percent of the contract to your price, which loses a competitive bid, or leaves it out of a cost plan, which loses money on the job. Showing the base is what lets the client verify it in a glance instead of a phone call.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "review",

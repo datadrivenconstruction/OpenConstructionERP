@@ -140,13 +140,13 @@ const playbook: Playbook = {
       titleDefault: "Set the markups and decide on price adjustment",
       whatKey: "cases.measure_a_building_bill_to_the_asaqs_standard_system.step.markups.what",
       whatDefault:
-        "Load the South African markup template, set overheads and profit against the cost element each belongs to, and decide whether the contract carries contract price adjustment. Where it does, the adjustment is the Haylett formula worked on the Statistics South Africa work group indices named in the contract data.",
+        "In the bill's Markups & Overheads panel, load the South African markup template, set overheads and profit against the cost element each belongs to, and decide whether the contract carries contract price adjustment. Where it does, the adjustment is the Haylett formula worked on the Statistics South Africa work group indices named in the contract data.",
       whyKey: "cases.measure_a_building_bill_to_the_asaqs_standard_system.step.markups.why",
       whyDefault:
         "A fixed price bid on a two year building contract is a bet on the rand price of steel and cement, and contract price adjustment is the mechanism the market uses instead of that bet. Deciding it at tender rather than at the first cement increase is what keeps the decision commercial rather than adversarial, and clause 26.9 of the JBCC principal building agreement expects the basis to be in the priced document already.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "check",

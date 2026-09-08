@@ -96,9 +96,9 @@ const playbook: Playbook = {
       whyKey: "cases.price_one_bill_for_hst_pst_and_qst.step.tail.why",
       whyDefault:
         "Stacking one tax on a figure that already includes the other is a small percentage of the whole contract, which is more than the margin on most of it. The province decides the base as much as it decides the rate, and a build-up showing which base was used is the difference between a client checking your tax in a glance and a client checking it with their accountant.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "dates",

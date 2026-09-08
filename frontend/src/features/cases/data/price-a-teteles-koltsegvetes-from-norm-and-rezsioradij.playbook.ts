@@ -138,13 +138,13 @@ const playbook: Playbook = {
       titleDefault: "Add the markups where they can be seen",
       whatKey: "cases.price_a_teteles_koltsegvetes_from_norm_and_rezsioradij.step.markups.what",
       whatDefault:
-        "Apply the markups as their own layer over the direct cost, so the direct cost stays readable underneath. Decide once whether overhead already sits inside the rezsioradij or on top of the tetel, and apply that decision everywhere rather than per section.",
+        "In the bill's Markups & Overheads panel, apply the markups as their own layer over the direct cost, so the direct cost stays readable underneath. Decide once whether overhead already sits inside the rezsioradij or on top of the tetel, and apply that decision everywhere rather than per section.",
       whyKey: "cases.price_a_teteles_koltsegvetes_from_norm_and_rezsioradij.step.markups.why",
       whyDefault:
         "Overhead counted twice, once inside the hourly rate and once as a percentage on the total, is the commonest quiet error in an itemised bill and it is invisible in the total. Keeping the layer separate makes it a thing you can look at, and it also makes a discount a decision about margin rather than an unexplained edit to a unit rate.",
-      moduleLabel: "Markups",
-      moduleLabelKey: "nav.markups",
-      to: "/markups",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "boq.title",
+      to: "/projects/:projectId/boq",
     },
     {
       id: "check",
