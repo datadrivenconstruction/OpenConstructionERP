@@ -43,6 +43,23 @@
  * A playbook is the unit a translator works in and the unit a case ships
  * in, so it is the grain at which a regression has a name.
  *
+ * THE FLOOR IS MEASURED FROM A COMMIT, NEVER FROM THE WORKING TREE
+ *
+ * The first floor was written from a checkout that also held Russian and
+ * Chinese case translations nobody had committed, about 626 lines in each
+ * file. It recorded fifteen playbooks as answered in ru and zh while the
+ * committed files answered none of them, and the gate then failed every
+ * push on main for a regression that had never happened: the tree it
+ * measured and the tree it guards were two different things. So --update
+ * reads the playbooks, the locale files and SUPPORTED_LANGUAGES out of a
+ * commit (HEAD unless --from-git names another) and writes that commit's
+ * hash into the manifest as measured_at. What is on disk cannot reach the
+ * floor, there is no flag that lets it, and anyone can re-derive the
+ * numbers from the hash. The check itself still reads the working tree,
+ * because that is what a developer wants to know before committing and
+ * because in CI the working tree is the commit; when the two differ it
+ * says so and names the files.
+ *
  * Regional variants are counted through their base language. es-MX,
  * es-CL, es-CO and pt-BR fall back to es and pt before English
  * (fallbackLng in src/app/i18n.ts), and the chip and orphan guards apply
@@ -73,38 +90,48 @@
  *   node frontend/scripts/check-case-coverage.mjs --update
  *   node frontend/scripts/check-case-coverage.mjs --selftest
  *
- *   --update              record the current, lower numbers and promote a
- *                         locale that reached full catalogue coverage.
- *                         Refuses to raise a number or demote a locale.
- *   --selftest            prove the check can fail, on data built to fail
+ *   --update              measure HEAD, record the current, lower numbers
+ *                         and promote a locale that reached full catalogue
+ *                         coverage. Refuses to raise a number or demote a
+ *                         locale. Never reads the working tree.
+ *   --from-git <ref>      measure that commit instead of HEAD (--update) or
+ *                         instead of the working tree (check, --json)
+ *   --selftest            prove the check can fail, on data built to fail,
+ *                         and that --update cannot see the working tree
  *   --json                print the measurement as JSON instead of a table
- *   --data-dir <dir>      read playbooks from here instead of the tree
- *   --locales-dir <dir>   read locale files from here instead of the tree
+ *   --data-dir <dir>      check only: read playbooks from here
+ *   --locales-dir <dir>   check only: read locale files from here
  *   --manifest <file>     read and write this manifest instead of the tree's
- *   The overrides exist so a regression can be staged in a scratch copy
- *   and shown to fail without touching the tree.
+ *   The directory overrides exist so a regression can be staged in a
+ *   scratch copy and shown to fail without touching the tree. They are
+ *   refused with --update, which measures a commit and nothing else.
  * ================================================================ */
 
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_ROOT = resolve(SCRIPT_DIR, '..');
+const REPO_ROOT = resolve(FRONTEND_ROOT, '..');
 
-const DEFAULTS = {
-  dataDir: join(FRONTEND_ROOT, 'src/features/cases/data'),
-  localesDir: join(FRONTEND_ROOT, 'src/app/locales'),
-  i18n: join(FRONTEND_ROOT, 'src/app/i18n.ts'),
-  manifest: join(FRONTEND_ROOT, 'src/features/cases/case-coverage-manifest.json'),
+/* Paths as git and a reader of the message know them, from the repo root. */
+const REL = {
+  data: 'frontend/src/features/cases/data',
+  locales: 'frontend/src/app/locales',
+  i18n: 'frontend/src/app/i18n.ts',
+  manifest: 'frontend/src/features/cases/case-coverage-manifest.json',
+  script: 'frontend/scripts/check-case-coverage.mjs',
 };
 
-/* Paths as a reader of the message will type them, from the repo root. */
-const REL_DATA = 'frontend/src/features/cases/data';
-const REL_LOCALES = 'frontend/src/app/locales';
-const REL_MANIFEST = 'frontend/src/features/cases/case-coverage-manifest.json';
-const REL_SCRIPT = 'frontend/scripts/check-case-coverage.mjs';
+const DEFAULTS = {
+  dataDir: join(REPO_ROOT, REL.data),
+  localesDir: join(REPO_ROOT, REL.locales),
+  i18n: join(REPO_ROOT, REL.i18n),
+  manifest: join(REPO_ROOT, REL.manifest),
+};
 
 const KEY_FIELDS = ['titleKey', 'descKey', 'longDescKey', 'whatKey', 'whyKey', 'labelKey', 'inputsHintKey', 'outputsHintKey'];
 /* \b keeps moduleLabelKey out: that one names a module chip in the nav
@@ -123,6 +150,9 @@ const MANIFEST_NOTE =
   'a key the locale had and lost, or a case that shipped without its strings. Lower is always fine and ' +
   '--update records it; --update never raises a number and never removes a locale from card_complete, ' +
   'so the debt here only shrinks and any exception has to be a hand edit that shows in the diff. ' +
+  'The numbers are measured from the committed blobs at measured_at and never from the working tree: ' +
+  'a floor once banked from a dirty checkout recorded translations nobody had committed, and the gate ' +
+  'failed every push for a regression that had not happened. ' +
   'Regional variants (es-MX, es-CL, es-CO, pt-BR) are counted through their base language, the way ' +
   'i18n.ts resolves them. card_complete lists the base locales whose catalogue text (title, description, ' +
   'and long description where the English has one) is complete for every playbook, and ' +
@@ -136,10 +166,12 @@ function parseArgs(argv) {
     update: false,
     selftest: false,
     json: false,
+    fromGit: null,
     dataDir: DEFAULTS.dataDir,
     localesDir: DEFAULTS.localesDir,
     i18n: DEFAULTS.i18n,
     manifest: DEFAULTS.manifest,
+    overrides: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -149,14 +181,19 @@ function parseArgs(argv) {
         console.error(`check-case-coverage: ${a} needs a value`);
         process.exit(2);
       }
-      return resolve(v);
+      return v;
     };
     if (a === '--update') out.update = true;
     else if (a === '--selftest') out.selftest = true;
     else if (a === '--json') out.json = true;
-    else if (a === '--data-dir') out.dataDir = value();
-    else if (a === '--locales-dir') out.localesDir = value();
-    else if (a === '--manifest') out.manifest = value();
+    else if (a === '--from-git') out.fromGit = value();
+    else if (a === '--data-dir') {
+      out.dataDir = resolve(value());
+      out.overrides = true;
+    } else if (a === '--locales-dir') {
+      out.localesDir = resolve(value());
+      out.overrides = true;
+    } else if (a === '--manifest') out.manifest = resolve(value());
     else {
       console.error(`check-case-coverage: unknown argument ${a}`);
       process.exit(2);
@@ -166,32 +203,113 @@ function parseArgs(argv) {
 }
 
 /* ---------------------------------------------------------------- */
+/* Sources. The same three inputs, playbooks, locale files and i18n.ts,
+ * read either from directories on disk or from one commit. Everything
+ * after this point works on text and does not know where it came from. */
+
+function treeSources(opts) {
+  const files = (dir, suffix) =>
+    readdirSync(dir)
+      .filter((f) => f.endsWith(suffix))
+      .sort()
+      .map((f) => ({ name: f, text: readFileSync(join(dir, f), 'utf8') }));
+  return {
+    playbooks: files(opts.dataDir, '.playbook.ts'),
+    locales: files(opts.localesDir, '.ts'),
+    i18n: readFileSync(opts.i18n, 'utf8'),
+    origin: 'the working tree',
+    sha: null,
+  };
+}
+
+function git(args, repoRoot, extra = {}) {
+  return execFileSync('git', args, { cwd: repoRoot, maxBuffer: 1024 * 1024 * 1024, ...extra });
+}
+
+/* One `git cat-file --batch` for every blob rather than a `git show` per
+ * file: 264 files at a process each is ten seconds on Windows. Parsed on
+ * the byte buffer, because the size in each header is in bytes. */
+function catFileBatch(specs, repoRoot) {
+  const buf = git(['cat-file', '--batch'], repoRoot, { input: specs.join('\n') + '\n' });
+  const out = [];
+  let off = 0;
+  while (off < buf.length && out.length < specs.length) {
+    const nl = buf.indexOf(10, off);
+    const header = buf.toString('utf8', off, nl).split(' ');
+    if (header[1] === 'missing') {
+      out.push(null);
+      off = nl + 1;
+      continue;
+    }
+    const size = Number(header[2]);
+    out.push(buf.toString('utf8', nl + 1, nl + 1 + size));
+    off = nl + 1 + size + 1;
+  }
+  return out;
+}
+
+function gitSources(ref, repoRoot, rel = REL) {
+  const sha = git(['rev-parse', '--verify', `${ref}^{commit}`], repoRoot, { encoding: 'utf8' }).trim();
+  const list = (dir, suffix) =>
+    git(['ls-tree', '-r', '--name-only', sha, '--', dir], repoRoot, { encoding: 'utf8' })
+      .split('\n')
+      .filter((p) => p.endsWith(suffix) && !p.slice(dir.length + 1).includes('/'))
+      .sort();
+  const playbookPaths = list(rel.data, '.playbook.ts');
+  const localePaths = list(rel.locales, '.ts');
+  const blobs = catFileBatch([...playbookPaths, ...localePaths, rel.i18n].map((p) => `${sha}:${p}`), repoRoot);
+  const i18n = blobs[blobs.length - 1];
+  if (i18n === null) throw new Error(`${rel.i18n} is not in ${ref}`);
+  const named = (paths, offset) => paths.map((p, i) => ({ name: basename(p), text: blobs[offset + i] || '' }));
+  return {
+    playbooks: named(playbookPaths, 0),
+    locales: named(localePaths, playbookPaths.length),
+    i18n,
+    origin: `commit ${sha.slice(0, 9)}${ref === sha ? '' : ` (${ref})`}`,
+    sha,
+  };
+}
+
+/* Which files the check just read differ from HEAD. Informational: the
+ * check is about the disk on purpose, this line says when that is not
+ * the same thing as the commit. Null when git cannot answer. */
+function dirtyPaths(repoRoot, rel = REL) {
+  try {
+    return git(['status', '--porcelain', '--untracked-files=all', '--', rel.data, rel.locales, rel.i18n], repoRoot, {
+      encoding: 'utf8',
+    })
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => l.slice(3).trim())
+      .sort();
+  } catch {
+    return null;
+  }
+}
+
+/* ---------------------------------------------------------------- */
 
 /* Every key a playbook names, plus the three catalogue keys picked out by
  * shape: the top-level title, desc and longdesc are the only keys with
  * exactly two dots, cases.<slug>.<field>, while step keys carry the step
  * id as well. */
-function readPlaybooks(dataDir) {
-  const files = readdirSync(dataDir)
-    .filter((f) => f.endsWith('.playbook.ts'))
-    .sort();
+function parsePlaybooks(files) {
   const playbooks = [];
   const byField = Object.fromEntries(KEY_FIELDS.map((f) => [f, 0]));
   for (const f of files) {
-    const src = readFileSync(join(dataDir, f), 'utf8');
     const keys = new Set();
     const named = {};
     let m;
     KEY_REF.lastIndex = 0;
-    while ((m = KEY_REF.exec(src)) !== null) {
+    while ((m = KEY_REF.exec(f.text)) !== null) {
       keys.add(m[2]);
       byField[m[1]]++;
       (named[m[1]] ??= []).push(m[2]);
     }
     const top = (field) => (named[field] || []).find((k) => k.split('.').length === 3) || null;
     playbooks.push({
-      slug: basename(f, '.playbook.ts'),
-      file: f,
+      slug: basename(f.name, '.playbook.ts'),
+      file: f.name,
       keys,
       title: top('titleKey'),
       desc: top('descKey'),
@@ -201,19 +319,15 @@ function readPlaybooks(dataDir) {
   return { playbooks, byField };
 }
 
-function readLocales(localesDir) {
+function parseLocales(files) {
   const out = new Map();
-  const files = readdirSync(localesDir)
-    .filter((f) => f.endsWith('.ts'))
-    .sort();
   for (const f of files) {
-    const code = basename(f, '.ts');
+    const code = basename(f.name, '.ts');
     if (code === 'index' || code === 'types') continue;
-    const src = readFileSync(join(localesDir, f), 'utf8');
     const have = new Set();
     let m;
     LOCALE_KEY.lastIndex = 0;
-    while ((m = LOCALE_KEY.exec(src)) !== null) have.add(m[1]);
+    while ((m = LOCALE_KEY.exec(f.text)) !== null) have.add(m[1]);
     out.set(code, have);
   }
   return out;
@@ -225,8 +339,7 @@ function readLocales(localesDir) {
  * Null when the block cannot be found, and the caller stops on null: a
  * fallback to "every file on disk" would gate the locales this tree says
  * not to touch. */
-function offeredLanguages(i18nPath) {
-  const src = readFileSync(i18nPath, 'utf8');
+function offeredLanguages(src) {
   const start = src.indexOf('export const SUPPORTED_LANGUAGES');
   if (start < 0) return null;
   const end = src.indexOf('\n];', start);
@@ -272,10 +385,11 @@ function measure(playbooks, answers) {
   return { gaps, catalogue, missing, titles, descs, cards, longdescs, complete };
 }
 
-function analyse(opts) {
-  const { playbooks, byField } = readPlaybooks(opts.dataDir);
-  const files = readLocales(opts.localesDir);
-  const offered = opts.offered;
+function analyse(sources) {
+  const offered = offeredLanguages(sources.i18n);
+  if (!offered) throw new Error(`could not read SUPPORTED_LANGUAGES out of i18n.ts from ${sources.origin}`);
+  const { playbooks, byField } = parsePlaybooks(sources.playbooks);
+  const files = parseLocales(sources.locales);
   const references = new Set();
   for (const p of playbooks) for (const k of p.keys) references.add(k);
 
@@ -298,6 +412,8 @@ function analyse(opts) {
   }
   const missingFiles = offered.filter((c) => !files.has(c) && !NOT_COUNTED.has(c)).sort();
   return {
+    origin: sources.origin,
+    sha: sources.sha,
     playbooks,
     byField,
     references: references.size,
@@ -316,6 +432,11 @@ function evaluate(analysis, manifest) {
   const tighten = new Set();
   const recorded = manifest.locales || {};
   const cardComplete = new Set(manifest.card_complete || []);
+
+  /* A floor with no provenance was not written by --update from a commit,
+   * and the one way that happens is the way that already went wrong: a
+   * file measured over a working tree and staged by hand. */
+  if (!/^[0-9a-f]{40}$/.test(manifest.measured_at || '')) failures.push({ kind: 'provenance', reason: 'carries no measured_at commit' });
 
   for (const e of analysis.counted) {
     const rec = recorded[e.code];
@@ -376,6 +497,7 @@ function buildManifest(analysis, prior) {
   const manifest = {
     note: MANIFEST_NOTE,
     updated: new Date().toISOString().slice(0, 10),
+    measured_at: analysis.sha,
     playbooks: analysis.playbooks.length,
     references: analysis.references,
     card_complete: [...cardComplete].sort(),
@@ -389,10 +511,19 @@ function buildManifest(analysis, prior) {
 function printPopulation(analysis) {
   const fields = KEY_FIELDS.map((f) => `${f} ${analysis.byField[f]}`).join(', ');
   console.log(
-    `case coverage: ${analysis.playbooks.length} playbooks name ${analysis.references} keys (${fields}); ` +
-      `${analysis.files} locale files, ${analysis.counted.length} counted`
+    `case coverage, measured from ${analysis.origin}: ${analysis.playbooks.length} playbooks name ` +
+      `${analysis.references} keys (${fields}); ${analysis.files} locale files, ${analysis.counted.length} counted`
   );
   for (const s of analysis.skipped) console.log(`  not counted: ${s.code}, ${s.why}`);
+}
+
+function printDirty(dirty) {
+  if (!dirty || !dirty.length) return;
+  const shown = dirty.slice(0, 6).map((p) => basename(p));
+  console.log(
+    `  the working tree differs from HEAD in ${dirty.length} of the files read (${shown.join(', ')}` +
+      `${dirty.length > shown.length ? ', ...' : ''}): this verdict is about the disk; --update reads the commit and cannot see them`
+  );
 }
 
 function printTable(analysis, manifest) {
@@ -435,7 +566,7 @@ function printProblems(problems, verb) {
     console.error('');
     let shown = 0;
     for (const [slug, list] of bySlug) {
-      console.error(`    ${slug}  (${REL_DATA}/${slug}.playbook.ts)`);
+      console.error(`    ${slug}  (${REL.data}/${slug}.playbook.ts)`);
       for (const r of list) {
         if (shown++ >= 40) continue;
         const where = r.base ? `${r.code} and its base ${r.base}` : r.code;
@@ -449,17 +580,23 @@ function printProblems(problems, verb) {
   }
   for (const p of problems.filter((x) => x.kind === 'catalogue')) {
     console.error(`    ${p.code} is listed as card_complete and is missing catalogue text:`);
-    for (const c of p.catalogue.slice(0, 12)) console.error(`        ${c.key}  (${REL_DATA}/${c.file})`);
+    for (const c of p.catalogue.slice(0, 12)) console.error(`        ${c.key}  (${REL.data}/${c.file})`);
     if (p.catalogue.length > 12) console.error(`        ... and ${p.catalogue.length - 12} more`);
     console.error('');
   }
   for (const p of problems.filter((x) => x.kind === 'unrecorded')) {
-    console.error(`    ${p.code} is offered in SUPPORTED_LANGUAGES and has no baseline in ${REL_MANIFEST}.`);
-    console.error(`      Record one: node ${REL_SCRIPT} --update`);
+    console.error(`    ${p.code} is offered in SUPPORTED_LANGUAGES and has no baseline in ${REL.manifest}.`);
+    console.error(`      Record one: node ${REL.script} --update`);
     console.error('');
   }
   for (const p of problems.filter((x) => x.kind === 'nofile')) {
-    console.error(`    ${p.code} is offered in SUPPORTED_LANGUAGES and has no file under ${REL_LOCALES}.`);
+    console.error(`    ${p.code} is offered in SUPPORTED_LANGUAGES and has no file under ${REL.locales}.`);
+    console.error('');
+  }
+  for (const p of problems.filter((x) => x.kind === 'provenance')) {
+    console.error(`    ${REL.manifest} ${p.reason}, so its numbers were not measured by --update`);
+    console.error('      from a commit in this history and describe no tree this gate guards.');
+    console.error(`      Regenerate it from HEAD: node ${REL.script} --update`);
     console.error('');
   }
 }
@@ -468,11 +605,11 @@ function printHowToFix() {
   console.error('  A key a playbook names and a locale does not answer renders English to');
   console.error('  every reader of that locale, and nothing on screen says so.');
   console.error('');
-  console.error(`  Add the missing keys to ${REL_LOCALES}/<code>.ts, translated from the`);
-  console.error(`  *Default English beside each key in ${REL_DATA}/<slug>.playbook.ts.`);
-  console.error('  A locale may only ever answer more. When it does, record the lower');
-  console.error('  numbers and commit the manifest with the translations:');
-  console.error(`    node ${REL_SCRIPT} --update`);
+  console.error(`  Add the missing keys to ${REL.locales}/<code>.ts, translated from the`);
+  console.error(`  *Default English beside each key in ${REL.data}/<slug>.playbook.ts.`);
+  console.error('  A locale may only ever answer more. When it does, commit the translations,');
+  console.error('  then record the lower numbers from that commit and commit the manifest:');
+  console.error(`    node ${REL.script} --update`);
   console.error('');
 }
 
@@ -502,6 +639,8 @@ function toJson(analysis, manifest) {
     locales[e.code] = { base: e.base, file: strip(e.file), gate: strip(e.gate) };
   }
   return {
+    measured_from: analysis.origin,
+    measured_at: analysis.sha,
     playbooks: analysis.playbooks.length,
     references: analysis.references,
     by_field: analysis.byField,
@@ -515,12 +654,19 @@ function toJson(analysis, manifest) {
 }
 
 function run(args) {
-  const offered = offeredLanguages(args.i18n);
-  if (!offered) {
-    console.error(`check-case-coverage: could not read SUPPORTED_LANGUAGES from ${args.i18n}`);
+  if (args.update && args.overrides) {
+    console.error('check-case-coverage: --update measures a commit; --data-dir and --locales-dir are for the check only');
     return 2;
   }
-  const analysis = analyse({ ...args, offered });
+
+  let analysis;
+  try {
+    const sources = args.update || args.fromGit ? gitSources(args.fromGit || 'HEAD', REPO_ROOT) : treeSources(args);
+    analysis = analyse(sources);
+  } catch (err) {
+    console.error(`check-case-coverage: ${err.message.split('\n')[0]}`);
+    return 2;
+  }
   const manifest = readManifest(args.manifest);
 
   if (args.json) {
@@ -543,30 +689,53 @@ function run(args) {
       printProblems(refused, 'would raise');
       printHowToFix();
       console.error('  If a case really must ship ahead of its strings, raise the number by');
-      console.error(`  hand in ${REL_MANIFEST} so the decision is visible in the diff.`);
+      console.error(`  hand in ${REL.manifest} so the decision is visible in the diff.`);
       console.error('');
       return 2;
     }
     writeManifest(args.manifest, next);
     const gaps = Object.values(next.locales).reduce((n, l) => n + Object.keys(l.gaps).length, 0);
     console.log(
-      `case-coverage-manifest: ${Object.keys(next.locales).length} locale(s) recorded, ${gaps} playbook gap(s), ` +
-        `card_complete: ${next.card_complete.join(' ') || 'none'}`
+      `case-coverage-manifest: measured at ${next.measured_at.slice(0, 9)}, ${Object.keys(next.locales).length} locale(s) recorded, ` +
+        `${gaps} playbook gap(s), card_complete: ${next.card_complete.join(' ') || 'none'}`
     );
     if (promoted.length) console.log(`  promoted to card_complete: ${promoted.join(' ')}`);
     if (firstSeen.length) console.log(`  recorded for the first time: ${firstSeen.join(' ')}`);
-    if (dropped.length) console.log(`  dropped, no longer offered or on disk: ${dropped.join(' ')}`);
+    if (dropped.length) console.log(`  dropped, no longer offered or in the commit: ${dropped.join(' ')}`);
     return 0;
   }
 
   if (!manifest) {
-    console.error(`check-case-coverage: no manifest at ${REL_MANIFEST}. Create one with --update`);
-    console.error('  (that records the tree as it stands, which is a floor and not a certificate)');
+    console.error(`check-case-coverage: no manifest at ${REL.manifest}. Create one with --update`);
+    console.error('  (that records HEAD as it stands, which is a floor and not a certificate)');
     return 2;
   }
 
+  if (!args.fromGit && !args.overrides) printDirty(dirtyPaths(REPO_ROOT));
   printTable(analysis, manifest);
   const { failures, tighten } = evaluate(analysis, manifest);
+  /* The commit the floor names has to be in this history, or its numbers
+   * describe a tree nobody can check out. Only decidable when the object
+   * is here: a shallow CI checkout may not carry it, and that is not the
+   * manifest's fault, so an unknown commit is noted and not failed. */
+  if (manifest.measured_at && !failures.some((f) => f.kind === 'provenance')) {
+    const known = (() => {
+      try {
+        git(['cat-file', '-e', `${manifest.measured_at}^{commit}`], REPO_ROOT, { stdio: 'ignore' });
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+    if (!known) console.log(`  measured_at ${manifest.measured_at.slice(0, 9)} is not in this checkout, so its place in the history was not checked`);
+    else {
+      try {
+        git(['merge-base', '--is-ancestor', manifest.measured_at, 'HEAD'], REPO_ROOT, { stdio: 'ignore' });
+      } catch {
+        failures.push({ kind: 'provenance', reason: `was measured at ${manifest.measured_at.slice(0, 9)}, which is not an ancestor of HEAD` });
+      }
+    }
+  }
 
   if (!failures.length) {
     console.log(
@@ -596,7 +765,9 @@ function run(args) {
  * fail at all. Every branch that can turn the tree red is driven here:
  * a lost key, a case shipped without strings, catalogue text lost under a
  * stale-high floor, a regional variant losing what its base lost, and
- * --update refusing to raise a number. */
+ * --update refusing to raise a number. The last case builds a real git
+ * repository, changes a locale file on disk, and proves the commit-based
+ * reading does not see it: that is the floor's whole guarantee. */
 function selftest() {
   const tmp = mkdtempSync(join(tmpdir(), 'case-coverage-'));
   const fail = (msg) => {
@@ -624,6 +795,7 @@ function selftest() {
       `cases.${slug}.step.one.why`,
     ];
     const locale = (keys) => `const resource = {\n  "translation": {\n${keys.map((k) => `    "${k}": "v",`).join('\n')}\n  },\n};\n`;
+    const i18nOf = (codes) => `export const SUPPORTED_LANGUAGES = [\n${codes.map((c) => `  { code: '${c}', name: '${c}' },`).join('\n')}\n];\n`;
     const write = (name, keys) => writeFileSync(join(locs, `${name}.ts`), locale(keys), 'utf8');
 
     writeFileSync(join(data, 'a.playbook.ts'), playbook('a', true), 'utf8');
@@ -636,10 +808,13 @@ function selftest() {
     write('en', []);
     write('mm', []);
     const offered = ['en', 'xx', 'yy', 'zz', 'zz-XX'];
-    const opts = { dataDir: data, localesDir: locs, offered };
+    const i18n = join(tmp, 'i18n.ts');
+    writeFileSync(i18n, i18nOf(offered), 'utf8');
+    const opts = { dataDir: data, localesDir: locs, i18n };
+    const current = () => analyse(treeSources(opts));
 
     /* 1. A baseline from a tree, and the same tree against it, is green. */
-    const a0 = analyse(opts);
+    const a0 = current();
     const base = buildManifest(a0, null);
     if (base.refused.length) return fail('a first baseline was refused');
     if (base.manifest.card_complete.join(' ') !== 'xx yy zz') {
@@ -653,19 +828,19 @@ function selftest() {
 
     /* 2. A key a locale had and lost. */
     write('xx', full.filter((k) => k !== 'cases.a.step.one.what'));
-    r = evaluate(analyse(opts), base.manifest);
+    r = evaluate(current(), base.manifest);
     const lost = r.failures.find((f) => f.kind === 'regressed' && f.code === 'xx' && f.slug === 'a');
     if (!lost || !lost.keys.includes('cases.a.step.one.what')) return fail('a lost step key was not reported by locale, playbook and key');
     if (r.failures.length !== 1) return fail(`one lost key should be one failure, got ${r.failures.length}`);
     /* ... and --update will not record it. */
-    if (!buildManifest(analyse(opts), base.manifest).refused.length) return fail('--update recorded a raised number');
+    if (!buildManifest(current(), base.manifest).refused.length) return fail('--update recorded a raised number');
     write('xx', full);
 
     /* 3. Catalogue text lost under a stale-high floor is still caught. */
     const stale = JSON.parse(JSON.stringify(base.manifest));
     stale.locales.yy.gaps.a = 99;
     write('yy', full.filter((k) => k !== 'cases.a.step.one.why' && k !== 'cases.a.title'));
-    r = evaluate(analyse(opts), stale);
+    r = evaluate(current(), stale);
     if (r.failures.some((f) => f.kind === 'regressed')) return fail('a stale-high floor should not have reported a ratchet regression');
     const cat = r.failures.find((f) => f.kind === 'catalogue' && f.code === 'yy');
     if (!cat || !cat.catalogue.some((c) => c.key === 'cases.a.title')) return fail('a lost title in a card_complete locale was not reported');
@@ -673,14 +848,14 @@ function selftest() {
 
     /* 4. A case shipped without its strings regresses every counted locale. */
     writeFileSync(join(data, 'c.playbook.ts'), playbook('c', false), 'utf8');
-    r = evaluate(analyse(opts), base.manifest);
+    r = evaluate(current(), base.manifest);
     const hit = r.failures.filter((f) => f.kind === 'regressed' && f.slug === 'c').map((f) => f.code);
     if (hit.sort().join(' ') !== 'xx yy zz zz-XX') return fail(`a new case without strings should regress every counted locale, got: ${hit.join(' ')}`);
     rmSync(join(data, 'c.playbook.ts'));
 
     /* 5. A regional variant loses what its base loses, and nothing else. */
     write('zz', full.filter((k) => k !== 'cases.b.desc'));
-    r = evaluate(analyse(opts), base.manifest);
+    r = evaluate(current(), base.manifest);
     const regional = r.failures.filter((f) => f.kind === 'regressed').map((f) => f.code);
     if (regional.sort().join(' ') !== 'zz zz-XX') return fail(`a base losing a key should regress it and its variant, got: ${regional.join(' ')}`);
     if (!r.failures.some((f) => f.kind === 'catalogue' && f.code === 'zz')) return fail('a lost desc in a card_complete base was not reported');
@@ -689,14 +864,51 @@ function selftest() {
 
     /* 6. Restored, the tree is green again, and an offered locale with no
      *    baseline is named. */
-    r = evaluate(analyse(opts), base.manifest);
+    r = evaluate(current(), base.manifest);
     if (r.failures.length) return fail('the restored tree is not green');
-    r = evaluate(analyse({ ...opts, offered: [...offered, 'mm'] }), base.manifest);
+    writeFileSync(i18n, i18nOf([...offered, 'mm']), 'utf8');
+    r = evaluate(current(), base.manifest);
     if (!r.failures.some((f) => f.kind === 'unrecorded' && f.code === 'mm')) return fail('an offered locale without a baseline was not reported');
+
+    /* 7. The floor is read from the commit and cannot see the working tree.
+     *    A real repository, the fixtures committed, then a locale file on
+     *    disk loses a key: the tree reading owes it, the commit reading does
+     *    not, and the commit reading names the hash it measured. */
+    const repo = join(tmp, 'repo');
+    const rData = join(repo, REL.data);
+    const rLocs = join(repo, REL.locales);
+    mkdirSync(rData, { recursive: true });
+    mkdirSync(rLocs, { recursive: true });
+    writeFileSync(join(rData, 'a.playbook.ts'), playbook('a', true), 'utf8');
+    writeFileSync(join(rLocs, 'xx.ts'), locale(allKeys('a', true)), 'utf8');
+    writeFileSync(join(rLocs, 'en.ts'), locale([]), 'utf8');
+    writeFileSync(join(repo, REL.i18n), i18nOf(['en', 'xx']), 'utf8');
+    const g = (...a) => git(['-c', 'user.name=selftest', '-c', 'user.email=selftest@localhost', '-c', 'commit.gpgsign=false', ...a], repo, { encoding: 'utf8' });
+    g('init', '-q');
+    g('add', '--', 'frontend');
+    g('commit', '-q', '-m', 'fixtures');
+    writeFileSync(join(rLocs, 'xx.ts'), locale(allKeys('a', true).filter((k) => k !== 'cases.a.step.one.why')), 'utf8');
+    const disk = analyse(treeSources({ dataDir: rData, localesDir: rLocs, i18n: join(repo, REL.i18n) }));
+    const commit = analyse(gitSources('HEAD', repo));
+    if (disk.counted[0].gate.missing !== 1) return fail('the working tree reading should owe the key just removed from disk');
+    if (commit.counted[0].gate.missing !== 0) return fail('the commit reading saw a change that exists only on disk');
+    if (!/^[0-9a-f]{40}$/.test(commit.sha || '')) return fail('the commit reading did not record the hash it measured');
+    const floor = buildManifest(commit, null).manifest;
+    if (floor.measured_at !== commit.sha || floor.locales.xx.missing !== 0) return fail('the floor did not record the commit it was measured from');
+
+    /* 8. A floor with no measured_at is refused: that is the shape a file
+     *    measured over a working tree and staged by hand has. */
+    if (evaluate(commit, floor).failures.length) return fail('a floor measured from the commit it is checked against is not green');
+    const orphan = { ...floor };
+    delete orphan.measured_at;
+    if (!evaluate(commit, orphan).failures.some((f) => f.kind === 'provenance')) return fail('a floor without measured_at was accepted');
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
-  console.log('selftest ok: the check fails on a lost key, a case without strings, lost catalogue text, a regional variant behind its base, and an unrecorded locale, and --update refuses to raise a number');
+  console.log(
+    'selftest ok: the check fails on a lost key, a case without strings, lost catalogue text, a regional variant behind its base, ' +
+      'an unrecorded locale and a floor with no measured_at; --update refuses to raise a number and reads the commit, not the disk'
+  );
   return 0;
 }
 
