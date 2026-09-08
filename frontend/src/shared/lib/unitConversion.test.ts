@@ -20,6 +20,9 @@ import {
   toDisplayRate,
   fromDisplayRate,
 } from './unitConversion';
+// The live unit picker. Imported so this file measures what the product
+// actually offers as a storable unit rather than a copy of it that drifts.
+import { UNITS } from '@/features/boq/boqHelpers';
 
 describe('convertUnit - metric to imperial', () => {
   it('converts length m -> ft', () => {
@@ -307,5 +310,83 @@ describe('convertBetween (unit-to-unit within a dimension, #319 / #320)', () => 
     const between = convertBetween(4, 'm3', 'ft3');
     const display = convertUnit(4, 'm3', 'imperial').value;
     expect(between).toBeCloseTo(display, 6);
+  });
+});
+
+/* ── Picker population: an imperial unit must never be scaled ─────────── */
+
+/**
+ * `toDisplayQuantity` calls its parameter `metricUnit`, but the unit field is
+ * not restricted to metric. The picker (`BASE_UNITS` in
+ * features/boq/boqHelpers.ts) offers imperial and US trade tokens as storable
+ * values, so a US estimator's position can reach the converter already
+ * expressed in cubic yards. Nothing scales it today because the lookup is
+ * keyed on metric tokens only - the imperial token matches nothing and falls
+ * through. This block pins that, because the property currently holds by the
+ * shape of one table and would break silently if a token were added to the
+ * wrong side of it: the quantity would then be multiplied a second time and
+ * the printed line would carry a wrong number at the right total.
+ *
+ * The imperial list is written out rather than derived from the converter's
+ * own tables on purpose. A gate that asked the converter which units are
+ * imperial would agree with the converter by construction and go green in
+ * exactly the case it exists to catch.
+ */
+const IMPERIAL_PICKER_TOKENS = [
+  'in', 'ft', 'yd', 'mi',
+  'sqft', 'sqyd', 'acre', 'sq',
+  'cuft', 'cuyd', 'gal', 'oz', 'lb', 'cwt', 'ton',
+  'cy', 'lf', 'msf', 'mbf', 'bdft',
+] as const;
+
+/**
+ * The picker tokens that MUST scale under `imperial` - the metric ones the
+ * converter knows. Asserted as an exact set so the check fails in both
+ * directions: an imperial token wrongly given a metric mapping appears here
+ * as an unexpected member, and a metric mapping quietly dropped appears as a
+ * missing one.
+ */
+const EXPECTED_SCALING_TOKENS = [
+  'mm', 'cm', 'm', 'km', 'lm',
+  'mm2', 'cm2', 'dm2', 'm2', 'ha',
+  'm3', 'l',
+  'kg', 't',
+];
+
+describe('unit picker population (imperial storage is never re-converted)', () => {
+  it('offers a population big enough for the verdict to mean anything', () => {
+    // Measured 2026-09-07: 96 tokens in the picker, 20 of them imperial / US
+    // trade units and 14 metric ones the converter scales. Floors, not exact
+    // counts, so adding a countable or a locale token does not fail the file.
+    expect(UNITS.length).toBeGreaterThanOrEqual(90);
+    expect(IMPERIAL_PICKER_TOKENS.length).toBe(20);
+  });
+
+  it('still offers every imperial token this block claims to cover', () => {
+    // Guards the list above against drift: a token renamed or dropped from
+    // the picker must not leave a silently empty assertion behind.
+    const missing = IMPERIAL_PICKER_TOKENS.filter((u) => !UNITS.includes(u));
+    expect(missing).toEqual([]);
+  });
+
+  it('passes an imperial-stored quantity through unscaled in imperial mode', () => {
+    for (const unit of IMPERIAL_PICKER_TOKENS) {
+      expect(toDisplayQuantity(7.5, unit, 'imperial').value).toBe(7.5);
+      expect(conversionFactorFor(unit, 'imperial')).toBe(1);
+      // The paired rate must not move either, or the line stops reconciling.
+      expect(toDisplayRate(250, unit, 'imperial')).toBe(250);
+    }
+  });
+
+  it('scales exactly the metric picker tokens and no others', () => {
+    const scaling = UNITS.filter((u) => conversionFactorFor(u, 'imperial') !== 1);
+    expect([...scaling].sort()).toEqual([...EXPECTED_SCALING_TOKENS].sort());
+  });
+
+  it('still converts metric quantities, so the check above is not vacuous', () => {
+    // The other direction: if the converter stopped converting anything, every
+    // assertion above would pass. One known scaling case holds it honest.
+    expect(toDisplayQuantity(10, 'm2', 'imperial').value).toBeCloseTo(107.639, 3);
+    expect(conversionFactorFor('m2', 'imperial')).toBeGreaterThan(1);
   });
 });

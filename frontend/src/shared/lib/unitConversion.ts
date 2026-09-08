@@ -187,8 +187,23 @@ export interface DisplayQuantity {
  * Convert a metric-canonical quantity into the user's measurement system,
  * the single decision every display / export surface should funnel through.
  *
- * The whole app stores quantities metric-canonical (m / m2 / m3 / kg ...).
- * This helper takes such a value plus the target `system` and returns what
+ * `metricUnit` names what this helper ASSUMES, not what storage guarantees.
+ * The unit picker (`BASE_UNITS` in features/boq/boqHelpers.ts) is an open
+ * list: it offers imperial and US trade tokens (`sqft`, `cy`, `lf`, `bdft`
+ * ...) alongside the metric ones, adds locale-native tokens per language, and
+ * `saveCustomUnit` lets a user add their own. A stored `position.unit` is
+ * therefore metric by convention only, and a US estimator's `cy` reaches this
+ * function unchanged.
+ *
+ * That is safe, and deliberately so: the lookup is keyed on metric tokens
+ * alone, so an already-imperial or locale-native unit matches nothing and
+ * leaves through the pass-through branch unscaled. The pass-through is
+ * load-bearing rather than incidental - it is what stops a quantity already
+ * expressed in cubic yards from being converted a second time - so it is
+ * pinned by the picker-population test in `unitConversion.test.ts` rather
+ * than left to hold by luck of the table.
+ *
+ * This helper takes a value plus the target `system` and returns what
  * to render:
  *   - `metric`   : the value passes through bit-for-bit; only the unit label
  *                  is normalised to its display form ("m2" -> "m²"), so a
