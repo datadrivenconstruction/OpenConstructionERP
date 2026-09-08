@@ -344,6 +344,34 @@ async def test_record_usage_unknown_item_404(http_client, auth_headers):
     assert resp.status_code == 404, resp.text
 
 
+@pytest.mark.asyncio
+async def test_record_usage_refuses_an_anonymous_caller(http_client, app_instance):
+    """A caller with no credentials must not be able to write to the ledger.
+
+    The two tests above both send auth headers, so on their own they would
+    still pass if the route stopped requiring credentials at all. This one is
+    the actual regression guard, and it matters because the usage ledger feeds
+    the shared cross-tenant certainty badge: an anonymous writer could inflate
+    another tenant's rate into looking "proven".
+
+    It asserts only that the caller is turned away, not which status says so.
+    Pinning the exact code is how the tests in this cluster went stale in the
+    first place - the routes were deliberately hardened and the assertions were
+    left describing the older contract.
+    """
+    item_id = app_instance.state.test_item_idle_id
+
+    resp = await http_client.post(
+        f"/api/v1/costs/{item_id}/record-usage/",
+        json={
+            "project_id": str(uuid.uuid4()),
+            "context": "boq",
+            "unit_rate_at_use": 1.50,
+        },
+    )
+    assert resp.status_code in (401, 403), resp.text
+
+
 # ── Classifier unit boundaries ─────────────────────────────────────────────
 
 
