@@ -1834,10 +1834,19 @@ class VariationsService:
     ) -> dict[uuid.UUID, Any]:
         """Estimating positions the variation takes scope from, by id.
 
-        Every id must resolve to a position on a bill of *this* project. A
-        request that names a position from somewhere else is refused rather
-        than silently skipped: seeding a bill with fewer lines than were asked
-        for, and saying nothing, is how a variation ends up understated.
+        Every id must resolve to a position on an *estimating* bill of this
+        project. A request that names a position from somewhere else is
+        refused rather than silently skipped: seeding a bill with fewer lines
+        than were asked for, and saying nothing, is how a variation ends up
+        understated.
+
+        Another variation's bill is somewhere else, and is excluded by the
+        same ``variation_request_id IS NULL`` filter the three other places
+        that mean "the project's own bills" already apply
+        (``app/core/boq_target.py``, ``BOQRepository.list_for_project``,
+        ``_resolve_writeback_boq`` in change orders). It is priced scope that
+        nobody has agreed to yet, so estimating provenance pointing at it
+        would defend one unagreed figure with another.
         """
         if not position_ids:
             return {}
@@ -1850,7 +1859,11 @@ class VariationsService:
                 await self.session.execute(
                     select(Position)
                     .join(BOQ, BOQ.id == Position.boq_id)
-                    .where(Position.id.in_(position_ids), BOQ.project_id == project_id)
+                    .where(
+                        Position.id.in_(position_ids),
+                        BOQ.project_id == project_id,
+                        BOQ.variation_request_id.is_(None),
+                    )
                 )
             )
             .scalars()
@@ -1859,13 +1872,17 @@ class VariationsService:
         found = {row.id: row for row in rows}
         missing = [str(pid) for pid in position_ids if pid not in found]
         if missing:
+            # One code for one refusal. A caller that learned it when the only
+            # filter was the project keeps reading it, and the message says
+            # what the filter is now rather than a narrower thing it once was.
             raise HTTPException(
                 status_code=http_status.HTTP_400_BAD_REQUEST,
                 detail={
                     "error": "source_position_not_in_project",
                     "message": (
-                        "These positions are not on any bill of this project, so a variation on "
-                        "this project cannot take scope from them."
+                        "These positions are not on any estimating bill of this project, so a "
+                        "variation on this project cannot take scope from them. Another "
+                        "variation's own bill is not estimating scope."
                     ),
                     "position_ids": missing,
                 },
@@ -2213,6 +2230,12 @@ class VariationsService:
         this record holds. A schedule-of-values line of any contract on the
         project is therefore accepted, and one belonging to another project's
         contract is refused by the same loader the seeding path uses.
+
+        The estimating position goes through the same loader, which admits
+        only the project's estimating bills. A line of this bill, or of any
+        other variation's bill, is refused there rather than guarded against
+        here, so there is one answer to "what may a line be traced to" and
+        both paths give it.
         """
         vr = await self.get_request(vr_id)
         position = await self._require_variation_boq_line(vr_id, position_id)
@@ -2223,14 +2246,6 @@ class VariationsService:
         sources = await self._load_source_positions(
             vr.project_id, [data.source_position_id] if data.source_position_id else []
         )
-        if data.source_position_id and data.source_position_id == position_id:
-            raise HTTPException(
-                status_code=http_status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "error": "line_cannot_be_its_own_source",
-                    "message": "A line cannot be the scope it was taken from.",
-                },
-            )
         line = contract_lines.get(data.contract_line_id) if data.contract_line_id else None
         source = sources.get(data.source_position_id) if data.source_position_id else None
 

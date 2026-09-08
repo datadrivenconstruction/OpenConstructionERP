@@ -398,6 +398,64 @@ class TestReferencesThatWouldPointOutOfTheProject:
         assert await _trace_rows(session, my_boq.id) == []
         assert await _trace_rows(session, their_boq.id) == []
 
+    @pytest.mark.asyncio
+    async def test_another_variations_priced_scope_is_not_estimating_provenance(self, session: AsyncSession) -> None:
+        """The source of a line may be the estimate, never another variation's bill.
+
+        Both bills are on the caller's own project, so the project filter
+        cannot be what refuses this. A variation bill holds priced scope
+        nobody has agreed to, and citing it as where the money came from
+        defends one unagreed figure with another. The loader excludes it by
+        the same ``variation_request_id IS NULL`` filter the three other
+        places that mean "the project's own bills" already apply, which is
+        also why a line cannot cite itself.
+        """
+        project = await _make_project(session)
+        mine = await _make_request(session, project, code="VR-0001")
+        theirs = await _make_request(session, project, code="VR-0002")
+        service = VariationsService(session)
+
+        my_boq = await service.create_request_boq(mine.id, VariationBOQCreate())
+        their_boq = await service.create_request_boq(theirs.id, VariationBOQCreate())
+        position = await _add_line_by_hand(session, my_boq.id)
+        their_line = await _add_line_by_hand(session, their_boq.id, description="Priced by somebody else")
+
+        for source_id, why in ((their_line.id, "another request's bill"), (position.id, "the line itself")):
+            with pytest.raises(HTTPException) as excinfo:
+                await service.set_boq_line_trace(
+                    mine.id, position.id, VariationBOQLineTraceUpdate(source_position_id=source_id)
+                )
+            assert excinfo.value.status_code == 400, why
+            assert excinfo.value.detail["error"] == "source_position_not_in_project", why
+
+        assert await _trace_rows(session, my_boq.id) == []
+
+    @pytest.mark.asyncio
+    async def test_the_estimating_bill_is_still_a_source(self, session: AsyncSession) -> None:
+        """The control for the exclusion above, on the same project.
+
+        Narrowing what counts as a source is only correct if it still admits
+        the thing it exists to admit, and a filter that refused everything
+        would make the test above pass while breaking the feature.
+        """
+        project = await _make_project(session)
+        estimate = BOQ(project_id=project.id, name="Tender estimate")
+        session.add(estimate)
+        await session.flush()
+        source = await _add_line_by_hand(session, estimate.id, description="Reinforced concrete wall C30/37")
+        request = await _make_request(session, project)
+        service = VariationsService(session)
+
+        boq = await service.create_request_boq(request.id, VariationBOQCreate())
+        position = await _add_line_by_hand(session, boq.id)
+
+        trace = await service.set_boq_line_trace(
+            request.id, position.id, VariationBOQLineTraceUpdate(source_position_id=source.id)
+        )
+
+        assert trace.source_position_id == source.id
+        assert trace.source_boq_id == estimate.id
+
 
 # ── The route in front of the service ───────────────────────────────────────
 
