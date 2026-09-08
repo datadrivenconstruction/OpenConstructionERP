@@ -98,26 +98,51 @@ def test_a_phase_past_its_budget_stops_being_vouched_for(monkeypatch: pytest.Mon
 
     This is the property that keeps the repair from being worse than the bug it
     fixes. Reporting is what stops, not the boot.
+
+    The budget is narrowed after the phase has been reported and widened again
+    before the phase moves on, rather than being set small for the whole test.
+    Held small throughout, one constant has to do two contradictory jobs: be
+    wide enough that two reports fit inside it, and expire while the test is
+    still watching. A runner under load that lands the first tick inside a
+    0.3s budget and the next one outside it satisfies neither, and then waits
+    out the full patience for a second report that can no longer come. That is
+    how this failed on macOS while passing on Linux and Windows, on a machine
+    difference rather than a product one. The property asserted is unchanged;
+    the two demands are separated in time so that no scheduling delay can put
+    them in conflict.
     """
     from app import main
 
     lines = _capture(monkeypatch)
+    shipped_budget = main._BOOT_PHASE_BUDGET_SECONDS
     monkeypatch.setattr(main, "_BOOT_HEARTBEAT_SECONDS", 0.05)
-    monkeypatch.setattr(main, "_BOOT_PHASE_BUDGET_SECONDS", 0.3)
 
     with main._heartbeat_through_startup():
+        # The budget is still the shipped one here, so this waits on the
+        # heartbeat alone and has no expiry to race.
         main._set_boot_phase("Modules")
         assert _wait_until(lambda: len(lines) >= 2), f"never reported at all: {lines}"
+
+        # Retire the phase by declaring a budget it has already outrun, rather
+        # than by setting a small one and waiting for the clock to reach it.
+        monkeypatch.setattr(main, "_BOOT_PHASE_BUDGET_SECONDS", (time.monotonic() - main._boot_phase_started) / 2)
+        assert time.monotonic() - main._boot_phase_started > main._BOOT_PHASE_BUDGET_SECONDS, (
+            "the phase has to be over budget before silence means anything"
+        )
+
         # Once the phase is past its budget no further report is possible, so
         # two readings taken after that point must agree however badly this
-        # machine happens to be scheduling threads.
-        assert _wait_until(lambda: time.monotonic() - main._boot_phase_started > 0.3)
+        # machine happens to be scheduling threads. The first wait lets a tick
+        # that had already passed its budget check land before the reading.
+        time.sleep(main._BOOT_HEARTBEAT_SECONDS * 2)
         settled = len(lines)
         time.sleep(0.3)
         assert len(lines) == settled, f"a stuck phase was still being vouched for: {lines[settled:]}"
 
         # A phase that does move on is reported again: the budget retires one
-        # phase, not the heartbeat.
+        # phase, not the heartbeat. The budget goes back to the shipped value
+        # first, so this asserts the phase change and not the budget's width.
+        monkeypatch.setattr(main, "_BOOT_PHASE_BUDGET_SECONDS", shipped_budget)
         main._set_boot_phase("Demo data")
         assert _wait_until(lambda: any("Demo data" in line for line in lines)), (
             f"the budget retired the whole heartbeat rather than one phase: {lines}"
