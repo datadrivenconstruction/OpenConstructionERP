@@ -673,7 +673,7 @@ export function BugReportMenu() {
     if (descriptionTooShort) return;
     setOpen(false);
     setDescription('');
-    const { url, body } = buildBugReportUrl(t, trimmedDescription);
+    const { url, body } = buildBugReportUrl(trimmedDescription);
     if (url) {
       openLink(url);
       return;
@@ -698,7 +698,7 @@ export function BugReportMenu() {
     if (descriptionTooShort) return;
     setOpen(false);
     setDescription('');
-    const { body, title } = buildBugReportUrl(t, trimmedDescription);
+    const { body, title } = buildBugReportUrl(trimmedDescription);
     const subject = `OpenConstructionERP Issue - ${title}`;
     // mailto bodies are also length-limited (~2000 chars in Chrome),
     // so we trim aggressively. The downloaded log JSON is the long form.
@@ -1387,11 +1387,21 @@ export function deriveComponentFromRoute(pathname: string): string {
  * caller now requires the text (see `MIN_DESCRIPTION_LENGTH`) rather than
  * inviting it, so there is no longer a version of this body that travels
  * looking filled in while saying nothing.
+ *
+ * Everything this function writes itself is an English literal, and that is
+ * why it takes no `t`. The audience for the payload is not the person in
+ * front of the screen: it is a public tracker and an inbox we read in
+ * English, so the title, the section headings and the "no error captured"
+ * marker are ours to word, not the UI language's. Two of them used to go
+ * through `t()` and travelled in whatever language the app was running in,
+ * which put a title nobody could scan the issue list by, in one of forty
+ * odd spellings, on every automatically filed report. Passing the function
+ * a translator is what made that possible, so the parameter is gone rather
+ * than merely unused: there is no longer a call shape that can localize the
+ * payload by accident. The reporter's own words are the exception and stay
+ * exactly as typed, in their own language, because they are the report.
  */
-function buildBugReportUrl(
-  t: (key: string, opts?: { defaultValue?: string; [k: string]: unknown }) => string,
-  description: string,
-): {
+function buildBugReportUrl(description: string): {
   url: string;
   body: string;
   title: string;
@@ -1400,9 +1410,20 @@ function buildBugReportUrl(
   const stackLines = last?.stack ? last.stack.split('\n').slice(0, 30).join('\n') : '';
   const errorBlock = last
     ? `\`\`\`\n${last.message}\n${stackLines}\n\`\`\``
-    : t('app.report_bug_no_error', { defaultValue: '_No error captured during this session._' });
+    : '_No error captured during this session._';
 
   const component = deriveComponentFromRoute(window.location.pathname);
+  // The language the app was running in, which a report written in one we do
+  // not read otherwise leaves us to infer from the prose. App.tsx keeps this
+  // attribute in step with the active UI language, so that is normally what
+  // this names: the bundle that rendered the screen being described. If it is
+  // ever unset the browser's own locale stands in, which is a near neighbour
+  // rather than the same fact, and a named fallback beats a blank line that
+  // reads as though the question was never asked.
+  const uiLocale =
+    document.documentElement.lang ||
+    (typeof navigator !== 'undefined' ? navigator.language : '') ||
+    'unknown';
 
   const body = [
     '### Description',
@@ -1412,6 +1433,7 @@ function buildBugReportUrl(
     `- App version: ${APP_VERSION}`,
     `- Component: ${component}`,
     `- Page: ${window.location.pathname}${window.location.search}`,
+    `- UI locale: ${uiLocale}`,
     `- User agent: ${navigator.userAgent}`,
     `- Build: ${APP_BUILD_FINGERPRINT}`,
     last ? `- Captured at: ${last.at}` : '',
@@ -1437,11 +1459,9 @@ function buildBugReportUrl(
   }
 
   // Name the screen in the title so triage knows the affected surface at a
-  // glance (#168). i18n interpolation keeps the component verbatim.
-  const title = t('app.report_bug_title_component', {
-    defaultValue: '[{{component}}] Bug report from in-app menu',
-    component,
-  });
+  // glance (#168), and keep the rest of the line fixed so the same report
+  // filed from two installs reads as the same report.
+  const title = `[${component}] Bug report from in-app menu`;
   const encodedTitle = encodeURIComponent(title);
   const url = GITHUB_REPO
     ? `https://github.com/${GITHUB_REPO}/issues/new?title=${encodedTitle}&body=${encoded}`
