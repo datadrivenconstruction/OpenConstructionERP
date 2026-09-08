@@ -268,7 +268,16 @@ async def test_generate_from_template_rejects_unknown(http_client, admin_session
 
 @pytest.mark.asyncio
 async def test_generate_refuses_active_schedule(http_client, admin_session) -> None:
-    """Re-running the generator against an active schedule must 409."""
+    """Re-running the generator against a live active schedule must 409.
+
+    Two active schedules look alike and are treated differently on purpose.
+    The one convert-to-spa creates is a single-line placeholder nobody has
+    posted against yet; the generator rebuilds it in place, otherwise the
+    only way to a real schedule is to suspend the default first, which is
+    the dead end the UI reported. Once a schedule has a line that is due,
+    overdue, paid or waived, the generator refuses with 409 so paid lines
+    are never clobbered.
+    """
     ctx = await _create_spa(
         http_client,
         admin_session["headers"],
@@ -276,17 +285,41 @@ async def test_generate_refuses_active_schedule(http_client, admin_session) -> N
         plot_number="T-003",
     )
     spa = ctx["spa"]
-    # Default schedule is active immediately after convert-to-spa.
-    resp = await http_client.post(
+    body = {
+        "sales_contract_id": spa["id"],
+        "template_key": "10_40_50",
+        "start_date": "2026-06-01",
+    }
+    # The auto-created default is active but pristine: rebuilt, not refused.
+    first = await http_client.post(
         "/api/v1/property-dev/payment-schedules/from-template",
-        json={
-            "sales_contract_id": spa["id"],
-            "template_key": "10_40_50",
-            "start_date": "2026-06-01",
-        },
+        json=body,
         headers=admin_session["headers"],
     )
-    assert resp.status_code == 409, resp.text
+    assert first.status_code == 201, first.text
+    assert first.json()["status"] == "active"
+    # Rebuilt in place: still exactly one schedule on the SPA.
+    listing = await http_client.get(
+        f"/api/v1/property-dev/payment-schedules/?sales_contract_id={spa['id']}",
+        headers=admin_session["headers"],
+    )
+    assert listing.status_code == 200, listing.text
+    assert [s["id"] for s in listing.json()] == [first.json()["id"]]
+
+    # The template marks its first line due, so the schedule is now live.
+    second = await http_client.post(
+        "/api/v1/property-dev/payment-schedules/from-template",
+        json={**body, "template_key": "30_30_40"},
+        headers=admin_session["headers"],
+    )
+    assert second.status_code == 409, second.text
+    # And the live schedule was left exactly as the first call built it.
+    ins = await http_client.get(
+        f"/api/v1/property-dev/instalments/?schedule_id={first.json()['id']}",
+        headers=admin_session["headers"],
+    )
+    assert ins.status_code == 200, ins.text
+    assert len(ins.json()) == 3
 
 
 @pytest.mark.asyncio
