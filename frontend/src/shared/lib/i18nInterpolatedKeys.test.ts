@@ -155,7 +155,16 @@ describe('#200 counted keys carry every plural form their own language uses', ()
     // invented roots passed every gate, so the language is withheld until the
     // file is retranslated. The file stays covered by every assertion below;
     // only the registry comparison must expect its absence.
-    const undeclaredOnPurpose = ['mn'];
+    //
+    // Hungarian joined it on 2026-09-04: `extract` seeds every batch with the
+    // English source text as a placeholder, and `assemble`'s own checks (key
+    // present, no cross-batch duplicate) cannot tell a translated batch from
+    // one where that placeholder was never replaced. As of the date above,
+    // 30,746 of the file's 41,903 values are still byte-identical to their
+    // English source - measured by direct comparison, not estimated. `hu.ts`
+    // stays covered by every assertion below, including the plural-form loop;
+    // only the registry comparison must expect its absence, same as mn.
+    const undeclaredOnPurpose = ['mn', 'hu'];
     expect([...localeFiles.map(([code]) => code)].filter((code) => !undeclaredOnPurpose.includes(code)).sort())
       .toEqual([...declaredCodes].sort());
   });
