@@ -499,11 +499,8 @@ def _format_money(amount: Decimal | int | float | None, locale: str, currency_co
     sign = "-" if q < 0 else ""
     abs_q = -q if q < 0 else q
     int_part, _, frac_part = format(abs_q, "f").partition(".")
-    # Group by 3 from the right.
-    rev = int_part[::-1]
-    chunks = [rev[i : i + 3] for i in range(0, len(rev), 3)]
     thou_sep, dec_sep = _separators_for_locale(locale)
-    grouped = thou_sep.join([c[::-1] for c in chunks][::-1])  # readable order
+    grouped = _group_digits(int_part, _base_language(locale), thou_sep)
     if decimals == 0:
         # No subunit, so no separator either - a trailing "," on a forint
         # would read as a truncated number rather than a whole one.
@@ -511,15 +508,105 @@ def _format_money(amount: Decimal | int | float | None, locale: str, currency_co
     return f"{sign}{grouped}{dec_sep}{frac_part}"
 
 
+def _base_language(locale: str) -> str:
+    """The BCP-47 root of *locale*, lowercased. English when nothing says."""
+    return (locale or "en").split("-")[0].lower()
+
+
+#: Languages whose readers do not group the integer part in uniform threes.
+#:
+#: The Indian system groups the last three digits and then in twos, so
+#: 47657972.78 is written ``4,76,57,972.78`` and not ``47,657,972.78``. That is
+#: not a stylistic preference about where the commas fall: ``lakh`` names the
+#: sixth digit and ``crore`` the eighth, so the grouping is what lets a figure
+#: be read aloud at all, and one grouped by threes has to be counted digit by
+#: digit first. This renderer chunked the reversed integer in threes for every
+#: locale, which no argument could change, so ``hi`` - offered above, with a
+#: bundled Devanagari face and HarfBuzz shaping behind it - issued contracts
+#: written the way nobody in that market writes one.
+#:
+#: Only ``hi`` of the 27 offered locales reads this way. Bengali and Urdu do
+#: too and are not offered as document locales; each joins this set with its
+#: translation rather than ahead of it.
+_INDIAN_GROUPING: frozenset[str] = frozenset({"hi"})
+
+
+def _group_digits(digits: str, base: str, thou_sep: str) -> str:
+    """Punctuate *digits* with *thou_sep* the way *base*'s readers group them."""
+    if base in _INDIAN_GROUPING and len(digits) > 3:
+        head, last_three = digits[:-3], digits[-3:]
+        pairs = [head[max(i - 2, 0) : i] for i in range(len(head), 0, -2)]
+        return thou_sep.join([*reversed(pairs), last_three])
+    rev = digits[::-1]
+    chunks = [rev[i : i + 3] for i in range(0, len(rev), 3)]
+    return thou_sep.join([c[::-1] for c in chunks][::-1])  # readable order
+
+
+#: (thousands separator, decimal separator) per BCP-47 root: one row for every
+#: entry in ``SUPPORTED_LOCALES``, measured rather than recalled.
+#:
+#: Each row is what ``Intl.NumberFormat(<root>)`` puts between the digits of
+#: 1234567.89 - the same CLDR data every browser and phone in that market
+#: already formats numbers with. The table this replaced named nine languages
+#: and let the other eighteen fall through to the English pair, and for ten of
+#: them that was wrong. Five (cs, fi, no, sv, bg) write a space and a comma.
+#: Five more (da, vi, id, ro, hr) write a dot and a comma, and for those the
+#: fall-through did not merely look foreign: their readers take ``,`` as the
+#: decimal separator, so a contract saying ``47,657,972.78`` opens with a
+#: figure that reads as forty-seven point six five seven. Polish had a row and
+#: the row said ``.``, where Poland writes a space.
+#:
+#: Measured across the 27 offered locales, 12 were written wrongly: those
+#: eleven, plus Hindi, whose separators were right and whose grouping was not.
+#:
+#: Every space here is U+00A0 and not the U+202F CLDR gives French. Both are
+#: non-breaking spaces, no reader can tell them apart on a printed page, and
+#: holding the table to one character keeps its font requirement to a codepoint
+#: every bundled face carries - NotoSansDevanagari has U+00A0 and no U+202F.
+#:
+#: Arabic keeps Western digits and the separators CLDR pairs with them.
+#: Arabic-Indic digits in a generated contract are a larger decision than a
+#: separator table and are not made here.
+_SEPARATORS: dict[str, tuple[str, str]] = {
+    "ar": (",", "."),
+    "bg": (" ", ","),
+    "cs": (" ", ","),
+    "da": (".", ","),
+    "de": (".", ","),
+    "en": (",", "."),
+    "es": (".", ","),
+    "fi": (" ", ","),
+    "fr": (" ", ","),
+    "hi": (",", "."),
+    "hr": (".", ","),
+    "id": (".", ","),
+    "it": (".", ","),
+    "ja": (",", "."),
+    "ko": (",", "."),
+    "mn": (",", "."),
+    "nl": (".", ","),
+    "no": (" ", ","),
+    "pl": (" ", ","),
+    "pt": (".", ","),
+    "ro": (".", ","),
+    "ru": (" ", ","),
+    "sv": (" ", ","),
+    "th": (",", "."),
+    "tr": (".", ","),
+    "vi": (".", ","),
+    "zh": (",", "."),
+}
+
+
 def _separators_for_locale(locale: str) -> tuple[str, str]:
-    """Return (thousand_sep, decimal_sep) for a locale (BCP-47 root)."""
-    base = (locale or "en").split("-")[0].lower()
-    # Continental Europe + Russia + Spanish + Arabic (using Arabic-Indic
-    # digits is overkill for a generated PDF; stick to Western digits with
-    # locale-conventional separators).
-    if base in {"de", "ru", "es", "fr", "it", "nl", "pt", "tr", "pl"}:
-        return (" " if base in {"fr", "ru"} else ".", ",")
-    return (",", ".")
+    """Return (thousand_sep, decimal_sep) for a locale (BCP-47 root).
+
+    A locale with no row keeps the English pair, which is the fallback the
+    words already take: ``_load_locale`` answers an untranslated locale with
+    ``en.json``, so the separators and the sentences around them stay in one
+    convention instead of pairing Danish punctuation with English prose.
+    """
+    return _SEPARATORS.get(_base_language(locale), (",", "."))
 
 
 def _format_date(value: str | date | datetime | None, _locale: str) -> str:
