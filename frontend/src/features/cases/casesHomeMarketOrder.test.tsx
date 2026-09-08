@@ -187,8 +187,19 @@ describe("catalogue order follows the reader's language", () => {
     expect(cards).toHaveLength(PLAYBOOKS.length);
   });
 
-  it("puts the British cases first for an English reader, and keeps the rest", () => {
+  it("leaves the catalogue in its own order for plain English", () => {
+    // Plain `en` declares no country: a reader who has said only that they
+    // read English has not said whose procurement they work under, and the
+    // registry stopped guessing Britain for them. The same shape as the
+    // Japanese case below, for the product's default language.
     const texts = textsOf(renderCards("en"));
+    catalogueOrder.slice(0, 24).forEach((pb, i) => {
+      expect(texts[i]?.includes(pb.titleDefault), `${pb.id} at ${i}`).toBe(true);
+    });
+  });
+
+  it("puts the British cases first for a reader of English (UK), and keeps the rest", () => {
+    const texts = textsOf(renderCards("en-GB"));
     const british = PLAYBOOKS.filter((pb) => pb.region === "GB");
     expect(british.length).toBeGreaterThan(0);
 

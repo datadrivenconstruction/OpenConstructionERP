@@ -55,8 +55,10 @@ export interface HomeMarketResolution {
  * Keyed by the tag as `normalizeLanguageTag` writes it. A regional tag is
  * looked up exactly and then by its base language, so `es-CL` is answered by
  * its own row and `fr-CA` by the French one. A row only ever matters AFTER the
- * language step has answered null, which is why `pt-BR` and `en-US` need no
- * entry: the registry already declares Brazil and the United States for them.
+ * language step has answered null, which is why `pt-BR` needs no entry: the
+ * registry already declares Brazil for it. A language the registry leaves
+ * without a country ON PURPOSE gets no row either, because a row here would
+ * put back the guess the registry removed; plain `en` is that case, below.
  *
  * Every candidate is checked against the catalogue before it is used, so a
  * market that loses its last case drops out of the answer with no edit here,
@@ -82,11 +84,17 @@ export const NEAREST_MARKETS_BY_LANGUAGE: Readonly<Record<string, readonly strin
   // country for it. This row keeps the Hungarian case reachable meanwhile and
   // becomes redundant, not wrong, the day the language is registered.
   hu: ['HU'],
-  // English: the registry already answers Britain for `en` and the United
-  // States for `en-US`, so this row is consulted only if those cases were ever
-  // gone. It exists so that "no British cases" degrades to the next English-
-  // speaking market instead of to nothing.
-  en: ['US', 'GB', 'CA', 'AU', 'NZ', 'IN', 'ZA'],
+  // English. The registry answers Britain for `en-GB` and the United States
+  // for `en-US`, so these two rows are consulted only if those cases were ever
+  // gone, and exist so that "no British cases" degrades to the next English-
+  // speaking market instead of to nothing. Plain `en` has no row on purpose:
+  // since the registry stopped declaring a country for it, the hub leaves the
+  // catalogue in its own order for that reader, and a row here would have the
+  // card lead with a country the hub had just declined to guess. The lookup
+  // falls from `en-GB` to `en` when no exact row exists, so the absence has to
+  // be an absence of both, not a shorter base row.
+  'en-GB': ['US', 'CA', 'AU', 'NZ', 'IN', 'ZA'],
+  'en-US': ['GB', 'CA', 'AU', 'NZ', 'IN', 'ZA'],
 };
 
 /** The nearest-market candidates for a language, or an empty list. */

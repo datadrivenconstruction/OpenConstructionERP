@@ -345,7 +345,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   // the very top. `null` when the route has no sidebar entry (then nothing
   // renders and the layout is unchanged).
   const RouteIcon = getRouteIcon(location.pathname);
-  const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English', flag: '', country: 'gb' };
+  const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English', flag: '', country: 'xx' };
   const openCommandPalette = useCallback(() => {
     // Dispatch Ctrl+K to open the CommandPalette managed by App.tsx
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
