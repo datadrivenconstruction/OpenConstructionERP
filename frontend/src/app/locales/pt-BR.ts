@@ -18402,7 +18402,7 @@ const resource = {
     "subcontractors.tab_ratings": "Avaliações",
     "subcontractors.tab_retention": "Retenção",
     "subcontractors.tab_scope": "Âmbito do trabalho",
-    "subcontractors.tax_id": "NIF",
+    "subcontractors.tax_id": "CNPJ/CPF",
     "subcontractors.title": "Subempreiteiros",
     "subcontractors.trade_categories": "Categorias de especialidade (separadas por vírgulas)",
     "subcontractors.trade_categories_hint": "Etiquetas de formato livre usadas nos filtros de concurso - ex.: concreto, aço, mep, acabamentos.",

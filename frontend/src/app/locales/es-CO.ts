@@ -18526,7 +18526,7 @@ const resource = {
     "subcontractors.tab_ratings": "Valoraciones",
     "subcontractors.tab_retention": "Retención",
     "subcontractors.tab_scope": "Alcance del trabajo",
-    "subcontractors.tax_id": "NIF",
+    "subcontractors.tax_id": "NIT",
     "subcontractors.title": "Subcontratistas",
     "subcontractors.trade_categories": "Categorías de oficio (separadas por comas)",
     "subcontractors.trade_categories_hint": "Etiquetas de texto libre usadas para los filtros de licitación, p. ej. concreto, acero, instalaciones, acabados.",
