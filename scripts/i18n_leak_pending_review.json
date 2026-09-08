@@ -134,6 +134,15 @@
     "n": 25,
     "reason": "Seeded when the leak guard was first split into three lists (ci(i18n): rebuild the leak guard as two separate lists plus a general scan). This entry's n is >=24/28, the shape the threshold scan actually flags; filed as ambiguous at guard rollout rather than triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
   },
+  "approvalRoutes.kind_rfi": {
+    "added_by": "ci(i18n): classify the three initialisms the leak scan flagged (2026-09-08)",
+    "differs_in": [
+      "he"
+    ],
+    "en_value": "RFI",
+    "n": 36,
+    "reason": "Flagged by the threshold scan at n=36 of 42 non-en locales on 2026-09-08, after the 282-key backfill pushed the family over the bar. Not allowlisted, because the tell that list requires is failed: he renders it in Hebrew words, so the value is not identical in every locale. Not baselined either, because the leak shape this guard describes is the reverse of what is here - ru keeps RFI and a single locale translated it, rather than ru translating while the rest keep English. Evidence read at filing: the siblings in this family are translated nearly everywhere, kind_change_order and kind_variation matching en in 0 locales and kind_submittal in 1, against 36 here, so the translation passes reached this block and left the initialism rather than never arriving; and two sibling keys whose value is also the bare string RFI, governance.mod_rfi and rfi.insights.f_subject, are already on the allowlist even though he translates those two as well, so the repo has not answered this question consistently. Five locales do not carry the key at all: the regional overlays en-US, es-CL, es-CO, es-MX, pt-BR. What is open: whether RFI travels as an initialism in every market, in which case the three keys belong together on the allowlist and the Hebrew is the outlier, or whether the Hebrew reading is right and the other 36 locales owe a translation. Left unresolved rather than decided by whoever was clearing the lane. added_by names the commit by subject because a commit cannot cite its own hash."
+  },
   "architecture.legend": {
     "added_by": "03cc10968 (2026-08-08)",
     "differs_in": [
@@ -1807,6 +1816,16 @@
     "en_value": "{{task_title}}",
     "n": 27,
     "reason": "Seeded when the leak guard was first split into three lists (ci(i18n): rebuild the leak guard as two separate lists plus a general scan). This entry's n is >=24/28, the shape the threshold scan actually flags; filed as ambiguous at guard rollout rather than triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
+  },
+  "notifications.preferences.channel_webhook": {
+    "added_by": "ci(i18n): classify the three initialisms the leak scan flagged (2026-09-08)",
+    "differs_in": [
+      "ru",
+      "uk"
+    ],
+    "en_value": "Webhook",
+    "n": 35,
+    "reason": "Flagged by the threshold scan at n=35 of 42 non-en locales on 2026-09-08. Fails the allowlist tell outright: ru and uk both write the term transliterated into Cyrillic. Evidence read at filing that points the other way: the two sibling channels in the same block match en in 3 locales (channel_email) and 0 (channel_inapp) against 35 here, so the translation passes worked this family and left Webhook standing rather than never reaching it. That makes this neither a clean leak nor a clean allowlist entry. Five locales do not carry the key at all: the regional overlays en-US, es-CL, es-CO, es-MX, pt-BR. What is open: whether the transliteration should spread to the other locales or be dropped in favour of the term of art. Left unresolved rather than decided by whoever was clearing the lane. added_by names the commit by subject because a commit cannot cite its own hash."
   },
   "onboarding.mod_crm": {
     "added_by": "adb78c983 (2026-08-02)",

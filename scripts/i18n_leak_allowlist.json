@@ -354,6 +354,11 @@
     "note": "bare technical/business acronym or initialism",
     "reason_category": "abbreviation"
   },
+  "contracts.type_gmp": {
+    "en_value": "GMP",
+    "note": "contract-type initialism, guaranteed maximum price. Identical in all 37 locale files that carry the key, ru included; the five that do not carry it (en-US, es-CL, es-CO, es-MX, pt-BR) are regional overlays that hold deltas only. Every other member of contracts.type_ is translated in every locale, so the translation passes worked this block and left this one initialism standing rather than skipping the family.",
+    "reason_category": "acronym"
+  },
   "coordination.matrix_tooltip_empty": {
     "en_value": "-",
     "note": "bare symbol/punctuation glyph, not a word",
