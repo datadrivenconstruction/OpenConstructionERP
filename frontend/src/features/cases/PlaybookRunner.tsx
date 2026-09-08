@@ -27,7 +27,7 @@ import {
   type KeyboardEvent,
   type ReactElement,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -759,6 +759,52 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
       .getElementById(`case-step-${stepId}`)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
+
+  // A link to a case can name the step the sender was on: `?step=raise`.
+  // The step id is the one thing about a run that means the same on every
+  // install - progress lives in this browser, the sample project has an id
+  // this deployment minted - so it is the one thing the address carries.
+  //
+  // Same shape as the hub's `?market=`: a ref remembers the last value seen
+  // in the address, an unseen value came from navigation and moves the
+  // focus, an unchanged one with a moved focus means the reader moved and
+  // the address follows, replacing the entry so stepping never stacks the
+  // back button. The focus is only moved when it differs, and the page is
+  // scrolled to the step in both cases, so an opened link lands on the step
+  // rather than on the hero above it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const seenStepParam = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const raw = searchParams.get("step");
+    const current = playbook.steps[currentIndex]?.id ?? null;
+    if (raw !== seenStepParam.current) {
+      seenStepParam.current = raw;
+      const index = raw ? playbook.steps.findIndex((s) => s.id === raw) : -1;
+      if (index >= 0) {
+        if (index !== currentIndex) selectStep(index);
+        scrollToStep(playbook.steps[index]!.id);
+        if (index !== currentIndex) return;
+      }
+    }
+    if (current && raw !== current) {
+      seenStepParam.current = current;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set("step", current);
+          return next;
+        },
+        { replace: true },
+      );
+    }
+  }, [
+    searchParams,
+    currentIndex,
+    playbook.steps,
+    selectStep,
+    scrollToStep,
+    setSearchParams,
+  ]);
 
   // Activating a hexagon in the module honeycomb goes to the first step that
   // opens that module, which is the step the cell was named after. It answers
