@@ -441,6 +441,10 @@
     "missing_duration": {
       "fail": "La actividad '{activity}' tiene una duración inválida ({duration} días) para una tarea que no es un hito",
       "suggestion": "Establezca una duración positiva en días laborables, o marque la fila como hito si realmente es un evento de duración cero"
+    },
+    "duration_on_project_week": {
+      "fail": "La actividad '{activity}' está guardada con {stored} días laborables, el recuento de lunes a viernes de {start} a {end}; en la semana laboral del proyecto, {calendar}, esas fechas abarcan {expected}",
+      "suggestion": "Guarde de nuevo las fechas de la actividad para que la duración se recalcule con la semana laboral del proyecto, o introduzca la duración de forma deliberada"
     }
   },
   "sheet_completeness": {

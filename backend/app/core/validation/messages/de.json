@@ -441,6 +441,10 @@
     "missing_duration": {
       "fail": "Vorgang '{activity}' hat eine ungültige Dauer ({duration} Tage) für einen Nicht-Meilenstein",
       "suggestion": "Eine positive Arbeitstage-Dauer setzen oder die Zeile als Meilenstein kennzeichnen, falls es wirklich ein Ereignis ohne Dauer ist"
+    },
+    "duration_on_project_week": {
+      "fail": "Vorgang '{activity}' ist mit {stored} Arbeitstagen gespeichert, der Zählung von Montag bis Freitag für {start} bis {end}; in der Arbeitswoche des Projekts, {calendar}, umfassen diese Termine {expected}",
+      "suggestion": "Die Termine des Vorgangs erneut speichern, damit die Dauer in der Arbeitswoche des Projekts neu gezählt wird, oder die Dauer bewusst eingeben"
     }
   },
   "sheet_completeness": {

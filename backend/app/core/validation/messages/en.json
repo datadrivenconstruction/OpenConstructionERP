@@ -441,6 +441,10 @@
     "missing_duration": {
       "fail": "Activity '{activity}' has an invalid duration ({duration} days) for a non-milestone task",
       "suggestion": "Set a positive working-day duration, or type the row as a milestone if it is genuinely a zero-duration event"
+    },
+    "duration_on_project_week": {
+      "fail": "Activity '{activity}' is stored as {stored} working days, the Monday-to-Friday count of {start} to {end}; on the project's week, {calendar}, those dates hold {expected}",
+      "suggestion": "Save the activity's dates again so the duration is recounted on the project's working week, or enter the duration deliberately"
     }
   },
   "sheet_completeness": {
