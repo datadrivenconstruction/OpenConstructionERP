@@ -224,10 +224,13 @@ async def test_broker_kyc_verify_manager_only(
 
 @pytest.mark.asyncio
 async def test_broker_license_uniqueness(http_client, manager_headers):
-    """Two brokers with the same (tenant, license) violate the unique
-    constraint. Whether the API returns 409 (handled) or 500 (unhandled
-    IntegrityError) is acceptable — what matters is that the second
-    insert does NOT silently succeed with 201.
+    """A second broker with the same licence number is refused with 409.
+
+    These brokers are registered without a tenant, which is the default
+    deployment. The (tenant_id, license_number) unique constraint never
+    fires for that cohort because NULL never collides in SQL, so the
+    service checks the licence itself and a partial unique index backs it.
+    The first broker still exists afterwards and the second was not stored.
     """
     license = f"LIC-{uuid.uuid4().hex[:8]}"
     first = await http_client.post(
@@ -236,21 +239,20 @@ async def test_broker_license_uniqueness(http_client, manager_headers):
         headers=manager_headers,
     )
     assert first.status_code == 201, first.text
-    try:
-        dup = await http_client.post(
-            "/api/v1/property-dev/brokers/",
-            json={"name": "Second", "license_number": license},
-            headers=manager_headers,
-        )
-        assert dup.status_code != 201, dup.text
-    except Exception as exc:
-        # The IntegrityError can surface through the ASGI transport instead of
-        # being mapped to a 500. That still proves the constraint is enforced.
-        # Match the violation across drivers: asyncpg raises
-        # UniqueViolationError ("duplicate key value violates unique
-        # constraint"); SQLAlchemy wraps it as IntegrityError.
-        detail = f"{type(exc).__name__}: {exc}".lower()
-        assert "integrity" in detail or "unique" in detail or "duplicate" in detail, exc
+    dup = await http_client.post(
+        "/api/v1/property-dev/brokers/",
+        json={"name": "Second", "license_number": license},
+        headers=manager_headers,
+    )
+    assert dup.status_code == 409, dup.text
+    assert license in dup.json()["detail"]
+    listing = await http_client.get(
+        "/api/v1/property-dev/brokers/?limit=500",
+        headers=manager_headers,
+    )
+    assert listing.status_code == 200, listing.text
+    holders = [b for b in listing.json() if b["license_number"] == license]
+    assert [b["name"] for b in holders] == ["First"]
 
 
 # ── Tests: CommissionAgreement structure validation ───────────────────

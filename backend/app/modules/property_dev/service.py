@@ -18,6 +18,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any, Iterable
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus, publish_after_commit
@@ -5787,6 +5788,18 @@ def compute_plot_price_breakdown(
 
 
 async def _svc_create_broker(svc: PropertyDevService, data: Any) -> Broker:
+    # A licence number is unique within a tenant and unique among brokers
+    # that have no tenant. The (tenant_id, license_number) constraint only
+    # covers the first cohort, because NULL never collides in SQL; the second
+    # is covered by a partial unique index, and on installs that predate that
+    # index by this lookup alone. Refuse here with a clear 409 rather than
+    # let the database answer with an IntegrityError.
+    taken = await svc.brokers.find_by_license_number(data.tenant_id, data.license_number)
+    if taken is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"A broker with licence number '{data.license_number}' already exists",
+        )
     obj = Broker(
         tenant_id=data.tenant_id,
         name=data.name,
@@ -5799,7 +5812,17 @@ async def _svc_create_broker(svc: PropertyDevService, data: Any) -> Broker:
         active=data.active,
         metadata_=data.metadata,
     )
-    return await svc.brokers.create(obj)
+    try:
+        return await svc.brokers.create(obj)
+    except IntegrityError as exc:
+        # Two concurrent creates can both pass the lookup; the unique index
+        # stops the second at flush. Brokers carry no foreign keys, so the
+        # only integrity rule an insert can break is the licence one.
+        await svc.session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"A broker with licence number '{data.license_number}' already exists",
+        ) from exc
 
 
 async def _svc_get_broker(svc: PropertyDevService, broker_id: uuid.UUID) -> Broker:

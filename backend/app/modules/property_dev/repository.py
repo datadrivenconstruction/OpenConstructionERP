@@ -970,14 +970,21 @@ class BrokerRepository(_BaseRepo):
         tenant_id: uuid.UUID | None,
         license_number: str,
     ) -> Broker | None:
-        """Tenant-scoped broker lookup by regulator license number."""
+        """Tenant-scoped broker lookup by regulator license number.
+
+        Returns the oldest match. Installs that predate the NULL-tenant
+        uniqueness index can hold several brokers with one licence number;
+        ``scalar_one_or_none`` would turn that legacy state into a 500 on
+        every create, and the caller only needs to know that one exists.
+        """
         stmt = select(Broker).where(Broker.license_number == license_number)
         if tenant_id is None:
             stmt = stmt.where(Broker.tenant_id.is_(None))
         else:
             stmt = stmt.where(Broker.tenant_id == tenant_id)
+        stmt = stmt.order_by(Broker.created_at).limit(1)
         result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def list_active(
         self,

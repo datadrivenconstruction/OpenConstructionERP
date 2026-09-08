@@ -40,6 +40,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -1108,6 +1109,18 @@ class Broker(Base):
             "tenant_id",
             "license_number",
             name="uq_oe_property_dev_broker_tenant_license",
+        ),
+        # The constraint above never fires for brokers without a tenant: SQL
+        # treats every NULL as distinct, so two NULL-tenant rows with one
+        # licence number coexist. Single-tenant installs (the default) keep
+        # tenant_id NULL on every broker, which made the licence unique on
+        # paper only. This partial index closes that cohort; the constraint
+        # keeps covering the tenant-scoped one.
+        Index(
+            "uq_oe_property_dev_broker_license_no_tenant",
+            "license_number",
+            unique=True,
+            postgresql_where=text("tenant_id IS NULL"),
         ),
     )
 
