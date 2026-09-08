@@ -28,10 +28,10 @@ implementation is our own.
   setups ([#206](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/206)).
   More recently proposed BOQ per-element quantity formulas with a projection editor and a
   batch of multi-model BIM viewer fixes
-  ([#347](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/347)), and a
+  ([#347](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/347)), and a
   schedule dependency editor, an editable activity data grid and a per-activity work
   calendar for the Gantt
-  ([#348](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/348)). Both
+  ([#348](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/348)). Both
   shipped as our own implementation.
 - **rjohny** ([@rjohny55](https://github.com/rjohny55)): multi-area patch set
   ([#161](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/161)),
