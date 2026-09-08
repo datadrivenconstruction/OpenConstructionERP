@@ -51,6 +51,7 @@ set-equality question for every country.
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
@@ -269,6 +270,32 @@ _DIVERGENCES: dict[str, Divergence] = {
 _MIN_SEEDED = 36
 _MIN_BOUND = 19
 
+#: The countries that ship a calendar nothing computes, named rather than
+#: counted. This has to be an explicit list: ``UNBOUND`` is derived from
+#: ``_HOLIDAY_FUNCS``, so a test that asks whether an unbound country is absent
+#: from ``_HOLIDAY_FUNCS`` is asking a tautology, and a country gaining an
+#: engine function would silently drop out of the derived list instead of
+#: failing anything. Pinned here, that migration is a failure that says so.
+_EXPECTED_UNBOUND: tuple[str, ...] = (
+    "AU",
+    "CZ",
+    "DK",
+    "ES",
+    "FI",
+    "FR",
+    "IT",
+    "KR",
+    "MX",
+    "NL",
+    "NO",
+    "NZ",
+    "PL",
+    "SE",
+    "TR",
+    "UA",
+    "ZA",
+)
+
 
 def _seed() -> list[dict]:
     return json.loads(SEED_PATH.read_text(encoding="utf-8"))
@@ -363,7 +390,11 @@ def test_the_countries_that_agree_are_named() -> None:
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
     assert agreeing == ["BG", "DE", "NG", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
-        f"If a country left this list it started disagreeing; if one joined, delete its "
+        f"A country that LEFT this list started disagreeing with the engine, and belongs in "
+        f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "
+        f"fixed, in which case delete its _DIVERGENCES entry, or is newly bound to an engine "
+        f"function and agrees, in which case only this expectation needs updating. "
+        f"Previously: "
         f"_DIVERGENCES entry."
     )
 
@@ -395,23 +426,39 @@ def test_every_divergence_names_a_side_and_a_reason() -> None:
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("code", UNBOUND)
-def test_an_unbound_country_is_visible_rather_than_absent(code: str) -> None:
+@pytest.mark.parametrize("code", _EXPECTED_UNBOUND)
+def test_an_unbound_country_ships_a_calendar_nothing_can_contradict(code: str) -> None:
     """A seeded calendar with no engine function is unchecked, and says so.
 
-    This is the honest half of the population. Seventeen countries ship holiday
-    dates that nothing computes, so nothing can contradict them. That is a real
-    limit of this gate and it is asserted rather than left to inference: the day
-    somebody adds an engine function for one of these, this test fails and
-    forces the country into tier 1 where it will actually be compared.
+    This is the honest half of the population: these countries ship holiday
+    dates that nothing computes, so nothing can disagree with them.
+
+    Parametrized over the pinned list rather than the derived one on purpose. A
+    country gaining an engine function disappears from ``UNBOUND`` the moment
+    ``_HOLIDAY_FUNCS`` grows, so parametrizing over ``UNBOUND`` and then
+    asserting the country is not in ``_HOLIDAY_FUNCS`` is a tautology that
+    cannot fail and, worse, drops the country out of the report instead of
+    moving it into tier 1. Driven from ``_EXPECTED_UNBOUND``, the same event is
+    a failure that names itself.
     """
+    assert code in SEEDED, f"{code} is pinned as unbound but is no longer seeded at all"
     assert code not in _HOLIDAY_FUNCS, (
-        f"{code} now has an engine function, so it is no longer unbound. Move it into the "
-        f"tier 1 population by rerunning this module: BOUND and UNBOUND are computed from "
-        f"_HOLIDAY_FUNCS, so this failure means the recorded expectation below is stale."
+        f"{code} now has an engine function, so its seeded calendar CAN be compared and this "
+        f"gate must start comparing it. Remove {code} from _EXPECTED_UNBOUND; it will then "
+        f"appear in BOUND and tier 1 will check it, which is where a divergence would show up."
     )
     seeded = _seed_dates(code)
     assert seeded, f"{code} ships an empty calendar, which no source can be checked against"
+
+
+def test_the_pinned_unbound_list_matches_the_tree() -> None:
+    """Both directions, so the pin cannot drift away from what is measured."""
+    assert sorted(_EXPECTED_UNBOUND) == sorted(UNBOUND), (
+        f"the pinned unbound list and the measured one have parted. Pinned but not measured: "
+        f"{sorted(set(_EXPECTED_UNBOUND) - set(UNBOUND))}. Measured but not pinned: "
+        f"{sorted(set(UNBOUND) - set(_EXPECTED_UNBOUND))}. A country in the second list is a "
+        f"newly seeded calendar that nothing computes and nothing is checking."
+    )
 
 
 def test_the_unbound_population_is_printed_and_bounded() -> None:
@@ -558,29 +605,91 @@ def test_citizens_holiday_is_sandwiched_between_two_holidays() -> None:
 # --------------------------------------------------------------------------
 
 
-def test_the_gate_catches_a_seed_date_that_drifts() -> None:
-    """Red in the other direction, using the exact shape of the Japanese defect."""
-    seed_only = frozenset({"2026-10-14"})
-    recorded = _DIVERGENCES["JP"]
-    unexpected = seed_only - recorded.seed_only
-    assert unexpected == frozenset({"2026-10-14"}), (
-        "a date appearing in the seed and not in the engine must be reported as unexpected "
-        "unless it is recorded; if this passes trivially the tier 1 assertion is inert"
-    )
+def _with_planted_seed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mutate) -> None:
+    """Point this module at a mutated COPY of the shipped seed.
+
+    The controls below have to exercise the real assertions rather than restate
+    their arithmetic. A control that recomputes a set difference by hand proves
+    that set subtraction works, which was never in doubt; only calling the test
+    function itself proves the test function would fail. The tree is never
+    written to: the mutation lands in ``tmp_path``.
+    """
+    data = json.loads(SEED_PATH.read_text(encoding="utf-8"))
+    mutate(data)
+    planted = tmp_path / "work_calendars.json"
+    planted.write_text(json.dumps(data), encoding="utf-8")
+    monkeypatch.setattr(sys.modules[__name__], "SEED_PATH", planted)
 
 
-def test_the_gate_catches_a_repaired_divergence() -> None:
+def _row(data: list[dict], code: str) -> dict:
+    return next(c for c in data if c["country_code"] == code)
+
+
+def test_the_gate_catches_a_new_seed_date(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A date added to a country that agrees today must fail tier 1."""
+
+    def mutate(data: list[dict]) -> None:
+        _row(data, "DE")["exceptions"].append(
+            {"date": "2026-07-04", "name": {"en": "Invented Day"}, "type": "public_holiday"}
+        )
+
+    _with_planted_seed(monkeypatch, tmp_path, mutate)
+    with pytest.raises(AssertionError, match="started to disagree"):
+        test_the_seed_and_the_engine_agree("DE")
+
+
+def test_the_gate_catches_a_repaired_divergence(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Fixing a recorded difference must also fail, or the record rots silently."""
-    recorded = _DIVERGENCES["RU"]
-    still_diverging = frozenset({"2026-03-09"})
-    repaired = recorded.seed_only - still_diverging
-    assert repaired == frozenset({"2026-05-11"}), (
-        "when a recorded divergence is fixed the ratchet must notice, otherwise _DIVERGENCES "
-        "accumulates entries describing a tree that has moved on"
-    )
+
+    def mutate(data: list[dict]) -> None:
+        row = _row(data, "RU")
+        row["exceptions"] = [e for e in row["exceptions"] if e["date"] != "2026-05-11"]
+
+    _with_planted_seed(monkeypatch, tmp_path, mutate)
+    with pytest.raises(AssertionError, match="a recorded divergence is gone"):
+        test_the_seed_and_the_engine_agree("RU")
 
 
-def test_the_transposed_japanese_labels_would_be_caught() -> None:
-    """The exact strings that shipped, run through the equinox rule."""
-    shipped_equinox = date(2026, 9, 22)
-    assert shipped_equinox != date(2026, 9, _equinox_day(2026, spring=False))
+def test_the_gate_catches_sports_day_moving_back(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """The original defect, planted in the seed instead of the engine."""
+
+    def mutate(data: list[dict]) -> None:
+        for entry in _row(data, "JP")["exceptions"]:
+            if entry["date"] == "2026-10-12":
+                entry["date"] = "2026-10-14"
+
+    _with_planted_seed(monkeypatch, tmp_path, mutate)
+    with pytest.raises(AssertionError, match="second Monday"):
+        test_japans_seeded_sports_day_matches_the_engine()
+    with pytest.raises(AssertionError, match="started to disagree"):
+        test_the_seed_and_the_engine_agree("JP")
+
+
+def test_the_gate_catches_the_transposed_japanese_labels(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """The exact rows that shipped, restored, must fail both label assertions."""
+
+    def mutate(data: list[dict]) -> None:
+        for entry in _row(data, "JP")["exceptions"]:
+            if entry["date"] == "2026-09-22":
+                entry["name"] = {"en": "Autumnal Equinox Day", "ja": "秋分の日"}
+            elif entry["date"] == "2026-09-23":
+                entry["name"] = {"en": "Citizen's Holiday", "ja": "国民の休日"}
+
+    _with_planted_seed(monkeypatch, tmp_path, mutate)
+    with pytest.raises(AssertionError, match="the equinox falls on"):
+        test_the_equinox_label_is_on_the_equinox()
+    with pytest.raises(AssertionError, match="not between two holidays"):
+        test_citizens_holiday_is_sandwiched_between_two_holidays()
+
+
+def test_the_gate_catches_a_second_year_appearing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A year nothing here compares must not ship in silence."""
+
+    def mutate(data: list[dict]) -> None:
+        _row(data, "DE")["exceptions"].append(
+            {"date": "2027-01-01", "name": {"en": "New Year's Day"}, "type": "public_holiday"}
+        )
+
+    _with_planted_seed(monkeypatch, tmp_path, mutate)
+    with pytest.raises(AssertionError, match="the seed now carries"):
+        test_the_seed_carries_exactly_one_year_and_one_kind_of_entry()
