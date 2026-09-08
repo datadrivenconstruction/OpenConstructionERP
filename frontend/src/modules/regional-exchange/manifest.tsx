@@ -134,6 +134,13 @@ export const manifest: ModuleManifest = {
       'regional.tab_import': 'Import',
       'regional.tab_export': 'Export',
       'regional.import_complete': 'Import complete',
+      'regional.import_summary': '{{n}} positions imported',
+      'regional.import_count_unknown':
+        'The server did not report how many positions were imported',
+      'regional.import_errors': '{{n}} rows could not be imported',
+      'regional.import_timeout':
+        'The server did not respond within 90 seconds. Try a smaller file.',
+      'regional.read_by': 'read by {{format}}',
       'regional.export_complete': 'Export complete',
       'regional.import_failed': 'Import failed',
       'regional.export_failed': 'Export failed',

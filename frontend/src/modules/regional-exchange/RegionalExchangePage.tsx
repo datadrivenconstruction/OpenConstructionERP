@@ -32,7 +32,8 @@ import {
 } from 'lucide-react';
 import { Button, Badge, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { parseExcelFile } from '../_shared/excelImport';
 import { exportToCSV, downloadBlob } from '../_shared/excelExport';
@@ -69,6 +70,44 @@ interface BOQPosition {
 }
 
 type ExportFormatChoice = 'detailed' | 'summary';
+
+/**
+ * What `POST /v1/boq/boqs/{id}/import/auto/` answers.
+ *
+ * `imported` is optional on purpose: the count belongs to the server, and a
+ * response that does not carry one must be reported as unknown rather than
+ * filled in from the client-side preview.
+ */
+interface AutoImportResponse {
+  imported?: number;
+  skipped?: number;
+  errors?: unknown[];
+  warnings?: unknown[];
+  source_format?: string;
+  format_id?: string;
+  currency?: string;
+  method?: string;
+}
+
+/**
+ * Render one entry of the response's `errors` list.
+ *
+ * Every producer on the backend appends a dict, not a string: the native
+ * importers use `{ordinal, error}`, the persistence step `{row, position_id,
+ * error}`, the smart-import fallback `{row, error, data}`. Joining those into
+ * a template literal yields "[object Object]", so pull the message out and
+ * prefix it with whichever row identifier the entry happens to carry.
+ */
+function describeImportError(entry: unknown): string {
+  if (typeof entry === 'string') return entry;
+  if (entry === null || typeof entry !== 'object') return String(entry);
+
+  const row = entry as Record<string, unknown>;
+  const message = row.error ?? row.message ?? row.detail;
+  const label = row.ordinal ?? row.row ?? row.index ?? row.position_id;
+  const text = typeof message === 'string' ? message : JSON.stringify(entry);
+  return label === undefined || label === null ? text : `${label}: ${text}`;
+}
 
 /* ── Import preview table ───────────────────────────────────────────── */
 
@@ -194,8 +233,12 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
   const [importTargetBoqId, setImportTargetBoqId] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<{
-    imported: number;
+    // `null` means the request came back without a count. The server owns
+    // this number; when it does not send one we say so instead of guessing.
+    imported: number | null;
     errors: string[];
+    // Which reader claimed the file, e.g. "gaeb" / "bc3" / "xlsx".
+    sourceFormat?: string;
   } | null>(null);
 
   /* Export state */
@@ -297,45 +340,92 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
   );
 
   const handleImport = useCallback(async () => {
-    if (!parsedResult || !importTargetBoqId) return;
+    if (!parsedResult || !importFile || !importTargetBoqId) return;
     setIsImporting(true);
+
+    // The dispatcher takes the FILE, not the preview. It sniffs magic bytes
+    // and extension to pick the native reader (GAEB, BC3, Excel/CSV) and
+    // applies that reader's validator packs; a JSON body of already-parsed
+    // rows never satisfied its `file` field and could only ever come back
+    // 422. The client-side parse above stays exactly as it is - it is what
+    // shows the column mapping before anything is committed.
+    const form = new FormData();
+    form.append('file', importFile);
+    const token = useAuthStore.getState().accessToken;
+
+    // `importDispatcher` returns the path without the "/api" prefix because
+    // its usual caller goes through the api helper, which prepends it. Raw
+    // fetch has to add it or the request 404s.
+    const url = `/api${importDispatcher(importTargetBoqId)}`;
+
+    // Imports of large sheets and AI fallbacks run for tens of seconds, so
+    // give this the same 90s ceiling the BOQ import screens use rather than
+    // leaving the request without one.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90_000);
+
     try {
-      const positions = parsedResult.positions.map((pos) => ({
-        ordinal: pos.ordinal,
-        description: pos.description,
-        unit: pos.unit,
-        quantity: pos.quantity,
-        // Money fields travel as strings (Decimal-safe) - backend re-parses.
-        unit_rate: String(pos.unitRate ?? 0),
-        total: String(pos.total ?? pos.quantity * (pos.unitRate ?? 0)),
-        section: pos.section || undefined,
-        classification: pos.classification,
-      }));
-
-      // POST to the new dispatcher endpoint (Epic I-A backend). The
-      // backend auto-detects format from magic bytes / extension and
-      // applies the country-specific validator pack.
-      const url = importDispatcher(importTargetBoqId);
-      const response = await apiPost<{ imported: number; errors?: string[] }>(url, {
-        positions,
-        source: `${template.id}_import`,
-        country_code: template.countryCode,
-        validator_packs: template.validatorPacks,
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
-      const imported = response?.imported ?? positions.length;
-      const errors = response?.errors ?? [];
-      setImportResult({ imported, errors });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
+        throw new Error(
+          typeof body.detail === 'string'
+            ? body.detail
+            : t('regional.import_failed', { defaultValue: 'Import failed' }),
+        );
+      }
+
+      const response = (await res.json()) as AutoImportResponse;
+      const imported = typeof response.imported === 'number' ? response.imported : null;
+      const errors = (response.errors ?? []).map(describeImportError);
+      const sourceFormat = response.source_format || response.format_id || undefined;
+
+      setImportResult({ imported, errors, sourceFormat });
       queryClient.invalidateQueries({ queryKey: ['boq-positions'] });
+
+      const summary =
+        imported === null
+          ? t('regional.import_count_unknown', {
+              defaultValue: 'The server did not report how many positions were imported',
+            })
+          : t('regional.import_summary', {
+              defaultValue: '{{n}} positions imported',
+              n: imported,
+            });
+      const parts = [summary];
+      if (sourceFormat) {
+        parts.push(t('regional.read_by', { defaultValue: 'read by {{format}}', format: sourceFormat }));
+      }
+      if (errors.length > 0) {
+        parts.push(
+          t('regional.import_errors', {
+            defaultValue: '{{n}} rows could not be imported',
+            n: errors.length,
+          }),
+        );
+      }
       addToast({
-        type: imported > 0 ? 'success' : 'warning',
+        type: imported !== null && imported > 0 ? 'success' : 'warning',
         title: t('regional.import_complete', { defaultValue: 'Import complete' }),
-        message: `${imported} positions imported${
-          errors.length > 0 ? `, ${errors.length} errors` : ''
-        }`,
+        message: fmtList(parts),
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
+      clearTimeout(timeoutId);
+      const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+      const msg = isTimeout
+        ? t('regional.import_timeout', {
+            defaultValue: 'The server did not respond within 90 seconds. Try a smaller file.',
+          })
+        : err instanceof Error
+          ? err.message
+          : String(err);
       setImportResult({ imported: 0, errors: [msg] });
       addToast({
         type: 'error',
@@ -345,7 +435,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
     } finally {
       setIsImporting(false);
     }
-  }, [parsedResult, importTargetBoqId, template, queryClient, addToast, t]);
+  }, [parsedResult, importFile, importTargetBoqId, queryClient, addToast, t]);
 
   const handleClearImport = useCallback(() => {
     setImportFile(null);
@@ -726,9 +816,25 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   <CheckCircle2 size={16} className="text-emerald-600" />
                 )}
                 <span className="text-content-primary">
-                  {importResult.imported}{' '}
-                  {t('regional.positions_imported', { defaultValue: 'positions imported' })}
+                  {importResult.imported === null ? (
+                    t('regional.import_count_unknown', {
+                      defaultValue: 'The server did not report how many positions were imported',
+                    })
+                  ) : (
+                    <>
+                      {importResult.imported}{' '}
+                      {t('regional.positions_imported', { defaultValue: 'positions imported' })}
+                    </>
+                  )}
                 </span>
+                {importResult.sourceFormat && (
+                  <Badge variant="neutral" size="sm">
+                    {t('regional.read_by', {
+                      defaultValue: 'read by {{format}}',
+                      format: importResult.sourceFormat,
+                    })}
+                  </Badge>
+                )}
               </div>
               {importResult.errors.length > 0 && (
                 <ul className="mt-2 space-y-1 text-xs text-content-secondary">
@@ -737,7 +843,10 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                   ))}
                 </ul>
               )}
-              {importResult.imported > 0 && (
+              {/* Offered whenever the request succeeded. A missing count is
+                  not evidence that nothing landed, so an unknown count still
+                  gets the link into the BOQ where the truth can be read. */}
+              {(importResult.imported === null || importResult.imported > 0) && (
                 <Link
                   data-testid="regional-open-boq"
                   // The editor is a path param (/boq/:boqId). `?boq=` was read by

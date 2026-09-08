@@ -14,19 +14,21 @@
  *      to the same registry entry (deep-link compat shim).
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-// Stub the API layer — the test never makes a network call. Mocking
-// also keeps React Query from hanging on a real fetch promise.
+// Stub the read side of the API layer — the project and BOQ pickers would
+// otherwise leave React Query hanging on a real fetch promise. The import
+// itself is NOT routed through this mock: it posts multipart through raw
+// `fetch`, and the tests below assert on that request directly. Stubbing the
+// api helper there would only re-prove that the helper was called.
 vi.mock('@/shared/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/lib/api')>();
   return {
     ...actual,
     apiGet: vi.fn(async () => []),
-    apiPost: vi.fn(async () => ({ imported: 0, errors: [] })),
     triggerDownload: vi.fn(),
   };
 });
@@ -37,6 +39,7 @@ vi.mock('@/stores/useToastStore', () => ({
   useToastStore: () => vi.fn(),
 }));
 
+import { apiGet } from '@/shared/lib/api';
 import RegionalExchangePage from './RegionalExchangePage';
 import {
   COUNTRY_TEMPLATES,
@@ -138,5 +141,131 @@ describe('RegionalExchangePage - sample link visibility', () => {
 
     renderWithProviders(au);
     expect(screen.queryByTestId('regional-sample-link')).toBeNull();
+  });
+});
+
+/* ── Import request shape ───────────────────────────────────────────── */
+
+/**
+ * The dispatcher endpoint takes a file, not a row list. These tests drive
+ * the whole drop-parse-import flow against a stubbed `fetch` so the request
+ * that leaves the page is asserted on directly. Mocking `apiPost` instead
+ * is what let a JSON body sit in front of a multipart route unnoticed.
+ */
+
+const CSV_FIXTURE =
+  'Ordinal,Description,Unit,Qty,Rate,Total,Code\n' +
+  '01.01,Concrete C25/30,m3,10,100,1000,03 30 00\n';
+
+async function driveImportFlow(
+  template: ReturnType<typeof getRegionalTemplate>,
+  fetchImpl: typeof fetch,
+) {
+  vi.mocked(apiGet).mockImplementation(async (path: string) => {
+    if (path.startsWith('/v1/projects/')) return [{ id: 'p-1', name: 'Harbour works' }];
+    if (path.startsWith('/v1/boq/boqs/?project_id=')) {
+      return [{ id: 'boq-9', name: 'Structure', project_id: 'p-1' }];
+    }
+    return [];
+  });
+  globalThis.fetch = fetchImpl;
+
+  const { container } = renderWithProviders(template);
+
+  const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+  const file = new File([CSV_FIXTURE], 'positions.csv', { type: 'text/csv' });
+  await act(async () => {
+    fireEvent.change(fileInput, { target: { files: [file] } });
+  });
+
+  const [projectSelect, boqSelect] = Array.from(
+    container.querySelectorAll('select'),
+  ) as HTMLSelectElement[];
+  await act(async () => {
+    fireEvent.change(projectSelect!, { target: { value: 'p-1' } });
+  });
+  await waitFor(() => expect(boqSelect!.querySelectorAll('option').length).toBe(2));
+  await act(async () => {
+    fireEvent.change(boqSelect!, { target: { value: 'boq-9' } });
+  });
+
+  const importButton = screen
+    .getAllByRole('button')
+    .find((b) => /Import \d+ positions/.test(b.textContent ?? ''));
+  await act(async () => {
+    fireEvent.click(importButton!);
+  });
+
+  return { file };
+}
+
+describe('RegionalExchangePage - import request', () => {
+  const realFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+    vi.mocked(apiGet).mockImplementation(async () => []);
+  });
+
+  it('sends the dropped file as multipart form data, not a JSON row list', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ imported: 1, errors: [], source_format: 'csv' }),
+    })) as unknown as typeof fetch;
+
+    const { file } = await driveImportFlow(getRegionalTemplate('es-pbc'), fetchMock);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = vi.mocked(fetchMock).mock.calls[0]!;
+    expect(url).toBe('/api/v1/boq/boqs/boq-9/import/auto/');
+    expect(init!.method).toBe('POST');
+    expect(init!.body).toBeInstanceOf(FormData);
+    expect((init!.body as FormData).get('file')).toBe(file);
+    // A multipart body must not carry a JSON content type: the browser has
+    // to set the boundary itself.
+    expect(JSON.stringify(init!.headers ?? {})).not.toMatch(/application\/json/);
+  });
+
+  it('reports the format the backend says read the file', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ imported: 1, errors: [], source_format: 'bc3' }),
+    })) as unknown as typeof fetch;
+
+    await driveImportFlow(getRegionalTemplate('es-pbc'), fetchMock);
+
+    expect(screen.getByText(/read by bc3/i)).toBeTruthy();
+  });
+
+  it('says the count is unknown when the response carries no imported field', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ errors: [], source_format: 'csv' }),
+    })) as unknown as typeof fetch;
+
+    await driveImportFlow(getRegionalTemplate('es-pbc'), fetchMock);
+
+    expect(
+      screen.getByText(/did not report how many positions were imported/i),
+    ).toBeTruthy();
+    // The parsed preview held one row. That number is the client's, not the
+    // server's, and must never be presented as the server's answer.
+    expect(screen.queryByText(/^1 positions imported$/)).toBeNull();
+  });
+
+  it('renders a backend error entry as its message rather than [object Object]', async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        imported: 0,
+        errors: [{ ordinal: '01.01', error: 'quantity is not a number' }],
+        source_format: 'csv',
+      }),
+    })) as unknown as typeof fetch;
+
+    await driveImportFlow(getRegionalTemplate('es-pbc'), fetchMock);
+
+    expect(screen.getByText(/01\.01: quantity is not a number/)).toBeTruthy();
+    expect(screen.queryByText(/\[object Object\]/)).toBeNull();
   });
 });
