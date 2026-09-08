@@ -10,7 +10,7 @@
 // on the contract, and closing the drawer takes the param back out.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -214,12 +214,19 @@ describe('a deep link into the contract register', () => {
   it('opens nothing without a highlight', async () => {
     // The control: a register that opened its first contract on mount would
     // pass the test above for the wrong reason.
+    //
+    // The wait is for the row itself, not for the request going out. Asserting
+    // the URL proved only that the page asked; it could not tell an empty
+    // register from one whose answer arrived in a shape the page could not
+    // read, and under either of those an absent dialog is worth nothing. The
+    // register answers with a page rather than a bare array, so waiting for
+    // the row proves it both asked and unwrapped what came back.
     search = '';
     renderPage();
 
-    await waitFor(() =>
-      expect(api.apiGet).toHaveBeenCalledWith(expect.stringContaining('/v1/contracts/contracts/?')),
-    );
+    // The register writes the code and the title into separate cells; only the
+    // drawer joins them, so the row is asserted on the code alone.
+    expect(await screen.findByText('MC-01')).toBeTruthy();
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
