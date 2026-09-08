@@ -133,6 +133,10 @@
     "revision_cost_impact_review": {
       "fail": "El impacto en el coste de la revisión, de {amount}, aún no se ha registrado como una modificación",
       "suggestion": "Cree un borrador de solicitud de modificación a partir de esta comparación de revisiones para seguir el cambio de coste"
+    },
+    "base_date_readable": {
+      "fail": "La fecha base '{base_date}' no es una fecha, por lo que la medición se grava al tipo de hoy y no al suyo propio",
+      "suggestion": "Indique la base de precios como día, mes, trimestre o año ({shapes})"
     }
   },
   "din276": {

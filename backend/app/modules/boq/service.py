@@ -265,22 +265,13 @@ async def _safe_audit(
 # Re-exported under its own name so ``from app.modules.boq.service import
 # DEFAULT_MARKUP_TEMPLATES`` keeps resolving for the readers that predate the
 # move. The table itself lives in a module the methodology catalogue can import.
+from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
     region_key_for_country,
     resolve_region_lines,
 )
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES as DEFAULT_MARKUP_TEMPLATES
-from app.modules.i18n_foundation.repository import TaxConfigRepository
-from app.modules.i18n_foundation.tax_rules import TaxRuleError
-from app.modules.i18n_foundation.tax_rules import resolve as resolve_tax
-from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm
-
-#: A full ISO date and nothing else. ``BOQ.base_date`` is a free-text column
-#: and the shipped demo packs fill it with ``"2026-Q1"`` and ``"2026-01"``, so
-#: what it holds has to be tested before it can be used as a date. See
-#: :meth:`BOQService._seeded_vat_rate`.
-_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 from app.modules.boq.models import (
     BOQ,
     BOQActivityLog,
@@ -338,6 +329,10 @@ from app.modules.boq.schemas import (
 )
 from app.modules.boq.templates import TEMPLATES
 from app.modules.costs.repository import CostItemRepository
+from app.modules.i18n_foundation.repository import TaxConfigRepository
+from app.modules.i18n_foundation.tax_rules import TaxRuleError
+from app.modules.i18n_foundation.tax_rules import resolve as resolve_tax
+from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm
 
 logger = logging.getLogger(__name__)
 
@@ -5761,7 +5756,7 @@ class BOQService:
             logger.debug("project lookup failed for boq %s", boq_id, exc_info=True)
             return None
 
-    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None) -> str | None:
+    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None, boq_id: uuid.UUID) -> str | None:
         """The country's own standard VAT rate from the shipped tax seed.
 
         The bill used to price a country with no project override off its
@@ -5779,17 +5774,19 @@ class BOQService:
 
         Args:
             country_code: The project's ISO 3166-1 alpha-2 code, or None.
-            base_date: The bill's own base date, used only when it is a full
-                ISO date. The column is ``String(40)`` with no format
-                validation and the shipped demo packs put ``"2026-Q1"`` and
-                ``"2026-01"`` in it, which are not dates. Passing those through
-                would not fail - ``active_rows`` compares date strings, so
-                ``"2026-Q1"`` sorts after ``"2026-02-01"`` because ``"Q"`` is
-                above ``"0"`` while ``"2026-01"`` sorts before it. The two
-                shipped formats therefore select windows in opposite
-                directions, both silently. Anything that is not
-                ``YYYY-MM-DD`` is dropped and the resolver dates the bill
-                today.
+            base_date: The bill's own base date. A bill of quantities is taxed
+                at its own base date, so this is the date the rate is resolved
+                on - not today. The column is ``String(40)`` free text and a
+                price base is legitimately stated as a day, a month, a quarter
+                or a year, so it is read by
+                :func:`app.modules.boq.base_date.price_base_day`, which owns
+                the one rule for which day inside a stated period is meant.
+                Never passed to the resolver raw: ``active_rows`` compares date
+                strings, so ``"2026-Q1"`` sorts above ``"2026-02-01"`` while
+                ``"2026-01"`` sorts below it, so those two shapes would select
+                windows in opposite directions without failing.
+            boq_id: The bill being priced, so that a base date nothing can read
+                names the bill it came from in the log rather than only itself.
 
         Returns:
             The rate as a decimal-string percentage, or None when the country
@@ -5814,7 +5811,24 @@ class BOQService:
             # is 9; the 9 is on the regional stack, so leaving it alone is the
             # answer rather than a gap.
             return None
-        on_date = base_date.strip() if base_date and _ISO_DATE.fullmatch(base_date.strip()) else None
+        stated = (base_date or "").strip()
+        day = price_base_day(stated)
+        on_date = day.isoformat() if day else None
+        if stated and day is None:
+            # A bill that states no base date is ordinary and says nothing
+            # here. A bill that states one nobody can read is a different
+            # event: it is priced at today's rate while its own label says
+            # otherwise, and until this line that happened without a word. The
+            # bill still seeds, for the same reason a broken seed row does not
+            # stop it - refusing to price a project is worse than pricing it at
+            # today's rate - so the log is the only thing that reports it.
+            logger.warning(
+                "BOQ %s states base date %r, which is not a date the platform reads (%s); "
+                "the bill is taxed at today's rate instead of its own",
+                boq_id,
+                stated,
+                ", ".join(ACCEPTED_SHAPES),
+            )
         try:
             configs = await TaxConfigRepository(self.session).list(country_code=country_code)
         except SQLAlchemyError:
@@ -5929,7 +5943,7 @@ class BOQService:
         vat_rate = project_vat_override
         rate_source = "project"
         if vat_rate is None:
-            vat_rate = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None))
+            vat_rate = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None), boq_id)
             rate_source = "country_seed"
         if vat_rate is None:
             rate_source = "region_template"

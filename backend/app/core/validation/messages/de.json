@@ -133,6 +133,10 @@
     "revision_cost_impact_review": {
       "fail": "Die Kostenauswirkung der Revision von {amount} ist noch nicht als Nachtrag erfasst",
       "suggestion": "Aus diesem Revisionsvergleich einen Nachtragsentwurf erstellen, um die Kostenänderung zu erfassen"
+    },
+    "base_date_readable": {
+      "fail": "Das Basisdatum '{base_date}' ist kein Datum, daher wird das LV mit dem heutigen Steuersatz statt mit seinem eigenen besteuert",
+      "suggestion": "Die Preisbasis als Tag, Monat, Quartal oder Jahr angeben ({shapes})"
     }
   },
   "din276": {

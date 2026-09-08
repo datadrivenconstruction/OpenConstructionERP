@@ -133,6 +133,10 @@
     "revision_cost_impact_review": {
       "fail": "Revision cost impact of {amount} is not yet captured as a variation",
       "suggestion": "Create a draft variation request from this revision compare to track the cost change"
+    },
+    "base_date_readable": {
+      "fail": "Base date '{base_date}' is not a date, so the bill is taxed at today's rate rather than its own",
+      "suggestion": "State the price base as a day, a month, a quarter or a year ({shapes})"
     }
   },
   "din276": {

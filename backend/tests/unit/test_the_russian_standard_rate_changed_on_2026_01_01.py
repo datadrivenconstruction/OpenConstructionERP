@@ -57,27 +57,30 @@ same page, so not a second source: the 10/110 calculation rate stays as it is
 while 20/120 becomes 22/122, which it could not do if the 10 had moved.
 ``test_the_reduced_rate_did_not_change`` below holds the shipped row to that.
 
-Which date the resolver is handed, and why that is still open
--------------------------------------------------------------
-A dated window is only as good as the date it is queried with.
-``BOQService.apply_default_markups`` passes ``BOQ.base_date`` into
-``_seeded_vat_rate``, which forwards it to ``resolve`` as ``on_date`` when and
-only when it fullmatches ``YYYY-MM-DD``; anything else is dropped and the bill
-is dated today. But ``base_date`` is documented in ``boq/schemas.py`` as the
-price level reference, the date the unit rates are indexed to, while the tax
-service wording keys the new rate on realisation of the works from 1 January
-2026 whatever date the contract carries. Those are two different axes. A
-Russian bill indexed to 2025 prices for works performed in 2026 therefore
-resolves at 20 where the works attract 22.
+Which date the resolver is handed, and how that was settled
+------------------------------------------------------------
+A dated window is only as good as the date it is queried with, and this file
+used to record that question as open. It is closed: a bill of quantities is
+taxed at its own base date. ``BOQService.apply_default_markups`` passes
+``BOQ.base_date`` into ``_seeded_vat_rate``, which reads it through
+``app.modules.boq.base_date.price_base_day`` - a day, a month, a quarter or a
+year, each period read as its first day - and hands the result to ``resolve``
+as ``on_date``. A value nothing can read still dates the bill today, because a
+mistyped label must not stop a project being priced, but it is now logged
+against the bill and reported by ``boq_quality.base_date_readable`` instead of
+passing in silence. ``tests/unit/test_a_price_base_stated_as_a_quarter_dated_the_bill_today``
+and the Israeli and Russian cases in
+``tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat`` hold that end to end.
 
-The exposure is one sided and narrow. The shipped demo packs put "2026-Q1" and
-"2026-01" in that column, neither of which is an ISO date, so they are dropped
-and land on today, which is currently the right answer by accident of the
-fallback. It bites only a bill carrying a real past ISO date, and the number it
-produces is a seeded suggestion that both the project's ``default_vat_rate``
-and the bill's own ``tax_rate`` override. Which date a bill of quantities is
-taxed on is a product decision and not a data repair, so it is recorded here
-and left alone.
+What the decision does not claim is that the base date and the tax point are
+the same thing in law. ``base_date`` is the price level reference, the date the
+unit rates are indexed to, while the tax service wording keys the new rate on
+realisation of the works from 1 January 2026 whatever date the contract
+carries. Those remain two axes, and a bill indexed to 2025 prices for works
+performed in 2026 is now seeded at 20 where the works themselves attract 22.
+That is deliberate: the seeded number is a suggestion about the money the bill
+is written in, and both the project's ``default_vat_rate`` and the bill's own
+``tax_rate`` override it where the works say otherwise.
 """
 
 from __future__ import annotations

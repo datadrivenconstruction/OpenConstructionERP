@@ -5534,6 +5534,71 @@ class RevisionCostImpactReview(ValidationRule):
         ]
 
 
+class BOQBaseDateReadable(ValidationRule):
+    """A base date the bill states must be one the platform can read.
+
+    Not "every bill must state a base date": that is NRM's question and
+    :class:`NRMBaseDateDeclared` already asks it of the bills it governs. This
+    one is silent about a bill that states nothing and speaks only when a bill
+    states something no reader can turn into a date.
+
+    Why that narrow case earns a rule of its own: a bill of quantities is taxed
+    at its own base date, so an unreadable one is not a cosmetic blemish. The
+    bill is priced at today's rate while its own label says the rates are of
+    another period, the tax line looks perfectly ordinary, and the only other
+    trace is a line in the server log that the person who typed the value will
+    never read. The parser is shared with the pricing path
+    (``app.modules.boq.base_date``) so that this rule cannot pass a value the
+    tax lookup then rejects.
+    """
+
+    rule_id = "boq_quality.base_date_readable"
+    name = "BOQ Base Date Readable"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.STRUCTURE
+    description = "Flags a stated base date that is not a date, which taxes the bill at today's rate"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
+
+        locale = _get_locale(context)
+        stated = str(_boq_document(context).get("base_date") or "").strip()
+        if not stated:
+            # A bill with no price base has nothing to be wrong about, and a
+            # passing row here would claim this was checked on every payload
+            # that never carries a bill at all.
+            return []
+        if price_base_day(stated) is not None:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                    details={"base_date": stated},
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate("boq_quality.base_date_readable.fail", locale=locale, base_date=stated),
+                details={"base_date": stated},
+                suggestion=translate(
+                    "boq_quality.base_date_readable.suggestion",
+                    locale=locale,
+                    shapes=", ".join(ACCEPTED_SHAPES),
+                ),
+            )
+        ]
+
+
 # ── Pipeline Builder graph-validity rule ────────────────────────────────────
 
 
@@ -9380,6 +9445,7 @@ def register_builtin_rules() -> None:
         (BOQUnitSystemConsistencyRule(), None),
         (ClassificationCountryMismatchRule(), None),
         (RevisionCostImpactReview(), None),
+        (BOQBaseDateReadable(), None),
         # DIN 276 (DACH)
         (DIN276CostGroupRequired(), None),
         (DIN276ValidCostGroup(), None),

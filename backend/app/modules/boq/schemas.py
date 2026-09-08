@@ -169,7 +169,13 @@ class BOQCreate(BaseModel):
     base_date: str | None = Field(
         default=None,
         max_length=20,
-        description="Base date / price level reference (e.g. 2026-Q2)",
+        description=(
+            "Base date / price level reference: the date the unit rates are current at, and the "
+            "date the bill's tax is resolved on. A day (2026-03-15), a month (2026-03), a quarter "
+            "(2026-Q1) or a year (2026); a period is read as its first day. Free text by design, "
+            "so anything else is stored and reported rather than refused - see "
+            "app.modules.boq.base_date."
+        ),
         examples=["2026-Q2"],
     )
     tax_rate: Decimal | None = Field(

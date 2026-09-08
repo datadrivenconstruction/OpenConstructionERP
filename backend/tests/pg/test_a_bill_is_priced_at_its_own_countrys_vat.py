@@ -407,28 +407,36 @@ async def test_kuwait_is_billed_the_nothing_it_levies(pg_session) -> None:
         )
 
 
-async def test_a_quarter_label_in_base_date_does_not_pick_a_tax_window(pg_session) -> None:
-    """``base_date`` is free text, and two of its shipped values sort opposite ways.
+async def test_a_quarter_label_in_base_date_picks_that_quarters_tax_window(pg_session) -> None:
+    """A bill is taxed at its own base date, and a quarter is a base date.
 
-    The column is ``String(40)`` with no format validation and the shipped demo
-    packs put ``"2026-Q1"`` and ``"2026-01"`` in it. ``active_rows`` compares
-    date strings, so ``"2026-Q1"`` sorts ABOVE ``"2026-02-01"`` and
-    ``"2026-01"`` sorts BELOW it: neither is a date, and passing them through
-    would select windows in opposite directions without failing. Israel is the
-    country where that shows, because it has two windows and the older one is
-    the superseded 17.
+    The column is ``String(40)`` with no format validation and a price base is
+    legitimately stated as a day, a month, a quarter or a year. The API accepts
+    all four and the shipped demo packs state ``"2026-Q1"`` and ``"2026-01"``
+    as their price base, though the packs write theirs into ``boq_metadata``
+    rather than into this column. None of those shapes may reach the resolver
+    raw - ``active_rows`` compares date strings, so ``"2026-Q1"`` sorts ABOVE
+    ``"2026-02-01"`` while ``"2026-01"`` sorts BELOW it, and the two would
+    select windows in opposite directions without failing. They go through
+    :func:`app.modules.boq.base_date.price_base_day`, which reads each as the
+    first day of the period it names.
+
+    Israel is the country where that shows, because it has two windows and the
+    older one is the superseded 17. Which day inside a period is meant is
+    pinned in ``tests/unit/test_a_price_base_stated_as_a_quarter_dated_the_bill_today``;
+    here the point is that the whole product path honours it.
     """
     await _install_tax_seed(pg_session)
     current = _seed_rate("IL")
-    assert current == Decimal("18")
+    assert current == Decimal("18"), "Israel's current rate moved; the numbers below are stated against 17 and 18"
 
-    for label in ("2026-Q1", "2026-01", "not a date", ""):
+    for label, expected in (("2026-Q1", "18"), ("2026-01", "18"), ("2024-Q4", "17"), ("2024", "17"), ("2024-12", "17")):
         boq = await _bill_for(pg_session, "IL", base_date=label)
         await BOQService(pg_session).apply_default_markups(boq.id)
         line = (await _tax_lines(pg_session, boq.id))[0]
-        assert Decimal(line.percentage) == current, (
-            f"base_date {label!r} was read as a date and selected a tax window: the bill was "
-            f"charged {line.percentage} rather than the {current} in force today"
+        assert Decimal(line.percentage) == Decimal(expected), (
+            f"a bill labelled {label!r} was charged {line.percentage} rather than the {expected} "
+            f"in force in the period it names"
         )
 
     dated = await _bill_for(pg_session, "IL", base_date="2020-06-01")
@@ -437,6 +445,98 @@ async def test_a_quarter_label_in_base_date_does_not_pick_a_tax_window(pg_sessio
     assert Decimal(line.percentage) == Decimal("17"), (
         "a real ISO base date must still price the window in force then, or this test is "
         "only proving that base_date is ignored altogether"
+    )
+
+
+async def test_a_russian_bill_priced_to_2025_is_taxed_at_2025s_rate(pg_session) -> None:
+    """The live-money case, driven through the path the product uses.
+
+    Russia raised the standard rate from 20 to 22 with effect from 2026-01-01
+    and the shipped seed carries both windows. A bill whose rates are indexed
+    to 2025 was being charged 22 because its base date never reached the
+    resolver, which is two points on every priced line of it. The rate is read
+    back off the stored markup rather than from ``resolve``, because a bill
+    that resolves correctly and stores something else is exactly the failure
+    this exists to catch.
+    """
+    await _install_tax_seed(pg_session)
+    assert _seed_rate("RU") == Decimal("22"), "Russia's current rate moved; this test is written against 20 and 22"
+
+    for label, expected in (
+        ("2025-Q2", "20"),
+        ("2025-06", "20"),
+        ("2025-06-01", "20"),
+        ("2025", "20"),
+        ("2026-Q1", "22"),
+        ("2026-01", "22"),
+        ("2026", "22"),
+    ):
+        boq = await _bill_for(pg_session, "RU", base_date=label)
+        await BOQService(pg_session).apply_default_markups(boq.id)
+        line = (await _tax_lines(pg_session, boq.id))[0]
+        assert Decimal(line.percentage) == Decimal(expected), (
+            f"a Russian bill with base date {label!r} was charged {line.percentage} rather than "
+            f"the {expected} in force then"
+        )
+        assert line.metadata_["vat_rate_source"] == "country_seed", (
+            f"{label!r} produced the right number off the region's stack rather than off the "
+            f"dated seed, which would go wrong the moment the region's line is edited"
+        )
+
+
+async def test_a_base_date_nothing_can_read_is_dated_today_and_says_so(pg_session, caplog) -> None:
+    """The fallback stayed; the silence did not.
+
+    An unreadable price base still prices the bill at today's rate, because
+    refusing to price a project over a mistyped label would be worse. What it
+    no longer does is happen quietly: the log names the bill and the value, and
+    ``boq_quality.base_date_readable`` puts the same finding where the person
+    who typed it will see it. Israel again, because its 17 is far enough from
+    its 18 for a wrong window to be visible.
+    """
+    await _install_tax_seed(pg_session)
+    current = _seed_rate("IL")
+
+    for label in ("01.02.2026", "mid 2026", "2026-Q5"):
+        boq = await _bill_for(pg_session, "IL", base_date=label)
+        caplog.clear()
+        with caplog.at_level(logging.WARNING, logger="app.modules.boq.service"):
+            await BOQService(pg_session).apply_default_markups(boq.id)
+
+        line = (await _tax_lines(pg_session, boq.id))[0]
+        assert Decimal(line.percentage) == current, (
+            f"an unreadable base date {label!r} must fall back to today's rate rather than "
+            f"refusing to price the bill, got {line.percentage}"
+        )
+
+        reported = [r for r in caplog.records if r.levelno >= logging.WARNING and label in r.getMessage()]
+        assert reported, (
+            f"base date {label!r} was dropped and the bill dated today without a word. The stored "
+            f"line is indistinguishable from a bill that correctly resolved to today's window, so "
+            f"this log line is the only thing that tells them apart"
+        )
+        assert str(boq.id) in reported[0].getMessage(), (
+            f"the warning must name the bill, or an operator reading a busy log cannot find it: "
+            f"{reported[0].getMessage()!r}"
+        )
+
+
+async def test_a_bill_that_states_no_base_date_is_taxed_today_in_silence(pg_session, caplog) -> None:
+    """Saying nothing is not the same event as saying something unreadable.
+
+    A bill with no price base is the ordinary state of a new estimate, and
+    warning about it would put a line in the log for every bill in the product
+    and teach the reader to skip the ones that matter.
+    """
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "IL", base_date=None)
+    with caplog.at_level(logging.WARNING, logger="app.modules.boq.service"):
+        await BOQService(pg_session).apply_default_markups(boq.id)
+
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert Decimal(line.percentage) == _seed_rate("IL")
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING and "base date" in r.getMessage()], (
+        "a bill that states no base date produced a warning about its base date"
     )
 
 
