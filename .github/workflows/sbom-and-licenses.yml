@@ -54,7 +54,12 @@ jobs:
       - name: Install tooling
         run: |
           pip install --upgrade pip
-          pip install pip-licenses cyclonedx-bom
+          # cyclonedx-bom is pinned because the backend step below relies on
+          # its `--pyproject` and `--mc-type` flags to name the root component,
+          # and an unpinned generator can rename or drop a flag between two of
+          # our releases and fail the step on release day. 7.3.1 is the version
+          # whose `environment --help` was read when the flags were written.
+          pip install pip-licenses cyclonedx-bom==7.3.1
           npm install -g license-checker @cyclonedx/cyclonedx-npm
 
       - name: Backend - license inventory and SBOM
@@ -72,10 +77,44 @@ jobs:
             # No `|| true` here. A swallowed failure produced an empty SBOM slot
             # that the attach step below was configured not to mind, so a broken
             # generator and a healthy one looked the same from the release page.
-            cyclonedx-py environment -o ../sbom-backend.cdx.json
+            #
+            # `--pyproject` names the root component from the project table of
+            # pyproject.toml, name and version included. Without it the
+            # generator writes no `metadata.component` at all and the document
+            # never says what product it describes; the backend SBOM shipped
+            # that way on v15.4.0, v15.5.0 and v15.6.0. cyclonedx-py has no
+            # `--mc-name` or `--mc-version`: the file is the only source of the
+            # root component, and `--mc-type` sets its type.
+            cyclonedx-py environment --pyproject pyproject.toml --mc-type application -o ../sbom-backend.cdx.json
             cd ..
             echo "backend=true" >> "$GITHUB_OUTPUT"
           fi
+
+      # A component list that does not say which product and which version it
+      # is the list for is not an SBOM of anything. The generator writes the
+      # root component only when asked, so this asks the file rather than
+      # trusting the flag: the name has to be the project's own and the version
+      # has to be the release's, the tag without its `v`. Both come from the
+      # checkout at the tag, so a disagreement means the generator did not do
+      # what the flag promised, not that the sources drifted.
+      - name: Backend SBOM names the product and the release
+        if: steps.backend.outputs.backend == 'true'
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          expected=$(python3 -c 'import tomllib; print(tomllib.load(open("backend/pyproject.toml", "rb"))["project"]["name"])')
+          name=$(jq -r '.metadata.component.name // empty' sbom-backend.cdx.json)
+          version=$(jq -r '.metadata.component.version // empty' sbom-backend.cdx.json)
+          if [ -z "$name" ] || [ -z "$version" ]; then
+            echo "sbom-backend.cdx.json has no root component (name '${name}', version '${version}'), refusing to publish an inventory of nothing in particular." >&2
+            exit 1
+          fi
+          if [ "$name" != "$expected" ] || [ "$version" != "${TAG#v}" ]; then
+            echo "sbom-backend.cdx.json describes ${name} ${version}; pyproject.toml says ${expected} and the release is ${TAG}." >&2
+            exit 1
+          fi
+          echo "sbom-backend.cdx.json describes ${name} ${version}"
 
       - name: Frontend - license inventory and SBOM
         id: frontend
@@ -88,6 +127,29 @@ jobs:
             cd ..
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           fi
+
+      # cyclonedx-npm names the root component from package.json without being
+      # asked, so the frontend never had the backend's gap. It is held to the
+      # same check so the two documents on one release cannot differ in whether
+      # they say what they are.
+      - name: Frontend SBOM names the package and the release
+        if: steps.frontend.outputs.frontend == 'true'
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          expected=$(jq -r '.name // empty' frontend/package.json)
+          name=$(jq -r '.metadata.component.name // empty' sbom-frontend.cdx.json)
+          version=$(jq -r '.metadata.component.version // empty' sbom-frontend.cdx.json)
+          if [ -z "$name" ] || [ -z "$version" ]; then
+            echo "sbom-frontend.cdx.json has no root component (name '${name}', version '${version}'), refusing to publish an inventory of nothing in particular." >&2
+            exit 1
+          fi
+          if [ "$name" != "$expected" ] || [ "$version" != "${TAG#v}" ]; then
+            echo "sbom-frontend.cdx.json describes ${name} ${version}; package.json says ${expected} and the release is ${TAG}." >&2
+            exit 1
+          fi
+          echo "sbom-frontend.cdx.json describes ${name} ${version}"
 
       # Both generators stamp the moment they ran into the document they emit,
       # so generating the same SBOM from the same tag twice produces two files
@@ -115,11 +177,12 @@ jobs:
       # becomes a UUIDv5 over the release and the filename, which is stable for
       # the same release and distinct between releases.
       #
-      # Done here rather than with a generator flag on purpose: neither
-      # cyclonedx-bom nor @cyclonedx/cyclonedx-npm is pinned in the install step
-      # above, so a flag that exists today is not a thing this file can rely on
-      # next month. Rewriting the emitted JSON does not care which version
-      # emitted it. Done inline rather than as a script in scripts/ because the
+      # Done here rather than with a generator flag on purpose. cyclonedx-bom
+      # is pinned in the install step above now that the root component depends
+      # on its flags, but @cyclonedx/cyclonedx-npm is not, so a flag that exists
+      # today is not a thing this file can rely on next month for the frontend
+      # half. Rewriting the emitted JSON does not care which version emitted it
+      # and treats both files the same way. Done inline rather than as a script in scripts/ because the
       # checkout is at `inputs.tag`, so a script added to main today does not
       # exist in the tree of a tag cut before today, which is every tag this
       # will first run against.
