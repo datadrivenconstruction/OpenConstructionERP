@@ -152,8 +152,13 @@ def _convert_to_base(
     the rollup degrades visibly, and its code is returned in the second tuple
     element so the caller can surface a "missing FX rate" hint.
 
-    The converted total is returned as a quantized (2-place) Decimal string so
-    money never round-trips through a binary float. Callers parse it back into a
+    The converted total is returned as a quantized Decimal string so money never
+    round-trips through a binary float. The quantum is the base currency's own
+    minor unit, via :func:`app.core.money.money_quantum`, not a fixed two places:
+    this helper is the last step that sees ``base_currency``, so a literal here
+    rounds a Kuwaiti dinar total to cents and loses a fils no caller can put
+    back, and gives a yen total two digits it cannot carry. A blank base keeps
+    the registry's two-decimal default. Callers parse the string back into a
     Decimal where they need to do further arithmetic.
     """
     base = (base_currency or "").strip().upper()
@@ -171,7 +176,7 @@ def _convert_to_base(
             elif norm not in missing:
                 missing.append(norm)
         total += value
-    return str(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)), missing
+    return str(total.quantize(money_quantum(base), rounding=ROUND_HALF_UP)), missing
 
 
 # ── Allowed status transitions ──────────────────────────────────────────────
