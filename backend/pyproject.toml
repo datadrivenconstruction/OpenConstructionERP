@@ -120,11 +120,15 @@ dependencies = [
     "structlog>=24.4.0",
     "pyyaml>=6.0",
     "defusedxml>=0.7.1",
-    # Capped below 3.0: pandas 3.0 changed string-column type inference (a
-    # numeric-looking string column now infers as "string" not "numeric"),
-    # which the dashboards integrity detector and its tests were written
-    # against. Revisit and lift the cap when adopting pandas 3 deliberately.
-    "pandas>=2.2.0,<3",
+    # pandas 3 is allowed. It was capped below 3.0 while the dashboards
+    # integrity detector sniffed values only for object columns, which pandas 3
+    # no longer produces for text (it gives the str dtype), so a CSV whose
+    # numbers arrived as text went unflagged. The detector accepts both dtypes
+    # now (see _dtype_says_nothing_about_the_values in dashboards/integrity.py)
+    # and the pandas-touching suites were run green under 3.0.5 before the cap
+    # was lifted on 2026-09-08. Keep the <4 ceiling: a new major gets the same
+    # deliberate run before it is let in.
+    "pandas>=2.2.0,<4",
     "pyarrow>=23.0.1,<26",
     "trimesh>=4.0.0",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
