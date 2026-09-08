@@ -108,6 +108,7 @@ from app.modules.boq.copilot_schemas import (
     CopilotChatResponse,
     CopilotMessageOut,
 )
+from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
 from app.modules.boq.roundtrip import (
     ID_COLUMN_ALIASES,
@@ -518,6 +519,43 @@ async def list_boqs(
         )
         results.append(item)
     return results
+
+
+# ── Exchange formats ─────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/exchange-formats/",
+    response_model=ExchangeCatalogue,
+    summary="List the BOQ exchange formats by market, with what we can do with each",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_exchange_formats(
+    country: str | None = Query(
+        None,
+        description=(
+            "ISO 3166-1 alpha-2 code of the market the caller is working in. "
+            "Decides default_format_id and nothing else: the format list is "
+            "the same for everybody, because a surveyor in one country is "
+            "regularly sent a file from another."
+        ),
+        max_length=8,
+    ),
+) -> ExchangeCatalogue:
+    """The catalogue of market documents this product can read or write.
+
+    Every row says which countries it belongs to, so a client can fly the
+    right flags, and how well we handle it in each direction. Those two
+    verdicts are computed from the importer and exporter registries on
+    each call rather than stored, so a row cannot outlive the code that
+    justified it.
+
+    ``country`` is optional. Supplying it does not filter anything, it
+    only picks the row the caller should start on, which is that market's
+    own document where we can read one and their document anyway where we
+    cannot yet, so the answer is never silently a different market's.
+    """
+    return build_catalogue(country)
 
 
 # ── Templates ────────────────────────────────────────────────────────────────

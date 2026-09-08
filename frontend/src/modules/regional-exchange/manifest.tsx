@@ -103,7 +103,12 @@ export const manifest: ModuleManifest = {
   version: '1.0.0',
   icon: Globe2,
   category: 'regional',
-  defaultEnabled: false,
+  // Was false, which combined badly with `navItems: []`: the module was
+  // switched off AND had no way in, so twenty market screens and the
+  // whole exchange path existed in the bundle and reached nobody. The
+  // hub now has a sidebar row of its own beside the BOQ, and a row for a
+  // module that is off by default is a row most people never see.
+  defaultEnabled: true,
   depends: ['boq'],
   routes,
   // No per-country sidebar items, by the #217 decision: twenty country rows

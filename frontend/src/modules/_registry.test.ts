@@ -64,16 +64,15 @@ describe('MODULE_REGISTRY', () => {
     expect(ids).toContain('regional-exchange');
   });
 
-  it('regional-exchange should be disabled by default (gaeb-exchange is the lone exception)', () => {
-    const regional = MODULE_REGISTRY.filter((m) => m.category === 'regional');
-    for (const mod of regional) {
-      if (mod.id === 'gaeb-exchange') {
-        // GAEB DA XML 3.3 is core for the DACH workflow — on by default
-        // since v2.6.30, see modules/gaeb-exchange/manifest.ts.
-        expect(mod.defaultEnabled).toBe(true);
-      } else {
-        expect(mod.defaultEnabled).toBe(false);
-      }
+  it('both exchange modules are on by default, because a file has to be able to get in', () => {
+    // Was 'regional-exchange should be disabled by default'. It shipped off
+    // AND with no sidebar row, and the two together meant the twenty market
+    // screens behind it reached nobody at all. It now owns the exchange row
+    // beside the BOQ, so being off by default would hide the way in for
+    // every installation that never went looking through the module list.
+    const byId = new Map(MODULE_REGISTRY.map((m) => [m.id, m]));
+    for (const id of ['gaeb-exchange', 'regional-exchange']) {
+      expect(byId.get(id)?.defaultEnabled, `${id} should be enabled by default`).toBe(true);
     }
   });
 
@@ -210,10 +209,12 @@ describe('getModuleDefaults', () => {
     // gaeb-exchange flipped to on-by-default in v2.6.30 (GAEB DA XML 3.3
     // is core for the DACH workflow — see manifest defaultEnabled=true).
     expect(defaults['gaeb-exchange']).toBe(true);
-    // Wave 5 Epic I: 20 individual country exchanges collapsed into
-    // one polymorphic module (kept disabled by default like its
-    // predecessors).
-    expect(defaults['regional-exchange']).toBe(false);
+    // Wave 5 Epic I collapsed 20 country exchanges into one polymorphic
+    // module and kept it disabled, like its predecessors. It is the
+    // exchange hub now and carries its own sidebar row, so off by default
+    // would mean the row is absent for anyone who never opened the module
+    // list.
+    expect(defaults['regional-exchange']).toBe(true);
   });
 
   it('should return an object with boolean values', () => {

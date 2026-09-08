@@ -69,6 +69,7 @@ import {
   Factory,
   BookOpen,
   Globe,
+  Globe2,
   FileSignature,
   Briefcase,
   Scale,
@@ -278,6 +279,33 @@ export const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
+      // The way in and out of the platform for a tender file, in whatever
+      // shape a market issues one. It sits directly under the BOQ because
+      // that is the object it fills and empties, and because the question
+      // it answers, how do I get my file in, is asked before the BOQ
+      // exists rather than after.
+      //
+      // This module shipped with no sidebar row at all and disabled by
+      // default, so the twenty market screens behind it were reachable
+      // only by typing a URL. `moduleKey` is what stops the row
+      // outliving its screen if the module is switched off again.
+      {
+        // Field order is load bearing, not taste. `check_i18n_computed_keys.py`
+        // pairs each `default*` with the next unpaired `*Key` in source order,
+        // so a `moduleKey` sitting between `helpKey` and `defaultHelp` gets
+        // read as the key that default belongs to, and the gate then asks the
+        // English bundle for a key called `regional-exchange`, which is a
+        // module id and will never be there. Keep every key immediately above
+        // its own default, and anything ending in Key that is not an i18n key
+        // below all of them.
+        labelKey: 'nav.exchange_hub',
+        defaultLabel: 'Import / Export',
+        helpKey: 'nav.exchange_hub_help',
+        defaultHelp: "Move a bill of quantities in or out in your market's own format",
+        to: '/regional-exchange',
+        icon: Globe2,
+        moduleKey: 'regional-exchange',
+      },
       { labelKey: 'nav.match_elements', to: '/match-elements', icon: Link2, badge: 'BETA' },
       { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit },
       { labelKey: 'nav.rom_estimate', to: '/rom-estimate', icon: Gauge },

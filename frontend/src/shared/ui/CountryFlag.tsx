@@ -12,6 +12,18 @@ const FLAGS: Record<string, string> = {
   // DE — Germany
   de: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 3"><rect width="5" height="1" fill="#000"/><rect y="1" width="5" height="1" fill="#D00"/><rect y="2" width="5" height="1" fill="#FFCE00"/></svg>`,
 
+  // AT — Austria. Needed by the exchange catalogue, where GAEB DA XML
+  // is offered to all of DACH and an Austrian row with no flag reads as
+  // a broken card rather than as a missing asset.
+  at: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="6" fill="#ED2939"/><rect y="2" width="9" height="2" fill="#fff"/></svg>`,
+
+  // CH — Switzerland. Drawn in a 3:2 box rather than the square the
+  // federal flag actually is, because every flag here is rendered at one
+  // aspect ratio and a square would be squashed into a rectangle by the
+  // caller. The civil ensign uses these proportions, so this is a real
+  // rendering of the flag rather than a distortion of the square one.
+  ch: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="6" fill="#DA291C"/><rect x="3.9" y="1.2" width="1.2" height="3.6" fill="#fff"/><rect x="2.7" y="2.4" width="3.6" height="1.2" fill="#fff"/></svg>`,
+
   // FR — France
   fr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="1" height="2" fill="#002395"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ED2939"/></svg>`,
 
@@ -307,6 +319,27 @@ export function CountryFlag({ code, size = 16, className = '' }: CountryFlagProp
  *  single national flag. This is provenance, not geography — it is applied
  *  only by callers that opt in via `originFlagCode`, and never changes the
  *  plain national flag anywhere else. */
+/** Does this product carry drawn artwork for `code`, looked up strictly?
+ *
+ *  `CountryFlag` is deliberately forgiving: it also accepts cost-database
+ *  region keys and a handful of language prefixes, so `resolveIso` maps
+ *  `ar` to the United Arab Emirates (Arabic) and `uk` to Great Britain
+ *  (Ukrainian). That is right for a cost-base selector keyed by language
+ *  and wrong for a caller holding an ISO 3166-1 country code, where `AR`
+ *  is Argentina and `UA` is Ukraine: such a caller would fly the wrong
+ *  country's flag and never be told.
+ *
+ *  So this asks the narrow question instead, with no prefix map and no
+ *  fallbacks. A caller working in country codes uses it to decide between
+ *  the flag and a legible two-letter chip, and cannot be answered with a
+ *  different country. It says nothing about the emoji fallback, which is
+ *  not artwork and does not render as a flag on every platform.
+ */
+export function hasFlagArt(code: string | null | undefined): boolean {
+  if (!code) return false;
+  return Object.prototype.hasOwnProperty.call(FLAGS, code.toLowerCase());
+}
+
 export const CIS_ISO = new Set(['ru', 'by', 'kz', 'kg', 'tj', 'am', 'az', 'uz', 'md']);
 
 /** Map a region's country ISO to the flag code to show in a cost-base
