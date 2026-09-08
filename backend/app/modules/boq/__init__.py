@@ -15,7 +15,8 @@ async def on_startup() -> None:
     that only takes one of them is dormant in the other deployment.
     """
     from app.modules.boq.permissions import register_boq_permissions
-    from app.modules.boq.validators import register_boq_markup_rules
+    from app.modules.boq.validators import register_boq_markup_rules, register_boq_resource_rules
 
     register_boq_permissions()
     register_boq_markup_rules()
+    register_boq_resource_rules()

@@ -287,6 +287,11 @@ from app.modules.boq.repository import (
     PositionRepository,
     QuantityLinkRepository,
 )
+from app.modules.boq.resource_norms import (
+    clear_unit_rate_kept,
+    stamp_unit_rate_kept,
+    untrusted_buildup_reason,
+)
 from app.modules.boq.schemas import (
     ActivityLogList,
     ActivityLogResponse,
@@ -3793,15 +3798,49 @@ class BOQService:
             and _has_contributing_resources(meta.get("resources"))
         ):
             resources = meta["resources"]
-            _fx_base_ccy, _fx_map = await self._resolve_project_fx(position.boq_id)
-            # Sum of per-unit subtotals == position unit_rate (NO division by
-            # qty). Each resource is converted from its own ``currency`` to the
-            # project base via the FX table before summing - never blend
-            # currencies into the stored rate (Issue #88 / #157). Mirrors the
-            # read-side ``_resource_total_in_base`` so the persisted value and
-            # the FX-aware rollup agree.
-            new_unit_rate = _quantize_money_str(_resource_total_in_base(resources, _fx_map, _fx_base_ccy or ""))
-            fields["unit_rate"] = new_unit_rate
+            # ── Rows that are not per-unit norms must not re-price the line ──
+            # The sum below is only a unit rate when every row's quantity is
+            # per ONE unit of the position. The AI estimator stores rows whose
+            # quantity is ``factor * position_quantity`` (a whole-position
+            # total), fallback allowance rows flagged ``estimated`` whose
+            # quantity is the position quantity itself, and rows flagged
+            # ``factor_estimated`` whose norm is an assumed 1.0. Positions
+            # booked before the estimator read the catalogue norm hold the
+            # position quantity on every row. All of them price correctly at
+            # apply time, because the rate is written from the chosen
+            # candidate, and summing them here on an ordinary edit overwrote a
+            # correct rate with roughly quantity times the correct value. So
+            # when the rows cannot be trusted the stored rate stands, the
+            # position is stamped, and a boq_quality warning names the reason
+            # for a person to review; nothing is repaired silently.
+            _stored_meta_for_check = position.metadata_ if isinstance(position.metadata_, dict) else {}
+            _untrusted_reason = untrusted_buildup_reason(
+                source=position.source,
+                metadata={**_stored_meta_for_check, **meta},
+                quantity=new_quantity,
+                resources=resources,
+            )
+            if _untrusted_reason is not None:
+                stamp_unit_rate_kept(meta, reason=_untrusted_reason, unit_rate=new_unit_rate)
+                if "validation_status" not in fields:
+                    fields["validation_status"] = "warnings"
+                logger.info(
+                    "update_position kept unit_rate %s on %s: resource rows %s",
+                    new_unit_rate,
+                    position_id,
+                    _untrusted_reason,
+                )
+            else:
+                clear_unit_rate_kept(meta)
+                _fx_base_ccy, _fx_map = await self._resolve_project_fx(position.boq_id)
+                # Sum of per-unit subtotals == position unit_rate (NO division by
+                # qty). Each resource is converted from its own ``currency`` to the
+                # project base via the FX table before summing - never blend
+                # currencies into the stored rate (Issue #88 / #157). Mirrors the
+                # read-side ``_resource_total_in_base`` so the persisted value and
+                # the FX-aware rollup agree.
+                new_unit_rate = _quantize_money_str(_resource_total_in_base(resources, _fx_map, _fx_base_ccy or ""))
+                fields["unit_rate"] = new_unit_rate
 
         # Recalculate total only when something pricing-related actually changed.
         # A pure metadata patch (e.g. setting a custom column value) leaves the

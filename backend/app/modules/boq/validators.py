@@ -67,6 +67,7 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.core.validation.messages import DEFAULT_LOCALE, translate
+from app.modules.boq.resource_norms import REVIEW_CATEGORIES, UNIT_RATE_KEPT_KEY, untrusted_buildup_reason
 
 logger = logging.getLogger(__name__)
 
@@ -353,6 +354,110 @@ class MarkupCumulativeBaseIsSettled(ValidationRule):
         return results
 
 
+# ── Resource buildup rules ──────────────────────────────────────────────────
+
+
+def _leaf_positions(context: ValidationContext) -> list[dict[str, Any]]:
+    """Leaf positions out of the payload, sections skipped, like the core rules.
+
+    A row is a section when its ``type`` says so or when another row names it
+    as parent. Sections carry no buildup, so a resource rule has nothing to say
+    about them and must not error on their empty fields.
+    """
+    data = context.data
+    positions: list[Any] = []
+    if isinstance(data, dict):
+        positions = data.get("positions") or []
+    elif isinstance(data, list):
+        positions = data
+    rows = [p for p in positions if isinstance(p, dict)]
+    parent_ids = {str(p["parent_id"]) for p in rows if p.get("parent_id")}
+    return [p for p in rows if (p.get("type") or "position") != "section" and str(p.get("id") or "") not in parent_ids]
+
+
+def _position_metadata(position: dict[str, Any]) -> dict[str, Any]:
+    for key in ("metadata", "metadata_"):
+        meta = position.get(key)
+        if isinstance(meta, dict):
+            return meta
+    return {}
+
+
+class UnitRateNotRederivedFromUntrustedBuildup(ValidationRule):
+    """The resource rows cannot price the line, so an edit will not re-derive the rate.
+
+    Fires in two situations, both of which a person has to look at:
+
+    * An edit touched the resources and the BOQ service kept the stored rate
+      instead of re-deriving it. The service stamps the position when it does
+      that; this is the finding that carries the stamp into the report, with
+      the rate it kept.
+    * The stored rows would make the service do the same on the next edit.
+      That is the same predicate the service uses, so the report and the
+      guard never disagree about a position: rows holding whole-position
+      quantities, an allowance split holding the position quantity, or a norm
+      the catalogue never stated and the estimator assumed.
+
+    The resource split check flags most of these positions too, on the
+    arithmetic alone. This finding names the cause and points at the review
+    path, which is what the split check cannot do.
+    """
+
+    rule_id = "boq.resources.unit_rate_not_rederived"
+    name = "Unit rate was not re-derived from an untrusted resource buildup"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "The resource rows of this position cannot price the line, so the stored unit "
+        "rate stands and the buildup needs a human look."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per leaf position whose buildup is stamped or flagged."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            meta = _position_metadata(position)
+            stamp = meta.get(UNIT_RATE_KEPT_KEY)
+            reason: str | None = None
+            kept_rate: str | None = None
+            if isinstance(stamp, dict):
+                reason = str(stamp.get("reason") or "") or None
+                kept_rate = str(stamp.get("kept_unit_rate") or "") or None
+            if reason is None:
+                reason = untrusted_buildup_reason(
+                    source=position.get("source"),
+                    metadata=meta,
+                    quantity=position.get("quantity"),
+                    resources=meta.get("resources"),
+                )
+            if reason is None:
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            # One message per reason, so each locale can say what the rows are
+            # instead of interpolating an English phrase into a translation.
+            key = f"boq_resources.unit_rate_not_rederived.{reason}" if reason in REVIEW_CATEGORIES else None
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(key or "boq_resources.unit_rate_not_rederived.fail", locale, ordinal=ordinal),
+                    element_ref=str(position.get("id")) if position.get("id") else None,
+                    suggestion=translate("boq_resources.unit_rate_not_rederived.suggestion", locale),
+                    details={
+                        "reason": reason,
+                        "kept_unit_rate": kept_rate,
+                        "stamped_by_edit": isinstance(stamp, dict),
+                    },
+                )
+            )
+        return results
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
@@ -361,6 +466,8 @@ _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
     MarkupPercentageWithinBand(),
     MarkupCumulativeBaseIsSettled(),
 )
+
+_BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (UnitRateNotRederivedFromUntrustedBuildup(),)
 
 
 def register_boq_markup_rules() -> None:
@@ -377,4 +484,12 @@ def register_boq_markup_rules() -> None:
     logger.debug("Registered %d boq markup validation rules", len(_BOQ_MARKUP_RULES))
 
 
+def register_boq_resource_rules() -> None:
+    """Register the resource buildup rules under the same universal set."""
+    for rule in _BOQ_RESOURCE_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq resource validation rules", len(_BOQ_RESOURCE_RULES))
+
+
 register_boq_markup_rules()
+register_boq_resource_rules()
