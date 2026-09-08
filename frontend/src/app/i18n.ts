@@ -388,7 +388,44 @@ export function resolveInitialLanguage(): string {
   return 'en';
 }
 
+/**
+ * The writing direction of one supported language.
+ *
+ * Read from the ``dir`` field on the ``SUPPORTED_LANGUAGES`` entry rather than
+ * from a list of codes kept somewhere else, so a fifth right-to-left language
+ * is carried by the entry that adds it. Four languages we offer are written
+ * right to left today: ar, fa, he and ur.
+ */
+export function resolveDirection(code: string): 'rtl' | 'ltr' {
+  const lang = getLanguageByCode(code);
+  return lang && 'dir' in lang && lang.dir === 'rtl' ? 'rtl' : 'ltr';
+}
+
+/** Write ``dir`` and ``lang`` onto <html> for the given language. SSR-safe. */
+export function applyDocumentDirection(code: string): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.dir = resolveDirection(code);
+  document.documentElement.lang = code;
+}
+
 const initialLanguage = resolveInitialLanguage();
+
+// Direction has to be on <html> BEFORE the first paint, and until now nothing
+// put it there. `useDocumentDirection` in App.tsx sets it from a `useEffect`,
+// which by definition runs after React has mounted and painted, and `main.tsx`
+// additionally awaits `initialLocaleReady` (capped at 2000 ms) before mounting
+// at all. So an Arabic, Persian, Hebrew or Urdu session painted its first frame
+// left-to-right - sidebar on the wrong edge, every label flush to the wrong
+// margin - and flipped once the effect ran.
+//
+// `index.html` cannot answer this: it is static, ships `lang="en"` with no
+// `dir`, and teaching it the rule would be a third hardcoded copy of the RTL
+// language list after `SUPPORTED_LANGUAGES` here and `SPLASH_RTL` in
+// public/splash.html. `public/splash.html:1998` already sets `dir` on its own
+// root, which is why the splash screen got this right while the app shell did
+// not. Module scope runs before `createRoot`, so this closes the window while
+// still reading the one source of truth.
+applyDocumentDirection(initialLanguage);
 
 i18n
   .use(initReactI18next)
@@ -464,6 +501,16 @@ i18n.on('languageChanged', (lng) => {
   } catch {
     // localStorage not available (private browsing, etc.)
   }
+  // Keep <html dir> with the active language here, at the i18n layer, rather
+  // than only in App.tsx's `useDocumentDirection`. That hook is correct but it
+  // is bound to a mounted App, so direction was a property of the React tree
+  // instead of a property of the language. Anything that switches language
+  // outside a mounted App - the partner-pack locale hook, a test driving
+  // `changeLanguage`, the onboarding wizard before the shell renders - moved
+  // the strings without moving the layout. Applying it here is idempotent with
+  // the hook: both write the same value from the same `SUPPORTED_LANGUAGES`
+  // entry, so whichever runs first wins and the second is a no-op.
+  applyDocumentDirection(lng);
   // Fire-and-forget; i18next will trigger a re-render when addResourceBundle
   // resolves. UI flashes English for the in-flight ms then re-paints.
   void loadLocaleResource(lng);

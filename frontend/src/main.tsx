@@ -127,13 +127,29 @@ const renderApp = () => {
 
 // A saved non-English language must be IN the i18next store before the first
 // paint, or that first frame renders through the English fallback — the
-// "English flash" every non-English session used to open with. Waiting here
-// costs one same-origin chunk fetch (~50 KB gzip, usually cached) during a
-// window where the user already sees the plain index.html shell, so nothing
-// visibly changes except the language of the first frame. The cap bounds the
-// wait: if the chunk stalls, mount anyway in English and let the existing
+// "English flash" every non-English session used to open with. The cap bounds
+// the wait: if the chunk stalls, mount anyway in English and let the existing
 // re-render-on-arrival path recover. English boots keep today's fully
 // synchronous mount (`initialLocaleReady` is null — no promise, no timer).
+//
+// What this costs, measured rather than assumed. This comment used to say the
+// wait happens "during a window where the user already sees the plain
+// index.html shell, so nothing visibly changes". There is no such shell:
+// index.html carries an empty `<div id="root">`, so for the whole of this wait
+// the document has no app DOM in it at all — no `<main>`, no header, no
+// sidebar. The state is route-independent: the wait is over before React, the
+// router or any page component exists, so a probe that samples here is
+// measuring the boot and not whatever page it thinks it opened.
+//
+// Width of the window on the Vite dev server, cold loads of /settings, React
+// mount timed in-page against navigation start: English 0 of 25 reads landed
+// in it, German 24 of 25, Persian 25 of 25 — so it tracks non-English, not
+// RTL. Mount lands ~0.5 s after DOMContentLoaded on an English boot and
+// ~1.3-2.0 s on a non-English one. Injecting a 5 s stall on the locale module
+// pins mount at DCL + ~2.5 s (this cap, plus React's first render) instead of
+// DCL + 5 s, which is what proves the wait below is what holds the document
+// empty. Production ships the locale as a ~50 KB gzip chunk rather than a 4 MB
+// dev module, so the window is far narrower there — narrower, not absent.
 const LOCALE_MOUNT_CAP_MS = 2000;
 if (initialLocaleReady) {
   let mounted = false;
