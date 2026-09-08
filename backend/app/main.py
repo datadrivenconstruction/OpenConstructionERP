@@ -67,6 +67,7 @@ from app.config import (
     get_settings,
     jwt_secret_is_known_weak,
     jwt_secret_is_too_short,
+    load_or_create_dev_jwt_secret,
 )
 from app.core.demo_read_only import (
     DemoReadOnlyError,
@@ -3941,67 +3942,50 @@ def create_app() -> FastAPI:
             # to a dev box could forge tokens. Rotate to a strong random
             # secret so forged "open-source-secret" tokens stop working.
             #
-            # The secret is **persisted** to ``~/.openestimator/.jwt-secret``
-            # (chmod 600) and re-used across boots so the user's browser
-            # session survives a ``Ctrl+C`` + relaunch of the CLI. Previously
-            # this rotated on every boot, which silently invalidated every
-            # active token and dumped PWA users back to the OS desktop on
-            # the next request (auth → 401 → window.location to /login,
-            # which for a standalone-installed PWA looks like a "crash").
-            import secrets as _secrets
-            from pathlib import Path as _Path
-
-            # The CLI's default data dir is ``~/.openestimate`` (no "r")
-            # per cli.py:51. The historical brand namespace ``.openestimator``
-            # is honoured only as a read fallback for legacy installs.
-            primary_dir = _Path.home() / ".openestimate"
-            legacy_dir = _Path.home() / ".openestimator"
-            secret_path = primary_dir / ".jwt-secret"
-            legacy_secret_path = legacy_dir / ".jwt-secret"
-            persisted: str | None = None
-            for path in (secret_path, legacy_secret_path):
-                try:
-                    if path.is_file():
-                        candidate = path.read_text(encoding="utf-8").strip()
-                        if len(candidate.encode("utf-8")) >= 32:
-                            persisted = candidate
-                            break
-                except OSError:
-                    continue
-
-            if persisted is None:
-                persisted = _secrets.token_urlsafe(48)
-                try:
-                    secret_path.parent.mkdir(parents=True, exist_ok=True)
-                    secret_path.write_text(persisted, encoding="utf-8")
-                    # Best-effort chmod 600 (POSIX). On Windows the file
-                    # inherits user-only ACLs from the home directory.
-                    try:
-                        secret_path.chmod(0o600)
-                    except OSError:
-                        pass
-                    logger.info(
-                        "JWT_SECRET was default/short - generated a fresh dev secret "
-                        "and persisted it to %s. Sessions now survive restarts. "
-                        "Set JWT_SECRET env var for a stable team-wide secret.",
-                        secret_path,
-                    )
-                except OSError as _persist_err:
-                    logger.warning(
-                        "JWT_SECRET persistence to %s failed (%s) - falling back "
-                        "to a per-process random secret. Sessions WILL be invalidated "
-                        "on every restart. Set JWT_SECRET env var (>=32 bytes) "
-                        "to keep sessions alive.",
-                        secret_path,
-                        _persist_err,
-                    )
-            else:
+            # The secret is **persisted** (chmod 600) and re-used across boots
+            # so the user's browser session survives a ``Ctrl+C`` + relaunch
+            # of the CLI. Previously this rotated on every boot, which silently
+            # invalidated every active token and dumped PWA users back to the
+            # OS desktop on the next request (auth → 401 → window.location to
+            # /login, which for a standalone-installed PWA looks like a
+            # "crash").
+            #
+            # Where it is persisted is the data directory, resolved by the same
+            # function the zero-config provisioning in ``app.config`` uses, so
+            # ``--data-dir``, ``OE_DATA_DIR`` and ``DATA_DIR`` move the secret
+            # with the data. This block used to spell its own path,
+            # ``~/.openestimate``, which is the CLI's default and therefore
+            # right for a default install and wrong for every other one: two
+            # instances started from two data directories on one machine
+            # signed with one key, and a data directory carried to another
+            # machine arrived without its secret. A secret left under the
+            # pre-rename ``~/.openestimator`` is adopted once and written into
+            # the data directory; that legacy file is only ever read.
+            persisted, secret_path, secret_source = load_or_create_dev_jwt_secret()
+            if secret_source == "generated":
+                logger.info(
+                    "JWT_SECRET was default/short - generated a fresh dev secret "
+                    "and persisted it to %s. Sessions now survive restarts. "
+                    "Set JWT_SECRET env var for a stable team-wide secret.",
+                    secret_path,
+                )
+            elif secret_source == "adopted":
+                logger.info(
+                    "JWT_SECRET was default/short - adopted the dev secret from the "
+                    "legacy ~/.openestimator folder and persisted it to %s. Existing "
+                    "sessions remain valid. Set JWT_SECRET env var for a stable "
+                    "team-wide secret.",
+                    secret_path,
+                )
+            elif secret_source == "loaded":
                 logger.info(
                     "JWT_SECRET was default/short - loaded persisted dev secret from %s. "
                     "Existing sessions remain valid. Set JWT_SECRET env var for a "
                     "stable team-wide secret.",
                     secret_path,
                 )
+            # "ephemeral" is reported where it happens, in app.config, with the
+            # OSError that caused it.
 
             try:
                 # pydantic-settings blocks direct assignment when frozen,

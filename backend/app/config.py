@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import secrets
+from collections.abc import Iterable
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
@@ -1021,6 +1022,90 @@ def _ensure_persistent_jwt_secret() -> None:
             exc,
         )
     os.environ["JWT_SECRET"] = generated
+
+
+def _read_persisted_secret(path: Path) -> str | None:
+    """Return the secret stored in ``path`` when it is readable and long enough to sign with."""
+    try:
+        if not path.is_file():
+            return None
+        candidate = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    if len(candidate.encode("utf-8")) < _JWT_SECRET_MIN_LENGTH:
+        return None
+    return candidate
+
+
+def load_or_create_dev_jwt_secret(
+    *,
+    legacy_paths: Iterable[Path] | None = None,
+) -> tuple[str, Path, str]:
+    """Return the development JWT secret for the data directory this process runs in.
+
+    The development branch of the boot rotates the published default secret to
+    a strong random one and keeps it on disk so browser sessions survive a
+    restart. Where that file lives is decided here, by
+    :func:`_jwt_secret_persist_dir`, the same resolver the zero-config
+    provisioning above uses, so the secret follows ``--data-dir`` (which the
+    CLI exports as ``OE_CLI_DATA_DIR``), ``OE_DATA_DIR`` and ``DATA_DIR``
+    exactly as the embedded cluster, the uploads and the demo credentials do.
+    Until it did, ``main.py`` spelled its own path, ``~/.openestimate``, which
+    is the CLI's default and therefore right for a default install and wrong
+    for every other one: two instances started from two data directories on
+    one machine signed with one key, and a data directory carried to another
+    machine arrived without its secret and logged everyone out.
+
+    A secret left under the pre-rename ``~/.openestimator`` folder is adopted
+    once, if the data directory has none yet, and written into the data
+    directory so the next boot is self-contained. That legacy file is only
+    ever read.
+
+    Args:
+        legacy_paths: Files a secret may be adopted from when the data
+            directory has none. Defaults to the pre-rename home folder. Tests
+            pass their own so nothing reads the real home directory.
+
+    Returns:
+        ``(secret, path, source)``. ``path`` is where the secret lives, or
+        would live. ``source`` is ``"loaded"`` (read from the data directory),
+        ``"adopted"`` (taken from a legacy file and persisted), ``"generated"``
+        (fresh and persisted) or ``"ephemeral"`` (fresh but nothing could be
+        written, so it is per-process and sessions end with it; the reason is
+        logged here, where the error is).
+    """
+    secret_path = _jwt_secret_persist_dir() / ".jwt-secret"
+    existing = _read_persisted_secret(secret_path)
+    if existing is not None:
+        return existing, secret_path, "loaded"
+
+    if legacy_paths is None:
+        try:
+            legacy_paths = (Path.home() / ".openestimator" / ".jwt-secret",)
+        except RuntimeError:
+            legacy_paths = ()
+    adopted = next((found for found in map(_read_persisted_secret, legacy_paths) if found is not None), None)
+    secret = adopted if adopted is not None else secrets.token_urlsafe(48)
+    try:
+        secret_path.parent.mkdir(parents=True, exist_ok=True)
+        secret_path.write_text(secret, encoding="utf-8")
+        # Best-effort chmod 600 (POSIX). On Windows the file inherits the
+        # user-only ACL of the data directory.
+        try:
+            secret_path.chmod(0o600)
+        except OSError:
+            pass
+    except OSError as exc:
+        _logger.warning(
+            "JWT_SECRET persistence to %s failed (%s) - falling back to a "
+            "per-process random secret. Sessions WILL be invalidated on every "
+            "restart. Set JWT_SECRET env var (>=32 bytes) or make the data "
+            "directory writable to keep sessions alive.",
+            secret_path,
+            exc,
+        )
+        return secret, secret_path, "ephemeral"
+    return secret, secret_path, "adopted" if adopted is not None else "generated"
 
 
 @lru_cache
