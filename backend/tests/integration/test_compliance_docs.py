@@ -291,6 +291,115 @@ async def test_create_cert_already_expired(http_client, two_tenants):
 
 
 @pytest.mark.asyncio
+async def test_create_cover_starting_in_the_future_is_not_yet_effective(http_client, two_tenants):
+    """``effective_date`` after today → status ``not_yet_effective``.
+
+    Next year's policy is filed the day it is issued, months before cover
+    starts. The status came off ``expires_at`` alone, so the row was
+    persisted ``active`` from that day and the project read as covered for
+    the whole interval before the cover began. Asserted through the request
+    path, because the new value also has to pass the create schema's status
+    pattern and come back out of ``ComplianceDocResponse``.
+    """
+    a = two_tenants["a"]
+    body = {
+        "project_id": a["project_id"],
+        "doc_type": "insurance_general_liability",
+        "name": "GL Insurance — next policy year",
+        "issuer": "Acme",
+        "policy_number": "GL-FUTURE-001",
+        "coverage_amount": "1000000.00",
+        "currency": "EUR",
+        "effective_date": _iso(_today() + timedelta(days=116)),
+        "expires_at": _iso(_today() + timedelta(days=485)),
+        "notify_days_before": 30,
+    }
+    resp = await http_client.post(
+        "/api/v1/compliance_docs/",
+        json=body,
+        headers=a["headers"],
+    )
+    assert resp.status_code == 201, resp.text
+    out = resp.json()
+    assert out["status"] == "not_yet_effective", out
+
+    # The other direction. Same window, cover already running, still
+    # ``active`` — a ladder that answered ``not_yet_effective`` for
+    # everything would pass the assertion above and fail this one.
+    in_force = dict(
+        body,
+        policy_number="GL-INFORCE-001",
+        effective_date=_iso(_today() - timedelta(days=30)),
+    )
+    resp_in_force = await http_client.post(
+        "/api/v1/compliance_docs/",
+        json=in_force,
+        headers=a["headers"],
+    )
+    assert resp_in_force.status_code == 201, resp_in_force.text
+    assert resp_in_force.json()["status"] == "active", resp_in_force.text
+
+    # The register can be asked which documents are not live cover yet.
+    listing = await http_client.get(
+        f"/api/v1/compliance_docs/?project_id={a['project_id']}&status=not_yet_effective",
+        headers=a["headers"],
+    )
+    assert listing.status_code == 200, listing.text
+    listed = listing.json()
+    rows = listed["items"] if isinstance(listed, dict) else listed
+    ids = {row["id"] for row in rows}
+    assert out["id"] in ids, rows
+    assert resp_in_force.json()["id"] not in ids, rows
+
+
+@pytest.mark.asyncio
+async def test_project_widget_counts_unstarted_cover_in_its_own_bucket(http_client, two_tenants):
+    """The dashboard tile buckets a future start date separately.
+
+    The widget re-derives its buckets on read instead of trusting the
+    persisted ``status``, and it did not select ``effective_date`` at all,
+    so repairing the service ladder alone would have left the tiles calling
+    unstarted cover ``active``. A project of its own keeps the counts exact
+    rather than at the mercy of what the other tests in this module filed.
+    """
+    a = two_tenants["a"]
+    project_id = await _create_project(a["uid"], "Tile bucket project")
+
+    for policy_number, effective_offset in (("TILE-FUTURE-1", 200), ("TILE-INFORCE-1", -10)):
+        resp = await http_client.post(
+            "/api/v1/compliance_docs/",
+            json={
+                "project_id": project_id,
+                "doc_type": "insurance_general_liability",
+                "name": f"GL Insurance {policy_number}",
+                "policy_number": policy_number,
+                "effective_date": _iso(_today() + timedelta(days=effective_offset)),
+                "expires_at": _iso(_today() + timedelta(days=500)),
+                "notify_days_before": 30,
+            },
+            headers=a["headers"],
+        )
+        assert resp.status_code == 201, resp.text
+
+    rollup = await http_client.get(
+        f"/api/v1/dashboard/rollup/?widgets=project_compliance_summary&project_ids={project_id}",
+        headers=a["headers"],
+    )
+    assert rollup.status_code == 200, rollup.text
+    payload = rollup.json()["project_compliance_summary"]
+
+    assert payload["not_yet_effective"] == 1, payload
+    assert payload["active"] == 1, payload
+    assert payload["expiring"] == 0, payload
+    assert payload["expired"] == 0, payload
+    # Four buckets, two documents on file. Counting the unstarted one
+    # nowhere would make the project's cover look smaller than the
+    # register says it is, which is a different wrong answer.
+    assert sum(payload[k] for k in ("active", "not_yet_effective", "expiring", "expired")) == 2, payload
+    assert {item["effective_date"] for item in payload["items"]} != {None}, payload["items"]
+
+
+@pytest.mark.asyncio
 async def test_patch_expires_at_recomputes_status(http_client, two_tenants):
     """PATCH ``expires_at`` flips ``active`` → ``expiring_soon``."""
     a = two_tenants["a"]
