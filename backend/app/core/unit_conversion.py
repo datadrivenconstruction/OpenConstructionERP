@@ -7,11 +7,23 @@ This is the backend twin of the frontend ``unitConversion.ts``
 display labels are kept byte-identical so a PDF rendered server-side and a
 quantity rendered in the browser agree to the last decimal.
 
-Scope (GitHub #270): the whole platform stores quantities metric-canonical
-(``m`` / ``m2`` / ``m3`` / ``kg`` ...). Only *human-facing* output (a printed
-PDF, a rendered cell) is ever converted into the user's measurement system.
-Data-interchange exports (CSV, Excel, GAEB) stay canonical metric and must
-never call this module.
+Scope (GitHub #270): only *human-facing* output (a printed PDF, a rendered
+cell) is ever converted into the user's measurement system. Data-interchange
+exports (CSV, Excel, GAEB) stay canonical metric and must never call this
+module.
+
+A quantity is metric-canonical *by convention*, not by construction. This
+module used to claim the whole platform stored quantities metric-canonical
+(``m`` / ``m2`` / ``m3`` / ``kg`` ...); that is not what the product does. The
+unit field is free text fed by an open picker (``BASE_UNITS`` in the frontend
+``features/boq/boqHelpers.ts``) that offers imperial and US trade tokens -
+``sqft``, ``cy``, ``lf``, ``bdft`` - and locale-native ones, so a position
+saved by a US estimator carries an imperial unit in the same column as a
+German one carrying ``m2``. :func:`convert` is safe on both because its
+lookup is keyed on metric tokens only: an imperial or locale-native unit
+matches nothing and passes through unscaled. That pass-through is what keeps
+a quantity already expressed in cubic yards from being converted twice, so
+treat it as a guarantee to preserve, not an accident of the table.
 
 What is and is not converted:
 
