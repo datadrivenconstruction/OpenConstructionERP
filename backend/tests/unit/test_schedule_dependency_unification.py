@@ -185,6 +185,10 @@ class _StubSession:
         matched = [a for aid, a in self._activity_repo.rows.items() if aid in self._pred_ids]
         return _StubResult(matched)
 
+    async def get(self, *_args: Any, **_kwargs: Any) -> None:
+        """The project lookup behind the regional working week; no project here
+        means the DEFAULT Monday-to-Friday week, which these tests do not measure."""
+
 
 def _make_service() -> ScheduleService:
     service = ScheduleService.__new__(ScheduleService)

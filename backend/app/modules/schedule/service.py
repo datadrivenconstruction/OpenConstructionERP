@@ -314,30 +314,29 @@ def _calc_duration_from_resources(
 # The gate is tests/unit/test_work_calendar_rest_days_do_not_conflict.py, and
 # its module docstring is the long form of this paragraph.
 #
-# WHAT CONSULTS IT, measured rather than assumed. get_work_calendar is the only
-# reader that computes a date, and it is reached from two places that do not
-# behave the same way:
+# WHAT CONSULTS IT. get_work_calendar is the only reader that computes a date,
+# and every path that reaches it asks the same question the same way: the
+# project's stored region, resolved once per request by
+# ScheduleService.resolve_project_region. BOQ schedule generation, the three
+# compute_duration call sites in this file (create_activity, update_activity
+# and the get_gantt_data fallback for a stored duration of zero) and the two
+# schedule imports in the router (XER and MSP XML) all pass its answer, so one
+# project is planned on one week wherever its dates are counted.
 #
-#   * BOQ schedule generation resolves it from project.region, so a project's
-#     region really does select its calendar there.
-#   * compute_duration takes a region argument, and no caller anywhere passes
-#     one. Every call site supplies two arguments, so get_work_calendar(None)
-#     returns DEFAULT and compute_duration is Monday-Friday for every project
-#     in every region. The parameter works; nothing gives it a value.
+# It was not always so. compute_duration took a region argument from March 2026
+# and no caller passed one until September, so every recompute counted Monday
+# to Friday while BOQ generation counted the regional week: a Gulf project was
+# drawn Sunday to Thursday and recounted Monday to Friday the first time anyone
+# dragged a date. Durations persisted before that fix were not rewritten. A row
+# keeps the count it was given until its dates are next saved, so a schedule
+# can carry both counts side by side until then. The gate against the paths
+# parting again is tests/unit/test_schedule.py, the tests named for Doha and
+# Berlin.
 #
 # core.country_coverage reads this table as well, but as a coverage probe, and
 # it deliberately answers through the resolver rather than off the table: the
 # keys are a mixed vocabulary rather than country codes, so reading them
 # directly gives the wrong answer. It computes no dates.
-#
-# So the same project can be given a six-day duration by BOQ generation and a
-# five-day one as soon as anything recomputes it: create_activity always,
-# update_activity whenever the payload carries a start or end date, and
-# get_gantt_data as a fallback when the stored duration is zero. Nothing
-# exempts a BOQ-generated row from that, so a Chinese project's duration
-# changes the first time someone drags one of its dates. Do not read an entry
-# below as "this is what the product does for that country" until you know
-# which of the paths produced the number in front of you.
 #
 # WHERE EACH WEEK CAME FROM is recorded per entry. An entry with no note is
 # one whose source was never recorded, and that is worth knowing as such.
@@ -629,33 +628,31 @@ def get_work_calendar(region: str | None = None) -> dict:
 
 
 def compute_duration(start_date: str, end_date: str, region: str | None = None) -> int:
-    """Calculate working days between two ISO date strings.
+    """Calculate working days between two ISO date strings, inclusive.
 
-    ``region`` selects a working week from :data:`WORK_CALENDARS`, but nothing
-    passes one. Every call site supplies two arguments, so this resolves DEFAULT
-    and counts a Monday-to-Friday week for every project in every region. The
-    parameter has existed since ``9e266fced`` added it in March 2026 and no commit
-    since has given it a value, so the previous wording here, that the function
-    respects different work weeks, described the parameter rather than the
-    behaviour.
+    ``region`` selects the working week from :data:`WORK_CALENDARS` through
+    :func:`get_work_calendar`. Every call site in this module and in the router
+    passes the project's region, resolved once per request by
+    :meth:`ScheduleService.resolve_project_region`, so a Gulf activity is counted
+    Sunday to Thursday and a German one Monday to Friday, on the same week BOQ
+    schedule generation draws its dates on. ``None`` resolves to the DEFAULT
+    Monday-to-Friday week and is the right answer only when there is no project
+    to ask, which is why no caller in the product passes it any more.
 
-    This is worth knowing before threading a region through. BOQ schedule
-    generation does resolve a calendar from ``project.region``, so a Chinese
-    project's activities are generated on a six-day week and recomputed here on
-    five. Passing a region would make those durations agree at six days; leaving
-    it unset would make them agree at five. Both change dates that shipped demo
-    packs already produce, which makes it a product decision rather than a
-    correction.
+    Holidays are not counted here and never have been: every day of the working
+    week between the two dates is a working day.
 
     Args:
         start_date: ISO date string (e.g. "2026-04-01").
         end_date: ISO date string (e.g. "2026-04-15").
-        region: Optional region key for :data:`WORK_CALENDARS`, for example
-            "DACH" or "GULF". No caller sets it; ``None`` resolves to the
-            DEFAULT Monday-to-Friday week.
+        region: The project's region as stored, in any vocabulary
+            :func:`get_work_calendar` accepts: a calendar key ("GULF"), an ISO
+            country code ("QA"), a catalogue region id ("DE_BERLIN"), a picker
+            token ("GulfStates") or a label ("Saudi Arabia").
 
     Returns:
-        Number of working days between start and end, inclusive.
+        Number of working days between start and end, inclusive. 0 when either
+        date does not parse or the end precedes the start.
     """
     try:
         start = date.fromisoformat(start_date)
@@ -764,6 +761,37 @@ class ScheduleService:
         self.activity_repo = ActivityRepository(session)
         self.work_order_repo = WorkOrderRepository(session)
         self.relationship_repo = RelationshipRepository(session)
+
+    # ── Regional working week ──────────────────────────────────────────────
+
+    async def resolve_project_region(self, project_id: uuid.UUID | None) -> str | None:
+        """Return the stored region a project's working week is selected by.
+
+        This is the one place the module asks which week a project works.
+        Every path that counts or draws dates feeds the answer to
+        :func:`get_work_calendar`: ``compute_duration`` in ``create_activity``,
+        ``update_activity`` and the ``get_gantt_data`` fallback, BOQ schedule
+        generation, the XER and MSP XML imports, and the stats and work-calendar
+        routes. Resolving the region in one place is what keeps those paths on
+        one week. Before this helper existed the recompute paths passed no
+        region and counted Monday to Friday for every project while generation
+        counted the regional week.
+
+        Args:
+            project_id: The owning project. ``None`` when the caller has no
+                project to ask, which nothing the product creates is.
+
+        Returns:
+            ``project.region`` as stored, or ``None`` when the project is gone
+            or was never given, which :func:`get_work_calendar` reads as the
+            DEFAULT Monday-to-Friday week.
+        """
+        if project_id is None:
+            return None
+        from app.modules.projects.repository import ProjectRepository
+
+        project = await ProjectRepository(self.session).get_by_id(project_id)
+        return project.region if project else None
 
     # ── Schedule operations ────────────────────────────────────────────────
 
@@ -909,14 +937,17 @@ class ScheduleService:
             HTTPException 404 if the target schedule doesn't exist.
         """
         # Verify schedule exists
-        await self.get_schedule(data.schedule_id)
+        schedule = await self.get_schedule(data.schedule_id)
 
         # Auto-compute duration only when the client omitted it (sent explicit
         # null / not provided). An explicit ``duration_days=0`` is respected
-        # so callers can create milestones / zero-duration events.
+        # so callers can create milestones / zero-duration events. The count
+        # is on the project's working week, the same one BOQ generation draws
+        # dates on, so a Gulf activity is not counted Monday to Friday.
         duration = data.duration_days
         if duration is None and data.start_date and data.end_date:
-            duration = compute_duration(data.start_date, data.end_date)
+            region = await self.resolve_project_region(schedule.project_id)
+            duration = compute_duration(data.start_date, data.end_date, region)
         if duration is None:
             duration = 0
 
@@ -1379,11 +1410,16 @@ class ScheduleService:
                 else _incoming
             )
 
-        # Recalculate duration if dates changed
+        # Recalculate duration if dates changed, on the project's working week.
+        # A duration persisted on another week (every recompute before the
+        # region was threaded through counted Monday to Friday) is corrected
+        # here, the first time its dates are saved again, and not before.
         new_start = fields.get("start_date", activity.start_date)
         new_end = fields.get("end_date", activity.end_date)
         if "start_date" in fields or "end_date" in fields:
-            fields["duration_days"] = compute_duration(new_start, new_end)
+            schedule = await self.get_schedule(schedule_id)
+            region = await self.resolve_project_region(schedule.project_id)
+            fields["duration_days"] = compute_duration(new_start, new_end, region)
 
         # Completion guard (mirrors tasks.complete_task): reject the transition
         # to completed while any canonical predecessor is still open. Skipped
@@ -1906,13 +1942,10 @@ class ScheduleService:
         """
         schedule = await self.get_schedule(schedule_id)
 
-        # Resolve the project region once so the delay check honours the same
-        # regional work calendar the rest of the schedule math uses.
-        from app.modules.projects.repository import ProjectRepository
-
-        proj_repo = ProjectRepository(self.session)
-        project = await proj_repo.get_by_id(schedule.project_id)
-        project_region = project.region if project else None
+        # Resolve the project region once so the delay check and the duration
+        # fallback below count on the same regional working week as every
+        # other path in this module.
+        project_region = await self.resolve_project_region(schedule.project_id)
         today = datetime.now(UTC).date()
 
         activities, _ = await self.activity_repo.list_for_schedule(schedule_id)
@@ -1933,7 +1966,7 @@ class ScheduleService:
             # number than the rest of the UI for any multi-week activity.
             duration = act.duration_days or 0
             if not duration:
-                duration = compute_duration(str(act.start_date), str(act.end_date))
+                duration = compute_duration(str(act.start_date), str(act.end_date), project_region)
 
             # Derive the effective status: an unfinished activity whose planned
             # end date has already passed is "delayed". This is computed at read
@@ -2340,12 +2373,9 @@ class ScheduleService:
             total_project_days = 540 if building_type == "office" else 365
 
         # ── Get regional work calendar from project ──────────────────────
-        # Fetch project to get region for work calendar
-        from app.modules.projects.repository import ProjectRepository
-
-        proj_repo = ProjectRepository(self.session)
-        project = await proj_repo.get_by_id(schedule_project_id)
-        project_region = project.region if project else None
+        # The same resolver compute_duration's callers use, so the week the
+        # dates are drawn on here is the week they are recounted on later.
+        project_region = await self.resolve_project_region(schedule_project_id)
         cal = get_work_calendar(project_region)
         hours_per_day = cal["hours_per_day"]
         work_days_set = cal["work_days"]

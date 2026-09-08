@@ -10,7 +10,8 @@ Scope:
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from collections.abc import Callable, Coroutine
+from datetime import UTC, date, datetime, timedelta
 from types import SimpleNamespace
 from typing import Any
 
@@ -29,9 +30,21 @@ from app.modules.schedule.service import ScheduleService, _normalize_deps, compu
 PROJECT_ID = uuid.uuid4()
 
 
-async def _session_get_none(*_args: Any, **_kwargs: Any) -> None:
-    """Stub for ``AsyncSession.get`` — Gantt resolves the project for the
-    regional work calendar; returning None falls back to the default region."""
+def _session_get_project(region: str | None) -> Callable[..., Coroutine[Any, Any, Any]]:
+    """Stub for ``AsyncSession.get``: the project a schedule belongs to.
+
+    The service resolves the project once per request for the regional working
+    week (``ScheduleService.resolve_project_region``). ``None`` stands for a
+    project that cannot be found, which falls back to the DEFAULT
+    Monday-to-Friday week the older tests in this file count on.
+    """
+
+    async def _get(*_args: Any, **_kwargs: Any) -> Any:
+        if region is None:
+            return None
+        return SimpleNamespace(id=PROJECT_ID, region=region)
+
+    return _get
 
 
 class _StubRelationshipRepo:
@@ -41,9 +54,9 @@ class _StubRelationshipRepo:
         return []
 
 
-def _make_service() -> ScheduleService:
+def _make_service(project_region: str | None = None) -> ScheduleService:
     service = ScheduleService.__new__(ScheduleService)
-    service.session = SimpleNamespace(get=_session_get_none)
+    service.session = SimpleNamespace(get=_session_get_project(project_region))
     service.schedule_repo = _StubScheduleRepo()
     service.activity_repo = _StubActivityRepo()
     service.work_order_repo = _StubWorkOrderRepo()
@@ -300,6 +313,205 @@ async def test_update_activity_recalculates_duration() -> None:
     )
     # 2026-05-01 (Thu) to 2026-05-15 (Thu) = 11 working days
     assert updated.duration_days == 11
+
+
+# ── One project, one working week ─────────────────────────────────────────
+#
+# Sunday 7 June 2026 to Saturday 13 June 2026 is one whole week. The Gulf works
+# Sunday to Thursday and Germany Monday to Friday, so the two count different
+# days of it: Friday is a working day only in Berlin, Sunday only in Doha.
+_WEEK_SUNDAY = "2026-06-07"
+_WEEK_MONDAY = "2026-06-08"
+_WEEK_THURSDAY = "2026-06-11"
+_WEEK_FRIDAY = "2026-06-12"
+_WEEK_SATURDAY = "2026-06-13"
+
+# Stored the way the project picker stores them, so the calendar is reached the
+# way a project created in the product reaches it, not by a calendar key.
+_GULF = "GulfStates"
+_GERMANY = "DACH"
+_GULF_REST_DAYS = {4, 5}  # Friday, Saturday
+_GERMAN_REST_DAYS = {5, 6}  # Saturday, Sunday
+
+
+def _weekdays_between(start: str, end: str) -> list[int]:
+    """Every weekday index from ``start`` to ``end`` inclusive, the tests' own oracle."""
+    first = date.fromisoformat(start)
+    last = date.fromisoformat(end)
+    return [(first + timedelta(days=offset)).weekday() for offset in range((last - first).days + 1)]
+
+
+def _working_days(start: str, end: str, rest_days: set[int]) -> int:
+    return sum(1 for weekday in _weekdays_between(start, end) if weekday not in rest_days)
+
+
+@pytest.mark.asyncio
+async def test_a_gulf_project_and_a_german_project_count_the_same_dates_differently() -> None:
+    """Monday to Saturday holds four Gulf working days and five German ones.
+
+    Before the project's region reached ``compute_duration`` every project was
+    counted Monday to Friday, so both projects stored 5 here, and a Gulf schedule
+    drawn Sunday to Thursday by BOQ generation was recounted on the wrong week
+    the first time anyone saved a date. Asserted through the service methods the
+    activity routes call: create, update and the Gantt fallback for a row with
+    no stored duration.
+    """
+    doha = _make_service(project_region=_GULF)
+    berlin = _make_service(project_region=_GERMANY)
+    doha_schedule = await _create_schedule(doha)
+    berlin_schedule = await _create_schedule(berlin)
+    monday_to_saturday = {"start_date": _WEEK_MONDAY, "end_date": _WEEK_SATURDAY}
+
+    doha_task = await _create_activity(doha, doha_schedule.id, **monday_to_saturday)
+    berlin_task = await _create_activity(berlin, berlin_schedule.id, **monday_to_saturday)
+    assert doha_task.duration_days == 4, "Doha rests on Friday and Saturday"
+    assert berlin_task.duration_days == 5, "Berlin rests on Saturday only"
+
+    # Moving both onto Sunday to Thursday flips it: only Doha works the Sunday.
+    sunday_to_thursday = ActivityUpdate(start_date=_WEEK_SUNDAY, end_date=_WEEK_THURSDAY)
+    doha_task = await doha.update_activity(doha_task.id, sunday_to_thursday)
+    berlin_task = await berlin.update_activity(berlin_task.id, sunday_to_thursday)
+    assert doha_task.duration_days == 5
+    assert berlin_task.duration_days == 4
+
+    # A row stored with no duration is counted at read time, on the same week.
+    doha_unsized = await _create_activity(doha, doha_schedule.id, duration_days=0, **monday_to_saturday)
+    berlin_unsized = await _create_activity(berlin, berlin_schedule.id, duration_days=0, **monday_to_saturday)
+    doha_gantt = {a.id: a for a in (await doha.get_gantt_data(doha_schedule.id)).activities}
+    berlin_gantt = {a.id: a for a in (await berlin.get_gantt_data(berlin_schedule.id)).activities}
+    assert doha_gantt[doha_unsized.id].duration_days == 4
+    assert berlin_gantt[berlin_unsized.id].duration_days == 5
+
+
+@pytest.mark.asyncio
+async def test_five_working_days_end_on_thursday_in_doha_and_on_friday_in_berlin() -> None:
+    """From the same Sunday start, five working days end a day earlier in Doha.
+
+    Sunday to Thursday is five working days in the Gulf and four in Germany,
+    where the fifth is the Friday. Friday adds nothing in Doha, so the Gulf
+    activity is five days long either way.
+    """
+    doha = _make_service(project_region=_GULF)
+    berlin = _make_service(project_region=_GERMANY)
+    doha_schedule = await _create_schedule(doha)
+    berlin_schedule = await _create_schedule(berlin)
+    to_thursday = {"start_date": _WEEK_SUNDAY, "end_date": _WEEK_THURSDAY}
+    to_friday = {"start_date": _WEEK_SUNDAY, "end_date": _WEEK_FRIDAY}
+
+    assert (await _create_activity(doha, doha_schedule.id, **to_thursday)).duration_days == 5
+    assert (await _create_activity(berlin, berlin_schedule.id, **to_thursday)).duration_days == 4
+    assert (await _create_activity(berlin, berlin_schedule.id, **to_friday)).duration_days == 5
+    assert (await _create_activity(doha, doha_schedule.id, **to_friday)).duration_days == 5
+
+
+def _boq_section_with_three_positions() -> list[Any]:
+    """One BOQ section and three priced children with crew data, as the BOQ repo would hand them over."""
+    section_id = uuid.uuid4()
+
+    def _position(ordinal: str, quantity: int) -> Any:
+        return SimpleNamespace(
+            id=uuid.uuid4(),
+            parent_id=section_id,
+            ordinal=ordinal,
+            description=f"Position {ordinal}",
+            unit="m3",
+            quantity=str(quantity),
+            unit_rate="10",
+            total=str(quantity * 10),
+            metadata_={"labor_hours": 1, "workers_per_unit": 2},
+        )
+
+    section = SimpleNamespace(
+        id=section_id,
+        parent_id=None,
+        ordinal="1",
+        description="Earthworks",
+        unit="",
+        quantity="0",
+        unit_rate="0",
+        total="0",
+        metadata_={},
+    )
+    return [section, _position("1.1", 50), _position("1.2", 100), _position("1.3", 200)]
+
+
+def _patch_boq_repositories(monkeypatch: pytest.MonkeyPatch, positions: list[Any]) -> uuid.UUID:
+    """Stand in for the BOQ repositories ``generate_from_boq`` imports; returns the BOQ id they answer for."""
+    import app.modules.boq.repository as boq_repo_mod
+
+    boq_id = uuid.uuid4()
+
+    class _FakeBOQRepo:
+        def __init__(self, session: object) -> None:
+            self.session = session
+
+        async def get_by_id(self, wanted: uuid.UUID) -> Any:
+            return SimpleNamespace(id=wanted, metadata_={}) if wanted == boq_id else None
+
+    class _FakePositionRepo:
+        def __init__(self, session: object) -> None:
+            self.session = session
+
+        async def list_for_boq(self, wanted: uuid.UUID, **_kwargs: Any) -> tuple[list[Any], int]:
+            return (positions, len(positions)) if wanted == boq_id else ([], 0)
+
+    monkeypatch.setattr(boq_repo_mod, "BOQRepository", _FakeBOQRepo)
+    monkeypatch.setattr(boq_repo_mod, "PositionRepository", _FakePositionRepo)
+    return boq_id
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("region", "rest_days"),
+    [(_GULF, _GULF_REST_DAYS), (_GERMANY, _GERMAN_REST_DAYS)],
+    ids=["doha", "berlin"],
+)
+async def test_the_same_project_is_counted_on_one_week_by_both_paths(
+    monkeypatch: pytest.MonkeyPatch, region: str, rest_days: set[int]
+) -> None:
+    """BOQ generation draws dates on the regional week and a re-save recounts them on it.
+
+    Two paths in the module give an activity its duration: generation steps the
+    project's working week to place each activity, and ``compute_duration``
+    recounts the working days whenever a date is saved. Before the project's
+    region reached the second path it counted Monday to Friday for every
+    project, so a Gulf schedule drawn Sunday to Thursday got a different number
+    the first time anyone re-saved a date without changing it. Here the dates
+    generation drew are re-saved unchanged, and the recount must equal an
+    independent count of the region's working days between them. Berlin is the
+    control: its week is the old default, so it agreed before and must still.
+    """
+    svc = _make_service(project_region=region)
+    schedule = await svc.create_schedule(
+        ScheduleCreate(project_id=PROJECT_ID, name="Generated", start_date=_WEEK_SUNDAY, end_date="2027-03-31")
+    )
+    boq_id = _patch_boq_repositories(monkeypatch, _boq_section_with_three_positions())
+
+    async def _no_reconcile(_schedule_id: uuid.UUID) -> dict[str, int]:
+        return {}
+
+    monkeypatch.setattr(svc, "reconcile_dependency_sources", _no_reconcile)
+
+    await svc.generate_from_boq(schedule.id, boq_id, total_project_days=120)
+
+    tasks = [a for a in svc.activity_repo.rows.values() if a.activity_type == "task"]
+    assert len(tasks) == 3
+    spans = [_weekdays_between(t.start_date, t.end_date) for t in tasks]
+    # Generation lands every end on a working day of the region...
+    assert all(span[-1] not in rest_days for span in spans)
+    # ...and the first task starts on the Sunday, the day the two weeks disagree
+    # on, so a recount on the wrong week cannot come out equal by chance.
+    assert spans[0][0] == 6
+    if region == _GULF:
+        monday_to_friday = [_working_days(t.start_date, t.end_date, _GERMAN_REST_DAYS) for t in tasks]
+        regional = [_working_days(t.start_date, t.end_date, rest_days) for t in tasks]
+        assert regional != monday_to_friday
+
+    for task in tasks:
+        resaved = await svc.update_activity(task.id, ActivityUpdate(start_date=task.start_date, end_date=task.end_date))
+        assert resaved.duration_days == _working_days(task.start_date, task.end_date, rest_days), (
+            f"{task.name}: {task.start_date} to {task.end_date} recounted on another week than it was drawn on"
+        )
 
 
 @pytest.mark.asyncio

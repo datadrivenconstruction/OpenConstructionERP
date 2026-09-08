@@ -1675,7 +1675,10 @@ async def import_xer(
     from app.modules.schedule.xer_encoding import decode_xer
 
     # Verify schedule exists
-    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    schedule = await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    # A duration the file does not state is counted on the project's working
+    # week, the same one the activity write paths and BOQ generation use.
+    project_region = await service.resolve_project_region(schedule.project_id)
 
     # Read and decode file. A P6 export carries no declaration of its code
     # page, and the pair this used to be, utf-8 then latin-1, could not fail:
@@ -1739,7 +1742,7 @@ async def import_xer(
         except (ValueError, TypeError):
             duration_days = 0
         if duration_days == 0:
-            duration_days = max(1, compute_duration(start_date, end_date))
+            duration_days = max(1, compute_duration(start_date, end_date, project_region))
 
         # Task type
         task_type_xer = task_row.get("task_type", "TT_Task")
@@ -1915,7 +1918,10 @@ async def import_msp_xml(
     from app.modules.schedule.models import Activity, ScheduleRelationship
 
     # Verify schedule exists
-    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    schedule = await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    # A duration the file does not state is counted on the project's working
+    # week, the same one the activity write paths and BOQ generation use.
+    project_region = await service.resolve_project_region(schedule.project_id)
 
     raw = await file.read()
 
@@ -2010,7 +2016,7 @@ async def import_msp_xml(
 
         duration_days = _parse_msp_duration_to_days(duration_str)
         if duration_days == 0 and start_date and end_date:
-            duration_days = max(0, compute_duration(start_date, end_date))
+            duration_days = max(0, compute_duration(start_date, end_date, project_region))
 
         try:
             pct = float(pct_str)
@@ -2389,7 +2395,6 @@ async def schedule_stats(
 
     from sqlalchemy import select
 
-    from app.modules.projects.repository import ProjectRepository
     from app.modules.schedule.models import Activity, Schedule
 
     # Get all schedules for the project
@@ -2411,8 +2416,7 @@ async def schedule_stats(
 
     # Resolve the project region + today so "delayed" is derived the same way
     # as the Gantt summary (overdue + unfinished), keeping the rollup honest.
-    project = await ProjectRepository(session).get_by_id(project_id)
-    project_region = project.region if project else None
+    project_region = await ScheduleService(session).resolve_project_region(project_id)
     today = datetime.now(UTC).date()
 
     critical_count = 0
@@ -2510,10 +2514,7 @@ async def schedule_work_calendar(
     """
     await verify_project_access(project_id, _user_id, session)
 
-    from app.modules.projects.repository import ProjectRepository
-
-    project = await ProjectRepository(session).get_by_id(project_id)
-    region = project.region if project else None
+    region = await ScheduleService(session).resolve_project_region(project_id)
     cal = get_work_calendar(region)
     return WorkCalendarResponse(
         region=region,
