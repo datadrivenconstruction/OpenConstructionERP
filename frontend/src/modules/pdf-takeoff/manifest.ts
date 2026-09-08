@@ -1,15 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import { Ruler } from 'lucide-react';
 import type { ModuleManifest } from '../_types';
-
-// The module accepts optional props (for in-app embedding); cast to the
-// module-route's `ComponentType<unknown>` signature so the manifest type
-// remains uniform across all modules.
-const TakeoffViewerModule = lazy(
-  () => import('./TakeoffViewerModule'),
-) as unknown as LazyExoticComponent<ComponentType<unknown>>;
 
 // internal build lineage: ddc-lineage:a17f93c4-takeoff-02
 export const manifest: ModuleManifest = {
@@ -20,13 +12,24 @@ export const manifest: ModuleManifest = {
   icon: Ruler,
   category: 'tools',
   defaultEnabled: true,
-  routes: [
-    {
-      path: '/takeoff-viewer',
-      title: 'nav.takeoff',
-      component: TakeoffViewerModule,
-    },
-  ],
+  // The viewer this module owns is not retired — `TakeoffViewerModule` is
+  // mounted by `features/takeoff/TakeoffPage.tsx`, on the Measurements tab of
+  // `/takeoff`, which the sidebar offers as `nav.pdf_measurements`. What is
+  // retired is the standalone `/takeoff-viewer` route this manifest used to
+  // register: it mounted the same component with none of the props TakeoffPage
+  // passes (document library, filmstrip, annotation deep-link), so it was a
+  // strictly poorer second door, and nothing under `frontend/src` ever linked
+  // to it. `App.tsx` now redirects `/takeoff-viewer` to
+  // `/takeoff?tab=measurements` so old bookmarks keep working whatever this
+  // module's enabled-state is, the way `/risk-analysis` was retired in #71.
+  //
+  // With no route and no nav item, the manifest is a name, a description and a
+  // translations bundle: nothing reads `isModuleEnabled('pdf-takeoff')`, and
+  // TakeoffPage does not gate the embed on it. Turning this module off in the
+  // Modules page therefore changes nothing on screen today. Left as-is rather
+  // than flipped, because the flag is the natural gate should the takeoff tab
+  // ever want one, and `defaultEnabled` is pinned by `_registry.test.ts`.
+  routes: [],
   navItems: [],
   translations: {
     en: {

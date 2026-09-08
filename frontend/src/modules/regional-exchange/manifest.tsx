@@ -64,13 +64,37 @@ function makeBoundComponent(templateId: string): ComponentType<unknown> {
  * is not translated in any language. Keying all 20 would translate the country
  * word alone and split one recognisable name across two sources.
  */
-const routes = COUNTRY_TEMPLATES.map((tpl) => ({
+const countryRoutes = COUNTRY_TEMPLATES.map((tpl) => ({
   path: `/${tpl.routeSlug}`,
   title: tpl.label,
   component: lazy<ComponentType<unknown>>(async () => ({
     default: makeBoundComponent(tpl.id),
   })),
 }));
+
+/**
+ * The hub that picks among the twenty. It goes FIRST so `routes[0]` is the
+ * route the module is entered by rather than whichever country happens to sort
+ * first in the registry.
+ *
+ * Unlike the country routes above, this one's title is an i18n key: the page
+ * speaks for the module, not for a national standard, so there is nothing here
+ * that has to stay in its own language.
+ *
+ * The key is `boq.preset_regional` ("Regional standards") rather than this
+ * module's own `nav.regional_exchange`, and it is the key the page's `<h1>`
+ * uses too, so the top bar and the heading say one thing. `nav.regional_exchange`
+ * is answered by the `translations` block below and by no locale file, which is
+ * fine while only `translateManifestText` reads it, and not fine for a page that
+ * has to name itself in 43 languages.
+ */
+const hubRoute = {
+  path: '/regional-exchange',
+  title: 'boq.preset_regional',
+  component: lazy<ComponentType<unknown>>(() => import('./RegionalExchangeHubPage')),
+};
+
+const routes = [hubRoute, ...countryRoutes];
 
 export const manifest: ModuleManifest = {
   id: 'regional-exchange',
@@ -83,18 +107,21 @@ export const manifest: ModuleManifest = {
   depends: ['boq'],
   routes,
   // No per-country sidebar items, by the #217 decision: twenty country rows
-  // would swamp the menu, so the way in was to be a link from a BOQ, the way
+  // would swamp the menu, so the way in is a link from a BOQ, the way
   // `gaeb-exchange` is reached from `BOQListPage` and `BOQToolbar`.
   //
-  // That link is not in the tree. This line used to claim "reached from
-  // /boq", while nothing under `frontend/src` navigates to any of the twenty
-  // routes below and the command palette does not offer them either, so
-  // today they are reachable only by typing the URL. Written down plainly
-  // rather than left as a claim: the routes work, the entry point is
-  // missing, and adding one means choosing a target among twenty countries
-  // (there is no region-to-template resolver — `regionalRegistry` resolves
-  // only by `id` and by route slug) or giving the module a landing page
-  // that picks.
+  // That link did not exist when this module was collapsed out of twenty, and
+  // the comment here said so plainly rather than claiming otherwise: nothing
+  // under `frontend/src` navigated to any of the twenty routes, so they were
+  // reachable only by typing the URL. It exists now. `RegionalExchangeHubPage`
+  // is the landing page that picks, and `BOQListPage` offers it from the BOQ
+  // intro card under the same module-enabled gate the GAEB link uses.
+  //
+  // Not one row either, and not through `getModuleNavItems('regional')`: the
+  // sidebar's `regional` group was deleted (see the note at the foot of
+  // `app/layout/navCatalog.ts`), so a nav item in that group would render
+  // nowhere at all. `navItems` staying empty is the shipped behaviour, not an
+  // omission, and `modules/_registry.test.ts` pins it.
   navItems: [],
   translations: {
     en: {

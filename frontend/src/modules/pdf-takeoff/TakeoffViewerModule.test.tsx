@@ -212,6 +212,13 @@ describe('TakeoffViewerModule', () => {
     // The manifest names itself with an i18n key; the module carries the
     // English and German wording in its own translations block.
     expect(mod!.name).toBe('modules.pdf_takeoff.name');
-    expect(mod!.routes[0].path).toBe('/takeoff-viewer');
+    // No route of its own. This used to assert `routes[0].path` was
+    // '/takeoff-viewer', a standalone mount of this component with none of the
+    // props `features/takeoff/TakeoffPage.tsx` passes it — no document library,
+    // no filmstrip, no annotation deep-link — and nothing under `frontend/src`
+    // linked to it. `/takeoff` is where the viewer is reached, and App.tsx
+    // redirects the old path there so bookmarks keep working even for someone
+    // who has switched this module off, which a manifest route cannot do.
+    expect(mod!.routes).toEqual([]);
   }, 15000);
 });

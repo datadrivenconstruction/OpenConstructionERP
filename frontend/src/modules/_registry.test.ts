@@ -7,6 +7,7 @@ import {
   getModuleDefaults,
   getModulesByCategory,
 } from './_registry';
+import { COUNTRY_TEMPLATES } from './regional-exchange/regionalRegistry';
 
 describe('MODULE_REGISTRY', () => {
   it('should contain at least 16 modules (post Wave 5 Epic I collapse)', () => {
@@ -83,11 +84,16 @@ describe('MODULE_REGISTRY', () => {
     }
   });
 
-  it('regional-exchange should expose all 20 back-compat country routes', () => {
+  it('regional-exchange should expose all 20 back-compat country routes, plus the hub that reaches them', () => {
     const mod = MODULE_REGISTRY.find((m) => m.id === 'regional-exchange');
     expect(mod).toBeDefined();
-    expect(mod!.routes.length).toBe(20);
+    // 20 country routes and one picker. The count used to be the bare literal
+    // 20, which is the number of countries rather than the number of routes;
+    // stated as countries-plus-one so adding a country moves it and adding a
+    // second non-country route does not go unnoticed.
+    expect(mod!.routes.length).toBe(COUNTRY_TEMPLATES.length + 1);
     const paths = mod!.routes.map((r) => r.path);
+    expect(paths).toContain('/regional-exchange');
     expect(paths).toContain('/uk-nrm-exchange');
     expect(paths).toContain('/us-masterformat-exchange');
     expect(paths).toContain('/fr-dpgf-exchange');
@@ -114,8 +120,18 @@ describe('getAllModuleRoutes', () => {
     // Tool modules
     expect(routes.some((r) => r.path === '/sustainability')).toBe(true);
     expect(routes.some((r) => r.path === '/benchmarks')).toBe(true);
-    expect(routes.some((r) => r.path === '/takeoff-viewer')).toBe(true);
     expect(routes.some((r) => r.path === '/collaboration')).toBe(true);
+    // `/takeoff-viewer` is deliberately NOT here any more. It mounted
+    // `pdf-takeoff`'s viewer a second time with no props, next door to
+    // `/takeoff`, which mounts the same component with the document library and
+    // the filmstrip wired in, and nothing in the app ever linked to it. It is a
+    // redirect in App.tsx now, so the bookmark survives a disabled module,
+    // which a manifest route cannot do. Same retirement as `/risk-analysis`.
+    expect(routes.some((r) => r.path === '/takeoff-viewer')).toBe(false);
+    // The hub that picks among the twenty country routes below. Before it, the
+    // twenty were reachable only by typing the URL: no nav row (#217), and the
+    // BOQ link the decision assumed had never been written.
+    expect(routes.some((r) => r.path === '/regional-exchange')).toBe(true);
     // Regional back-compat routes — Wave 5 Epic I kept all 20 of them
     // even though they now share one polymorphic page.
     expect(routes.some((r) => r.path === '/uk-nrm-exchange')).toBe(true);
@@ -143,8 +159,11 @@ describe('getModuleNavItems', () => {
   it('should return nav items for tools group', () => {
     const items = getModuleNavItems('tools');
     // Tools group holds sustainability. Other tools (benchmarks,
-    // takeoff-viewer, collaboration) live in their own groups now;
-    // gaeb-exchange opts out of sidebar nav (#217). risk-analysis no longer
+    // collaboration) live in their own groups now; gaeb-exchange and
+    // regional-exchange opt out of sidebar nav and are reached from the BOQ
+    // page instead (#217). pdf-takeoff contributes nothing here either: its
+    // viewer is mounted by `/takeoff`, whose row the static catalogue owns, and
+    // its own standalone route is retired. risk-analysis no longer
     // contributes a nav item: its standalone page was retired in the Monte
     // Carlo IA merge (#71) so there is one simulation home (Risk Register).
     expect(items.length).toBeGreaterThanOrEqual(1);
@@ -157,12 +176,15 @@ describe('getModuleNavItems', () => {
     // the way in was to be a link from the BOQ page, the way `gaeb-exchange`
     // is. Wave 5 Epic I kept this invariant when collapsing the modules.
     //
-    // The title and this comment used to state the BOQ link as fact. It does
-    // not exist: nothing under `frontend/src` navigates to any of the twenty
-    // routes. What this test pins is the empty list, which is still the right
-    // invariant — twenty rows do not belong in the menu — so the assertion is
-    // unchanged and only the false half of its wording is gone. See the note
-    // on `navItems` in `regional-exchange/manifest.tsx`.
+    // The title and this comment used to state the BOQ link as fact while it
+    // did not exist. It exists now: `BOQListPage` offers the module's hub page
+    // from the BOQ intro card, under the same module-enabled gate the GAEB link
+    // uses, and the hub links on to all twenty.
+    //
+    // The empty list is still the right invariant, and now for a second reason
+    // as well: the sidebar's `regional` group was deleted, so an item in that
+    // group would render nowhere whatever it said. See the note on `navItems`
+    // in `regional-exchange/manifest.tsx`.
     const items = getModuleNavItems('regional');
     expect(items).toEqual([]);
   });

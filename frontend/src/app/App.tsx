@@ -1211,6 +1211,18 @@ export default function App() {
 
         <Route path="/quantities" element={<P title="Quantity Takeoff"><QuantitiesPage /></P>} />
         <Route path="/takeoff" element={<P title="PDF Takeoff"><TakeoffPage /></P>} />
+        {/* The PDF takeoff viewer's real home is the Measurements tab above,
+            which mounts the same `modules/pdf-takeoff/TakeoffViewerModule` with
+            the project's document library, the filmstrip and annotation
+            deep-linking wired in. `/takeoff-viewer` used to mount that
+            component a second time with no props at all — a poorer copy of the
+            page next door that nothing in the app linked to. The route stays as
+            a redirect so old bookmarks land somewhere, and it lives here rather
+            than in the module manifest because `ModuleRoutes` mounts manifest
+            routes only while the module is enabled, which would 404 the
+            bookmark of anyone who had switched pdf-takeoff off. Same shape as
+            the retired `/risk-analysis` below. */}
+        <Route path="/takeoff-viewer" element={<Navigate to="/takeoff?tab=measurements" replace />} />
         <Route path="/dwg-takeoff" element={<P title="DWG Takeoff"><DwgTakeoffPage /></P>} />
 
         <Route path="/schedule" element={<P title="4D Schedule"><SchedulePage /></P>} />
