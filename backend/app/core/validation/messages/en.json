@@ -92,7 +92,11 @@
     },
     "unrealistic_rate": {
       "fail": "Position {ordinal}: {details}",
-      "suggestion": "Verify this value - it seems unrealistically high"
+      "suggestion": "Verify this value - it seems unrealistically high",
+      "not_assessed_no_currency": "{count} position(s) not assessed: the bill states no currency, so the money thresholds (written in {reference}) could not be scaled to it",
+      "not_assessed_no_currency_suggestion": "Set the project currency, or record a currency on the positions",
+      "not_assessed_no_rate": "{count} position(s) in {currency} not assessed: no {reference} to {currency} rate is on file, so the money thresholds could not be scaled to this bill",
+      "not_assessed_no_rate_suggestion": "Add a {reference} rate for {currency} to the FX rate register or to the project's exchange rates"
     },
     "total_mismatch": {
       "fail": "Position {ordinal}: computed {computed} != stored {stored} (diff={diff})",
@@ -112,7 +116,11 @@
     },
     "rate_vs_benchmark": {
       "fail": "Position {ordinal}: unit rate {rate}/{unit} exceeds benchmark threshold {threshold}/{unit} - potentially unrealistic",
-      "suggestion": "Verify this rate - typical rates for {unit} should be below {threshold}. Check for unit or decimal errors."
+      "suggestion": "Verify this rate - typical rates for {unit} should be below {threshold}. Check for unit or decimal errors.",
+      "not_assessed_no_currency": "{count} position(s) not assessed: the bill states no currency, so the benchmark thresholds (written in {reference}) could not be scaled to it",
+      "not_assessed_no_currency_suggestion": "Set the project currency, or record a currency on the positions",
+      "not_assessed_no_rate": "{count} position(s) in {currency} not assessed: no {reference} to {currency} rate is on file, so the benchmark thresholds could not be scaled to this bill",
+      "not_assessed_no_rate_suggestion": "Add a {reference} rate for {currency} to the FX rate register or to the project's exchange rates"
     },
     "lump_sum_ratio": {
       "fail": "{lsum_count} of {total_count} positions ({percent}) use lump sum - exceeds {threshold} threshold",

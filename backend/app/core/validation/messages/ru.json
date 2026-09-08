@@ -92,7 +92,11 @@
     },
     "unrealistic_rate": {
       "fail": "Позиция {ordinal}: {details}",
-      "suggestion": "Проверьте значение - оно выглядит нереалистично высоким"
+      "suggestion": "Проверьте значение - оно выглядит нереалистично высоким",
+      "not_assessed_no_currency": "Позиций не оценено: {count}. В смете не указана валюта, поэтому денежные пороги (заданы в {reference}) не удалось пересчитать в неё",
+      "not_assessed_no_currency_suggestion": "Укажите валюту проекта или запишите валюту у позиций",
+      "not_assessed_no_rate": "Позиций в {currency} не оценено: {count}. Нет курса {reference} к {currency}, поэтому денежные пороги не удалось пересчитать для этой сметы",
+      "not_assessed_no_rate_suggestion": "Добавьте курс {reference} для {currency} в реестр курсов или в курсы проекта"
     },
     "total_mismatch": {
       "fail": "Позиция {ordinal}: расчёт {computed} != сохранённое {stored} (разница={diff})",
@@ -112,7 +116,11 @@
     },
     "rate_vs_benchmark": {
       "fail": "Позиция {ordinal}: единичная расценка {rate}/{unit} превышает эталонный порог {threshold}/{unit} - потенциально нереалистично",
-      "suggestion": "Проверьте расценку - обычные значения для {unit} ниже {threshold}. Проверьте единицу и десятичные разряды."
+      "suggestion": "Проверьте расценку - обычные значения для {unit} ниже {threshold}. Проверьте единицу и десятичные разряды.",
+      "not_assessed_no_currency": "Позиций не оценено: {count}. В смете не указана валюта, поэтому эталонные пороги (заданы в {reference}) не удалось пересчитать в неё",
+      "not_assessed_no_currency_suggestion": "Укажите валюту проекта или запишите валюту у позиций",
+      "not_assessed_no_rate": "Позиций в {currency} не оценено: {count}. Нет курса {reference} к {currency}, поэтому эталонные пороги не удалось пересчитать для этой сметы",
+      "not_assessed_no_rate_suggestion": "Добавьте курс {reference} для {currency} в реестр курсов или в курсы проекта"
     },
     "lump_sum_ratio": {
       "fail": "{lsum_count} из {total_count} позиций ({percent}) используют паушальную стоимость - превышает порог {threshold}",

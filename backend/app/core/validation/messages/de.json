@@ -92,7 +92,11 @@
     },
     "unrealistic_rate": {
       "fail": "Position {ordinal}: {details}",
-      "suggestion": "Diesen Wert prüfen - er wirkt unrealistisch hoch"
+      "suggestion": "Diesen Wert prüfen - er wirkt unrealistisch hoch",
+      "not_assessed_no_currency": "{count} Position(en) nicht geprüft: das LV nennt keine Währung, daher konnten die Betragsschwellen (in {reference}) nicht darauf umgerechnet werden",
+      "not_assessed_no_currency_suggestion": "Projektwährung festlegen oder eine Währung an den Positionen hinterlegen",
+      "not_assessed_no_rate": "{count} Position(en) in {currency} nicht geprüft: kein Kurs {reference} zu {currency} hinterlegt, daher konnten die Betragsschwellen nicht auf dieses LV umgerechnet werden",
+      "not_assessed_no_rate_suggestion": "Einen {reference}-Kurs für {currency} im Kursregister oder in den Wechselkursen des Projekts hinterlegen"
     },
     "total_mismatch": {
       "fail": "Position {ordinal}: berechnet {computed} != gespeichert {stored} (Differenz={diff})",
@@ -112,7 +116,11 @@
     },
     "rate_vs_benchmark": {
       "fail": "Position {ordinal}: Einheitspreis {rate}/{unit} überschreitet Benchmark-Schwellenwert {threshold}/{unit} - möglicherweise unrealistisch",
-      "suggestion": "Preis prüfen - übliche Preise für {unit} liegen unter {threshold}. Einheit bzw. Dezimalstellen kontrollieren."
+      "suggestion": "Preis prüfen - übliche Preise für {unit} liegen unter {threshold}. Einheit bzw. Dezimalstellen kontrollieren.",
+      "not_assessed_no_currency": "{count} Position(en) nicht geprüft: das LV nennt keine Währung, daher konnten die Benchmark-Schwellenwerte (in {reference}) nicht darauf umgerechnet werden",
+      "not_assessed_no_currency_suggestion": "Projektwährung festlegen oder eine Währung an den Positionen hinterlegen",
+      "not_assessed_no_rate": "{count} Position(en) in {currency} nicht geprüft: kein Kurs {reference} zu {currency} hinterlegt, daher konnten die Benchmark-Schwellenwerte nicht auf dieses LV umgerechnet werden",
+      "not_assessed_no_rate_suggestion": "Einen {reference}-Kurs für {currency} im Kursregister oder in den Wechselkursen des Projekts hinterlegen"
     },
     "lump_sum_ratio": {
       "fail": "{lsum_count} von {total_count} Positionen ({percent}) sind Pauschalen - überschreitet {threshold}-Schwelle",

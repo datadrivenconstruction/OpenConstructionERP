@@ -20,8 +20,10 @@ from __future__ import annotations
 import logging
 import re
 from decimal import Decimal, InvalidOperation
+from types import SimpleNamespace
 from typing import Any
 
+from app.core.money import minor_units
 from app.core.validation.engine import (
     RuleCategory,
     RuleResult,
@@ -144,6 +146,190 @@ def _boq_document_metadata(context: ValidationContext) -> dict[str, Any]:
         for key, value in context.metadata.items():
             merged.setdefault(key, value)
     return merged
+
+
+# ── Money thresholds and the currency they are written in ──────────────────
+#
+# Every absolute money threshold in this module is written in one reference
+# currency and scaled into the bill's own currency when the rule runs. A bare
+# number is not a threshold: 100,000 per unit is a fortune in euros and about
+# six euros in rupiah, so a rule comparing against it fired on every Indonesian,
+# Vietnamese, Korean or Hungarian bill and never on a real outlier in a strong
+# currency.
+#
+# The reference is EUR, for two reasons. The platform's rate register
+# (``app.modules.fx``) is quoted against EUR in every layer - the ECB daily feed
+# it refreshes from, the bundled seed it degrades to and the rate map it hands
+# out - so a EUR threshold reaches any bill currency with one lookup and no
+# rebase. And EUR is the currency the figures were written in: these rules were
+# authored against DIN 276 and GAEB bills, so a EUR bill keeps exactly the
+# thresholds it always had and nothing already validated moves.
+_REFERENCE_CURRENCY = "EUR"
+
+#: ``details['fx_reason']`` on the row a rule emits when it could not scale.
+_FX_NO_CURRENCY = "no_currency"
+_FX_NO_RATE = "no_rate"
+
+
+def _bill_currency(context: ValidationContext, pos: dict[str, Any]) -> str:
+    """The currency ``pos`` is priced in, or ``""`` when nothing states one.
+
+    The position's own currency wins, because ``metadata.currency`` is the
+    authoritative per-line value (``boq.service._position_currency``). Then the
+    bill header the estimate audit supplies, then the project record the shared
+    payload builder carries (``project_record.currency``, the project's base),
+    then the run metadata, which is how a caller driving one rule states it.
+    """
+    own = _position_currency(pos)
+    if own:
+        return own
+    data = context.data if isinstance(context.data, dict) else {}
+    record = data.get("project_record")
+    candidates = (
+        _boq_document(context).get("currency"),
+        record.get("currency") if isinstance(record, dict) else None,
+        _boq_document_metadata(context).get("currency"),
+    )
+    for raw in candidates:
+        if isinstance(raw, str) and raw.strip():
+            return raw.strip().upper()
+    return ""
+
+
+async def _fx_context(context: ValidationContext) -> Any:
+    """Resolve the rate sources a rule scales its thresholds with, once per run.
+
+    Goes through the platform's FX bridge rather than a rate table of its own,
+    so a threshold is converted by the same sources that convert an assembly
+    price: the project's hand-typed exchange rates when the payload carries
+    them, then the ``oe_fx`` register, which degrades from the applicable rate
+    set to the bundled seed and reports which it used. The register is read
+    through ``metadata['session']`` when a caller supplies one (the idiom
+    ``_resolve_cwicr_matcher`` uses); without a session the bundled seed still
+    prices every currency the ECB publishes plus the few the seed adds.
+
+    Returns:
+        An ``FxContext`` whose ``rate(from, to)`` answers ``(multiplier,
+        provenance)``, with ``None`` for a pair no source can price.
+    """
+    from app.modules.assemblies.fx_bridge import load_fx_context
+
+    data = context.data if isinstance(context.data, dict) else {}
+    record = data.get("project_record")
+    record = record if isinstance(record, dict) else {}
+    meta = context.metadata if isinstance(context.metadata, dict) else {}
+    base = record.get("currency") or _boq_document(context).get("currency") or meta.get("currency") or ""
+    fx_rates = record.get("fx_rates")
+    project = SimpleNamespace(
+        currency=str(base).strip().upper(),
+        fx_rates=fx_rates if isinstance(fx_rates, list) else [],
+    )
+    session = meta.get("session")
+    return await load_fx_context(session if hasattr(session, "begin_nested") else None, project)
+
+
+def _reference_multiplier(fx: Any, currency: str) -> tuple[float | None, dict[str, Any]]:
+    """Units of ``currency`` per one unit of the reference currency, with provenance.
+
+    Returns:
+        ``(multiplier, provenance)``. ``multiplier`` is ``None`` when no source
+        prices the pair, and ``provenance['fx_reason']`` then says whether that
+        is because the bill names no currency or because none of the sources
+        holds a rate for the one it names.
+    """
+    multiplier, provenance = fx.rate(_REFERENCE_CURRENCY, currency)
+    if multiplier is None:
+        reason = _FX_NO_CURRENCY if provenance.get("reason") == "missing_currency" else _FX_NO_RATE
+        return None, {"fx_reason": reason, "currency": currency, "reference_currency": _REFERENCE_CURRENCY}
+    return float(multiplier), {
+        "currency": currency,
+        "reference_currency": _REFERENCE_CURRENCY,
+        "fx_rate": str(multiplier),
+        "fx_source": str(provenance.get("fx_source") or ""),
+    }
+
+
+def _fmt_money(value: float, currency: str) -> str:
+    """Format an amount with the decimals its currency actually has, plus the code.
+
+    ``175,000,000 IDR`` rather than ``175,000,000.00 IDR``: the rupiah has no
+    subunit, and two decimals in it invite the reader to look for a decimal
+    error that is not there.
+    """
+    return f"{value:,.{minor_units(currency)}f} {currency}".rstrip()
+
+
+def _thresholds_not_scaled(
+    rule: ValidationRule,
+    locale: str,
+    *,
+    currency: str,
+    reason: str,
+    positions: list[dict[str, Any]],
+    reference_thresholds: dict[str, float],
+) -> RuleResult:
+    """One diagnostic row saying the rule could not judge these positions.
+
+    Not a pass and not a finding. A passing row would say the money was checked
+    when it was not; a failing one would charge the bill for a rate table it
+    does not control. The row therefore takes the shape the engine gives a rule
+    it could not execute (``is_engine_error``, INFO, DIAGNOSTIC): every consumer
+    already keeps such rows out of the findings and out of the score, and the
+    report still says, in words, what was not assessed and why.
+
+    The message goes through the catalogue when its key exists and renders an
+    English default until then, the convention ``_audit_text`` follows.
+    """
+    if reason == _FX_NO_CURRENCY:
+        message = _audit_text(
+            f"{rule.rule_id}.not_assessed_no_currency",
+            locale,
+            "{count} position(s) not assessed: the bill states no currency, so the money thresholds "
+            "(written in {reference}) could not be scaled to it",
+            count=len(positions),
+            reference=_REFERENCE_CURRENCY,
+        )
+        suggestion = _audit_text(
+            f"{rule.rule_id}.not_assessed_no_currency_suggestion",
+            locale,
+            "Set the project currency, or record a currency on the positions",
+        )
+    else:
+        message = _audit_text(
+            f"{rule.rule_id}.not_assessed_no_rate",
+            locale,
+            "{count} position(s) in {currency} not assessed: no {reference} to {currency} rate is on file, "
+            "so the money thresholds could not be scaled to this bill",
+            count=len(positions),
+            currency=currency,
+            reference=_REFERENCE_CURRENCY,
+        )
+        suggestion = _audit_text(
+            f"{rule.rule_id}.not_assessed_no_rate_suggestion",
+            locale,
+            "Add a {reference} rate for {currency} to the FX rate register or to the project's exchange rates",
+            currency=currency,
+            reference=_REFERENCE_CURRENCY,
+        )
+    return RuleResult(
+        rule_id=rule.rule_id,
+        rule_name=rule.name,
+        severity=Severity.INFO,
+        category=RuleCategory.DIAGNOSTIC,
+        passed=False,
+        message=message,
+        element_ref=None,
+        details={
+            "fx_reason": reason,
+            "currency": currency,
+            "reference_currency": _REFERENCE_CURRENCY,
+            "reference_thresholds": reference_thresholds,
+            "position_count": len(positions),
+            "position_ids": [str(pos.get("id")) for pos in positions if pos.get("id")],
+        },
+        suggestion=suggestion,
+        is_engine_error=True,
+    )
 
 
 def _position_metadata(pos: dict[str, Any]) -> dict[str, Any]:
@@ -1365,19 +1551,42 @@ class UnrealisticRate(ValidationRule):
     standard = "boq_quality"
     severity = Severity.WARNING
     category = RuleCategory.QUALITY
-    description = "Flags positions with unit rate > 100,000 or total > 10,000,000"
+    description = (
+        "Flags positions with a unit rate above 100,000 EUR or a total above 10,000,000 EUR, "
+        "both limits converted into the bill's own currency"
+    )
 
+    # Written in _REFERENCE_CURRENCY and scaled into the bill's currency at run
+    # time; see the note above _REFERENCE_CURRENCY for why a bare number is not
+    # a threshold.
     RATE_THRESHOLD = 100_000
     TOTAL_THRESHOLD = 10_000_000
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
+        positions = _get_positions(context)
+        if not positions:
+            return []
+        fx = await _fx_context(context)
+        multipliers: dict[str, tuple[float | None, dict[str, Any]]] = {}
+        unscaled: dict[tuple[str, str], list[dict[str, Any]]] = {}
         results: list[RuleResult] = []
-        for pos in _get_positions(context):
+        for pos in positions:
             rate = _num(pos.get("unit_rate"), default=0.0) or 0.0
             total = _num(pos.get("total"), default=0.0) or 0.0
-            rate_ok = rate <= self.RATE_THRESHOLD
-            total_ok = total <= self.TOTAL_THRESHOLD
+            currency = _bill_currency(context, pos)
+            if currency not in multipliers:
+                multipliers[currency] = _reference_multiplier(fx, currency)
+            multiplier, provenance = multipliers[currency]
+            if multiplier is None and (rate > 0 or total > 0):
+                unscaled.setdefault((provenance["fx_reason"], currency), []).append(pos)
+                continue
+            # A row carrying no money passes in any currency; only money needs a scale.
+            scale = multiplier if multiplier is not None else 1.0
+            rate_limit = self.RATE_THRESHOLD * scale
+            total_limit = self.TOTAL_THRESHOLD * scale
+            rate_ok = rate <= rate_limit
+            total_ok = total <= total_limit
             passed = rate_ok and total_ok
             if passed:
                 message = _ok(locale)
@@ -1385,9 +1594,9 @@ class UnrealisticRate(ValidationRule):
             else:
                 parts: list[str] = []
                 if not rate_ok:
-                    parts.append(f"unit_rate {_fmt_decimal(rate)} > {self.RATE_THRESHOLD:,}")
+                    parts.append(f"unit_rate {_fmt_money(rate, currency)} > {_fmt_money(rate_limit, currency)}")
                 if not total_ok:
-                    parts.append(f"total {_fmt_decimal(total)} > {self.TOTAL_THRESHOLD:,}")
+                    parts.append(f"total {_fmt_money(total, currency)} > {_fmt_money(total_limit, currency)}")
                 message = translate(
                     "boq_quality.unrealistic_rate.fail",
                     locale=locale,
@@ -1398,6 +1607,17 @@ class UnrealisticRate(ValidationRule):
                     "boq_quality.unrealistic_rate.suggestion",
                     locale=locale,
                 )
+            details: dict[str, Any] = {"unit_rate": rate, "total": total, "currency": currency}
+            if multiplier is not None:
+                details.update(
+                    {
+                        "rate_threshold": rate_limit,
+                        "total_threshold": total_limit,
+                        "reference_rate_threshold": self.RATE_THRESHOLD,
+                        "reference_total_threshold": self.TOTAL_THRESHOLD,
+                        **provenance,
+                    }
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1407,8 +1627,19 @@ class UnrealisticRate(ValidationRule):
                     passed=passed,
                     message=message,
                     element_ref=pos.get("id"),
-                    details={"unit_rate": rate, "total": total},
+                    details=details,
                     suggestion=suggestion,
+                )
+            )
+        for (reason, currency), rows in unscaled.items():
+            results.append(
+                _thresholds_not_scaled(
+                    self,
+                    locale,
+                    currency=currency,
+                    reason=reason,
+                    positions=rows,
+                    reference_thresholds={"unit_rate": self.RATE_THRESHOLD, "total": self.TOTAL_THRESHOLD},
                 )
             )
         return results
@@ -2272,16 +2503,23 @@ class RateVsBenchmark(ValidationRule):
         "Flags rates that are potentially unrealistic compared to industry medians."
     )
 
-    # Simple heuristic thresholds per unit (upper bound for typical rates)
+    # Upper bounds for a typical unit rate, written in _REFERENCE_CURRENCY and
+    # scaled into the bill's currency at run time (see the note above it).
     UNIT_THRESHOLDS: dict[str, float] = {
-        "m2": 10_000,  # > 10,000 per m2 is suspicious
-        "m3": 50_000,  # > 50,000 per m3 is suspicious
+        "m2": 10_000,  # above 10,000 EUR per m2 is suspicious
+        "m3": 50_000,  # above 50,000 EUR per m3 is suspicious
     }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
+        positions = _get_positions(context)
+        if not positions:
+            return []
+        fx = await _fx_context(context)
+        multipliers: dict[str, tuple[float | None, dict[str, Any]]] = {}
+        unscaled: dict[tuple[str, str], list[dict[str, Any]]] = {}
         results: list[RuleResult] = []
-        for pos in _get_positions(context):
+        for pos in positions:
             rate = pos.get("unit_rate")
             if rate is None:
                 continue
@@ -2292,9 +2530,17 @@ class RateVsBenchmark(ValidationRule):
             if rate_val <= 0:
                 continue
             unit = (pos.get("unit") or "").strip().lower()
-            threshold = self.UNIT_THRESHOLDS.get(unit)
-            if threshold is None:
+            reference = self.UNIT_THRESHOLDS.get(unit)
+            if reference is None:
                 continue
+            currency = _bill_currency(context, pos)
+            if currency not in multipliers:
+                multipliers[currency] = _reference_multiplier(fx, currency)
+            multiplier, provenance = multipliers[currency]
+            if multiplier is None:
+                unscaled.setdefault((provenance["fx_reason"], currency), []).append(pos)
+                continue
+            threshold = reference * multiplier
             passed = rate_val <= threshold
             if passed:
                 message = _ok(locale)
@@ -2304,15 +2550,15 @@ class RateVsBenchmark(ValidationRule):
                     "boq_quality.rate_vs_benchmark.fail",
                     locale=locale,
                     ordinal=pos.get("ordinal", "?"),
-                    rate=_fmt_decimal(rate_val),
+                    rate=_fmt_money(rate_val, currency),
                     unit=unit,
-                    threshold=_fmt_decimal(threshold),
+                    threshold=_fmt_money(threshold, currency),
                 )
                 suggestion = translate(
                     "boq_quality.rate_vs_benchmark.suggestion",
                     locale=locale,
                     unit=unit,
-                    threshold=_fmt_decimal(threshold),
+                    threshold=_fmt_money(threshold, currency),
                 )
             results.append(
                 RuleResult(
@@ -2327,8 +2573,21 @@ class RateVsBenchmark(ValidationRule):
                         "unit_rate": rate_val,
                         "unit": unit,
                         "benchmark_threshold": threshold,
+                        "reference_benchmark_threshold": reference,
+                        **provenance,
                     },
                     suggestion=suggestion,
+                )
+            )
+        for (reason, currency), rows in unscaled.items():
+            results.append(
+                _thresholds_not_scaled(
+                    self,
+                    locale,
+                    currency=currency,
+                    reason=reason,
+                    positions=rows,
+                    reference_thresholds=dict(self.UNIT_THRESHOLDS),
                 )
             )
         return results

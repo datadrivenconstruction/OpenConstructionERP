@@ -92,7 +92,11 @@
     },
     "unrealistic_rate": {
       "fail": "Posición {ordinal}: {details}",
-      "suggestion": "Verifique este valor - parece poco realista por lo alto"
+      "suggestion": "Verifique este valor - parece poco realista por lo alto",
+      "not_assessed_no_currency": "{count} posición(es) sin evaluar: el presupuesto no indica moneda, por lo que los umbrales de importe (expresados en {reference}) no pudieron convertirse a ella",
+      "not_assessed_no_currency_suggestion": "Defina la moneda del proyecto o registre una moneda en las posiciones",
+      "not_assessed_no_rate": "{count} posición(es) en {currency} sin evaluar: no hay tipo de cambio de {reference} a {currency} registrado, por lo que los umbrales de importe no pudieron convertirse a este presupuesto",
+      "not_assessed_no_rate_suggestion": "Añada un tipo de cambio de {reference} para {currency} en el registro de tipos de cambio o en los tipos del proyecto"
     },
     "total_mismatch": {
       "fail": "Posición {ordinal}: el importe calculado {computed} no coincide con el guardado {stored} (diferencia={diff})",
@@ -112,7 +116,11 @@
     },
     "rate_vs_benchmark": {
       "fail": "Posición {ordinal}: el precio unitario {rate}/{unit} supera el umbral de referencia {threshold}/{unit} - posiblemente poco realista",
-      "suggestion": "Verifique este precio - los precios habituales para {unit} deberían estar por debajo de {threshold}. Compruebe posibles errores de unidad o de decimales."
+      "suggestion": "Verifique este precio - los precios habituales para {unit} deberían estar por debajo de {threshold}. Compruebe posibles errores de unidad o de decimales.",
+      "not_assessed_no_currency": "{count} posición(es) sin evaluar: el presupuesto no indica moneda, por lo que los umbrales de referencia (expresados en {reference}) no pudieron convertirse a ella",
+      "not_assessed_no_currency_suggestion": "Defina la moneda del proyecto o registre una moneda en las posiciones",
+      "not_assessed_no_rate": "{count} posición(es) en {currency} sin evaluar: no hay tipo de cambio de {reference} a {currency} registrado, por lo que los umbrales de referencia no pudieron convertirse a este presupuesto",
+      "not_assessed_no_rate_suggestion": "Añada un tipo de cambio de {reference} para {currency} en el registro de tipos de cambio o en los tipos del proyecto"
     },
     "lump_sum_ratio": {
       "fail": "{lsum_count} de {total_count} posiciones ({percent}) usan importe alzado - supera el umbral del {threshold}",
