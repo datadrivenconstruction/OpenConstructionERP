@@ -1905,13 +1905,16 @@
     // strings on this screen the answer is that they do not diverge: none of
     // them names a file, a computer or anything else these variants spell
     // differently, and es-CL and es-CO differ from es across the whole product
-    // by a handful of words. pt-BR is deliberately absent from this list and
-    // carries its own table, because Brazilian Portuguese does diverge here,
-    // in every sentence rather than in a corner of one.
+    // by a handful of words. en-GB and en-US both read the plain English
+    // table: read word by word when English (UK) joined the picker, none of
+    // these strings is spelt differently on either side of the Atlantic.
+    // pt-BR is deliberately absent from this list and carries its own table,
+    // because Brazilian Portuguese does diverge here, in every sentence
+    // rather than in a corner of one.
     //
     // Anything offered and missing from both this list and the table above is
     // a language nobody decided about, which is what this list exists to stop.
-    var SPLASH_INHERIT = { 'en-US': 'en', 'es-MX': 'es', 'es-CL': 'es', 'es-CO': 'es' };
+    var SPLASH_INHERIT = { 'en-GB': 'en', 'en-US': 'en', 'es-MX': 'es', 'es-CL': 'es', 'es-CO': 'es' };
 
     var SPLASH_RTL = ['ar', 'fa', 'he', 'ur'];
 
