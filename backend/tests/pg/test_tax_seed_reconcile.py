@@ -97,16 +97,31 @@ _ADDED_AFTER_V15_4_0 = {
     ("IL", "VAT", "2025-01-01"),
     ("KW", "NONE", None),
     ("QA", "NONE", None),
+    # Russia's 22 % window. Unlike every entry above it, this is a second row
+    # on a rate line both cohorts already hold rather than a line they lack,
+    # which is why it is excluded here and left out of _EXPECTED_DELIVERY: a
+    # rate that changed belongs to the supersede repair, exactly as Nova
+    # Scotia's 14 % row does.
+    ("RU", "NDS", "2026-01-01"),
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
-#: All three are windows that were still open back then and have since been
+#: All four are windows that were still open back then and have since been
 #: closed, which is the half of an old cohort that an exclusion list alone
 #: cannot reproduce.
+#:
+#: Only Romania restores a second field, and the asymmetry is the data rather
+#: than an oversight. Romania unflagged its 19 % row as the default when the
+#: reform closed it, while Russia's 20 % row keeps ``is_default`` true on both
+#: sides of its own close, because the reduced NDS_RED row is open ended and
+#: unflagging the closed standard one would leave Russia unable to price at
+#: all from 2019 to 2025. So for Russia the open window is the whole of the
+#: difference.
 _RESTORED_TO_V15_4_0 = {
     ("RO", "TVA", "2017-01-01"): {"effective_to": None, "is_default": True},
     ("CA", "HST_NS", "2010-07-01"): {"effective_to": None},
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
+    ("RU", "NDS", "2019-01-01"): {"effective_to": None},
 }
 
 _ADDED_AFTER_V15_9_1 = {
@@ -114,17 +129,19 @@ _ADDED_AFTER_V15_9_1 = {
     ("IL", "VAT", "2025-01-01"),
     ("KW", "NONE", None),
     ("QA", "NONE", None),
+    ("RU", "NDS", "2026-01-01"),
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
 #: added: every window the current file had closed by then was already closed
-#: in the file that release shipped. Israel's 17 % window is the first one to
-#: be closed after v15.9.1, so this is where that cohort's copy of it is put
-#: back to open. An empty dict here would silently reconstruct a database in
-#: which Israel was already up to date, which is the one state the supersede
-#: repair cannot be measured in.
+#: in the file that release shipped. Israel's 17 % window was the first one to
+#: be closed after v15.9.1 and Russia's 20 % one is the second, so this is
+#: where that cohort's copy of each is put back to open. A country missing from
+#: this dict would silently reconstruct a database in which it was already up
+#: to date, which is the one state the supersede repair cannot be measured in.
 _RESTORED_TO_V15_9_1 = {
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
+    ("RU", "NDS", "2019-01-01"): {"effective_to": None},
 }
 
 #: SHA-256 of the real shipped file at each tag, over the fields the fixture
