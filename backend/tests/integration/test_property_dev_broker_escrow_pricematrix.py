@@ -463,9 +463,16 @@ async def test_commission_accrual_event_flow(
             trigger_entity_type="spa",
             trigger_entity_id=uuid.uuid4(),
         )
-        assert len(accruals) == 1
-        accrual_id = accruals[0].id
-        assert accruals[0].commission_amount == Decimal("12500.00")
+        # The event fires one accrual per matching agreement, and an agreement
+        # with no development_id is broker-wide by design (see
+        # CommissionAgreementRepository.list_matching). Earlier tests in this
+        # module leave active broker-wide agreements behind in the shared
+        # session cluster, so the flow legitimately accrues for them too.
+        # Assert on the accrual this agreement produced, not on the count.
+        mine = [a for a in accruals if a.agreement_id == agreement_id]
+        assert len(mine) == 1, [(a.agreement_id, a.commission_amount) for a in accruals]
+        accrual_id = mine[0].id
+        assert mine[0].commission_amount == Decimal("12500.00")
         await session.commit()
 
     # Approve via endpoint as MANAGER.
