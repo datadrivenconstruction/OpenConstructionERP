@@ -352,6 +352,71 @@ def _resolve_base_currency(
     return distinct.pop() if len(distinct) == 1 else ""
 
 
+def plot_currency_mismatches(
+    plots: Iterable[Any],
+    matrix_currency: Any,
+    fallback_currency: Any = "",
+) -> list[tuple[str, str]]:
+    """Name the plots a price matrix cannot price because they are other money.
+
+    A plot's money is denominated in its own ``currency`` stamp, else in the
+    development's (``fallback_currency``, already resolved through the parent
+    project the way :func:`_resolve_base_currency` does it). A matrix computes
+    ``area_m2 * base_price_per_m2 * multipliers`` in *its* currency, and the
+    bulk recompute writes that figure into ``Plot.computed_price`` beside
+    ``Plot.price_base``, where both are read under the plot's one currency
+    stamp. A matrix in another currency therefore has nowhere to put its
+    number truthfully, and the recompute refuses rather than writing it.
+
+    A blank on either side is not a mismatch. The escrow transaction check in
+    this module compares only two stated codes, and so does this one: a plot
+    with no currency anywhere is priced and stays as unlabelled as every
+    other money figure in that development, which this run did not cause.
+
+    Args:
+        plots: Rows exposing ``plot_number`` and ``currency``.
+        matrix_currency: ``PriceMatrix.currency`` as stored.
+        fallback_currency: The development's resolved currency, or ``""``.
+
+    Returns:
+        ``[(plot_number, plot_currency), ...]`` in input order; empty when
+        every plot can take the matrix's price.
+    """
+    matrix_code = _currency_code(matrix_currency)
+    if not matrix_code:
+        return []
+    fallback = _currency_code(fallback_currency)
+    mismatched: list[tuple[str, str]] = []
+    for plot in plots:
+        code = _currency_code(getattr(plot, "currency", "")) or fallback
+        if code and code != matrix_code:
+            mismatched.append((str(getattr(plot, "plot_number", "") or ""), code))
+    return mismatched
+
+
+def _plot_currency_mismatch_detail(
+    matrix_name: Any,
+    matrix_currency: Any,
+    mismatched: list[tuple[str, str]],
+    total_plots: int,
+    *,
+    listed: int = 20,
+) -> str:
+    """Build the 422 detail for a recompute refused over currency.
+
+    Names both currencies and the plots, capped so a development of ten
+    thousand plots does not put ten thousand names on the wire.
+    """
+    names = ", ".join(f"{number} ({code})" for number, code in mismatched[:listed])
+    if len(mismatched) > listed:
+        names = f"{names} and {len(mismatched) - listed} more"
+    return (
+        f"PriceMatrix {str(matrix_name or '')!r} is denominated in {_currency_code(matrix_currency)}; "
+        f"{len(mismatched)} of {total_plots} plots are recorded in another currency, "
+        f"so no plot was repriced: {names}"
+    )
+
+
 def compute_kanban_column_money(
     values_by_currency: dict[str, Decimal],
     *,
@@ -6265,6 +6330,22 @@ async def _svc_bulk_recompute_dev_prices(
         offset=0,
         limit=10_000,
     )
+    # A plot's price is read under the plot's own currency stamp, else the
+    # development's, else the project's. A matrix in other money cannot fill
+    # ``computed_price`` without the figure landing under the wrong label, so
+    # the run is refused here, before the first write, naming both currencies
+    # and every plot concerned. Refusing the whole run rather than skipping
+    # the odd plots keeps the 200 honest: ``plots_updated + plots_unchanged``
+    # is read as the whole development, and a skipped plot would sit behind
+    # it at a stale price with nothing in the response saying so.
+    project = await _load_project_currency_meta(svc.session, dev.project_id)
+    fallback_code = _resolve_base_currency(dev.currency, getattr(project, "currency", ""), ())
+    mismatched = plot_currency_mismatches(rows, matrix.currency, fallback_code)
+    if mismatched:
+        raise HTTPException(
+            status_code=422,
+            detail=_plot_currency_mismatch_detail(matrix.name, matrix.currency, mismatched, len(rows)),
+        )
     # Snapshot all needed attributes BEFORE the first update_fields call so
     # every plot is repriced from the values this run started with, rather than
     # reloading a row an earlier iteration rewrote - that read raises
@@ -7677,6 +7758,7 @@ __all__ = [
     "compute_plot_price_breakdown",
     "compute_withholding",
     "derive_plot_construction_progress",
+    "plot_currency_mismatches",
     "supported_jurisdictions",
     "validate_option_compatibility",
 ]
