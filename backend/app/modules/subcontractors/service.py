@@ -687,7 +687,10 @@ _TAX_ID_RULES: dict[str, tuple[str, re.Pattern[str]]] = {
     # Outside EU
     "GB": ("GB VRN", re.compile(r"^\d{9}$|^\d{12}$|^GD\d{3}$|^HA\d{3}$")),
     "US": ("US EIN", re.compile(r"^\d{9}$")),
-    "CH": ("CH UID", re.compile(r"^E\d{9}$|^\d{9}MWST$")),
+    # Written CHE-123.456.789 MWST. The E belongs to the number and survives
+    # prefix stripping, and the VAT suffix is named in the language of the
+    # canton, so MWST, TVA and IVA are the same number rather than three.
+    "CH": ("CH UID", re.compile(r"^E?\d{9}(?:MWST|TVA|IVA)?$")),
     "NO": ("NO Org.nr", re.compile(r"^\d{9}MVA$|^\d{9}$")),
     "AU": ("AU ABN", re.compile(r"^\d{11}$")),
     "CA": ("CA BN9/15", re.compile(r"^\d{9}$|^\d{9}RT\d{4}$")),
@@ -701,21 +704,27 @@ _TAX_ID_RULES: dict[str, tuple[str, re.Pattern[str]]] = {
 }
 
 
-def _normalise_tax_id(country: str, raw: str) -> tuple[str, str]:
-    """Return (country_upper, canonical_tax_id) for a free-form input.
+def _tax_id_candidates(country: str, raw: str) -> tuple[str, list[str]]:
+    """Return (country_upper, bodies to try) for a free-form input.
 
     * Drops whitespace, dashes, slashes, dots.
     * Upper-cases the result.
     * If the input starts with the same 2-letter country code as the
-      ``country`` arg (e.g. ``DE123…`` with country=``DE``), strips it.
-      EU VAT numbers commonly carry the country prefix in invoicing
-      contexts but the format rules check only the body.
+      ``country`` arg (e.g. ``DE123…`` with country=``DE``), the stripped
+      body is offered first. EU VAT numbers commonly carry the country
+      prefix in invoicing contexts but the format rules check only the body.
+
+    The unstripped form stays as a second candidate, because those two
+    letters are not always a prefix. A French VAT key is two characters that
+    may themselves be letters, so a body can legitimately open with ``FR``.
+    Offering both can only accept input that one candidate alone refused;
+    anything that matched before still matches.
     """
     country_u = country.upper()[:2]
     cleaned = re.sub(r"[\s\-./,_]", "", raw or "").upper()
     if cleaned.startswith(country_u) and len(cleaned) > 2:
-        cleaned = cleaned[2:]
-    return country_u, cleaned
+        return country_u, [cleaned[2:], cleaned]
+    return country_u, [cleaned]
 
 
 def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
@@ -726,7 +735,8 @@ def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
     with no rule registered return ``format_valid=True`` with ``standard=None``
     - we don't want to block payment in unknown jurisdictions.
     """
-    country_u, normalised = _normalise_tax_id(country or "", tax_id or "")
+    country_u, candidates = _tax_id_candidates(country or "", tax_id or "")
+    normalised = candidates[0]
     if not normalised:
         return TaxIdValidationResponse(
             country=country_u,
@@ -745,14 +755,15 @@ def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
             reason=None,
         )
     standard_name, pattern = rule
-    if pattern.fullmatch(normalised):
-        return TaxIdValidationResponse(
-            country=country_u,
-            tax_id_normalised=normalised,
-            format_valid=True,
-            standard=standard_name,
-            reason=None,
-        )
+    for candidate in candidates:
+        if pattern.fullmatch(candidate):
+            return TaxIdValidationResponse(
+                country=country_u,
+                tax_id_normalised=candidate,
+                format_valid=True,
+                standard=standard_name,
+                reason=None,
+            )
     return TaxIdValidationResponse(
         country=country_u,
         tax_id_normalised=normalised,
