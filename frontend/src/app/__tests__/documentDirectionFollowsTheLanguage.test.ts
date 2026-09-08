@@ -59,7 +59,7 @@ describe('document direction follows the active language', () => {
     // to answer 'rtl' for everything - or for one language by accident - the
     // assertion above would still pass and this one would fail.
     const wrong = LTR.filter((code) => resolveDirection(code) !== 'ltr');
-    expect({ checked: LTR.length, wrong }).toEqual({ checked: 38, wrong: [] });
+    expect({ checked: LTR.length, wrong }).toEqual({ checked: 39, wrong: [] });
   });
 
   it('writes dir and lang onto <html> for each right-to-left language', () => {
