@@ -54,6 +54,7 @@ from app.modules.variations.repository import (
     VariationScheduleImpactRepository,
 )
 from app.modules.variations.schemas import (
+    DEFAULT_CHANGE_KIND,
     DayworkSheetCreate,
     DayworkSheetLineCreate,
     DayworkSheetLineUpdate,
@@ -70,6 +71,7 @@ from app.modules.variations.schemas import (
     SiteMeasurementUpdate,
     VariationBOQCreate,
     VariationBOQLineTraceUpdate,
+    VariationChangeKind,
     VariationCostImpactCreate,
     VariationCostImpactUpdate,
     VariationOrderCreate,
@@ -2080,6 +2082,7 @@ class VariationsService:
                     "source_position_id": source.id,
                     "contract_id": None,
                     "contract_line_id": None,
+                    "change_kind": item.change_kind,
                     "note": item.note,
                 }
             )
@@ -2111,6 +2114,7 @@ class VariationsService:
                     "source_position_id": None,
                     "contract_id": line.contract_id,
                     "contract_line_id": line.id,
+                    "change_kind": item.change_kind,
                     "note": item.note,
                 }
             )
@@ -2131,6 +2135,7 @@ class VariationsService:
                 source_position_id=fields["source_position_id"],
                 contract_id=fields["contract_id"],
                 contract_line_id=fields["contract_line_id"],
+                change_kind=str(fields["change_kind"]),
                 note=str(fields["note"] or ""),
             )
             for position, fields in zip(positions, pending, strict=True)
@@ -2176,6 +2181,7 @@ class VariationsService:
         source_position_id: uuid.UUID | None,
         contract_id: uuid.UUID | None,
         contract_line_id: uuid.UUID | None,
+        change_kind: VariationChangeKind,
         note: str,
     ) -> VariationBOQTrace:
         """Upsert the one trace row a line is allowed to have.
@@ -2185,7 +2191,9 @@ class VariationsService:
         answer rather than add a second one. Every field is written on both
         paths, including the ones being cleared: a partial update would leave
         the previous answer's ``contract_id`` sitting under a new
-        ``source_position_id`` and read as a line traced to both.
+        ``source_position_id`` and read as a line traced to both. The change
+        kind is written for the same reason - ``removed`` left under a fresh
+        estimating reference would read as omitting scope the line adds.
         """
         fields = {
             "origin": origin,
@@ -2193,6 +2201,7 @@ class VariationsService:
             "source_position_id": source_position_id,
             "contract_id": contract_id,
             "contract_line_id": contract_line_id,
+            "change_kind": change_kind,
             "note": note,
         }
         existing = await self.boq_trace_repo.get_for_position(position_id)
@@ -2253,6 +2262,11 @@ class VariationsService:
         # what contracted scope this line changes, which is what a variation
         # argues about. The estimating position is provenance for the money.
         origin = "contract_line" if line is not None else "boq_position" if source is not None else "manual"
+        # The kind is stored as stated, even where it contradicts the
+        # numbers or names no contract line to remove from. The validator
+        # reports that on the next read of the bill; refusing it here would
+        # make "the estimator has not finished" and "the estimator is wrong"
+        # the same 4xx, and only the second is anybody's business to stop.
         trace = await self._write_boq_line_trace(
             vr=vr,
             boq_id=position.boq_id,
@@ -2262,6 +2276,7 @@ class VariationsService:
             source_position_id=source.id if source is not None else None,
             contract_id=line.contract_id if line is not None else None,
             contract_line_id=line.id if line is not None else None,
+            change_kind=data.change_kind,
             note=data.note,
         )
         _safe_publish(
@@ -2273,15 +2288,17 @@ class VariationsService:
                 "boq_id": str(position.boq_id),
                 "position_id": str(position_id),
                 "origin": origin,
+                "change_kind": data.change_kind,
                 "actor_id": user_id or "",
             },
         )
         logger.info(
-            "Variation request %s traced line %s of bill %s as %s",
+            "Variation request %s traced line %s of bill %s as %s (%s)",
             vr.code,
             position_id,
             position.boq_id,
             origin,
+            data.change_kind,
         )
         return trace
 
@@ -2301,7 +2318,9 @@ class VariationsService:
         "somebody said it derives from nothing" the same absence.
 
         The line then fails ``variations.boq_lines_are_traced`` again, which
-        is correct: it no longer traces anywhere.
+        is correct: it no longer traces anywhere. Its change kind goes back
+        to ``added`` with the references, because a line that derives from
+        nothing cannot be omitting or modifying anything.
         """
         vr = await self.get_request(vr_id)
         position = await self._require_variation_boq_line(vr_id, position_id)
@@ -2314,6 +2333,7 @@ class VariationsService:
             source_position_id=None,
             contract_id=None,
             contract_line_id=None,
+            change_kind=DEFAULT_CHANGE_KIND,
             note="",
         )
         _safe_publish(
@@ -2359,7 +2379,8 @@ class VariationsService:
         from app.modules.boq.service import BOQService
 
         boq_id = boq.id
-        breakdown = (await BOQService(self.session).compute_boq_totals([boq_id])).get(boq_id, {})
+        boq_service = BOQService(self.session)
+        breakdown = (await boq_service.compute_boq_totals([boq_id])).get(boq_id, {})
         rows = list(
             (
                 await self.session.execute(
@@ -2371,6 +2392,7 @@ class VariationsService:
         )
         traces = await self.boq_trace_repo.list_for_boq(boq_id)
         by_position = {trace.position_id: trace for trace in traces}
+        change_summary = await self._summarise_change_kinds(boq_service, vr.project_id, rows, by_position)
 
         grand_total = _money(breakdown.get("grand_total"))
         payload: dict[str, Any] = {
@@ -2390,9 +2412,54 @@ class VariationsService:
             "estimated_cost_impact": headline,
             "estimate_matches_boq": abs(headline - grand_total) < _MONEY_EPSILON,
             "traces": traces,
+            "change_summary": change_summary,
         }
         payload["checks"] = await self._run_variation_boq_rules(payload, rows, by_position)
         return payload
+
+    async def _summarise_change_kinds(
+        self,
+        boq_service: Any,
+        project_id: uuid.UUID,
+        rows: list[Any],
+        by_position: dict[uuid.UUID, VariationBOQTrace],
+    ) -> dict[str, Any]:
+        """The bill's direct cost split by what each line does to the contract.
+
+        Each priced line is valued by the same helper
+        ``BOQService.compute_boq_totals`` values it with, against the same
+        project FX table, so the three subtotals sum to the bill's own
+        ``direct_cost`` rather than to a second figure that agrees with it
+        only on a single-currency bill. Which lines count as priced is also
+        the BOQ module's answer (``_is_section``), for the same reason.
+
+        A line with no trace row is ``added``, and so is a row whose kind is
+        something this code does not know - a value that reached the column
+        by some path other than the schema is not a claim about an omission.
+        """
+        from app.modules.boq.service import _is_section, _leaf_total_base_with_resources
+
+        base_currency, fx_map = await boq_service._resolve_project_fx_by_project(project_id)
+        buckets: dict[str, dict[str, Any]] = {
+            kind: {"line_count": 0, "total": Decimal("0")} for kind in ("added", "removed", "modified")
+        }
+        for row in rows:
+            if _is_section(row):
+                continue
+            trace = by_position.get(row.id)
+            kind = str(getattr(trace, "change_kind", "") or "") if trace is not None else ""
+            bucket = buckets.get(kind) or buckets[DEFAULT_CHANGE_KIND]
+            bucket["line_count"] += 1
+            bucket["total"] += _leaf_total_base_with_resources(row, fx_map, base_currency)
+        # Cents at the boundary, the way ``direct_cost`` leaves this module, so
+        # the three figures read like the total beside them and the net is the
+        # sum of the figures shown rather than of the unrounded ones behind them.
+        for bucket in buckets.values():
+            bucket["total"] = _money(bucket["total"])
+        return {
+            **buckets,
+            "net_total": sum((bucket["total"] for bucket in buckets.values()), Decimal("0")),
+        }
 
     async def _run_variation_boq_rules(
         self,
@@ -2426,6 +2493,16 @@ class VariationsService:
                             "id": str(row.id),
                             "ordinal": row.ordinal,
                             "unit": row.unit,
+                            "quantity": row.quantity,
+                            # The stated kind, or the default a line with no
+                            # row reads as. The rule that judges it against
+                            # the numbers has to see the same kind the
+                            # subtotals bucket the line under.
+                            "change_kind": (
+                                by_position[row.id].change_kind
+                                if row.id in by_position and by_position[row.id].change_kind
+                                else DEFAULT_CHANGE_KIND
+                            ),
                             "source_position_id": (
                                 str(by_position[row.id].source_position_id)
                                 if row.id in by_position and by_position[row.id].source_position_id

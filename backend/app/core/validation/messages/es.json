@@ -646,6 +646,13 @@
     "boq_total_matches_estimate": {
       "fail": "La estimación de esta solicitud es {estimate}, pero su presupuesto valorado suma {priced}",
       "suggestion": "Adopte el total valorado en la solicitud o corrija el presupuesto para que quede una sola cifra"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "La línea {line} está marcada como alcance eliminado, pero lleva una cantidad positiva de {quantity} - una omisión se descuenta del contrato como cantidad negativa",
+      "added_negative": "La línea {line} está marcada como alcance añadido, pero lleva una cantidad negativa de {quantity} - el alcance que se descuenta del contrato es eliminado, no añadido",
+      "removed_needs_contract_line": "La línea {line} está marcada como alcance eliminado, pero no remite a ninguna línea de contrato de la que eliminar algo",
+      "modified_needs_contract_line": "La línea {line} está marcada como alcance modificado, pero no remite a ninguna línea de contrato que se modifique",
+      "suggestion": "Corrija el tipo de cambio o la cantidad en el origen de la línea, o indique la línea de contrato afectada"
     }
   },
   "cases": {

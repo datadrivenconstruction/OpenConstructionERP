@@ -192,6 +192,17 @@ class VariationBOQTrace(Base):
     module must not put a DB-level dependency on the BOQ or contracts
     tables. Only ``variation_request_id`` is a real FK, because that row is
     in this module and deleting a request must take its trace with it.
+
+    ``change_kind`` is the other half of provenance. The references say where
+    a line came from; this says what the variation does to that source:
+    ``added`` scope the contract never held, ``removed`` scope the contract
+    holds and the variation omits (a negative quantity against the schedule
+    of values), or ``modified`` scope where the same contract line is kept
+    at a different quantity or rate. It is stated by the estimator, never
+    inferred from the numbers: a negative quantity is consistent with an
+    omission and also with a typing error, and only a person knows which.
+    The validator reports a kind that contradicts the numbers; it does not
+    correct it.
     """
 
     __tablename__ = "oe_variations_boq_trace"
@@ -224,10 +235,15 @@ class VariationBOQTrace(Base):
     #: The contract and schedule-of-values line the change affects.
     contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     contract_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    #: What the variation does to the source: ``added``, ``removed`` or
+    #: ``modified``. ``added`` is the default because a line with no trace at
+    #: all is added scope, and a row that predates the column has to read
+    #: the same way as no row rather than as a claim nobody made.
+    change_kind: Mapped[str] = mapped_column(String(10), nullable=False, default="added", server_default="added")
     note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
     def __repr__(self) -> str:
-        return f"<VariationBOQTrace {self.origin} pos={self.position_id}>"
+        return f"<VariationBOQTrace {self.origin}/{self.change_kind} pos={self.position_id}>"
 
 
 class VariationOrder(Base):

@@ -2,9 +2,9 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Validation rules for a variation request's dedicated bill of quantities.
 
-The variations module shipped without any registered rules, so these two are
-the first. They are deliberately narrow: they answer the two questions a
-priced variation can be wrong about in a way no other module would notice.
+The variations module shipped without any registered rules, so these are the
+first. They are deliberately narrow: they answer the questions a priced
+variation can be wrong about in a way no other module would notice.
 
 * ``variations.boq_lines_are_traced`` - every priced line in a variation bill
   says where it came from. A variation is an argument about a contract, and a
@@ -16,11 +16,16 @@ priced variation can be wrong about in a way no other module would notice.
   bill existed, and the whole point of pricing is to replace it. It is a
   warning so the reader knows which of the two numbers on the screen is now
   the stale one.
+* ``variations.change_kind_matches_numbers`` - what a line says it does to
+  the contract (``added``, ``removed``, ``modified``) agrees with its numbers
+  and its trace. The kind is stated by the estimator and never inferred, so
+  a contradiction is a person's statement disagreeing with a person's
+  figures, and only the person can say which is wrong. The rule names the
+  disagreement; it corrects nothing.
 
-Both are WARNING severity on purpose. Neither states that the data is
-invalid; both state that a human is about to read two numbers and needs to
-know which one to believe. Errors would block the workflow the rules exist to
-inform.
+All are WARNING severity on purpose. None states that the data is invalid;
+each states that a human is about to read two things and needs to know which
+one to believe. Errors would block the workflow the rules exist to inform.
 
 The rules run on the read path of ``GET /variation-requests/{id}/boq/`` and
 their results are part of that response, so validation is not an optional
@@ -182,6 +187,92 @@ class VariationBOQTotalMatchesEstimate(ValidationRule):
         ]
 
 
+#: The change kinds a trace may state. Anything else in the column reached it
+#: by some path other than the schema and is read as the default, exactly as
+#: the subtotals read it, so the rule and the money agree on every line.
+_CHANGE_KINDS = ("added", "removed", "modified")
+_DEFAULT_CHANGE_KIND = "added"
+
+
+def _contradiction(kind: str, quantity: Decimal, has_contract_line: bool) -> str | None:
+    """Which message key a line's kind contradicts, or ``None`` when it does not.
+
+    One finding per line, in this order, so the count of findings stays a
+    count of lines and a line wrong twice is not reported as two lines:
+
+    * ``removed`` with a positive quantity - an omission comes off the
+      contract, and money that comes off is a negative quantity against the
+      schedule of values. This is the contradiction that makes an omission
+      price wrong in the contractor's favour, so it is checked first.
+    * ``removed`` or ``modified`` with no contract line - there is no
+      contracted item to remove or modify. Scope the contract never held can
+      only be added.
+    * ``added`` with a negative quantity - the mirror of the first: money
+      coming off the contract is not an addition.
+
+    ``modified`` with either sign is fine: a re-measure goes up or down.
+    """
+    if kind == "removed" and quantity > 0:
+        return "removed_positive"
+    if kind in ("removed", "modified") and not has_contract_line:
+        return f"{kind}_needs_contract_line"
+    if kind == "added" and quantity < 0:
+        return "added_negative"
+    return None
+
+
+class VariationBOQChangeKindMatchesNumbers(ValidationRule):
+    """A line's stated change kind agrees with its quantity and its trace."""
+
+    rule_id = "variations.change_kind_matches_numbers"
+    name = "Variation Line Change Kind Matches Its Numbers"
+    standard = "variations"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a variation line whose stated added/removed/modified kind contradicts its quantity or trace."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for line in _lines(context):
+            # The same priced-line test the two rules above apply, so the
+            # three rules and the bill view judge one population.
+            if str(line.get("unit") or "") in ("", "section"):
+                continue
+            kind = str(line.get("change_kind") or "")
+            if kind not in _CHANGE_KINDS:
+                kind = _DEFAULT_CHANGE_KIND
+            quantity = _decimal(line.get("quantity"))
+            fault = _contradiction(kind, quantity, bool(line.get("contract_line_id")))
+            label = str(line.get("ordinal") or line.get("id") or "")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=fault is None,
+                    message=(
+                        _ok(locale)
+                        if fault is None
+                        else translate(
+                            f"variations.change_kind_matches_numbers.{fault}",
+                            locale=locale,
+                            line=label,
+                            quantity=format(quantity, "f"),
+                        )
+                    ),
+                    element_ref=str(line.get("id") or label),
+                    suggestion=(
+                        None
+                        if fault is None
+                        else translate("variations.change_kind_matches_numbers.suggestion", locale=locale)
+                    ),
+                )
+            )
+        return results
+
+
 def register_variations_rules() -> None:
     """Idempotently register the variation-bill rules.
 
@@ -190,3 +281,4 @@ def register_variations_rules() -> None:
     """
     rule_registry.register(VariationBOQLinesAreTraced(), rule_sets=[VARIATIONS_RULE_SET])
     rule_registry.register(VariationBOQTotalMatchesEstimate(), rule_sets=[VARIATIONS_RULE_SET])
+    rule_registry.register(VariationBOQChangeKindMatchesNumbers(), rule_sets=[VARIATIONS_RULE_SET])

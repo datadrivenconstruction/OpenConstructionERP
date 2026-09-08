@@ -646,6 +646,13 @@
     "boq_total_matches_estimate": {
       "fail": "Die Schätzung auf diesem Antrag lautet {estimate}, das kalkulierte LV ergibt jedoch {priced}",
       "suggestion": "Übernehmen Sie die kalkulierte Summe auf den Antrag oder korrigieren Sie das LV, damit eine Zahl gilt"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Position {line} ist als entfallender Leistungsumfang gekennzeichnet, trägt aber eine positive Menge von {quantity} - ein Entfall geht als negative Menge vom Vertrag ab",
+      "added_negative": "Position {line} ist als zusätzlicher Leistungsumfang gekennzeichnet, trägt aber eine negative Menge von {quantity} - Umfang, der vom Vertrag abgeht, ist entfallend, nicht zusätzlich",
+      "removed_needs_contract_line": "Position {line} ist als entfallender Leistungsumfang gekennzeichnet, verweist aber auf keine Vertragsposition, von der etwas entfallen könnte",
+      "modified_needs_contract_line": "Position {line} ist als geänderter Leistungsumfang gekennzeichnet, verweist aber auf keine Vertragsposition, die geändert würde",
+      "suggestion": "Korrigieren Sie die Änderungsart oder die Menge in der Herkunft der Position, oder benennen Sie die betroffene Vertragsposition"
     }
   },
   "cases": {

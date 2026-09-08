@@ -646,6 +646,13 @@
     "boq_total_matches_estimate": {
       "fail": "The headline estimate on this request is {estimate}, but its priced bill totals {priced}",
       "suggestion": "Adopt the priced total onto the request, or correct the bill, so one figure is the answer"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Line {line} is marked as removed scope but carries a positive quantity of {quantity} - an omission comes off the contract as a negative quantity",
+      "added_negative": "Line {line} is marked as added scope but carries a negative quantity of {quantity} - scope that comes off the contract is removed, not added",
+      "removed_needs_contract_line": "Line {line} is marked as removed scope but traces to no schedule-of-values line, so there is no contracted item for it to remove",
+      "modified_needs_contract_line": "Line {line} is marked as modified scope but traces to no schedule-of-values line, so there is no contracted item for it to modify",
+      "suggestion": "Correct the change kind or the quantity on the line's trace, or name the contract line the change affects"
     }
   },
   "cases": {
