@@ -34,10 +34,14 @@ Where the country comes from, and where it does not
 From ``oe_projects_project.country_code``. It is the only country the product
 stores: a ``User`` row carries ``locale``, which is a language and not a
 country, and the distinction is not pedantic here. The interface language
-``en`` declares country ``gb`` in ``SUPPORTED_LANGUAGES``, so an American
-reading the product in English would have been served A4 by any resolver that
-read the language, and the one country the setting exists for would have been
-the one country it got wrong.
+``en`` declares country ``xx`` in ``SUPPORTED_LANGUAGES``, which is this
+codebase's way of saying no country at all, so a resolver that read the
+language would learn nothing about anyone reading in plain English. It used to
+declare ``gb``, which was worse than learning nothing: an American reading the
+product in English was served A4 by any resolver that read the language, and
+the one country the setting exists for was the one country it got wrong.
+``en-GB`` and ``en-US`` do declare a country, but only for a reader who went
+and picked a region, which is not the population a default is written for.
 
 ``country_code`` is nullable and its own column comment is emphatic that NULL
 means unknown rather than neutral, and that no reader may substitute a

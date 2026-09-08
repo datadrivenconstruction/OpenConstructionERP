@@ -11,8 +11,10 @@
  * the stored value into the sheet a generated document is laid out on, and
  * 'auto' there means "follow the project's country" rather than "follow the
  * interface language". The language would be the wrong source - our own `en`
- * entry declares country `gb`, so an American reading the product in English
- * would be handed A4 by a resolver that asked it.
+ * entry declares country `xx`, meaning no country at all, so a resolver that
+ * asked it would learn nothing about anyone reading in plain English. It used
+ * to declare `gb`, which answered the question wrongly rather than declining
+ * to answer: an American reading the product in English was handed A4.
  */
 
 import { useState, useMemo, useCallback } from 'react';
