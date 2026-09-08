@@ -35,6 +35,22 @@ concurrency:
   # cancelled, 19 of the last 20 consecutively. What that costs is not a wrong
   # answer, it is NO answer. A cancelled run has no conclusion, nothing goes
   # red, and the silence is indistinguishable from health.
+  #
+  # Remeasured 2026-09-08: this setting does what it says and main is still
+  # losing verdicts, 8 of the last 20 runs cancelled. The setting governs the
+  # run that is already executing. It does not govern the one waiting behind
+  # it: a group holds at most one pending run, so when a third push arrives
+  # the pending one is evicted. Both cancelled runs read that day had zero
+  # jobs and a run_started_at equal to their created_at, which is what being
+  # dropped from the queue looks like as opposed to being stopped mid-flight.
+  #
+  # So the guarantee here is narrower than "every push to main gets a
+  # verdict". It is "the newest push gets one, once the pushes stop". That is
+  # enough for the way we read this workflow, since we read it on a settled
+  # head, and it is not enough for anyone who reads a per-commit result. Fix
+  # it, if it ever needs fixing, by putting the sha in the group rather than
+  # by touching the line below; the cost of that is one full matrix per
+  # commit, which is why it is not the default.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
