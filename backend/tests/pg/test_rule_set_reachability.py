@@ -196,7 +196,7 @@ def test_every_declared_rule_set_has_rules(trees: dict[Path, ast.Module]) -> Non
 
 @pytest.mark.parametrize(
     "rule_set",
-    ["procurement", "subcontract", "submittal", "rfq_issue", "rfq_award", "boq_quality"],
+    ["procurement", "subcontract", "submittal", "rfq_issue", "rfq_award", "boq_quality", "project_completeness"],
 )
 def test_known_rule_set_is_reachable(rule_set: str) -> None:
     """Pin the core sets whose reachability has been questioned before.
@@ -205,6 +205,11 @@ def test_known_rule_set_is_reachable(rule_set: str) -> None:
     coverage. They do. Naming them here means the next person gets the answer
     from a test rather than from another read of the registry, and a rename
     that breaks one says which module lost its validation.
+
+    ``project_completeness`` is the set twenty two demo templates named for
+    months while nothing registered into it. It is pinned by name so that the
+    day its registration line is lost the failure says which twenty two
+    dashboards went back to promising a check that does not run.
     """
     assert rule_registry.has_rules(rule_set), (
         f"rule set {rule_set!r} resolves to no rules, so every validation "
@@ -295,16 +300,17 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "app" / "scripts"
 
 #: Rule sets a demo asks for that the engine does not register.
 #:
-#: ``project_completeness`` is declared by twenty two demo templates and no rule
-#: registers into it. Requesting it prints "Validation requested unimplemented
-#: rule set(s): project_completeness (no rules registered)" and the run
-#: continues, so twenty two dashboards promise a completeness check and show
-#: nothing. Whether that set gets written or the declarations get
-#: dropped is a product decision and not this test's to make, so it is named
-#: here rather than hidden by a wildcard: a new pack cannot quietly join it,
-#: and ``test_the_allowlist_still_describes_the_tree`` fails the day it is
-#: implemented, which is the day this entry has to go.
-_UNREGISTERED_DEMO_RULE_SETS = {"project_completeness"}
+#: Empty, and kept rather than deleted. It held ``project_completeness`` while
+#: twenty two demo templates declared that set and no rule registered into it:
+#: requesting it printed "Validation requested unimplemented rule set(s):
+#: project_completeness (no rules registered)" and the run continued, so
+#: twenty two dashboards promised a completeness check and showed nothing.
+#: The set is now written (``app/core/validation/rules/project_completeness.py``)
+#: and the entry left, as this comment said it would have to. The set stays so
+#: that the next such name has one place to be recorded instead of a wildcard,
+#: and so that ``test_the_allowlist_still_describes_the_tree`` keeps asking,
+#: in both directions, whether what is written here is still true.
+_UNREGISTERED_DEMO_RULE_SETS: set[str] = set()
 
 
 def _demo_sources() -> list[Path]:

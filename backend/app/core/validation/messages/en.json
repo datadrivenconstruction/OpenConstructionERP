@@ -712,5 +712,50 @@
       "fail": "The estimate does not say how VAT is treated",
       "suggestion": "Record the treatment: the standard rate, a reduced or zero rate where the work qualifies, or the domestic reverse charge where the supply falls inside it. The reverse charge moves the VAT to the customer and changes what the contractor may invoice"
     }
-  }
+  },
+    "project_completeness": {
+      "country_set": {
+        "fail": "The project names no country, so no price base, tax rate or working calendar can be resolved for it",
+        "suggestion": "Set the project's country in its settings. The country decides which regional pack, tax and calendar every figure is read against"
+      },
+      "currency_set": {
+        "fail": "The project states no currency, so its bills, markups and contracts cannot be summed",
+        "suggestion": "Choose the project currency in its settings. Every bill and contract is priced in it and every total is read in it"
+      },
+      "currency_matches_bill": {
+        "fail": "The project is priced in {project_currency}, but rows of this bill are priced in {bill_currencies}",
+        "suggestion": "Convert the rows to the project currency at a stated rate, or record the exchange rate on the project, so the bill total is one number"
+      },
+      "priced_bill_present": {
+        "fail": "The project has no bill of quantities with positions, so there is nothing to estimate from",
+        "suggestion": "Create a bill of quantities and add positions, or import one from a CAD model, a spreadsheet or an exchange file"
+      },
+      "bill_base_date_set": {
+        "fail": "The bill \"{bill}\" does not state the base date its rates are current at",
+        "suggestion": "Record the base date on the bill. Without it the rates cannot be indexed, taxed at their own date or compared with another estimate"
+      },
+      "classification_standard_set": {
+        "fail": "The project has no classification standard, so its positions carry codes nobody can check",
+        "suggestion": "Choose the classification standard the project is coded to. It also decides which country rule sets validation runs"
+      },
+      "planned_dates_set": {
+        "both_missing": "The project has neither a planned start nor a planned end date",
+        "start_missing": "The project has a planned end date but no planned start date",
+        "end_missing": "The project has a planned start date but no planned end date",
+        "unreadable": "The planned date \"{value}\" cannot be read as a date",
+        "suggestion": "Enter the planned start and end dates on the project as dates. Time-related cost, escalation and the programme are priced between them"
+      },
+      "planned_dates_ordered": {
+        "fail": "The project is planned to start on {start} and end on {end}, which is before it starts",
+        "suggestion": "Swap or correct the planned dates so the start comes before the end"
+      },
+      "client_recorded": {
+        "fail": "The project records no client, and no contract names an employer",
+        "suggestion": "Record the client on the project, or add the employer as a party on the contract, so the estimate has an addressee"
+      },
+      "procurement_started": {
+        "fail": "The project is in the {phase} phase, yet it has no contract and no tender package",
+        "suggestion": "Create a tender package from the bill or record the contract, or set the phase back to the estimating stage the project is actually in"
+      }
+    }
 }

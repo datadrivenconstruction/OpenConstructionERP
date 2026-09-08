@@ -445,6 +445,7 @@ teach identifiers that were never rule sets at all.
 | `estimate_audit` | Estimate-level audit checks |
 | `schedule_quality` | Programme quality |
 | `sheet_completeness` | Drawing index against issue register |
+| `project_completeness` | The project record itself: country and currency set, a priced bill in that currency, a base date on every bill, a classification standard, planned dates in order, a client, and a contract or tender once past estimating |
 | `classification_nudge` | Suggests a classification when none is set |
 | `ai_estimator` | Guards on machine-produced estimate lines |
 | `field_time` | Site time capture |

@@ -712,5 +712,50 @@
       "fail": "Die Kalkulation sagt nicht, wie die Umsatzsteuer behandelt wird",
       "suggestion": "Hinterlegen Sie die Behandlung: Regelsatz, ermäßigter oder Nullsatz, soweit die Leistung dafür qualifiziert, oder das Reverse-Charge-Verfahren, soweit die Leistung darunter fällt. Das Reverse-Charge-Verfahren verlagert die Steuer auf den Leistungsempfänger und ändert, was der Unternehmer abrechnen darf"
     }
-  }
+  },
+    "project_completeness": {
+      "country_set": {
+        "fail": "Das Projekt nennt kein Land, daher lassen sich weder Preisbasis noch Steuersatz noch Arbeitskalender bestimmen",
+        "suggestion": "Legen Sie das Land des Projekts in den Einstellungen fest. Es entscheidet, gegen welches Regionalpaket, welche Steuer und welchen Kalender jede Zahl gelesen wird"
+      },
+      "currency_set": {
+        "fail": "Das Projekt nennt keine Währung, daher lassen sich Leistungsverzeichnisse, Zuschläge und Verträge nicht summieren",
+        "suggestion": "Wählen Sie die Projektwährung in den Einstellungen. Jedes Leistungsverzeichnis und jeder Vertrag wird in ihr bepreist und jede Summe in ihr gelesen"
+      },
+      "currency_matches_bill": {
+        "fail": "Das Projekt ist in {project_currency} bepreist, Positionen dieses Leistungsverzeichnisses aber in {bill_currencies}",
+        "suggestion": "Rechnen Sie die Positionen zu einem angegebenen Kurs in die Projektwährung um oder hinterlegen Sie den Wechselkurs am Projekt, damit die Summe des Leistungsverzeichnisses eine Zahl ist"
+      },
+      "priced_bill_present": {
+        "fail": "Das Projekt hat kein Leistungsverzeichnis mit Positionen, es gibt also nichts zu kalkulieren",
+        "suggestion": "Legen Sie ein Leistungsverzeichnis an und erfassen Sie Positionen, oder importieren Sie eines aus einem CAD-Modell, einer Tabelle oder einer Austauschdatei"
+      },
+      "bill_base_date_set": {
+        "fail": "Das Leistungsverzeichnis \"{bill}\" nennt kein Preisbasisdatum für seine Ansätze",
+        "suggestion": "Hinterlegen Sie das Preisbasisdatum am Leistungsverzeichnis. Ohne dieses lassen sich die Ansätze weder indexieren noch zu ihrem eigenen Datum versteuern noch mit einer anderen Kalkulation vergleichen"
+      },
+      "classification_standard_set": {
+        "fail": "Das Projekt hat keinen Klassifikationsstandard, seine Positionen tragen also Codes, die niemand prüfen kann",
+        "suggestion": "Wählen Sie den Klassifikationsstandard, nach dem das Projekt codiert ist. Er entscheidet auch, welche Länderregelsätze die Validierung ausführt"
+      },
+      "planned_dates_set": {
+        "both_missing": "Das Projekt hat weder einen geplanten Beginn noch ein geplantes Ende",
+        "start_missing": "Das Projekt hat ein geplantes Ende, aber keinen geplanten Beginn",
+        "end_missing": "Das Projekt hat einen geplanten Beginn, aber kein geplantes Ende",
+        "unreadable": "Das geplante Datum \"{value}\" lässt sich nicht als Datum lesen",
+        "suggestion": "Tragen Sie geplanten Beginn und geplantes Ende am Projekt als Datum ein. Zeitabhängige Kosten, Preissteigerung und Terminplan werden zwischen ihnen bepreist"
+      },
+      "planned_dates_ordered": {
+        "fail": "Das Projekt soll am {start} beginnen und am {end} enden, also vor seinem Beginn",
+        "suggestion": "Vertauschen oder korrigieren Sie die geplanten Daten, damit der Beginn vor dem Ende liegt"
+      },
+      "client_recorded": {
+        "fail": "Das Projekt nennt keinen Auftraggeber, und kein Vertrag führt einen Auftraggeber als Partei",
+        "suggestion": "Hinterlegen Sie den Auftraggeber am Projekt oder nehmen Sie ihn als Vertragspartei auf, damit die Kalkulation einen Adressaten hat"
+      },
+      "procurement_started": {
+        "fail": "Das Projekt befindet sich in der Phase {phase}, hat aber weder einen Vertrag noch ein Vergabepaket",
+        "suggestion": "Erstellen Sie ein Vergabepaket aus dem Leistungsverzeichnis oder erfassen Sie den Vertrag, oder setzen Sie die Phase auf den Kalkulationsstand zurück, in dem sich das Projekt tatsächlich befindet"
+      }
+    }
 }

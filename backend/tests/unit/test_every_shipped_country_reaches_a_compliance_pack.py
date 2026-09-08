@@ -114,11 +114,13 @@ NON_JURISDICTION_RULE_SETS: dict[str, str] = {
         "trade pack with no country, so no jurisdiction should reach it."
     ),
     "project_completeness": (
-        "No rule implements it. Twenty two demo templates declare it and the "
-        "engine reports it as unsupported, which is how the dashboard draws it "
-        "as a check that did not run. It names no jurisdiction either, so "
-        "reaching it from a country's contract-signature gate would be a "
-        "different decision from this one."
+        "Registered by register_builtin_rules from its own module under "
+        "app/core/validation/rules and run through the project's own "
+        "validation_rule_sets, which twenty two demo templates declare. It "
+        "asks whether the project record is complete (country, currency, "
+        "dates, client, a priced bill) and names no jurisdiction, so reaching "
+        "it from a country's contract-signature gate would be a different "
+        "decision from this one."
     ),
 }
 

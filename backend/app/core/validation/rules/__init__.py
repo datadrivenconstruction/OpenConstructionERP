@@ -9424,6 +9424,11 @@ class RFQAwardHasCompetition(_RFQRule):
 
 def register_builtin_rules() -> None:
     """Register all built-in validation rules."""
+    # Imported here and not at the top of the file: the module reads its
+    # locale, position and currency helpers from this package, so a top-level
+    # import would run before those names exist.
+    from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
+
     rules: list[tuple[ValidationRule, list[str] | None]] = [
         # BOQ Quality (universal)
         (PositionHasQuantity(), None),
@@ -9622,6 +9627,10 @@ def register_builtin_rules() -> None:
         (SheetCompletenessMissing(), ["sheet_completeness"]),
         (SheetCompletenessExtra(), ["sheet_completeness"]),
         (SheetRevisionMismatch(), ["sheet_completeness"]),
+        # Project completeness (universal). Twenty two demo templates asked for
+        # this set while nothing registered into it; the rules live in their own
+        # module and read the project record the shared payload builder carries.
+        *((rule_class(), None) for rule_class in PROJECT_COMPLETENESS_RULES),
     ]
 
     for rule, sets in rules:

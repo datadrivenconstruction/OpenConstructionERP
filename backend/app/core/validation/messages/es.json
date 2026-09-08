@@ -712,5 +712,50 @@
       "fail": "El presupuesto no indica como se trata el IVA",
       "suggestion": "Registre el tratamiento: tipo general, tipo reducido o cero cuando la obra lo permita, o la inversion del sujeto pasivo cuando la entrega quede dentro de ella. La inversion del sujeto pasivo traslada el impuesto al cliente y cambia lo que el contratista puede facturar"
     }
-  }
+  },
+    "project_completeness": {
+      "country_set": {
+        "fail": "El proyecto no indica ningún país, por lo que no se puede determinar ni la base de precios, ni el tipo impositivo ni el calendario laboral",
+        "suggestion": "Defina el país del proyecto en su configuración. El país decide contra qué paquete regional, qué impuesto y qué calendario se lee cada cifra"
+      },
+      "currency_set": {
+        "fail": "El proyecto no indica ninguna moneda, por lo que sus presupuestos, recargos y contratos no se pueden sumar",
+        "suggestion": "Elija la moneda del proyecto en su configuración. Cada presupuesto y cada contrato se valoran en ella y cada total se lee en ella"
+      },
+      "currency_matches_bill": {
+        "fail": "El proyecto está valorado en {project_currency}, pero hay partidas de este presupuesto valoradas en {bill_currencies}",
+        "suggestion": "Convierta las partidas a la moneda del proyecto a un tipo de cambio declarado, o registre el tipo de cambio en el proyecto, para que el total del presupuesto sea una sola cifra"
+      },
+      "priced_bill_present": {
+        "fail": "El proyecto no tiene ningún presupuesto con partidas, así que no hay nada que estimar",
+        "suggestion": "Cree un presupuesto y añada partidas, o importe uno desde un modelo CAD, una hoja de cálculo o un archivo de intercambio"
+      },
+      "bill_base_date_set": {
+        "fail": "El presupuesto \"{bill}\" no indica la fecha base a la que están referidos sus precios",
+        "suggestion": "Registre la fecha base en el presupuesto. Sin ella los precios no se pueden actualizar, ni gravar a su propia fecha, ni comparar con otra estimación"
+      },
+      "classification_standard_set": {
+        "fail": "El proyecto no tiene un estándar de clasificación, así que sus partidas llevan códigos que nadie puede comprobar",
+        "suggestion": "Elija el estándar de clasificación con el que está codificado el proyecto. También decide qué conjuntos de reglas nacionales ejecuta la validación"
+      },
+      "planned_dates_set": {
+        "both_missing": "El proyecto no tiene ni fecha de inicio ni fecha de fin previstas",
+        "start_missing": "El proyecto tiene fecha de fin prevista pero no fecha de inicio prevista",
+        "end_missing": "El proyecto tiene fecha de inicio prevista pero no fecha de fin prevista",
+        "unreadable": "La fecha prevista \"{value}\" no se puede leer como fecha",
+        "suggestion": "Introduzca las fechas de inicio y fin previstas en el proyecto como fechas. Los costes ligados al tiempo, la revisión de precios y el programa se valoran entre ellas"
+      },
+      "planned_dates_ordered": {
+        "fail": "El proyecto está previsto para empezar el {start} y terminar el {end}, es decir, antes de empezar",
+        "suggestion": "Intercambie o corrija las fechas previstas para que el inicio sea anterior al fin"
+      },
+      "client_recorded": {
+        "fail": "El proyecto no registra ningún cliente y ningún contrato nombra a un promotor",
+        "suggestion": "Registre el cliente en el proyecto, o añada al promotor como parte del contrato, para que la estimación tenga un destinatario"
+      },
+      "procurement_started": {
+        "fail": "El proyecto está en la fase {phase}, pero no tiene ningún contrato ni ningún paquete de licitación",
+        "suggestion": "Cree un paquete de licitación a partir del presupuesto o registre el contrato, o devuelva la fase a la etapa de estimación en la que realmente está el proyecto"
+      }
+    }
 }

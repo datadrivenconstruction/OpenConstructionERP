@@ -71,6 +71,12 @@ RULE_SET_DESCRIPTIONS: dict[str, str] = {
         "uploaded sheet set - flags missing sheets (error), extra sheets and revision "
         "mismatches (warning)."
     ),
+    "project_completeness": (
+        "Project completeness (universal): the project names its country and currency "
+        "(errors), has a priced bill whose rows are in that currency, a base date on "
+        "every bill, a classification standard, planned start and end dates in order, a "
+        "recorded client, and, once past estimating, a contract or tender package."
+    ),
 }
 
 
