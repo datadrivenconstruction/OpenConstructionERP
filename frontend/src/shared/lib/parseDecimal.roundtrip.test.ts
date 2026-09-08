@@ -113,7 +113,7 @@ describe('the separator a user actually types', () => {
     expect(parseDecimalInput(new Intl.NumberFormat('fa').format(1234.56))).toBe(1234.56);
     // ar is NOT in that set: it resolves to Latin digits. Asserted so nobody
     // "fixes" a fold that was never needed.
-    expect(new Intl.NumberFormat('ar').format(1234.56)).toMatch(/^[0-9.,  ]+$/);
+    expect(new Intl.NumberFormat('ar').format(1234.56)).toMatch(/^[0-9.,\u00A0\u202F]+$/);
   });
 });
 
