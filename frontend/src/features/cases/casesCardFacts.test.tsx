@@ -234,6 +234,11 @@ const companyNames = target.companyTypes.map(
  *  assertion that matters here. */
 let card: HTMLElement;
 
+// Rendering the whole catalogue is the one expensive step in this file and it
+// runs once, here. Vitest gives a hook ten seconds by default, and on a loaded
+// runner that has not been enough: the macOS job on d2c397005 failed this file
+// at collection with "Hook timed out in 10000ms" while every assertion behind
+// it was green. Sixty seconds is what visual-regression gives the same render.
 beforeAll(() => {
   localStorage.clear();
   render(
@@ -247,7 +252,7 @@ beforeAll(() => {
   const root = title.closest<HTMLElement>('[role="button"]');
   if (!root) throw new Error("Case card root (role=button) not found");
   card = root;
-});
+}, 60_000);
 
 describe("the catalogue card names the case's audience and its span", () => {
   it("is testing a case that has both facts to state", () => {
