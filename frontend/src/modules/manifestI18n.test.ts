@@ -45,11 +45,13 @@ const ROUTE_TITLES: ManifestString[] = MODULE_REGISTRY.flatMap((m) =>
 );
 
 /**
- * The one module whose route titles stay English literals: a country label
- * names a measurement standard and carries its country with it
+ * The one module whose country route titles stay English literals: a country
+ * label names a measurement standard and carries its country with it
  * ("United Kingdom NRM 1/2"), and the standard half is not translated in any
- * language. Named here rather than skipped silently, so the exception stays a
- * closed set of exactly one module and a new literal anywhere else fails.
+ * language. Its hub route is keyed like every other title, because the hub
+ * speaks for the module and not for a standard. Named here rather than
+ * skipped silently, so the exception stays a closed set of exactly one module
+ * and a new literal anywhere else fails.
  */
 const LITERAL_ROUTE_TITLE_MODULES = new Set(['regional-exchange']);
 
@@ -138,12 +140,17 @@ describe('module route titles', () => {
   });
 
   it('keep the exception to the modules that declare it', () => {
-    // If regional-exchange ever keys its titles, this fails and the exception
-    // above gets deleted rather than quietly outliving its reason.
+    // If regional-exchange ever keys its country titles too, this fails and
+    // the exception above gets deleted rather than quietly outliving its
+    // reason. Its hub route is keyed already, so the question is whether any
+    // literal is left, not whether every title is one.
     for (const moduleId of LITERAL_ROUTE_TITLE_MODULES) {
       const titles = ROUTE_TITLES.filter((e) => e.moduleId === moduleId);
       expect(titles.length, `${moduleId} declares no routes`).toBeGreaterThan(0);
-      expect(titles.every((e) => !isModuleI18nKey(e.value))).toBe(true);
+      expect(
+        titles.some((e) => !isModuleI18nKey(e.value)),
+        `${moduleId} keys every title now, delete the exception`,
+      ).toBe(true);
     }
   });
 
