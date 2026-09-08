@@ -272,6 +272,29 @@ class VariationBOQCreate(BaseModel):
     source_contract_lines: list[VariationBOQSourceContractLine] = Field(default_factory=list, max_length=500)
 
 
+class VariationBOQLineTraceUpdate(BaseModel):
+    """Where one line of an existing variation bill came from.
+
+    Seeding a bill records this for every line it copies, but a bill is an
+    ordinary bill and grows the ordinary way: a surveyor adds lines to it
+    through the BOQ editor long after it was opened, and those lines arrive
+    with no provenance at all. This is how one acquires it afterwards.
+
+    Both references are optional and independent, exactly as they are on the
+    seeded path. Naming neither is not the same as declining to answer - it
+    is the answer "this line derives from nothing", which is a legitimate
+    thing for a variation line to be and is recorded as ``origin='manual'``.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    #: The contract schedule-of-values line this line changes.
+    contract_line_id: UUID | None = None
+    #: The estimating bill position the scope was taken from.
+    source_position_id: UUID | None = None
+    note: str = Field(default="", max_length=2000)
+
+
 class VariationBOQTraceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 

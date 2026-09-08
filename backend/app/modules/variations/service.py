@@ -69,6 +69,7 @@ from app.modules.variations.schemas import (
     SiteMeasurementCreate,
     SiteMeasurementUpdate,
     VariationBOQCreate,
+    VariationBOQLineTraceUpdate,
     VariationCostImpactCreate,
     VariationCostImpactUpdate,
     VariationOrderCreate,
@@ -2118,6 +2119,200 @@ class VariationsService:
             for position, fields in zip(positions, pending, strict=True)
         ]
         return await self.boq_trace_repo.bulk_create(traces)
+
+    async def _require_variation_boq_line(self, vr_id: uuid.UUID, position_id: uuid.UUID) -> Any:
+        """The line, once it is established that it is a line of *this* bill.
+
+        Two separate facts, and both have to hold. Project access, checked at
+        the route, says the caller may touch this request. It says nothing at
+        all about the position id in the path, which is a bare id from another
+        module's table: without the ``boq_id`` comparison below, a caller with
+        access to one project could write a provenance row naming a line of a
+        different project's bill, and the trace table would then hold a row
+        about a line its own request has never seen.
+        """
+        from app.modules.boq.models import Position
+
+        boq = await self._require_request_boq(vr_id)
+        position = await self.session.get(Position, position_id)
+        if position is None or position.boq_id != boq.id:
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail={
+                    "error": "line_not_in_variation_boq",
+                    "message": (
+                        "This line is not part of this variation request's bill of quantities, so "
+                        "its provenance cannot be recorded here."
+                    ),
+                },
+            )
+        return position
+
+    async def _write_boq_line_trace(
+        self,
+        *,
+        vr: VariationRequest,
+        boq_id: uuid.UUID,
+        position_id: uuid.UUID,
+        origin: str,
+        source_boq_id: uuid.UUID | None,
+        source_position_id: uuid.UUID | None,
+        contract_id: uuid.UUID | None,
+        contract_line_id: uuid.UUID | None,
+        note: str,
+    ) -> VariationBOQTrace:
+        """Upsert the one trace row a line is allowed to have.
+
+        ``uq_oe_variations_boq_trace_position`` permits exactly one row per
+        line, so writing provenance a second time has to replace the first
+        answer rather than add a second one. Every field is written on both
+        paths, including the ones being cleared: a partial update would leave
+        the previous answer's ``contract_id`` sitting under a new
+        ``source_position_id`` and read as a line traced to both.
+        """
+        fields = {
+            "origin": origin,
+            "source_boq_id": source_boq_id,
+            "source_position_id": source_position_id,
+            "contract_id": contract_id,
+            "contract_line_id": contract_line_id,
+            "note": note,
+        }
+        existing = await self.boq_trace_repo.get_for_position(position_id)
+        if existing is not None:
+            await self.boq_trace_repo.update_fields(existing.id, **fields)
+            return existing
+        return await self.boq_trace_repo.create(
+            VariationBOQTrace(
+                variation_request_id=vr.id,
+                boq_id=boq_id,
+                position_id=position_id,
+                **fields,
+            )
+        )
+
+    async def set_boq_line_trace(
+        self,
+        vr_id: uuid.UUID,
+        position_id: uuid.UUID,
+        data: VariationBOQLineTraceUpdate,
+        user_id: str | None = None,
+    ) -> VariationBOQTrace:
+        """Record where one line of a variation's bill came from.
+
+        Seeding a bill records this for the lines it copies, and until this
+        existed that was the only moment at which a line could acquire it. A
+        bill is an ordinary bill, so it grows through the BOQ editor like any
+        other, and every line added that way stayed permanently untraced -
+        which ``variations.boq_lines_are_traced`` reported, correctly, with no
+        way for the reader to act on it.
+
+        The references are validated against the request's project, which is
+        the only scope available: a variation request names a project, not a
+        contract, so "the contract this variation is against" is not a fact
+        this record holds. A schedule-of-values line of any contract on the
+        project is therefore accepted, and one belonging to another project's
+        contract is refused by the same loader the seeding path uses.
+        """
+        vr = await self.get_request(vr_id)
+        position = await self._require_variation_boq_line(vr_id, position_id)
+
+        contract_lines = await self._load_source_contract_lines(
+            vr.project_id, [data.contract_line_id] if data.contract_line_id else []
+        )
+        sources = await self._load_source_positions(
+            vr.project_id, [data.source_position_id] if data.source_position_id else []
+        )
+        if data.source_position_id and data.source_position_id == position_id:
+            raise HTTPException(
+                status_code=http_status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "line_cannot_be_its_own_source",
+                    "message": "A line cannot be the scope it was taken from.",
+                },
+            )
+        line = contract_lines.get(data.contract_line_id) if data.contract_line_id else None
+        source = sources.get(data.source_position_id) if data.source_position_id else None
+
+        # The contract line is the stronger statement of the two: it says
+        # what contracted scope this line changes, which is what a variation
+        # argues about. The estimating position is provenance for the money.
+        origin = "contract_line" if line is not None else "boq_position" if source is not None else "manual"
+        trace = await self._write_boq_line_trace(
+            vr=vr,
+            boq_id=position.boq_id,
+            position_id=position_id,
+            origin=origin,
+            source_boq_id=source.boq_id if source is not None else None,
+            source_position_id=source.id if source is not None else None,
+            contract_id=line.contract_id if line is not None else None,
+            contract_line_id=line.id if line is not None else None,
+            note=data.note,
+        )
+        _safe_publish(
+            "variations.request.boq_line_traced",
+            {
+                "project_id": str(vr.project_id),
+                "variation_request_id": str(vr_id),
+                "code": vr.code,
+                "boq_id": str(position.boq_id),
+                "position_id": str(position_id),
+                "origin": origin,
+                "actor_id": user_id or "",
+            },
+        )
+        logger.info(
+            "Variation request %s traced line %s of bill %s as %s",
+            vr.code,
+            position_id,
+            position.boq_id,
+            origin,
+        )
+        return trace
+
+    async def clear_boq_line_trace(
+        self,
+        vr_id: uuid.UUID,
+        position_id: uuid.UUID,
+        user_id: str | None = None,
+    ) -> VariationBOQTrace:
+        """Withdraw a line's provenance without withdrawing the answer.
+
+        The row survives with ``origin='manual'`` and both references null,
+        which is the state the model describes for a line entered by hand:
+        "recorded with ``origin='manual'`` rather than left without a row, so
+        the trace covers the bill rather than only the parts of it that were
+        derived". Deleting the row instead would make "nobody has said" and
+        "somebody said it derives from nothing" the same absence.
+
+        The line then fails ``variations.boq_lines_are_traced`` again, which
+        is correct: it no longer traces anywhere.
+        """
+        vr = await self.get_request(vr_id)
+        position = await self._require_variation_boq_line(vr_id, position_id)
+        trace = await self._write_boq_line_trace(
+            vr=vr,
+            boq_id=position.boq_id,
+            position_id=position_id,
+            origin="manual",
+            source_boq_id=None,
+            source_position_id=None,
+            contract_id=None,
+            contract_line_id=None,
+            note="",
+        )
+        _safe_publish(
+            "variations.request.boq_line_trace_cleared",
+            {
+                "project_id": str(vr.project_id),
+                "variation_request_id": str(vr_id),
+                "code": vr.code,
+                "boq_id": str(position.boq_id),
+                "position_id": str(position_id),
+                "actor_id": user_id or "",
+            },
+        )
+        return trace
 
     async def get_request_boq_view(self, vr_id: uuid.UUID) -> dict[str, Any]:
         """Everything the request's bill says, priced and traced.

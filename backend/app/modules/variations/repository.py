@@ -200,6 +200,16 @@ class VariationBOQTraceRepository(_BaseRepo):
         await self.session.flush()
         return rows
 
+    async def get_for_position(self, position_id: uuid.UUID) -> VariationBOQTrace | None:
+        """The one trace row about a line, or ``None`` if it has none.
+
+        At most one can exist - ``uq_oe_variations_boq_trace_position`` says
+        so - which is why setting a line's provenance is an update of this row
+        when it is there and an insert when it is not.
+        """
+        stmt = select(VariationBOQTrace).where(VariationBOQTrace.position_id == position_id)
+        return (await self.session.execute(stmt)).scalars().one_or_none()
+
     async def list_for_request(self, variation_request_id: uuid.UUID) -> list[VariationBOQTrace]:
         """Every trace row of a request, oldest first."""
         stmt = (

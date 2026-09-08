@@ -50,7 +50,9 @@ from app.modules.variations.schemas import (
     SiteMeasurementResponse,
     SiteMeasurementUpdate,
     VariationBOQCreate,
+    VariationBOQLineTraceUpdate,
     VariationBOQResponse,
+    VariationBOQTraceResponse,
     VariationCostImpactCreate,
     VariationCostImpactResponse,
     VariationCostImpactUpdate,
@@ -538,6 +540,63 @@ async def adopt_variation_request_boq(
     await verify_project_access(vr.project_id, str(user_id), session)
     updated = await service.adopt_request_boq_total(vr_id, user_id=str(user_id) if user_id else None)
     return VariationRequestResponse.model_validate(updated)
+
+
+@router.put(
+    "/variation-requests/{vr_id}/boq/lines/{position_id}/trace",
+    response_model=VariationBOQTraceResponse,
+    summary="Record where one line of the bill came from",
+)
+async def set_variation_boq_line_trace(
+    vr_id: uuid.UUID,
+    position_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    body: VariationBOQLineTraceUpdate = Body(default=VariationBOQLineTraceUpdate()),
+    _perm: None = Depends(RequirePermission("variations.update")),
+    service: VariationsService = Depends(_get_service),
+) -> VariationBOQTraceResponse:
+    """Trace a line of the bill to the contracted scope it changes.
+
+    Seeding a bill records this for the lines it copies. This is the route for
+    every line that arrived afterwards, which is most of them: the bill is an
+    ordinary bill and is edited through the BOQ module's own position routes,
+    so a line typed in there had no way to acquire provenance at all.
+
+    Naming a schedule-of-values line of another project's contract is refused
+    rather than stored, so the trace table cannot come to hold a reference
+    that points out of the project it belongs to.
+    """
+    vr = await service.get_request(vr_id)
+    await verify_project_access(vr.project_id, str(user_id), session)
+    trace = await service.set_boq_line_trace(vr_id, position_id, body, user_id=str(user_id) if user_id else None)
+    return VariationBOQTraceResponse.model_validate(trace)
+
+
+@router.delete(
+    "/variation-requests/{vr_id}/boq/lines/{position_id}/trace",
+    response_model=VariationBOQTraceResponse,
+    summary="Withdraw a line's recorded provenance",
+)
+async def clear_variation_boq_line_trace(
+    vr_id: uuid.UUID,
+    position_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("variations.update")),
+    service: VariationsService = Depends(_get_service),
+) -> VariationBOQTraceResponse:
+    """Say that this line derives from nothing after all.
+
+    The row stays, holding ``origin='manual'`` and no references, because a
+    line nobody has answered for and a line answered for as originating scope
+    are different states and the bill should not report them as the same
+    silence.
+    """
+    vr = await service.get_request(vr_id)
+    await verify_project_access(vr.project_id, str(user_id), session)
+    trace = await service.clear_boq_line_trace(vr_id, position_id, user_id=str(user_id) if user_id else None)
+    return VariationBOQTraceResponse.model_validate(trace)
 
 
 # ── Variation orders ───────────────────────────────────────────────────────
