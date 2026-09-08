@@ -693,12 +693,13 @@ jobs:
     # on every push. e2e-cross-os.yml already proves the embedded cluster boots
     # on these runners.
     runs-on: ${{ matrix.os }}
-    # Advisory during rollout: the unit tree has never run on Windows or macOS
-    # before, so it reports on every push (that is the point - maximum quality
-    # signal on every change) but does not block while first-time OS-specific
-    # gaps are shaken out. Remove this line to make it a hard gate once it is
-    # consistently green.
-    continue-on-error: true
+    # This job carried continue-on-error while the unit tree was new to Windows
+    # and macOS. A census of 15 completed runs on main (2026-09-07 to 09-08)
+    # found every red it hid on shards 1 and 2 was the same test the ubuntu
+    # shards reported in the same run, Windows produced no independent red in
+    # 45 shards, and the one macOS-only red was the heartbeat timing test fixed
+    # in e0433b90b, after which all six shards ran green. A red shard reports
+    # itself now.
     timeout-minutes: 90
     strategy:
       fail-fast: false
