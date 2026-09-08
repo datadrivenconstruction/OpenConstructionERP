@@ -816,6 +816,13 @@ function selftest() {
     /* 1. A baseline from a tree, and the same tree against it, is green. */
     const a0 = current();
     const base = buildManifest(a0, null);
+    /* Steps 1 to 6 drive the ratchet over directories, which have no commit
+     * to name, so the manifest they produce carries no sha. A real one always
+     * does: --update reads a commit and nothing else. Stamp one the way
+     * --update would, visibly not a real hash so nobody goes looking for it,
+     * and leave the provenance rule itself to steps 7 and 8, which build a
+     * repository and check the sha they measured. */
+    base.manifest.measured_at = '0'.repeat(40);
     if (base.refused.length) return fail('a first baseline was refused');
     if (base.manifest.card_complete.join(' ') !== 'xx yy zz') {
       return fail(`card_complete should be the three base locales with complete catalogue text, got: ${base.manifest.card_complete.join(' ')}`);
