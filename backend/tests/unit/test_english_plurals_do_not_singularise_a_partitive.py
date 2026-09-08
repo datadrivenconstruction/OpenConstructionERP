@@ -46,8 +46,17 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
-EN_LOCALE = REPO_ROOT / "frontend" / "src" / "app" / "locales" / "en.ts"
+LOCALES = REPO_ROOT / "frontend" / "src" / "app" / "locales"
+
+#: Every file written in English. The regional overlays carry only the keys
+#: they spell differently, but a ``_one`` form in an overlay is exactly as
+#: reachable as one in en.ts: en-US.ts shipped the same singular partitive and
+#: kept it for a day after en.ts lost it, because this gate read one file. Each
+#: overlay is read the way i18next resolves it, its own keys over en.ts.
+ENGLISH = ("en", "en-GB", "en-US")
 
 #: Quote-agnostic on purpose: the repo has no frontend autoformatter, so a file
 #: may carry either quoting style and a gate keyed to one of them goes quiet on
@@ -59,14 +68,19 @@ _ENTRY = re.compile(r"""^\s*["']([A-Za-z0-9_.\-]+)["']\s*:\s*["'](.*?)["'],?\s*$
 _PARTITIVE_HEAD = re.compile(r"\bof (?:your|these|those|the) (\w+)\b")
 
 
-def _read_english() -> dict[str, str]:
-    """Every key and value in the English locale, read off disk."""
+def _read_locale(code: str) -> dict[str, str]:
+    """Every key and value in one locale file, read off disk."""
     entries: dict[str, str] = {}
-    for line in EN_LOCALE.read_text(encoding="utf-8").splitlines():
+    for line in (LOCALES / f"{code}.ts").read_text(encoding="utf-8").splitlines():
         match = _ENTRY.match(line)
         if match:
             entries[match.group(1)] = match.group(2)
     return entries
+
+
+def _read_english(code: str = "en") -> dict[str, str]:
+    """The English a reader of ``code`` sees: the overlay's keys over en.ts."""
+    return {**_read_locale("en"), **_read_locale(code)}
 
 
 def _singularised_partitives(one: str, other: str) -> list[tuple[str, str]]:
@@ -76,8 +90,9 @@ def _singularised_partitives(one: str, other: str) -> list[tuple[str, str]]:
     return [(s, p) for s, p in zip(singular, plural, strict=False) if p == f"{s}s"]
 
 
-def test_no_english_one_form_singularises_the_noun_in_a_partitive() -> None:
-    entries = _read_english()
+@pytest.mark.parametrize("code", ENGLISH)
+def test_no_english_one_form_singularises_the_noun_in_a_partitive(code: str) -> None:
+    entries = _read_english(code)
     # Population printed beside the verdict: a gate whose denominator is not the
     # whole set can be satisfied by narrowing the set instead of fixing the tree.
     pairs = {key[: -len("_one")]: key for key in entries if key.endswith("_one")}
@@ -91,7 +106,7 @@ def test_no_english_one_form_singularises_the_noun_in_a_partitive() -> None:
     }
 
     print(
-        f"english partitives: {len(entries)} keys read, {len(pairs)} with a _one form, "
+        f"english partitives ({code}): {len(entries)} keys read, {len(pairs)} with a _one form, "
         f"{len(partitive_pairs)} of those carrying a partitive, {len(offenders)} singularised"
     )
     assert not offenders, (
@@ -122,9 +137,10 @@ def test_a_correct_singular_partitive_is_not_reported() -> None:
     assert _singularised_partitives(one, other) == []
 
 
-def test_the_three_keys_that_shipped_the_defect_are_gone() -> None:
+@pytest.mark.parametrize("code", ENGLISH)
+def test_the_three_keys_that_shipped_the_defect_are_gone(code: str) -> None:
     """The specific regression, named, so the general rule is not the only record."""
-    entries = _read_english()
+    entries = _read_english(code)
     for stem in (
         "benchmarks.portfolio_note_cost_and_area",
         "benchmarks.portfolio_note_budget_and_boq",

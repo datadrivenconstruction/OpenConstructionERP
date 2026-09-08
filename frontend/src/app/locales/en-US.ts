@@ -1496,7 +1496,6 @@ const resource = {
     "modules.request_chip_data": "Regional cost catalogs",
     "integrations.google_sheets_desc": "Export Bid Schedule and cost data in formats compatible with Google Sheets",
     "benchmarks.portfolio_note_budget_and_boq": "Based on {{count}} of your projects with an approved budget and a priced bid schedule.",
-    "benchmarks.portfolio_note_budget_and_boq_one": "Based on {{count}} of your project with an approved budget and a priced bid schedule.",
     "benchmarks.portfolio_note_budget_and_boq_other": "Based on {{count}} of your projects with an approved budget and a priced bid schedule.",
     "onboarding.mod_field_time_desc": "Signed daily timesheets for labor and equipment, coded to bid schedule",
     "onboarding.mod_portfolio_desc": "Schedule tree across projects with cross-schedule links and rollup CPM",
