@@ -394,8 +394,6 @@ def test_the_countries_that_agree_are_named() -> None:
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "
         f"fixed, in which case delete its _DIVERGENCES entry, or is newly bound to an engine "
         f"function and agrees, in which case only this expectation needs updating. "
-        f"Previously: "
-        f"_DIVERGENCES entry."
     )
 
 
