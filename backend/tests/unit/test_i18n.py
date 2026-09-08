@@ -6,6 +6,7 @@ function including fallback and interpolation behavior.
 
 import json
 import logging
+import re
 import tempfile
 from pathlib import Path
 
@@ -24,12 +25,34 @@ from app.core.i18n import (
 
 # ── Supported locales ────────────────────────────────────────────────────────
 
+#: The shape a code in SUPPORTED_LOCALES may take: ISO 639-1 where the language
+#: has a two-letter code and ISO 639-2/3 where it has none, optionally followed
+#: by a region. Filipino is why the three-letter case exists - there is no
+#: two-letter code for it, and tl is Tagalog, a different language - and the
+#: region tail is admitted because 4e376eb1e made the backend answer a regional
+#: code, so a pt-BR arriving in this list would be a language being filled in
+#: rather than a fault.
+LOCALE_CODE = re.compile(r"[a-z]{2,3}(-[A-Z]{2})?")
+
 
 class TestSupportedLocales:
-    def test_28_locales_defined(self):
-        # One entry per JSON file in backend/locales; the equality itself is
-        # asserted by tests/unit/test_backend_locale_catalogue.py.
-        assert len(SUPPORTED_LOCALES) == 28
+    def test_the_two_lists_name_the_same_languages(self):
+        """A language is held in two hand-edited lists that drift apart.
+
+        This stood as ``len(SUPPORTED_LOCALES) == 28`` until nine languages
+        were added and the count reached 37. A literal count asserts no
+        property: it stays green while both lists are wrong in the same way,
+        and it reds when a language is added correctly, which is the only
+        thing it ever did. Identity against the JSON files on disk is held by
+        tests/unit/test_backend_locale_catalogue.py, so what is left for this
+        file is the pair of lists themselves, which can drift against each
+        other without any file on disk changing.
+        """
+        gated, named = set(SUPPORTED_LOCALES), set(LOCALE_NAMES)
+        assert gated == named, (
+            f"gated on but unnamed, so offered to nobody: {sorted(gated - named)}; "
+            f"named but not gated on, so offered and then refused: {sorted(named - gated)}"
+        )
 
     def test_en_is_first(self):
         assert SUPPORTED_LOCALES[0] == "en"
@@ -40,10 +63,27 @@ class TestSupportedLocales:
     def test_ru_is_present(self):
         assert "ru" in SUPPORTED_LOCALES
 
-    def test_all_locales_are_two_char_codes(self):
+    def test_all_locales_are_wellformed_language_codes(self):
+        """This read ``len(locale) == 2``, and Filipino is spelled fil.
+
+        A length was standing in for a shape, so the check could only hold
+        while every language the product offered happened to have an ISO 639-1
+        code. The shape is what was meant, and it is what a caller matching an
+        Accept-Language header against this list depends on.
+        """
         for locale in SUPPORTED_LOCALES:
             assert isinstance(locale, str)
-            assert len(locale) == 2
+            assert LOCALE_CODE.fullmatch(locale), f"{locale!r} is not a language code this list may hold"
+
+    def test_the_code_shape_refuses_what_is_not_a_language_code(self):
+        """A pattern widened to admit fil has to keep refusing the rest.
+
+        Without this the previous test could be satisfied by a pattern that
+        matches anything, and a locale key entered as ``en_GB`` or ``English``
+        would reach the Accept-Language match unchallenged.
+        """
+        for bad in ["EN", "e", "engl", "en_GB", "en-gb", "en-GBR", "3n", "", "en "]:
+            assert not LOCALE_CODE.fullmatch(bad), f"{bad!r} should not read as a language code"
 
     def test_no_duplicates(self):
         assert len(SUPPORTED_LOCALES) == len(set(SUPPORTED_LOCALES))
