@@ -286,6 +286,12 @@ def test_every_declared_header_is_stored_lowercased_and_stripped() -> None:
 
 def test_every_language_names_the_four_columns_a_bill_row_needs() -> None:
     assert _languages_missing_mandatory_columns(_HEADERS_BY_LANGUAGE) == {}
+
+
+def test_the_four_columns_a_bill_row_needs_are_still_those_four() -> None:
+    # Pinned rather than read off the constant elsewhere: dropping one of
+    # these would weaken the completeness rule without failing it, and a
+    # language admitted with no rate column imports every line at zero.
     assert _MANDATORY_COLUMNS == ("description", "unit", "quantity", "unit_rate")
 
 
@@ -335,9 +341,14 @@ def test_supported_header_languages_is_the_tables_own_key_set() -> None:
     ]
 
 
-def test_supported_header_languages_follows_the_table_rather_than_a_second_list() -> None:
-    # The constant is read from another module to decide whether a national
-    # profile may claim native import, so it has to move when the table does.
+def test_the_flat_alias_map_is_derived_from_the_table_rather_than_kept_beside_it() -> None:
+    # ``SUPPORTED_HEADER_LANGUAGES`` is only honest if the matcher reads the
+    # same table the constant is counted from. A second list maintained by
+    # hand would agree with both of these on the day it was written and drift
+    # afterwards, so the map is asserted to BE the table's union, and a table
+    # with one more language is asserted to produce a different map.
+    assert _build_column_aliases(_HEADERS_BY_LANGUAGE) == _COLUMN_ALIASES
+
     grown = dict(_HEADERS_BY_LANGUAGE)
     grown["xx"] = {
         "description": ("beskrywing",),
@@ -345,8 +356,9 @@ def test_supported_header_languages_follows_the_table_rather_than_a_second_list(
         "quantity": ("hoeveelheid",),
         "unit_rate": ("prys",),
     }
-    assert frozenset(grown) - SUPPORTED_HEADER_LANGUAGES == {"xx"}
-    assert _build_column_aliases(grown)["description"] > _COLUMN_ALIASES["description"]
+    rebuilt = _build_column_aliases(grown)
+    assert rebuilt["description"] - _COLUMN_ALIASES["description"] == {"beskrywing"}
+    assert rebuilt["unit_rate"] - _COLUMN_ALIASES["unit_rate"] == {"prys"}
 
 
 # ── Reading a real workbook in each market's own words ──────────────────────
