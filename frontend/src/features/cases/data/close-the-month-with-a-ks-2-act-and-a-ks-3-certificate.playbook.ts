@@ -136,13 +136,13 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.sign.what",
       whatDefault:
-        "Route the KS-2 act to the client's technical supervisor, and to whoever the contract adds after them. Keep the approval date, because the KS-3 certificate follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the KS-2 act to the client's technical supervisor, and to whoever the contract adds after them. Keep the approval date, because the KS-3 certificate follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. On a state contract under 44-FZ the act is signed as the acceptance document in the EIS, the customer has the period the contract sets and at most twenty working days to sign it or refuse it with reasons, and payment then falls due within seven working days of that signature.",
       whyKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.sign.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "cumulative",
@@ -206,13 +206,48 @@ const playbook: Playbook = {
       titleDefault: "Issue the KS-3 certificate against the approved figure",
       whatKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.ks3.what",
       whatDefault:
-        "Raise the KS-3 certificate against the approved KS-2 act, carrying guarantee retention and any deduction the contract provides for, and reference the KS-2 act on it.",
+        "Raise the KS-3 certificate against the approved KS-2 act, carrying guarantee retention and any deduction the contract provides for, and reference the KS-2 act on it. The KS-3 carries the VAT line, at twenty-two percent since January 2026, and the VAT invoice (schet-faktura), or the universal transfer document that replaces the act and the invoice together, follows within five calendar days of the KS-2 signature, because that signature is the tax point for the works.",
       whyKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.ks3.why",
       whyDefault:
         "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the KS-2 act also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",
+    },
+    {
+      id: "clock",
+      icon: "Clock",
+      inputs: [
+        {
+          labelKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.in.ks3",
+          label: "KS-3 certificate and its date",
+        },
+        {
+          labelKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.in.terms",
+          label: "Contract payment terms",
+        },
+      ],
+      outputs: [
+        {
+          labelKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.out.clock",
+          label: "Open payment clock",
+        },
+        {
+          labelKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.out.final",
+          label: "Final date for payment",
+        },
+      ],
+      titleKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.title",
+      titleDefault: "Open the payment clock on the right day",
+      whatKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.what",
+      whatDefault:
+        "Open a clock over the KS-3 certificate starting from the day the KS-2 act is signed, under 44-FZ. Payment falls due 7 working days later, and the clock records that date rather than leaving it to be worked out when somebody asks. That is the state-contract clock, and the module carries it as the Russian public procurement regime. On a private contract the Civil Code leaves the period to the parties, so open the clock on the contract's own days instead.",
+      whyKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.clock.why",
+      whyDefault:
+        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the KS-2 act is signed once makes the whole chain checkable.",
+      moduleLabel: "Payment Clock",
+      moduleLabelKey: "nav.payment_clock",
+      to: "/payment-clock",
     },
     {
       id: "reconcile",

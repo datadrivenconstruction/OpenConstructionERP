@@ -71,7 +71,7 @@ const playbook: Playbook = {
       titleDefault: "Hold your labour, material and plant rates in one place",
       whatKey: "cases.build_a_comprehensive_unit_rate_under_gb_50500.step.resources.what",
       whatDefault:
-        "Put the prices you actually buy at into the resource catalog: wage costs by trade, material prices by supplier, plant by the hour. Keep them current rather than accurate once a year.",
+        "Put the prices you actually buy at into the resource catalog: wage costs by trade, with the social insurance and housing fund contributions the 2024 standard now carries inside the labour price; material prices by supplier, net of deductible input VAT if you price under the general tax method; plant by the hour. Keep them current rather than accurate once a year.",
       whyKey: "cases.build_a_comprehensive_unit_rate_under_gb_50500.step.resources.why",
       whyDefault:
         "The rates a contractor is judged on are the firm's own, and a published average is a starting point rather than an answer. Holding them centrally means the next hundred rates you build are consistent with this one, and a price change is one edit instead of a hunt through old bids.",
@@ -97,7 +97,7 @@ const playbook: Playbook = {
         "Enter the labour, material and plant the item consumes per unit, then open the rate analysis on the line. It shows the direct cost per unit, the management fee, the profit, the comprehensive unit rate and the item total, in that order.",
       whyKey: "cases.build_a_comprehensive_unit_rate_under_gb_50500.step.compose.why",
       whyDefault:
-        "That sequence is the composition GB 50500 defines, and seeing it as a chain rather than as a total is what lets you answer a client who asks why the rate is what it is. The fee and the profit are taken on the direct cost, so the measure items, the statutory charges and the tax stay where they belong, on the bill total, instead of inflating a rate from the inside.",
+        "That sequence is the composition GB/T 50500-2024 defines: labour, material and plant, the management fee, the profit and the priced risk, with VAT outside the rate. Seeing it as a chain rather than as a total is what lets you answer a client who asks why the rate is what it is. The fee and the profit are taken on the direct cost here, so the measures items, the other items and the VAT stay where they belong, on the bill total, instead of inflating a rate from the inside. The statutory charges the 2013 code kept as a separate head are gone from the 2024 standard: the social insurance and housing fund contributions now sit inside the labour price and the management fee, so where your province has moved to the 2024 shape take the statutory-charges head out of the bill's markup stack, and where it still runs the 2013 shape leave that head on the bill total.",
       moduleLabel: "BOQ",
       moduleLabelKey: "boq.title",
       to: "/projects/:projectId/boq",

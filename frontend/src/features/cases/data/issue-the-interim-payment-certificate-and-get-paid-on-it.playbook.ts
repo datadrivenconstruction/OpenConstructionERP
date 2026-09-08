@@ -9,12 +9,16 @@
 // and this country's words and step order live at
 //   frontend/src/features/cases/intl/layers/f01-progress-payment/ZA.json
 //
-// South Africa runs the shortest payment window in the family, which
-// is why this layer surfaces the deadlines and the watch steps rather
-// than stopping at the invoice. Seven calendar days from the
-// certificate leaves no room for a certificate that was issued and not
-// read, so the clock is opened on the certificate date rather than on
-// the invoice date.
+// South Africa has no security of payment statute, so the only clock
+// is the contract's. Under the JBCC Principal Building Agreement 6.2
+// the employer pays within fourteen calendar days of the date FOR
+// issue of the payment certificate fixed in the contract data, not of
+// the day the certificate actually arrives, and the contractor pays
+// subcontractors within seven calendar days of that due date. So the
+// layer opens the clock on the contract-data date for issue and
+// surfaces the deadlines, watch and escalation steps, because the
+// remedy the agreement gives is a five working day notice to comply
+// and the right to suspend.
 //
 // Rebuild with:
 //   node frontend/scripts/compose-case-layers.mjs --family f01-progress-payment
@@ -69,7 +73,7 @@ const playbook: Playbook = {
         "Record what was executed against each bill item for the period as a percentage of its contract quantity. The earned quantity follows from that percentage and the design quantity, and the earned amount from the same percentage and the position total, so one honest number per line produces the whole valuation.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.measure.why",
       whyDefault:
-        "An interim payment certificate built from a single project percentage cannot be checked and therefore cannot be approved without a conversation. Measured line by line, the disagreement is about one bill item rather than about the whole month, and the rest of the money moves while that one is settled.",
+        "A payment valuation built from a single project percentage cannot be checked and therefore cannot be approved without a conversation. Measured line by line, the disagreement is about one bill item rather than about the whole month, and the rest of the money moves while that one is settled.",
       moduleLabel: "Progress",
       moduleLabelKey: "nav.progress",
       to: "/progress",
@@ -136,7 +140,7 @@ const playbook: Playbook = {
       titleDefault: "Apply retention and previous payments",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.retention.what",
       whatDefault:
-        "Take the cumulative valuation, subtract what has already been certified, and apply retention at the contract percentage. The figure that leaves this step is the one the tax invoice is raised for, and the backup behind it is the measure that produced it.",
+        "Take the cumulative valuation, subtract what has already been certified, and apply retention at the contract percentage. The figure that leaves this step is the one the tax invoice is raised for, and the backup behind it is the measure that produced it. Under JBCC 6.2 the money withheld is the payment reduction that comes with the fixed construction guarantee, 5 percent of the value certified up to practical completion and 2.5 percent up to final completion, and under GCC 2015 it is retention in the ordinary sense; either way it is a figure with a release date attached.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.retention.why",
       whyDefault:
         "Interim payments are cumulative, so the month's money is a difference between two totals rather than a total of its own. Computing it from the cumulative figure is what stops a line being paid twice or dropped entirely when a period is re-measured.",
@@ -164,20 +168,20 @@ const playbook: Playbook = {
         },
         {
           labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.out.date",
-          label: "Certificate date on record",
+          label: "Date for issue and date issued on record",
         },
       ],
       titleKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.title",
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.what",
       whatDefault:
-        "Route the interim payment certificate to the principal agent, and to whoever the contract adds after them. Keep the approval date, because the tax invoice follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the payment valuation to the principal agent, and to whoever the contract adds after them. Keep the approval date, because the tax invoice follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. The principal agent's approval is the interim payment certificate itself, issued by the date for issue the contract data fixes each month. Record that date beside the day the certificate actually arrived, because the payment count runs from the first and a certificate issued late does not move it.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "invoice",
@@ -206,10 +210,10 @@ const playbook: Playbook = {
       titleDefault: "Issue the tax invoice against the approved figure",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.invoice.what",
       whatDefault:
-        "Raise the tax invoice against the approved interim payment certificate, carrying retention and any deduction the contract provides for, and reference the interim payment certificate on it.",
+        "Raise the tax invoice against the approved payment valuation, carrying retention and any deduction the contract provides for, and reference the payment valuation on it. Quote the certificate number and the certified amount on the invoice, since the employer's accounts pay against the certificate and not against the valuation.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.invoice.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the interim payment certificate also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the payment valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",
@@ -220,7 +224,7 @@ const playbook: Playbook = {
       inputs: [
         {
           labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.openclock.in.certificate",
-          label: "Certificate and its date",
+          label: "Certificate and its date for issue",
         },
         {
           labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.openclock.in.amount",
@@ -241,10 +245,10 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.openclock.what",
       whatDefault:
-        "Open a clock over the tax invoice starting from the date of the interim payment certificate, under the contract payment provisions. Payment falls due 7 days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+        "Open a clock over the tax invoice starting from the date for issue of the payment certificate fixed in the contract data, under the JBCC payment clause. Payment falls due 14 calendar days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.openclock.why",
       whyDefault:
-        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the date of the interim payment certificate once makes the whole chain checkable. Opening it on your own invoice date rather than on the certificate date moves every deadline later and does it silently, which is the version of this mistake that never gets caught, because nothing looks overdue until the remedy has already expired.",
+        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the date for issue of the payment certificate fixed in the contract data once makes the whole chain checkable. Opening it on the day the certificate arrived, or on your own invoice date, moves every deadline later and does it silently, which is the version of this mistake that never gets caught, because nothing looks overdue until the remedy has already expired. The agreement counts from the date the certificate was due, so a principal agent who issues late has not bought the employer a day.",
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",
@@ -276,7 +280,7 @@ const playbook: Playbook = {
       titleDefault: "Read the dates the regime computes",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.dates.what",
       whatDefault:
-        "Read back the dates the contract payment provisions produces from the date of the interim payment certificate. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted.",
+        "Read back the dates the JBCC payment clause produces from the date for issue of the payment certificate fixed in the contract data. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted. There is no statute behind these dates, so the only authority is the agreement: fourteen calendar days from the date for issue under JBCC 6.2, seven more for the money to reach each subcontractor, and GCC 2015 running its own longer count from the engineer's certificate. The row the clock is opened on has to carry the count the agreement gives, and its derivation is what you quote.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.dates.why",
       whyDefault:
         "Deadlines that are typed in are deadlines that are typed in wrong, and a payment regime has more of them than anyone holds in their head. A derivation you can read out loud is what turns a phone call about a late payment into a quotable line.",
@@ -318,6 +322,41 @@ const playbook: Playbook = {
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",
+    },
+    {
+      id: "escalate",
+      icon: "Gavel",
+      inputs: [
+        {
+          labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.in.passed",
+          label: "Due date passed unpaid",
+        },
+        {
+          labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.in.record",
+          label: "Certificate, invoice and dates",
+        },
+      ],
+      outputs: [
+        {
+          labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.out.notice",
+          label: "Five working days notice to comply",
+        },
+        {
+          labelKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.out.entitlement",
+          label: "Right to suspend or call the guarantee preserved",
+        },
+      ],
+      titleKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.title",
+      titleDefault: "Escalate with the record already assembled",
+      whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.what",
+      whatDefault:
+        "When the clock has run out, give the employer the five working days notice to comply that the JBCC agreement requires, and if it passes unpaid suspend the works, exercise the lien or call up the payment guarantee. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
+      whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.escalate.why",
+      whyDefault:
+        "The difference between a claim that is paid and one that is argued about is almost never the merits. It is whether the dates and the documents were kept as the work happened, because reconstructing them afterwards is expensive and looks exactly like inventing them.",
+      moduleLabel: "Correspondence",
+      moduleLabelKey: "nav.correspondence",
+      to: "/projects/:projectId/correspondence",
     },
   ],
 };

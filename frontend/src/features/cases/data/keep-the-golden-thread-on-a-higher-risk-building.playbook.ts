@@ -116,7 +116,7 @@ const playbook: Playbook = {
       titleDefault: "Answer building control against the version you submitted",
       whatKey: "cases.keep_the_golden_thread_on_a_higher_risk_building.step.review.what",
       whatDefault:
-        "Run the review cycle with the approving authority: record the submission with the document version pinned to it, log each remark, respond to it and close out the decision. When the live document moves on, a remark raised against the submitted version is flagged as stale rather than silently remapped onto the new one.",
+        "Run the review cycle with the Building Safety Regulator, which is the building control authority for a higher-risk building in England: record the submission with the document version pinned to it, log each remark, respond to it and close out the decision. When the live document moves on, a remark raised against the submitted version is flagged as stale rather than silently remapped onto the new one.",
       whyKey: "cases.keep_the_golden_thread_on_a_higher_risk_building.step.review.why",
       whyDefault:
         "A remark answered against a drawing that has changed since submission is an answer to a question nobody asked. Pinning the version makes the exchange reconstructable, which is the whole ask of a gateway: show what you submitted, what you were told about it, and what you did in response.",

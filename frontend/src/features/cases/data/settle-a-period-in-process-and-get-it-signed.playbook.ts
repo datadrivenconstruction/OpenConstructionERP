@@ -54,7 +54,7 @@ const playbook: Playbook = {
         "Work the bill for the period: price the quantities that are complete, add the changes that were accepted inside it, and deliberately leave out anything still in dispute. Note what you left out and why.",
       whyKey: "cases.settle_a_period_in_process_and_get_it_signed.step.price.why",
       whyDefault:
-        "The point of settling in process is to take the settled part off the table permanently, and one contested item is enough to keep a whole period open. Confirming ninety percent now and carrying ten percent forward is worth far more than agreeing everything eventually.",
+        "The point of settling in process is to take the settled part off the table permanently, and one contested item is enough to keep a whole period open. Confirming ninety percent now and carrying ten percent forward is worth far more than agreeing everything eventually. The 2024 standard makes the settled part permanent by rule: a period statement both parties have confirmed is the basis of the completion settlement and is not measured or priced again, and the period is paid at no less than eighty percent of its settled value.",
       moduleLabel: "BOQ",
       moduleLabelKey: "boq.title",
       to: "/projects/:projectId/boq",

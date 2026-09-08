@@ -46,7 +46,7 @@ const playbook: Playbook = {
       titleDefault: "Draw the contract from the form you are actually using",
       whatKey: "cases.set_the_project_up_on_a_jct_or_nec4_contract.step.form.what",
       whatDefault:
-        "Create the contract and pick the clause template it is drawn from: a JCT standard building contract, a JCT design and build, a JCT minor works, or an NEC4 engineering and construction contract under the main option you are working to. The contract records the template and its version, so it keeps naming the right paper after a later version is published.",
+        "Create the contract and pick the clause template it is drawn from: a JCT standard building contract, design and build or minor works in the 2024 or the 2016 edition, or an NEC4 engineering and construction contract under the main option A to F you are working to. The contract records the template and its version, so it keeps naming the right paper after a later version is published.",
       whyKey: "cases.set_the_project_up_on_a_jct_or_nec4_contract.step.form.why",
       whyDefault:
         "Half the arguments on a job start with two people applying different contracts to the same fact. Naming the form on the record means the clause somebody cites can be looked up rather than remembered, and a quantity surveyor who joined in month nine can see what the job is working to without ringing round.",

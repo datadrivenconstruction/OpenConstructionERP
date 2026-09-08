@@ -54,7 +54,7 @@ const playbook: Playbook = {
       titleDefault: "Put every sum on the register with what it is for",
       whatKey: "cases.release_a_provisional_sum_and_charge_the_attendance_fee.step.hold.what",
       whatDefault:
-        "Enter each sum the bill carries: the provisional sums the owner holds for undefined scope, the prime cost sums standing in for packages to be tendered, and the contingency. Give each one the scope it covers, not just a figure.",
+        "Enter each sum the bill carries among its other items: the provisional sums the owner holds for scope and changes not yet defined, which are also the bill's contingency, and the provisional prices standing in for the materials, equipment and specialist packages to be priced later. Give each one the scope it covers, not just a figure.",
       whyKey: "cases.release_a_provisional_sum_and_charge_the_attendance_fee.step.hold.why",
       whyDefault:
         "A sum with no stated scope gets drawn against for whatever is convenient, and by the time somebody asks what it was for the answer is a list of unrelated instructions. Writing the scope down at the start is what makes the drawdowns arguable later.",
@@ -100,7 +100,7 @@ const playbook: Playbook = {
       titleDefault: "Tender the package the sum was holding money for",
       whatKey: "cases.release_a_provisional_sum_and_charge_the_attendance_fee.step.tender.what",
       whatDefault:
-        "Once the scope firms up, tender the package properly and let it. The price it is let at is what actually gets drawn against the sum, not the sum itself.",
+        "Once the scope firms up, tender the package properly and let it; a package carried at a provisional price is tendered with the owner in the room, and jointly where the law requires a tender. The price it is let at is what actually gets drawn against the sum, not the sum itself.",
       whyKey: "cases.release_a_provisional_sum_and_charge_the_attendance_fee.step.tender.why",
       whyDefault:
         "A provisional sum is an estimate of something nobody had designed, and the gap between the sum and the let price is money that belongs to somebody. Tendering it rather than converting it at book value is how that gap becomes visible while there is still a decision to make about it.",

@@ -46,7 +46,7 @@ const playbook: Playbook = {
       titleDefault: "Record the licence with its subclass, not just its number",
       whatKey: "cases.check_the_rbq_subclass_and_price_gst_and_qst.step.licence.what",
       whatDefault:
-        "Add the RBQ licence to the subcontractor's record with the class and subclass it carries and the date it expires, and file the certificate itself beside it rather than a note saying it was seen.",
+        "Add the RBQ licence to the subcontractor's record with the class and subclass it carries, whether it is restricted, and the date it expires, and file the certificate itself beside it rather than a note saying it was seen. File next to it the other papers a Quebec award turns on: the CNESST clearance, the CCQ letter of good standing and, on public work, the Revenu Quebec attestation.",
       whyKey: "cases.check_the_rbq_subclass_and_price_gst_and_qst.step.licence.why",
       whyDefault:
         "A register that says only that a firm is licensed has answered the easy half of the question. The subclass is what states the work the licence actually permits, and without it on the record nobody can tell later whether the right question was ever asked.",

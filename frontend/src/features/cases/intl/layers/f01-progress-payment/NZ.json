@@ -119,7 +119,7 @@
         }
       ],
       "note": {
-        "why": "Retention money on a commercial construction contract is held on trust and has to be identifiable as such. A figure that exists only as a deduction line on a claim is not identifiable, and the party who needs it to be is the one who is not holding it."
+        "why": "Retention money on a commercial construction contract is held on trust and has to be identifiable as such, and since October 2023 it has to sit in a separate bank account and be reported to the party it is held from. A figure that exists only as a deduction line on a claim is not identifiable, and the party who needs it to be is the one who is not holding it."
       }
     },
     {
@@ -150,7 +150,7 @@
         }
       ],
       "note": {
-        "what": "The claim has to state that it is made under the Act and say how the amount was calculated. A claim that does neither is a request for money rather than a payment claim, and it carries none of the Act's consequences for ignoring it. The tax invoice follows for GST and is not the document the Act counts from."
+        "what": "The claim has to state that it is made under the Act and say how the amount was calculated, and since 1 December 2015 every payment claim, commercial or residential, must also be accompanied by the prescribed Form 1 notice explaining the payer's obligations. A claim that does none of this is a request for money rather than a payment claim, and it carries none of the Act's consequences for ignoring it. The tax invoice follows for GST and is not the document the Act counts from."
       }
     },
     {
@@ -179,7 +179,10 @@
           "key": "due",
           "label": "Due date computed"
         }
-      ]
+      ],
+      "note": {
+        "what": "Twenty working days is the Act's default where the contract is silent. NZS 3910 and most commercial forms set their own shorter periods, and where they do the contract's date governs, so read the default the clock gives against the contract before relying on it."
+      }
     },
     {
       "id": "dates",

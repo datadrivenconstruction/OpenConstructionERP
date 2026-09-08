@@ -45,7 +45,7 @@ const playbook: Playbook = {
       titleDefault: "Set the early cost frame",
       whatKey: "cases.din_276_cost_plan_for_the_client.step.frame.what",
       whatDefault:
-        "Open the conceptual estimate and put down the first cost frame: gross floor area, quality level and region give a cost per square metre, and the total comes back split across the elemental categories rather than as one number.",
+        "Open the conceptual estimate and put down the Kostenrahmen, the first of the DIN 276 stages: gross floor area, quality level and region give a cost per square metre, and the total comes back split across the elemental categories rather than as one number.",
       whyKey: "cases.din_276_cost_plan_for_the_client.step.frame.why",
       whyDefault:
         "The client approves a figure long before there is a bill to price. Holding that early frame in the project is what lets the later, finer plan be read against something instead of arriving as a fresh number nobody recognises.",
@@ -68,7 +68,7 @@ const playbook: Playbook = {
       titleDefault: "Code every position to a Kostengruppe",
       whatKey: "cases.din_276_cost_plan_for_the_client.step.classify.what",
       whatDefault:
-        "Work down the bill and give each position its DIN 276 code in the classification column: 300 for the Baukonstruktionen, 400 for the Technische Anlagen, 500 for the Aussenanlagen, down to the three-digit group where the work really sits.",
+        "Work down the bill and give each position its DIN 276 code in the classification column: 300 for the Baukonstruktionen, 400 for the Technische Anlagen, 500 for the Aussenanlagen, down to the third level where the work really sits, 351 Deckenkonstruktionen rather than 350 Decken or a bare 300.",
       whyKey: "cases.din_276_cost_plan_for_the_client.step.classify.why",
       whyDefault:
         "The cost group is what turns a flat list of positions into a plan that can be read by group. A position left uncoded is money that shows up under no heading at all when the client asks what a group contains.",
@@ -183,7 +183,7 @@ const playbook: Playbook = {
       titleDefault: "Issue the plan to the client",
       whatKey: "cases.din_276_cost_plan_for_the_client.step.report.what",
       whatDefault:
-        "Export the plan grouped by Kostengruppe, with the group totals, the variance against the budget and the basis alongside them, in the structure the client and their auditor already read.",
+        "Export the plan grouped by Kostengruppe, with the group totals, the variance against the budget and the basis alongside them, in the structure the client and their auditor already read. Name the stage it stands at, Kostenschaetzung at the Vorplanung, Kostenberechnung at the Entwurfsplanung, Kostenanschlag once the bids are in, because the client reads the tolerance off the stage.",
       whyKey: "cases.din_276_cost_plan_for_the_client.step.report.why",
       whyDefault:
         "A client who receives the plan in the structure they work in every day can approve it. One who has to re-sort a flat total into cost groups first will send it back, and the next meeting is about the format instead of the money.",

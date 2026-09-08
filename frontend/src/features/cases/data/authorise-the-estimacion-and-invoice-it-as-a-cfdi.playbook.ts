@@ -181,7 +181,7 @@ const playbook: Playbook = {
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "cfdi",

@@ -91,7 +91,7 @@ const playbook: Playbook = {
       titleDefault: "Write each item the way the rules ask and classify it",
       whatKey: "cases.measure_a_bill_of_quantities_to_nrm2.step.bill.what",
       whatDefault:
-        "Write each bill item as NRM 2 asks for it, a description that identifies the work, the unit of measurement and the measured quantity, and price it from the cost catalogue or from your own rates. Then classify the items: pick NRM as the standard and the picker offers the cost groups, from facilitating works and substructure through superstructure, internal finishes and services to external works.",
+        "Write each bill item as NRM 2 asks for it, a description that identifies the work, the unit of measurement and the measured quantity, and price it from the cost catalogue or from your own rates. Then classify the items: pick NRM as the standard and the picker offers the cost groups, from facilitating works and substructure through superstructure, internal finishes and services to external works. NRM 2 lets the bill be broken down by elements, by work sections or by work packages, and the elemental breakdown is the one that rolls straight back up into the NRM 1 cost plan.",
       whyKey: "cases.measure_a_bill_of_quantities_to_nrm2.step.bill.why",
       whyDefault:
         "Classification is what makes one bill comparable with another bill and with the cost plan the job started from. A bill organised in whatever order the measurer happened to work in prices perfectly well and benchmarks against nothing, and putting the items into the same groups the estimate used is what lets somebody answer why this job came in above the last one.",

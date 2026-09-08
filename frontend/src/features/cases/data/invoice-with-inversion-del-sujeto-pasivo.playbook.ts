@@ -194,13 +194,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.invoice_with_inversion_del_sujeto_pasivo.step.report.title",
-      titleDefault: "Report it inside the four days",
+      titleDefault: "Report it in the return, or inside four days on the SII",
       whatKey: "cases.invoice_with_inversion_del_sujeto_pasivo.step.report.what",
       whatDefault:
-        "Send the invoice record to the authority under the Spanish reporting regime and keep the acknowledgement reference against it. The invoice is valid from the moment it is issued; the report is a separate obligation with a four calendar day window, and a correction is an annulment record followed by a corrected one.",
+        "If you file under the SII, which binds companies with turnover above 6.01 million euros, VAT groups and monthly filers, send the invoice record to the AEAT within four days of issue, weekends and national holidays not counted, and keep the acknowledgement reference against it; the invoice is valid from the moment it is issued, and a correction is an annulment record followed by a corrected one. Everyone else declares the invoice in the periodic modelo 303, in the box for operations under inversion del sujeto pasivo, and again in the annual modelo 390.",
       whyKey: "cases.invoice_with_inversion_del_sujeto_pasivo.step.report.why",
       whyDefault:
-        "Late reporting is a penalty rather than an invalid invoice, which is exactly why it slides: nothing breaks and nobody chases it. It is also the cheapest thing on this list to keep on top of, because the window is short enough that either you have a routine or you have a fine.",
+        "Late reporting is a penalty rather than an invalid invoice, which is exactly why it slides: nothing breaks and nobody chases it. On the SII the window is short enough that either you have a routine or you have a fine, and in the return an invoice issued without VAT that is missing from the reverse-charge box is the first thing an inspection compares against your customer's modelo 303.",
       moduleLabel: "E-invoice Clearance",
       moduleLabelKey: "nav.einvoice_clearance",
       to: "/einvoice-clearance",

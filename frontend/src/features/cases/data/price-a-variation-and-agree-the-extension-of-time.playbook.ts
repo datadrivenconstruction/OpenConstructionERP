@@ -45,7 +45,7 @@ const playbook: Playbook = {
       titleDefault: "Notice it while it is still a fact and not a claim",
       whatKey: "cases.price_a_variation_and_agree_the_extension_of_time.step.notice.what",
       whatDefault:
-        "Raise the notice as soon as the change appears, addressed to the party the contract names, carrying the date it was raised and the date a response is due. Under NEC4 this is the compensation event notification; under JCT it is the notice that starts the extension of time running.",
+        "Raise the notice as soon as the change appears, addressed to the party the contract names, carrying the date it was raised and the date a response is due. Under NEC4 this is the compensation event notification, and the quotation follows within three weeks of the project manager's instruction to quote; under JCT it is the notice of delay given forthwith, with particulars of the cause and its expected effect, which starts the extension of time running.",
       whyKey: "cases.price_a_variation_and_agree_the_extension_of_time.step.notice.why",
       whyDefault:
         "Both forms make the notice the thing that preserves the entitlement, and NEC4 says so out loud: a compensation event not notified within eight weeks of the contractor becoming aware of it is generally not assessed at all. A notice raised on the day costs a minute; the same notice raised in the final account costs the entitlement.",

@@ -62,7 +62,7 @@ const playbook: Playbook = {
       titleDefault: "Find out whether revision applies at all",
       whatKey: "cases.apply_revision_de_precios_to_a_public_contract.step.entitlement.what",
       whatDefault:
-        "Read the contract for three things: whether revision was provided for, which formula it names, and from which date and after which qualifying period it bites. Record all three against the contract rather than in a spreadsheet on somebody's machine.",
+        "Read the contract for three things: whether revision was provided for in the pliego, which of the formulas of Real Decreto 1359/2011 it names, and from which date it bites. Under article 103 LCSP the revision cannot start before two years have passed since formalisation and twenty percent of the price has been executed, and it reaches only the work after that point. Record all three against the contract rather than in a spreadsheet on somebody's machine.",
       whyKey: "cases.apply_revision_de_precios_to_a_public_contract.step.entitlement.why",
       whyDefault:
         "Most of the effort spent on revision de precios is spent on contracts that never carried the entitlement, and the answer takes ten minutes to establish at the start of the job instead of at the first month you want to claim. The base period matters as much as the formula: the same published indices give a different answer from a different base.",

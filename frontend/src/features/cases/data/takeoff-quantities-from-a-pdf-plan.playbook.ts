@@ -73,7 +73,7 @@ const playbook: Playbook = {
         "A plan that has been through a plotter or a scanner is rarely at the scale printed on it. Calibrating against a stated dimension costs a minute, while a scale two percent out multiplies quietly through every area on the sheet and only surfaces at Abrechnung.",
       moduleLabel: "PDF Measurements",
       moduleLabelKey: "nav.pdf_measurements",
-      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss.pdf",
+      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss%20%28Index%20A%29.pdf",
     },
     {
       id: "measure",
@@ -90,13 +90,13 @@ const playbook: Playbook = {
       titleDefault: "Measure lengths, areas and counts",
       whatKey: "cases.takeoff_quantities_from_a_pdf_plan.step.measure.what",
       whatDefault:
-        "Work the sheet trade by trade. Area for floors, screed and wall faces, distance or polyline for skirting, kerb and pipe runs, count for doors, sockets and fittings. Give an area a depth where you need the volume, and take openings off the way the rules for that trade require.",
+        "Work the sheet trade by trade. Area for floors, screed and wall faces, distance or polyline for skirting, kerb and pipe runs, count for doors, sockets and fittings. Give an area a depth where you need the volume, and take openings off the way section 5 of that trade's ATV in VOB/C requires, which for most trades means an opening up to 2.5 square metres is measured over and a larger one is deducted.",
       whyKey: "cases.takeoff_quantities_from_a_pdf_plan.step.measure.why",
       whyDefault:
         "The rate you are pricing is a rate per the quantity the contract measures, and VOB/C sets those rules trade by trade. Measuring the way the trade is settled keeps the figure in your offer and the figure in the final account the same figure.",
       moduleLabel: "PDF Measurements",
       moduleLabelKey: "nav.pdf_measurements",
-      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss.pdf",
+      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss%20%28Index%20A%29.pdf",
     },
     {
       id: "organise",
@@ -119,7 +119,7 @@ const playbook: Playbook = {
         "A checkable Aufmass is one where a number leads back to a named measurement on a named sheet. Naming costs seconds now and saves the afternoon when the client asks where a figure came from.",
       moduleLabel: "PDF Measurements",
       moduleLabelKey: "nav.pdf_measurements",
-      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss.pdf",
+      to: "/takeoff?tab=measurements&name=A-2.01%20Grundriss%20Erdgeschoss%20%28Index%20A%29.pdf",
     },
     {
       id: "review",
@@ -182,7 +182,7 @@ const playbook: Playbook = {
       titleDefault: "Issue the bill as GAEB",
       whatKey: "cases.takeoff_quantities_from_a_pdf_plan.step.export.what",
       whatDefault:
-        "Export the finished bill as a GAEB XML file straight from the BOQ editor. What leaves the office is the same structure you built from the takeoff, positions, quantities and units, in the exchange format every German AVA package opens without retyping.",
+        "Export the finished bill as a GAEB XML file straight from the BOQ editor, as an X83 Angebotsaufforderung, the exchange phase for a bill that goes out to be priced. What leaves the office is the same structure you built from the takeoff, positions, quantities and units, in the exchange format every German AVA package opens without retyping.",
       whyKey: "cases.takeoff_quantities_from_a_pdf_plan.step.export.why",
       whyDefault:
         "A bill that travels as GAEB stays a bill instead of becoming a PDF someone retypes with new mistakes. The quantities you measured arrive in the other side's software as data, and the Aufmass chain behind them survives the handover.",

@@ -56,7 +56,7 @@ const playbook: Playbook = {
       titleDefault: "Set the Soll from the calculation",
       whatKey: "cases.soll_ist_control_on_a_running_site.step.soll.what",
       whatDefault:
-        "Generate the cost budget from the priced bill, then work down the budget lines category by category so the Soll carries the money your calculation carried, split the way site will actually spend it.",
+        "Generate the cost budget from the Auftragskalkulation, the priced bill as awarded, then work down the budget lines category by category so the Soll carries the money your calculation carried, split the way site will actually spend it. Where the Arbeitskalkulation moved money between positions before the start, the Soll follows the Arbeitskalkulation, not the offer.",
       whyKey: "cases.soll_ist_control_on_a_running_site.step.soll.why",
       whyDefault:
         "A Soll is only worth comparing against when it comes from the calculation the job was priced on. A budget keyed in from memory turns every later variance into an argument about the budget instead of a decision about the work.",

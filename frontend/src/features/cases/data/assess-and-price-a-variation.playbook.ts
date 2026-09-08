@@ -64,7 +64,7 @@ const playbook: Playbook = {
         "A change that is worked on site but never written down is the one that gets argued about later. Logging it at the instruction is what makes the claim provable instead of a memory.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "price",

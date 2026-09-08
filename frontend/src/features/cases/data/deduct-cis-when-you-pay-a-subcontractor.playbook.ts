@@ -114,7 +114,7 @@ const playbook: Playbook = {
       titleDefault: "Settle whether the reverse charge applies",
       whatKey: "cases.deduct_cis_when_you_pay_a_subcontractor.step.vat.what",
       whatDefault:
-        "Determine whether the domestic reverse charge applies to this supply. It covers construction services reported under the scheme between VAT registered businesses, and it stops at the end user, who accounts for VAT the ordinary way.",
+        "Determine whether the domestic reverse charge applies to this supply. It covers construction services reported under the scheme between VAT registered businesses, and it stops at the end user or intermediary supplier, who accounts for VAT the ordinary way, but only once they have told you so in writing; without that written confirmation you apply the reverse charge.",
       whyKey: "cases.deduct_cis_when_you_pay_a_subcontractor.step.vat.why",
       whyDefault:
         "The reverse charge moves the VAT from the supplier to the customer, so an invoice raised the old way is wrong on its face and the customer cannot simply pay it and move on. Determining it per supply, and keeping the determination, is what keeps a subcontractor's invoice payable on the day it arrives.",
@@ -140,7 +140,7 @@ const playbook: Playbook = {
         "Report the deductions taken in the period: who they were taken from, the gross, the materials, the amount deducted and the verification each band rested on. That is the substance of the monthly return and of the statement every subcontractor is entitled to receive.",
       whyKey: "cases.deduct_cis_when_you_pay_a_subcontractor.step.return.why",
       whyDefault:
-        "The return is due every month whether or not the paperwork was kept, and reconstructing a month of deductions from bank payments is how a small error turns into a penalty. A report built from the recorded deductions carries the same facts as the subcontractor's own statement, which is why the two agree without anybody negotiating.",
+        "The CIS300 is due by the 19th for the tax month that ended on the 5th, whether or not the paperwork was kept, and each subcontractor's payment and deduction statement within fourteen days of the same month end. Reconstructing a month of deductions from bank payments is how a small error turns into a penalty. A report built from the recorded deductions carries the same facts as the subcontractor's own statement, which is why the two agree without anybody negotiating.",
       moduleLabel: "Reports",
       moduleLabelKey: "nav.reports",
       to: "/reports",

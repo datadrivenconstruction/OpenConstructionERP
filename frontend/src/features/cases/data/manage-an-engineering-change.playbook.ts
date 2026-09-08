@@ -129,7 +129,7 @@ const playbook: Playbook = {
         "The engineering side can be closed and still leave the money open. A change order is what turns an authorised change into an agreed cost and a moved date, before it quietly becomes your problem.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
   ],
 };

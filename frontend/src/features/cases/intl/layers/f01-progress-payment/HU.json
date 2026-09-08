@@ -29,7 +29,7 @@
     "excessTerm": "potmunka",
     "retentionTerm": "visszatartas",
     "payDoc": "szamla",
-    "clockRegime": "the Ptk. payment rules",
+    "clockRegime": "Ptk. 6:130",
     "clockStart": "the day the szamla is received",
     "payDays": "30",
     "escalationRoute": "take it to the Teljesitesigazolasi Szakertoi Szerv and preserve the claim"
@@ -91,7 +91,7 @@
         }
       ],
       "note": {
-        "what": "Keep potmunka on its own tetel rather than inside an existing one. A certifier who has to decide the whole period in order to decide the extra will decide neither."
+        "what": "Keep potmunka on its own tetel rather than inside an existing one. A certifier who has to decide the whole period in order to decide the extra will decide neither. Where the contract settles on measured quantities, the decree on construction contracting has them kept in the felmeresi naplo of the e-epitesi naplo, so the percentages here should be the ones that log can back."
       }
     },
     {
@@ -100,7 +100,7 @@
       "icon": "Stamp",
       "module": "Approval routes",
       "moduleKey": "approvalRoutes.title",
-      "to": "/approval-routes",
+      "to": "/governance?tab=approvals",
       "in": [
         {
           "key": "valuation",
@@ -122,6 +122,7 @@
         }
       ],
       "note": {
+        "what": "The decree on construction contracting gives the muszaki ellenor fifteen working days from your written notice that the performance is complete to issue the teljesitesigazolas or refuse it with reasons, and the szamla cannot lawfully be issued before it, so record the day the notice went in: the fifteen days run from it.",
         "why": "A certificate that is refused and a certificate that has simply not arrived look identical from the contractor's side, and the remedies for them are different. Recording the submission date is what tells the two apart."
       }
     },
@@ -153,7 +154,7 @@
         }
       ],
       "note": {
-        "what": "Between businesses the domestic reverse charge usually applies to construction work, so the szamla carries the note and the customer accounts for the tax rather than the rate appearing on the invoice."
+        "what": "Between domestic VAT-registered businesses the reverse charge applies to construction and installation work on a property that needs a permit from, or a notification to, any authority, so the szamla carries the words forditott adozas and no tax, the customer accounts for the twenty-seven percent, and the invoice is reported to NAV online at issue like every other."
       }
     },
     {
@@ -182,7 +183,10 @@
           "key": "due",
           "label": "Due date computed"
         }
-      ]
+      ],
+      "note": {
+        "what": "The module carries this period as the EU late-payment regime, which is the directive Ptk. 6:130 transposes, so pick that regime and count from the day the szamla arrives. Thirty days is the default; a business-to-business contract may agree longer, and past sixty days the term is presumed unfair, so where the contract sets its own date enter that date instead."
+      }
     },
     {
       "id": "dates",
@@ -238,7 +242,10 @@
           "key": "entitlement",
           "label": "Entitlement preserved"
         }
-      ]
+      ],
+      "note": {
+        "what": "The expert body can be asked when the certificate is refused, when it never arrives and when it was issued and not paid; it answers within thirty days, sixty at most, and a court asked to enforce its opinion afterwards hears the case out of turn."
+      }
     }
   ]
 }

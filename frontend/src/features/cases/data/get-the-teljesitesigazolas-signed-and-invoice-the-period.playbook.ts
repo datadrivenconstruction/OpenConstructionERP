@@ -66,7 +66,7 @@ const playbook: Playbook = {
       titleDefault: "Register the contract and its payment regime",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.register.what",
       whatDefault:
-        "Record the contract, its the Ptk. Payment rules payment regime and the dates it turns on, so every later step reads the same terms instead of somebody's memory of them.",
+        "Record the contract, its Ptk. 6:130 payment regime and the dates it turns on, so every later step reads the same terms instead of somebody's memory of them.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.register.why",
       whyDefault:
         "A payment regime that lives in a PDF nobody opens is a regime that gets applied differently by each person who applies it. Registered once, the deadlines below are computed rather than argued about.",
@@ -101,7 +101,7 @@ const playbook: Playbook = {
       titleDefault: "Measure the period tetel by tetel",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.measure.what",
       whatDefault:
-        "Record what was executed against each tetel for the period as a percentage of its contract quantity. The earned quantity follows from that percentage and the design quantity, and the earned amount from the same percentage and the position total, so one honest number per line produces the whole valuation. Keep potmunka on its own tetel rather than inside an existing one. A certifier who has to decide the whole period in order to decide the extra will decide neither.",
+        "Record what was executed against each tetel for the period as a percentage of its contract quantity. The earned quantity follows from that percentage and the design quantity, and the earned amount from the same percentage and the position total, so one honest number per line produces the whole valuation. Keep potmunka on its own tetel rather than inside an existing one. A certifier who has to decide the whole period in order to decide the extra will decide neither. Where the contract settles on measured quantities, the decree on construction contracting has them kept in the felmeresi naplo of the e-epitesi naplo, so the percentages here should be the ones that log can back.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.measure.why",
       whyDefault:
         "A teljesitesigazolas built from a single project percentage cannot be checked and therefore cannot be approved without a conversation. Measured line by line, the disagreement is about one tetel rather than about the whole month, and the rest of the money moves while that one is settled.",
@@ -136,13 +136,13 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.igazolas.what",
       whatDefault:
-        "Route the teljesitesigazolas to the muszaki ellenor, and to whoever the contract adds after them. Keep the approval date, because the szamla follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the teljesitesigazolas to the muszaki ellenor, and to whoever the contract adds after them. Keep the approval date, because the szamla follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. The decree on construction contracting gives the muszaki ellenor fifteen working days from your written notice that the performance is complete to issue the teljesitesigazolas or refuse it with reasons, and the szamla cannot lawfully be issued before it, so record the day the notice went in: the fifteen days run from it.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.igazolas.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint. A certificate that is refused and a certificate that has simply not arrived look identical from the contractor's side, and the remedies for them are different. Recording the submission date is what tells the two apart.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "szamla",
@@ -171,7 +171,7 @@ const playbook: Playbook = {
       titleDefault: "Issue the szamla against the approved figure",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.szamla.what",
       whatDefault:
-        "Raise the szamla against the approved teljesitesigazolas, carrying visszatartas and any deduction the contract provides for, and reference the teljesitesigazolas on it. Between businesses the domestic reverse charge usually applies to construction work, so the szamla carries the note and the customer accounts for the tax rather than the rate appearing on the invoice.",
+        "Raise the szamla against the approved teljesitesigazolas, carrying visszatartas and any deduction the contract provides for, and reference the teljesitesigazolas on it. Between domestic VAT-registered businesses the reverse charge applies to construction and installation work on a property that needs a permit from, or a notification to, any authority, so the szamla carries the words forditott adozas and no tax, the customer accounts for the twenty-seven percent, and the invoice is reported to NAV online at issue like every other.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.szamla.why",
       whyDefault:
         "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the teljesitesigazolas also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
@@ -206,7 +206,7 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.openclock.what",
       whatDefault:
-        "Open a clock over the szamla starting from the day the szamla is received, under the Ptk. Payment rules. Payment falls due 30 days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+        "Open a clock over the szamla starting from the day the szamla is received, under Ptk. 6:130. Payment falls due 30 days later, and the clock records that date rather than leaving it to be worked out when somebody asks. The module carries this period as the EU late-payment regime, which is the directive Ptk. 6:130 transposes, so pick that regime and count from the day the szamla arrives. Thirty days is the default; a business-to-business contract may agree longer, and past sixty days the term is presumed unfair, so where the contract sets its own date enter that date instead.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.openclock.why",
       whyDefault:
         "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the szamla is received once makes the whole chain checkable.",
@@ -241,7 +241,7 @@ const playbook: Playbook = {
       titleDefault: "Read the dates the regime computes",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.dates.what",
       whatDefault:
-        "Read back the dates the Ptk. Payment rules produces from the day the szamla is received. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted.",
+        "Read back the dates Ptk. 6:130 produces from the day the szamla is received. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.dates.why",
       whyDefault:
         "Deadlines that are typed in are deadlines that are typed in wrong, and a payment regime has more of them than anyone holds in their head. A derivation you can read out loud is what turns a phone call about a late payment into a quotable line.",
@@ -276,7 +276,7 @@ const playbook: Playbook = {
       titleDefault: "Escalate with the record already assembled",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.escalate.what",
       whatDefault:
-        "When the clock has run out, take it to the Teljesitesigazolasi Szakertoi Szerv and preserve the claim. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
+        "When the clock has run out, take it to the Teljesitesigazolasi Szakertoi Szerv and preserve the claim. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure. The expert body can be asked when the certificate is refused, when it never arrives and when it was issued and not paid; it answers within thirty days, sixty at most, and a court asked to enforce its opinion afterwards hears the case out of turn.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.escalate.why",
       whyDefault:
         "The difference between a claim that is paid and one that is argued about is almost never the merits. It is whether the dates and the documents were kept as the work happened, because reconstructing them afterwards is expensive and looks exactly like inventing them.",

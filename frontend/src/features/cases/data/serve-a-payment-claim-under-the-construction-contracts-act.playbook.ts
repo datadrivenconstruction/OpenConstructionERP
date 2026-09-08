@@ -141,7 +141,7 @@ const playbook: Playbook = {
         "Take the cumulative valuation, subtract what has already been certified, and apply retentions at the contract percentage. The figure that leaves this step is the one the payment claim is raised for, and the backup behind it is the measure that produced it.",
       whyKey: "cases.serve_a_payment_claim_under_the_construction_contracts_act.step.retentions.why",
       whyDefault:
-        "Interim payments are cumulative, so the month's money is a difference between two totals rather than a total of its own. Computing it from the cumulative figure is what stops a line being paid twice or dropped entirely when a period is re-measured. Retention money on a commercial construction contract is held on trust and has to be identifiable as such. A figure that exists only as a deduction line on a claim is not identifiable, and the party who needs it to be is the one who is not holding it.",
+        "Interim payments are cumulative, so the month's money is a difference between two totals rather than a total of its own. Computing it from the cumulative figure is what stops a line being paid twice or dropped entirely when a period is re-measured. Retention money on a commercial construction contract is held on trust and has to be identifiable as such, and since October 2023 it has to sit in a separate bank account and be reported to the party it is held from. A figure that exists only as a deduction line on a claim is not identifiable, and the party who needs it to be is the one who is not holding it.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",
@@ -173,7 +173,7 @@ const playbook: Playbook = {
       titleDefault: "Issue the payment claim against the approved figure",
       whatKey: "cases.serve_a_payment_claim_under_the_construction_contracts_act.step.serve.what",
       whatDefault:
-        "Raise the payment claim against the approved progress valuation, carrying retentions and any deduction the contract provides for, and reference the progress valuation on it. The claim has to state that it is made under the Act and say how the amount was calculated. A claim that does neither is a request for money rather than a payment claim, and it carries none of the Act's consequences for ignoring it. The tax invoice follows for GST and is not the document the Act counts from.",
+        "Raise the payment claim against the approved progress valuation, carrying retentions and any deduction the contract provides for, and reference the progress valuation on it. The claim has to state that it is made under the Act and say how the amount was calculated, and since 1 December 2015 every payment claim, commercial or residential, must also be accompanied by the prescribed Form 1 notice explaining the payer's obligations. A claim that does none of this is a request for money rather than a payment claim, and it carries none of the Act's consequences for ignoring it. The tax invoice follows for GST and is not the document the Act counts from.",
       whyKey: "cases.serve_a_payment_claim_under_the_construction_contracts_act.step.serve.why",
       whyDefault:
         "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the progress valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
@@ -208,7 +208,7 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.serve_a_payment_claim_under_the_construction_contracts_act.step.openclock.what",
       whatDefault:
-        "Open a clock over the payment claim starting from the day the payment claim is served, under the Construction Contracts Act. Payment falls due 20 working days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+        "Open a clock over the payment claim starting from the day the payment claim is served, under the Construction Contracts Act. Payment falls due 20 working days later, and the clock records that date rather than leaving it to be worked out when somebody asks. Twenty working days is the Act's default where the contract is silent. NZS 3910 and most commercial forms set their own shorter periods, and where they do the contract's date governs, so read the default the clock gives against the contract before relying on it.",
       whyKey: "cases.serve_a_payment_claim_under_the_construction_contracts_act.step.openclock.why",
       whyDefault:
         "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the payment claim is served once makes the whole chain checkable.",

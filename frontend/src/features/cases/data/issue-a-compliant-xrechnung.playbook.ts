@@ -182,7 +182,7 @@ const playbook: Playbook = {
       titleDefault: "Record where it went",
       whatKey: "cases.issue_a_compliant_xrechnung.step.record.what",
       whatDefault:
-        "Log the send: the registration you issued under, the document itself, and the transmission id the portal or the access point gave back. The Leitweg-ID it was routed on is what the record keeps.",
+        "Log the send: the registration you issued under, the document itself, and the transmission id that came back from the ZRE or OZG-RE of the federal administration, the portal of the Land, or the Peppol access point where the client receives that way. The Leitweg-ID it was routed on is what the record keeps.",
       whyKey: "cases.issue_a_compliant_xrechnung.step.record.why",
       whyDefault:
         "Germany routes an invoice rather than clearing it, so no authority stamps yours. The transmission id is the only proof you sent it on the day you say you did, and it is what you quote when the client's accounts department cannot find it.",

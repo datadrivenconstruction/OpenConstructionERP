@@ -186,7 +186,7 @@ const playbook: Playbook = {
         "A review route that can never clear, or that needs two approvers where you meant one, only bites once real work is stuck in it. The dry run proves the flow terminates at approved before anyone routes a live container through it.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "federate",

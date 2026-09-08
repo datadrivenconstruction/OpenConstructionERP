@@ -44,7 +44,7 @@ const playbook: Playbook = {
       titleDefault: "File the tender documents as received",
       whatKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.receive.what",
       whatDefault:
-        "Save the GAEB X83 and the rest of the Vergabeunterlagen into the project files exactly as the client sent them, with the date they arrived and the Angebotsfrist recorded alongside.",
+        "Save the GAEB X83 and the rest of the Vergabeunterlagen into the project files exactly as the client sent them, with the date they arrived, the Angebotsfrist and the Bindefrist recorded alongside, because the second one is how long your price has to stand.",
       whyKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.receive.why",
       whyDefault:
         "Tenders get corrected and reissued during the bidding period. Keeping the file you actually priced on record is what lets you show, weeks later, which version your offer answers.",
@@ -172,7 +172,7 @@ const playbook: Playbook = {
       icon: "Send",
       inputs: [
         { labelKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.in.x84", label: "GAEB X84 Hauptangebot" },
-        { labelKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.in.forms", label: "Signed tender forms" },
+        { labelKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.in.forms", label: "Completed tender forms" },
       ],
       outputs: [
         { labelKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.out.angebot", label: "Submitted Angebot" },
@@ -182,7 +182,7 @@ const playbook: Playbook = {
       titleDefault: "Submit the Angebot and log what went out",
       whatKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.what",
       whatDefault:
-        "Assemble the X84 with the signed tender forms and any Nebenangebot the tender allows into one submission, issue it before the Angebotsfrist, and keep the record of what went out, to whom and when.",
+        "Assemble the X84 with the completed tender forms and any Nebenangebot the tender allows into one submission. On a public VOB/A tender it goes up through the Vergabeplattform in Textform before the Angebotsfrist, not by e-mail; on a private tender send it the way the Anfrage asked. Keep the record of what went out, to whom and when.",
       whyKey: "cases.win_a_gaeb_tender_from_lv_to_angebot.step.submit.why",
       whyDefault:
         "A strong price inside an incomplete or late submission is not a price, it is an exclusion. The dated record of what you sent is also the starting point for any Nachtrag discussion once you win.",

@@ -67,7 +67,7 @@ const playbook: Playbook = {
       titleDefault: "Pick the Nachunternehmer you will ask",
       whatKey: "cases.build_a_preisspiegel_and_award.step.nuwahl.what",
       whatDefault:
-        "Work through the NU register and shortlist the firms for this Gewerk: the right trade, capacity free in your window, references you can actually call, and a valid Freistellungsbescheinigung on file.",
+        "Work through the NU register and shortlist the firms for this Gewerk: the right trade, capacity free in your window, references you can actually call, a valid Freistellungsbescheinigung under paragraph 48b EStG on file, and the Unbedenklichkeitsbescheinigungen of the Krankenkasse, the Berufsgenossenschaft and, where the trade falls under it, SOKA-BAU.",
       whyKey: "cases.build_a_preisspiegel_and_award.step.nuwahl.why",
       whyDefault:
         "Asking everybody wastes their time and yours, and asking the wrong firm costs more than that. A missing Freistellungsbescheinigung becomes a Bauabzugsteuer deduction you have to handle, and MiLoG leaves you answerable for the wages your NU pays. That belongs in the shortlist, not in the week of the award.",

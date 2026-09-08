@@ -46,7 +46,7 @@ const playbook: Playbook = {
       titleDefault: "Decide per province what you recover and what you carry",
       whatKey: "cases.price_one_bill_for_hst_pst_and_qst.step.position.what",
       whatDefault:
-        "For every province the work touches, settle whether the provincial tax on materials is recoverable in your position or a cost you carry, and write the decision down before a single rate is entered.",
+        "For every province the work touches, settle whether the provincial tax on materials is recoverable in your position or a cost you carry, and write the decision down before a single rate is entered. Saskatchewan reverses the picture: since 2017 a contractor charges PST on the whole contract price for work on real property and buys the materials exempt for resale, so there the tax belongs on the tail and not in the rate, and Manitoba does the same for mechanical and electrical work.",
       whyKey: "cases.price_one_bill_for_hst_pst_and_qst.step.position.why",
       whyDefault:
         "This one decision moves the tax between two completely different places in the estimate. Getting it wrong does not produce a wrong total, it produces a right total built the wrong way, which passes review cleanly and then fails at the first cost report when the recovery nobody was entitled to does not arrive.",

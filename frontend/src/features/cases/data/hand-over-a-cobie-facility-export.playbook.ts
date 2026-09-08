@@ -136,7 +136,7 @@ const playbook: Playbook = {
       titleDefault: "Build the COBie 2.4 workbook",
       whatKey: "cases.hand_over_a_cobie_facility_export.step.build.what",
       whatDefault:
-        "Export the register as a COBie UK 2.4 workbook. It arrives as one spreadsheet with seven sheets, Contact, Facility, Floor, Space, Type, Component and System, each projected straight from the canonical model and the asset data sitting on it.",
+        "Export the register as a COBie 2.4 workbook in the shape BS 1192-4 asks for in the United Kingdom. It arrives as one spreadsheet with seven sheets, Contact, Facility, Floor, Space, Type, Component and System, each projected straight from the canonical model and the asset data sitting on it.",
       whyKey: "cases.hand_over_a_cobie_facility_export.step.build.why",
       whyDefault:
         "A workbook generated from the model matches the building; a workbook typed into a template matches whatever the typist had in front of them that week. Exporting per model as each one is signed off also keeps the register current, instead of leaving the whole job to the fortnight before handover.",

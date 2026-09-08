@@ -49,7 +49,7 @@ const playbook: Playbook = {
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.contract.in.schedule",
-          label: "Priced schedule of values",
+          label: "Priced LV",
         },
       ],
       outputs: [
@@ -59,7 +59,7 @@ const playbook: Playbook = {
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.contract.out.retention",
-          label: "Retention terms on record",
+          label: "Sicherheitseinbehalt terms on record",
         },
       ],
       titleKey: "cases.run_the_vob_payment_clock.step.contract.title",
@@ -84,7 +84,7 @@ const playbook: Playbook = {
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.claim.in.measured",
-          label: "Work measured this period",
+          label: "Aufmass for the period",
         },
       ],
       outputs: [
@@ -101,10 +101,10 @@ const playbook: Playbook = {
       titleDefault: "Issue the Abschlagsrechnung against the approved figure",
       whatKey: "cases.run_the_vob_payment_clock.step.claim.what",
       whatDefault:
-        "Raise the Abschlagsrechnung against the approved verifiable statement of work, carrying Sicherheitseinbehalt and any deduction the contract provides for, and reference the verifiable statement of work on it. Between businesses in construction the tax is usually accounted for by the customer under the reverse charge, so the invoice carries the note and not a rate.",
+        "Raise the Abschlagsrechnung against the approved Aufmass, carrying Sicherheitseinbehalt and any deduction the contract provides for, and reference the Aufmass on it. Take the Aufmass jointly with the client's site supervision wherever you can, as paragraph 14 (2) VOB/B provides, and attach it as the pruefbare Aufstellung, the verifiable statement of work an Abschlagsrechnung has to carry under paragraph 16 (1) VOB/B. Where the client is itself a construction business and holds a USt 1 TG certificate, the tax is accounted for by the client under paragraph 13b UStG, so the invoice carries the reverse-charge note and no tax rate.",
       whyKey: "cases.run_the_vob_payment_clock.step.claim.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the verifiable statement of work also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the Aufmass also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Contracts",
       moduleLabelKey: "nav.contracts",
       to: "/projects/:projectId/contracts",
@@ -119,7 +119,7 @@ const playbook: Playbook = {
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.openclock.in.receipt",
-          label: "Date the client received it",
+          label: "Day the client received the Aufstellung",
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.openclock.in.amount",
@@ -140,10 +140,10 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.run_the_vob_payment_clock.step.openclock.what",
       whatDefault:
-        "Open a clock over the Abschlagsrechnung starting from the client receiving the verifiable statement, under paragraph 16 VOB/B. Payment falls due 21 days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+        "Open a clock over the Abschlagsrechnung starting from the client receiving the pruefbare Aufstellung, under paragraph 16 VOB/B. Payment falls due 21 days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
       whyKey: "cases.run_the_vob_payment_clock.step.openclock.why",
       whyDefault:
-        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the client receiving the verifiable statement once makes the whole chain checkable. The period runs from receipt, not from the day you printed the invoice. Entering the posting date moves every deadline in your own favour and leaves you holding a date you cannot prove on the one occasion it has to be proved.",
+        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the client receiving the pruefbare Aufstellung once makes the whole chain checkable. The period runs from receipt, not from the day you printed the invoice. Entering the posting date moves every deadline in your own favour and leaves you holding a date you cannot prove on the one occasion it has to be proved.",
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",
@@ -179,7 +179,7 @@ const playbook: Playbook = {
       titleDefault: "Read the dates the regime computes",
       whatKey: "cases.run_the_vob_payment_clock.step.dates.what",
       whatDefault:
-        "Read back the dates paragraph 16 VOB/B produces from the client receiving the verifiable statement. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted.",
+        "Read back the dates paragraph 16 VOB/B produces from the client receiving the pruefbare Aufstellung. The sum payable leads, the due date and the final date for payment sit under it, and the derivation spells out each date against the provision it came from, so every one of them can be quoted rather than asserted. On this regime the day the client received the Aufstellung stands as the due date and the twenty-first day after it as the final date for payment, which is the Faelligkeit of paragraph 16 (1) VOB/B. The Nachfrist you set after that day is not computed here and has to be minded by hand.",
       whyKey: "cases.run_the_vob_payment_clock.step.dates.why",
       whyDefault:
         "Deadlines that are typed in are deadlines that are typed in wrong, and a payment regime has more of them than anyone holds in their head. A derivation you can read out loud is what turns a phone call about a late payment into a quotable line. On a VOB/B clock the two notice rows stay empty, because VOB/B sets no payment notice and no pay-less notice, so there is nothing to serve and nothing to chase, only the money and the date it stops being on time.",
@@ -217,7 +217,7 @@ const playbook: Playbook = {
         "Come back to the list as the month runs. It says how many clocks the project carries and how many are past their final date, badges the overdue ones and fills the breach register underneath. Open an overdue one and the findings name the sum outstanding, the days it has run past the final date and the rate interest runs at.",
       whyKey: "cases.run_the_vob_payment_clock.step.watch.why",
       whyDefault:
-        "Reading a clock is what writes its register, so a quiet register on a project nobody opens is telling you about the reading and not about the payments. Nobody misses a deadline on purpose; they miss it because the day it mattered looked like every other day. The statutory interest is due as of right and starts running the moment the date passes, without having to be claimed separately, so the only thing standing between you and it is a record that says when.",
+        "Reading a clock is what writes its register, so a quiet register on a project nobody opens is telling you about the reading and not about the payments. Nobody misses a deadline on purpose; they miss it because the day it mattered looked like every other day. Under VOB/B the interest does not start by itself on the twenty-first day. It runs from the end of a Nachfrist you set in writing, or at the latest from the thirtieth day after the client received the invoice and its Aufstellung, when paragraph 16 (5) VOB/B puts the client in default without any reminder. The clock reading is what tells you which of those two days you are on.",
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",
@@ -228,7 +228,7 @@ const playbook: Playbook = {
       inputs: [
         {
           labelKey: "cases.run_the_vob_payment_clock.step.receivable.in.claim",
-          label: "Certified progress claim",
+          label: "Checked Abschlagsrechnung",
         },
         {
           labelKey: "cases.run_the_vob_payment_clock.step.receivable.in.overdue",
@@ -284,7 +284,7 @@ const playbook: Playbook = {
       titleDefault: "Escalate with the record already assembled",
       whatKey: "cases.run_the_vob_payment_clock.step.escalate.what",
       whatDefault:
-        "When the clock has run out, send the Mahnung and start default interest running. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
+        "When the clock has run out, set the client a written Nachfrist under paragraph 16 (5) VOB/B, after which default interest runs at the paragraph 288 (2) BGB rate and you may suspend the works until you are paid. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
       whyKey: "cases.run_the_vob_payment_clock.step.escalate.why",
       whyDefault:
         "The difference between a claim that is paid and one that is argued about is almost never the merits. It is whether the dates and the documents were kept as the work happened, because reconstructing them afterwards is expensive and looks exactly like inventing them.",

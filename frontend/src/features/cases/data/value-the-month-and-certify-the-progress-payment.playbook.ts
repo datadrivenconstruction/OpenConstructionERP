@@ -122,7 +122,7 @@ const playbook: Playbook = {
         "Open the period's application and populate the percent complete from the progress you just recorded. Each line gets this period's quantity, this period's value and the running total; the header keeps gross, retention held, previously settled and net due recomputing as you go.",
       whyKey: "cases.value_the_month_and_certify_the_progress_payment.step.value.why",
       whyDefault:
-        "Retention is the deduction the application holds for you, and holding it in the same document as the valuation is what stops the two drifting apart. Anything else your contract deducts - advance payment recovery, owner-supplied material, site utilities, the wage account carve-out - is yours to apply, and you should agree those figures with the other side in the same conversation as the valuation, not after it.",
+        "Retention is the deduction the application holds for you, and the national rules cap the quality retention at three percent of the settlement total, so holding it in the same document as the valuation is what stops the two drifting apart. Anything else your contract deducts - advance payment recovery, owner-supplied material, site utilities, the wage account carve-out - is yours to apply, and you should agree those figures with the other side in the same conversation as the valuation, not after it.",
       moduleLabel: "Contracts",
       moduleLabelKey: "nav.contracts",
       to: "/projects/:projectId/contracts",
@@ -163,7 +163,7 @@ const playbook: Playbook = {
       titleDefault: "Carry the certified amount into finance",
       whatKey: "cases.value_the_month_and_certify_the_progress_payment.step.invoice.what",
       whatDefault:
-        "The certified amount lands in finance as a payable without being re-entered. Raise the invoice against it with the tax rate on each line, and keep the fapiao you issue to the buyer tied to the same record.",
+        "The certified amount lands in finance as a payable without being re-entered. Raise the invoice against it with the tax rate on each line, nine percent for construction services under the general method or three percent where the project runs on the simplified method, and keep the fapiao you issue to the buyer tied to the same record.",
       whyKey: "cases.value_the_month_and_certify_the_progress_payment.step.invoice.why",
       whyDefault:
         "In China the buyer generally cannot process the money until the fapiao is in hand, so the tax invoicing chain is part of the payment cycle rather than an accounting afterthought. Re-keying the certified figure into a separate ledger is where a transposed digit becomes a payment nobody can reconcile at year end.",

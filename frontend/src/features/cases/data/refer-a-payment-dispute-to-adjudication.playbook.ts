@@ -92,7 +92,7 @@ const playbook: Playbook = {
       titleDefault: "Serve the notice where the contract says to serve it",
       whatKey: "cases.refer_a_payment_dispute_to_adjudication.step.serve.what",
       whatDefault:
-        "Issue the notice of adjudication through the correspondence register: to the right party, at the address the contract gives for service, stating the nature of the dispute, what is claimed and the redress sought. The register keeps the date and the method of service with it.",
+        "Issue the notice of adjudication through the correspondence register: to the right party, at the address the contract gives for service, stating the nature of the dispute, what is claimed and the redress sought. The register keeps the date and the method of service with it. Apply to the adjudicator nominating body the contract names in the same window, because the referral has to reach the adjudicator within seven days of the notice.",
       whyKey: "cases.refer_a_payment_dispute_to_adjudication.step.serve.why",
       whyDefault:
         "Service is where an otherwise good referral dies. A notice sent to the wrong entity inside a group, or to an email address the contract does not recognise, can be challenged on jurisdiction before anybody looks at the merits, and the seven days to the referral do not pause while that gets sorted out.",

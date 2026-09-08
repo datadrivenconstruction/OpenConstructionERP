@@ -184,7 +184,7 @@ const playbook: Playbook = {
       inputs: [
         {
           labelKey: "cases.certify_the_month_against_the_mediciones.step.clock.in.invoice",
-          label: "Issued invoice and its date",
+          label: "Issued invoice and the day it was received",
         },
         {
           labelKey: "cases.certify_the_month_against_the_mediciones.step.clock.in.terms",
@@ -205,10 +205,10 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.certify_the_month_against_the_mediciones.step.clock.what",
       whatDefault:
-        "Open a clock over the invoice starting from the invoice date, under Ley 3/2004. Payment falls due 30 days later, and the clock records that date rather than leaving it to be worked out when somebody asks. Thirty days between businesses by default, extendable to sixty by express agreement and no further unless the term is not grossly unfair. On a public contract read the periods the LCSP fixes against the date it gives you.",
+        "Open a clock over the invoice starting from the day the client receives the invoice, under Ley 3/2004. Payment falls due 30 days later, and the clock records that date rather than leaving it to be worked out when somebody asks. Thirty days between businesses by default and sixty by express agreement, not a day more, because article 4 of Ley 3/2004 makes a longer term void. Where the contract ties payment to the certificación its approval may not take more than thirty days from delivery of the works, and the count runs from the day the client receives the electronic invoice. On a public contract article 198 LCSP gives the Administration thirty days to approve the certificación and thirty more to pay.",
       whyKey: "cases.certify_the_month_against_the_mediciones.step.clock.why",
       whyDefault:
-        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the invoice date once makes the whole chain checkable. Interest runs at the European Central Bank reference rate plus eight points from the day it is missed. Late payment is normal in this market and interest is almost never claimed, which is precisely why it keeps happening.",
+        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the client receives the invoice once makes the whole chain checkable. Interest runs at the European Central Bank reference rate plus eight points from the day after the final date, without any reminder, and each late invoice carries a fixed forty euro recovery cost under article 8 on top. Late payment is normal in this market and interest is almost never claimed, which is precisely why it keeps happening.",
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",

@@ -68,7 +68,7 @@ const playbook: Playbook = {
         "Routes drawn from scratch tend to encode one person's habits and one project's politics, and they leave out the review step nobody remembers until an auditor asks. Cloning rather than editing in place also means tuning yours cannot silently move the flow every other project is already running.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "simulate",
@@ -110,7 +110,7 @@ const playbook: Playbook = {
         "A step set to all against a role with one member behaves nothing like the same step once that role has four. Reading the walk is the only way to see the real shape of a flow without discovering it on a live document in the week it matters.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "fix",
@@ -151,7 +151,7 @@ const playbook: Playbook = {
         "The stuck step is the one that hurts, because nothing fails visibly. A document simply sits in review until somebody thinks to ask why, and the answer is always that the route was never walked. Finding it in a simulation costs a minute, finding it the week before a gate costs the gate.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "commit",
@@ -193,7 +193,7 @@ const playbook: Playbook = {
         "A route that terminates in a simulation can still take three weeks in practice, and the held time per step is the only honest read on whether the approver you picked has the capacity to be one. The same record is what proves, a year later, that the thing that got approved went through the route everybody agreed to rather than a nod in a corridor.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
   ],
 };

@@ -1,7 +1,7 @@
 {
   "family": "f01-progress-payment",
   "jurisdiction": "ZA",
-  "note": "South Africa runs the shortest payment window in the family, which is why this layer surfaces the deadlines and the watch steps rather than stopping at the invoice. Seven calendar days from the certificate leaves no room for a certificate that was issued and not read, so the clock is opened on the certificate date rather than on the invoice date.",
+  "note": "South Africa has no security of payment statute, so the only clock is the contract's. Under the JBCC Principal Building Agreement 6.2 the employer pays within fourteen calendar days of the date FOR issue of the payment certificate fixed in the contract data, not of the day the certificate actually arrives, and the contractor pays subcontractors within seven calendar days of that due date. So the layer opens the clock on the contract-data date for issue and surfaces the deadlines, watch and escalation steps, because the remedy the agreement gives is a five working day notice to comply and the right to suspend.",
   "slug": "issue-the-interim-payment-certificate-and-get-paid-on-it",
   "order": 1340,
   "region": "ZA",
@@ -24,15 +24,15 @@
   "slots": {
     "priceLine": "bill item",
     "priceLinePlural": "bill items",
-    "valuationDoc": "interim payment certificate",
+    "valuationDoc": "payment valuation",
     "certifier": "principal agent",
     "excessTerm": "contract instruction",
     "retentionTerm": "retention",
     "payDoc": "tax invoice",
-    "clockRegime": "the contract payment provisions",
-    "clockStart": "the date of the interim payment certificate",
-    "payDays": "7",
-    "escalationRoute": "give notice of default and refer the dispute to adjudication"
+    "clockRegime": "the JBCC payment clause",
+    "clockStart": "the date for issue of the payment certificate fixed in the contract data",
+    "payDays": "14 calendar",
+    "escalationRoute": "give the employer the five working days notice to comply that the JBCC agreement requires, and if it passes unpaid suspend the works, exercise the lien or call up the payment guarantee"
   },
   "steps": [
     {
@@ -117,7 +117,10 @@
           "key": "net",
           "label": "Net due for the period"
         }
-      ]
+      ],
+      "note": {
+        "what": "Under JBCC 6.2 the money withheld is the payment reduction that comes with the fixed construction guarantee, 5 percent of the value certified up to practical completion and 2.5 percent up to final completion, and under GCC 2015 it is retention in the ordinary sense; either way it is a figure with a release date attached."
+      }
     },
     {
       "id": "certify",
@@ -143,9 +146,12 @@
         },
         {
           "key": "date",
-          "label": "Certificate date on record"
+          "label": "Date for issue and date issued on record"
         }
-      ]
+      ],
+      "note": {
+        "what": "The principal agent's approval is the interim payment certificate itself, issued by the date for issue the contract data fixes each month. Record that date beside the day the certificate actually arrived, because the payment count runs from the first and a certificate issued late does not move it."
+      }
     },
     {
       "id": "invoice",
@@ -173,7 +179,10 @@
           "key": "carried",
           "label": "Amount carried into the accounts"
         }
-      ]
+      ],
+      "note": {
+        "what": "Quote the certificate number and the certified amount on the invoice, since the employer's accounts pay against the certificate and not against the valuation."
+      }
     },
     {
       "id": "openclock",
@@ -185,7 +194,7 @@
       "in": [
         {
           "key": "certificate",
-          "label": "Certificate and its date"
+          "label": "Certificate and its date for issue"
         },
         {
           "key": "amount",
@@ -203,7 +212,7 @@
         }
       ],
       "note": {
-        "why": "Opening it on your own invoice date rather than on the certificate date moves every deadline later and does it silently, which is the version of this mistake that never gets caught, because nothing looks overdue until the remedy has already expired."
+        "why": "Opening it on the day the certificate arrived, or on your own invoice date, moves every deadline later and does it silently, which is the version of this mistake that never gets caught, because nothing looks overdue until the remedy has already expired. The agreement counts from the date the certificate was due, so a principal agent who issues late has not bought the employer a day."
       }
     },
     {
@@ -232,7 +241,10 @@
           "key": "derivation",
           "label": "Derivation you can quote"
         }
-      ]
+      ],
+      "note": {
+        "what": "There is no statute behind these dates, so the only authority is the agreement: fourteen calendar days from the date for issue under JBCC 6.2, seven more for the money to reach each subcontractor, and GCC 2015 running its own longer count from the engineer's certificate. The row the clock is opened on has to carry the count the agreement gives, and its derivation is what you quote."
+      }
     },
     {
       "id": "watch",
@@ -259,6 +271,34 @@
         {
           "key": "register",
           "label": "Breach register rows"
+        }
+      ]
+    },
+    {
+      "id": "escalate",
+      "spine": "escalate",
+      "icon": "Gavel",
+      "module": "Correspondence",
+      "moduleKey": "nav.correspondence",
+      "to": "/projects/:projectId/correspondence",
+      "in": [
+        {
+          "key": "passed",
+          "label": "Due date passed unpaid"
+        },
+        {
+          "key": "record",
+          "label": "Certificate, invoice and dates"
+        }
+      ],
+      "out": [
+        {
+          "key": "notice",
+          "label": "Five working days notice to comply"
+        },
+        {
+          "key": "entitlement",
+          "label": "Right to suspend or call the guarantee preserved"
         }
       ]
     }

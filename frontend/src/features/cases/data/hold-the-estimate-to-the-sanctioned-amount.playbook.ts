@@ -174,7 +174,7 @@ const playbook: Playbook = {
         "Deviations are approved one at a time and consume the ceiling collectively, which is precisely the arithmetic nobody does in the moment. A running total is the only instrument that turns twelve reasonable individual decisions into a visible position.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "revise",

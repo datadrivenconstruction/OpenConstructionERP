@@ -99,7 +99,7 @@ const playbook: Playbook = {
         "A number without its method invites the other side to re-price it by a different method, and the method they choose will not be the one that favours you. Naming the route also settles the argument in the right order: first whether the route is right, which is a contract question, and only then whether the number is right, which is an arithmetic one.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "price",

@@ -93,7 +93,7 @@ const playbook: Playbook = {
         "Export the bill to FIEBDC-3. The file carries the chapters and items with their codes, units, quantities, unit rates and long texts, which is what a Spanish desktop estimating tool needs to open it as a working budget instead of a list of numbers.",
       whyKey: "cases.export_a_boq_to_fiebdc3.step.export.why",
       whyDefault:
-        "BC3 is what that market actually exchanges budgets in, and for Spanish public work it is not optional. Sending a spreadsheet instead means somebody at the other end retypes your bill, and a retyped bill of four hundred positions always loses a few.",
+        "BC3 is what that market actually exchanges budgets in, and the pliego of a Spanish public tender almost always asks for the presupuesto in it. Sending a spreadsheet instead means somebody at the other end retypes your bill, and a retyped bill of four hundred positions always loses a few.",
       moduleLabel: "Bill of Quantities",
       moduleLabelKey: "boq.title",
       to: "/boq",

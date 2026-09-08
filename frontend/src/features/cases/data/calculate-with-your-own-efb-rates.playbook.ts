@@ -27,7 +27,7 @@ const playbook: Playbook = {
   longDescKey: "cases.calculate_with_your_own_efb_rates.longdesc",
   longDescDefault:
     "A price carried in your head loses a tender twice: too high and someone else gets the job, too low and you win a loss you carry for months. A calculation built from your own Mittellohn, your own material and plant rates and written recipes gives a figure you can defend line by line, which is what the EFB price sheets 221 and 223 ask a bidder to show on a public tender.",
-  estMinutes: 12,
+  estMinutes: 13,
   steps: [
     {
       id: "oncosts",
@@ -141,6 +141,29 @@ const playbook: Playbook = {
       whyKey: "cases.calculate_with_your_own_efb_rates.step.positions.why",
       whyDefault:
         "A unit price assembled from resources survives a question. When the client asks how you got to the figure you open the position and show the hours and the quantities, instead of promising to look into it and hoping the answer is close.",
+      moduleLabel: "Bill of Quantities",
+      moduleLabelKey: "nav.boq",
+      to: "/projects/:projectId/boq",
+    },
+    {
+      id: "zuschlaege",
+      icon: "Percent",
+      inputs: [
+        { labelKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.in.ekt", label: "Einzelkosten der Teilleistungen" },
+        { labelKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.in.overheads", label: "Site and company overheads" },
+      ],
+      outputs: [
+        { labelKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.out.markups", label: "Zuschlaege on record" },
+        { labelKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.out.prices", label: "Angebotspreise per position" },
+      ],
+      titleKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.title",
+      titleDefault: "Put the Zuschlaege on top of the Einzelkosten",
+      whatKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.what",
+      whatDefault:
+        "Open the markups panel in the bill and load the DACH template, then set the Baustellengemeinkosten, the Allgemeine Geschaeftskosten and Wagnis und Gewinn as percentages on the Einzelkosten der Teilleistungen, each against the cost element it belongs to. The bill recalculates the Angebotspreis of every position from the same figures, which is what Formblatt 221 asks you to declare.",
+      whyKey: "cases.calculate_with_your_own_efb_rates.step.zuschlaege.why",
+      whyDefault:
+        "The Einzelkosten are the cost of doing the work and nothing else. A bidder who forgets the site and company overheads has offered to run the site for free, and one who spreads them by hand across a few hundred positions cannot show the Vergabestelle a Zuschlagssatz that reconciles with the prices. Formblatt 221 exists precisely to make those percentages checkable.",
       moduleLabel: "Bill of Quantities",
       moduleLabelKey: "nav.boq",
       to: "/projects/:projectId/boq",

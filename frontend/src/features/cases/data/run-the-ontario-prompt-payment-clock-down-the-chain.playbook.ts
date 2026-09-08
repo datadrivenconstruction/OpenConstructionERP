@@ -48,7 +48,7 @@ const playbook: Playbook = {
       titleDefault: "Issue an invoice that cannot be sent back",
       whatKey: "cases.run_the_ontario_prompt_payment_clock_down_the_chain.step.invoice.what",
       whatDefault:
-        "Raise the payment application for the period and check it carries everything a proper invoice has to carry before it leaves: the contract it is drawn under and its number, the period or milestone the money is claimed for, the work done, the amount, and the person it is to be sent to. Record the date it was received, not the date it was written.",
+        "Raise the payment application for the period and check it carries everything a proper invoice has to carry before it leaves: your name and address, the date and the period it covers, the contract it is drawn under and its number, a description and quantity of the work done, the amount and the payment terms, the name and contact details of the person payment is to be sent to, and anything else the contract adds to the list. Record the date it was received, not the date it was written.",
       whyKey: "cases.run_the_ontario_prompt_payment_clock_down_the_chain.step.invoice.why",
       whyDefault:
         "The clock starts on receipt of a proper invoice, so a missing element does not delay payment by a few days, it stops the clock from ever starting. The owner has seven days to object in writing and say what has to be corrected, and an invoice nobody objects to inside that window is deemed proper. Getting the elements right is the cheapest work in this whole case.",

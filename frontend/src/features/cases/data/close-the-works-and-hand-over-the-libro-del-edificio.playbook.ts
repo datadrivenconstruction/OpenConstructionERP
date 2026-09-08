@@ -97,7 +97,7 @@ const playbook: Playbook = {
       titleDefault: "Take the recepcion with the reservas written into it",
       whatKey: "cases.close_the_works_and_hand_over_the_libro_del_edificio.step.reception.what",
       whatDefault:
-        "Work the closeout checklist to the point where the package is genuinely complete, then record the acta de recepcion with its date and any reservas set out item by item, along with the period allowed to clear them.",
+        "Work the closeout checklist to the point where the package is genuinely complete, then record the acta de recepcion with its date and any reservas set out item by item, along with the period allowed to clear them. Article 6 of the LOE gives the promotor thirty days from the written notice of completion to receive the works or refuse them with reasons, and after that they count as received without reservas; on a public contract article 243 LCSP makes it a formal act with the Administration's representative and the direccion facultativa within a month of completion.",
       whyKey: "cases.close_the_works_and_hand_over_the_libro_del_edificio.step.reception.why",
       whyDefault:
         "A recepcion taken with a vague reserva about finishes is a recepcion where every later disagreement is about what was meant. Written item by item, the reserva names what is outstanding and the rest of the building is received, which is what both sides actually want.",

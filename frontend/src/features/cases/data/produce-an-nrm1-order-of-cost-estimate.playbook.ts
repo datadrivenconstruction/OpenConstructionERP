@@ -68,7 +68,7 @@ const playbook: Playbook = {
       titleDefault: "Carry the risk allowances as their own money",
       whatKey: "cases.produce_an_nrm1_order_of_cost_estimate.step.risk.what",
       whatDefault:
-        "Open the register and put design development risk, construction risk and employer change risk in as separate allowances rather than folding one percentage into the rate. As the design firms up, draw against them and read what is left.",
+        "Open the register and put the four NRM 1 risk allowances in separately, design development risk, construction risk, employer change risk and employer other risk, rather than folding one percentage into the rate. As the design firms up, draw against them and read what is left.",
       whyKey: "cases.produce_an_nrm1_order_of_cost_estimate.step.risk.why",
       whyDefault:
         "NRM 1 treats risk as a cost plan item with a name and an owner, not as a cushion buried in a rate. Held separately it can be reported, spent and released deliberately. Buried in the rate it is invisible, and the first time anybody goes looking for it is the day it has already gone.",
@@ -91,7 +91,7 @@ const playbook: Playbook = {
       titleDefault: "Rebase it to the date the money is spent",
       whatKey: "cases.produce_an_nrm1_order_of_cost_estimate.step.rebase.what",
       whatDefault:
-        "Load a tender price index series of the kind the cost information services publish, set the base period the rates came from and the target period the works will be tendered and built in, and let the adjustment run. A location factor moves a national rate to the region the site is actually in.",
+        "Load a tender price index series of the kind the cost information services publish, set the base period the rates came from and the target period the works will be tendered and built in, and let the adjustment run as the two lines NRM 1 keeps apart, tender inflation from the estimate base date to the date of tender and construction inflation from tender to the mid-point of construction. A location factor moves a national rate to the region the site is actually in.",
       whyKey: "cases.produce_an_nrm1_order_of_cost_estimate.step.rebase.why",
       whyDefault:
         "A rate taken from a price book or from a finished job is priced at the date that job was tendered, and repeating it unchanged for work three years out is a forecast nobody made on purpose. Rebasing turns the gap into a line the client can see, argue with and sign off, which is the whole point of showing inflation rather than absorbing it.",

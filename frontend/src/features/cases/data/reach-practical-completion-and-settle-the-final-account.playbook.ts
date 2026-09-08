@@ -94,7 +94,7 @@ const playbook: Playbook = {
         "Open the register: every warranty and defects liability entry with its start date, its length and what it covers, and every defect notice raised against it with a severity and a status. The register shows what is still inside its period, what is expiring and what has run clean.",
       whyKey: "cases.reach_practical_completion_and_settle_the_final_account.step.defects.why",
       whyDefault:
-        "The rectification period is twelve months on most jobs and nobody is thinking about it in month seven. A register that knows which entries are expiring is what turns the final inspection into something you schedule rather than something you miss, and it is also the evidence that an entry finished clean and its retention is due.",
+        "The rectification period is six months by JCT default and twelve where the contract particulars say so, as they usually do, and nobody is thinking about it in month four. A register that knows which entries are expiring is what turns the final inspection into something you schedule rather than something you miss, and it is also the evidence that an entry finished clean and its retention is due.",
       moduleLabel: "Warranties & Defects Liability",
       moduleLabelKey: "defects_liability.title",
       to: "/projects/:projectId/defects-liability",
@@ -137,7 +137,7 @@ const playbook: Playbook = {
       titleDefault: "Agree the final account as arithmetic, not archaeology",
       whatKey: "cases.reach_practical_completion_and_settle_the_final_account.step.account.what",
       whatDefault:
-        "Build the final account from what has already been recorded: the contract sum, the variation orders posted as they were agreed, the provisional sums adjusted to what was actually instructed, the prime cost sums, any fluctuations the contract carries, and the retention released. Agree it, sign it and close the contract.",
+        "Build the final account from what has already been recorded: the contract sum, the variation orders posted as they were agreed, the provisional sums adjusted to what was actually instructed, the prime cost sums, any fluctuations the contract carries, and the retention released. Agree it, sign it and close the contract. Under JCT the contractor has six months from practical completion to send in the documents the final account is built from, and the final certificate follows; under NEC4 the project manager makes the final assessment within four weeks of the defects certificate.",
       whyKey: "cases.reach_practical_completion_and_settle_the_final_account.step.account.why",
       whyDefault:
         "A final account reconstructed at the end takes months and settles in favour of whichever party kept better records. One that has been current all along is a statement both sides have already seen every month, and agreeing it becomes a signature rather than a negotiation nobody budgeted for.",

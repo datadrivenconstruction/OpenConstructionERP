@@ -169,7 +169,7 @@ const playbook: Playbook = {
       titleDefault: "Book the Stundenlohn hours and get them signed",
       whatKey: "cases.nachtrag_with_evidence_not_argument.step.daywork.what",
       whatDefault:
-        "Where the work runs as Stundenlohnarbeiten, book the labour and plant hours against the change and flag the lines as daywork rather than measured work, then get the Stundenlohnzettel countersigned by the site supervision inside the period the contract allows.",
+        "Where the work runs as Stundenlohnarbeiten, book the labour and plant hours against the change and flag the lines as daywork rather than measured work, then hand the Stundenlohnzettel to the site supervision daily, or at the latest weekly, for countersignature as paragraph 15 (3) VOB/B requires. A sheet the client does not return with objections within six working days counts as recognised.",
       whyKey: "cases.nachtrag_with_evidence_not_argument.step.daywork.why",
       whyDefault:
         "Daywork is recovered against the Nachtrag and measured work against the bill; mix them and you lose both. An unsigned Stundenlohnzettel handed over weeks late is the easiest item on any Nachtrag to strike out.",
@@ -204,7 +204,7 @@ const playbook: Playbook = {
       titleDefault: "Price it against the contract basis",
       whatKey: "cases.nachtrag_with_evidence_not_argument.step.price.what",
       whatDefault:
-        "Derive the new position from the nearest position in the contract bill rather than inventing a fresh price, carry the same cost elements the original calculation was built on, and measure the omitted work as carefully as the added.",
+        "Derive the new position from the nearest position in the contract bill rather than inventing a fresh price, carry the same cost elements the Urkalkulation was built on, the one you lodged sealed with a public client at award, and measure the omitted work as carefully as the added. Keep the actual cost evidence beside it, because where the contract fixes no basis the courts now fall back on the tatsaechlich erforderlichen Kosten with reasonable markups.",
       whyKey: "cases.nachtrag_with_evidence_not_argument.step.price.why",
       whyDefault:
         "A Nachtrag built on the original calculation can be checked in an afternoon. One built on a market rate that has nothing to do with the contract turns the whole negotiation into a fight about the price basis instead of the work.",

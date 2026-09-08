@@ -56,7 +56,7 @@ const playbook: Playbook = {
         "A change recorded the day it happens is a change you can substantiate and get paid for. The ones the team just gets on with, without a note, are the ones that eat the margin with nothing to show for it.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "variation",

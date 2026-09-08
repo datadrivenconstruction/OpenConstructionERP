@@ -12,10 +12,13 @@
 // Australia surfaces the whole arc from measurement to adjudication,
 // because the statutory regime here attaches to the claim rather than
 // to the certificate: serving the payment claim is what starts the
-// clock, and the Superintendent's certificate sits inside that window
-// rather than in front of it. The Act counts business days, so payDays
-// carries the word and the sentence reads correctly without the spine
-// knowing that some regimes count calendar days and some do not.
+// clock, and the Superintendent's progress certificate is the payment
+// schedule that answers it inside that window. So the claim is served
+// before anything is certified, and the certify step sits after the
+// clock is open. The count is a state's, not the country's, so the
+// clock sentence is overridden rather than filled: the module carries
+// New South Wales and Queensland, and one number would be wrong for
+// one of them.
 //
 // Rebuild with:
 //   node frontend/scripts/compose-case-layers.mjs --family f01-progress-payment
@@ -111,47 +114,12 @@ const playbook: Playbook = {
       to: "/projects/:projectId/boq",
     },
     {
-      id: "certify",
-      icon: "Stamp",
-      inputs: [
-        {
-          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.in.valuation",
-          label: "Valuation for the period",
-        },
-        {
-          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.in.superintendent",
-          label: "Superintendent named for certification",
-        },
-      ],
-      outputs: [
-        {
-          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.out.certificate",
-          label: "Progress certificate",
-        },
-        {
-          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.out.date",
-          label: "Certification date on record",
-        },
-      ],
-      titleKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.title",
-      titleDefault: "Get it approved by the people who have to approve it",
-      whatKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.what",
-      whatDefault:
-        "Route the progress claim to the Superintendent, and to whoever the contract adds after them. Keep the approval date, because the payment claim follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
-      whyKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.why",
-      whyDefault:
-        "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint. The Superintendent certifies under the contract and the Act runs on its own timetable regardless, so a certificate that arrives late does not move the statutory dates. Recording both is what lets you see the two regimes disagree while there is still time to act on it.",
-      moduleLabel: "Approval routes",
-      moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
-    },
-    {
       id: "serve",
       icon: "ReceiptText",
       inputs: [
         {
           labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.serve.in.certificate",
-          label: "Progress certificate",
+          label: "Valuation for the period",
         },
         {
           labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.serve.in.retention",
@@ -169,13 +137,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.serve.title",
-      titleDefault: "Issue the payment claim against the approved figure",
+      titleDefault: "Serve the payment claim on the respondent",
       whatKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.serve.what",
       whatDefault:
-        "Raise the payment claim against the approved progress claim, carrying retention and any deduction the contract provides for, and reference the progress claim on it. The claim must say on its face that it is made under the Act, because a document that does not is not a payment claim and starts no clock at all.",
+        "Raise the payment claim from the valuation, carrying retention and any deduction the contract provides for, and serve it the way the contract directs, which under the standard forms is by giving it to the Superintendent. Record the day and the manner of service, because every deadline in the regime counts from that day. In New South Wales the claim must say on its face that it is made under the Act, on every contract signed since 21 October 2019, and a head contractor's claim on the principal must carry the supporting statement that its subcontractors have been paid. Queensland went the other way: any invoice that identifies the work and states the amount is a payment claim there, endorsed or not, so an invoice you did not mean as a claim still starts a clock.",
       whyKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.serve.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the progress claim also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Nothing in the regime waits for the Superintendent. The Act counts from service, the respondent has a fixed number of business days to answer with a payment schedule, and a claim served late, served on the wrong party or missing the words the Act requires is a month of cash flow lost with nobody to blame but the claimant.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",
@@ -207,10 +175,10 @@ const playbook: Playbook = {
       titleDefault: "Open the payment clock on the right day",
       whatKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.openclock.what",
       whatDefault:
-        "Open a clock over the payment claim starting from the day the payment claim is served, under the Security of Payment Act. Payment falls due 15 business days later, and the clock records that date rather than leaving it to be worked out when somebody asks.",
+        "Open a clock over the payment claim starting from the day it is served, under the Act of the state the work is in. In New South Wales payment falls due 15 business days after service on a head contract and 20 on a subcontract, and the respondent has 10 business days to answer with a payment schedule; Queensland runs its own count under the Building Industry Fairness Act. A contract may shorten either period and never lengthen it. The clock records the dates rather than leaving them to be worked out when somebody asks.",
       whyKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.openclock.why",
       whyDefault:
-        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the payment claim is served once makes the whole chain checkable. Business days are not calendar days, and the state's public holidays move the answer. Counting them by hand is how a claimant arrives at adjudication one day out of time with a case that was otherwise good.",
+        "The single most expensive mistake in interim payment is starting the count on the wrong event, because every deadline behind it inherits the error and none of them look wrong. Anchoring on the day the payment claim is served once makes the whole chain checkable. Business days are not calendar days, the state's public holidays move the answer, and New South Wales strikes 27 to 31 December out of the count as well. Counting them by hand is how a claimant arrives at adjudication one day out of time with a case that was otherwise good.",
       moduleLabel: "Payment Clock",
       moduleLabelKey: "nav.payment_clock",
       to: "/payment-clock",
@@ -251,6 +219,41 @@ const playbook: Playbook = {
       to: "/payment-clock",
     },
     {
+      id: "certify",
+      icon: "Stamp",
+      inputs: [
+        {
+          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.in.valuation",
+          label: "Payment claim served",
+        },
+        {
+          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.in.superintendent",
+          label: "Superintendent's progress certificate",
+        },
+      ],
+      outputs: [
+        {
+          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.out.certificate",
+          label: "Payment schedule on record",
+        },
+        {
+          labelKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.out.date",
+          label: "Date the schedule arrived",
+        },
+      ],
+      titleKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.title",
+      titleDefault: "Log the Superintendent's certificate as the payment schedule",
+      whatKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.what",
+      whatDefault:
+        "When the Superintendent's progress certificate comes back, record it against the claim as the payment schedule, with the day it arrived and the amount it schedules. If it schedules less than was claimed it has to say why, and if it arrives after the business days the Act allows it is no schedule at all and the claimed amount stands.",
+      whyKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.certify.why",
+      whyDefault:
+        "The Superintendent certifies under the contract and the Act runs on its own timetable regardless, so a certificate that arrives late does not move the statutory dates, it only decides whether the respondent still has a schedule. Recording both is what lets you see the two regimes disagree while there is still time to act on it.",
+      moduleLabel: "Payment Clock",
+      moduleLabelKey: "nav.payment_clock",
+      to: "/payment-clock",
+    },
+    {
       id: "adjudicate",
       icon: "Gavel",
       inputs: [
@@ -277,7 +280,7 @@ const playbook: Playbook = {
       titleDefault: "Escalate with the record already assembled",
       whatKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.adjudicate.what",
       whatDefault:
-        "When the clock has run out, lodge an adjudication application under the Security of Payment Act. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure.",
+        "When the clock has run out, lodge an adjudication application under the Security of Payment Act. The record the steps above produced, dates, approvals and the documents themselves, is the case, and it is assembled already rather than reconstructed under time pressure. Under the New South Wales Act an unanswered claim needs a notice of intention to apply, served inside the window the Act gives, before the application itself, and both windows are counted in business days.",
       whyKey: "cases.run_the_security_of_payment_clock_on_a_progress_claim.step.adjudicate.why",
       whyDefault:
         "The difference between a claim that is paid and one that is argued about is almost never the merits. It is whether the dates and the documents were kept as the work happened, because reconstructing them afterwards is expensive and looks exactly like inventing them.",

@@ -95,7 +95,7 @@ const playbook: Playbook = {
       titleDefault: "Run the line-by-line comparison",
       whatKey: "cases.compare_the_tender_bill_against_the_settlement.step.compare.what",
       whatDefault:
-        "Open the comparison on the awarded bill and pick the settlement bill as the other side. Every line comes back classified as added, removed, quantity changed, rate changed or unchanged, with the old and new quantity, rate and total, and the difference rebased into the project's currency.",
+        "Open the comparison on the awarded bill and pick the settlement bill as the other side. Every line comes back classified as added, removed, quantity changed, rate changed or unchanged, with the old and new quantity, rate and total, and the difference rebased into the project's currency. Lines settled in process and confirmed by both parties are not measured or priced again under the 2024 standard, so mark them and keep them out of the query list.",
       whyKey: "cases.compare_the_tender_bill_against_the_settlement.step.compare.why",
       whyDefault:
         "This is the part of a settlement review that consumes the days and produces none of the judgement. Getting it in one pass leaves your attention for the lines that are actually contentious, and it catches the quiet ones - a rate that moved by a few percent on a very large quantity - that eyes reading a printout do not.",
@@ -124,7 +124,7 @@ const playbook: Playbook = {
         "The comparison tells you what moved and the register tells you what was instructed; pairing them is judgement and stays yours. Doing it while the classified list is in front of you is what turns a settlement review into a short, specific set of questions instead of a general objection nobody can answer.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "agree",
@@ -143,7 +143,7 @@ const playbook: Playbook = {
         "Issue the query list as correspondence, item by item with the amount at stake on each, and record the answer against the query rather than in somebody's inbox.",
       whyKey: "cases.compare_the_tender_bill_against_the_settlement.step.agree.why",
       whyDefault:
-        "A settlement is agreed line by line or it is not agreed at all. Queries raised in writing get answered; queries raised in a meeting get remembered differently by each side, and the difference surfaces at the worst possible moment, when the final figure is being signed.",
+        "An owner who neither checks the settlement nor objects within the review period the contract sets is taken, under the 2024 standard, to have accepted it as submitted, so the queries have to leave inside that window. A settlement is agreed line by line or it is not agreed at all. Queries raised in writing get answered; queries raised in a meeting get remembered differently by each side, and the difference surfaces at the worst possible moment, when the final figure is being signed.",
       moduleLabel: "Correspondence",
       moduleLabelKey: "nav.correspondence",
       to: "/projects/:projectId/correspondence",

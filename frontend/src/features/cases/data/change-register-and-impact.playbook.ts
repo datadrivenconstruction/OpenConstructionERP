@@ -62,7 +62,7 @@ const playbook: Playbook = {
         "A change that never made the register is a change you will not get paid for. One shared list is what turns a scatter of verbal instructions and site memos into a claimable, auditable position.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "impact",

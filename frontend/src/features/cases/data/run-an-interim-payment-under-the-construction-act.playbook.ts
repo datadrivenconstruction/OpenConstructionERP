@@ -68,7 +68,7 @@ const playbook: Playbook = {
       titleDefault: "Open the clock the statute imposes",
       whatKey: "cases.run_an_interim_payment_under_the_construction_act.step.open.what",
       whatDefault:
-        "Open a payment clock over the application under the United Kingdom regime. The due date, the payment notice deadline, the pay less deadline and the final date for payment are computed from the Act and the Scheme, counting days the way the statute counts them rather than the way a calendar app would.",
+        "Open a payment clock over the application under the United Kingdom regime. The due date, the payment notice deadline, the pay less deadline and the final date for payment are computed from the Act and the Scheme, counting days the way the statute counts them rather than the way a calendar app would. Where the contract fixes nothing the Scheme's defaults apply: the due date seven days after the end of the period or the claim, whichever is later, the payment notice five days after the due date, the pay less notice seven days before the final date, and the final date seventeen days after the due date.",
       whyKey: "cases.run_an_interim_payment_under_the_construction_act.step.open.why",
       whyDefault:
         "Nobody argues about a payment timetable until the week it matters, and by then the dates are being reconstructed from a mailbox. Computing them the day the application goes in means the argument that follows is about the valuation, which is a proper argument, rather than about which Tuesday something fell due.",

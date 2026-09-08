@@ -127,7 +127,7 @@ const playbook: Playbook = {
         "Set the current bill against the version approved at the previous stage and read the difference by section: which items were added, which quantities grew, which rates moved. Work the rate per square metre out again on the current area and put it beside the one you started with.",
       whyKey: "cases.hold_the_design_estimate_to_the_approved_budget.step.compare.why",
       whyDefault:
-        "Nothing here declares a limit or returns a verdict, and that is the honest shape of it: the product shows you where the money went and the cap is held by people. What makes that workable is running the comparison at each gate rather than once at the end, because a section that has grown by six percent is a design conversation while a total that has grown by twenty is a re-approval.",
+        "Nothing here declares a limit or returns a verdict, and that is the honest shape of it: the product shows you where the money went and the cap is held by people. What makes that workable is running the comparison at each gate rather than once at the end, because a section that has grown by six percent is a design conversation, while a design estimate more than ten percent over the approved investment estimate is, under the government investment regulation, a report to the investment authority that can send the feasibility study back.",
       moduleLabel: "BOQ",
       moduleLabelKey: "boq.title",
       to: "/projects/:projectId/boq",
@@ -149,7 +149,7 @@ const playbook: Playbook = {
         "Report the stage total, the rate per square metre, the difference against the approved figure and the sections it came from, with a line on each saying whether it was a scope change, a design decision or a price movement.",
       whyKey: "cases.hold_the_design_estimate_to_the_approved_budget.step.report.why",
       whyDefault:
-        "An approving body asked to consider a number will ask where it came from, and a report that answers that in advance gets a decision instead of a deferral. Naming the cause per section is also what tells the design team where the savings have to come from, which is the only useful output of the exercise.",
+        "An approving body asked to consider a number will ask where it came from, and a report that answers that in advance gets a decision instead of a deferral. The approved design estimate is the figure the project is controlled to from then on, and raising it means going back to the body that approved it with a funding source, so naming the cause per section is also what tells the design team where the savings have to come from, which is the only useful output of the exercise.",
       moduleLabel: "Reports",
       moduleLabelKey: "nav.reports",
       to: "/reports",

@@ -145,7 +145,7 @@ const playbook: Playbook = {
         "Work done first and papered afterwards is the work that never gets paid. Starting the change record before you act is what keeps a verbal instruction from turning into free scope.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
   ],
 };

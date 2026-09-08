@@ -29,7 +29,7 @@
     "excessTerm": "additional works agreement",
     "retentionTerm": "guarantee retention",
     "payDoc": "KS-3 certificate",
-    "clockRegime": "the contract payment terms",
+    "clockRegime": "44-FZ",
     "clockStart": "the day the KS-2 act is signed",
     "payDays": "7 working",
     "escalationRoute": "send the pretenziya and start the contractual penalty running"
@@ -100,7 +100,7 @@
       "icon": "Stamp",
       "module": "Approval routes",
       "moduleKey": "approvalRoutes.title",
-      "to": "/approval-routes",
+      "to": "/governance?tab=approvals",
       "in": [
         {
           "key": "act",
@@ -120,7 +120,10 @@
           "key": "date",
           "label": "Acceptance date on record"
         }
-      ]
+      ],
+      "note": {
+        "what": "On a state contract under 44-FZ the act is signed as the acceptance document in the EIS, the customer has the period the contract sets and at most twenty working days to sign it or refuse it with reasons, and payment then falls due within seven working days of that signature."
+      }
     },
     {
       "id": "cumulative",
@@ -176,7 +179,41 @@
           "key": "carried",
           "label": "Amount carried into the accounts"
         }
-      ]
+      ],
+      "note": {
+        "what": "The KS-3 carries the VAT line, at twenty-two percent since January 2026, and the VAT invoice (schet-faktura), or the universal transfer document that replaces the act and the invoice together, follows within five calendar days of the KS-2 signature, because that signature is the tax point for the works."
+      }
+    },
+    {
+      "id": "clock",
+      "spine": "clock",
+      "icon": "Clock",
+      "module": "Payment Clock",
+      "moduleKey": "nav.payment_clock",
+      "to": "/payment-clock",
+      "in": [
+        {
+          "key": "ks3",
+          "label": "KS-3 certificate and its date"
+        },
+        {
+          "key": "terms",
+          "label": "Contract payment terms"
+        }
+      ],
+      "out": [
+        {
+          "key": "clock",
+          "label": "Open payment clock"
+        },
+        {
+          "key": "final",
+          "label": "Final date for payment"
+        }
+      ],
+      "note": {
+        "what": "That is the state-contract clock, and the module carries it as the Russian public procurement regime. On a private contract the Civil Code leaves the period to the parties, so open the clock on the contract's own days instead."
+      }
     },
     {
       "id": "reconcile",

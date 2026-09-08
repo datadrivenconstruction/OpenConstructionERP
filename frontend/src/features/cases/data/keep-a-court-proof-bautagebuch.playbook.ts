@@ -95,7 +95,7 @@ const playbook: Playbook = {
         "Raise the Behinderungsanzeige to the Auftraggeber as an outgoing notice in the correspondence register, quoting the diary entry and its date, and set a response deadline so the answer - or the silence - lands on the same thread.",
       whyKey: "cases.keep_a_court_proof_bautagebuch.step.anzeige.why",
       whyDefault:
-        "The diary entry is your evidence, but it is not the notice. VOB/B expects the Auftraggeber to be told in writing without delay, and the claim for time or money most often refused is the one that was never announced. Served from the register it carries its own timestamp and its own thread, so nobody has to search a mailbox two years later.",
+        "The diary entry is your evidence, but it is not the notice. Paragraph 6 (1) VOB/B expects the Auftraggeber to be told in writing without delay, and unless the hindrance was obvious to them the extension of time under paragraph 6 (2) stands or falls on that notice. The claim for time or money most often refused is the one that was never announced. Served from the register it carries its own timestamp and its own thread, so nobody has to search a mailbox two years later.",
       moduleLabel: "Correspondence",
       moduleLabelKey: "correspondence.title",
       to: "/projects/:projectId/correspondence",

@@ -130,13 +130,13 @@ const playbook: Playbook = {
       titleDefault: "Route the plan to the coordinador",
       whatKey: "cases.answer_the_estudio_with_a_plan_de_seguridad.step.approve.what",
       whatDefault:
-        "Send the plan through an approval route that names the coordinador de seguridad y salud as the approver, and keep the same route for every later revision, because a plan is amended whenever the method or the subcontractors change.",
+        "Send the plan through an approval route that names the coordinador de seguridad y salud as the approver, or on a public work the Administration that approves it on the coordinador's informe, and keep the same route for every later revision, because a plan is amended whenever the method or the subcontractors change. The approved plan is what goes with the comunicacion de apertura del centro de trabajo to the autoridad laboral before the site opens.",
       whyKey: "cases.answer_the_estudio_with_a_plan_de_seguridad.step.approve.why",
       whyDefault:
         "The approval, and its date, is what makes the plan the governing document. Revisions are where it quietly comes apart: the plan on site is version one, the method changed in March, and nobody can say whether the change was ever approved. A route that every version goes through answers that without anybody having to remember.",
       moduleLabel: "Approval routes",
       moduleLabelKey: "approvalRoutes.title",
-      to: "/approval-routes",
+      to: "/governance?tab=approvals",
     },
     {
       id: "checks",

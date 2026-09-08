@@ -61,7 +61,7 @@ const playbook: Playbook = {
       titleDefault: "Prove the site is available before you go",
       whatKey: "cases.start_the_works_with_an_acta_de_replanteo.step.readiness.what",
       whatDefault:
-        "Work the mobilisation checklist before the date is set: land handed over, permits issued, services diverted or at least located, access agreed, welfare in place. Anything still open is a reserva you take to the act with you rather than a surprise you find on the ground.",
+        "Work the mobilisation checklist before the date is set: land handed over, permits issued, services diverted or at least located, access agreed, welfare in place. Anything still open is a reserva you take to the act with you rather than a surprise you find on the ground. Under article 237 LCSP the comprobacion del replanteo has to take place within a month of formalisation of the contract, so the checklist runs from the day the contract is signed, not from the day somebody proposes a date.",
       whyKey: "cases.start_the_works_with_an_acta_de_replanteo.step.readiness.why",
       whyDefault:
         "A reserva raised in the acta suspends the start for exactly that part and costs nothing. The same fact discovered three weeks later is an extension of time you have to prove, against a clock that has already been running. The list is short and the asymmetry between the two outcomes is not.",
@@ -158,7 +158,7 @@ const playbook: Playbook = {
       titleDefault: "Start the plazo and the dates that hang off it",
       whatKey: "cases.start_the_works_with_an_acta_de_replanteo.step.clock.what",
       whatDefault:
-        "Enter the completion date and the intermediate plazos parciales, counted from the acta, and put a name against each. Include the contractual date by which the programa de trabajo itself is due, because that one is measured from the same act.",
+        "Enter the completion date and the intermediate plazos parciales, counted from the acta, and put a name against each. Include the date by which the programa de trabajo itself is due, which on a public contract article 144 RGLCAP sets at thirty days from formalisation, so that one can already be running before the acta is signed.",
       whyKey: "cases.start_the_works_with_an_acta_de_replanteo.step.clock.why",
       whyDefault:
         "Dates that exist only in the contract are dates nobody is watching. The plazos parciales are the ones that carry penalties of their own and the ones a monthly meeting forgets first, precisely because the final date still looks reachable.",
@@ -193,7 +193,7 @@ const playbook: Playbook = {
       titleDefault: "Build the programa de trabajo from that date",
       whatKey: "cases.start_the_works_with_an_acta_de_replanteo.step.programme.what",
       whatDefault:
-        "Build the programme starting on the day after the acta, with the activities and the monthly quantities the contract asks you to show, and baseline it once the direccion facultativa has approved it.",
+        "Build the programme starting on the day after the acta, with the activities and the monthly quantities the contract asks you to show, and baseline it once it has been approved, which on a public contract is the Administration resolving on it within fifteen days of submission under article 144 RGLCAP, on the direccion facultativa's report.",
       whyKey: "cases.start_the_works_with_an_acta_de_replanteo.step.programme.why",
       whyDefault:
         "An approved programa is what an extension of time is later measured against, so it is worth being honest in rather than optimistic. A programme that started on the wrong day is worse than none at all: every comparison drawn from it is shifted, and the shift is invisible in the numbers.",

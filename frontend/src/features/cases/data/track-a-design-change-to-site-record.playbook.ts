@@ -101,7 +101,7 @@ const playbook: Playbook = {
         "Tying the instruction to the exact revision is what stops a dispute later over which version of the change was actually agreed.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "verify",

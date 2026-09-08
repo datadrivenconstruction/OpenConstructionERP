@@ -46,7 +46,7 @@ const playbook: Playbook = {
       titleDefault: "Certify the date once, and only once",
       whatKey: "cases.close_out_from_substantial_performance_to_the_final_account.step.certify.what",
       whatDefault:
-        "Record substantial performance as a dated, certified event with the signature behind it, and attach the certificate together with the record of the state of the work it was certified against.",
+        "Record substantial performance as a dated, certified event with the signature behind it, and attach the certificate together with the record of the state of the work it was certified against. On a CCDC 2 (2020) contract record Ready-for-Takeover as a second dated milestone: it is a contractual test rather than the statutory one, and the one-year warranty runs from it.",
       whyKey: "cases.close_out_from_substantial_performance_to_the_final_account.step.certify.why",
       whyDefault:
         "Everything downstream counts from this date, so it has to be one date with a document behind it rather than a date three people remember slightly differently. The version that ends up challenged is always the one nobody can produce on the day it is questioned.",

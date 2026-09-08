@@ -72,7 +72,7 @@ const playbook: Playbook = {
       titleDefault: "Add each contribution as its own named line",
       whatKey: "cases.build_an_all_in_labour_rate_with_the_canadian_burden.step.stack.what",
       whatDefault:
-        "Build the stack on the wage as separate lines: pension contribution, employment insurance at the employer multiple, vacation pay, statutory holiday pay, workers compensation at the classification unit rate for this trade, and the benefit contributions that apply. Keep percentages as percentages and fixed amounts as amounts rather than blending them into one uplift.",
+        "Build the stack on the wage as separate lines: pension contribution, employment insurance at the employer multiple, vacation pay, statutory holiday pay, workers compensation at the classification unit rate for this trade, the employer health or payroll tax where the province levies one, and the benefit, pension and training contributions the collective agreement sets. Keep percentages as percentages and fixed amounts as amounts rather than blending them into one uplift.",
       whyKey: "cases.build_an_all_in_labour_rate_with_the_canadian_burden.step.stack.why",
       whyDefault:
         "A single burden percentage hides the fact that its parts move independently and on different dates. Workers compensation in particular is rated by classification unit, so it changes when the work the crew does changes, not when the calendar turns, and that is the movement a blended uplift will never show you.",

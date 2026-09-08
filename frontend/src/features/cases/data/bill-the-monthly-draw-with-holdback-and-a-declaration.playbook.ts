@@ -138,7 +138,7 @@ const playbook: Playbook = {
       titleDefault: "Issue the draw and the declaration as one package",
       whatKey: "cases.bill_the_monthly_draw_with_holdback_and_a_declaration.step.package.what",
       whatDefault:
-        "Print the claim, the holdback statement and the subcontractor payment record as one package, draw the statutory declaration from that record instead of retyping it, and have it sworn and issued alongside the claim.",
+        "Print the claim, the holdback statement and the subcontractor payment record as one package, draw the statutory declaration from that record instead of retyping it, on CCDC 9A where the contract is a CCDC form, and have it sworn and issued alongside the claim.",
       whyKey: "cases.bill_the_monthly_draw_with_holdback_and_a_declaration.step.package.why",
       whyDefault:
         "The declaration is a contract requirement rather than a requirement of the Act, which is why the payer is entitled to sit on the draw until it arrives and why arguing about it wastes a month. A package whose sworn statement and payment record are visibly the same numbers is a package nobody sends back for checking.",

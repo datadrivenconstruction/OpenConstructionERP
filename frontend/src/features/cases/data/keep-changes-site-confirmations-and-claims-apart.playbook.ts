@@ -75,13 +75,13 @@ const playbook: Playbook = {
       titleDefault: "Raise the instructed change and price it",
       whatKey: "cases.keep_changes_site_confirmations_and_claims_apart.step.instructed.what",
       whatDefault:
-        "Where the work was instructed, raise a change order, state the reason it arose, and price its lines against the contract's rates. Name the instruction and the day it was diarised in the reason, so the record points back at itself.",
+        "Where the work was instructed, raise a change order, state the reason it arose, and price its lines in the order the valuation code sets: the contract's rate where one applies, an adjusted similar rate where one is close, and market evidence where there is neither. Name the instruction and the day it was diarised in the reason, so the record points back at itself.",
       whyKey: "cases.keep_changes_site_confirmations_and_claims_apart.step.instructed.why",
       whyDefault:
         "An instructed change is the cheapest of the three to settle because the authority for it is not in dispute. What is in dispute a year later is the reason it arose and the rate it was priced at, so both belong on the record now, while the person who knows them is still on the job.",
       moduleLabel: "Change Orders",
       moduleLabelKey: "nav.change_orders",
-      to: "/change-orders",
+      to: "/changeorders",
     },
     {
       id: "confirmation",
@@ -101,7 +101,7 @@ const playbook: Playbook = {
         "Where the work was done on site without a priced instruction, register it as a daywork sheet with the quantities as executed and the date the work was done. Record who signed it on site and the reference the signed paper carries, and hold the sheet at draft or disputed until the value is agreed.",
       whyKey: "cases.keep_changes_site_confirmations_and_claims_apart.step.confirmation.why",
       whyDefault:
-        "A site confirmation is signed on the day exactly so that the pricing conversation can happen afterwards without reopening the facts. If it sits in a folder unregistered until settlement, the facts get reopened anyway and the signature stops helping. A register makes the open ones countable, which is the only way anybody chases them.",
+        "Under the 2024 standard a site confirmation is the signed acknowledgement by both site representatives of an event one party is responsible for, and the work itself is new work the owner has to instruct in writing; the 2013 code's seven-day report and forty-eight-hour confirmation are gone, so the deadlines are the contract's own. A site confirmation is signed on the day exactly so that the pricing conversation can happen afterwards without reopening the facts. If it sits in a folder unregistered until settlement, the facts get reopened anyway and the signature stops helping. A register makes the open ones countable, which is the only way anybody chases them.",
       moduleLabel: "Variations",
       moduleLabelKey: "nav.variations",
       to: "/projects/:projectId/variations",
@@ -147,7 +147,7 @@ const playbook: Playbook = {
         "Issue the notice as correspondence, dated, naming the event and the clause, and keep every later letter on the same matter in the same thread.",
       whyKey: "cases.keep_changes_site_confirmations_and_claims_apart.step.notice.why",
       whyDefault:
-        "Most claims that fail do not fail on the merits, they fail on a notice period that ran out while the matter was being discussed verbally. A dated letter costs nothing and is the only thing that answers the question of when the other party first knew.",
+        "Most claims that fail do not fail on the merits, they fail on a notice period that ran out while the matter was being discussed verbally. The valuation code's default is 28 days from the event for the notice of intention and a further 28 for the full claim with its evidence, and the right is lost when the first one is missed. A dated letter costs nothing and is the only thing that answers the question of when the other party first knew.",
       moduleLabel: "Correspondence",
       moduleLabelKey: "nav.correspondence",
       to: "/projects/:projectId/correspondence",

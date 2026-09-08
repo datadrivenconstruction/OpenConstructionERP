@@ -92,7 +92,7 @@ const playbook: Playbook = {
       titleDefault: "Hold the formal Abnahme and write the protocol",
       whatKey: "cases.maengel_abnahme_and_verjaehrung.step.abnahme.what",
       whatDefault:
-        "Run the acceptance walk with the client and record the Abnahmeprotokoll: the date, who was present, what was accepted, which defects are reserved, and any contract penalty the client wants to keep. Both sides sign it.",
+        "Run the acceptance walk with the client and record the Abnahmeprotokoll: the date, who was present, what was accepted, which defects are reserved, and any contract penalty the client wants to keep. Both sides sign it. If the client does not turn up, the works count as accepted under paragraph 12 (5) VOB/B twelve working days after your written notice of completion, or six working days after the client starts using them, and the protocol then records that date instead.",
       whyKey: "cases.maengel_abnahme_and_verjaehrung.step.abnahme.why",
       whyDefault:
         "This one document decides more than any other on the project: risk passes, the final payment falls due, the burden of proof turns to the client, and the Verjaehrung starts on its date. A defect not reserved in it, and a contract penalty not reserved with it, is one nobody can raise afterwards.",
@@ -164,7 +164,7 @@ const playbook: Playbook = {
         "Work the deadline register: the day each limitation period ends, the date a notified defect must be remedied by, and the counter-deadlines you set the contractor. Issue the Maengelruege in writing, with a deadline to put it right.",
       whyKey: "cases.maengel_abnahme_and_verjaehrung.step.ruege.why",
       whyDefault:
-        "A claim raised one day after the period has run out is worth nothing, however well it was documented. A written notice sent while the period is still open is what preserves the claim, and the remedy deadline you set with it is what turns it into work on site rather than correspondence.",
+        "A claim raised one day after the period has run out is worth nothing, however well it was documented. Under a VOB/B contract a written Maengelruege starts a fresh two-year period for that defect, paragraph 13 (5) VOB/B, which is the reason to send it in writing rather than say it on site. Under the BGB alone a letter stops nothing, only negotiations, an independent evidence procedure or a claim do, so read the contract before you rely on the notice. The remedy deadline you set with it is what turns it into work on site rather than correspondence.",
       moduleLabel: "Deadlines",
       moduleLabelKey: "deadlines.title",
       to: "/deadlines",

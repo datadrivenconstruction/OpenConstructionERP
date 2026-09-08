@@ -96,7 +96,7 @@ const playbook: Playbook = {
       titleDefault: "Land the quantity on a coded bill item",
       whatKey: "cases.measure_the_drawing_into_a_coded_bill_item.step.code.what",
       whatDefault:
-        "Put the quantity on a bill item under the right section and give the item its code. The national schedule gives nine digits; a project bill extends that with a three-digit sequence of its own, so a code of either length is what the bill ends up carrying.",
+        "Put the quantity on a bill item under the right section and give the item its code. The measurement standard for your discipline gives the first nine digits (GB/T 50854-2024 for buildings and decoration, with eight siblings for the other disciplines, all in force since September 2025); a project bill extends that with a three-digit sequence of its own, so a code of either length is what the bill ends up carrying.",
       whyKey: "cases.measure_the_drawing_into_a_coded_bill_item.step.code.why",
       whyDefault:
         "The code is the item's identity for the rest of the job. It is what lets a settlement bill be compared against a tender bill after both have been renumbered, and it is what lets two bidders' prices for the same work be set against each other at all.",
@@ -121,7 +121,7 @@ const playbook: Playbook = {
         "Beside the code, write out what the item actually covers: grade, mix, thickness, finish, method, and anything about access or sequence that changes the price. It is free text, so it can say whatever the item needs it to say.",
       whyKey: "cases.measure_the_drawing_into_a_coded_bill_item.step.characteristics.why",
       whyDefault:
-        "The characteristics are what the code cannot carry, and they differ for every kind of work: what you must state for concrete is nothing like what you must state for windows. An item described in three words gets priced three different ways by three bidders, and the difference becomes yours to absorb at settlement.",
+        "The characteristics are what the code cannot carry, and they differ for every kind of work: what you must state for concrete is nothing like what you must state for windows. An item described in three words gets priced three different ways by three bidders, and the difference becomes yours to absorb at settlement. The 2024 standard treats a characteristic that does not match the drawings as a defect in the bill: on a unit-rate contract the item is repriced and the owner pays the difference, on a lump-sum contract the bidder is taken to have priced what the drawings show.",
       moduleLabel: "BOQ",
       moduleLabelKey: "boq.title",
       to: "/projects/:projectId/boq",

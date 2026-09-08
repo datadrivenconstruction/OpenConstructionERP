@@ -63,7 +63,7 @@ const playbook: Playbook = {
       titleDefault: "Import it as a bill",
       whatKey: "cases.import_a_gaeb_tender_into_a_priced_boq.step.import.what",
       whatDefault:
-        "Import the GAEB into a new bill. The groups, positions, quantities, units and long text come across intact, so you have an empty priced-out column to fill and nothing else to retype.",
+        "Import the GAEB X83 into a new bill. The groups, positions, quantities, units and long text come across intact, so you have an empty Einheitspreis column to fill and nothing else to retype.",
       whyKey: "cases.import_a_gaeb_tender_into_a_priced_boq.step.import.why",
       whyDefault:
         "Retyping a bill of a few hundred positions is where transposed quantities and dropped items creep in. Importing keeps your offer tied to the client's exact wording and numbering.",
@@ -129,13 +129,13 @@ const playbook: Playbook = {
       titleDefault: "Return the priced GAEB",
       whatKey: "cases.import_a_gaeb_tender_into_a_priced_boq.step.return.what",
       whatDefault:
-        "Export the priced bill back to GAEB and issue it as your offer, so the client reads your prices straight into their evaluation without touching a keyboard.",
+        "Export the priced bill from GAEB Exchange as an X84 Angebotsabgabe against the X83 you were sent, so the client reads your prices straight into their evaluation without touching a keyboard. The X84 carries your Einheitspreise and Gesamtbetraege on the client's own position numbers, which is what their Preisspiegel is built on.",
       whyKey: "cases.import_a_gaeb_tender_into_a_priced_boq.step.return.why",
       whyDefault:
         "An offer that loads cleanly into the client's system is easier to award. Returning the same open format you were given is a small courtesy that keeps your bid at the front of the pile.",
-      moduleLabel: "Reports",
-      moduleLabelKey: "nav.reports",
-      to: "/reports",
+      moduleLabel: "GAEB Exchange",
+      moduleLabelKey: "nav.gaeb_exchange",
+      to: "/gaeb-exchange",
     },
   ],
 };
