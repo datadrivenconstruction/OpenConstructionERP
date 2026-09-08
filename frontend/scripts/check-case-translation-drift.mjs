@@ -172,7 +172,7 @@ function localeIndex() {
   const index = new Map();
   for (const f of files) {
     const code = basename(f, '.ts');
-    if (code === 'en' || code === 'en-US' || code === 'index' || code === 'types') continue;
+    if (code === 'en' || code === 'en-GB' || code === 'en-US' || code === 'index' || code === 'types') continue;
     const src = readFileSync(join(LOCALE_DIR, f), 'utf8');
     const re = /"(cases\.[A-Za-z0-9_.]+)":/g;
     let m;

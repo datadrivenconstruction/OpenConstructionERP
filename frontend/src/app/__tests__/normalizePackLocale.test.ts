@@ -11,7 +11,6 @@ import { normalizePackLocale } from '../i18n';
 describe('normalizePackLocale', () => {
   it('strips the region subtag when the UI does not ship that region', () => {
     expect(normalizePackLocale('fr-CA')).toBe('fr'); // batimatech-ca
-    expect(normalizePackLocale('en-GB')).toBe('en'); // uk-jct
     expect(normalizePackLocale('en-AU')).toBe('en'); // aus
     expect(normalizePackLocale('en-NZ')).toBe('en'); // nzs
   });
@@ -21,6 +20,12 @@ describe('normalizePackLocale', () => {
     // commercial-denver asking for American English and being handed the British
     // strings, which is the one thing the locale exists to prevent.
     expect(normalizePackLocale('en-US')).toBe('en-US'); // commercial-denver, us-costdata
+    // uk-jct and commercial-london both declare en-GB. This answered 'en'
+    // until the UI started offering English (UK), and the pack was handed the
+    // unqualified entry that names no region: American dates and prices under
+    // a JCT contract. It moved up here the moment the region became something
+    // the app could actually give it.
+    expect(normalizePackLocale('en-GB')).toBe('en-GB');
     expect(normalizePackLocale('es-MX')).toBe('es-MX');
     expect(normalizePackLocale('pt-BR')).toBe('pt-BR'); // brazil-sinapi
     expect(normalizePackLocale('es-CL')).toBe('es-CL');

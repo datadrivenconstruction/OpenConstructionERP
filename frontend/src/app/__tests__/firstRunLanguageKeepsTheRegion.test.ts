@@ -107,9 +107,15 @@ describe('detectCountry', () => {
     expect(detectCountry('pl')).toBe('pl');
     firstRunWith('ar');
     expect(detectCountry('ar')).toBe('sa');
-    // And the one that surprises people: bare English is Great Britain.
+    // And the one that surprises people: bare English names no country. It
+    // used to answer 'gb', which read a preference out of a reader who had
+    // expressed none. Now the two English entries that DO name a region
+    // answer, and the unqualified one answers the code this codebase uses for
+    // "not tied to a market" - which resolveCountryOffer already turns into no
+    // offer, exactly as it does for null.
     firstRunWith('en');
-    expect(detectCountry('en')).toBe('gb');
+    expect(detectCountry('en')).toBe('xx');
+    expect(detectCountry('en-GB')).toBe('gb');
     expect(detectCountry('en-US')).toBe('us');
   });
 

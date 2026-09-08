@@ -12,12 +12,12 @@
  * Greek and Ukrainian went the same way: both were in ``SUPPORTED_LANGUAGES``
  * and shipping, and neither was listed here until this line was written.
  *
- * The list tracks ``SUPPORTED_LANGUAGES`` in ``./i18n.ts``, with one exception
- * either way. ``en-US`` is left out because it is an overrides-only overlay
- * rather than a full locale, so iterating it would compare a deliberate 1579
- * key file against a 35243 key one. ``mn`` is listed although it does not
- * ship, so the Mongolian file keeps whatever test coverage it has while it
- * waits for a native-speaker pass.
+ * The list tracks ``SUPPORTED_LANGUAGES`` in ``./i18n.ts``, with exceptions in
+ * both directions. ``en-GB`` and ``en-US`` are left out because they are
+ * overrides-only overlays rather than full locales, so iterating them would
+ * compare a deliberate 9 key and 1584 key file against a 35865 key one.
+ * ``mn`` is listed although it does not ship, so the Mongolian file keeps
+ * whatever test coverage it has while it waits for a native-speaker pass.
  *
  * This paragraph used to name ``uz`` as a third exception, absent because it
  * was commented out of ``SUPPORTED_LANGUAGES``, and it told whoever uncommented
@@ -25,8 +25,8 @@
  * was not added, so Uzbek shipped to users while being invisible to every test
  * that iterates this object, which is the exact failure the Kyrgyz sentence
  * above describes. A comment that records a rule cannot enforce it, so
- * ``i18n-fallbacks.test.ts`` now checks the two lists against each other and
- * names ``en-US`` and ``mn`` as the only two exceptions, in both directions.
+ * ``everyOfferedLanguageIsInTheFallbackAggregator.test.ts`` now checks the two
+ * lists against each other and names the exceptions, in both directions.
  *
  * IMPORTANT: this file is intentionally NOT imported from runtime code.
  * The application boots from ``./locales/en`` and lazy-loads other

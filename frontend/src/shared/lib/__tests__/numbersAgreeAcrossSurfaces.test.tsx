@@ -51,7 +51,11 @@ const SRC = join(__dirname, '..', '..', '..');
  * checking passes whatever that function returns.
  */
 const LANGUAGES: [string, string][] = [
-  ['en', 'en-US'],
+  // `en` claims no region and resolves to itself. The picker offers
+  // `English (UK)` and `English (US)` beside it, so a reader with a preference
+  // says which; a reader who picks plain English gets what CLDR gives
+  // unqualified `en`, which is `$1,234.50` and a month-first date.
+  ['en', 'en'],
   ['de', 'de-DE'],
   ['fr', 'fr-FR'],
   ['ja', 'ja-JP'],
@@ -130,7 +134,7 @@ describe('a money surface is written in the language the reader is reading', () 
   // output. Stating the differences explicitly means a hollow environment
   // fails here, loudly, instead of turning the rest of the file green.
   it('the locales under test genuinely disagree about how to write a number', () => {
-    const en = shapeOf('en-US', 'USD', 180174.28);
+    const en = shapeOf('en', 'USD', 180174.28);
     const de = shapeOf('de-DE', 'USD', 180174.28);
 
     expect(en.group).toBe(',');
@@ -180,9 +184,43 @@ describe('a money surface is written in the language the reader is reading', () 
     speak('de');
     const second = render(<MoneyDisplay amount={180174.28} currency="USD" />).container.textContent;
 
-    expect(first).toBe(expectedMoney('en-US', 'USD', 180174.28));
+    expect(first).toBe(expectedMoney('en', 'USD', 180174.28));
     expect(second).toBe(expectedMoney('de-DE', 'USD', 180174.28));
     expect(first).not.toBe(second);
+  });
+
+  it('writes each of the three English entries the way that entry says', () => {
+    // The decision, pinned as a decision rather than as one language's answer.
+    // Plain English claims no region and resolves to itself; the two entries
+    // beside it in the picker claim one and get it. This file has twice been
+    // edited to say that `en` IS one of the regions - first American, then
+    // British - and each time the entry that actually exists to be that region
+    // was left with nothing of its own to say.
+    //
+    // The British half is what carries the test. `en` and `en-US` are
+    // formatting twins, because CLDR has no region-free English and
+    // unqualified `en` inherits the American reading, so an assertion that
+    // only compared those two would pass under any of the three decisions.
+    // en-GB is the one that differs, and it is asserted both ways: it must
+    // write this amount `US$180,174.28`, and it must not write it the way the
+    // neutral entry does.
+    for (const [language, tag] of [
+      ['en', 'en'],
+      ['en-GB', 'en-GB'],
+      ['en-US', 'en-US'],
+    ] as const) {
+      speak(language);
+      const { container } = render(<MoneyDisplay amount={180174.28} currency="USD" />);
+      expect(container.textContent, language).toBe(expectedMoney(tag, 'USD', 180174.28));
+      cleanup();
+    }
+
+    expect(expectedMoney('en-GB', 'USD', 180174.28)).not.toBe(
+      expectedMoney('en', 'USD', 180174.28),
+    );
+    expect(expectedMoney('en-US', 'USD', 180174.28)).toBe(
+      expectedMoney('en', 'USD', 180174.28),
+    );
   });
 });
 
@@ -230,15 +268,18 @@ describe('the number-format preference', () => {
     // The negative control, without which the test above passes on a surface
     // that renders one frozen string for every reader.
     //
-    // More than one rather than four: `en-US` and `ja-JP` write this amount
-    // the same way, both grouping on commas with a leading symbol, so four
+    // More than one rather than four: `en` and `ja-JP` write this amount the
+    // same way, both grouping on commas with a leading bare symbol, so four
     // languages are only three readings and asserting four would be asserting
-    // a fact about Japanese that is not true.
+    // a fact about Japanese that is not true. The count is deliberately not
+    // pinned either way - it has moved with each of this entry's decisions,
+    // and it is a fact about which currency symbols ICU disambiguates for
+    // whom rather than about the contract under test.
     expect(usePreferencesStore.getState().numberLocale).toBe('auto');
     const readings = readAcrossLanguages(money);
 
     expect(new Set(readings).size).toBeGreaterThan(1);
-    expect(readings[0]).toBe(expectedMoney('en-US', 'USD', 180174.28));
+    expect(readings[0]).toBe(expectedMoney('en', 'USD', 180174.28));
     expect(readings[1]).toBe(expectedMoney('de-DE', 'USD', 180174.28));
   });
 
@@ -1153,14 +1194,17 @@ describe('the bill and the finance register cannot be told different things', ()
     for (const [amount, currency] of REGISTER_FIXTURES) {
       const bill = fmtWithCurrency(amount, 'de-DE', currency);
       expect(bill).toBe(registerReading(amount, currency));
-      expect(bill).not.toBe(expectedMoney('en-US', currency, amount));
+      expect(bill).not.toBe(expectedMoney('en', currency, amount));
     }
   });
 
   it('no currency the product offers reads differently on the two surfaces', () => {
     speak('en');
     const disagree = offeredCurrencies().filter(
-      (code) => fmtWithCurrency(1234.5, 'en-US', code) !== registerReading(1234.5, code),
+      // `en` because `speak('en')` above is what the register will resolve.
+      // Naming a tag the UI is not in makes this pass or fail on whether the
+      // two tags happen to agree about a symbol, which is not the question.
+      (code) => fmtWithCurrency(1234.5, 'en', code) !== registerReading(1234.5, code),
     );
     expect(disagree).toEqual([]);
   });
@@ -1172,10 +1216,10 @@ describe('the bill and the finance register cannot be told different things', ()
       // an opinion, and the whole point of the ruling is that the opinion
       // belongs to CLDR: a test that spells the digits out would go on
       // passing while the product argued with the reader.
-      const digits = new Intl.NumberFormat('en-US', { style: 'currency', currency: code })
+      const digits = new Intl.NumberFormat('en', { style: 'currency', currency: code })
         .resolvedOptions().maximumFractionDigits;
       expect(registerReading(1234.5, code), code).toBe(
-        new Intl.NumberFormat('en-US', {
+        new Intl.NumberFormat('en', {
           style: 'currency',
           currency: code,
           minimumFractionDigits: digits,

@@ -18,7 +18,14 @@ import { dateFnsLocaleFor, LANGUAGES_WITHOUT_DATE_FNS_LOCALE } from './dateFnsLo
 
 /** i18next code → the `code` field of the date-fns locale it must resolve to. */
 const EXPECTED: Record<string, string> = {
+  // Plain `en` names no region and date-fns ships no region-free English, so
+  // it lands on enUS, which is also what CLDR gives unqualified `en`. The two
+  // regional entries each get their own, and en-GB having its own is the
+  // point of offering it: without the entry it would inherit `en` and a
+  // British reader would be shown American dates by the date-fns path while
+  // the Intl path showed British ones.
   en: 'en-US',
+  'en-GB': 'en-GB',
   'en-US': 'en-US',
   de: 'de',
   fr: 'fr',

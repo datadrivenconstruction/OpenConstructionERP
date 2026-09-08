@@ -24,7 +24,28 @@ export const LOCALE_MAP: Record<string, string> = {
   de: 'de-DE',
   da: 'da-DK',
   cs: 'cs-CZ',
-  en: 'en-US',
+  // Plain English claims no region, and the two entries beside it in the
+  // picker are how a reader says which one they want: `en-GB` and `en-US` are
+  // both offered, so nobody has to work out what unqualified `English` means.
+  // This entry used to say `en-US` and was briefly changed to `en-GB`, and
+  // both spellings had the same flaw - the map answered a regional question
+  // that the reader had not been asked.
+  //
+  // Self-mapping rather than absent so that the decision is written where the
+  // next person looks for it. `LOCALE_MAP[lang] || lang` gives the same string
+  // either way, and the contract to pin is `getIntlLocale() === 'en'`, not the
+  // shape of this map: an absent key would also be produced by somebody
+  // deleting a line, which is not a decision anybody made.
+  //
+  // What `Intl` does with it, measured rather than assumed (ICU 78): `en`
+  // resolves to `en`, prints `3/14/2026` and `$1,234.50`, and starts its week
+  // on Sunday - byte for byte what `en-US` prints. CLDR has no region-free
+  // English; unqualified `en` inherits the American reading, and `en-001` is
+  // the world region rather than no region. So this is neutral in what it
+  // claims, not in what it renders, and the honest way to give a reader the
+  // British reading is the `en-GB` entry in the picker, not a quiet
+  // reinterpretation of the entry they did not qualify.
+  en: 'en',
   es: 'es-ES',
   fr: 'fr-FR',
   fi: 'fi-FI',

@@ -66,8 +66,16 @@ describe('homeMarketForLanguage', () => {
     expect(homeMarketForLanguage('uk', [...MARKETS, 'UK'])).not.toBe('UK');
   });
 
-  it('separates the two English entries', () => {
-    expect(homeMarketForLanguage('en', MARKETS)).toBe('GB');
+  it('separates the three English entries', () => {
+    // The unqualified entry leads with nothing in particular, which is the
+    // decision rather than a gap: it names no region, so it has no claim on
+    // either market's cases and the catalogue comes back in its own order. It
+    // used to answer GB, which put British procurement in front of a reader
+    // who had said only that they read English. The two entries that do name
+    // a region answer with it, and asserting all three together is what stops
+    // a future edit from quietly folding the neutral one back onto Britain.
+    expect(homeMarketForLanguage('en', MARKETS)).toBeNull();
+    expect(homeMarketForLanguage('en-GB', MARKETS)).toBe('GB');
     expect(homeMarketForLanguage('en-US', MARKETS)).toBe('US');
   });
 

@@ -95,6 +95,17 @@ _TEMPLATE_LITERAL = re.compile(r"[\$][{]")
 # about 1580, so the floor sits below that rather than at a full file's size.
 _MIN_KEYS = 900
 
+# Overlays that legitimately parse to far fewer keys than a locale. Named here
+# rather than accommodated by lowering the floor above, which would retire the
+# guard for every file to let two through. Each carries only the words its
+# region spells differently and inherits the rest, so a small key count is a
+# fact about the file and not evidence of a broken reader: `en-GB.ts` is 9 keys
+# and `en-US.ts` about 1580. The parity comparison still runs over every key
+# they do carry; only the floor is waived, and it is replaced by a floor of one
+# rather than by nothing, so a reader that breaks on these files still says so
+# instead of reporting a green loop over an empty dictionary.
+_OVERLAYS = frozenset({"en-GB", "en-US"})
+
 
 def _names(value: str) -> set[str]:
     """Variable names only: `{{count}}` and `{{count, number}}` are one slot."""
@@ -160,7 +171,8 @@ def main() -> int:
 
         if code == SOURCE:
             continue
-        if len(locale) < _MIN_KEYS:
+        floor = 1 if code in _OVERLAYS else _MIN_KEYS
+        if len(locale) < floor:
             print(
                 f"ERROR: {path} parsed to {len(locale)} keys. Either the file shape "
                 f"changed or this reader is broken; both mean the parity check did "

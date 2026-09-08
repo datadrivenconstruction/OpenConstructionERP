@@ -68,7 +68,10 @@ function readSurfaces() {
 describe('DateDisplay renders exactly what it rendered before while the preference is unset', () => {
   const LANGUAGES: [string, string][] = [
     ['de', 'de-DE'],
-    ['en', 'en-US'],
+    // Neither British nor American: plain `English` claims no region, and
+    // `English (UK)` and `English (US)` are the separate entries beside it.
+    // `LOCALE_MAP` follows, resolving `en` to itself.
+    ['en', 'en'],
     ['ru', 'ru-RU'],
     ['ja', 'ja-JP'],
     ['ar', 'ar-SA'],
@@ -129,8 +132,10 @@ describe('the date-format preference reaches every date surface', () => {
   it('leaves all three surfaces on the language rendering while it is automatic', () => {
     render(<Surfaces />);
     const { header, cell, field } = readSurfaces();
-    // en-US in the test environment: a written month in the long form, a
-    // month-first numeric date in the dense one. The exact strings are proved
+    // Unqualified `en` in the test environment, the language having no
+    // explicit setting here: a written month in the long form, a month-first
+    // numeric date in the dense one, because CLDR has no region-free English
+    // and `en` inherits the American reading. The exact strings are proved
     // equal to the pre-change rendering in dateFormatPreference.test.ts; here
     // what matters is that nothing has been forced into one shared order yet.
     expect(header).not.toBe(DUE);

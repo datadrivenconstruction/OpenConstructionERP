@@ -26,6 +26,7 @@ import {
   da,
   de,
   el,
+  enGB,
   enUS,
   es,
   et,
@@ -85,7 +86,13 @@ const DATE_FNS_LOCALE_MAP: Record<string, Locale> = {
   da,
   de,
   el,
+  // Plain `en` names no region, and date-fns has no region-free English
+  // either, so it lands on enUS - the same reading CLDR gives unqualified
+  // `en`, which keeps this agreeing with `Intl` rather than arguing with it.
+  // The two regional entries are named, because date-fns publishes both and
+  // falling through to the base would hand a British reader American dates.
   en: enUS,
+  'en-GB': enGB,
   'en-US': enUS,
   es,
   et,

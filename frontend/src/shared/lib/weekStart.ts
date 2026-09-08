@@ -46,7 +46,7 @@ export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
  * language and no way to notice. This table is exported so
  * `weekStart.test.ts` can assert it agrees with ICU for every offered
  * language, which turns it from documentation of an intent into a checked
- * copy. Anything absent starts on Monday, the majority answer at 25 of 42.
+ * copy. Anything absent starts on Monday, the majority answer.
  *
  * Keys are matched whole first, then by base language, so `es-MX` can differ
  * from `es` while `pt-BR` inherits `pt`.
@@ -69,6 +69,12 @@ export const FALLBACK_FIRST_DAY: Readonly<Record<string, CldrFirstDay>> = {
   fil: 7,
   ur: 7,
   he: 7,
+  // Monday-first, and named rather than left to inherit, because its base
+  // answers differently. Britain starts its week on Monday where unqualified
+  // English is Sunday-first, so `en-GB` falling through to the `en` above
+  // would put this table a day away from the `Intl` path on the reader who
+  // picked English (UK) precisely to get the British reading.
+  'en-GB': 1,
 };
 
 /**

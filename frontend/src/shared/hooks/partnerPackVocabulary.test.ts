@@ -150,8 +150,18 @@ describe('resolvePackVocabularyCode', () => {
     // fr-CA is not in SUPPORTED_LANGUAGES, so the UI language is fr — and the
     // pack file that belongs to that language is still called fr-CA.
     expect(resolvePackVocabularyCode(['en-CA', 'fr-CA'], 'fr-CA', 'fr')).toBe('fr-CA');
-    expect(resolvePackVocabularyCode(['en-GB'], 'en-GB', 'en')).toBe('en-GB');
+    expect(resolvePackVocabularyCode(['en-NZ'], 'en-NZ', 'en')).toBe('en-NZ');
     expect(resolvePackVocabularyCode(['en-AU'], 'en-AU', 'en')).toBe('en-AU');
+  });
+
+  it('gives a region the UI ships its own file rather than the base language’s', () => {
+    // en-GB used to belong in the case above, because the UI shipped no
+    // British entry and uk-jct's file was merged into plain English. Now that
+    // English (UK) is offered, the pack's file follows the reader who picked
+    // it and stops reaching the reader who did not. Both halves are asserted:
+    // without the second, folding en-GB back onto `en` would pass.
+    expect(resolvePackVocabularyCode(['en-GB'], 'en-GB', 'en-GB')).toBe('en-GB');
+    expect(resolvePackVocabularyCode(['en-GB'], 'en-GB', 'en')).toBeNull();
   });
 
   it('serves the pack’s second file when the user picks that language', () => {
@@ -178,7 +188,10 @@ describe('resolvePackVocabularyCode', () => {
     expect(resolvePackVocabularyCode(['es-419', 'es'], 'es-419', 'es')).toBe('es');
     // Neither is exact: es-CL and es-CO are both shipped by the UI, so make the
     // tie-break visible on codes that really do collapse to the same language.
-    expect(resolvePackVocabularyCode(['en-AU', 'en-GB'], 'en-GB', 'en')).toBe('en-GB');
+    // en-AU and en-NZ are that pair now - the previous one used en-GB, which
+    // stopped collapsing to `en` when English (UK) joined the picker, so the
+    // tie it demonstrated no longer existed.
+    expect(resolvePackVocabularyCode(['en-AU', 'en-NZ'], 'en-NZ', 'en')).toBe('en-NZ');
   });
 });
 
@@ -234,15 +247,21 @@ describe('syncPackVocabulary', () => {
     // the resolution path a component actually uses: `useTranslation().t`
     // delegates straight to `i18n.t`. `nav.coordination_hub` is the sidebar
     // entry for /coordination (navCatalog.ts) and that page's breadcrumb
-    // (CoordinationHubPage.tsx), so this is the British reading of a string a
-    // uk-jct user has in front of them.
+    // (CoordinationHubPage.tsx), so this is a pack's reading of a string an
+    // nzs user has in front of them.
+    //
+    // nzs rather than uk-jct, which this used to name: uk-jct declares en-GB,
+    // and en-GB became a UI language of its own, so its overlay now lands on
+    // the en-GB bundle rather than on this one. en-NZ still has no entry in
+    // SUPPORTED_LANGUAGES and so still normalizes to `en`, which is the shape
+    // this test is about.
     expect(i18n.t('nav.coordination_hub')).toBe('Coordination Hub');
 
     mockedApiGet.mockResolvedValue({
       translation: { 'nav.coordination_hub': 'Coordination Centre' },
     });
     await syncPackVocabulary(
-      manifest({ slug: 'uk-jct', additional_locales: ['en-GB'], default_locale: 'en-GB' }),
+      manifest({ slug: 'nzs', additional_locales: ['en-NZ'], default_locale: 'en-NZ' }),
       'en',
     );
 
@@ -302,15 +321,18 @@ describe('revertPackVocabulary', () => {
   });
 
   it('undoes an overlay that was merged into English', async () => {
-    // uk-jct, aus and nzs all normalize to `en`, and resetPackLocale switching
-    // the app to English cannot undo them - English never reloads.
+    // aus and nzs both normalize to `en`, and resetPackLocale switching the
+    // app to English cannot undo them - English never reloads. uk-jct was on
+    // that list until en-GB became a UI language of its own; its overlay now
+    // lands on the en-GB bundle instead, which is a different arrangement and
+    // not the one this test is about.
     const before = bundleValue('en', 'nav.coordination_hub');
     mockedApiGet.mockResolvedValue({
       translation: { 'nav.coordination_hub': 'Coordination Centre' },
     });
 
     await syncPackVocabulary(
-      manifest({ slug: 'uk-jct', additional_locales: ['en-GB'], default_locale: 'en-GB' }),
+      manifest({ slug: 'nzs', additional_locales: ['en-NZ'], default_locale: 'en-NZ' }),
       'en',
     );
     expect(bundleValue('en', 'nav.coordination_hub')).toBe('Coordination Centre');
@@ -321,11 +343,17 @@ describe('revertPackVocabulary', () => {
 });
 
 describe('switching from one pack to another', () => {
-  // uk-jct and aus both normalize to `en`, so their overlays land on the same
-  // bundle. uk-jct renames the subcontractor screen and aus does not, which is
+  // nzs and aus both normalize to `en`, so their overlays land on the same
+  // bundle. nzs renames the subcontractor screen and aus does not, which is
   // exactly the shape that leaks: applying a pack does not reload the app, so
   // the outgoing pack's words are still live when the next one arrives.
-  const uk = manifest({ slug: 'uk-jct', additional_locales: ['en-GB'], default_locale: 'en-GB' });
+  //
+  // The pair used to be uk-jct and aus. uk-jct declares en-GB, and en-GB is a
+  // UI language now, so it no longer shares a bundle with the Australasian
+  // packs and cannot demonstrate a collision on one. The pair has to be two
+  // packs whose regions the UI does NOT ship, or the test is measuring
+  // nothing; en-NZ and en-AU are both in that state.
+  const nzs = manifest({ slug: 'nzs', additional_locales: ['en-NZ'], default_locale: 'en-NZ' });
   const aus = manifest({ slug: 'aus', additional_locales: ['en-AU'], default_locale: 'en-AU' });
 
   it('takes the outgoing pack’s words off screen instead of merging on top', async () => {
@@ -338,11 +366,11 @@ describe('switching from one pack to another', () => {
         'nav.subcontractors': 'Subcontractors',
       },
     });
-    await syncPackVocabulary(uk, 'en');
+    await syncPackVocabulary(nzs, 'en');
     expect(bundleValue('en', 'nav.subcontractors')).toBe('Subcontractors');
 
     // The Australian pack says nothing about subcontractors, so that key has to
-    // go back to the app's own English rather than keep the British wording.
+    // go back to the app's own English rather than keep the New Zealand wording.
     mockedApiGet.mockResolvedValueOnce({
       translation: { 'nav.coordination_hub': 'Coordination Centre' },
     });
@@ -358,9 +386,9 @@ describe('switching from one pack to another', () => {
 
   it('clears the outgoing pack even when the incoming one ships nothing for this language', async () => {
     // The hole the same-language case cannot reach. batimatech-ca is active
-    // with French vocabulary on screen; the user applies uk-jct, which ships
-    // only en-GB. That resolves to no file for `fr`, so nothing would merge and
-    // an early return would leave Quebec wording under the British pack.
+    // with French vocabulary on screen; the user applies nzs, which ships
+    // only en-NZ. That resolves to no file for `fr`, so nothing would merge and
+    // an early return would leave Quebec wording under the incoming pack.
     const before = bundleValue('fr', 'nav.boq');
     mockedApiGet.mockResolvedValueOnce({
       translation: { 'nav.boq': 'Bordereau de quantités' },
@@ -368,7 +396,7 @@ describe('switching from one pack to another', () => {
     await syncPackVocabulary(manifest(), 'fr');
     expect(bundleValue('fr', 'nav.boq')).toBe('Bordereau de quantités');
 
-    await syncPackVocabulary(uk, 'fr');
+    await syncPackVocabulary(nzs, 'fr');
     expect(bundleValue('fr', 'nav.boq')).toBe(before);
   });
 
@@ -376,7 +404,7 @@ describe('switching from one pack to another', () => {
     const before = bundleValue('en', 'nav.phase_estimation');
 
     mockedApiGet.mockResolvedValueOnce({ translation: { 'nav.phase_estimation': 'Estimating' } });
-    await syncPackVocabulary(uk, 'en');
+    await syncPackVocabulary(nzs, 'en');
     mockedApiGet.mockResolvedValueOnce({ translation: { 'nav.phase_estimation': 'Pricing' } });
     await syncPackVocabulary(aus, 'en');
     expect(bundleValue('en', 'nav.phase_estimation')).toBe('Pricing');

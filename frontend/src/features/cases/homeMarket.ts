@@ -61,8 +61,15 @@ export function normalizeLanguageTag(lang: string | null | undefined): string {
  *     does not, so the two have parted company: `pt-BR` reaches Brazil and
  *     `pt` reaches none. The shape is the same as Spanish; only the counts
  *     differ.
- *   - `en` declares `gb` and `en-US` declares `us`, and the catalogue has both
- *     British and American cases, so the two English entries separate cleanly.
+ *   - `en-GB` declares `gb` and `en-US` declares `us`, and the catalogue has
+ *     both British and American cases, so the two regional English entries
+ *     separate cleanly. Plain `en` declares `xx`, the code for a language not
+ *     tied to a market, and so reaches none: a reader who has said only that
+ *     they read English has not said which country's procurement they work
+ *     under, and leading with either country's cases would answer a question
+ *     they did not ask. This is the one place where reaching no market is the
+ *     deliberate answer for a language rather than the consequence of the
+ *     catalogue having nothing for it.
  *
  * A tag the registry does not list is read through its region subtag instead,
  * and the subtag wins outright rather than falling back to the base language's

@@ -85,6 +85,7 @@ CATEGORIES: dict[str, tuple[str, ...]] = {
     "de": ("one", "other"),
     "el": ("one", "other"),
     "en": ("one", "other"),
+    "en-GB": ("one", "other"),
     "en-US": ("one", "other"),
     "es": ("one", "many", "other"),
     "es-CO": ("one", "many", "other"),

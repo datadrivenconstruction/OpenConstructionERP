@@ -5,13 +5,25 @@ import { initReactI18next } from 'react-i18next';
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧', country: 'gb' },
-  // American English is a regional variant of the entry above, in the same sense
-  // es-MX is one of es: the file under `locales/en-US.ts` holds only the words
-  // American practice names differently, and every other key is answered by
-  // `en.ts` through the fallback chain. The region subtag is upper case because
-  // that is how i18next normalises a two-part code, and the bundle has to be
-  // registered under the same spelling it looks up.
+  // Plain English names no region, and the two entries under it are how a
+  // reader says which one they mean rather than working out what unqualified
+  // `English` is. It used to fly a Union Jack over a `gb` country, which said
+  // British in the picker while `shared/lib/intlLocale.ts` said American in
+  // every date and price on screen. Both halves now say the same thing: the
+  // country is `xx`, this codebase's existing code for "not tied to a market"
+  // (`shared/lib/regionalPack.ts`, `features/onboarding/countryOffer.ts`), so
+  // no flag is claimed, `detectCountry` offers no pack off the back of a bare
+  // `en` browser, and `homeMarketForLanguage` steers nobody at the British
+  // cases who did not ask for Britain.
+  { code: 'en', name: 'English', flag: '🌐', country: 'xx' },
+  // British and American English are regional variants of the entry above, in
+  // the same sense es-MX is one of es: the files under `locales/en-GB.ts` and
+  // `locales/en-US.ts` hold only the words that region names differently, and
+  // every other key is answered by `en.ts` through the fallback chain. The
+  // region subtag is upper case because that is how i18next normalises a
+  // two-part code, and the bundle has to be registered under the same spelling
+  // it looks up.
+  { code: 'en-GB', name: 'English (UK)', english: 'English (United Kingdom)', flag: '🇬🇧', country: 'gb' },
   { code: 'en-US', name: 'English (US)', english: 'English (United States)', flag: '🇺🇸', country: 'us' },
   { code: 'de', name: 'Deutsch', english: 'German', flag: '🇩🇪', country: 'de' },
   { code: 'fr', name: 'Français', english: 'French', flag: '🇫🇷', country: 'fr' },
@@ -99,7 +111,11 @@ export function getLanguageByCode(code: string): (typeof SUPPORTED_LANGUAGES)[nu
  * (batimatech-ca ships ``fr-CA`` for French Canada, uk-jct ships ``en-GB``,
  * commercial-denver ships ``en-US``). A regional code the UI actually ships is
  * answered with itself, because a pack that names a region has asked for that
- * region and stripping it would hand a Denver pack British English. Anything
+ * region and stripping it would hand a Denver pack the unqualified English
+ * that names no region at all. ``en-GB`` is answered with itself for the same
+ * reason from the moment the UI started offering it, so a uk-jct reader gets
+ * the British dates and the pack's own vocabulary rather than both of them
+ * landing on the neutral entry. Anything
  * else falls back to the base language (``fr-CA`` -> ``fr``), and a locale we do
  * not ship at all returns ``'en'``, so a pack can never force the app into a
  * language that has no strings.
@@ -142,18 +158,21 @@ export function matchSupportedLanguage(raw: string | null | undefined): string |
  * Two sources, and both are needed. The region subtag of
  * ``navigator.language`` is the better one wherever it exists, and it is the
  * ONLY one that can reach Australia, New Zealand or South Africa, because no
- * language we offer names those countries -- ``en`` names Great Britain. But
+ * language we offer names those countries. But
  * a German, French, Polish or Russian browser commonly sends a bare ``de``,
  * ``fr``, ``pl`` or ``ru`` with no region at all, so a region-only reading
  * returns nothing for most of Europe, which is where most of our cases are.
  * Falling back to the country named by the resolved language covers those,
  * and every one of the SUPPORTED_LANGUAGES entries carries that field.
  *
- * ``en`` maps to ``gb``, so a browser sending a bare ``en`` is read as United
- * Kingdom rather than United States. That is chosen, not overlooked:
- * ``en-US`` is its own entry with its own country, so a reader who wants
- * American English has a browser that already says so, and guessing the
- * larger market from silence would be guessing.
+ * ``en`` maps to ``xx``, which is this codebase's code for "not tied to a
+ * market", so a browser sending a bare ``en`` and nothing else gets no
+ * country read out of its language at all. That is chosen, not overlooked.
+ * ``en-GB`` and ``en-US`` are their own entries with their own countries, so a
+ * reader who wants one of them has a browser that already says so, and
+ * naming either from silence would be guessing. ``xx`` is a value the offer
+ * side already knows: ``resolveCountryOffer`` returns null for it, the same
+ * answer it gives for ``null``.
  *
  * This is a hint used to OFFER something, never a gate. Nothing may become
  * unreachable because the guess was wrong, and a wrong guess must always be
@@ -446,10 +465,11 @@ i18n
     // a key not localised for Chile shows Spanish rather than English. That is
     // what lets those files carry only the words that actually differ.
     //
-    // en-US needs no line of its own. i18next resolves a two-part code through
-    // ['en-US', 'en'] before it ever consults this map, and the `default` branch
-    // below names the same fallback again, so a key absent from en-US.ts is
-    // answered by en.ts either way. Asserted in enUSFallsBackToEnglish.test.ts
+    // en-GB and en-US need no line of their own. i18next resolves a two-part
+    // code through ['en-US', 'en'] before it ever consults this map, and the
+    // `default` branch below names the same fallback again, so a key absent
+    // from en-US.ts is answered by en.ts either way. Asserted in
+    // enUSFallsBackToEnglish.test.ts
     // rather than assumed, because a missing key and a resolved one look alike
     // on screen when every call site passes a defaultValue.
     fallbackLng: {

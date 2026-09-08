@@ -68,8 +68,8 @@
  * for anyone measuring what the regional file itself holds.
  *
  * en is the source, its English lives in the playbooks and not in en.ts,
- * so it is not counted; en-US is an overlay over en and is not counted
- * either; a locale file that is not in SUPPORTED_LANGUAGES is reported
+ * so it is not counted; en-GB and en-US are overlays over en and are not
+ * counted either; a locale file that is not in SUPPORTED_LANGUAGES is reported
  * and not gated, because nothing loads it.
  *
  * card_complete is the list of base locales whose catalogue text is
@@ -141,6 +141,7 @@ const LOCALE_KEY = /^\s*"(cases\.[^"]+)":/gm;
 
 const NOT_COUNTED = new Map([
   ['en', 'the source; the English of a case lives in its playbook, not in en.ts'],
+  ['en-GB', 'an overlay over en that holds only the words British practice names differently'],
   ['en-US', 'an overlay over en that holds only the words American practice names differently'],
 ]);
 

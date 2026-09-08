@@ -30,11 +30,12 @@ import { fallbackResources } from '../i18n-fallbacks';
 /**
  * Offered, but deliberately not aggregated.
  *
- * ``en-US`` is an overrides-only overlay rather than a full locale, so a test
- * that iterates the object would compare a deliberate ~1.6k key file against a
- * ~35k key one and report a gap that is the whole point of the file.
+ * ``en-GB`` and ``en-US`` are overrides-only overlays rather than full
+ * locales, so a test that iterates the object would compare a deliberate 9 key
+ * and ~1.6k key file against a ~35k key one and report a gap that is the whole
+ * point of those files.
  */
-const OFFERED_BUT_NOT_AGGREGATED = ['en-US'];
+const OFFERED_BUT_NOT_AGGREGATED = ['en-GB', 'en-US'];
 
 /**
  * Aggregated, but deliberately not offered.
@@ -66,7 +67,7 @@ describe('the offered languages and the fallback aggregator', () => {
     // The counts are the weakest form of this check and are asserted only to
     // catch a rewrite that empties one of the lists above and leaves the two
     // set comparisons trivially true.
-    expect(OFFERED_BUT_NOT_AGGREGATED).toHaveLength(1);
+    expect(OFFERED_BUT_NOT_AGGREGATED).toHaveLength(2);
     expect(AGGREGATED_BUT_NOT_OFFERED).toHaveLength(1);
     expect(offered.size).toBeGreaterThan(40);
     expect(aggregated.size).toBeGreaterThan(40);

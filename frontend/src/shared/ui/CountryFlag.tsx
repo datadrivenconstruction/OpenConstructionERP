@@ -188,6 +188,17 @@ const FLAGS: Record<string, string> = {
   // At thirty by twenty a five-pointed star is a smudge, and the count is the
   // part a reader can actually recognise.
   uz: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.8" fill="#0099B5"/><rect y="6.4" width="30" height="6.8" fill="#CE1126"/><rect y="6.8" width="30" height="6" fill="#fff"/><rect y="13.2" width="30" height="6.8" fill="#CE1126"/><rect y="13.6" width="30" height="6.4" fill="#1EB53A"/><g fill="#fff"><circle cx="4" cy="3.2" r="2"/><circle cx="10.4" cy="1.7" r="0.38"/><circle cx="11.8" cy="1.7" r="0.38"/><circle cx="13.2" cy="1.7" r="0.38"/><circle cx="9" cy="3.2" r="0.38"/><circle cx="10.4" cy="3.2" r="0.38"/><circle cx="11.8" cy="3.2" r="0.38"/><circle cx="13.2" cy="3.2" r="0.38"/><circle cx="7.6" cy="4.7" r="0.38"/><circle cx="9" cy="4.7" r="0.38"/><circle cx="10.4" cy="4.7" r="0.38"/><circle cx="11.8" cy="4.7" r="0.38"/><circle cx="13.2" cy="4.7" r="0.38"/></g><circle cx="4.8" cy="3.2" r="1.7" fill="#0099B5"/></svg>`,
+
+  // XX - no country. `xx` is this codebase's existing code for something not
+  // tied to a market (`shared/lib/regionalPack.ts`,
+  // `features/onboarding/countryOffer.ts`), and the language picker needs a
+  // glyph for it: plain `English` names no region, with `English (UK)` and
+  // `English (US)` under it, so it must not fly either one's flag. Leaving it
+  // unresolved was not an option - `resolveIso` answers null for an unknown
+  // code and the component renders nothing, which is the empty slot the test
+  // beside this file exists to catch. A globe rather than a national flag,
+  // because the absence of a country is what the entry means.
+  xx: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#E2E8F0"/><g transform="translate(15 10)"><circle r="7.2" fill="#64748B"/><g fill="none" stroke="#F8FAFC" stroke-width="0.85"><circle r="7.2"/><ellipse rx="3.1" ry="7.2"/><path d="M-7.2 0h14.4M-6.1-3.7h12.2M-6.1 3.7h12.2"/></g></g></svg>`,
 };
 
 /** Fallback emoji map for unknown codes. Covers everything that lands in
