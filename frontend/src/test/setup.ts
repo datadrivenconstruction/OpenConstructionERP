@@ -179,14 +179,31 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-// Mock react-router-dom navigation
+// react-router-dom: stub the navigation hooks ONLY where no Router is mounted.
+//
+// This mock used to replace useNavigate / useParams / useSearchParams for the
+// whole suite. Components rendered without a Router need that, otherwise the
+// real hooks throw "may be used only in the context of a <Router>". But 126
+// test files mount a real <MemoryRouter>, 43 of them with initialEntries that
+// name a route or a query string, and every one of those was reading the stub:
+// useParams answered {} whatever the path said, useSearchParams was always
+// empty, and a click that should have navigated called a vi.fn(). Deep-link
+// and search-param tests were therefore testing the mock, and passing.
+//
+// The hooks below ask the real module whether a Router is above them
+// (useInRouterContext is a plain useContext read, stable for the life of a
+// component) and delegate to the real hook when there is one. A test that
+// mounts a Router gets real routing; a test that does not keeps the stubs.
+// A file that needs a stub inside a Router still mocks the module itself, as
+// 33 files already do; a per-file vi.mock overrides this one.
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => vi.fn(),
-    useParams: () => ({}),
-    useSearchParams: () => [new URLSearchParams(), vi.fn()],
+    useNavigate: () => (actual.useInRouterContext() ? actual.useNavigate() : vi.fn()),
+    useParams: () => (actual.useInRouterContext() ? actual.useParams() : {}),
+    useSearchParams: (init?: Parameters<typeof actual.useSearchParams>[0]) =>
+      actual.useInRouterContext() ? actual.useSearchParams(init) : [new URLSearchParams(), vi.fn()],
   };
 });
 
