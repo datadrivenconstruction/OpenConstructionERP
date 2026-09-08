@@ -697,3 +697,29 @@ def test_a_value_that_is_nothing_but_punctuation_says_so_rather_than_mismatching
         result = validate_tax_id("DE", blank)
         assert not result.format_valid
         assert result.reason == "empty_after_normalisation"
+
+
+#: The member states of the European Union, ISO 3166-1 alpha-2, as of 2026.
+_EU_MEMBER_STATES: frozenset[str] = frozenset(
+    {
+        "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU",
+        "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK",
+    }
+)  # fmt: skip
+
+
+def test_the_eu_block_is_the_whole_union_and_greece_answers_to_both_of_its_codes():
+    """What the table's EU block holds, stated as the property and not a count.
+
+    The comment above the table once said twenty-two member states beside a
+    block of twenty-eight keys, and nothing could contradict it because nothing
+    read it. The property is that every member state has a rule, and that
+    Greece is keyed twice: VIES prints its numbers with EL while ISO 3166 calls
+    the country GR, and a form fed from a country picker sends the ISO code.
+    Set equality names the missing or the surplus state rather than a number.
+    """
+    eu_keys = {code for code, (standard, _pattern) in _TAX_ID_RULES.items() if standard.startswith("EU VAT")}
+    assert {"EL", "GR"} <= eu_keys
+    assert eu_keys - {"EL"} == _EU_MEMBER_STATES, (
+        f"missing: {sorted(_EU_MEMBER_STATES - eu_keys)}; surplus: {sorted(eu_keys - {'EL'} - _EU_MEMBER_STATES)}"
+    )

@@ -651,9 +651,12 @@ def compute_rating(
 # Patterns are *format* checks. They are deliberately permissive (no MOD-97 /
 # checksum validation) - the goal is to reject obviously broken input at the
 # UI boundary, not to authenticate against a registry. Live VIES checks are a
-# follow-up module concern. Coverage: the 22 EU member states whose VAT
-# numbers follow a published ISO/EU format, plus US (EIN), GB (post-Brexit
-# VRN), CH, NO, AU (ABN), CA (BN9), BR (CNPJ), IN (GSTIN), AE (TRN), SA (TRN).
+# follow-up module concern. Coverage: all 27 EU member states under the VAT
+# prefix VIES publishes for each; Greece is keyed twice, as EL (its VAT
+# prefix) and as GR (its ISO 3166 code), because callers arrive with either,
+# so the EU block holds 28 keys. Outside the EU: GB (post-Brexit VRN), US
+# (EIN), CH (UID), NO (Org.nr), AU (ABN), CA (BN9/15), BR (CNPJ), IN (GSTIN),
+# AE (TRN), SA (TRN), TR (VKN), RU (INN), ZA (VAT).
 _TAX_ID_RULES: dict[str, tuple[str, re.Pattern[str]]] = {
     # EU VAT - country prefix is OPTIONAL on input; we normalise to bare body.
     "AT": ("EU VAT (AT)", re.compile(r"^U\d{8}$")),
