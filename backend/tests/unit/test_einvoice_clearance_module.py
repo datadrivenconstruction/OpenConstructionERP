@@ -18,6 +18,7 @@ lane, so a guard placed there would pass review and gate nothing.
 
 from __future__ import annotations
 
+import re
 import uuid
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
@@ -65,6 +66,28 @@ MX_FIELDS = {
 
 
 # ── Country registry and status machine (no DB) ──────────────────────────────
+
+
+#: Where each class's example paragraph starts in the registry docstring, and
+#: the marker that ends the last of them. The three acts are headed by their
+#: literal name; the hybrid paragraph by its section title.
+_DOCSTRING_HEADINGS: tuple[tuple[str, str], ...] = (
+    (regimes.REGIME_CLEARANCE, "``clearance``\n"),
+    (regimes.REGIME_REPORTING, "``reporting``\n"),
+    (regimes.REGIME_NETWORK, "``network``\n"),
+    (regimes.REGIME_HYBRID, "Countries that do more than one of them\n"),
+)
+_DOCSTRING_EXAMPLES_END = "``regime`` therefore"
+#: An ISO code the docstring attaches to a country name: ``(FR)`` or ``(ES, SII``.
+_DOCSTRING_CODE = re.compile(r"\(([A-Z]{2})(?=[,)])")
+
+
+def _docstring_examples(doc: str) -> dict[str, set[str]]:
+    """The ISO codes named under each class heading of the registry docstring."""
+    starts = [(cls, doc.index(marker)) for cls, marker in _DOCSTRING_HEADINGS]
+    end = doc.index(_DOCSTRING_EXAMPLES_END)
+    bounds = [*(pos for _, pos in starts[1:]), end]
+    return {cls: set(_DOCSTRING_CODE.findall(doc[pos:stop])) for (cls, pos), stop in zip(starts, bounds, strict=True)}
 
 
 class TestCountryRegistry:
@@ -138,6 +161,27 @@ class TestCountryRegistry:
         assert set(regimes.REGIMES) < set(regimes.REGIME_CLASSES)
         for entry in regimes.COUNTRY_REGIMES.values():
             assert entry.regime in regimes.REGIMES, entry.country
+
+    def test_every_country_the_docstring_uses_as_an_example_is_a_row_of_the_class_it_illustrates(self):
+        # The module docstring is the taxonomy's worked explanation and it has
+        # drifted twice: it named France as the example of a class France is
+        # not in, and later named Greece, Croatia and Turkiye as countries
+        # pairing two acts when the registry held no row for any of them.
+        # Every example now carries its ISO code in parentheses, and this
+        # reads the codes back rather than trusting the prose.
+        examples = _docstring_examples(regimes.__doc__ or "")
+        for act in regimes.REGIMES:
+            codes = examples[act]
+            assert codes, f"the {act} paragraph names no example"
+            for code in codes:
+                assert code in regimes.COUNTRY_REGIMES, f"{code} is named under {act} but has no row"
+                assert regimes.COUNTRY_REGIMES[code].regime == act, f"{code} is named under {act}"
+        hybrid_named = examples[regimes.REGIME_HYBRID]
+        for code in hybrid_named:
+            assert code in regimes.COUNTRY_REGIMES, f"{code} is named as a hybrid example but has no row"
+        classed_hybrid = {code for code, entry in regimes.COUNTRY_REGIMES.items() if entry.is_hybrid}
+        assert classed_hybrid, "the registry classes nothing hybrid; the paragraph would explain an empty class"
+        assert classed_hybrid <= hybrid_named, f"classed hybrid but not named: {sorted(classed_hybrid - hybrid_named)}"
 
     def test_no_commencement_date_is_stated_without_the_source_it_was_read_from(self):
         # The whole point of the field. A date a business plans around that

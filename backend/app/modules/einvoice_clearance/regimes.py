@@ -5,33 +5,45 @@
 Three acts, and they are architecturally different acts, not three flavours of
 one act:
 
+Every country named as an example below carries its ISO code in parentheses,
+and a test parses those codes: each must be a ``COUNTRY_REGIMES`` entry whose
+deciding act is the class it illustrates. Name a country here that the
+registry does not hold, or under a class its row does not declare, and the
+suite says so.
+
 ``clearance``
     Pre-issuance. The tax authority validates the document and returns an
-    identifier, and the invoice is not legally valid without it. Mexico returns
-    a UUID for a CFDI, Brazil a chave de acesso for an NF-e, Italy a protocol
-    number from SdI, Poland a KSeF number, Romania an upload index, Saudi Arabia
-    a cryptographic stamp, India an IRN. The document cannot be handed to the
-    buyer until the authority has answered.
+    identifier, and the invoice is not legally valid without it. Mexico (MX)
+    returns a UUID for a CFDI, Brazil (BR) a chave de acesso for an NF-e,
+    Italy (IT) a protocol number from SdI, Poland (PL) a KSeF number, Romania
+    (RO) an upload index, Saudi Arabia (SA) a cryptographic stamp, India (IN)
+    an IRN. The document cannot be handed to the buyer until the authority has
+    answered.
 
 ``reporting``
     Post-issuance. The invoice is valid the moment it is issued and is reported
-    to the authority afterwards, inside a deadline. Spain (SII and Verifactu)
-    and Hungary (RTIR) work this way.
+    to the authority afterwards, inside a deadline. Spain (ES, SII and
+    Verifactu) and Hungary (HU, RTIR) work this way.
 
 ``network``
     No authority at all. The document is routed to the buyer over an agreed
-    network - Peppol BIS Billing 3.0, XRechnung into the German public sector,
-    Peppol BIS into the Belgian and Irish supply chains. There is nothing to
-    clear, so what this module records for these countries is routing state.
+    network - Peppol BIS Billing 3.0, XRechnung into the German (DE) public
+    sector, Peppol BIS into the Belgian (BE) and Irish (IE) supply chains.
+    There is nothing to clear, so what this module records for these countries
+    is routing state.
 
 Countries that do more than one of them
 =======================================
-Several countries do two of these acts at once, and calling such a country by
-one of the three names alone states something false about it. France routes the
-document to the buyer over a network of accredited platforms and separately
-reports transaction and payment data to the DGFiP; Saudi Arabia clears standard
-invoices and reports simplified ones; Greece, Croatia and Turkiye each pair a
-national submission with a reporting duty of its own.
+A country can do two of these acts at once, and calling such a country by one
+of the three names alone states something false about it. France (FR) routes
+the document to the buyer over a network of accredited platforms and
+separately reports transaction and payment data to the DGFiP, and it is the
+registry's one hybrid entry today. Other countries pair acts the same way -
+Saudi Arabia (SA) reports its simplified invoices after issue where standard
+ones are cleared - but a row is classed by what it declares, and the SA row
+models the standard-invoice clearance path alone, as its notes say. Closing
+that gap is a second act in ``additional_regimes`` on the row, not a sentence
+here; this paragraph names every row the registry classes hybrid.
 
 ``regime`` therefore keeps naming the act that decides what a successful answer
 means, and ``additional_regimes`` names the other acts the same country also
