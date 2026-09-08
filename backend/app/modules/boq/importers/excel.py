@@ -44,18 +44,30 @@ from app.modules.boq.roundtrip import ID_COLUMN_ALIASES, normalise_id
 logger = logging.getLogger(__name__)
 
 
-# ── Column alias map (mirrors the historic ``_COLUMN_ALIASES``) ────────────
+# ── Column alias map, tagged by language ───────────────────────────────────
 #
-# Canonical column → set of accepted header strings (lowercased). Editing
-# this map is the supported extension point for new locale variants
-# (Polish ``Ilosc``, Italian ``Quantità`` etc. land here).
-_COLUMN_ALIASES: dict[str, frozenset[str]] = {
-    # Round-trip identity column (GitHub #360). Recognised FIRST so an
-    # exported "Position ID" header maps here, never to ``ordinal``. A blank
-    # cell -> new row; a value belonging to the target BOQ -> update in place.
-    "position_id": ID_COLUMN_ALIASES,
-    "ordinal": frozenset(
-        {
+# Canonical column → accepted header strings (lowercased), grouped by the
+# language whose market writes them. Editing this map is the supported
+# extension point for new locale variants (Polish ``Ilosc``, Italian
+# ``Quantità`` etc. land here).
+#
+# It is a table keyed by language rather than a flat set of strings because a
+# caller has to be able to ask which languages a header row can be read in,
+# and deriving that back out of a flat set means guessing which market owns
+# ``prezzo``. ``_COLUMN_ALIASES`` below is the union, computed rather than
+# maintained, so the matcher keeps behaving exactly as it did.
+#
+# Every accented header carries its unaccented twin: exports strip diacritics
+# often enough that a table holding only ``descrição`` reads nothing out of a
+# file whose header says ``DESCRICAO``.
+#
+# Strings no single language owns live under ``"en"``: the abbreviations an
+# export writes whatever its locale (``pos``, ``nr``, ``qty``) and the
+# classification standards (``nrm``, ``csi``, ``masterformat``). The German
+# ones stay German - ``kg`` is a DIN 276 Kostengruppe, not a kilogramme.
+_HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
+    "en": {
+        "ordinal": (
             "pos",
             "pos.",
             "position",
@@ -68,85 +80,19 @@ _COLUMN_ALIASES: dict[str, frozenset[str]] = {
             "item",
             "item no",
             "ref",
-            # Note: ``"code"`` lives in the ``"classification"`` alias
-            # set, not here. Spreadsheets that name their classification
-            # column "Code" (NRM / MasterFormat exports) need that header
-            # to map to ``classification`` so the I9 / I10 heuristics can
-            # infer ``nrm`` / ``masterformat``.
-        }
-    ),
-    "description": frozenset(
-        {
-            "description",
-            "desc",
-            "text",
-            "beschreibung",
-            "leistung",
-            "designación",
-            "designacion",
-            "designation",
-            "désignation",
-            "descripción",
-            "descripcion",
-            "descrizione",
-            "opis",
-            "наименование",
-        }
-    ),
-    "unit": frozenset(
-        {
-            "unit",
-            "einheit",
-            "me",
-            "uds",
-            "ud",
-            "u",
-            "unité",
-            "unidad",
-            "unità",
-            "jed",
-            "ед",
-            "ед.",
-        }
-    ),
-    "quantity": frozenset(
-        {
-            "quantity",
-            "qty",
-            "menge",
-            "cantidad",
-            "cant",
-            "cant.",
-            "quantité",
-            "quantita",
-            "quantità",
-            "ilość",
-            "ilosc",
-            "количество",
-            "кол-во",
-        }
-    ),
-    "unit_rate": frozenset(
-        {
-            "unit rate",
-            "rate",
-            "unitrate",
-            "ep",
-            "einheitspreis",
-            "preis",
-            "precio",
-            "prezzo",
-            "prix",
-            "цена",
-        }
-    ),
-    "total": frozenset({"total", "amount", "gesamt", "gesamtpreis", "importe", "subtotal", "стоимость"}),
-    "classification": frozenset(
-        {
+        ),
+        "description": ("description", "desc", "text"),
+        "unit": ("unit",),
+        "quantity": ("quantity", "qty"),
+        "unit_rate": ("unit rate", "rate", "unitrate"),
+        "total": ("total", "amount", "subtotal"),
+        # Note: ``"code"`` lives here in the ``classification`` group, not in
+        # ``ordinal``. Spreadsheets that name their classification column
+        # "Code" (NRM / MasterFormat exports) need that header to map to
+        # ``classification`` so the I9 / I10 heuristics can infer ``nrm`` /
+        # ``masterformat``.
+        "classification": (
             "classification",
-            "din 276",
-            "din276",
-            "kg",
             "nrm",
             "code",
             "csi",
@@ -155,9 +101,344 @@ _COLUMN_ALIASES: dict[str, frozenset[str]] = {
             "division",
             "category",
             "trade",
-        }
-    ),
+        ),
+    },
+    "de": {
+        "description": ("beschreibung", "leistung"),
+        "unit": ("einheit", "me"),
+        "quantity": ("menge",),
+        "unit_rate": ("einheitspreis", "ep", "preis"),
+        "total": ("gesamt", "gesamtpreis"),
+        "classification": ("din 276", "din276", "kg"),
+    },
+    "es": {
+        "description": ("descripción", "descripcion", "designación", "designacion"),
+        "unit": ("unidad", "uds", "ud"),
+        "quantity": ("cantidad", "cant", "cant."),
+        "unit_rate": ("precio",),
+        "total": ("importe",),
+    },
+    "fr": {
+        "description": ("désignation", "designation"),
+        "unit": ("unité",),
+        "quantity": ("quantité",),
+        "unit_rate": ("prix",),
+    },
+    "it": {
+        "description": ("descrizione",),
+        "unit": ("unità", "u"),
+        "quantity": ("quantità", "quantita"),
+        "unit_rate": ("prezzo",),
+    },
+    "pl": {
+        "description": ("opis",),
+        "unit": ("jed",),
+        "quantity": ("ilość", "ilosc"),
+        # Polish carried no rate header at all until the table was split by
+        # language, which made a Polish bill import with every rate at zero.
+        "unit_rate": ("cena jednostkowa", "cena jedn.", "cena"),
+    },
+    "ru": {
+        "description": ("наименование",),
+        "unit": ("ед", "ед."),
+        "quantity": ("количество", "кол-во"),
+        "unit_rate": ("цена",),
+        "total": ("стоимость",),
+    },
+    "pt": {
+        "ordinal": ("nº", "n°", "n.º", "ordem"),
+        "description": (
+            "descrição",
+            "descricao",
+            "discriminação",
+            "discriminacao",
+            "especificação",
+            "especificacao",
+            "serviço",
+            "servico",
+        ),
+        "unit": ("unidade", "und", "unid", "unid.", "un"),
+        "quantity": ("quantidade", "qtd", "qtde", "quant", "quant."),
+        "unit_rate": (
+            "preço unitário",
+            "preco unitario",
+            "preço unit.",
+            "preco unit.",
+            "valor unitário",
+            "valor unitario",
+            "custo unitário",
+            "custo unitario",
+        ),
+        "total": ("valor total", "preço total", "preco total"),
+    },
+    "nl": {
+        "ordinal": ("post", "postnr", "postnr.", "volgnr", "volgnr."),
+        "description": ("omschrijving", "beschrijving"),
+        "unit": ("eenheid", "eenh", "eenh."),
+        "quantity": ("hoeveelheid", "aantal", "hvh"),
+        "unit_rate": ("eenheidsprijs", "prijs per eenheid", "prijs"),
+        "total": ("totaal", "totaalbedrag", "bedrag"),
+    },
+    "cs": {
+        "ordinal": ("poř.", "por.", "poř. č.", "por. c.", "p.č.", "p.c.", "pol."),
+        "description": ("popis", "název", "nazev", "popis položky", "popis polozky"),
+        "unit": ("mj", "m.j.", "měrná jednotka", "merna jednotka", "jednotka"),
+        "quantity": ("množství", "mnozstvi", "výměra", "vymera"),
+        "unit_rate": ("jednotková cena", "jednotkova cena", "j. cena", "cena"),
+        "total": ("celkem", "cena celkem", "celková cena", "celkova cena"),
+    },
+    "sk": {
+        "ordinal": ("por.", "por. č.", "p. č.", "p. c."),
+        "description": ("popis", "názov", "nazov", "popis položky", "popis polozky"),
+        "unit": ("mj", "m.j.", "merná jednotka", "merna jednotka", "jednotka"),
+        "quantity": ("množstvo", "mnozstvo", "výmera", "vymera"),
+        "unit_rate": ("jednotková cena", "jednotkova cena", "cena"),
+        "total": ("spolu", "celkom", "cena spolu"),
+    },
+    "tr": {
+        "ordinal": ("sıra", "sira", "sıra no", "sira no", "poz", "poz no"),
+        "description": (
+            "tanım",
+            "tanim",
+            "iş kalemi",
+            "is kalemi",
+            "açıklama",
+            "aciklama",
+            "imalatın cinsi",
+            "imalatin cinsi",
+        ),
+        "unit": ("birim", "ölçü birimi", "olcu birimi"),
+        "quantity": ("miktar", "metraj"),
+        "unit_rate": ("birim fiyat", "birim fiyatı", "birim fiyati"),
+        "total": ("tutar", "toplam", "toplam tutar"),
+    },
+    "hu": {
+        "ordinal": ("sorszám", "sorszam", "tételszám", "tetelszam", "ssz", "ssz."),
+        "description": ("megnevezés", "megnevezes", "tétel szövege", "tetel szovege", "leírás", "leiras"),
+        "unit": ("egység", "egyseg", "m.e.", "mennyiségi egység", "mennyisegi egyseg"),
+        "quantity": ("mennyiség", "mennyiseg"),
+        "unit_rate": ("egységár", "egysegar", "egység ár", "egyseg ar"),
+        "total": ("összesen", "osszesen", "összeg", "osszeg", "mindösszesen", "mindosszesen"),
+    },
+    "ro": {
+        "ordinal": ("nr. crt.", "nr crt", "crt.", "poz."),
+        "description": ("denumire", "denumire lucrare", "denumirea lucrării", "denumirea lucrarii", "descriere"),
+        "unit": ("um", "u.m.", "unitate", "unitate de măsură", "unitate de masura"),
+        "quantity": ("cantitate",),
+        "unit_rate": ("preț unitar", "pret unitar"),
+        "total": ("valoare", "valoare totală", "valoare totala"),
+    },
+    "bg": {
+        "ordinal": ("№", "поз", "поз."),
+        "description": ("описание", "вид работа", "видове работи"),
+        "unit": ("мярка", "ед. мярка", "единица мярка", "мерна единица"),
+        "quantity": ("количество",),
+        "unit_rate": ("ед. цена", "единична цена"),
+        "total": ("стойност", "обща стойност", "общо"),
+    },
+    "el": {
+        "ordinal": ("α/α", "αα"),
+        "description": ("περιγραφή", "περιγραφη", "είδος εργασίας", "ειδος εργασιας", "ονομασία", "ονομασια"),
+        "unit": ("μονάδα", "μοναδα", "μονάδα μέτρησης", "μοναδα μετρησης", "μ.μ."),
+        "quantity": ("ποσότητα", "ποσοτητα"),
+        "unit_rate": ("τιμή μονάδας", "τιμη μοναδας", "τιμή", "τιμη"),
+        "total": ("σύνολο", "συνολο", "δαπάνη", "δαπανη"),
+    },
+    "sv": {
+        "ordinal": ("post", "postnr"),
+        "description": ("beskrivning", "benämning", "benamning"),
+        "unit": ("enhet", "enh", "enh."),
+        "quantity": ("mängd", "mangd", "antal"),
+        "unit_rate": ("à-pris", "a-pris", "enhetspris"),
+        "total": ("summa", "belopp", "totalt"),
+    },
+    "no": {
+        "ordinal": ("post", "postnr", "postnr."),
+        "description": ("beskrivelse", "betegnelse"),
+        "unit": ("enhet", "enh", "enh."),
+        "quantity": ("mengde", "antall"),
+        "unit_rate": ("enhetspris", "pris"),
+        "total": ("sum", "beløp", "belop", "totalt"),
+    },
+    "da": {
+        "ordinal": ("post", "postnr", "løbenr", "lobenr"),
+        "description": ("beskrivelse", "betegnelse", "ydelse"),
+        "unit": ("enhed", "enh", "enh."),
+        "quantity": ("mængde", "maengde", "antal"),
+        "unit_rate": ("enhedspris", "pris"),
+        "total": ("sum", "beløb", "belob", "i alt"),
+    },
+    "fi": {
+        "ordinal": ("nro", "nro.", "n:o"),
+        "description": ("kuvaus", "selite", "nimike", "työn kuvaus", "tyon kuvaus"),
+        "unit": ("yksikkö", "yksikko", "yks", "yks."),
+        "quantity": ("määrä", "maara"),
+        "unit_rate": ("yksikköhinta", "yksikkohinta", "yks.hinta", "hinta"),
+        "total": ("yhteensä", "yhteensa", "summa", "kokonaishinta"),
+    },
+    "uk": {
+        "ordinal": ("№ з/п", "поз", "поз."),
+        "description": ("найменування", "опис", "найменування робіт"),
+        "unit": ("од", "од.", "од. вим.", "одиниця виміру", "одиниця"),
+        "quantity": ("кількість", "к-ть"),
+        "unit_rate": ("ціна", "ціна за одиницю", "вартість одиниці"),
+        "total": ("сума", "вартість", "загальна вартість"),
+    },
+    "ja": {
+        "ordinal": ("番号", "項番"),
+        "description": ("名称", "工種", "摘要", "工事内容", "説明", "内容"),
+        "unit": ("単位",),
+        "quantity": ("数量",),
+        "unit_rate": ("単価",),
+        "total": ("金額", "合計"),
+    },
+    "ko": {
+        "ordinal": ("번호", "순번", "연번"),
+        "description": ("품명", "공종", "내역", "설명", "공사명"),
+        "unit": ("단위",),
+        "quantity": ("수량",),
+        "unit_rate": ("단가",),
+        "total": ("금액", "합계"),
+    },
+    "zh": {
+        "ordinal": ("序号", "编号"),
+        "description": ("名称", "项目名称", "工作内容", "描述", "项目描述"),
+        "unit": ("单位", "计量单位"),
+        "quantity": ("数量", "工程量"),
+        "unit_rate": ("单价", "综合单价"),
+        "total": ("合价", "金额", "合计"),
+    },
+    "ar": {
+        "ordinal": ("رقم", "الرقم", "التسلسل", "رقم البند"),
+        "description": ("الوصف", "وصف", "البيان", "وصف الأعمال", "البند"),
+        "unit": ("الوحدة", "وحدة", "وحدة القياس"),
+        "quantity": ("الكمية", "كمية"),
+        "unit_rate": ("سعر الوحدة", "السعر", "سعر"),
+        "total": ("الإجمالي", "الاجمالي", "المجموع"),
+    },
+    "he": {
+        "ordinal": ("מס'", "מספר", "סעיף"),
+        "description": ("תיאור", "תאור", "פירוט"),
+        "unit": ("יחידה", "יח'", "יחידת מידה"),
+        "quantity": ("כמות",),
+        "unit_rate": ("מחיר יחידה", "מחיר"),
+        "total": ('סה"כ', "סהכ", "סך הכל", "סכום"),
+    },
+    "id": {
+        "ordinal": ("nomor", "urut", "no. urut"),
+        "description": ("uraian", "uraian pekerjaan", "deskripsi", "jenis pekerjaan"),
+        "unit": ("satuan", "sat", "sat."),
+        # ``jumlah`` is deliberately absent. Indonesian bills head both the
+        # quantity column and the money column with it, so accepting it makes
+        # one of the two read as the other; ``volume`` and ``jumlah harga``
+        # are the spellings that say which is meant.
+        "quantity": ("volume", "vol.", "kuantitas", "banyaknya"),
+        "unit_rate": ("harga satuan", "harga"),
+        "total": ("jumlah harga", "total harga", "jumlah biaya"),
+    },
+    "vi": {
+        "ordinal": ("stt", "số tt", "so tt"),
+        "description": (
+            "nội dung công việc",
+            "noi dung cong viec",
+            "tên công việc",
+            "ten cong viec",
+            "mô tả",
+            "mo ta",
+            "diễn giải",
+            "dien giai",
+        ),
+        "unit": ("đơn vị", "don vi", "đơn vị tính", "don vi tinh", "đvt", "dvt"),
+        "quantity": ("khối lượng", "khoi luong", "số lượng", "so luong"),
+        "unit_rate": ("đơn giá", "don gia"),
+        "total": ("thành tiền", "thanh tien", "tổng cộng", "tong cong"),
+    },
 }
+
+
+# The four columns a bill row cannot be read without. A language that names
+# fewer than these cannot carry a bill on its own, however many other headers
+# it declares, so it has no business being listed as supported.
+_MANDATORY_COLUMNS: tuple[str, ...] = ("description", "unit", "quantity", "unit_rate")
+
+# Canonical column order for the flattened map. ``position_id`` is prepended
+# by the builder and comes first: an exported "Position ID" header maps there,
+# never to ``ordinal``. A blank cell -> new row; a value belonging to the
+# target BOQ -> update in place (GitHub #360).
+_CANONICAL_COLUMNS: tuple[str, ...] = (
+    "ordinal",
+    "description",
+    "unit",
+    "quantity",
+    "unit_rate",
+    "total",
+    "classification",
+)
+
+
+def _languages_missing_mandatory_columns(
+    table: dict[str, dict[str, tuple[str, ...]]],
+) -> dict[str, tuple[str, ...]]:
+    """Report which mandatory columns each language fails to name.
+
+    Args:
+        table: A language-tagged header table shaped like
+            :data:`_HEADERS_BY_LANGUAGE`.
+
+    Returns:
+        Language code -> the mandatory columns it leaves empty or omits.
+        Empty when every language is complete.
+    """
+    holes: dict[str, tuple[str, ...]] = {}
+    for language, headers in table.items():
+        missing = tuple(column for column in _MANDATORY_COLUMNS if not headers.get(column))
+        if missing:
+            holes[language] = missing
+    return holes
+
+
+def _build_column_aliases(
+    table: dict[str, dict[str, tuple[str, ...]]],
+) -> dict[str, frozenset[str]]:
+    """Flatten the language-tagged table into the canonical alias map.
+
+    Args:
+        table: A language-tagged header table shaped like
+            :data:`_HEADERS_BY_LANGUAGE`.
+
+    Returns:
+        Canonical column -> every accepted header string for it, across all
+        languages, with ``position_id`` seeded from
+        :data:`~app.modules.boq.roundtrip.ID_COLUMN_ALIASES`.
+    """
+    merged: dict[str, set[str]] = {}
+    for headers in table.values():
+        for canonical, words in headers.items():
+            merged.setdefault(canonical, set()).update(words)
+    aliases: dict[str, frozenset[str]] = {"position_id": ID_COLUMN_ALIASES}
+    for canonical in _CANONICAL_COLUMNS:
+        aliases[canonical] = frozenset(merged.pop(canonical, set()))
+    for canonical in sorted(merged):
+        aliases[canonical] = frozenset(merged[canonical])
+    return aliases
+
+
+_COLUMN_ALIASES: dict[str, frozenset[str]] = _build_column_aliases(_HEADERS_BY_LANGUAGE)
+
+SUPPORTED_HEADER_LANGUAGES: frozenset[str] = frozenset(_HEADERS_BY_LANGUAGE)
+"""Languages whose spreadsheet header row this importer reads natively.
+
+Computed from :data:`_HEADERS_BY_LANGUAGE`, never written out by hand, so a
+caller deciding whether a national profile can claim native spreadsheet
+import reads what the table actually holds rather than what a second list
+once said it held. Membership means the language names at least
+:data:`_MANDATORY_COLUMNS`.
+
+Note that this covers the header row only. A market whose bills are not
+tables with a header row at all (the Hungarian workbooks, whose item code is
+composed down a heading tree across nine columns) needs a profile of its own
+regardless of what this set says.
+"""
 
 
 def _match_column(header: str) -> str | None:
