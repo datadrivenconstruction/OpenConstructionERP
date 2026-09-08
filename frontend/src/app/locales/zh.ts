@@ -13349,6 +13349,7 @@ const resource = {
     "compliance.col.status": "状态",
     "compliance.confirm.delete": "删除此合规文档？",
     "compliance.status.active": "活动",
+    "compliance.status.not_yet_effective": "尚未生效",
     "compliance.status.expiring_soon": "即将到期",
     "compliance.status.expired": "已过期",
     "compliance.status.cancelled": "已取消",

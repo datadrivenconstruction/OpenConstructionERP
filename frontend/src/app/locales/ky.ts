@@ -4580,6 +4580,7 @@ const resource = {
     "compliance.col.status": "Статусу",
     "compliance.confirm.delete": "Бул шайкештик документин өчүрөсүзбү?",
     "compliance.status.active": "Активдүү",
+    "compliance.status.not_yet_effective": "Күчүнө кире элек",
     "compliance.status.expiring_soon": "Жакында бүтөт",
     "compliance.status.expired": "Мөөнөтү бүттү",
     "compliance.status.cancelled": "Жокко чыгарылды",

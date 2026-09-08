@@ -9320,6 +9320,7 @@ const resource = {
     "compliance.page.subtitle": "Сақтандыруды, рұқсаттарды, кепілдіктерді және сертификаттарды мерзімі бітуін еске салумен бақылаңыз.",
     "compliance.page.title": "Сәйкестік құжаттары",
     "compliance.status.active": "Белсенді",
+    "compliance.status.not_yet_effective": "Әлі күшіне енбеген",
     "compliance.status.cancelled": "Жойылған",
     "compliance.status.expired": "Мерзімі өткен",
     "compliance.status.expiring_soon": "Жақында бітеді",

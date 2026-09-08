@@ -9555,6 +9555,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Slette dette etterlevelsesdokumentet?",
     "compliance.status.active": "Aktiv",
+    "compliance.status.not_yet_effective": "Ikke trådt i kraft ennå",
     "compliance.status.expiring_soon": "Utløper snart",
     "compliance.status.expired": "Utløpt",
     "compliance.status.cancelled": "Avbrutt",

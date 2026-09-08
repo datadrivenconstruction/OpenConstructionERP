@@ -9320,6 +9320,7 @@ const resource = {
     "compliance.page.subtitle": "میعاد ختم ہونے کی یاد دہانیوں کے ساتھ انشورنس، اجازت نامے، بانڈز اور تصدیقات ٹریک کریں۔",
     "compliance.page.title": "Compliance دستاویزات",
     "compliance.status.active": "فعال",
+    "compliance.status.not_yet_effective": "ابھی نافذ نہیں",
     "compliance.status.cancelled": "منسوخ شدہ",
     "compliance.status.expired": "میعاد ختم",
     "compliance.status.expiring_soon": "جلد میعاد ختم",

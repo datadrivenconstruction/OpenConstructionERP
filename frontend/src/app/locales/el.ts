@@ -9350,6 +9350,7 @@ const resource = {
     "compliance.page.subtitle": "Παρακολουθήστε ασφαλιστήρια, άδειες, εγγυήσεις και πιστοποιήσεις με υπενθυμίσεις λήξης.",
     "compliance.page.title": "Έγγραφα συμμόρφωσης",
     "compliance.status.active": "Ενεργό",
+    "compliance.status.not_yet_effective": "Δεν ισχύει ακόμη",
     "compliance.status.cancelled": "Ακυρώθηκε",
     "compliance.status.expired": "Έληξε",
     "compliance.status.expiring_soon": "Λήγει σύντομα",

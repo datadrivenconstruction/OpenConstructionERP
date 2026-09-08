@@ -13236,6 +13236,7 @@ const resource = {
     "compliance.col.status": "Stare",
     "compliance.confirm.delete": "șterge acest conformitate document?",
     "compliance.status.active": "Activ",
+    "compliance.status.not_yet_effective": "Încă nu este în vigoare",
     "compliance.status.expiring_soon": "Expiring curând",
     "compliance.status.expired": "Expirat",
     "compliance.status.cancelled": "Anulat",

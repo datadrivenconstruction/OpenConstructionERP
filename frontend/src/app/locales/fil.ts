@@ -9313,6 +9313,7 @@ const resource = {
     "compliance.page.subtitle": "Subaybayan ang insurance, permit, bond, at certification na may paalala ng pag-expire.",
     "compliance.page.title": "Mga dokumento ng compliance",
     "compliance.status.active": "Aktibo",
+    "compliance.status.not_yet_effective": "Hindi pa epektibo",
     "compliance.status.cancelled": "Kinansela",
     "compliance.status.expired": "Nag-expire na",
     "compliance.status.expiring_soon": "Malapit nang mag-expire",

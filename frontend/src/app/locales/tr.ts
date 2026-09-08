@@ -13309,6 +13309,7 @@ const resource = {
     "compliance.col.status": "Durum",
     "compliance.confirm.delete": "Bu uyum belgesi silinsin mi?",
     "compliance.status.active": "Aktif",
+    "compliance.status.not_yet_effective": "Henüz yürürlükte değil",
     "compliance.status.expiring_soon": "Yakında bitiyor",
     "compliance.status.expired": "Süresi doldu",
     "compliance.status.cancelled": "İptal edildi",

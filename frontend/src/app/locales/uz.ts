@@ -13509,6 +13509,7 @@ const resource = {
     "compliance.col.status": "Holat",
     "compliance.confirm.delete": "Bu muvofiqlik hujjati oʻchirilsinmi?",
     "compliance.status.active": "Faol",
+    "compliance.status.not_yet_effective": "Hali kuchga kirmagan",
     "compliance.status.expiring_soon": "Tez orada tugaydi",
     "compliance.status.expired": "Muddati tugagan",
     "compliance.status.cancelled": "Bekor qilindi",

@@ -13527,6 +13527,7 @@ const resource = {
     "compliance.col.status": "Статус",
     "compliance.confirm.delete": "Видалити цей документ відповідності вимогам?",
     "compliance.status.active": "Дійсний",
+    "compliance.status.not_yet_effective": "Ще не набув чинності",
     "compliance.status.expiring_soon": "Скоро закінчується",
     "compliance.status.expired": "Термін минув",
     "compliance.status.cancelled": "Скасовано",

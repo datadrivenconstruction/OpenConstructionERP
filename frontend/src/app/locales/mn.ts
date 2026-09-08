@@ -9903,6 +9903,7 @@ const resource = {
     "compliance.page.subtitle": "Даатгал, зөвшөөрөл, баталгаа, гэрчилгээг хугацаа дуусах сануулгатай хянана.",
     "compliance.page.title": "Нийцлийн баримт бичиг",
     "compliance.status.active": "Идэвхтэй",
+    "compliance.status.not_yet_effective": "Хүчин төгөлдөр болоогүй",
     "compliance.status.cancelled": "Цуцлагдсан",
     "compliance.status.expired": "Дууссан",
     "compliance.status.expiring_soon": "Удахгүй дуусна",

@@ -13639,6 +13639,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Dieses Compliance-Dokument löschen?",
     "compliance.status.active": "Aktiv",
+    "compliance.status.not_yet_effective": "Noch nicht in Kraft",
     "compliance.status.expiring_soon": "Läuft bald ab",
     "compliance.status.expired": "Abgelaufen",
     "compliance.status.cancelled": "Storniert",

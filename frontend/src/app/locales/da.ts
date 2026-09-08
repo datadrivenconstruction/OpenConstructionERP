@@ -9611,6 +9611,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Slet dette compliance-dokument?",
     "compliance.status.active": "Aktiv",
+    "compliance.status.not_yet_effective": "Endnu ikke trådt i kraft",
     "compliance.status.expiring_soon": "Udløber snart",
     "compliance.status.expired": "Udløbet",
     "compliance.status.cancelled": "Annulleret",

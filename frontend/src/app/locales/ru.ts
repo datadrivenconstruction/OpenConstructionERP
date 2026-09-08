@@ -13899,6 +13899,7 @@ const resource = {
     "compliance.col.status": "Статус",
     "compliance.confirm.delete": "Удалить этот документ соответствия?",
     "compliance.status.active": "Активный",
+    "compliance.status.not_yet_effective": "Ещё не вступил в силу",
     "compliance.status.expiring_soon": "Истекает скоро",
     "compliance.status.expired": "Истёк",
     "compliance.status.cancelled": "Отменён",

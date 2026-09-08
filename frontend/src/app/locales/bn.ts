@@ -9313,6 +9313,7 @@ const resource = {
     "compliance.page.subtitle": "মেয়াদ শেষের অনুস্মারকসহ বীমা, পারমিট, বন্ড ও সার্টিফিকেশন ট্র্যাক করুন।",
     "compliance.page.title": "সম্মতি ডকুমেন্ট",
     "compliance.status.active": "সক্রিয়",
+    "compliance.status.not_yet_effective": "এখনও কার্যকর নয়",
     "compliance.status.cancelled": "বাতিল",
     "compliance.status.expired": "মেয়াদোত্তীর্ণ",
     "compliance.status.expiring_soon": "শীঘ্রই মেয়াদ শেষ",

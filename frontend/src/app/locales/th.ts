@@ -13332,6 +13332,7 @@ const resource = {
     "compliance.col.status": "สถานะ",
     "compliance.confirm.delete": "ลบเอกสารการปฏิบัติตามนี้?",
     "compliance.status.active": "ใช้งาน",
+    "compliance.status.not_yet_effective": "ยังไม่มีผลบังคับใช้",
     "compliance.status.expiring_soon": "ใกล้หมดอายุ",
     "compliance.status.expired": "หมดอายุ",
     "compliance.status.cancelled": "ยกเลิก",

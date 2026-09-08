@@ -9320,6 +9320,7 @@ const resource = {
     "compliance.page.subtitle": "بیمه، مجوزها، ضمانت‌نامه‌ها و گواهی‌نامه‌ها را همراه با یادآوری انقضا پیگیری کنید.",
     "compliance.page.title": "اسناد تطابق",
     "compliance.status.active": "فعال",
+    "compliance.status.not_yet_effective": "هنوز اجرایی نشده",
     "compliance.status.cancelled": "لغوشده",
     "compliance.status.expired": "منقضی‌شده",
     "compliance.status.expiring_soon": "نزدیک به انقضا",

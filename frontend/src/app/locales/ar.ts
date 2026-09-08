@@ -10151,6 +10151,7 @@ const resource = {
     "compliance.page.subtitle": "تتبّع التأمين والتراخيص والكفالات والشهادات مع تذكيرات بانتهاء الصلاحية.",
     "compliance.page.title": "مستندات الامتثال",
     "compliance.status.active": "ساري",
+    "compliance.status.not_yet_effective": "غير سارٍ بعد",
     "compliance.status.cancelled": "ملغى",
     "compliance.status.expired": "منتهي",
     "compliance.status.expiring_soon": "ينتهي قريبًا",

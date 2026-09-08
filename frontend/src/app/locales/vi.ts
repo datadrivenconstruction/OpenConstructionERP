@@ -13291,6 +13291,7 @@ const resource = {
     "compliance.col.status": "Trạng thái",
     "compliance.confirm.delete": "Xóa tài liệu tuân thủ này?",
     "compliance.status.active": "Hoạt động",
+    "compliance.status.not_yet_effective": "Chưa có hiệu lực",
     "compliance.status.expiring_soon": "Sắp hết hạn",
     "compliance.status.expired": "Đã hết hạn",
     "compliance.status.cancelled": "Đã hủy",

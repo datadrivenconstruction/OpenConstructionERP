@@ -13374,6 +13374,7 @@ const resource = {
     "compliance.col.status": "स्थिति",
     "compliance.confirm.delete": "यह अनुपालन दस्तावेज़ हटाएं?",
     "compliance.status.active": "सक्रिय",
+    "compliance.status.not_yet_effective": "अभी प्रभावी नहीं",
     "compliance.status.expiring_soon": "जल्द समाप्त होने वाला",
     "compliance.status.expired": "समाप्त",
     "compliance.status.cancelled": "रद्द",

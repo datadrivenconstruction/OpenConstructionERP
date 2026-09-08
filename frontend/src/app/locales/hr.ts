@@ -13187,6 +13187,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Izbriši ovaj usklađenost dokument?",
     "compliance.status.active": "Aktivan",
+    "compliance.status.not_yet_effective": "Još nije na snazi",
     "compliance.status.expiring_soon": "Expiring uskoro",
     "compliance.status.expired": "Isteklo",
     "compliance.status.cancelled": "Otkazano",

@@ -10034,6 +10034,7 @@ const resource = {
     "compliance.page.subtitle": "Jälgi kindlustusi, lube, tagatisi ja sertifikaate koos aegumismeeldetuletustega.",
     "compliance.page.title": "Vastavusdokumendid",
     "compliance.status.active": "Aktiivne",
+    "compliance.status.not_yet_effective": "Ei ole veel jõustunud",
     "compliance.status.cancelled": "Tühistatud",
     "compliance.status.expired": "Aegunud",
     "compliance.status.expiring_soon": "Aegub peagi",

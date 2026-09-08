@@ -9326,6 +9326,7 @@ const resource = {
     "compliance.page.subtitle": "מעקב אחר ביטוח, היתרים, ערבויות והסמכות עם תזכורות פקיעה.",
     "compliance.page.title": "מסמכי ציות",
     "compliance.status.active": "פעיל",
+    "compliance.status.not_yet_effective": "טרם נכנס לתוקף",
     "compliance.status.cancelled": "בוטל",
     "compliance.status.expired": "פג תוקף",
     "compliance.status.expiring_soon": "פג תוקף בקרוב",

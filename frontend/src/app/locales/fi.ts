@@ -13310,6 +13310,7 @@ const resource = {
     "compliance.col.status": "Tila",
     "compliance.confirm.delete": "Poistetaanko tämä vaatimustenmukaisuusasiakirja?",
     "compliance.status.active": "Aktiivinen",
+    "compliance.status.not_yet_effective": "Ei vielä voimassa",
     "compliance.status.expiring_soon": "Vanhenee pian",
     "compliance.status.expired": "Vanhentunut",
     "compliance.status.cancelled": "Peruutettu",

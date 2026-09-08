@@ -12602,6 +12602,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Dit nalevingsdocument verwijderen?",
     "compliance.status.active": "Actief",
+    "compliance.status.not_yet_effective": "Nog niet van kracht",
     "compliance.status.expiring_soon": "Vervalt binnenkort",
     "compliance.status.expired": "Verlopen",
     "compliance.status.cancelled": "Geannuleerd",

@@ -13348,6 +13348,7 @@ const resource = {
     "compliance.col.status": "상태",
     "compliance.confirm.delete": "이 준법 서류를 삭제하시겠습니까?",
     "compliance.status.active": "활성",
+    "compliance.status.not_yet_effective": "아직 발효 전",
     "compliance.status.expiring_soon": "곧 만료",
     "compliance.status.expired": "만료됨",
     "compliance.status.cancelled": "취소됨",

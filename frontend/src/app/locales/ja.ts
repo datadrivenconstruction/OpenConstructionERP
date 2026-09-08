@@ -13349,6 +13349,7 @@ const resource = {
     "compliance.col.status": "ステータス",
     "compliance.confirm.delete": "このコンプライアンス文書を削除しますか？",
     "compliance.status.active": "アクティブ",
+    "compliance.status.not_yet_effective": "未発効",
     "compliance.status.expiring_soon": "もうすぐ期限切れ",
     "compliance.status.expired": "期限切れ",
     "compliance.status.cancelled": "キャンセル済み",

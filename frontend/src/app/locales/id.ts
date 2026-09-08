@@ -13290,6 +13290,7 @@ const resource = {
     "compliance.col.status": "Status",
     "compliance.confirm.delete": "Hapus dokumen kepatuhan ini?",
     "compliance.status.active": "Aktif",
+    "compliance.status.not_yet_effective": "Belum berlaku",
     "compliance.status.expiring_soon": "Segera kedaluwarsa",
     "compliance.status.expired": "Kedaluwarsa",
     "compliance.status.cancelled": "Dibatalkan",
