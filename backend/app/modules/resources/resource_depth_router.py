@@ -40,6 +40,29 @@ def _get_depth_service(session: SessionDep) -> ResourceDepthService:
     return ResourceDepthService(session)
 
 
+async def _guard_assignment(
+    assignment_id: uuid.UUID,
+    user_id: str | None,
+    session: SessionDep,
+    service: ResourceDepthService,
+) -> None:
+    """Verify cross-project access on the project an assignment belongs to.
+
+    ``RequirePermission(...)`` only checks role/permission scope - it does not
+    prove the caller may reach the *specific* project the assignment is filed
+    against. The assignment routes in the parent router resolve that project
+    and run it through ``verify_project_access``; the curve and units routes
+    here are keyed by the same assignment id and need the same check, or any
+    reader could fetch another project's curve by guessing a UUID and any
+    editor could rewrite it. Run before the service call so a later 404 or 409
+    cannot confirm that a foreign row exists. ``verify_project_access`` answers
+    404 on both "missing" and "denied", so the response is opaque.
+    """
+    assignment = await service.base.get_assignment(assignment_id)
+    if assignment.project_id is not None:
+        await verify_project_access(assignment.project_id, user_id, session)
+
+
 # ── Rates ──────────────────────────────────────────────────────────────────
 
 
@@ -89,9 +112,12 @@ async def delete_rate(
 @resource_depth_router.get("/assignments/{assignment_id}/curve", response_model=CurveResponse)
 async def get_curve(
     assignment_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("resources.read")),
     service: ResourceDepthService = Depends(_get_depth_service),
 ) -> CurveResponse:
+    await _guard_assignment(assignment_id, user_id, session, service)
     curve = await service.get_curve(assignment_id)
     if curve is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curve not found")
@@ -102,9 +128,12 @@ async def get_curve(
 async def upsert_curve(
     assignment_id: uuid.UUID,
     data: CurveUpsert,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("resources.update")),
     service: ResourceDepthService = Depends(_get_depth_service),
 ) -> CurveResponse:
+    await _guard_assignment(assignment_id, user_id, session, service)
     curve = await service.upsert_curve(assignment_id, data)
     return CurveResponse.model_validate(curve)
 
@@ -112,9 +141,12 @@ async def upsert_curve(
 @resource_depth_router.delete("/assignments/{assignment_id}/curve", status_code=204)
 async def delete_curve(
     assignment_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("resources.update")),
     service: ResourceDepthService = Depends(_get_depth_service),
 ) -> None:
+    await _guard_assignment(assignment_id, user_id, session, service)
     await service.delete_curve(assignment_id)
 
 
@@ -130,11 +162,7 @@ async def set_assignment_units(
     _perm: None = Depends(RequirePermission("resources.update")),
     service: ResourceDepthService = Depends(_get_depth_service),
 ) -> AssignmentUnitsResponse:
-    # Cross-tenant guard: an assignment filed against a project the caller cannot
-    # reach must not be editable (404 on deny, existence-oracle safe).
-    assignment = await service.base.get_assignment(assignment_id)
-    if assignment.project_id is not None:
-        await verify_project_access(assignment.project_id, user_id, session)
+    await _guard_assignment(assignment_id, user_id, session, service)
     updated = await service.set_units(assignment_id, data)
     return AssignmentUnitsResponse(
         assignment_id=updated.id,
