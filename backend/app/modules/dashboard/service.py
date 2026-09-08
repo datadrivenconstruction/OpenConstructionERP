@@ -87,11 +87,19 @@ async def accessible_projects(
 ) -> list[Project]:
     """Return Project rows the caller may see.
 
-    Admins see all (non-archived). Regular users see only their own.
+    Admins see all (non-archived). Everyone else sees the projects they own
+    or are a team member of - the same rule ``verify_project_access`` and
+    ``accessible_project_ids`` in ``app.dependencies`` enforce for every
+    other read, so the rollup describes the estate the rest of the product
+    shows. It used to filter on ownership alone, and a manager added to a
+    project through a team could open the project, its BOQ and its schedule
+    and land on a dashboard reporting zero projects.
     When ``requested_ids`` is provided we silently drop ids that are
     not accessible - never raise 403, the parent router returns 404 /
     empty per the IDOR posture.
     """
+    from app.modules.teams.access import member_project_ids_subquery
+
     admin = await is_admin(session, user_id)
     stmt = select(Project).where(Project.status != "archived")
     # When a partner pack is active the whole workspace is scoped to that
@@ -104,7 +112,7 @@ async def accessible_projects(
             uid = uuid.UUID(str(user_id))
         except (ValueError, TypeError):
             return []
-        stmt = stmt.where(Project.owner_id == uid)
+        stmt = stmt.where((Project.owner_id == uid) | Project.id.in_(member_project_ids_subquery(uid)))
     if requested_ids:
         stmt = stmt.where(Project.id.in_(requested_ids))
     rows = await session.execute(stmt)
