@@ -95,7 +95,7 @@ const playbook: Playbook = {
         "Build the hourly rate from its parts: gross wage, the employer contributions on it, paid non-working time, small plant and hand tools, site running costs and the share of company overhead the job carries. Keep the build-up attached to the rate so anyone can see which of those parts is doing the work.",
       whyKey: "cases.price_a_teteles_koltsegvetes_from_norm_and_rezsioradij.step.rezsi.why",
       whyDefault:
-        "The rezsioradij is the single number that decides whether a Hungarian bid is profitable, and it is the number most often taken from last year without being rebuilt. A recommended industry figure is published annually and a public client will hold yours against it, so a rate far below it needs an explanation you have written down and a rate far above it needs one too.",
+        "The rezsioradij is the single number that decides whether a Hungarian bid is profitable, and it is the number most often carried over from last year without being rebuilt. It is also not a free choice. A minimum construction rezsioradij is set by ministerial decree for the year, and on public work an offer calculated below it can be found invalid, so a rate under the minimum has to be a decision somebody made rather than a number that came out of a spreadsheet.",
       moduleLabel: "Labor Rates",
       moduleLabelKey: "nav.labor_rates",
       to: "/labor-rates",
