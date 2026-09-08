@@ -34,7 +34,7 @@
     "@xyflow/react": "^12.11.1",
     "ag-grid-community": "^32.3.0",
     "ag-grid-react": "^32.3.9",
-    "cesium": "^1.142.0",
+    "cesium": "^1.145.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "exceljs": "^4.4.0",
