@@ -9,6 +9,10 @@
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
+    "bn": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
     "cs": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
@@ -21,7 +25,19 @@
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
+    "el": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
     "es": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
+    "et": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
+    "fa": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
@@ -29,7 +45,15 @@
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
+    "fil": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
     "fr": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
+    "he": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
@@ -53,7 +77,15 @@
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
+    "kk": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
     "ko": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
+    "ky": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
@@ -94,6 +126,10 @@
       "digest": "e3b0c44298fc1c14"
     },
     "uk": {
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
+    },
+    "ur": {
       "missing": 0,
       "digest": "e3b0c44298fc1c14"
     },
