@@ -512,12 +512,19 @@ def test_comparison_create_rejects_weights_not_summing_to_100() -> None:
 # ── compute_bid_summary ───────────────────────────────────────────────────
 
 
-def _full_sub(total: str, completeness: str = "100", valid: bool = True, late: bool = False) -> Any:
+def _full_sub(
+    total: str,
+    completeness: str = "100",
+    valid: bool = True,
+    late: bool = False,
+    currency: str = "EUR",
+) -> Any:
     return SimpleNamespace(
         total_amount=Decimal(total),
         completeness_score=Decimal(completeness),
         is_valid=valid,
         open_after_deadline=late,
+        currency=currency,
     )
 
 
@@ -534,6 +541,8 @@ def test_compute_bid_summary_basic() -> None:
     assert summary["average"] == Decimal("1233.33")
     assert summary["valid_count"] == 3
     assert summary["late_count"] == 0
+    assert summary["excluded_invalid_count"] == 0
+    assert summary["excluded_off_currency"] == 0
 
 
 def test_compute_bid_summary_with_invalid_and_late() -> None:
@@ -544,6 +553,88 @@ def test_compute_bid_summary_with_invalid_and_late() -> None:
     summary = compute_bid_summary(subs)
     assert summary["valid_count"] == 1
     assert summary["late_count"] == 1
+    assert summary["excluded_invalid_count"] == 1
+    # The late, invalid bid is the most expensive one; it must not set the max.
+    assert summary["max"] == Decimal("1000.00")
+
+
+def test_compute_bid_summary_invalid_cheapest_bid_does_not_set_the_min() -> None:
+    """Two valid bids and one disqualified bid that undercuts both.
+
+    Before the fix the disqualified bid set the min the tender board shows
+    and dragged the average down with it, while ``valid_count`` quietly
+    said two. Now the price stats are the two valid bids and the summary
+    says one bid was held out for being invalid.
+    """
+    subs = [
+        _full_sub("1000", valid=True),
+        _full_sub("1200", valid=True),
+        _full_sub("700", valid=False),
+    ]
+    summary = compute_bid_summary(subs)
+    assert summary["count"] == 3
+    assert summary["valid_count"] == 2
+    assert summary["excluded_invalid_count"] == 1
+    assert summary["min"] == Decimal("1000.00")
+    assert summary["max"] == Decimal("1200.00")
+    assert summary["average"] == Decimal("1100.00")
+    assert summary["std_dev"] == Decimal("100.00")
+    # No currency was involved in this exclusion, so it is not reported as one.
+    assert summary["excluded_off_currency"] == 0
+    assert summary["mixed_currency"] is False
+    assert summary["excluded_invalid_count"] + summary["valid_count"] == summary["count"]
+
+
+def test_compute_bid_summary_reports_invalid_and_off_currency_exclusions_apart() -> None:
+    """An invalid bid and an off-currency bid land in different counters.
+
+    The invalid off-currency bid goes to the invalid counter only: it is not
+    an off-currency exclusion, and it does not get a vote on the reporting
+    currency either.
+    """
+    subs = [
+        _full_sub("1000", valid=True, currency="EUR"),
+        _full_sub("1200", valid=True, currency="EUR"),
+        _full_sub("900", valid=True, currency="USD"),
+        _full_sub("500", valid=False, currency="EUR"),
+        _full_sub("400", valid=False, currency="USD"),
+    ]
+    summary = compute_bid_summary(subs)
+    assert summary["count"] == 5
+    assert summary["valid_count"] == 3
+    assert summary["currency"] == "EUR"
+    assert summary["min"] == Decimal("1000.00")
+    assert summary["max"] == Decimal("1200.00")
+    assert summary["excluded_invalid_count"] == 2
+    assert summary["excluded_off_currency"] == 1
+    assert summary["mixed_currency"] is True
+
+
+def test_compute_bid_summary_invalid_bids_cannot_swing_the_reporting_currency() -> None:
+    """Two rejected USD bids do not outvote the one valid EUR bid."""
+    subs = [
+        _full_sub("1000", valid=True, currency="EUR"),
+        _full_sub("800", valid=False, currency="USD"),
+        _full_sub("850", valid=False, currency="USD"),
+    ]
+    summary = compute_bid_summary(subs)
+    assert summary["currency"] == "EUR"
+    assert summary["min"] == Decimal("1000.00")
+    assert summary["excluded_invalid_count"] == 2
+    assert summary["excluded_off_currency"] == 0
+    assert summary["mixed_currency"] is False
+
+
+def test_compute_bid_summary_all_invalid_has_no_price_stats() -> None:
+    subs = [_full_sub("1000", valid=False), _full_sub("1200", valid=False)]
+    summary = compute_bid_summary(subs)
+    assert summary["count"] == 2
+    assert summary["valid_count"] == 0
+    assert summary["excluded_invalid_count"] == 2
+    assert summary["min"] is None
+    assert summary["max"] is None
+    assert summary["average"] is None
+    assert summary["currency"] == ""
 
 
 def test_compute_bid_summary_empty() -> None:
@@ -551,6 +642,7 @@ def test_compute_bid_summary_empty() -> None:
     assert summary["count"] == 0
     assert summary["min"] is None
     assert summary["max"] is None
+    assert summary["excluded_invalid_count"] == 0
 
 
 # ── State machines ────────────────────────────────────────────────────────

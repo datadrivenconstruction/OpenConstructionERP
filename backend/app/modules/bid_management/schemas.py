@@ -644,8 +644,14 @@ class SubmissionAnalyticsResponse(BaseModel):
     completeness_avg: Decimal | None = None
     valid_count: int = 0
     late_count: int = 0
-    # Price stats (min/max/average) are computed in a single reporting currency -
-    # the dominant one across the package's bids. Bids submitted in any other
+    # Price stats (min/max/average/std dev) run over the VALID bids only. A bid
+    # that failed opening (late, incomplete, currency mismatch, zero total) or
+    # was withdrawn / disqualified is held out of them and counted here, so the
+    # reader can tell "min of 5" from "min of 5 where 2 were thrown out".
+    # Always equals count - valid_count. Disjoint from excluded_off_currency.
+    excluded_invalid_count: int = 0
+    # Price stats are computed in a single reporting currency - the dominant one
+    # across the package's VALID priced bids. Valid bids submitted in any other
     # currency are excluded from those stats and counted here (FX never blends).
     currency: str = ""
     excluded_off_currency: int = 0

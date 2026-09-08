@@ -379,15 +379,39 @@ def compute_bid_summary(submissions: list[Any]) -> dict[str, Any]:
     """Aggregate stats across a list of submissions.
 
     Returns a dict ready to drop into :class:`SubmissionAnalyticsResponse`.
+
+    The headline price statistics (min, max, average, std dev) run over the
+    valid submissions only. A submission that failed bid opening (late,
+    incomplete, currency mismatch, zero total), or was withdrawn or
+    disqualified afterwards, carries ``is_valid=False`` and is held out of
+    the price maths, the same way the leveling matrix and the award already
+    hold it out. Otherwise a disqualified low bid still sets the lowest
+    price the tender board shows. The two exclusion counters are disjoint and
+    both reported, never conflated:
+
+    * ``excluded_invalid_count``: submissions with ``is_valid=False``,
+      whatever their currency. Always ``count - valid_count``.
+    * ``excluded_off_currency``: valid priced submissions in a currency
+      other than the reporting one.
+
+    ``count``, ``completeness_avg``, ``valid_count`` and ``late_count`` stay
+    over the full set, so the reader can tell "min of 5" from "min of 5
+    where 2 were thrown out".
     """
-    # Group positive bid totals by currency so we never blend (e.g. EUR vs JPY)
-    # into one min/max/avg. The dominant currency (most priced bids) is the
-    # reporting currency; bids in any other currency are excluded from the price
-    # stats and counted separately - the FX-never-blend rule the tendering
-    # leveling path also enforces. completeness / valid / late are currency-
-    # agnostic so they stay over the full set.
+    valid_subs = [s for s in submissions if getattr(s, "is_valid", False)]
+    valid_count = len(valid_subs)
+    excluded_invalid_count = len(submissions) - valid_count
+
+    # Group positive bid totals of the VALID bids by currency so we never blend
+    # (e.g. EUR vs JPY) into one min/max/avg. The dominant currency (most
+    # priced valid bids) is the reporting currency; valid bids in any other
+    # currency are excluded from the price stats and counted separately - the
+    # FX-never-blend rule the tendering leveling path also enforces. The vote
+    # runs over the valid bids only, so a rejected bid cannot decide the
+    # currency label stamped on the bids that remain. completeness / late are
+    # currency-agnostic so they stay over the full set.
     totals_by_currency: dict[str, list[float]] = {}
-    for s in submissions:
+    for s in valid_subs:
         amt = _to_decimal(getattr(s, "total_amount", 0))
         if amt <= 0:
             continue
@@ -404,7 +428,6 @@ def compute_bid_summary(submissions: list[Any]) -> dict[str, Any]:
     excluded_off_currency = sum(len(v) for c, v in totals_by_currency.items() if c != report_currency)
 
     completeness = [float(_to_decimal(getattr(s, "completeness_score", 0))) for s in submissions]
-    valid_count = sum(1 for s in submissions if getattr(s, "is_valid", False))
     late_count = sum(1 for s in submissions if getattr(s, "open_after_deadline", False))
 
     if totals:
@@ -430,6 +453,7 @@ def compute_bid_summary(submissions: list[Any]) -> dict[str, Any]:
         "completeness_avg": comp_avg,
         "valid_count": valid_count,
         "late_count": late_count,
+        "excluded_invalid_count": excluded_invalid_count,
         "currency": report_currency,
         "excluded_off_currency": excluded_off_currency,
         "mixed_currency": excluded_off_currency > 0,
@@ -2032,6 +2056,7 @@ class BidManagementService:
             completeness_avg=summary["completeness_avg"],
             valid_count=summary["valid_count"],
             late_count=summary["late_count"],
+            excluded_invalid_count=summary["excluded_invalid_count"],
             currency=summary["currency"],
             excluded_off_currency=summary["excluded_off_currency"],
             mixed_currency=summary["mixed_currency"],
