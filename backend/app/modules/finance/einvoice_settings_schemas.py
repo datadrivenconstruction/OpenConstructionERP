@@ -12,9 +12,14 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
-from app.modules.einvoice.bank import InvalidBankDetail, normalise_bic, normalise_iban
+from app.modules.einvoice.bank import (
+    InvalidBankDetail,
+    iban_countries,
+    normalise_payment_account,
+    normalise_payment_provider,
+)
 from app.modules.einvoice.rules import DIRECT_DEBIT_CODES, PAYMENT_CARD_CODES, UNTDID_4461_CODES
 
 __all__ = ["EInvoiceSettingsRead", "EInvoiceSettingsUpdate"]
@@ -95,18 +100,25 @@ class EInvoiceSettingsUpdate(_StoredFields):
 
     @field_validator("payee_iban")
     @classmethod
-    def _check_iban(cls, v: str) -> str:
-        """BT-84. The one field on this screen no later step can check."""
+    def _check_iban(cls, v: str, info: ValidationInfo) -> str:
+        """BT-84. The one field on this screen no later step can check.
+
+        The seller's country decides what may be stored, so this reads it back
+        out of ``info.data``. That works because ``seller_country_code`` is
+        declared before this field on ``_StoredFields`` and pydantic validates
+        in declaration order; a value the country validator has already refused
+        is simply absent, and an absent country is the permissive case anyway.
+        """
         try:
-            return normalise_iban(v, allow_empty=True)
+            return normalise_payment_account(v, country=info.data.get("seller_country_code", ""), allow_empty=True)
         except InvalidBankDetail as exc:
             raise ValueError(str(exc)) from exc
 
     @field_validator("payee_bic")
     @classmethod
-    def _check_bic(cls, v: str) -> str:
+    def _check_bic(cls, v: str, info: ValidationInfo) -> str:
         try:
-            return normalise_bic(v, allow_empty=True)
+            return normalise_payment_provider(v, country=info.data.get("seller_country_code", ""), allow_empty=True)
         except InvalidBankDetail as exc:
             raise ValueError(str(exc)) from exc
 
@@ -155,6 +167,13 @@ class EInvoiceSettingsRead(_StoredFields):
 
     complete: bool = False
     missing: list[str] = Field(default_factory=list)
+    #: The countries whose sellers are paid through an IBAN, sent so the screen
+    #: can label the account field for the country the user is typing rather
+    #: than for the language they read. It is served rather than held on the
+    #: client because there must be one copy of this list, and the copy that
+    #: decides what may be saved is the one in ``bank.py``. A client list would
+    #: be a second, and the two would part company the day the registry moves.
+    iban_countries: list[str] = Field(default_factory=list)
 
     @classmethod
     def from_row(cls, row: Any) -> EInvoiceSettingsRead:
@@ -164,7 +183,7 @@ class EInvoiceSettingsRead(_StoredFields):
         if not (stored.get("seller_vat_id") or stored.get("seller_tax_number") or stored.get("seller_legal_id")):
             missing.append("seller_vat_id")
         missing += _german_gaps(stored)
-        return cls(**stored, complete=not missing, missing=missing)
+        return cls(**stored, complete=not missing, missing=missing, iban_countries=iban_countries())
 
 
 #: Fields XRechnung needs that EN 16931 does not, reported on the settings screen

@@ -645,7 +645,7 @@ def _check_payment(inv: EInvoice) -> list[RuleViolation]:
                 "BR-61",
                 FATAL,
                 "This invoice says it is paid by bank transfer, so it must carry the account "
-                "to pay into. Add the IBAN in the e-invoice settings.",
+                "to pay into. Add the account number in the e-invoice settings.",
                 "BT-84",
             )
         )
@@ -655,7 +655,7 @@ def _check_payment(inv: EInvoice) -> list[RuleViolation]:
                 "OCE-PAY-01",
                 WARNING,
                 "No bank account is given, so the buyer cannot pay this invoice automatically. "
-                "Add the IBAN in the e-invoice settings.",
+                "Add the account number in the e-invoice settings.",
                 "BT-84",
             )
         )

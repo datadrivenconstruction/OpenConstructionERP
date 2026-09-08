@@ -60,6 +60,10 @@ type FormState = Record<FieldName, string>;
 export interface EInvoiceSettingsPayload extends FormState {
   complete: boolean;
   missing: string[];
+  // The countries paid through an IBAN, served by the API. Not held here: the
+  // list that decides what the server will accept has to be the same list that
+  // labels the field, or the screen asks for one thing and the save refuses it.
+  iban_countries?: string[];
 }
 
 const EMPTY: FormState = ALL_FIELDS.reduce((acc, f) => ({ ...acc, [f]: '' }), {} as FormState);
@@ -143,10 +147,42 @@ export function EInvoiceSettings() {
 
   const missing = data?.missing ?? [];
 
+  // Which instrument the payment fields name follows the seller's country, not
+  // the reader's language. A German-speaking user filing under US law is paid
+  // by routing and account number, and showing them "IBAN" in German names a
+  // field their bank does not have. The country is read from the form rather
+  // than from the saved row so the labels change as soon as it is typed, which
+  // is the same moment the server starts judging the account against it.
+  const paidByIban = useMemo(() => {
+    const known = data?.iban_countries;
+    const country = form.seller_country_code.trim().toUpperCase();
+    // Before the list arrives, and for a country outside it, the neutral label
+    // is the safe one: it is right everywhere and merely less specific in the
+    // IBAN area, whereas the wrong specific label sends somebody to the wrong
+    // field of their banking app.
+    if (!known || !country) return false;
+    return known.includes(country);
+  }, [data?.iban_countries, form.seller_country_code]);
+
+  // The two fields whose label is not a constant, mapped to the key that names
+  // what the seller is actually asked for.
+  const LABEL_KEY: Partial<Record<FieldName, string>> = {
+    payee_iban: paidByIban ? 'settings.einvoice.field.payee_iban' : 'settings.einvoice.field.payee_account_number',
+    payee_bic: paidByIban ? 'settings.einvoice.field.payee_bic' : 'settings.einvoice.field.payee_bank_code',
+  };
+
+  // The worked examples are IBAN-area notation. Outside it they would be an
+  // instruction to type the wrong thing, and there is no one national format to
+  // put in their place, so the field is simply left blank.
+  const exampleFor = (name: FieldName): string => {
+    if (!paidByIban && (name === 'payee_iban' || name === 'payee_bic')) return '';
+    return EXAMPLES[name] ?? '';
+  };
+
   const renderField = (name: FieldName) => (
     <div key={name}>
       <label htmlFor={name} className="block text-sm font-medium text-content-primary mb-1.5">
-        {t(`settings.einvoice.field.${name}`)}
+        {t(LABEL_KEY[name] ?? `settings.einvoice.field.${name}`)}
       </label>
       <input
         id={name}
@@ -155,7 +191,7 @@ export function EInvoiceSettings() {
         onChange={(e) => setField(name, e.target.value)}
         // The example is the business term's own notation, not prose, so it is
         // the same in every language and does not belong in the locale files.
-        placeholder={EXAMPLES[name] ?? ''}
+        placeholder={exampleFor(name)}
         className={
           'w-full rounded-md border border-border-light bg-surface-secondary px-2 py-1.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40' +
           (CODE_FIELDS.has(name) ? ' font-mono' : '')
@@ -224,7 +260,7 @@ export function EInvoiceSettings() {
               {t('settings.einvoice.paymentTitle')}
             </span>
           }
-          subtitle={t('settings.einvoice.paymentSubtitle')}
+          subtitle={t(paidByIban ? 'settings.einvoice.paymentSubtitle' : 'settings.einvoice.paymentSubtitleDomestic')}
         />
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">{PAYMENT_FIELDS.map(renderField)}</div>
