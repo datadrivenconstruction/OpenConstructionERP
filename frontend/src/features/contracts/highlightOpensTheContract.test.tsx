@@ -83,9 +83,70 @@ const CONTRACT: ContractItem = {
 
 const PROJECT = { id: 'p-1', name: 'Riverside', currency: 'EUR' };
 
+/** An analytics endpoint's response for a contract that has nothing recorded
+ *  yet. Each of these is an object, not a list, and the panels read into it
+ *  without guarding — rightly, because the API always sends the whole shape.
+ *  A route that answered them with `[]` would not be an empty fixture, it
+ *  would be a fixture of the wrong type, and the panel would throw during
+ *  render and take the drawer down with it. */
+const EMPTY_ANALYTICS: Record<string, unknown> = {
+  'sov-status': {
+    by_line: {},
+    totals: { scheduled: 0, billed: 0, earned: 0, paid: 0, retained: 0, percent_complete: 0 },
+  },
+  completeness: {
+    contract_id: 'ct-1',
+    status: 'passed',
+    score: 1,
+    summary: {
+      status: 'passed',
+      score: 1,
+      counts: { total: 0, passed: 0, errors: 0, warnings: 0, infos: 0, engine_errors: 0 },
+    },
+    errors: [],
+    warnings: [],
+  },
+  'eot-summary': {
+    contract_id: 'ct-1',
+    claims_count: 0,
+    pending_count: 0,
+    decided_count: 0,
+    total_days_claimed: 0,
+    total_days_granted: 0,
+    latest_revised_completion_date: null,
+  },
+  'final-account-checklist': {
+    contract_id: 'ct-1',
+    ready: false,
+    completion_percent: 0,
+    passed_count: 0,
+    applicable_count: 0,
+    total_count: 0,
+    items: [],
+  },
+  'security-coverage': {
+    contract_id: 'ct-1',
+    currency: 'EUR',
+    count: 0,
+    active_count: 0,
+    total_active_amount: 0,
+    by_status: {},
+    active_types: [],
+  },
+  'milestone-schedule': {
+    contract_id: 'ct-1',
+    currency: 'EUR',
+    count: 0,
+    scheduled_value: 0,
+    milestones: [],
+  },
+};
+
 /** Routes a GET by path. The panels the drawer opens beside itself own their
- *  own data and none of this question; the two that cannot take an empty
- *  list are refused outright, which their own error states absorb. */
+ *  own data and none of this question, so each is answered with the empty
+ *  form of its own response — a shape-blind default answers a question it was
+ *  not asked. The two that stay refused have error states of their own and
+ *  no bearing on which record the drawer opens. */
 function routeGet(): void {
   api.apiGet.mockImplementation((path: string) => {
     if (path.startsWith('/v1/projects/')) return Promise.resolve([PROJECT]);
@@ -95,7 +156,11 @@ function routeGet(): void {
     if (path.includes('/dashboard') || path.includes('retention')) {
       return Promise.reject(new Error(`not served in this test: ${path}`));
     }
+    const analytics = Object.keys(EMPTY_ANALYTICS).find((suffix) => path.endsWith(`/${suffix}`));
+    if (analytics) return Promise.resolve(EMPTY_ANALYTICS[analytics]);
     if (path.includes('?')) return Promise.resolve({ items: [], total: 0, offset: 0, limit: 200 });
+    // What is left really is a list on the wire: /lines, /parties,
+    // /securities and the template catalogue.
     return Promise.resolve([]);
   });
 }

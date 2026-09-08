@@ -95,6 +95,25 @@ const DASHBOARD = {
   eot_claims_open: 0,
 };
 
+/** The provability score the drawer's gauge asks for beside the record. It is
+ *  an object, not a list, and the gauge maps over `sub_scores` without
+ *  guarding — rightly, because the API always sends the whole shape. Answered
+ *  with `[]` it is not an empty fixture but a fixture of the wrong type: the
+ *  gauge throws during render and takes the drawer down with it, which is a
+ *  louder failure than the missing drawer it looks like from the assertion. */
+const PROVABILITY = {
+  subject_kind: 'variation_order',
+  subject_id: 'vo-1',
+  subject_ref: 'VO-001',
+  score: 0,
+  band: 'weak',
+  sub_scores: [],
+  weaknesses: [],
+  entry_count: 0,
+  date_from: null,
+  date_to: null,
+};
+
 /** Routes a GET by path. Registers answer a page; everything else an empty list. */
 function routeGet(): void {
   api.apiGet.mockImplementation((path: string) => {
@@ -103,6 +122,7 @@ function routeGet(): void {
     if (path.startsWith('/v1/variations/variation-orders/')) {
       return Promise.resolve({ items: [ORDER], total: 1, offset: 0, limit: 200 });
     }
+    if (path.endsWith('/provability')) return Promise.resolve(PROVABILITY);
     if (path.includes('?')) return Promise.resolve({ items: [], total: 0, offset: 0, limit: 200 });
     return Promise.resolve([]);
   });
@@ -117,6 +137,17 @@ function renderPage() {
       </MemoryRouter>
     </QueryClientProvider>,
   );
+}
+
+/** Waits for `text` to appear inside the open drawer and returns the element.
+ *
+ *  Scoped to the dialog because the register behind it renders the same title
+ *  in its row, and re-queried on every poll rather than held from before the
+ *  wait, because a node captured from an earlier render detaches if the tree
+ *  re-renders and the text would then never be found on it.
+ */
+function inDrawer(text: string): Promise<HTMLElement> {
+  return waitFor(() => within(screen.getByRole('dialog')).getByText(text));
 }
 
 /** Runs the updater a close handed to setSearchParams over the URL it closed from. */
@@ -144,8 +175,11 @@ describe('a deep link into the variations workspace', () => {
     search = '?tab=orders&highlight=vo-1';
     renderPage();
 
-    const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('Extra piling to grid F')).toBeTruthy();
+    // The drawer is opened from the URL on the first render, so it is on
+    // screen before the register it draws from has answered. Waiting for the
+    // dialog alone would therefore assert nothing about the record: the wait
+    // has to be for the record's own title inside it.
+    await inDrawer('Extra piling to grid F');
     expect(screen.getByRole('tab', { selected: true }).id).toBe('variations-tab-orders');
   });
 
@@ -156,8 +190,7 @@ describe('a deep link into the variations workspace', () => {
     search = '?tab=orders&highlight=vo-1';
     renderPage();
 
-    const dialog = await screen.findByRole('dialog');
-    fireEvent.click(within(dialog).getByText('Contract'));
+    fireEvent.click(await inDrawer('Contract'));
 
     expect(navigateSpy).toHaveBeenCalledWith('/contracts?highlight=ct-7');
     expect(navigateSpy).not.toHaveBeenCalledWith('/contracts');
