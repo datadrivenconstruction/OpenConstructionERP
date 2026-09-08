@@ -241,6 +241,72 @@ async def purge_demo_tagged_global_rows(
     return deleted
 
 
+def _compliance_pack_source(
+    country_code: str | None,
+    region: str | None,
+    resolved_pack: str,
+) -> str:
+    """Name the input that decided a project's compliance rule pack.
+
+    Every one of these decisions can end on the ``universal`` pack, and until
+    this was recorded they were indistinguishable once written: a project whose
+    country genuinely registers no national rule set stored exactly what a
+    project nobody gave a country to stored. The pack id alone cannot tell them
+    apart, and the settings page renders the universal pack the same way it
+    renders a national one.
+
+    ``universal`` stays the answer for a country with no pack - nine shipped
+    countries (IT, NL, PL, KR, AE, ZA, SA, AU, NZ) deliberately have no rule
+    set in the engine, and claiming national coverage they do not have would be
+    worse than the honest baseline. What changes is only that the record says
+    which input produced it, so falling back is explicit rather than incidental.
+
+    Where the country itself came from is a separate fact and stays a separate
+    key: ``country_from_pack`` marks a country the product inherited from the
+    active pack rather than one the caller typed.
+
+    Both axes get the same treatment, and the region one is easy to leave out:
+    a project whose region is "Italy" reaches the baseline for the very same
+    reason an Italian ``country_code`` does, and reporting that as ``"default"``
+    would put the conflation straight back one axis over.
+
+    Args:
+        country_code: The settled ISO 3166-1 alpha-2 country, or ``None`` when
+            neither the caller nor the active pack named one.
+        region: The free-text region label the caller sent, if any.
+        resolved_pack: The pack id ``resolve_pack`` returned for those two.
+
+    Returns:
+        One of ``"country"`` (the country named a pack), ``"region"`` (the
+        region label named one), ``"country_without_pack"`` (a country was
+        given and produced no pack, so the baseline), ``"region_without_pack"``
+        (same, for a region label no pack claims) or ``"default"`` (nothing
+        named a jurisdiction at all).
+    """
+    from app.modules.contracts.compliance_packs import (
+        DEFAULT_PACK_ID,
+        suggest_pack_for_country,
+        suggest_pack_for_region,
+    )
+
+    if suggest_pack_for_country(country_code):
+        return "country"
+    # The country produced nothing, which is two situations: it registers no
+    # pack, or it was not a usable alpha-2 at all (the schema caps the field's
+    # length and does not floor it) and ``resolve_pack`` fell through to the
+    # region. Which one happened is readable from the answer itself rather than
+    # by re-deriving the resolver's rules here: the region decided only if the
+    # pack it suggests on its own is the pack that actually came back.
+    named_region = (region or "").strip()
+    if named_region and resolved_pack != DEFAULT_PACK_ID and resolved_pack == suggest_pack_for_region(named_region):
+        return "region"
+    if country_code:
+        return "country_without_pack"
+    if named_region:
+        return "region_without_pack"
+    return "default"
+
+
 class ProjectService:
     """Business logic for project operations."""
 
@@ -409,15 +475,86 @@ class ProjectService:
             project_code = await self._generate_project_code()
             reserved_code = project_code
 
+        # ── The market, and only then the packs the market decides ─────────
+        #
+        # The order below is the whole point of this block and it used to be
+        # the other way round. The compliance pack was resolved from
+        # ``data.country_code``, and the country was inherited from the active
+        # pack forty lines further on, after the project object already
+        # existed. A create that names no country - which is every create from
+        # the UI form, since it posts ``region`` and never sets
+        # ``country_code`` - therefore resolved its pack against ``None``,
+        # landed on the cross-market baseline, and was then stamped with the
+        # pack's country. The stored row said Hungary and enforced nothing
+        # Hungarian, and the settings page renders the universal pack exactly
+        # like a national one, so nothing anywhere said so.
+        #
+        # So the country is settled first, from the caller and then from the
+        # active pack, and every decision under it reads the settled value.
+
+        # One lookup for the three things that need the active pack (rule
+        # sets, methodology, market). Fail-soft: creation must never break on
+        # a pack lookup, which is why a broken pack yields ``None`` here
+        # rather than an exception the caller sees.
+        active_pack = None
+        try:
+            from app.core.partner_pack.discovery import get_active_pack
+
+            active_pack = get_active_pack()
+        except Exception:  # noqa: BLE001 - creation must never break on pack lookup
+            active_pack = None
+
+        # Metadata the pack and the resolution contribute, merged onto the
+        # project once it exists.
+        pack_meta: dict[str, str] = {}
+        country_code = (data.country_code or "").strip().upper() or None
+
+        if active_pack is not None:
+            try:
+                # Inherit the pack's country, and only when the creator named
+                # none. A country pack is an unambiguous statement of market,
+                # and without this the pack fitted out the methodology cascade
+                # while the country column stayed unset, so the bill's markup
+                # region, the working calendar, the compliance-pack resolver
+                # and the measurement system all still answered "no opinion" on
+                # a workspace that had just been told which country it was for.
+                # An explicit choice always wins: this only ever fills a blank.
+                #
+                # 'XX' is the manifest's own cross-region marker, used by the
+                # sector packs, and means the opposite of a country. Anything
+                # that is not a clean alpha-2 is left alone rather than
+                # normalised, because a pack that cannot state its market
+                # plainly should not be guessed at. ``market_country_code``
+                # owns that judgement; reading ``metadata["country"]`` here
+                # would be a second definition of what counts as a market.
+                #
+                # Recorded in metadata as well as written to the column,
+                # because a country the product filled in is not the same fact
+                # as a country the user typed, and v3319 exists precisely so
+                # those two stop being the same row.
+                if not (data.country_code or "").strip():
+                    _pack_country = getattr(active_pack, "market_country_code", None)
+                    if _pack_country:
+                        country_code = _pack_country
+                        pack_meta["country_from_pack"] = _pack_country
+            except Exception:  # noqa: BLE001 - creation must never break on pack lookup
+                pass
+
         # Compliance rule packs (Item #27). When the caller left the default
         # ``["universal"]`` we upgrade it to a jurisdiction-matched pack so a
         # DACH / UK / US project gets its gate out of the box; an explicit
         # non-default choice is always respected verbatim.
         #
-        # Resolved from ``country_code`` (ISO 3166-1 alpha-2, a controlled
-        # value) with ``region`` as a fallback only. It used to read the
-        # free-text region alone, by substring, so the pack a project enforced
-        # depended on how its region label was spelled.
+        # Resolved from the settled ``country_code`` (ISO 3166-1 alpha-2, a
+        # controlled value) with ``region`` as a fallback only. It used to read
+        # the free-text region alone, by substring, so the pack a project
+        # enforced depended on how its region label was spelled.
+        #
+        # Note that an inherited country now outranks a region label, which is
+        # a change of answer for a create that named a region and no country
+        # while a country pack was active. That is ``resolve_pack``'s stated
+        # contract - the ISO column decides whenever it holds a usable code -
+        # and the pack's market is a controlled value where the region is not.
         from app.modules.contracts.compliance_packs import (
             DEFAULT_PACK_ID,
             resolve_pack,
@@ -425,19 +562,27 @@ class ProjectService:
         )
 
         requested_packs = valid_pack_ids(list(data.compliance_rule_packs or []))
-        if not requested_packs or requested_packs == [DEFAULT_PACK_ID]:
-            requested_packs = [resolve_pack(data.country_code, data.region)]
+        if requested_packs and requested_packs != [DEFAULT_PACK_ID]:
+            pack_meta["compliance_pack_source"] = "explicit"
+        else:
+            requested_packs = [resolve_pack(country_code, data.region)]
+            pack_meta["compliance_pack_source"] = _compliance_pack_source(country_code, data.region, requested_packs[0])
+            if pack_meta["compliance_pack_source"] == "country_without_pack":
+                logger.info(
+                    "Project create: country %s registers no compliance pack, falling back to %s",
+                    country_code,
+                    requested_packs[0],
+                )
 
         # A pack that is active at creation time widens what the new project
         # validates against. Additive: whatever the caller asked for is kept,
         # the pack's sets are appended, and a set the engine does not register
         # is dropped rather than written - a project must be creatable even
-        # when a pack is wrong. Fail-soft, like the pack lookup below.
+        # when a pack is wrong. Fail-soft, like the pack lookup above.
         try:
             from app.core.partner_pack.apply import inherited_rule_sets
-            from app.core.partner_pack.discovery import get_active_pack
 
-            _rule_sets = inherited_rule_sets(data.validation_rule_sets, get_active_pack())
+            _rule_sets = inherited_rule_sets(data.validation_rule_sets, active_pack)
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
             _rule_sets = list(data.validation_rule_sets or [])
 
@@ -458,7 +603,7 @@ class ProjectService:
             client_id=data.client_id,
             parent_project_id=data.parent_project_id,
             address=data.address,
-            country_code=data.country_code,
+            country_code=country_code,
             contract_value=data.contract_value,
             planned_start_date=data.planned_start_date,
             planned_end_date=data.planned_end_date,
@@ -480,49 +625,21 @@ class ProjectService:
         # untagged project). Deactivating the pack untags it again. Fail-soft:
         # a pack-lookup error never blocks project creation.
         try:
-            from app.core.partner_pack.discovery import get_active_pack
-
-            _pack = get_active_pack()
-            if _pack is not None:
-                _pack_meta: dict[str, str] = {"partner_pack": _pack.slug}
+            if active_pack is not None:
+                pack_meta["partner_pack"] = active_pack.slug
                 # Inherit the pack's estimating methodology so a project created
                 # while a pack is active opens with the partner's cascade, not
                 # the flat international default. Builtin template slug only,
                 # validated against the pure templates catalogue (no DB import).
-                _meth = getattr(_pack, "default_methodology", None)
+                _meth = getattr(active_pack, "default_methodology", None)
                 if _meth:
                     from app.modules.methodology.templates import TEMPLATES_BY_SLUG
 
                     if _meth in TEMPLATES_BY_SLUG:
-                        _pack_meta["methodology_slug"] = _meth
-                # Inherit the pack's country too, and only when the creator
-                # named none. A country pack is an unambiguous statement of
-                # market, and without this the pack fitted out the methodology
-                # cascade while the country column stayed unset, so the bill's
-                # markup region, the working calendar, the compliance-pack
-                # resolver and the measurement system all still answered "no
-                # opinion" on a workspace that had just been told which country
-                # it was for. An explicit choice always wins: this only ever
-                # fills a blank.
-                #
-                # 'XX' is the manifest's own cross-region marker, used by the
-                # sector packs, and means the opposite of a country. Anything
-                # that is not a clean alpha-2 is left alone rather than
-                # normalised, because a pack that cannot state its market
-                # plainly should not be guessed at.
-                #
-                # Recorded in metadata as well as written to the column,
-                # because a country the product filled in is not the same fact
-                # as a country the user typed, and v3319 exists precisely so
-                # those two stop being the same row.
-                if not (data.country_code or "").strip():
-                    _pack_country = getattr(_pack, "market_country_code", None)
-                    if _pack_country:
-                        project.country_code = _pack_country
-                        _pack_meta["country_from_pack"] = _pack_country
-                project.metadata_ = merge_metadata(project.metadata_, _pack_meta)
+                        pack_meta["methodology_slug"] = _meth
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
             pass
+        project.metadata_ = merge_metadata(project.metadata_, pack_meta)
 
         try:
             project = await self.repo.create(project)

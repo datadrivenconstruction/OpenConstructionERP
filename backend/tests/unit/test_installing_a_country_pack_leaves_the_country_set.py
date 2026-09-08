@@ -116,6 +116,17 @@ def _country_assignment_guards() -> list[str]:
     respected. Collecting them all lets the assertion ask the real question:
     somewhere on the way in, does anything consult what the caller asked for.
 
+    The statement is found by what it *reads* - the pack's
+    ``market_country_code`` - rather than by where it lands. It used to be
+    found by its target, ``project.country_code``, and that stopped being the
+    target when the country was moved ahead of the compliance-pack resolution:
+    the market is now settled into a local that the ``Project`` constructor is
+    given, because resolving the pack from a country the method had not decided
+    yet is what made a Hungarian project enforce the cross-market baseline.
+    Keying on the target would have made this gate red for a change that
+    strengthened exactly the property it guards, and keying on the read asks
+    the same question of either shape.
+
     Finding no assignment at all is a failure rather than a skip: it means the
     inheritance is gone, or moved somewhere this file no longer watches.
     """
@@ -128,7 +139,7 @@ def _country_assignment_guards() -> list[str]:
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
             continue
-        if not any(isinstance(t, ast.Attribute) and ast.unparse(t) == "project.country_code" for t in node.targets):
+        if "market_country_code" not in ast.unparse(node.value):
             continue
         conditions: list[str] = []
         walker: ast.AST | None = parents.get(node)
@@ -139,8 +150,9 @@ def _country_assignment_guards() -> list[str]:
         return conditions
 
     raise AssertionError(
-        "no statement in ProjectService.create_project assigns project.country_code. Either the "
-        "pack inheritance is gone, or it moved somewhere this gate no longer watches."
+        "no statement in ProjectService.create_project reads the active pack's "
+        "market_country_code. Either the pack inheritance is gone, or it moved somewhere this "
+        "gate no longer watches."
     )
 
 

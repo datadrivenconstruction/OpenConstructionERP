@@ -348,10 +348,12 @@ class ProjectCreate(BaseModel):
         default=None,
         max_length=2,
         description="ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). "
-        "Drives the AIA G702/G703 payment-application gate (US/CA/AU only). "
-        "Omitting it does not leave the project without a country: the stored "
-        "column is not nullable and defaults to DE, so an omitted country is "
-        "kept as Germany and read back as though it had been chosen.",
+        "Drives the AIA G702/G703 payment-application gate (US/CA/AU only) and "
+        "decides which compliance rule pack the new project enforces. Since "
+        "revision v3319 the stored column is nullable and no longer defaults to "
+        "DE, so omitting this leaves the project with no country rather than "
+        "with Germany - unless a country pack is active, in which case the "
+        "pack's market fills the blank and is recorded as inherited.",
     )
 
     @field_validator("country_code", mode="after")
