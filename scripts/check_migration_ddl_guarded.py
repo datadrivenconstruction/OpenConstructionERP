@@ -190,11 +190,7 @@ def additive_ddl(tree: ast.Module) -> set[str]:
             # Only string literals inside the call: a variable holding SQL is
             # out of reach of an AST and out of scope for a shallow check.
             for sub in ast.walk(node):
-                if (
-                    isinstance(sub, ast.Constant)
-                    and isinstance(sub.value, str)
-                    and RAW_DDL.search(sub.value)
-                ):
+                if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and RAW_DDL.search(sub.value):
                     found.add(RAW_LABEL)
     return found
 
@@ -244,21 +240,14 @@ def stale_exemptions(
     stale = []
     for name in sorted(known):
         if name not in present:
-            stale.append(
-                f"{name}: listed as known-unguarded but no such revision exists"
-            )
+            stale.append(f"{name}: listed as known-unguarded but no such revision exists")
         elif name not in still_unguarded:
-            stale.append(
-                f"{name}: listed as known-unguarded but it is guarded now, drop the entry"
-            )
+            stale.append(f"{name}: listed as known-unguarded but it is guarded now, drop the entry")
     return stale
 
 
 def read_versions() -> list[tuple[str, str]]:
-    return [
-        (path.name, path.read_text(encoding="utf-8"))
-        for path in sorted(VERSIONS.glob("*.py"))
-    ]
+    return [(path.name, path.read_text(encoding="utf-8")) for path in sorted(VERSIONS.glob("*.py"))]
 
 
 def main() -> int:
@@ -281,9 +270,7 @@ def main() -> int:
         f"({result.with_ddl - len(result.unguarded)} ask the database first), "
         f"{result.without_ddl} perform none, {len(result.unparseable)} unparseable"
     )
-    for verb, count in sorted(
-        result.verb_users.items(), key=lambda kv: (-kv[1], kv[0])
-    ):
+    for verb, count in sorted(result.verb_users.items(), key=lambda kv: (-kv[1], kv[0])):
         print(f"    {count:4d}  {verb}")
 
     failed = False
@@ -322,9 +309,7 @@ def main() -> int:
         print(f"  UNPARSEABLE {line}", file=sys.stderr)
         failed = True
 
-    new_unguarded = [
-        (name, verbs) for name, verbs in result.unguarded if name not in KNOWN_UNGUARDED
-    ]
+    new_unguarded = [(name, verbs) for name, verbs in result.unguarded if name not in KNOWN_UNGUARDED]
     if new_unguarded:
         print(
             "\nThese revisions add schema without asking whether it is already there.\n"

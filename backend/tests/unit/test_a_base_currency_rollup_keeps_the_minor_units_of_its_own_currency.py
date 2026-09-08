@@ -106,9 +106,7 @@ def test_an_fx_converted_rollup_is_rounded_in_the_currency_it_lands_in() -> None
     is read from the amount's own currency rather than from the base it was
     converted into.
     """
-    total, missing = _convert_to_base(
-        {"USD": "1000"}, base_currency="KWD", fx_rates_map={"USD": "0.3061234"}
-    )
+    total, missing = _convert_to_base({"USD": "1000"}, base_currency="KWD", fx_rates_map={"USD": "0.3061234"})
 
     assert missing == [], f"a configured rate should not be reported missing: {missing}"
     assert _places(total) == 3, f"converted to {total!r}, a dinar carries three places"
@@ -165,8 +163,7 @@ def test_every_registered_currency_is_rounded_by_the_resolver_and_not_a_literal(
     population = len(CURRENCIES)
     spread = sorted({-money_quantum(code).as_tuple().exponent for code in CURRENCIES})
     assert not disagreements, (
-        f"{len(disagreements)} of {population} registered currencies "
-        f"disagree with money_quantum: {disagreements}"
+        f"{len(disagreements)} of {population} registered currencies disagree with money_quantum: {disagreements}"
     )
     # Printed rather than merely counted: the population is the part of a green
     # verdict that a narrowed gate cannot fake.

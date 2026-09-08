@@ -59,9 +59,7 @@ def test_a_cvr_cost_head_refuses_a_comma_decimal(raw: str) -> None:
 @pytest.mark.parametrize("raw,expected", DOT_SPELLINGS)
 def test_the_dot_decimal_the_frontend_sends_is_accepted(raw: str, expected: Decimal) -> None:
     """The other direction, so this cannot pass by rejecting everything."""
-    allowance = AllowanceCreate(
-        label="Provisional sum", allowance_type="provisional_sum", held_amount=raw
-    )
+    allowance = AllowanceCreate(label="Provisional sum", allowance_type="provisional_sum", held_amount=raw)
     assert allowance.held_amount == expected
 
     line = CvrLineCreate(cost_code="1.1", description="Groundworks", cost_to_date=raw)
