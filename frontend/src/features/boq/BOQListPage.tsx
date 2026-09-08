@@ -637,6 +637,12 @@ export function BOQListPage() {
   // for someone who has not opened a BOQ yet - the estimator who just received
   // an X83 and has nothing to open - is here (Issue #439).
   const isGaebExchangeEnabled = useModuleStore((s) => s.isModuleEnabled('gaeb-exchange'));
+  // Regional Exchange is the same shape of surface for the other twenty cost
+  // standards, and it kept no sidebar entry either (#217 - twenty country rows
+  // would swamp the menu). Until this link existed, none of its twenty routes
+  // was reachable by clicking anywhere in the app; the module's hub page picks
+  // the country and hands over to the route that was already there.
+  const isRegionalExchangeEnabled = useModuleStore((s) => s.isModuleEnabled('regional-exchange'));
   const seedDemoPresence = usePresenceStore((s) => s.seedDemoPresence);
   useEffect(() => {
     if (isCollabEnabled && allBoqs && allBoqs.length > 0) {
@@ -646,16 +652,16 @@ export function BOQListPage() {
 
   /* ── Filter + Sort ────────────────────────────────────────────────── */
 
+  // Estimate names are user data, so the name column has to order them the
+  // way this reader's language does rather than by UTF-16 code unit.
+  const compareNames = useNameCollator();
+
   const filtered = useMemo(() => {
     if (!allBoqs) return [];
     let list = [...allBoqs];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-  // Estimate names are user data, so the name column has to order them the
-  // way this reader's language does rather than by UTF-16 code unit.
-  const compareNames = useNameCollator();
-
       list = list.filter(
         (b) =>
           b.name.toLowerCase().includes(q) ||
@@ -900,6 +906,17 @@ export function BOQListPage() {
                         ? `/gaeb-exchange?project_id=${encodeURIComponent(activeProjectId)}&tab=import`
                         : '/gaeb-exchange?tab=import',
                     ),
+                },
+              ]
+            : []),
+          // No project_id on this one: the hub picks a country before there is
+          // a screen to scope, and each country route reads the project from
+          // the same context anyway.
+          ...(isRegionalExchangeEnabled
+            ? [
+                {
+                  label: t('boq.preset_regional', { defaultValue: 'Regional standards' }),
+                  onClick: () => navigate('/regional-exchange'),
                 },
               ]
             : []),
