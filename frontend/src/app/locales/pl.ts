@@ -13392,7 +13392,7 @@ const resource = {
     "compliance.confirm.delete": "Usuń ten zgodność dokument?",
     "compliance.status.active": "Aktywny",
     "compliance.status.not_yet_effective": "Jeszcze nie obowiązuje",
-    "compliance.status.expiring_soon": "Expiring wkrótce",
+    "compliance.status.expiring_soon": "Wygasa wkrótce",
     "compliance.status.expired": "Wygasłe",
     "compliance.status.cancelled": "Anulowane",
     "compliance.status.void": "Unieważniony",
