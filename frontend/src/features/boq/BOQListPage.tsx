@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
@@ -488,14 +488,23 @@ export function BOQListPage() {
       return saved.status ?? '';
     } catch { return ''; }
   });
+  // The project the user picked in the dropdown, and only that. A project the
+  // route pins (/projects/:projectId/boq) or the one active in the top bar is
+  // a scope this page was opened under, not a choice made in its toolbar, and
+  // it never enters this state: the state is persisted, so a scope written
+  // here outlived the page that imposed it, and /boq opened after one
+  // project's estimates listed that project alone under a header that still
+  // counted every estimate.
   const [projectFilter, setProjectFilter] = useState(() => {
-    if (projectIdFromUrl) return projectIdFromUrl;
-    if (activeProjectId) return activeProjectId;
     try {
       const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
       return saved.project ?? '';
     } catch { return ''; }
   });
+  // On a route-scoped page the fetch below is already narrowed to that
+  // project, so the persisted choice does not apply on top of it: a project
+  // remembered from /boq would empty another project's page.
+  const userProjectFilter = projectIdFromUrl ? '' : projectFilter;
   const [sortField, setSortField] = useState<SortField>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
@@ -510,9 +519,16 @@ export function BOQListPage() {
   });
   const [page, setPage] = useState(1);
 
-  // Sync project filter when user switches active project in the header
+  // Switching the active project in the header while this page is open is a
+  // choice made with the page in view, so the filter follows it. The project
+  // that was already active when the page mounted is not: it used to be copied
+  // into the persisted filter on every mount, which is the leak above.
+  const activeProjectAtMount = useRef(activeProjectId);
   useEffect(() => {
-    if (activeProjectId) setProjectFilter(activeProjectId);
+    if (activeProjectId && activeProjectId !== activeProjectAtMount.current) {
+      setProjectFilter(activeProjectId);
+    }
+    activeProjectAtMount.current = activeProjectId;
   }, [activeProjectId]);
 
   // Persist filters to localStorage
@@ -672,8 +688,8 @@ export function BOQListPage() {
     if (statusFilter) {
       list = list.filter((b) => b.status === statusFilter);
     }
-    if (projectFilter) {
-      list = list.filter((b) => b.project_id === projectFilter);
+    if (userProjectFilter) {
+      list = list.filter((b) => b.project_id === userProjectFilter);
     }
 
     list.sort((a, b) => {
@@ -688,9 +704,9 @@ export function BOQListPage() {
     });
 
     return list;
-  }, [allBoqs, searchQuery, statusFilter, projectFilter, sortField, sortAsc, compareNames]);
+  }, [allBoqs, searchQuery, statusFilter, userProjectFilter, sortField, sortAsc, compareNames]);
 
-  const isFiltered = !!(searchQuery || statusFilter || projectFilter);
+  const isFiltered = !!(searchQuery || statusFilter || userProjectFilter);
 
   // Reset page when filters/search/sort change
   useEffect(() => {
@@ -853,7 +869,7 @@ export function BOQListPage() {
             : t('boq.list_subtitle_count', {
                 defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
                 boqCount: allBoqs?.length ?? 0,
-                projectCount: projects?.length ?? 0,
+                projectCount: scopedProjects?.length ?? 0,
               })
         }
         actions={
@@ -873,7 +889,7 @@ export function BOQListPage() {
               size="sm"
               icon={<Plus size={14} />}
               onClick={() => {
-                const pid = activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
+                const pid = projectIdFromUrl || activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
                 setCreateModalProjectId(pid);
                 setCreateModalOpen(true);
               }}
@@ -1008,7 +1024,7 @@ export function BOQListPage() {
             </div>
 
             {/* Project filter */}
-            {uniqueProjects.length > 1 && (
+            {!projectIdFromUrl && uniqueProjects.length > 1 && (
               <div className="relative">
                 <select
                   value={projectFilter}
@@ -1101,7 +1117,7 @@ export function BOQListPage() {
         // yet", hiding the real auth/permission/server error — surface a
         // recovery affordance instead.
         <RecoveryCard error={projErrorValue} onRetry={() => refetchProjects()} />
-      ) : filtered.length === 0 && (searchQuery || statusFilter || projectFilter) ? (
+      ) : filtered.length === 0 && (searchQuery || statusFilter || userProjectFilter) ? (
         <EmptyState
           icon={<Search size={28} strokeWidth={1.5} />}
           title={t('boq.no_results', { defaultValue: 'No matching estimates' })}
@@ -1340,7 +1356,7 @@ export function BOQListPage() {
             {/* Summary footer */}
             <p className="text-sm text-content-tertiary">
               {t('boq.pagination_range', { defaultValue: '{{from}}–{{to}} of {{total}} estimates', from: (page - 1) * ITEMS_PER_PAGE + 1, to: Math.min(page * ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
-              {(searchQuery || statusFilter || projectFilter) && filtered.length !== (allBoqs?.length ?? 0)
+              {(searchQuery || statusFilter || userProjectFilter) && filtered.length !== (allBoqs?.length ?? 0)
                 ? ` (${t('boq.filtered_from', { defaultValue: 'filtered from {{total}}', total: allBoqs?.length ?? 0 })})`
                 : ''}
             </p>
