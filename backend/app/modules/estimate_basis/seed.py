@@ -226,16 +226,21 @@ async def _priced_position_count(session: AsyncSession, project_id: uuid.UUID) -
 
 
 async def _base_date(session: AsyncSession, project_id: uuid.UUID) -> str | None:
-    """The estimate's stated base date, taken from the project's own BOQ."""
+    """The estimate's stated base date, taken from the project's own BOQ.
+
+    Ranked by :func:`app.modules.boq.base_date.latest_base_date` rather than by
+    ``max()`` in SQL: ``base_date`` is free text holding a day, a month, a
+    quarter or a year, and those strings do not sort in the order their dates
+    run - ``"2026-Q1"`` sorts above ``"2026-12-01"``.
+    """
     try:
+        from app.modules.boq.base_date import latest_base_date
         from app.modules.boq.models import BOQ
 
-        stmt = select(func.max(BOQ.base_date)).where(BOQ.project_id == project_id)
-        value = (await session.execute(stmt)).scalar()
+        stmt = select(BOQ.base_date).where(BOQ.project_id == project_id, BOQ.base_date.is_not(None))
+        return latest_base_date((await session.execute(stmt)).scalars().all())
     except Exception:
         return None
-    text = str(value or "").strip()
-    return text or None
 
 
 def _items(raw: list | None, category: str) -> list[QualificationItem]:
