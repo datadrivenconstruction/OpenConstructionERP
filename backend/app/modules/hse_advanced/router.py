@@ -158,10 +158,17 @@ async def list_investigations(
 async def create_investigation(
     data: InvestigationCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.create")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> InvestigationResponse:
     """Create a root-cause investigation for an incident."""
+    # The investigation inherits its project from the incident it names, so
+    # that incident is where the boundary lives. Without this the create
+    # siblings' rule (create_jsa / create_audit / create_capa all verify the
+    # target project) would not hold here, and any editor could file a probe
+    # against another project's incident by quoting its UUID.
+    await _guard_project(await service.incident_project_id(data.incident_ref), user_id, session)
     obj = await service.create_investigation(data, user_id=user_id)
     return InvestigationResponse.model_validate(obj)
 
@@ -187,9 +194,17 @@ async def get_investigation(
 async def update_investigation(
     item_id: uuid.UUID,
     data: InvestigationUpdate,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.update")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> InvestigationResponse:
+    # IDOR guard, same shape as GET /{item_id}: the read side already
+    # resolves the owning project through the incident, and the mutators
+    # must not be a way around it. Guarded before the service call so the
+    # immutability 409 cannot confirm the row to a caller who may not see it.
+    existing = await service.get_investigation(item_id)
+    await _guard_project(await service.investigation_project_id(existing), user_id, session)
     obj = await service.update_investigation(item_id, data)
     return InvestigationResponse.model_validate(obj)
 
@@ -198,9 +213,14 @@ async def update_investigation(
 async def complete_investigation(
     item_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.close_investigation")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> InvestigationResponse:
+    # Closure is a compliance-bearing write on another project's regulatory
+    # record, so it needs the project check as much as the read does.
+    existing = await service.get_investigation(item_id)
+    await _guard_project(await service.investigation_project_id(existing), user_id, session)
     obj = await service.complete_investigation(item_id, user_id=user_id)
     return InvestigationResponse.model_validate(obj)
 
@@ -209,9 +229,12 @@ async def complete_investigation(
 async def abandon_investigation(
     item_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.close_investigation")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> InvestigationResponse:
+    existing = await service.get_investigation(item_id)
+    await _guard_project(await service.investigation_project_id(existing), user_id, session)
     obj = await service.abandon_investigation(item_id, user_id=user_id)
     return InvestigationResponse.model_validate(obj)
 
@@ -1481,10 +1504,16 @@ async def list_corrective_actions(
 )
 async def create_corrective_action(
     data: CorrectiveActionCreate,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.create")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> CorrectiveActionResponse:
     """Open a new corrective action against an incident (status=pending)."""
+    # Slim corrective actions carry no project_id either - the incident they
+    # are opened against decides the project, so the boundary is checked there
+    # before we write into somebody else's incident.
+    await _guard_project(await service.incident_project_id(data.incident_id), user_id, session)
     obj = await service.create_corrective_action(
         incident_id=data.incident_id,
         description=data.description,
@@ -1502,6 +1531,7 @@ async def transition_corrective_action(
     ca_id: uuid.UUID,
     payload: CATransitionRequest,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("hse_advanced.update")),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> CorrectiveActionResponse:
@@ -1510,6 +1540,11 @@ async def transition_corrective_action(
     Allowed: ``pending → in_progress → verified → closed``. Any other
     transition is rejected with HTTP 409.
     """
+    # IDOR guard, resolved through the incident the action hangs off, the
+    # way the list route above resolves project scope. Runs before the FSM
+    # so an invalid-hop 409 cannot confirm a foreign row's existence.
+    existing = await service.get_corrective_action(ca_id)
+    await _guard_project(await service.incident_project_id(existing.incident_id), user_id, session)
     obj = await service.transition_corrective_action(
         ca_id,
         to_status=payload.to_status,

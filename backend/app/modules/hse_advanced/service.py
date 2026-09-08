@@ -617,18 +617,27 @@ class HSEAdvancedService:
             raise HTTPException(404, "Investigation not found")
         return obj
 
+    async def incident_project_id(self, incident_ref: uuid.UUID) -> uuid.UUID | None:
+        """Resolve the owning project of a safety incident.
+
+        Investigations and the slim corrective actions carry no ``project_id``
+        column of their own - both are keyed to the safety module's incident
+        instead. The router resolves their project through this link so it can
+        apply the same project-access (IDOR) guard the JSA / permit / audit /
+        CAPA routes use. Returns ``None`` when the incident cannot be resolved,
+        which the guard treats as "skip" rather than 500-ing on a dangling
+        reference.
+        """
+        stmt = select(SafetyIncident.project_id).where(SafetyIncident.id == incident_ref)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
     async def investigation_project_id(self, obj: HSEIncidentInvestigation) -> uuid.UUID | None:
         """Resolve the owning project for an investigation.
 
         ``HSEIncidentInvestigation`` carries no ``project_id`` column - it is
-        keyed by ``incident_ref`` to the safety module's incident. We resolve
-        the project through that link so the router can apply the same
-        project-access (IDOR) guard the JSA / permit / audit / CAPA reads use.
-        Returns ``None`` when the incident cannot be resolved, which the
-        guard treats as "skip" rather than 500-ing on a dangling reference.
+        keyed by ``incident_ref`` to the safety module's incident.
         """
-        stmt = select(SafetyIncident.project_id).where(SafetyIncident.id == obj.incident_ref)
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        return await self.incident_project_id(obj.incident_ref)
 
     async def update_investigation(self, item_id: uuid.UUID, data: InvestigationUpdate) -> HSEIncidentInvestigation:
         obj = await self.get_investigation(item_id)
