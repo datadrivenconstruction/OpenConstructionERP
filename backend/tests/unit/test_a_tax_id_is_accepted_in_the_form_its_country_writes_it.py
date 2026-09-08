@@ -50,7 +50,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from app.modules.subcontractors.service import _TAX_ID_RULES, validate_tax_id
+from app.modules.subcontractors.tax_id import _TAX_ID_RULES, validate_tax_id
 
 
 @dataclass(frozen=True)
@@ -570,14 +570,13 @@ def test_the_form_a_country_writes_its_number_in_is_accepted(case: TaxIdCase, sp
 def test_every_spelling_of_one_number_is_stored_as_the_same_value(case: TaxIdCase):
     """One number, however it was written, comes back as one canonical value.
 
-    What this pins is the validation endpoint's answer, and only that. It is
-    worth being exact about the limit, because the obvious next sentence is
-    wrong: ``create_subcontractor`` stores ``data.tax_id`` as it was typed and
-    ``find_by_tax_id`` compares that column for exact equality, so the unique
-    index on ``(country, tax_id)`` guards the raw string and the canonical form
-    computed here is never written. Two spellings of one number are two rows
-    today whatever this returns. Normalising on the write path is what would
-    change that, and it is not something a test may decide.
+    What this pins is the validation endpoint's answer, and only that.
+    ``create_subcontractor`` still stores ``data.tax_id`` as it was typed, and
+    the value asserted here is never written anywhere. What keeps two spellings
+    of one number from becoming two rows is the separate identity key,
+    ``canonical_tax_id``, which ``find_by_tax_id`` compares instead of the raw
+    column; that half lives in
+    ``test_one_tax_number_is_one_subcontractor_however_it_is_spelled.py``.
     """
     stored = {validate_tax_id(case.country, spelling).tax_id_normalised for spelling in case.written}
     assert stored == {case.canonical}
@@ -614,14 +613,15 @@ class TestTheSwissSuffixIsNamedInTheLanguageOfTheRegion:
         assert result.standard == "CH UID"
 
     def test_the_suffix_is_kept_rather_than_folded_into_one_spelling(self):
-        """A known split, asserted so it is a decision and not a surprise.
+        """The validator echoes the suffix it read; only the identity key folds it.
 
-        The three suffixes are accepted, but each is stored as it was written,
-        so the same firm entered from a German letter and from a French one is
-        two rows. Folding them onto one spelling would also fold the bare UID
-        onto the VAT number, and those two genuinely differ: the suffix is what
-        says the firm is in the VAT register at all. Norway has the identical
-        shape with MVA. Collapsing them is a product decision, not a test one.
+        The three suffixes are accepted and each comes back as it was written,
+        so the form can show what was understood and the stored value keeps the
+        register mark the letterhead carried. Whether the same firm entered
+        from a German letter and from a French one is one row is decided by
+        ``canonical_tax_id`` in the register, not here: that key drops the
+        suffix, and Norway's MVA with it, and is pinned in
+        ``test_one_tax_number_is_one_subcontractor_however_it_is_spelled.py``.
         """
         stored = {validate_tax_id("CH", f"CHE-123.456.789 {s}").tax_id_normalised for s in self._SUFFIXES}
         assert stored == {"E123456789MWST", "E123456789TVA", "E123456789IVA"}

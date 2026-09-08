@@ -27,6 +27,7 @@ from app.modules.subcontractors.models import (
     SubcontractorRating,
     WorkPackage,
 )
+from app.modules.subcontractors.tax_id import canonical_tax_id, tax_id_digit_run
 
 
 class _BaseRepo:
@@ -128,22 +129,38 @@ class SubcontractorRepository(_BaseRepo):
         *,
         country: str | None = None,
     ) -> Subcontractor | None:
-        """Look up an active subcontractor by ``(country, tax_id)``.
+        """Look up an active subcontractor holding the same tax number.
 
-        Used by ``SubcontractorService.create_subcontractor`` for the
-        happy-path 409 - backed by the partial unique index added in
-        ``v3099_subcontractors_unique_tax_id``.
+        "Same" is decided by :func:`canonical_tax_id`, not by the stored
+        string. ``tax_id`` is kept as typed, so ``CHE-123.456.789 MWST`` and
+        ``che123456789`` sit in the column as two spellings of one number, and
+        an equality on the column used to call them two firms. The query
+        narrows to rows whose digit run matches - every canonicalisation keeps
+        the digits and their order, so the run is a superset key SQL can
+        compute - and the exact comparison happens on the identity key here.
+
+        Used by ``SubcontractorService`` for the happy-path 409 on create and
+        on a PATCH that changes the number. The partial unique index added in
+        ``v3099_subcontractors_unique_tax_id`` stays the backstop for the
+        exact-string race.
         """
         if not tax_id:
             return None
+        country_u = country.upper()[:2] if country else None
+        key = canonical_tax_id(country_u, tax_id)
+        if not key:
+            return None
         stmt = select(Subcontractor).where(
-            Subcontractor.tax_id == tax_id,
             Subcontractor.is_active.is_(True),
+            func.regexp_replace(Subcontractor.tax_id, r"\D", "", "g") == tax_id_digit_run(tax_id),
         )
-        if country:
-            stmt = stmt.where(Subcontractor.country == country.upper()[:2])
-        stmt = stmt.limit(1)
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        if country_u:
+            stmt = stmt.where(Subcontractor.country == country_u)
+        rows = (await self.session.execute(stmt)).scalars().all()
+        for row in rows:
+            if canonical_tax_id(row.country or country_u, row.tax_id) == key:
+                return row
+        return None
 
     async def get_by_contact_id(self, contact_id: uuid.UUID) -> Subcontractor | None:
         """Resolve the subcontractor linked to a CRM ``Contact`` row.
