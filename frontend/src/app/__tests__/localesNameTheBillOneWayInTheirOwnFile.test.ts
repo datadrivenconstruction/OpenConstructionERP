@@ -210,10 +210,22 @@ describe('every locale names the bill one way inside its own file', () => {
     expect(thin).toEqual([]);
   });
 
-  it('has a catalogue label to compare against in every locale', () => {
-    // The whole gate hangs off this key. A locale missing it is not consistent,
-    // it is unmeasured, and divergent() would skip it in silence.
-    expect(CODES.filter((code) => !VALUES.get(code)?.get(CATALOGUE))).toEqual([]);
+  it('has a catalogue label to compare against in every locale that names the bill', () => {
+    // The whole gate hangs off this key. A locale that carries one of the
+    // naming keys and not the label is not consistent, it is unmeasured, and
+    // divergent() would skip it in silence.
+    const names = (code: string) => NAMING_KEYS.some((key) => VALUES.get(code)?.has(key));
+    expect(CODES.filter((code) => names(code) && !VALUES.get(code)?.get(CATALOGUE))).toEqual([]);
+  });
+
+  it('exempts only an overlay that names the bill nowhere, and names it', () => {
+    // en-GB carries nine British spellings and not one of them is this object,
+    // so there is nothing in it to compare and nothing for it to disagree
+    // with: every bill key a British reader sees comes from en.ts. The list is
+    // written out so a full locale that lost every naming key reads as the
+    // hole it is rather than as a second exemption.
+    const silent = CODES.filter((code) => !NAMING_KEYS.some((key) => VALUES.get(code)?.has(key)));
+    expect(silent).toEqual(['en-GB']);
   });
 
   for (const key of NAMING_KEYS) {
