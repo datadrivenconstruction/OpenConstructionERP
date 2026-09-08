@@ -35,10 +35,10 @@ import { getIntlLocale, useIntlLocale } from './intlLocale';
  *
  * `numeric` is on because our names habitually carry numbers - "Level 2",
  * "Block 10", "Rev 9" - and code-unit order puts "Block 10" before
- * "Block 2". `caseFirst: false` leaves case ranking to the locale rather
+ * "Block 2". `caseFirst: 'false'` leaves case ranking to the locale rather
  * than forcing upper- or lower-case to the front of every list.
  */
-const NAME_COLLATION: Intl.CollatorOptions = { numeric: true, caseFirst: false };
+const NAME_COLLATION: Intl.CollatorOptions = { numeric: true, caseFirst: 'false' };
 
 const cache = new Map<string, Intl.Collator>();
 
