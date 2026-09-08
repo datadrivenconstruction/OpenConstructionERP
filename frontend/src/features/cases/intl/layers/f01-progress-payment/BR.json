@@ -128,7 +128,7 @@
       "icon": "Stamp",
       "module": "Approval routes",
       "moduleKey": "approvalRoutes.title",
-      "to": "/approval-routes",
+      "to": "/governance?tab=approvals",
       "in": [
         {
           "key": "boletim",
