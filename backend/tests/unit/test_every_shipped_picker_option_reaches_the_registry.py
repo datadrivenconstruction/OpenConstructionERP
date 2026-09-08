@@ -992,7 +992,7 @@ def test_the_widened_gate_goes_red_when_a_mirror_drifts() -> None:
     drifted = (
         "const STANDARDS = [\n"
         "  { value: 'din276', label: 'DIN 276' },\n"
-        "  { value: 'omniclass', label: 'OmniClass' },\n"
+        "  { value: 'omniclass', label: 'OmniClass' },\n"  # denylist-ok
         "];"
     )
     values = _real_values(_block_from_source(drifted, "const STANDARDS", "synthetic"))
