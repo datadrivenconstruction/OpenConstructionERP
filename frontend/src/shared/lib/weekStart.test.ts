@@ -19,12 +19,30 @@
  * correct" means nothing without the denominator it was measured over, and a
  * suite that quietly narrowed to three languages would otherwise still
  * report a pass.
+ *
+ * There are two populations here, and the difference between them is the
+ * second defect this file now pins. A language code is not the locale the
+ * reader is in: the product resolves `ar` to `ar-SA` before it writes a
+ * single date, and ICU gives that tag a different first day from the bare
+ * code - Sunday rather than Saturday. Everything below therefore runs twice,
+ * once over the codes and once over the tags they resolve to, because a
+ * census that only knew the codes stayed green while the grid disagreed with
+ * the dates printed above it.
+ *
+ * Arabic is the only language in that state today, measured over all of them
+ * rather than assumed. English used to be the second, while plain `en`
+ * resolved to `en-GB`; it stopped being one when `en` was made
+ * region-neutral and `en-GB` became an entry a reader picks for themselves,
+ * which resolves to itself and so cannot disagree with itself.
  */
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
+import i18next from 'i18next';
 
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { LOCALE_MAP, getIntlLocale } from './intlLocale';
 import {
   FALLBACK_FIRST_DAY,
+  getWeekStartsOn,
   toWeekStartsOn,
   weekStartFor,
   weekStartsOnFor,
@@ -52,6 +70,16 @@ const DAY_NAME: Record<number, string> = {
 };
 
 const CODES = SUPPORTED_LANGUAGES.map((l) => l.code);
+
+/**
+ * The locale tag each offered language actually resolves to.
+ *
+ * Read through `LOCALE_MAP` rather than by calling `getIntlLocale` in a loop,
+ * because that function answers for whatever language i18next currently holds
+ * and the census wants all of them at once. It is the same map that function
+ * reads, so the tags are the app's own.
+ */
+const TAGS = CODES.map((code) => LOCALE_MAP[code] ?? code);
 
 describe('week start, over every offered language', () => {
   it('has a language list to measure at all', () => {
@@ -132,26 +160,40 @@ describe('week start, over every offered language', () => {
     }
   });
 
-  it('has a fallback table that agrees with ICU for every offered language', () => {
+  it('has a fallback table that agrees with ICU for every offered language and tag', () => {
     // The map this replaced was unreachable on any engine implementing
     // weekInfo, so nothing ever contradicted it, and it had Arabic on Sunday
-    // while the live path said Monday and the truth was Saturday. Three
+    // while the live path said Monday and generic Arabic is Saturday. Three
     // answers for one language. Checking the table against ICU here is what
     // stops it drifting back into being untested documentation.
+    //
+    // Over the tags as well as the codes, because on an engine with no week
+    // data the tags are what `getWeekStartsOn` will hand this table, and one
+    // of them - `ar-SA` - answers differently from the language it is a
+    // region of. Asking only about codes would have let the fallback path sit
+    // a day away from the `Intl` path for every Arabic reader. `en-GB` is in
+    // the table for the same reason and is checked here too, but it arrives
+    // as a code a reader picked rather than as something `en` resolved into.
     const wrong: string[] = [];
-    for (const code of CODES) {
-      const expected = cldrFirstDay(code);
+    const asked = [...new Set([...CODES, ...TAGS])];
+    for (const locale of asked) {
+      const expected = cldrFirstDay(locale);
       if (expected === undefined) continue;
-      const exact = FALLBACK_FIRST_DAY[code];
-      const base = FALLBACK_FIRST_DAY[code.split('-')[0] ?? ''];
+      const exact = FALLBACK_FIRST_DAY[locale];
+      const base = FALLBACK_FIRST_DAY[locale.split('-')[0] ?? ''];
       const viaFallback = exact ?? base ?? 1;
       if (viaFallback !== expected) {
         wrong.push(
-          `${code}: ICU says ${DAY_NAME[expected]}(${expected}), fallback says ${viaFallback}`,
+          `${locale}: ICU says ${DAY_NAME[expected]}(${expected}), fallback says ${viaFallback}`,
         );
       }
     }
-    expect(wrong, `fallback disagrees with ICU for ${wrong.length} languages`).toEqual([]);
+    // The denominator beside the verdict, as everywhere else in this file.
+    console.log(
+      `[week start] fallback checked over ${asked.length} locales ` +
+        `(${CODES.length} codes, ${new Set(TAGS).size} distinct resolved tags).`,
+    );
+    expect(wrong, `fallback disagrees with ICU for ${wrong.length} locales`).toEqual([]);
   });
 
   it('answers Monday for an unknown or malformed tag rather than throwing', () => {
@@ -159,5 +201,84 @@ describe('week start, over every offered language', () => {
     expect(weekStartFor('not a tag!!')).toBe(1);
     expect(weekStartFor(undefined)).toBe(weekStartFor('en'));
     expect(weekStartFor('')).toBe(weekStartFor('en'));
+  });
+});
+
+/* ── The grid and the dates above it come from one answer ─────────────────── */
+
+/**
+ * `getWeekStartsOn` resolves the language the way every other reader-facing
+ * format does, through `getIntlLocale`.
+ *
+ * It used to read `i18next.language` raw, which is a second answer to the
+ * question `intlLocale` exists to answer once. Nothing was red: the census
+ * above measured bare codes, the helper agreed with ICU about those codes,
+ * and the disagreement lived entirely in the gap between the code and the tag
+ * the product had already chosen for it. An Arabic reader got Saudi dates
+ * over a grid that began on Saturday.
+ *
+ * The named case below has to fail in both directions - red if the wiring is
+ * reverted to the raw language, red if the resolution changes underneath and
+ * nobody revisits this - so it states the tag's answer and denies the bare
+ * code's. One row is all the product has: measured over every offered
+ * language, Arabic is the only one whose code and resolved tag disagree about
+ * the first day of the week. The row is therefore guarded rather than
+ * trusted, and the assertion that actually holds the contract is the census
+ * over the whole set at the end of this block.
+ */
+describe('the week start follows the resolved locale, not the raw language', () => {
+  const originalLanguage = i18next.language;
+  const setLanguage = (lang: string) => {
+    (i18next as unknown as { language: string }).language = lang;
+  };
+  afterAll(() => setLanguage(originalLanguage));
+
+  /** Language, the tag it resolves to, the bare code's rival answer. */
+  const DIVERGING: [string, string, string][] = [
+    ['ar', 'ar-SA', 'ar'],
+  ];
+
+  it('has languages whose code and tag genuinely disagree, or it proves nothing', () => {
+    // Guards the guard. Every assertion below is "the tag wins over the code",
+    // which is satisfied by anything at all on a pair that agrees. If ICU ever
+    // stops splitting this one, this suite is measuring nothing and should be
+    // told so rather than left green. The list is also asserted non-empty,
+    // because it has already lost a member once - English, when `en` was made
+    // region-neutral - and an empty table would leave every loop below
+    // iterating nothing and passing.
+    expect(DIVERGING.length).toBeGreaterThan(0);
+    for (const [lang, tag, bare] of DIVERGING) {
+      expect(LOCALE_MAP[lang], `${lang} no longer resolves to ${tag}`).toBe(tag);
+      expect(
+        cldrFirstDay(tag),
+        `${tag} and ${bare} now start their week on the same day`,
+      ).not.toBe(cldrFirstDay(bare));
+    }
+  });
+
+  it.each(DIVERGING)('gives a %s reader the week %s starts, not the one %s starts', (lang, tag, bare) => {
+    setLanguage(lang);
+    expect(getIntlLocale()).toBe(tag);
+    expect(getWeekStartsOn()).toBe(weekStartsOnFor(tag));
+    expect(getWeekStartsOn()).not.toBe(weekStartsOnFor(bare));
+  });
+
+  it('agrees with the resolved locale for every offered language, not only the two', () => {
+    // The population beside the verdict. Naming two languages fixes two
+    // languages; the contract is that the grid and the tag never part company
+    // for anybody, including whoever is added next.
+    const wrong: string[] = [];
+    for (const code of CODES) {
+      setLanguage(code);
+      const tag = getIntlLocale();
+      const fromTag = weekStartsOnFor(tag);
+      if (getWeekStartsOn() !== fromTag) {
+        wrong.push(`${code} resolves to ${tag}, which starts ${fromTag}, but the app said ${getWeekStartsOn()}`);
+      }
+    }
+    console.log(
+      `[week start] grid follows the resolved tag for ${CODES.length - wrong.length}/${CODES.length} offered languages.`,
+    );
+    expect(wrong, `grid and dates disagree for ${wrong.length} languages`).toEqual([]);
   });
 });

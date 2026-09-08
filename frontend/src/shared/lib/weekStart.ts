@@ -26,9 +26,27 @@
  * reason as `./intlLocale`: `weekStartFor` imports nothing at all, so a test
  * can bundle and run the shipped function on its own. Only the two
  * "current language" wrappers at the bottom pull in i18next and React.
+ *
+ * Those wrappers ask `./intlLocale` which locale the reader is in rather than
+ * reading the raw i18next language, and that is the whole of the arrangement
+ * worth stating. `intlLocale` calls itself the one place that answers "which
+ * locale does this reader read in"; a week grid that answered the question a
+ * second way would be a second place, and this repository has spent a lot of
+ * its life finding defects of exactly that shape.
+ *
+ * The second answer was not hypothetical. `ar` resolves to `ar-SA` - the
+ * entry carries the Saudi flag and `country: 'sa'` - and Saudi Arabia starts
+ * its week on Sunday, where unqualified Arabic is the Saturday-first reading
+ * of Egypt and the Levant. So an Arabic reader was shown Saudi dates over an
+ * Egyptian grid: the language disagreeing with the region the product had
+ * already picked for it. Measured over all 43 offered languages, Arabic is
+ * the only one whose code and resolved tag part company today, which is why
+ * the census below is written over the whole set rather than over a list.
  */
 import { useSyncExternalStore } from 'react';
 import i18next from 'i18next';
+
+import { getIntlLocale } from './intlLocale';
 
 /** CLDR first day of week: 1 = Monday through 7 = Sunday. Never 0. */
 export type CldrFirstDay = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -37,19 +55,22 @@ export type CldrFirstDay = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
- * First day of the week per language, for engines with no `weekInfo`.
+ * First day of the week per locale, for engines with no `weekInfo`.
  *
  * The map that used to sit inside `localeWeekStart` listed Arabic as
- * Sunday-first while the `Intl` path above it answered Monday and the truth
- * is Saturday. It was unreachable on every engine that implements
+ * Sunday-first while the `Intl` path above it answered Monday and generic
+ * Arabic is Saturday. It was unreachable on every engine that implements
  * `weekInfo`, so nothing ever contradicted it: three answers for one
  * language and no way to notice. This table is exported so
- * `weekStart.test.ts` can assert it agrees with ICU for every offered
- * language, which turns it from documentation of an intent into a checked
- * copy. Anything absent starts on Monday, the majority answer.
+ * `weekStart.test.ts` can assert it agrees with ICU, which turns it from
+ * documentation of an intent into a checked copy. Anything absent starts on
+ * Monday, the majority answer.
  *
  * Keys are matched whole first, then by base language, so `es-MX` can differ
- * from `es` while `pt-BR` inherits `pt`.
+ * from `es` while `pt-BR` inherits `pt`. Both shapes have to be right,
+ * because both are reachable: `getWeekStartsOn` resolves the language through
+ * `LOCALE_MAP` and so asks with a tag, while `weekStartFor` is exported and
+ * is asked directly with a bare language code.
  */
 export const FALLBACK_FIRST_DAY: Readonly<Record<string, CldrFirstDay>> = {
   // Saturday-first.
@@ -75,6 +96,13 @@ export const FALLBACK_FIRST_DAY: Readonly<Record<string, CldrFirstDay>> = {
   // would put this table a day away from the `Intl` path on the reader who
   // picked English (UK) precisely to get the British reading.
   'en-GB': 1,
+  // Sunday-first, and named for the same reason: Saudi Arabia starts its week
+  // on Sunday where unqualified Arabic is Saturday-first. This is the tag
+  // `ar` resolves to, so leaving it to inherit the `ar` above would put the
+  // fallback path a day away from the `Intl` path on the locale an Arabic
+  // reader is actually in - the one disagreement this table exists to
+  // prevent, and the only one left across all 43 offered languages.
+  'ar-SA': 7,
 };
 
 /**
@@ -131,9 +159,16 @@ const subscribe = (cb: () => void) => {
   };
 };
 
-/** First day of the week for the language the UI is in right now. */
+/**
+ * First day of the week for the locale the UI is in right now.
+ *
+ * `getIntlLocale()` rather than `i18next.language`, so the grid and the dates
+ * written above it come from one resolved answer. Reading the raw language
+ * here is what put an Arabic reader's Saudi dates over an Egyptian week - see
+ * the note at the top of this file.
+ */
 export function getWeekStartsOn(): WeekStartsOn {
-  return weekStartsOnFor(i18next.language);
+  return weekStartsOnFor(getIntlLocale());
 }
 
 /**
