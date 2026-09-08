@@ -236,17 +236,21 @@ def test_two_uncovered_countries_are_no_longer_indistinguishable() -> None:
 def test_the_field_order_carries_the_source_that_produced_it() -> None:
     """A real order and a stand-in order came back looking the same.
 
-    Street-city-state-postcode is both a genuine order for some countries and
+    Street-postcode-city is both the genuine order for the DACH countries and
     the generic one for all the rest, so the list alone was never enough for a
     form that wants to claim it knows how addresses are written here.
+
+    The two differ here only by the state slot the generic order keeps for
+    countries that might have one, and Germany does not. Nothing but the
+    provenance separates the shape.
     """
     covered_order, covered = get_address_field_order("DE")
     uncovered_order, uncovered = get_address_field_order("CA")
 
     assert covered.source is Source.DECLARED
     assert uncovered.source is Source.FALLBACK
-    assert covered_order == ["street", "city", "postcode", "country"]
-    assert uncovered_order == ["street", "city", "state", "postcode", "country"]
+    assert covered_order == ["street", "postcode", "city", "country"]
+    assert uncovered_order == ["street", "postcode", "city", "state", "country"]
 
 
 def test_validate_address_says_whose_requirements_it_applied() -> None:
@@ -298,7 +302,7 @@ def test_postcode_optional_is_present_only_on_the_rules_that_are_not_a_country()
         _ = covered["postcode_optional"]
 
 
-@pytest.mark.parametrize("cc", ["DE", "AT", "CH", "BR", "CN", "IN", "JP", "RU", "US"])
+@pytest.mark.parametrize("cc", ["AT", "AU", "BR", "CH", "CN", "DE", "IN", "JP", "NZ", "RU", "SG", "US"])
 def test_no_country_row_answers_the_postcode_optional_question(cc: str) -> None:
     """The gap above is every country row, not one that was missed.
 
