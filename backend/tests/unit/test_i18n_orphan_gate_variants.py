@@ -90,9 +90,11 @@ def test_the_real_tree_derives_the_bases_the_app_declares() -> None:
     """Not a fixture: the guard has to agree with frontend/src/app/i18n.ts.
 
     That file resolves es-MX, es-CL and es-CO through es and pt-BR through
-    pt, and notes that i18next expands en-US into ['en-US', 'en'] before it
-    consults the map at all. If a locale file is added whose base is derived
-    differently from what the app does, this is where it shows.
+    pt, and notes that i18next expands en-GB and en-US into ['en-GB', 'en']
+    and ['en-US', 'en'] before it consults the map at all. If a locale file
+    is added whose base is derived differently from what the app does, this
+    is where it shows; when English (UK) joined the picker it showed here
+    first, on three shards, because the list below was a copy of the tree.
     """
     repo = Path(__file__).resolve().parents[3]
     locales = {p.stem for p in (repo / "frontend" / "src" / "app" / "locales").glob("*.ts")}
@@ -107,5 +109,6 @@ def test_the_real_tree_derives_the_bases_the_app_declares() -> None:
         "es-CL": "es",
         "es-CO": "es",
         "pt-BR": "pt",
+        "en-GB": "en",
         "en-US": "en",
     }
