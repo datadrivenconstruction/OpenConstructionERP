@@ -59,6 +59,11 @@ const BLANK = {
   payment_terms: '',
   complete: false,
   missing: ['seller_name', 'seller_country_code', 'seller_vat_id'],
+  // Served by the API with every answer, cut here to what the assertions
+  // need: the panel labels the account field by whether the seller's country
+  // is in this list, so a fixture without it asks for an "account number" and
+  // the IBAN label these tests look for never renders.
+  iban_countries: ['DE', 'AT', 'NL', 'FR'],
 };
 
 const CONFIGURED = {
@@ -175,6 +180,25 @@ describe('EInvoiceSettings', () => {
     // Present and empty, not absent: a patch could not express a removal.
     expect(body).toHaveProperty('payee_iban', '');
     expect(body).toHaveProperty('seller_name', 'Hochbau Nord GmbH');
+  });
+
+  it("labels the account the way the seller's country is paid", async () => {
+    // The IBAN check is strict on the server, so the label has to say what the
+    // server will judge the value as. A seller outside the IBAN area is asked
+    // for an account number; typing a country inside it flips the label at
+    // once, because the country is read off the form and not off the saved
+    // row, and the same moment is when the server starts judging the account.
+    apiGetMock.mockResolvedValue({ ...CONFIGURED, seller_country_code: 'US', payee_iban: '021000021' });
+    renderPanel();
+
+    await screen.findByLabelText('settings.einvoice.field.payee_account_number');
+    expect(screen.queryByLabelText('settings.einvoice.field.payee_iban')).toBeNull();
+
+    fireEvent.change(screen.getByLabelText('settings.einvoice.field.seller_country_code'), {
+      target: { value: 'DE' },
+    });
+    await screen.findByLabelText('settings.einvoice.field.payee_iban');
+    expect(screen.queryByLabelText('settings.einvoice.field.payee_account_number')).toBeNull();
   });
 
   it('shows what the server said about a refused account number', async () => {
