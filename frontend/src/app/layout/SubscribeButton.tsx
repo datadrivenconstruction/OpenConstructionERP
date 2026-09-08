@@ -92,8 +92,12 @@ export function SubscribeButton({ condensed = false }: { condensed?: boolean } =
         })}
         className={clsx(
           // Partner mode condenses to the icon-only form so the co-brand
-          // chip gets a clean central slot; otherwise full pill from md up.
-          condensed ? 'hidden' : 'hidden md:inline-flex',
+          // chip gets a clean central slot; otherwise full pill from 2xl up.
+          // 2xl rather than md for the header-width reason documented on the
+          // matching line in SupportUsButton: the action cluster is `shrink-0`
+          // and sets the document width, and these two labels are what put it
+          // over 1280. xl would not do - xl is 1280 exactly, the failing width.
+          condensed ? 'hidden' : 'hidden 2xl:inline-flex',
           'h-8 items-center gap-1.5 rounded-lg border px-3',
           'text-xs font-medium transition-colors',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40',
@@ -128,7 +132,7 @@ export function SubscribeButton({ condensed = false }: { condensed?: boolean } =
         aria-label={t('header.subscribe.button_short', { defaultValue: 'Subscribe' })}
         title={buttonLabel}
         className={clsx(
-          condensed ? 'inline-flex' : 'md:hidden inline-flex',
+          condensed ? 'inline-flex' : '2xl:hidden inline-flex',
           'h-8 w-8 items-center justify-center rounded-lg',
           'transition-colors',
           subscribed

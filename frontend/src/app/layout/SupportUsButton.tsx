@@ -191,8 +191,18 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
           'support-btn group relative items-center gap-1.5 h-8 px-3 rounded-lg overflow-hidden',
           // Partner mode condenses secondary actions to icons so the
           // co-brand chip gets a clean central slot; otherwise show the
-          // full labelled pill from md up.
-          condensed ? 'hidden' : 'hidden md:inline-flex',
+          // full labelled pill from 2xl up.
+          //
+          // 2xl, not md: the header's right-hand cluster is `shrink-0`, so it
+          // never compresses and its content width sets the width of the whole
+          // document. At a 1280 viewport the labelled form pushed the page to
+          // 1307 in English and 1401 in Uzbek, whose label for this button is
+          // "Bizni qo'llab-quvvatlang" - 24 characters against English's 10,
+          // and the widest of any language we offer. Dropping to the icon here
+          // and at Subscribe returns 232px at Uzbek against the 121 needed.
+          // It has to be 2xl rather than xl because xl is 1280 exactly, the
+          // width that fails.
+          condensed ? 'hidden' : 'hidden 2xl:inline-flex',
           'border border-amber-400/60 dark:border-amber-500/40',
           'bg-gradient-to-r from-amber-100/80 via-yellow-100/60 to-orange-100/80',
           'dark:from-amber-900/40 dark:via-yellow-900/30 dark:to-orange-900/40',
@@ -223,12 +233,14 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
         </span>
       </button>
 
-      {/* Mobile fallback — icon-only, fits the cramped topbar */}
+      {/* Narrow-screen form — icon-only, fits the cramped topbar. Carries the
+          header below 2xl, which is every laptop, so it is the common case
+          rather than a mobile fallback. */}
       <button
         type="button"
         onClick={handleOpen}
         className={clsx(
-          condensed ? 'inline-flex' : 'md:hidden inline-flex',
+          condensed ? 'inline-flex' : '2xl:hidden inline-flex',
           'h-8 w-8 items-center justify-center rounded-lg',
           'text-amber-500 hover:bg-surface-secondary transition-colors',
         )}
