@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from xml.etree import ElementTree as ET  # noqa: N817 - trusted, we build not parse
 
+from app.modules.einvoice.bank import is_bic, is_iban
 from app.modules.einvoice.profiles import PROFILES, Profile, get_profile
 from app.modules.einvoice.rules import FATAL, RuleViolation, check, check_profile, money_decimals
 
@@ -440,10 +441,26 @@ def build_cii_xml(inv: EInvoice, *, strict: bool = True) -> bytes:
         # without which a credit transfer instruction fails BR-61.
         if inv.payee_iban:
             acct = _sub(pm, "ram", "PayeePartyCreditAccountID")
-            _sub(acct, "ram", "IBANID", inv.payee_iban)
-            if inv.payee_account_name:
-                _sub(acct, "ram", "AccountName", inv.payee_account_name)
-        if inv.payee_bic:
+            # BT-84 is an account identifier, not an IBAN, and D16B gives it two
+            # homes accordingly. Writing a domestic account number into IBANID
+            # would produce a document that passes every check we can run here
+            # and is refused by the receiving platform, which is the worst shape
+            # a defect can take: the sender is told nothing. The element order
+            # is fixed by CreditorFinancialAccountType, IBANID then AccountName
+            # then ProprietaryID, so the domestic branch writes last.
+            if is_iban(inv.payee_iban):
+                _sub(acct, "ram", "IBANID", inv.payee_iban)
+                if inv.payee_account_name:
+                    _sub(acct, "ram", "AccountName", inv.payee_account_name)
+            else:
+                if inv.payee_account_name:
+                    _sub(acct, "ram", "AccountName", inv.payee_account_name)
+                _sub(acct, "ram", "ProprietaryID", inv.payee_iban)
+        # BT-86 has only the one home in D16B, so a national bank code has
+        # nowhere truthful to go and is left out rather than misdeclared. The
+        # term is optional and no rule requires it; the account above is what
+        # BR-61 asks for, and the PDF still shows the code to the person paying.
+        if inv.payee_bic and is_bic(inv.payee_bic):
             inst = _sub(pm, "ram", "PayeeSpecifiedCreditorFinancialInstitution")
             _sub(inst, "ram", "BICID", inv.payee_bic)
 

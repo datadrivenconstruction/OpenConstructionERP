@@ -88,6 +88,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         "payment": "Payment",
         "iban": "IBAN: {value}",
         "bic": "BIC: {value}",
+        # BT-84 and BT-86 when the seller is not paid through an IBAN. Naming
+        # the wrong instrument on the page a person reads is how a transfer gets
+        # keyed into the wrong field of a banking app.
+        "account_number": "Account: {value}",
+        "bank_code": "Bank code: {value}",
         "account_holder": "Account holder: {value}",
         "footer": "This PDF carries an embedded EN 16931 e-invoice (Factur-X / ZUGFeRD). "
         "The embedded XML is the operative document.",
@@ -116,6 +121,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "payment": "Zahlung",
         "iban": "IBAN: {value}",
         "bic": "BIC: {value}",
+        "account_number": "Konto: {value}",
+        "bank_code": "Bankleitzahl: {value}",
         "account_holder": "Kontoinhaber: {value}",
         "footer": "Diese PDF-Datei enthält eine eingebettete E-Rechnung nach EN 16931 "
         "(Factur-X / ZUGFeRD). Maßgeblich ist das eingebettete XML.",

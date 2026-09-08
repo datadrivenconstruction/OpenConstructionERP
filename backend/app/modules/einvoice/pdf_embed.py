@@ -42,6 +42,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 
 from app.core.pdf_fonts import pdf_font_for_text
+from app.core.validation.address import format_address_lines
+from app.modules.einvoice.bank import is_bic, is_iban
 from app.modules.einvoice.cii import EInvoice, Party, build_cii_xml
 from app.modules.einvoice.pdf_translations import (
     DEFAULT_PDF_LOCALE,
@@ -77,14 +79,29 @@ def party_address_lines(p: Party) -> list[str]:
     A field the party does not answer produces no line, which is what keeps the
     invoices that carry no street byte-identical to the pages they were before.
 
+    The order is the country's own. The page used to write the post code before
+    the city for everyone, which is right for the DACH countries and the rest of
+    continental Europe and wrong for every party the ``peppol_aunz`` and
+    ``peppol_sg`` profiles exist to serve. BT-40 / BT-55 already names the
+    country on both parties, so the page had the answer and was not asking.
+
+    ``state`` is not passed because :class:`Party` has no field to carry it:
+    BT-39 / BT-54 CountrySubentity is absent from the model, so a US or
+    Australian party prints "Boston 02108" where it should print
+    "Boston, MA 02108". The shape is right and one part is missing, which is a
+    question about the party model rather than about this renderer.
+
     Args:
         p: the seller or buyer trade party.
 
     Returns:
         The address lines, top to bottom, with nothing empty in them.
     """
-    lines = [p.line1, " ".join(x for x in (p.postcode, p.city) if x)]
-    return [text.strip() for text in lines if text and text.strip()]
+    lines, _jurisdiction = format_address_lines(
+        {"street": p.line1, "postcode": p.postcode, "city": p.city},
+        p.country_code,
+    )
+    return lines
 
 
 def _readable_pdf(inv: EInvoice, locale: str = DEFAULT_PDF_LOCALE) -> bytes:
@@ -309,9 +326,15 @@ def _readable_pdf(inv: EInvoice, locale: str = DEFAULT_PDF_LOCALE) -> bytes:
         put(left, ry, tr(locale, "payment"), base="Helvetica-Bold", size=8)
         c.setFont("Helvetica", 8)
         ry -= 5 * mm
-        put(left, ry, tr(locale, "iban", value=inv.payee_iban), base="Helvetica", size=8)
+        # Label what the value actually is. A seller outside the IBAN area
+        # stores a domestic account identifier in the same business term, and
+        # calling it an IBAN on the page tells the person paying to look for a
+        # field their bank will not offer them.
+        account_key = "iban" if is_iban(inv.payee_iban) else "account_number"
+        put(left, ry, tr(locale, account_key, value=inv.payee_iban), base="Helvetica", size=8)
         if inv.payee_bic:
-            put(left + 70 * mm, ry, tr(locale, "bic", value=inv.payee_bic), base="Helvetica", size=8)
+            provider_key = "bic" if is_bic(inv.payee_bic) else "bank_code"
+            put(left + 70 * mm, ry, tr(locale, provider_key, value=inv.payee_bic), base="Helvetica", size=8)
         if inv.payee_account_name:
             ry -= 5 * mm
             # The fourth party-controlled string, and the widest budget on the

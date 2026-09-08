@@ -26,6 +26,42 @@ from typing import Any
 
 from app.core.provenance import Provenance, declared, fell_back
 
+# ── Locality shapes ───────────────────────────────────────────────────────────
+#
+# ``field_order`` says which parts an address has and in what sequence. It
+# cannot say which of them share a line, and that is most of what makes a
+# printed address look native: "10115 Berlin" and "Berlin 10115" are the same
+# sequence of two fields under any ordering that puts one before the other.
+# A shape is the missing half, and there are few enough of them to name.
+#
+# A shape is a rendering decision only. Nothing here changes what an address is
+# required to carry, which stays with ``required_fields``.
+
+#: "Hauptstrasse 17" / "10115 Berlin". DACH, and everywhere uncovered.
+POSTCODE_BEFORE_CITY = "POSTCODE_BEFORE_CITY"
+
+#: "1600 Pennsylvania Ave" / "Washington, DC 20500". The post code closes the
+#: locality line behind the region. Also Australia, New Zealand, Singapore,
+#: India and the Gulf, whose region part is simply absent more often.
+POSTCODE_AFTER_CITY_AND_STATE = "POSTCODE_AFTER_CITY_AND_STATE"
+
+#: "10 Downing St" / "London" / "SW1A 2AA". The post code takes a line of its
+#: own under the city, which is what Royal Mail asks for and what Russian post
+#: does with the index at the foot of the address.
+POSTCODE_ON_ITS_OWN_LINE = "POSTCODE_ON_ITS_OWN_LINE"
+
+#: "Av. Paulista 1578" / "01310-200 Sao Paulo - SP". Correios opens the last
+#: line with the CEP and closes it with the state abbreviation.
+POSTCODE_BEFORE_CITY_AND_STATE = "POSTCODE_BEFORE_CITY_AND_STATE"
+
+#: One field per line, in the order the country's own row declares. This is
+#: how the CJK addresses are written: largest unit first, the exact reverse of
+#: the Western sequence, and no two parts sharing a line. The row is the
+#: authority because Japan and China do not agree with each other about where
+#: the country name goes, so a single hard-coded reversal would be wrong for
+#: one of them.
+DECLARED_FIELD_ORDER = "DECLARED_FIELD_ORDER"
+
 # ── Per-country definitions ───────────────────────────────────────────────────
 #
 # Each entry mirrors exactly what the regional pack config.py exposes so
@@ -39,19 +75,22 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
     "DE": {
         "postcode_regex": r"^\d{5}$",
         "required_fields": ["street", "city", "postcode", "country"],
-        "field_order": ["street", "city", "postcode", "country"],
+        "field_order": ["street", "postcode", "city", "country"],
+        "locality_shape": POSTCODE_BEFORE_CITY,
         "state_required": False,
     },
     "AT": {
         "postcode_regex": r"^\d{4}$",
         "required_fields": ["street", "city", "postcode", "country"],
-        "field_order": ["street", "city", "postcode", "country"],
+        "field_order": ["street", "postcode", "city", "country"],
+        "locality_shape": POSTCODE_BEFORE_CITY,
         "state_required": False,
     },
     "CH": {
         "postcode_regex": r"^\d{4}$",
         "required_fields": ["street", "city", "postcode", "country"],
-        "field_order": ["street", "city", "postcode", "country"],
+        "field_order": ["street", "postcode", "city", "country"],
+        "locality_shape": POSTCODE_BEFORE_CITY,
         "state_required": False,
     },
     # ── UK ────────────────────────────────────────────────────────────────
@@ -61,6 +100,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$",
         "required_fields": ["street", "city", "postcode", "country"],
         "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_ON_ITS_OWN_LINE,
         "state_required": False,
         "postcode_note": "Format: e.g. SW1A 1AA, EC2A 4BH",
     },
@@ -69,6 +109,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$",
         "required_fields": ["street", "city", "postcode", "country"],
         "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_ON_ITS_OWN_LINE,
         "state_required": False,
         "postcode_note": "Format: e.g. SW1A 1AA, EC2A 4BH",
     },
@@ -77,6 +118,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^\d{5}(-\d{4})?$",
         "required_fields": ["street", "city", "state", "postcode", "country"],
         "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
         "state_required": True,
     },
     # ── India ─────────────────────────────────────────────────────────────
@@ -84,21 +126,55 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^\d{6}$",
         "required_fields": ["street", "city", "state", "postcode", "country"],
         "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
         "state_required": True,
+    },
+    # ── Australia and New Zealand ─────────────────────────────────────────
+    # Reached by the ``peppol_aunz`` profile, which this product ships. The
+    # generic shape would print "3000 Melbourne", which is not an address
+    # anyone in either country writes, so these two rows exist to render
+    # rather than to validate.
+    "AU": {
+        "postcode_regex": r"^\d{4}$",
+        "required_fields": ["street", "city", "state", "postcode", "country"],
+        "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
+        "state_required": True,
+    },
+    "NZ": {
+        "postcode_regex": r"^\d{4}$",
+        "required_fields": ["street", "city", "postcode", "country"],
+        "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
+        "state_required": False,
+    },
+    # ── Singapore ─────────────────────────────────────────────────────────
+    # Reached by the ``peppol_sg`` profile. No region line, and the postal
+    # code follows the city: "Singapore 238877".
+    "SG": {
+        "postcode_regex": r"^\d{6}$",
+        "required_fields": ["street", "city", "postcode", "country"],
+        "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
+        "state_required": False,
     },
     # ── Brazil (LATAM anchor) ─────────────────────────────────────────────
     # CEP: 99999-999 or 99999999
     "BR": {
         "postcode_regex": r"^\d{5}-?\d{3}$",
         "required_fields": ["street", "city", "postcode", "country"],
-        "field_order": ["street", "city", "state", "postcode", "country"],
+        "field_order": ["street", "postcode", "city", "state", "country"],
+        "locality_shape": POSTCODE_BEFORE_CITY_AND_STATE,
         "state_required": False,
     },
     # ── Russia ────────────────────────────────────────────────────────────
+    # The index closes a Russian address rather than opening it, which is the
+    # one respect in which it does not follow its DACH neighbours.
     "RU": {
         "postcode_regex": r"^\d{6}$",
         "required_fields": ["street", "city", "postcode", "country"],
         "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_ON_ITS_OWN_LINE,
         "state_required": False,
     },
     # ── Middle East - UAE (postcode optional) ─────────────────────────────
@@ -106,6 +182,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": None,  # No formal postcode system
         "required_fields": ["street", "city", "country"],
         "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
         "state_required": False,
         "postcode_optional": True,
     },
@@ -116,6 +193,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^\d{5}$",
         "required_fields": ["street", "city", "country"],
         "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
         "state_required": False,
         "postcode_optional": True,
     },
@@ -125,6 +203,7 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^\d{3}-?\d{4}$",
         "required_fields": ["street", "city", "postcode", "country"],
         "field_order": ["postcode", "state", "city", "street", "country"],
+        "locality_shape": DECLARED_FIELD_ORDER,
         "state_required": False,
     },
     # ── China ─────────────────────────────────────────────────────────────
@@ -132,15 +211,26 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "postcode_regex": r"^\d{6}$",
         "required_fields": ["street", "city", "postcode", "country"],
         "field_order": ["country", "postcode", "state", "city", "street"],
+        "locality_shape": DECLARED_FIELD_ORDER,
         "state_required": False,
     },
 }
 
 # Default rules used when no country-specific entry exists.
+#
+# The order and the shape are the continental-European one rather than a
+# neutral-looking street-city-state-postcode, and that is a decision about
+# being wrong less often rather than a claim to knowledge. Every uncovered
+# country whose address a document is likely to carry - France, Spain, Italy,
+# the Netherlands, Norway, Poland, Sweden - writes the post code before the
+# city, and it is what every page this product has printed already said.
+# ``jurisdiction`` remains the only thing that separates the stand-in from a
+# country that really was consulted.
 _DEFAULT_RULES: dict[str, Any] = {
     "postcode_regex": None,
     "required_fields": ["street", "city", "country"],
-    "field_order": ["street", "city", "state", "postcode", "country"],
+    "field_order": ["street", "postcode", "city", "state", "country"],
+    "locality_shape": POSTCODE_BEFORE_CITY,
     "state_required": False,
     "postcode_optional": True,
 }
@@ -345,10 +435,14 @@ def get_address_field_order(country_code: str) -> tuple[list[str], Provenance]:
 
     Used by the UI to reorder address form fields without a round-trip. Falls
     back to the default order when the country has no dedicated entry, which is
-    why the order alone was never enough to act on: street-city-state-postcode
-    is a real order for some countries and the stand-in for all the rest, and
-    the two came back indistinguishable. A form that wants to say "we know how
+    why the order alone was never enough to act on: street-postcode-city is a
+    real order for the DACH countries and the stand-in for all the rest, and
+    the two come back indistinguishable. A form that wants to say "we know how
     addresses are written here" needs the second half of this return value.
+
+    To print an address rather than to lay out a form, use
+    :func:`format_address_lines`. A field order cannot say which fields share a
+    line, and a renderer that reads this alone has to invent that half.
 
     Returns:
         The field order, and a :class:`Provenance` on the ``jurisdiction`` axis.
@@ -356,6 +450,106 @@ def get_address_field_order(country_code: str) -> tuple[list[str], Provenance]:
     cc = (country_code or "").upper().strip()
     rules, jurisdiction = _resolve_rules(cc)
     return list(rules.get("field_order", _DEFAULT_RULES["field_order"])), jurisdiction
+
+
+# ── Rendering ─────────────────────────────────────────────────────────────────
+
+#: The fields an address can answer with, and the only keys read from the dict
+#: handed to :func:`format_address_lines`. Callers holding another spelling -
+#: ``line1`` in the e-invoice party, ``postal_code`` in the project JSONB - map
+#: it themselves rather than having a tolerant reader guess here, because a key
+#: this module silently ignored would print an address with a part missing and
+#: nothing anywhere would say so.
+ADDRESS_FIELDS: tuple[str, ...] = ("street", "postcode", "city", "state", "country")
+
+
+def _joined(separator: str, *parts: str) -> str:
+    """Join the parts that carry a value, so a separator never leads or doubles."""
+    return separator.join(part for part in parts if part)
+
+
+def _postcode_before_city(f: dict[str, str], _rules: dict[str, Any]) -> list[str]:
+    return [f["street"], _joined(" ", f["postcode"], f["city"]), f["state"], f["country"]]
+
+
+def _postcode_after_city_and_state(f: dict[str, str], _rules: dict[str, Any]) -> list[str]:
+    return [f["street"], _joined(" ", _joined(", ", f["city"], f["state"]), f["postcode"]), f["country"]]
+
+
+def _postcode_on_its_own_line(f: dict[str, str], _rules: dict[str, Any]) -> list[str]:
+    return [f["street"], f["city"], f["state"], f["postcode"], f["country"]]
+
+
+def _postcode_before_city_and_state(f: dict[str, str], _rules: dict[str, Any]) -> list[str]:
+    return [f["street"], _joined(" ", f["postcode"], _joined(" - ", f["city"], f["state"])), f["country"]]
+
+
+def _declared_field_order(f: dict[str, str], rules: dict[str, Any]) -> list[str]:
+    return [f[name] for name in rules["field_order"] if name in f]
+
+
+_LOCALITY_SHAPES = {
+    POSTCODE_BEFORE_CITY: _postcode_before_city,
+    POSTCODE_AFTER_CITY_AND_STATE: _postcode_after_city_and_state,
+    POSTCODE_ON_ITS_OWN_LINE: _postcode_on_its_own_line,
+    POSTCODE_BEFORE_CITY_AND_STATE: _postcode_before_city_and_state,
+    DECLARED_FIELD_ORDER: _declared_field_order,
+}
+
+
+def format_address_lines(
+    address: dict[str, Any],
+    country_code: str,
+) -> tuple[list[str], Provenance]:
+    """Render an address as the lines a recipient in that country expects.
+
+    A German address printed in US order is not a formatting preference, it is
+    an address a German recipient reads as malformed, and the reverse holds. The
+    two facts that decide it are the sequence of the parts and which of them
+    share a line; ``field_order`` carries the first and ``locality_shape`` the
+    second, both off the same country row.
+
+    A field the address does not answer produces no line rather than an empty
+    one, so this never draws a gap at an offset a reader will take for a missing
+    part of a real address. Whitespace counts as unanswered: the contacts
+    directory stores addresses as a free-form dict, and a key present with a
+    space in it is a shape that reaches here.
+
+    On the fallback. It is the continental-European shape, not a neutral one,
+    and it is what this product already printed for every country including the
+    covered ones. So an uncovered country is not being guessed at any harder
+    than it was before this function existed; it is the same statement, now with
+    a record attached saying nobody published a rule for it. Read the
+    ``Provenance`` before telling a user the address is written the way their
+    country writes it.
+
+    Args:
+        address: Flat dict keyed by :data:`ADDRESS_FIELDS`. Unknown keys are
+            ignored, and a caller with another spelling maps it first.
+        country_code: ISO 3166-1 alpha-2, upper or lower case.
+
+    Returns:
+        The lines, top to bottom, and a :class:`Provenance` on the
+        ``jurisdiction`` axis saying whose rules produced them.
+
+    Examples::
+
+        lines, _ = format_address_lines(
+            {"street": "Hauptstr. 1", "postcode": "10115", "city": "Berlin"}, "DE"
+        )
+        assert lines == ["Hauptstr. 1", "10115 Berlin"]
+
+        lines, _ = format_address_lines(
+            {"street": "1 Main St", "city": "Boston", "state": "MA", "postcode": "02108"}, "US"
+        )
+        assert lines == ["1 Main St", "Boston, MA 02108"]
+    """
+    cc = (country_code or "").upper().strip()
+    rules, jurisdiction = _resolve_rules(cc)
+    fields = {name: str(address.get(name) or "").strip() for name in ADDRESS_FIELDS}
+    shape = rules.get("locality_shape", _DEFAULT_RULES["locality_shape"])
+    lines = _LOCALITY_SHAPES[shape](fields, rules)
+    return [line for line in lines if line], jurisdiction
 
 
 def get_address_rules(country_code: str) -> dict[str, Any]:
