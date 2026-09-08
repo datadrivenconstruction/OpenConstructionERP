@@ -642,6 +642,47 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         en16931_profile="ehf",
         profile_fields=("network_participant_id",),
         correction_mechanism="credit note",
+        scope=(
+            "The statute covers sales to other bokforingspliktige. It names no network and no format itself, "
+            "leaving both to regulation, and a size-based exemption for the smallest sole proprietorships is "
+            "proposed rather than in force."
+        ),
+        commencement=(
+            # Dateless on purpose, and this is the case the empty date was built
+            # for. The statute is passed and sanctioned, so the obligation is
+            # real and a Norwegian user should be told so; but it commences "fra
+            # den tid Kongen bestemmer", and the decree that would supply the
+            # dates was not published when this was read. Showing no row at all
+            # would say "no regime declared", which is a different and worse
+            # claim than "enacted, commencement decree pending".
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="",
+                scope="Sales to other bokforingspliktige",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://lovdata.no/dokument/LTI/lov/2026-06-19-39",
+                read_date="2026-09-07",
+                notes="LOV-2026-06-19-39, sanctioned 19 June 2026. Commencement is by royal decree and unpublished.",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_RECEIVE,
+                effective_date="",
+                scope="Sales to other bokforingspliktige",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://lovdata.no/dokument/LTI/lov/2026-06-19-39",
+                read_date="2026-09-07",
+                notes="Same statute. The King may commence individual provisions at different times.",
+            ),
+        ),
+        notes=(
+            "Norway is the case that shows why a date and its legal status are two separate claims. The statute "
+            "is enacted and carries no dates whatsoever: commencement is left to royal decree, and the decree "
+            "may bring individual provisions into force at different times, which is the legal mechanism that "
+            "produces the split between issuing and receiving in the first place. Commentary sources agree that "
+            "issuing starts in 2027 and receiving in 2030, and that split is believed to be the widest of any "
+            "country here, but no primary document read for this row carries either date, so neither is stated "
+            "as data. Fill them in when the commencement decree is published."
+        ),
     ),
     "AU": CountryRegime(
         country="AU",
