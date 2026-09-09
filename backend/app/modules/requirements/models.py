@@ -109,19 +109,25 @@ class Requirement(Base):
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
 
     # ── The five questions the EAC triplet does not answer ──────────────────
+    # All five carry ``server_default=""`` beside the Python default, the same
+    # DEFAULT ``v3285_requirements_cycle`` declared. ``create_all`` reads the
+    # model and never the revision, so without it every embedded and
+    # self-hosted install built the five NOT NULL and defaultless, and the boot
+    # repair ``requirements_cycle_not_null`` then reported five schema repairs
+    # on a database that was seconds old.
     #: Warum. Why this is required at all, in the words of whoever asked. A
     #: requirement without one cannot be negotiated, only obeyed or broken.
-    rationale: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    rationale: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     #: Wer. Who raised it. Free text because the originator is often a document
     #: or an authority rather than a platform user.
-    originator: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    originator: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     #: Wer, as a controlled party role from ``lifecycle.ORIGINATOR_ROLES``.
-    originator_role: Mapped[str] = mapped_column(String(50), nullable=False, default="")
+    originator_role: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="")
     #: Wann. A phase key from ``lifecycle.PHASE_SPINE``, never a display word,
     #: so the same row reads as "LP 5" in Germany and "Stage 4" in Britain.
-    phase: Mapped[str] = mapped_column(String(50), nullable=False, default="", index=True)
+    phase: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="", index=True)
     #: Wie. How compliance gets proven, from ``lifecycle.VERIFICATION_METHODS``.
-    verification_method: Mapped[str] = mapped_column(String(50), nullable=False, default="")
+    verification_method: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="")
 
     #: A requirement decomposed from another one. Self-referencing, so a client
     #: demand can be broken into the specific constraints that satisfy it while

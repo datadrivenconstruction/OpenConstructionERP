@@ -14,8 +14,13 @@ Every NOT NULL column carries an explicit Python-side ``default`` so an ORM
 insert never depends on a DB-side default, and the matching migration
 (``v3132_formwork_init`` plus ``v3262_formwork_rate_buildup``) carries the
 equivalent ``server_default`` so raw-SQL inserts and column backfills on an
-existing database are safe too. Losing either half is how the v3119
-fresh-install cascade happened, so keep both in step. The migrations that
+existing database are safe too. The four rate columns ``v3262`` added carry
+that ``server_default`` on the model as well, because ``create_all`` is the
+build path every embedded and self-hosted install boots on, it reads the model
+and never the revision, and a column it builds without the DEFAULT the revision
+declared is what the boot repair ``formwork_rate_buildup_not_null`` then
+reports as a schema repair on a database that is seconds old. Losing either
+half is how the v3119 fresh-install cascade happened, so keep both in step. The migrations that
 carry this table are ``v3132_formwork_init``, ``v3262_formwork_rate_buildup``,
 ``v3271_formwork_debrand`` and ``v3300_formwork_system_choice``.
 
@@ -114,9 +119,10 @@ class FormworkSystem(Base):
         Numeric(18, 2),
         nullable=False,
         default=Decimal("0"),
+        server_default="0",
     )
     # Minimum days from pour to strike. Drives the cycle-feasibility check.
-    strip_time_days: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    strip_time_days: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     # What ``unit_rate`` means. "purchase" amortises over the reuses; the
     # per-use bases do not. Defaults to "purchase" so every row written before
     # this column existed keeps the arithmetic it was priced with.
@@ -224,11 +230,13 @@ class FormworkAssignment(Base):
         Numeric(18, 2),
         nullable=False,
         default=Decimal("0"),
+        server_default="0",
     )
     labour_unit_cost: Mapped[Decimal] = mapped_column(
         Numeric(18, 2),
         nullable=False,
         default=Decimal("0"),
+        server_default="0",
     )
     computed_total: Mapped[Decimal] = mapped_column(
         Numeric(18, 2),
