@@ -109,6 +109,29 @@ function describeImportError(entry: unknown): string {
   return label === undefined || label === null ? text : `${label}: ${text}`;
 }
 
+/**
+ * Extensions the browser-side preview can actually read.
+ *
+ * `parseExcelFile` is a delimited-text reader: it splits on commas, semicolons
+ * and tabs and maps columns. Handed a native container it does not refuse, it
+ * splits it anyway and produces rows that mean nothing. A BC3 came back as two
+ * rows cut out of its long-text records while the server's own reader made nine
+ * positions out of the same file, so the preview said one number and the result
+ * said another. Worse, the accepted extensions are what a screen offers, not
+ * what arrives: an HTML error page saved under a .bc3 name parsed into three
+ * confident-looking positions.
+ *
+ * So the preview is offered only for what it can read. Everything else still
+ * imports, by the same route it always did, because the file goes to the server
+ * whole and the server picks the reader.
+ */
+const PREVIEWABLE_EXTENSIONS = ['.csv', '.tsv', '.xls', '.xlsx'] as const;
+
+function previewCanRead(filename: string): boolean {
+  const lower = filename.toLowerCase();
+  return PREVIEWABLE_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
+
 /* ── Import preview table ───────────────────────────────────────────── */
 
 function ImportPreview({
@@ -230,6 +253,8 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
   const [importFile, setImportFile] = useState<File | null>(null);
   const [parsedResult, setParsedResult] = useState<ImportParseResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  /** The dropped file is a native container, so there is no browser preview of it. */
+  const [previewUnavailable, setPreviewUnavailable] = useState(false);
   const [importTargetBoqId, setImportTargetBoqId] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<{
@@ -289,6 +314,12 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
       setParsedResult(null);
       setParseError(null);
       setImportResult(null);
+      setPreviewUnavailable(!previewCanRead(file.name));
+
+      if (!previewCanRead(file.name)) {
+        // Nothing to preview and nothing wrong: the server reads this one.
+        return;
+      }
 
       try {
         const result = await parseExcelFile(file, template.excelTemplate.defaultColumns);
@@ -340,7 +371,9 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
   );
 
   const handleImport = useCallback(async () => {
-    if (!parsedResult || !importFile || !importTargetBoqId) return;
+    // A parsed preview is not a precondition. It never was one for the request,
+    // which posts the file, and a native container has no preview to wait for.
+    if (!importFile || !importTargetBoqId) return;
     setIsImporting(true);
 
     // The dispatcher takes the FILE, not the preview. It sniffs magic bytes
@@ -435,12 +468,13 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
     } finally {
       setIsImporting(false);
     }
-  }, [parsedResult, importFile, importTargetBoqId, queryClient, addToast, t]);
+  }, [importFile, importTargetBoqId, queryClient, addToast, t]);
 
   const handleClearImport = useCallback(() => {
     setImportFile(null);
     setParsedResult(null);
     setParseError(null);
+    setPreviewUnavailable(false);
     setImportResult(null);
   }, []);
 
@@ -528,6 +562,13 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
   /* ── Render ────────────────────────────────────────────────────── */
 
   const parsedPositions = parsedResult?.positions ?? null;
+  /**
+   * A file is ready to send once it is chosen and either previewed or known to
+   * be a format only the server reads. Before this the whole target block hung
+   * off the preview, so a BC3 could only be imported because the preview had
+   * invented rows out of it.
+   */
+  const readyToImport = Boolean(importFile) && (previewUnavailable || (parsedPositions?.length ?? 0) > 0);
 
   return (
     <div
@@ -643,6 +684,19 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                     </Badge>
                   </div>
                 )}
+                {previewUnavailable && (
+                  <div
+                    data-testid="regional-no-browser-preview"
+                    className="flex items-center justify-center gap-1.5 text-xs text-content-tertiary"
+                  >
+                    <Info size={14} />
+                    {t('regional.no_browser_preview', {
+                      defaultValue:
+                        'No preview for this format in the browser. The file is read by the {{standard}} reader on import.',
+                      standard: template.excelTemplate.classification,
+                    })}
+                  </div>
+                )}
                 {parseError && (
                   <div className="flex items-center justify-center gap-1.5 text-xs text-rose-600">
                     <AlertTriangle size={14} />
@@ -726,7 +780,7 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
           )}
 
           {/* Target BOQ selection + Import button */}
-          {parsedPositions && parsedPositions.length > 0 && (
+          {readyToImport && (
             <div className="rounded-xl border border-border bg-surface-primary p-5">
               <h3 className="text-sm font-semibold text-content-primary mb-3">
                 {t('regional.target_boq', { defaultValue: 'Import Target' })}
@@ -788,12 +842,23 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                     onClick={handleImport}
                     disabled={!importTargetBoqId || isImporting}
                   >
+                    {/*
+                      Label by the file when there is no preview. Naming a count
+                      the browser never counted is how the old screen came to
+                      offer "Import 2 positions" for a file the server read as
+                      nine.
+                    */}
                     {isImporting
                       ? t('regional.importing', { defaultValue: 'Importing…' })
-                      : t('regional.import_btn', {
-                          defaultValue: 'Import {{count}} positions',
-                          count: parsedPositions.length,
-                        })}
+                      : parsedPositions && parsedPositions.length > 0
+                        ? t('regional.import_btn', {
+                            defaultValue: 'Import {{count}} positions',
+                            count: parsedPositions.length,
+                          })
+                        : t('regional.import_file_btn', {
+                            defaultValue: 'Import {{name}}',
+                            name: importFile?.name ?? '',
+                          })}
                   </Button>
                 </div>
               </div>

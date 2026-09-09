@@ -157,9 +157,23 @@ const CSV_FIXTURE =
   'Ordinal,Description,Unit,Qty,Rate,Total,Code\n' +
   '01.01,Concrete C25/30,m3,10,100,1000,03 30 00\n';
 
+/**
+ * A real FIEBDC budget, in the record layout the backend reader and the BC3
+ * exporter both use. The browser-side parser cannot read it, and that is the
+ * point: it is a native container, not a delimited sheet.
+ */
+const BC3_FIXTURE =
+  '~V|sample.bc3|FIEBDC-3/2020|OpenConstructionERP|26052026|Sample|ISO-8859-1|2||EUR|\r\n' +
+  '~C|01#||01 Movimiento de tierras|0|||1|\r\n' +
+  '~C|01.01|m3|Excavacion en zanja|18.50|||0|\r\n' +
+  '~D|01#|01.01\\1\\120|\r\n' +
+  '~M|01#\\01.01|1|120.000||\r\n';
+
 async function driveImportFlow(
   template: ReturnType<typeof getRegionalTemplate>,
   fetchImpl: typeof fetch,
+  upload: File = new File([CSV_FIXTURE], 'positions.csv', { type: 'text/csv' }),
+  buttonMatcher: RegExp = /Import \d+ positions/,
 ) {
   vi.mocked(apiGet).mockImplementation(async (path: string) => {
     if (path.startsWith('/v1/projects/')) return [{ id: 'p-1', name: 'Harbour works' }];
@@ -173,7 +187,7 @@ async function driveImportFlow(
   const { container } = renderWithProviders(template);
 
   const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
-  const file = new File([CSV_FIXTURE], 'positions.csv', { type: 'text/csv' });
+  const file = upload;
   await act(async () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
   });
@@ -181,6 +195,11 @@ async function driveImportFlow(
   const [projectSelect, boqSelect] = Array.from(
     container.querySelectorAll('select'),
   ) as HTMLSelectElement[];
+  // Wait for the project list before choosing from it. Setting a value an
+  // option list does not carry yet is a no-op that leaves the state empty, and
+  // the CSV path only ever got away with it because awaiting its parse happened
+  // to give the query time to settle.
+  await waitFor(() => expect(projectSelect!.querySelectorAll('option').length).toBe(2));
   await act(async () => {
     fireEvent.change(projectSelect!, { target: { value: 'p-1' } });
   });
@@ -191,12 +210,12 @@ async function driveImportFlow(
 
   const importButton = screen
     .getAllByRole('button')
-    .find((b) => /Import \d+ positions/.test(b.textContent ?? ''));
+    .find((b) => buttonMatcher.test(b.textContent ?? ''));
   await act(async () => {
     fireEvent.click(importButton!);
   });
 
-  return { file };
+  return { file, container, importButton };
 }
 
 describe('RegionalExchangePage - import request', () => {
@@ -267,5 +286,70 @@ describe('RegionalExchangePage - import request', () => {
 
     expect(screen.getByText(/01\.01: quantity is not a number/)).toBeTruthy();
     expect(screen.queryByText(/\[object Object\]/)).toBeNull();
+  });
+});
+
+/* ── Native containers the browser cannot preview ───────────────────── */
+
+/**
+ * The client-side preview is a delimited-text reader. Handed a BC3 it used to
+ * split it on commas anyway and announce the rows it made up: two, cut out of
+ * the file's long-text records, while the server read the same file as nine
+ * positions. The button then said "Import 2 positions" and the result said 9.
+ *
+ * The same reader also read an HTML error page saved under a .bc3 name as three
+ * positions, which is how a broken download looked like a working one.
+ */
+describe('RegionalExchangePage - a format the browser cannot read', () => {
+  const realFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+    vi.mocked(apiGet).mockImplementation(async () => []);
+  });
+
+  const okFetch = () =>
+    vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ imported: 9, errors: [], source_format: 'bc3' }),
+    })) as unknown as typeof fetch;
+
+  it('offers no invented preview for a BC3 and says why', async () => {
+    const bc3 = new File([BC3_FIXTURE], 'es-pbc-sample.bc3', { type: 'text/plain' });
+    await driveImportFlow(getRegionalTemplate('es-pbc'), okFetch(), bc3, /Import es-pbc-sample\.bc3/);
+
+    expect(screen.getByTestId('regional-no-browser-preview')).toBeTruthy();
+    // Not "0 positions found" and not a made-up count either: no count at all.
+    expect(screen.queryByText(/positions found/i)).toBeNull();
+    // And not an error. The file is fine; this browser just does not read it.
+    expect(screen.queryByText(/Ensure the file matches the expected layout/i)).toBeNull();
+  });
+
+  it('still imports it, and posts the file itself', async () => {
+    const fetchMock = okFetch();
+    const bc3 = new File([BC3_FIXTURE], 'es-pbc-sample.bc3', { type: 'text/plain' });
+    const { file } = await driveImportFlow(
+      getRegionalTemplate('es-pbc'),
+      fetchMock,
+      bc3,
+      /Import es-pbc-sample\.bc3/,
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = vi.mocked(fetchMock).mock.calls[0]!;
+    expect(url).toBe('/api/v1/boq/boqs/boq-9/import/auto/');
+    expect((init!.body as FormData).get('file')).toBe(file);
+    // The answer on screen is the server's nine, and nothing on the way there
+    // ever offered a number of its own.
+    expect(screen.getByText(/9 positions imported/i)).toBeTruthy();
+  });
+
+  it('leaves the CSV path alone', async () => {
+    // The control. Without it, a flag stuck on would pass both tests above and
+    // silently take the preview away from every format that has one.
+    await driveImportFlow(getRegionalTemplate('us-masterformat'), okFetch());
+
+    expect(screen.queryByTestId('regional-no-browser-preview')).toBeNull();
+    expect(screen.getByText(/positions found/i)).toBeTruthy();
   });
 });

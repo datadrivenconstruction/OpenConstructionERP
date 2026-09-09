@@ -185,6 +185,9 @@ export const manifest: ModuleManifest = {
       'regional.no_positions_msg': 'This BOQ has no positions to export.',
       'regional.trades_ref': '{{standard}} Reference',
       'regional.download_sample': 'Download a sample file to try it',
+      'regional.no_browser_preview':
+        'No preview for this format in the browser. The file is read by the {{standard}} reader on import.',
+      'regional.import_file_btn': 'Import {{name}}',
       'regional.clear_file': 'Clear file',
       'regional.open_boq': 'Open in BOQ editor to review & validate →',
       'regional.info':
