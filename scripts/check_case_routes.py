@@ -17,12 +17,16 @@ and any failure it reports is new.
 
 Two lists, one comparison:
 
-  - Every ``path="..."`` in ``frontend/src/app/App.tsx``, plus every route a
-    bundled module declares in ``frontend/src/modules/*/manifest.ts(x)``.
-    Modules mount their routes into the same ``<Routes>`` through
-    ``useModuleRouteElements``, so App.tsx alone is not the route table. The
-    catch-all ``*`` is deliberately excluded: it matches everything, so
-    counting it as a match would make this file always pass and mean nothing.
+  - The route table, from ``scripts/app_routes.py``. That module reads
+    ``frontend/src/app/App.tsx`` and every bundled module manifest, and it
+    resolves the paths a manifest computes from a table rather than skipping
+    them. This file used to read both sources itself, with a regex that saw
+    only quoted literals, and so did the gate that compares the router against
+    the reverse proxy's allowlist; the two collectors disagreed, and the twenty
+    routes ``regional-exchange`` builds from ``COUNTRY_TEMPLATES`` were
+    invisible to both. There is one collector now. The catch-all ``*`` is
+    deliberately excluded here: it matches everything, so counting it as a
+    match would make this file always pass and mean nothing.
   - Every ``to`` in ``frontend/src/features/cases/data/*.playbook.ts``.
 
 Matching is segment-wise rather than by string equality, because a route
@@ -45,65 +49,19 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from app_routes import collect, print_unresolved, require_self_test  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 APP_TSX = REPO_ROOT / "frontend" / "src" / "app" / "App.tsx"
 MODULES_DIR = REPO_ROOT / "frontend" / "src" / "modules"
-MANIFEST_NAMES = ("manifest.ts", "manifest.tsx")
 PLAYBOOK_DIR = REPO_ROOT / "frontend" / "src" / "features" / "cases" / "data"
 PLAYBOOK_GLOB = "*.playbook.ts"
 
-ROUTE_PATH_RE = re.compile(r'path="([^"]*)"')
-# A module manifest writes its routes as object literals, so the path is a
-# `path:` property rather than a JSX attribute. Both quote styles appear.
-MANIFEST_PATH_RE = re.compile(r"""path:\s*(["'])(/[^"'\n]*)\1""")
-DEFAULT_ENABLED_FALSE_RE = re.compile(r"defaultEnabled:\s*false")
 # `to` inside a playbook step. Single and double quotes both appear in the tree.
 STEP_TO_RE = re.compile(r"""^\s*to:\s*(["'])([^"']*)\1""", re.MULTILINE)
 PLAYBOOK_ID_RE = re.compile(r"""^\s*id:\s*(["'])([^"']*)\1""", re.MULTILINE)
-
-
-def read_routes(path: Path) -> list[str]:
-    """Every route path declared in App.tsx, catch-all excluded."""
-    source = path.read_text(encoding="utf-8", errors="replace")
-    return [p for p in ROUTE_PATH_RE.findall(source) if p != "*"]
-
-
-def read_module_routes(directory: Path) -> list[str]:
-    """Every route path a bundled module declares in its manifest.
-
-    App.tsx is not the whole route table. ``useModuleRouteElements`` mounts
-    ``manifest.routes`` for every enabled module inside the same ``<Routes>``,
-    so a module screen such as ``/gaeb-exchange`` is exactly as reachable as
-    anything written in App.tsx. Reading only App.tsx calls it dead, and that
-    is what happened: the first case to link a module screen turned this lane
-    red for a route that works. ``cases.test.ts`` already read both sources.
-
-    Modules that ship disabled are skipped on purpose. Their routes are not
-    mounted until the reader turns the module on, so a step pointing at one
-    really does dead-end on a default install. regional-exchange is the live
-    example: it declares twenty country screens and ships off, so a case that
-    links ``/us-masterformat-exchange`` has to say "enable the module first"
-    or point somewhere else, and this guard is right to call it dead.
-
-    Only literal paths are read, and manifests are read as text rather than
-    imported, the same trade-off ``cases.test.ts`` makes. A module that builds
-    its paths from a table (again regional-exchange, ``/${tpl.routeSlug}``) is
-    invisible here; it is also disabled, so nothing is missed today, and if one
-    is ever both enabled and table-built the result is a loud false failure
-    rather than a silent pass. Both manifest extensions are read because
-    regional-exchange keeps its manifest in a ``.tsx``.
-    """
-    routes: list[str] = []
-    for module_dir in sorted(p for p in directory.iterdir() if p.is_dir()):
-        manifests = [module_dir / name for name in MANIFEST_NAMES]
-        manifest = next((m for m in manifests if m.is_file()), None)
-        if manifest is None:
-            continue
-        source = manifest.read_text(encoding="utf-8", errors="replace")
-        if DEFAULT_ENABLED_FALSE_RE.search(source):
-            continue
-        routes.extend(path for _, path in MANIFEST_PATH_RE.findall(source))
-    return routes
 
 
 def segments(path: str) -> list[str]:
@@ -156,8 +114,30 @@ def main() -> int:
         print(f"ERROR: {PLAYBOOK_DIR} not found", file=sys.stderr)
         return 1
 
-    app_routes = read_routes(APP_TSX)
-    module_routes = read_module_routes(MODULES_DIR) if MODULES_DIR.is_dir() else []
+    # The collector proves it can still read a route table, and still refuse one,
+    # before this guard builds a verdict on what it returns. A collector that has
+    # quietly stopped matching returns a short list, and a short list is what makes
+    # a dead case step look alive.
+    require_self_test()
+
+    table = collect(app_tsx=APP_TSX, modules_dir=MODULES_DIR)
+
+    # A route declaration the collector found and could not read is not a
+    # reason to carry on with a shorter list. The shorter list is what makes a
+    # dead case step look alive, and it is what made twenty shipped screens
+    # look like screens nobody had.
+    if table.unresolved:
+        print_unresolved(table)
+        return 1
+
+    # Routes owned by a module that ships switched off are excluded here on
+    # purpose, and only here. Their routes are not mounted until the reader
+    # turns the module on, so a step pointing at one really does dead-end on a
+    # default install. The proxy allowlist gate wants the opposite set, because
+    # enablement is client side and a visitor who switches a module on still
+    # has to get through Caddy to reach it.
+    app_routes = [r.path for r in table.app_routes if r.path != "*"]
+    module_routes = [r.path for r in table.module_routes if r.default_enabled is not False]
     routes = app_routes + module_routes
     steps = read_steps(PLAYBOOK_DIR)
 
@@ -197,6 +177,9 @@ def main() -> int:
             )
 
     if dead:
+        # stdout is block buffered into a pipe and stderr is not, so without
+        # this the verdict below overtakes what the collector printed above it.
+        sys.stdout.flush()
         print(
             f"Case steps pointing at screens that do not exist: {len(dead)}",
             file=sys.stderr,
@@ -214,10 +197,14 @@ def main() -> int:
         return 1
 
     cases = len({case_id for case_id, _ in steps})
+    resolved_from_table = sum(
+        1 for r in table.module_routes if r.origin == "resolved" and r.default_enabled is not False
+    )
     print(
         f"case routes OK: {len(steps)} steps across {cases} cases, "
         f"all resolve against {len(routes)} declared routes "
-        f"({len(app_routes)} in App.tsx, {len(module_routes)} from module manifests)"
+        f"({len(app_routes)} in App.tsx, {len(module_routes)} from module manifests, "
+        f"{resolved_from_table} of those resolved from a table)"
     )
     return 0
 

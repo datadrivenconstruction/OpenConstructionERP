@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 76. They run on every push and pull request, grouped into three
+# Guards: 77. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -201,6 +201,25 @@ jobs:
       - name: Check case step targets against the route table
         if: ${{ !cancelled() }}
         run: python scripts/check_case_routes.py
+
+      # The public origin serves the marketing site and the app from one
+      # hostname, and Caddy decides which a URL belongs to from one allowlist of
+      # top-level segments. A route the app serves that the list does not carry
+      # never reaches the app at all: the visitor gets the static site's 404. On
+      # 2026-09-09 that was the whole regional BOQ exchange feature, the hub plus
+      # twenty country screens, and the gate that exists for this was run that
+      # same day and passed over every one of them, because it read App.tsx and
+      # those routes come from a module manifest that builds them from a table.
+      #
+      # This compares against the committed mirror, not the host: the runner has
+      # no access to the VPS. That catches the common case, a route added with
+      # nothing added to the proxy, on the commit that adds it. The mirror is
+      # extracted from a real Caddyfile and never generated from the routes, and
+      # `--compare-mirror --caddyfile <live file>` is the manual step that checks
+      # the mirror against the host. See the script header.
+      - name: Check app routes against the proxy allowlist mirror
+        if: ${{ !cancelled() }}
+        run: python scripts/check_app_route_allowlist.py
 
       # frontend/src/features/cases/countryPortraits.generated.ts is derived
       # from the filenames under frontend/public/assets/people and imported at

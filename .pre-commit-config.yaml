@@ -184,6 +184,25 @@ repos:
         language: system
         pass_filenames: false
 
+      # The public origin serves the marketing site and the app from one
+      # hostname, and Caddy picks between them from one allowlist of top-level
+      # path segments. A route the app serves that the list does not carry never
+      # reaches the app: the visitor gets the static site's 404. On 2026-09-09
+      # that was the whole regional BOQ exchange feature, twenty one routes, and
+      # the gate that existed for it passed over every one of them because it
+      # read App.tsx alone and those routes come from a module manifest.
+      #
+      # A hook rather than a lane check alone, because the commit that adds a
+      # route is where the answer is cheapest: the script reads the tree and the
+      # committed allowlist mirror, no network, under a second. It runs whole
+      # tree rather than on staged files, since a route in one file and the
+      # allowlist in another are the two halves being compared.
+      - id: app-route-allowlist-check
+        name: Check app routes against the proxy allowlist mirror
+        entry: python scripts/check_app_route_allowlist.py
+        language: system
+        pass_filenames: false
+
       # Refuse a commit whose Python imports a module the same commit does not
       # carry. The module is usually right there on the author's disk, untracked,
       # so everything imports and every test passes locally and the backend fails
