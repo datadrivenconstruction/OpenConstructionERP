@@ -21,9 +21,6 @@
   "cases.pay_davis_bacon_wages_and_file_the_certified_payroll.desc",
   "cases.pay_davis_bacon_wages_and_file_the_certified_payroll.longdesc"
  ],
- "pl.ts": [
-  "cases.certify_the_month_against_the_mediciones.step.measure.what"
- ],
  "ro.ts": [
   "cases.budget_development_contributions_for_a_territorial_authority.longdesc"
  ]
