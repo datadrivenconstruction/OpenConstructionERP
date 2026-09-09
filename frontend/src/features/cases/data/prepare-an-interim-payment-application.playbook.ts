@@ -177,13 +177,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.prepare_an_interim_payment_application.step.issue.title",
-      titleDefault: "Issue the interim application against the approved figure",
+      titleDefault: "Issue the interim application against the interim valuation behind it",
       whatKey: "cases.prepare_an_interim_payment_application.step.issue.what",
       whatDefault:
-        "Raise the interim application against the approved interim valuation, carrying retention and any deduction the contract provides for, and reference the interim valuation on it.",
+        "Raise the interim application against the interim valuation behind it, carrying retention and any deduction the contract provides for, and reference the interim valuation on it.",
       whyKey: "cases.prepare_an_interim_payment_application.step.issue.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the interim valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any interim application the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the interim valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Reports",
       moduleLabelKey: "nav.reports",
       to: "/reports",

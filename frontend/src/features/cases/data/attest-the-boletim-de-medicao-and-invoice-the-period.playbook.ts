@@ -173,7 +173,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.what",
       whatDefault:
-        "Route the boletim de medicao to the fiscal do contrato, and to whoever the contract adds after them. Keep the approval date, because the nota fiscal follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the boletim de medicao to the fiscal do contrato, and to whoever the contract adds after them. Keep the approval date, because the nota fiscal follows the approval and the payment clock runs from the attestation of the boletim de medicao, so an approval that slips moves everything behind it.",
       whyKey: "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -205,13 +205,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.notafiscal.title",
-      titleDefault: "Issue the nota fiscal against the approved figure",
+      titleDefault: "Issue the nota fiscal against the attested boletim de medicao",
       whatKey: "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.notafiscal.what",
       whatDefault:
-        "Raise the nota fiscal against the approved boletim de medicao, carrying retencao contratual and any deduction the contract provides for, and reference the boletim de medicao on it. Reference the attested boletim on the nota fiscal itself. The accounts match the two by that reference, and an invoice carrying no reference is one a clerk has to chase somebody to explain.",
+        "Raise the nota fiscal against the attested boletim de medicao, carrying retencao contratual and any deduction the contract provides for, and reference the boletim de medicao on it. Reference the attested boletim on the nota fiscal itself. The accounts match the two by that reference, and an invoice carrying no reference is one a clerk has to chase somebody to explain.",
       whyKey: "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.notafiscal.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the boletim de medicao also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any nota fiscal the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the boletim de medicao also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

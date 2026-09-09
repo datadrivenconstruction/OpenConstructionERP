@@ -29,6 +29,7 @@
     "excessTerm": "termo aditivo",
     "retentionTerm": "retencao contratual",
     "payDoc": "nota fiscal",
+    "payAgainst": "the attested boletim de medicao",
     "clockRegime": "the contract payment terms under Lei 14.133",
     "clockStart": "the attestation of the boletim de medicao",
     "payDays": "30",

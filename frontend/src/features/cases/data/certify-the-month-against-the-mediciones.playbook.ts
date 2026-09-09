@@ -135,7 +135,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.certify_the_month_against_the_mediciones.step.approve.what",
       whatDefault:
-        "Route the certificación to the dirección facultativa, and to whoever the contract adds after them. Keep the approval date, because the invoice follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the certificación to the dirección facultativa, and to whoever the contract adds after them. Keep the approval date, because the invoice follows the approval and the payment clock runs from the day the client receives the invoice, so an approval that slips moves everything behind it.",
       whyKey: "cases.certify_the_month_against_the_mediciones.step.approve.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -167,13 +167,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.certify_the_month_against_the_mediciones.step.invoice.title",
-      titleDefault: "Issue the invoice against the approved figure",
+      titleDefault: "Issue the invoice against the approved certificación",
       whatKey: "cases.certify_the_month_against_the_mediciones.step.invoice.what",
       whatDefault:
         "Raise the invoice against the approved certificación, carrying retención and any deduction the contract provides for, and reference the certificación on it. Between businesses the invoice usually carries inversión del sujeto pasivo rather than a rate, so the customer accounts for the tax and the invoice has to say so on its face.",
       whyKey: "cases.certify_the_month_against_the_mediciones.step.invoice.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the certificación also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any invoice the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the certificación also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

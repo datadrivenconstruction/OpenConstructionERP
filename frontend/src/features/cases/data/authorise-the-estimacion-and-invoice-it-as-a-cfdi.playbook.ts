@@ -175,7 +175,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.authorise_the_estimacion_and_invoice_it_as_a_cfdi.step.autorizar.what",
       whatDefault:
-        "Route the estimacion to the residente de obra, and to whoever the contract adds after them. Keep the approval date, because the CFDI follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the estimacion to the residente de obra, and to whoever the contract adds after them. Keep the approval date, because the CFDI follows the approval and the payment clock runs from the authorisation of the estimacion, so an approval that slips moves everything behind it.",
       whyKey: "cases.authorise_the_estimacion_and_invoice_it_as_a_cfdi.step.autorizar.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -207,13 +207,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.authorise_the_estimacion_and_invoice_it_as_a_cfdi.step.cfdi.title",
-      titleDefault: "Issue the CFDI against the approved figure",
+      titleDefault: "Issue the CFDI against the authorised estimacion",
       whatKey: "cases.authorise_the_estimacion_and_invoice_it_as_a_cfdi.step.cfdi.what",
       whatDefault:
-        "Raise the CFDI against the approved estimacion, carrying fondo de garantia and any deduction the contract provides for, and reference the estimacion on it. A stamped CFDI is corrected by cancelling it and issuing another, not by editing it, so the figure has to be right before it is stamped rather than after.",
+        "Raise the CFDI against the authorised estimacion, carrying fondo de garantia and any deduction the contract provides for, and reference the estimacion on it. A stamped CFDI is corrected by cancelling it and issuing another, not by editing it, so the figure has to be right before it is stamped rather than after.",
       whyKey: "cases.authorise_the_estimacion_and_invoice_it_as_a_cfdi.step.cfdi.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the estimacion also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any CFDI the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the estimacion also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

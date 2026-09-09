@@ -29,6 +29,7 @@
     "excessTerm": "variation",
     "retentionTerm": "retention",
     "payDoc": "payment claim",
+    "payAgainst": "the valuation for the period",
     "clockRegime": "the Security of Payment Act",
     "clockStart": "the day the payment claim is served",
     "payDays": "15 business",

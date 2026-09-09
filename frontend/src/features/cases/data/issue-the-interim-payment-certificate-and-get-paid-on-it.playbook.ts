@@ -175,7 +175,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.what",
       whatDefault:
-        "Route the payment valuation to the principal agent, and to whoever the contract adds after them. Keep the approval date, because the tax invoice follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. The principal agent's approval is the interim payment certificate itself, issued by the date for issue the contract data fixes each month. Record that date beside the day the certificate actually arrived, because the payment count runs from the first and a certificate issued late does not move it.",
+        "Route the payment valuation to the principal agent, and to whoever the contract adds after them. Keep the approval date, because the tax invoice follows the approval and the payment clock runs from the date for issue of the payment certificate fixed in the contract data, so an approval that slips moves everything behind it. The principal agent's approval is the interim payment certificate itself, issued by the date for issue the contract data fixes each month. Record that date beside the day the certificate actually arrived, because the payment count runs from the first and a certificate issued late does not move it.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.certify.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -207,13 +207,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.invoice.title",
-      titleDefault: "Issue the tax invoice against the approved figure",
+      titleDefault: "Issue the tax invoice against the approved payment valuation",
       whatKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.invoice.what",
       whatDefault:
         "Raise the tax invoice against the approved payment valuation, carrying retention and any deduction the contract provides for, and reference the payment valuation on it. Quote the certificate number and the certified amount on the invoice, since the employer's accounts pay against the certificate and not against the valuation.",
       whyKey: "cases.issue_the_interim_payment_certificate_and_get_paid_on_it.step.invoice.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the payment valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any tax invoice the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the payment valuation also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

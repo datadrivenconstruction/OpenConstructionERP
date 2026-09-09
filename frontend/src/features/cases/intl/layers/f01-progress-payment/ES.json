@@ -29,6 +29,7 @@
     "excessTerm": "exceso de medición",
     "retentionTerm": "retención",
     "payDoc": "invoice",
+    "payAgainst": "the approved certificación",
     "clockRegime": "Ley 3/2004",
     "clockStart": "the day the client receives the invoice",
     "payDays": "30",

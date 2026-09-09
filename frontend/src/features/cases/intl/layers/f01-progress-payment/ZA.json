@@ -29,6 +29,7 @@
     "excessTerm": "contract instruction",
     "retentionTerm": "retention",
     "payDoc": "tax invoice",
+    "payAgainst": "the approved payment valuation",
     "clockRegime": "the JBCC payment clause",
     "clockStart": "the date for issue of the payment certificate fixed in the contract data",
     "payDays": "14 calendar",

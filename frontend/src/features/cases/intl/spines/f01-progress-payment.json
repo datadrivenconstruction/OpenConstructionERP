@@ -11,6 +11,7 @@
     "excessTerm": "A quantity measured past what the contract carries",
     "retentionTerm": "Money held back from each payment against defects",
     "payDoc": "The document that actually asks for the money",
+    "payAgainst": "What the {payDoc} is raised against: an approved valuation where the arc has one, and the measure behind the claim where it does not",
     "clockRegime": "The statutory or contractual regime that sets the payment deadlines",
     "clockStart": "The event the payment clock starts counting from",
     "payDays": "Days from clockStart to the payment becoming due",
@@ -87,7 +88,7 @@
     },
     "certify": {
       "title": "Get it approved by the people who have to approve it",
-      "what": "Route the {valuationDoc} to the {certifier}, and to whoever the contract adds after them. Keep the approval date, because the {payDoc} follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+      "what": "Route the {valuationDoc} to the {certifier}, and to whoever the contract adds after them. Keep the approval date, because the {payDoc} follows the approval and the payment clock runs from {clockStart}, so an approval that slips moves everything behind it.",
       "why": "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
       "module": "Approval routes",
       "moduleKey": "approvalRoutes.title",
@@ -103,9 +104,9 @@
       ]
     },
     "invoice": {
-      "title": "Issue the {payDoc} against the approved figure",
-      "what": "Raise the {payDoc} against the approved {valuationDoc}, carrying {retentionTerm} and any deduction the contract provides for, and reference the {valuationDoc} on it.",
-      "why": "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the {valuationDoc} also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+      "title": "Issue the {payDoc} against {payAgainst}",
+      "what": "Raise the {payDoc} against {payAgainst}, carrying {retentionTerm} and any deduction the contract provides for, and reference the {valuationDoc} on it.",
+      "why": "Any {payDoc} the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the {valuationDoc} also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       "module": "Finance",
       "moduleKey": "nav.finance",
       "to": "/projects/:projectId/finance",

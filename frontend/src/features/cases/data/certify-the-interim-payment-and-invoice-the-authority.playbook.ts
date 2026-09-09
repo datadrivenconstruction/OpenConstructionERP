@@ -210,7 +210,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.certify_the_interim_payment_and_invoice_the_authority.step.certify.what",
       whatDefault:
-        "Route the interim payment certificate to the Engineer, and to whoever the contract adds after them. Keep the approval date, because the invoice follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it.",
+        "Route the interim payment certificate to the Engineer, and to whoever the contract adds after them. Keep the approval date, because the invoice follows the approval and the payment clock runs from the day the invoice is submitted against the issued certificate, so an approval that slips moves everything behind it.",
       whyKey: "cases.certify_the_interim_payment_and_invoice_the_authority.step.certify.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -242,13 +242,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.certify_the_interim_payment_and_invoice_the_authority.step.invoice.title",
-      titleDefault: "Issue the invoice against the approved figure",
+      titleDefault: "Issue the invoice against the approved interim payment certificate",
       whatKey: "cases.certify_the_interim_payment_and_invoice_the_authority.step.invoice.what",
       whatDefault:
         "Raise the invoice against the approved interim payment certificate, carrying retention and any deduction the contract provides for, and reference the interim payment certificate on it.",
       whyKey: "cases.certify_the_interim_payment_and_invoice_the_authority.step.invoice.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the interim payment certificate also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any invoice the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the interim payment certificate also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

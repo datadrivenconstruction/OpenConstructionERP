@@ -136,7 +136,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.igazolas.what",
       whatDefault:
-        "Route the teljesitesigazolas to the muszaki ellenor, and to whoever the contract adds after them. Keep the approval date, because the szamla follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. The decree on construction contracting gives the muszaki ellenor fifteen working days from your written notice that the performance is complete to issue the teljesitesigazolas or refuse it with reasons, and the szamla cannot lawfully be issued before it, so record the day the notice went in: the fifteen days run from it.",
+        "Route the teljesitesigazolas to the muszaki ellenor, and to whoever the contract adds after them. Keep the approval date, because the szamla follows the approval and the payment clock runs from the day the szamla is received, so an approval that slips moves everything behind it. The decree on construction contracting gives the muszaki ellenor fifteen working days from your written notice that the performance is complete to issue the teljesitesigazolas or refuse it with reasons, and the szamla cannot lawfully be issued before it, so record the day the notice went in: the fifteen days run from it.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.igazolas.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint. A certificate that is refused and a certificate that has simply not arrived look identical from the contractor's side, and the remedies for them are different. Recording the submission date is what tells the two apart.",
@@ -168,13 +168,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.szamla.title",
-      titleDefault: "Issue the szamla against the approved figure",
+      titleDefault: "Issue the szamla against the signed teljesitesigazolas",
       whatKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.szamla.what",
       whatDefault:
-        "Raise the szamla against the approved teljesitesigazolas, carrying visszatartas and any deduction the contract provides for, and reference the teljesitesigazolas on it. Between domestic VAT-registered businesses the reverse charge applies to construction and installation work on a property that needs a permit from, or a notification to, any authority, so the szamla carries the words forditott adozas and no tax, the customer accounts for the twenty-seven percent, and the invoice is reported to NAV online at issue like every other.",
+        "Raise the szamla against the signed teljesitesigazolas, carrying visszatartas and any deduction the contract provides for, and reference the teljesitesigazolas on it. Between domestic VAT-registered businesses the reverse charge applies to construction and installation work on a property that needs a permit from, or a notification to, any authority, so the szamla carries the words forditott adozas and no tax, the customer accounts for the twenty-seven percent, and the invoice is reported to NAV online at issue like every other.",
       whyKey: "cases.get_the_teljesitesigazolas_signed_and_invoice_the_period.step.szamla.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the teljesitesigazolas also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any szamla the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the teljesitesigazolas also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

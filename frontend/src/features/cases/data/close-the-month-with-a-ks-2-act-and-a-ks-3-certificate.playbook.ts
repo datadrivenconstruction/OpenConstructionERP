@@ -136,7 +136,7 @@ const playbook: Playbook = {
       titleDefault: "Get it approved by the people who have to approve it",
       whatKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.sign.what",
       whatDefault:
-        "Route the KS-2 act to the client's technical supervisor, and to whoever the contract adds after them. Keep the approval date, because the KS-3 certificate follows the approval and the payment clock runs from there, so an approval that slips moves everything behind it. On a state contract under 44-FZ the act is signed as the acceptance document in the EIS, the customer has the period the contract sets and at most twenty working days to sign it or refuse it with reasons, and payment then falls due within seven working days of that signature.",
+        "Route the KS-2 act to the client's technical supervisor, and to whoever the contract adds after them. Keep the approval date, because the KS-3 certificate follows the approval and the payment clock runs from the day the KS-2 act is signed, so an approval that slips moves everything behind it. On a state contract under 44-FZ the act is signed as the acceptance document in the EIS, the customer has the period the contract sets and at most twenty working days to sign it or refuse it with reasons, and payment then falls due within seven working days of that signature.",
       whyKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.sign.why",
       whyDefault:
         "Approval sitting in an inbox is the most common reason a payment is late, and it is invisible while it is happening because nobody has refused anything. A route with a date on each hop turns that into a question with an owner instead of a monthly complaint.",
@@ -203,13 +203,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.ks3.title",
-      titleDefault: "Issue the KS-3 certificate against the approved figure",
+      titleDefault: "Issue the KS-3 certificate against the signed KS-2 act",
       whatKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.ks3.what",
       whatDefault:
-        "Raise the KS-3 certificate against the approved KS-2 act, carrying guarantee retention and any deduction the contract provides for, and reference the KS-2 act on it. The KS-3 carries the VAT line, at twenty-two percent since January 2026, and the VAT invoice (schet-faktura), or the universal transfer document that replaces the act and the invoice together, follows within five calendar days of the KS-2 signature, because that signature is the tax point for the works.",
+        "Raise the KS-3 certificate against the signed KS-2 act, carrying guarantee retention and any deduction the contract provides for, and reference the KS-2 act on it. The KS-3 carries the VAT line, at twenty-two percent since January 2026, and the VAT invoice (schet-faktura), or the universal transfer document that replaces the act and the invoice together, follows within five calendar days of the KS-2 signature, because that signature is the tax point for the works.",
       whyKey: "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.step.ks3.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the KS-2 act also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any KS-3 certificate the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the KS-2 act also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Finance",
       moduleLabelKey: "nav.finance",
       to: "/projects/:projectId/finance",

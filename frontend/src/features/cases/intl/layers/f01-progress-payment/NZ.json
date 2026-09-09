@@ -29,6 +29,7 @@
     "excessTerm": "variation",
     "retentionTerm": "retentions",
     "payDoc": "payment claim",
+    "payAgainst": "the progress valuation behind it",
     "clockRegime": "the Construction Contracts Act",
     "clockStart": "the day the payment claim is served",
     "payDays": "20 working",

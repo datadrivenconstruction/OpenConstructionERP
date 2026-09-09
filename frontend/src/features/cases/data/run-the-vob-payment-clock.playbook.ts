@@ -98,13 +98,13 @@ const playbook: Playbook = {
         },
       ],
       titleKey: "cases.run_the_vob_payment_clock.step.claim.title",
-      titleDefault: "Issue the Abschlagsrechnung against the approved figure",
+      titleDefault: "Issue the Abschlagsrechnung against the Aufmass behind it",
       whatKey: "cases.run_the_vob_payment_clock.step.claim.what",
       whatDefault:
-        "Raise the Abschlagsrechnung against the approved Aufmass, carrying Sicherheitseinbehalt and any deduction the contract provides for, and reference the Aufmass on it. Take the Aufmass jointly with the client's site supervision wherever you can, as paragraph 14 (2) VOB/B provides, and attach it as the pruefbare Aufstellung, the verifiable statement of work an Abschlagsrechnung has to carry under paragraph 16 (1) VOB/B. Where the client is itself a construction business and holds a USt 1 TG certificate, the tax is accounted for by the client under paragraph 13b UStG, so the invoice carries the reverse-charge note and no tax rate.",
+        "Raise the Abschlagsrechnung against the Aufmass behind it, carrying Sicherheitseinbehalt and any deduction the contract provides for, and reference the Aufmass on it. Take the Aufmass jointly with the client's site supervision wherever you can, as paragraph 14 (2) VOB/B provides, and attach it as the pruefbare Aufstellung, the verifiable statement of work an Abschlagsrechnung has to carry under paragraph 16 (1) VOB/B. Where the client is itself a construction business and holds a USt 1 TG certificate, the tax is accounted for by the client under paragraph 13b UStG, so the invoice carries the reverse-charge note and no tax rate.",
       whyKey: "cases.run_the_vob_payment_clock.step.claim.why",
       whyDefault:
-        "A demand for a figure nobody approved is one that will be returned, and the clock does not start on a returned document. Matching it to the Aufmass also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
+        "Any Abschlagsrechnung the other side cannot check against the measure behind it comes back, and the clock does not start on a returned document. Matching it to the Aufmass also means the accounts and the valuation tell the same story at year end without anybody reconciling them by hand.",
       moduleLabel: "Contracts",
       moduleLabelKey: "nav.contracts",
       to: "/projects/:projectId/contracts",

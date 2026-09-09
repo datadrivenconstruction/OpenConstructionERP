@@ -29,6 +29,7 @@
     "excessTerm": "potmunka",
     "retentionTerm": "visszatartas",
     "payDoc": "szamla",
+    "payAgainst": "the signed teljesitesigazolas",
     "clockRegime": "Ptk. 6:130",
     "clockStart": "the day the szamla is received",
     "payDays": "30",

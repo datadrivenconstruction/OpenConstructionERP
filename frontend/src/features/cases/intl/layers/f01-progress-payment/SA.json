@@ -29,6 +29,7 @@
     "excessTerm": "variation order",
     "retentionTerm": "retention",
     "payDoc": "invoice",
+    "payAgainst": "the approved interim payment certificate",
     "clockRegime": "the government procurement payment rules",
     "clockStart": "the day the invoice is submitted against the issued certificate",
     "payDays": "30",
