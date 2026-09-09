@@ -1,10 +1,30 @@
-# Migration guide — OpenConstructionERP v4.5 → v4.6
+# Migration guide - OpenConstructionERP v4.5 -> v4.6
 
-Covers v4.5.0 → v4.6.0. No breaking API changes; two new alembic revisions; one new
+> **This is a historical note for one version pair, not the current deployment
+> procedure.** It describes the product as it stood at v4.6.0 and it is kept
+> because that upgrade path is still a fair record of what those two releases
+> needed. Three things it says were true then and are not true now, and each of
+> them will break an installation if carried forward:
+>
+> - It installs a wheel over the deployment with `pip install --upgrade`. A
+>   deployment that runs from a git checkout, which is how ours runs, is
+>   overwritten by that command.
+> - It runs `alembic -c backend/alembic.ini upgrade head`. The schema moves at
+>   boot now, through the automatic migration pass plus `create_all`, and
+>   running alembic by hand against a populated database sets a revision the
+>   boot path does not expect.
+> - It assumes SQLite at `data/openestimate.db`. Production has been
+>   PostgreSQL since August 2026, so the backup command here backs up nothing.
+>
+> `alembic_head_matches: false` in `/api/health` is also not a fault on the
+> boot-heal path, and the checklist at the end of this file reads it as one.
+> Do not roll back a healthy deployment on the strength of that line.
+
+Covers v4.5.0 -> v4.6.0. No breaking API changes; two new alembic revisions; one new
 required-default column on `accommodation_bookings`; one new optional `UserPreference`
 key (dashboard layout) that auto-migrates from `localStorage`.
 
-If you are on v4.4.x or earlier, run the v4.4→v4.5 migration first, then this one.
+If you are on v4.4.x or earlier, run the v4.4->v4.5 migration first, then this one.
 
 ---
 
