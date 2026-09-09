@@ -25,14 +25,6 @@
   "cases.certify_the_month_against_the_mediciones.step.measure.what"
  ],
  "ro.ts": [
-  "cases.budget_development_contributions_for_a_territorial_authority.longdesc",
-  "guide.ai_estimator.tips.body",
-  "guide.benchmarks.inputs.body",
-  "guide.benchmarks.reading.body",
-  "guide.match.run.body",
-  "guide.match.scope.body",
-  "howto.carbon.tip.1",
-  "howto.changeorders.when",
-  "howto.contacts.summary"
+  "cases.budget_development_contributions_for_a_territorial_authority.longdesc"
  ]
 }
