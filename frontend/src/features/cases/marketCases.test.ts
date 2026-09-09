@@ -54,6 +54,10 @@ describe('resolveHomeMarket, the language table', () => {
       ['ru', 'RU'],
       ['ar', 'SA'],
       ['en-US', 'US'],
+      // Hungarian answered 'nearest' through the fallback table while the
+      // language sat on disk unregistered; it declares Hungary since it was
+      // offered, so it is the language step that answers now.
+      ['hu', 'HU'],
     ] as const) {
       expect(resolve(language), language).toEqual({ market, source: 'language' });
       expect(homeMarketForLanguage(language, MARKETS), language).toBe(market);
@@ -77,7 +81,6 @@ describe('resolveHomeMarket, the language table', () => {
     expect(resolve('pt')).toEqual({ market: 'BR', source: 'nearest' });
     expect(resolve('fr')).toEqual({ market: 'CA', source: 'nearest' });
     expect(resolve('bn')).toEqual({ market: 'IN', source: 'nearest' });
-    expect(resolve('hu')).toEqual({ market: 'HU', source: 'nearest' });
     // A regional tag with no row of its own reads through its base language.
     expect(resolve('pt-PT')).toEqual({ market: 'BR', source: 'nearest' });
   });

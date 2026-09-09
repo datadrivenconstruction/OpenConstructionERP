@@ -52,6 +52,7 @@ const EXPECTED: Record<string, string> = {
   fi: 'fi',
   bg: 'bg',
   hr: 'hr',
+  hu: 'hu',
   id: 'id',
   ro: 'ro',
   th: 'th',

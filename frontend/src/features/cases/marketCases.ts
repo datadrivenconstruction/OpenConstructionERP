@@ -80,9 +80,11 @@ export const NEAREST_MARKETS_BY_LANGUAGE: Readonly<Record<string, readonly strin
   fr: ['CA'],
   // Bengali declares Bangladesh; the Indian cases are the nearest market.
   bn: ['IN'],
-  // Hungarian is on disk and not yet offered, so the registry declares no
-  // country for it. This row keeps the Hungarian case reachable meanwhile and
-  // becomes redundant, not wrong, the day the language is registered.
+  // Hungarian is offered and the registry declares Hungary for it, so the
+  // language step answers this reader first. The row dates from the months
+  // the language sat on disk unregistered, and stays as a fallback the way
+  // the English rows below do: consulted only if the Hungarian case were
+  // ever gone.
   hu: ['HU'],
   // English. The registry answers Britain for `en-GB` and the United States
   // for `en-US`, so these two rows are consulted only if those cases were ever

@@ -50,19 +50,16 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'fi', name: 'Suomi', english: 'Finnish', flag: '🇫🇮', country: 'fi' },
   { code: 'bg', name: 'Български', english: 'Bulgarian', flag: '🇧🇬', country: 'bg' },
   { code: 'hr', name: 'Hrvatski', english: 'Croatian', flag: '🇭🇷', country: 'hr' },
-  // Hungarian is not offered, and the blocker is the bundle rather than the
-  // language. Hungary already ships as a full market on the backend, with its
-  // own estimate-workbook importer, two demo projects, and classification,
-  // markup, compliance and e-invoicing entries, so a Hungarian user reads all
-  // of that through an English menu. That gap is known, not an oversight. The
-  // translation is assembled outside the repository and no hu.ts is committed
-  // here, because the last assembly measured 73.7% of its values byte-identical
-  // to their English source, where `scripts/check_locale_english_placeholder.py`
-  // refuses anything above 10% and every finished locale in the tree sits
-  // between 0.65% and 3.72%. Diacritics were measured separately and are sound,
-  // so they are not what holds this back. Hungarian joins the list when a
-  // rebuilt bundle clears that guard, and `backend/locales/hu.json` has to land
-  // with it, because every language offered here is answered by one today.
+  // Hungarian was held back while its bundle measured 73.7% of values
+  // byte-identical to English, where `scripts/check_locale_english_placeholder.py`
+  // refuses anything above 10%. The rebuilt hu.ts measures 1.0%, and the two
+  // English nouns the byte comparison cannot see (takeoff and validation, kept
+  // as Hungarian nouns across some 470 values) were translated before it was
+  // offered. `backend/locales/hu.json` landed with it, as every language here
+  // is answered by one. Hungary was already a full market on the backend, so
+  // the market reads in its own language now rather than through an English
+  // menu.
+  { code: 'hu', name: 'Magyar', english: 'Hungarian', flag: '🇭🇺', country: 'hu' },
   { code: 'id', name: 'Bahasa Indonesia', english: 'Indonesian', flag: '🇮🇩', country: 'id' },
   { code: 'ro', name: 'Română', english: 'Romanian', flag: '🇷🇴', country: 'ro' },
   { code: 'th', name: 'ไทย', english: 'Thai', flag: '🇹🇭', country: 'th' },

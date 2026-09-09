@@ -255,7 +255,7 @@ UNDER_TRANSLATION: dict[str, int] = {
 # or reading git history, which this guard does nowhere else. Neither was judged
 # worth it while the swap is still visible in the diff to anyone reading it. If
 # a swap ever does get through unnoticed, that judgement is the thing to revisit.
-PENDING_REVIEW_CEILING = 186
+PENDING_REVIEW_CEILING = 188
 
 import re
 

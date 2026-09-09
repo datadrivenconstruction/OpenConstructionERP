@@ -323,6 +323,7 @@ const LANGUAGES = [
   { value: 'nl', label: 'Nederlands' },
   { value: 'pl', label: 'Polski' },
   { value: 'cs', label: 'Čeština' },
+  { value: 'hu', label: 'Magyar' },
   { value: 'ru', label: 'Русский' },
   { value: 'tr', label: 'Türkçe' },
   { value: 'ar', label: 'العربية' },

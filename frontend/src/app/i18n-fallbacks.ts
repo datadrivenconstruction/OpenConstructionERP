@@ -61,6 +61,7 @@ import da from './locales/da';
 import fi from './locales/fi';
 import bg from './locales/bg';
 import hr from './locales/hr';
+import hu from './locales/hu';
 import id from './locales/id';
 import ro from './locales/ro';
 import th from './locales/th';
@@ -105,6 +106,7 @@ export const fallbackResources = {
   fi,
   bg,
   hr,
+  hu,
   id,
   ro,
   th,

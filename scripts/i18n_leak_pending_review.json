@@ -1666,6 +1666,32 @@
     "n": 24,
     "reason": "Seeded when the leak guard was first split into three lists (ci(i18n): rebuild the leak guard as two separate lists plus a general scan). This entry's n is >=24/28, the shape the threshold scan actually flags; filed as ambiguous at guard rollout rather than triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
   },
+  "login.mod.ai": {
+    "added_by": "feat(i18n): Hungarian had a locale file but was never offered (2026-09-08)",
+    "differs_in": [
+      "ar",
+      "bn",
+      "de",
+      "el",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "fa",
+      "fr",
+      "he",
+      "it",
+      "kk",
+      "pt",
+      "pt-BR",
+      "ru",
+      "uk",
+      "ur"
+    ],
+    "en_value": "AI",
+    "n": 24,
+    "reason": "Flagged by the threshold scan at n=24 of 42 non-en locales on 2026-09-08, the day hu.ts joined the offered languages: the key stood at 23 before, one under the bar, and Hungarian keeping AI lifted it over. Not allowlisted, because the tell that list requires is failed: 18 locales render the initialism in their own letters (KI in de, IA in fr, es, it and pt, ИИ in ru, ШІ in uk, and the Arabic, Persian, Hebrew, Urdu, Bengali, Kazakh and Greek scripts), so the value is not identical everywhere and ru in particular translates it. Not baselined either, because the 24 locales that keep AI are not a leak shape but a usage: cs, pl, nl, sv, da, no, fi, ja, ko, zh, vi, th, id, tr, hi, ro, hr, bg, et, fil, ky, mn, uz and hu all write AI as the everyday initialism in software, and the Hungarian file is internally consistent about it - 384 of its values carry AI and none carry the domestic MI, so translating these two keys alone to dodge the threshold would have split the glossary inside one file. Two locales do not carry the key at all: the overlays en-GB and en-US. What is open: whether AI travels as an initialism in every market, in which case the key belongs on the allowlist once the 18 translating locales are read as the outliers, or whether the 24 owe a domestic form. Left unresolved rather than decided by the locale that happened to tip the count. added_by names the commit by subject because a commit cannot cite its own hash."
+  },
   "login.mod.cad": {
     "added_by": "adb78c983 (2026-08-02)",
     "differs_in": [
@@ -1978,6 +2004,32 @@
     "en_value": "{{ms}} ms",
     "n": 26,
     "reason": "Added in the commit that split Chile, Colombia and Brazil into their own locales (feat(i18n): give Chile, Colombia and Brazil a locale of their own). This entry's n is >=25/28, the shape the threshold scan actually flags. Checked: only one of the thirteen keys from this commit names es-CL or es-CO in its differs_in set (this one may or may not be that key), so a link to those new locales is not established for most of them. Not individually triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
+  },
+  "pipeline.palette.cat_ai": {
+    "added_by": "feat(i18n): Hungarian had a locale file but was never offered (2026-09-08)",
+    "differs_in": [
+      "ar",
+      "bn",
+      "de",
+      "el",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "fa",
+      "fr",
+      "he",
+      "it",
+      "kk",
+      "pt",
+      "pt-BR",
+      "ru",
+      "uk",
+      "ur"
+    ],
+    "en_value": "AI",
+    "n": 24,
+    "reason": "Flagged by the threshold scan at n=24 of 42 non-en locales on 2026-09-08, the day hu.ts joined the offered languages: the key stood at 23 before, one under the bar, and Hungarian keeping AI lifted it over. Not allowlisted, because the tell that list requires is failed: 18 locales render the initialism in their own letters (KI in de, IA in fr, es, it and pt, ИИ in ru, ШІ in uk, and the Arabic, Persian, Hebrew, Urdu, Bengali, Kazakh and Greek scripts), so the value is not identical everywhere and ru in particular translates it. Not baselined either, because the 24 locales that keep AI are not a leak shape but a usage: cs, pl, nl, sv, da, no, fi, ja, ko, zh, vi, th, id, tr, hi, ro, hr, bg, et, fil, ky, mn, uz and hu all write AI as the everyday initialism in software, and the Hungarian file is internally consistent about it - 384 of its values carry AI and none carry the domestic MI, so translating these two keys alone to dodge the threshold would have split the glossary inside one file. Two locales do not carry the key at all: the overlays en-GB and en-US. What is open: whether AI travels as an initialism in every market, in which case the key belongs on the allowlist once the 18 translating locales are read as the outliers, or whether the 24 owe a domestic form. Left unresolved rather than decided by the locale that happened to tip the count. added_by names the commit by subject because a commit cannot cite its own hash."
   },
   "pipeline.palette.item_title": {
     "added_by": "03cc10968 (2026-08-08)",

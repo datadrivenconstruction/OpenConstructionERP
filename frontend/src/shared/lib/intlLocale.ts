@@ -50,6 +50,7 @@ export const LOCALE_MAP: Record<string, string> = {
   fr: 'fr-FR',
   fi: 'fi-FI',
   hi: 'hi-IN',
+  hu: 'hu-HU',
   it: 'it-IT',
   ja: 'ja-JP',
   ko: 'ko-KR',
