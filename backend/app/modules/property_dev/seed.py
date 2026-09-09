@@ -405,6 +405,7 @@ async def seed_property_dev_demo(session: AsyncSession, project_ids: Iterable[uu
             buyer_id=buyer.id,
             status="draft" if buyer.status == "reserved" else "locked",
             locked_at="2026-03-15" if buyer.status == "contracted" else None,
+            currency=buyer.currency,
         )
         session.add(sel)
         await session.flush()
@@ -424,6 +425,7 @@ async def seed_property_dev_demo(session: AsyncSession, project_ids: Iterable[uu
                 quantity=qty,
                 unit_price_snapshot=unit_price,
                 total_price=total,
+                currency=opt.currency or buyer.currency,
                 included_in_production=buyer.status == "contracted",
             )
             session.add(item)

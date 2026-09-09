@@ -563,6 +563,81 @@ async def _load_project_currency_meta(session: AsyncSession, project_id: uuid.UU
         return None
 
 
+async def _development_currency(svc: Any, development_id: uuid.UUID | None) -> str:
+    """The currency a development's money is read in when a row carries none.
+
+    ``Development.currency`` first, else the parent project's, else ``""``,
+    which is the fallback the model declares for a blank stamp. The lookups
+    are defensive because the stub repositories the unit suite drives the
+    service with answer ``None`` for anything they were not given, and a
+    missing parent is "no stamp", not an error.
+
+    Args:
+        svc: The service, for its repositories and session.
+        development_id: ``Development.id``, or ``None``.
+
+    Returns:
+        The upper-case code, or ``""``.
+    """
+    if development_id is None:
+        return ""
+    dev = await svc.developments.get_by_id(development_id)
+    if dev is None:
+        return ""
+    project = await _load_project_currency_meta(svc.session, getattr(dev, "project_id", None))
+    return _resolve_base_currency(getattr(dev, "currency", ""), getattr(project, "currency", ""), ())
+
+
+async def _buyer_currency(svc: Any, buyer: Any) -> str:
+    """The currency a buyer's option selection is priced in.
+
+    The buyer's own stamp, because the contract is signed in it; else the
+    plot's; else the development's; else the project's; else ``""``.
+
+    Args:
+        svc: The service, for its repositories and session.
+        buyer: A ``Buyer`` row or anything exposing ``currency``,
+            ``plot_id`` and ``development_id``.
+
+    Returns:
+        The upper-case code, or ``""``.
+    """
+    code = _currency_code(getattr(buyer, "currency", ""))
+    if code:
+        return code
+    plot_id = getattr(buyer, "plot_id", None)
+    if plot_id is not None:
+        plot = await svc.plots.get_by_id(plot_id)
+        code = _currency_code(getattr(plot, "currency", ""))
+        if code:
+            return code
+    return await _development_currency(svc, getattr(buyer, "development_id", None))
+
+
+async def _option_currency(svc: Any, option: Any) -> str:
+    """The currency an option's ``price_delta`` is quoted in.
+
+    The option's own stamp, else its group's development's, else that
+    development's project's, else ``""``.
+
+    Args:
+        svc: The service, for its repositories and session.
+        option: A ``BuyerOption`` row or anything exposing ``currency`` and
+            ``group_id``.
+
+    Returns:
+        The upper-case code, or ``""``.
+    """
+    code = _currency_code(getattr(option, "currency", ""))
+    if code:
+        return code
+    group_id = getattr(option, "group_id", None)
+    if group_id is None:
+        return ""
+    group = await svc.option_groups.get_by_id(group_id)
+    return await _development_currency(svc, getattr(group, "development_id", None))
+
+
 # ── State machines ──────────────────────────────────────────────────────
 
 
@@ -2192,10 +2267,17 @@ class PropertyDevService:
     # ── Selection ───────────────────────────────────────────────────────
 
     async def create_selection(self, data: BuyerSelectionCreate) -> BuyerSelection:
+        buyer = await self.buyers.get_by_id(data.buyer_id)
+        if buyer is None:
+            raise HTTPException(status_code=422, detail="buyer not found")
         obj = BuyerSelection(
             buyer_id=data.buyer_id,
             status=data.status,
             notes=data.notes,
+            # Settled once, here, from the buyer's chain (see _buyer_currency).
+            # Blank when that chain is blank; the first stamped line then
+            # settles it, in add_selection_item.
+            currency=await _buyer_currency(self, buyer),
             metadata_=data.metadata,
         )
         return await self.selections.create(obj)
@@ -2232,6 +2314,21 @@ class PropertyDevService:
                 status_code=409,
                 detail="Option is no longer available",
             )
+        # The option's price is quoted in its own currency, else its
+        # development's; the selection's total is in the selection's. Two
+        # stated codes that disagree are refused, the way an escrow
+        # transaction in the wrong money is, because a total that added them
+        # would be money in neither. A blank selection is settled by its
+        # first stamped line, once, so a blank is never what two lines are
+        # said to have in common.
+        option_code = await _option_currency(self, option)
+        selection_code = _currency_code(getattr(sel, "currency", ""))
+        if option_code and selection_code and option_code != selection_code:
+            raise HTTPException(
+                status_code=422,
+                detail=(f"Option {option.code!r} is priced in {option_code}; this selection is in {selection_code}"),
+            )
+        line_code = option_code or selection_code
         unit_price = data.unit_price_snapshot if data.unit_price_snapshot is not None else option.price_delta
         item = BuyerSelectionItem(
             selection_id=selection_id,
@@ -2239,11 +2336,14 @@ class PropertyDevService:
             quantity=data.quantity,
             unit_price_snapshot=unit_price,
             total_price=Decimal(str(unit_price)) * Decimal(str(data.quantity)),
+            currency=line_code,
             included_in_production=False,
             metadata_=data.metadata,
         )
         item = await self.selection_items.create(item)
         item_id = item.id
+        if line_code and not selection_code:
+            await self.selections.update_fields(selection_id, currency=line_code)
         # Re-fetch after the recompute so the router serialises the item
         # alongside the selection total ``_recompute_selection_total`` just
         # wrote, rather than lazy-loading it and raising MissingGreenlet.

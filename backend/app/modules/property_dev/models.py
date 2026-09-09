@@ -414,6 +414,12 @@ class BuyerSelection(Base):
     submitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     locked_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     total_options_value: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    # ISO-4217 code ``total_options_value`` and every line's price are in.
+    # Settled once at creation from the buyer's chain (buyer, plot,
+    # development, project) and, when that chain is blank, by the first
+    # stamped line added. Empty string means "not stamped", as on every
+    # other money row in this module.
+    currency: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"
@@ -443,6 +449,11 @@ class BuyerSelectionItem(Base):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     unit_price_snapshot: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     total_price: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    # ISO-4217 code of ``unit_price_snapshot`` and ``total_price``: the
+    # option's currency when the line was written, else the selection's.
+    # Kept per line so a locked selection reads the money it was priced in
+    # even after the catalogue option is re-stamped.
+    currency: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
     included_in_production: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata", JSON, nullable=False, default=dict, server_default="{}"

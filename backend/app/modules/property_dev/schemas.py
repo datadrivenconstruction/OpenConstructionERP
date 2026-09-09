@@ -750,6 +750,10 @@ class BuyerSelectionResponse(BaseModel):
     submitted_at: str | None = None
     locked_at: str | None = None
     total_options_value: Decimal = Decimal("0")
+    # ISO-4217 code ``total_options_value`` is in; "" when the selection has
+    # not been stamped yet (no currency anywhere on the buyer's chain and no
+    # stamped line added so far).
+    currency: str = ""
     notes: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
@@ -778,6 +782,9 @@ class BuyerSelectionItemResponse(BaseModel):
     quantity: int = 1
     unit_price_snapshot: Decimal = Decimal("0")
     total_price: Decimal = Decimal("0")
+    # ISO-4217 code both prices are in: the option's currency when the line
+    # was written, else the selection's.
+    currency: str = ""
     included_in_production: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
