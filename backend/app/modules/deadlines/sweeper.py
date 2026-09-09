@@ -18,8 +18,10 @@ Per sweep, for every currently-overdue item across every project:
   managers exactly once (``deadline_escalated``, metadata ``level=1``).
 
 De-duplication is migration-free, exactly like ``sla_monitor``: before
-notifying, the sweep reads the notification store for a recent
-``deadline_overdue`` row on the same entity within :data:`RENOTIFY_WINDOW_HOURS`.
+notifying, the sweep reads the notification store for ``deadline_overdue``
+rows on the same entity. One inside :data:`RENOTIFY_WINDOW_HOURS` silences
+this tick; :data:`MAX_OVERDUE_NUDGES` of them silence the item for good, which
+is what stops an item nobody resolves from being nudged forever.
 The escalation tier reconstructs from the ``deadline_escalated`` notifications'
 ``metadata.level`` so a target is escalated at most once. This reuses the
 *technique* of ``escalation_service`` (notification-store tier dedup), not the
@@ -54,6 +56,14 @@ POLL_INTERVAL_SECONDS = 3600
 # An overdue item is nudged at most once inside this window, so a long-overdue
 # item does not spam its owner on every tick.
 RENOTIFY_WINDOW_HOURS = 20.0
+
+# ...and at most this many times in total. The window alone sets the interval
+# between nudges, never their number, so an item that is never resolved is
+# nudged for as long as the process runs. That is what it did: on the public
+# demo the seeded items are overdue on purpose and nobody closes them, so the
+# sweep re-sent the same reminders twice a day until the mail host disabled
+# outbound sending for the whole account.
+MAX_OVERDUE_NUDGES = 3
 
 # Notification types carry the word "overdue"/"escalated" so the inbox severity
 # classifier promotes them (see notifications/templates.py:_TYPE_TO_ICON).
@@ -148,7 +158,25 @@ async def _overdue_recipients(session: AsyncSession, item: DeadlineItem) -> list
 
 
 async def _already_notified(session: AsyncSession, item: DeadlineItem, now: datetime) -> bool:
-    """True when an overdue nudge for this entity was sent within the window."""
+    """True when this entity should not be nudged again right now.
+
+    Two reasons to stay quiet, and the second one is the point of this
+    function. The first is the window: one nudge per entity per
+    :data:`RENOTIFY_WINDOW_HOURS`. The second is the ceiling: an entity gets
+    at most :data:`MAX_OVERDUE_NUDGES` overdue nudges in its life.
+
+    Without the ceiling this is a perpetual mailer. A due date that has passed
+    stays passed, so an item nobody resolves qualifies on every sweep forever,
+    and the window only sets the interval. On the public demo, where the
+    seeded items are permanently overdue by design and no one ever closes
+    them, that produced two bursts a day for as long as the instance was up.
+    Re-nudging is worth something; re-nudging without end is not, and it is
+    the same message every time.
+
+    The query drops the time bound so the rows can answer both questions at
+    once: a lifetime count for the ceiling, and the newest timestamp for the
+    window.
+    """
     cutoff = now - timedelta(hours=RENOTIFY_WINDOW_HOURS)
     rows = (
         (
@@ -157,17 +185,16 @@ async def _already_notified(session: AsyncSession, item: DeadlineItem, now: date
                     Notification.entity_type == item.entity_type,
                     Notification.entity_id == item.entity_id,
                     Notification.notification_type == OVERDUE_TYPE,
-                    Notification.created_at >= cutoff,
                 )
             )
         )
         .scalars()
         .all()
     )
-    for n in rows:
-        if (n.metadata_ or {}).get("module") == item.module:
-            return True
-    return False
+    mine = [n for n in rows if (n.metadata_ or {}).get("module") == item.module]
+    if len(mine) >= MAX_OVERDUE_NUDGES:
+        return True
+    return any(n.created_at is not None and n.created_at >= cutoff for n in mine)
 
 
 async def _already_escalated(session: AsyncSession, item: DeadlineItem) -> bool:

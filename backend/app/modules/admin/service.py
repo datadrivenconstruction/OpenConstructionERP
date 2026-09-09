@@ -24,17 +24,17 @@ from dataclasses import dataclass
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
 logger = logging.getLogger(__name__)
 
 
-DEMO_EMAILS: tuple[str, ...] = (
-    "demo@openconstructionerp.com",
-    "estimator@openconstructionerp.com",
-    "manager@openconstructionerp.com",
-)
+#: Sorted so the reset endpoint reports the same order every call. The set
+#: itself lives in ``app.core.demo_accounts``; a frozenset iterated straight
+#: into a response body would reorder between runs for no reason.
+DEMO_EMAILS: tuple[str, ...] = tuple(sorted(DEMO_ACCOUNT_EMAILS))
 
 # Hostnames that look like dev/staging/qa. A hostname not in this list is
 # treated as production - the gate refuses to run.

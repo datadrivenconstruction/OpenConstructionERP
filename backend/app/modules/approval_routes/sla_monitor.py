@@ -22,7 +22,8 @@ single-process deploy.
 De-duplication is migration-free: before sending a reminder the monitor checks
 the notification store for a recent ``approval_overdue`` row already raised for
 the same instance and step, so a long-overdue approval is nudged at most once
-per :data:`RENOTIFY_WINDOW_HOURS`, not on every tick.
+per :data:`RENOTIFY_WINDOW_HOURS`, not on every tick, and at most
+:data:`MAX_STEP_REMINDERS` times for that step in total.
 """
 
 from __future__ import annotations
@@ -53,6 +54,11 @@ POLL_INTERVAL_SECONDS = 1800
 # A breached step is nudged at most once inside this window, so a stuck
 # approval does not spam its approver on every tick.
 RENOTIFY_WINDOW_HOURS = 20.0
+
+# ...and at most this many times for the same step. A window bounds the rate,
+# not the total, and a step nobody ever approves would otherwise be reminded
+# about forever. Advancing to the next step starts a fresh count.
+MAX_STEP_REMINDERS = 3
 
 # notification_type carries the word "overdue" on purpose: the inbox severity
 # classifier promotes overdue/breach/escalation notifications to "critical".
@@ -90,11 +96,17 @@ async def _already_notified(
     step_ordinal: int,
     now: datetime,
 ) -> bool:
-    """True when a reminder for this instance+step was sent within the window.
+    """True when this instance+step should not be nudged again right now.
 
     Keyed on the instance id (stored in ``entity_id``) plus the step ordinal
     (stored in the notification metadata), so advancing to a new step lets a
     fresh reminder through while a stuck step is nudged only once per window.
+
+    The window sets the interval between reminders and never their number, so
+    a step that is never approved is reminded about for as long as the process
+    runs. :data:`MAX_STEP_REMINDERS` bounds it. Advancing the step resets the
+    count, which is the behaviour worth keeping: a new step is a new fact,
+    the fourth reminder about the same one is not.
     """
     cutoff = now - timedelta(hours=RENOTIFY_WINDOW_HOURS)
     rows = await session.execute(
@@ -102,13 +114,12 @@ async def _already_notified(
             Notification.entity_type == ENTITY_TYPE,
             Notification.entity_id == str(instance_id),
             Notification.notification_type == OVERDUE_TYPE,
-            Notification.created_at >= cutoff,
         )
     )
-    for n in rows.scalars().all():
-        if (n.metadata_ or {}).get("step_ordinal") == step_ordinal:
-            return True
-    return False
+    mine = [n for n in rows.scalars().all() if (n.metadata_ or {}).get("step_ordinal") == step_ordinal]
+    if len(mine) >= MAX_STEP_REMINDERS:
+        return True
+    return any(n.created_at is not None and n.created_at >= cutoff for n in mine)
 
 
 async def _raise_breach(

@@ -25,6 +25,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.core.email import get_email_service
 from app.core.events import event_bus
 
@@ -225,27 +226,16 @@ def generate_api_key() -> tuple[str, str, str]:
 # ── Service class ──────────────────────────────────────────────────────────
 
 
-# Whitelist of seeded demo accounts. Must mirror the same set in
-# ``backend/app/modules/users/router.py:_DEMO_EMAIL_WHITELIST`` and
-# ``backend/app/main.py:_seed_demo_account``. This duplicate exists so
-# ``login()`` can route demo logins without importing from router (which
-# would create a circular import).
-#
-# All three copies are covered:
-# ``test_demo_login_endpoint.py::test_whitelist_matches_seeder_spec`` parses
-# the seeder's literals out of its source and asserts the router set AND this
-# set both equal them. This comment used to say the test checked "router and
-# seeder", which undersold it by exactly one copy - and a reader acting on
-# that went looking for an uncovered mirror that does not exist. A comment
-# that understates its own guard invents work the same way one that overstates
-# it hides a gap.
-_DEMO_EMAIL_WHITELIST: frozenset[str] = frozenset(
-    {
-        "demo@openconstructionerp.com",
-        "estimator@openconstructionerp.com",
-        "manager@openconstructionerp.com",
-    }
-)
+# Whitelist of seeded demo accounts, taken from the one module that names
+# them. The literals used to be repeated here, in
+# ``backend/app/modules/users/router.py`` and in
+# ``backend/app/modules/admin/service.py``, each with a comment asking the
+# reader to keep the copies in step. The name stays because
+# ``test_demo_login_endpoint.py::test_whitelist_matches_seeder_spec`` imports
+# it and asserts both this set and the router's equal the literals it parses
+# out of ``backend/app/main.py:_seed_demo_account``; that test still runs and
+# still covers the seeder, which is the one copy this import cannot remove.
+_DEMO_EMAIL_WHITELIST: frozenset[str] = DEMO_ACCOUNT_EMAILS
 
 
 class UserService:

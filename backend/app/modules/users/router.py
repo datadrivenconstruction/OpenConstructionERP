@@ -40,6 +40,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 
+from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.core.rate_limiter import client_identifier, login_limiter
 from app.dependencies import (
     CurrentUserId,
@@ -222,16 +223,10 @@ class DemoLoginRequest(BaseModel):
     email: str
 
 
-# Whitelist of seeded demo accounts. Mirrors the spec list in
-# ``app.main._seed_demo_account``; both must stay in sync - the test
-# ``backend/tests/integration/test_demo_login_endpoint.py`` asserts this.
-_DEMO_EMAIL_WHITELIST: frozenset[str] = frozenset(
-    {
-        "demo@openconstructionerp.com",
-        "estimator@openconstructionerp.com",
-        "manager@openconstructionerp.com",
-    }
-)
+# Whitelist of seeded demo accounts, taken from the one module that names
+# them. It still has to match the spec list in ``app.main._seed_demo_account``,
+# and ``backend/tests/integration/test_demo_login_endpoint.py`` asserts that.
+_DEMO_EMAIL_WHITELIST: frozenset[str] = DEMO_ACCOUNT_EMAILS
 
 
 @router.post("/auth/demo-login/", response_model=TokenResponse)
