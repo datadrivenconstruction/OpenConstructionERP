@@ -765,5 +765,15 @@
         "fail": "Das Projekt befindet sich in der Phase {phase}, hat aber weder einen Vertrag noch ein Vergabepaket",
         "suggestion": "Erstellen Sie ein Vergabepaket aus dem Leistungsverzeichnis oder erfassen Sie den Vertrag, oder setzen Sie die Phase auf den Kalkulationsstand zurück, in dem sich das Projekt tatsächlich befindet"
       }
+    },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Position {ordinal}: die Ressourcenzeilen können die Position nicht bepreisen, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
+      "fallback_allowance": "Position {ordinal}: die Ressourcenzeilen sind eine geschätzte Pauschalaufteilung mit der Positionsmenge, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
+      "assumed_norm": "Position {ordinal}: die Ressourcenzeilen tragen Ansätze, die der Katalog nie angegeben hat, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
+      "norm_collapsed": "Position {ordinal}: die Ressourcenzeilen haben ihren Katalogansatz verloren und tragen stattdessen die Positionsmenge, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
+      "whole_position_quantities": "Position {ordinal}: die Ressourcenzeilen tragen Gesamtmengen der Position statt Ansätzen je Einheit, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
+      "suggestion": "Aufbau prüfen - die Position über die Ressourcenansatz-Prüfung aus ihrer Katalogposition neu ableiten oder die Zeilen von Hand korrigieren"
     }
+  }
 }

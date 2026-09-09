@@ -765,5 +765,15 @@
         "fail": "The project is in the {phase} phase, yet it has no contract and no tender package",
         "suggestion": "Create a tender package from the bill or record the contract, or set the phase back to the estimating stage the project is actually in"
       }
+    },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Position {ordinal}: the resource rows cannot price the line, so the unit rate was not re-derived from them",
+      "fallback_allowance": "Position {ordinal}: the resource rows are an estimated allowance split holding the position quantity, so the unit rate was not re-derived from them",
+      "assumed_norm": "Position {ordinal}: the resource rows carry norms the catalogue never stated, so the unit rate was not re-derived from them",
+      "norm_collapsed": "Position {ordinal}: the resource rows lost their catalogue norm and hold the position quantity instead, so the unit rate was not re-derived from them",
+      "whole_position_quantities": "Position {ordinal}: the resource rows hold whole-position quantities instead of per-unit norms, so the unit rate was not re-derived from them",
+      "suggestion": "Review the buildup - re-derive the position from its catalogue item through the resource norm review, or correct the rows by hand"
     }
+  }
 }

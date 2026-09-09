@@ -765,5 +765,15 @@
         "fail": "El proyecto está en la fase {phase}, pero no tiene ningún contrato ni ningún paquete de licitación",
         "suggestion": "Cree un paquete de licitación a partir del presupuesto o registre el contrato, o devuelva la fase a la etapa de estimación en la que realmente está el proyecto"
       }
+    },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Posición {ordinal}: las filas de recursos no pueden valorar la posición, por lo que el precio unitario no se volvió a derivar de ellas",
+      "fallback_allowance": "Posición {ordinal}: las filas de recursos son un reparto estimado que lleva la cantidad de la posición, por lo que el precio unitario no se volvió a derivar de ellas",
+      "assumed_norm": "Posición {ordinal}: las filas de recursos llevan rendimientos que el catálogo nunca indicó, por lo que el precio unitario no se volvió a derivar de ellas",
+      "norm_collapsed": "Posición {ordinal}: las filas de recursos perdieron su rendimiento de catálogo y llevan la cantidad de la posición en su lugar, por lo que el precio unitario no se volvió a derivar de ellas",
+      "whole_position_quantities": "Posición {ordinal}: las filas de recursos llevan cantidades de toda la posición en vez de rendimientos por unidad, por lo que el precio unitario no se volvió a derivar de ellas",
+      "suggestion": "Revise el descompuesto - vuelva a derivar la posición desde su elemento de catálogo mediante la revisión de rendimientos de recursos, o corrija las filas a mano"
     }
+  }
 }
