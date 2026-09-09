@@ -27,7 +27,8 @@ implementation is our own.
   tolerance in `ElementManager`, and `degraded` model status surfacing in the viewer UI;
   the shipped implementation is our own. Later raised ideas for driving BOQ quantities
   from live BIM parameters, surfacing real server errors on Excel paste, and resolving
-  linked elements per model in multi-model setups ([#206](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/206)).
+  linked elements per model in multi-model setups
+  ([#206](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/206)).
   More recently proposed BOQ per-element quantity formulas with a projection editor and a
   batch of multi-model BIM viewer fixes
   ([#347](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/347)), and a
