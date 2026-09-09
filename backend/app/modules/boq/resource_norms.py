@@ -8,15 +8,18 @@ so ``sum(quantity * unit_rate)`` is the position's unit rate. The BOQ service
 relies on that when an edit touches the resources and re-derives ``unit_rate``
 from them; the procurement rollup and the resource split rule rely on it too.
 
-The AI estimator writes rows that do not follow the convention. Its apply path
-stores ``quantity = factor * position_quantity``, a whole-position total, and
-its fallback path stores an allowance whose quantity is the position quantity
-itself. Before the estimator started reading the catalogue norm, ``factor`` was
+Before 17.1.0 the AI estimator wrote rows that did not follow the convention.
+Its apply path stored ``quantity = factor * position_quantity``, a
+whole-position total, and its fallback path stored an allowance whose quantity
+was the position quantity itself; the demo seeder's lump-sum allowance did the
+same. Before the estimator started reading the catalogue norm, ``factor`` was
 always 1.0, so every row's quantity was simply the position quantity and the
 norm was lost. Rows of either kind price the line correctly at apply time,
 because the unit rate is written separately from the chosen candidate, and
 mis-price it by roughly the position quantity the first time somebody edits a
-resource.
+resource. Since 17.1.0 every writer in the tree stores per-unit rows, so the
+shapes below describe positions booked before that release and nothing a
+current apply produces.
 
 Everything in this module is pure and database-free, so the BOQ service, the
 validation rule and the review path read one definition of an untrusted
@@ -111,8 +114,9 @@ def is_estimator_position(source: Any, metadata: Any) -> bool:
 def _row_is_whole_position_total(row: dict[str, Any], position_quantity: float) -> bool:
     """A row whose quantity is exactly ``factor * position_quantity``.
 
-    That product is the estimator's output shape. A hand-entered per-unit row
-    carries no ``factor`` and is never matched here, whatever its quantity.
+    That product was the estimator's output shape before 17.1.0. A
+    hand-entered per-unit row carries no ``factor`` and is never matched here,
+    whatever its quantity.
     """
     if "factor" not in row:
         return False
@@ -211,10 +215,12 @@ def classify_buildup(
     """Sort a stored buildup into a review category, or None when it is clean.
 
     Differs from :func:`untrusted_buildup_reason` in one place: it separates
-    the pre-fix shape, every contributing row holding the position quantity
-    (``norm_collapsed``), from the post-fix shape where the norm survived but
-    was multiplied by the position quantity (``whole_position_quantities``).
-    The first can be re-derived from the catalogue to recover a lost norm; the
+    the oldest shape, every contributing row holding the position quantity
+    (``norm_collapsed``), from the shape where the norm survived but was
+    multiplied by the position quantity (``whole_position_quantities``). Both
+    describe positions booked before 17.1.0 and nothing a current apply
+    produces: since that release the estimator stores the norm itself. The
+    first can be re-derived from the catalogue to recover a lost norm; the
     second can be re-derived to restore the per-unit convention. Both are
     recoverable only through a ``cost_item_id`` link.
 

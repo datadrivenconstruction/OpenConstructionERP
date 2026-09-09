@@ -2995,11 +2995,17 @@ def _resources_for_position(
 
     Mirrors the ai_estimator apply shape (``_ensure_resources`` /
     ``_resource_rollup``) so a seeded position renders the same M/L/E badge and
-    drill-down as an AI-applied one. The invariant the BOQ relies on is
-    ``Sum(leaf.quantity * leaf.unit_rate) == position.quantity *
-    position.unit_rate`` (the position total): each leaf carries ``quantity =
-    position quantity`` and ``unit_rate = unit_rate * share``. The split is
-    flagged ``estimated`` so it is never presented as catalogue-grounded.
+    drill-down as an AI-applied one. The rows follow the BOQ's per-unit norm
+    convention: each leaf is one allowance per unit of the position, so it
+    carries ``quantity = 1.0`` and ``unit_rate = unit_rate * share``, and
+    ``Sum(leaf.quantity * leaf.unit_rate) == position.unit_rate``. The BOQ
+    service relies on that when an edit re-derives the unit rate from the
+    rows; before 17.1.0 each leaf held the position quantity instead and such
+    an edit multiplied the rate by it. The split is flagged ``estimated`` so
+    it is never presented as catalogue-grounded.
+
+    ``quantity`` decides only whether there is anything to build up: a
+    zero-quantity row gets no buildup, like a zero-priced one.
 
     Returns an empty list for sections / zero-priced rows (nothing to build up).
     """
@@ -3020,8 +3026,8 @@ def _resources_for_position(
     )
     # Distribute the per-unit rate across the three leaves so the leaf rates sum
     # to EXACTLY ``unit_rate`` (no rounding drift): the last leaf takes the
-    # remainder. Each leaf's quantity is the position quantity, so
-    # Sum(qty * leaf_rate) == qty * unit_rate == position total.
+    # remainder. Each leaf's quantity is 1.0, one allowance per unit, so
+    # Sum(quantity * leaf_rate) == unit_rate, the position's unit rate.
     allocated = Decimal("0")
     for idx, (label, rtype, share) in enumerate(specs):
         if idx == len(specs) - 1:
@@ -3037,7 +3043,7 @@ def _resources_for_position(
                 "unit": res_unit,
                 "factor": 1.0,
                 "unit_rate": format(leaf_rate, "f"),
-                "quantity": qty,
+                "quantity": 1.0,
                 "estimated": True,
             }
         )

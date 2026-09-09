@@ -422,19 +422,24 @@ def test_group_by_values_reads_unit_alias_and_properties():
     assert vals["material"] == "concrete"  # nested property lookup
 
 
-def test_preview_resources_scale_by_factor_times_parent_qty():
+def test_preview_resources_show_the_per_unit_norm_not_a_whole_position_total():
+    """The preview shows what apply stores: the norm per ONE unit of the parent.
+
+    Before 17.1.0 both multiplied by the parent quantity (a parent of 10 showed
+    10.0 and 8.0 here), and an edit on the BOQ then re-priced the position from
+    rows that held whole-position totals.
+    """
     service = AiEstimatorService.__new__(AiEstimatorService)
     rows = service._preview_resources(
         [
             {"name": "Concrete", "factor": 1.0, "unit": "m3", "unit_rate": "120.00", "type": "material"},
             {"name": "Labour", "factor": 0.8, "unit": "h", "unit_rate": "55.00", "type": "labor"},
             "junk-not-a-dict",
-        ],
-        parent_qty=10.0,
+        ]
     )
     assert len(rows) == 2
-    assert rows[0].quantity == pytest.approx(10.0)  # 1.0 x 10
-    assert rows[1].quantity == pytest.approx(8.0)  # 0.8 x 10
+    assert rows[0].quantity == pytest.approx(1.0)
+    assert rows[1].quantity == pytest.approx(0.8)
     assert rows[0].unit_rate == Decimal("120.00")
 
 

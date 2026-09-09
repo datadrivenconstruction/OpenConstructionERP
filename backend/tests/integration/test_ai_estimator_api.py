@@ -485,8 +485,13 @@ async def test_full_run_lifecycle_to_applied_boq(http_client, admin, monkeypatch
     assert pos.metadata_["ai_estimator_run_id"] == run_id
     assert pos.metadata_["cost_item_id"] == str(cost_id)
     assert len(pos.metadata_["resources"]) == 2
-    # Resource scaled by factor x parent qty (1.0 x 10).
-    assert pos.metadata_["resources"][0]["quantity"] == pytest.approx(10.0)
+    # Rows are stored per unit of the position (the norms, 1.0 and 0.8), not
+    # multiplied by the parent quantity of 10; the position's own money is
+    # 10 x 185 regardless, exactly as before 17.1.0 when the rows held 10 and 8.
+    assert pos.metadata_["resources"][0]["quantity"] == pytest.approx(1.0)
+    assert pos.metadata_["resources"][1]["quantity"] == pytest.approx(0.8)
+    assert float(pos.unit_rate) == pytest.approx(185.0)
+    assert float(pos.total) == pytest.approx(1850.0)
 
 
 @pytest.mark.asyncio

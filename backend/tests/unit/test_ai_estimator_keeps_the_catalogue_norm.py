@@ -101,22 +101,28 @@ def test_an_ungrounded_component_reaches_review_flagged() -> None:
 
 
 @pytest.mark.parametrize("parent_qty", [1.0, 12.0, 100.0, 2400.0])
-def test_the_applied_quantity_is_the_norm_times_the_parent_not_the_parent(parent_qty: float) -> None:
+def test_the_stored_quantity_is_the_norm_whatever_the_parent_quantity(parent_qty: float) -> None:
     """The invariant the original defect violated, stated as a relationship.
 
-    Apply stores ``factor * parent_qty``. When the norm is not 1.0 the stored
-    resource quantity must therefore differ from the parent quantity. Under the
-    defect the two were always equal, for every resource on every position, and
-    that equality is what this asserts against - not one expected number, which
-    a different wrong default could reproduce by accident.
+    Apply stores each row's ``quantity`` per ONE unit of the position, which is
+    the catalogue norm itself, so the stored quantity does not move with the
+    parent quantity and differs from it whenever the norm is not 1.0. Under
+    the defect the two were always equal, for every resource on every
+    position, and that equality is what this asserts against - not one
+    expected number, which a different wrong default could reproduce by
+    accident. Before 17.1.0 apply stored ``factor * parent_qty`` instead, a
+    whole-position total that priced the line correctly until an edit
+    re-derived the unit rate from it.
     """
     norm = 0.85
     rows = _breakdown([{"code": "L1", "description": "Bricklayer", "unit": "h", "quantity": norm}])
 
-    applied = rows[0]["factor"] * parent_qty
+    stored = AiEstimatorService._per_unit_rows(rows)[0]["quantity"]
 
-    assert applied == pytest.approx(norm * parent_qty)
-    assert applied != pytest.approx(parent_qty), "the buildup collapsed onto the position quantity"
+    assert stored == pytest.approx(norm)
+    assert stored != pytest.approx(parent_qty), "the buildup collapsed onto the position quantity"
+    if parent_qty != 1.0:
+        assert stored != pytest.approx(norm * parent_qty), "a whole-position total was stored"
 
 
 def test_a_norm_of_exactly_one_is_the_one_case_the_two_legitimately_coincide() -> None:

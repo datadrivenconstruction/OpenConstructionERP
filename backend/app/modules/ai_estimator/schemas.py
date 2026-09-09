@@ -567,7 +567,7 @@ class BulkConfirmResponse(BaseModel):
 class PreviewResourceRow(BaseModel):
     description: str
     factor: float  # ratio per parent unit, not currency
-    quantity: float  # factor x parent quantity, measurement
+    quantity: float  # per ONE unit of the parent position, the figure apply stores
     unit: str
     unit_rate: Decimal = Decimal("0")
     type: str = "other"

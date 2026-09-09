@@ -1546,8 +1546,25 @@ class AiEstimatorService:
             out.append(row)
         return out
 
+    @staticmethod
+    def _per_unit_rows(resources: list[Any]) -> list[dict[str, Any]]:
+        """The rows apply stores: each component's norm per ONE unit of the position.
+
+        ``metadata.resources[].quantity`` follows the convention the BOQ
+        service, the resource split rule and the procurement rollup all read:
+        the amount of the resource per one unit of the position, so that
+        ``sum(quantity * unit_rate)`` is the position's unit rate. The
+        estimator's ``factor`` is exactly that norm, so the stored quantity is
+        the factor itself and never depends on the position quantity. Before
+        17.1.0 this multiplied by the position quantity and stored
+        whole-position totals; the position priced correctly at apply time,
+        because its unit rate comes from the chosen candidate, and an ordinary
+        edit then re-priced it at roughly quantity times the correct rate.
+        """
+        return [{**c, "quantity": float(c.get("factor", 1.0) or 1.0)} for c in resources if isinstance(c, dict)]
+
     async def _ensure_resources(self, grp: Any, qty: Decimal, unit_rate: Decimal) -> list[dict[str, Any]]:
-        """Guarantee a non-empty resource buildup for an applied position.
+        """Guarantee a non-empty per-unit resource buildup for an applied position.
 
         Founder principle: every position carries resources. Prefers the chosen
         catalogue candidate's real labour/material/plant components; when the
@@ -1555,7 +1572,9 @@ class AiEstimatorService:
         split that sums exactly to the unit rate so no position is ever stored
         without a buildup. The split is clearly flagged ``estimated`` (not
         catalogue-grounded), surfaced for human review, never silently
-        authoritative.
+        authoritative. Either way each row's ``quantity`` is per ONE unit of
+        the position, as :meth:`_per_unit_rows` stores it; the position
+        quantity only decides whether there is anything to build up.
         """
         qf = float(qty)
         # 1) Re-derive from the chosen candidate when the group lost its
@@ -1564,23 +1583,24 @@ class AiEstimatorService:
         if candidate_id:
             comps = await self._resource_breakdown(candidate_id)
             if comps:
-                return [{**c, "quantity": float(c.get("factor", 1.0) or 1.0) * qf} for c in comps]
+                return self._per_unit_rows(comps)
         # 2) Transparent labour/material split that sums to the unit rate.
         rate = float(unit_rate)
         if rate <= 0 or qf <= 0:
             return []
         unit = getattr(grp, "chosen_unit", None) or "pcs"
         out: list[dict[str, Any]] = []
-        # ONE KEY, TWO MEANINGS - do not let these rows back through
-        # ``_resource_breakdown``. In ``CostItem.components`` the catalogue
-        # writes ``quantity`` as the norm for ONE unit of the item; in the rows
-        # below, which are this module's own output shape, ``quantity`` is
-        # already the total for the whole position. ``factor`` of 1.0 is correct
-        # here and is not a missing norm: an allowance priced at a share of the
-        # unit rate genuinely is one allowance per unit. ``_resource_breakdown``
-        # reads only ``CostItem.components`` and never this output, which is
-        # what keeps the two apart; feeding it these rows would read a total as
-        # a norm and square the quantity.
+        # ONE KEY, ONE MEANING. ``quantity`` below is the norm for ONE unit of
+        # the position, the meaning ``CostItem.components`` gives the key and
+        # the meaning ``_per_unit_rows`` stores for catalogue-grounded rows. An
+        # allowance priced at a share of the unit rate genuinely is one
+        # allowance per unit, so ``quantity`` and ``factor`` are both 1.0 and
+        # neither is a missing norm; ``estimated`` marks the split as not
+        # catalogue-grounded. Before 17.1.0 these rows held the position
+        # quantity instead, a whole-position total under a per-unit key, and
+        # the BOQ's re-derivation of the unit rate from them multiplied the
+        # rate by that quantity. ``_resource_breakdown`` still reads only
+        # ``CostItem.components`` and never this output.
         for rtype, share in (("labor", 0.40), ("material", 0.60)):
             out.append(
                 {
@@ -1590,7 +1610,7 @@ class AiEstimatorService:
                     "type": rtype,
                     "factor": 1.0,
                     "unit_rate": format(_dec(rate * share), "f"),
-                    "quantity": qf,
+                    "quantity": 1.0,
                     "estimated": True,
                 }
             )
@@ -1599,7 +1619,9 @@ class AiEstimatorService:
     def _resource_rollup(self, resources: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
         """Roll resource leaves up to a per-type {total, pct} map for the
         material / labour / equipment badge on the BOQ, mirroring the assembly
-        apply path so an AI-applied position renders the same split.
+        apply path so an AI-applied position renders the same split. The rows
+        are per unit of the position, so ``total`` is per unit too; the badge
+        reads ``pct``.
         """
         totals: dict[str, Decimal] = {}
         for c in resources:
@@ -1983,7 +2005,7 @@ class AiEstimatorService:
             qty = Decimal(str(_quantity_for_unit(grp.quantities or {}, unit)))
             unit_rate = _dec(grp.unit_rate)
             currency = (grp.currency or base_currency or "").upper()
-            resources = self._preview_resources(grp.resources or [], float(qty))
+            resources = self._preview_resources(grp.resources or [])
             line = qty * unit_rate
             # FX-correct base-currency rollup; never blend currencies.
             base_line = line
@@ -2065,23 +2087,24 @@ class AiEstimatorService:
             can_apply=can_apply,
         )
 
-    def _preview_resources(
-        self, resources: list[dict[str, Any]], parent_qty: float
-    ) -> list[schemas.PreviewResourceRow]:
-        """Scale stored resource components by factor x parent quantity."""
+    def _preview_resources(self, resources: list[dict[str, Any]]) -> list[schemas.PreviewResourceRow]:
+        """Show stored resource components the way :meth:`apply` will store them.
+
+        Each row's ``quantity`` is the norm per ONE unit of the position, the
+        figure :meth:`_per_unit_rows` writes, so what the reviewer confirms is
+        what the BOQ receives. Before 17.1.0 the preview multiplied by the
+        parent quantity and showed whole-position totals.
+        """
         out: list[schemas.PreviewResourceRow] = []
-        for comp in resources:
-            if not isinstance(comp, dict):
-                continue
-            factor = float(comp.get("factor", 1.0) or 1.0)
+        for row in self._per_unit_rows(resources):
             out.append(
                 schemas.PreviewResourceRow(
-                    description=str(comp.get("name") or comp.get("code") or ""),
-                    factor=factor,
-                    quantity=factor * parent_qty,
-                    unit=str(comp.get("unit") or ""),
-                    unit_rate=_dec(comp.get("unit_rate")),
-                    type=str(comp.get("type") or "other"),
+                    description=str(row.get("name") or row.get("code") or ""),
+                    factor=float(row.get("factor", 1.0) or 1.0),
+                    quantity=float(row["quantity"]),
+                    unit=str(row.get("unit") or ""),
+                    unit_rate=_dec(row.get("unit_rate")),
+                    type=str(row.get("type") or "other"),
                 )
             )
         return out
@@ -2201,7 +2224,7 @@ class AiEstimatorService:
         (no ERROR-severity rule). Creates one Position per confirmed group with
         provenance ``source='ai_precise_estimate'``, the real (or null)
         confidence, ``validation_status='pending'``, ``cad_element_ids``, and
-        the scaled resource breakdown in ``metadata_['resources']``.
+        the per-unit resource breakdown in ``metadata_['resources']``.
         """
         from app.modules.boq.models import BOQ, Position
         from app.modules.projects.models import Project
@@ -2266,17 +2289,18 @@ class AiEstimatorService:
             subtotals[currency or base_currency] = subtotals.get(currency or base_currency, Decimal("0")) + line
 
             max_ord += 1
-            scaled_resources = [
-                {**c, "quantity": float(c.get("factor", 1.0) or 1.0) * float(qty)}
-                for c in (grp.resources or [])
-                if isinstance(c, dict)
-            ]
+            # Stored per unit of the position, never multiplied by ``qty``: the
+            # BOQ re-derives the unit rate from these rows when an edit touches
+            # them, so a row holding a whole-position total would re-price the
+            # position at roughly ``qty`` times the correct rate. The position's
+            # own ``unit_rate`` and ``total`` come from the chosen candidate.
+            resource_rows = self._per_unit_rows(grp.resources or [])
             # Every position must carry a resource buildup. When the group has
             # none (a bare price row, or an override/merge/split path that
             # nulled it), backfill from the candidate's catalogue components or
             # a transparent labour/material split that sums to the unit rate.
-            if not scaled_resources:
-                scaled_resources = await self._ensure_resources(grp, qty, unit_rate)
+            if not resource_rows:
+                resource_rows = await self._ensure_resources(grp, qty, unit_rate)
             metadata: dict[str, Any] = {
                 "ai_estimator_run_id": str(run.id),
                 "group_key": grp.group_key,
@@ -2284,8 +2308,8 @@ class AiEstimatorService:
                 "match_method": grp.match_method or "manual",
                 "score": grp.score,
                 "candidates_considered": len(grp.candidates or []),
-                "resources": scaled_resources,
-                "resource_breakdown": self._resource_rollup(scaled_resources),
+                "resources": resource_rows,
+                "resource_breakdown": self._resource_rollup(resource_rows),
                 # Stamp the line currency so the FX-aware BOQ rollup converts a
                 # non-base-currency rate instead of summing it as base. The run
                 # already records correct per-currency subtotals; without this
