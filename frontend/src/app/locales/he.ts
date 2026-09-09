@@ -30712,6 +30712,8 @@ const resource = {
     "regional.clear_file": "נקה קובץ",
     "regional.detailed_short": "מפורט",
     "regional.download_sample": "הורד קובץ לדוגמה כדי לנסות",
+    "regional.no_browser_preview": "אין תצוגה מקדימה לפורמט הזה בדפדפן. הקובץ נקרא בידי קורא {{standard}} בעת הייבוא.",
+    "regional.import_file_btn": "ייבא את {{name}}",
     "regional.drop_file": "גרור קובץ לכאן, או",
     "regional.export_btn": "ייצוא כ-CSV",
     "regional.export_complete": "הייצוא הושלם",

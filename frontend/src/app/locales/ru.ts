@@ -31604,6 +31604,8 @@ const resource = {
     "regional.clear_file": "Очистить файл",
     "regional.detailed_short": "Подробно",
     "regional.download_sample": "Загрузите образец файла, чтобы попробовать",
+    "regional.no_browser_preview": "Для этого формата в браузере нет предпросмотра. При импорте файл читает модуль чтения {{standard}}.",
+    "regional.import_file_btn": "Импортировать {{name}}",
     "regional.drop_file": "Перетащите файл сюда или",
     "regional.export_btn": "Экспортировать как CSV",
     "regional.export_complete": "Экспорт завершен",

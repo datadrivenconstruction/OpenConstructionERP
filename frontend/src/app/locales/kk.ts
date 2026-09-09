@@ -30687,6 +30687,8 @@ const resource = {
     "regional.clear_file": "Файлды тазарту",
     "regional.detailed_short": "Толық",
     "regional.download_sample": "Байқап көру үшін үлгі файлды жүктеп алыңыз",
+    "regional.no_browser_preview": "Бұл пішімді браузерде алдын ала қарау мүмкін емес. Импорттау кезінде файлды {{standard}} оқығышы оқиды.",
+    "regional.import_file_btn": "{{name}} импорттау",
     "regional.drop_file": "Файлды мұнда тастаңыз немесе",
     "regional.export_btn": "CSV ретінде экспорттау",
     "regional.export_complete": "Экспорт аяқталды",

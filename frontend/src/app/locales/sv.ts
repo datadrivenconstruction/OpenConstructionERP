@@ -31416,6 +31416,8 @@ const resource = {
     "regional.clear_file": "Rensa fil",
     "regional.detailed_short": "Detaljerad",
     "regional.download_sample": "Ladda ned en exempelfil för att prova det",
+    "regional.no_browser_preview": "Det finns ingen förhandsgranskning av det här formatet i webbläsaren. Filen läses av {{standard}}-läsaren vid import.",
+    "regional.import_file_btn": "Importera {{name}}",
     "regional.drop_file": "Släpp en fil här eller",
     "regional.export_btn": "Exportera som CSV",
     "regional.export_complete": "Export slutförd",

@@ -30627,6 +30627,8 @@ const resource = {
     "regional.clear_file": "ফাইল সাফ করুন",
     "regional.detailed_short": "বিস্তারিত",
     "regional.download_sample": "চেষ্টা করতে একটি নমুনা ফাইল ডাউনলোড করুন",
+    "regional.no_browser_preview": "এই ফরম্যাটের প্রিভিউ ব্রাউজারে দেখা যায় না। ইম্পোর্টের সময় ফাইলটি {{standard}} রিডার দিয়ে পড়া হয়।",
+    "regional.import_file_btn": "{{name}} ইম্পোর্ট করুন",
     "regional.drop_file": "এখানে একটি ফাইল ড্রপ করুন, অথবা",
     "regional.export_btn": "CSV হিসেবে এক্সপোর্ট করুন",
     "regional.export_complete": "এক্সপোর্ট সম্পন্ন",

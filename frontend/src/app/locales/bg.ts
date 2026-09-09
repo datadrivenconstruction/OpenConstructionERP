@@ -31489,6 +31489,8 @@ const resource = {
     "regional.clear_file": "Изчистване на файл",
     "regional.detailed_short": "Подробно",
     "regional.download_sample": "Изтегляне на примерен файл за пробване",
+    "regional.no_browser_preview": "Няма преглед на този формат в браузъра. При импортиране файлът се чете от четеца {{standard}}.",
+    "regional.import_file_btn": "Импортиране на {{name}}",
     "regional.drop_file": "Поставете файл тук или",
     "regional.export_btn": "Експортиране като CSV",
     "regional.export_complete": "Експортирането е завършено",

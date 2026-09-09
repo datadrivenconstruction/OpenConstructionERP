@@ -31483,6 +31483,8 @@ const resource = {
     "regional.clear_file": "Dosyayı temizle",
     "regional.detailed_short": "Ayrıntılı",
     "regional.download_sample": "Denemek için örnek bir dosya indir",
+    "regional.no_browser_preview": "Bu biçim için tarayıcıda önizleme yok. Dosya içe aktarılırken {{standard}} okuyucusu tarafından okunur.",
+    "regional.import_file_btn": "{{name}} dosyasını içe aktar",
     "regional.drop_file": "Buraya bir dosya bırakın veya",
     "regional.export_btn": "CSV olarak dışa aktar",
     "regional.export_complete": "Dışa aktarma tamamlandı",

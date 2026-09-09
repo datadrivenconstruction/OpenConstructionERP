@@ -31408,6 +31408,8 @@ const resource = {
     "regional.clear_file": "Ryd fil",
     "regional.detailed_short": "Detaljeret",
     "regional.download_sample": "Download en eksempelfil for at prøve det",
+    "regional.no_browser_preview": "Der er ingen forhåndsvisning af dette format i browseren. Filen læses af {{standard}}-læseren ved import.",
+    "regional.import_file_btn": "Importer {{name}}",
     "regional.drop_file": "Slip en fil her, eller",
     "regional.export_btn": "Eksporter som CSV",
     "regional.export_complete": "Eksport fuldført",

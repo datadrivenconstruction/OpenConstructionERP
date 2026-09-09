@@ -31201,6 +31201,8 @@ const resource = {
     "regional.clear_file": "Fájl törlése",
     "regional.detailed_short": "Részletes",
     "regional.download_sample": "Töltse le a mintafájlt kipróbáláshoz",
+    "regional.no_browser_preview": "Ehhez a formátumhoz nincs előnézet a böngészőben. A fájlt importáláskor a {{standard}} olvasó dolgozza fel.",
+    "regional.import_file_btn": "{{name}} importálása",
     "regional.drop_file": "Ejtse ide a fájlt, vagy",
     "regional.export_btn": "Exportálás CSV-be",
     "regional.export_complete": "Export kész",

@@ -31418,6 +31418,8 @@ const resource = {
     "regional.clear_file": "Xóa tệp",
     "regional.detailed_short": "Chi tiết",
     "regional.download_sample": "Tải xuống một tệp mẫu để thử",
+    "regional.no_browser_preview": "Không có bản xem trước cho định dạng này trong trình duyệt. Khi nhập, tệp được đọc bằng trình đọc {{standard}}.",
+    "regional.import_file_btn": "Nhập {{name}}",
     "regional.drop_file": "Thả một tệp ở đây, hoặc",
     "regional.export_btn": "Xuất dưới dạng CSV",
     "regional.export_complete": "Xuất hoàn tất",

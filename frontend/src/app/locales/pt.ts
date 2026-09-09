@@ -31480,6 +31480,8 @@ const resource = {
     "regional.clear_file": "Limpar ficheiro",
     "regional.detailed_short": "Detalhado",
     "regional.download_sample": "Descarregue um ficheiro de amostra para experimentar",
+    "regional.no_browser_preview": "Não há visualização deste formato no navegador. O ficheiro é lido pelo leitor {{standard}} na importação.",
+    "regional.import_file_btn": "Importar {{name}}",
     "regional.drop_file": "Solte um ficheiro aqui, ou",
     "regional.export_btn": "Exportar como CSV",
     "regional.export_complete": "Exportação concluída",

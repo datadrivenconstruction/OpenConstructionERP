@@ -30687,6 +30687,8 @@ const resource = {
     "regional.clear_file": "فائل صاف کریں",
     "regional.detailed_short": "تفصیلی",
     "regional.download_sample": "آزمانے کے لیے ایک نمونہ فائل ڈاؤن لوڈ کریں",
+    "regional.no_browser_preview": "اس فارمیٹ کا براؤزر میں پیش نظارہ دستیاب نہیں۔ درآمد کے وقت فائل کو {{standard}} ریڈر پڑھتا ہے۔",
+    "regional.import_file_btn": "{{name}} درآمد کریں",
     "regional.drop_file": "یہاں ایک فائل ڈراپ کریں، یا",
     "regional.export_btn": "CSV کے طور پر ایکسپورٹ کریں",
     "regional.export_complete": "ایکسپورٹ مکمل",

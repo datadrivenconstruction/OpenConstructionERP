@@ -31714,6 +31714,8 @@ const resource = {
     "regional.browse": "Файлдарды тандоо",
     "regional.formats_hint": "Колдоого алынгандар: {{exts}}",
     "regional.download_sample": "Аракет кылуу үчүн үлгү файлды жүктөп алыңыз",
+    "regional.no_browser_preview": "Бул форматты браузерде алдын ала кароо мүмкүн эмес. Импорттоодо файлды {{standard}} окугучу окуйт.",
+    "regional.import_file_btn": "{{name}} импорттоо",
     "regional.trades_ref": "{{standard}} Шитеме",
     "regional.target_boq": "Импорттоо үчүн максат",
     "regional.select_project": "Долбоорду тандоо",

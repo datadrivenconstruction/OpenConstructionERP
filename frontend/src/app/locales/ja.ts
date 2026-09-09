@@ -31405,6 +31405,8 @@ const resource = {
     "regional.clear_file": "ファイルをクリア",
     "regional.detailed_short": "詳細",
     "regional.download_sample": "試すためにサンプルファイルをダウンロード",
+    "regional.no_browser_preview": "この形式はブラウザーでプレビューできません。インポート時にファイルは {{standard}} リーダーが読み込みます。",
+    "regional.import_file_btn": "{{name}} をインポート",
     "regional.drop_file": "ここにファイルをドロップするか、",
     "regional.export_btn": "CSVとしてエクスポート",
     "regional.export_complete": "エクスポート完了",

@@ -31283,6 +31283,8 @@ const resource = {
     "regional.clear_file": "Tøm fil",
     "regional.detailed_short": "Detaljert",
     "regional.download_sample": "Last ned en eksempelfil for å prøve den",
+    "regional.no_browser_preview": "Det finnes ingen forhåndsvisning av dette formatet i nettleseren. Filen leses av {{standard}}-leseren ved import.",
+    "regional.import_file_btn": "Importer {{name}}",
     "regional.drop_file": "Slipp en fil her, eller",
     "regional.export_btn": "Eksporter som CSV",
     "regional.export_complete": "Eksport fullstendig",

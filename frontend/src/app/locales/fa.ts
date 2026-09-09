@@ -30633,6 +30633,8 @@ const resource = {
     "regional.clear_file": "پاک‌کردن فایل",
     "regional.detailed_short": "با جزئیات",
     "regional.download_sample": "یک فایل نمونه را برای امتحان دانلود کنید",
+    "regional.no_browser_preview": "برای این قالب پیش‌نمایشی در مرورگر وجود ندارد. هنگام درون‌ریزی، فایل با خوانندهٔ {{standard}} خوانده می‌شود.",
+    "regional.import_file_btn": "درون‌ریزی {{name}}",
     "regional.drop_file": "یک فایل را اینجا رها کنید، یا",
     "regional.export_btn": "برون‌بری به‌صورت CSV",
     "regional.export_complete": "برون‌بری کامل شد",

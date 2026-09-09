@@ -31597,6 +31597,8 @@ const resource = {
     "regional.clear_file": "مسح الملف",
     "regional.detailed_short": "مفصّل",
     "regional.download_sample": "تحميل ملف نموذجي لتجربته",
+    "regional.no_browser_preview": "لا تتوفر معاينة لهذه الصيغة في المتصفح. يُقرأ الملف بواسطة قارئ {{standard}} عند الاستيراد.",
+    "regional.import_file_btn": "استيراد {{name}}",
     "regional.drop_file": "أفلت ملفاً هنا، أو",
     "regional.export_btn": "تصدير كـ CSV",
     "regional.export_complete": "اكتمل التصدير",

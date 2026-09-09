@@ -31472,6 +31472,8 @@ const resource = {
     "regional.clear_file": "Ștergeți fișierul",
     "regional.detailed_short": "Detaliat",
     "regional.download_sample": "Descărcați un fișier de exemplu pentru a-l încerca",
+    "regional.no_browser_preview": "Pentru acest format nu există previzualizare în browser. La import, fișierul este citit de cititorul {{standard}}.",
+    "regional.import_file_btn": "Importare {{name}}",
     "regional.drop_file": "Trageți un fișier aici, sau",
     "regional.export_btn": "Exportare ca CSV",
     "regional.export_complete": "Export complet",

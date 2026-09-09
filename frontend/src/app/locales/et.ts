@@ -31353,6 +31353,8 @@ const resource = {
     "regional.clear_file": "Tühjenda fail",
     "regional.detailed_short": "Üksikasjalik",
     "regional.download_sample": "Laadige alla näidisfail, et seda proovida",
+    "regional.no_browser_preview": "Selle vormingu eelvaadet brauseris ei ole. Importimisel loeb faili {{standard}} lugeja.",
+    "regional.import_file_btn": "Impordi {{name}}",
     "regional.drop_file": "Lohistage fail siia või",
     "regional.export_btn": "Ekspordi CSV-na",
     "regional.export_complete": "Eksport valmis",

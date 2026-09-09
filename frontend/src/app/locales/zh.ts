@@ -31405,6 +31405,8 @@ const resource = {
     "regional.clear_file": "清除文件",
     "regional.detailed_short": "详细",
     "regional.download_sample": "下载示例文件进行尝试",
+    "regional.no_browser_preview": "浏览器无法预览此格式。导入时由 {{standard}} 读取器读取该文件。",
+    "regional.import_file_btn": "导入 {{name}}",
     "regional.drop_file": "在此处放置文件，或",
     "regional.export_btn": "导出为CSV",
     "regional.export_complete": "导出完成",

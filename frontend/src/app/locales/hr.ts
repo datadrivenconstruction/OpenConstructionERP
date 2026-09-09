@@ -31480,6 +31480,8 @@ const resource = {
     "regional.clear_file": "Obriši datoteku",
     "regional.detailed_short": "Detaljno",
     "regional.download_sample": "Preuzmi uzorak datoteke da ga isprobate",
+    "regional.no_browser_preview": "Za ovaj format nema pregleda u pregledniku. Datoteku pri uvozu čita {{standard}} čitač.",
+    "regional.import_file_btn": "Uvezi {{name}}",
     "regional.drop_file": "Prebacite datoteku ovdje ili",
     "regional.export_btn": "Izvezi kao CSV",
     "regional.export_complete": "Izvoz je dovršen",

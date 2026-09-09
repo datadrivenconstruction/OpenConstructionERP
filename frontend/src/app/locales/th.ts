@@ -31386,6 +31386,8 @@ const resource = {
     "regional.clear_file": "ล้างไฟล์",
     "regional.detailed_short": "รายละเอียด",
     "regional.download_sample": "ดาวน์โหลดไฟล์ตัวอย่างเพื่อลอง",
+    "regional.no_browser_preview": "ไม่มีตัวอย่างของรูปแบบนี้ในเบราว์เซอร์ ไฟล์จะถูกอ่านด้วยตัวอ่าน {{standard}} เมื่อนำเข้า",
+    "regional.import_file_btn": "นำเข้า {{name}}",
     "regional.drop_file": "วางไฟล์ที่นี่ หรือ",
     "regional.export_btn": "ส่งออกเป็น CSV",
     "regional.export_complete": "ส่งออกเสร็จสิ้น",

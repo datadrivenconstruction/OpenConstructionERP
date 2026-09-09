@@ -31879,6 +31879,8 @@ const resource = {
     "regional.clear_file": "Faylni tozalash",
     "regional.detailed_short": "Batafsil",
     "regional.download_sample": "Sinab koʻrish uchun namuna faylni yuklab oling",
+    "regional.no_browser_preview": "Bu format uchun brauzerda oldindan koʻrish yoʻq. Import qilishda faylni {{standard}} oʻqigichi oʻqiydi.",
+    "regional.import_file_btn": "{{name}} ni import qilish",
     "regional.drop_file": "Faylni shu yerga tashlang, yoki",
     "regional.export_btn": "CSV sifatida eksport qilish",
     "regional.export_complete": "Eksport yakunlandi",

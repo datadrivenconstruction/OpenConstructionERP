@@ -31400,6 +31400,8 @@ const resource = {
     "regional.clear_file": "Hapus file",
     "regional.detailed_short": "Detail",
     "regional.download_sample": "Unduh file contoh untuk mencobanya",
+    "regional.no_browser_preview": "Tidak ada pratinjau untuk format ini di peramban. Berkas dibaca oleh pembaca {{standard}} saat diimpor.",
+    "regional.import_file_btn": "Impor {{name}}",
     "regional.drop_file": "Letakkan file di sini, atau",
     "regional.export_btn": "Ekspor sebagai CSV",
     "regional.export_complete": "Ekspor selesai",

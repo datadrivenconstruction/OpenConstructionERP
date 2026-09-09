@@ -31378,6 +31378,8 @@ const resource = {
     "regional.clear_file": "Tyhjennä tiedosto",
     "regional.detailed_short": "Yksityiskohtainen",
     "regional.download_sample": "Lataa näytetiedosto sitä kokeillaksesi",
+    "regional.no_browser_preview": "Tälle muodolle ei ole esikatselua selaimessa. Tiedosto luetaan tuonnin yhteydessä {{standard}}-lukijalla.",
+    "regional.import_file_btn": "Tuo {{name}}",
     "regional.drop_file": "Pudota tiedosto tähän tai",
     "regional.export_btn": "Vie CSV:ksi",
     "regional.export_complete": "Vienti valmis",

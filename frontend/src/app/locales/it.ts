@@ -31581,6 +31581,8 @@ const resource = {
     "regional.clear_file": "Cancella file",
     "regional.detailed_short": "Dettagliato",
     "regional.download_sample": "Scarica un file di esempio per provarlo",
+    "regional.no_browser_preview": "Per questo formato non c'è anteprima nel browser. Il file viene letto dal lettore {{standard}} durante l'importazione.",
+    "regional.import_file_btn": "Importa {{name}}",
     "regional.drop_file": "Rilascia un file qui, oppure",
     "regional.export_btn": "Esporta come CSV",
     "regional.export_complete": "Esportazione completa",

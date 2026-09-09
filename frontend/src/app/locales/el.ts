@@ -30670,6 +30670,8 @@ const resource = {
     "regional.clear_file": "Καθαρισμός αρχείου",
     "regional.detailed_short": "Λεπτομερές",
     "regional.download_sample": "Λήψη δείγματος αρχείου για δοκιμή",
+    "regional.no_browser_preview": "Δεν υπάρχει προεπισκόπηση αυτής της μορφής στο πρόγραμμα περιήγησης. Το αρχείο διαβάζεται από τον αναγνώστη {{standard}} κατά την εισαγωγή.",
+    "regional.import_file_btn": "Εισαγωγή {{name}}",
     "regional.drop_file": "Αφήστε ένα αρχείο εδώ, ή",
     "regional.export_btn": "Εξαγωγή ως CSV",
     "regional.export_complete": "Η εξαγωγή ολοκληρώθηκε",

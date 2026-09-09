@@ -30627,6 +30627,8 @@ const resource = {
     "regional.clear_file": "I-clear ang file",
     "regional.detailed_short": "Detalyado",
     "regional.download_sample": "Mag-download ng sample file para subukan ito",
+    "regional.no_browser_preview": "Walang preview ang format na ito sa browser. Binabasa ang file ng {{standard}} reader kapag na-import.",
+    "regional.import_file_btn": "I-import ang {{name}}",
     "regional.drop_file": "Ilagay ang file dito, o",
     "regional.export_btn": "I-export bilang CSV",
     "regional.export_complete": "Kumpleto ang export",

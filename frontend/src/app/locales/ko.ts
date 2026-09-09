@@ -31404,6 +31404,8 @@ const resource = {
     "regional.clear_file": "파일 삭제",
     "regional.detailed_short": "자세함",
     "regional.download_sample": "시도할 샘플 파일 다운로드",
+    "regional.no_browser_preview": "이 형식은 브라우저에서 미리 볼 수 없습니다. 가져올 때 파일은 {{standard}} 리더가 읽습니다.",
+    "regional.import_file_btn": "{{name}} 가져오기",
     "regional.drop_file": "여기에 파일을 끌어 놓거나,",
     "regional.export_btn": "CSV로 내보내기",
     "regional.export_complete": "내보내기 완료",

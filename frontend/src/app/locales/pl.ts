@@ -31540,6 +31540,8 @@ const resource = {
     "regional.clear_file": "Wyczyść plik",
     "regional.detailed_short": "Szczegółowe",
     "regional.download_sample": "Pobierz przykładowy plik, aby go wypróbować",
+    "regional.no_browser_preview": "Dla tego formatu nie ma podglądu w przeglądarce. Przy imporcie plik odczytuje czytnik {{standard}}.",
+    "regional.import_file_btn": "Importuj {{name}}",
     "regional.drop_file": "Upuść plik tutaj, lub",
     "regional.export_btn": "Eksportuj jako CSV",
     "regional.export_complete": "Eksport ukończony",

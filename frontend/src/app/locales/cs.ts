@@ -31496,6 +31496,8 @@ const resource = {
     "regional.clear_file": "Vymazat soubor",
     "regional.detailed_short": "Podrobně",
     "regional.download_sample": "Stáhněte si vzorový soubor a vyzkoušejte",
+    "regional.no_browser_preview": "Pro tento formát není v prohlížeči náhled. Soubor při importu načte čtečka {{standard}}.",
+    "regional.import_file_btn": "Importovat {{name}}",
     "regional.drop_file": "Přetáhněte soubor sem nebo",
     "regional.export_btn": "Exportovat jako CSV",
     "regional.export_complete": "Export dokončen",

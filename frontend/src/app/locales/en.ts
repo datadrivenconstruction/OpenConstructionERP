@@ -32616,6 +32616,8 @@ const resource = {
     "regional.browse": "Browse files",
     "regional.formats_hint": "Supported: {{exts}}",
     "regional.download_sample": "Download a sample file to try it",
+    "regional.no_browser_preview": "No preview for this format in the browser. The file is read by the {{standard}} reader on import.",
+    "regional.import_file_btn": "Import {{name}}",
     "regional.trades_ref": "{{standard}} Reference",
     "regional.target_boq": "Import Target",
     "regional.select_project": "Select project",

@@ -30813,6 +30813,8 @@ const resource = {
     "regional.clear_file": "Файлыг цэвэрлэх",
     "regional.detailed_short": "Дэлгэрэнгүй",
     "regional.download_sample": "Туршихын тулд жишээ файлыг татаж авна уу",
+    "regional.no_browser_preview": "Энэ форматыг хөтөч дээр урьдчилан харах боломжгүй. Импортлохад файлыг {{standard}} уншигч уншина.",
+    "regional.import_file_btn": "{{name}}-г импортлох",
     "regional.drop_file": "Файлыг эндээ унааж эсвэл",
     "regional.export_btn": "CSV болгон экспортлох",
     "regional.export_complete": "Экспортлолт дуусчээ",

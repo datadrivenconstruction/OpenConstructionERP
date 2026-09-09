@@ -31437,6 +31437,8 @@ const resource = {
     "regional.clear_file": "Bestand wissen",
     "regional.detailed_short": "Gedetailleerd",
     "regional.download_sample": "Download een voorbeeldbestand om het uit te proberen",
+    "regional.no_browser_preview": "Voor dit formaat is er geen voorbeeld in de browser. Het bestand wordt bij het importeren door de {{standard}}-lezer gelezen.",
+    "regional.import_file_btn": "{{name}} importeren",
     "regional.drop_file": "Zet een bestand hier neer, of",
     "regional.export_btn": "Exporteren als CSV",
     "regional.export_complete": "Export voltooid",

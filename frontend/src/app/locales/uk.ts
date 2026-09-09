@@ -31933,6 +31933,8 @@ const resource = {
     "regional.clear_file": "Очистити файл",
     "regional.detailed_short": "Детально",
     "regional.download_sample": "Завантажте зразок файлу, щоб спробувати",
+    "regional.no_browser_preview": "Для цього формату немає попереднього перегляду в браузері. Під час імпорту файл читає зчитувач {{standard}}.",
+    "regional.import_file_btn": "Імпортувати {{name}}",
     "regional.drop_file": "Перетягніть файл сюди або",
     "regional.export_btn": "Експортувати як CSV",
     "regional.export_complete": "Експорт завершено",

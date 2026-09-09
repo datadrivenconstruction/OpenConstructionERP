@@ -31125,6 +31125,8 @@ const resource = {
     "regional.clear_file": "फ़ाइल साफ़ करें",
     "regional.detailed_short": "विस्तृत",
     "regional.download_sample": "इसे आजमाने के लिए एक नमूना फ़ाइल डाउनलोड करें",
+    "regional.no_browser_preview": "इस प्रारूप का ब्राउज़र में पूर्वावलोकन नहीं है। आयात के समय फ़ाइल को {{standard}} रीडर पढ़ता है।",
+    "regional.import_file_btn": "{{name}} आयात करें",
     "regional.drop_file": "यहाँ एक फ़ाइल ड्रॉप करें, या",
     "regional.export_btn": "CSV के रूप में निर्यात करें",
     "regional.export_complete": "निर्यात पूर्ण",
