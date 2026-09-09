@@ -110,6 +110,7 @@ from app.modules.boq.copilot_schemas import (
 )
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
+from app.modules.boq.resource_review_router import resource_review_router
 from app.modules.boq.roundtrip import (
     ID_COLUMN_ALIASES,
     ID_COLUMN_HEADER,
@@ -214,6 +215,10 @@ from app.modules.measurement.presets import PRESETS as MEASUREMENT_PRESETS
 from app.modules.price_breakdown.presets import PRESETS as PRICE_BREAKDOWN_PRESETS
 
 router = APIRouter(tags=["boq"])
+
+# The module loader mounts exactly one router per module, this one. Sub-routers
+# that live in their own files answer nowhere until they are included here.
+router.include_router(resource_review_router)
 _log = logging.getLogger(__name__)
 
 

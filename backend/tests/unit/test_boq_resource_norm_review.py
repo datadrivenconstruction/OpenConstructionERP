@@ -584,3 +584,23 @@ def test_the_review_router_exposes_the_two_routes() -> None:
     routes = {(route.path, method) for route in resource_review_router.routes for method in (route.methods or ())}
     assert ("/projects/{project_id}/resource-norm-review", "GET") in routes
     assert ("/positions/{position_id}/resource-norm-review", "POST") in routes
+
+
+def test_the_boq_router_mounts_the_review_routes() -> None:
+    """The module loader mounts one router per module; a sub-router nobody includes answers nowhere.
+
+    Current FastAPI does not copy an included router's routes into the parent
+    table; it appends one marker that resolves them when a request arrives, so
+    a flat read of ``router.routes`` reports an included sub-router as absent.
+    The test therefore reads the router the way the module loader does.
+    """
+    from app.core.module_loader import _walk_routes
+    from app.modules.boq.router import router as boq_router
+
+    mounted = {
+        (path, method)
+        for path, route in _walk_routes(boq_router.routes)
+        for method in (getattr(route, "methods", None) or ())
+    }
+    assert ("/projects/{project_id}/resource-norm-review", "GET") in mounted
+    assert ("/positions/{position_id}/resource-norm-review", "POST") in mounted
