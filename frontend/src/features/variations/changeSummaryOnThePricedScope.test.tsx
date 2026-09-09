@@ -142,9 +142,9 @@ describe('the pricing card splits the bill by what each line does to the contrac
     // the total. The currency sign sits between the minus and the digits
     // ("-€12,000.00") and digit-group separators differ by locale, so match
     // the sign and the digits and let the formatter own the rest.
-    expect(within(summary).getAllByText(/-\s?\D{0,3}12[.,   ]?000/).length).toBeGreaterThan(0);
-    expect(within(summary).getAllByText(/-\s?\D{0,3}9[.,   ]?000/).length).toBeGreaterThan(0);
-    expect(within(summary).getAllByText(/2[.,   ]?000/).length).toBeGreaterThan(0);
+    expect(within(summary).getAllByText(/-\s?\D{0,3}12[.,\u00a0\u202f ]?000/).length).toBeGreaterThan(0);
+    expect(within(summary).getAllByText(/-\s?\D{0,3}9[.,\u00a0\u202f ]?000/).length).toBeGreaterThan(0);
+    expect(within(summary).getAllByText(/2[.,\u00a0\u202f ]?000/).length).toBeGreaterThan(0);
   });
 
   it('shows no split for a bill the server did not split', async () => {
