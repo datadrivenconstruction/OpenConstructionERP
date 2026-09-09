@@ -25701,7 +25701,7 @@ const resource = {
     "clash.ct_both": "Hart + Abstand (Interferenz & Naehe)",
     "clash.ct_both_hint": "Meldet harte Interferenzen, dann einen Abstands-Verstoß für jedes nicht-harte Paar innerhalb des Abstands.",
     "clash.ct_clearance": "Nur Abstand - Naehe, kein Übergang",
-    "clash.ct_clearance_hint": "Meldet nur Paare, die sich NICHT ueberlappen, aber innerhalb des Abstands sitzen (z.B. Wartungszugang). Legen Sie einen Abstand > 0 fest.",
+    "clash.ct_clearance_hint": "Meldet nur Paare, die sich NICHT überlappen, aber innerhalb des Abstands sitzen (z.B. Wartungszugang). Legen Sie einen Abstand > 0 fest.",
     "clash.ct_hard": "Nur hart - echte Durchdringung",
     "clash.ct_hard_hint": "Meldet nur Elementpaare, deren Geometrie die Toleranz tatsächlich durchdringt. Der Abstands-Durchgang wird übersprungen.",
     "clash.ctx_elements": "Elemente",
