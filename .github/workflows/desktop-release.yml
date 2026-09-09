@@ -224,8 +224,9 @@ jobs:
       # is what makes it safe to gate a release on.
       #
       # Know what this step does NOT prove. A control run built from this
-      # workflow with the spec's codesign_identity reverted started here just
-      # fine, so this runner does not reproduce the user's failure: whether dyld
+      # workflow with the spec's codesign_identity set to None, the value it
+      # carries today after issue #480, started here just fine, so this runner
+      # does not reproduce the user's failure: whether dyld
       # enforces Team ID matching depends on the policy applied to the process,
       # and a binary built locally and never quarantined is judged leniently.
       # This step therefore catches "the build does not start at all", the issue

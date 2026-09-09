@@ -242,7 +242,14 @@ def test_the_spec_does_not_name_an_ad_hoc_identity_again(script):
 
     ``codesign_identity = None`` and ``codesign_identity = "-"`` look like the same request and
     are not: PyInstaller ad-hoc signs either way, and only the second one also asks for the
-    hardened runtime. Nothing in a build log distinguishes them, so the line is asserted here.
+    hardened runtime.
+
+    A macOS build log does distinguish them, in one line, ``Code signing identity: None``
+    against ``Code signing identity: -`` (PyInstaller ``building/api.py``, printed under
+    ``if is_darwin``). That line is worth knowing when reading a CI log by hand, but it is
+    weak as a gate: it only appears on macOS runners, it says nothing about what the runtime
+    flag ended up as, and a build nobody reads the log of emits it just the same. The line in
+    the spec is the thing that decides, so the line in the spec is what is asserted here.
     """
     assignments = [
         line.split("=", 1)[1].strip()
