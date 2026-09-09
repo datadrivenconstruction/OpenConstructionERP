@@ -1,29 +1,31 @@
 # Contributors
 
 OpenConstructionERP is authored and owned by DataDrivenConstruction (see
-[AUTHORS.md](AUTHORS.md)). The people listed here are contributors: they have sent
-patches, fixes and feedback that made the project better. They are not authors of the
-project, and authorship and copyright remain with DataDrivenConstruction.
+[AUTHORS.md](AUTHORS.md)). The people listed here are contributors: they have sent bug
+reports, questions, ideas and patches that made the project better. They are not authors
+of the project, and authorship and copyright remain with DataDrivenConstruction.
 
 Thank you to everyone who has contributed.
 
-Almost everyone listed here helped by reporting a bug, asking a question or proposing an
-idea, not by shipping code into the project. When a fix does arrive as a patch, we
-normally reimplement it ourselves rather than merging the change as-is. That keeps one
-reviewed source of truth for a codebase that many companies run in production, and it
+Being listed here means one thing: you reported a bug, asked a question, proposed an idea
+or sent a patch, and the project is better for it. It does not mean that any of your code
+is in the product. We do not merge external pull requests. When a fix arrives as a patch
+we read it, credit the author, and write our own implementation from scratch. That keeps
+one reviewed source of truth for a codebase that many companies run in production, and it
 avoids taking in code we have not written ourselves, which is the safer path on security.
-So the credit below is for the report or the idea that led to a fix, and the
+So every credit below is for the report, the question or the proposal, and the
 implementation is our own.
 
 - **skolodi** ([@skolodi](https://github.com/skolodi)): issue reports and field feedback
   on the BOQ AI assistant, and reported that a single budget could mix currencies and that
   an exchange rate could be entered the wrong way round
   ([#111](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/111)).
-- **Mourtadha Diop** ([@Mourdi59](https://github.com/Mourdi59)): fixed three BIM viewer
-  bugs ([#159](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/159)),
+- **Mourtadha Diop** ([@Mourdi59](https://github.com/Mourdi59)): sent a pull request
+  proposing fixes for three BIM viewer bugs
+  ([#159](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/159)),
   COLLADA namespace-prefix serialisation in `ifc_processor`, defence-in-depth regex
-  tolerance in `ElementManager`, and `degraded` model status surfacing in the viewer UI.
-  Later raised ideas for driving BOQ quantities from live BIM parameters, surfacing real
+  tolerance in `ElementManager`, and `degraded` model status surfacing in the viewer UI;
+  the shipped implementation is our own. Later raised ideas for driving BOQ quantities from live BIM parameters, surfacing real
   server errors on Excel paste, and resolving linked elements per model in multi-model
   setups ([#206](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/206)).
   More recently proposed BOQ per-element quantity formulas with a projection editor and a
@@ -33,25 +35,26 @@ implementation is our own.
   calendar for the Gantt
   ([#348](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/348)). Both
   shipped as our own implementation.
-- **rjohny** ([@rjohny55](https://github.com/rjohny55)): multi-area patch set
-  ([#161](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/161)),
-  defensive guards for the slow-query SQLAlchemy listener and the module-presence probe
-  under concurrency, a FieldReport activity-rollup column fix, Qdrant multipart snapshot
-  upload so app-container snapshots reach a separate Qdrant container, and three new AI
-  providers, Kimi (Moonshot AI), Ollama and vLLM, with custom base URL support for the
-  two local backends.
-- **Jehad Baniowda** ([@jehadbaniodeh](https://github.com/jehadbaniodeh)): fixed the
-  production Docker deployment and the takeoff viewer. The backend image now installs its
-  dependencies and starts correctly
-  ([#173](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/173)), nginx
-  upgrades WebSocket connections so real-time notifications and presence work
-  ([#176](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/176)), `.mjs`
-  workers are served with the correct MIME type so the PDF takeoff viewer renders
-  ([#175](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/175)), the
-  upload ceiling is raised to 100M for PDF and CAD drawings
+- **rjohny** ([@rjohny55](https://github.com/rjohny55)): sent a multi-area pull request
+  ([#161](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/161))
+  proposing defensive guards for the slow-query SQLAlchemy listener and the
+  module-presence probe under concurrency, a FieldReport activity-rollup column fix,
+  Qdrant multipart snapshot upload so app-container snapshots reach a separate Qdrant
+  container, and three new AI providers, Kimi (Moonshot AI), Ollama and vLLM, with custom
+  base URL support for the two local backends. The shipped implementation is our own.
+- **Jehad Baniowda** ([@jehadbaniodeh](https://github.com/jehadbaniodeh)): sent five pull
+  requests proposing fixes to the production Docker deployment and the takeoff viewer:
+  that the backend image install its dependencies and start correctly
+  ([#173](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/173)), that
+  nginx upgrade WebSocket connections so real-time notifications and presence work
+  ([#176](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/176)), that
+  `.mjs` workers be served with the correct MIME type so the PDF takeoff viewer renders
+  ([#175](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/175)), that
+  the upload ceiling be raised to 100M for PDF and CAD drawings
   ([#174](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/174)), and
-  takeoff documents open in the in-app viewer instead of a broken download navigation
-  ([#172](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/172)).
+  that takeoff documents open in the in-app viewer instead of a broken download navigation
+  ([#172](https://github.com/datadrivenconstruction/OpenConstructionERP/pull/172)). The
+  shipped implementation is our own.
 - **Jérémy Christillin** ([@bvisible](https://github.com/bvisible)): feedback and feature
   proposals for the PDF takeoff module, in-canvas measurement editing and LLM-assisted
   plan reading
