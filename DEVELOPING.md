@@ -195,18 +195,28 @@ English. Lint passes. The type check passes. The build passes. The tests pass. T
 When you add a string, add it to every locale, or use the translation tooling to do so, and
 verify by switching language rather than by watching a gate go green.
 
-Counting the languages is worth doing carefully, because the two obvious numbers disagree and
-both are correct. There are 43 locale files in `frontend/src/app/locales/`, and 41 languages
-offered in the picker. The gap is two files that exist and are deliberately not offered:
-`uz` is commented out in the `SUPPORTED_LANGUAGES` list in `frontend/src/app/i18n.ts`, and `mn`
-is held back pending a native-speaker pass. Both carry their reason in a comment next to them. So
-count files when you are asking about coverage, and count `SUPPORTED_LANGUAGES` when you are
-asking what a user can select. If you inherit a single number for this, it is wrong for one of
-the two questions.
+Counting the languages is worth doing carefully, because the obvious numbers disagree and every
+one of them is correct about something. There are 45 locale files in `frontend/src/app/locales/`,
+44 entries in the `SUPPORTED_LANGUAGES` list in `frontend/src/app/i18n.ts`, and 38 distinct
+languages, because four of those entries are regional variants of Spanish, Portuguese or English
+rather than languages of their own. The gap between the first two numbers is one file that exists
+and is deliberately not offered: `mn` is held back until a native speaker has read it, after five
+invented roots passed every gate in it, and the comment beside its place in the list says so. So
+count files when you are asking about coverage, count `SUPPORTED_LANGUAGES` when you are asking
+what a user can select, and fold the regional variants together when you are asking how many
+languages the product speaks. If you inherit a single number for this, it is wrong for two of the
+three questions.
+
+Do not inherit these three from this paragraph either. It carried the counts from two releases
+back for long enough to be wrong about both of them, and it also still said Uzbek was commented
+out of the picker months after Uzbek was offered, which is the worse half: a document that
+explains how to count is the one a reader trusts instead of measuring. `scripts/check_public_language_counts.py` recounts all three
+from the tree and fails when this file or the README has drifted from them, so the way to answer
+the question is to run it.
 
 Backend validation messages are a separate bundle with a separate and much smaller reach.
 `backend/app/core/validation/messages/` ships `en.json`, `de.json`, `es.json` and `ru.json`, and
-that is all of them. Four languages on the backend against 41 offered on the frontend. Nothing in
+that is all of them. Four languages on the backend against 44 offered on the frontend. Nothing in
 the interface tells a user this, and a validation report in, say, Polish will come back with
 English message text. The resolution order is the requested locale, then English, then a
 humanised form of the key, so it degrades quietly rather than breaking.

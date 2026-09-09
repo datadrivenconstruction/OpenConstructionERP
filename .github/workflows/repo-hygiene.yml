@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 77. They run on every push and pull request, grouped into three
+# Guards: 79. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -1004,6 +1004,25 @@ jobs:
       - name: Check for t() keys no locale file can answer
         if: ${{ !cancelled() }}
         run: python scripts/check_i18n_orphan_keys.py
+
+      # The language count in README.md sat at 42 while two more were added, and
+      # the paragraph in DEVELOPING.md whose entire subject is how to count them
+      # correctly was itself wrong about both of its numbers and still said
+      # Uzbek was commented out of the picker months after Uzbek was offered.
+      # Nothing could have noticed: a number in prose is not a symbol, so no
+      # import, no render and no type check has any opinion about it, and the
+      # count a reader takes for the size of the product is the one thing here
+      # with no owner. The guard recounts all three from the tree, checks every
+      # claim it can find, and refuses when a rule stops finding the claim it
+      # exists to check, because a sentence reworded out of reach of its own
+      # check is the state this was written to prevent.
+      - name: Prove the public language count guard can fail
+        if: ${{ !cancelled() }}
+        run: python scripts/check_public_language_counts.py --selftest
+
+      - name: Check the public documents still count the languages correctly
+        if: ${{ !cancelled() }}
+        run: python scripts/check_public_language_counts.py
 
       - name: Check computed t() keys against the English bundle
         if: ${{ !cancelled() }}
