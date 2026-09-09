@@ -184,6 +184,21 @@
     "note": "entirely template variables/punctuation, no literal word to translate",
     "reason_category": "template_placeholder"
   },
+  "boq.variation_kind_short_added": {
+    "en_value": "A",
+    "note": "single letter code for the change kind, the initial of each language's own word rather than of the English one: es writes E for Eliminado, fr writes S for Supprime, de writes H, G and E, cs writes P, Z and O; it, pt and pt-BR coincide with English only because Aggiunto, Modificato, Rimosso and Adicionado, Modificado, Removido begin with the same letters, which is the opposite of a string left untranslated",
+    "reason_category": "abbreviation"
+  },
+  "boq.variation_kind_short_modified": {
+    "en_value": "M",
+    "note": "single letter code for the change kind, the initial of each language's own word rather than of the English one: es writes E for Eliminado, fr writes S for Supprime, de writes H, G and E, cs writes P, Z and O; it, pt and pt-BR coincide with English only because Aggiunto, Modificato, Rimosso and Adicionado, Modificado, Removido begin with the same letters, which is the opposite of a string left untranslated",
+    "reason_category": "abbreviation"
+  },
+  "boq.variation_kind_short_removed": {
+    "en_value": "R",
+    "note": "single letter code for the change kind, the initial of each language's own word rather than of the English one: es writes E for Eliminado, fr writes S for Supprime, de writes H, G and E, cs writes P, Z and O; it, pt and pt-BR coincide with English only because Aggiunto, Modificato, Rimosso and Adicionado, Modificado, Removido begin with the same letters, which is the opposite of a string left untranslated",
+    "reason_category": "abbreviation"
+  },
   "capacity.legend_low": {
     "en_value": "≤ 50%",
     "note": "symbol/number only, no words to translate, identical in en/ru/kk (kk locale addition)",
@@ -519,6 +534,16 @@
     "note": "German hybrid invoice standard name and version, see einvoice.profile.en16931",
     "reason_category": "standard_code"
   },
+  "exchange.direction_export": {
+    "en_value": "Export",
+    "note": "cognate of the English word, spelled the same in cs, fr, ro and sv; the sibling import key is matched by a different and larger locale set (cs, da, et, fr, pl, ro, sv) because da, et and pl write Eksport for this one, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
+  },
+  "exchange.direction_import": {
+    "en_value": "Import",
+    "note": "cognate of the English word, spelled the same in cs, da, et, fr, pl, ro and sv; the sibling export key is matched by a smaller locale set because da, et and pl write Eksport there, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
+  },
   "explorer.load_failed_desc_status": {
     "en_value": "HTTP {{status}} - {{message}}",
     "note": "bare technical/business acronym or initialism",
@@ -593,6 +618,16 @@
     "en_value": "1 {{from}} = {{rate}} {{to}}",
     "note": "pure interpolation template, no literal text to translate (bn locale addition)",
     "reason_category": "template_only"
+  },
+  "gaeb.tab_export": {
+    "en_value": "Export",
+    "note": "cognate of the English word, spelled the same in cs, fr, ro and sv; the sibling import key is matched by a different and larger locale set (cs, da, et, fr, pl, ro, sv) because da, et and pl write Eksport for this one, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
+  },
+  "gaeb.tab_import": {
+    "en_value": "Import",
+    "note": "cognate of the English word, spelled the same in cs, da, et, fr, pl, ro and sv; the sibling export key is matched by a smaller locale set because da, et and pl write Eksport there, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
   },
   "geoHub.scene2D": {
     "en_value": "2D",
@@ -1038,6 +1073,16 @@
     "en_value": "name@company.com",
     "note": "placeholder email address shown as an input example",
     "reason_category": "file_path_example"
+  },
+  "regional.tab_export": {
+    "en_value": "Export",
+    "note": "cognate of the English word, spelled the same in cs, fr, ro and sv; the sibling import key is matched by a different and larger locale set (cs, da, et, fr, pl, ro, sv) because da, et and pl write Eksport for this one, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
+  },
+  "regional.tab_import": {
+    "en_value": "Import",
+    "note": "cognate of the English word, spelled the same in cs, da, et, fr, pl, ro and sv; the sibling export key is matched by a smaller locale set because da, et and pl write Eksport there, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
+    "reason_category": "cognate_loanword"
   },
   "reporting.col_cpi": {
     "en_value": "CPI",
