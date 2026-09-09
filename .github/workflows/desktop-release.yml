@@ -70,12 +70,31 @@ jobs:
   build-sidecar:
     name: Build Sidecar (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # Measured over v14.3.0, v14.4.0, v14.5.0 and five sidecar-only runs:
-    # Linux 14.4 to 15.2 min, Windows 15.6 to 17.8, macOS 25.6 to 34.4. The cap
-    # is a little over twice the slowest observed leg, so it cannot fire on a
-    # healthy build. Without one the job inherits the six hour default, which is
-    # what a hung PyInstaller run costs across three parallel legs.
-    timeout-minutes: 75
+    # Without a cap the job inherits the six hour default, which is what a hung
+    # PyInstaller run costs across three parallel legs. So there is a cap, and
+    # the only question is where it goes.
+    #
+    # It was 75, from a measurement of v14.3.0 to v14.5.0 that put macOS at 25.6
+    # to 34.4 minutes. That reading is two months old and macOS is nowhere near
+    # it any more. Over the twelve most recent runs the macOS leg took 18.8,
+    # 37.9, 51.2, 52.6, 55.2, 57.7, 60.1, 63.2, 66.6, 68.3, 68.3 and 75.4
+    # minutes, and the last of those is v17.2.0, which the cap killed after
+    # every check in the job had already passed. Nine of the twelve were over
+    # fifty.
+    #
+    # The spread is the point, not the middle. The same commit builds the
+    # frontend on macOS in 18 minutes on one runner and 60 on another, so a cap
+    # anywhere near the median fires on runner luck rather than on a defect. The
+    # other two legs are steady at 30 and 37 and are nowhere near this.
+    #
+    # 120 is the number build-tauri already uses, and it is above every run in
+    # that sample, so a job that reaches it is stuck rather than unlucky.
+    #
+    # What this does not fix: three legs each build the same frontend from the
+    # same commit and get the same bytes, and on macOS that build is most of the
+    # job. Building it once and passing it to the three would take the whole
+    # variance out of two of them.
+    timeout-minutes: 120
     strategy:
       # Build every OS even if one fails, so a single-platform break never
       # cancels the others and we still ship the installers that did build.
