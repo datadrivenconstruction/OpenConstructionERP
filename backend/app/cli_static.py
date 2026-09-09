@@ -81,6 +81,12 @@ def mounted_frontend_intact() -> bool | None:
 
 # Pin JavaScript-family MIME types at import time.
 #
+# ``.bc3`` is here for a different reason than the rest: the stdlib table has no
+# entry for it on any host, so it would be served as ``application/octet-stream``.
+# The value is the one ``REGISTERED_EXPORTERS`` already declares for a BC3 the
+# product writes, so a downloaded sample and an exported budget arrive under the
+# same type.
+#
 # Both ``StaticFiles`` (the ``/assets`` mount) and ``FileResponse`` (the root
 # SPA fallback) derive ``Content-Type`` from the stdlib ``mimetypes`` table.
 # That table is seeded from the host OS, and on a fresh wheel install it does
@@ -100,8 +106,57 @@ for _suffix, _mime in (
     (".wasm", "application/wasm"),
     (".json", "application/json"),
     (".svg", "image/svg+xml"),
+    (".bc3", "text/plain"),
 ):
     mimetypes.add_type(_mime, _suffix)
+
+
+# Suffixes the SPA fallback will serve from the dist root instead of answering
+# with index.html. A file whose suffix is not here is not "missing" in any way a
+# reader can see: the request comes back 200 carrying the app shell, under the
+# asset's own URL, and whatever asked for it fails several steps later.
+#
+# NB: ``.js``/``.mjs``/``.css``/``.map``/``.wasm`` MUST be here - Vite-PWA emits
+# ``registerSW.js``, ``sw.js`` and ``workbox-*.js`` at the dist ROOT (not under
+# ``/assets``), and Cesium ships root-level ``.css``/``.wasm``. Without these
+# suffixes the browser refused the service worker on a wrong MIME type and the
+# PWA never registered.
+#
+# ``.csv``/``.tsv``/``.xlsx``/``.bc3`` are the sample budgets under
+# ``/templates``, which the regional exchange screens link to as "download a
+# sample file to try it". ``.bc3`` was the one missing, so on 9 September that
+# link answered 200 with index.html under a .bc3 name, and the page's own parser
+# read the HTML as a budget and reported positions found in it. Whatever a screen
+# offers for download belongs in this set, and
+# ``test_shipped_exchange_samples_are_importable`` is what keeps the two in step.
+SERVED_ROOT_EXTENSIONS: frozenset[str] = frozenset(
+    {
+        ".ico",
+        ".png",
+        ".svg",
+        ".webmanifest",
+        ".json",
+        ".txt",
+        ".xml",
+        ".webp",
+        ".avif",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".woff",
+        ".woff2",
+        ".csv",
+        ".tsv",
+        ".xlsx",
+        ".xls",
+        ".bc3",
+        ".js",
+        ".mjs",
+        ".css",
+        ".map",
+        ".wasm",
+    }
+)
 
 
 def get_frontend_dir() -> Path:
@@ -272,38 +327,9 @@ def mount_frontend(app: FastAPI) -> None:
             app.get(f"/{static_name}", include_in_schema=False)(_make_static_handler(static_path))
 
     # Serve other root-level static files (e.g. manifest.json, robots.txt)
-    # that may exist in the frontend dist directory.
-    # NB: ``.js``/``.mjs``/``.css``/``.map``/``.wasm`` MUST be here - Vite-PWA
-    # emits ``registerSW.js``, ``sw.js`` and ``workbox-*.js`` at the dist ROOT
-    # (not under ``/assets``), and Cesium ships root-level ``.css``/``.wasm``.
-    # Without these suffixes the SPA 404 fallback returned ``index.html`` for
-    # them, so the browser refused the service worker (wrong MIME) and the PWA
-    # never registered.
-    _root_static_extensions = {
-        ".ico",
-        ".png",
-        ".svg",
-        ".webmanifest",
-        ".json",
-        ".txt",
-        ".xml",
-        ".webp",
-        ".avif",
-        ".jpg",
-        ".jpeg",
-        ".gif",
-        ".woff",
-        ".woff2",
-        ".csv",
-        ".tsv",
-        ".xlsx",
-        ".xls",
-        ".js",
-        ".mjs",
-        ".css",
-        ".map",
-        ".wasm",
-    }
+    # that may exist in the frontend dist directory. The set is module level so
+    # a test can ask what this build will actually hand back.
+    _root_static_extensions = SERVED_ROOT_EXTENSIONS
 
     # ── Conventional API path aliases ────────────────────────────────────
     # k8s liveness/readiness probes, openapi-typescript generators, third-

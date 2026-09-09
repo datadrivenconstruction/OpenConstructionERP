@@ -14,13 +14,22 @@ header. The records the importer cares about:
 * ``~V`` - Property record (file metadata, exporter version, currency).
 * ``~K`` - Coefficient record (global tax / overhead factors). Captured
   in metadata, not applied to unit rates.
-* ``~C`` - Concept record. The core BOQ position:
-  ``~C|CODE|UNIT|SUMMARY|PRICE|DATE|TYPE|``
-  ``TYPE`` is ``0`` for partidas (work items), ``1`` for capítulos
-  (chapter / section), ``3`` for chapter aggregates etc.
-* ``~D`` - Decomposition record. Parent → children with factors. Not
-  used by this importer (we keep top-level partidas only; assembly
-  recipes belong to the assemblies module).
+* ``~C`` - Concept record. The core BOQ position. Field indices matter
+  here and are worth stating rather than drawing, because a file whose
+  fields land one place over parses without an error and imports a date
+  as a unit rate. Counting from zero after the ``~C`` header:
+  ``0`` CODE, ``1`` UNIT, ``2`` SUMMARY, ``3`` PRICE, ``6`` TYPE, with
+  the date subfields in between. ``TYPE`` is ``0`` for partidas (work
+  items), ``1`` for capítulos (chapter / section), ``3`` for the obra
+  root and other aggregates. A file that carries no type that far along
+  falls back to the shape of the code, since a capítulo code
+  conventionally ends in ``#``. Our own exporter writes this same
+  layout, so an exported budget re-imports.
+* ``~D`` - Decomposition record. Parent → children, each child a
+  ``code\\factor\\yield`` triplet. Read for the parent set only, which is
+  how a concept that other concepts decompose into is told apart from a
+  partida; the yields are not taken as measured quantities, that is what
+  ``~M`` is for, and assembly recipes belong to the assemblies module.
 * ``~T`` - Extended text record (long description for a concept).
 * ``~M`` - Measurement record. ``~M|PARENT\\CHILD|...|QTY|COMMENT|``.
 
@@ -253,7 +262,10 @@ class BC3Importer:
                         break
 
             elif hdr == _HDR_CONCEPT:
-                # ``~C|CODE|UNIT|SUMMARY|PRICE|DATE|TYPE|``
+                # ``~C|CODE|UNIT|SUMMARY|PRICE|DATE|DATE|TYPE|`` - see the module
+                # docstring for why the indices are spelled out. PRICE is 3 and
+                # TYPE is 6; a file that puts either one field over still parses,
+                # and the damage is silent.
                 if not fields:
                     continue
                 code = fields[0]

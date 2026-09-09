@@ -1,17 +1,22 @@
-~V|FIEBDC-3/2020|VERSION-1.0|ISO-8859-1|26052026|OpenConstructionERP|||
-~C|##|Obra de Ejemplo PBC|EUR|26052026||#######|0|
-~C|01#|Cap|01 Actuaciones Previas|EUR|26052026|0|0|
-~C|02#|Cap|02 Cimentaciones y Estructura|EUR|26052026|0|0|
-~C|03#|Cap|03 Cerramientos y Particiones|EUR|26052026|0|0|
-~C|01.01|m2|Despeje y desbroce del terreno con medios mecanicos|EUR|26052026|1.25|0|
-~C|01.02|m3|Excavacion en pozos y zanjas de cimentacion|EUR|26052026|14.50|0|
-~C|02.01|m3|Hormigon armado HA-30/B/20/IIa para cimentacion|EUR|26052026|142.50|0|
-~C|02.02|kg|Acero corrugado B 500 SD para armaduras|EUR|26052026|1.18|0|
-~C|03.01|m2|Fabrica de ladrillo perforado en exterior de 24 cm|EUR|26052026|62.40|0|
-~D|##|01#\1\02#\1\03#\1\|
-~D|01#|01.01\1500.000\01.02\320.000\|
-~D|02#|02.01\180.000\02.02\14500.000\|
-~D|03#|03.01\420.000\|
-~T|01.01|Despeje y desbroce del terreno con un espesor medio hasta 20 cm, con medios mecanicos, retirada de los materiales y carga sobre transporte. Sample row for OpenConstructionERP PBC importer.|
-~T|02.01|Hormigon armado HA-30/B/20/IIa, central, vertido por bombeo, vibrado y curado, incluido transporte y puesta en obra.|
+~V|es-pbc-sample.bc3|FIEBDC-3/2020|OpenConstructionERP|26052026|Obra de Ejemplo PBC|ISO-8859-1|2||EUR|
+~C|##||Obra de Ejemplo PBC|0|||3|
+~C|01#||01 Actuaciones Previas|0|||1|
+~C|01.01|m2|Despeje y desbroce del terreno con medios mecánicos|1.25|||0|
+~C|01.02|m3|Excavación en pozos y zanjas de cimentación|14.50|||0|
+~C|02#||02 Cimentaciones y Estructura|0|||1|
+~C|02.01|m3|Hormigón armado HA-30/B/20/IIa para cimentación|142.50|||0|
+~C|02.02|kg|Acero corrugado B 500 SD para armaduras|1.18|||0|
+~C|03#||03 Cerramientos y Particiones|0|||1|
+~C|03.01|m2|Fábrica de ladrillo perforado en exterior de 24 cm|62.40|||0|
+~D|##|01#\1\1\02#\1\1\03#\1\1|
+~D|01#|01.01\1\1500\01.02\1\320|
+~D|02#|02.01\1\180\02.02\1\14500|
+~D|03#|03.01\1\420|
+~T|01.01|Despeje y desbroce del terreno con un espesor medio hasta 20 cm, con medios mecánicos, retirada de los materiales y carga sobre transporte. Fila de ejemplo para el importador PBC de OpenConstructionERP.|
+~T|02.01|Hormigón armado HA-30/B/20/IIa, central, vertido por bombeo, vibrado y curado, incluido transporte y puesta en obra.|
+~M|01#\01.01|1|1500.000||
+~M|01#\01.02|1|320.000||
+~M|02#\02.01|1|180.000||
+~M|02#\02.02|1|14500.000||
+~M|03#\03.01|1|420.000||
 ~K|0|EH|1.000|
