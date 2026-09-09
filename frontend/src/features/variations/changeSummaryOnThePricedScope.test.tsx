@@ -58,6 +58,7 @@ const REQUEST: VariationRequest = {
   decided_by: null,
   submitted_boq_id: null,
   submitted_boq_total: null,
+  submitted_boq_snapshot_id: null,
   agreed_cost_impact: null,
   agreed_basis: '',
   agreed_variance_note: '',

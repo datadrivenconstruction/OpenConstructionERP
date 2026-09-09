@@ -100,6 +100,17 @@ export interface VariationRequest {
    * statement from a bill that prices at nothing.
    */
   submitted_boq_total: string | null;
+  /**
+   * The submitted bill as a snapshot in the bill's own version history, which
+   * is what makes the total above openable: the bill itself keeps being
+   * revised while the variation is negotiated, so reading it today does not
+   * tell anyone what the approver saw. The API has served this since the
+   * commercial approval boundary landed and this interface did not declare
+   * it, so the field arrived on the wire and every reader here was blind to
+   * it. Null for a request with no bill and for one submitted before the
+   * snapshot was taken.
+   */
+  submitted_boq_snapshot_id: string | null;
   /** What was actually agreed. Null until somebody has decided. */
   agreed_cost_impact: string | null;
   /** 'negotiated' | 'priced_boq' | 'headline_estimate', or '' when undecided. */
