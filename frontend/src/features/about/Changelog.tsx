@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.1.0',
+    date: '2026-09-09',
+    tag: 'NEW',
+    summary:
+      'A Windows desktop that gave up before it had finished starting now waits for the backend to speak first, and opening the API reference no longer makes the desktop shell think the backend has died. Hungary, Mexico, Saudi Arabia, South Africa and Russia each have a full shelf of guided cases, every national exchange format for bills of quantities has one place to go instead of hiding behind a German menu entry, Hungarian and English (UK) are offered in the language picker, and a spreadsheet header row is read in 28 languages. Russian VAT is 22 percent from 2026 with each bill taxed at its own base date, and this release ships on GitHub, as desktop installers and as a container image, but not on PyPI until old releases there are removed to make room.',
+  },
+  {
     version: '17.0.2',
     date: '2026-09-07',
     tag: 'FIX',
