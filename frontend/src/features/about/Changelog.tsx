@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.2.0',
+    date: '2026-09-09',
+    tag: 'NEW',
+    summary:
+      'The sample budget the Spanish exchange screen offers could not be downloaded and could not be read, so the first thing a visitor tried came back as an error page under a budget name and imported nine rows with no money in them; it is rewritten, and a test now asks of every shipped sample whether the origin serves it and whether it imports as a budget with prices. The preview beside that drop zone no longer splits a native format on commas and announces rows it made up. Australia, New Zealand and Brazil gain nine guided cases each, with six more single cases for Mexico, Hungary, Saudi Arabia, South Africa, the United States and Russia, taking the library from 260 to 293 with every card translated into all 36 offered languages. On macOS the bundled database would not start because the build asked for a hardened runtime it had no signing identity to satisfy. On Windows a start refused for want of disk space now says where the space went, counting what earlier versions left behind instead of only printing an error number.',
+  },
+  {
     version: '17.1.0',
     date: '2026-09-09',
     tag: 'NEW',
