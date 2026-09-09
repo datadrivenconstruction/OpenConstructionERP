@@ -12,15 +12,21 @@
  * then fired on each line, which is the rule correctly reporting that the only
  * writer of the trace table was unreachable.
  *
- * The picker is deliberately in front of opening the bill rather than beside
- * it. Provenance is a statement about where a line came from, and a line
- * cannot acquire one after it has been typed by hand: seeding is the only
- * moment the answer is known.
+ * The picker is in front of opening the bill because seeding is the moment
+ * the answer is cheapest to give; a line typed later acquires its provenance
+ * from the bill editor's own trace control, which reads the same sources
+ * through `useVariationSourceRows` below.
  *
  * Both source kinds are offered because a variation is priced against both.
  * Schedule-of-values lines answer "was this priced at contract rates", which
  * is the traceability the issue is titled for; estimating positions answer
  * "what did we think this scope cost when we tendered it".
+ *
+ * Each picked line also says what the variation does to it - added, removed
+ * or modified - because a line citing a contract line could be extra quantity
+ * of the item, a re-measure or the whole item omitted, and the three price
+ * differently. The kind is the estimator's statement; the server checks it
+ * against the numbers and reports a contradiction rather than resolving it.
  */
 
 import { useMemo, useState } from 'react';
@@ -32,7 +38,11 @@ import { Button, Card } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { listContracts, listContractLines } from '../contracts/api';
 import { boqApi, isSection } from '../boq/api';
-import type { CreateVariationBOQPayload } from './api';
+import {
+  VARIATION_CHANGE_KINDS,
+  type CreateVariationBOQPayload,
+  type VariationChangeKind,
+} from './api';
 
 const pickerInputCls =
   'h-8 w-24 rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -40,8 +50,11 @@ const pickerInputCls =
 const selectCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
+const kindSelectCls =
+  'h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+
 /** One line of an existing bill or schedule, in the one shape the list needs. */
-interface SourceRow {
+export interface SourceRow {
   id: string;
   code: string;
   description: string;
@@ -49,52 +62,32 @@ interface SourceRow {
   quantity: string;
 }
 
-/**
- * The chosen sources as the seeding endpoint reads them.
- *
- * Quantities go over as the string that was typed rather than a parsed float,
- * for the same reason the agreed amount does: the server holds these as
- * decimals and a round trip through binary is a change to the number nobody
- * asked for. Picking a line prefills its own quantity, because a variation
- * that re-measures part of a line starts from what the line says; a quantity
- * cleared to nothing is left out of the payload, which tells the server to
- * carry the source line's quantity across itself.
- */
-export function buildSourcePayload(
-  pickedLines: Record<string, string>,
-  pickedPositions: Record<string, string>,
-): CreateVariationBOQPayload {
-  const payload: CreateVariationBOQPayload = {};
-  const lines = Object.entries(pickedLines).map(([contract_line_id, quantity]) => ({
-    contract_line_id,
-    ...(quantity.trim() !== '' ? { quantity: quantity.trim() } : {}),
-  }));
-  if (lines.length > 0) payload.source_contract_lines = lines;
-
-  const positions = Object.entries(pickedPositions).map(([position_id, quantity]) => ({
-    position_id,
-    ...(quantity.trim() !== '' ? { quantity: quantity.trim() } : {}),
-  }));
-  if (positions.length > 0) payload.source_positions = positions;
-  return payload;
+/** What the estimator has said about one picked line. */
+export interface PickedSource {
+  quantity: string;
+  change_kind: VariationChangeKind;
 }
 
-export function VariationSourcePicker({
-  projectId,
-  busy,
-  onOpen,
-  onCancel,
-}: {
-  projectId: string;
-  busy: boolean;
-  onOpen: (payload: CreateVariationBOQPayload) => void;
-  onCancel: () => void;
-}) {
-  const { t } = useTranslation();
-  const [sourceKey, setSourceKey] = useState('');
-  const [pickedLines, setPickedLines] = useState<Record<string, string>>({});
-  const [pickedPositions, setPickedPositions] = useState<Record<string, string>>({});
+type Translate = ReturnType<typeof useTranslation>['t'];
 
+/** The label a change kind reads as on screen, shared by every control that offers one. */
+export function changeKindLabel(kind: VariationChangeKind, t: Translate): string {
+  if (kind === 'removed') return t('variations.change_removed', { defaultValue: 'Removed' });
+  if (kind === 'modified') return t('variations.change_modified', { defaultValue: 'Modified' });
+  return t('variations.change_added', { defaultValue: 'Added' });
+}
+
+/**
+ * The contracts and estimating bills of a project, and the lines of whichever
+ * one `sourceKey` names (`contract:<id>` or `boq:<id>`).
+ *
+ * Shared between the picker in front of opening a bill and the trace control
+ * in the bill editor, so the two offer exactly the same sources: a variation's
+ * own bill is never one of them, because a chain of variations repricing each
+ * other would record scope as coming from a change rather than from the
+ * contract or the estimate it actually changes.
+ */
+export function useVariationSourceRows(projectId: string, sourceKey: string) {
   const contractsQ = useQuery({
     queryKey: ['variations', 'source-contracts', projectId],
     queryFn: () => listContracts({ project_id: projectId, limit: 200 }),
@@ -127,10 +120,6 @@ export function VariationSourcePicker({
     enabled: kind === 'boq' && Boolean(sourceId),
   });
 
-  // A variation's own bill is never a source for another variation's bill.
-  // Offering it would let a chain of variations reprice each other, and the
-  // provenance would say the scope came from a change rather than from the
-  // contract or the estimate it actually changes.
   const estimates = useMemo(
     () => (estimatesQ.data ?? []).filter((boq) => boq.estimate_type !== 'variation'),
     [estimatesQ.data],
@@ -160,6 +149,127 @@ export function VariationSourcePicker({
     return [];
   }, [kind, linesQ.data, positionsQ.data]);
 
+  const rowsLoading =
+    (kind === 'contract' && linesQ.isLoading) || (kind === 'boq' && positionsQ.isLoading);
+  const rowsError = kind === 'contract' ? linesQ.error : kind === 'boq' ? positionsQ.error : null;
+
+  return {
+    contracts: contractsQ.data?.items ?? [],
+    estimates,
+    /** 'contract' | 'boq' | '' - which kind of source `sourceKey` names. */
+    kind,
+    sourceId,
+    rows,
+    rowsLoading,
+    rowsError,
+  };
+}
+
+/**
+ * The source select shared by the picker and the trace drawer: one option per
+ * contract and per estimating bill of the project.
+ */
+export function VariationSourceSelect({
+  value,
+  onChange,
+  contracts,
+  estimates,
+  className,
+}: {
+  value: string;
+  onChange: (sourceKey: string) => void;
+  contracts: ReturnType<typeof useVariationSourceRows>['contracts'];
+  estimates: ReturnType<typeof useVariationSourceRows>['estimates'];
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={className ?? selectCls}
+      aria-label={t('variations.boq_source_select', {
+        defaultValue: 'Where the scope comes from',
+      })}
+    >
+      <option value="">
+        {t('variations.boq_source_choose', { defaultValue: 'Choose a source…' })}
+      </option>
+      {contracts.map((contract) => (
+        <option key={contract.id} value={`contract:${contract.id}`}>
+          {t('variations.boq_source_contract', { defaultValue: 'Contract' })}
+          {' · '}
+          {[contract.code, contract.title].filter(Boolean).join(' - ') || contract.id}
+        </option>
+      ))}
+      {estimates.map((boq) => (
+        <option key={boq.id} value={`boq:${boq.id}`}>
+          {t('variations.boq_source_estimate', { defaultValue: 'Estimate' })}
+          {' · '}
+          {boq.name || boq.id}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/**
+ * The chosen sources as the seeding endpoint reads them.
+ *
+ * Quantities go over as the string that was typed rather than a parsed float,
+ * for the same reason the agreed amount does: the server holds these as
+ * decimals and a round trip through binary is a change to the number nobody
+ * asked for. Picking a line prefills its own quantity, because a variation
+ * that re-measures part of a line starts from what the line says; a quantity
+ * cleared to nothing is left out of the payload, which tells the server to
+ * carry the source line's quantity across itself.
+ *
+ * The change kind is left out when it is `added`, which is what the server
+ * records for a source that names none, so a body that says nothing about
+ * the kind is the same body the endpoint has read since it shipped.
+ */
+export function buildSourcePayload(
+  pickedLines: Record<string, PickedSource>,
+  pickedPositions: Record<string, PickedSource>,
+): CreateVariationBOQPayload {
+  const payload: CreateVariationBOQPayload = {};
+  const lines = Object.entries(pickedLines).map(([contract_line_id, picked]) => ({
+    contract_line_id,
+    ...(picked.quantity.trim() !== '' ? { quantity: picked.quantity.trim() } : {}),
+    ...(picked.change_kind !== 'added' ? { change_kind: picked.change_kind } : {}),
+  }));
+  if (lines.length > 0) payload.source_contract_lines = lines;
+
+  const positions = Object.entries(pickedPositions).map(([position_id, picked]) => ({
+    position_id,
+    ...(picked.quantity.trim() !== '' ? { quantity: picked.quantity.trim() } : {}),
+    ...(picked.change_kind !== 'added' ? { change_kind: picked.change_kind } : {}),
+  }));
+  if (positions.length > 0) payload.source_positions = positions;
+  return payload;
+}
+
+export function VariationSourcePicker({
+  projectId,
+  busy,
+  onOpen,
+  onCancel,
+}: {
+  projectId: string;
+  busy: boolean;
+  onOpen: (payload: CreateVariationBOQPayload) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const [sourceKey, setSourceKey] = useState('');
+  const [pickedLines, setPickedLines] = useState<Record<string, PickedSource>>({});
+  const [pickedPositions, setPickedPositions] = useState<Record<string, PickedSource>>({});
+
+  const { contracts, estimates, kind, rows, rowsLoading, rowsError } = useVariationSourceRows(
+    projectId,
+    sourceKey,
+  );
+
   const picked = kind === 'contract' ? pickedLines : pickedPositions;
   const setPicked = kind === 'contract' ? setPickedLines : setPickedPositions;
 
@@ -167,19 +277,28 @@ export function VariationSourcePicker({
     setPicked((prev) => {
       const next = { ...prev };
       if (row.id in next) delete next[row.id];
-      else next[row.id] = row.quantity;
+      else next[row.id] = { quantity: row.quantity, change_kind: 'added' };
       return next;
     });
   };
 
   const setQuantity = (id: string, value: string) => {
-    setPicked((prev) => ({ ...prev, [id]: value }));
+    setPicked((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      return { ...prev, [id]: { ...current, quantity: value } };
+    });
+  };
+
+  const setKind = (id: string, change_kind: VariationChangeKind) => {
+    setPicked((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+      return { ...prev, [id]: { ...current, change_kind } };
+    });
   };
 
   const total = Object.keys(pickedLines).length + Object.keys(pickedPositions).length;
-  const rowsLoading =
-    (kind === 'contract' && linesQ.isLoading) || (kind === 'boq' && positionsQ.isLoading);
-  const rowsError = kind === 'contract' ? linesQ.error : kind === 'boq' ? positionsQ.error : null;
 
   return (
     <Card padding="sm" className="space-y-2">
@@ -190,32 +309,12 @@ export function VariationSourcePicker({
         })}
       </p>
 
-      <select
+      <VariationSourceSelect
         value={sourceKey}
-        onChange={(e) => setSourceKey(e.target.value)}
-        className={selectCls}
-        aria-label={t('variations.boq_source_select', {
-          defaultValue: 'Where the scope comes from',
-        })}
-      >
-        <option value="">
-          {t('variations.boq_source_choose', { defaultValue: 'Choose a source…' })}
-        </option>
-        {(contractsQ.data?.items ?? []).map((contract) => (
-          <option key={contract.id} value={`contract:${contract.id}`}>
-            {t('variations.boq_source_contract', { defaultValue: 'Contract' })}
-            {' · '}
-            {[contract.code, contract.title].filter(Boolean).join(' - ') || contract.id}
-          </option>
-        ))}
-        {estimates.map((boq) => (
-          <option key={boq.id} value={`boq:${boq.id}`}>
-            {t('variations.boq_source_estimate', { defaultValue: 'Estimate' })}
-            {' · '}
-            {boq.name || boq.id}
-          </option>
-        ))}
-      </select>
+        onChange={setSourceKey}
+        contracts={contracts}
+        estimates={estimates}
+      />
 
       {rowsLoading && (
         <p className="text-sm text-content-tertiary">
@@ -238,7 +337,8 @@ export function VariationSourcePicker({
       {rows.length > 0 && (
         <ul className="max-h-64 space-y-1 overflow-y-auto">
           {rows.map((row) => {
-            const checked = row.id in picked;
+            const current = picked[row.id];
+            const checked = current !== undefined;
             return (
               <li key={row.id} className="flex items-start gap-2 text-sm">
                 <input
@@ -263,17 +363,41 @@ export function VariationSourcePicker({
                     </p>
                   )}
                 </div>
-                {checked && (
-                  <input
-                    type="number"
-                    step="any"
-                    value={picked[row.id]}
-                    onChange={(e) => setQuantity(row.id, e.target.value)}
-                    className={clsx(pickerInputCls, 'shrink-0')}
-                    aria-label={t('variations.boq_source_quantity', {
-                      defaultValue: 'Quantity this variation changes',
-                    })}
-                  />
+                {current && (
+                  <>
+                    {/* What the variation does to this line. Only a schedule-of-values
+                        line can be removed or modified - there is nothing contracted
+                        behind an estimate position to omit - so the estimate side offers
+                        the one kind that applies, and the server's rule would report the
+                        others anyway. */}
+                    {kind === 'contract' && (
+                      <select
+                        value={current.change_kind}
+                        onChange={(e) => setKind(row.id, e.target.value as VariationChangeKind)}
+                        className={clsx(kindSelectCls, 'shrink-0')}
+                        aria-label={t('variations.boq_source_kind', {
+                          defaultValue: 'What this variation does to {{code}}',
+                          code: row.code,
+                        })}
+                      >
+                        {VARIATION_CHANGE_KINDS.map((option) => (
+                          <option key={option} value={option}>
+                            {changeKindLabel(option, t)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <input
+                      type="number"
+                      step="any"
+                      value={current.quantity}
+                      onChange={(e) => setQuantity(row.id, e.target.value)}
+                      className={clsx(pickerInputCls, 'shrink-0')}
+                      aria-label={t('variations.boq_source_quantity', {
+                        defaultValue: 'Quantity this variation changes',
+                      })}
+                    />
+                  </>
                 )}
                 <span className="shrink-0 text-xs text-content-tertiary">{row.unit}</span>
               </li>

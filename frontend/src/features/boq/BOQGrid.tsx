@@ -89,6 +89,7 @@ import {
   DescriptionCellRenderer,
   type ContextMenuTarget,
   type FullGridContext,
+  type VariationLineTraceBadge,
 } from './grid/cellRenderers';
 import { countComments } from './CommentDrawer';
 import {
@@ -453,6 +454,21 @@ export interface BOQGridProps {
    */
   onShowMeasurement?: (positionId: string) => void;
   /**
+   * Issue #435 - open the provenance control for one line of a variation's
+   * bill: which contract line or estimate position it comes from, and
+   * whether it adds, removes or modifies that scope. Wired by BOQEditorPage
+   * only when the bill belongs to a variation request; omitted on an
+   * estimating bill, where the menu entry is not shown.
+   */
+  onTraceLine?: (positionId: string) => void;
+  /**
+   * The trace state of each line, keyed by position id, painted as a chip on
+   * the ordinal cell. Defined only for a variation bill; a line missing from
+   * the map is untraced and paints `variationUntracedBadge`.
+   */
+  variationTraces?: Record<string, VariationLineTraceBadge>;
+  variationUntracedBadge?: VariationLineTraceBadge;
+  /**
    * Position id the AI copilot is currently open on. When set (and the
    * position is visible), a full-width copilot row is injected directly under
    * that position. Null/undefined ⇒ no inline copilot row.
@@ -629,6 +645,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onPriceAnalysis,
   onShowPositionActuals,
   onShowMeasurement,
+  onTraceLine,
+  variationTraces,
+  variationUntracedBadge,
   aiCopilotPositionId,
   renderInlineCopilot,
   onRepickResourceVariant,
@@ -685,6 +704,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     api.resetRowHeights();
     api.refreshCells({ columns: ['description'], force: true });
   }, [descDensity]);
+
+  // Issue #435: the trace chip on the ordinal cell reads the map through the
+  // grid context, and AG Grid does not repaint a cell because the context
+  // changed. Saving a trace refetches the map; this is what makes the chip
+  // follow it.
+  useEffect(() => {
+    gridApiRef.current?.refreshCells({ columns: ['ordinal'], force: true });
+  }, [variationTraces, variationUntracedBadge]);
 
   // Track all setTimeout(..., 0) handles scheduled to refresh AG Grid cells
   // after a state change (toggle resources, open variant picker, position
@@ -1308,6 +1335,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // Base-currency direct cost, used only to show each section's share of
       // the project total as a small chip on the section header.
       sectionTotalBasis,
+      // Issue #435: per-line provenance chips, defined only on a variation bill.
+      variationTraces,
+      variationUntracedBadge,
     }) as FullGridContext,
     [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
@@ -1317,7 +1347,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied,
      positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, renderInlineCopilot, displayQuantity,
-     sectionTotalBasis],
+     sectionTotalBasis, variationTraces, variationUntracedBadge],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -3091,6 +3121,20 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { onShowMeasurement(d.id as string); closeContextMenu(); }}
                   />
                 )}
+                {/* Issue #435: on a variation's bill, where this line comes from
+                    and what it does to the contract. The label reads the line's
+                    current state so the menu itself says traced or untraced. */}
+                {onTraceLine && (() => {
+                  const badge = variationTraces?.[d.id as string];
+                  return (
+                    <CtxItem icon={<Link2 size={14} className={badge?.traced ? 'text-oe-blue' : undefined}/>}
+                      label={badge?.traced
+                        ? t('boq.variation_trace_action_traced', { defaultValue: 'Provenance: {{kind}}…', kind: badge.short })
+                        : t('boq.variation_trace_action', { defaultValue: 'Trace to contract or estimate…' })}
+                      onClick={() => { onTraceLine(d.id as string); closeContextMenu(); }}
+                    />
+                  );
+                })()}
                 <CtxSeparator />
                 <CtxItem icon={<Copy size={14}/>}
                   label={t('boq.duplicate_position', { defaultValue: 'Duplicate Position' })}

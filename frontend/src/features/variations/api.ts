@@ -7,7 +7,7 @@
  * backend/app/modules/variations/router.py
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -436,7 +436,21 @@ export function deleteVR(id: string): Promise<void> {
 
 /* ── A request's own bill of quantities (Issue #435) ───────────────────── */
 
-/** Where one line of a variation's bill came from. */
+/**
+ * What a variation line does to the source it traces to.
+ *
+ * `added` is scope the contract never held; `removed` is contracted scope the
+ * variation omits, carried as a negative quantity against the schedule of
+ * values; `modified` is the same contract line kept at a different quantity
+ * or rate. Stated by the estimator, never inferred from the numbers: the
+ * server's `variations.change_kind_matches_numbers` rule reports a
+ * contradiction between the two, it does not resolve it.
+ */
+export type VariationChangeKind = 'added' | 'removed' | 'modified';
+
+export const VARIATION_CHANGE_KINDS: readonly VariationChangeKind[] = ['added', 'removed', 'modified'];
+
+/** Where one line of a variation's bill came from, and what it does to it. */
 export interface VariationBOQTrace {
   id: string;
   variation_request_id: string;
@@ -448,8 +462,29 @@ export interface VariationBOQTrace {
   source_position_id: string | null;
   contract_id: string | null;
   contract_line_id: string | null;
+  /** `added` on every row written before the kind existed. */
+  change_kind: VariationChangeKind;
   note: string;
   created_at: string;
+}
+
+/** The lines of one change kind and what they add up to (direct cost, base currency). */
+export interface VariationBOQKindSubtotal {
+  line_count: number;
+  total: string;
+}
+
+/**
+ * The bill's direct cost split by what each line does to the contract. The
+ * net is the sum of the three, so an omission carried as a negative line
+ * comes off and the figure reads as arithmetic a person can check. A line
+ * with no trace row counts as `added`.
+ */
+export interface VariationBOQChangeSummary {
+  added: VariationBOQKindSubtotal;
+  removed: VariationBOQKindSubtotal;
+  modified: VariationBOQKindSubtotal;
+  net_total: string;
 }
 
 /** One validation finding about the bill, from the variations rule set. */
@@ -485,6 +520,8 @@ export interface VariationBOQ {
   estimated_cost_impact: string;
   estimate_matches_boq: boolean;
   traces: VariationBOQTrace[];
+  /** Null when there is no bill, for the same reason the money fields are. */
+  change_summary: VariationBOQChangeSummary | null;
   checks: VariationBOQCheck[];
 }
 
@@ -495,13 +532,29 @@ export interface CreateVariationBOQPayload {
   source_positions?: {
     position_id: string;
     quantity?: number | string;
+    /** Left out to mean `added`, which is what the server records for it. */
+    change_kind?: VariationChangeKind;
     note?: string;
   }[];
   source_contract_lines?: {
     contract_line_id: string;
     quantity?: number | string;
+    change_kind?: VariationChangeKind;
     note?: string;
   }[];
+}
+
+/**
+ * One line's provenance as the trace PUT reads it. Every field is sent on
+ * every write, including the nulls: the server replaces the row whole, and a
+ * body that named only the new reference would still read as a full answer,
+ * so the client says the whole answer too rather than relying on that.
+ */
+export interface SetVariationBOQLineTracePayload {
+  contract_line_id: string | null;
+  source_position_id: string | null;
+  change_kind: VariationChangeKind;
+  note: string;
 }
 
 export function getVariationRequestBOQ(id: string): Promise<VariationBOQ> {
@@ -527,6 +580,37 @@ export function adoptVariationRequestBOQ(id: string): Promise<VariationRequest> 
   return apiPost<VariationRequest>(
     `/v1/variations/variation-requests/${id}/boq/adopt`,
     {},
+  );
+}
+
+/**
+ * Record where one line of the request's bill came from and what it does to
+ * that source. The route exists for every line typed into the bill after it
+ * was opened, which is most of them; until the editor called it, such a line
+ * could never acquire provenance from the product at all.
+ */
+export function setVariationBOQLineTrace(
+  requestId: string,
+  positionId: string,
+  payload: SetVariationBOQLineTracePayload,
+): Promise<VariationBOQTrace> {
+  return apiPut<VariationBOQTrace>(
+    `/v1/variations/variation-requests/${requestId}/boq/lines/${positionId}/trace`,
+    payload,
+  );
+}
+
+/**
+ * Withdraw a line's provenance. The row survives as `manual` / `added` with
+ * no references, so "somebody said this derives from nothing" stays
+ * distinguishable from "nobody has looked".
+ */
+export function clearVariationBOQLineTrace(
+  requestId: string,
+  positionId: string,
+): Promise<VariationBOQTrace> {
+  return apiDelete<VariationBOQTrace>(
+    `/v1/variations/variation-requests/${requestId}/boq/lines/${positionId}/trace`,
   );
 }
 

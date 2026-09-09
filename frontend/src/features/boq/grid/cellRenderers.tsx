@@ -589,7 +589,32 @@ export interface ResourceGridContext {
   t: (key: string, options?: Record<string, string | number>) => string;
 }
 
+/**
+ * Issue #435 - what one line of a variation's bill says about its provenance,
+ * in the shape the ordinal cell paints it. Built by the host (BOQEditorPage)
+ * from the request's trace rows, translated there, so this renderer stays
+ * ignorant of the variations module.
+ */
+export interface VariationLineTraceBadge {
+  /** 'added' | 'removed' | 'modified' - drives the chip colour. */
+  kind: string;
+  /** True when the line names a contract line or an estimate position. */
+  traced: boolean;
+  /** One or two characters shown in the chip. */
+  short: string;
+  /** Tooltip and accessible name. */
+  title: string;
+}
+
 export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
+  /**
+   * Issue #435 - present only when the bill belongs to a variation request.
+   * Keyed by position id; a line missing from the map is untraced and paints
+   * `variationUntracedBadge`. Undefined on an estimating bill, where the
+   * chip has no meaning and is not shown.
+   */
+  variationTraces?: Record<string, VariationLineTraceBadge>;
+  variationUntracedBadge?: VariationLineTraceBadge;
   /** Description-density preference: how tall a position description renders
    *  at rest (compact = one truncated line, comfortable/tall = multi-line
    *  Langtext with newlines honoured). Driven by the BOQ toolbar toggle. */
@@ -1378,6 +1403,31 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
           {confidencePct}%
         </span>
       )}
+      {/* Issue #435: on a variation bill, what this line does to the contract
+          and whether it traces anywhere. The host decides the words; the
+          renderer only paints them, and paints nothing on an ordinary bill. */}
+      {ctx?.variationTraces && (() => {
+        const badge = ctx.variationTraces[data.id as string] ?? ctx.variationUntracedBadge;
+        if (!badge) return null;
+        const tone = !badge.traced
+          ? 'border border-dashed border-border text-content-tertiary'
+          : badge.kind === 'removed'
+            ? 'bg-red-500/15 text-red-600 dark:text-red-400'
+            : badge.kind === 'modified'
+              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
+        return (
+          <span
+            className={`inline-flex h-4 shrink-0 items-center rounded px-1 text-[9px] font-semibold ${tone} cursor-help`}
+            title={badge.title}
+            aria-label={badge.title}
+            data-testid="boq-variation-trace-badge"
+            data-kind={badge.traced ? badge.kind : 'untraced'}
+          >
+            {badge.short}
+          </span>
+        );
+      })()}
       <span
         className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotColor} cursor-help`}
         title={getValidationTooltip(status, t)}

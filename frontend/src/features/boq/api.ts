@@ -17,6 +17,14 @@ export interface BOQ {
   /** Set when this BOQ was created via "Create revision" — points at the
    *  BOQ it was cloned from. Drives the baseline pick in the compare UI. */
   parent_estimate_id?: string | null;
+  /**
+   * Issue #435 - the variation request this bill was raised for, when it is a
+   * variation's own bill rather than a bill of the project at large. The
+   * editor reads it to offer the per-line trace control, which makes no
+   * sense on an estimating bill and is not shown there. Null for every bill
+   * that existed before variation bills did.
+   */
+  variation_request_id?: string | null;
   created_at: string;
   updated_at: string;
 }

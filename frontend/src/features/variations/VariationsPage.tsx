@@ -1863,6 +1863,37 @@ function PricedScope({
             />
           </div>
 
+          {/* What the variation does to the contract, before markups: the
+              direct cost split by added / removed / modified, with the net as
+              their sum so an omission visibly comes off. A line nobody has
+              traced counts as added, the same reading the bill's rule gives it. */}
+          {boq.change_summary && (() => {
+            const summary = boq.change_summary;
+            const money = boq.base_currency || request.currency || currency;
+            const cell = (label: string, subtotal: { line_count: number; total: string }) => (
+              <Field
+                label={`${label} · ${subtotal.line_count}`}
+                value={<MoneyDisplay amount={Number(subtotal.total)} currency={money} />}
+              />
+            );
+            return (
+              <div data-testid="variation-change-summary">
+                <p className="text-xs uppercase tracking-wide text-content-tertiary mb-1">
+                  {t('variations.change_summary', { defaultValue: 'Change to the contract' })}
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {cell(t('variations.change_added', { defaultValue: 'Added' }), summary.added)}
+                  {cell(t('variations.change_removed', { defaultValue: 'Removed' }), summary.removed)}
+                  {cell(t('variations.change_modified', { defaultValue: 'Modified' }), summary.modified)}
+                  <Field
+                    label={t('variations.net_change', { defaultValue: 'Net change' })}
+                    value={<MoneyDisplay amount={Number(summary.net_total)} currency={money} />}
+                  />
+                </div>
+              </div>
+            );
+          })()}
+
           {boq.is_mixed_currency && (
             <p className="flex items-start gap-1.5 text-xs text-content-secondary">
               <AlertTriangle size={13} className="mt-0.5 shrink-0" />
