@@ -15,7 +15,15 @@ pinned here against a real database:
   the SAME project (a link to a row that does not exist renders as silently
   empty, which is worse than no link);
 * the seed is idempotent per document, and it prunes the legacy document-less
-  "boq_derived" rows earlier demo installs left behind.
+  "boq_derived" rows earlier demo installs left behind;
+* the flagship's CAD extraction session is idempotent on its own deterministic
+  id. It used to be inserted unguarded, so a boot that found the row already
+  there raised a unique violation, and since the seeder shares one transaction
+  that took the documents and the measurements of the same run down with it.
+  A run-twice assertion never saw this, because the second run short-circuited
+  on the documents before it reached the row; the state that has to be built
+  is the one production was in, a session already present and a sheet still
+  missing.
 
 The revision compare needs a second document to exist at all, so the shoot
 project carries both issues of sheet A-2.01. Pinned here as well, because a
@@ -30,15 +38,16 @@ from __future__ import annotations
 import hashlib
 import math
 import uuid
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 
 from app.modules.boq.models import BOQ, Position
 from app.modules.projects.models import Project
-from app.modules.takeoff.models import TakeoffDocument, TakeoffMeasurement
+from app.modules.takeoff.models import CadExtractionSession, TakeoffDocument, TakeoffMeasurement
 from app.modules.takeoff.seed import seed_takeoff_demo
 from app.modules.takeoff.service import TakeoffService, recompute_measurement_value
 from app.modules.users.models import User
@@ -628,3 +637,188 @@ async def test_seed_is_idempotent_per_project(pg_session) -> None:
     assert rows_after > before[1]
     heidelberg_rows = await _measurements(pg_session, heidelberg)
     assert heidelberg_rows and all(m.document_id for m in heidelberg_rows)
+
+
+# ── The flagship CAD extraction session ──────────────────────────────────────
+
+
+def _seeded_session_id(project_id: uuid.UUID) -> str:
+    """The deterministic id the seeder mints, spelled out here on purpose.
+
+    Written out rather than imported so the test states the contract instead of
+    agreeing with whatever the seeder currently builds.
+    """
+    return f"seed-cad-{project_id}"
+
+
+async def _cad_session_rows(session, project_id: uuid.UUID) -> list[CadExtractionSession]:
+    return list(
+        (
+            await session.execute(
+                select(CadExtractionSession).where(CadExtractionSession.session_id == _seeded_session_id(project_id))
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+
+async def test_a_cad_session_already_present_does_not_abort_the_rest_of_the_seed(pg_session) -> None:
+    """The production state: the session is there, a sheet is still missing.
+
+    The row was inserted with no existence check, so this raised
+    ``UniqueViolationError`` from the autoflush of the NEXT project's document
+    query, and the caller's blanket except discarded the whole run - documents,
+    measurements and prune together - which left the same state in place for
+    the next boot to fail on identically.
+    """
+    ids = await _build_stand(pg_session)
+    pg_session.add(
+        CadExtractionSession(
+            session_id=_seeded_session_id(ids["flagship"]),
+            user_id=str(ids["owner"]),
+            filename="structure.ifc",
+            file_format="ifc",
+            project_id=str(ids["flagship"]),
+            display_name="Structure (IFC) extraction",
+            is_permanent=True,
+            expires_at=datetime.now(UTC) + timedelta(days=7),
+            created_by=str(ids["owner"]),
+        )
+    )
+    await pg_session.flush()
+
+    # The flagship is seeded first and Frankfurt second, so the pending insert
+    # is pushed out by the query that opens the second project.
+    counts = await seed_takeoff_demo(pg_session, [ids["flagship"], ids["frankfurt"]])
+    await pg_session.flush()
+
+    assert counts["documents"] == 3, f"the sheets must still be written: {counts}"
+    assert counts["cad_sessions"] == 0, "the session was already there"
+    rows = await _cad_session_rows(pg_session, ids["flagship"])
+    assert len(rows) == 1, "the seeded session id is unique and must stay single"
+    assert len(await _measurements(pg_session, ids["frankfurt"])) > 0
+
+
+async def test_seeding_twice_leaves_exactly_one_cad_session(pg_session) -> None:
+    """The second run raises nothing, writes nothing and changes nothing."""
+    ids = await _build_stand(pg_session)
+    first = await seed_takeoff_demo(pg_session, [ids["flagship"], ids["frankfurt"]])
+    await pg_session.flush()
+    assert first["cad_sessions"] == 1
+
+    before = await _cad_session_rows(pg_session, ids["flagship"])
+    assert len(before) == 1
+    written_expiry = before[0].expires_at
+
+    second = await seed_takeoff_demo(pg_session, [ids["flagship"], ids["frankfurt"]])
+    await pg_session.flush()
+
+    assert second == {}, f"the second run must be a no-op, got {second}"
+    after = await _cad_session_rows(pg_session, ids["flagship"])
+    assert len(after) == 1
+    assert after[0].expires_at == written_expiry, "an unexpired session must not be touched"
+
+
+async def test_the_cad_session_reaches_an_install_whose_sheets_are_all_seeded(pg_session) -> None:
+    """The row is guarded on itself, not on the documents beside it.
+
+    An install that received its sheets before this session existed used to be
+    unreachable: the seeder returned on "every sheet present" before it got as
+    far as the session, so the workspace stayed empty forever.
+    """
+    ids = await _build_stand(pg_session)
+    await seed_takeoff_demo(pg_session, [ids["flagship"]])
+    await pg_session.flush()
+    await pg_session.execute(
+        delete(CadExtractionSession).where(CadExtractionSession.session_id == _seeded_session_id(ids["flagship"]))
+    )
+    await pg_session.flush()
+
+    counts = await seed_takeoff_demo(pg_session, [ids["flagship"]])
+    await pg_session.flush()
+
+    assert counts.get("documents", 0) == 0, f"the sheets are already there: {counts}"
+    assert counts["cad_sessions"] == 1, f"the missing session must still be written: {counts}"
+    assert len(await _cad_session_rows(pg_session, ids["flagship"])) == 1
+
+
+async def test_an_expired_seeded_cad_session_is_made_readable_again(pg_session) -> None:
+    """A row the workspace lists but cannot open is healed, not skipped.
+
+    The seed used to pair ``is_permanent=True`` with a seven-day ``expires_at``.
+    The list query exempts a permanent row from the expiry test and the
+    single-session read does not, so a week on, the showcase listed an
+    extraction that answered nothing. Read here through the product's own
+    reader rather than by re-deriving the date, because the date is not the
+    contract, opening the session is.
+    """
+    from app.modules.takeoff.router import _get_session_from_db
+
+    ids = await _build_stand(pg_session)
+    pg_session.add(
+        CadExtractionSession(
+            session_id=_seeded_session_id(ids["flagship"]),
+            user_id=str(ids["owner"]),
+            filename="structure.ifc",
+            file_format="ifc",
+            elements_data=[{"id": "elem_001", "category": "wall", "area_m2": 84.3}],
+            project_id=str(ids["flagship"]),
+            display_name="Structure (IFC) extraction",
+            is_permanent=True,
+            expires_at=datetime.now(UTC) - timedelta(days=1),
+            created_by=str(ids["owner"]),
+        )
+    )
+    await pg_session.flush()
+    assert await _get_session_from_db(pg_session, _seeded_session_id(ids["flagship"])) is None
+
+    await seed_takeoff_demo(pg_session, [ids["flagship"]])
+    await pg_session.flush()
+
+    assert len(await _cad_session_rows(pg_session, ids["flagship"])) == 1
+    reopened = await _get_session_from_db(pg_session, _seeded_session_id(ids["flagship"]))
+    assert reopened is not None, "the seeded session must be readable after the seed has run"
+
+
+async def test_losing_the_race_for_the_cad_session_costs_that_row_alone(pg_session, monkeypatch) -> None:
+    """The half the existence check cannot cover: two boots insert at once.
+
+    Driven by making the check answer "not there" against a database that holds
+    the row, which is the state the loser of that race is in by the time it
+    flushes. The row must not be duplicated, the run must not raise, and the
+    documents written before it must survive, which is what the SAVEPOINT is
+    for: on PostgreSQL a failed statement aborts the whole transaction, so
+    catching the error without one would have cost the entire seed.
+    """
+    from app.modules.takeoff import seed as takeoff_seed
+
+    ids = await _build_stand(pg_session)
+    pg_session.add(
+        CadExtractionSession(
+            session_id=_seeded_session_id(ids["flagship"]),
+            user_id=str(ids["owner"]),
+            filename="structure.ifc",
+            file_format="ifc",
+            project_id=str(ids["flagship"]),
+            display_name="Structure (IFC) extraction",
+            is_permanent=True,
+            expires_at=datetime.now(UTC) + timedelta(days=3650),
+            created_by=str(ids["owner"]),
+        )
+    )
+    await pg_session.flush()
+
+    async def _always_missing(session, session_id: str):
+        return None
+
+    monkeypatch.setattr(takeoff_seed, "_existing_cad_session", _always_missing)
+
+    counts = await seed_takeoff_demo(pg_session, [ids["flagship"], ids["frankfurt"]])
+    await pg_session.flush()
+
+    assert counts["cad_sessions"] == 0, "the row the winner wrote is the row we wanted"
+    assert counts["documents"] == 3, f"the sheets must survive the losing insert: {counts}"
+    assert len(await _cad_session_rows(pg_session, ids["flagship"])) == 1
+    # The session is still usable, which is the whole point of the SAVEPOINT.
+    assert len(await _measurements(pg_session, ids["frankfurt"])) > 0

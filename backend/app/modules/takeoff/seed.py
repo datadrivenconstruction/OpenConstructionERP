@@ -32,6 +32,11 @@ without a document, points or scale (the old "boq_derived" fill) are pruned -
 a measurement that cannot be shown on any sheet is worse than an honest empty
 state - and a document seeded before the sheet carried a revision index is
 adopted into the index-A plan instead of being duplicated.
+
+The flagship's CAD extraction session is idempotent on its own account, keyed
+on the deterministic ``seed-cad-<project>`` session id its unique column
+carries, because the row outlives any one sheet: it must survive a boot that
+adds a sheet, and it must reach an install whose sheets are all already there.
 """
 
 from __future__ import annotations
@@ -47,6 +52,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.boq.models import BOQ, Position
@@ -872,6 +878,124 @@ async def _seed_project_document(
     return counts
 
 
+#: How long the seeded CAD extraction session stays readable. The showcase row
+#: is a fixture rather than somebody's working upload, so it is minted with the
+#: same far-future expiry the two "keep this session" endpoints write
+#: (``cad_data_save`` and ``takeoff_save_session_to_project``, both
+#: ``now + 365 * 10 days``). The seed used to pair ``is_permanent=True`` with a
+#: seven-day ``expires_at``, and the two readers disagree about which column
+#: decides: the list query exempts a permanent row from the expiry test, the
+#: single-session read does not. A week after the row was written the workspace
+#: therefore still listed the extraction and returned nothing when it was
+#: opened.
+_CAD_SESSION_LIFETIME = timedelta(days=365 * 10)
+
+
+async def _existing_cad_session(session: AsyncSession, session_id: str) -> CadExtractionSession | None:
+    """The seeded CAD session row of this id, or None.
+
+    The idempotency guard of the seeder below, and the one question that
+    decides whether it writes. Kept separate because it is also the seam the
+    race is reached through: a check that answers "not there" against a
+    database that holds the row puts the caller in exactly the position the
+    loser of two simultaneous boots is in.
+    """
+    return (
+        await session.execute(select(CadExtractionSession).where(CadExtractionSession.session_id == session_id))
+    ).scalar_one_or_none()
+
+
+async def _seed_flagship_cad_session(session: AsyncSession, project_id: uuid.UUID) -> int:
+    """Seed the flagship's CAD extraction session, once.
+
+    Guarded on the session id itself rather than on the documents seeded beside
+    it. ``session_id`` is deterministic (``seed-cad-<project>``) and its column
+    is unique, so the unguarded insert this replaces raised a unique violation
+    on every boot that found the row already there. Because the whole seeder
+    shares one transaction and the caller swallows the exception, that took the
+    documents, the measurements and the prune of the same run down with it, and
+    left the state that produced the failure in place for the next boot.
+
+    Existence check plus a SAVEPOINT rather than an upsert: the check is the
+    shape the sibling seeders in this tree already use and it reads as the
+    intent ("a row that is there is not written again"), while the SAVEPOINT
+    covers the one case the check cannot, two workers booting at the same
+    moment and both missing. A dialect-specific ``ON CONFLICT DO NOTHING``
+    would have to be a Core insert, which means spelling out by hand every
+    default ``session.add`` supplies here (the primary key, both timestamps and
+    the two JSON columns).
+
+    Args:
+        session: Open async DB session.
+        project_id: The flagship project, whose id the session id is built from.
+
+    Returns:
+        1 when a row was written, 0 when one was already there or no owner user
+        could be resolved.
+    """
+    session_id = f"seed-cad-{project_id}"
+    existing = await _existing_cad_session(session, session_id)
+    now = datetime.now(UTC)
+    if existing is not None:
+        # Heal a row minted with the old seven-day expiry, which the workspace
+        # lists and then cannot open. Only this seeder's own row is touched,
+        # and only when its expiry has already passed, so an ordinary re-boot
+        # writes nothing at all.
+        stored = existing.expires_at
+        if stored is not None and stored.tzinfo is None:
+            stored = stored.replace(tzinfo=UTC)
+        if stored is None or stored <= now:
+            existing.expires_at = now + _CAD_SESSION_LIFETIME
+            existing.is_permanent = True
+            logger.info("takeoff seed: refreshed the expiry of CAD session %s", session_id)
+        return 0
+
+    owner_id = await _resolve_owner_id(session, project_id)
+    if owner_id is None:
+        logger.info("takeoff CAD session seed skipped for %s: no owner user available", project_id)
+        return 0
+
+    owner_ref = str(owner_id)
+    # Flush the documents and measurements added earlier in this run before the
+    # SAVEPOINT opens, so they sit outside it and a lost race here costs this
+    # row alone.
+    await session.flush()
+    try:
+        async with session.begin_nested():
+            session.add(
+                CadExtractionSession(
+                    session_id=session_id,
+                    user_id=owner_ref,
+                    filename="structure.ifc",
+                    file_format="ifc",
+                    element_count=6,
+                    extraction_time=2.4,
+                    elements_data=[
+                        {"id": "elem_001", "category": "wall", "area_m2": 84.3},
+                        {"id": "elem_002", "category": "slab", "area_m2": 92.6},
+                    ],
+                    columns_metadata={"category": "string", "area_m2": "number"},
+                    project_id=str(project_id),
+                    display_name="Structure (IFC) extraction",
+                    is_permanent=True,
+                    expires_at=now + _CAD_SESSION_LIFETIME,
+                    created_by=owner_ref,
+                    session_ttl_days=None,
+                    is_persistent=True,
+                    bim_model_id=None,
+                )
+            )
+            await session.flush()
+    except IntegrityError:
+        # A worker booting alongside this one won the unique index. The row it
+        # wrote is the row this one wanted, so there is nothing left to do.
+        # Catching it is not enough on its own: a failed statement aborts the
+        # whole transaction, which is why the insert sits in a SAVEPOINT.
+        logger.info("takeoff seed: CAD session %s was written by a concurrent boot", session_id)
+        return 0
+    return 1
+
+
 async def seed_takeoff_demo(
     session: AsyncSession,
     project_ids: list[uuid.UUID],
@@ -883,7 +1007,8 @@ async def seed_takeoff_demo(
         project_ids: Candidate projects. The flagship project and the German
             showcase projects (matched by name) each receive their own
             documents - two on the shoot project, one everywhere else - and a
-            document already seeded is skipped.
+            document already seeded is skipped. The flagship also receives one
+            CAD extraction session, guarded separately on its own session id.
 
     Returns:
         A dict of row counts per entity inserted (plus ``linked``, ``pruned``
@@ -940,46 +1065,25 @@ async def seed_takeoff_demo(
             seeded_keys.add(doc_plans[0].seed_key)
             counts["adopted"] += 1
         pending = [doc_plan for doc_plan in doc_plans if doc_plan.seed_key not in seeded_keys]
-        if not pending:
-            continue
+        if pending:
+            owner_id = await _resolve_owner_id(session, project_id)
+            if owner_id is None:
+                logger.info("takeoff seed skipped for %s: no owner user available", project_id)
+            else:
+                for doc_plan in pending:
+                    project_counts = await _seed_project_document(session, project_id, owner_id, doc_plan)
+                    for key, num in project_counts.items():
+                        counts[key] += num
 
-        owner_id = await _resolve_owner_id(session, project_id)
-        if owner_id is None:
-            logger.info("takeoff seed skipped for %s: no owner user available", project_id)
-            continue
-
-        for doc_plan in pending:
-            project_counts = await _seed_project_document(session, project_id, owner_id, doc_plan)
-            for key, num in project_counts.items():
-                counts[key] += num
-
-        # --- 1 optional CAD extraction session (flagship only) ---
+        # --- 1 CAD extraction session (flagship only) ---
+        # Reached whether or not a sheet was pending. The row carries its own
+        # guard, so an install holding every sheet still receives the session it
+        # never got, and one holding the session is not asked to insert it a
+        # second time when a new sheet arrives. The user-takeover bail-out above
+        # still covers it: a project somebody has taken over is skipped before
+        # this line.
         if project_id == _FLAGSHIP_ID:
-            now = datetime.now(UTC)
-            owner_ref = str(owner_id)
-            cad_session = CadExtractionSession(
-                session_id=f"seed-cad-{project_id}",
-                user_id=owner_ref,
-                filename="structure.ifc",
-                file_format="ifc",
-                element_count=6,
-                extraction_time=2.4,
-                elements_data=[
-                    {"id": "elem_001", "category": "wall", "area_m2": 84.3},
-                    {"id": "elem_002", "category": "slab", "area_m2": 92.6},
-                ],
-                columns_metadata={"category": "string", "area_m2": "number"},
-                project_id=str(project_id),
-                display_name="Structure (IFC) extraction",
-                is_permanent=True,
-                expires_at=now + timedelta(days=7),
-                created_by=owner_ref,
-                session_ttl_days=7,
-                is_persistent=True,
-                bim_model_id=None,
-            )
-            session.add(cad_session)
-            counts["cad_sessions"] += 1
+            counts["cad_sessions"] += await _seed_flagship_cad_session(session, project_id)
 
     await session.flush()
     if any(counts.values()):
