@@ -62,6 +62,10 @@
  *   --from-git <ref>  hash the English as it exists at that git ref
  *                     instead of on disk, to answer "what did my
  *                     working tree just invalidate".
+ *   --selftest        run the ratchet's own decision over a fixture and
+ *                     assert it still fails on a fresh reword. A ratchet
+ *                     that has quietly stopped firing reports a clean
+ *                     tree, which is indistinguishable from a clean tree.
  * ================================================================ */
 
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -82,10 +86,20 @@ const REL_DATA = 'frontend/src/features/cases/data';
 /* ---------------------------------------------------------------- */
 
 function parseArgs(argv) {
-  const out = { update: false, slugs: null, fromGit: null, quiet: false, ratchet: false, owe: false, force: false };
+  const out = {
+    update: false,
+    slugs: null,
+    fromGit: null,
+    quiet: false,
+    ratchet: false,
+    owe: false,
+    force: false,
+    selftest: false,
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--update') out.update = true;
+    else if (a === '--selftest') out.selftest = true;
     else if (a === '--ratchet') out.ratchet = true;
     else if (a === '--owe') out.owe = true;
     else if (a === '--force') out.force = true;
@@ -184,10 +198,92 @@ function localeIndex() {
   return index;
 }
 
+/* The whole decision, in one place, so that --selftest exercises the code
+ * that actually ships rather than a second copy of it that can agree with
+ * itself while the real one has stopped firing.
+ *
+ *   current    key -> hash of the English on disk now
+ *   manifest   key -> hash of the English the translations were made from
+ *   translated key -> the locale codes that hold the key
+ *   owed       keys already recorded as knowingly stale
+ *
+ * A key drifts when its hash moved AND somebody has translated it. A key
+ * nobody has translated cannot have gone stale, and counting it would make
+ * the number mean something else. */
+function classifyDrift(current, manifest, translated, owed) {
+  const drifted = [];
+  let untranslated = 0;
+  for (const [key, hash] of Object.entries(current)) {
+    if (!(key in manifest)) continue;
+    if (manifest[key] === hash) continue;
+    const locales = translated.get(key) || [];
+    if (!locales.length) {
+      untranslated++;
+      continue;
+    }
+    drifted.push({ key, locales });
+  }
+  const fresh = drifted.filter((d) => !owed.has(d.key));
+  const repaid = [...owed].filter((k) => !drifted.some((d) => d.key === k));
+  return { drifted, untranslated, fresh, repaid };
+}
+
+/* Prove the ratchet can still fail. Four cases, and the third and fourth are
+ * the ones worth having: a key that is owed must NOT fail, or the debt would
+ * block every commit and somebody would delete the guard; and a key nobody
+ * has translated must NOT fail, or rewording a page before it is translated
+ * would be an error. A gate that only ever says yes is the failure mode this
+ * is here to catch. */
+function selftest() {
+  const H = (s) => sha(s);
+  const manifest = {
+    'cases.a.step.one.what': H('old english'),
+    'cases.b.step.two.what': H('old english'),
+    'cases.c.step.three.what': H('old english'),
+    'cases.d.step.four.what': H('unchanged'),
+  };
+  const current = {
+    'cases.a.step.one.what': H('new english'), // reworded today, translated
+    'cases.b.step.two.what': H('new english'), // reworded, already owed
+    'cases.c.step.three.what': H('new english'), // reworded, nobody translated it
+    'cases.d.step.four.what': H('unchanged'), // untouched
+    'cases.e.step.five.what': H('brand new'), // not in the manifest at all
+  };
+  const translated = new Map([
+    ['cases.a.step.one.what', ['de', 'fr']],
+    ['cases.b.step.two.what', ['de']],
+    ['cases.d.step.four.what', ['de']],
+    ['cases.e.step.five.what', ['de']],
+  ]);
+  const owed = new Set(['cases.b.step.two.what']);
+
+  const got = classifyDrift(current, manifest, translated, owed);
+  const failures = [];
+  const want = (label, actual, expected) => {
+    if (actual !== expected) failures.push(`${label}: expected ${expected}, got ${actual}`);
+  };
+  want('drifted keys', got.drifted.map((d) => d.key).sort().join(','), 'cases.a.step.one.what,cases.b.step.two.what');
+  want('fresh (these fail the build)', got.fresh.map((d) => d.key).join(','), 'cases.a.step.one.what');
+  want('reworded but untranslated', got.untranslated, 1);
+  want('repaid', got.repaid.join(','), '');
+
+  /* And the shape the ratchet reads: a fresh key must be present, or the
+   * guard passes on a tree that has just gone stale. */
+  if (!got.fresh.length) failures.push('the ratchet found nothing to fail on, so it can no longer fail');
+
+  if (failures.length) {
+    console.error('check-case-translation-drift --selftest FAILED');
+    for (const f of failures) console.error(`  ${f}`);
+    process.exit(1);
+  }
+  console.log('case drift ratchet selftest OK: fails on a fresh reword, stays quiet on owed, untranslated and unchanged keys');
+}
+
 /* ---------------------------------------------------------------- */
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.selftest) return selftest();
   const sources = playbookSources(args);
 
   const current = {};
@@ -257,19 +353,9 @@ function main() {
 
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')).keys;
   const translated = localeIndex();
+  const owedNow = new Set((JSON.parse(readFileSync(MANIFEST, 'utf8')).owed || {}).keys || []);
 
-  const drifted = [];
-  let untranslated = 0;
-  for (const [key, hash] of Object.entries(current)) {
-    if (!(key in manifest)) continue;
-    if (manifest[key] === hash) continue;
-    const locales = translated.get(key) || [];
-    if (!locales.length) {
-      untranslated++;
-      continue;
-    }
-    drifted.push({ key, locales });
-  }
+  const { drifted, untranslated, fresh, repaid } = classifyDrift(current, manifest, translated, owedNow);
 
   if (!drifted.length) {
     console.log(`case translation drift: none (${Object.keys(current).length} English strings checked)`);
@@ -318,9 +404,7 @@ function main() {
   /* The ratchet. An owed key is a debt somebody already knows about. Anything
    * else is a reword made today, and that is the thing nothing else catches. */
   if (args.ratchet) {
-    const owed = new Set((JSON.parse(readFileSync(MANIFEST, 'utf8')).owed || {}).keys || []);
-    const fresh = drifted.filter((d) => !owed.has(d.key));
-    const repaid = [...owed].filter((k) => !drifted.some((d) => d.key === k));
+    const owed = owedNow;
     console.log(
       `case translation drift: ${drifted.length} drifted, ${owed.size} of them already owed` +
         (repaid.length ? `, ${repaid.length} repaid` : '')

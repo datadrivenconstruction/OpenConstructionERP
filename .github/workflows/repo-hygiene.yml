@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 79. They run on every push and pull request, grouped into three
+# Guards: 81. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -1110,6 +1110,27 @@ jobs:
         run: node scripts/check-case-coverage.mjs
         working-directory: frontend
 
+
+      # A case string whose English was rewritten under an unchanged key. The
+      # key still resolves, so nothing else in this file reports it: the page
+      # publishes in every language carrying a faithful translation of a
+      # sentence that no longer exists. The ratchet form tolerates the debt
+      # already written down in case-en-manifest.json and fails on anything
+      # added today, which is the only part anybody can still do something
+      # about. Until now the check lived only in an npm script nothing calls.
+      #
+      # The proof step runs first, for the same reason the coverage ratchet's
+      # does: a ratchet that had stopped firing reports a clean tree, and a
+      # clean tree reports a clean tree.
+      - name: Prove the case drift ratchet can fail
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-translation-drift.mjs --selftest
+        working-directory: frontend
+
+      - name: Check no case English was reworded without its translations
+        if: ${{ !cancelled() }}
+        run: node scripts/check-case-translation-drift.mjs --ratchet
+        working-directory: frontend
       - name: Prove the payment application sense gate can fail
         if: ${{ !cancelled() }}
         run: python scripts/check_payment_application_sense.py --selftest
