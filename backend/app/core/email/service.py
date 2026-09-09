@@ -29,7 +29,7 @@ import logging
 from functools import lru_cache
 
 from app.config import Settings, get_settings
-from app.core.demo_accounts import is_demo_account
+from app.core.demo_accounts import is_non_mailbox_login
 
 from .base import BackendName, DeliveryResult, EmailAttachment, EmailBackend, EmailMessage
 from .console import ConsoleEmailBackend
@@ -221,19 +221,24 @@ class EmailService:
 
     async def send(self, message: EmailMessage) -> DeliveryResult:
         """Low-level send - use the typed helpers below when possible."""
-        if is_demo_account(message.to):
-            # The seeded demo logins are not mailboxes. Sending to them
-            # produces a hard bounce on a domain we own, which is what cost
-            # the account its outbound privileges in September 2026. The
-            # guard sits here rather than in the notification dispatcher
-            # because six other modules reach the transport directly, and a
-            # rail placed on one of seven paths is not a rail.
+        if is_non_mailbox_login(message.to):
+            # The seeded logins are not mailboxes. Sending to them produces a
+            # hard bounce on a domain we own, which is what cost the account
+            # its outbound privileges in September 2026. The guard sits here
+            # rather than in the notification dispatcher because six other
+            # modules reach the transport directly, and a rail placed on one
+            # of seven paths is not a rail.
+            #
+            # This asks ``is_non_mailbox_login`` and not ``is_demo_account``:
+            # the seeder scripts also create admin@openestimate.io, which is
+            # just as unmailable but must never be given the passwordless
+            # demo login that ``is_demo_account`` grants.
             logger.warning(
                 "email refused: recipient is a seeded demo login, not a mailbox: to=%s subject=%r",
                 message.to,
                 message.subject,
             )
-            return DeliveryResult.failure(self._backend.name, "recipient is a demo login, not a mailbox")
+            return DeliveryResult.failure(self._backend.name, "recipient is a seeded login, not a mailbox")
         result = await self._backend.send(message)
         if not result.ok:
             logger.warning(

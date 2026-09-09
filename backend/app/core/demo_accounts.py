@@ -33,8 +33,53 @@ DEMO_ACCOUNT_EMAILS: frozenset[str] = frozenset(
 )
 
 
+#: The ``ADMIN_EMAIL`` each seeder script under ``app/scripts`` registers.
+#: They log in and, failing that, POST a registration, so any installation
+#: that has run one of those scripts holds the account. None of them is a
+#: mailbox: they were created as credentials and no inbox was ever made.
+#:
+#: ``demo@openestimator.io`` is not a typo of the other. It is a different
+#: domain, seeded only by ``seed_demo_v2``, and it is the reason this list is
+#: kept beside a test that reads the constants back out of the scripts rather
+#: than being maintained by hand. A grep written from memory for our three
+#: known domains does not match it, which is how it stayed unguarded.
+SEEDED_ADMIN_EMAILS: frozenset[str] = frozenset(
+    {
+        "admin@openestimate.io",
+        "demo@openestimator.io",
+    }
+)
+
+#: Every address the product must refuse to send mail to.
+#:
+#: Deliberately NOT folded into ``DEMO_ACCOUNT_EMAILS`` above, because that
+#: set is not only "these are not mailboxes". It is also the whitelist of the
+#: passwordless ``/auth/demo-login`` endpoint and the list the demo reset
+#: deletes, so putting an admin address in it would hand out a password-free
+#: login to an administrator account. The two questions happen to have had the
+#: same answer for three addresses; they are not the same question.
+NON_MAILBOX_LOGINS: frozenset[str] = DEMO_ACCOUNT_EMAILS | SEEDED_ADMIN_EMAILS
+
+
 def is_demo_account(email: str | None) -> bool:
-    """True when ``email`` is one of the seeded demo logins."""
+    """True when ``email`` is one of the seeded demo logins.
+
+    This is the authentication question: may this address use the demo
+    login, and is it cleared by the demo reset. For "may we send mail to
+    it", ask :func:`is_non_mailbox_login` instead - the sets differ.
+    """
     if not email:
         return False
     return email.strip().lower() in DEMO_ACCOUNT_EMAILS
+
+
+def is_non_mailbox_login(email: str | None) -> bool:
+    """True when ``email`` is a seeded login rather than a real mailbox.
+
+    Every address this returns True for bounces, because it was created by a
+    seeder as a credential and no mailbox was ever made for it. This is the
+    question the mail transport has to ask.
+    """
+    if not email:
+        return False
+    return email.strip().lower() in NON_MAILBOX_LOGINS

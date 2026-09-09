@@ -17,29 +17,74 @@ other six.
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
 import pytest
 
-from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS, is_demo_account
+from app.core.demo_accounts import (
+    DEMO_ACCOUNT_EMAILS,
+    NON_MAILBOX_LOGINS,
+    is_demo_account,
+    is_non_mailbox_login,
+)
 from app.core.email.base import EmailMessage
 from app.core.email.memory import MemoryEmailBackend
 from app.core.email.service import EmailService
+
+SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "app" / "scripts"
 
 
 def _message(to: str) -> EmailMessage:
     return EmailMessage(to=to, subject="Overdue item", html_body="<p>nudge</p>")
 
 
-@pytest.mark.parametrize("address", sorted(DEMO_ACCOUNT_EMAILS))
+@pytest.mark.parametrize("address", sorted(NON_MAILBOX_LOGINS))
 @pytest.mark.asyncio
-async def test_a_demo_login_is_refused_and_nothing_is_handed_to_the_backend(address: str) -> None:
+async def test_a_seeded_login_is_refused_and_nothing_is_handed_to_the_backend(address: str) -> None:
     backend = MemoryEmailBackend()
     service = EmailService(backend)
 
     result = await service.send(_message(address))
 
     assert result.ok is False
-    assert "demo login" in result.reason
+    assert "not a mailbox" in result.reason
     assert backend.sent == [], "the message must not reach the transport at all"
+
+
+def test_every_address_a_seeder_registers_is_known_to_be_unmailable() -> None:
+    """The guard's population must be the seeders, not a remembered list.
+
+    A seeder creates its admin by POSTing a registration, so the account
+    exists on any installation that ran one. Before this test the guard knew
+    the three demo logins and not ``admin@openestimate.io``, which four
+    seeders create, so that address was one overdue nudge away from the
+    bounce that disabled outbound mail once already. Reading the constants
+    out of the scripts means a new seeder cannot quietly add a fourth.
+    """
+    seeded = {}
+    for script in sorted(SCRIPTS_DIR.glob("seed_*.py")):
+        for m in re.finditer(r'^ADMIN_EMAIL\s*=\s*"([^"]+)"', script.read_text(encoding="utf-8"), re.M):
+            seeded[m.group(1)] = script.name
+
+    assert seeded, f"no seeder declared an ADMIN_EMAIL under {SCRIPTS_DIR}, so this test proves nothing"
+
+    unguarded = {addr: name for addr, name in seeded.items() if not is_non_mailbox_login(addr)}
+    assert not unguarded, f"a seeder registers an address the mail guard does not know: {unguarded}"
+
+
+def test_the_seeder_admin_cannot_use_the_passwordless_demo_login() -> None:
+    """The two sets are not interchangeable, and this pins that.
+
+    ``DEMO_ACCOUNT_EMAILS`` is the whitelist of ``/auth/demo-login``, which
+    hands out a session without a password. ``admin@openestimate.io`` has to
+    be unmailable without becoming password-free, so it belongs in one set
+    and not the other. Folding them back together would be a quiet
+    privilege escalation, which is why this asserts in both directions.
+    """
+    assert is_non_mailbox_login("admin@openestimate.io")
+    assert not is_demo_account("admin@openestimate.io")
+    assert DEMO_ACCOUNT_EMAILS < NON_MAILBOX_LOGINS, "the demo logins must stay a strict subset"
 
 
 @pytest.mark.asyncio
