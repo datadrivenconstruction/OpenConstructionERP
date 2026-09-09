@@ -101,6 +101,14 @@ CI_ONLY_BY_DESIGN = {
         "read the locale files alone. Nine seconds of hook accounting was already judged "
         "too much here (673773c00); this is fourteen times that."
     ),
+    "check_public_language_counts.py": (
+        "Counts locale files and offered languages at import time, then checks "
+        "every number in README.md and DEVELOPING.md against the live count. "
+        "Step: 'Check the public documents still count the languages correctly', "
+        "with 'Prove the public language count guard can fail' beside it. A hook "
+        "scoped to locale files would miss a prose change, and a hook scoped to "
+        "the docs would miss a locale addition; the gate needs both sides at once."
+    ),
 }
 
 # Invoked by a lane, declared by no hook, and carrying no reason on record. This
