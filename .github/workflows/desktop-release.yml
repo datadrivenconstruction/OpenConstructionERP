@@ -890,6 +890,22 @@ jobs:
       # exactly the kind that would go missing that way, so --require-member
       # below makes the run fail unless that member was actually opened.
       # Whether 14.4.0 was clean is still an open question, not a settled one.
+      #
+      # The second flag is not a tripwire and reads a different property. Issue
+      # #480: from 14.5.0 to 17.1.0 every member of this archive was signed
+      # ad-hoc AND with the hardened runtime, because the spec named "-" as a
+      # signing identity and PyInstaller reads any truthy identity as a real
+      # Developer ID and adds --options=runtime. That pair enables library
+      # validation in a process with no identity able to pass it, so initdb,
+      # spawned out of the extraction directory, was refused the libpq sitting
+      # beside it and no macOS install could create its database. The Team ID
+      # census was green throughout, correctly: every member agreed with the
+      # wrapper, all of them having no Team ID at all. Agreement was never the
+      # question. The flags word was, and nothing was reading it.
+      #
+      # It is checked here as well as on the bundled copy because the members are
+      # byte-identical at both points, and this is the cheaper and earlier of the
+      # two: a bad spec fails before a Rust build rather than after one.
       - name: Check what the sidecar archive carries
         if: always() && runner.os == 'macOS'
         shell: bash
@@ -898,6 +914,7 @@ jobs:
           set -uo pipefail
           python scripts/inspect_desktop_sidecar_signatures.py \
             --fail-on-foreign-team-id \
+            --fail-on-hardened-adhoc \
             --require-member Python.framework \
             desktop/dist/openconstructionerp-server
 
@@ -1555,7 +1572,7 @@ jobs:
           # what this check exists to notice, because the failure it predicts
           # only shows up on a user's Mac.
           if echo "$SIG" | grep -qi 'flags=.*runtime'; then
-            echo "::warning title=The shipped sidecar is ad-hoc and hardened at the same time::The sidecar inside the .app is signed ad-hoc AND with the hardened runtime, and carries no entitlements. That enables library validation with nothing able to satisfy it: the process has no Team ID, every file it unpacks into its _MEI directory has no Team ID, and the loader refuses them with a message about differing Team IDs. A clean member census below does not clear this, because no member is at fault."
+            echo "::warning title=The shipped sidecar is ad-hoc and hardened at the same time::The sidecar inside the .app is signed ad-hoc AND with the hardened runtime, and carries no entitlements. That enables library validation with nothing able to satisfy it: the process has no Team ID, every file it unpacks into its _MEI directory has no Team ID, and the loader refuses them with a message about differing Team IDs. A Team ID census does not clear this, because no member is at fault. It is the census below that fails on it now, under --fail-on-hardened-adhoc, which reads this same pair on the wrapper and on every member."
           else
             echo "The bundled sidecar is not signed with the hardened runtime, so library validation is not in play."
           fi
@@ -1570,6 +1587,7 @@ jobs:
           census_rc=0
           python scripts/inspect_desktop_sidecar_signatures.py \
               --fail-on-foreign-team-id \
+              --fail-on-hardened-adhoc \
               --require-member Python.framework \
               "$SIDECAR" > "$RUNNER_TEMP/census.log" 2>&1 || census_rc=$?
           cat "$RUNNER_TEMP/census.log"
@@ -1581,7 +1599,7 @@ jobs:
           census_n="$(sed -n 's/^census: \([0-9][0-9]*\) member.*/\1/p' "$RUNNER_TEMP/census.log" | tail -1)"
           census_n="${census_n:-0}"
           if [ "$census_rc" -eq 0 ]; then
-            echo "OK: inside the shipped bundle, nothing the sidecar unpacks disagrees with it about a Team ID."
+            echo "OK: inside the shipped bundle, nothing the sidecar unpacks disagrees with it about a Team ID, and nothing is hardened without one."
             echo "Bundled sidecar census: clean over $census_n member(s) inspected." >> "$GITHUB_STEP_SUMMARY"
           elif [ "$census_rc" -eq 2 ]; then
             # Exit 2 is the script saying it read nothing: no codesign on this
@@ -1595,7 +1613,7 @@ jobs:
             echo "Bundled sidecar census: COULD NOT MEASURE, nothing was read, see the Build Desktop (macos-latest) log." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           else
-            echo "::error title=The shipped sidecar disagrees with its own payload about a Team ID::The census above found inside the .app the shape that stops the app at 'Starting the application server' on a user's machine, or could not measure enough of it to rule that out. Compare it against the pre-bundle census in the Build Sidecar job: if that one was clean, bundling is what changed it."
+            echo "::error title=The shipped sidecar cannot load its own payload::The census above found inside the .app one of the two shapes that stop the app on a user's machine, or could not measure enough of it to rule them out. Either a member disagrees with the process about a Team ID, which stops it at 'Starting the application server', or something is signed with the hardened runtime while carrying no Team ID, which stops the children it spawns and shows up as the local database failing to start (issue #480). The log above says which. Compare it against the pre-bundle census in the Build Sidecar job: if that one was clean, bundling is what changed it."
             echo "Bundled sidecar census: MISMATCH or inconclusive over $census_n member(s) inspected, see the Build Desktop (macos-latest) log." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi

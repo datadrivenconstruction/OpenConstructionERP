@@ -403,38 +403,61 @@ a = Analysis(
 
 pyz = PYZ(a.pure, cipher=block_cipher)
 
-# Ad-hoc sign every Mach-O collected into the archive, not only the executable
-# wrapped around it. macOS only; PyInstaller ignores the option elsewhere, and
-# naming it unconditionally would be a lie about what the build does on Windows.
+# LEAVE THIS None ON THE AD-HOC PATH. Do not set it to "-".
 #
-# An ad-hoc signature carries no Team ID, so two ad-hoc binaries can never
-# mismatch. The binaries collected into the archive are a different matter: the
-# Python framework installed by the build machine is signed by whoever built
-# that Python, and PyInstaller packs it verbatim. At launch the onefile
-# bootloader extracts the archive to a temporary directory and dlopens the
-# framework from there, and dyld compares the two signatures:
+# PyInstaller already ad-hoc signs, on macOS, every Mach-O it collects into the
+# archive, not only the executable wrapped around it. That happens with no
+# identity named here: PyInstaller/utils/osx.py sign_binary() reads
 #
-#   code signature in '.../_MEIxxxxxx/Python.framework/Versions/3.12/Python'
-#   not valid for use in process: mapping process and mapped file
-#   (non-platform) have different Team IDs
+#     if not identity:
+#         identity = '-'          # ad-hoc signing
+#     else:
+#         extra_args.append('--options=runtime')   # hardened runtime
 #
-# The process is ad-hoc with no Team ID, the framework has a real one, and the
-# load is refused. The app reaches "Starting the application server" and stops
-# there, on a machine that is otherwise fine. Reported against 14.4.0 on macOS
-# 26, Apple Silicon, by a user who had already cleared Gatekeeper by hand.
+# so None already produces the plain ad-hoc signature we want, and "-" produces
+# something else entirely. "-" is truthy, so PyInstaller reads it as a real
+# Developer ID and turns on the hardened runtime for every collected binary. The
+# spec then supplies no entitlements_file, so those binaries end up ad-hoc,
+# hardened, and carrying no entitlements at all.
 #
-# The fix is to make the payload's identity match the process's rather than to
-# grant the process permission to ignore the mismatch. That needs no
-# entitlement and no hardened runtime, so Entitlements.plist stays out of this
-# and the ad-hoc rule in docs/desktop/MACOS_NOTARIZATION.md still holds: on the
-# ad-hoc path, sign with "-" and no timestamp.
+# That combination is unsatisfiable. The hardened runtime enables library
+# validation, and library validation only accepts a library carrying the
+# process's own Team ID or a platform identity. An ad-hoc process has no Team ID
+# and its ad-hoc payload has none either, so the loader refuses the process the
+# very files it just unpacked for itself, and words the refusal as a Team ID
+# disagreement even though no Team ID exists on either side:
 #
-# This is also a prerequisite for notarization rather than a stopgap. The notary
-# service sees a onefile sidecar as one Mach-O and never inspects the archive
-# appended to it, so a notarized build made without this would sign the wrapper,
-# pass review and still fail to start, with the mismatch now against a real Team
-# ID instead of none.
-codesign_identity = "-" if sys.platform == "darwin" else None
+#   dyld: Library not loaded: .../pginstall/lib/libpq.5.dylib
+#   Reason: mapping process and mapped file (non-platform) have different Team IDs
+#
+# Issue #480, reported against 17.1.0 on macOS 26, Apple Silicon: the embedded
+# PostgreSQL cluster could not be created because initdb, extracted from this
+# archive and run as its own process, was refused libpq.
+#
+# It reached users wearing two different symptoms, and the second is the one
+# that made it durable. The wrapper is the one file later signing passes reach,
+# the release workflow's own codesign step and Tauri's bundling. While Tauri's
+# hardenedRuntime default was still in force, that pass put the flag back on the
+# wrapper and the sidecar died on its own Python framework at "Starting the
+# application server", which is 14.5.0 and 14.6.0. From 14.7.0, ab7ad351c set
+# hardenedRuntime false and neither pass adds the flag any more, so the wrapper
+# was healthy and only the children spawned out of the extraction directory
+# still carried it. The members are sealed inside this archive by then and no
+# later pass reaches them, so the fix has to be here.
+#
+# The line arrived for the 14.4.0 report about Python.framework, where a
+# collected binary really did carry a foreign Team ID. It was later measured not
+# to change that property in either direction, because PyInstaller re-signs
+# collected binaries ad-hoc regardless of what is named here. See the census in
+# scripts/inspect_desktop_sidecar_signatures.py, which reads the shipped archive
+# member by member. What the line did change was the runtime flag, which nothing
+# was reading.
+#
+# The Developer ID path is a different setting, not a reason to put "-" back. If
+# notarization is activated as docs/desktop/MACOS_NOTARIZATION.md describes, name
+# the real identity here AND pass entitlements_file so the hardened runtime the
+# identity then justifies has something able to satisfy it.
+codesign_identity = None
 
 # Unpack into a directory this application owns, rather than into the system
 # temporary folder.

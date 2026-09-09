@@ -42,9 +42,10 @@ run fail unless a named member was genuinely inspected.
 Whether the shipped archive is clean is therefore still open. What is settled is that the
 spec's codesign_identity line does not change this property either way.
 
-That leaves this script as a tripwire rather than a fix: it fails the build the day a
-dependency or a packer upgrade starts sealing a vendor-signed binary inside the archive,
-which would introduce that failure for real.
+That leaves the Team ID half of this script as a tripwire rather than a fix: it fails the
+build the day a dependency or a packer upgrade starts sealing a vendor-signed binary inside
+the archive, which would introduce that failure for real. The other half, added for issue
+#480 and described below, is not a tripwire. It fires on a defect that shipped.
 
 Both directions of the mismatch count
 -------------------------------------
@@ -63,6 +64,33 @@ signs the executable after it was measured changes the value every member is com
 against without touching a single member, so a reading taken before that step says nothing
 about the artifact that ships.
 
+A Team ID census cannot answer the second question
+--------------------------------------------------
+Agreement about a Team ID is not the only way this failure arrives, and the other way is
+what shipped. Issue #480, against 17.1.0: the app started, the backend started, and the
+embedded cluster did not, because initdb, extracted from this archive and run as its own
+process, was refused ``pginstall/lib/libpq.5.dylib`` with the same words about differing
+Team IDs. Every member of that archive was ad-hoc and every one agreed with the wrapper,
+so the census above was green on it and had nothing to add.
+
+What was wrong was a flag, not an identity. ``desktop/pyinstaller.spec`` set
+``codesign_identity = "-"``, and PyInstaller reads any truthy identity as a real Developer
+ID: ``sign_binary`` adds ``--options=runtime`` in that branch. Every collected binary was
+therefore signed ad-hoc, hardened, and with no entitlements. The hardened runtime turns on
+library validation, library validation accepts only a library carrying the loading
+process's Team ID or a platform identity, and an ad-hoc binary carries neither, so such a
+process is refused the payload unpacked beside it. The wrapper is the one file later
+signing passes reach, the workflow's own codesign step and Tauri's bundling, and from
+14.7.0 neither of them asks for the runtime any more, so the wrapper is healthy while the
+children spawned out of the extraction directory are not. Nothing reaches the members: by
+that point they are bytes inside a file rather than files on disk.
+
+``--fail-on-hardened-adhoc`` is that question. It reads the flags word out of each member's
+own bytes rather than writing the member out and asking codesign, and it fires on the pair
+"hardened runtime, no Team ID" rather than on the hardened runtime alone: hardened with a
+real Developer ID is the correct end state described in docs/desktop/MACOS_NOTARIZATION.md,
+and a check that fired on it would be switched off exactly when it is most useful.
+
 Usage:
     python scripts/inspect_desktop_sidecar_signatures.py desktop/dist/openconstructionerp-server
 
@@ -74,12 +102,14 @@ the file lives.
 
 Exit codes
 ----------
-    0   the archive was read and there is a verdict. Either nothing disagrees with the
-        wrapper, or --fail-on-foreign-team-id was not passed and this ran as plain
-        evidence without deciding anything by itself.
-    1   the archive was read and the answer is bad: a member disagrees with the wrapper,
-        the census was too narrow to support a claim about the whole archive, a
-        --require-member name was never opened, or the path given is not a file.
+    0   the archive was read and there is a verdict. Either nothing is wrong under the
+        gates that were asked for, or neither --fail-on-foreign-team-id nor
+        --fail-on-hardened-adhoc was passed and this ran as plain evidence without
+        deciding anything by itself.
+    1   the archive was read and the answer is bad: a member disagrees with the wrapper
+        about a Team ID, a member is hardened while carrying none, the census was too
+        narrow to support a claim about the whole archive, a --require-member name was
+        never opened, or the path given is not a file.
     2   nothing was read and there is no verdict of any kind. This is not macOS, so there
         is no codesign to ask, or PyInstaller is not importable, so the archive cannot be
         opened. Never 0.
@@ -97,6 +127,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -111,6 +142,24 @@ MACHO_MAGIC = (
     b"\xca\xfe\xba\xbe",  # universal
     b"\xbe\xba\xfe\xca",  # universal, swapped
 )
+
+# The pieces of a Mach-O needed to read a code-signing flags word out of member
+# bytes, without asking codesign about a file on disk. See Apple's cs_blobs.h.
+LC_CODE_SIGNATURE = 0x1D
+CSMAGIC_EMBEDDED_SIGNATURE = 0xFADE0CC0
+CSMAGIC_CODEDIRECTORY = 0xFADE0C02
+CSSLOT_CODEDIRECTORY = 0
+# The two flags this file has an opinion about. CS_ADHOC is not read directly:
+# an ad-hoc signature is one with no Team ID, and the Team ID is what the rest of
+# the script already compares, so absence of a team is what "ad-hoc" means below.
+CS_RUNTIME = 0x00010000
+# Offsets inside a CodeDirectory blob, from its own start. The first nine fields
+# are uint32 (36 bytes), then hashSize, hashType, platform and pageSize as single
+# bytes (40), then spare2 (44), then scatterOffset (48) and teamOffset, each of
+# which only exists from the version noted beside it.
+CD_FIXED_FIELDS = ">9I"
+CD_TEAM_OFFSET = 48
+CD_VERSION_WITH_TEAM_ID = 0x20200
 
 # Exit codes, named after what they say rather than after pass and fail. 0 and 1 both
 # belong to a run that opened the archive; 2 belongs to a run that did not, and it exists
@@ -177,6 +226,126 @@ def extract(reader, name: str) -> bytes | None:
     return None
 
 
+def _macho_slices(data: bytes) -> list[bytes]:
+    """Split universal binary bytes into its architecture slices; a thin one is a list of one."""
+    if data[:4] == b"\xca\xfe\xba\xbe":
+        (count,) = struct.unpack_from(">I", data, 4)
+        out = []
+        for i in range(count):
+            _cputype, _cpusubtype, offset, size, _align = struct.unpack_from(">5I", data, 8 + 20 * i)
+            out.append(data[offset : offset + size])
+        return out
+    return [data]
+
+
+def _code_signature_blob(sl: bytes) -> bytes | None:
+    """Return the embedded signature of one Mach-O slice, or None when it carries none."""
+    magic = sl[:4]
+    if magic in (b"\xcf\xfa\xed\xfe", b"\xce\xfa\xed\xfe"):
+        endian = "<"
+        wide = magic == b"\xcf\xfa\xed\xfe"
+    elif magic in (b"\xfe\xed\xfa\xcf", b"\xfe\xed\xfa\xce"):
+        endian = ">"
+        wide = magic == b"\xfe\xed\xfa\xcf"
+    else:
+        raise ValueError(f"not a thin Mach-O slice: {magic!r}")
+    (ncmds,) = struct.unpack_from(endian + "I", sl, 16)
+    offset = 32 if wide else 28
+    for _ in range(ncmds):
+        cmd, cmdsize = struct.unpack_from(endian + "2I", sl, offset)
+        if cmdsize == 0:
+            raise ValueError("load command of zero length, the header is not walkable")
+        if cmd == LC_CODE_SIGNATURE:
+            dataoff, datasize = struct.unpack_from(endian + "2I", sl, offset + 8)
+            return sl[dataoff : dataoff + datasize]
+        offset += cmdsize
+    return None
+
+
+def _code_directory(signature: bytes) -> dict[str, object]:
+    """Read the flags word and Team ID out of an embedded signature's CodeDirectory."""
+    magic, _length, count = struct.unpack_from(">3I", signature, 0)
+    if magic != CSMAGIC_EMBEDDED_SIGNATURE:
+        raise ValueError(f"not an embedded signature superblob: 0x{magic:08x}")
+    for i in range(count):
+        slot, offset = struct.unpack_from(">2I", signature, 12 + 8 * i)
+        (blob_magic,) = struct.unpack_from(">I", signature, offset)
+        if slot != CSSLOT_CODEDIRECTORY or blob_magic != CSMAGIC_CODEDIRECTORY:
+            continue
+        cd = signature[offset:]
+        _m, _len, version, flags, _hash_off, _ident_off, _nss, _ncs, _limit = struct.unpack_from(CD_FIXED_FIELDS, cd, 0)
+        team = None
+        if version >= CD_VERSION_WITH_TEAM_ID:
+            (team_offset,) = struct.unpack_from(">I", cd, CD_TEAM_OFFSET)
+            if team_offset:
+                end = cd.index(b"\0", team_offset)
+                team = cd[team_offset:end].decode("utf-8", "replace")
+        return {"state": "parsed", "flags": flags, "team": team}
+    raise ValueError("the signature carries no CodeDirectory")
+
+
+def code_directories(data: bytes) -> list[dict[str, object]]:
+    """Report the signing state of every architecture slice in the given Mach-O bytes.
+
+    Each entry is one of three states, and they are three different answers rather
+    than degrees of one. ``parsed`` carries the flags word and the Team ID.
+    ``unsigned`` means the slice has no LC_CODE_SIGNATURE at all, which settles the
+    hardened question in the negative rather than leaving it open. ``unreadable``
+    means there is a signature here that this code could not walk, which settles
+    nothing and has to be reported as such.
+
+    Read from the member's own bytes rather than by writing it out and asking
+    codesign, so the answer does not depend on the machine reading it. That matters
+    for what this predicate is for: the property travels inside the archive to a
+    user's Mac, and it is decided at build time on a runner that never enforces it.
+    """
+    out: list[dict[str, object]] = []
+    try:
+        parts = _macho_slices(data)
+    except Exception as exc:  # noqa: BLE001 - a header we cannot walk is one answer
+        return [{"state": "unreadable", "why": f"the universal header did not parse: {exc}"}]
+    for sl in parts:
+        try:
+            signature = _code_signature_blob(sl)
+        except Exception as exc:  # noqa: BLE001
+            out.append({"state": "unreadable", "why": f"the load commands did not parse: {exc}"})
+            continue
+        if signature is None:
+            out.append({"state": "unsigned"})
+            continue
+        try:
+            out.append(_code_directory(signature))
+        except Exception as exc:  # noqa: BLE001
+            out.append({"state": "unreadable", "why": f"the signature did not parse: {exc}"})
+    return out
+
+
+def hardened_without_team(data: bytes) -> tuple[bool, list[str]]:
+    """Answer the second question this file asks of a member, and say when it cannot.
+
+    Returns whether any slice is signed with the hardened runtime while carrying no
+    Team ID, and the reasons any slice could not be read. That pairing is what makes
+    a process refuse its own payload: the hardened runtime turns on library
+    validation, library validation accepts only a library carrying the loading
+    process's Team ID or a platform identity, and an ad-hoc binary carries neither.
+    Both sides of the load are then refused for disagreeing about a Team ID that
+    neither of them has.
+
+    Deliberately narrower than "no member may be hardened". A member signed with a
+    real Developer ID and the hardened runtime is the correct end state described in
+    docs/desktop/MACOS_NOTARIZATION.md, and a check that fired on it would have to be
+    turned off the day that work lands, which is the day it is most worth having.
+    """
+    bad = False
+    reasons: list[str] = []
+    for entry in code_directories(data):
+        if entry["state"] == "unreadable":
+            reasons.append(str(entry.get("why", "unreadable")))
+        elif entry["state"] == "parsed" and int(entry["flags"]) & CS_RUNTIME and not entry["team"]:
+            bad = True
+    return bad, reasons
+
+
 def describe(path: Path) -> dict[str, str]:
     proc = subprocess.run(
         ["codesign", "-dvvv", str(path)],
@@ -213,6 +382,17 @@ def main() -> int:
             "in either direction, and also when any member could not be read, "
             "parsed or reached - a census that skipped members cannot support a "
             "claim about all of them"
+        ),
+    )
+    parser.add_argument(
+        "--fail-on-hardened-adhoc",
+        action="store_true",
+        help=(
+            "exit non-zero when any member is signed with the hardened runtime "
+            "while carrying no Team ID. That pair is unsatisfiable: it turns on "
+            "library validation in a process that has no identity able to pass "
+            "it, so the member is refused the rest of the payload it unpacks "
+            "beside it. A member could not be read counts too"
         ),
     )
     parser.add_argument(
@@ -271,6 +451,8 @@ def main() -> int:
         unreadable_names: list[str] = []
         inspected_names: list[str] = []
         by_team: dict[str, list[str]] = {}
+        hardened_adhoc: list[str] = []
+        unreadable_flags: list[str] = []
         for name in names:
             data = extract(reader, name)
             if data is None:
@@ -289,6 +471,17 @@ def main() -> int:
             if checked >= args.limit:
                 skipped_over_limit += 1
                 continue
+            # The second question, asked of the same bytes and before they are
+            # written anywhere. It is a different property from the Team ID
+            # census below and neither one implies the other: every member of
+            # the 17.1.0 archive agreed with the wrapper about the Team ID, all
+            # of them having none, and every one of them was hardened, which is
+            # the state that made the app unusable. See issue #480.
+            bad_flags, why = hardened_without_team(data)
+            if bad_flags:
+                hardened_adhoc.append(name)
+            unreadable_flags.extend(f"{name}: {reason}" for reason in why)
+
             target = workdir / Path(name).name
             target.write_bytes(data)
             info = describe(target)
@@ -386,6 +579,42 @@ def main() -> int:
                     "so none disagrees with the process."
                 )
 
+        # The second verdict, printed whether or not its gate is on, because a
+        # run that measured the property and said nothing about it is how this
+        # one went unnoticed for eleven releases. describe() has always read the
+        # flags word; only the wrapper's was ever printed, and the wrapper is
+        # the one file in the artifact that something re-signs afterwards.
+        wrapper_hardened = "runtime" in wrapper["flags"] and wrapper_team is None
+        print()
+        if wrapper_hardened:
+            print(
+                f"HARDENED AD-HOC: the wrapper itself is signed {wrapper['flags']} with no Team ID. "
+                "Library validation is on and nothing it unpacks can satisfy it."
+            )
+        if hardened_adhoc:
+            print(f"HARDENED AD-HOC: {len(hardened_adhoc)} member(s) carry the hardened runtime and no Team ID.")
+            print(
+                "Each of these runs, or is loaded into something that runs, under library validation "
+                "with no identity able to pass it. A member spawned as its own process out of the "
+                "extraction directory is refused the libraries sitting next to it, and the loader "
+                "words that refusal as a Team ID disagreement even though neither side has one."
+            )
+            for member in sorted(hardened_adhoc)[:12]:
+                print(f"    {member}")
+            if len(hardened_adhoc) > 12:
+                print(f"    ... and {len(hardened_adhoc) - 12} more")
+        if unreadable_flags:
+            print(f"flags not readable on {len(unreadable_flags)} slice(s):")
+            for item in sorted(unreadable_flags)[:12]:
+                print(f"    {item}")
+            if len(unreadable_flags) > 12:
+                print(f"    ... and {len(unreadable_flags) - 12} more")
+        if not wrapper_hardened and not hardened_adhoc and not unreadable_flags:
+            print(
+                f"No member of the {len(inspected_names)} inspected is hardened without a Team ID, "
+                "so none is running under a library validation it cannot satisfy."
+            )
+
         # Under the gate, a disagreeing member, an unread member and an
         # unmeasured required member are each failures in their own right: the
         # gate's whole claim is that nothing in there disagrees with the process,
@@ -404,6 +633,13 @@ def main() -> int:
         # narrower than the archive fails it - but the run still has facts to
         # report, which is exactly what separates it from the branches above.
         if args.fail_on_foreign_team_id and (foreign or inconclusive or missing_required):
+            return EXIT_ALARM
+        # The same rule for the second question. A census narrower than the
+        # archive cannot clear the archive of this either, so the shared
+        # inconclusive list counts here as well as above.
+        if args.fail_on_hardened_adhoc and (
+            hardened_adhoc or wrapper_hardened or unreadable_flags or inconclusive or missing_required
+        ):
             return EXIT_ALARM
     finally:
         shutil.rmtree(workdir, ignore_errors=True)

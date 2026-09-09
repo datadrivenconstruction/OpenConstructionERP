@@ -147,6 +147,8 @@ The piece that needs attention is the existing CI step named "Ad-hoc sign sideca
 
 Whichever way you go, the rule to remember is simple. On the ad-hoc path, sidecar signed with `-` and no timestamp. On the Developer ID path, every binary signed with the real identity, hardened runtime on, secure timestamp on. The notary service checks all of them.
 
+One place that rule does not apply, and it cost a release to learn. It is about the `codesign` command in CI, which signs the sidecar file on disk. It is not about `codesign_identity` in `desktop/pyinstaller.spec`, which decides how PyInstaller signs the binaries it seals inside that file, and there `-` is wrong on the ad-hoc path. PyInstaller ad-hoc signs collected binaries when no identity is named at all, and reads any identity that is named, `-` included, as a real Developer ID for which it adds `--options=runtime`. The spec spent 14.5.0 to 17.1.0 asking for `-` and shipping every archived binary ad-hoc and hardened with no entitlements, which is a process with library validation on and no identity able to pass it. Users could install the app, start it, and never get a database, because `initdb` was refused the copy of libpq unpacked beside it. That is issue #480. On the ad-hoc path the spec line stays `codesign_identity = None`; on the Developer ID path it takes the real identity and an `entitlements_file` alongside it. `backend/tests/unit/test_desktop_sidecar_hardened_adhoc.py` asserts the line, and the release workflow reads the property back out of the built artifact with `--fail-on-hardened-adhoc`.
+
 ## Verifying a notarized build
 
 After a release build with notarization on, two checks confirm it worked. Run them against the built `.app` (the same bundle the dmg contains).
