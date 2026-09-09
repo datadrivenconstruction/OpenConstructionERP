@@ -229,11 +229,11 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         name="Schedule of values",
         countries=("US", "CA"),
         extensions=(".xlsx", ".csv"),
-        summary="The North American priced breakdown, divided by MasterFormat or by UniFormat element.",
+        summary="The North American priced breakdown, divided by specification division or by building element.",
         reader="excel",
         writer="excel",
         header_language="en",
-        standard="CSI MasterFormat",
+        standard="US specification division numbering",
         rule_packs=("masterformat",),
     ),
     ExchangeFormat(
