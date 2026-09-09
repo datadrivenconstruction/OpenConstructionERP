@@ -6803,11 +6803,15 @@ class PropDevBrokerCommissionRateWithinBounds(ValidationRule):
                     pct = None
                 if pct is None:
                     issue = "percent agreement missing 'pct'"
-                else:
-                    # Heuristic: rate may be expressed as 0.025 (=2.5%) or 2.5.
-                    rate = pct / Decimal("100") if pct > Decimal("1") else pct
-                    if rate < Decimal("0.001") or rate > Decimal("0.15"):
-                        issue = f"percent rate {pct} outside permitted range 0.1%-15%"
+                elif pct < Decimal("0.1") or pct > Decimal("15"):
+                    # ``pct`` is a percentage everywhere the module reads it:
+                    # the schema caps it at 100 and the accrual divides by
+                    # 100. An earlier heuristic also accepted a fraction
+                    # (0.025 for 2.5%) by treating any value up to 1 as one,
+                    # which read a 1% agreement as 100% and failed it. One
+                    # notation, one range; 0.025 here means 0.025% and is
+                    # the data-entry error this rule exists to catch.
+                    issue = f"percent rate {pct} outside permitted range 0.1%-15%"
             elif stype == "flat":
                 amt_raw = structure.get("amount") if isinstance(structure, dict) else None
                 try:

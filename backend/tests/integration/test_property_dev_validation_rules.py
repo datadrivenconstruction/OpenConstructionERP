@@ -664,6 +664,64 @@ async def test_rule_commission_passes_with_valid_percent(session, seeded_dev):
 
 
 @pytest.mark.asyncio
+async def test_rule_commission_reads_pct_as_a_percentage(session, seeded_dev):
+    """1% and 0.5% pass; 0.025 is 0.025%, not 2.5%, and fails.
+
+    ``pct`` is a percentage everywhere the module reads it (the schema caps
+    it at 100, the accrual divides by 100). The rule once tried to accept a
+    fraction too and read every value up to 1 as one, so a 1% agreement was
+    flagged as 100%. The three agreements below pin the one notation.
+    """
+    import uuid as _uuid
+
+    from app.core.validation.rules import (
+        PropDevBrokerCommissionRateWithinBounds,
+    )
+    from app.modules.property_dev.models import Broker, CommissionAgreement
+
+    dev = seeded_dev["development"]
+    broker = Broker(
+        id=_uuid.uuid4(),
+        name="Low Rate Realty",
+        license_number=f"LIC-{_uuid.uuid4().hex[:8]}",
+        jurisdiction="AE-DU",
+        contact_email="low@example.com",
+        kyc_status="verified",
+        active=True,
+    )
+    session.add(broker)
+    await session.flush()
+
+    def _agreement(pct: str) -> CommissionAgreement:
+        return CommissionAgreement(
+            id=_uuid.uuid4(),
+            broker_id=broker.id,
+            development_id=dev.id,
+            structure_type="percent",
+            structure={"pct": pct},
+            accrual_trigger="spa_signed",
+            currency="AED",
+            effective_from="2026-01-01",
+            status="active",
+        )
+
+    one_percent = _agreement("1.0")
+    half_percent = _agreement("0.5")
+    session.add_all([one_percent, half_percent])
+    await session.commit()
+    rule = PropDevBrokerCommissionRateWithinBounds()
+    results = await _run_rule(rule, session, dev.id)
+    assert all(r.passed for r in results), [r.message for r in results if not r.passed]
+
+    fraction = _agreement("0.025")
+    session.add(fraction)
+    await session.commit()
+    results = await _run_rule(rule, session, dev.id)
+    flagged = {r.details["agreement_id"] for r in results if not r.passed}
+    assert flagged == {str(fraction.id)}, flagged
+
+
+@pytest.mark.asyncio
 async def test_rule_commission_fails_with_excessive_percent(session, seeded_dev):
     """A 25% percent commission is outside the 0.1%-15% band."""
     import uuid as _uuid
