@@ -127,6 +127,29 @@ DENY_PATTERNS = [
     r"|partner-applications|contact-requests|email-delivery-failures)[^/]*\.(jsonl|json|csv)$",
     r"(^|/)[^/]*(subscribers?|mailing[_-]?list|newsletter|email[_-]?export"
     r"|contacts?[_-]?export|leads?[_-]?export|audience)[^/]*\.(csv|jsonl|xlsx)$",
+    # Credential-bearing files, named here as well as in .gitignore because the
+    # project's rule is that a new ignore pattern goes in both places: git can
+    # be told to add an ignored file, and the ignore rules do not travel into a
+    # wheel or a directory scan, which this gate also covers.
+    #
+    # Environment files carry live secrets. The repo-root .gitignore used to
+    # name three suffixes somebody had thought of, so a .env.staging or a
+    # prod.env copied off a server was ordinary tracked source in a public
+    # repository. The shape is matched instead of the list. The negative
+    # lookahead keeps the tracked .env.example templates, which is the whole
+    # point of shipping them.
+    r"(^|/)[^/]*\.env$",
+    r"(^|/)[^/]*\.env\.(?!example$)[^/]+$",
+    # Two files the running application writes: the generated demo passwords
+    # from app/main.py _persist_demo_credentials, and the persisted JWT signing
+    # secret from app/config.py. Both default to a directory outside the
+    # checkout (OE_CLI_DATA_DIR, else ~/.openestimator), so neither is leaking
+    # today. They are named because a data directory pointed at the working
+    # tree is a plausible dev or container misconfiguration, and the failure it
+    # produces, a signing secret published in a public repository, is not one
+    # to discover afterwards.
+    r"(^|/)\.demo_credentials\.json$",
+    r"(^|/)\.jwt-secret$",
 ]
 _RX = [re.compile(p) for p in DENY_PATTERNS]
 

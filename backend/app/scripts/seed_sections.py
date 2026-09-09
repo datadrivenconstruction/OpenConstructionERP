@@ -10,19 +10,40 @@ import asyncio
 
 import httpx
 
+from app.scripts.seed_credentials import (
+    SEED_PASSWORD_ENV,
+    login_failed_message,
+    resolve_seed_password,
+)
+
 BASE = "http://localhost:8000"
+ADMIN_EMAIL = "admin@openestimate.io"
 
 
 async def main() -> None:
+    # No password is hardcoded here: this tree is public, so a literal would be
+    # a published credential. Unlike the other seed scripts this one only logs
+    # in, it never registers, so it has no account of its own whose password it
+    # could have just chosen. A generated password therefore cannot work here
+    # and SEED_ADMIN_PASSWORD is effectively required.
+    password, was_generated = resolve_seed_password()
+    if was_generated:
+        print(f"{SEED_PASSWORD_ENV} is not set. This script only logs in, so set it to the")
+        print(f"password of {ADMIN_EMAIL} and run again.")
+        return
+
     async with httpx.AsyncClient(base_url=BASE, timeout=30.0) as c:
         # Login
         r = await c.post(
             "/api/v1/users/auth/login",
             json={
-                "email": "admin@openestimate.io",
-                "password": "OpenEstimate2026",
+                "email": ADMIN_EMAIL,
+                "password": password,
             },
         )
+        if r.status_code != 200:
+            print(login_failed_message(r.status_code, ADMIN_EMAIL))
+            return
         token = r.json()["access_token"]
         h = {"Authorization": f"Bearer {token}"}
 

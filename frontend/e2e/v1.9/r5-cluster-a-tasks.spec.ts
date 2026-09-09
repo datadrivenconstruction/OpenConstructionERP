@@ -9,14 +9,21 @@
  * Artifacts land in test-results/r5-cluster-a/.
  */
 import { test, expect, type ConsoleMessage, type Page } from '@playwright/test';
+import { V19_USER } from './helpers-v19';
 
 const OUT = 'test-results/r5-cluster-a';
 
-// Use the admin account confirmed to exist in every environment. The v1.9
-// helper defaults to a throwaway user that may not be provisioned — we roll
-// our own tiny login so the spec is self-contained.
-const ADMIN_EMAIL = process.env.R5_ADMIN_EMAIL ?? 'admin@openestimate.io';
-const ADMIN_PASSWORD = process.env.R5_ADMIN_PASSWORD ?? 'OpenEstimate2026';
+// Fall back to the user this suite provisions for itself. global-setup.ts in
+// this directory logs in as V19_USER and registers it when the login fails, so
+// it is the one account guaranteed to exist wherever these specs run. The
+// earlier default here, admin@openestimate.io with a constant password, was a
+// backend seed-script account, and those scripts now mint a random password
+// per run, so the constant authenticates nowhere. R5_ADMIN_EMAIL and
+// R5_ADMIN_PASSWORD still override, for a run pointed at some other account.
+// We keep the small login below rather than calling loginV19, so the spec
+// stays self-contained about which account it drives.
+const ADMIN_EMAIL = process.env.R5_ADMIN_EMAIL ?? V19_USER.email;
+const ADMIN_PASSWORD = process.env.R5_ADMIN_PASSWORD ?? V19_USER.password;
 const API_BASE = 'http://localhost:8000';
 
 let cachedAccessToken: string | null = null;

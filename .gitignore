@@ -41,6 +41,29 @@ Thumbs.db
 .env
 .env.local
 .env.production
+# The three lines above name suffixes somebody thought of. Any other one, a
+# .env.staging or a .env.dev or a prod.env copied off a server, was tracked as
+# ordinary source in a public repository. Name the shape instead: *.env catches
+# a name ending in .env, .env.* catches any suffix after .env.
+#
+# The negation is load-bearing, do not delete it. .env.* DOES match
+# .env.example, and the three tracked template files (.env.example,
+# backend/.env.example, deploy/docker/.env.example) are the only thing keeping
+# it from swallowing them. Verified with git check-ignore on all three.
+*.env
+.env.*
+!.env.example
+
+# Two files the running application writes, both holding live secrets: the
+# generated demo passwords from app/main.py _persist_demo_credentials, and the
+# persisted JWT signing secret from app/config.py. Both default to a directory
+# outside the checkout (OE_CLI_DATA_DIR, else ~/.openestimator), so this is not
+# covering a live leak. It is the guard for a data directory pointed at the
+# working tree, which is a plausible dev or container misconfiguration and
+# would otherwise put a signing secret into a commit. Unanchored on purpose:
+# the data directory can be at any depth.
+.demo_credentials.json
+.jwt-secret
 
 # Database
 *.db

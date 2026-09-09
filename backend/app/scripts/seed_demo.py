@@ -9,23 +9,38 @@ import asyncio
 
 import httpx
 
+from app.scripts.seed_credentials import (
+    SEED_PASSWORD_ENV,
+    describe_seed_login,
+    login_failed_message,
+    resolve_seed_password,
+)
+
 BASE = "http://localhost:8000"
+ADMIN_EMAIL = "admin@openestimate.io"
 
 
 async def main() -> None:
+    # No password is hardcoded here: this tree is public, so a literal would be
+    # a published credential. SEED_ADMIN_PASSWORD pins one, otherwise this run
+    # mints a random one and prints it once at the end.
+    password, was_generated = resolve_seed_password()
+
     async with httpx.AsyncClient(base_url=BASE, timeout=30.0) as c:
         # 1. Register admin user
         print("Creating admin user...")
         r = await c.post(
             "/api/v1/users/auth/register",
             json={
-                "email": "admin@openestimate.io",
-                "password": "OpenEstimate2026",
+                "email": ADMIN_EMAIL,
+                "password": password,
                 "full_name": "Artem Boiko",
             },
         )
         if r.status_code == 409:
             print("  User already exists, logging in...")
+            if was_generated:
+                print(f"  Its password is not the one generated for this run, so set {SEED_PASSWORD_ENV}.")
         elif r.status_code == 201:
             print(f"  Created: {r.json()['email']} (role: {r.json()['role']})")
 
@@ -33,10 +48,13 @@ async def main() -> None:
         r = await c.post(
             "/api/v1/users/auth/login",
             json={
-                "email": "admin@openestimate.io",
-                "password": "OpenEstimate2026",
+                "email": ADMIN_EMAIL,
+                "password": password,
             },
         )
+        if r.status_code != 200:
+            print(login_failed_message(r.status_code, ADMIN_EMAIL))
+            return
         token = r.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
         print("  Logged in, token obtained")
@@ -381,6 +399,7 @@ async def main() -> None:
 
         print(f"\nSeed complete! {len(cost_items)} cost items added.")
         print("\nOpen http://localhost:5173 to see the app")
+        print(describe_seed_login(ADMIN_EMAIL, password, was_generated))
 
 
 if __name__ == "__main__":

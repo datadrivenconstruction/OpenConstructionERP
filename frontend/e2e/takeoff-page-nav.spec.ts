@@ -11,9 +11,16 @@
  */
 import { test, expect } from '@playwright/test';
 import path from 'path';
+import { TEST_USER } from './helpers';
 
-const EMAIL = process.env.E2E_USER_EMAIL ?? 'admin@openestimate.io';
-const PASSWORD = process.env.E2E_USER_PASSWORD ?? 'OpenEstimate2026';
+// Use the shared TEST_USER rather than a literal of our own. It names the demo
+// account the platform seeds on boot, and the same E2E_USER_EMAIL /
+// E2E_USER_PASSWORD overrides every other spec in this directory honours. The
+// pair this spec used to default to, admin@openestimate.io with a constant
+// password, is created only by the backend seed scripts, and those now mint a
+// random password per run, so the constant authenticates nowhere.
+const EMAIL = TEST_USER.email;
+const PASSWORD = TEST_USER.password;
 
 test('PDF takeoff: Next button advances page indicator (no 0/31 reset)', async ({
   page,

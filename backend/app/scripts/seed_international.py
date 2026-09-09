@@ -15,27 +15,42 @@ import asyncio
 
 import httpx
 
+from app.scripts.seed_credentials import (
+    describe_seed_login,
+    login_failed_message,
+    resolve_seed_password,
+)
+
 BASE = "http://localhost:8000"
+ADMIN_EMAIL = "admin@openestimate.io"
 
 
 async def main() -> None:
+    # No password is hardcoded here: this tree is public, so a literal would be
+    # a published credential. SEED_ADMIN_PASSWORD pins one, otherwise this run
+    # mints a random one and the summary block prints it once.
+    password, was_generated = resolve_seed_password()
+
     async with httpx.AsyncClient(base_url=BASE, timeout=30.0) as c:
         # Register / login
         await c.post(
             "/api/v1/users/auth/register",
             json={
-                "email": "admin@openestimate.io",
-                "password": "OpenEstimate2026",
+                "email": ADMIN_EMAIL,
+                "password": password,
                 "full_name": "Artem Boiko",
             },
         )
         r = await c.post(
             "/api/v1/users/auth/login",
             json={
-                "email": "admin@openestimate.io",
-                "password": "OpenEstimate2026",
+                "email": ADMIN_EMAIL,
+                "password": password,
             },
         )
+        if r.status_code != 200:
+            print(login_failed_message(r.status_code, ADMIN_EMAIL))
+            return
         token = r.json()["access_token"]
         h = {"Authorization": f"Bearer {token}"}
         print("Authenticated.\n")
@@ -643,7 +658,7 @@ async def main() -> None:
 
         print("\n" + "=" * 70)
         print("Open http://localhost:5173 to see all projects")
-        print("Login: admin@openestimate.io / OpenEstimate2026")
+        print(describe_seed_login(ADMIN_EMAIL, password, was_generated))
 
 
 async def create_project(c: httpx.AsyncClient, h: dict, data: dict) -> dict:

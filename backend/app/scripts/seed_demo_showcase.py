@@ -37,6 +37,8 @@ import time
 
 import httpx
 
+from app.scripts.seed_credentials import describe_seed_login, login_failed_message, resolve_seed_password
+
 # Windows console defaults to cp1252; force utf-8 for the Unicode project names.
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     try:
@@ -47,7 +49,11 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 BASE = "http://localhost:8000"
 ADMIN_EMAIL = "admin@openestimate.io"
-ADMIN_PASSWORD = "OpenEstimate2026"
+# No password is hardcoded here: this tree is public, so a literal would be a
+# published credential. SEED_ADMIN_PASSWORD pins one, otherwise this run mints
+# a random one and the summary prints it once. Resolved at import so both
+# login_or_register() calls in main() present the same value.
+ADMIN_PASSWORD, ADMIN_PASSWORD_GENERATED = resolve_seed_password()
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 _default_cad = REPO_ROOT / "data" / "cad2data" / "Sample_Projects" / "test"
@@ -242,7 +248,10 @@ async def login_or_register(client: httpx.AsyncClient) -> dict[str, str]:
             "/api/v1/users/auth/login",
             json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
         )
-        r.raise_for_status()
+        if r.status_code != 200:
+            # A generated password only authenticates against an account this
+            # run created, so an existing account needs its own password.
+            raise SystemExit(login_failed_message(r.status_code, ADMIN_EMAIL))
     token = r.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
@@ -520,6 +529,7 @@ async def main() -> None:
         # Re-login so the fresh JWT carries role='admin'
         headers = await login_or_register(client)
         print("\n[1/7] Authenticated as", ADMIN_EMAIL, "(promoted to admin)")
+        print("     ", describe_seed_login(ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_PASSWORD_GENERATED))
 
         # ── Wipe ──
         print("\n[2/7] Wiping existing projects (direct DB cascade)...")
