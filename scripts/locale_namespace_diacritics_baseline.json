@@ -9,43 +9,30 @@
   "modules.dev_trouble_7_a"
  ],
  "es.ts": [
+  "cases.claim_an_extension_of_time_under_as_4000.longdesc",
   "modules.dev_trouble_7_a"
  ],
  "fr.ts": [
-  "aiest.alts.grounded_note",
-  "cases.compare_the_tender_bill_against_the_settlement.longdesc"
+  "cases.compare_the_tender_bill_against_the_settlement.longdesc",
+  "cases.hold_retention_money_on_trust_under_the_construction_contracts_act.longdesc",
+  "cases.issue_a_tax_invoice_and_attribute_gst_on_a_progress_payment.longdesc",
+  "cases.open_a_project_trust_account_under_the_building_industry_fairness_act.desc",
+  "cases.open_a_project_trust_account_under_the_building_industry_fairness_act.longdesc",
+  "cases.pay_davis_bacon_wages_and_file_the_certified_payroll.desc",
+  "cases.pay_davis_bacon_wages_and_file_the_certified_payroll.longdesc"
  ],
  "pl.ts": [
   "cases.certify_the_month_against_the_mediciones.step.measure.what"
  ],
  "ro.ts": [
-  "cases.draft_the_first_year_maintenance_budget.step.budget.in.planned",
-  "cases.draft_the_first_year_maintenance_budget.step.rates.out.planned",
-  "cases.plan_preventive_maintenance_from_the_asset_register.step.report.in.plan",
-  "cases.plan_preventive_maintenance_from_the_asset_register.step.schedule.out.plan",
-  "guide.ai_estimator.source.body",
+  "cases.budget_development_contributions_for_a_territorial_authority.longdesc",
   "guide.ai_estimator.tips.body",
-  "guide.assemblies.components.body",
-  "guide.benchmarks.concept.body",
   "guide.benchmarks.inputs.body",
-  "guide.benchmarks.intro",
   "guide.benchmarks.reading.body",
-  "guide.dashboard.cost.body",
-  "guide.dashboard.intro",
-  "guide.match.catalogue.body",
   "guide.match.run.body",
   "guide.match.scope.body",
-  "guide.project_intelligence.drivers.body",
-  "guide.project_intelligence.gaps.body",
-  "guide.project_intelligence.gaps.title",
-  "guide.project_intelligence.intro",
-  "guide.projects.next.body",
   "howto.carbon.tip.1",
   "howto.changeorders.when",
-  "howto.contacts.summary",
-  "howto.finance.when",
-  "howto.methodologies.tip.1",
-  "howto.users.when",
-  "whatsnew.v820.fx.title"
+  "howto.contacts.summary"
  ]
 }
