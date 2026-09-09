@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Check that the vendored NSIS installer template is upstream plus our one edit.
+"""Check that the vendored NSIS installer template is upstream plus our edits.
 
 ``desktop/src-tauri/windows/installer.nsi`` is a copy of the template that ships
-inside the Tauri bundler, carrying a single deliberate change: on the upgrade
-branch of the reinstall page the second radio button, "Do not uninstall", starts
-selected instead of the first. The reason is written at length in that file.
+inside the Tauri bundler, carrying three deliberate changes, all of them on the
+reinstall page a user meets when a previous version is already installed. The
+second radio button, "Do not uninstall", starts selected on an upgrade. The WiX
+migration branch obeys whichever button was selected rather than uninstalling
+regardless. And a file the old uninstaller left behind after reporting success no
+longer aborts the install. The reasons are written at length in that file.
 
 Vendoring it costs something, and this script is the payment. The template is a
 Handlebars template, not plain NSI: blocks like each-resources and each-binaries
@@ -15,15 +18,15 @@ installer that is missing files, or missing a language, and say nothing.
 
 So this compares our copy against the real thing. It reads the Tauri CLI version
 out of the release workflow rather than carrying its own copy of it, fetches the
-template at that tag, applies our edit to what it fetched, and demands the result
+template at that tag, applies our edits to what it fetched, and demands the result
 match our file byte for byte. Anything else upstream changed, inside our patched
-region or anywhere else, shows up as a diff.
+regions or anywhere else, shows up as a diff.
 
 The direction matters. A gate that merely ignored our known diff would go green
-if upstream rewrote the very lines we patched. This one reconstructs instead: the
-pre-edit text must occur in the fetched upstream exactly once, and the
-substitution must actually change something. If our copy ever reverts to stock,
-the reconstruction no longer matches it and the gate goes red.
+if upstream rewrote the very lines we patched. This one reconstructs instead:
+each pre-edit text must occur exactly once in the template as the edits before it
+leave it, and every substitution must actually change something. If our copy ever
+reverts to stock, the reconstruction no longer matches it and the gate goes red.
 
 It also asserts that ``tauri.conf.json`` still names the vendored file, because
 that is the other way the fix can vanish quietly: without the template key the
@@ -79,11 +82,18 @@ REQUIRED_ANCHORS = (
     "!insertmacro MUI_LANGUAGE",
 )
 
-# Our edit, held as the pair of texts rather than as a diff to ignore, so that an
-# upstream rewrite of these very lines is caught instead of skipped. PATCH_BEFORE
-# has to appear in the fetched template exactly once.
-PATCH_BEFORE = """\
-    ; Check the first radio button if this the first time
+# Our edits, held as pairs of texts rather than as a diff to ignore, so that an
+# upstream rewrite of these very lines is caught instead of skipped. Each BEFORE
+# has to appear exactly once in the template as the edits before it leave it.
+#
+# Raw strings, and so the first line of each rides along with its assignment
+# rather than starting under it. NSIS writes a newline as $\n and a path holds
+# backslashes of its own; in a plain literal those would be read as escapes and
+# the reconstruction would stop matching for a reason nobody would see. A raw
+# string cannot take the backslash continuation that would move the first line
+# down, so it does not get one.
+
+REINSTALL_DEFAULT_BEFORE = r"""    ; Check the first radio button if this the first time
     ; we enter this page or if the second button wasn't
     ; selected the last time we were on this page
     ${If} $ReinstallPageCheck <> 2
@@ -95,12 +105,11 @@ PATCH_BEFORE = """\
     ${NSD_SetFocus} $R2
 """
 
-PATCH_AFTER = """\
-    ; OpenConstructionERP fork of the stock Tauri template. The block below and
-    ; this comment are the only difference from upstream, and
-    ; scripts/check_nsis_template_drift.py proves that by fetching the template
-    ; at the CLI version pinned in .github/workflows/desktop-release.yml and
-    ; reconstructing this file from it.
+REINSTALL_DEFAULT_AFTER = r"""    ; OpenConstructionERP fork of the stock Tauri template, edit one of three.
+    ; The other two are in PageLeaveReinstall below and carry their own notes.
+    ; scripts/check_nsis_template_drift.py proves the set is exactly these three
+    ; by fetching the template at the CLI version pinned in
+    ; .github/workflows/desktop-release.yml and reconstructing this file from it.
     ;
     ; What it defends against. On an upgrade the first radio button reads
     ; "Uninstall before installing", and upstream starts it selected, so a user
@@ -130,9 +139,11 @@ PATCH_AFTER = """\
     ; different pair of choices and keeps its default, and the downgrade case
     ; keeps its default. The WiX migration path is excluded by hand, and that is
     ; the one exclusion that is not obvious: it reaches this page with $R0 = 1
-    ; too, but PageLeaveReinstall uninstalls on it whichever button is selected,
-    ; so pre-selecting "Do not uninstall" there would show a default the
-    ; installer does not honour. The condition also requires $ReinstallPageCheck
+    ; too, but installing over an MSI install leaves the MSI's own entry in
+    ; Add/Remove Programs, so one product would offer two ways to remove it. The
+    ; first radio button therefore stays the default there. PageLeaveReinstall
+    ; does honour the other button on that path, see the fork note in it.
+    ; The condition also requires $ReinstallPageCheck
     ; to still be empty, which is true only the first time the page is shown, so
     ; a user who picks the first radio button and then walks back into the page
     ; still finds their own choice selected.
@@ -172,6 +183,112 @@ PATCH_AFTER = """\
     ${EndIf}
 
 """
+
+WIX_SELECTION_BEFORE = r"""  ; If migrating from Wix, always uninstall
+  ${If} $WixMode = 1
+    Goto reinst_uninstall
+"""
+
+WIX_SELECTION_AFTER = r"""  ; OpenConstructionERP fork, edit two of three. Upstream sent every WiX
+  ; migration to reinst_uninstall without reading $R1, so the page offered a
+  ; choice and then ignored it: a user who picked "Do not uninstall" watched the
+  ; MSI uninstaller start anyway, and if it then failed the upgrade stopped on a
+  ; step that user had declined. The selection is honoured here instead.
+  ;
+  ; Passive mode is the exception, and it has to be one. PageReinstall calls
+  ; this function directly when $PassiveMode = 1, before nsDialogs::Create has
+  ; run, so $R2 still holds the label text rather than a window handle and the
+  ; ${NSD_GetState} above leaves $R1 at 0. Reading that as "the user chose not
+  ; to uninstall" would quietly stop removing the MSI on every unattended
+  ; migration, with nothing anywhere to say so. A passive run keeps uninstalling.
+  ; Note also that this branch sits ahead of the $UpdateMode check below, so
+  ; update mode does not cover the case either.
+  ${If} $WixMode = 1
+    ${If} $PassiveMode = 1
+    ${OrIf} $R1 = 1
+      Goto reinst_uninstall
+    ${Else}
+      Goto reinst_done
+    ${EndIf}
+"""
+
+LEFTOVER_FILE_BEFORE = r"""    ${IfThen} ${Errors} ${|} StrCpy $0 2 ${|} ; ExecWait failed, set fake exit code
+
+    ${If} $0 <> 0
+    ${OrIf} ${FileExists} "$INSTDIR\${MAINBINARYNAME}.exe"
+      ; User cancelled wix uninstaller? return to select un/reinstall page
+      ${If} $WixMode = 1
+      ${AndIf} $0 = 1602
+        Abort
+      ${EndIf}
+
+      ; User cancelled NSIS uninstaller? return to select un/reinstall page
+      ${If} $0 = 1
+        Abort
+      ${EndIf}
+
+      ; Other erros? show generic error message and return to select un/reinstall page
+      MessageBox MB_ICONEXCLAMATION "$(unableToUninstall)"
+"""
+
+LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of three. Three things change here,
+    ; all of them about when an upgrade is allowed to stop and what the person in
+    ; front of it is told when it does.
+    ;
+    ; A leftover binary on its own is no longer fatal. Upstream aborted when the
+    ; old uninstaller returned success and $INSTDIR still held the main
+    ; executable, which is what happens whenever that file was locked at the
+    ; moment it was deleted, and an antivirus or a search indexer holding it open
+    ; is ordinary rather than exotic. It explains why one machine refuses an
+    ; upgrade that two others take. The install that follows writes over that
+    ; exact path, so the check was refusing an upgrade that would have worked. A
+    ; non-zero code still stops us, because that means the previous version is
+    ; only partly removed and the two would be mixed.
+    ;
+    ; The message says what happened. It used to be one sentence carrying no
+    ; number and no path, so "the previous version could not be removed" was all
+    ; the user got and there was nothing in it to act on. The detail we add is
+    ; English only: $(unableToUninstall) is a LangString living in the bundler's
+    ; own language files, unreachable from this template, and keeping it as the
+    ; first sentence keeps the translations we ship for it.
+    ;
+    ; A fabricated code is not reported as one. Upstream put 2 in $0 when
+    ; ExecWait could not start the uninstaller at all, and printing that as an
+    ; exit code would be the same defect the message is here to fix.
+    StrCpy $R5 ""
+    ${If} ${Errors}
+      StrCpy $0 2 ; ExecWait failed, set fake exit code
+      StrCpy $R5 "The uninstaller of the installed version could not be started."
+    ${Else}
+      StrCpy $R5 "The uninstaller of the installed version exited with code $0."
+    ${EndIf}
+
+    ${If} $0 <> 0
+      ; User cancelled wix uninstaller? return to select un/reinstall page
+      ${If} $WixMode = 1
+      ${AndIf} $0 = 1602
+        Abort
+      ${EndIf}
+
+      ; User cancelled NSIS uninstaller? return to select un/reinstall page
+      ${If} $0 = 1
+        Abort
+      ${EndIf}
+
+      ${If} ${FileExists} "$INSTDIR\${MAINBINARYNAME}.exe"
+        StrCpy $R5 "$R5$\nIt left $INSTDIR\${MAINBINARYNAME}.exe behind."
+      ${EndIf}
+
+      ; Other errors? say what happened and return to select un/reinstall page
+      MessageBox MB_ICONEXCLAMATION "$(unableToUninstall)$\n$\n$R5$\n$\nOpen Windows Settings, go to Apps, remove ${PRODUCTNAME} there, then run this installer again."
+"""
+
+# Applied in this order, which is the order they appear in the file.
+PATCHES: tuple[tuple[str, str, str], ...] = (
+    ("the reinstall page default", REINSTALL_DEFAULT_BEFORE, REINSTALL_DEFAULT_AFTER),
+    ("the WiX branch honouring the selection", WIX_SELECTION_BEFORE, WIX_SELECTION_AFTER),
+    ("a leftover file not being fatal", LEFTOVER_FILE_BEFORE, LEFTOVER_FILE_AFTER),
+)
 
 HANDLEBARS = re.compile(r"\{\{.*?\}\}", re.DOTALL)
 
@@ -257,16 +374,21 @@ def fetch_upstream(version: str) -> str:
 
 
 def reconstruct(upstream: str) -> str:
-    """Upstream with our edit applied, which is what the vendored file must be."""
-    occurrences = upstream.count(PATCH_BEFORE)
-    if occurrences != 1:
-        raise CheckError(
-            f"upstream moved: the lines this fork patches occur {occurrences} times upstream, expected exactly 1. "
-            "Re-vendor the template and re-derive the patch by hand."
-        )
-    patched = upstream.replace(PATCH_BEFORE, PATCH_AFTER)
-    if patched == upstream:
-        raise CheckError("the patch is a no-op, which means PATCH_BEFORE and PATCH_AFTER are the same text")
+    """Upstream with our edits applied, which is what the vendored file must be."""
+    patched = upstream
+    for label, before, after in PATCHES:
+        # Counted against the text the earlier edits have already produced rather
+        # than against the original, because two edits are allowed to share a
+        # region and counting in the original would let both claim it.
+        occurrences = patched.count(before)
+        if occurrences != 1:
+            raise CheckError(
+                f"upstream moved: the lines {label} patches occur {occurrences} times upstream, expected "
+                "exactly 1. Re-vendor the template and re-derive the patch by hand."
+            )
+        if before == after:
+            raise CheckError(f"the edit for {label} is a no-op, its two texts are the same")
+        patched = patched.replace(before, after)
     return patched
 
 
@@ -306,11 +428,11 @@ def main() -> int:
         diff = difflib.unified_diff(
             expected.splitlines(),
             vendored.splitlines(),
-            fromfile=f"upstream tauri-cli-v{version} plus our patch",
+            fromfile=f"upstream tauri-cli-v{version} plus our patches",
             tofile=str(args.vendored),
             lineterm="",
         )
-        print("FAIL: the vendored template is not upstream plus our one edit.", file=sys.stderr)
+        print("FAIL: the vendored template is not upstream plus our own edits.", file=sys.stderr)
         for line in diff:
             print(line, file=sys.stderr)
         problems.append("content differs")
@@ -321,13 +443,13 @@ def main() -> int:
             print(f"FAIL: {problem}", file=sys.stderr)
         print(
             "\nIf upstream moved on purpose, re-fetch the template at the pinned version, re-apply the fork "
-            "described in its header comment, and update PATCH_BEFORE and PATCH_AFTER in this script to match.",
+            "described in its header comment, and update PATCHES in this script to match.",
             file=sys.stderr,
         )
         return 1
 
     print(
-        f"OK: {args.vendored} is tauri-cli-v{version} plus the reinstall-page default, "
+        f"OK: {args.vendored} is tauri-cli-v{version} plus the {len(PATCHES)} fork edits, "
         f"{len(HANDLEBARS.findall(vendored))} Handlebars expressions intact."
     )
     return 0

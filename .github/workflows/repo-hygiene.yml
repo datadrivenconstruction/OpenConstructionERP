@@ -150,21 +150,37 @@ jobs:
         run: python scripts/check_untracked_imports.py
 
       # desktop/src-tauri/windows/installer.nsi is a fork of the stock Tauri
-      # NSIS template, and the single line it changes is what keeps an upgrade
-      # from hanging forever. Upstream starts "Uninstall before installing"
-      # selected, which ExecWaits the uninstaller already on the machine, and
-      # every uninstaller from v11.7.1 to v15.8.0 calls nsExec with no timeout,
-      # so a PowerShell that never returns stops the upgrade dead. The fork
-      # pre-selects "Do not uninstall" on the upgrade branch instead.
+      # NSIS template, and everything it changes is on the page a user meets
+      # when a previous version is already installed. There are three edits now,
+      # not the one this comment used to name.
       #
-      # The script was written months ago and nothing ever ran it. A fork
-      # nobody compares against upstream stops being a fork and becomes a copy
-      # that drifts, and the drift that matters here is silent: bumping the
+      # The first keeps an upgrade from hanging forever. Upstream starts
+      # "Uninstall before installing" selected, which ExecWaits the uninstaller
+      # already on the machine, and every uninstaller from v11.7.1 to v15.8.0
+      # calls nsExec with no timeout, so a PowerShell that never returns stops
+      # the upgrade dead. The fork pre-selects "Do not uninstall" on the upgrade
+      # branch instead. The second makes the WiX migration branch obey whichever
+      # button was selected rather than uninstalling either way. The third stops
+      # a file the old uninstaller left behind, after reporting success, from
+      # aborting an install that would have written over it anyway, and puts the
+      # exit code and the path into the message when the abort is real.
+      #
+      # The script was written months ago and nothing ran it until this step. A
+      # fork nobody compares against upstream stops being a fork and becomes a
+      # copy that drifts, and the drift that matters here is silent: bumping the
       # Tauri CLI regenerates the template with different Handlebars
       # expressions, our block survives textually, and the installer builds
       # green while the page it patches has moved. This fetches the template at
       # the CLI version pinned in desktop-release.yml, reconstructs the file
       # from it, and fails when the two stop agreeing.
+      #
+      # This lane reports, it does not block: nothing here is a required status
+      # check, so a red run does not stop the push that caused it. The same
+      # script therefore runs a second time in desktop-release.yml, on the
+      # Windows leg, ahead of the bundle. That copy is the one that blocks,
+      # because a tag is the only place in this repository where a red check
+      # withholds something. Two placements, one script, on purpose; if either
+      # is ever removed, say in the other which one is left.
       - name: Check the installer template against the Tauri version it forks
         if: ${{ !cancelled() }}
         run: python scripts/check_nsis_template_drift.py

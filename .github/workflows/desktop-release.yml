@@ -1038,6 +1038,49 @@ jobs:
               echo "Not a release ref (${ref:-<empty>}), so the version is not compared against a tag." ;;
           esac
 
+      # The vendored NSIS template, held against the upstream it was forked from.
+      #
+      # The same script also runs in repo-hygiene.yml, on every push, and that is
+      # not an accident to be tidied away. That lane reports and this one blocks:
+      # no check anywhere is required for a push to main, so the hygiene copy
+      # tells you within minutes and stops nothing, while a red step here
+      # withholds the installer from the tag. Both are wanted. If one is removed,
+      # say in the survivor which one is left.
+      #
+      # Windows only, because Windows is the only leg that bundles NSIS, and this
+      # job rather than a push lane because of how the failure behaves.
+      # desktop/src-tauri/windows/installer.nsi is a Handlebars template and the
+      # bundler renders it with strict mode off, so a name that stops existing
+      # upstream renders as nothing at all and the build stays green. A stale
+      # copy does not break, it produces an installer that is missing files or
+      # missing a language and says so nowhere. The moment that costs us
+      # something is the moment the installer is built, and this is that job.
+      #
+      # What a red check here stops: the Windows leg fails, so no NSIS installer
+      # is built, signed or attached to the tag. fail-fast is false, so macOS and
+      # Linux still publish, which is the right blast radius for a file only
+      # Windows reads. It sits ahead of the frontend and Rust builds so it costs
+      # seconds rather than half an hour when it does fire.
+      #
+      # The check fetches the stock template from raw.githubusercontent.com and
+      # treats an unreachable upstream as a failure rather than a pass. That is
+      # not a new dependency for this job: the Tauri CLI itself arrives over the
+      # network through npx a few steps below.
+      - name: Check the vendored NSIS template is upstream plus our edits
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -uo pipefail
+          py=python3
+          command -v python3 >/dev/null 2>&1 || py=python
+          code=0
+          out=$("$py" scripts/check_nsis_template_drift.py 2>&1) || code=$?
+          echo "$out"
+          if [ "$code" -ne 0 ]; then
+            echo "::error title=The vendored NSIS installer template has drifted::check_nsis_template_drift.py exits ${code}. Either desktop/src-tauri/windows/installer.nsi is no longer the pinned upstream template plus the fork edits that script holds, or tauri.conf.json has stopped naming it and the bundler is using its own built-in copy. An unknown Handlebars name renders as nothing, so the installer this job would build could be missing files or a language with nothing else going red."
+            exit 1
+          fi
+
       - name: Set up Node.js 24
         uses: actions/setup-node@v7
         with:
