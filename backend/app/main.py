@@ -290,6 +290,90 @@ def should_prime_openapi_schema(
     return asked and not fast_startup and bool(openapi_url)
 
 
+def serve_openapi_document_off_the_event_loop(app: FastAPI) -> bool:
+    """Replace FastAPI's own document route with one that builds on a worker thread.
+
+    The route FastAPI adds for ``openapi_url`` in ``FastAPI.setup()`` is an
+    ``async`` handler that calls ``app.openapi()`` inline. So the first
+    request for the document, which is what opening /api/docs or /api/redoc
+    sends, runs the whole build on the event loop, and the process answers
+    nothing else until it is done. Measured on the published 17.0.2 wheel on
+    this stand: the build took 52.5s on an idle 16.9.0 install and 113.6s and
+    139.7s on two 17.0.2 installs, and a ``GET /api/health`` issued during one
+    of those builds came back after 71.5s, exactly when the build ended,
+    against 0.05s at any other time. The health endpoint is what the desktop
+    shell polls to decide whether a backend is alive, so one visitor opening
+    the API reference could make the shell conclude the backend had hung.
+
+    The replacement hands the build to a worker thread and serialises the
+    6.75 MB body there too, then swaps into the same position in the route
+    table, because the frontend's catch-all is mounted later and a route
+    appended after it would never be reached. ``_custom_openapi`` keeps its
+    cache and its lock, so concurrent first callers still share one build and
+    every later request is served from the cache. A thread does not escape the
+    GIL: while a build runs the loop is slowed, not stopped, and a request
+    queued behind it no longer waits for the build to end. Whoever asked for
+    the document waits as before, and the build is logged with its duration.
+
+    Args:
+        app: The application whose ``openapi_url`` route is to be replaced.
+
+    Returns:
+        ``True`` when a route was replaced, ``False`` when the app has no
+        ``openapi_url`` (production, BUG-394) or FastAPI registered none.
+    """
+    import json
+
+    from starlette.concurrency import run_in_threadpool
+    from starlette.requests import Request
+    from starlette.responses import Response
+    from starlette.routing import Route
+
+    openapi_url = app.openapi_url
+    if not openapi_url:
+        return False
+    for index, route in enumerate(app.router.routes):
+        if getattr(route, "path", None) == openapi_url and getattr(route, "include_in_schema", True) is False:
+            break
+    else:
+        return False
+
+    async def _openapi_document(request: Request) -> Response:
+        root_path = request.scope.get("root_path", "").rstrip("/")
+
+        def _build_body() -> tuple[bytes, float, int]:
+            started = time.perf_counter()
+            schema = app.openapi()
+            elapsed = time.perf_counter() - started
+            # The same root_path handling FastAPI's own handler does, on a
+            # copy, so the cached document is not changed by one request.
+            if root_path and app.root_path_in_servers:
+                server_urls = {server.get("url") for server in schema.get("servers", [])}
+                if root_path not in server_urls:
+                    schema = dict(schema)
+                    schema["servers"] = [{"url": root_path}, *schema.get("servers", [])]
+            # JSONResponse's exact rendering, so the bytes are the ones FastAPI
+            # would have sent; done here rather than on the loop because the
+            # body is 6.75 MB.
+            body = json.dumps(
+                schema,
+                ensure_ascii=False,
+                allow_nan=False,
+                indent=None,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            return body, elapsed, len(schema.get("paths", {}))
+
+        body, elapsed, path_count = await run_in_threadpool(_build_body)
+        # A cache hit returns in milliseconds; a build takes tens of seconds.
+        if elapsed >= 1.0:
+            logger.info("OpenAPI document built in %.1fs (%d paths), off the event loop", elapsed, path_count)
+        return Response(content=body, media_type="application/json")
+
+    app.router.routes[index] = Route(openapi_url, _openapi_document, include_in_schema=False)
+    return True
+
+
 #: The path the route-table warm-up asks for. It has to match nothing, because
 #: matching nothing is what forces the router to consider every route it holds.
 #: Named rather than spelled at the call site so the test that pins this can ask
@@ -1910,6 +1994,11 @@ def create_app() -> FastAPI:
             return schema
 
     app.openapi = _custom_openapi  # type: ignore[method-assign]
+    # The route FastAPI registered for that document calls it on the event
+    # loop, which is the 71.5s health stall measured on the 17.0.2 wheel; see
+    # the function for the numbers. Swapped here, right after the builder it
+    # wraps, so the two are read together.
+    serve_openapi_document_off_the_event_loop(app)
 
     # ── The API reference pages, served from this install ────────────────
     # FastAPI's stock /api/docs pulls swagger-ui-bundle.js and swagger-ui.css
