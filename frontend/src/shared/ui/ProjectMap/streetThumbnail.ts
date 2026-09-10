@@ -235,7 +235,7 @@ async function renderOnce(opts: StreetThumbnailRequest): Promise<string | null> 
     // Imported here rather than at module scope so a page that never
     // renders a thumbnail never pays for the library, and so a failure to
     // load it is just another null.
-    const maplibregl = (await import('maplibre-gl')).default;
+    const { Map } = await import('maplibre-gl');
     if (aborted(signal)) return null;
 
     // ATTACHED, not detached, and deliberately not display:none. MapLibre
@@ -253,7 +253,7 @@ async function renderOnce(opts: StreetThumbnailRequest): Promise<string | null> 
     container.style.pointerEvents = 'none';
     document.body.appendChild(container);
 
-    map = new maplibregl.Map({
+    map = new Map({
       container,
       style: VECTOR_BASEMAP_STYLE_URL,
       center: [lng, lat],
@@ -284,8 +284,8 @@ async function renderOnce(opts: StreetThumbnailRequest): Promise<string | null> 
       fadeDuration: 0,
     });
 
-    const ready = await waitForIdle(map, signal);
-    if (!ready || aborted(signal)) return null;
+    const ready = map && await waitForIdle(map, signal);
+    if (!ready || aborted(signal) || !map) return null;
 
     const dataUrl = map.getCanvas().toDataURL('image/png');
     // A canvas that never got a context stringifies to the 1x1 data URL
