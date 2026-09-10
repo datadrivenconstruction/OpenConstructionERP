@@ -731,6 +731,40 @@ async def list_drawing_versions(
 
 
 @router.post(
+    "/drawings/{drawing_id}/compare/create-variation",
+    response_model=CreateVariationFromDiffResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_variation_from_drawing_diff(
+    drawing_id: uuid.UUID,
+    body: CreateVariationFromDiffRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep = None,  # type: ignore[assignment]
+    _perm_read: None = Depends(RequirePermission("dwg_takeoff.read")),
+    _perm_create: None = Depends(RequirePermission("variations.create")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> CreateVariationFromDiffResponse:
+    """Create a DRAFT variation request from a drawing revision delta.
+
+    Recomputes the deterministic compare for the two version ids and turns
+    its net cost impact into a draft VariationRequest (never submitted -
+    a human confirms it in the variations module). Requires BOTH
+    ``dwg_takeoff.read`` (to see the drawing) AND ``variations.create``
+    (so a read-only viewer cannot mint a variation). Gated on the
+    drawing's owning project so a foreign-tenant drawing 404s.
+    """
+    await _gate_by_drawing(drawing_id, user_id, service, session)
+    payload = await service.create_variation_from_versions(
+        drawing_id,
+        body.from_version_id,
+        body.to_version_id,
+        title=body.title,
+        user_id=str(user_id) if user_id else None,
+    )
+    return CreateVariationFromDiffResponse(**payload)
+
+
+@router.post(
     "/drawings/{drawing_id}/compare/{other_version_id}",
     response_model=DwgDrawingDiffResponse,
 )
@@ -764,40 +798,6 @@ async def compare_drawing_versions(
         other_version_id,
     )
     return DwgDrawingDiffResponse(**payload)
-
-
-@router.post(
-    "/drawings/{drawing_id}/compare/create-variation",
-    response_model=CreateVariationFromDiffResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_variation_from_drawing_diff(
-    drawing_id: uuid.UUID,
-    body: CreateVariationFromDiffRequest,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    session: SessionDep = None,  # type: ignore[assignment]
-    _perm_read: None = Depends(RequirePermission("dwg_takeoff.read")),
-    _perm_create: None = Depends(RequirePermission("variations.create")),
-    service: DwgTakeoffService = Depends(_get_service),
-) -> CreateVariationFromDiffResponse:
-    """Create a DRAFT variation request from a drawing revision delta.
-
-    Recomputes the deterministic compare for the two version ids and turns
-    its net cost impact into a draft VariationRequest (never submitted -
-    a human confirms it in the variations module). Requires BOTH
-    ``dwg_takeoff.read`` (to see the drawing) AND ``variations.create``
-    (so a read-only viewer cannot mint a variation). Gated on the
-    drawing's owning project so a foreign-tenant drawing 404s.
-    """
-    await _gate_by_drawing(drawing_id, user_id, service, session)
-    payload = await service.create_variation_from_versions(
-        drawing_id,
-        body.from_version_id,
-        body.to_version_id,
-        title=body.title,
-        user_id=str(user_id) if user_id else None,
-    )
-    return CreateVariationFromDiffResponse(**payload)
 
 
 # ── Layer Visibility ────────────────────────────────────────────────────────

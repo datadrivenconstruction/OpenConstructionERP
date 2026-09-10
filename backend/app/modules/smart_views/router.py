@@ -94,6 +94,51 @@ async def list_smart_views(
     )
 
 
+# ── Presets ────────────────────────────────────────────────────────────
+
+
+class _InstallPresetRequest(BaseModel):
+    """Body for ``POST /smart-views/presets/{preset_id}/install``.
+
+    The caller picks the target scope explicitly; the same preset can be
+    installed once for the user's My-views and again at project scope.
+    """
+
+    scope_type: str = Field(..., pattern="^(user|project|federation)$")
+    scope_id: uuid.UUID
+
+
+@router.get(
+    "/presets",
+    response_model=list[SmartViewPresetSummary],
+    dependencies=[Depends(RequirePermission("smart_views.read"))],
+)
+async def list_smart_view_presets() -> list[SmartViewPresetSummary]:
+    """List the built-in preset catalogue (static, no DB hit)."""
+    return SmartViewService.list_presets()
+
+
+@router.post(
+    "/presets/{preset_id}/install",
+    response_model=SmartViewResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("smart_views.create"))],
+)
+async def install_smart_view_preset(
+    preset_id: str,
+    payload: _InstallPresetRequest,
+    user_id: CurrentUserId,
+    service: SmartViewService = Depends(_get_service),
+) -> SmartViewResponse:
+    """Materialise a preset as a new SmartView under the given scope."""
+    return await service.install_preset(
+        preset_id,
+        scope_type=payload.scope_type,
+        scope_id=payload.scope_id,
+        user_id=_user_uuid(user_id),
+    )
+
+
 @router.get(
     "/{view_id}",
     response_model=SmartViewResponse,
@@ -150,51 +195,6 @@ async def evaluate_smart_view(
 ) -> SmartViewEvaluateResponse:
     """Evaluate a SmartView against a specific BIM model's elements."""
     return await service.evaluate(view_id, model_id, user_id=_user_uuid(user_id))
-
-
-# ── Presets ────────────────────────────────────────────────────────────
-
-
-class _InstallPresetRequest(BaseModel):
-    """Body for ``POST /smart-views/presets/{preset_id}/install``.
-
-    The caller picks the target scope explicitly; the same preset can be
-    installed once for the user's My-views and again at project scope.
-    """
-
-    scope_type: str = Field(..., pattern="^(user|project|federation)$")
-    scope_id: uuid.UUID
-
-
-@router.get(
-    "/presets",
-    response_model=list[SmartViewPresetSummary],
-    dependencies=[Depends(RequirePermission("smart_views.read"))],
-)
-async def list_smart_view_presets() -> list[SmartViewPresetSummary]:
-    """List the built-in preset catalogue (static, no DB hit)."""
-    return SmartViewService.list_presets()
-
-
-@router.post(
-    "/presets/{preset_id}/install",
-    response_model=SmartViewResponse,
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(RequirePermission("smart_views.create"))],
-)
-async def install_smart_view_preset(
-    preset_id: str,
-    payload: _InstallPresetRequest,
-    user_id: CurrentUserId,
-    service: SmartViewService = Depends(_get_service),
-) -> SmartViewResponse:
-    """Materialise a preset as a new SmartView under the given scope."""
-    return await service.install_preset(
-        preset_id,
-        scope_type=payload.scope_type,
-        scope_id=payload.scope_id,
-        user_id=_user_uuid(user_id),
-    )
 
 
 # ── Share-by-link ──────────────────────────────────────────────────────

@@ -226,6 +226,188 @@ async def list_snapshots(
     return SnapshotListResponse(total=total, items=items)
 
 
+# ── Historical Snapshot Navigator (T11) ────────────────────────────────────
+
+
+@router.get(
+    "/snapshots/timeline",
+    response_model=None,
+    summary="Paged timeline of snapshots for a project",
+)
+async def get_snapshot_timeline(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    project_id: Annotated[uuid.UUID, Query(description="Project to scope the timeline to")],
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    before: Annotated[datetime | None, Query(description="Cursor - only return rows with created_at < before")] = None,
+    locale: Annotated[str, Query()] = "en",
+):
+    """Return the snapshot timeline newest-first.
+
+    The frontend keeps the oldest ``created_at`` it currently shows as
+    the cursor (``next_before``) and re-issues the request to extend
+    the timeline. Pagination by cursor (rather than offset) avoids the
+    drift you'd get when a teammate uploads a new snapshot mid-scroll.
+    """
+    from app.modules.dashboards.schemas import (
+        SnapshotTimelineItemOut,
+        SnapshotTimelineResponse,
+    )
+    from app.modules.dashboards.snapshot_navigator import (
+        list_snapshots_for_project,
+    )
+
+    # IDOR/RBAC guard: scope the timeline to a project the caller can
+    # access (404 on denial, team-inclusive via verify_project_access).
+    user_id = _user_id_from_payload(payload)
+    await verify_project_access(project_id, str(user_id), session)
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    # Pull a generous page; the navigator pure helper applies the
+    # ``before`` cursor and the ``limit`` itself. Repository limit is
+    # capped at 500, which matches the navigator's 200-item ceiling
+    # twice over so the cursor never starves.
+    rows, _total = await service.list_for_project(
+        project_id,
+        tenant_id=tenant_id,
+        limit=500,
+        offset=0,
+    )
+
+    metas = list_snapshots_for_project(
+        list(rows),
+        limit=limit,
+        before=before,
+    )
+
+    next_before: datetime | None = None
+    if metas and len(metas) >= limit:
+        next_before = metas[-1].created_at
+
+    items = [
+        SnapshotTimelineItemOut(
+            id=m.id,
+            project_id=m.project_id,
+            label=m.label,
+            created_at=m.created_at,
+            created_by_user_id=m.created_by_user_id,
+            parent_snapshot_id=m.parent_snapshot_id,
+            total_entities=m.total_entities,
+            total_categories=m.total_categories,
+            source_file_count=m.source_file_count,
+            schema_hash=m.schema_hash,
+            completeness_score=m.completeness_score,
+        )
+        for m in metas
+    ]
+    return SnapshotTimelineResponse(
+        project_id=project_id,
+        items=items,
+        next_before=next_before,
+    )
+
+
+@router.get(
+    "/snapshots/diff",
+    response_model=None,
+    summary="Column-level diff between two snapshots",
+)
+async def get_snapshot_diff(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    a: Annotated[uuid.UUID, Query(description="Older snapshot id")],
+    b: Annotated[uuid.UUID, Query(description="Newer snapshot id")],
+    locale: Annotated[str, Query()] = "en",
+):
+    """Compare two snapshots and return the structural delta.
+
+    Both snapshots must belong to the same project (the navigator UI
+    enforces this client-side, but we re-check server-side to avoid
+    cross-project leaks). The endpoint reports schema-level changes
+    (columns added / removed / dtype changed) and the row-count
+    delta - it does **not** scan parquet files for value-level diffs;
+    that would be too expensive for a "click any two snapshots" UX.
+    """
+    from app.modules.dashboards.schemas import (
+        SnapshotDiffColumnChangeOut,
+        SnapshotDiffOut,
+    )
+    from app.modules.dashboards.snapshot_navigator import (
+        SnapshotsNotInSameProjectError,
+        diff_two_snapshots,
+        schema_from_summary_stats,
+    )
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    try:
+        row_a = await service.get(a, tenant_id=tenant_id)
+        row_b = await service.get(b, tenant_id=tenant_id)
+    except SnapshotError as exc:
+        _raise_http(exc, locale)
+
+    if row_a.project_id != row_b.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=messages.translate(
+                SnapshotsNotInSameProjectError.message_key,
+                locale=locale,
+            ),
+        )
+
+    # The navigator's diff is intentionally cheap: we use the
+    # row-side ``summary_stats`` for both snapshots. A future revision
+    # may upgrade this to a parquet-side schema probe; the navigator's
+    # public contract already accommodates dtype changes for that day.
+    schema_a = schema_from_summary_stats(
+        row_a.id,
+        summary_stats=row_a.summary_stats,
+        total_entities=row_a.total_entities,
+    )
+    schema_b = schema_from_summary_stats(
+        row_b.id,
+        summary_stats=row_b.summary_stats,
+        total_entities=row_b.total_entities,
+    )
+
+    diff = diff_two_snapshots(
+        schema_a,
+        schema_b,
+        a_label=row_a.label,
+        b_label=row_b.label,
+        a_created_at=row_a.created_at,
+        b_created_at=row_b.created_at,
+    )
+
+    return SnapshotDiffOut(
+        snapshot_a_id=diff.snapshot_a_id,
+        snapshot_b_id=diff.snapshot_b_id,
+        a_label=diff.a_label,
+        b_label=diff.b_label,
+        a_created_at=diff.a_created_at,
+        b_created_at=diff.b_created_at,
+        columns_added=list(diff.columns_added),
+        columns_removed=list(diff.columns_removed),
+        columns_changed=[
+            SnapshotDiffColumnChangeOut(
+                name=c.name,
+                a_dtype=c.a_dtype,
+                b_dtype=c.b_dtype,
+            )
+            for c in diff.columns_changed
+        ],
+        a_row_count=diff.a_row_count,
+        b_row_count=diff.b_row_count,
+        rows_added=diff.rows_added,
+        rows_removed=diff.rows_removed,
+        schema_hash_match=diff.schema_hash_match,
+        is_identical=diff.is_identical,
+    )
+
+
 @router.get(
     "/snapshots/{snapshot_id}",
     response_model=SnapshotOut,
@@ -1279,188 +1461,6 @@ async def post_integrity_report(
         schema_hash=report.schema_hash,
         columns=columns,
         issue_summary=report.issue_summary,
-    )
-
-
-# ── Historical Snapshot Navigator (T11) ────────────────────────────────────
-
-
-@router.get(
-    "/snapshots/timeline",
-    response_model=None,
-    summary="Paged timeline of snapshots for a project",
-)
-async def get_snapshot_timeline(
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    project_id: Annotated[uuid.UUID, Query(description="Project to scope the timeline to")],
-    limit: Annotated[int, Query(ge=1, le=200)] = 50,
-    before: Annotated[datetime | None, Query(description="Cursor - only return rows with created_at < before")] = None,
-    locale: Annotated[str, Query()] = "en",
-):
-    """Return the snapshot timeline newest-first.
-
-    The frontend keeps the oldest ``created_at`` it currently shows as
-    the cursor (``next_before``) and re-issues the request to extend
-    the timeline. Pagination by cursor (rather than offset) avoids the
-    drift you'd get when a teammate uploads a new snapshot mid-scroll.
-    """
-    from app.modules.dashboards.schemas import (
-        SnapshotTimelineItemOut,
-        SnapshotTimelineResponse,
-    )
-    from app.modules.dashboards.snapshot_navigator import (
-        list_snapshots_for_project,
-    )
-
-    # IDOR/RBAC guard: scope the timeline to a project the caller can
-    # access (404 on denial, team-inclusive via verify_project_access).
-    user_id = _user_id_from_payload(payload)
-    await verify_project_access(project_id, str(user_id), session)
-
-    tenant_id = _tenant_id_from_payload(payload)
-    service = SnapshotService(repo=SnapshotRepository(session))
-
-    # Pull a generous page; the navigator pure helper applies the
-    # ``before`` cursor and the ``limit`` itself. Repository limit is
-    # capped at 500, which matches the navigator's 200-item ceiling
-    # twice over so the cursor never starves.
-    rows, _total = await service.list_for_project(
-        project_id,
-        tenant_id=tenant_id,
-        limit=500,
-        offset=0,
-    )
-
-    metas = list_snapshots_for_project(
-        list(rows),
-        limit=limit,
-        before=before,
-    )
-
-    next_before: datetime | None = None
-    if metas and len(metas) >= limit:
-        next_before = metas[-1].created_at
-
-    items = [
-        SnapshotTimelineItemOut(
-            id=m.id,
-            project_id=m.project_id,
-            label=m.label,
-            created_at=m.created_at,
-            created_by_user_id=m.created_by_user_id,
-            parent_snapshot_id=m.parent_snapshot_id,
-            total_entities=m.total_entities,
-            total_categories=m.total_categories,
-            source_file_count=m.source_file_count,
-            schema_hash=m.schema_hash,
-            completeness_score=m.completeness_score,
-        )
-        for m in metas
-    ]
-    return SnapshotTimelineResponse(
-        project_id=project_id,
-        items=items,
-        next_before=next_before,
-    )
-
-
-@router.get(
-    "/snapshots/diff",
-    response_model=None,
-    summary="Column-level diff between two snapshots",
-)
-async def get_snapshot_diff(
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    a: Annotated[uuid.UUID, Query(description="Older snapshot id")],
-    b: Annotated[uuid.UUID, Query(description="Newer snapshot id")],
-    locale: Annotated[str, Query()] = "en",
-):
-    """Compare two snapshots and return the structural delta.
-
-    Both snapshots must belong to the same project (the navigator UI
-    enforces this client-side, but we re-check server-side to avoid
-    cross-project leaks). The endpoint reports schema-level changes
-    (columns added / removed / dtype changed) and the row-count
-    delta - it does **not** scan parquet files for value-level diffs;
-    that would be too expensive for a "click any two snapshots" UX.
-    """
-    from app.modules.dashboards.schemas import (
-        SnapshotDiffColumnChangeOut,
-        SnapshotDiffOut,
-    )
-    from app.modules.dashboards.snapshot_navigator import (
-        SnapshotsNotInSameProjectError,
-        diff_two_snapshots,
-        schema_from_summary_stats,
-    )
-
-    tenant_id = _tenant_id_from_payload(payload)
-    service = SnapshotService(repo=SnapshotRepository(session))
-
-    try:
-        row_a = await service.get(a, tenant_id=tenant_id)
-        row_b = await service.get(b, tenant_id=tenant_id)
-    except SnapshotError as exc:
-        _raise_http(exc, locale)
-
-    if row_a.project_id != row_b.project_id:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=messages.translate(
-                SnapshotsNotInSameProjectError.message_key,
-                locale=locale,
-            ),
-        )
-
-    # The navigator's diff is intentionally cheap: we use the
-    # row-side ``summary_stats`` for both snapshots. A future revision
-    # may upgrade this to a parquet-side schema probe; the navigator's
-    # public contract already accommodates dtype changes for that day.
-    schema_a = schema_from_summary_stats(
-        row_a.id,
-        summary_stats=row_a.summary_stats,
-        total_entities=row_a.total_entities,
-    )
-    schema_b = schema_from_summary_stats(
-        row_b.id,
-        summary_stats=row_b.summary_stats,
-        total_entities=row_b.total_entities,
-    )
-
-    diff = diff_two_snapshots(
-        schema_a,
-        schema_b,
-        a_label=row_a.label,
-        b_label=row_b.label,
-        a_created_at=row_a.created_at,
-        b_created_at=row_b.created_at,
-    )
-
-    return SnapshotDiffOut(
-        snapshot_a_id=diff.snapshot_a_id,
-        snapshot_b_id=diff.snapshot_b_id,
-        a_label=diff.a_label,
-        b_label=diff.b_label,
-        a_created_at=diff.a_created_at,
-        b_created_at=diff.b_created_at,
-        columns_added=list(diff.columns_added),
-        columns_removed=list(diff.columns_removed),
-        columns_changed=[
-            SnapshotDiffColumnChangeOut(
-                name=c.name,
-                a_dtype=c.a_dtype,
-                b_dtype=c.b_dtype,
-            )
-            for c in diff.columns_changed
-        ],
-        a_row_count=diff.a_row_count,
-        b_row_count=diff.b_row_count,
-        rows_added=diff.rows_added,
-        rows_removed=diff.rows_removed,
-        schema_hash_match=diff.schema_hash_match,
-        is_identical=diff.is_identical,
     )
 
 

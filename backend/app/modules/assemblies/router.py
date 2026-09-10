@@ -368,6 +368,90 @@ async def get_stats(
     return await service.get_stats(owner_id=_scope_owner_id(user_id, payload))
 
 
+# ── Assembly Library templates (v3.13.0 - Slice 1) ───────────────────────────
+
+
+def _template_to_response(template: object) -> AssemblyTemplateResponse:
+    """Convert an AssemblyTemplate ORM row to its response schema."""
+    components = getattr(template, "components", []) or []
+    return AssemblyTemplateResponse(
+        id=template.id,  # type: ignore[attr-defined]
+        name=template.name,  # type: ignore[attr-defined]
+        name_translations=getattr(template, "name_translations", {}) or {},
+        category=getattr(template, "category", ""),
+        unit=getattr(template, "unit", ""),
+        components=list(components),
+        classification=getattr(template, "classification", {}) or {},
+        tags=list(getattr(template, "tags", []) or []),
+        is_builtin=bool(getattr(template, "is_builtin", True)),
+        component_count=len(components),
+        created_at=template.created_at,  # type: ignore[attr-defined]
+        updated_at=template.updated_at,  # type: ignore[attr-defined]
+    )
+
+
+@router.get(
+    "/templates/",
+    response_model=AssemblyTemplateSearchResponse,
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def list_templates(
+    session: SessionDep,
+    q: str | None = Query(default=None, description="Free-text search"),
+    category: str | None = Query(default=None, description="Filter by category"),
+    tag: str | None = Query(default=None, description="Filter by tag"),
+    din276: str | None = Query(default=None, description="Filter by DIN 276 KG code"),
+    masterformat: str | None = Query(default=None, description="Filter by MasterFormat division"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
+) -> AssemblyTemplateSearchResponse:
+    """List Assembly Library templates with filters + pagination.
+
+    Any authenticated user with ``assemblies.read`` can browse. Templates
+    are read-only at this slice; future slices add user-contributed rows.
+    """
+    from app.modules.assemblies.repository import AssemblyTemplateRepository
+
+    repo = AssemblyTemplateRepository(session)
+    items, total = await repo.list_all(
+        offset=offset,
+        limit=limit,
+        q=q,
+        category=category,
+        tag=tag,
+        classification_din276=din276,
+        classification_masterformat=masterformat,
+    )
+    return AssemblyTemplateSearchResponse(
+        items=[_template_to_response(t) for t in items],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/templates/{template_id}",
+    response_model=AssemblyTemplateResponse,
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def get_template(
+    template_id: uuid.UUID,
+    session: SessionDep,
+) -> AssemblyTemplateResponse:
+    """Fetch a single Assembly Library template by id."""
+    from app.modules.assemblies.repository import AssemblyTemplateRepository
+
+    repo = AssemblyTemplateRepository(session)
+    template = await repo.get_by_id(template_id)
+    if template is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=translate("errors.template_not_found", locale=get_locale()),
+        )
+    return _template_to_response(template)
+
+
 @router.get(
     "/{assembly_id}",
     response_model=AssemblyWithComponents,
@@ -718,90 +802,6 @@ async def update_tags(
     await _verify_assembly_owner(session, assembly_id, user_id, payload)
     assembly = await service.update_tags(assembly_id, data.tags)
     return _assembly_to_response(assembly, component_count=await _component_count_of(service, assembly))
-
-
-# ── Assembly Library templates (v3.13.0 - Slice 1) ───────────────────────────
-
-
-def _template_to_response(template: object) -> AssemblyTemplateResponse:
-    """Convert an AssemblyTemplate ORM row to its response schema."""
-    components = getattr(template, "components", []) or []
-    return AssemblyTemplateResponse(
-        id=template.id,  # type: ignore[attr-defined]
-        name=template.name,  # type: ignore[attr-defined]
-        name_translations=getattr(template, "name_translations", {}) or {},
-        category=getattr(template, "category", ""),
-        unit=getattr(template, "unit", ""),
-        components=list(components),
-        classification=getattr(template, "classification", {}) or {},
-        tags=list(getattr(template, "tags", []) or []),
-        is_builtin=bool(getattr(template, "is_builtin", True)),
-        component_count=len(components),
-        created_at=template.created_at,  # type: ignore[attr-defined]
-        updated_at=template.updated_at,  # type: ignore[attr-defined]
-    )
-
-
-@router.get(
-    "/templates/",
-    response_model=AssemblyTemplateSearchResponse,
-    dependencies=[Depends(RequirePermission("assemblies.read"))],
-)
-async def list_templates(
-    session: SessionDep,
-    q: str | None = Query(default=None, description="Free-text search"),
-    category: str | None = Query(default=None, description="Filter by category"),
-    tag: str | None = Query(default=None, description="Filter by tag"),
-    din276: str | None = Query(default=None, description="Filter by DIN 276 KG code"),
-    masterformat: str | None = Query(default=None, description="Filter by MasterFormat division"),
-    offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=50, ge=1, le=500),
-) -> AssemblyTemplateSearchResponse:
-    """List Assembly Library templates with filters + pagination.
-
-    Any authenticated user with ``assemblies.read`` can browse. Templates
-    are read-only at this slice; future slices add user-contributed rows.
-    """
-    from app.modules.assemblies.repository import AssemblyTemplateRepository
-
-    repo = AssemblyTemplateRepository(session)
-    items, total = await repo.list_all(
-        offset=offset,
-        limit=limit,
-        q=q,
-        category=category,
-        tag=tag,
-        classification_din276=din276,
-        classification_masterformat=masterformat,
-    )
-    return AssemblyTemplateSearchResponse(
-        items=[_template_to_response(t) for t in items],
-        total=total,
-        limit=limit,
-        offset=offset,
-    )
-
-
-@router.get(
-    "/templates/{template_id}",
-    response_model=AssemblyTemplateResponse,
-    dependencies=[Depends(RequirePermission("assemblies.read"))],
-)
-async def get_template(
-    template_id: uuid.UUID,
-    session: SessionDep,
-) -> AssemblyTemplateResponse:
-    """Fetch a single Assembly Library template by id."""
-    from app.modules.assemblies.repository import AssemblyTemplateRepository
-
-    repo = AssemblyTemplateRepository(session)
-    template = await repo.get_by_id(template_id)
-    if template is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=translate("errors.template_not_found", locale=get_locale()),
-        )
-    return _template_to_response(template)
 
 
 def _component_total(factor: float, quantity: float, unit_rate: float) -> float:

@@ -190,6 +190,53 @@ async def create_rfq(
     return RFQResponse.model_validate(rfq)
 
 
+# ── Bids ────────────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/bids/",
+    response_model=BidListResponse,
+    dependencies=[Depends(RequirePermission("rfq.read"))],
+)
+async def list_bids(
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    rfq_id: uuid.UUID = Query(..., description="Filter by RFQ (required)"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    service: RFQService = Depends(_get_service),
+) -> BidListResponse:
+    """List bids for a specific RFQ. Project access is enforced via the RFQ."""
+    await _verify_rfq_access(session, rfq_id, user_id, payload)
+    items, total = await service.list_bids(rfq_id=rfq_id, limit=limit, offset=offset)
+    return BidListResponse(
+        items=[RFQBidResponse.model_validate(b) for b in items],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
+
+
+@router.post(
+    "/bids/",
+    response_model=RFQBidResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("rfq.create"))],
+)
+async def submit_bid(
+    data: BidCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: RFQService = Depends(_get_service),
+) -> RFQBidResponse:
+    """Submit a bid against an RFQ. Verifies project access via the RFQ."""
+    await _verify_rfq_access(session, data.rfq_id, user_id, payload)
+    bid = await service.submit_bid(data, user_id=user_id)
+    return RFQBidResponse.model_validate(bid)
+
+
 @router.get(
     "/{rfq_id}",
     response_model=RFQResponse,
@@ -416,53 +463,6 @@ async def get_rfq_award(
     await _verify_rfq_access(session, rfq_id, user_id, payload)
     award = await service.get_award(rfq_id)
     return RFQAwardResponse.model_validate(award)
-
-
-# ── Bids ────────────────────────────────────────────────────────────────────
-
-
-@router.get(
-    "/bids/",
-    response_model=BidListResponse,
-    dependencies=[Depends(RequirePermission("rfq.read"))],
-)
-async def list_bids(
-    user_id: CurrentUserId,
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    rfq_id: uuid.UUID = Query(..., description="Filter by RFQ (required)"),
-    offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=50, ge=1, le=100),
-    service: RFQService = Depends(_get_service),
-) -> BidListResponse:
-    """List bids for a specific RFQ. Project access is enforced via the RFQ."""
-    await _verify_rfq_access(session, rfq_id, user_id, payload)
-    items, total = await service.list_bids(rfq_id=rfq_id, limit=limit, offset=offset)
-    return BidListResponse(
-        items=[RFQBidResponse.model_validate(b) for b in items],
-        total=total,
-        offset=offset,
-        limit=limit,
-    )
-
-
-@router.post(
-    "/bids/",
-    response_model=RFQBidResponse,
-    status_code=201,
-    dependencies=[Depends(RequirePermission("rfq.create"))],
-)
-async def submit_bid(
-    data: BidCreate,
-    user_id: CurrentUserId,
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    service: RFQService = Depends(_get_service),
-) -> RFQBidResponse:
-    """Submit a bid against an RFQ. Verifies project access via the RFQ."""
-    await _verify_rfq_access(session, data.rfq_id, user_id, payload)
-    bid = await service.submit_bid(data, user_id=user_id)
-    return RFQBidResponse.model_validate(bid)
 
 
 @router.get(

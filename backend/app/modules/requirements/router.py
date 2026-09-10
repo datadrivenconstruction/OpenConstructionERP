@@ -369,6 +369,33 @@ async def download_requirements_template(
     )
 
 
+@router.get(
+    "/by-bim-element/",
+    response_model=list[RequirementResponse],
+)
+async def list_requirements_by_bim_element(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("requirements.read")),
+    service: RequirementsService = Depends(_get_service),
+    bim_element_id: str = Query(..., description="UUID of the BIM element"),
+    project_id: uuid.UUID = Query(..., description="Project scope for the search"),
+) -> list[RequirementResponse]:
+    """Reverse query: every requirement that pins ``bim_element_id``.
+
+    Used by the BIM viewer's element details panel and the AI advisor's
+    structured project state to surface requirements relevant to the
+    currently selected element.  ``project_id`` is required and the caller
+    must have access to it: requirements.read is a global role, so a
+    tenant-wide scan without a project gate would let any holder enumerate
+    every requirement across all projects (IDOR). This mirrors the sibling
+    schedule module's ``/activities/by-bim-element/`` endpoint.
+    """
+    await verify_project_access(project_id, str(user_id), session)
+    rows = await service.list_by_bim_element(bim_element_id, project_id=project_id)
+    return [_req_to_response(r) for r in rows]
+
+
 # ── Get set detail ──────────────────────────────────────────────────────────
 
 
@@ -1058,33 +1085,6 @@ async def link_requirement_to_bim(
             detail="Requirement does not belong to the specified set",
         )
     return _req_to_response(item)
-
-
-@router.get(
-    "/by-bim-element/",
-    response_model=list[RequirementResponse],
-)
-async def list_requirements_by_bim_element(
-    user_id: CurrentUserId,
-    session: SessionDep,
-    _perm: None = Depends(RequirePermission("requirements.read")),
-    service: RequirementsService = Depends(_get_service),
-    bim_element_id: str = Query(..., description="UUID of the BIM element"),
-    project_id: uuid.UUID = Query(..., description="Project scope for the search"),
-) -> list[RequirementResponse]:
-    """Reverse query: every requirement that pins ``bim_element_id``.
-
-    Used by the BIM viewer's element details panel and the AI advisor's
-    structured project state to surface requirements relevant to the
-    currently selected element.  ``project_id`` is required and the caller
-    must have access to it: requirements.read is a global role, so a
-    tenant-wide scan without a project gate would let any holder enumerate
-    every requirement across all projects (IDOR). This mirrors the sibling
-    schedule module's ``/activities/by-bim-element/`` endpoint.
-    """
-    await verify_project_access(project_id, str(user_id), session)
-    rows = await service.list_by_bim_element(bim_element_id, project_id=project_id)
-    return [_req_to_response(r) for r in rows]
 
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
