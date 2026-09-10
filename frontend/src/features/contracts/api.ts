@@ -85,6 +85,7 @@ export interface ContractItem {
   start_date: string | null;
   end_date: string | null;
   total_value: number | string;
+  original_contract_value: number | string | null;
   currency: string;
   retention_percent: number | string;
   retention_release_event: RetentionReleaseEvent;
@@ -221,6 +222,11 @@ export interface LDClauseItem {
 export interface ContractDashboard {
   contract_id: string;
   total_value: number | string;
+  original_contract_value: number | string | null;
+  agreed_variations: number | string;
+  current_contract_value: number | string;
+  pending_variations: number | string;
+  forecast_contract_value: number | string;
   paid_to_date: number | string;
   retention_held: number | string;
   outstanding: number | string;

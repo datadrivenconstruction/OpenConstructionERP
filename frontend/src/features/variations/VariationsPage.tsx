@@ -1673,10 +1673,14 @@ function WorkflowStepper({
   notice,
   request,
   order,
+  changeOrderId,
+  contractId,
 }: {
   notice: Notice | null;
   request: VariationRequest | null;
   order: VariationOrder | null;
+  changeOrderId?: string | null;
+  contractId?: string | null;
 }) {
   const { t } = useTranslation();
   const steps = [
@@ -1695,6 +1699,20 @@ function WorkflowStepper({
       present: !!order,
       status: order?.status,
     },
+    ...(changeOrderId
+      ? [{
+          label: t('variations.step_change_order', { defaultValue: 'CO' }),
+          present: true,
+          status: undefined as string | undefined,
+        }]
+      : []),
+    ...(contractId
+      ? [{
+          label: t('variations.step_contract', { defaultValue: 'Contract' }),
+          present: true,
+          status: undefined as string | undefined,
+        }]
+      : []),
   ];
   return (
     <div className="flex items-center gap-1.5 text-xs">
@@ -2577,6 +2595,8 @@ export function DetailDrawer({
               notice={chainNotice ?? null}
               request={chainRequest ?? null}
               order={chainOrder ?? null}
+              changeOrderId={chainOrder?.reference_change_order_id}
+              contractId={chainOrder?.affected_contract_id}
             />
           )}
 

@@ -1700,6 +1700,42 @@ export function ContractDetailDrawer({
             />
           </div>
 
+          {/* Commercial breakdown (PR-14/PR-15 of #435) */}
+          {dashQ.data && contract.status !== 'draft' && (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 rounded-lg border border-border-light bg-surface-secondary p-3 text-xs sm:grid-cols-5">
+              <div>
+                <div className="text-content-tertiary">{t('contracts.original_value', { defaultValue: 'Original value' })}</div>
+                <div className="font-semibold text-content-primary">
+                  <MoneyDisplay amount={toNum(dashQ.data.original_contract_value)} currency={contract.currency || undefined} />
+                </div>
+              </div>
+              <div>
+                <div className="text-content-tertiary">{t('contracts.agreed_variations', { defaultValue: 'Agreed variations' })}</div>
+                <div className="font-semibold text-content-primary">
+                  <MoneyDisplay amount={toNum(dashQ.data.agreed_variations)} currency={contract.currency || undefined} />
+                </div>
+              </div>
+              <div>
+                <div className="text-content-tertiary">{t('contracts.current_value', { defaultValue: 'Current value' })}</div>
+                <div className="font-semibold text-content-primary">
+                  <MoneyDisplay amount={toNum(dashQ.data.current_contract_value)} currency={contract.currency || undefined} />
+                </div>
+              </div>
+              <div>
+                <div className="text-content-tertiary">{t('contracts.pending_variations', { defaultValue: 'Pending variations' })}</div>
+                <div className="font-semibold text-content-primary text-semantic-warning">
+                  <MoneyDisplay amount={toNum(dashQ.data.pending_variations)} currency={contract.currency || undefined} />
+                </div>
+              </div>
+              <div>
+                <div className="text-content-tertiary">{t('contracts.forecast_value', { defaultValue: 'Forecast value' })}</div>
+                <div className="font-semibold text-content-primary">
+                  <MoneyDisplay amount={toNum(dashQ.data.forecast_contract_value)} currency={contract.currency || undefined} />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Workflow buttons */}
           <div className="flex flex-wrap gap-2 pt-1">
             {contract.status === 'draft' && (
