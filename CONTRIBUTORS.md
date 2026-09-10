@@ -336,6 +336,12 @@ implementation is our own.
   ([@JoseJFernandezAlvarez](https://github.com/JoseJFernandezAlvarez)): sent an in-app report
   from the Modules page
   ([#468](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/468)).
+- **NeilYam** ([@NeilYam](https://github.com/NeilYam)): reported that the desktop app on macOS
+  could not initialise bundled PostgreSQL due to a code signature Team ID mismatch on libpq
+  ([#480](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/480)).
+- **maverikhp** ([@maverikhp](https://github.com/maverikhp)): sent an in-app bug report from
+  the Dashboard page
+  ([#481](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/481)).
 
 See the full list of everyone who has contributed:
 
