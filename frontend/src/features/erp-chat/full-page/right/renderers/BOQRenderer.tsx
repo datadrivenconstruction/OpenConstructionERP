@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { unwrapList } from './normalize';
@@ -18,6 +19,7 @@ interface BOQItem {
 }
 
 export default function BOQRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const labels = useOpenLabels();
   // Display-only measurement-system conversion. The chat BOQ table is a
@@ -34,7 +36,7 @@ export default function BOQRenderer({ data }: { data: unknown }) {
   if (items.length === 0) {
     return (
       <div style={{ padding: 24, color: 'var(--chat-text-tertiary)', textAlign: 'center', fontFamily: 'var(--chat-font-body)' }}>
-        No BOQ items to display
+        {t('erp_chat.boq.no_items', { defaultValue: 'No BOQ items to display' })}
       </div>
     );
   }
@@ -65,11 +67,11 @@ export default function BOQRenderer({ data }: { data: unknown }) {
         <thead>
           <tr style={{ background: 'var(--chat-surface-2)' }}>
             <th style={{ ...cellBase, fontWeight: 600, width: 60 }}>#</th>
-            <th style={{ ...cellBase, fontWeight: 600, textAlign: 'left' }}>Description</th>
-            <th style={{ ...cellBase, fontWeight: 600, width: 60, textAlign: 'center' }}>Unit</th>
-            <th style={{ ...numCell, fontWeight: 600, width: 80 }}>Qty</th>
-            <th style={{ ...numCell, fontWeight: 600, width: 100 }}>Rate</th>
-            <th style={{ ...numCell, fontWeight: 600, width: 110 }}>Total</th>
+            <th style={{ ...cellBase, fontWeight: 600, textAlign: 'left' }}>{t('erp_chat.boq.description', { defaultValue: 'Description' })}</th>
+            <th style={{ ...cellBase, fontWeight: 600, width: 60, textAlign: 'center' }}>{t('erp_chat.boq.unit', { defaultValue: 'Unit' })}</th>
+            <th style={{ ...numCell, fontWeight: 600, width: 80 }}>{t('erp_chat.boq.qty', { defaultValue: 'Qty' })}</th>
+            <th style={{ ...numCell, fontWeight: 600, width: 100 }}>{t('erp_chat.boq.rate', { defaultValue: 'Rate' })}</th>
+            <th style={{ ...numCell, fontWeight: 600, width: 110 }}>{t('erp_chat.boq.total', { defaultValue: 'Total' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -114,7 +116,7 @@ export default function BOQRenderer({ data }: { data: unknown }) {
         <tfoot>
           <tr style={{ background: 'var(--chat-surface-2)' }}>
             <td colSpan={5} style={{ ...cellBase, fontWeight: 600, textAlign: 'right', paddingRight: 16 }}>
-              Grand Total
+              {t('erp_chat.boq.grand_total', { defaultValue: 'Grand Total' })}
             </td>
             <td style={{ ...numCell, fontWeight: 700, color: 'var(--chat-accent)', fontSize: 14 }}>
               {grandTotal.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}

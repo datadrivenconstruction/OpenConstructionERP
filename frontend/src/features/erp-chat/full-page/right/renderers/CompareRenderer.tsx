@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useTranslation } from 'react-i18next';
 import { unwrapList, toNum } from './normalize';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -46,6 +47,7 @@ function projectsToMatrix(projects: CompareProject[]): CompareData {
 }
 
 export default function CompareRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const d = (data && typeof data === 'object' ? data : {}) as CompareData;
   // Prefer the pre-built matrix if a caller supplied it; otherwise pivot the
   // backend's `{ projects: [...] }` list.
@@ -56,7 +58,7 @@ export default function CompareRenderer({ data }: { data: unknown }) {
   if (metrics.length === 0) {
     return (
       <div style={{ padding: 24, color: 'var(--chat-text-tertiary)', textAlign: 'center', fontFamily: 'var(--chat-font-body)' }}>
-        No comparison data available
+        {t('erp_chat.compare.no_data', { defaultValue: 'No comparison data available' })}
       </div>
     );
   }
@@ -74,7 +76,7 @@ export default function CompareRenderer({ data }: { data: unknown }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--chat-text-primary)' }}>
         <thead>
           <tr style={{ background: 'var(--chat-surface-2)' }}>
-            <th style={{ ...cellBase, fontWeight: 600, textAlign: 'left', minWidth: 120 }}>Metric</th>
+            <th style={{ ...cellBase, fontWeight: 600, textAlign: 'left', minWidth: 120 }}>{t('erp_chat.compare.metric', { defaultValue: 'Metric' })}</th>
             {columns.map((col) => (
               <th key={col} style={{ ...cellBase, fontWeight: 600, textAlign: 'right', minWidth: 100 }}>
                 {col}

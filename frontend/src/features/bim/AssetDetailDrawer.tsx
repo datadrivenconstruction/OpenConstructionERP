@@ -345,22 +345,22 @@ export function AssetDetailDrawer({ asset, onClose }: AssetDetailDrawerProps) {
             >
               <div className="grid grid-cols-2 gap-2">
                 {quantities.area != null && (
-                  <QtyTile label="Area" {...q.convert(quantities.area, 'm²')} />
+                  <QtyTile label={t('bim.asset.area', { defaultValue: 'Area' })} {...q.convert(quantities.area, 'm²')} />
                 )}
                 {quantities.volume != null && (
-                  <QtyTile label="Volume" {...q.convert(quantities.volume, 'm³')} />
+                  <QtyTile label={t('bim.asset.volume', { defaultValue: 'Volume' })} {...q.convert(quantities.volume, 'm³')} />
                 )}
                 {quantities.length != null && (
-                  <QtyTile label="Length" {...q.convert(quantities.length, 'm')} />
+                  <QtyTile label={t('bim.asset.length', { defaultValue: 'Length' })} {...q.convert(quantities.length, 'm')} />
                 )}
                 {quantities.height != null && (
-                  <QtyTile label="Height" {...q.convert(quantities.height, 'm')} />
+                  <QtyTile label={t('bim.asset.height', { defaultValue: 'Height' })} {...q.convert(quantities.height, 'm')} />
                 )}
                 {quantities.width != null && (
-                  <QtyTile label="Width" {...q.convert(quantities.width, 'm')} />
+                  <QtyTile label={t('bim.asset.width', { defaultValue: 'Width' })} {...q.convert(quantities.width, 'm')} />
                 )}
                 {quantities.thickness != null && (
-                  <QtyTile label="Thickness" {...q.convert(quantities.thickness, 'm')} />
+                  <QtyTile label={t('bim.asset.thickness', { defaultValue: 'Thickness' })} {...q.convert(quantities.thickness, 'm')} />
                 )}
               </div>
             </Section>

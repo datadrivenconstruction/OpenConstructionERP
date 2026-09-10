@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useTranslation } from 'react-i18next';
 import { toNum } from './normalize';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -70,6 +71,7 @@ function KPICard({ label, value }: { label: string; value: number | undefined })
 }
 
 function MiniChart({ planned, actual, earned }: { planned?: number[]; actual?: number[]; earned?: number[] }) {
+  const { t } = useTranslation();
   const allSeries = [planned, actual, earned].filter(Boolean) as number[][];
   if (allSeries.length === 0) return null;
 
@@ -92,9 +94,9 @@ function MiniChart({ planned, actual, earned }: { planned?: number[]; actual?: n
   }
 
   const seriesConfig: { data: number[] | undefined; color: string; label: string }[] = [
-    { data: planned, color: 'var(--chat-text-tertiary)', label: 'Planned' },
-    { data: actual, color: 'var(--chat-tool-running)', label: 'Actual' },
-    { data: earned, color: 'var(--chat-tool-done)', label: 'Earned' },
+    { data: planned, color: 'var(--chat-text-tertiary)', label: t('erp_chat.cost_model.planned', { defaultValue: 'Planned' }) },
+    { data: actual, color: 'var(--chat-tool-running)', label: t('erp_chat.cost_model.actual', { defaultValue: 'Actual' }) },
+    { data: earned, color: 'var(--chat-tool-done)', label: t('erp_chat.cost_model.earned', { defaultValue: 'Earned' }) },
   ];
 
   return (
@@ -139,6 +141,7 @@ function fmtMoney(n: number | undefined): string {
  * direct cost, markups (with %/amount), section subtotals, and grand total.
  */
 function CostBreakdown({ model }: { model: CostModelData }) {
+  const { t } = useTranslation();
   const direct = toNum(model.direct_cost) ?? 0;
   const grand = toNum(model.grand_total) ?? 0;
   const markups = model.markups ?? [];
@@ -164,20 +167,20 @@ function CostBreakdown({ model }: { model: CostModelData }) {
 
       {/* KPI strip: direct cost + grand total */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 16 }}>
-        <KPICard label="Direct cost" value={direct} />
-        <KPICard label="Grand total" value={grand} />
+        <KPICard label={t('erp_chat.cost_model.direct_cost', { defaultValue: 'Direct cost' })} value={direct} />
+        <KPICard label={t('erp_chat.cost_model.grand_total', { defaultValue: 'Grand total' })} value={grand} />
       </div>
 
       {markups.length > 0 && (
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontFamily: 'var(--chat-font-mono)', color: 'var(--chat-text-tertiary)', textTransform: 'uppercase', marginBottom: 4 }}>
-            Markups
+            {t('erp_chat.cost_model.markups', { defaultValue: 'Markups' })}
           </div>
           <div style={{ background: 'var(--chat-surface-1)', border: '1px solid var(--chat-border-subtle)', borderRadius: 'var(--chat-radius)' }}>
             {markups.map((m, i) => (
               <div key={m.name ?? i} style={rowStyle}>
                 <span style={{ color: 'var(--chat-text-secondary)' }}>
-                  {m.name ?? m.category ?? `Markup ${i + 1}`}
+                  {m.name ?? m.category ?? t('erp_chat.cost_model.markup_n', { defaultValue: 'Markup {{n}}', n: i + 1 })}
                   {m.percentage != null && (
                     <span style={{ color: 'var(--chat-text-tertiary)', marginLeft: 6 }}>{m.percentage}%</span>
                   )}
@@ -192,16 +195,16 @@ function CostBreakdown({ model }: { model: CostModelData }) {
       {sections.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontFamily: 'var(--chat-font-mono)', color: 'var(--chat-text-tertiary)', textTransform: 'uppercase', marginBottom: 4 }}>
-            Sections
+            {t('erp_chat.cost_model.sections', { defaultValue: 'Sections' })}
           </div>
           <div style={{ background: 'var(--chat-surface-1)', border: '1px solid var(--chat-border-subtle)', borderRadius: 'var(--chat-radius)' }}>
             {sections.map((s, i) => (
               <div key={s.title ?? i} style={rowStyle}>
                 <span style={{ color: 'var(--chat-text-secondary)' }}>
-                  {s.title ?? `Section ${i + 1}`}
+                  {s.title ?? t('erp_chat.cost_model.section_n', { defaultValue: 'Section {{n}}', n: i + 1 })}
                   {s.position_count != null && (
                     <span style={{ color: 'var(--chat-text-tertiary)', marginLeft: 6 }}>
-                      {s.position_count} pos
+                      {t('erp_chat.cost_model.position_count', { defaultValue: '{{count}} pos', count: s.position_count })}
                     </span>
                   )}
                 </span>
@@ -216,6 +219,7 @@ function CostBreakdown({ model }: { model: CostModelData }) {
 }
 
 export default function CostModelRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const model = (data && typeof data === 'object' ? data : {}) as CostModelData;
 
   const hasKPIs = model.bac != null || model.eac != null || model.spi != null || model.cpi != null;
@@ -231,7 +235,7 @@ export default function CostModelRenderer({ data }: { data: unknown }) {
     if (hasBreakdown) return <CostBreakdown model={model} />;
     return (
       <div style={{ padding: 24, color: 'var(--chat-text-tertiary)', textAlign: 'center', fontFamily: 'var(--chat-font-body)' }}>
-        No cost model data available
+        {t('erp_chat.cost_model.no_data', { defaultValue: 'No cost model data available' })}
       </div>
     );
   }

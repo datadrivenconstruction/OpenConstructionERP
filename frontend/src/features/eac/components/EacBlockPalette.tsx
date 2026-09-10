@@ -264,7 +264,7 @@ export function EacBlockPalette({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search…"
+            placeholder={t('eac.block_palette.search', { defaultValue: 'Search…' })}
             data-testid="eac-palette-search"
             className={clsx(
               'h-8 w-full rounded-md border border-border bg-surface-primary pl-7 pr-2 text-sm',

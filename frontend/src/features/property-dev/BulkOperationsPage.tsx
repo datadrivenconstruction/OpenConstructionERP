@@ -94,6 +94,7 @@ function BulkResultPanel({
   result: BulkResult | null;
   sectionLabel: string;
 }) {
+  const { t } = useTranslation();
   if (!result) return null;
   const { requested, succeeded, skipped, failed, dry_run } = result;
   const pct = requested === 0 ? 0 : Math.round((succeeded / requested) * 100);
@@ -117,10 +118,10 @@ function BulkResultPanel({
     <div className="mt-4 rounded-lg border border-border-light bg-surface-secondary p-4">
       <div className="flex flex-wrap items-center gap-3">
         {dry_run && (
-          <Badge variant="blue">DRY RUN - no rows were written</Badge>
+          <Badge variant="blue">{t('property_dev.bulk.dry_run_badge', { defaultValue: 'DRY RUN - no rows were written' })}</Badge>
         )}
         <div className="text-sm font-semibold text-content-primary">
-          {succeeded} / {requested} succeeded ({pct}%)
+          {t('property_dev.bulk.result_summary', { defaultValue: '{{succeeded}} / {{requested}} succeeded ({{pct}}%)', succeeded, requested, pct })}
         </div>
         {(failed.length > 0 || skipped.length > 0) && (
           <Button
@@ -129,7 +130,7 @@ function BulkResultPanel({
             icon={<Download size={14} />}
             onClick={handleDownloadCsv}
           >
-            Download log CSV
+            {t('property_dev.bulk.download_csv', { defaultValue: 'Download log CSV' })}
           </Button>
         )}
       </div>
@@ -137,22 +138,22 @@ function BulkResultPanel({
       <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
         <div className="rounded-md bg-green-50 px-2 py-1.5 text-green-800 dark:bg-green-900/30 dark:text-green-300">
           <CheckCircle2 size={12} className="mr-1 inline" />
-          {succeeded} ok
+          {t('property_dev.bulk.ok_count', { defaultValue: '{{count}} ok', count: succeeded })}
         </div>
         <div className="rounded-md bg-yellow-50 px-2 py-1.5 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
           <ShieldAlert size={12} className="mr-1 inline" />
-          {skipped.length} skipped
+          {t('property_dev.bulk.skipped_count', { defaultValue: '{{count}} skipped', count: skipped.length })}
         </div>
         <div className="rounded-md bg-red-50 px-2 py-1.5 text-red-800 dark:bg-red-900/30 dark:text-red-300">
           <XCircle size={12} className="mr-1 inline" />
-          {failed.length} failed
+          {t('property_dev.bulk.failed_count', { defaultValue: '{{count}} failed', count: failed.length })}
         </div>
       </div>
 
       {failed.length > 0 && (
         <details className="mt-3">
           <summary className="cursor-pointer text-xs font-medium text-content-secondary">
-            Show {failed.length} failure{failed.length === 1 ? '' : 's'}
+            {t('property_dev.bulk.show_failures', { defaultValue: 'Show {{count}} failure(s)', count: failed.length })}
           </summary>
           <ul className="mt-2 space-y-1 text-xs">
             {failed.slice(0, 100).map((f, i) => (
@@ -173,7 +174,7 @@ function BulkResultPanel({
             ))}
             {failed.length > 100 && (
               <li className="text-content-tertiary">
-                … and {failed.length - 100} more (download CSV for the full list).
+                {t('property_dev.bulk.more_download_csv', { defaultValue: '\u2026 and {{count}} more (download CSV for the full list).', count: failed.length - 100 })}
               </li>
             )}
           </ul>
@@ -183,7 +184,7 @@ function BulkResultPanel({
       {skipped.length > 0 && (
         <details className="mt-3">
           <summary className="cursor-pointer text-xs font-medium text-content-secondary">
-            Show {skipped.length} skipped
+            {t('property_dev.bulk.show_skipped', { defaultValue: 'Show {{count}} skipped', count: skipped.length })}
           </summary>
           <ul className="mt-2 space-y-1 text-xs">
             {skipped.slice(0, 100).map((s, i) => (
@@ -204,7 +205,7 @@ function BulkResultPanel({
             ))}
             {skipped.length > 100 && (
               <li className="text-content-tertiary">
-                … and {skipped.length - 100} more.
+                {t('property_dev.bulk.more_skipped', { defaultValue: '\u2026 and {{count}} more.', count: skipped.length - 100 })}
               </li>
             )}
           </ul>
@@ -235,6 +236,7 @@ function useExecuteConfirm(itemsCount: number): {
 /* ───────────── Section: plot status change ─────────────────────────── */
 
 function PlotStatusChangeSection() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [idsText, setIdsText] = useState('');
   const [targetStatus, setTargetStatus] = useState<
@@ -284,19 +286,19 @@ function PlotStatusChangeSection() {
   if (plotIds.length === 0 && phase === 'idle') {
     return (
       <SectionShell
-        title="Bulk plot status change"
+        title={t('property_dev.bulk.plot_status_change', { defaultValue: 'Bulk plot status change' })}
         icon={<RefreshCw size={16} />}
-        desc="Flip a set of plots to a new status (excludes hold/release - use the inventory map)."
+        desc={t('property_dev.bulk.plot_status_desc', { defaultValue: 'Flip a set of plots to a new status (excludes hold/release - use the inventory map).' })}
       >
         <EmptyState
-          title="No plots selected"
-          description="Pick from the inventory map first, then paste their UUIDs here."
+          title={t('property_dev.bulk.no_plots_selected', { defaultValue: 'No plots selected' })}
+          description={t('property_dev.bulk.no_plots_desc', { defaultValue: 'Pick from the inventory map first, then paste their UUIDs here.' })}
           action={
             <Link
               to="/property-dev"
               className="inline-flex items-center gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue/10 px-3 py-1.5 text-sm text-oe-blue hover:bg-oe-blue/20"
             >
-              <MapIcon size={14} /> Open inventory map
+              <MapIcon size={14} /> {t('property_dev.bulk.open_inventory_map', { defaultValue: 'Open inventory map' })}
             </Link>
           }
         />
@@ -311,9 +313,9 @@ function PlotStatusChangeSection() {
 
   return (
     <SectionShell
-      title="Bulk plot status change"
+      title={t('property_dev.bulk.plot_status_change', { defaultValue: 'Bulk plot status change' })}
       icon={<RefreshCw size={16} />}
-      desc="Flip a set of plots to a new status (excludes hold/release - use the inventory map)."
+      desc={t('property_dev.bulk.plot_status_desc', { defaultValue: 'Flip a set of plots to a new status (excludes hold/release - use the inventory map).' })}
     >
       <PlotIdsInput
         value={idsText}
@@ -322,7 +324,7 @@ function PlotStatusChangeSection() {
       />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Target status</label>
+          <label className={labelCls}>{t('property_dev.bulk.target_status', { defaultValue: 'Target status' })}</label>
           <select
             value={targetStatus}
             onChange={(e) => setTargetStatus(e.target.value as typeof targetStatus)}
@@ -336,7 +338,7 @@ function PlotStatusChangeSection() {
           </select>
         </div>
         <div>
-          <label className={labelCls}>Reason (audit-logged)</label>
+          <label className={labelCls}>{t('property_dev.bulk.reason_label', { defaultValue: 'Reason (audit-logged)' })}</label>
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -363,6 +365,7 @@ function PlotStatusChangeSection() {
 /* ───────────── Section: reservation extend expiry ──────────────────── */
 
 function ReservationExtendExpirySection() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [idsText, setIdsText] = useState('');
   const [newExpiry, setNewExpiry] = useState('');
@@ -410,19 +413,19 @@ function ReservationExtendExpirySection() {
 
   return (
     <SectionShell
-      title="Bulk extend reservation expiries"
+      title={t('property_dev.bulk.extend_reservation_expiries', { defaultValue: 'Bulk extend reservation expiries' })}
       icon={<RefreshCw size={16} />}
-      desc="Push expires_at to a new ISO date for a set of ACTIVE reservations."
+      desc={t('property_dev.bulk.extend_expiry_desc', { defaultValue: 'Push expires_at to a new ISO date for a set of ACTIVE reservations.' })}
     >
       <PlotIdsInput
         value={idsText}
         onChange={setIdsText}
         plotIdsCount={reservationIds.length}
-        label="Reservation UUIDs"
+        label={t('property_dev.bulk.reservation_uuids', { defaultValue: 'Reservation UUIDs' })}
       />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>New expiry (ISO date)</label>
+          <label className={labelCls}>{t('property_dev.bulk.new_expiry_label', { defaultValue: 'New expiry (ISO date)' })}</label>
           <input
             type="date"
             value={newExpiry}
@@ -431,7 +434,7 @@ function ReservationExtendExpirySection() {
           />
         </div>
         <div>
-          <label className={labelCls}>Reason (audit-logged)</label>
+          <label className={labelCls}>{t('property_dev.bulk.reason_label', { defaultValue: 'Reason (audit-logged)' })}</label>
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -458,6 +461,7 @@ function ReservationExtendExpirySection() {
 /* ───────────── Section: documents regenerate ───────────────────────── */
 
 function DocumentsRegenerateSection() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [docType, setDocType] = useState<
     'reservation_receipt' | 'sales_contract' | 'handover_certificate' | 'warranty_certificate' | 'noc'
@@ -505,27 +509,27 @@ function DocumentsRegenerateSection() {
 
   return (
     <SectionShell
-      title="Bulk regenerate documents"
+      title={t('property_dev.bulk.regenerate_documents', { defaultValue: 'Bulk regenerate documents' })}
       icon={<FileText size={16} />}
-      desc="Re-render PDFs after a template fix - receipts, SPAs, certificates, NOCs."
+      desc={t('property_dev.bulk.regenerate_desc', { defaultValue: 'Re-render PDFs after a template fix - receipts, SPAs, certificates, NOCs.' })}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Document type</label>
+          <label className={labelCls}>{t('property_dev.bulk.document_type', { defaultValue: 'Document type' })}</label>
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value as typeof docType)}
             className={inputCls}
           >
-            <option value="reservation_receipt">Reservation receipt</option>
-            <option value="sales_contract">Sales contract (SPA)</option>
-            <option value="handover_certificate">Handover certificate</option>
-            <option value="warranty_certificate">Warranty certificate</option>
-            <option value="noc">No-Objection Certificate (NOC)</option>
+            <option value="reservation_receipt">{t('property_dev.bulk.doc_reservation_receipt', { defaultValue: 'Reservation receipt' })}</option>
+            <option value="sales_contract">{t('property_dev.bulk.doc_sales_contract', { defaultValue: 'Sales contract (SPA)' })}</option>
+            <option value="handover_certificate">{t('property_dev.bulk.doc_handover_certificate', { defaultValue: 'Handover certificate' })}</option>
+            <option value="warranty_certificate">{t('property_dev.bulk.doc_warranty_certificate', { defaultValue: 'Warranty certificate' })}</option>
+            <option value="noc">{t('property_dev.bulk.doc_noc', { defaultValue: 'No-Objection Certificate (NOC)' })}</option>
           </select>
         </div>
         <div>
-          <label className={labelCls}>Locale</label>
+          <label className={labelCls}>{t('property_dev.bulk.locale_label', { defaultValue: 'Locale' })}</label>
           <select
             value={locale}
             onChange={(e) => setLocale(e.target.value)}
@@ -546,8 +550,8 @@ function DocumentsRegenerateSection() {
         plotIdsCount={ids.length}
         label={
           docType === 'reservation_receipt'
-            ? 'Reservation UUIDs'
-            : 'Sales-contract UUIDs'
+            ? t('property_dev.bulk.reservation_uuids', { defaultValue: 'Reservation UUIDs' })
+            : t('property_dev.bulk.sales_contract_uuids', { defaultValue: 'Sales-contract UUIDs' })
         }
       />
       <ActionBar
@@ -566,6 +570,7 @@ function DocumentsRegenerateSection() {
 /* ───────────── Section: leads bulk import CSV ──────────────────────── */
 
 function LeadsImportCsvSection() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [file, setFile] = useState<File | null>(null);
   const [developmentId, setDevelopmentId] = useState('');
@@ -625,13 +630,13 @@ function LeadsImportCsvSection() {
 
   return (
     <SectionShell
-      title="Bulk import leads from CSV"
+      title={t('property_dev.bulk.import_leads_csv', { defaultValue: 'Bulk import leads from CSV' })}
       icon={<Upload size={16} />}
-      desc="Headers required: full_name, email, phone, source, plot_type_interest, budget_min, budget_max, notes."
+      desc={t('property_dev.bulk.import_leads_desc', { defaultValue: 'Headers required: full_name, email, phone, source, plot_type_interest, budget_min, budget_max, notes.' })}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>CSV file</label>
+          <label className={labelCls}>{t('property_dev.bulk.csv_file', { defaultValue: 'CSV file' })}</label>
           <input
             type="file"
             accept=".csv,text/csv"
@@ -646,7 +651,7 @@ function LeadsImportCsvSection() {
         </div>
         <div>
           <label className={labelCls}>
-            Development UUID (optional - scopes dedupe)
+            {t('property_dev.bulk.development_uuid_label', { defaultValue: 'Development UUID (optional - scopes dedupe)' })}
           </label>
           <input
             value={developmentId}
@@ -673,6 +678,7 @@ function LeadsImportCsvSection() {
 /* ───────────── Section: buyer merge ────────────────────────────────── */
 
 function BuyerMergeSection() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [primaryId, setPrimaryId] = useState('');
   const [duplicatesText, setDuplicatesText] = useState('');
@@ -717,13 +723,13 @@ function BuyerMergeSection() {
 
   return (
     <SectionShell
-      title="Bulk merge duplicate buyers"
+      title={t('property_dev.bulk.merge_duplicate_buyers', { defaultValue: 'Bulk merge duplicate buyers' })}
       icon={<GitMerge size={16} />}
-      desc="Re-point reservations, contracts, warranty claims from duplicates → primary, then soft-delete the duplicates. Atomic via SAVEPOINT."
+      desc={t('property_dev.bulk.merge_desc', { defaultValue: 'Re-point reservations, contracts, warranty claims from duplicates \u2192 primary, then soft-delete the duplicates. Atomic via SAVEPOINT.' })}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Primary buyer UUID (keeper)</label>
+          <label className={labelCls}>{t('property_dev.bulk.primary_buyer_uuid', { defaultValue: 'Primary buyer UUID (keeper)' })}</label>
           <input
             value={primaryId}
             onChange={(e) => setPrimaryId(e.target.value)}
@@ -732,7 +738,7 @@ function BuyerMergeSection() {
           />
         </div>
         <div>
-          <label className={labelCls}>Reason (audit-logged)</label>
+          <label className={labelCls}>{t('property_dev.bulk.reason_label', { defaultValue: 'Reason (audit-logged)' })}</label>
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -746,7 +752,7 @@ function BuyerMergeSection() {
         value={duplicatesText}
         onChange={setDuplicatesText}
         plotIdsCount={duplicates.length}
-        label="Duplicate buyer UUIDs (one per line / comma-separated)"
+        label={t('property_dev.bulk.duplicate_buyer_uuids', { defaultValue: 'Duplicate buyer UUIDs (one per line / comma-separated)' })}
       />
       <ActionBar
         plotIdsCount={duplicates.length}
@@ -775,6 +781,7 @@ function SectionShell({
   desc: string;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="overflow-hidden">
       <details className="group" open>
@@ -785,7 +792,7 @@ function SectionShell({
               {title}
             </h2>
             <span className="text-xs text-content-tertiary group-open:hidden">
-              tap to expand
+              {t('property_dev.bulk.tap_to_expand', { defaultValue: 'tap to expand' })}
             </span>
           </div>
           <p className="mt-1 text-xs text-content-tertiary">{desc}</p>
@@ -800,17 +807,18 @@ function PlotIdsInput({
   value,
   onChange,
   plotIdsCount,
-  label = 'Plot UUIDs (one per line / comma-separated)',
+  label,
 }: {
   value: string;
   onChange: (v: string) => void;
   plotIdsCount: number;
   label?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <label className={labelCls}>
-        {label}{' '}
+        {label ?? t('property_dev.bulk.plot_uuids_label', { defaultValue: 'Plot UUIDs (one per line / comma-separated)' })}{' '}
         <span
           className={
             plotIdsCount > BULK_MAX_ITEMS
@@ -831,7 +839,7 @@ function PlotIdsInput({
       {plotIdsCount > BULK_MAX_ITEMS && (
         <div className="mt-1 text-xs text-red-600">
           <AlertTriangle size={12} className="mr-1 inline" />
-          Over the {BULK_MAX_ITEMS}-item cap - server will return 422.
+          {t('property_dev.bulk.over_cap', { defaultValue: 'Over the {{max}}-item cap - server will return 422.', max: BULK_MAX_ITEMS })}
         </div>
       )}
     </div>
@@ -855,6 +863,7 @@ function ActionBar({
   isPending: boolean;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -863,7 +872,7 @@ function ActionBar({
           onClick={onDryRun}
           disabled={isPending || plotIdsCount === 0 || disabled}
         >
-          1. Dry run (preview)
+          {t('property_dev.bulk.dry_run_button', { defaultValue: '1. Dry run (preview)' })}
         </Button>
         <Button
           variant="danger"
@@ -876,24 +885,24 @@ function ActionBar({
             !confirm.canExecute
           }
         >
-          2. Execute for real
+          {t('property_dev.bulk.execute_button', { defaultValue: '2. Execute for real' })}
         </Button>
         {phase !== 'idle' && (
           <span className="text-xs text-content-tertiary">
             {phase === 'dry-run-done'
-              ? 'Dry run complete - review below before executing'
-              : 'Live run complete'}
+              ? t('property_dev.bulk.dry_run_complete', { defaultValue: 'Dry run complete - review below before executing' })
+              : t('property_dev.bulk.live_run_complete', { defaultValue: 'Live run complete' })}
           </span>
         )}
       </div>
       {confirm.needsTypedConfirm && phase === 'dry-run-done' && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-xs text-red-900 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
           <AlertTriangle size={12} className="mr-1 inline" />
-          {plotIdsCount} items selected - type{' '}
+          {t('property_dev.bulk.typed_confirm', { defaultValue: '{{count}} items selected - type', count: plotIdsCount })}{' '}
           <code className="rounded bg-white px-1 font-bold dark:bg-surface-primary">
             EXECUTE
           </code>{' '}
-          to confirm:
+          {t('property_dev.bulk.to_confirm', { defaultValue: 'to confirm:' })}
           <input
             value={confirm.confirmText}
             onChange={(e) => confirm.setConfirmText(e.target.value)}

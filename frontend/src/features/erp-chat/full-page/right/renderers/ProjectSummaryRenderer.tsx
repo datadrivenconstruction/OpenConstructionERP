@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useTranslation } from 'react-i18next';
 import { toNum } from './normalize';
 import { projectPath } from './deepLink';
 import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
@@ -59,13 +60,14 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export default function ProjectSummaryRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const labels = useOpenLabels();
   const p = (data && typeof data === 'object' && !Array.isArray(data) ? data : {}) as ProjectSummary;
 
   if (!p.name && !p.id) {
     return (
       <div style={{ padding: 24, color: 'var(--chat-text-tertiary)', textAlign: 'center', fontFamily: 'var(--chat-font-body)' }}>
-        No project summary available
+        {t('erp_chat.project_summary.no_data', { defaultValue: 'No project summary available' })}
       </div>
     );
   }
@@ -76,7 +78,7 @@ export default function ProjectSummaryRenderer({ data }: { data: unknown }) {
     <div style={{ overflow: 'auto', height: '100%', padding: 16, fontFamily: 'var(--chat-font-body)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--chat-text-primary)' }}>{p.name ?? 'Project'}</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--chat-text-primary)' }}>{p.name ?? t('erp_chat.project_summary.project', { defaultValue: 'Project' })}</div>
           {p.code && (
             <div style={{ fontSize: 12, fontFamily: 'var(--chat-font-mono)', color: 'var(--chat-text-tertiary)', marginTop: 2 }}>
               {p.code}
@@ -112,15 +114,15 @@ export default function ProjectSummaryRenderer({ data }: { data: unknown }) {
           padding: 16,
         }}
       >
-        <Field label="Contract value" value={money(p.contract_value, cur)} />
-        <Field label="Budget estimate" value={money(p.budget_estimate, cur)} />
-        {p.phase && <Field label="Phase" value={p.phase} />}
-        {p.project_type && <Field label="Type" value={p.project_type} />}
-        {p.region && <Field label="Region" value={p.region} />}
-        <Field label="Planned start" value={dateOrDash(p.planned_start_date)} />
-        <Field label="Planned end" value={dateOrDash(p.planned_end_date)} />
-        <Field label="Actual start" value={dateOrDash(p.actual_start_date)} />
-        <Field label="Actual end" value={dateOrDash(p.actual_end_date)} />
+        <Field label={t('erp_chat.project_summary.contract_value', { defaultValue: 'Contract value' })} value={money(p.contract_value, cur)} />
+        <Field label={t('erp_chat.project_summary.budget_estimate', { defaultValue: 'Budget estimate' })} value={money(p.budget_estimate, cur)} />
+        {p.phase && <Field label={t('erp_chat.project_summary.phase', { defaultValue: 'Phase' })} value={p.phase} />}
+        {p.project_type && <Field label={t('erp_chat.project_summary.type', { defaultValue: 'Type' })} value={p.project_type} />}
+        {p.region && <Field label={t('erp_chat.project_summary.region', { defaultValue: 'Region' })} value={p.region} />}
+        <Field label={t('erp_chat.project_summary.planned_start', { defaultValue: 'Planned start' })} value={dateOrDash(p.planned_start_date)} />
+        <Field label={t('erp_chat.project_summary.planned_end', { defaultValue: 'Planned end' })} value={dateOrDash(p.planned_end_date)} />
+        <Field label={t('erp_chat.project_summary.actual_start', { defaultValue: 'Actual start' })} value={dateOrDash(p.actual_start_date)} />
+        <Field label={t('erp_chat.project_summary.actual_end', { defaultValue: 'Actual end' })} value={dateOrDash(p.actual_end_date)} />
       </div>
 
       {p.description && (

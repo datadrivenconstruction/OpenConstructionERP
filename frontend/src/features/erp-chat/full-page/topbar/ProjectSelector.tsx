@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiGet } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -10,6 +11,7 @@ interface ProjectOption {
 }
 
 export default function ProjectSelector() {
+  const { t } = useTranslation();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
@@ -43,7 +45,7 @@ export default function ProjectSelector() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
-  const label = activeProjectId ? activeProjectName || 'Project' : 'All Projects';
+  const label = activeProjectId ? activeProjectName || t('erp_chat.project_selector.project', { defaultValue: 'Project' }) : t('erp_chat.project_selector.all_projects', { defaultValue: 'All Projects' });
 
   return (
     <div ref={dropdownRef} style={{ position: 'relative' }}>
@@ -109,13 +111,13 @@ export default function ProjectSelector() {
               textAlign: 'left',
             }}
           >
-            All Projects
+            {t('erp_chat.project_selector.all_projects', { defaultValue: 'All Projects' })}
           </button>
 
           <div style={{ height: 1, background: 'var(--chat-border-subtle)' }} />
 
           {loading && (
-            <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--chat-text-tertiary)' }}>Loading...</div>
+            <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--chat-text-tertiary)' }}>{t('erp_chat.project_selector.loading', { defaultValue: 'Loading...' })}</div>
           )}
 
           {!loading &&
@@ -148,7 +150,7 @@ export default function ProjectSelector() {
             ))}
 
           {!loading && projects.length === 0 && (
-            <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--chat-text-tertiary)' }}>No projects</div>
+            <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--chat-text-tertiary)' }}>{t('erp_chat.project_selector.no_projects', { defaultValue: 'No projects' })}</div>
           )}
         </div>
       )}

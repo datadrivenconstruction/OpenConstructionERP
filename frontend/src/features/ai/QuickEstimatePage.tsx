@@ -2763,10 +2763,10 @@ export function QuickEstimatePage() {
             </span>
           </div>
           <div className="flex items-center gap-2 text-2xs text-semantic-success">
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Text</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Photo</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> PDF</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Excel</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('ai.quick_estimate.input_text', { defaultValue: 'Text' })}</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('ai.quick_estimate.input_photo', { defaultValue: 'Photo' })}</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('ai.quick_estimate.input_pdf', { defaultValue: 'PDF' })}</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> {t('ai.quick_estimate.input_excel', { defaultValue: 'Excel' })}</span>
           </div>
         </div>
       ) : null}
@@ -3654,8 +3654,8 @@ export function QuickEstimatePage() {
                     : 'border-border bg-surface-secondary text-content-secondary hover:border-oe-blue/40',
                 )}
               >
-                <div className="font-semibold">Custom</div>
-                <div className="text-2xs opacity-70 mt-0.5">Advanced column selection</div>
+                <div className="font-semibold">{t('ai.quick_estimate.custom', { defaultValue: 'Custom' })}</div>
+                <div className="text-2xs opacity-70 mt-0.5">{t('ai.quick_estimate.advanced_column_selection', { defaultValue: 'Advanced column selection' })}</div>
               </button>
             </div>
           </div>
