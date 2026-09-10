@@ -15,7 +15,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { priceIntelligence, substitute, type CatalogResource } from './api';
 import { ResourceSearchInput } from './ResourceSearchInput';
 import { fmtMoney, MetaLine, signedPct } from './parts';
-import { RowEstimateActions, type EstimateRow } from './RowEstimateActions';
+import { RowEstimateActions } from './RowEstimateActions';
 import type { SubstituteSeed } from './types';
 
 type Mode = 'price' | 'resource';

@@ -378,7 +378,27 @@ _INFRA_COLUMNS: dict[str, tuple[str, ...]] = {
     "work_process": ("mfolyamat",),
     "start": ("kezdes",),
     "finish": ("befejezes",),
+    # Tag / classification columns carried by infrastructure coding sheets.
+    # Each is resolved against a dictionary sheet of the same name.
+    "building_number": ("epitmenyszam",),
+    "trade": ("szak",),
+    "depreciation": ("ecs",),
+    "structure_id": ("esz",),
+    "catalogue_code": ("tkod",),
+    "asset_owner": ("vagyon",),
+    "asset_class": ("vk",),
+    "funding_source": ("fin",),
+    "item_type": ("ttip",),
+    "statistics_code": ("ksh",),
 }
+
+# Fields in _INFRA_COLUMNS that are tag/classification codes resolved against
+# dictionary sheets, as opposed to structural or pricing fields.
+_INFRA_TAG_FIELDS = frozenset({
+    "work_process", "trade", "depreciation", "structure_id",
+    "catalogue_code", "asset_owner", "asset_class", "funding_source",
+    "item_type", "statistics_code",
+})
 
 
 def _infra_header(rows: list[tuple[Any, ...]]) -> tuple[int, dict[str, int]] | None:
@@ -398,6 +418,52 @@ def _infra_header(rows: list[tuple[Any, ...]]) -> tuple[int, dict[str, int]] | N
     return None
 
 
+def _read_dictionary_sheets(workbook: Any, data_sheet: str) -> dict[str, dict[str, str]]:
+    """Read code-to-label mappings from every non-data sheet.
+
+    Each dictionary sheet has a code column and a label column (usually the
+    first two). Returns ``{sheet_name_lower: {code: label}}``.
+    """
+    dictionaries: dict[str, dict[str, str]] = {}
+    for name in workbook.sheetnames:
+        if name == data_sheet:
+            continue
+        worksheet = workbook[name]
+        rows = list(worksheet.iter_rows(min_row=1, max_row=2000, values_only=True))
+        if len(rows) < 2:
+            continue
+        mapping: dict[str, str] = {}
+        for row in rows[1:]:
+            if not row or len(row) < 2:
+                continue
+            code = _text(row[0])
+            label = _text(row[1]) if len(row) > 1 else ""
+            if code and label:
+                mapping[code] = label
+        if mapping:
+            dictionaries[_fold(name)] = mapping
+    return dictionaries
+
+
+def _resolve_tag(value: str, field: str, dictionaries: dict[str, dict[str, str]]) -> dict[str, str]:
+    """Resolve a tag code against the dictionary sheets.
+
+    Returns ``{"code": raw, "label": resolved}`` when a match is found, or
+    ``{"code": raw}`` when it is not.
+    """
+    entry: dict[str, str] = {"code": value}
+    for dict_name, codes in dictionaries.items():
+        if value in codes:
+            entry["label"] = codes[value]
+            break
+        # The field name sometimes matches the sheet name (mfolyamat -> MFOLYAMAT).
+        if _fold(field) in dict_name or dict_name in _fold(field):
+            if value in codes:
+                entry["label"] = codes[value]
+                break
+    return entry
+
+
 def _parse_infrastructure(workbook: Any) -> ImportedBOQ:
     """Read the flat infrastructure sheet into positions."""
     result = ImportedBOQ(source_format="xlsx", currency="HUF")
@@ -410,6 +476,8 @@ def _parse_infrastructure(workbook: Any) -> ImportedBOQ:
             continue
         header_index, columns = header
 
+        dictionaries = _read_dictionary_sheets(workbook, sheet_name)
+
         for row_index, row in enumerate(rows[header_index + 1 :], start=header_index + 2):
             description = _text(_at(row, columns, "description"))
             if not description:
@@ -421,10 +489,19 @@ def _parse_infrastructure(workbook: Any) -> ImportedBOQ:
             unit_rate = _number(_at(row, columns, "unit_rate"))
 
             hu: dict[str, Any] = {"profile": "infrastructure", "sheet": sheet_name}
-            for field in ("structure_code", "row_number", "item_number", "work_process", "start", "finish"):
+            for field in ("structure_code", "row_number", "item_number", "building_number", "start", "finish"):
                 value = _text(_at(row, columns, field))
                 if value:
                     hu[field] = value
+
+            # Tag / classification columns: capture raw code and resolved label.
+            tags: dict[str, dict[str, str]] = {}
+            for field in _INFRA_TAG_FIELDS:
+                value = _text(_at(row, columns, field))
+                if value:
+                    tags[field] = _resolve_tag(value, field, dictionaries)
+            if tags:
+                hu["tags"] = tags
 
             unit = _text(_at(row, columns, "unit"))
             # A coding file carries no prices at all and still has a unit
@@ -450,6 +527,7 @@ def _parse_infrastructure(workbook: Any) -> ImportedBOQ:
             "hu_profile": "infrastructure",
             "item_sheet": sheet_name,
             "dictionary_sheets": [name for name in workbook.sheetnames if name != sheet_name],
+            "dictionaries_resolved": {k: len(v) for k, v in dictionaries.items()},
             "sheet_names": list(workbook.sheetnames),
         }
         break

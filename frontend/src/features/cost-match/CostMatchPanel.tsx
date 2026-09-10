@@ -907,8 +907,11 @@ export function CostMatchPanel() {
       const targets = confirmableResults;
       setBatchProgress({ done: 0, total: targets.length });
       for (let i = 0; i < targets.length; i++) {
-        await decideResult(targets[i].id, { decision: 'confirmed' });
-        setBatchProgress({ done: i + 1, total: targets.length });
+        const target = targets[i];
+        if (target) {
+          await decideResult(target.id, { decision: 'confirmed' });
+          setBatchProgress({ done: i + 1, total: targets.length });
+        }
       }
     },
     onSuccess: () => {

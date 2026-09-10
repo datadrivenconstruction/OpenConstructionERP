@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.4.0',
+    date: '2026-09-10',
+    tag: 'NEW',
+    summary:
+      'Cost explorer substitute results can be added to a BOQ or saved as an assembly, and cost match results can be confirmed in batch. The Hungarian infrastructure importer now captures all ten tag columns and resolves them against the dictionary sheets. The Windows desktop upgrade no longer freezes on a legacy uninstaller.',
+  },
+  {
     version: '17.3.1',
     date: '2026-09-10',
     tag: 'FIX',

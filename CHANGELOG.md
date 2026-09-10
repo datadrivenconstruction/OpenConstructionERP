@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.4.0] - 2026-09-10
+
+The cost explorer and cost match modules gained a substitute handoff flow. A substitute result in cost explorer can be added directly to a bill of quantities or saved as a reusable assembly, and cost match results can be confirmed in batch with a single click and copied to the clipboard for pasting into a spreadsheet. Twelve new interface strings are translated into all offered languages.
+
+The Hungarian infrastructure workbook importer now captures all ten classification tag columns that the state railway coding sheets carry, not just the work process. The six dictionary sheets that travel with every coding file are read on import and each tag code is resolved to the human-readable label the dictionary defines, so the trade, funding source, asset owner, depreciation rate, catalogue code, statistics code, structure identifier, asset class and item type survive the import alongside the activity they already did. The building structure number column is captured as well.
+
+The Windows desktop upgrade no longer freezes when a legacy uninstaller is still on disk. The old installer used ExecWait to run the previous uninstaller, which opened a visible window and waited for the user to interact with it before continuing, so a silent upgrade hung indefinitely; it now runs under nsExec with a five-minute timeout and no window.
+
 ## [17.3.1] - 2026-09-10
 
 Two test fixtures did not carry the original_contract_value field that 17.3.0 added to the ContractItem and ContractDashboard interfaces, so the Docker build of 17.3.0 failed at the TypeScript step. The field is nullable and both mocks now carry it.
