@@ -236,7 +236,8 @@ async def _verify_boq_owner(
 
     Admins bypass the check. Grants access to the project owner and to
     any user who is a team member of the project (added via add_project_member).
-    Raises 403 if none of those conditions are met.
+    Raises 404 (not 403) on denial to keep 'missing' and 'denied'
+    indistinguishable, matching verify_project_access.
     """
     if payload and payload.get("role") == "admin":
         return
@@ -264,8 +265,8 @@ async def _verify_boq_owner(
     if uid is not None and await is_project_member(session, boq.project_id, uid):
         return
     raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="You do not have access to this BOQ",
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="BOQ not found",
     )
 
 

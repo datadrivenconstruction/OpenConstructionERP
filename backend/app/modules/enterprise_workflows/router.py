@@ -82,42 +82,6 @@ async def create_workflow(
     return WorkflowResponse.model_validate(workflow)
 
 
-@router.get("/{workflow_id}", response_model=WorkflowResponse)
-async def get_workflow(
-    workflow_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("enterprise_workflows.read")),
-    service: WorkflowService = Depends(_get_service),
-) -> WorkflowResponse:
-    """Get a single workflow by ID."""
-    workflow = await service.get_workflow(workflow_id, user_id=user_id)
-    return WorkflowResponse.model_validate(workflow)
-
-
-@router.patch("/{workflow_id}", response_model=WorkflowResponse)
-async def update_workflow(
-    workflow_id: uuid.UUID,
-    data: WorkflowUpdate,
-    user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("enterprise_workflows.manage")),
-    service: WorkflowService = Depends(_get_service),
-) -> WorkflowResponse:
-    """Update a workflow."""
-    workflow = await service.update_workflow(workflow_id, data, user_id=user_id)
-    return WorkflowResponse.model_validate(workflow)
-
-
-@router.delete("/{workflow_id}", status_code=204)
-async def delete_workflow(
-    workflow_id: uuid.UUID,
-    user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("enterprise_workflows.manage")),
-    service: WorkflowService = Depends(_get_service),
-) -> None:
-    """Delete a workflow and all its requests."""
-    await service.delete_workflow(workflow_id, user_id=user_id)
-
-
 # ── Approval Requests ──────────────────────────────────────────────────────
 
 
@@ -215,3 +179,42 @@ async def cancel_request(
     """
     request = await service.cancel_request(request_id, user_id=user_id)
     return ApprovalRequestResponse.model_validate(request)
+
+
+# ── Workflow by ID (after /requests/ to avoid route shadowing) ─────────────
+
+
+@router.get("/{workflow_id}", response_model=WorkflowResponse)
+async def get_workflow(
+    workflow_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("enterprise_workflows.read")),
+    service: WorkflowService = Depends(_get_service),
+) -> WorkflowResponse:
+    """Get a single workflow by ID."""
+    workflow = await service.get_workflow(workflow_id, user_id=user_id)
+    return WorkflowResponse.model_validate(workflow)
+
+
+@router.patch("/{workflow_id}", response_model=WorkflowResponse)
+async def update_workflow(
+    workflow_id: uuid.UUID,
+    data: WorkflowUpdate,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("enterprise_workflows.manage")),
+    service: WorkflowService = Depends(_get_service),
+) -> WorkflowResponse:
+    """Update a workflow."""
+    workflow = await service.update_workflow(workflow_id, data, user_id=user_id)
+    return WorkflowResponse.model_validate(workflow)
+
+
+@router.delete("/{workflow_id}", status_code=204)
+async def delete_workflow(
+    workflow_id: uuid.UUID,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("enterprise_workflows.manage")),
+    service: WorkflowService = Depends(_get_service),
+) -> None:
+    """Delete a workflow and all its requests."""
+    await service.delete_workflow(workflow_id, user_id=user_id)
