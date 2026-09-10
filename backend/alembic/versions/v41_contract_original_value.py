@@ -27,7 +27,10 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v41_contract_original_value"
-down_revision: Union[str, Sequence[str], None] = "v41_coordination_thresholds"
+down_revision: Union[str, Sequence[str], None] = (
+    "v41_coordination_thresholds",
+    "v3324_buyer_selection_currency",
+)
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

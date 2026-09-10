@@ -2786,10 +2786,44 @@ class ContractsService:
                 )
                 gainshare_estimate = share["savings"] - share["overrun"]
         outstanding = Decimal(str(contract.total_value or 0)) - paid
-        change_orders_count, _change_orders_net = self._change_order_rollup(contract)
+        change_orders_count, change_orders_net = self._change_order_rollup(contract)
+
+        # Commercial breakdown (PR-14 / PR-15 of issue #435).
+        original = contract.original_contract_value
+        current_value = Decimal(str(contract.total_value or 0))
+        agreed_variations = change_orders_net
+
+        # Pending variations: sum of VR cost impacts that are submitted or
+        # under review but not yet approved.  This is a cross-module query
+        # that tolerates the variations module being absent.
+        pending_variations = DEC_ZERO
+        try:
+            from sqlalchemy import func, select
+
+            from app.modules.variations.models import VariationRequest
+
+            row = (
+                await self.session.execute(
+                    select(func.coalesce(func.sum(VariationRequest.estimated_cost_impact), 0)).where(
+                        VariationRequest.project_id == contract.project_id,
+                        VariationRequest.status.in_(("submitted", "under_review")),
+                    )
+                )
+            ).scalar_one()
+            pending_variations = Decimal(str(row or 0))
+        except (ImportError, Exception):
+            pass
+
+        forecast = current_value + pending_variations
+
         return {
             "contract_id": contract_id,
-            "total_value": Decimal(str(contract.total_value or 0)),
+            "total_value": current_value,
+            "original_contract_value": original,
+            "agreed_variations": agreed_variations,
+            "current_contract_value": current_value,
+            "pending_variations": pending_variations,
+            "forecast_contract_value": forecast,
             "paid_to_date": paid,
             "retention_held": retention,
             "outstanding": outstanding if outstanding > DEC_ZERO else DEC_ZERO,
