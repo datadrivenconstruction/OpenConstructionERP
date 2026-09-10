@@ -353,3 +353,4 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 # Acknowledged: @EQSTLab
 # Acknowledged: @INAPA-desarrolloTIC
 # Acknowledged: @JimZed
+# Acknowledged: @JoseJFernandezAlvarez
