@@ -37,6 +37,7 @@ from app.modules.rebar_schedule.abs_format import MAX_RECORD_LENGTH, SUPER_GROUP
 from app.modules.rebar_schedule.schemas import (
     AbsPreviewRequest,
     AbsPreviewResponse,
+    CuttingItem,
     RebarImportListResponse,
     RebarImportResponse,
     RebarImportResult,
@@ -243,12 +244,12 @@ async def list_shapes(
     )
 
 
-@router.get("/imports/{import_id}/cutting", dependencies=[_READ])
+@router.get("/imports/{import_id}/cutting", response_model=list[CuttingItem], dependencies=[_READ])
 async def cutting_summary(
     import_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
-) -> list[dict]:
+) -> list[CuttingItem]:
     """Bars and steel weight per bar diameter, for ordering and cutting."""
     service = _service(session)
     try:

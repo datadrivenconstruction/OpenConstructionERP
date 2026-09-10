@@ -17,7 +17,7 @@ import uuid
 from decimal import Decimal
 
 from sqlalchemy import JSON, Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
 
@@ -58,6 +58,12 @@ class RebarScheduleImport(Base):
     warning_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
+    shapes: Mapped[list["RebarShape"]] = relationship(
+        back_populates="schedule_import",
+        lazy="raise_on_sql",
+        cascade="all, delete-orphan",
+    )
+
     __table_args__ = (UniqueConstraint("project_id", "content_sha256", name="uq_rebar_import_project_content"),)
 
     def __repr__(self) -> str:
@@ -74,6 +80,10 @@ class RebarShape(Base):
         ForeignKey("oe_rebar_schedule_import.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+    schedule_import: Mapped["RebarScheduleImport"] = relationship(
+        back_populates="shapes",
+        lazy="raise_on_sql",
     )
     # Denormalised from the import so a project-wide query over shapes does not
     # have to join, and so an IDOR check can be made on the row itself.

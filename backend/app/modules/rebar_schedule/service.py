@@ -456,7 +456,18 @@ class RebarScheduleService:
     async def delete_import(self, import_id: uuid.UUID) -> None:
         """Delete an import and its shapes."""
         record = await self.get_import(import_id)
+        project_id = record.project_id
+        filename = record.filename
         await self.imports.delete(record)
+        event_bus.publish_detached(
+            events.SCHEDULE_DELETED,
+            data={
+                "import_id": str(import_id),
+                "project_id": str(project_id),
+                "filename": filename,
+            },
+            source_module="rebar_schedule",
+        )
 
     # ── Export ────────────────────────────────────────────────────────────
 

@@ -153,6 +153,14 @@ class AbsPreviewResponse(BaseModel):
     validation: AbsValidationSummary
 
 
+class CuttingItem(BaseModel):
+    """One diameter row in a cutting summary."""
+
+    diameter_mm: str
+    bars: int
+    weight_kg: float
+
+
 class SuperGroupInfo(BaseModel):
     """One super-group of the standard, for a picker."""
 

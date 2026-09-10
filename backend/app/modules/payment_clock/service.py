@@ -24,13 +24,11 @@ the screen can never disagree about what the statute says happened.
 from __future__ import annotations
 
 import logging
-import uuid
 from collections.abc import Iterable, Sequence
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.payment_clock.clock import (
@@ -48,6 +46,28 @@ from app.modules.payment_clock.models import (
     PaymentRegime,
     StatutoryPaymentApplication,
 )
+from app.modules.payment_clock.repository import (
+    TERMINAL_STATUSES,
+    get_application,
+    get_notice,
+    get_regime,
+    get_regime_by_code,
+    list_applications,
+    list_events,
+    list_notices,
+    list_regimes,
+)
+from app.modules.payment_clock.repository import add_application as _repo_add_application
+from app.modules.payment_clock.repository import add_event as _repo_add_event
+from app.modules.payment_clock.repository import add_notice as _repo_add_notice
+from app.modules.payment_clock.repository import count_regimes as _repo_count_regimes
+from app.modules.payment_clock.repository import delete_stale_events as _repo_delete_stale_events
+from app.modules.payment_clock.repository import flush_application as _repo_flush_application
+from app.modules.payment_clock.repository import flush_events as _repo_flush_events
+from app.modules.payment_clock.repository import list_events_for_application as _repo_list_events_for_application
+from app.modules.payment_clock.repository import remove_application as _repo_remove_application
+from app.modules.payment_clock.repository import remove_notice as _repo_remove_notice
+from app.modules.payment_clock.schemas import ApplicationCreate, ApplicationUpdate, NoticeCreate
 from app.modules.payment_clock.validators import RULE_EVENT_TYPES
 
 logger = logging.getLogger(__name__)
@@ -55,9 +75,6 @@ logger = logging.getLogger(__name__)
 # Columns of :class:`PaymentRegime` that are the row's identity or its
 # bookkeeping rather than part of the statutory specification.
 _NON_SPEC_COLUMNS = frozenset({"id", "created_at", "updated_at"})
-
-# Statuses that close an application: the money arrived, or the row was retired.
-TERMINAL_STATUSES: frozenset[str] = frozenset({"paid", "closed"})
 
 
 # ── Regimes ──────────────────────────────────────────────────────────────────
@@ -81,25 +98,6 @@ def regime_spec(regime: PaymentRegime) -> dict[str, Any]:
     return spec
 
 
-async def list_regimes(session: AsyncSession, *, country_code: str = "") -> list[PaymentRegime]:
-    """The regime catalogue, alphabetically by jurisdiction."""
-    stmt = select(PaymentRegime)
-    if country_code:
-        stmt = stmt.where(PaymentRegime.country_code == country_code.upper())
-    stmt = stmt.order_by(PaymentRegime.jurisdiction.asc(), PaymentRegime.code.asc())
-    return list((await session.execute(stmt)).scalars().all())
-
-
-async def get_regime(session: AsyncSession, *, regime_id: uuid.UUID) -> PaymentRegime | None:
-    """One regime by id."""
-    return (await session.execute(select(PaymentRegime).where(PaymentRegime.id == regime_id))).scalar_one_or_none()
-
-
-async def get_regime_by_code(session: AsyncSession, *, code: str) -> PaymentRegime | None:
-    """One regime by its stable code, which is how callers name it."""
-    return (await session.execute(select(PaymentRegime).where(PaymentRegime.code == code.strip()))).scalar_one_or_none()
-
-
 async def ensure_regimes(session: AsyncSession, *, refresh: bool = False) -> dict[str, int]:
     """Seed the statutory catalogue if it is empty (or refresh it on request).
 
@@ -109,9 +107,9 @@ async def ensure_regimes(session: AsyncSession, *, refresh: bool = False) -> dic
     2026 reading of six statutes into the schema history.
     """
     if not refresh:
-        count = await session.scalar(select(func.count()).select_from(PaymentRegime))
+        count = await _repo_count_regimes(session)
         if count:
-            return {"created": 0, "updated": 0, "unchanged": int(count)}
+            return {"created": 0, "updated": 0, "unchanged": count}
     return await seed_payment_regimes(session, refresh=refresh)
 
 
@@ -167,14 +165,14 @@ async def recompute_schedule(
         return schedule, False
     apply_schedule(application, schedule)
     application.dates_overridden = False
-    await session.flush()
+    await _repo_flush_application(session)
     return schedule, True
 
 
 # ── Applications ─────────────────────────────────────────────────────────────
 
 
-def _stated_dates(body: Any) -> dict[str, date]:
+def _stated_dates(body: ApplicationCreate | ApplicationUpdate) -> dict[str, date]:
     """The statutory dates a caller stated explicitly, if any."""
     stated: dict[str, date] = {}
     for field in ("due_date", "payment_notice_deadline", "pay_less_deadline", "final_date"):
@@ -184,57 +182,10 @@ def _stated_dates(body: Any) -> dict[str, date]:
     return stated
 
 
-async def list_applications(
-    session: AsyncSession,
-    *,
-    project_id: uuid.UUID,
-    status: str = "",
-    regime_id: uuid.UUID | None = None,
-    overdue_as_of: date | None = None,
-    limit: int = 100,
-    offset: int = 0,
-) -> list[StatutoryPaymentApplication]:
-    """Applications on one project, newest application date first.
-
-    ``overdue_as_of`` narrows to the rows whose final date for payment has
-    passed and which are not closed - the ones somebody is owed money on.
-    """
-    stmt = select(StatutoryPaymentApplication).where(StatutoryPaymentApplication.project_id == project_id)
-    if status:
-        stmt = stmt.where(StatutoryPaymentApplication.status == status)
-    if regime_id is not None:
-        stmt = stmt.where(StatutoryPaymentApplication.regime_id == regime_id)
-    if overdue_as_of is not None:
-        stmt = stmt.where(
-            StatutoryPaymentApplication.final_date.is_not(None),
-            StatutoryPaymentApplication.final_date < overdue_as_of,
-            StatutoryPaymentApplication.status.not_in(tuple(TERMINAL_STATUSES)),
-        )
-    stmt = stmt.order_by(
-        StatutoryPaymentApplication.application_date.desc(),
-        StatutoryPaymentApplication.created_at.desc(),
-    )
-    stmt = stmt.limit(limit).offset(offset)
-    return list((await session.execute(stmt)).scalars().all())
-
-
-async def get_application(
-    session: AsyncSession,
-    *,
-    application_id: uuid.UUID,
-) -> StatutoryPaymentApplication | None:
-    """One application by id, or ``None``."""
-    return (
-        await session.execute(
-            select(StatutoryPaymentApplication).where(StatutoryPaymentApplication.id == application_id)
-        )
-    ).scalar_one_or_none()
-
-
 async def create_application(
     session: AsyncSession,
     *,
-    body: Any,
+    body: ApplicationCreate,
     regime: PaymentRegime,
     created_by: str | None = None,
 ) -> StatutoryPaymentApplication:
@@ -275,8 +226,7 @@ async def create_application(
     for field, value in stated.items():
         setattr(application, field, value)
     application.dates_overridden = bool(stated)
-    session.add(application)
-    await session.flush()
+    await _repo_add_application(session, application)
     return application
 
 
@@ -284,7 +234,7 @@ async def update_application(
     session: AsyncSession,
     *,
     application: StatutoryPaymentApplication,
-    body: Any,
+    body: ApplicationUpdate,
 ) -> StatutoryPaymentApplication:
     """Apply the fields the caller actually sent. Does not recompute dates.
 
@@ -298,34 +248,23 @@ async def update_application(
         setattr(application, field, value)
     if any(field in changes for field in ("due_date", "payment_notice_deadline", "pay_less_deadline", "final_date")):
         application.dates_overridden = True
-    await session.flush()
+    await _repo_flush_application(session)
     return application
 
 
 async def delete_application(session: AsyncSession, *, application: StatutoryPaymentApplication) -> None:
     """Delete a clock. Its notices and events cascade in the database."""
-    await session.delete(application)
-    await session.flush()
+    await _repo_remove_application(session, application)
 
 
 # ── Notices ──────────────────────────────────────────────────────────────────
-
-
-async def list_notices(session: AsyncSession, *, application_id: uuid.UUID) -> list[PaymentNotice]:
-    """Notices served against one application, in the order they were served."""
-    stmt = (
-        select(PaymentNotice)
-        .where(PaymentNotice.application_id == application_id)
-        .order_by(PaymentNotice.issued_at.asc(), PaymentNotice.created_at.asc())
-    )
-    return list((await session.execute(stmt)).scalars().all())
 
 
 async def create_notice(
     session: AsyncSession,
     *,
     application: StatutoryPaymentApplication,
-    body: Any,
+    body: NoticeCreate,
     created_by: str | None = None,
 ) -> PaymentNotice:
     """Record a notice that was served.
@@ -346,20 +285,13 @@ async def create_notice(
         reference=body.reference,
         created_by=created_by,
     )
-    session.add(notice)
-    await session.flush()
+    await _repo_add_notice(session, notice)
     return notice
-
-
-async def get_notice(session: AsyncSession, *, notice_id: uuid.UUID) -> PaymentNotice | None:
-    """One notice by id, or ``None``."""
-    return (await session.execute(select(PaymentNotice).where(PaymentNotice.id == notice_id))).scalar_one_or_none()
 
 
 async def delete_notice(session: AsyncSession, *, notice: PaymentNotice) -> None:
     """Delete a notice that was recorded in error."""
-    await session.delete(notice)
-    await session.flush()
+    await _repo_remove_notice(session, notice)
 
 
 # ── The snapshot the rules read ──────────────────────────────────────────────
@@ -624,11 +556,7 @@ async def record_clock_events(
     string LIKE rather than to JSONB containment, so a query written that way
     would quietly mean something else.
     """
-    existing = list(
-        (await session.execute(select(PaymentClockEvent).where(PaymentClockEvent.application_id == application.id)))
-        .scalars()
-        .all()
-    )
+    existing = await _repo_list_events_for_application(session, application_id=application.id)
     by_key: dict[tuple[str, str], PaymentClockEvent] = {}
     for event in existing:
         detail = event.detail if isinstance(event.detail, dict) else {}
@@ -652,7 +580,7 @@ async def record_clock_events(
         event = by_key.get(key)
         if event is None:
             event = PaymentClockEvent(application_id=application.id, event_type=event_type, detected_at=now)
-            session.add(event)
+            await _repo_add_event(session, event)
         event.severity = str(finding.severity)
         event.rule_id = finding.rule_id
         event.deadline_date = _finding_date(details)
@@ -664,39 +592,9 @@ async def record_clock_events(
         written.append(event)
 
     stale = [event.id for key, event in by_key.items() if key not in kept]
-    if stale:
-        await session.execute(delete(PaymentClockEvent).where(PaymentClockEvent.id.in_(stale)))
-    await session.flush()
+    await _repo_delete_stale_events(session, stale)
+    await _repo_flush_events(session)
     return written
-
-
-async def list_events(
-    session: AsyncSession,
-    *,
-    project_id: uuid.UUID | None = None,
-    application_id: uuid.UUID | None = None,
-    event_type: str = "",
-    limit: int = 200,
-    offset: int = 0,
-) -> list[PaymentClockEvent]:
-    """The breach register, newest first.
-
-    Scoped to one application, or to a whole project through a join on the
-    application table. There is no ``relationship()`` between the two, so the
-    join is written out and nothing lazy-loads behind it.
-    """
-    stmt = select(PaymentClockEvent)
-    if application_id is not None:
-        stmt = stmt.where(PaymentClockEvent.application_id == application_id)
-    if project_id is not None:
-        stmt = stmt.join(
-            StatutoryPaymentApplication,
-            StatutoryPaymentApplication.id == PaymentClockEvent.application_id,
-        ).where(StatutoryPaymentApplication.project_id == project_id)
-    if event_type:
-        stmt = stmt.where(PaymentClockEvent.event_type == event_type)
-    stmt = stmt.order_by(PaymentClockEvent.detected_at.desc()).limit(limit).offset(offset)
-    return list((await session.execute(stmt)).scalars().all())
 
 
 def regime_summary(regime: PaymentRegime) -> str:

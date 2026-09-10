@@ -1,16 +1,23 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""International electronic-invoicing library.
+"""International electronic-invoicing module.
 
 Outbound EN 16931 invoice writer in both syntaxes:
     * CII  - ZUGFeRD 2.1, Factur-X 1.0, XRechnung 3.0 (DACH/EU)
     * UBL  - Peppol BIS Billing 3.0 and plain EN 16931 UBL (worldwide)
 
 One EN 16931 model, many country profiles (see ``profiles.py``); adding a
-country is one registry entry. This is a pure library (no manifest, no router
-of its own); the download endpoint lives in the finance module and renders
-from the finance ``Invoice`` aggregate. The inbound counterpart is
-``supplier_catalogs.peppol`` (UBL parser).
+country is one registry entry. The core is an ORM-free library: it takes
+plain dicts and returns XML or PDF bytes, with no database dependency.
+
+Two API surfaces expose it:
+    * The finance module renders a persisted ``Invoice`` aggregate through
+      ``/invoices/{id}/einvoice`` and manages the standing e-invoice settings.
+    * This module's own ``router.py`` exposes standalone validation and
+      generation at ``/api/v1/einvoice/``, accepting raw dicts for
+      integrations, pre-flight checks and testing.
+
+The inbound counterpart is ``supplier_catalogs.peppol`` (UBL parser).
 """
 
 from app.modules.einvoice.cii import (
