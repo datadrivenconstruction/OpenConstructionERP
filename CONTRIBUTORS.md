@@ -375,3 +375,4 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 # Acknowledged: @dzintars
 # Acknowledged: @elric-cpu
 # Acknowledged: @elsayed-mazen
+# Acknowledged: @hibohsuc-svg
