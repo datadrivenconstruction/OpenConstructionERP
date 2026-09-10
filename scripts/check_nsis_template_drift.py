@@ -2,12 +2,15 @@
 """Check that the vendored NSIS installer template is upstream plus our edits.
 
 ``desktop/src-tauri/windows/installer.nsi`` is a copy of the template that ships
-inside the Tauri bundler, carrying three deliberate changes, all of them on the
+inside the Tauri bundler, carrying four deliberate changes, all of them on the
 reinstall page a user meets when a previous version is already installed. The
 second radio button, "Do not uninstall", starts selected on an upgrade. The WiX
 migration branch obeys whichever button was selected rather than uninstalling
-regardless. And a file the old uninstaller left behind after reporting success no
-longer aborts the install. The reasons are written at length in that file.
+regardless. The old uninstaller is run with a five-minute timeout via nsExec
+instead of an unbounded ExecWait, so a hanging pre-v15.9.0 uninstaller cannot
+freeze the upgrade forever. And a file the old uninstaller left behind after
+reporting success no longer aborts the install. The reasons are written at length
+in that file.
 
 Vendoring it costs something, and this script is the payment. The template is a
 Handlebars template, not plain NSI: blocks like each-resources and each-binaries
@@ -105,9 +108,9 @@ REINSTALL_DEFAULT_BEFORE = r"""    ; Check the first radio button if this the fi
     ${NSD_SetFocus} $R2
 """
 
-REINSTALL_DEFAULT_AFTER = r"""    ; OpenConstructionERP fork of the stock Tauri template, edit one of three.
-    ; The other two are in PageLeaveReinstall below and carry their own notes.
-    ; scripts/check_nsis_template_drift.py proves the set is exactly these three
+REINSTALL_DEFAULT_AFTER = r"""    ; OpenConstructionERP fork of the stock Tauri template, edit one of four.
+    ; The other three are in PageLeaveReinstall below and carry their own notes.
+    ; scripts/check_nsis_template_drift.py proves the set is exactly these four
     ; by fetching the template at the CLI version pinned in
     ; .github/workflows/desktop-release.yml and reconstructing this file from it.
     ;
@@ -189,7 +192,7 @@ WIX_SELECTION_BEFORE = r"""  ; If migrating from Wix, always uninstall
     Goto reinst_uninstall
 """
 
-WIX_SELECTION_AFTER = r"""  ; OpenConstructionERP fork, edit two of three. Upstream sent every WiX
+WIX_SELECTION_AFTER = r"""  ; OpenConstructionERP fork, edit two of four. Upstream sent every WiX
   ; migration to reinst_uninstall without reading $R1, so the page offered a
   ; choice and then ignored it: a user who picked "Do not uninstall" watched the
   ; MSI uninstaller start anyway, and if it then failed the upgrade stopped on a
@@ -212,6 +215,40 @@ WIX_SELECTION_AFTER = r"""  ; OpenConstructionERP fork, edit two of three. Upstr
     ${EndIf}
 """
 
+UNINSTALL_TIMEOUT_BEFORE = r"""      StrCpy $R1 "$R1 _?=$4" ; append uninstall directory
+      ExecWait '$R1' $0
+    ${EndIf}
+
+    BringToFront
+"""
+
+UNINSTALL_TIMEOUT_AFTER = r"""      StrCpy $R1 "$R1 _?=$4" ; append uninstall directory
+      ; OpenConstructionERP fork, edit four of four. ExecWait blocks forever
+      ; when the old uninstaller hangs, and every release from v11.7.1 to v15.8.0
+      ; shipped an uninstaller whose process-stop hooks called nsExec without
+      ; /TIMEOUT. On a machine where PowerShell never returns (antivirus, PowerToys,
+      ; wedged WMI), that uninstaller never finishes, and the upgrade stops dead.
+      ; The default radio button already steers people away from this path (edit one
+      ; above), but a person who explicitly chose to uninstall still hits the hang.
+      ;
+      ; nsExec with /TIMEOUT=300000 (five minutes) replaces ExecWait. If the old
+      ; uninstaller finishes normally, nsExec pushes its exit code as a decimal
+      ; string. If it hangs, nsExec terminates it after five minutes and pushes
+      ; the string "timeout". If it cannot be started at all, nsExec pushes
+      ; "error". The three are distinguished below.
+      ;
+      ; On timeout the upgrade continues rather than aborting: the old uninstaller
+      ; was already killed, NSIS_HOOK_PREINSTALL will stop any processes it left
+      ; behind, and the install overwrites every file. This is a strictly better
+      ; outcome than the alternative, which was a frozen installer window with no
+      ; way out but the task manager.
+      nsExec::Exec /TIMEOUT=300000 '$R1'
+      Pop $0
+    ${EndIf}
+
+    BringToFront
+"""
+
 LEFTOVER_FILE_BEFORE = r"""    ${IfThen} ${Errors} ${|} StrCpy $0 2 ${|} ; ExecWait failed, set fake exit code
 
     ${If} $0 <> 0
@@ -231,9 +268,10 @@ LEFTOVER_FILE_BEFORE = r"""    ${IfThen} ${Errors} ${|} StrCpy $0 2 ${|} ; ExecW
       MessageBox MB_ICONEXCLAMATION "$(unableToUninstall)"
 """
 
-LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of three. Three things change here,
-    ; all of them about when an upgrade is allowed to stop and what the person in
-    ; front of it is told when it does.
+LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of four (was three of three before
+    ; the timeout guard above). Three things change here, all of them about when
+    ; an upgrade is allowed to stop and what the person in front of it is told
+    ; when it does.
     ;
     ; A leftover binary on its own is no longer fatal. Upstream aborted when the
     ; old uninstaller returned success and $INSTDIR still held the main
@@ -255,11 +293,20 @@ LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of three. T
     ; A fabricated code is not reported as one. Upstream put 2 in $0 when
     ; ExecWait could not start the uninstaller at all, and printing that as an
     ; exit code would be the same defect the message is here to fix.
+    ;
+    ; A timed-out uninstaller is not reported as an error at all. nsExec killed
+    ; it, NSIS_HOOK_PREINSTALL takes care of what is left, and the files are
+    ; overwritten. Aborting here after a five-minute wait would be worse than
+    ; the original hang, because the person waited and still got nothing.
     StrCpy $R5 ""
-    ${If} ${Errors}
-      StrCpy $0 2 ; ExecWait failed, set fake exit code
+    ${If} $0 == "timeout"
+      ; Old uninstaller was hanging and has been terminated. Continue.
+      StrCpy $0 0
+    ${ElseIf} $0 == "error"
+      StrCpy $0 2
       StrCpy $R5 "The uninstaller of the installed version could not be started."
     ${Else}
+      ; $0 is the exit code as a decimal string; NSIS compares it numerically below
       StrCpy $R5 "The uninstaller of the installed version exited with code $0."
     ${EndIf}
 
@@ -287,6 +334,7 @@ LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of three. T
 PATCHES: tuple[tuple[str, str, str], ...] = (
     ("the reinstall page default", REINSTALL_DEFAULT_BEFORE, REINSTALL_DEFAULT_AFTER),
     ("the WiX branch honouring the selection", WIX_SELECTION_BEFORE, WIX_SELECTION_AFTER),
+    ("the old uninstaller timeout", UNINSTALL_TIMEOUT_BEFORE, UNINSTALL_TIMEOUT_AFTER),
     ("a leftover file not being fatal", LEFTOVER_FILE_BEFORE, LEFTOVER_FILE_AFTER),
 )
 

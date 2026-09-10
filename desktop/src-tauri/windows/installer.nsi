@@ -286,9 +286,9 @@ Function PageReinstall
     !endif
     ${NSD_OnClick} $R3 PageReinstallUpdateSelection
 
-    ; OpenConstructionERP fork of the stock Tauri template, edit one of three.
-    ; The other two are in PageLeaveReinstall below and carry their own notes.
-    ; scripts/check_nsis_template_drift.py proves the set is exactly these three
+    ; OpenConstructionERP fork of the stock Tauri template, edit one of four.
+    ; The other three are in PageLeaveReinstall below and carry their own notes.
+    ; scripts/check_nsis_template_drift.py proves the set is exactly these four
     ; by fetching the template at the CLI version pinned in
     ; .github/workflows/desktop-release.yml and reconstructing this file from it.
     ;
@@ -377,7 +377,7 @@ FunctionEnd
 Function PageLeaveReinstall
   ${NSD_GetState} $R2 $R1
 
-  ; OpenConstructionERP fork, edit two of three. Upstream sent every WiX
+  ; OpenConstructionERP fork, edit two of four. Upstream sent every WiX
   ; migration to reinst_uninstall without reading $R1, so the page offered a
   ; choice and then ignored it: a user who picked "Do not uninstall" watched the
   ; MSI uninstaller start anyway, and if it then failed the upgrade stopped on a
@@ -442,14 +442,35 @@ Function PageLeaveReinstall
       ${IfThen} $UpdateMode = 1 ${|} StrCpy $R1 "$R1 /UPDATE" ${|} ; append /UPDATE
       ${IfThen} $PassiveMode = 1 ${|} StrCpy $R1 "$R1 /P" ${|} ; append /P
       StrCpy $R1 "$R1 _?=$4" ; append uninstall directory
-      ExecWait '$R1' $0
+      ; OpenConstructionERP fork, edit four of four. ExecWait blocks forever
+      ; when the old uninstaller hangs, and every release from v11.7.1 to v15.8.0
+      ; shipped an uninstaller whose process-stop hooks called nsExec without
+      ; /TIMEOUT. On a machine where PowerShell never returns (antivirus, PowerToys,
+      ; wedged WMI), that uninstaller never finishes, and the upgrade stops dead.
+      ; The default radio button already steers people away from this path (edit one
+      ; above), but a person who explicitly chose to uninstall still hits the hang.
+      ;
+      ; nsExec with /TIMEOUT=300000 (five minutes) replaces ExecWait. If the old
+      ; uninstaller finishes normally, nsExec pushes its exit code as a decimal
+      ; string. If it hangs, nsExec terminates it after five minutes and pushes
+      ; the string "timeout". If it cannot be started at all, nsExec pushes
+      ; "error". The three are distinguished below.
+      ;
+      ; On timeout the upgrade continues rather than aborting: the old uninstaller
+      ; was already killed, NSIS_HOOK_PREINSTALL will stop any processes it left
+      ; behind, and the install overwrites every file. This is a strictly better
+      ; outcome than the alternative, which was a frozen installer window with no
+      ; way out but the task manager.
+      nsExec::Exec /TIMEOUT=300000 '$R1'
+      Pop $0
     ${EndIf}
 
     BringToFront
 
-    ; OpenConstructionERP fork, edit three of three. Three things change here,
-    ; all of them about when an upgrade is allowed to stop and what the person in
-    ; front of it is told when it does.
+    ; OpenConstructionERP fork, edit three of four (was three of three before
+    ; the timeout guard above). Three things change here, all of them about when
+    ; an upgrade is allowed to stop and what the person in front of it is told
+    ; when it does.
     ;
     ; A leftover binary on its own is no longer fatal. Upstream aborted when the
     ; old uninstaller returned success and $INSTDIR still held the main
@@ -471,11 +492,20 @@ Function PageLeaveReinstall
     ; A fabricated code is not reported as one. Upstream put 2 in $0 when
     ; ExecWait could not start the uninstaller at all, and printing that as an
     ; exit code would be the same defect the message is here to fix.
+    ;
+    ; A timed-out uninstaller is not reported as an error at all. nsExec killed
+    ; it, NSIS_HOOK_PREINSTALL takes care of what is left, and the files are
+    ; overwritten. Aborting here after a five-minute wait would be worse than
+    ; the original hang, because the person waited and still got nothing.
     StrCpy $R5 ""
-    ${If} ${Errors}
-      StrCpy $0 2 ; ExecWait failed, set fake exit code
+    ${If} $0 == "timeout"
+      ; Old uninstaller was hanging and has been terminated. Continue.
+      StrCpy $0 0
+    ${ElseIf} $0 == "error"
+      StrCpy $0 2
       StrCpy $R5 "The uninstaller of the installed version could not be started."
     ${Else}
+      ; $0 is the exit code as a decimal string; NSIS compares it numerically below
       StrCpy $R5 "The uninstaller of the installed version exited with code $0."
     ${EndIf}
 
