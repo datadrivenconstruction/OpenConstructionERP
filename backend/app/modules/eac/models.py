@@ -180,11 +180,11 @@ class EacRuleset(Base):
     runs: Mapped[list["EacRun"]] = relationship(
         back_populates="ruleset",
         cascade="all, delete-orphan",
-        lazy="noload",
+        lazy="raise_on_sql",
     )
     parent: Mapped["EacRuleset | None"] = relationship(
         remote_side="EacRuleset.id",
-        lazy="noload",
+        lazy="raise_on_sql",
     )
 
     def __repr__(self) -> str:
@@ -268,7 +268,7 @@ class EacRule(Base):
     versions: Mapped[list["EacRuleVersion"]] = relationship(
         back_populates="rule",
         cascade="all, delete-orphan",
-        lazy="noload",
+        lazy="raise_on_sql",
         order_by="EacRuleVersion.version_number",
     )
 
@@ -375,7 +375,7 @@ class EacRun(Base):
     result_items: Mapped[list["EacRunResultItem"]] = relationship(
         back_populates="run",
         cascade="all, delete-orphan",
-        lazy="noload",
+        lazy="raise_on_sql",
     )
 
     def __repr__(self) -> str:

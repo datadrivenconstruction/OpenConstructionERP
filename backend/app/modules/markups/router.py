@@ -412,7 +412,7 @@ async def delete_scale(
     if existing is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale config not found")
     if not existing.created_by or existing.created_by != str(user_id):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your scale")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale config not found")
     await service.delete_scale(config_id)
 
 
@@ -549,7 +549,7 @@ async def _authorize_stamp_mutation(
         await verify_project_access(existing.project_id, user_id, session)
         return
     if not existing.owner_id or existing.owner_id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your stamp template")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stamp template not found")
 
 
 @router.patch("/stamps/templates/{template_id}", response_model=StampTemplateResponse)
