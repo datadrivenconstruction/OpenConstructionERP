@@ -377,3 +377,4 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 # Acknowledged: @elsayed-mazen
 # Acknowledged: @hibohsuc-svg
 # Acknowledged: @j209
+# Acknowledged: @juanjosecasba
