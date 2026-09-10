@@ -350,3 +350,4 @@ https://github.com/datadrivenconstruction/OpenConstructionERP/graphs/contributor
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 # Acknowledged: @Bluster83
 # Acknowledged: @CADcoLabs
+# Acknowledged: @EQSTLab
