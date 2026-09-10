@@ -89,6 +89,13 @@ class Contract(Base):
         nullable=False,
         default=Decimal("0"),
     )
+    original_contract_value: Mapped[Decimal | None] = mapped_column(
+        Numeric(18, 4),
+        nullable=True,
+        default=None,
+        comment="Frozen copy of total_value at the moment the contract left draft. "
+        "Immutable after being set; the current value lives in total_value.",
+    )
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
     retention_percent: Mapped[Decimal] = mapped_column(
         Numeric(5, 2),

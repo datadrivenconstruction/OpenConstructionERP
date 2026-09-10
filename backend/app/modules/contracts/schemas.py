@@ -96,6 +96,7 @@ class ContractResponse(BaseModel):
     start_date: str | None = None
     end_date: str | None = None
     total_value: Decimal
+    original_contract_value: Decimal | None = None
     currency: str
     retention_percent: Decimal
     retention_release_event: str

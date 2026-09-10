@@ -852,6 +852,9 @@ class ContractsService:
                 },
             )
         fields.pop("status", None)
+        # original_contract_value is set internally when the contract
+        # leaves draft and must never be edited through the API.
+        fields.pop("original_contract_value", None)
         # Once the contract leaves `draft`, its financial terms are frozen.
         if contract.status != "draft":
             locked = sorted(f for f in self._LOCKED_FINANCIAL_FIELDS if f in fields)
@@ -1528,6 +1531,12 @@ class ContractsService:
                 contract,
                 actor_id=actor_id,
             )
+
+            # Freeze the original contract value so it survives later
+            # amendments via change orders and variations.  The current
+            # value lives in total_value; this column is immutable after
+            # being set and is the figure auditors compare against.
+            fields["original_contract_value"] = contract.total_value
 
             # Gate passed - stamp the audit trail onto the contract metadata.
             meta = dict(contract.metadata_ or {})
@@ -2974,7 +2983,13 @@ class ContractsService:
             if rollup_tracked
             else Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
         )
-        original_contract_sum = Decimal(str(contract.total_value or 0)) - change_orders_net
+        # Prefer the immutable stored baseline when available; fall back
+        # to the subtraction reconstruction for contracts that were active
+        # before the column existed.
+        if contract.original_contract_value is not None:
+            original_contract_sum = contract.original_contract_value
+        else:
+            original_contract_sum = Decimal(str(contract.total_value or 0)) - change_orders_net
 
         g702 = build_g702_summary(
             g703,

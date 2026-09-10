@@ -1645,6 +1645,7 @@ class ChangeOrderService:
         self,
         project_id: uuid.UUID,
         boq_id: uuid.UUID | None,
+        order: Any | None = None,
     ) -> tuple[Any | None, str | None]:
         """Decide which bill an approved change order writes into.
 
@@ -1671,6 +1672,12 @@ class ChangeOrderService:
         That distinction matters more now than it did: a bill per variation
         request is a bill per variation request, and each one is another
         unlocked bill on the same project.
+
+        When ``order`` is a change order mirrored from a variation and no
+        explicit ``boq_id`` is given, the variation request's own bill is
+        preferred over the project-wide search. This is the canonical change
+        lifecycle: a CO derived from a VO writes back to the variation's
+        bill, not to an arbitrary unlocked project bill.
         """
         from sqlalchemy import select
 
@@ -1685,6 +1692,28 @@ class ChangeOrderService:
             if boq.is_locked:
                 return None, "boq_locked"
             return boq, None
+
+        # Canonical change lifecycle: a CO mirrored from a VO inherits the
+        # variation request's own bill as the default write-back target,
+        # so a project with multiple unlocked bills (one per variation) does
+        # not require an explicit boq_id from the caller.
+        if order is not None:
+            vo_id = mirrored_variation_order_id(order)
+            if vo_id:
+                vr_id = (getattr(order, "metadata_", None) or {}).get("variation_request_id")
+                if vr_id:
+                    variation_boq = (
+                        await self.session.execute(
+                            select(BOQ).where(
+                                BOQ.variation_request_id == vr_id,
+                                BOQ.project_id == project_id,
+                            )
+                        )
+                    ).scalar_one_or_none()
+                    if variation_boq is not None:
+                        if variation_boq.is_locked:
+                            return None, "boq_locked"
+                        return variation_boq, None
 
         # Two rows answer the only question this branch asks - "one candidate
         # or several" - so two rows are all that are fetched. This runs on the
@@ -1787,7 +1816,7 @@ class ChangeOrderService:
             # order; skipping costs an unrecoverable desync.
             return
         try:
-            _, refusal = await self._resolve_writeback_boq(order.project_id, boq_id)
+            _, refusal = await self._resolve_writeback_boq(order.project_id, boq_id, order=order)
         except ImportError:
             # The bill-of-quantities module is not installed, so there is no
             # target to be wrong about. That is the ``no_active_boq`` case
@@ -1885,7 +1914,7 @@ class ChangeOrderService:
         if not items:
             return {"applied": False, "reason": "no_items"}
 
-        boq, refusal = await self._resolve_writeback_boq(order.project_id, boq_id)
+        boq, refusal = await self._resolve_writeback_boq(order.project_id, boq_id, order=order)
         if boq is None:
             if refusal == "no_active_boq":
                 logger.info(
