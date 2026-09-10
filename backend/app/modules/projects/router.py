@@ -2014,7 +2014,6 @@ async def project_activity(
     return events
 
 
-
 # ── Cross-Project Analytics ─────────────────────────────────────────────
 
 
