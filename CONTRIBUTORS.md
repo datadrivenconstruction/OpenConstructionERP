@@ -348,3 +348,4 @@ See the full list of everyone who has contributed:
 https://github.com/datadrivenconstruction/OpenConstructionERP/graphs/contributors
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+# Acknowledged: @Bluster83
