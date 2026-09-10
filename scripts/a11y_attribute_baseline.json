@@ -29,7 +29,6 @@
    "features/carbon/WholeLifePanel.tsx::placeholder::DE, GB, US...",
    "features/cde/CDESetupWizard.tsx::placeholder::Project-Originator-Functional-Spatial-Form-Discipline-Number",
    "features/daily-diary/DailyDiaryPage.tsx::placeholder::e.g. DJI Mavic 3 Enterprise",
-   "features/eac/components/EacBlockPalette.tsx::placeholder::Search…",
    "features/equipment/EquipmentPage.tsx::placeholder::320 GC",
    "features/equipment/EquipmentPage.tsx::placeholder::Caterpillar",
    "features/equipment/EquipmentPage.tsx::placeholder::VIN / serial / asset number",

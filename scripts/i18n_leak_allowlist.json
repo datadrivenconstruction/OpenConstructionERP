@@ -29,6 +29,16 @@
     "note": "entirely template variables/punctuation, no literal word to translate",
     "reason_category": "template_placeholder"
   },
+  "ai.quick_estimate.input_excel": {
+    "en_value": "Excel",
+    "note": "Microsoft Excel product name, identical in every script and locale",
+    "reason_category": "product_name"
+  },
+  "ai.quick_estimate.input_pdf": {
+    "en_value": "PDF",
+    "note": "Portable Document Format abbreviation, identical in every script and locale",
+    "reason_category": "abbreviation"
+  },
   "app.name": {
     "en_value": "OpenConstructionERP",
     "note": "our own product name, never translated",

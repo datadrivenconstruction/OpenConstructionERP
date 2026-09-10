@@ -59,6 +59,8 @@ def upgrade() -> None:
     # subtraction (same logic the G702 report used before this column).
     # This is a best-effort reconstruction; contracts with no rollup
     # metadata fall back to the manually-entered terms value.
+    # data-rewrite-ack: table=oe_contracts_contract growth=tenure rows=draft contracts whose original_contract_value was never set
+    # boot-repair: none - the column is added by the boot heal but left NULL; only alembic backfills it
     op.execute(
         sa.text(f"""
             UPDATE {_TABLE}

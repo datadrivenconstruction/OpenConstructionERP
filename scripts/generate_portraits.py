@@ -42,9 +42,7 @@ PEOPLE_DIR = ROOT / "frontend" / "public" / "assets" / "people"
 # Re-use the data from list_missing_country_portraits
 sys.path.insert(0, str(ROOT / "scripts"))
 from list_missing_country_portraits import (
-    HOUSE_STYLE,
     MARKET_NAMES,
-    ROLE_BRIEFS,
     brief_for,
     wanted_by_country,
 )
@@ -69,6 +67,7 @@ def generate_one(client: OpenAI, filename: str, prompt: str) -> bytes:
         img_data = base64.b64decode(item.b64_json)
     elif hasattr(item, "url") and item.url:
         import urllib.request
+
         with urllib.request.urlopen(item.url) as resp:
             img_data = resp.read()
     else:
