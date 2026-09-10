@@ -5,6 +5,10 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.3.1] - 2026-09-10
+
+Two test fixtures did not carry the original_contract_value field that 17.3.0 added to the ContractItem and ContractDashboard interfaces, so the Docker build of 17.3.0 failed at the TypeScript step. The field is nullable and both mocks now carry it.
+
 ## [17.3.0] - 2026-09-10
 
 One hundred and five English strings that were rendered directly by eleven frontend components now go through i18n and are translated into all 41 non-English languages. The chat renderers, the project selector, the BIM asset drawer, the EAC block palette and the property development bulk operations console spoke English regardless of the user's language setting, and now they do not. The bulk operations page, which is the MANAGER-only batch console for plots, reservations, documents, leads and buyers, had every visible label, heading, form field, select option, button and status message wrapped.

@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.3.1',
+    date: '2026-09-10',
+    tag: 'FIX',
+    summary:
+      'Two test fixtures did not carry the new original_contract_value field, breaking the Docker build of 17.3.0.',
+  },
+  {
     version: '17.3.0',
     date: '2026-09-10',
     tag: 'NEW',
