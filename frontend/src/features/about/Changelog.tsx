@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.3.0',
+    date: '2026-09-10',
+    tag: 'NEW',
+    summary:
+      'One hundred and five hardcoded English strings are now translated into 41 languages. Contracts store their original value as an immutable baseline and the dashboard shows the commercial breakdown: original, agreed variations, current, pending and forecast. A mirrored change order inherits the variation bill as its write-back target. Twelve shadowed API routes are fixed. Two hundred and ten country portraits fill every gap in the cases honeycomb across fifteen markets.',
+  },
+  {
     version: '17.2.0',
     date: '2026-09-09',
     tag: 'NEW',
