@@ -37,6 +37,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Check,
+  ClipboardCopy,
   ClipboardPaste,
   FileSearch,
   Layers,
@@ -797,6 +798,7 @@ export function CostMatchPanel() {
   const [decidingId, setDecidingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [report, setReport] = useState<CostMatchValidationReport | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
   const runsQuery = useQuery({
     queryKey: ['cost-match', 'runs', activeProjectId],
@@ -894,6 +896,41 @@ export function CostMatchPanel() {
     setDecidingId(result.id);
     decideMutation.mutate({ result, kind, costItemId, note });
   };
+
+  const confirmableResults = useMemo(
+    () => results.filter((r) => canConfirm(r) && decisionStateOf(r) === 'pending'),
+    [results],
+  );
+
+  const batchConfirm = useMutation({
+    mutationFn: async () => {
+      const targets = confirmableResults;
+      setBatchProgress({ done: 0, total: targets.length });
+      for (let i = 0; i < targets.length; i++) {
+        await decideResult(targets[i].id, { decision: 'confirmed' });
+        setBatchProgress({ done: i + 1, total: targets.length });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cost-match', 'results'] });
+      queryClient.invalidateQueries({ queryKey: ['cost-match', 'runs', activeProjectId] });
+      addToast({
+        type: 'success',
+        title: t('cost_match.batch_confirmed', { defaultValue: 'Batch confirmed' }),
+        message: t('cost_match.batch_confirmed_detail', {
+          defaultValue: '{{count}} lines confirmed in one pass.',
+          count: confirmableResults.length,
+        }),
+      });
+    },
+    onError: (err) =>
+      addToast({
+        type: 'error',
+        title: t('cost_match.batch_failed', { defaultValue: 'Some confirmations did not go through' }),
+        message: getErrorMessage(err),
+      }),
+    onSettled: () => setBatchProgress(null),
+  });
 
   /* Every hook is above this line; the guards start here. */
 
@@ -1052,6 +1089,29 @@ export function CostMatchPanel() {
 
           <CountsStrip run={selectedRun} />
 
+          {confirmableResults.length > 0 && !locked && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<ListChecks size={13} />}
+                loading={batchConfirm.isPending}
+                onClick={() => batchConfirm.mutate()}
+              >
+                {batchProgress
+                  ? t('cost_match.batch_progress', {
+                      defaultValue: 'Confirming {{done}} / {{total}}...',
+                      done: batchProgress.done,
+                      total: batchProgress.total,
+                    })
+                  : t('cost_match.batch_confirm', {
+                      defaultValue: 'Confirm all {{count}} suggested on this page',
+                      count: confirmableResults.length,
+                    })}
+              </Button>
+            </div>
+          )}
+
           {report && (
             <div className="rounded-md border border-border bg-surface-secondary p-3">
               <div className="flex items-center justify-between">
@@ -1161,6 +1221,45 @@ export function CostMatchPanel() {
                   </option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ClipboardCopy size={13} />}
+                onClick={() => {
+                  const header = ['Line', 'Description', 'Qty', 'Unit', 'Ref', 'Tier', 'Status', 'Matched code', 'Matched rate', 'Currency'].join('\t');
+                  const rows = results.map((r) => {
+                    const adopted2 = adoptedItem(r);
+                    return [
+                      r.line_no,
+                      r.source_description || '',
+                      r.source_quantity || '',
+                      r.source_unit || '',
+                      r.source_ref || '',
+                      resultTier(r),
+                      decisionStateOf(r),
+                      adopted2?.code || r.suggested_code || '',
+                      adopted2?.rate || r.suggested_rate || '',
+                      adopted2?.currency || r.suggested_currency || '',
+                    ].join('\t');
+                  });
+                  navigator.clipboard.writeText([header, ...rows].join('\n'));
+                  addToast({
+                    type: 'success',
+                    title: t('cost_match.copied', { defaultValue: 'Copied to clipboard' }),
+                    message: t('cost_match.copied_detail', {
+                      defaultValue: '{{count}} lines ready to paste into a spreadsheet.',
+                      count: results.length,
+                    }),
+                  });
+                }}
+              >
+                {t('cost_match.copy_results', { defaultValue: 'Copy to clipboard' })}
+              </Button>
             </div>
           )}
 

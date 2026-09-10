@@ -15,6 +15,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { priceIntelligence, substitute, type CatalogResource } from './api';
 import { ResourceSearchInput } from './ResourceSearchInput';
 import { fmtMoney, MetaLine, signedPct } from './parts';
+import { RowEstimateActions, type EstimateRow } from './RowEstimateActions';
 import type { SubstituteSeed } from './types';
 
 type Mode = 'price' | 'resource';
@@ -298,6 +299,23 @@ export function SubstitutePanel({ seed }: { seed: SubstituteSeed | null }) {
               </span>
             </div>
           )}
+
+          <div className="mt-3 flex items-center gap-2 border-t border-border-light pt-3">
+            <span className="text-xs text-content-tertiary">
+              {t('costExplorer.substitute.useResult', { defaultValue: 'Use this rate' })}
+            </span>
+            <RowEstimateActions
+              row={{
+                cost_item_id: result.cost_item_id,
+                code: result.code,
+                description: result.description,
+                unit: result.unit,
+                rate: result.new_rate,
+                currency: result.currency,
+                region: result.region,
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
