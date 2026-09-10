@@ -67,6 +67,7 @@ const CONTRACT: ContractItem = {
   start_date: '2026-01-01',
   end_date: '2026-12-31',
   total_value: '1000000.00',
+  original_contract_value: '1000000.00',
   currency: 'EUR',
   retention_percent: '5',
   retention_release_event: 'practical_completion',
