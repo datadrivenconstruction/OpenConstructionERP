@@ -37,6 +37,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from app.core.validation.engine import RuleResult
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -82,7 +83,7 @@ def _actor(user_id: str) -> uuid.UUID | None:
         return None
 
 
-def _to_findings(results: list) -> list[ClearanceFinding]:
+def _to_findings(results: list[RuleResult]) -> list[ClearanceFinding]:
     return [
         ClearanceFinding(
             # The rule id already starts with the module name, so the key strips

@@ -70,7 +70,7 @@ class MeasurementSheet:
     def total_quantity(self) -> Decimal:
         return sum((ln.raw_quantity for ln in self.lines), Decimal("0"))
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "item_ref": self.item_ref,
             "description": self.description,
@@ -100,9 +100,25 @@ def _q(value: Decimal, quant: Decimal) -> str:
 
 
 def build_line(raw: dict[str, Any], *, strict: bool = True) -> MeasurementLine:
-    """Build and validate one line. In non-strict mode a bad formula is kept
-    as an error on the line (quantity 0) instead of raising, so one typo does
-    not blow up a whole sheet in the UI."""
+    """Build and validate one measurement line from a plain dict.
+
+    In non-strict mode a bad formula is kept as an error on the line
+    (quantity 0) instead of raising, so one typo does not blow up a whole
+    sheet in the UI.
+
+    Args:
+        raw: Dict with keys ``description``, ``formula``, ``variables``,
+            ``factor``, ``sign``, ``ref``, ``unit``.
+        strict: If ``True`` (default), an invalid formula raises
+            :class:`MeasurementError`. If ``False``, the error is captured
+            on the line and its quantity becomes zero.
+
+    Returns:
+        A validated :class:`MeasurementLine`.
+
+    Raises:
+        MeasurementError: If *strict* and the formula is invalid.
+    """
     line = MeasurementLine(
         description=str(raw.get("description") or "").strip(),
         formula=str(raw.get("formula") or "").strip(),
@@ -121,11 +137,22 @@ def build_line(raw: dict[str, Any], *, strict: bool = True) -> MeasurementLine:
     return line
 
 
-def reconcile(sheet: MeasurementSheet, target_quantity: Any, *, tolerance: Any = "0.001") -> dict:
-    """Compare the measured total against a target (for example the position
-    quantity) and report the drift, so a user can trust or fix a quantity.
+def reconcile(sheet: MeasurementSheet, target_quantity: Any, *, tolerance: Any = "0.001") -> dict[str, Any]:
+    """Compare the measured total against a target and report the drift.
 
-    ``matches`` is true when the absolute difference is within ``tolerance``.
+    Lets a user trust or fix a quantity by showing whether the take-off
+    total matches the position quantity within a configurable tolerance.
+
+    Args:
+        sheet: The measurement sheet whose total is compared.
+        target_quantity: The expected quantity (e.g. position quantity).
+            Converted to :class:`~decimal.Decimal` internally.
+        tolerance: Maximum acceptable absolute difference. Defaults to
+            ``"0.001"``.
+
+    Returns:
+        Dict with keys ``measured_quantity``, ``target_quantity``,
+        ``difference``, ``tolerance`` and ``matches`` (bool).
     """
     measured = sheet.total_quantity
     target = _dec(target_quantity)
@@ -148,7 +175,22 @@ def build_sheet(
     lines: list[dict[str, Any] | MeasurementLine],
     strict: bool = True,
 ) -> MeasurementSheet:
-    """Assemble a :class:`MeasurementSheet` from plain dicts or lines."""
+    """Assemble a :class:`MeasurementSheet` from plain dicts or lines.
+
+    Args:
+        item_ref: BoQ item reference the sheet belongs to.
+        description: Human-readable description of the measured item.
+        unit: Unit of measurement (m, m2, m3, etc.).
+        lines: Raw dicts or pre-built :class:`MeasurementLine` instances.
+        strict: Passed through to :func:`build_line` for dict entries.
+
+    Returns:
+        A :class:`MeasurementSheet` with all lines built and validated.
+
+    Raises:
+        MeasurementError: If *lines* is empty or *strict* and a formula
+            is invalid.
+    """
     built: list[MeasurementLine] = []
     for raw in lines or []:
         if isinstance(raw, MeasurementLine):

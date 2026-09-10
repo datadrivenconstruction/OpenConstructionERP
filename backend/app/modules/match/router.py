@@ -5,26 +5,25 @@
 Endpoints:
     * ``POST /api/v1/match/element``  - run the matcher.
     * ``POST /api/v1/match/feedback`` - record user confirmation.
+    * ``POST /api/v1/match/accept``   - confirm match and write BOQ position.
 
-Both require auth via the existing JWT bearer scheme.
+All endpoints require auth via the existing JWT bearer scheme.
 """
 
 from __future__ import annotations
 
 import logging
-import uuid
-from typing import Any, Literal
-from uuid import UUID
 
 from fastapi import APIRouter, status
-from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.match_service import (
-    ElementEnvelope,
-    MatchCandidate,
-    MatchResponse,
-)
+from app.core.match_service import MatchResponse
 from app.dependencies import CurrentUserPayload, SessionDep
+from app.modules.match.schemas import (
+    MatchAcceptRequest,
+    MatchAcceptResponse,
+    MatchElementRequest,
+    MatchFeedbackRequest,
+)
 from app.modules.match.service import (
     accept_match,
     run_match_for_element,
@@ -33,69 +32,6 @@ from app.modules.match.service import (
 
 router = APIRouter(tags=["match"])
 logger = logging.getLogger(__name__)
-
-
-# ── Request schemas ──────────────────────────────────────────────────────
-
-
-class MatchElementRequest(BaseModel):
-    """Inbound body for ``POST /element``."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    source: Literal["bim", "pdf", "dwg", "photo"] = Field(
-        ...,
-        description="One of bim/pdf/dwg/photo. Validated to a closed allowlist.",
-    )
-    project_id: UUID
-    raw_element_data: dict[str, Any] = Field(default_factory=dict)
-    top_k: int = Field(default=10, ge=1, le=100)
-    use_reranker: bool = False
-
-
-class MatchFeedbackRequest(BaseModel):
-    """Inbound body for ``POST /feedback``."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    project_id: UUID
-    element_envelope: ElementEnvelope
-    accepted_candidate: MatchCandidate | None = None
-    rejected_candidates: list[MatchCandidate] = Field(default_factory=list)
-    user_chose_code: str | None = None
-
-
-class MatchAcceptRequest(BaseModel):
-    """Inbound body for ``POST /accept``.
-
-    Consolidates the three round-trips the frontend would otherwise need
-    (create / update position → create BIM link → submit feedback) into
-    one transactional call. ``existing_position_id`` swaps the create
-    path for an update; ``bim_element_id`` opts into the BIM link.
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    project_id: UUID
-    element_envelope: ElementEnvelope
-    accepted_candidate: MatchCandidate
-    rejected_candidates: list[MatchCandidate] = Field(default_factory=list)
-    boq_id: UUID
-    parent_section_id: UUID | None = None
-    existing_position_id: UUID | None = None
-    quantity_override: float | None = Field(default=None, ge=0.0)
-    bim_element_id: str | None = None
-
-
-class MatchAcceptResponse(BaseModel):
-    """Outbound body for ``POST /accept``."""
-
-    position_id: UUID
-    position_ordinal: str
-    created: bool
-    cost_link_created: bool
-    bim_link_created: bool
-    audit_entry_id: UUID | None = None
 
 
 # ── Routes ────────────────────────────────────────────────────────────────
@@ -202,12 +138,3 @@ async def accept_endpoint(
 async def health() -> dict[str, str]:
     """Module-loaded probe."""
     return {"module": "oe_match", "status": "ok"}
-
-
-# Convenience handle for typed re-exports if needed.
-ROUTER_PREFIX = "/match"
-
-
-def _prevent_unused_import_warning() -> tuple[Any, ...]:
-    """Keep static-analysis happy while exposing a stable test handle."""
-    return (uuid.UUID, ROUTER_PREFIX)

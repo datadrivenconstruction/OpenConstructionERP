@@ -20,6 +20,16 @@ from app.modules.measurement.model import MeasurementSheet, _dec
 
 @dataclass(frozen=True)
 class Preset:
+    """Labelling and rounding convention for a measurement sheet.
+
+    Attributes:
+        name: Machine key, e.g. ``"reb"`` or ``"international"``.
+        label: Human-readable title shown at the top of a rendered sheet.
+        region: ISO 3166-1 alpha-2 country code, or ``"international"``.
+        decimals: Number of decimal places for quantity rounding.
+        standard: Name of the measurement standard, if any.
+    """
+
     name: str
     label: str
     region: str
@@ -53,6 +63,15 @@ PRESETS: dict[str, Preset] = {p.name: p for p in (_INTERNATIONAL, _REB, _OENORM)
 
 
 def get_preset(name: str | None) -> Preset:
+    """Look up a preset by name, falling back to the international default.
+
+    Args:
+        name: Preset key (case-insensitive), or ``None`` for the default.
+
+    Returns:
+        The matching :class:`Preset`, or the international preset if *name*
+        is unknown or ``None``.
+    """
     return PRESETS.get((name or "").strip().lower(), _INTERNATIONAL)
 
 
@@ -113,7 +132,18 @@ def _q(value: Decimal, decimals: int) -> str:
 
 
 def render_markdown(sheet: MeasurementSheet, *, preset: str = "international") -> str:
-    """A readable measurement sheet: every line shows its formula and result."""
+    """Render a measurement sheet as a Markdown table.
+
+    Every line shows its formula, factor, sign and resulting quantity,
+    rounded according to the preset's convention.
+
+    Args:
+        sheet: The measurement sheet to render.
+        preset: Preset name controlling rounding and heading labels.
+
+    Returns:
+        A complete Markdown document with a heading, table and total.
+    """
     p = get_preset(preset)
     out: list[str] = []
     heading = f"# {p.label}: {sheet.item_ref} {sheet.description}".rstrip()
@@ -136,7 +166,18 @@ def render_markdown(sheet: MeasurementSheet, *, preset: str = "international") -
 
 
 def render_csv(sheet: MeasurementSheet, *, preset: str = "international") -> str:
-    """Spreadsheet-friendly measurement sheet (RFC 4180 style quoting)."""
+    """Render a measurement sheet as CSV (RFC 4180 quoting).
+
+    Suitable for spreadsheet import. Includes a header row, one row per
+    line, and a TOTAL row at the bottom.
+
+    Args:
+        sheet: The measurement sheet to render.
+        preset: Preset name controlling quantity rounding.
+
+    Returns:
+        A CSV string with ``\\r\\n`` line endings.
+    """
     p = get_preset(preset)
     rows: list[str] = []
     rows.append(_csv_row(["ref", "description", "formula", "factor", "sign", "unit", "quantity", "error"]))
