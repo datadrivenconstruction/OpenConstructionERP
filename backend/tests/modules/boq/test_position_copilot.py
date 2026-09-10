@@ -275,12 +275,12 @@ async def test_cross_tenant_position_is_forbidden(session: AsyncSession, monkeyp
     svc = BOQCopilotService(session)
     with pytest.raises(HTTPException) as exc_info:
         await svc.chat(session, pid, "whose position is this", _payload_for(intruder), _FakeSettings())
-    assert exc_info.value.status_code == 403
+    assert exc_info.value.status_code == 404
 
     # list_messages is guarded the same way.
     with pytest.raises(HTTPException) as exc_info2:
         await svc.list_messages(session, pid, _payload_for(intruder))
-    assert exc_info2.value.status_code == 403
+    assert exc_info2.value.status_code == 404
 
 
 @pytest.mark.asyncio

@@ -528,7 +528,7 @@ class BOQCopilotService:
         """Load a position after verifying the caller owns its BOQ's project.
 
         Reuses ``_verify_boq_owner`` (the exact check the position routes use),
-        so a missing position is 404 and a cross-tenant one is 403 - before any
+        so a missing position is 404 and a cross-tenant one is also 404 - before any
         data is returned or mutated. ``user`` is the JWT payload (carries
         ``sub``/``role``); admins bypass via the same path the routes use.
         """
