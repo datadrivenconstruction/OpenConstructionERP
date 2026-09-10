@@ -143,6 +143,7 @@ class SitePrepItem(Base):
     plan: Mapped["SitePrepPlan | None"] = relationship(
         "app.modules.site_prep.models.SitePrepPlan",
         back_populates="items",
+        lazy="raise_on_sql",
     )
 
     def __repr__(self) -> str:

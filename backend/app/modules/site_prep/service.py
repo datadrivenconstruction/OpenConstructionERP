@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Site-prep service layer (pre-construction mobilisation readiness).
 
-Async data access on top of the module's own two tables plus the read-side
-loaders that project persisted rows onto the pure
+Business logic delegating data access to :mod:`app.modules.site_prep.repository`
+and projecting persisted rows onto the pure
 :class:`app.modules.site_prep.readiness.ReadinessItem` list fed to the
 computation core. Every referenced ``plan_id`` is confirmed to belong to the same
 project before it is written to an item, so an item can never be attached to
@@ -18,10 +18,10 @@ from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
 
 from app.modules.site_prep import readiness
 from app.modules.site_prep.models import SitePrepItem, SitePrepPlan
+from app.modules.site_prep.repository import SitePrepItemRepository, SitePrepPlanRepository
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -69,13 +69,14 @@ class SitePrepService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self._plan_repo = SitePrepPlanRepository(session)
+        self._item_repo = SitePrepItemRepository(session)
 
     # -- Plan ---------------------------------------------------------------
 
     async def get_plan(self, project_id: uuid.UUID) -> SitePrepPlan | None:
         """Load the project's mobilisation plan (``None`` if none exists yet)."""
-        stmt = select(SitePrepPlan).where(SitePrepPlan.project_id == project_id)
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        return await self._plan_repo.get_by_project(project_id)
 
     async def require_plan(self, project_id: uuid.UUID) -> SitePrepPlan:
         """Load the project's plan or raise 404 when it has not been created."""
@@ -106,9 +107,7 @@ class SitePrepService:
             notes=payload.notes,
             created_by=_as_optional_uuid(created_by),
         )
-        self.session.add(plan)
-        await self.session.flush()
-        return plan
+        return await self._plan_repo.create(plan)
 
     async def update_plan(
         self,
@@ -149,9 +148,7 @@ class SitePrepService:
             notes=payload.notes,
             created_by=_as_optional_uuid(created_by),
         )
-        self.session.add(item)
-        await self.session.flush()
-        return item
+        return await self._item_repo.create(item)
 
     async def list_items(
         self,
@@ -161,21 +158,11 @@ class SitePrepService:
         item_status: str | None = None,
     ) -> list[SitePrepItem]:
         """List a project's readiness items with optional category / status filter."""
-        stmt = select(SitePrepItem).where(SitePrepItem.project_id == project_id)
-        if category is not None:
-            stmt = stmt.where(SitePrepItem.category == category)
-        if item_status is not None:
-            stmt = stmt.where(SitePrepItem.status == item_status)
-        stmt = stmt.order_by(SitePrepItem.sort_order.asc(), SitePrepItem.created_at.asc())
-        return list((await self.session.execute(stmt)).scalars().all())
+        return await self._item_repo.list_by_project(project_id, category=category, status=item_status)
 
     async def get_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> SitePrepItem | None:
         """Load one item, scoped to the project (``None`` if foreign/absent)."""
-        stmt = select(SitePrepItem).where(
-            SitePrepItem.id == item_id,
-            SitePrepItem.project_id == project_id,
-        )
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        return await self._item_repo.get_by_id_and_project(item_id, project_id)
 
     async def require_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> SitePrepItem:
         """Load one in-project item or raise 404 (missing or foreign alike)."""
@@ -206,8 +193,7 @@ class SitePrepService:
     async def delete_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> None:
         """Delete an in-project readiness item (404 if missing or foreign)."""
         item = await self.require_item(project_id, item_id)
-        await self.session.delete(item)
-        await self.session.flush()
+        await self._item_repo.delete(item)
 
     # -- Derived readiness (DB loaders + pure core) -------------------------
 
@@ -264,11 +250,7 @@ class SitePrepService:
         create / update is rejected even though the caller passed the project
         access gate.
         """
-        stmt = select(SitePrepPlan.id).where(
-            SitePrepPlan.id == plan_id,
-            SitePrepPlan.project_id == project_id,
-        )
-        if (await self.session.execute(stmt)).first() is None:
+        if not await self._plan_repo.plan_exists_for_project(project_id, plan_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Mobilisation plan not found in this project",

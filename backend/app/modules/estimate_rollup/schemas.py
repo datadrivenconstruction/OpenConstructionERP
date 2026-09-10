@@ -12,6 +12,7 @@ the wire.
 
 from __future__ import annotations
 
+import uuid
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -72,7 +73,7 @@ class EstimateRollupResponse(BaseModel):
     lines: list[RollupLineOut] = Field(default_factory=list)
 
     @classmethod
-    def from_rollup(cls, rollup: EstimateRollup, *, project_id: object) -> EstimateRollupResponse:
+    def from_rollup(cls, rollup: EstimateRollup, *, project_id: uuid.UUID) -> EstimateRollupResponse:
         """Render the pure :class:`EstimateRollup` onto the wire schema."""
         return cls(
             project_id=str(project_id),
