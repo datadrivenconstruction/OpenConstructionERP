@@ -2300,6 +2300,17 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     # rather than a claim about where the project sits.
     "us-texas": "medical-us",
     "us-california": "commercial-denver",
+    # 10 country packs added 2026-09-11. Each maps to its flagship demo.
+    "germany-de": "residential-berlin",
+    "france-fr": "school-paris",
+    "japan-jp": "office-tokyo",
+    "korea-kr": "residential-seoul",
+    "turkey-tr": "mixed-use-istanbul",
+    "italy-it": "residential-rome",
+    "spain-es": "mixed-use-barcelona",
+    "uae-ae": "warehouse-dubai",
+    "netherlands-nl": "office-amsterdam",
+    "poland-pl": "residential-warsaw",
 }
 
 # Country-name → ISO 3166-1 alpha-2, for catalog rows auto-derived from a
