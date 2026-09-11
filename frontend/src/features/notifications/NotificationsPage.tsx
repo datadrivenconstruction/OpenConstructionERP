@@ -34,6 +34,7 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Eraser,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -120,6 +121,37 @@ function humanizeKey(key: string): string {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+// ── Time-based grouping ──────────────────────────────────────────────────────
+
+type DateBucket = 'today' | 'yesterday' | 'this_week' | 'earlier';
+
+const DATE_BUCKET_ORDER: DateBucket[] = ['today', 'yesterday', 'this_week', 'earlier'];
+
+function bucketFor(dateStr: string): DateBucket {
+  const created = new Date(dateStr);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+  // "This week" = last 7 days (excluding today and yesterday which have their own buckets)
+  const startOfWeek = startOfToday - 7 * 24 * 60 * 60 * 1000;
+  const t = created.getTime();
+  if (t >= startOfToday) return 'today';
+  if (t >= startOfYesterday) return 'yesterday';
+  if (t >= startOfWeek) return 'this_week';
+  return 'earlier';
+}
+
+function groupByBucket(items: Notification[]): Record<DateBucket, Notification[]> {
+  const buckets: Record<DateBucket, Notification[]> = {
+    today: [],
+    yesterday: [],
+    this_week: [],
+    earlier: [],
+  };
+  for (const n of items) buckets[bucketFor(n.created_at)].push(n);
+  return buckets;
+}
+
 const PAGE_SIZE = 50;
 
 type NotificationFilter = 'all' | 'unread' | 'read';
@@ -193,6 +225,8 @@ export function NotificationsPage() {
   const unreadCount = data?.unread_count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  const grouped = useMemo(() => groupByBucket(items), [items]);
+
   const markReadMutation = useMutation({
     mutationFn: (id: string) => apiPost<void>(`/v1/notifications/${id}/read/`),
     onSuccess: () => {
@@ -213,6 +247,16 @@ export function NotificationsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiDelete(`/v1/notifications/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications-page'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications-list'] });
+    },
+  });
+
+  const clearAllMutation = useMutation({
+    mutationFn: () =>
+      Promise.all(items.map((n) => apiDelete(`/v1/notifications/${n.id}`))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications-page'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
@@ -256,6 +300,17 @@ export function NotificationsPage() {
                 disabled={markAllReadMutation.isPending}
               >
                 {t('notifications.mark_all_read_short', { defaultValue: 'Mark all read' })}
+              </Button>
+            )}
+            {activeTab === 'inbox' && items.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Eraser size={14} />}
+                onClick={() => clearAllMutation.mutate()}
+                disabled={clearAllMutation.isPending}
+              >
+                {t('notifications.clear_all', { defaultValue: 'Clear all' })}
               </Button>
             )}
             <ModuleGuideButton content={notificationsGuide} />
@@ -403,91 +458,110 @@ export function NotificationsPage() {
             />
           </div>
         ) : (
-          <ul role="list" className="divide-y divide-border-light">
-            {items.map((n) => {
-              const cfg = ICON_MAP[n.icon_category] ?? ICON_MAP.info;
-              const TypeIcon = cfg.icon;
-              const title = t(n.title_key, {
-                defaultValue: n.title_default || humanizeKey(n.title_key),
-                ...(n.body_context as Record<string, unknown>),
-              });
-              const body = n.body_key
-                ? t(n.body_key, {
-                    defaultValue: n.body_default || humanizeKey(n.body_key),
-                    ...(n.body_context as Record<string, unknown>),
-                  })
-                : n.body_default;
-              const deleting = deleteMutation.isPending && deleteMutation.variables === n.id;
+          <div>
+            {DATE_BUCKET_ORDER.map((bucket) => {
+              const rows = grouped[bucket];
+              if (rows.length === 0) return null;
+              const bucketLabels: Record<DateBucket, string> = {
+                today: t('notifications.bucket.today', { defaultValue: 'Today' }),
+                yesterday: t('notifications.bucket.yesterday', { defaultValue: 'Yesterday' }),
+                this_week: t('notifications.bucket.this_week', { defaultValue: 'This week' }),
+                earlier: t('notifications.bucket.earlier', { defaultValue: 'Earlier' }),
+              };
               return (
-                <li
-                  key={n.id}
-                  className={clsx(
-                    'group flex items-start gap-3 px-4 py-3',
-                    'hover:bg-surface-secondary/60 transition-colors',
-                    !n.is_read && 'bg-oe-blue-subtle/30',
-                    deleting && 'opacity-50 pointer-events-none',
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => handleRowClick(n)}
-                    className="flex items-start gap-3 flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded-md -m-1 p-1"
-                  >
-                    <span
-                      className={clsx(
-                        'shrink-0 h-9 w-9 rounded-lg flex items-center justify-center',
-                        cfg.bg,
-                      )}
-                    >
-                      <TypeIcon size={16} className={cfg.color} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <p
+                <div key={bucket}>
+                  <div className="sticky top-0 z-10 bg-surface-elevated/95 backdrop-blur px-4 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-content-quaternary border-b border-border-light/60">
+                    {bucketLabels[bucket]}
+                  </div>
+                  <ul role="list" className="divide-y divide-border-light">
+                    {rows.map((n) => {
+                      const cfg = ICON_MAP[n.icon_category] ?? ICON_MAP.info;
+                      const TypeIcon = cfg.icon;
+                      const title = t(n.title_key, {
+                        defaultValue: n.title_default || humanizeKey(n.title_key),
+                        ...(n.body_context as Record<string, unknown>),
+                      });
+                      const body = n.body_key
+                        ? t(n.body_key, {
+                            defaultValue: n.body_default || humanizeKey(n.body_key),
+                            ...(n.body_context as Record<string, unknown>),
+                          })
+                        : n.body_default;
+                      const deleting = deleteMutation.isPending && deleteMutation.variables === n.id;
+                      return (
+                        <li
+                          key={n.id}
                           className={clsx(
-                            'text-sm leading-snug',
-                            n.is_read
-                              ? 'font-medium text-content-primary'
-                              : 'font-semibold text-content-primary',
+                            'group flex items-start gap-3 px-4 py-3',
+                            'hover:bg-surface-secondary/60 transition-colors',
+                            !n.is_read && 'bg-oe-blue-subtle/30',
+                            deleting && 'opacity-50 pointer-events-none',
                           )}
                         >
-                          {title}
-                        </p>
-                        {!n.is_read && (
-                          <span className="inline-block h-2 w-2 rounded-full bg-oe-blue shrink-0" />
-                        )}
-                      </div>
-                      {body && (
-                        <p className="text-xs text-content-secondary mt-0.5">{body}</p>
-                      )}
-                      <p className="text-[11px] text-content-quaternary mt-1 tabular-nums">
-                        <DateDisplay value={n.created_at} format="datetime" />
-                      </p>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteMutation.mutate(n.id)}
-                    className={clsx(
-                      'shrink-0 flex h-7 w-7 items-center justify-center rounded-md',
-                      'text-content-quaternary',
-                      'opacity-0 group-hover:opacity-100 focus:opacity-100',
-                      'hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/30',
-                      'transition-all',
-                    )}
-                    title={t('common.delete', { defaultValue: 'Delete' })}
-                    aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                  >
-                    {deleting ? (
-                      <Loader2 size={13} className="animate-spin" />
-                    ) : (
-                      <Trash2 size={13} />
-                    )}
-                  </button>
-                </li>
+                          <button
+                            type="button"
+                            onClick={() => handleRowClick(n)}
+                            className="flex items-start gap-3 flex-1 min-w-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded-md -m-1 p-1"
+                          >
+                            <span
+                              className={clsx(
+                                'shrink-0 h-9 w-9 rounded-lg flex items-center justify-center',
+                                cfg.bg,
+                              )}
+                            >
+                              <TypeIcon size={16} className={cfg.color} />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                <p
+                                  className={clsx(
+                                    'text-sm leading-snug',
+                                    n.is_read
+                                      ? 'font-medium text-content-primary'
+                                      : 'font-semibold text-content-primary',
+                                  )}
+                                >
+                                  {title}
+                                </p>
+                                {!n.is_read && (
+                                  <span className="inline-block h-2 w-2 rounded-full bg-oe-blue shrink-0" />
+                                )}
+                              </div>
+                              {body && (
+                                <p className="text-xs text-content-secondary mt-0.5">{body}</p>
+                              )}
+                              <p className="text-[11px] text-content-quaternary mt-1 tabular-nums">
+                                <DateDisplay value={n.created_at} format="datetime" />
+                              </p>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteMutation.mutate(n.id)}
+                            className={clsx(
+                              'shrink-0 flex h-7 w-7 items-center justify-center rounded-md',
+                              'text-content-quaternary',
+                              'opacity-0 group-hover:opacity-100 focus:opacity-100',
+                              'hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/30',
+                              'transition-all',
+                            )}
+                            title={t('common.delete', { defaultValue: 'Delete' })}
+                            aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                          >
+                            {deleting ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Trash2 size={13} />
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               );
             })}
-          </ul>
+          </div>
         )}
       </div>
 

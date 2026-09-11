@@ -18,9 +18,13 @@ const STORAGE_KEY = 'oe_view_mode';
 function readMode(): ViewMode {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
-    return v === 'simple' ? 'simple' : 'advanced';
+    if (v === 'advanced') return 'advanced';
+    if (v === 'simple') return 'simple';
+    // New users (no stored preference) start in simple mode so the sidebar
+    // shows only the essential groups instead of all 19.
+    return 'simple';
   } catch {
-    return 'advanced';
+    return 'simple';
   }
 }
 

@@ -82,12 +82,15 @@ from app.modules.projects.schemas import (
     MilestoneUpdate,
     PresetRead,
     ProfileSpec,
+    ProjectBackupResponse,
     ProjectCardMetrics,
     ProjectCreate,
     ProjectModulePresence,
     ProjectModuleRead,
     ProjectProfileResult,
     ProjectResponse,
+    ProjectRestoreRequest,
+    ProjectRestoreResponse,
     ProjectStatusHistoryResponse,
     ProjectUpdate,
     WBSCreate,
@@ -3411,3 +3414,96 @@ async def get_module_presence(
     # ``probe_project_modules`` returns sidebar slugs (incl. "5d");
     # ``model_validate`` resolves the ``5d`` → ``five_d`` alias.
     return ProjectModulePresence.model_validate(presence)
+
+
+# ── Project backup / restore ─────────────────────────────────────────────
+
+
+@router.post(
+    "/{project_id}/backup",
+    response_model=ProjectBackupResponse,
+    summary="Export project backup",
+    description=(
+        "Export a project and all its related data (BOQ positions, markups, "
+        "WBS nodes, milestones) as a JSON archive. The archive carries a "
+        "format version for future compatibility and can be restored into "
+        "a new project via the restore endpoint."
+    ),
+)
+@router.post(
+    "/{project_id}/backup/",
+    response_model=ProjectBackupResponse,
+    include_in_schema=False,
+)
+async def backup_project(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectBackupResponse:
+    """Export a project as a JSON backup archive.
+
+    Requires read access to the project (owner, admin, or team member).
+    Returns the full project data tree including BOQs with their positions
+    and markups, WBS hierarchy and milestones.
+    """
+    await _verify_project_access(service, project_id, user_id, session, payload)
+    try:
+        backup_data = await service.backup_project(project_id)
+        return ProjectBackupResponse(backup=backup_data)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create backup for project %s", project_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create project backup",
+        )
+
+
+@router.post(
+    "/{project_id}/backup/restore",
+    response_model=ProjectRestoreResponse,
+    status_code=201,
+    summary="Restore project from backup",
+    description=(
+        "Create a new project from a JSON backup archive. The original "
+        "project is never modified. A fresh project is created with new "
+        "UUIDs and an auto-generated project code. The project_id in the "
+        "URL is used only for access verification (the caller must have "
+        "access to the source project context)."
+    ),
+)
+@router.post(
+    "/{project_id}/backup/restore/",
+    response_model=ProjectRestoreResponse,
+    status_code=201,
+    include_in_schema=False,
+)
+async def restore_project_from_backup(
+    project_id: uuid.UUID,
+    body: ProjectRestoreRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectRestoreResponse:
+    """Restore a project from a JSON backup archive.
+
+    Creates a new project owned by the current user. The project_id in the
+    URL is used for access verification only. All data is created with
+    fresh UUIDs.
+    """
+    await _verify_project_access(service, project_id, user_id, session, payload)
+    try:
+        result = await service.restore_project_from_backup(body.backup, uuid.UUID(user_id))
+        return result
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to restore project from backup")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to restore project from backup",
+        )

@@ -1283,3 +1283,171 @@ class ProjectCardMetrics(BaseModel):
     open_rfis: int = 0
     safety_incidents: int = 0
     progress_pct: float = 0.0
+
+
+# ── Project backup / restore schemas ────────────────────────────────────
+
+
+class BackupPositionData(BaseModel):
+    """Single BOQ position inside a project backup archive."""
+
+    ordinal: str
+    description: str
+    unit: str
+    quantity: str = "0"
+    unit_rate: str = "0"
+    total: str = "0"
+    classification: dict[str, Any] = Field(default_factory=dict)
+    source: str = "manual"
+    confidence: str | None = None
+    risk_dispersion: str | None = None
+    price_basis: str | None = None
+    cad_element_ids: list[str] = Field(default_factory=list)
+    cad_model_id: str | None = None
+    validation_status: str = "pending"
+    wbs_id: str | None = None
+    cost_code_id: str | None = None
+    node_type: str | None = None
+    contractor_id: str | None = None
+    contract_id: str | None = None
+    funding_source_id: str | None = None
+    stage_id: str | None = None
+    reference_code: str | None = None
+    norm_work_key: str | None = None
+    sort_order: int = 0
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    children: list["BackupPositionData"] = Field(default_factory=list)
+
+
+class BackupMarkupData(BaseModel):
+    """Single BOQ markup line inside a project backup archive."""
+
+    name: str
+    markup_type: str = "percentage"
+    category: str = "overhead"
+    percentage: str = "0"
+    fixed_amount: str = "0"
+    apply_to: str = "direct_cost"
+    sort_order: int = 0
+    is_active: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class BackupBOQData(BaseModel):
+    """Single BOQ inside a project backup archive."""
+
+    name: str
+    description: str = ""
+    status: str = "draft"
+    estimate_type: str | None = None
+    is_locked: bool = False
+    approved_by: str | None = None
+    approved_at: str | None = None
+    base_date: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    positions: list[BackupPositionData] = Field(default_factory=list)
+    markups: list[BackupMarkupData] = Field(default_factory=list)
+
+
+class BackupWBSData(BaseModel):
+    """Single WBS node inside a project backup archive.
+
+    Children are nested inline so the hierarchy can be restored without
+    relying on stable UUIDs.
+    """
+
+    code: str
+    name: str
+    name_translations: dict[str, str] | None = None
+    level: int = 0
+    sort_order: int = 0
+    wbs_type: str = "cost"
+    planned_cost: str | None = None
+    planned_hours: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    children: list["BackupWBSData"] = Field(default_factory=list)
+
+
+class BackupMilestoneData(BaseModel):
+    """Single milestone inside a project backup archive."""
+
+    name: str
+    milestone_type: str = "general"
+    planned_date: str | None = None
+    actual_date: str | None = None
+    status: str = "pending"
+    linked_payment_pct: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class BackupProjectMetadata(BaseModel):
+    """Project-level fields included in the backup archive."""
+
+    name: str
+    description: str = ""
+    region: str = ""
+    classification_standard: str = ""
+    currency: str = ""
+    locale: str = "en"
+    validation_rule_sets: list[str] = Field(default_factory=lambda: ["boq_quality"])
+    compliance_rule_packs: list[str] = Field(default_factory=lambda: ["universal"])
+    status: str = "active"
+    country_code: str | None = None
+    project_code: str | None = None
+    project_type: str | None = None
+    phase: str | None = None
+    address: dict[str, Any] | None = None
+    contract_value: str | None = None
+    planned_start_date: str | None = None
+    planned_end_date: str | None = None
+    actual_start_date: str | None = None
+    actual_end_date: str | None = None
+    budget_estimate: str | None = None
+    contingency_pct: str | None = None
+    gross_floor_area: str | None = None
+    custom_fields: dict[str, Any] | None = None
+    work_calendar_id: str | None = None
+    fx_rates: list[dict[str, Any]] = Field(default_factory=list)
+    default_vat_rate: str | None = None
+    custom_units: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ProjectBackupData(BaseModel):
+    """Complete project backup archive returned as JSON.
+
+    Carries a format version for forward compatibility so a future restore
+    can detect and migrate old archives without guessing.
+    """
+
+    format_version: str = "1.0.0"
+    exported_at: datetime
+    source_project_id: str
+    project: BackupProjectMetadata
+    wbs_nodes: list[BackupWBSData] = Field(default_factory=list)
+    milestones: list[BackupMilestoneData] = Field(default_factory=list)
+    boqs: list[BackupBOQData] = Field(default_factory=list)
+
+
+class ProjectBackupResponse(BaseModel):
+    """Response wrapper for the project backup endpoint."""
+
+    backup: ProjectBackupData
+
+
+class ProjectRestoreRequest(BaseModel):
+    """Request body for restoring a project from a backup archive."""
+
+    backup: ProjectBackupData
+
+
+class ProjectRestoreResponse(BaseModel):
+    """Response returned after a successful project restore."""
+
+    project_id: UUID
+    name: str
+    boqs_created: int = 0
+    positions_created: int = 0
+    markups_created: int = 0
+    wbs_nodes_created: int = 0
+    milestones_created: int = 0

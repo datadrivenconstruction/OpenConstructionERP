@@ -8061,12 +8061,18 @@ class BOQService:
         return list(result.scalars().all())
 
     async def create_snapshot(
-        self, boq_id: uuid.UUID, *, name: str = "", user_id: uuid.UUID | None = None
+        self,
+        boq_id: uuid.UUID,
+        *,
+        name: str = "",
+        description: str = "",
+        user_id: uuid.UUID | None = None,
     ) -> BOQSnapshot:
         """Create a point-in-time snapshot of the current BOQ state."""
         boq = await self.get_boq(boq_id)
 
         # Serialize positions
+        grand_total = Decimal("0")
         positions_data = []
         for p in boq.positions:
             positions_data.append(
@@ -8085,6 +8091,7 @@ class BOQService:
                     "sort_order": p.sort_order,
                 }
             )
+            grand_total += _to_decimal(p.total)
 
         # Serialize markups
         markups_data = []
@@ -8102,25 +8109,165 @@ class BOQService:
                 }
             )
 
+        pos_count = len(positions_data)
         snapshot_data = {
             "boq_name": boq.name,
             "boq_status": boq.status,
             "positions": positions_data,
             "markups": markups_data,
-            "position_count": len(positions_data),
+            "position_count": pos_count,
         }
 
-        auto_name = name or f"Snapshot ({len(positions_data)} positions)"
+        auto_name = name or f"Snapshot ({pos_count} positions)"
         snap = BOQSnapshot(
             boq_id=boq_id,
             name=auto_name,
+            description=description,
             snapshot_data=snapshot_data,
+            total_value=str(grand_total),
+            position_count=pos_count,
             created_by=user_id,
         )
         self.session.add(snap)
         await self.session.flush()
         await self.session.refresh(snap)
         return snap
+
+    async def get_snapshot(self, boq_id: uuid.UUID, snapshot_id: uuid.UUID) -> BOQSnapshot:
+        """Load a single snapshot with full data payload.
+
+        Raises:
+            HTTPException: 404 if snapshot not found or does not belong to the BOQ.
+        """
+        from sqlalchemy import select
+
+        stmt = select(BOQSnapshot).where(
+            BOQSnapshot.id == snapshot_id,
+            BOQSnapshot.boq_id == boq_id,
+        )
+        result = await self.session.execute(stmt)
+        snap = result.scalar_one_or_none()
+        if not snap:
+            raise HTTPException(status_code=404, detail="Snapshot not found")
+        return snap
+
+    async def delete_snapshot(self, boq_id: uuid.UUID, snapshot_id: uuid.UUID) -> None:
+        """Delete a snapshot.
+
+        Raises:
+            HTTPException: 404 if snapshot not found or does not belong to the BOQ.
+        """
+        from sqlalchemy import delete as sa_delete
+        from sqlalchemy import select
+
+        stmt = select(BOQSnapshot).where(
+            BOQSnapshot.id == snapshot_id,
+            BOQSnapshot.boq_id == boq_id,
+        )
+        result = await self.session.execute(stmt)
+        snap = result.scalar_one_or_none()
+        if not snap:
+            raise HTTPException(status_code=404, detail="Snapshot not found")
+        await self.session.execute(sa_delete(BOQSnapshot).where(BOQSnapshot.id == snapshot_id))
+        await self.session.flush()
+
+    async def compare_snapshots(
+        self,
+        boq_id: uuid.UUID,
+        snapshot_id_a: uuid.UUID,
+        snapshot_id_b: uuid.UUID,
+    ) -> dict[str, Any]:
+        """Compare two snapshots of the same BOQ.
+
+        Returns a diff of positions: added (in B but not A), removed
+        (in A but not B), and changed (same ordinal, different values).
+        Positions are matched by ordinal.
+
+        Args:
+            boq_id: The BOQ both snapshots belong to.
+            snapshot_id_a: The baseline snapshot.
+            snapshot_id_b: The snapshot to compare against.
+
+        Returns:
+            Dict with keys ``snapshot_a``, ``snapshot_b``, ``added``,
+            ``removed``, ``changed``, and ``summary``.
+        """
+        snap_a = await self.get_snapshot(boq_id, snapshot_id_a)
+        snap_b = await self.get_snapshot(boq_id, snapshot_id_b)
+
+        positions_a = {p["ordinal"]: p for p in snap_a.snapshot_data.get("positions", [])}
+        positions_b = {p["ordinal"]: p for p in snap_b.snapshot_data.get("positions", [])}
+
+        ordinals_a = set(positions_a.keys())
+        ordinals_b = set(positions_b.keys())
+
+        added = []
+        for ordinal in sorted(ordinals_b - ordinals_a):
+            p = positions_b[ordinal]
+            added.append(
+                {
+                    "ordinal": ordinal,
+                    "description": p.get("description", ""),
+                    "change_type": "added",
+                    "fields": {"quantity": p.get("quantity"), "unit_rate": p.get("unit_rate"), "total": p.get("total")},
+                }
+            )
+
+        removed = []
+        for ordinal in sorted(ordinals_a - ordinals_b):
+            p = positions_a[ordinal]
+            removed.append(
+                {
+                    "ordinal": ordinal,
+                    "description": p.get("description", ""),
+                    "change_type": "removed",
+                    "fields": {"quantity": p.get("quantity"), "unit_rate": p.get("unit_rate"), "total": p.get("total")},
+                }
+            )
+
+        changed = []
+        compare_fields = ("description", "unit", "quantity", "unit_rate", "total")
+        for ordinal in sorted(ordinals_a & ordinals_b):
+            pa = positions_a[ordinal]
+            pb = positions_b[ordinal]
+            field_diffs: dict[str, Any] = {}
+            for field in compare_fields:
+                va = pa.get(field)
+                vb = pb.get(field)
+                if va != vb:
+                    field_diffs[field] = {"old": va, "new": vb}
+            if field_diffs:
+                changed.append(
+                    {
+                        "ordinal": ordinal,
+                        "description": pb.get("description", ""),
+                        "change_type": "changed",
+                        "fields": field_diffs,
+                    }
+                )
+
+        # Summary
+        total_a = sum(_to_decimal(p.get("total")) for p in positions_a.values())
+        total_b = sum(_to_decimal(p.get("total")) for p in positions_b.values())
+        change_amount = total_b - total_a
+        change_percent = float(change_amount / total_a * 100) if total_a else 0.0
+
+        return {
+            "snapshot_a": snap_a,
+            "snapshot_b": snap_b,
+            "added": added,
+            "removed": removed,
+            "changed": changed,
+            "summary": {
+                "total_a": str(total_a),
+                "total_b": str(total_b),
+                "total_change_amount": str(change_amount),
+                "total_change_percent": round(change_percent, 2),
+                "positions_added": len(added),
+                "positions_removed": len(removed),
+                "positions_changed": len(changed),
+            },
+        }
 
     async def restore_snapshot(self, boq_id: uuid.UUID, snapshot_id: uuid.UUID) -> BOQWithPositions:
         """Restore a BOQ to a previous snapshot state.

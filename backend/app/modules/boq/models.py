@@ -482,7 +482,10 @@ class BOQSnapshot(Base):
     """Point-in-time snapshot of a BOQ for version history.
 
     Stores a full JSON snapshot of the BOQ state (positions, markups)
-    so users can view and restore previous versions.
+    so users can view and restore previous versions. ``total_value``
+    and ``position_count`` are denormalised summaries captured at
+    creation time so the version-history list can render deltas
+    without deserialising the heavy ``snapshot_data`` blob.
     """
 
     __tablename__ = "oe_boq_snapshot"
@@ -500,12 +503,18 @@ class BOQSnapshot(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     snapshot_data: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
         default=dict,
         server_default="{}",
     )
+    # Denormalised summaries so the version-history drawer can show
+    # position count and grand total without loading snapshot_data.
+    # String for the same SQLite-precision reason as Position.total.
+    total_value: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    position_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),

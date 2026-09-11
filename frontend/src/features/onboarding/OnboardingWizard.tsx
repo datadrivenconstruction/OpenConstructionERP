@@ -4413,8 +4413,9 @@ function StepFinish({
   const handleFinish = useCallback(async () => {
     setSaving(true);
 
-    // Apply advanced mode (default for onboarding) in every path.
-    setViewMode('advanced');
+    // Start new users in simple mode -- clean sidebar with essential groups.
+    // They can switch to advanced any time from Settings > Interface Mode.
+    setViewMode('simple');
 
     if (packInstalled) {
       // The ready-made pack already configured modules, locale, classification

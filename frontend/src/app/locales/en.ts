@@ -16649,6 +16649,11 @@ const resource = {
     "global_search.collection.variations": "Variations",
     "global_search.collection.moc": "Management of Change",
     "global_search.collection.costs": "Cost Database",
+    // --- Saved searches ---
+    "search.save_search": "Save search",
+    "search.saved_searches": "Saved searches",
+    "search.remove_saved": "Remove",
+    "search.no_saved": "No saved searches yet",
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info
     "info.ai-estimator.title": "How the AI Estimate Builder works",
@@ -27285,6 +27290,11 @@ const resource = {
     "normExpansion.new_norm": "New norm",
     "normExpansion.library": "Norm library",
     "notifications.mark_all_read_short": "Mark all read",
+    "notifications.clear_all": "Clear all",
+    "notifications.bucket.today": "Today",
+    "notifications.bucket.yesterday": "Yesterday",
+    "notifications.bucket.this_week": "This week",
+    "notifications.bucket.earlier": "Earlier",
     "notifications.total": "total",
     "notifications.filter_all": "All",
     "notifications.filter_unread": "Unread only",

@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Clock, RotateCcw, Loader2, Save, History, Undo2 } from 'lucide-react';
+import { X, Clock, RotateCcw, Loader2, Save, History, Undo2, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { boqApi, type BOQSnapshot, type ActivityEntry } from './api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -174,6 +174,24 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
       useToastStore.getState().addToast({
         type: 'error',
         title: t('boq.restore_failed', { defaultValue: 'Failed to restore snapshot' }),
+        message: e.message,
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (snapshotId: string) => boqApi.deleteSnapshot(boqId, snapshotId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boq-snapshots', boqId] });
+      useToastStore.getState().addToast({
+        type: 'success',
+        title: t('boq.snapshot_deleted', { defaultValue: 'Snapshot deleted' }),
+      });
+    },
+    onError: (e: Error) => {
+      useToastStore.getState().addToast({
+        type: 'error',
+        title: t('boq.snapshot_delete_failed', { defaultValue: 'Failed to delete snapshot' }),
         message: e.message,
       });
     },
@@ -444,6 +462,11 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             <p className="text-2xs text-content-tertiary mt-0.5">
                               {formatDate(snap.created_at)}
                             </p>
+                            {snap.description && (
+                              <p className="text-2xs text-content-secondary mt-0.5 line-clamp-2">
+                                {snap.description}
+                              </p>
+                            )}
                             {(snap.position_count != null || snap.grand_total != null) && (
                             <div className="flex items-center gap-3 mt-1.5">
                               {snap.position_count != null && (
@@ -527,13 +550,27 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             </button>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => setConfirmRestoreId(snap.id)}
-                            className="shrink-0 flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                            title={t('boq.restore_snapshot', { defaultValue: 'Restore this version' })}
-                          >
-                            <RotateCcw size={13} />
-                          </button>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <button
+                              onClick={() => setConfirmRestoreId(snap.id)}
+                              className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                              title={t('boq.restore_snapshot', { defaultValue: 'Restore this version' })}
+                            >
+                              <RotateCcw size={13} />
+                            </button>
+                            <button
+                              onClick={() => deleteMutation.mutate(snap.id)}
+                              disabled={deleteMutation.isPending}
+                              className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                              title={t('boq.delete_snapshot', { defaultValue: 'Delete snapshot' })}
+                            >
+                              {deleteMutation.isPending ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={12} />
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>

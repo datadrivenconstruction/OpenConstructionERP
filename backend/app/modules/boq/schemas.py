@@ -1391,6 +1391,7 @@ class SnapshotCreate(BaseModel):
         max_length=255,
         validation_alias=AliasChoices("name", "label"),
     )
+    description: str = Field(default="", max_length=2000)
 
 
 class SnapshotResponse(BaseModel):
@@ -1401,6 +1402,9 @@ class SnapshotResponse(BaseModel):
     id: UUID
     boq_id: UUID
     name: str
+    description: str = ""
+    position_count: int | None = None
+    grand_total: float | None = None
     created_at: datetime
     created_by: UUID | None = None
 
@@ -1409,6 +1413,33 @@ class SnapshotDetail(SnapshotResponse):
     """Full snapshot including data payload."""
 
     snapshot_data: dict[str, Any] = Field(default_factory=dict)
+
+
+class SnapshotCompareRequest(BaseModel):
+    """Request body for comparing two BOQ snapshots."""
+
+    snapshot_id_a: UUID
+    snapshot_id_b: UUID
+
+
+class SnapshotPositionDiff(BaseModel):
+    """A single position that changed between two snapshots."""
+
+    ordinal: str
+    description: str = ""
+    change_type: str  # "added", "removed", "changed"
+    fields: dict[str, Any] = Field(default_factory=dict)
+
+
+class SnapshotCompareResponse(BaseModel):
+    """Result of comparing two BOQ snapshots."""
+
+    snapshot_a: SnapshotResponse
+    snapshot_b: SnapshotResponse
+    added: list[SnapshotPositionDiff] = Field(default_factory=list)
+    removed: list[SnapshotPositionDiff] = Field(default_factory=list)
+    changed: list[SnapshotPositionDiff] = Field(default_factory=list)
+    summary: dict[str, Any] = Field(default_factory=dict)
 
 
 # ── Sustainability / CO2 schemas ─────────────────────────────────────────────

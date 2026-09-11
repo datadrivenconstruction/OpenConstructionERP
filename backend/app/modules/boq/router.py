@@ -73,6 +73,7 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from app.modules.boq.copilot_service import BOQCopilotService
     from app.modules.boq.importers import ImportedBOQ
+    from app.modules.boq.models import BOQSnapshot
 
 from fastapi import (
     APIRouter,
@@ -193,7 +194,11 @@ from app.modules.boq.schemas import (
     SectionCreate,
     SensitivityItem,
     SensitivityResponse,
+    SnapshotCompareRequest,
+    SnapshotCompareResponse,
     SnapshotCreate,
+    SnapshotDetail,
+    SnapshotPositionDiff,
     SnapshotResponse,
     SuggestPrerequisitesRequest,
     SuggestPrerequisitesResponse,
@@ -2877,6 +2882,26 @@ async def compare_boqs(
 # ── Snapshots (Version History) ───────────────────────────────────────────────
 
 
+def _snap_to_response(s: "BOQSnapshot") -> SnapshotResponse:
+    """Build a SnapshotResponse from a BOQSnapshot ORM instance."""
+    grand_total: float | None = None
+    if s.total_value is not None:
+        try:
+            grand_total = float(s.total_value)
+        except (ValueError, TypeError):
+            grand_total = None
+    return SnapshotResponse(
+        id=s.id,
+        boq_id=s.boq_id,
+        name=s.name,
+        description=s.description or "",
+        position_count=s.position_count,
+        grand_total=grand_total,
+        created_at=s.created_at,
+        created_by=s.created_by,
+    )
+
+
 @router.get(
     "/boqs/{boq_id}/snapshots/",
     response_model=list[SnapshotResponse],
@@ -2895,16 +2920,7 @@ async def list_snapshots(
     # caller may access this BOQ's project before listing its version history.
     await _verify_boq_owner(session, boq_id, user_id, payload)
     snapshots = await service.list_snapshots(boq_id)
-    return [
-        SnapshotResponse(
-            id=s.id,
-            boq_id=s.boq_id,
-            name=s.name,
-            created_at=s.created_at,
-            created_by=s.created_by,
-        )
-        for s in snapshots
-    ]
+    return [_snap_to_response(s) for s in snapshots]
 
 
 @router.post(
@@ -2926,13 +2942,77 @@ async def create_snapshot(
     # IDOR guard: the global boq.update role is not project-scoped - verify the
     # caller may access this BOQ's project before snapshotting it.
     await _verify_boq_owner(session, boq_id, user_id, payload)
-    snap = await service.create_snapshot(boq_id, name=data.name, user_id=user_id)
-    return SnapshotResponse(
-        id=snap.id,
-        boq_id=snap.boq_id,
-        name=snap.name,
-        created_at=snap.created_at,
-        created_by=snap.created_by,
+    snap = await service.create_snapshot(boq_id, name=data.name, description=data.description, user_id=user_id)
+    return _snap_to_response(snap)
+
+
+@router.get(
+    "/boqs/{boq_id}/snapshots/{snapshot_id}",
+    response_model=SnapshotDetail,
+    summary="Get snapshot detail",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_snapshot(
+    boq_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> SnapshotDetail:
+    """Return a single snapshot with the full data payload."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    snap = await service.get_snapshot(boq_id, snapshot_id)
+    base = _snap_to_response(snap)
+    return SnapshotDetail(
+        **base.model_dump(),
+        snapshot_data=snap.snapshot_data,
+    )
+
+
+@router.delete(
+    "/boqs/{boq_id}/snapshots/{snapshot_id}",
+    status_code=204,
+    summary="Delete snapshot",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def delete_snapshot(
+    boq_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> None:
+    """Delete a snapshot permanently."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    await service.delete_snapshot(boq_id, snapshot_id)
+
+
+@router.post(
+    "/boqs/{boq_id}/snapshots/compare",
+    response_model=SnapshotCompareResponse,
+    summary="Compare two snapshots",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def compare_snapshots(
+    boq_id: uuid.UUID,
+    data: SnapshotCompareRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> SnapshotCompareResponse:
+    """Compare two snapshots of the same BOQ and return a position-level diff."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    result = await service.compare_snapshots(boq_id, data.snapshot_id_a, data.snapshot_id_b)
+    return SnapshotCompareResponse(
+        snapshot_a=_snap_to_response(result["snapshot_a"]),
+        snapshot_b=_snap_to_response(result["snapshot_b"]),
+        added=[SnapshotPositionDiff(**p) for p in result["added"]],
+        removed=[SnapshotPositionDiff(**p) for p in result["removed"]],
+        changed=[SnapshotPositionDiff(**p) for p in result["changed"]],
+        summary=result["summary"],
     )
 
 

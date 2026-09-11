@@ -558,6 +558,12 @@ export function BOQEditorPage() {
     mutationFn: (data: CreatePositionData) => boqApi.addPosition(data),
     onSuccess: (addedPosition) => {
       invalidateAll();
+      // Issue #139 — make the freshly added row the active insert anchor
+      // so the NEXT "Add Position" chains below it without requiring an
+      // explicit click. beginEditDescription sets focus (and thus the
+      // anchor) for the normal path, but the linked-instance and undo/redo
+      // paths skip it — this explicit update covers all branches.
+      setActivePositionId(addedPosition.id);
       // Highlight new position and scroll to it
       setNewPositionId(addedPosition.id);
       setTimeout(() => setNewPositionId(null), 3000);

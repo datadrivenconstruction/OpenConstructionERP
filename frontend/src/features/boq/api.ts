@@ -1271,10 +1271,39 @@ export interface BOQSnapshot {
   id: string;
   boq_id: string;
   name: string;
+  description?: string;
   position_count?: number;
   grand_total?: number;
   created_at: string;
   created_by: string | null;
+}
+
+export interface BOQSnapshotDetail extends BOQSnapshot {
+  snapshot_data: Record<string, unknown>;
+}
+
+export interface SnapshotPositionDiff {
+  ordinal: string;
+  description: string;
+  change_type: 'added' | 'removed' | 'changed';
+  fields: Record<string, unknown>;
+}
+
+export interface SnapshotCompareResponse {
+  snapshot_a: BOQSnapshot;
+  snapshot_b: BOQSnapshot;
+  added: SnapshotPositionDiff[];
+  removed: SnapshotPositionDiff[];
+  changed: SnapshotPositionDiff[];
+  summary: {
+    total_a: string;
+    total_b: string;
+    total_change_amount: string;
+    total_change_percent: number;
+    positions_added: number;
+    positions_removed: number;
+    positions_changed: number;
+  };
 }
 
 /* ── Feature 1: model→BOQ quantity links ─────────────────────────────── */
@@ -2006,8 +2035,17 @@ export const boqApi = {
   /* Snapshot / Version History */
   getSnapshots: (boqId: string) =>
     apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots/`),
-  createSnapshot: (boqId: string, label?: string) =>
-    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots/`, { name: label ?? '' }),
+  getSnapshot: (boqId: string, snapshotId: string) =>
+    apiGet<BOQSnapshotDetail>(`/v1/boq/boqs/${boqId}/snapshots/${snapshotId}`),
+  createSnapshot: (boqId: string, label?: string, description?: string) =>
+    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots/`, { name: label ?? '', description: description ?? '' }),
+  deleteSnapshot: (boqId: string, snapshotId: string) =>
+    apiDelete<void>(`/v1/boq/boqs/${boqId}/snapshots/${snapshotId}`),
+  compareSnapshots: (boqId: string, snapshotIdA: string, snapshotIdB: string) =>
+    apiPost<SnapshotCompareResponse>(`/v1/boq/boqs/${boqId}/snapshots/compare`, {
+      snapshot_id_a: snapshotIdA,
+      snapshot_id_b: snapshotIdB,
+    }),
   restoreSnapshot: (boqId: string, snapshotId: string) =>
     apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/restore/${snapshotId}`, {}),
 

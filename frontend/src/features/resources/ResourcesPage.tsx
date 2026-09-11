@@ -4158,6 +4158,7 @@ function CreateResourceModal({ onClose }: { onClose: () => void }) {
   const addToast = useToastStore((s) => s.addToast);
   const prefCurrency = usePreferencesStore((s) => s.currency);
   const [busy, setBusy] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [form, setForm] = useState({
     code: '',
     name: '',
@@ -4167,16 +4168,18 @@ function CreateResourceModal({ onClose }: { onClose: () => void }) {
     currency: prefCurrency,
   });
 
+  const codeError =
+    touched && !form.code.trim()
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+  const nameError =
+    touched && !form.name.trim()
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+
   async function submit() {
-    if (!form.code || !form.name) {
-      addToast({
-        type: 'error',
-        title: t('resources.required_missing', {
-          defaultValue: 'Code and name are required.',
-        }),
-      });
-      return;
-    }
+    setTouched(true);
+    if (!form.code.trim() || !form.name.trim()) return;
     setBusy(true);
     try {
       await createResource({
@@ -4223,7 +4226,7 @@ function CreateResourceModal({ onClose }: { onClose: () => void }) {
       }
     >
       <WideModalSection columns={2}>
-        <WideModalField label={t('resources.code', { defaultValue: 'Code' })} required>
+        <WideModalField label={t('resources.code', { defaultValue: 'Code' })} required error={codeError}>
           <input
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
@@ -4231,7 +4234,7 @@ function CreateResourceModal({ onClose }: { onClose: () => void }) {
             placeholder="e.g. CR-001"
           />
         </WideModalField>
-        <WideModalField label={t('resources.name', { defaultValue: 'Name' })} required>
+        <WideModalField label={t('resources.name', { defaultValue: 'Name' })} required error={nameError}>
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -4297,6 +4300,7 @@ function EditResourceModal({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [busy, setBusy] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [form, setForm] = useState({
     code: resource.code,
     name: resource.name,
@@ -4307,26 +4311,27 @@ function EditResourceModal({
     notes: resource.notes ?? '',
   });
 
-  async function submit() {
-    if (!form.code.trim() || !form.name.trim()) {
-      addToast({
-        type: 'error',
-        title: t('resources.required_missing', {
-          defaultValue: 'Code and name are required.',
-        }),
-      });
-      return;
-    }
-    const rateNum = Number(form.default_cost_rate);
-    if (Number.isNaN(rateNum) || rateNum < 0) {
-      addToast({
-        type: 'error',
-        title: t('resources.rate_invalid', {
+  const codeError =
+    touched && !form.code.trim()
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+  const nameError =
+    touched && !form.name.trim()
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+  const rateNum = Number(form.default_cost_rate);
+  const rateError =
+    touched && (Number.isNaN(rateNum) || rateNum < 0)
+      ? t('resources.rate_invalid', {
           defaultValue: 'Rate must be a non-negative number.',
-        }),
-      });
-      return;
-    }
+        })
+      : undefined;
+
+  const invalid = !form.code.trim() || !form.name.trim() || Number.isNaN(rateNum) || rateNum < 0;
+
+  async function submit() {
+    setTouched(true);
+    if (invalid) return;
     setBusy(true);
     try {
       await updateResource(resource.id, {
@@ -4377,7 +4382,7 @@ function EditResourceModal({
       }
     >
       <WideModalSection columns={2}>
-        <WideModalField label={t('resources.code', { defaultValue: 'Code' })} required>
+        <WideModalField label={t('resources.code', { defaultValue: 'Code' })} required error={codeError}>
           <input
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
@@ -4386,7 +4391,7 @@ function EditResourceModal({
             data-testid="edit-resource-code"
           />
         </WideModalField>
-        <WideModalField label={t('resources.name', { defaultValue: 'Name' })} required>
+        <WideModalField label={t('resources.name', { defaultValue: 'Name' })} required error={nameError}>
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -4435,7 +4440,7 @@ function EditResourceModal({
             </option>
           </select>
         </WideModalField>
-        <WideModalField label={t('resources.rate', { defaultValue: 'Rate' })}>
+        <WideModalField label={t('resources.rate', { defaultValue: 'Rate' })} error={rateError}>
           <input
             type="number"
             min={0}

@@ -67,7 +67,14 @@ export function Toast({ toast, onDismiss }: ToastProps) {
       className={`flex items-start gap-3 w-80 rounded-xl border px-4 py-3 shadow-md animate-toast-in ${styles.bg} ${styles.border}`}
       role="alert"
     >
-      <Icon size={18} className={`shrink-0 mt-0.5 ${styles.icon}`} />
+      <div className="relative shrink-0 mt-0.5">
+        <Icon size={18} className={styles.icon} />
+        {(toast.count ?? 1) > 1 && (
+          <span className="absolute -top-1.5 -end-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-oe-blue px-1 text-[10px] font-bold text-white tabular-nums">
+            {toast.count}
+          </span>
+        )}
+      </div>
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium ${styles.title}`}>{toast.title}</p>
         {toast.message && (

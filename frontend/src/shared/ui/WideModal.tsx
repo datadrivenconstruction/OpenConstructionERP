@@ -334,17 +334,36 @@ export function WideModalField({
   // every call site picks this up automatically, without a per-form
   // change. If the child is a Fragment, plain text, or already declares
   // aria-required, we leave it untouched.
-  const enhancedChildren = required
+  //
+  // When `error` is set, the first child also receives `aria-invalid`
+  // and a red border class so the field visually matches the error text
+  // below it — even when the child is a raw <input> or <select> rather
+  // than the <Input> component (which handles error styling internally).
+  const hasError = Boolean(error);
+  const needsClone = required || hasError;
+  const enhancedChildren = needsClone
     ? Children.map(children, (child, idx) => {
         if (idx !== 0) return child;
         if (!isValidElement(child)) return child;
-        const existing = (child.props as Record<string, unknown>)[
-          'aria-required'
-        ];
-        if (existing !== undefined) return child;
-        return cloneElement(child as ReactElement<Record<string, unknown>>, {
-          'aria-required': true,
-        });
+        const childProps = child.props as Record<string, unknown>;
+        const extra: Record<string, unknown> = {};
+        if (required && childProps['aria-required'] === undefined) {
+          extra['aria-required'] = true;
+        }
+        if (hasError) {
+          extra['aria-invalid'] = true;
+          // Inject a red border on raw inputs/selects. The <Input> component
+          // handles its own error styling via the `error` prop, so we only
+          // add the class when the child does not already carry it.
+          const existing = typeof childProps.className === 'string' ? childProps.className : '';
+          if (!existing.includes('border-semantic-error')) {
+            extra.className = existing
+              ? `${existing} border-semantic-error focus:ring-semantic-error/30`
+              : 'border-semantic-error focus:ring-semantic-error/30';
+          }
+        }
+        if (Object.keys(extra).length === 0) return child;
+        return cloneElement(child as ReactElement<Record<string, unknown>>, extra);
       })
     : children;
 

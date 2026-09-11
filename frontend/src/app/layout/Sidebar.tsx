@@ -269,7 +269,11 @@ const ROUTE_BACKEND_MODULE: Record<string, string> = {
 
 // localStorage key for collapsed state
 const COLLAPSED_KEY = 'oe_sidebar_collapsed_v2';
-const PINNED_KEY = 'oe_sidebar_pinned';
+const PINNED_KEY = 'oce-pinned-routes';
+/** Legacy key used before the rename — migrated once on first read so
+ *  existing users keep their pins without noticing the key change. */
+const PINNED_KEY_LEGACY = 'oe_sidebar_pinned';
+const MAX_PINNED = 5;
 // Hidden-modules persistence is owned by `useHiddenModules()` — it stores
 // the per-user list server-side under `metadata_.sidebar_hidden_modules`
 // with localStorage as instant cache + offline fallback. The legacy global
@@ -296,10 +300,19 @@ function writeCollapsedState(state: Record<string, boolean>) {
 
 function readPinned(): string[] {
   try {
-    const raw = localStorage.getItem(PINNED_KEY);
+    let raw = localStorage.getItem(PINNED_KEY);
+    // One-time migration from the legacy key.
+    if (!raw) {
+      const legacy = localStorage.getItem(PINNED_KEY_LEGACY);
+      if (legacy) {
+        raw = legacy;
+        localStorage.setItem(PINNED_KEY, legacy);
+        localStorage.removeItem(PINNED_KEY_LEGACY);
+      }
+    }
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.filter((p) => typeof p === 'string');
+      if (Array.isArray(parsed)) return parsed.filter((p) => typeof p === 'string').slice(0, MAX_PINNED);
     }
   } catch {
     /* ignore */
@@ -706,9 +719,11 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }, [setViewMode]);
 
   const togglePin = useCallback((route: string) => {
-    setPinned((prev) =>
-      prev.includes(route) ? prev.filter((p) => p !== route) : [...prev, route],
-    );
+    setPinned((prev) => {
+      if (prev.includes(route)) return prev.filter((p) => p !== route);
+      if (prev.length >= MAX_PINNED) return prev; // silently cap at MAX_PINNED
+      return [...prev, route];
+    });
   }, []);
 
   // ── Two-key navigation shortcuts (G then X) ──────────────────────────

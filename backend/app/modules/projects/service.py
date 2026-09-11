@@ -9,6 +9,8 @@ Stateless service layer. Handles:
 - Event publishing on create/update/delete
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import uuid
@@ -103,7 +105,12 @@ async def _safe_publish(
 
 from app.modules.projects.models import Project, ProjectStatusHistory
 from app.modules.projects.repository import ProjectRepository
-from app.modules.projects.schemas import ProjectCreate, ProjectUpdate
+from app.modules.projects.schemas import (
+    ProjectBackupData,
+    ProjectCreate,
+    ProjectRestoreResponse,
+    ProjectUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1543,6 +1550,411 @@ class ProjectService:
 
         # Re-fetch to return fresh data
         return await self.get_project(project_id)
+
+    # ── Project backup / restore ─────────────────────────────────────────
+
+    async def backup_project(self, project_id: uuid.UUID) -> ProjectBackupData:
+        """Export a project and its related data as a JSON-serialisable archive.
+
+        Loads the project with its eagerly-loaded WBS nodes and milestones,
+        then fetches BOQs (with positions and markups via selectin) and
+        assembles everything into a ``ProjectBackupData`` schema.
+
+        Args:
+            project_id: UUID of the project to back up.
+
+        Returns:
+            A ``ProjectBackupData`` instance containing all project data.
+
+        Raises:
+            HTTPException: 404 if the project does not exist.
+        """
+        from sqlalchemy import select as _select
+
+        from app.modules.projects.schemas import (
+            BackupBOQData,
+            BackupMarkupData,
+            BackupMilestoneData,
+            BackupPositionData,
+            BackupProjectMetadata,
+            BackupWBSData,
+            ProjectBackupData,
+        )
+
+        project = await self.get_project(project_id)
+
+        # Build project metadata
+        project_meta = BackupProjectMetadata(
+            name=project.name,
+            description=project.description,
+            region=project.region,
+            classification_standard=project.classification_standard,
+            currency=project.currency,
+            locale=project.locale,
+            validation_rule_sets=list(project.validation_rule_sets or []),
+            compliance_rule_packs=list(project.compliance_rule_packs or []),
+            status=project.status,
+            country_code=project.country_code,
+            project_code=project.project_code,
+            project_type=project.project_type,
+            phase=project.phase,
+            address=project.address,
+            contract_value=project.contract_value,
+            planned_start_date=project.planned_start_date,
+            planned_end_date=project.planned_end_date,
+            actual_start_date=project.actual_start_date,
+            actual_end_date=project.actual_end_date,
+            budget_estimate=project.budget_estimate,
+            contingency_pct=project.contingency_pct,
+            gross_floor_area=project.gross_floor_area,
+            custom_fields=project.custom_fields,
+            work_calendar_id=project.work_calendar_id,
+            fx_rates=list(project.fx_rates or []),
+            default_vat_rate=project.default_vat_rate,
+            custom_units=list(project.custom_units or []),
+            metadata=dict(project.metadata_ or {}),
+        )
+
+        # Serialize WBS nodes as a nested tree
+        def _serialize_wbs(node: object) -> BackupWBSData:
+            children_list = getattr(node, "children", None) or []
+            return BackupWBSData(
+                code=node.code,
+                name=node.name,
+                name_translations=node.name_translations,
+                level=node.level,
+                sort_order=node.sort_order,
+                wbs_type=node.wbs_type,
+                planned_cost=node.planned_cost,
+                planned_hours=node.planned_hours,
+                metadata=dict(getattr(node, "metadata_", None) or {}),
+                children=[_serialize_wbs(c) for c in children_list],
+            )
+
+        # Top-level WBS nodes (no parent)
+        wbs_data = [_serialize_wbs(n) for n in (project.wbs_nodes or []) if n.parent_id is None]
+
+        # Serialize milestones
+        milestones_data = [
+            BackupMilestoneData(
+                name=m.name,
+                milestone_type=m.milestone_type,
+                planned_date=m.planned_date,
+                actual_date=m.actual_date,
+                status=m.status,
+                linked_payment_pct=m.linked_payment_pct,
+                metadata=dict(getattr(m, "metadata_", None) or {}),
+            )
+            for m in (project.milestones or [])
+        ]
+
+        # Load BOQs for this project
+        boqs_data: list[BackupBOQData] = []
+        try:
+            from app.modules.boq.models import BOQ
+
+            stmt = _select(BOQ).where(BOQ.project_id == project_id)
+            result = await self.session.execute(stmt)
+            boqs = list(result.scalars().all())
+
+            for boq in boqs:
+                # Serialize positions as a nested tree
+                def _serialize_position(pos: object) -> BackupPositionData:
+                    children_list = getattr(pos, "children", None) or []
+                    return BackupPositionData(
+                        ordinal=pos.ordinal,
+                        description=pos.description,
+                        unit=pos.unit,
+                        quantity=pos.quantity,
+                        unit_rate=pos.unit_rate,
+                        total=pos.total,
+                        classification=dict(pos.classification or {}),
+                        source=pos.source,
+                        confidence=pos.confidence,
+                        risk_dispersion=getattr(pos, "risk_dispersion", None),
+                        price_basis=getattr(pos, "price_basis", None),
+                        cad_element_ids=list(pos.cad_element_ids or []),
+                        cad_model_id=getattr(pos, "cad_model_id", None),
+                        validation_status=pos.validation_status,
+                        wbs_id=getattr(pos, "wbs_id", None),
+                        cost_code_id=getattr(pos, "cost_code_id", None),
+                        node_type=getattr(pos, "node_type", None),
+                        contractor_id=getattr(pos, "contractor_id", None),
+                        contract_id=getattr(pos, "contract_id", None),
+                        funding_source_id=getattr(pos, "funding_source_id", None),
+                        stage_id=getattr(pos, "stage_id", None),
+                        reference_code=getattr(pos, "reference_code", None),
+                        norm_work_key=getattr(pos, "norm_work_key", None),
+                        sort_order=pos.sort_order,
+                        metadata=dict(getattr(pos, "metadata_", None) or {}),
+                        children=[_serialize_position(c) for c in children_list],
+                    )
+
+                # Top-level positions only (parent_id is None)
+                positions_data = [_serialize_position(p) for p in (boq.positions or []) if p.parent_id is None]
+
+                markups_data = [
+                    BackupMarkupData(
+                        name=mk.name,
+                        markup_type=mk.markup_type,
+                        category=mk.category,
+                        percentage=mk.percentage,
+                        fixed_amount=mk.fixed_amount,
+                        apply_to=mk.apply_to,
+                        sort_order=mk.sort_order,
+                        is_active=mk.is_active,
+                        metadata=dict(getattr(mk, "metadata_", None) or {}),
+                    )
+                    for mk in (boq.markups or [])
+                ]
+
+                boqs_data.append(
+                    BackupBOQData(
+                        name=boq.name,
+                        description=boq.description,
+                        status=boq.status,
+                        estimate_type=boq.estimate_type,
+                        is_locked=boq.is_locked,
+                        approved_by=boq.approved_by,
+                        approved_at=boq.approved_at,
+                        base_date=boq.base_date,
+                        metadata=dict(getattr(boq, "metadata_", None) or {}),
+                        positions=positions_data,
+                        markups=markups_data,
+                    )
+                )
+        except ImportError:
+            logger.debug("BOQ models unavailable - backup will not include BOQ data")
+
+        return ProjectBackupData(
+            format_version="1.0.0",
+            exported_at=datetime.now(UTC),
+            source_project_id=str(project_id),
+            project=project_meta,
+            wbs_nodes=wbs_data,
+            milestones=milestones_data,
+            boqs=boqs_data,
+        )
+
+    async def restore_project_from_backup(
+        self,
+        data: ProjectBackupData,
+        owner_id: uuid.UUID,
+    ) -> ProjectRestoreResponse:
+        """Create a new project from a backup archive.
+
+        Always creates a fresh project with new UUIDs. The original project
+        is never modified. WBS nodes, milestones, BOQs, positions and markups
+        are re-created with remapped internal references.
+
+        Args:
+            data: The backup archive to restore from.
+            owner_id: UUID of the user who will own the restored project.
+
+        Returns:
+            A ``ProjectRestoreResponse`` with the new project ID and counts.
+        """
+        from app.modules.projects.schemas import ProjectRestoreResponse
+
+        meta = data.project
+
+        # Create the project row
+        project = Project(
+            name=meta.name,
+            description=meta.description,
+            region=meta.region,
+            classification_standard=meta.classification_standard,
+            currency=meta.currency,
+            locale=meta.locale,
+            validation_rule_sets=list(meta.validation_rule_sets or []),
+            compliance_rule_packs=list(meta.compliance_rule_packs or []),
+            status="active",
+            owner_id=owner_id,
+            country_code=meta.country_code,
+            project_code=None,  # auto-generated below
+            project_type=meta.project_type,
+            phase=meta.phase,
+            address=meta.address,
+            contract_value=meta.contract_value,
+            planned_start_date=meta.planned_start_date,
+            planned_end_date=meta.planned_end_date,
+            actual_start_date=meta.actual_start_date,
+            actual_end_date=meta.actual_end_date,
+            budget_estimate=meta.budget_estimate,
+            contingency_pct=meta.contingency_pct,
+            gross_floor_area=meta.gross_floor_area,
+            custom_fields=meta.custom_fields,
+            work_calendar_id=meta.work_calendar_id,
+            fx_rates=list(meta.fx_rates or []),
+            default_vat_rate=meta.default_vat_rate,
+            custom_units=list(meta.custom_units or []),
+            metadata_=dict(meta.metadata or {}),
+        )
+        # Auto-generate a project code for the restored project
+        project.project_code = await self._generate_project_code()
+        self.session.add(project)
+        await self.session.flush()
+
+        wbs_count = 0
+        milestone_count = 0
+        boq_count = 0
+        position_count = 0
+        markup_count = 0
+
+        # Restore WBS nodes (recursive)
+        from app.modules.projects.models import ProjectMilestone, ProjectWBS
+
+        def _create_wbs_nodes(
+            nodes: list,
+            parent_id: uuid.UUID | None,
+        ) -> list[ProjectWBS]:
+            result: list[ProjectWBS] = []
+            for node_data in nodes:
+                wbs_node = ProjectWBS(
+                    project_id=project.id,
+                    parent_id=parent_id,
+                    code=node_data.code,
+                    name=node_data.name,
+                    name_translations=node_data.name_translations,
+                    level=node_data.level,
+                    sort_order=node_data.sort_order,
+                    wbs_type=node_data.wbs_type,
+                    planned_cost=node_data.planned_cost,
+                    planned_hours=node_data.planned_hours,
+                    metadata_=dict(node_data.metadata or {}),
+                )
+                result.append(wbs_node)
+                result.extend(_create_wbs_nodes(node_data.children, wbs_node.id))
+            return result
+
+        wbs_nodes = _create_wbs_nodes(data.wbs_nodes, None)
+        for node in wbs_nodes:
+            self.session.add(node)
+        wbs_count = len(wbs_nodes)
+
+        # Restore milestones
+        for ms_data in data.milestones:
+            milestone = ProjectMilestone(
+                project_id=project.id,
+                name=ms_data.name,
+                milestone_type=ms_data.milestone_type,
+                planned_date=ms_data.planned_date,
+                actual_date=ms_data.actual_date,
+                status=ms_data.status,
+                linked_payment_pct=ms_data.linked_payment_pct,
+                metadata_=dict(ms_data.metadata or {}),
+            )
+            self.session.add(milestone)
+            milestone_count += 1
+
+        # Restore BOQs with positions and markups
+        try:
+            from app.modules.boq.models import BOQ, BOQMarkup, Position
+
+            for boq_data in data.boqs:
+                boq = BOQ(
+                    project_id=project.id,
+                    name=boq_data.name,
+                    description=boq_data.description,
+                    status=boq_data.status,
+                    estimate_type=boq_data.estimate_type,
+                    is_locked=boq_data.is_locked,
+                    approved_by=boq_data.approved_by,
+                    approved_at=boq_data.approved_at,
+                    base_date=boq_data.base_date,
+                    metadata_=dict(boq_data.metadata or {}),
+                )
+                self.session.add(boq)
+                await self.session.flush()
+                boq_count += 1
+
+                # Restore positions (recursive)
+                def _create_positions(
+                    positions: list,
+                    boq_id: uuid.UUID,
+                    parent_id: uuid.UUID | None,
+                ) -> list[Position]:
+                    result: list[Position] = []
+                    for pos_data in positions:
+                        pos = Position(
+                            boq_id=boq_id,
+                            parent_id=parent_id,
+                            ordinal=pos_data.ordinal,
+                            description=pos_data.description,
+                            unit=pos_data.unit,
+                            quantity=pos_data.quantity,
+                            unit_rate=pos_data.unit_rate,
+                            total=pos_data.total,
+                            classification=dict(pos_data.classification or {}),
+                            source=pos_data.source,
+                            confidence=pos_data.confidence,
+                            risk_dispersion=pos_data.risk_dispersion,
+                            price_basis=pos_data.price_basis,
+                            cad_element_ids=list(pos_data.cad_element_ids or []),
+                            cad_model_id=pos_data.cad_model_id,
+                            validation_status=pos_data.validation_status,
+                            wbs_id=pos_data.wbs_id,
+                            cost_code_id=pos_data.cost_code_id,
+                            node_type=pos_data.node_type,
+                            contractor_id=pos_data.contractor_id,
+                            contract_id=pos_data.contract_id,
+                            funding_source_id=pos_data.funding_source_id,
+                            stage_id=pos_data.stage_id,
+                            reference_code=pos_data.reference_code,
+                            norm_work_key=pos_data.norm_work_key,
+                            sort_order=pos_data.sort_order,
+                            metadata_=dict(pos_data.metadata or {}),
+                        )
+                        result.append(pos)
+                        result.extend(_create_positions(pos_data.children, boq_id, pos.id))
+                    return result
+
+                positions = _create_positions(boq_data.positions, boq.id, None)
+                for pos in positions:
+                    self.session.add(pos)
+                position_count += len(positions)
+
+                # Restore markups
+                for mk_data in boq_data.markups:
+                    markup = BOQMarkup(
+                        boq_id=boq.id,
+                        name=mk_data.name,
+                        markup_type=mk_data.markup_type,
+                        category=mk_data.category,
+                        percentage=mk_data.percentage,
+                        fixed_amount=mk_data.fixed_amount,
+                        apply_to=mk_data.apply_to,
+                        sort_order=mk_data.sort_order,
+                        is_active=mk_data.is_active,
+                        metadata_=dict(mk_data.metadata or {}),
+                    )
+                    self.session.add(markup)
+                    markup_count += 1
+
+        except ImportError:
+            logger.debug("BOQ models unavailable - restore will skip BOQ data")
+
+        await self.session.flush()
+
+        logger.info(
+            "Project restored from backup: project=%s boqs=%d positions=%d markups=%d wbs=%d milestones=%d",
+            project.id,
+            boq_count,
+            position_count,
+            markup_count,
+            wbs_count,
+            milestone_count,
+        )
+
+        return ProjectRestoreResponse(
+            project_id=project.id,
+            name=project.name,
+            boqs_created=boq_count,
+            positions_created=position_count,
+            markups_created=markup_count,
+            wbs_nodes_created=wbs_count,
+            milestones_created=milestone_count,
+        )
 
 
 # ── Match-settings service helpers (v2.8.0) ──────────────────────────────

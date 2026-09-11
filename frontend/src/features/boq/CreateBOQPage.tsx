@@ -54,6 +54,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: projects } = useQuery({
@@ -72,29 +73,38 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
       setFile(null);
       setBusy(false);
       setError(null);
+      setTouched(false);
     }
   }, [open, defaultProjectId]);
 
   const stripExt = (filename: string): string => filename.replace(/\.[^./\\]+$/, '');
 
+  // When importing, a missing name defaults to the file name so the user
+  // does not have to type one just to get going.
+  const effectiveName =
+    name.trim() || (startMode === 'import' && file ? stripExt(file.name) : '');
+
+  const projectError =
+    touched && !selectedProjectId
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+  const nameError =
+    touched && !effectiveName
+      ? t('validation.required', { defaultValue: 'This field is required' })
+      : undefined;
+  const fileError =
+    touched && startMode === 'import' && !file
+      ? t('boq.import_needs_file', { defaultValue: 'Choose a file to import, or switch to an empty BOQ.' })
+      : undefined;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
     setError(null);
+    setTouched(true);
 
-    // When importing, a missing name defaults to the file name so the user
-    // does not have to type one just to get going.
-    const effectiveName =
-      name.trim() || (startMode === 'import' && file ? stripExt(file.name) : '');
-
-    if (!selectedProjectId || !effectiveName) {
-      setError(t('boq.create_needs_name', { defaultValue: 'Pick a project and give the BOQ a name.' }));
-      return;
-    }
-    if (startMode === 'import' && !file) {
-      setError(t('boq.import_needs_file', { defaultValue: 'Choose a file to import, or switch to an empty BOQ.' }));
-      return;
-    }
+    if (!selectedProjectId || !effectiveName) return;
+    if (startMode === 'import' && !file) return;
 
     setBusy(true);
     try {
@@ -230,13 +240,19 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
           <div>
             <label className="text-sm font-medium text-content-primary block mb-1.5">
               {t('common.project')}
+              <span aria-hidden="true" className="ml-1 text-semantic-error">*</span>
             </label>
             <div className="relative">
               <select
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="w-full h-10 appearance-none rounded-lg border border-border px-3 pr-9 text-sm text-content-primary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary"
+                className={`w-full h-10 appearance-none rounded-lg border px-3 pr-9 text-sm text-content-primary bg-surface-primary focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-fast ease-oe ${
+                  projectError
+                    ? 'border-semantic-error focus:ring-semantic-error/30'
+                    : 'border-border focus:ring-oe-blue hover:border-content-tertiary'
+                }`}
                 required aria-required="true"
+                aria-invalid={Boolean(projectError)}
               >
                 <option value="" disabled>
                   {t('boq.select_project', { defaultValue: 'Select Project' })}
@@ -247,6 +263,9 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
               </select>
               <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
             </div>
+            {projectError && (
+              <p className="mt-1 text-xs text-semantic-error" role="alert">{projectError}</p>
+            )}
           </div>
 
           {/* Start mode: empty vs import */}
@@ -291,7 +310,11 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full items-center gap-3 rounded-lg border border-dashed border-border px-3 py-3 text-left text-sm hover:border-oe-blue hover:bg-oe-blue/5 transition-colors"
+                className={`flex w-full items-center gap-3 rounded-lg border border-dashed px-3 py-3 text-left text-sm transition-colors ${
+                  fileError
+                    ? 'border-semantic-error'
+                    : 'border-border hover:border-oe-blue hover:bg-oe-blue/5'
+                }`}
                 data-testid="create-boq-file-picker"
               >
                 <FileUp size={18} className="shrink-0 text-content-tertiary" />
@@ -303,6 +326,9 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
                   </span>
                 )}
               </button>
+              {fileError && (
+                <p className="text-xs text-semantic-error" role="alert">{fileError}</p>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -343,6 +369,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
             })}
             required={startMode === 'empty'}
             aria-required={startMode === 'empty'}
+            error={nameError}
             autoFocus
           />
 

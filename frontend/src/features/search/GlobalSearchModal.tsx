@@ -37,6 +37,7 @@ import {
   Sparkles,
   ArrowUpRight,
   Filter,
+  Bookmark,
 } from 'lucide-react';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -63,6 +64,47 @@ const FACET_COLOR: Record<string, string> = {
   oe_chat: 'bg-slate-50 text-slate-700 border-slate-200',
 };
 
+/* ── Saved searches (localStorage) ─────────────────────────────────────── */
+
+const SAVED_SEARCHES_KEY = 'oce-saved-searches';
+const MAX_SAVED = 10;
+
+interface SavedSearch {
+  query: string;
+  savedAt: string;
+}
+
+function loadSavedSearches(): SavedSearch[] {
+  try {
+    const raw = localStorage.getItem(SAVED_SEARCHES_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as SavedSearch[];
+  } catch {
+    return [];
+  }
+}
+
+function persistSavedSearches(entries: SavedSearch[]): void {
+  try {
+    localStorage.setItem(SAVED_SEARCHES_KEY, JSON.stringify(entries.slice(0, MAX_SAVED)));
+  } catch {
+    // Silently ignore storage errors
+  }
+}
+
+function addSavedSearch(q: string): SavedSearch[] {
+  const current = loadSavedSearches().filter((s) => s.query !== q);
+  const next = [{ query: q, savedAt: new Date().toISOString() }, ...current].slice(0, MAX_SAVED);
+  persistSavedSearches(next);
+  return next;
+}
+
+function removeSavedSearch(q: string): SavedSearch[] {
+  const next = loadSavedSearches().filter((s) => s.query !== q);
+  persistSavedSearches(next);
+  return next;
+}
+
 export default function GlobalSearchModal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -78,11 +120,13 @@ export default function GlobalSearchModal() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [scopeProject, setScopeProject] = useState(true);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
 
-  // Auto-focus on open
+  // Auto-focus on open + reload saved searches
   useEffect(() => {
     if (open) {
       requestAnimationFrame(() => inputRef.current?.focus());
+      setSavedSearches(loadSavedSearches());
     }
   }, [open]);
 
@@ -146,6 +190,21 @@ export default function GlobalSearchModal() {
 
   const facets = searchQuery.data?.facets ?? {};
   const totalHits = searchQuery.data?.total ?? 0;
+  const isQuerySaved = savedSearches.some((s) => s.query === query.trim());
+
+  const handleSaveSearch = () => {
+    const q = query.trim();
+    if (!q) return;
+    setSavedSearches(addSavedSearch(q));
+  };
+
+  const handleRemoveSaved = (q: string) => {
+    setSavedSearches(removeSavedSearch(q));
+  };
+
+  const handleClickSaved = (q: string) => {
+    setQuery(q);
+  };
 
   return (
     <div
@@ -172,6 +231,16 @@ export default function GlobalSearchModal() {
           />
           {searchQuery.isFetching && (
             <Loader2 size={14} className="text-content-tertiary animate-spin" />
+          )}
+          {debouncedQuery.length >= 2 && totalHits > 0 && !isQuerySaved && (
+            <button
+              onClick={handleSaveSearch}
+              className="p-1 rounded text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/5 transition-colors"
+              aria-label={t('search.save_search', { defaultValue: 'Save search' })}
+              title={t('search.save_search', { defaultValue: 'Save search' })}
+            >
+              <Bookmark size={14} />
+            </button>
           )}
           <button
             onClick={closeModal}
@@ -242,6 +311,39 @@ export default function GlobalSearchModal() {
         {/* Results — the single flex-grow scroll region. Header/input above and
             footer below stay pinned; only this area scrolls. */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+          {/* Saved searches */}
+          {savedSearches.length > 0 && (
+            <div className="px-4 pt-3 pb-1">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-content-secondary mb-1.5">
+                {t('search.saved_searches', { defaultValue: 'Saved searches' })}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {savedSearches.map((s) => (
+                  <button
+                    key={s.query}
+                    type="button"
+                    onClick={() => handleClickSaved(s.query)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-full border border-border-light bg-surface-secondary text-content-secondary hover:bg-oe-blue/5 hover:text-oe-blue hover:border-oe-blue/30 transition-colors group"
+                  >
+                    <Bookmark size={10} className="shrink-0 opacity-60" />
+                    <span className="truncate max-w-[180px]">{s.query}</span>
+                    <span
+                      role="button"
+                      aria-label={t('search.remove_saved', { defaultValue: 'Remove' })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveSaved(s.query);
+                      }}
+                      className="shrink-0 rounded-full p-0.5 hover:bg-red-100 hover:text-red-600 transition-colors"
+                    >
+                      <X size={10} />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {debouncedQuery.length < 2 && (
             <div className="flex flex-col items-center justify-center py-16 text-content-tertiary">
               <Sparkles size={28} className="text-amber-400 mb-2" />
