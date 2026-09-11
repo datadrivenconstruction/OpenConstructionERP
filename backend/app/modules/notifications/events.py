@@ -102,7 +102,7 @@ async def _on_boq_created(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_boq_created failed", exc_info=True)
+        logger.warning("notifications: _on_boq_created failed", exc_info=True)
 
 
 async def _on_meeting_action_items_created(event: Event) -> None:
@@ -147,7 +147,7 @@ async def _on_meeting_action_items_created(event: Event) -> None:
                 )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_meeting_action_items_created failed", exc_info=True)
+        logger.warning("notifications: _on_meeting_action_items_created failed", exc_info=True)
 
 
 async def _on_bim_element_deleted(event: Event) -> None:
@@ -189,7 +189,7 @@ async def _on_cde_state_transitioned(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_cde_state_transitioned failed", exc_info=True)
+        logger.warning("notifications: _on_cde_state_transitioned failed", exc_info=True)
 
 
 async def _on_rfi_assigned(event: Event) -> None:
@@ -219,7 +219,7 @@ async def _on_rfi_assigned(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_rfi_assigned failed", exc_info=True)
+        logger.warning("notifications: _on_rfi_assigned failed", exc_info=True)
 
 
 async def _on_risk_assigned(event: Event) -> None:
@@ -249,7 +249,7 @@ async def _on_risk_assigned(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_risk_assigned failed", exc_info=True)
+        logger.warning("notifications: _on_risk_assigned failed", exc_info=True)
 
 
 async def _on_rfi_responded(event: Event) -> None:
@@ -279,7 +279,7 @@ async def _on_rfi_responded(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_rfi_responded failed", exc_info=True)
+        logger.warning("notifications: _on_rfi_responded failed", exc_info=True)
 
 
 async def _resolve_project_owner(session, project_id: str) -> str | None:
@@ -342,7 +342,7 @@ async def _on_submittal_submitted(event: Event) -> None:
                 )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_submittal_submitted failed", exc_info=True)
+        logger.warning("notifications: _on_submittal_submitted failed", exc_info=True)
 
 
 async def _on_submittal_approved(event: Event) -> None:
@@ -372,7 +372,7 @@ async def _on_submittal_approved(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_submittal_approved failed", exc_info=True)
+        logger.warning("notifications: _on_submittal_approved failed", exc_info=True)
 
 
 async def _on_submittal_rejected(event: Event) -> None:
@@ -403,7 +403,7 @@ async def _on_submittal_rejected(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_submittal_rejected failed", exc_info=True)
+        logger.warning("notifications: _on_submittal_rejected failed", exc_info=True)
 
 
 async def _on_submittal_revise_resubmit(event: Event) -> None:
@@ -434,7 +434,7 @@ async def _on_submittal_revise_resubmit(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_submittal_revise_resubmit failed", exc_info=True)
+        logger.warning("notifications: _on_submittal_revise_resubmit failed", exc_info=True)
 
 
 async def _on_transmittal_issued(event: Event) -> None:
@@ -464,7 +464,7 @@ async def _on_transmittal_issued(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_transmittal_issued failed", exc_info=True)
+        logger.warning("notifications: _on_transmittal_issued failed", exc_info=True)
 
 
 async def _on_transmittal_acknowledged(event: Event) -> None:
@@ -494,7 +494,7 @@ async def _on_transmittal_acknowledged(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_transmittal_acknowledged failed", exc_info=True)
+        logger.warning("notifications: _on_transmittal_acknowledged failed", exc_info=True)
 
 
 async def _on_transmittal_responded(event: Event) -> None:
@@ -525,7 +525,7 @@ async def _on_transmittal_responded(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_transmittal_responded failed", exc_info=True)
+        logger.warning("notifications: _on_transmittal_responded failed", exc_info=True)
 
 
 async def _on_file_comment_mention(event: Event) -> None:
@@ -569,7 +569,7 @@ async def _on_file_comment_mention(event: Event) -> None:
             )
             await session.commit()
     except Exception:  # noqa: BLE001
-        logger.debug("notifications: _on_file_comment_mention failed", exc_info=True)
+        logger.warning("notifications: _on_file_comment_mention failed", exc_info=True)
 
 
 async def _on_validation_report_created(event: Event) -> None:
@@ -647,7 +647,7 @@ async def _on_validation_report_created(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_validation_report_created failed", exc_info=True)
+        logger.warning("notifications: _on_validation_report_created failed", exc_info=True)
 
 
 async def _on_clash_high_severity(event: Event) -> None:
@@ -716,7 +716,7 @@ async def _on_clash_high_severity(event: Event) -> None:
             )
             await session.commit()
     except Exception:
-        logger.debug("notifications: _on_clash_high_severity failed", exc_info=True)
+        logger.warning("notifications: _on_clash_high_severity failed", exc_info=True)
 
 
 # Declarative subscription map.  Adding a new event to this list

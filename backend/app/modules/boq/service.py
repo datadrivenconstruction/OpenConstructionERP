@@ -36,7 +36,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 
@@ -229,10 +229,27 @@ logger_events = logging.getLogger(__name__ + ".events")
 _logger_audit = logging.getLogger(__name__ + ".audit")
 
 
-async def _safe_publish(name: str, data: dict[str, Any], source_module: str = "oe_boq") -> None:
-    """Publish event safely - ignores MissingGreenlet errors with SQLite async."""
+async def _safe_publish(
+    name: str,
+    data: dict[str, Any],
+    source_module: str = "oe_boq",
+    *,
+    session: AsyncSession | None = None,
+) -> None:
+    """Publish event safely, deferring until after commit when possible.
+
+    When *session* is provided and a transaction is open, the event is
+    deferred via ``publish_after_commit`` so that subscribers who open
+    their own session can actually see the row the event describes.
+    Without this, notification handlers (and any other subscriber that
+    opens a fresh session) hit an FK violation on the still-uncommitted
+    parent and silently lose the child record.
+    """
     try:
-        event_bus.publish_detached(name, data, source_module=source_module)
+        if session is not None:
+            publish_after_commit(session, name, data, source_module=source_module)
+        else:
+            event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         logger_events.debug("Event publish skipped (SQLite async): %s", name)
 
@@ -2458,6 +2475,7 @@ class BOQService:
             "boq.boq.created",
             {"boq_id": str(boq.id), "project_id": str(data.project_id)},
             source_module="oe_boq",
+            session=self.session,
         )
 
         await _safe_audit(
@@ -2860,6 +2878,7 @@ class BOQService:
             await _safe_publish(
                 "boq.boq.updated",
                 {"boq_id": str(boq_id), "fields": list(fields.keys())},
+                session=self.session,
             )
 
         # Re-fetch to return fresh data
@@ -2901,6 +2920,7 @@ class BOQService:
             "boq.boq.deleted",
             {"boq_id": str(boq_id), "project_id": project_id},
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info("BOQ deleted: %s", boq_id)
@@ -3150,6 +3170,7 @@ class BOQService:
                 "ordinal": data.ordinal,
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         await _safe_audit(
@@ -3262,6 +3283,7 @@ class BOQService:
                 "linked": not as_copy,
             },
             source_module="oe_boq",
+            session=self.session,
         )
         await _safe_audit(
             self.session,
@@ -3432,6 +3454,7 @@ class BOQService:
             "boq.positions.bulk_created",
             {"boq_id": str(boq_id), "count": len(inserted)},
             source_module="oe_boq",
+            session=self.session,
         )
         await _safe_audit(
             self.session,
@@ -3511,6 +3534,7 @@ class BOQService:
                 "ordinal": data.ordinal,
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info("Section created: %s in BOQ %s", data.ordinal, boq_id)
@@ -4221,6 +4245,7 @@ class BOQService:
                                 "kind": "linked_master_propagation",
                             },
                             source_module="oe_boq",
+                            session=self.session,
                         )
                     await self.session.flush()
                     # The per-instance update_fields() calls wrote through other
@@ -4391,6 +4416,7 @@ class BOQService:
                                     "kind": "linked_master_child_propagation",
                                 },
                                 source_module="oe_boq",
+                                session=self.session,
                             )
                         await self.session.flush()
                         if _mc_affected:
@@ -4471,6 +4497,7 @@ class BOQService:
                 "version": int(position.version or 0),
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         # ── BUG-AUDIT01: direct activity-log write ──────────────────────
@@ -5082,6 +5109,7 @@ class BOQService:
                 "kind": "resource_variant_repick",
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         if actor_id is not None:
@@ -5217,6 +5245,7 @@ class BOQService:
                 "boq.position.deleted",
                 {"position_id": pid_str, "boq_id": boq_id},
                 source_module="oe_boq",
+                session=self.session,
             )
 
         logger.info(
@@ -5615,6 +5644,7 @@ class BOQService:
                 "name": data.name,
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info("Markup added: %s to BOQ %s", data.name, boq_id)
@@ -5698,6 +5728,7 @@ class BOQService:
                     "boq_id": str(markup.boq_id),
                     "fields": list(fields.keys()),
                 },
+                session=self.session,
             )
 
             if refreshed is not None:
@@ -5733,6 +5764,7 @@ class BOQService:
             "boq.markup.deleted",
             {"markup_id": str(markup_id), "boq_id": boq_id},
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info("Markup deleted: %s from BOQ %s", markup_id, boq_id)
@@ -6026,6 +6058,7 @@ class BOQService:
             "boq.markups.defaults_applied",
             {"boq_id": str(boq_id), "region": region_key, "count": len(created)},
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info(
@@ -6278,6 +6311,7 @@ class BOQService:
                 "project_id": str(source_project_id),
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info("BOQ duplicated: %s -> %s", boq_id, new_boq_id)
@@ -6443,6 +6477,7 @@ class BOQService:
                 "boq_id": str(source.boq_id),
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info(
@@ -6541,6 +6576,7 @@ class BOQService:
                 "kind": "linked_position_unlinked",
             },
             source_module="oe_boq",
+            session=self.session,
         )
         if actor_id is not None:
             try:
@@ -6906,6 +6942,7 @@ class BOQService:
                         "kind": "linked_resource_propagation",
                     },
                     source_module="oe_boq",
+                    session=self.session,
                 )
 
             if updated:
@@ -7416,6 +7453,7 @@ class BOQService:
         await _safe_publish(
             "boq.cost_breakdown.computed",
             {"boq_id": str(boq_id), "direct_cost": round(direct_cost_val, 2)},
+            session=self.session,
         )
 
         return CostBreakdownResponse(
@@ -7860,6 +7898,7 @@ class BOQService:
                 "area_m2": data.area_m2,
             },
             source_module="oe_boq",
+            session=self.session,
         )
 
         logger.info(
@@ -8593,6 +8632,7 @@ class BOQService:
                 "position_id": str(position_id),
                 "model_id": str(data.model_id),
             },
+            session=self.session,
         )
         return QuantityLinkResponse.model_validate(link)
 
@@ -8942,6 +8982,7 @@ class BOQService:
         await _safe_publish(
             "boq.quantity_link.applied",
             {"boq_id": str(boq_id), "applied": applied, "skipped": skipped},
+            session=self.session,
         )
         return QuantityLinkApplyResponse(
             boq_id=boq_id,
