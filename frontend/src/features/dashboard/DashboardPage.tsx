@@ -249,7 +249,7 @@ interface ProjectCardMetrics {
   phase: string | null;
   created_at: string | null;
   updated_at: string | null;
-  boq_total_value: number;
+  boq_total_value: number | string;
   boq_count: number;
   position_count: number;
   open_tasks: number;
@@ -3075,12 +3075,13 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
   // Used for the per-currency Total Value subtotals and the per-project
   // bar labels so no figure is ever shown without its currency.
   const fmtCompact = (value: number, code: string): string => {
+    const safe = Number.isFinite(value) ? value : 0;
     const num =
-      value >= 1_000_000
-        ? `${fmtFixed(value / 1_000_000, 1)}M`
-        : value >= 1_000
-          ? `${fmtFixed(value / 1_000, 0)}K`
-          : value.toLocaleString(getNumberLocale(), {
+      safe >= 1_000_000
+        ? `${fmtFixed(safe / 1_000_000, 1)}M`
+        : safe >= 1_000
+          ? `${fmtFixed(safe / 1_000, 0)}K`
+          : safe.toLocaleString(getNumberLocale(), {
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             });

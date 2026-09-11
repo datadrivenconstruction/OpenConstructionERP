@@ -162,7 +162,7 @@ export interface ProjectDashboard {
   recent_activity: DashboardActivity[];
   // Legacy flat fields
   boq_count: number;
-  boq_total_value: number;
+  boq_total_value: number | string;
   position_count: number;
   punch_items: Record<string, number>;
 }

@@ -15,6 +15,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { fmtNumber, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { toNum } from '@/shared/lib/money';
 import { useNameCollator } from '@/shared/lib/collator';
 import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
 import { projectsApi, type Project } from './api';
@@ -245,7 +246,7 @@ export function ProjectsPage() {
      archived projects are rarely sorted by value). */
   interface DashboardCard {
     id: string;
-    boq_total_value: number;
+    boq_total_value: number | string;
     boq_count: number;
     open_tasks?: number;
     open_rfis?: number;
@@ -271,7 +272,7 @@ export function ProjectsPage() {
         return {
           projectId: p.id,
           boqCount: c?.boq_count ?? 0,
-          totalValue: c?.boq_total_value ?? 0,
+          totalValue: toNum(c?.boq_total_value),
           hasError: false,
         };
       });
