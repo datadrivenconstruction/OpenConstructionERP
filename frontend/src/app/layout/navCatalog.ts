@@ -676,6 +676,17 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
       { labelKey: 'deadlines.title', to: '/deadlines', icon: AlarmClock, defaultLabel: 'Deadlines' },
       { labelKey: 'review_authority.title', to: '/review-authority', icon: FileCheck, advancedOnly: true },
+      // Governance: permissions, approval routes, and validation rule
+      // configuration. Sits at the end of Quality because it governs the
+      // rules that Quality runs. Also reachable from Settings > Governance.
+      {
+        labelKey: 'nav.governance',
+        defaultLabel: 'Governance',
+        helpKey: 'nav.governance_help',
+        defaultHelp: 'Permissions, approval routes, and validation rule configuration',
+        to: '/governance',
+        icon: Scale,
+      },
     ],
   },
   // ── 13b. HANDOVER & COMMISSIONING ──────────────────────────────────

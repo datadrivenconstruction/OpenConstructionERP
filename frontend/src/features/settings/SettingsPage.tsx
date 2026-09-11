@@ -1245,7 +1245,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'account' | 'regional' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'modules' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'account' | 'regional' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'modules' | 'governance' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1283,6 +1283,7 @@ const TABS: readonly TabDef[] = [
   // Audit log — moved here from the sidebar admin grid. Manager+ only; the
   // page component enforces `audit.view` on the backend, and we role-gate the
   // tab itself in the component so it never shows for viewers/editors.
+  { id: 'governance',   labelKey: 'settings.tab_governance',   defaultLabel: 'Governance',   icon: Scale,    descKey: 'settings.tab_governance_desc',   descDefault: 'Permissions, approval routes, and validation rules' },
   { id: 'audit',        labelKey: 'settings.tab_audit',        defaultLabel: 'Audit log',    icon: ScrollText, descKey: 'settings.tab_audit_desc',      descDefault: 'Read-only timeline of every recorded change' },
   { id: 'advanced',     labelKey: 'settings.tab_advanced',     defaultLabel: 'Advanced',     icon: Wrench,   descKey: 'settings.tab_advanced_desc',     descDefault: 'Backup, databases, setup wizard' },
 ];
@@ -1962,6 +1963,65 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
               <WebhookLeads />
+            </div>
+          )}
+
+          {/* ── GOVERNANCE ─────────────────────────────────────── */}
+          {activeTab === 'governance' && (
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader
+                  title={t('settings.governance_title', { defaultValue: 'Governance' })}
+                  subtitle={t('settings.governance_subtitle', { defaultValue: 'Manage permissions, approval workflows, and validation rules' })}
+                />
+                <CardContent className="space-y-3">
+                  <Link
+                    to="/governance?tab=permissions"
+                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                  >
+                    <ShieldCheck size={16} className="shrink-0 text-oe-blue" />
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium text-content-primary">
+                        {t('settings.governance_permissions', { defaultValue: 'Permissions' })}
+                      </span>
+                      <p className="text-xs text-content-tertiary mt-0.5">
+                        {t('settings.governance_permissions_desc', { defaultValue: 'Role-based access control for modules and actions' })}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} className="ml-auto shrink-0 text-content-quaternary" />
+                  </Link>
+                  <Link
+                    to="/governance?tab=approvals"
+                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                  >
+                    <Scale size={16} className="shrink-0 text-oe-blue" />
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium text-content-primary">
+                        {t('settings.governance_approvals', { defaultValue: 'Approval Routes' })}
+                      </span>
+                      <p className="text-xs text-content-tertiary mt-0.5">
+                        {t('settings.governance_approvals_desc', { defaultValue: 'Multi-step approval workflows for changes and documents' })}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} className="ml-auto shrink-0 text-content-quaternary" />
+                  </Link>
+                  <Link
+                    to="/governance?tab=validation"
+                    className="flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+                  >
+                    <ShieldAlert size={16} className="shrink-0 text-oe-blue" />
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium text-content-primary">
+                        {t('settings.governance_validation', { defaultValue: 'Validation Rules' })}
+                      </span>
+                      <p className="text-xs text-content-tertiary mt-0.5">
+                        {t('settings.governance_validation_desc', { defaultValue: 'Configure which validation rules apply to projects and BOQs' })}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} className="ml-auto shrink-0 text-content-quaternary" />
+                  </Link>
+                </CardContent>
+              </Card>
             </div>
           )}
 

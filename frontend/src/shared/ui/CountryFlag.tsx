@@ -17,6 +17,15 @@ const FLAGS: Record<string, string> = {
   // a broken card rather than as a missing asset.
   at: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="6" fill="#ED2939"/><rect y="2" width="9" height="2" fill="#fff"/></svg>`,
 
+  // AM — Armenia (red-blue-orange horizontal)
+  am: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3"><rect width="6" height="1" fill="#D90012"/><rect y="1" width="6" height="1" fill="#0033A0"/><rect y="2" width="6" height="1" fill="#F2A800"/></svg>`,
+
+  // AR — Argentina (light blue-white-light blue horizontal, sun of May)
+  ar: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#74ACDF"/><rect y="6.67" width="30" height="6.66" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#74ACDF"/><circle cx="15" cy="10" r="2.2" fill="#F6B40E"/><g stroke="#F6B40E" stroke-width="0.6" stroke-linecap="round"><line x1="15" y1="6.2" x2="15" y2="4.8"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(30 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(60 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(90 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(120 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(150 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(180 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(210 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(240 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(270 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(300 15 10)"/><line x1="15" y1="6.2" x2="15" y2="4.8" transform="rotate(330 15 10)"/></g></svg>`,
+
+  // AZ — Azerbaijan (blue-red-green horizontal, white crescent and star)
+  az: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#0092BC"/><rect y="6.67" width="30" height="6.66" fill="#E4002B"/><rect y="13.33" width="30" height="6.67" fill="#00AF66"/><circle cx="14" cy="10" r="3" fill="#fff"/><circle cx="15" cy="10" r="2.4" fill="#E4002B"/><polygon points="18,8 18.45,9.38 19.9,9.38 18.73,10.24 19.17,11.62 18,10.76 16.83,11.62 17.27,10.24 16.1,9.38 17.55,9.38" fill="#fff"/></svg>`,
+
   // CH — Switzerland. Drawn in a 3:2 box rather than the square the
   // federal flag actually is, because every flag here is rendered at one
   // aspect ratio and a square would be squashed into a rectangle by the
@@ -30,8 +39,20 @@ const FLAGS: Record<string, string> = {
   // ES — Spain
   es: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 4"><rect width="6" height="4" fill="#AA151B"/><rect y="1" width="6" height="2" fill="#F1BF00"/></svg>`,
 
+  // BE — Belgium (black-yellow-red vertical)
+  be: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2.6"><rect width="1" height="2.6" fill="#000"/><rect x="1" width="1" height="2.6" fill="#FAE042"/><rect x="2" width="1" height="2.6" fill="#ED2939"/></svg>`,
+
+  // BH — Bahrain (white with red serrated band on the fly)
+  bh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#CE1126"/><path d="M0,0 L10,0 L7.5,2 L10,4 L7.5,6 L10,8 L7.5,10 L10,12 L7.5,14 L10,16 L7.5,18 L10,20 L0,20 Z" fill="#fff"/></svg>`,
+
   // BR — Brazil
   br: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14"><rect width="20" height="14" fill="#009B3A"/><path d="M10 1.5l8.5 5.5L10 12.5 1.5 7z" fill="#FEDF00"/><circle cx="10" cy="7" r="3" fill="#002776"/><path d="M7.5 6.8a3 3 0 0 0 5 0" fill="none" stroke="#fff" stroke-width=".3"/></svg>`,
+
+  // BW — Botswana (light blue with black and white horizontal stripe)
+  bw: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#6DA9D2"/><rect y="7.5" width="30" height="5" fill="#000"/><rect y="7" width="30" height="0.8" fill="#fff"/><rect y="12.2" width="30" height="0.8" fill="#fff"/></svg>`,
+
+  // BY — Belarus (red and green horizontal with white ornament pattern on hoist)
+  by: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="11.67" fill="#CF101A"/><rect y="11.67" width="30" height="8.33" fill="#007D2C"/><rect width="3.6" height="20" fill="#fff"/><g fill="#CF101A"><rect x="1.2" y="2" width="1.2" height="1.2"/><rect x="1.2" y="5.2" width="1.2" height="1.2"/><rect x="1.2" y="8.4" width="1.2" height="1.2"/><rect x="1.2" y="11.6" width="1.2" height="1.2"/><rect x="1.2" y="14.8" width="1.2" height="1.2"/></g></svg>`,
 
   // PT — Portugal. Needed the moment pt stopped flying the Brazilian flag,
   // which it did when pt-BR arrived to carry it.
@@ -42,6 +63,18 @@ const FLAGS: Record<string, string> = {
 
   // CO — Colombia
   co: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 4"><rect width="6" height="4" fill="#FCD116"/><rect y="2" width="6" height="1" fill="#003893"/><rect y="3" width="6" height="1" fill="#CE1126"/></svg>`,
+
+  // CR — Costa Rica (blue-white-red-white-blue horizontal)
+  cr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="4" fill="#002B7F"/><rect y="4" width="30" height="3" fill="#fff"/><rect y="7" width="30" height="6" fill="#CE1126"/><rect y="13" width="30" height="3" fill="#fff"/><rect y="16" width="30" height="4" fill="#002B7F"/></svg>`,
+
+  // CY — Cyprus (white field with copper island silhouette and olive branches)
+  cy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><ellipse cx="15" cy="9" rx="6" ry="3.5" fill="#D57800"/><g fill="#4E7A3E"><path d="M12 14 Q13 12.5 15 13 Q17 12.5 18 14 Q15 15.5 12 14z"/></g></svg>`,
+
+  // DO — Dominican Republic (quartered blue-red with white cross)
+  do: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="15" height="10" fill="#002D62"/><rect x="15" width="15" height="10" fill="#CE1126"/><rect y="10" width="15" height="10" fill="#CE1126"/><rect x="15" y="10" width="15" height="10" fill="#002D62"/><rect x="12.5" width="5" height="20" fill="#fff"/><rect y="7.5" width="30" height="5" fill="#fff"/></svg>`,
+
+  // EC — Ecuador (yellow-blue-red horizontal, yellow double-width)
+  ec: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="10" fill="#FFD100"/><rect y="10" width="30" height="5" fill="#0033A0"/><rect y="15" width="30" height="5" fill="#CE1126"/></svg>`,
 
   // RU — Russia
   ru: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="2" fill="#fff"/><rect y="2" width="9" height="2" fill="#0039A6"/><rect y="4" width="9" height="2" fill="#D52B1E"/></svg>`,
@@ -55,6 +88,15 @@ const FLAGS: Record<string, string> = {
   // rendering of a religious text, which is worse than not rendering it. The
   // sword below is drawn properly and points to the hoist.
   sa: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#006C35"/><g fill="#fff"><rect x="5.20" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="6.62" y="6.55" width="0.62" height="1.55" rx="0.3"/><rect x="8.04" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="9.46" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="10.88" y="6.55" width="0.62" height="1.55" rx="0.3"/><rect x="12.30" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="13.72" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="15.14" y="6.55" width="0.62" height="1.55" rx="0.3"/><rect x="16.56" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="17.98" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="19.40" y="6.55" width="0.62" height="1.55" rx="0.3"/><rect x="20.82" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="22.24" y="6.00" width="0.62" height="2.10" rx="0.3"/><rect x="6.6" y="12.6" width="16.2" height="0.95" rx="0.47"/><path d="M6.6 13.08 3.4 11.3v3.56z"/><rect x="22.2" y="11.5" width="0.85" height="3.15" rx="0.42"/><circle cx="24.4" cy="13.08" r="1.35"/></g></svg>`,
+
+  // SG — Singapore (red over white with crescent and five stars)
+  sg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="10" fill="#EF3340"/><rect y="10" width="30" height="10" fill="#fff"/><circle cx="7.5" cy="5" r="3" fill="#fff"/><circle cx="8.5" cy="5" r="2.6" fill="#EF3340"/><g fill="#fff"><circle cx="10.5" cy="2.8" r="0.5"/><circle cx="12" cy="3.8" r="0.5"/><circle cx="12" cy="6.2" r="0.5"/><circle cx="10.5" cy="7.2" r="0.5"/><circle cx="11.2" cy="5" r="0.5"/></g></svg>`,
+
+  // SK — Slovakia (white-blue-red horizontal with shield)
+  sk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#0B4EA2"/><rect y="13.33" width="30" height="6.67" fill="#EE1C25"/><path d="M6,5 Q6,14 10.5,16 Q15,14 15,5 Z" fill="#EE1C25" stroke="#fff" stroke-width="0.5"/><path d="M8.5,10 H12.5 M10.5,8 V12" stroke="#fff" stroke-width="0.7"/></svg>`,
+
+  // SM — San Marino (white over light blue horizontal with coat of arms)
+  sm: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#5EB6E4"/><circle cx="15" cy="10" r="3.5" fill="#fff" stroke="#5EB6E4" stroke-width="0.5"/><path d="M13.5,9 Q15,6 16.5,9 Z" fill="#5EB6E4"/></svg>`,
 
   // IN - India. Twenty four spokes, generated. The previous chakra had four,
   // which reads as a plus sign inside a circle above about 40px.
@@ -105,6 +147,12 @@ const FLAGS: Record<string, string> = {
   // GR — Greece (9 blue-white stripes + white cross on blue canton)
   gr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 18"><rect width="27" height="18" fill="#0D5EAF"/><g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g><rect width="10" height="10" fill="#0D5EAF"/><rect x="4" width="2" height="10" fill="#fff"/><rect y="4" width="10" height="2" fill="#fff"/></svg>`,
 
+  // GH — Ghana (red-gold-green horizontal with black star)
+  gh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#CE1126"/><rect y="6.67" width="30" height="6.66" fill="#FCD116"/><rect y="13.33" width="30" height="6.67" fill="#006B3F"/><polygon points="15,7.7 15.9,10.4 18.7,10.4 16.4,12.1 17.3,14.8 15,13.1 12.7,14.8 13.6,12.1 11.3,10.4 14.1,10.4" fill="#000"/></svg>`,
+
+  // HK — Hong Kong (red field with white bauhinia flower)
+  hk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#CE1126"/><g fill="#fff" transform="translate(15,10)"><ellipse rx="1.5" ry="4" transform="rotate(0)"/><ellipse rx="1.5" ry="4" transform="rotate(72)"/><ellipse rx="1.5" ry="4" transform="rotate(144)"/><ellipse rx="1.5" ry="4" transform="rotate(216)"/><ellipse rx="1.5" ry="4" transform="rotate(288)"/></g><circle cx="15" cy="10" r="1.2" fill="#CE1126"/></svg>`,
+
   // US — United States (proper white star polygons, not font glyphs which
   // render as empty boxes inside an <img> data-URI without a guaranteed font)
   us: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19 10"><defs><polygon id="us-s" points="0,-0.32 0.072,-0.099 0.304,-0.099 0.116,0.038 0.188,0.259 0,0.122 -0.188,0.259 -0.116,0.038 -0.304,-0.099 -0.072,-0.099" fill="#fff"/></defs><rect width="19" height="10" fill="#B22234"/><g fill="#fff"><rect y=".77" width="19" height=".77"/><rect y="2.31" width="19" height=".77"/><rect y="3.85" width="19" height=".77"/><rect y="5.38" width="19" height=".77"/><rect y="6.92" width="19" height=".77"/><rect y="8.46" width="19" height=".77"/></g><rect width="7.6" height="5.38" fill="#3C3B6E"/><g><use href="#us-s" x="0.76" y="0.7"/><use href="#us-s" x="2.28" y="0.7"/><use href="#us-s" x="3.8" y="0.7"/><use href="#us-s" x="5.32" y="0.7"/><use href="#us-s" x="6.84" y="0.7"/><use href="#us-s" x="1.52" y="1.6"/><use href="#us-s" x="3.04" y="1.6"/><use href="#us-s" x="4.56" y="1.6"/><use href="#us-s" x="6.08" y="1.6"/><use href="#us-s" x="0.76" y="2.5"/><use href="#us-s" x="2.28" y="2.5"/><use href="#us-s" x="3.8" y="2.5"/><use href="#us-s" x="5.32" y="2.5"/><use href="#us-s" x="6.84" y="2.5"/><use href="#us-s" x="1.52" y="3.4"/><use href="#us-s" x="3.04" y="3.4"/><use href="#us-s" x="4.56" y="3.4"/><use href="#us-s" x="6.08" y="3.4"/><use href="#us-s" x="0.76" y="4.3"/><use href="#us-s" x="2.28" y="4.3"/><use href="#us-s" x="3.8" y="4.3"/><use href="#us-s" x="5.32" y="4.3"/><use href="#us-s" x="6.84" y="4.3"/></g></svg>`,
@@ -131,6 +179,18 @@ const FLAGS: Record<string, string> = {
   // NZ — New Zealand (blue with Union Jack canton + 4 Southern Cross stars)
   nz: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><rect width="60" height="30" fill="#00247D"/><clipPath id="nzc"><rect width="30" height="15"/></clipPath><g clip-path="url(#nzc)"><path d="M0,0 L30,15 M30,0 L0,15" stroke="#fff" stroke-width="3"/><path d="M0,0 L30,15 M30,0 L0,15" stroke="#CC142B" stroke-width="1.6"/><path d="M15,0 V15 M0,7.5 H30" stroke="#fff" stroke-width="5"/><path d="M15,0 V15 M0,7.5 H30" stroke="#CC142B" stroke-width="3"/></g><circle cx="46" cy="8" r="1.5" fill="#fff"/><circle cx="46" cy="8" r="1" fill="#CC142B"/><circle cx="52" cy="14" r="1.5" fill="#fff"/><circle cx="52" cy="14" r="1" fill="#CC142B"/><circle cx="47" cy="23" r="1.5" fill="#fff"/><circle cx="47" cy="23" r="1" fill="#CC142B"/><circle cx="41" cy="19" r="1.3" fill="#fff"/><circle cx="41" cy="19" r=".85" fill="#CC142B"/></svg>`,
 
+  // OM — Oman (white-red-green horizontal with red vertical bar on hoist)
+  om: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#DB161B"/><rect y="13.33" width="30" height="6.67" fill="#008000"/><rect width="8" height="20" fill="#DB161B"/><g fill="#fff" transform="translate(4,3.3)"><rect x="-0.8" y="0" width="1.6" height="1.8" rx="0.2"/><line x1="-1.5" y1="1.8" x2="1.5" y2="1.8" stroke="#fff" stroke-width="0.4"/></g></svg>`,
+
+  // PA — Panama (quartered white-blue-red-white with blue and red stars)
+  pa: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="15" height="10" fill="#fff"/><rect x="15" width="15" height="10" fill="#DA121A"/><rect y="10" width="15" height="10" fill="#003DA5"/><rect x="15" y="10" width="15" height="10" fill="#fff"/><polygon points="7.5,3 8.09,4.81 10,4.81 8.45,5.94 9.05,7.75 7.5,6.63 5.95,7.75 6.55,5.94 5,4.81 6.91,4.81" fill="#003DA5"/><polygon points="22.5,13 23.09,14.81 25,14.81 23.45,15.94 24.05,17.75 22.5,16.63 20.95,17.75 21.55,15.94 20,14.81 21.91,14.81" fill="#DA121A"/></svg>`,
+
+  // PE — Peru (red-white-red vertical)
+  pe: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="1" height="2" fill="#D91023"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#D91023"/></svg>`,
+
+  // QA — Qatar (maroon with white serrated band on hoist)
+  qa: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#8D1B3D"/><path d="M0,0 L10.5,0 L7.5,2.22 L10.5,4.44 L7.5,6.67 L10.5,8.89 L7.5,11.11 L10.5,13.33 L7.5,15.56 L10.5,17.78 L7.5,20 L0,20 Z" fill="#fff"/></svg>`,
+
   // HR — Croatia (red-white-blue horizontal + simplified shield)
   hr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 15"><rect width="30" height="5" fill="#FF0000"/><rect y="5" width="30" height="5" fill="#fff"/><rect y="10" width="30" height="5" fill="#171796"/><g transform="translate(13.5, 5.5)"><rect width="3" height="3" fill="#fff" stroke="#171796" stroke-width=".15"/><rect width=".75" height=".75" fill="#FF0000"/><rect x="1.5" width=".75" height=".75" fill="#FF0000"/><rect y="1.5" width=".75" height=".75" fill="#FF0000"/><rect x="1.5" y="1.5" width=".75" height=".75" fill="#FF0000"/><rect x=".75" y=".75" width=".75" height=".75" fill="#FF0000"/><rect x="2.25" y=".75" width=".75" height=".75" fill="#FF0000"/><rect x=".75" y="2.25" width=".75" height=".75" fill="#FF0000"/><rect x="2.25" y="2.25" width=".75" height=".75" fill="#FF0000"/></g></svg>`,
 
@@ -140,11 +200,38 @@ const FLAGS: Record<string, string> = {
   // TH — Thailand (5 horizontal stripes red-white-blue-white-red)
   th: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.33" fill="#F4F5F8"/><rect y="6.66" width="30" height="6.66" fill="#2D2A4A"/></svg>`,
 
+  // TJ — Tajikistan (red-white-green horizontal with gold crown and stars)
+  tj: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="5.71" fill="#CE1126"/><rect y="5.71" width="30" height="8.57" fill="#fff"/><rect y="14.29" width="30" height="5.71" fill="#007A3D"/><rect x="13.5" y="8" width="3" height="3" fill="#F8D12E"/><g fill="#F8D12E"><circle cx="12" cy="7.5" r="0.6"/><circle cx="15" cy="7.5" r="0.6"/><circle cx="18" cy="7.5" r="0.6"/><circle cx="13" cy="6.5" r="0.6"/><circle cx="17" cy="6.5" r="0.6"/><circle cx="15" cy="6" r="0.6"/><circle cx="14" cy="6" r="0.6"/></g></svg>`,
+
+  // UY — Uruguay (white with blue stripes and sun of May in canton)
+  uy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><g fill="#001489"><rect y="2.22" width="30" height="2.22"/><rect y="6.67" width="30" height="2.22"/><rect y="11.11" width="30" height="2.22"/><rect y="15.56" width="30" height="2.22"/></g><rect width="10" height="10" fill="#fff"/><circle cx="5" cy="5" r="2" fill="#F8D12E"/><g stroke="#F8D12E" stroke-width="0.5" stroke-linecap="round"><line x1="5" y1="1.5" x2="5" y2="0.5"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(45 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(90 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(135 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(180 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(225 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(270 5 5)"/><line x1="5" y1="1.5" x2="5" y2="0.5" transform="rotate(315 5 5)"/></g></svg>`,
+
   // VN — Vietnam (red with yellow 5-point star)
   vn: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#DA251D"/><polygon points="15,5 16.76,10.4 22.41,10.4 17.83,13.7 19.59,19.1 15,15.8 10.41,19.1 12.17,13.7 7.59,10.4 13.24,10.4" fill="#FF0"/></svg>`,
 
   // ID — Indonesia (red top, white bottom)
   id: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="3" height="1" fill="#FF0000"/><rect y="1" width="3" height="1" fill="#fff"/></svg>`,
+
+  // IE — Ireland (green-white-orange vertical)
+  ie: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="1" height="2" fill="#169B62"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#FF883E"/></svg>`,
+
+  // KE — Kenya (black-red-green horizontal with white fimbriation and shield)
+  ke: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#000"/><rect y="5.87" width="30" height="0.8" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#BB0000"/><rect y="12.53" width="30" height="0.8" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#006600"/><ellipse cx="15" cy="10" rx="2.8" ry="5" fill="#BB0000" stroke="#000" stroke-width="0.5"/><line x1="15" y1="4" x2="15" y2="16" stroke="#fff" stroke-width="0.5"/></svg>`,
+
+  // KW — Kuwait (green-white-red horizontal with black trapezoid on hoist)
+  kw: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#007A3D"/><rect y="6.67" width="30" height="6.66" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#CE1126"/><polygon points="0,0 8,6.67 8,13.33 0,20" fill="#000"/></svg>`,
+
+  // LK — Sri Lanka (golden border, maroon lion field on fly, green+orange on hoist)
+  lk: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#FFBE29"/><rect x="1" y="1" width="5" height="18" fill="#00534E"/><rect x="6" y="1" width="5" height="18" fill="#FF7722"/><rect x="11" y="1" width="18" height="18" rx="1" fill="#8B0000"/><rect x="23" y="5" width="1.5" height="10" fill="#FFBE29"/></svg>`,
+
+  // LU — Luxembourg (red-white-light blue horizontal)
+  lu: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 4"><rect width="6" height="1.33" fill="#ED2939"/><rect y="1.33" width="6" height="1.34" fill="#fff"/><rect y="2.67" width="6" height="1.33" fill="#00A1DE"/></svg>`,
+
+  // MD — Moldova (blue-yellow-red vertical with coat of arms)
+  md: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="1" height="2" fill="#003DA5"/><rect x="1" width="1" height="2" fill="#FFD200"/><rect x="2" width="1" height="2" fill="#CC0033"/><circle cx="1.5" cy="0.85" r="0.3" fill="#CC0033" stroke="#003DA5" stroke-width="0.06"/></svg>`,
+
+  // MY — Malaysia (red-white stripes with blue canton, crescent and star)
+  my: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><g fill="#CC0001"><rect width="30" height="20"/></g><g fill="#fff"><rect y="1.43" width="30" height="1.43"/><rect y="4.29" width="30" height="1.43"/><rect y="7.14" width="30" height="1.43"/><rect y="10" width="30" height="1.43"/><rect y="12.86" width="30" height="1.43"/><rect y="15.71" width="30" height="1.43"/><rect y="18.57" width="30" height="1.43"/></g><rect width="15" height="11.43" fill="#010066"/><circle cx="7" cy="5.7" r="3.2" fill="#FC0"/><circle cx="8" cy="5.7" r="2.6" fill="#010066"/><polygon points="11,3.5 11.38,4.68 12.6,4.68 11.61,5.39 11.99,6.57 11,5.86 10.01,6.57 10.39,5.39 9.4,4.68 10.62,4.68" fill="#FC0"/></svg>`,
 
   // MX — Mexico (green-white-red vertical)
   mx: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 4"><rect width="7" height="4" fill="#fff"/><rect width="2.33" height="4" fill="#006847"/><rect x="4.67" width="2.33" height="4" fill="#CE1126"/><circle cx="3.5" cy="2" r=".5" fill="none" stroke="#7B3F00" stroke-width=".15"/><circle cx="3.5" cy="2" r=".15" fill="#7B3F00"/></svg>`,
@@ -155,6 +242,12 @@ const FLAGS: Record<string, string> = {
 
   // NG — Nigeria (green-white-green vertical)
   ng: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3"><rect width="2" height="3" fill="#008753"/><rect x="2" width="2" height="3" fill="#fff"/><rect x="4" width="2" height="3" fill="#008753"/></svg>`,
+
+  // NA — Namibia (blue top-left, red bottom-right, green diagonal, white fimbriation, sun)
+  na: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><polygon points="0,0 30,0 0,20" fill="#003580"/><polygon points="30,0 30,20 0,20" fill="#009543"/><path d="M0,16 L24,0" stroke="#fff" stroke-width="3.5"/><path d="M0,16 L24,0" stroke="#D21034" stroke-width="2"/><circle cx="7" cy="5" r="3" fill="#FFE700"/><circle cx="7.8" cy="5" r="2.4" fill="#003580"/></svg>`,
+
+  // NP — Nepal (double-pennant, non-rectangular)
+  np: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><path d="M2,18 L2,2 L18,10 L2,10 L2,10 L14,18 Z" fill="#CE1126" stroke="#003893" stroke-width="1.2"/><circle cx="7.5" cy="7" r="1.5" fill="#fff"/><polygon points="7.5,12.5 8.1,14.2 9.8,14.2 8.35,15.2 8.95,16.9 7.5,15.9 6.05,16.9 6.65,15.2 5.2,14.2 6.9,14.2" fill="#fff"/></svg>`,
 
   // MN — Mongolia (red-blue-red vertical + simplified soyombo on hoist red)
   mn: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="3" height="6" fill="#C4272F"/><rect x="3" width="3" height="6" fill="#015197"/><rect x="6" width="3" height="6" fill="#C4272F"/><g fill="#F9CF02" transform="translate(1.5,3)"><circle r=".25"/><rect x="-.55" y="-1.4" width=".3" height="1" rx=".05"/><rect x=".25" y="-1.4" width=".3" height="1" rx=".05"/><rect x="-.55" y=".4" width=".3" height="1" rx=".05"/><rect x=".25" y=".4" width=".3" height="1" rx=".05"/><rect x="-1.05" y="-.15" width=".25" height=".3" rx=".05"/><rect x=".8" y="-.15" width=".25" height=".3" rx=".05"/></g></svg>`,
@@ -269,9 +362,13 @@ function resolveIso(code: string): string | null {
   const underscore = lc.indexOf('_');
   if (underscore > 0) {
     const prefix = lc.slice(0, underscore);
-    if (FLAGS[prefix] || EMOJI_FALLBACK[prefix]) return prefix;
+    // Check the explicit prefix map first: "ar" in "AR_DUBAI" is Arabic
+    // (→ ae), not the ISO code for Argentina. Without this order the
+    // addition of AR (Argentina) to FLAGS would hijack every Arabic
+    // region key.
     const mapped = REGION_PREFIX_TO_ISO[prefix];
     if (mapped) return mapped;
+    if (FLAGS[prefix] || EMOJI_FALLBACK[prefix]) return prefix;
   }
   // Bare non-ISO prefix (no underscore — e.g. someone passes "USA").
   const mapped = REGION_PREFIX_TO_ISO[lc];
