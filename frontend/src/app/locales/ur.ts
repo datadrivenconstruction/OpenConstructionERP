@@ -11713,6 +11713,7 @@ const resource = {
     "nav.ai_advisor": "AI لاگت مشیر",
     "nav.ai_estimator": "تخمینہ بنانے والا (AI)",
     "nav.ai_estimate": "فوری تخمینہ (AI)",
+    "nav.inbox": "ان باکس",
     "nav.analytics": "تجزیات",
     "nav.architecture": "آرکیٹیکچر نقشہ",
     "nav.assemblies": "اسمبلیز",

@@ -10966,6 +10966,7 @@ const resource = {
     "nav.change_orders": "Változtatási megrendelések",
     "nav.risk_register": "Kockázati nyilvántartás",
     "nav.documents": "Dokumentumok",
+    "nav.inbox": "Bejövő üzenetek",
     "nav.analytics": "Elemzés",
     "nav.schedule": "4D ütemterv",
     "nav.validation": "Validálás",

@@ -10364,6 +10364,7 @@ const resource = {
     "nav.change_orders": "Ordens de alteração",
     "nav.risk_register": "Registro de riscos",
     "nav.documents": "Documentos",
+    "nav.inbox": "Caixa de entrada",
     "nav.analytics": "Análises",
     "nav.schedule": "Cronograma 4D",
     "nav.validation": "Validação",

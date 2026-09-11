@@ -11677,6 +11677,7 @@ const resource = {
     "nav.ai_advisor": "مشاور هزینه هوش مصنوعی",
     "nav.ai_estimator": "سازنده برآورد (هوش مصنوعی)",
     "nav.ai_estimate": "برآورد سریع (هوش مصنوعی)",
+    "nav.inbox": "صندوق ورودی",
     "nav.analytics": "تحلیل‌ها",
     "nav.architecture": "نقشه معماری",
     "nav.assemblies": "اسمبلی‌ها",

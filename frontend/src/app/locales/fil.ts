@@ -11676,6 +11676,7 @@ const resource = {
     "nav.ai_advisor": "AI na Tagapayo sa Gastos",
     "nav.ai_estimator": "Tagabuo ng Pagtantya (AI)",
     "nav.ai_estimate": "Mabilisang Pagtantya (AI)",
+    "nav.inbox": "Inbox",
     "nav.analytics": "Analitika",
     "nav.architecture": "Mapa ng Arkitektura",
     "nav.assemblies": "Mga Assembly",

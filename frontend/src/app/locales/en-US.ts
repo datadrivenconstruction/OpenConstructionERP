@@ -400,6 +400,7 @@ const resource = {
     "sidebar.group.procurement_desc": "Three ways to buy. RFQ for quick quotes, Bid Management for formal competitive bids, Tendering when pricing from a bid schedule.",
     "sidebar.help.tendering": "Priced from a bid schedule; writes the winning rates back into the bid schedule.",
     "nav.boq_templates": "Bid Schedule Templates",
+    "nav.inbox": "Inbox",
     "estimate_rollup.subtitle": "Measured works plus general conditions and the allowances still carried.",
     "estimate_rollup.line_boq_base": "Bid Schedule base",
     "estimate_rollup.line_preliminaries": "General conditions",

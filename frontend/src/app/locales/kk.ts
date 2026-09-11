@@ -11713,6 +11713,7 @@ const resource = {
     "nav.ai_advisor": "ИИ Шығын Кеңесшісі",
     "nav.ai_estimator": "Смета Құрастырушысы (ИИ)",
     "nav.ai_estimate": "Жылдам Смета (ИИ)",
+    "nav.inbox": "Кіріс хаттар",
     "nav.analytics": "Аналитика",
     "nav.architecture": "Архитектура Картасы",
     "nav.assemblies": "Жинақтар",

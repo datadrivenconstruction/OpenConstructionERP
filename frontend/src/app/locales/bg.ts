@@ -11779,6 +11779,7 @@ const resource = {
     "nav.change_orders": "Промени по договора",
     "nav.risk_register": "Регистър на рисковете",
     "nav.documents": "Документи",
+    "nav.inbox": "Входяща поща",
     "nav.analytics": "Анализи",
     "nav.schedule": "4D График",
     "nav.validation": "Валидиране",

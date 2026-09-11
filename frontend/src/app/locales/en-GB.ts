@@ -77,6 +77,9 @@ const resource = {
     "boq.import_preview.truncated": "... and {{count}} more position(s)",
     "boq.import_preview.upload_hint": "Choose a file to preview before importing into this BOQ.",
     "boq.import_preview.warnings_title": "{{count}} warning(s)",
+    "nav.boq_templates": "BOQ Templates",
+    "nav.inbox": "Inbox",
+
   }
 } as { translation: Record<string, string> };
 

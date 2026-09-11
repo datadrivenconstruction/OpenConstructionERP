@@ -11546,6 +11546,7 @@ const resource = {
     "files.bulk.delete_partial_detail": "{{failed}} fil(er) kunde inte tas bort.",
     "files.bulk.skip_unsupported": "{{count}} hoppades över (stöds inte)",
     "files.bulk.no_deletable": "Valda filer kan inte raderas härifrån än",
+    "nav.inbox": "Inkorg",
     "nav.analytics": "Analys",
     "nav.schedule": "4D-tidplan",
     "nav.validation": "Validering",

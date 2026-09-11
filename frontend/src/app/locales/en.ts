@@ -6958,6 +6958,7 @@ const resource = {
     "files.status.error_role_denied": "Your role cannot make this transition. Sharing needs a task team manager, publishing needs a lead appointed party, and archiving needs an administrator.",
     "files.status.error_signature_required": "Publishing a document requires an approver signature.",
     "files.status.error_suitability_invalid": "That suitability code is not valid for this state. ISO 19650 codes are state-scoped: S0 in WIP, S1 to S7 in Shared, A1 to A5 in Published, AR in Archived.",
+    "nav.inbox": "Inbox",
     "nav.analytics": "Analytics",
     "nav.schedule": "4D Schedule",
     "nav.validation": "Validation",

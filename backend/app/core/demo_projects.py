@@ -2278,7 +2278,7 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "batimatech-ca": "condo-toronto",
     "bimhessen-de": "residential-berlin",
     "brazil-sinapi": "residential-saopaulo",
-    "china-gbt50500": "office-shanghai",
+    "china-gbt50500": "renovation-guangzhou",
     "doker-formwork": "rc-structure-formwork",
     "hungary-hu": "residential-budapest",
     "india-cpwd": "govt-building-delhi",
@@ -2459,6 +2459,8 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     # as it has been there. A default that is itself a valid answer is the kind
     # a miss hides inside.
     "residential-shenzhen": "Residential",
+    "renovation-guangzhou": "Renovation",
+    "villa-suzhou": "Residential",
 }
 
 

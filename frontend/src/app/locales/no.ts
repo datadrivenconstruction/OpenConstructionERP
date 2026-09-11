@@ -11486,6 +11486,7 @@ const resource = {
     "files.bulk.delete_partial_detail": "{{failed}} fil(er) kunne ikke slettes.",
     "files.bulk.skip_unsupported": "{{count}} hoppet over (ikke støttet)",
     "files.bulk.no_deletable": "Valgte filer kan ikke slettes herfra ennå",
+    "nav.inbox": "Innboks",
     "nav.analytics": "Analyse",
     "nav.schedule": "4D-tidsplan",
     "nav.validation": "Validering",

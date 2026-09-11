@@ -11618,6 +11618,7 @@ const resource = {
     "nav.change_orders": "변경 지시서",
     "nav.risk_register": "위험 등록부",
     "nav.documents": "문서",
+    "nav.inbox": "받은 편지함",
     "nav.analytics": "분석",
     "nav.schedule": "4D 일정",
     "nav.validation": "검증",

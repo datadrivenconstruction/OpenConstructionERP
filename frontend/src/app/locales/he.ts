@@ -11725,6 +11725,7 @@ const resource = {
     "nav.ai_advisor": "יועץ עלות בינה מלאכותית",
     "nav.ai_estimator": "בונה אומדנים (בינה מלאכותית)",
     "nav.ai_estimate": "אומדן מהיר (בינה מלאכותית)",
+    "nav.inbox": "תיבת דואר נכנס",
     "nav.analytics": "אנליטיקה",
     "nav.architecture": "מפת ארכיטקטורה",
     "nav.assemblies": "מכלולים",

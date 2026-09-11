@@ -11623,6 +11623,7 @@ const resource = {
     "nav.change_orders": "变更单",
     "nav.risk_register": "风险台账",
     "nav.documents": "文档",
+    "nav.inbox": "收件箱",
     "nav.analytics": "数据分析",
     "nav.schedule": "4D 进度",
     "nav.validation": "验证",

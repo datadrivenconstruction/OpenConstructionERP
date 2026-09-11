@@ -12566,6 +12566,7 @@ const resource = {
     "nav.ai_advisor": "مستشار التكلفة الذكي",
     "nav.ai_estimator": "منشئ التقديرات (ذكاء اصطناعي)",
     "nav.ai_estimate": "تقدير سريع (ذكاء اصطناعي)",
+    "nav.inbox": "صندوق الوارد",
     "nav.analytics": "التحليلات",
     "nav.architecture": "خريطة الهيكل",
     "nav.assemblies": "البنود المركبة",

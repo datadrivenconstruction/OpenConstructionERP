@@ -11619,6 +11619,7 @@ const resource = {
     "nav.change_orders": "変更指示書",
     "nav.risk_register": "リスク台帳",
     "nav.documents": "文書",
+    "nav.inbox": "受信トレイ",
     "nav.analytics": "分析",
     "nav.schedule": "4Dスケジュール",
     "nav.validation": "検証",

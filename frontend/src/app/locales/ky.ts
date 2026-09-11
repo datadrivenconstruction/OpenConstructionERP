@@ -7097,6 +7097,7 @@ const resource = {
     "files.status.error_role_denied": "Ролуңуз бул өтүүнү жасай албайт. Бөлүшүү үчүн тапшырма командасынын менеджери, жарыялоо үчүн жетектөөчү дайындалган тарап, а архивдөө үчүн администратор керек.",
     "files.status.error_signature_required": "Документти жарыялоо үчүн бекитүүчүнүн колтамгасы талап кылынат.",
     "files.status.error_suitability_invalid": "Бул жарактуулук коду ушул абал үчүн жарактуу эмес. ISO 19650 коддору абалга байланыштуу: WIPде S0, Sharedде S1дан S7ге чейин, Publishedде A1ден A5ке чейин, Archivedде AR.",
+    "nav.inbox": "Кирүүчү кат",
     "nav.analytics": "Аналитика",
     "nav.schedule": "4D график",
     "nav.validation": "Текшерүү",

@@ -9895,6 +9895,7 @@ const resource = {
     "nav.risk_register": "Registar rizika",
     "nav.documents": "Dokumenti",
     "nav.photos": "Fotografije projekta",
+    "nav.inbox": "Pristigla pošta",
     "nav.analytics": "Analitika",
     "nav.schedule": "4D raspored",
     "nav.validation": "Validacija",

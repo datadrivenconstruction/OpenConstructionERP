@@ -10763,6 +10763,7 @@ const resource = {
     "nav.change_orders": "Ordini di variazione",
     "nav.risk_register": "Registro dei rischi",
     "nav.documents": "Documenti",
+    "nav.inbox": "Posta in arrivo",
     "nav.analytics": "Analisi",
     "nav.schedule": "Programma 4D",
     "nav.validation": "Validazione",

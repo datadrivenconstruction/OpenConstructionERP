@@ -9923,6 +9923,7 @@ const resource = {
     "nav.risk_register": "Sổ rủi ro",
     "nav.documents": "Tài liệu",
     "nav.photos": "Ảnh dự án",
+    "nav.inbox": "Hộp thư đến",
     "nav.analytics": "Phân tích",
     "nav.schedule": "Lịch 4D",
     "nav.validation": "Xác thực",

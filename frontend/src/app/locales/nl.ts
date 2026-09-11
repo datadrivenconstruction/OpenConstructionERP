@@ -10642,6 +10642,7 @@ const resource = {
     "nav.change_orders": "Wijzigingsopdrachten",
     "nav.risk_register": "Risicoregister",
     "nav.documents": "Documenten",
+    "nav.inbox": "Inbox",
     "nav.analytics": "Analyses",
     "nav.schedule": "4D Planning",
     "nav.validation": "Validatie",

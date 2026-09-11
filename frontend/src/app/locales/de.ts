@@ -9506,6 +9506,7 @@ const resource = {
     "files.share.title": "Passwortgeschützter Freigabelink",
     "files.share.url_label": "Freigabe-URL",
     "files.tile.tooltip": "{{name}}, Doppelklick zum Öffnen in {{module}}",
+    "nav.inbox": "Posteingang",
     "nav.analytics": "Analytik",
     "nav.settings": "Einstellungen",
     "nav.schedule": "4D-Terminplan",

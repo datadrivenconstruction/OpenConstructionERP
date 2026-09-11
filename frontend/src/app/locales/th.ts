@@ -9953,6 +9953,7 @@ const resource = {
     "nav.risk_register": "ทะเบียนความเสี่ยง",
     "nav.documents": "เอกสาร",
     "nav.photos": "ภาพถ่ายโครงการ",
+    "nav.inbox": "กล่องจดหมาย",
     "nav.analytics": "การวิเคราะห์",
     "nav.schedule": "ตารางเวลา 4D",
     "nav.validation": "การตรวจสอบ",

@@ -11665,6 +11665,7 @@ const resource = {
     "nav.change_orders": "Değişiklik Emirleri",
     "nav.risk_register": "Risk Kaydı",
     "nav.documents": "Belgeler",
+    "nav.inbox": "Gelen Kutusu",
     "nav.analytics": "Analitik",
     "nav.schedule": "4D Takvim",
     "nav.validation": "Doğrulama",

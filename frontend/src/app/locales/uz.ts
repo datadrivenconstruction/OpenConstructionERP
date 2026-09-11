@@ -9476,6 +9476,7 @@ const resource = {
     "files.share.title": "Parol bilan himoyalangan boʻlishish havolasi",
     "files.share.url_label": "Boʻlishish URL",
     "files.tile.tooltip": "{{name}}, {{module}} da ochish uchun ikki marta bosing",
+    "nav.inbox": "Kiruvchi xabarlar",
     "nav.analytics": "Tahlillar",
     "nav.settings": "Sozlamalar",
     "nav.schedule": "4D grafik",

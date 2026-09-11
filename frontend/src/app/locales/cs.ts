@@ -11607,6 +11607,7 @@ const resource = {
     "nav.change_orders": "Změnové příkazy",
     "nav.risk_register": "Registr rizik",
     "nav.documents": "Dokumenty",
+    "nav.inbox": "Doručená pošta",
     "nav.analytics": "Analytika",
     "nav.schedule": "4D Harmonogram",
     "nav.validation": "Validace",

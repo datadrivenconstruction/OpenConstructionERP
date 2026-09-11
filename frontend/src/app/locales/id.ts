@@ -9923,6 +9923,7 @@ const resource = {
     "nav.risk_register": "Daftar Risiko",
     "nav.documents": "Dokumen",
     "nav.photos": "Foto Proyek",
+    "nav.inbox": "Kotak Masuk",
     "nav.analytics": "Analitik",
     "nav.schedule": "Jadwal 4D",
     "nav.validation": "Validasi",

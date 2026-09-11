@@ -12401,6 +12401,7 @@ const resource = {
     "nav.ai_advisor": "AI kulunõustaja",
     "nav.ai_estimator": "Kalkulatsiooni koostaja (AI)",
     "nav.ai_estimate": "Kiirkalkulatsioon (AI)",
+    "nav.inbox": "Postkast",
     "nav.analytics": "Analüütika",
     "nav.architecture": "Arhitektuurikaart",
     "nav.assemblies": "Koostised",

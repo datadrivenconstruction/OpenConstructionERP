@@ -9434,6 +9434,7 @@ const resource = {
     "files.share.title": "Посилання доступу, захищене паролем",
     "files.share.url_label": "URL для доступу",
     "files.tile.tooltip": "{{name}}, двічі клацніть, щоб відкрити в {{module}}",
+    "nav.inbox": "Вхідні",
     "nav.analytics": "Аналітика",
     "nav.settings": "Налаштування",
     "nav.schedule": "4D-графік",

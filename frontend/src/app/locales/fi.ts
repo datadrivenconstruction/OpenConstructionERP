@@ -11573,6 +11573,7 @@ const resource = {
     "nav.change_orders": "Muutostilaukset",
     "nav.risk_register": "Riskikirjanpito",
     "nav.documents": "Asiakirjat",
+    "nav.inbox": "Saapuneet",
     "nav.analytics": "Analytiikka",
     "nav.schedule": "4D-aikataulu",
     "nav.validation": "Validointi",

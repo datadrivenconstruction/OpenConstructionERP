@@ -10600,6 +10600,7 @@ const resource = {
     "nav.change_orders": "Ordres de modification",
     "nav.risk_register": "Registre des risques",
     "nav.documents": "Documents",
+    "nav.inbox": "Boîte de réception",
     "nav.analytics": "Analytique",
     "nav.schedule": "Planning 4D",
     "nav.validation": "Validation",

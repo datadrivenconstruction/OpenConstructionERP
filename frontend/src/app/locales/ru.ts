@@ -12640,6 +12640,7 @@ const resource = {
     "files.share.title": "Ссылка с защитой паролем",
     "files.share.url_label": "URL для общего доступа",
     "files.tile.tooltip": "{{name}}, двойной щелчок для открытия в {{module}}",
+    "nav.inbox": "Входящие",
     "nav.analytics": "Аналитика",
     "nav.schedule": "4D График",
     "nav.validation": "Проверка",

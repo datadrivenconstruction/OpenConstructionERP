@@ -11718,6 +11718,7 @@ const resource = {
     "nav.ai_advisor": "AI কস্ট অ্যাডভাইজর",
     "nav.ai_estimator": "এস্টিমেট বিল্ডার (AI)",
     "nav.ai_estimate": "দ্রুত এস্টিমেট (AI)",
+    "nav.inbox": "ইনবক্স",
     "nav.analytics": "অ্যানালিটিক্স",
     "nav.architecture": "আর্কিটেকচার ম্যাপ",
     "nav.assemblies": "অ্যাসেম্বলি",

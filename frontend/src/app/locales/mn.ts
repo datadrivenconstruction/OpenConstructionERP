@@ -12075,6 +12075,7 @@ const resource = {
     "nav.ai_advisor": "AI зөвлөх",
     "nav.ai_estimator": "Төсөв зохиогч (ХИ)",
     "nav.ai_estimate": "Шуурхай төсөв (ХИ)",
+    "nav.inbox": "Ирсэн шуудан",
     "nav.analytics": "Аналитик",
     "nav.architecture": "Архитектурын зураг",
     "nav.assemblies": "Нэгдэл",

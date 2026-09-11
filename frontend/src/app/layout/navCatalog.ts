@@ -228,6 +228,7 @@ export const navGroups: NavGroup[] = [
       // harmless unused key for a wide blast radius. Retire them only
       // together with a decision about the name itself.
       { labelKey: 'nav.documents', to: '/files', icon: HardDrive },
+      { labelKey: 'nav.inbox', defaultLabel: 'Inbox', to: '/inbox', icon: Inbox },
     ],
   },
   // ── 2. TAKEOFF ─────────────────────────────────────────────────────
@@ -279,6 +280,7 @@ export const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
+      { labelKey: 'nav.boq_templates', to: '/templates', icon: FileText },
       // The way in and out of the platform for a tender file, in whatever
       // shape a market issues one. It sits directly under the BOQ because
       // that is the object it fills and empties, and because the question

@@ -136,7 +136,7 @@ MANIFEST = PartnerPackManifest(
     ],
     default_modules=[],  # empty = show all (Shape A - no module hiding)
     hidden_modules=[],
-    demo_template_ids=["office-shanghai"],
+    demo_template_ids=["office-shanghai", "residential-shenzhen", "renovation-guangzhou", "villa-suzhou"],
     branding=PartnerBranding(
         primary_color="#DE2910",  # China red (national flag)
         accent_color="#FFDE00",  # China yellow (national flag stars)

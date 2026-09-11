@@ -11651,6 +11651,7 @@ const resource = {
     "nav.change_orders": "परिवर्तन आदेश",
     "nav.risk_register": "जोखिम रजिस्टर",
     "nav.documents": "दस्तावेज़",
+    "nav.inbox": "इनबॉक्स",
     "nav.analytics": "एनालिटिक्स",
     "nav.schedule": "4D शेड्यूल",
     "nav.validation": "सत्यापन",

@@ -11762,6 +11762,7 @@ const resource = {
     "nav.ai_advisor": "Σύμβουλος Κόστους AI",
     "nav.ai_estimator": "Κατασκευαστής Εκτιμήσεων (AI)",
     "nav.ai_estimate": "Γρήγορη Εκτίμηση (AI)",
+    "nav.inbox": "Εισερχόμενα",
     "nav.analytics": "Αναλυτικά στοιχεία",
     "nav.architecture": "Χάρτης Αρχιτεκτονικής",
     "nav.assemblies": "Σύνθετα άρθρα",
