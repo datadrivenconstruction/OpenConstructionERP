@@ -5749,7 +5749,7 @@ const resource = {
     "change_intelligence.watch.tile.on_track": "In linea",
     "change_intelligence.watch.empty_title": "Nulla alla deriva",
     "change_intelligence.watch.empty_desc": "Al momento nessuna modifica aperta e in stallo, persa o incompleta.",
-    "change_intelligence.watch.idle_days": "{{days}}g di inattivita",
+    "change_intelligence.watch.idle_days": "{{days}}g di inattività",
     "change_intelligence.watch.overdue_days": "{{days}}g di ritardo",
     "change_intelligence.clarifier.note_label": "Nota di modifica sommaria",
     "change_intelligence.clarifier.note_ph": "Incolla una breve descrizione della modifica come la annoteresti di getto...",

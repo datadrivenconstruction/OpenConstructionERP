@@ -181,6 +181,9 @@ const STANDARD_GROUPS: OptionGroup[] = [
       { value: 'din276', label: 'DIN 276 (Germany / DACH)' },
       { value: 'nrm', label: 'NRM 1/2 (United Kingdom)' },
       { value: 'masterformat', label: 'MasterFormat (US / Canada)' },
+      { value: 'uniformat', label: 'UniFormat (US / Canada)' },
+      { value: 'uniclass', label: 'Uniclass (United Kingdom)' },
+      { value: 'omniclass', label: 'OmniClass (North America)' },
       { value: 'gb50500', label: 'GB/T (China)' },
       { value: 'tetelrend', label: 'Tételrend (Hungary)' },
     ],
@@ -209,6 +212,8 @@ const STANDARD_GROUPS: OptionGroup[] = [
       { value: 'sekisan', label: 'Sekisan (Japan)' },
       { value: 'kbim', label: 'KBIM (South Korea)' },
       { value: 'birimfiyat', label: 'Birim Fiyat (Turkey)' },
+      { value: 'onorm', label: 'ÖNORM (Austria)' },
+      { value: 'gaeb', label: 'GAEB (Germany)' },
     ],
   },
   {
