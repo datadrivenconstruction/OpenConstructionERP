@@ -16928,7 +16928,7 @@ const resource = {
   "bi.kpi_custom": "Personalizado",
   "bi.kpi_delete": "Excluir KPI",
   "bi.kpi_delete_failed": "O KPI não foi excluído",
-  "bi.kpi_delete_hint": "Exclui este KPI personalizado. É recusado enquanto um widget, alerta ou relatório ainda o lê.",
+  "bi.kpi_delete_hint": "Excluir este KPI personalizado. É recusado enquanto um widget, alerta ou relatório ainda o lê.",
   "bi.kpi_delete_message": "{{name}} e as suas leituras guardadas são removidos definitivamente. Tudo o que ainda o lê tem de ser redirecionado primeiro, e a exclusão é recusada até que isso aconteça.",
   "bi.kpi_delete_title": "Excluir este KPI?",
   "bi.kpi_deleted": "KPI excluído",

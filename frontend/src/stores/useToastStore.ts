@@ -39,6 +39,24 @@ interface ToastStore {
 let nextId = 0;
 const dismissTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+function scheduleDismiss(
+  toastId: string,
+  duration: number,
+  set: (fn: (s: ToastStore) => Partial<ToastStore>) => void,
+) {
+  if (dismissTimers.has(toastId)) {
+    clearTimeout(dismissTimers.get(toastId)!);
+    dismissTimers.delete(toastId);
+  }
+  const timer = setTimeout(() => {
+    set((state) => ({
+      toasts: state.toasts.filter((t) => t.id !== toastId),
+    }));
+    dismissTimers.delete(toastId);
+  }, duration);
+  dismissTimers.set(toastId, timer);
+}
+
 export const useToastStore = create<ToastStore>((set) => ({
   toasts: [],
   history: [],
@@ -55,49 +73,32 @@ export const useToastStore = create<ToastStore>((set) => ({
       read: false,
     };
 
-    // Group: if a toast with the same type+title is already visible, bump its
-    // count instead of adding a duplicate. The auto-dismiss timer resets so
-    // the grouped toast stays on screen long enough for the user to notice.
-    const existing = useToastStore.getState().toasts.find(
-      (t) => t.type === toast.type && t.title === toast.title,
-    );
-
-    if (existing) {
-      // Clear existing timer and schedule a new one
-      if (dismissTimers.has(existing.id)) {
-        clearTimeout(dismissTimers.get(existing.id)!);
-        dismissTimers.delete(existing.id);
+    // Dedup: check current toasts for a match with the same type+title.
+    // We read from the *previous* state inside the set callback so the
+    // store never references itself during initialisation (avoids TS7022).
+    let mergedInto: string | null = null;
+    set((state) => {
+      const existing = state.toasts.find(
+        (t) => t.type === toast.type && t.title === toast.title,
+      );
+      if (existing) {
+        mergedInto = existing.id;
+        return {
+          toasts: state.toasts.map((t) =>
+            t.id === existing.id ? { ...t, count: (t.count ?? 1) + 1 } : t,
+          ),
+          history: [historyEntry, ...state.history].slice(0, MAX_HISTORY),
+        };
       }
-      set((state) => ({
-        toasts: state.toasts.map((t) =>
-          t.id === existing.id ? { ...t, count: (t.count ?? 1) + 1 } : t,
-        ),
+      return {
+        toasts: [...state.toasts, { ...toast, id, count: 1 }],
         history: [historyEntry, ...state.history].slice(0, MAX_HISTORY),
-      }));
-      const timer = setTimeout(() => {
-        set((state) => ({
-          toasts: state.toasts.filter((t) => t.id !== existing.id),
-        }));
-        dismissTimers.delete(existing.id);
-      }, duration);
-      dismissTimers.set(existing.id, timer);
-      return existing.id;
-    }
+      };
+    });
 
-    set((state) => ({
-      toasts: [...state.toasts, { ...toast, id, count: 1 }],
-      history: [historyEntry, ...state.history].slice(0, MAX_HISTORY),
-    }));
-
-    const timer = setTimeout(() => {
-      set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id),
-      }));
-      dismissTimers.delete(id);
-    }, duration);
-    dismissTimers.set(id, timer);
-
-    return id;
+    const effectiveId = mergedInto ?? id;
+    scheduleDismiss(effectiveId, duration, set);
+    return effectiveId;
   },
 
   removeToast: (id) => {
