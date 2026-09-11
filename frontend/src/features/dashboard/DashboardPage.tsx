@@ -2201,36 +2201,42 @@ function DashboardPageInner() {
         sessionStorage.removeItem('oe_skip_onboarding_redirect');
         return;
       }
-      const completed = localStorage.getItem('oe_onboarding_completed') === 'true';
-      if (completed) {
-        // Version-aware: if the user completed onboarding on a previous
-        // major.minor, show the update welcome dialog so they can re-run
-        // setup or just acknowledge the new version.
-        const completedVersion = localStorage.getItem('oe_onboarding_completed_version');
-        if (completedVersion && APP_VERSION) {
-          const cv = completedVersion.split('.').map((x) => parseInt(x, 10) || 0);
-          const av = APP_VERSION.split('.').map((x) => parseInt(x, 10) || 0);
-          const majorMinorChanged =
-            (av[0] ?? 0) > (cv[0] ?? 0) ||
-            ((av[0] ?? 0) === (cv[0] ?? 0) && (av[1] ?? 0) > (cv[1] ?? 0));
-          if (majorMinorChanged) {
-            setShowUpdateWelcome(true);
-          }
-        } else if (!completedVersion) {
-          // Completed before versioning was added — stamp it now so the
-          // dialog fires on the NEXT update, not this load.
-          localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
-        }
-        return;
-      }
+      // Always wait for the server state before making decisions.
+      // localStorage is a fast-path hint, but it can be STALE — WebView2
+      // on Windows preserves localStorage across uninstall/reinstall, so a
+      // fresh install inherits oe_onboarding_completed=true from the
+      // previous one and the user never sees the wizard.
       if (onboardingState === undefined) return; // wait for fetch
-      if (onboardingState === null) return; // fetch failed - do not ambush the user
-      if (onboardingState.completed) {
-        localStorage.setItem('oe_onboarding_completed', 'true');
-        localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
+      if (onboardingState === null) {
+        // Fetch failed — fall back to localStorage so a network hiccup
+        // does not ambush the user with the wizard.
+        if (localStorage.getItem('oe_onboarding_completed') === 'true') return;
+        return; // cannot determine — do nothing
+      }
+      if (!onboardingState.completed) {
+        // Server says NOT completed — clear any stale localStorage flags
+        // (e.g. from a previous install) and redirect to the wizard.
+        localStorage.removeItem('oe_onboarding_completed');
+        localStorage.removeItem('oe_onboarding_completed_version');
+        localStorage.removeItem('oe_lang_explicit');
+        navigate('/onboarding', { replace: true });
         return;
       }
-      navigate('/onboarding', { replace: true });
+      // Server says completed — sync localStorage and check version.
+      localStorage.setItem('oe_onboarding_completed', 'true');
+      const completedVersion = localStorage.getItem('oe_onboarding_completed_version');
+      if (completedVersion && APP_VERSION) {
+        const cv = completedVersion.split('.').map((x) => parseInt(x, 10) || 0);
+        const av = APP_VERSION.split('.').map((x) => parseInt(x, 10) || 0);
+        const majorMinorChanged =
+          (av[0] ?? 0) > (cv[0] ?? 0) ||
+          ((av[0] ?? 0) === (cv[0] ?? 0) && (av[1] ?? 0) > (cv[1] ?? 0));
+        if (majorMinorChanged) {
+          setShowUpdateWelcome(true);
+        }
+      } else if (!completedVersion) {
+        localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
+      }
     } catch { /* storage unavailable */ }
   }, [navigate, onboardingState]);
 
