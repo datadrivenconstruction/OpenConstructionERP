@@ -46,6 +46,7 @@ function compactCurrency(value: number, currency = 'EUR'): string {
       style: 'currency',
       currency: safe,
       notation: 'compact',
+      minimumFractionDigits: 0,
       maximumFractionDigits: 1,
     }).format(value);
   } catch {

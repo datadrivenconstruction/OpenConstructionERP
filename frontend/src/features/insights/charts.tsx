@@ -83,6 +83,7 @@ export function formatFull(v: number, format: ValueFormat = 'number', currency?:
         return new Intl.NumberFormat(locale, {
           style: 'currency',
           currency: code,
+          minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         }).format(v);
       } catch {

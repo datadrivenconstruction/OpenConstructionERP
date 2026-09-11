@@ -229,6 +229,7 @@ export function fmtCurrency(value: number | string | null | undefined, currency?
     return new Intl.NumberFormat(getNumberLocale(), {
       style: 'currency',
       currency: trimmed,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(safe);
   } catch {

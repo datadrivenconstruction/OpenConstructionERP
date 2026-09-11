@@ -220,6 +220,7 @@ export function formatCompactCurrency(
     return new Intl.NumberFormat(loc, {
       notation: 'compact',
       compactDisplay: 'short',
+      minimumFractionDigits: 0,
       maximumFractionDigits: 1,
       ...(isValid ? { style: 'currency' as const, currency: code } : {}),
     }).format(amount);

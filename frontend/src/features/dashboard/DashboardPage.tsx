@@ -933,7 +933,7 @@ function KpiRibbon({
         currency: code,
         // A ceiling belongs to compact notation, where one decimal is the
         // point of compacting. It does not belong to the full-length figure.
-        ...(compact ? { notation: 'compact' as const, maximumFractionDigits: 1 } : {}),
+        ...(compact ? { notation: 'compact' as const, minimumFractionDigits: 0, maximumFractionDigits: 1 } : {}),
       }).format(value);
     } catch {
       // Unknown currency code \u2014 fall back to raw number with code suffix.

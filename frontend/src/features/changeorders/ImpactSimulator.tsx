@@ -62,6 +62,7 @@ function fmtMoney(value: string, currency: string): string {
       return new Intl.NumberFormat(getNumberLocale(), {
         style: 'currency',
         currency: code,
+        minimumFractionDigits: 0,
         maximumFractionDigits: 0,
       }).format(n);
     }
