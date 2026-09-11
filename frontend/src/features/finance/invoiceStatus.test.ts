@@ -148,14 +148,11 @@ describe('invoice status dropdown options', () => {
   });
 
   it('offers Mark Paid in the state approving an invoice actually produces', () => {
-    // Approving writes 'sent', not 'approved': finance.service.approve_invoice
-    // does `self.invoices.update(invoice_id, status="sent")`, and the v3033
-    // data migration rewrote every stored 'approved' row to 'sent'. A test
-    // written against the word 'approved' passes either way and proves
-    // nothing, so this drives from the value the backend really stores. An
+    // Approving writes 'approved': finance.service.approve_invoice
+    // does `self.invoices.update(invoice_id, status="approved")`. An
     // invoice a manager has just approved must still offer the one action a
     // person needs next.
-    expect(canMarkPaid('sent')).toBe(true);
+    expect(canMarkPaid('approved')).toBe(true);
   });
 
   it('matches the exact status set the pay endpoint accepts', () => {
@@ -194,7 +191,7 @@ describe('invoice status dropdown options', () => {
     // The edit modal used to rewrite the stored 'sent' into 'approved' before
     // displaying it, so the same invoice read Sent in the table and Approved
     // in the modal. The founder settled this: a person sees the state the
-    // machine actually writes, and approving writes 'sent'.
+    // machine actually writes, and approving writes 'approved'.
     //
     // Both rewrite sites have to go together. Dropping only the one that fills
     // the form would leave the save path comparing a stored 'sent' against a

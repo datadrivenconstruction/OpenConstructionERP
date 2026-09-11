@@ -2025,7 +2025,7 @@ async def update_invoice(
     "/{invoice_id}/approve/",
     response_model=InvoiceResponse,
     summary="Approve invoice",
-    description="Transition an invoice to 'sent' (legacy alias 'approved') status. "
+    description="Transition an invoice to 'approved' status. "
     "Only invoices in 'draft' or 'pending' status can be approved. "
     "MANAGER-only - invoice approval is the financial-commitment gate.",
 )

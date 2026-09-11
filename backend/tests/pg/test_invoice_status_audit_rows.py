@@ -109,7 +109,7 @@ async def _audit_rows(pg_session, invoice_id: uuid.UUID) -> list:
 
 
 async def test_approve_invoice_writes_its_audit_row(pg_session) -> None:
-    """draft -> sent leaves one status_changed row carrying the invoice number."""
+    """draft -> approved leaves one status_changed row carrying the invoice number."""
     from app.modules.finance.service import FinanceService
 
     actor_id, invoice_id, invoice_number = await _seed_invoice(pg_session, status="draft")
@@ -120,14 +120,14 @@ async def test_approve_invoice_writes_its_audit_row(pg_session) -> None:
         actor_id=str(actor_id),
         reason="approved by the audit-row test",
     )
-    assert updated.status == "sent"
+    assert updated.status == "approved"
 
     rows = await _audit_rows(pg_session, invoice_id)
     assert len(rows) == 1, "approve_invoice must leave exactly one audit row"
     row = rows[0]
     assert row.action == "status_changed"
     assert row.from_status == "draft"
-    assert row.to_status == "sent"
+    assert row.to_status == "approved"
     assert row.reason == "approved by the audit-row test"
     assert row.actor_id == actor_id
     # The metadata read is the part that broke: it is the only place in the

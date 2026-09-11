@@ -221,8 +221,8 @@ class InvoiceRepository:
             "draft": 0,
             "pending": 0,
             "approved": 0,
-            # Since the v3033 FSM migration, approve writes status "sent".
-            # Keep both so dashboard approved counts stay accurate.
+            # Legacy rows may still carry "sent"; keep both so dashboard
+            # approved counts stay accurate.
             "sent": 0,
             "credit_note_issued": 0,
             "paid": 0,

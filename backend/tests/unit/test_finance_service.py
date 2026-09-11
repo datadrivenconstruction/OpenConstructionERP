@@ -1119,7 +1119,7 @@ async def test_approve_invoice_audit_failure_emits_warning(
         with caplog.at_level(_logging.WARNING, logger="app.modules.finance.service"):
             updated = await service.approve_invoice(invoice.id, actor_id=str(actor))
         # The status transition still landed:
-        assert updated.status == "sent"
+        assert updated.status == "approved"
         # The warning fired and carries the operational metadata:
         warning_records = [
             r

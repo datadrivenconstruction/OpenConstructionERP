@@ -741,12 +741,11 @@ class FinanceService:
         actor_id: str | None = None,
         reason: str | None = None,
     ) -> Invoice:
-        """Transition invoice to ``sent`` status (legacy alias: ``approved``).
+        """Transition invoice to ``approved`` status.
 
-        The FSM nomenclature was unified in v3033 - what the legacy code path
-        called ``approved`` is now stored as ``sent`` in the database. The
-        method keeps its old name for backwards compatibility but writes the
-        new value and records the transition in :class:`ActivityLog`.
+        Validates that the invoice is in ``draft`` or ``pending`` before
+        allowing the transition, records the change in :class:`ActivityLog`,
+        and emits an ``invoice.approved`` event for cross-module handlers.
         """
         invoice = await self.get_invoice(invoice_id)
         prior = invoice.status
@@ -760,7 +759,7 @@ class FinanceService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Cannot approve invoice in status '{prior}'",
             )
-        await self.invoices.update(invoice_id, status="sent")
+        await self.invoices.update(invoice_id, status="approved")
         # FSM audit row - see :mod:`app.core.fsm.registry` for the invoice
         # lifecycle. Best-effort: an audit failure must NOT roll back the
         # status change, but it MUST surface as a warning so audit-log
@@ -776,7 +775,7 @@ class FinanceService:
                 entity_id=str(invoice_id),
                 action="status_changed",
                 from_status=prior,
-                to_status="sent",
+                to_status="approved",
                 reason=reason or "Invoice approved via approve_invoice()",
                 metadata={"invoice_number": invoice_number},
             )
@@ -794,7 +793,7 @@ class FinanceService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Invoice not found",
             )
-        logger.info("Invoice approved (sent): %s", invoice.invoice_number)
+        logger.info("Invoice approved: %s", invoice.invoice_number)
 
         # Emit event so cross-module handlers can react (TOP-30 #4: ERP
         # connectors configured to auto-push on approval pick this up).
@@ -820,10 +819,9 @@ class FinanceService:
         """Transition invoice to paid status.
 
         After marking as paid, recalculates budget actuals for the project
-        (sum of all paid invoices) and emits ``invoice.paid`` event. Per
-        the v3033 FSM the prior status must be ``sent`` (legacy alias
-        ``approved`` is still accepted because both legacy values map to
-        the same FSM node after the data migration).
+        (sum of all paid invoices) and emits ``invoice.paid`` event.
+        The prior status must be ``approved`` (``sent`` is still accepted
+        for backwards compatibility with legacy rows).
         """
         invoice = await self.get_invoice(invoice_id)
         prior = invoice.status
@@ -834,7 +832,7 @@ class FinanceService:
         if prior not in ("approved", "sent"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(f"Cannot mark as paid invoice in status '{prior}'. Invoice must be sent first."),
+                detail=(f"Cannot mark as paid invoice in status '{prior}'. Invoice must be approved first."),
             )
         await self.invoices.update(invoice_id, status="paid")
         # Best-effort: an audit failure must NOT roll back the status

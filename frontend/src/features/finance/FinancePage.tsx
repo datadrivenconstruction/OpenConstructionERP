@@ -320,7 +320,7 @@ export const INVOICE_STATUS_COLORS: Record<string, BadgeVariant> = {
 // Editor-safe invoice status transitions offered by the edit-modal status
 // dropdown (#284). This is a DELIBERATE SUBSET of the backend FSM
 // (finance.service._INVOICE_STATUS_TRANSITIONS): the privileged steps
-// 'approved' (-> sent) and 'paid' are intentionally EXCLUDED here because the
+// 'approved' and 'paid' are intentionally EXCLUDED here because the
 // backend pins them to manager-only endpoints (finance.approve / finance.pay)
 // and 'pay' also writes a binding ledger entry. Driving them through a plain
 // PATCH would both bypass that gate and skip the payment side effects, so they
@@ -361,12 +361,10 @@ export const INVOICE_STATUS_ORDER = [
  * where the endpoint refuses produces a 400 nobody can act on, and a button
  * withheld where it would succeed strands the invoice with no way forward.
  *
- * Both values are reached in normal use, so neither may be dropped. Since the
- * v3033 FSM migration the Approve button writes 'sent'. 'approved' is not
- * merely a legacy leftover: posting a capture from the invoice inbox creates
- * its payable through `create_invoice(status="approved")`, so those rows land
- * in 'approved' on a fully migrated database. Older rows can still carry it
- * too, and the plain PATCH transition table accepts it as a target.
+ * Both values are reached in normal use, so neither may be dropped. The
+ * Approve button writes 'approved'. 'sent' is kept for backwards
+ * compatibility with legacy rows that may still carry it from before
+ * the status was corrected.
  */
 const MARK_PAID_FROM = ['sent', 'approved'];
 
@@ -2045,10 +2043,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
       currency: inv.currency_code || inv.currency || projectCurrency || '',
       description: inv.notes ?? inv.description ?? '',
       buyer_reference: readBuyerReference(inv.metadata),
-      // Shown exactly as stored. This used to rewrite 'sent' into 'approved'
-      // for display, which left the same invoice reading Sent in the table and
-      // Approved in this modal. A person sees the state the machine wrote, and
-      // approving writes 'sent'.
+      // Shown exactly as stored. A person sees the state the machine wrote.
       status: inv.status || 'draft',
     });
     // If the stored total differs from subtotal+tax, the invoice was saved
