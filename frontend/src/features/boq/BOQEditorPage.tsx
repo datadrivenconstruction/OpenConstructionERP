@@ -81,6 +81,7 @@ import { allResourcesExpanded, type ResourceExpansionState } from './resourceExp
 import { BatchActionBar } from './BatchActionBar';
 import { ScenarioDialog } from './ScenarioDialog';
 import { SendToTenderDialog } from './SendToTenderDialog';
+import { ImportPreviewDialog } from './ImportPreviewDialog';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
 import type { TenderPackageRef } from './api';
@@ -2048,7 +2049,7 @@ export function BOQEditorPage() {
       if (isCmd && !e.shiftKey && (k === 'i' || codeLetter === 'i')) {
         e.preventDefault();
         e.stopPropagation();
-        importInputRef.current?.click();
+        setShowImportPreview(true);
         return;
       }
       // Ctrl+L = Toggle lock/unlock
@@ -4294,6 +4295,7 @@ export function BOQEditorPage() {
 
   const importInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [showImportPreview, setShowImportPreview] = useState(false);
 
   const handleImportFile = useCallback(
     async (file: File) => {
@@ -4944,7 +4946,7 @@ export function BOQEditorPage() {
           onAddSection={handleAddSection}
           onOpenCostDb={() => setCostDbModalOpen(true)}
           onOpenAssembly={() => setAssemblyModalOpen(true)}
-          onImportClick={() => importInputRef.current?.click()}
+          onImportClick={() => setShowImportPreview(true)}
           isImporting={isImporting}
           importInputRef={importInputRef}
           onImportInputChange={handleImportInputChange}
@@ -5946,6 +5948,12 @@ export function BOQEditorPage() {
         </div>
       )}
       <ConfirmDialog {...confirmProps} />
+      <ImportPreviewDialog
+        open={showImportPreview && !!boqId}
+        onClose={() => setShowImportPreview(false)}
+        boqId={boqId!}
+        onImported={invalidateAll}
+      />
     </div>
   );
 }

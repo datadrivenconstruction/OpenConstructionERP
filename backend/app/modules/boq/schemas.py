@@ -2536,3 +2536,48 @@ class BOQCompareResponse(BaseModel):
     other_boq_name: str
     summary: CompareSummary
     rows: list[ComparePositionRow]
+
+
+# ── Import preview schemas ──────────────────────────────────────────────────
+
+
+class ImportPreviewPosition(BaseModel):
+    """One parsed position returned by the import preview endpoint.
+
+    Mirrors the fields of :class:`ImportedPosition` (from the importer
+    protocol) with an explicit ``total`` computed as ``quantity * unit_rate``.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    ordinal: str = ""
+    description: str = ""
+    unit: str = "pcs"
+    quantity: float = 0.0
+    unit_rate: float = 0.0
+    total: float = 0.0
+    is_section: bool = False
+    classification: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ImportPreviewResponse(BaseModel):
+    """Response schema for the import preview endpoint.
+
+    Returns parsed positions WITHOUT persisting anything to the database.
+    When the file contains more than 500 positions, the ``positions`` list
+    is truncated and ``truncated`` is set to ``True``. Aggregate counts
+    (``total_positions``, ``total_sections``, ``skipped``) always reflect
+    the full file regardless of truncation.
+    """
+
+    source_format: str = ""
+    currency: str = ""
+    total_positions: int = 0
+    total_sections: int = 0
+    skipped: int = 0
+    positions: list[ImportPreviewPosition] = Field(default_factory=list)
+    warnings: list[dict[str, Any]] = Field(default_factory=list)
+    errors: list[dict[str, Any]] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    truncated: bool = False

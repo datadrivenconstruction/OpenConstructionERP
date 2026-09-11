@@ -39,6 +39,7 @@ Endpoints:
     GET    /boqs/{boq_id}/export/gaeb          - Export BOQ as GAEB XML 3.3 (X83)
     POST   /boqs/{boq_id}/import/excel         - Import positions from Excel/CSV
     POST   /boqs/{boq_id}/import/smart         - Smart import: any file via AI (incl. CAD/BIM)
+    POST   /import/preview                     - Preview a BOQ file without importing
     GET    /boqs/{boq_id}/resource-summary    - Aggregated resource summary across positions
     GET    /boqs/{boq_id}/cost-breakdown     - Cost breakdown by resource category
     GET    /boqs/{boq_id}/sensitivity       - Sensitivity analysis (tornado chart)
@@ -6806,6 +6807,131 @@ async def import_boq_auto(
             "round_trip": bool(apply_summary["round_trip"]),
         },
     }
+
+
+# ── Import preview endpoint ─────────────────────────────────────────────────
+
+_PREVIEW_MAX_POSITIONS = 500
+
+
+@router.post(
+    "/import/preview/",
+    summary="Preview a BOQ file without importing",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def import_preview(
+    file: UploadFile = File(
+        ...,
+        description=(
+            "Any BOQ file. The dispatcher tries native importers (GAEB XML, "
+            "BC3 / FIEBDC-3, Excel/CSV) and returns parsed positions as "
+            "JSON without persisting anything."
+        ),
+    ),
+) -> dict[str, Any]:
+    """Parse a BOQ upload and return positions without persisting to the database.
+
+    Walks :data:`REGISTERED_IMPORTERS` in order, calling ``detect()`` on
+    each with the first 4 KB of the upload + the filename. The first
+    importer whose ``detect()`` returns ``True`` wins; its ``parse()`` is
+    invoked on the full buffer. Unlike ``/import/auto/``, this endpoint
+    never writes to the database and never falls back to the LLM path.
+
+    The response is capped at 500 positions. When the parsed file contains
+    more, ``truncated`` is set to ``True`` and the aggregate counts still
+    reflect the entire file.
+
+    Returns:
+        :class:`~app.modules.boq.schemas.ImportPreviewResponse` as a dict.
+    """
+    from app.modules.boq.importers import REGISTERED_IMPORTERS, ImportedBOQ, ImporterParseError
+    from app.modules.boq.schemas import ImportPreviewPosition, ImportPreviewResponse
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+    file_name = file.filename or "upload"
+
+    head = content[:4096]
+    chosen: type | None = None
+    for importer in REGISTERED_IMPORTERS:
+        try:
+            if importer.detect(head, file_name):
+                chosen = importer
+                break
+        except Exception as exc:  # noqa: BLE001 - detect() must never raise
+            logger.warning(
+                "Preview: importer %s.detect() raised on %s: %s",
+                importer.__name__,
+                file_name,
+                exc,
+            )
+            continue
+
+    if chosen is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "No native importer recognised this file format. "
+                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx/.xls), CSV."
+            ),
+        )
+
+    try:
+        imported_boq: ImportedBOQ = await chosen.parse(content, locale=get_locale())
+    except ImporterParseError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Could not parse file as {chosen.display_name}: {exc}",
+        ) from exc
+    except Exception as exc:  # noqa: BLE001 - log + sanitise
+        logger.exception(
+            "Preview: importer %s.parse() unexpected failure: %s",
+            chosen.__name__,
+            exc,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Could not parse file as {chosen.display_name}: unexpected error.",
+        ) from exc
+
+    all_positions = imported_boq.positions
+    total_positions = len(all_positions)
+    total_sections = sum(1 for p in all_positions if p.is_section)
+    truncated = total_positions > _PREVIEW_MAX_POSITIONS
+
+    preview_positions = [
+        ImportPreviewPosition(
+            ordinal=p.ordinal,
+            description=p.description,
+            unit=p.unit,
+            quantity=p.quantity,
+            unit_rate=p.unit_rate,
+            total=p.quantity * p.unit_rate,
+            is_section=p.is_section,
+            classification=p.classification,
+            metadata=p.metadata,
+        )
+        for p in all_positions[:_PREVIEW_MAX_POSITIONS]
+    ]
+
+    response = ImportPreviewResponse(
+        source_format=imported_boq.source_format,
+        currency=imported_boq.currency,
+        total_positions=total_positions,
+        total_sections=total_sections,
+        skipped=imported_boq.skipped,
+        positions=preview_positions,
+        warnings=imported_boq.warnings,
+        errors=imported_boq.errors,
+        metadata=imported_boq.metadata,
+        truncated=truncated,
+    )
+
+    return response.model_dump()
 
 
 # ── Smart import helpers ─────────────────────────────────────────────────────
