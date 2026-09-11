@@ -149,6 +149,53 @@ def resolve_cwicr_db_id(slug: str) -> str | None:
 # ── Orchestrator ─────────────────────────────────────────────────────────────
 
 
+async def _delete_pack_demo_projects(slug: str) -> int:
+    """Delete every demo project that belongs to the given pack.
+
+    During a pack *switch*, simply un-tagging demo projects makes them show up
+    in the general (un-scoped) project list, which is worse than the starting
+    state. Instead, we delete projects that carry both ``is_demo=True`` and
+    ``partner_pack=<slug>`` in their metadata. User-created projects (those
+    without ``is_demo``) are left alone and only un-tagged by the normal
+    ``unapply()`` path.
+    """
+    try:
+        from sqlalchemy import select
+
+        from app.database import async_session_factory
+        from app.modules.projects.models import Project
+
+        deleted = 0
+        async with async_session_factory() as session:
+            rows = (
+                (await session.execute(select(Project).where(Project.metadata_["partner_pack"].as_string() == slug)))
+                .scalars()
+                .all()
+            )
+            for proj in rows:
+                md = proj.metadata_ or {}
+                if md.get("is_demo"):
+                    logger.info(
+                        "Pack switch: deleting demo project %s ('%s') from pack '%s'",
+                        proj.id,
+                        proj.name,
+                        slug,
+                    )
+                    await session.delete(proj)
+                    deleted += 1
+                else:
+                    # User-created project: just remove the pack tag.
+                    new_md = dict(md)
+                    new_md.pop("partner_pack", None)
+                    proj.metadata_ = new_md
+            if deleted or rows:
+                await session.commit()
+        return deleted
+    except Exception as exc:  # noqa: BLE001 - cleanup must never abort the switch
+        logger.warning("Pack switch: could not delete demo projects for '%s': %s", slug, exc)
+        return 0
+
+
 async def _step_apply_pack(
     slug: str,
     app: FastAPI | None,
@@ -158,18 +205,20 @@ async def _step_apply_pack(
 ) -> StepResult:
     """Step 1 - apply the pack (modules + branding + defaults), no demo.
 
-    If another pack is already active, unapply it first so the old pack's
-    demo projects are released and the workspace starts clean. Without this,
-    switching from e.g. Russia to US left Russian demos visible and the old
-    cost database active.
+    If another pack is already active, delete its demo projects and unapply it
+    before applying the new one. Without this, switching from e.g. Russia to US
+    left Russian demos visible and the old cost database active.
     """
     from app.core.partner_pack.apply import apply_pack, unapply
     from app.core.partner_pack.state import load_applied_state
 
-    # Clean up previous pack before applying the new one.
+    switched_from: str | None = None
     prev = load_applied_state()
     if prev and prev.slug != slug:
-        logger.info("Switching pack: unapplying '%s' before applying '%s'", prev.slug, slug)
+        switched_from = prev.slug
+        logger.info("Switching pack: cleaning up '%s' before applying '%s'", prev.slug, slug)
+        deleted = await _delete_pack_demo_projects(prev.slug)
+        logger.info("Pack switch: deleted %d demo project(s) from '%s'", deleted, prev.slug)
         await unapply(app=app)
 
     res = await apply_pack(
@@ -182,10 +231,13 @@ async def _step_apply_pack(
     effects = res.get("effects", {})
     enabled = effects.get("modules_enabled", []) or []
     disabled = effects.get("modules_disabled", []) or []
+    detail: dict[str, Any] = {"modules_enabled": len(enabled), "modules_disabled": len(disabled)}
+    if switched_from:
+        detail["switched_from"] = switched_from
     return StepResult(
         step="apply_pack",
         status="ok",
-        detail={"modules_enabled": len(enabled), "modules_disabled": len(disabled)},
+        detail=detail,
     )
 
 
