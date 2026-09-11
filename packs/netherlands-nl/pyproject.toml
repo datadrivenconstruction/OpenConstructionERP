@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-netherlands-nl"
+version = "0.1.0"
+description = "Country pack for the Dutch market: NL/SfB classification, EUR currency, 21% BTW, RAW systematiek, STABU besteksystematiek, Bouwbesluit 2012 and BENG energy performance references."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "country-pack",
+    "netherlands",
+    "nlsfb",
+    "raw",
+    "stabu",
+    "bouwbesluit",
+    "btw",
+    "eur",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Dutch",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=5.5.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+netherlands-nl = "openconstructionerp_netherlands_nl:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_netherlands_nl = [
+    "onboarding.yaml",
+]

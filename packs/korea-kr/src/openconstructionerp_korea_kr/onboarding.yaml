@@ -1,0 +1,39 @@
+# OCERP x South Korea partner pack - first-login onboarding script.
+#
+# Replaces the default OnboardingWizard when this partner pack is active.
+# Each step is rendered by the frontend OnboardingWizard component.
+
+version: 1
+pack: korea-kr
+locale: ko
+estimated_minutes: 5
+title: "Welcome to OpenConstructionERP - South Korea Edition"
+title_ko: "OpenConstructionERP\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4 - \ud55c\uad6d\ud310"
+subtitle: "Three steps to align your workspace with Korean construction practice (KBIM, KS standards, MOLIT specifications)."
+
+steps:
+  - id: company_profile
+    title: "Company profile / \ud68c\uc0ac \uc815\ubcf4"
+    body: "Tell us about your company so tenders and reports carry the right attribution."
+    fields:
+      - { key: company_name, label: "Company name / \ud68c\uc0ac\uba85", type: text, required: true }
+      - { key: business_registration, label: "Business registration number (10 digits) / \uc0ac\uc5c5\uc790\ub4f1\ub85d\ubc88\ud638", type: text, required: false, help: "The 10-digit business registration number issued by the NTS." }
+      - { key: construction_license, label: "Construction business license / \uac74\uc124\uc5c5 \uba74\ud5c8", type: select, required: false, options: ["General construction (Jonghap)", "Specialty construction (Jeonmun)", "Not licensed"], default: "General construction (Jonghap)", help: "License type under the Framework Act on the Construction Industry." }
+      - { key: head_office_region, label: "Head-office region / \ubcf8\uc0ac \uc18c\uc7ac\uc9c0", type: select, required: true, options: ["Seoul", "Gyeonggi-do (Incheon, Suwon)", "Busan", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong", "Gangwon-do", "Chungcheong-do", "Jeolla-do", "Gyeongsang-do", "Jeju-do", "Other"] }
+
+  - id: standards
+    title: "Standards / \uaddc\uaca9 \ubc0f \uae30\uc900"
+    body: "Confirm which Korean standards apply to your typical projects."
+    fields:
+      - { key: enable_kbim, label: "KBIM classification (Korea Building Information Modeling)", type: checkbox, default: true }
+      - { key: enable_ks, label: "KS material standards (Korean Industrial Standards, KATS)", type: checkbox, default: true }
+      - { key: work_type, label: "Predominant work type / \uc8fc\uc694 \uacf5\uc0ac \uc720\ud615", type: radio, required: true, default: "Building (Geonchuk)", options: ["Building (Geonchuk)", "Civil engineering (Tobok)", "Both"] }
+
+  - id: review
+    title: "Review and finish / \ud655\uc778 \ubc0f \uc644\ub8cc"
+    body: "We will create your Korean workspace with KRW and VAT at 10 percent. You can change everything later in Settings."
+    action:
+      label: "Create my South Korea workspace / \ud55c\uad6d \uc6cc\ud06c\uc2a4\ud398\uc774\uc2a4 \ub9cc\ub4e4\uae30"
+      apply:
+        - set_default_currency: KRW
+        - set_tax_template: kr_vat_10

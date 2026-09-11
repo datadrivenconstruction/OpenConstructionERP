@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-spain-es"
+version = "0.1.0"
+description = "Country pack for the Spanish market: BC3/FIEBDC-3 exchange format, Codigo Tecnico de la Edificacion (CTE), Ley de Contratos del Sector Publico 9/2017, EHE-08 structural concrete, IVA at 21 percent, euro."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "country-pack",
+    "spain",
+    "bc3",
+    "fiebdc",
+    "cte",
+    "ehe",
+    "iva",
+    "contratos-publicos",
+    "presupuesto",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Spanish",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=5.5.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+spain-es = "openconstructionerp_spain_es:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_spain_es = [
+    "onboarding.yaml",
+]

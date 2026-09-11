@@ -1,0 +1,39 @@
+# OCERP x France partner pack - first-login onboarding script.
+#
+# Replaces the default OnboardingWizard when this partner pack is active.
+# Each step is rendered by the frontend OnboardingWizard component.
+
+version: 1
+pack: france-fr
+locale: fr
+estimated_minutes: 5
+title: "Welcome to OpenConstructionERP - France Edition"
+title_fr: "Bienvenue sur OpenConstructionERP - Edition France"
+subtitle: "Three steps to align your workspace with French construction practice (DPGF, NF DTU, RE 2020). Trois etapes pour configurer votre espace de travail selon les pratiques francaises."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Profil de l'entreprise"
+    body: "Tell us about your company so tenders and reports carry the right attribution. Renseignez votre entreprise pour que les appels d'offres et rapports soient correctement attribues."
+    fields:
+      - { key: company_name, label: "Company name / Raison sociale", type: text, required: true }
+      - { key: siret, label: "SIRET (14 digits) / Numero SIRET", type: text, required: false, placeholder: "123 456 789 00012", help: "The 14-digit establishment identifier from INSEE." }
+      - { key: head_office_region, label: "Head-office region / Region du siege", type: select, required: true, options: ["Ile-de-France", "Auvergne-Rhone-Alpes", "Nouvelle-Aquitaine", "Occitanie", "Hauts-de-France", "Provence-Alpes-Cote d'Azur", "Grand Est", "Pays de la Loire", "Normandie", "Bretagne", "Bourgogne-Franche-Comte", "Centre-Val de Loire", "Corse", "Other"] }
+
+  - id: standards
+    title: "Standards and regulations / Normes et reglementations"
+    body: "Confirm which French standards apply to your typical projects. Confirmez les normes applicables a vos projets habituels."
+    fields:
+      - { key: enable_dpgf, label: "DPGF decomposition (Decomposition du Prix Global et Forfaitaire)", type: checkbox, default: true }
+      - { key: enable_cctp, label: "CCTP specification framework (Cahier des Clauses Techniques Particulieres)", type: checkbox, default: true }
+      - { key: enable_nf_dtu, label: "NF DTU measurement standards (AFNOR / CSTB)", type: checkbox, default: true }
+      - { key: procurement_type, label: "Predominant procurement type / Type de marche", type: radio, required: true, default: "Public (Code des marches publics)", options: ["Public (Code des marches publics)", "Private (Loi MOP / CCMI)", "Both"] }
+
+  - id: review
+    title: "Review and finish / Verification et finalisation"
+    body: "We will create your French workspace with EUR, TVA at 20 percent and the DPGF validation rules. You can change everything later in Settings. Nous allons creer votre espace de travail avec EUR, TVA a 20% et les regles DPGF."
+    action:
+      label: "Create my France workspace / Creer mon espace de travail"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: fr_tva_20

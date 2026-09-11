@@ -1,0 +1,43 @@
+# Turkey Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: tr
+title: "Welcome to OpenConstructionERP - Turkey Edition"
+title_tr: "OpenConstructionERP'ye Hosgeldiniz - Turkiye"
+subtitle: "Three steps to align your workspace with Turkish construction practice (Birim Fiyat, TBDY, KDV). Calisma alaninizi Turk insaat uygulamalarina uygun hale getirin."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Firma bilgileri"
+    body: "Tell us about your firm so reports and tender documents are correctly attributed. Firma bilgilerinizi girin, boylece raporlar ve ihale belgeleri dogru sekilde duzenlenir."
+    fields:
+      - { key: company_name, label: "Company name / Firma adi", type: text, required: true }
+      - { key: vergi_no, label: "Vergi Kimlik Numarasi (Tax ID) / VKN", type: text, required: false, placeholder: "1234567890", help: "10-digit tax identification number issued by the Revenue Administration." }
+      - { key: ticaret_sicil_no, label: "Ticaret Sicil Numarasi (Trade Registry No.)", type: text, required: false }
+      - { key: yapi_denetim_class, label: "Yapi Denetim class (Building Inspection) / Yapi denetim sinifi", type: select, options: ["Not applicable", "A Grubu", "B Grubu", "C Grubu"], required: false, default: "Not applicable", help: "Building inspection classification under Law 4708." }
+      - { key: head_office_city, label: "Head-office city / Merkez ofis sehri", type: select, options: ["Istanbul", "Ankara", "Izmir", "Antalya", "Bursa", "Adana", "Konya", "Gaziantep", "Kayseri", "Trabzon", "Other"], required: true }
+      - { key: deprem_bolgesi, label: "Primary seismic zone / Deprem bolgesi", type: select, options: ["Zone 1 (highest risk)", "Zone 2", "Zone 3", "Zone 4 (lowest risk)"], required: false, default: "Zone 1 (highest risk)", help: "Determines which TBDY 2018 parameters apply by default." }
+
+  - id: standards_birimfiyat
+    title: "Standards and unit prices / Standartlar ve birim fiyat"
+    body: "Choose the specification and price base you work to. The BOQ editor and validation engine will check against this. Calistiginiz sartname ve fiyat tabanini secin."
+    fields:
+      - { key: price_base, label: "Default price base / Varsayilan fiyat tabani", type: radio, options: ["Bayindirlik Bakanligi Birim Fiyat (Ministry unit prices)", "Iller Bankasi (Provincial Bank unit prices)", "Private in-house rate library"], required: true, default: "Bayindirlik Bakanligi Birim Fiyat (Ministry unit prices)" }
+      - { key: birim_fiyat_year, label: "Birim Fiyat reference year", type: select, options: ["2026", "2025", "2024", "2023"], required: true, default: "2026" }
+      - { key: enable_tbdy_2018, label: "Enable TBDY 2018 seismic code checks / TBDY 2018 deprem yonetmeligi kontrollerini etkinlestir", type: checkbox, default: true, help: "Mandatory for all new buildings in Turkey since 2019." }
+      - { key: enable_tse_standards, label: "Enable TSE construction standards / TSE insaat standartlarini etkinlestir", type: checkbox, default: true }
+      - { key: enable_imar_kanunu, label: "Enable Imar Kanunu zoning compliance / Imar Kanunu uyumluluklarini etkinlestir", type: checkbox, default: true }
+      - { key: default_kdv_rate, label: "Default KDV (VAT) rate", type: select, options: ["20% (standard rate)", "10% (reduced, certain construction services)", "1% (social housing, specific categories)"], required: true, default: "20% (standard rate)" }
+
+  - id: review
+    title: "Review and finish / Gozden gecir ve tamamla"
+    body: "We will create your first Turkish project workspace with the standards and tax settings you selected. You can change everything later in Settings. Sectiklerinize gore ilk Turkiye proje alaninizi olusturacagiz."
+    action:
+      label: "Create my Turkey workspace / Turkiye calisma alanimi olustur"
+      apply:
+        - set_default_currency: TRY
+        - set_tax_template: tr_kdv_20
+        - preload_cwicr_regions:
+            - cwicr-tr-istanbul

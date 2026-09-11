@@ -1,0 +1,39 @@
+# OCERP x Japan partner pack - first-login onboarding script.
+#
+# Replaces the default OnboardingWizard when this partner pack is active.
+# Each step is rendered by the frontend OnboardingWizard component.
+
+version: 1
+pack: japan-jp
+locale: ja
+estimated_minutes: 5
+title: "Welcome to OpenConstructionERP - Japan Edition"
+title_ja: "OpenConstructionERP\u3078\u3088\u3046\u3053\u305d - \u65e5\u672c\u7248"
+subtitle: "Three steps to align your workspace with Japanese construction practice (Sekisan Kijun, JASS, Building Standards Act)."
+
+steps:
+  - id: company_profile
+    title: "Company profile / \u4f1a\u793e\u60c5\u5831"
+    body: "Tell us about your company so tenders and reports carry the right attribution."
+    fields:
+      - { key: company_name, label: "Company name / \u4f1a\u793e\u540d", type: text, required: true }
+      - { key: corporate_number, label: "Corporate number (13 digits) / \u6cd5\u4eba\u756a\u53f7", type: text, required: false, help: "The 13-digit corporate identification number issued by the National Tax Agency." }
+      - { key: construction_license, label: "Construction business license / \u5efa\u8a2d\u696d\u8a31\u53ef", type: select, required: false, options: ["General (Ippan)", "Special (Tokutei)", "Not licensed"], default: "General (Ippan)", help: "License type under the Construction Business Act." }
+      - { key: head_office_region, label: "Head-office region / \u672c\u793e\u6240\u5728\u5730", type: select, required: true, options: ["Kanto (Tokyo, Kanagawa, Saitama, Chiba)", "Kansai (Osaka, Kyoto, Hyogo)", "Chubu (Aichi, Shizuoka)", "Kyushu (Fukuoka, Kumamoto)", "Tohoku (Miyagi, Sendai)", "Hokkaido", "Chugoku (Hiroshima)", "Shikoku", "Okinawa", "Other"] }
+
+  - id: standards
+    title: "Standards / \u898f\u683c\u30fb\u57fa\u6e96"
+    body: "Confirm which Japanese standards apply to your typical projects."
+    fields:
+      - { key: enable_sekisan, label: "Sekisan Kijun estimation standards (MLIT) / \u7a4d\u7b97\u57fa\u6e96", type: checkbox, default: true }
+      - { key: enable_jass, label: "JASS specifications (AIJ) / JASS\u5efa\u7bc9\u5de5\u4e8b\u6a19\u6e96\u4ed5\u69d8\u66f8", type: checkbox, default: true }
+      - { key: work_type, label: "Predominant work type / \u4e3b\u306a\u5de5\u4e8b\u7a2e\u5225", type: radio, required: true, default: "Building (Kenchiku)", options: ["Building (Kenchiku)", "Civil engineering (Doboku)", "Both"] }
+
+  - id: review
+    title: "Review and finish / \u78ba\u8a8d\u30fb\u5b8c\u4e86"
+    body: "We will create your Japanese workspace with JPY and consumption tax at 10 percent. You can change everything later in Settings."
+    action:
+      label: "Create my Japan workspace / \u65e5\u672c\u306e\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u3092\u4f5c\u6210"
+      apply:
+        - set_default_currency: JPY
+        - set_tax_template: jp_consumption_10

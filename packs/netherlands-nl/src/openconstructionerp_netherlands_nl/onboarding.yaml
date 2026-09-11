@@ -1,0 +1,37 @@
+# Netherlands Construction Pack — first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: nl
+title: "Welcome to OpenConstructionERP — Netherlands Edition"
+title_nl: "Welkom bij OpenConstructionERP — Nederland Editie"
+subtitle: "Three steps to align your workspace with Dutch construction practice. Drie stappen om uw werkruimte in te richten voor de Nederlandse bouwpraktijk."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Bedrijfsprofiel"
+    body: "Enter your firm details so reports and tender documents carry the correct attribution. Voer uw bedrijfsgegevens in zodat rapporten en aanbestedingsdocumenten correct worden toegeschreven."
+    fields:
+      - { key: company_name, label: "Company name / Bedrijfsnaam", type: text, required: true }
+      - { key: kvk_number, label: "KvK number (Kamer van Koophandel) / KvK-nummer", type: text, required: false, placeholder: "12345678", help: "Eight-digit Chamber of Commerce registration number." }
+      - { key: btw_id, label: "BTW-identificatienummer (VAT ID)", type: text, required: false, placeholder: "NL123456789B01", help: "Dutch VAT identification number issued by the Belastingdienst." }
+      - { key: primary_sector, label: "Primary sector / Primaire sector", type: select, options: ["Utiliteitsbouw (building construction)", "Grond-, weg- en waterbouw (civil engineering)", "Woningbouw (residential)", "Renovatie en onderhoud (renovation and maintenance)", "Installatietechniek (building services)"], required: true, default: "Utiliteitsbouw (building construction)" }
+
+  - id: standards
+    title: "Standards / Standaarden — RAW and STABU"
+    body: "Choose the specification system your projects follow. RAW is the standard for civil engineering, STABU for building construction. Many firms use both. Kies het besteksysteem dat uw projecten volgen."
+    fields:
+      - { key: enable_raw, label: "Enable RAW systematiek (civil engineering specifications) / RAW systematiek inschakelen", type: checkbox, default: true, help: "Standard for GWW (grond-, weg- en waterbouw) projects." }
+      - { key: enable_stabu, label: "Enable STABU besteksystematiek (building specifications) / STABU besteksystematiek inschakelen", type: checkbox, default: true, help: "Standard for utiliteitsbouw and woningbouw projects." }
+      - { key: classification, label: "Classification standard / Classificatiestandaard", type: radio, options: ["NL/SfB (Dutch adaptation of SfB)", "NEN 2699 (cost classification)", "Both"], required: true, default: "NL/SfB (Dutch adaptation of SfB)" }
+      - { key: enable_beng, label: "Enable BENG energy performance references / BENG-referenties inschakelen", type: checkbox, default: true, help: "Nearly zero-energy building requirements (Bijna Energieneutrale Gebouwen), mandatory since 1 January 2021." }
+
+  - id: review
+    title: "Review and finish / Controleren en voltooien"
+    body: "We will create your workspace with NL/SfB classification, EUR currency, 21% BTW and the specification systems you selected. You can change everything later in Settings. Uw werkruimte wordt aangemaakt met de gekozen instellingen."
+    action:
+      label: "Create my Netherlands workspace / Mijn werkruimte aanmaken"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: nl_btw_21

@@ -1,0 +1,40 @@
+# UAE Construction Pack — first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: en
+title: "Welcome to OpenConstructionERP — UAE Edition"
+title_ar: "OpenConstructionERP مرحبًا بك في — الإمارات"
+subtitle: "Three steps to align your workspace with UAE construction practice."
+
+steps:
+  - id: company_profile
+    title: "Company profile and trade license"
+    body: "Enter your firm details so reports and tender documents carry the correct attribution. Your trade license number links the workspace to your DED or ADDC registration."
+    fields:
+      - { key: company_name, label: "Company name", type: text, required: true }
+      - { key: trade_license_number, label: "Trade license number (DED / ADDC)", type: text, required: false, placeholder: "CN-1234567", help: "Department of Economic Development or Abu Dhabi Department of Commerce license number." }
+      - { key: emirate, label: "Primary emirate of operation", type: select, options: ["Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"], required: true, default: "Dubai" }
+      - { key: classification_grade, label: "Contractor classification grade (if applicable)", type: select, options: ["Not classified", "Grade 1 (small)", "Grade 2", "Grade 3", "Grade 4", "Grade 5 (large)", "Unlimited"], required: false, default: "Not classified" }
+      - { key: vat_trn, label: "Tax Registration Number (TRN)", type: text, required: false, placeholder: "100123456789003", help: "15-digit TRN issued by the Federal Tax Authority for VAT registration." }
+
+  - id: standards
+    title: "Standards and classification"
+    body: "UAE construction predominantly uses MasterFormat for work breakdown. Confirm the building code and sustainability framework that applies to your projects."
+    fields:
+      - { key: primary_building_code, label: "Primary building code", type: radio, options: ["Abu Dhabi International Building Code", "Dubai Municipality Building Code", "Sharjah Building Code"], required: true, default: "Dubai Municipality Building Code" }
+      - { key: enable_civil_defense, label: "Enable Civil Defense fire and life safety regulation references", type: checkbox, default: true }
+      - { key: enable_estidama, label: "Enable Estidama Pearl Rating references (Abu Dhabi sustainable development)", type: checkbox, default: false, help: "Required for all new buildings on Abu Dhabi land since 2010." }
+
+  - id: review
+    title: "Review and finish"
+    body: "We will create your workspace with MasterFormat classification, AED currency, 5% VAT and the building code you selected. You can change everything later in Settings."
+    action:
+      label: "Create my UAE workspace"
+      apply:
+        - set_default_currency: AED
+        - set_tax_template: ae_vat_5
+        - enable_rule_sets:
+            - masterformat
+        - preload_cwicr_regions_from: emirate

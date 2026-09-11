@@ -1,0 +1,38 @@
+# Poland Construction Pack — first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: pl
+title: "Welcome to OpenConstructionERP — Poland Edition"
+title_pl: "Witamy w OpenConstructionERP — Edycja Polska"
+subtitle: "Three steps to align your workspace with Polish construction practice. Trzy kroki, aby dostosowac przestrzen robocza do polskiej praktyki budowlanej."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Profil firmy"
+    body: "Enter your firm details so reports and tender documents carry the correct attribution. Wprowadz dane firmy, aby raporty i dokumenty przetargowe byly poprawnie przypisane."
+    fields:
+      - { key: company_name, label: "Company name / Nazwa firmy", type: text, required: true }
+      - { key: nip, label: "NIP (Numer Identyfikacji Podatkowej)", type: text, required: false, placeholder: "1234567890", help: "Ten-digit tax identification number." }
+      - { key: regon, label: "REGON (national business registry number)", type: text, required: false, placeholder: "123456789", help: "Nine or fourteen-digit statistical identification number." }
+      - { key: krs, label: "KRS (National Court Register number, if applicable)", type: text, required: false, help: "Required for companies registered in the National Court Register." }
+      - { key: primary_sector, label: "Primary sector / Glowny sektor", type: select, options: ["Budownictwo ogolne (general construction)", "Budownictwo mieszkaniowe (residential)", "Budownictwo przemyslowe (industrial)", "Infrastruktura (infrastructure)", "Remonty i modernizacja (renovation and modernisation)"], required: true, default: "Budownictwo ogolne (general construction)" }
+
+  - id: standards
+    title: "Standards / Standardy — KNR and KNNR"
+    body: "Polish cost estimation relies on norm catalogues (KNR, KNNR) for labour and material quantities. Confirm which catalogues and classification you use. Polska kosztorysacja opiera sie na katalogach nakladow rzeczowych."
+    fields:
+      - { key: enable_knr, label: "Enable KNR catalogues (Katalog Nakladow Rzeczowych) / Wlacz KNR", type: checkbox, default: true, help: "Standard norm catalogues for construction works." }
+      - { key: enable_knnr, label: "Enable KNNR catalogues (Kosztorysowe Normy Nakladow Rzeczowych) / Wlacz KNNR", type: checkbox, default: true, help: "Updated cost estimation norms." }
+      - { key: estimate_type, label: "Default estimate type / Domyslny typ kosztorysu", type: radio, options: ["Kosztorys inwestorski (investor estimate)", "Kosztorys ofertowy (tender estimate)", "Kosztorys powykonawczy (as-built estimate)"], required: true, default: "Kosztorys inwestorski (investor estimate)" }
+      - { key: classification, label: "Classification standard / Standard klasyfikacji", type: radio, options: ["DIN 276 (German tradition, common in Poland)", "Custom classification"], required: true, default: "DIN 276 (German tradition, common in Poland)" }
+
+  - id: review
+    title: "Review and finish / Przejrzyj i zakoncz"
+    body: "We will create your workspace with DIN 276 classification, PLN currency, 23% VAT and the norm catalogues you selected. You can change everything later in Settings. Twoja przestrzen robocza zostanie utworzona z wybranymi ustawieniami."
+    action:
+      label: "Create my Poland workspace / Utworz moja przestrzen robocza"
+      apply:
+        - set_default_currency: PLN
+        - set_tax_template: pl_vat_23

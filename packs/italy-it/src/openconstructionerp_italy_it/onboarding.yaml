@@ -1,0 +1,41 @@
+# Italy Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: it
+title: "Welcome to OpenConstructionERP - Italy Edition"
+title_it: "Benvenuto su OpenConstructionERP - Edizione Italia"
+subtitle: "Three steps to align your workspace with Italian construction practice (Prezzario DEI, NTC 2018, IVA). Configura il tuo spazio di lavoro secondo la prassi edilizia italiana."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Profilo aziendale"
+    body: "Tell us about your firm so reports and tender documents are correctly attributed. Inserisci i dati della tua azienda per la corretta attribuzione di report e documenti di gara."
+    fields:
+      - { key: company_name, label: "Company name / Ragione sociale", type: text, required: true }
+      - { key: partita_iva, label: "Partita IVA (VAT number) / P.IVA", type: text, required: false, placeholder: "IT12345678901", help: "11-digit Italian VAT identification number." }
+      - { key: codice_fiscale, label: "Codice Fiscale (tax code)", type: text, required: false }
+      - { key: soa_category, label: "SOA qualification category / Categoria SOA", type: select, options: ["Not qualified", "OG1 - Edifici civili e industriali", "OG2 - Restauro e manutenzione", "OG3 - Strade, autostrade, ponti", "OG6 - Acquedotti e fognature", "OG11 - Impianti tecnologici", "OS18-A - Componenti strutturali in acciaio", "OS21 - Opere strutturali speciali", "Other"], required: false, default: "Not qualified", help: "SOA attestation required for public works above EUR 150,000 (D.Lgs. 36/2023)." }
+      - { key: head_office_region, label: "Head-office region / Regione sede legale", type: select, options: ["Lazio", "Lombardia", "Campania", "Veneto", "Piemonte", "Emilia-Romagna", "Toscana", "Sicilia", "Puglia", "Sardegna", "Liguria", "Calabria", "Friuli Venezia Giulia", "Trentino-Alto Adige", "Other"], required: true }
+
+  - id: standards_prezzario
+    title: "Standards and price list / Normativa e prezzario"
+    body: "Choose the specification and prezzario you work to. The BOQ editor and validation engine will check against this. Scegli la normativa e il prezzario di riferimento."
+    fields:
+      - { key: prezzario, label: "Default prezzario / Prezzario di riferimento", type: radio, options: ["DEI - Tipografia del Genio Civile (national reference)", "Regione Lazio", "Regione Lombardia", "Regione Campania", "Regione Veneto", "Regione Toscana", "Regione Emilia-Romagna", "Private in-house rate library"], required: true, default: "DEI - Tipografia del Genio Civile (national reference)" }
+      - { key: enable_ntc_2018, label: "Enable NTC 2018 structural code checks / Abilita controlli NTC 2018", type: checkbox, default: true, help: "Norme Tecniche per le Costruzioni (D.M. 17/01/2018), mandatory for all structural work." }
+      - { key: enable_uni_standards, label: "Enable UNI construction standards / Abilita standard UNI", type: checkbox, default: true }
+      - { key: enable_codice_contratti, label: "Enable Codice dei contratti pubblici compliance (D.Lgs. 36/2023) / Abilita conformita Codice contratti", type: checkbox, default: true, help: "Required for all public procurement above EUR 150,000." }
+      - { key: default_iva_rate, label: "Default IVA (VAT) rate", type: select, options: ["22% (standard rate)", "10% (reduced, renovation and restoration)", "4% (super-reduced, prima casa construction)"], required: true, default: "22% (standard rate)" }
+
+  - id: review
+    title: "Review and finish / Rivedi e completa"
+    body: "We will create your first Italian project workspace with the standards and tax settings you selected. You can change everything later in Settings. Creeremo il tuo primo progetto italiano con le impostazioni selezionate."
+    action:
+      label: "Create my Italy workspace / Crea il mio spazio di lavoro Italia"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: it_iva_22
+        - preload_cwicr_regions:
+            - cwicr-it-rome

@@ -1,0 +1,58 @@
+# Germany Construction Pack — first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+#
+# Sprachregister: Sie-Form (formal business German), with English parallel.
+
+version: 2
+pack: germany-de
+locale: de
+title: "Willkommen bei OpenConstructionERP — Deutschland"
+title_en: "Welcome to OpenConstructionERP — Germany Edition"
+subtitle: "Vier Schritte, um Ihren Arbeitsbereich auf deutsche Kalkulationspraxis auszurichten (DIN 276, VOB, GAEB, HOAI). Four quick steps to align your workspace with German estimating practice."
+
+steps:
+  - id: company_profile
+    title: "Unternehmensprofil / Company profile"
+    body: "Bitte hinterlegen Sie die Stammdaten Ihres Unternehmens. Sie erscheinen in Berichten, Angeboten und Vergabeunterlagen. Enter your company details so reports, tenders and invoices are correctly attributed."
+    fields:
+      - { key: company_name, label: "Firmenname / Company name", type: text, required: true }
+      - { key: ustid_nr, label: "USt-IdNr. (Umsatzsteuer-Identifikationsnummer) / VAT ID", type: text, required: false, placeholder: "DE123456789", help: "Ihre Umsatzsteuer-Identifikationsnummer nach Paragraph 27a UStG. Leave blank if not yet registered." }
+      - { key: legal_form, label: "Rechtsform / Legal form", type: select, options: ["GmbH", "GmbH & Co. KG", "AG", "Partnerschaftsgesellschaft (PartG mbB)", "Einzelunternehmen", "GbR", "UG (haftungsbeschraenkt)", "OHG", "KG", "Sonstige / Other"], default: "GmbH", required: true }
+      - { key: hr_number, label: "Handelsregister-Nummer (HRB / HRA) / Commercial register number", type: text, required: false }
+      - { key: head_office_bundesland, label: "Bundesland des Hauptsitzes / Head-office federal state", type: select, options: ["Baden-Wuerttemberg", "Bayern", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern", "Niedersachsen", "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen", "Sachsen-Anhalt", "Schleswig-Holstein", "Thueringen"], required: true }
+
+  - id: standards_classification
+    title: "Normen und Klassifikation / Standards and classification"
+    body: "Legen Sie fest, welche deutschen Normen fuer Ihre Projekte gelten. Die Validierung des Leistungsverzeichnisses wird darauf ausgerichtet. Confirm which German standards apply to your projects. BOQ validation will align accordingly."
+    fields:
+      - { key: classification_standard, label: "Kostenklassifikation / Cost classification", type: radio, options: ["DIN 276:2018 (KG 100-800, Standard)", "DIN 276:2018, erweitert bis Ebene 4 (Projektsteuerung)"], default: "DIN 276:2018 (KG 100-800, Standard)", required: true }
+      - { key: vob_reference, label: "VOB-Ausgabe / VOB edition", type: radio, options: ["VOB 2019 (aktuell / current)", "VOB 2016"], default: "VOB 2019 (aktuell / current)", required: true }
+      - { key: gaeb_export_phase, label: "Standard-GAEB-Austauschphase / Default GAEB exchange phase", type: select, options: ["X81 — LV-Uebermittlung (BOQ transmittal)", "X83 — Angebotsabgabe (bid submission)", "X84 — Nebenangebot (alternative bid)", "X86 — Auftragserteilung (contract award)"], default: "X83 — Angebotsabgabe (bid submission)", required: true }
+      - { key: default_honorarzone, label: "Standard-Honorarzone (HOAI 2021) / Default fee zone", type: select, options: ["HZ I — sehr geringe Anforderungen / very low complexity", "HZ II — geringe Anforderungen / low complexity", "HZ III — durchschnittliche Anforderungen / average complexity", "HZ IV — hohe Anforderungen / high complexity", "HZ V — sehr hohe Anforderungen / very high complexity"], default: "HZ III — durchschnittliche Anforderungen / average complexity", required: true }
+      - { key: enable_bki_benchmarks, label: "BKI-Plausibilitaetsbenchmarks aktivieren / Enable BKI cost benchmarks", type: checkbox, default: true, help: "Prueft Kostenansaetze gegen BKI-Referenzwerte nach Gebaeudetyp und Region. Checks cost estimates against BKI reference values by building type and region." }
+
+  - id: tax_procurement
+    title: "Steuer und Vergabe / Tax and procurement"
+    body: "Steuersatz und Vergabeprofil festlegen. Der Standardsatz liegt bei 19% USt. Confirm your tax rate and procurement profile. The default is 19% Umsatzsteuer."
+    fields:
+      - { key: default_ust_rate, label: "Umsatzsteuersatz / VAT rate", type: radio, options: ["19% (Regelsteuersatz / standard rate)", "7% (ermaessigter Satz / reduced rate)", "0% (Reverse-Charge / innergemeinschaftlich)"], default: "19% (Regelsteuersatz / standard rate)", required: true }
+      - { key: procurement_type, label: "Ueberwiegender Auftraggeber / Predominant client type", type: radio, options: ["Oeffentlicher Auftraggeber (VOB/A bindend) / Public client (VOB/A mandatory)", "Privater Auftraggeber (BGB-Werkvertrag) / Private client (civil code)", "Gemischt / Mixed"], default: "Gemischt / Mixed", required: true }
+      - { key: eu_threshold_aware, label: "EU-Schwellenwerte beachten (aktuell 5.538.000 EUR fuer Bauauftraege) / Observe EU procurement thresholds", type: checkbox, default: true, help: "Bei oeffentlichen Auftraegen oberhalb des EU-Schwellenwertes gelten zusaetzliche Vergabevorschriften (VgV, GWB Teil 4). For public contracts above the EU threshold, additional procurement rules apply." }
+      - { key: cwicr_regions, label: "CWICR-Kostenregionen / CWICR cost regions", type: multiselect, options: ["Berlin (EUR)", "Munich (EUR)"], default: ["Berlin (EUR)", "Munich (EUR)"], required: true }
+
+  - id: review
+    title: "Ueberpruefen und Abschliessen / Review and finish"
+    body: "Wir richten Ihren Arbeitsbereich mit DIN 276, VOB, GAEB, HOAI und den gewaehlten Einstellungen ein. Alles kann spaeter unter Einstellungen geaendert werden. We will create your workspace with DIN 276, VOB, GAEB, HOAI and your chosen settings. Everything can be changed later in Settings."
+    action:
+      label: "Arbeitsbereich anlegen / Create my workspace"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: de_ust_19
+        - enable_rule_packs:
+            - din_276
+            - gaeb_x83_x86
+            - vob_2019
+            - hoai_2021_fees
+            - bki_benchmarks
+        - preload_cwicr_regions_from: cwicr_regions

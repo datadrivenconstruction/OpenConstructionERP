@@ -1,0 +1,41 @@
+# Spain Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: es
+title: "Welcome to OpenConstructionERP - Spain Edition"
+title_es: "Bienvenido a OpenConstructionERP - Edicion Espana"
+subtitle: "Three steps to align your workspace with Spanish construction practice (BC3, CTE, IVA). Configura tu espacio de trabajo segun la practica constructiva espanola."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Perfil de empresa"
+    body: "Tell us about your firm so reports and tender documents are correctly attributed. Introduzca los datos de su empresa para la correcta atribucion de informes y documentos de licitacion."
+    fields:
+      - { key: company_name, label: "Company name / Razon social", type: text, required: true }
+      - { key: nif_cif, label: "NIF/CIF (Tax ID)", type: text, required: false, placeholder: "B12345678", help: "Numero de Identificacion Fiscal for companies (CIF) or individuals (NIF)." }
+      - { key: clasificacion_contratista, label: "Contractor classification / Clasificacion del contratista", type: select, options: ["Not classified", "Grupo A - Movimiento de tierras y perforaciones", "Grupo B - Puentes, viaductos y grandes estructuras", "Grupo C - Edificaciones", "Grupo E - Hidraulicas", "Grupo I - Instalaciones electricas", "Grupo J - Instalaciones mecanicas", "Grupo K - Especiales", "Other"], required: false, default: "Not classified", help: "Required for public works above EUR 500,000 (Ley 9/2017, Art. 77)." }
+      - { key: head_office_ccaa, label: "Head-office autonomous community / Comunidad autonoma sede", type: select, options: ["Madrid", "Cataluna", "Andalucia", "Comunidad Valenciana", "Pais Vasco", "Galicia", "Castilla y Leon", "Castilla-La Mancha", "Canarias", "Aragon", "Murcia", "Baleares", "Navarra", "Extremadura", "Asturias", "Cantabria", "La Rioja", "Other"], required: true }
+
+  - id: standards_bc3
+    title: "Standards and price base / Normativa y base de precios"
+    body: "Choose the specification and base de precios you work to. The BOQ editor and validation engine will check against this. Seleccione la normativa y base de precios con la que trabaja."
+    fields:
+      - { key: base_precios, label: "Default base de precios / Base de precios por defecto", type: radio, options: ["Base de Precios de la Comunidad de Madrid", "ITEC (Institut de Tecnologia de la Construccio de Catalunya)", "PREOC (Base de Precios Centro, Guadalajara)", "Junta de Andalucia - Base de Costes", "Gobierno Vasco - Base de Precios", "Private in-house rate library"], required: true, default: "Base de Precios de la Comunidad de Madrid" }
+      - { key: enable_cte, label: "Enable CTE compliance checks (Codigo Tecnico de la Edificacion) / Habilitar controles CTE", type: checkbox, default: true, help: "Mandatory for all building work in Spain (R.D. 314/2006)." }
+      - { key: enable_ehe_08, label: "Enable EHE-08 structural concrete checks / Habilitar controles EHE-08", type: checkbox, default: true, help: "Instruccion de Hormigon Estructural, mandatory for all concrete structures." }
+      - { key: enable_lcsp, label: "Enable Ley de Contratos del Sector Publico compliance (9/2017) / Habilitar conformidad LCSP", type: checkbox, default: true, help: "Required for all public procurement." }
+      - { key: bc3_format, label: "Enable FIEBDC-3/BC3 import and export / Habilitar importacion y exportacion BC3", type: checkbox, default: true, help: "Standard exchange format for construction cost data in Spain." }
+      - { key: default_iva_rate, label: "Default IVA (VAT) rate", type: select, options: ["21% (standard rate)", "10% (reduced, renovation of dwellings)", "4% (super-reduced, social housing)"], required: true, default: "21% (standard rate)" }
+
+  - id: review
+    title: "Review and finish / Revisar y finalizar"
+    body: "We will create your first Spanish project workspace with the standards and tax settings you selected. You can change everything later in Settings. Crearemos su primer proyecto con la configuracion seleccionada."
+    action:
+      label: "Create my Spain workspace / Crear mi espacio de trabajo Espana"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: es_iva_21
+        - preload_cwicr_regions:
+            - cwicr-es-madrid
