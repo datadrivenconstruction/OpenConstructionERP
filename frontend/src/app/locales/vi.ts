@@ -9362,6 +9362,10 @@ const resource = {
     "dashboard.no_projects": "Chưa có dự án nào",
     "dashboard.no_projects_desc": "Tạo dự án đầu tiên để bắt đầu",
     "dashboard.not_configured": "Chưa cấu hình",
+    "dashboard.update_welcome_title": "Chào mừng đến với v{{version}}",
+    "dashboard.update_welcome_body": "Nền tảng đã được cập nhật với các tính năng và cải tiến mới. Bạn có thể chạy lại trình hướng dẫn cài đặt để cấu hình các tùy chọn mới, hoặc tiếp tục làm việc ngay lập tức.",
+    "dashboard.update_rerun_setup": "Chạy lại cài đặt",
+    "dashboard.update_continue": "Tiếp tục",
     "dashboard.project_overview": "Tổng quan dự án",
     "dashboard.quick_actions": "Hành động nhanh",
     "dashboard.recent_projects": "Dự án gần đây",
@@ -19139,6 +19143,10 @@ const resource = {
     "global_search.collection.variations": "Công việc phát sinh",
     "global_search.collection.moc": "Quản lý thay đổi (MoC)",
     "global_search.collection.costs": "Cơ sở dữ liệu chi phí",
+    "search.save_search": "Lưu tìm kiếm",
+    "search.saved_searches": "Tìm kiếm đã lưu",
+    "search.remove_saved": "Xóa",
+    "search.no_saved": "Chưa có tìm kiếm nào được lưu",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

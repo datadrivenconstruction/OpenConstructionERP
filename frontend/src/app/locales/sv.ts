@@ -10363,6 +10363,10 @@ const resource = {
     "dashboard.no_projects": "Inga projekt ännu",
     "dashboard.no_projects_desc": "Skapa ditt första projekt för att komma igång",
     "dashboard.not_configured": "Ej konfigurerad",
+    "dashboard.update_welcome_title": "Välkommen till v{{version}}",
+    "dashboard.update_welcome_body": "Plattformen har uppdaterats med nya funktioner och förbättringar. Du kan köra installationsguiden igen för att konfigurera nya alternativ, eller fortsätta arbeta direkt.",
+    "dashboard.update_rerun_setup": "Kör konfiguration igen",
+    "dashboard.update_continue": "Fortsätt",
     "dashboard.project_overview": "Projektöversikt",
     "dashboard.quick_actions": "Snabbåtgärder",
     "dashboard.recent_projects": "Senaste projekt",
@@ -19222,6 +19226,10 @@ const resource = {
     "global_search.collection.variations": "Ändringsorder",
     "global_search.collection.moc": "Ändringshantering (MoC)",
     "global_search.collection.costs": "Kostnadsdatabas",
+    "search.save_search": "Spara sökning",
+    "search.saved_searches": "Sparade sökningar",
+    "search.remove_saved": "Ta bort",
+    "search.no_saved": "Inga sparade sökningar ännu",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

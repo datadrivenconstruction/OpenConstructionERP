@@ -9376,6 +9376,10 @@ const resource = {
     "dashboard.no_projects": "अभी तक कोई परियोजना नहीं",
     "dashboard.no_projects_desc": "शुरू करने के लिए अपनी पहली परियोजना बनाएँ",
     "dashboard.not_configured": "कॉन्फ़िगर नहीं",
+    "dashboard.update_welcome_title": "v{{version}} में आपका स्वागत है",
+    "dashboard.update_welcome_body": "प्लेटफ़ॉर्म को नई सुविधाओं और सुधारों के साथ अपडेट किया गया है। आप नए विकल्पों को कॉन्फ़िगर करने के लिए सेटअप विज़ार्ड फिर से चला सकते हैं, या तुरंत काम जारी रख सकते हैं।",
+    "dashboard.update_rerun_setup": "सेटअप फिर से चलाएँ",
+    "dashboard.update_continue": "जारी रखें",
     "dashboard.project_overview": "परियोजना अवलोकन",
     "dashboard.quick_actions": "त्वरित कार्य",
     "dashboard.recent_projects": "हालिया परियोजनाएँ",
@@ -19233,6 +19237,10 @@ const resource = {
     "global_search.collection.variations": "अतिरिक्त कार्य",
     "global_search.collection.moc": "परिवर्तन प्रबंधन (MoC)",
     "global_search.collection.costs": "लागत डेटाबेस",
+    "search.save_search": "खोज सहेजें",
+    "search.saved_searches": "सहेजी गई खोजें",
+    "search.remove_saved": "हटाएँ",
+    "search.no_saved": "अभी तक कोई सहेजी गई खोज नहीं",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

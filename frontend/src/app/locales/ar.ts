@@ -10975,6 +10975,10 @@ const resource = {
     "dashboard.no_projects": "لا توجد مشاريع بعد",
     "dashboard.no_projects_desc": "أنشئ مشروعك الأول للبدء",
     "dashboard.not_configured": "غير مُعَد",
+    "dashboard.update_welcome_title": "مرحباً بك في الإصدار v{{version}}",
+    "dashboard.update_welcome_body": "تم تحديث المنصة بميزات وتحسينات جديدة. يمكنك إعادة تشغيل معالج الإعداد لتهيئة الخيارات الجديدة، أو مواصلة العمل فوراً.",
+    "dashboard.update_rerun_setup": "إعادة تشغيل الإعداد",
+    "dashboard.update_continue": "متابعة",
     "dashboard.open_source_badge": "أول نظام ERP مفتوح المصدر للبناء",
     "dashboard.over_budget": "تجاوز الميزانية",
     "dashboard.portfolio_overview": "نظرة عامة على المحفظة",
@@ -19450,6 +19454,10 @@ const resource = {
     "global_search.collection.variations": "الأعمال الإضافية",
     "global_search.collection.moc": "إدارة التغييرات (MoC)",
     "global_search.collection.costs": "قاعدة بيانات التكاليف",
+    "search.save_search": "حفظ البحث",
+    "search.saved_searches": "البحوث المحفوظة",
+    "search.remove_saved": "إزالة",
+    "search.no_saved": "لا توجد بحوث محفوظة بعد",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

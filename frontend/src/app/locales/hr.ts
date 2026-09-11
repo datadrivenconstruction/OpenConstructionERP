@@ -9415,6 +9415,10 @@ const resource = {
     "dashboard.no_projects": "Još nema projekata",
     "dashboard.no_projects_desc": "Izradite prvi projekt za početak rada",
     "dashboard.not_configured": "Nije konfigurirano",
+    "dashboard.update_welcome_title": "Dobrodošli u v{{version}}",
+    "dashboard.update_welcome_body": "Platforma je ažurirana s novim funkcijama i poboljšanjima. Možete ponovo pokrenuti čarobnjak za postavljanje kako biste konfigurirali nove opcije ili odmah nastaviti s radom.",
+    "dashboard.update_rerun_setup": "Pokreni postavljanje ponovo",
+    "dashboard.update_continue": "Nastavi",
     "dashboard.project_overview": "Pregled projekta",
     "dashboard.quick_actions": "Brze radnje",
     "dashboard.recent_projects": "Nedavni projekti",
@@ -19091,6 +19095,10 @@ const resource = {
     "global_search.collection.variations": "Izmjene ugovora",
     "global_search.collection.moc": "Upravljanje izmjenama (MoC)",
     "global_search.collection.costs": "Baza troškova",
+    "search.save_search": "Spremi pretragu",
+    "search.saved_searches": "Spremljene pretrage",
+    "search.remove_saved": "Ukloni",
+    "search.no_saved": "Još nema spremljenih pretraga",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

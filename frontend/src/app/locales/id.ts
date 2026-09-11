@@ -9362,6 +9362,10 @@ const resource = {
     "dashboard.no_projects": "Belum ada proyek",
     "dashboard.no_projects_desc": "Buat proyek pertama Anda untuk memulai",
     "dashboard.not_configured": "Belum dikonfigurasi",
+    "dashboard.update_welcome_title": "Selamat datang di v{{version}}",
+    "dashboard.update_welcome_body": "Platform telah diperbarui dengan fitur dan peningkatan baru. Anda dapat menjalankan ulang wizard pengaturan untuk mengonfigurasi opsi baru, atau langsung melanjutkan pekerjaan.",
+    "dashboard.update_rerun_setup": "Jalankan ulang pengaturan",
+    "dashboard.update_continue": "Lanjutkan",
     "dashboard.project_overview": "Ikhtisar Proyek",
     "dashboard.quick_actions": "Tindakan Cepat",
     "dashboard.recent_projects": "Proyek Terbaru",
@@ -19090,6 +19094,10 @@ const resource = {
     "global_search.collection.variations": "Variasi",
     "global_search.collection.moc": "Manajemen Perubahan (MoC)",
     "global_search.collection.costs": "Basis Data Biaya",
+    "search.save_search": "Simpan pencarian",
+    "search.saved_searches": "Pencarian tersimpan",
+    "search.remove_saved": "Hapus",
+    "search.no_saved": "Belum ada pencarian tersimpan",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

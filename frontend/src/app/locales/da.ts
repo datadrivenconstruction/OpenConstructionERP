@@ -10399,6 +10399,10 @@ const resource = {
     "dashboard.no_projects": "Ingen projekter endnu",
     "dashboard.no_projects_desc": "Opret dit første projekt for at komme i gang",
     "dashboard.not_configured": "Ikke konfigureret",
+    "dashboard.update_welcome_title": "Velkommen til v{{version}}",
+    "dashboard.update_welcome_body": "Platformen er opdateret med nye funktioner og forbedringer. Du kan køre opsætningsguiden igen for at konfigurere nye indstillinger, eller fortsætte arbejdet med det samme.",
+    "dashboard.update_rerun_setup": "Kør opsætning igen",
+    "dashboard.update_continue": "Fortsæt",
     "dashboard.project_overview": "Projektoversigt",
     "dashboard.quick_actions": "Hurtige handlinger",
     "dashboard.recent_projects": "Seneste projekter",
@@ -19210,6 +19214,10 @@ const resource = {
     "global_search.collection.variations": "Ekstraarbejder",
     "global_search.collection.moc": "Ændringsstyring (MoC)",
     "global_search.collection.costs": "Prisdatabase",
+    "search.save_search": "Gem søgning",
+    "search.saved_searches": "Gemte søgninger",
+    "search.remove_saved": "Fjern",
+    "search.no_saved": "Ingen gemte søgninger endnu",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

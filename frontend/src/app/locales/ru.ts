@@ -9488,6 +9488,10 @@ const resource = {
     "dashboard.no_projects": "Проектов пока нет",
     "dashboard.no_projects_desc": "Создайте свой первый проект для начала работы",
     "dashboard.not_configured": "Не настроено",
+    "dashboard.update_welcome_title": "Добро пожаловать в v{{version}}",
+    "dashboard.update_welcome_body": "Платформа обновлена с новыми функциями и улучшениями. Вы можете повторно запустить мастер настройки для конфигурации новых параметров или сразу продолжить работу.",
+    "dashboard.update_rerun_setup": "Повторить настройку",
+    "dashboard.update_continue": "Продолжить",
     "dashboard.project_overview": "Обзор проекта",
     "dashboard.quick_actions": "Быстрые действия",
     "dashboard.recent_projects": "Последние проекты",
@@ -19282,6 +19286,10 @@ const resource = {
     "global_search.collection.variations": "Доп. соглашения",
     "global_search.collection.moc": "Управление изменениями (MoC)",
     "global_search.collection.costs": "База данных расценок",
+    "search.save_search": "Сохранить поиск",
+    "search.saved_searches": "Сохранённые поиски",
+    "search.remove_saved": "Удалить",
+    "search.no_saved": "Сохранённых поисков пока нет",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

@@ -9392,6 +9392,10 @@ const resource = {
     "dashboard.no_projects": "ยังไม่มีโครงการ",
     "dashboard.no_projects_desc": "สร้างโครงการแรกของคุณเพื่อเริ่มต้น",
     "dashboard.not_configured": "ยังไม่ได้กำหนดค่า",
+    "dashboard.update_welcome_title": "ยินดีต้อนรับสู่ v{{version}}",
+    "dashboard.update_welcome_body": "แพลตฟอร์มได้รับการอัปเดตด้วยฟีเจอร์และการปรับปรุงใหม่ คุณสามารถรันวิซาร์ดการตั้งค่าอีกครั้งเพื่อกำหนดค่าตัวเลือกใหม่ หรือเริ่มทำงานได้ทันที",
+    "dashboard.update_rerun_setup": "เรียกใช้การตั้งค่าอีกครั้ง",
+    "dashboard.update_continue": "ดำเนินการต่อ",
     "dashboard.project_overview": "ภาพรวมโครงการ",
     "dashboard.quick_actions": "การดำเนินการด่วน",
     "dashboard.recent_projects": "โครงการล่าสุด",
@@ -19201,6 +19205,10 @@ const resource = {
     "global_search.collection.variations": "ใบสั่งเปลี่ยนแปลง",
     "global_search.collection.moc": "การจัดการการเปลี่ยนแปลง (MoC)",
     "global_search.collection.costs": "ฐานข้อมูลต้นทุน",
+    "search.save_search": "บันทึกการค้นหา",
+    "search.saved_searches": "การค้นหาที่บันทึกไว้",
+    "search.remove_saved": "ลบ",
+    "search.no_saved": "ยังไม่มีการค้นหาที่บันทึกไว้",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

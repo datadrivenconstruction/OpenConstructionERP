@@ -9281,6 +9281,10 @@ const resource = {
     "dashboard.no_projects": "Ei projekteja vielä",
     "dashboard.no_projects_desc": "Luo ensimmäinen projektisi aloittaaksesi",
     "dashboard.not_configured": "Ei määritetty",
+    "dashboard.update_welcome_title": "Tervetuloa versioon v{{version}}",
+    "dashboard.update_welcome_body": "Alusta on päivitetty uusilla ominaisuuksilla ja parannuksilla. Voit suorittaa asennusohjatun toiminnon uudelleen uusien asetusten määrittämiseksi tai jatkaa työskentelyä heti.",
+    "dashboard.update_rerun_setup": "Suorita asennus uudelleen",
+    "dashboard.update_continue": "Jatka",
     "dashboard.project_overview": "Projektiyhteenveto",
     "dashboard.quick_actions": "Pikatoiminnot",
     "dashboard.recent_projects": "Viimeaikaiset projektit",
@@ -19124,6 +19128,10 @@ const resource = {
     "global_search.collection.variations": "Muutostyöt",
     "global_search.collection.moc": "Muutosten hallinta (MoC)",
     "global_search.collection.costs": "Kustannustietokanta",
+    "search.save_search": "Tallenna haku",
+    "search.saved_searches": "Tallennetut haut",
+    "search.remove_saved": "Poista",
+    "search.no_saved": "Ei tallennettuja hakuja vielä",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

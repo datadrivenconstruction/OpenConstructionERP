@@ -9443,6 +9443,10 @@ const resource = {
     "dashboard.no_projects": "Niciun proiect",
     "dashboard.no_projects_desc": "Creați primul proiect pentru a începe",
     "dashboard.not_configured": "Neconfigurat",
+    "dashboard.update_welcome_title": "Bun venit în v{{version}}",
+    "dashboard.update_welcome_body": "Platforma a fost actualizată cu funcții și îmbunătățiri noi. Puteți rula din nou expertul de configurare pentru a seta noile opțiuni sau puteți continua lucrul imediat.",
+    "dashboard.update_rerun_setup": "Reîncepere configurare",
+    "dashboard.update_continue": "Continuați",
     "dashboard.project_overview": "Prezentare Proiecte",
     "dashboard.quick_actions": "Acțiuni Rapide",
     "dashboard.recent_projects": "Proiecte Recente",
@@ -19170,6 +19174,10 @@ const resource = {
     "global_search.collection.variations": "Modificări contract",
     "global_search.collection.moc": "Gestionarea modificărilor (MoC)",
     "global_search.collection.costs": "Bază de date costuri",
+    "search.save_search": "Salvează căutarea",
+    "search.saved_searches": "Căutări salvate",
+    "search.remove_saved": "Șterge",
+    "search.no_saved": "Nicio căutare salvată",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

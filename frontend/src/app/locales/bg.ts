@@ -9478,6 +9478,10 @@ const resource = {
     "dashboard.no_projects": "Все още няма проекти",
     "dashboard.no_projects_desc": "Създайте първия си проект, за да започнете",
     "dashboard.not_configured": "Не е конфигуриран",
+    "dashboard.update_welcome_title": "Добре дошли в v{{version}}",
+    "dashboard.update_welcome_body": "Платформата беше актуализирана с нови функции и подобрения. Можете да стартирате отново съветника за настройка, за да конфигурирате новите опции, или да продължите работата веднага.",
+    "dashboard.update_rerun_setup": "Стартирай настройката отново",
+    "dashboard.update_continue": "Продължи",
     "dashboard.project_overview": "Преглед на проекти",
     "dashboard.quick_actions": "Бързи действия",
     "dashboard.recent_projects": "Последни проекти",
@@ -19314,6 +19318,10 @@ const resource = {
     "global_search.collection.variations": "Анекси",
     "global_search.collection.moc": "Управление на промените (MoC)",
     "global_search.collection.costs": "Ценоразпис",
+    "search.save_search": "Запази търсене",
+    "search.saved_searches": "Запазени търсения",
+    "search.remove_saved": "Премахни",
+    "search.no_saved": "Все още няма запазени търсения",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

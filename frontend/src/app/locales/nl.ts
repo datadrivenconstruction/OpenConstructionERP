@@ -8179,6 +8179,10 @@ const resource = {
     "dashboard.no_projects": "Nog geen projecten",
     "dashboard.no_projects_desc": "Maak uw eerste project om te beginnen",
     "dashboard.not_configured": "Niet geconfigureerd",
+    "dashboard.update_welcome_title": "Welkom bij v{{version}}",
+    "dashboard.update_welcome_body": "Het platform is bijgewerkt met nieuwe functies en verbeteringen. U kunt de installatiewizard opnieuw uitvoeren om nieuwe opties in te stellen, of direct verder werken.",
+    "dashboard.update_rerun_setup": "Installatie opnieuw uitvoeren",
+    "dashboard.update_continue": "Doorgaan",
     "dashboard.project_overview": "Projectoverzicht",
     "dashboard.quick_actions": "Snelle acties",
     "dashboard.recent_projects": "Recente projecten",
@@ -18900,6 +18904,10 @@ const resource = {
     "global_search.collection.variations": "Meerwerken",
     "global_search.collection.moc": "Wijzigingsbeheer (MoC)",
     "global_search.collection.costs": "Kostendatabase",
+    "search.save_search": "Zoekopdracht opslaan",
+    "search.saved_searches": "Opgeslagen zoekopdrachten",
+    "search.remove_saved": "Verwijderen",
+    "search.no_saved": "Nog geen opgeslagen zoekopdrachten",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

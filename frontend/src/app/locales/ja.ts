@@ -9326,6 +9326,10 @@ const resource = {
     "dashboard.no_projects": "まだプロジェクトがありません",
     "dashboard.no_projects_desc": "最初のプロジェクトを作成して開始しましょう",
     "dashboard.not_configured": "未設定",
+    "dashboard.update_welcome_title": "v{{version}} へようこそ",
+    "dashboard.update_welcome_body": "プラットフォームが新機能と改善点でアップデートされました。新しいオプションを設定するためにセットアップウィザードを再実行するか、そのまま作業を続けることができます。",
+    "dashboard.update_rerun_setup": "セットアップを再実行",
+    "dashboard.update_continue": "続ける",
     "dashboard.project_overview": "プロジェクト概要",
     "dashboard.quick_actions": "クイックアクション",
     "dashboard.recent_projects": "最近のプロジェクト",
@@ -19155,6 +19159,10 @@ const resource = {
     "global_search.collection.variations": "変更指示",
     "global_search.collection.moc": "変更管理（MoC）",
     "global_search.collection.costs": "単価データベース",
+    "search.save_search": "検索を保存",
+    "search.saved_searches": "保存済みの検索",
+    "search.remove_saved": "削除",
+    "search.no_saved": "保存済みの検索はまだありません",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

@@ -9363,6 +9363,10 @@ const resource = {
     "dashboard.no_projects": "暂无项目",
     "dashboard.no_projects_desc": "创建您的第一个项目以开始",
     "dashboard.not_configured": "未配置",
+    "dashboard.update_welcome_title": "欢迎使用 v{{version}}",
+    "dashboard.update_welcome_body": "平台已更新，包含新功能和改进。您可以重新运行设置向导以配置新选项，也可以立即继续工作。",
+    "dashboard.update_rerun_setup": "重新运行设置",
+    "dashboard.update_continue": "继续",
     "dashboard.project_overview": "项目概览",
     "dashboard.quick_actions": "快捷操作",
     "dashboard.recent_projects": "最近项目",
@@ -19203,6 +19207,10 @@ const resource = {
     "global_search.collection.variations": "变更增项",
     "global_search.collection.moc": "变更管理 (MoC)",
     "global_search.collection.costs": "造价数据库",
+    "search.save_search": "保存搜索",
+    "search.saved_searches": "已保存的搜索",
+    "search.remove_saved": "删除",
+    "search.no_saved": "暂无已保存的搜索",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

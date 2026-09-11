@@ -9345,6 +9345,10 @@ const resource = {
     "dashboard.no_projects": "아직 프로젝트가 없습니다",
     "dashboard.no_projects_desc": "시작하려면 첫 번째 프로젝트를 만드세요",
     "dashboard.not_configured": "설정되지 않음",
+    "dashboard.update_welcome_title": "v{{version}}에 오신 것을 환영합니다",
+    "dashboard.update_welcome_body": "플랫폼이 새로운 기능과 개선 사항으로 업데이트되었습니다. 새 옵션을 구성하려면 설정 마법사를 다시 실행하거나 바로 작업을 계속할 수 있습니다.",
+    "dashboard.update_rerun_setup": "설정 다시 실행",
+    "dashboard.update_continue": "계속",
     "dashboard.project_overview": "프로젝트 개요",
     "dashboard.quick_actions": "빠른 작업",
     "dashboard.recent_projects": "최근 프로젝트",
@@ -19155,6 +19159,10 @@ const resource = {
     "global_search.collection.variations": "변경 지시",
     "global_search.collection.moc": "변경 관리 (MoC)",
     "global_search.collection.costs": "단가 데이터베이스",
+    "search.save_search": "검색 저장",
+    "search.saved_searches": "저장된 검색",
+    "search.remove_saved": "삭제",
+    "search.no_saved": "저장된 검색이 없습니다",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

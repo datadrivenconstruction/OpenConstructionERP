@@ -8851,6 +8851,10 @@ const resource = {
     "dashboard.no_projects": "Noch keine Projekte",
     "dashboard.no_projects_desc": "Erstellen Sie Ihr erstes Projekt, um zu beginnen",
     "dashboard.not_configured": "Nicht konfiguriert",
+    "dashboard.update_welcome_title": "Willkommen bei v{{version}}",
+    "dashboard.update_welcome_body": "Die Plattform wurde mit neuen Funktionen und Verbesserungen aktualisiert. Sie können den Einrichtungsassistenten erneut ausführen, um neue Optionen zu konfigurieren, oder direkt weiterarbeiten.",
+    "dashboard.update_rerun_setup": "Einrichtung wiederholen",
+    "dashboard.update_continue": "Weiter",
     "dashboard.project_overview": "Projektübersicht",
     "dashboard.quick_actions": "Schnellaktionen",
     "dashboard.recent_projects": "Aktuelle Projekte",
@@ -19460,6 +19464,10 @@ const resource = {
     "global_search.collection.variations": "Nachträge",
     "global_search.collection.moc": "Änderungsmanagement (MoC)",
     "global_search.collection.costs": "Kostendatenbank",
+    "search.save_search": "Suche speichern",
+    "search.saved_searches": "Gespeicherte Suchen",
+    "search.remove_saved": "Entfernen",
+    "search.no_saved": "Noch keine gespeicherten Suchen",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

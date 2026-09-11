@@ -9418,6 +9418,10 @@ const resource = {
     "dashboard.no_projects": "Henüz proje yok",
     "dashboard.no_projects_desc": "Başlamak için ilk projenizi oluşturun",
     "dashboard.not_configured": "Yapılandırılmadı",
+    "dashboard.update_welcome_title": "v{{version}} sürümüne hoş geldiniz",
+    "dashboard.update_welcome_body": "Platform yeni özellikler ve iyileştirmelerle güncellendi. Yeni seçenekleri yapılandırmak için kurulum sihirbazını yeniden çalıştırabilir veya hemen çalışmaya devam edebilirsiniz.",
+    "dashboard.update_rerun_setup": "Kurulumu yeniden çalıştır",
+    "dashboard.update_continue": "Devam et",
     "dashboard.project_overview": "Proje Genel Bakış",
     "dashboard.quick_actions": "Hızlı İşlemler",
     "dashboard.recent_projects": "Son Projeler",
@@ -19216,6 +19220,10 @@ const resource = {
     "global_search.collection.variations": "İlave İşler",
     "global_search.collection.moc": "Değişiklik yönetimi (MoC)",
     "global_search.collection.costs": "Maliyet Veritabanı",
+    "search.save_search": "Aramayı kaydet",
+    "search.saved_searches": "Kaydedilen aramalar",
+    "search.remove_saved": "Kaldır",
+    "search.no_saved": "Henüz kaydedilen arama yok",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

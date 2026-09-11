@@ -5409,6 +5409,10 @@ const resource = {
     "dashboard.no_projects": "Азырынча долбоорлор жок",
     "dashboard.no_projects_desc": "Баштоо үчүн биринчи долбоорду түзүңүз",
     "dashboard.not_configured": "Туураланган эмес",
+    "dashboard.update_welcome_title": "v{{version}} версиясына кош келиңиз",
+    "dashboard.update_welcome_body": "Платформа жаңы функциялар жана жакшыртуулар менен жаңыланды. Жаңы параметрлерди орнотуу үчүн орнотуу жадыбалын кайра иштете аласыз же дароо иштей берсеңиз болот.",
+    "dashboard.update_rerun_setup": "Орнотууну кайра иштет",
+    "dashboard.update_continue": "Улантуу",
     "dashboard.project_overview": "Долбоорго жалпы көз чаптыруу",
     "dashboard.quick_actions": "Тез аракеттер",
     "dashboard.recent_projects": "Акыркы долбоорлор",
@@ -15846,6 +15850,10 @@ const resource = {
     "global_search.collection.variations": "Өзгөртүүлөр",
     "global_search.collection.moc": "Өзгөрүүлөрдү башкаруу",
     "global_search.collection.costs": "Нарк базасы",
+    "search.save_search": "Издөөнү сактоо",
+    "search.saved_searches": "Сакталган издөөлөр",
+    "search.remove_saved": "Жок кылуу",
+    "search.no_saved": "Сакталган издөөлөр жок",
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info
     "info.ai-estimator.title": "AI Смета Тузуучу кантип иштейт",

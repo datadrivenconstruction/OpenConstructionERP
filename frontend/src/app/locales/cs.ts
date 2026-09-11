@@ -9420,6 +9420,10 @@ const resource = {
     "dashboard.no_projects": "Zatím žádné projekty",
     "dashboard.no_projects_desc": "Vytvořte svůj první projekt",
     "dashboard.not_configured": "Nenastaveno",
+    "dashboard.update_welcome_title": "Vítejte ve verzi v{{version}}",
+    "dashboard.update_welcome_body": "Platforma byla aktualizována o nové funkce a vylepšení. Můžete znovu spustit průvodce nastavením pro konfiguraci nových možností, nebo rovnou pokračovat v práci.",
+    "dashboard.update_rerun_setup": "Spustit nastavení znovu",
+    "dashboard.update_continue": "Pokračovat",
     "dashboard.project_overview": "Přehled projektu",
     "dashboard.quick_actions": "Rychlé akce",
     "dashboard.recent_projects": "Poslední projekty",
@@ -19098,6 +19102,10 @@ const resource = {
     "global_search.collection.variations": "Změnové listy",
     "global_search.collection.moc": "Řízení změn (MoC)",
     "global_search.collection.costs": "Databáze cen",
+    "search.save_search": "Uložit vyhledávání",
+    "search.saved_searches": "Uložená vyhledávání",
+    "search.remove_saved": "Odebrat",
+    "search.no_saved": "Žádná uložená vyhledávání",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info

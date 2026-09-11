@@ -10331,6 +10331,10 @@ const resource = {
     "dashboard.no_projects": "Ingen prosjekter enna",
     "dashboard.no_projects_desc": "Opprett ditt forste prosjekt for a komme i gang",
     "dashboard.not_configured": "Ikke konfigurert",
+    "dashboard.update_welcome_title": "Velkommen til v{{version}}",
+    "dashboard.update_welcome_body": "Plattformen er oppdatert med nye funksjoner og forbedringer. Du kan kjøre oppsettveiviseren på nytt for å konfigurere nye alternativer, eller fortsette å arbeide umiddelbart.",
+    "dashboard.update_rerun_setup": "Kjør oppsett på nytt",
+    "dashboard.update_continue": "Fortsett",
     "dashboard.project_overview": "Prosjektoversikt",
     "dashboard.quick_actions": "Hurtighandlinger",
     "dashboard.recent_projects": "Nylige prosjekter",
@@ -19149,6 +19153,10 @@ const resource = {
     "global_search.collection.variations": "Endringsarbeider",
     "global_search.collection.moc": "Endringshåndtering (MoC)",
     "global_search.collection.costs": "Kostnadsdatabase",
+    "search.save_search": "Lagre søk",
+    "search.saved_searches": "Lagrede søk",
+    "search.remove_saved": "Fjern",
+    "search.no_saved": "Ingen lagrede søk ennå",
 
     // --- AI Estimate Builder (oe_ai_estimator) ---
     // page info
