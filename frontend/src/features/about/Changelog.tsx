@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.4.1',
+    date: '2026-09-11',
+    tag: 'NEW',
+    summary:
+      'BOQ import now opens a preview wizard showing parsed positions, sections, currency and warnings before committing. Invoice approval no longer writes the wrong status, and dashboard totals no longer show NaN. Nine backend modules hardened with repository layers, typed schemas and proper ORM relationships.',
+  },
+  {
     version: '17.4.0',
     date: '2026-09-10',
     tag: 'NEW',

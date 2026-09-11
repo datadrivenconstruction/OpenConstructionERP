@@ -394,11 +394,20 @@ _INFRA_COLUMNS: dict[str, tuple[str, ...]] = {
 
 # Fields in _INFRA_COLUMNS that are tag/classification codes resolved against
 # dictionary sheets, as opposed to structural or pricing fields.
-_INFRA_TAG_FIELDS = frozenset({
-    "work_process", "trade", "depreciation", "structure_id",
-    "catalogue_code", "asset_owner", "asset_class", "funding_source",
-    "item_type", "statistics_code",
-})
+_INFRA_TAG_FIELDS = frozenset(
+    {
+        "work_process",
+        "trade",
+        "depreciation",
+        "structure_id",
+        "catalogue_code",
+        "asset_owner",
+        "asset_class",
+        "funding_source",
+        "item_type",
+        "statistics_code",
+    }
+)
 
 
 def _infra_header(rows: list[tuple[Any, ...]]) -> tuple[int, dict[str, int]] | None:

@@ -5,6 +5,16 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.4.1] - 2026-09-11
+
+Importing a BOQ file now opens a preview wizard instead of posting the file immediately. The wizard shows the parsed positions in a scrollable table with section headings, quantities, rates and totals, the detected format and currency, any warnings the parser raised and a count of skipped rows, so the person importing can see exactly what will land in the bill before confirming. The preview parses but does not persist, and the confirm step calls the same import endpoint that ran before.
+
+Approving an invoice was writing "sent" instead of "approved", which blocked the Mark Paid button because it required the approved status. The service, the router description, the audit log and both test suites are corrected. Pay-invoice still accepts legacy rows that carry "sent" from before the fix.
+
+The dashboard no longer shows "CRCNaN" as a project total. Money values arriving from the API as strings were concatenated instead of summed, producing NaN that the currency formatter rendered as the currency code jammed against the literal text NaN. All arithmetic paths now coerce through toNum() before addition.
+
+Nine backend modules are hardened: payment-clock gains a repository layer and typed service signatures, e-invoice gains a manifest and a standalone validation and generation router, rebar-schedule gains ORM relationships and a typed cutting-summary response, site-prep gains a repository layer, estimate-rollup and einvoice-clearance gain narrower type hints, match gains a dedicated schemas file, and measurement gains Google-style docstrings throughout.
+
 ## [17.4.0] - 2026-09-10
 
 The cost explorer and cost match modules gained a substitute handoff flow. A substitute result in cost explorer can be added directly to a bill of quantities or saved as a reusable assembly, and cost match results can be confirmed in batch with a single click and copied to the clipboard for pasting into a spreadsheet. Twelve new interface strings are translated into all offered languages.
