@@ -121,11 +121,12 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "AT": "din276",
         "CH": "din276",
         "LI": "din276",
-        # Central Europe and the Low Countries. No native cost-group
-        # standard of their own in the product yet; DIN 276 is the
-        # nearest hierarchy their tender documents map onto.
+        # Central Europe and the Low Countries. Belgium and Luxembourg
+        # have no native cost-group standard in the product yet; DIN 276
+        # is the nearest hierarchy their tender documents map onto.
+        # The Netherlands now has its own pack declaring NL/SfB.
         "BE": "din276",
-        "NL": "din276",
+        "NL": "nlsfb",
         "LU": "din276",
         "PL": "din276",
         "CZ": "din276",
