@@ -2036,7 +2036,12 @@ export function SettingsPage() {
                         iconPosition="right"
                         className="sm:ml-auto shrink-0"
                         onClick={() => {
-                          try { localStorage.removeItem('oe_onboarding_completed'); } catch { /* ignore storage errors */ }
+                          try {
+                            localStorage.removeItem('oe_onboarding_completed');
+                            localStorage.removeItem('oe_onboarding_completed_version');
+                            localStorage.removeItem('oe_lang_explicit');
+                          } catch { /* ignore storage errors */ }
+                          void apiDelete('/v1/users/me/onboarding/complete/').catch(() => {});
                           window.location.href = '/onboarding';
                         }}
                       >

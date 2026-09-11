@@ -416,10 +416,21 @@ _boot_phase_started: float = 0.0
 
 
 def _set_boot_phase(name: str) -> None:
-    """Record which startup phase is running, and restart its clock."""
+    """Record which startup phase is running, and restart its clock.
+
+    Also emits a ``STAGE:migrate:progress`` marker so the desktop splash
+    screen shows which phase is active. Without this the migrate step
+    appeared frozen because only ``migrate:start`` was ever emitted.
+    """
     global _boot_phase, _boot_phase_started
     _boot_phase = name
     _boot_phase_started = time.monotonic()
+    try:
+        from app.core.embedded_pg import emit_stage
+
+        emit_stage("migrate", "progress", name)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 @contextmanager
@@ -470,7 +481,14 @@ def _heartbeat_through_startup() -> Iterator[None]:
             # while a phase that never moves stays silent for good.
             if elapsed >= _BOOT_PHASE_BUDGET_SECONDS:
                 continue
-            logger.info("Still working: %s (%ds so far)", _boot_phase or "startup", int(elapsed))
+            phase_msg = f"{_boot_phase or 'startup'} ({int(elapsed)}s)"
+            logger.info("Still working: %s", phase_msg)
+            try:
+                from app.core.embedded_pg import emit_stage
+
+                emit_stage("migrate", "progress", phase_msg)
+            except Exception:  # noqa: BLE001
+                pass
 
     worker = threading.Thread(target=tick, name="oe-boot-heartbeat", daemon=True)
     worker.start()

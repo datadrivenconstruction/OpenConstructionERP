@@ -1255,6 +1255,34 @@ async def complete_onboarding(
     )
 
 
+@router.delete("/me/onboarding/complete/", response_model=OnboardingResponse)
+async def reset_onboarding(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> OnboardingResponse:
+    """Reset onboarding to incomplete so the wizard can be re-run.
+
+    Called from the Settings "restart onboarding" action and from the
+    update-welcome dialog's "re-run setup" button.  Clears the per-user
+    ``completed`` flag on the server while leaving all other onboarding
+    choices (company_type, enabled_modules, etc.) intact.
+    """
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = dict(user.metadata_ or {})
+    onboarding: dict[str, Any] = dict(metadata.get("onboarding") or {})
+    onboarding["completed"] = False
+    metadata["onboarding"] = onboarding
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+
+    return OnboardingResponse(
+        completed=False,
+        company_type=onboarding.get("company_type"),
+        company_size=onboarding.get("company_size"),
+        enabled_modules=onboarding.get("enabled_modules", []),
+        interface_mode=onboarding.get("interface_mode"),
+    )
+
+
 @router.get("/onboarding-presets/")
 async def get_onboarding_presets() -> list[dict[str, Any]]:
     """Return all available company-type presets for the onboarding wizard.

@@ -55,7 +55,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
-import { detectCountry, matchSupportedLanguage, SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { APP_VERSION } from '@/shared/lib/version';
+import { detectCountry, matchSupportedLanguage, changeLanguage, SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   useBackgroundInstallStore,
@@ -560,6 +561,7 @@ export const ONBOARDING_COMPLETED_EVENT = 'oe:onboarding-completed';
 export function markOnboardingCompleted(): void {
   try {
     localStorage.setItem('oe_onboarding_completed', 'true');
+    localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
   } catch {
     // Storage unavailable -- ignore.
   }
@@ -1062,7 +1064,7 @@ function StepWelcome({
   const handleSelect = useCallback(
     (code: string) => {
       setSelected(code);
-      i18n.changeLanguage(code);
+      void changeLanguage(code);
       onLanguageChange(code);
     },
     [onLanguageChange],
@@ -1083,7 +1085,7 @@ function StepWelcome({
     // Portuguese and the user's click on Next made that the explicit choice.
     const target = matchSupportedLanguage(navigator.language) ?? 'en';
     if (target !== i18n.language) {
-      i18n.changeLanguage(target);
+      void changeLanguage(target);
       onLanguageChange(target);
     }
     setSelected(target);
@@ -3761,7 +3763,7 @@ export function StepDataSetup({
 
   /** Set the UI locale and persist it as an explicit user choice. */
   const applyLocale = useCallback((locale: string) => {
-    i18n.changeLanguage(locale);
+    void changeLanguage(locale);
     try {
       localStorage.setItem('oe_lang_explicit', '1');
     } catch {
@@ -4639,7 +4641,7 @@ export function OnboardingWizard() {
   // never overrides it, complete onboarding exactly like the finish path, and
   // drop the user straight on the dashboard. No confirmation dialog.
   const handleSkipAll = useCallback(() => {
-    void i18n.changeLanguage('en');
+    void changeLanguage('en');
     try {
       localStorage.setItem('oe_lang_explicit', '1');
     } catch {
@@ -4709,7 +4711,7 @@ export function OnboardingWizard() {
   /** Set the UI locale and persist it as an explicit user choice (shared with
    *  the country-pack data step). */
   const applyLocale = useCallback((locale: string) => {
-    i18n.changeLanguage(locale);
+    void changeLanguage(locale);
     try {
       localStorage.setItem('oe_lang_explicit', '1');
     } catch {

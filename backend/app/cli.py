@@ -1375,6 +1375,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
     try:
         from app.core.embedded_pg import emit_stage
 
+        emit_stage("migrate", "done", "Database ready")
         emit_stage("server", "start", "Starting the application server")
     except Exception:  # noqa: BLE001
         pass
