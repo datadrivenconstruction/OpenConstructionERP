@@ -156,8 +156,21 @@ async def _step_apply_pack(
     *,
     confirm_disables: bool = False,
 ) -> StepResult:
-    """Step 1 - apply the pack (modules + branding + defaults), no demo."""
-    from app.core.partner_pack.apply import apply_pack
+    """Step 1 - apply the pack (modules + branding + defaults), no demo.
+
+    If another pack is already active, unapply it first so the old pack's
+    demo projects are released and the workspace starts clean. Without this,
+    switching from e.g. Russia to US left Russian demos visible and the old
+    cost database active.
+    """
+    from app.core.partner_pack.apply import apply_pack, unapply
+    from app.core.partner_pack.state import load_applied_state
+
+    # Clean up previous pack before applying the new one.
+    prev = load_applied_state()
+    if prev and prev.slug != slug:
+        logger.info("Switching pack: unapplying '%s' before applying '%s'", prev.slug, slug)
+        await unapply(app=app)
 
     res = await apply_pack(
         slug,
