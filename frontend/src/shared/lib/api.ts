@@ -40,8 +40,8 @@ export const API_BASE = BASE_URL;
  * The long budget is kept for genuinely heavy operations (CWICR import, AI
  * estimation, CAD/BIM conversion) and must be opted into via `longRunning`.
  */
-const DEFAULT_GET_TIMEOUT_MS = 45_000;
-const DEFAULT_MUTATION_TIMEOUT_MS = 45_000;
+const DEFAULT_GET_TIMEOUT_MS = 90_000;
+const DEFAULT_MUTATION_TIMEOUT_MS = 90_000;
 const LONG_RUNNING_TIMEOUT_MS = 300_000; // 5 min — import / AI / CAD only
 
 /**
@@ -52,7 +52,7 @@ const LONG_RUNNING_TIMEOUT_MS = 300_000; // 5 min — import / AI / CAD only
  * states keep working; only the duplicate global toasts are suppressed.
  */
 let _lastTimeoutToastAt = 0;
-const TIMEOUT_TOAST_THROTTLE_MS = 12_000;
+const TIMEOUT_TOAST_THROTTLE_MS = 30_000;
 
 /**
  * Request init accepted by the typed API helpers.
