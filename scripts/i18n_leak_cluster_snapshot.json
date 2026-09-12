@@ -1479,5 +1479,57 @@
     ],
     "key_count_at_seed": 3,
     "note": "costs.classification 'Class.', resources.alloc 'Alloc', tendering.tab_addenda 'Addenda' are genuine French/Italian cognates, not leaks. Both languages inherit the Latin roots directly (fr classification/allocation are spelled identically to English; it classificazione/allocazione share the same 5-letter prefix), and both files demonstrate they know and use the full native words correctly elsewhere in the same section: it.ts/fr.ts write out 'Allocazione %'/'Allocation %' on the very next key after 'Alloc', and the whole tendering.addendum.* key family (create, draft, published, revision...) is meticulously translated except for the one title key where French/Italian addendum/addenda is the same word as English by inheritance, not by omission. Contrast with Hindi and Indonesian, which also render tendering.addendum.title as literal Latin-script 'Addenda' (not part of this 13-cluster job, left for a separate pass) - that is a real leak, because Hindi has no Latin cognate to fall back on; French and Italian do."
+  },
+  {
+    "locale_set": [
+      "en-GB"
+    ],
+    "key_count_at_seed": 26
+  },
+  {
+    "locale_set": [
+      "ar",
+      "bg",
+      "bn",
+      "cs",
+      "da",
+      "de",
+      "el",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "et",
+      "fa",
+      "fi",
+      "fil",
+      "fr",
+      "he",
+      "hi",
+      "hr",
+      "hu",
+      "id",
+      "it",
+      "ja",
+      "kk",
+      "ko",
+      "ky",
+      "mn",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "pt-BR",
+      "ro",
+      "ru",
+      "sv",
+      "th",
+      "tr",
+      "uk",
+      "ur",
+      "vi",
+      "zh"
+    ],
+    "key_count_at_seed": 3
   }
 ]

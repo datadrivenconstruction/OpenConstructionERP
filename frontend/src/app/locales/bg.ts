@@ -39236,7 +39236,7 @@ const resource = {
     "estimateBasis.headline.contingencyIncluded": "включен резерв",
     "estimateBasis.headline.directCost": "Пряк разход",
     "estimateBasis.headline.expectedRange": "Очакван диапазон",
-    "estimateBasis.headline.grossIncTax": "брuto с ДДС",
+    "estimateBasis.headline.grossIncTax": "бруто с ДДС",
     "estimateBasis.headline.markupCount_one": "{{count}} ред",
     "estimateBasis.headline.markupCount_other": "{{count}} реда",
     "estimateBasis.headline.markups": "Надценки",
