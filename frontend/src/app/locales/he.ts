@@ -26025,6 +26025,8 @@ const resource = {
     "documents.drop_zone": "אזור גרירת קבצים",
     "documents.field_added": "סומן כתמונת אתר",
     "documents.field_image_hint": "הציגו תמונה זו ברצועת התמונות של הפרויקט (ראיה מהשטח/אתר).",
+    "documents.revision_code": "גרסה",
+    "documents.drawing_number": "מספר תוכנית",
     "documents.field_image_off": "סימון כתמונת אתר",
     "documents.field_image_on": "תמונת אתר",
     "documents.field_removed": "הוסר מתמונות האתר",

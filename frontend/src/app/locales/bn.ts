@@ -25950,6 +25950,8 @@ const resource = {
     "documents.drop_zone": "ফাইল ড্রপ জোন",
     "documents.field_added": "একটি সাইট ছবি হিসেবে চিহ্নিত",
     "documents.field_image_hint": "প্রজেক্ট ফটো স্ট্রিপে (ফিল্ড/সাইট প্রমাণ) এই ছবিটি দেখান।",
+    "documents.revision_code": "রিভিশন",
+    "documents.drawing_number": "ড্রইং নম্বর",
     "documents.field_image_off": "সাইট ছবি হিসেবে চিহ্নিত করুন",
     "documents.field_image_on": "সাইট ছবি",
     "documents.field_removed": "সাইট ছবি থেকে সরানো হয়েছে",

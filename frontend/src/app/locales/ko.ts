@@ -26659,6 +26659,8 @@ const resource = {
     "documents.drop_zone": "파일 놓기 영역",
     "documents.field_added": "현장 사진으로 표시됨",
     "documents.field_image_hint": "이 이미지를 프로젝트 사진 스트립에 표시 (현장/현장 증거).",
+    "documents.revision_code": "개정",
+    "documents.drawing_number": "도면 번호",
     "documents.field_image_off": "현장 사진으로 표시",
     "documents.field_image_on": "현장 사진",
     "documents.field_removed": "현장 사진에서 제거됨",

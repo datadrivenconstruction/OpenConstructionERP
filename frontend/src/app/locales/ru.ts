@@ -26900,6 +26900,8 @@ const resource = {
     "documents.drop_zone": "Область для перетаскивания файлов",
     "documents.field_added": "Отмечено как фото с объекта",
     "documents.field_image_hint": "Показать это изображение в ленте фотографий проекта (доказательство на объекте).",
+    "documents.revision_code": "Ревизия",
+    "documents.drawing_number": "Номер чертежа",
     "documents.field_image_off": "Отметить как фото с объекта",
     "documents.field_image_on": "Фото с объекта",
     "documents.field_removed": "Удалено из фотографий объекта",

@@ -26649,6 +26649,8 @@ const resource = {
     "documents.drop_zone": "ファイルドロップゾーン",
     "documents.field_added": "現場写真としてマーク",
     "documents.field_image_hint": "このイメージをプロジェクトの写真ストリップに表示します(現場/現地の証拠)。",
+    "documents.revision_code": "改訂",
+    "documents.drawing_number": "図面番号",
     "documents.field_image_off": "現場写真としてマーク",
     "documents.field_image_on": "現場写真",
     "documents.field_removed": "現場写真から削除",

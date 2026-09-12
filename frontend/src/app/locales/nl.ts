@@ -26680,6 +26680,8 @@ const resource = {
     "documents.drop_zone": "Bestandsdropzone",
     "documents.field_added": "Gemarkeerd als sitefoto",
     "documents.field_image_hint": "Dit beeld weergeven in de fotoreeks van het project (veld/sitefoto).",
+    "documents.revision_code": "Revisie",
+    "documents.drawing_number": "Tekening nummer",
     "documents.field_image_off": "Markeren als sitefoto",
     "documents.field_image_on": "Sitefoto",
     "documents.field_removed": "Verwijderd uit sitefoto's",

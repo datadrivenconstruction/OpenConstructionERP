@@ -26714,6 +26714,8 @@ const resource = {
     "documents.drop_zone": "Vùng thả tệp",
     "documents.field_added": "Đã đánh dấu là ảnh trang web",
     "documents.field_image_hint": "Hiển thị hình ảnh này trong dải ảnh dự án (bằng chứng trang web).",
+    "documents.revision_code": "Bản sửa đổi",
+    "documents.drawing_number": "Số bản vẽ",
     "documents.field_image_off": "Đánh dấu là ảnh trang web",
     "documents.field_image_on": "Ảnh trang web",
     "documents.field_removed": "Đã xóa khỏi ảnh trang web",

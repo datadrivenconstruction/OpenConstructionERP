@@ -27260,6 +27260,8 @@ const resource = {
     "documents.drop_zone": "Зона перетягування файлів",
     "documents.field_added": "Позначено як фото майданчика",
     "documents.field_image_hint": "Показувати це зображення у стрічці фото проєкту (докази з майданчика).",
+    "documents.revision_code": "Ревізія",
+    "documents.drawing_number": "Номер креслення",
     "documents.field_image_off": "Позначити як фото майданчика",
     "documents.field_image_on": "Фото майданчика",
     "documents.field_removed": "Видалено з фото майданчика",

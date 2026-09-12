@@ -26010,6 +26010,8 @@ const resource = {
     "documents.drop_zone": "فائل drop zone",
     "documents.field_added": "بطور سائٹ فوٹو نشان زد",
     "documents.field_image_hint": "اس تصویر کو پروجیکٹ Photo strip میں دکھائیں (field/site شواہد)۔",
+    "documents.revision_code": "نظرثانی",
+    "documents.drawing_number": "ڈرائنگ نمبر",
     "documents.field_image_off": "سائٹ فوٹو کے طور پر نشان زد کریں",
     "documents.field_image_on": "سائٹ فوٹو",
     "documents.field_removed": "سائٹ فوٹوز سے ہٹا دیا گیا",

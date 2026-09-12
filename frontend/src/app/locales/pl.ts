@@ -26805,6 +26805,8 @@ const resource = {
     "documents.drop_zone": "Strefa upuszczania plików",
     "documents.field_added": "Oznaczony jako zdjęcie placu",
     "documents.field_image_hint": "Pokaż ten obraz na pasku fotografii projektu (dowód placu/terenu).",
+    "documents.revision_code": "Rewizja",
+    "documents.drawing_number": "Numer rysunku",
     "documents.field_image_off": "Oznacz jako zdjęcie placu",
     "documents.field_image_on": "Zdjęcie placu",
     "documents.field_removed": "Usunięto ze zdjęć placu",

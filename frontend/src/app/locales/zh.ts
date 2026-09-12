@@ -26697,6 +26697,8 @@ const resource = {
     "documents.drop_zone": "文件拖放区",
     "documents.field_added": "标记为现场照片",
     "documents.field_image_hint": "在项目照片栏中显示此图像（现场 / 现场证据）。",
+    "documents.revision_code": "修订版",
+    "documents.drawing_number": "图纸编号",
     "documents.field_image_off": "标记为现场照片",
     "documents.field_image_on": "现场照片",
     "documents.field_removed": "从现场照片中删除",

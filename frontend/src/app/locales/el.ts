@@ -25993,6 +25993,8 @@ const resource = {
     "documents.drop_zone": "Περιοχή απόθεσης αρχείων",
     "documents.field_added": "Σημειώθηκε ως φωτογραφία εργοταξίου",
     "documents.field_image_hint": "Εμφάνιση αυτής της εικόνας στη λωρίδα φωτογραφιών του έργου (τεκμήριο πεδίου/εργοταξίου).",
+    "documents.revision_code": "Αναθεώρηση",
+    "documents.drawing_number": "Αριθμός σχεδίου",
     "documents.field_image_off": "Σήμανση ως φωτογραφία εργοταξίου",
     "documents.field_image_on": "Φωτογραφία εργοταξίου",
     "documents.field_removed": "Αφαιρέθηκε από τις φωτογραφίες εργοταξίου",

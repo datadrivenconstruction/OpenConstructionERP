@@ -26747,6 +26747,8 @@ const resource = {
     "documents.drop_zone": "Zona de descarga de archivos",
     "documents.field_added": "Marcado como foto de sitio",
     "documents.field_image_hint": "Muestra esta imagen en la franja de fotos del proyecto (evidencia de campo/sitio).",
+    "documents.revision_code": "Revisión",
+    "documents.drawing_number": "Número de plano",
     "documents.field_image_off": "Marcar como foto de sitio",
     "documents.field_image_on": "Foto de sitio",
     "documents.field_removed": "Eliminado de fotos de sitio",

@@ -26688,6 +26688,8 @@ const resource = {
     "documents.drop_zone": "Filslip-zone",
     "documents.field_added": "Markeret som byggepladsfoto",
     "documents.field_image_hint": "Vis dette billede i projektets fotografi (felt/byggestedsvidence).",
+    "documents.revision_code": "Revision",
+    "documents.drawing_number": "Tegningsnummer",
     "documents.field_image_off": "Markér som byggepladsfoto",
     "documents.field_image_on": "Byggepladsfoto",
     "documents.field_removed": "Fjernet fra byggepladsfoto",

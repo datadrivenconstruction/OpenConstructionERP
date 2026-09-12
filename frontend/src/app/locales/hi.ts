@@ -26430,6 +26430,8 @@ const resource = {
     "documents.drop_zone": "फ़ाइल ड्रॉप क्षेत्र",
     "documents.field_added": "साइट फोटो के रूप में चिह्नित",
     "documents.field_image_hint": "इस छवि को परियोजना फोटो पट्टी में दिखाएं (फील्ड/साइट सबूत)।",
+    "documents.revision_code": "रिवीजन",
+    "documents.drawing_number": "ड्राइंग नंबर",
     "documents.field_image_off": "साइट फोटो के रूप में चिह्नित करें",
     "documents.field_image_on": "साइट फोटो",
     "documents.field_removed": "साइट फोटो से हटाया गया",

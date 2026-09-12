@@ -26700,6 +26700,8 @@ const resource = {
     "documents.drop_zone": "Filuppladdningszon",
     "documents.field_added": "Märkt som webbplatsfoto",
     "documents.field_image_hint": "Visa denna bild i projektets fotobälte (webbplats/arbetsplatsbevisen).",
+    "documents.revision_code": "Revision",
+    "documents.drawing_number": "Ritningsnummer",
     "documents.field_image_off": "Markera som webbplatsfoto",
     "documents.field_image_on": "Webbplatsfoto",
     "documents.field_removed": "Borttagen från webbplatsfoton",

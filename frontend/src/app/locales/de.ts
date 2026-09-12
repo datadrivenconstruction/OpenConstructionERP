@@ -27405,6 +27405,8 @@ const resource = {
     "documents.drop_zone": "Ablage-Zone für Dateien",
     "documents.field_added": "Als Standortfoto gekennzeichnet",
     "documents.field_image_hint": "Dieses Bild im Projekt-Fotostreifen anzeigen (Feld-/Standortbeleg).",
+    "documents.revision_code": "Revision",
+    "documents.drawing_number": "Plannummer",
     "documents.field_image_off": "Als Standortfoto kennzeichnen",
     "documents.field_image_on": "Standortfoto",
     "documents.field_removed": "Aus Standortfotos entfernt",

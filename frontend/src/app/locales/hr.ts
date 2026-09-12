@@ -26758,6 +26758,8 @@ const resource = {
     "documents.drop_zone": "Zona za ispuštanje datoteka",
     "documents.field_added": "Označeno kao slika s lokacije",
     "documents.field_image_hint": "Prikaži ovu sliku u traci Project Photo (terenska/lokacijska dokaza).",
+    "documents.revision_code": "Revizija",
+    "documents.drawing_number": "Broj nacrta",
     "documents.field_image_off": "Označi kao sliku s lokacije",
     "documents.field_image_on": "Slika s lokacije",
     "documents.field_removed": "Uklonjeno iz slika s lokacije",

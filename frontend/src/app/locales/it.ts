@@ -26814,6 +26814,8 @@ const resource = {
     "documents.drop_zone": "Zona di rilascio file",
     "documents.field_added": "Contrassegnato come foto del sito",
     "documents.field_image_hint": "Mostra questa immagine nella striscia fotografica del progetto (prove sul campo/sito).",
+    "documents.revision_code": "Revisione",
+    "documents.drawing_number": "Numero di elaborato",
     "documents.field_image_off": "Contrassegna come foto del sito",
     "documents.field_image_on": "Foto del sito",
     "documents.field_removed": "Rimosso dalle foto del sito",

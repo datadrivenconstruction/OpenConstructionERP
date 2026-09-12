@@ -25950,6 +25950,8 @@ const resource = {
     "documents.drop_zone": "Zone ng pag-drop ng file",
     "documents.field_added": "Namarkahang site photo",
     "documents.field_image_hint": "Ipakita ang larawang ito sa Photo strip ng proyekto (ebidensya sa field/site).",
+    "documents.revision_code": "Rebisyon",
+    "documents.drawing_number": "Numero ng guhit",
     "documents.field_image_off": "Markahang site photo",
     "documents.field_image_on": "Larawan sa Site",
     "documents.field_removed": "Naalis mula sa mga site photo",

@@ -26791,6 +26791,8 @@ const resource = {
     "documents.drop_zone": "Зона за пускане на файлове",
     "documents.field_added": "Отбелязано като снимка от място",
     "documents.field_image_hint": "Покажете това изображение в разделът Снимки на проекта (доказателство от място).",
+    "documents.revision_code": "Ревизия",
+    "documents.drawing_number": "Номер на чертежа",
     "documents.field_image_off": "Отбеляжете като снимка от място",
     "documents.field_image_on": "Снимка от място",
     "documents.field_removed": "Премахнато от снимките от място",

@@ -26684,6 +26684,8 @@ const resource = {
     "documents.drop_zone": "Failide lohistamise ala",
     "documents.field_added": "Märgitud objektifotona",
     "documents.field_image_hint": "Näita seda pilti projekti fotoribal (objekti/välitöö tõend).",
+    "documents.revision_code": "Revisjon",
+    "documents.drawing_number": "Joonise number",
     "documents.field_image_off": "Märgi objektifotoks",
     "documents.field_image_on": "Objektifoto",
     "documents.field_removed": "Eemaldatud objektifotodest",

@@ -26888,6 +26888,8 @@ const resource = {
     "documents.drop_zone": "منطقة إسقاط الملفات",
     "documents.field_added": "تم وضع علامة كصورة موقع",
     "documents.field_image_hint": "عرض هذه الصورة في شريط صور المشروع (دليل الموقع / الموقع).",
+    "documents.revision_code": "المراجعة",
+    "documents.drawing_number": "رقم المخطط",
     "documents.field_image_off": "وضع علامة كصورة موقع",
     "documents.field_image_on": "صورة الموقع",
     "documents.field_removed": "تم الحذف من صور الموقع",

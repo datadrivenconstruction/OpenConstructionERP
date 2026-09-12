@@ -26517,6 +26517,8 @@ const resource = {
     "documents.drop_zone": "Fájl elengedési terület",
     "documents.field_added": "Megjelölve helyszíni fotóként",
     "documents.field_image_hint": "Jelenjen meg ez a kép a projekt fotócsíkjában (helyszíni bizonyíték).",
+    "documents.revision_code": "Revízió",
+    "documents.drawing_number": "Rajzszám",
     "documents.field_image_off": "Megjelölés helyszíni fotóként",
     "documents.field_image_on": "Helyszíni fotó",
     "documents.field_removed": "Eltávolítva a helyszíni fotók közül",

@@ -23526,6 +23526,8 @@ const resource = {
     "documents.field_image_on": "Сайттын сүрөтү",
     "documents.field_image_off": "Сайт сүрөтү катары белгилөө",
     "documents.field_image_hint": "Бул сүрөттү долбоордун Сүрөт тилкесинде (талаа/сайт далили) көрсөтүү.",
+    "documents.revision_code": "Кайра карап чыгуу",
+    "documents.drawing_number": "Сызма номери",
     "photos.lightbox": "Сүрөт көрүүчү",
     "photos.previous": "Мурунку сүрөт",
     "photos.next": "Кийинки сүрөт",

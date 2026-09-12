@@ -26805,6 +26805,8 @@ const resource = {
     "documents.drop_zone": "Zone de dépôt de fichiers",
     "documents.field_added": "Marqué comme photo de chantier",
     "documents.field_image_hint": "Afficher cette image dans la bande de photos du projet (photos de chantier/preuves).",
+    "documents.revision_code": "Révision",
+    "documents.drawing_number": "Numéro de plan",
     "documents.field_image_off": "Marquer comme photo de chantier",
     "documents.field_image_on": "Photo de chantier",
     "documents.field_removed": "Supprimé des photos de chantier",

@@ -26789,6 +26789,8 @@ const resource = {
     "documents.drop_zone": "Dosya bırakma alanı",
     "documents.field_added": "Site fotoğrafı olarak işaretlendi",
     "documents.field_image_hint": "Bu görüntüyü proje Fotoğraf şeridinde göster (saha/site kanıtı).",
+    "documents.revision_code": "Revizyon",
+    "documents.drawing_number": "Çizim numarası",
     "documents.field_image_off": "Site fotoğrafı olarak işaretle",
     "documents.field_image_on": "Site fotoğrafı",
     "documents.field_removed": "Site fotoğraflarından kaldırıldı",

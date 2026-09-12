@@ -26767,6 +26767,8 @@ const resource = {
     "documents.drop_zone": "Zóna přetahování souborů",
     "documents.field_added": "Označeno jako fotografie ze stavby",
     "documents.field_image_hint": "Zobrazit tento obrázek v pruhu fotografií projektu (záznamy ze stavby).",
+    "documents.revision_code": "Revize",
+    "documents.drawing_number": "Číslo výkresu",
     "documents.field_image_off": "Označit jako fotografie ze stavby",
     "documents.field_image_on": "Fotografie ze stavby",
     "documents.field_removed": "Odebráno z fotografií stavby",

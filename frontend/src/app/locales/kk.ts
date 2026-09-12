@@ -25962,6 +25962,8 @@ const resource = {
     "documents.drop_zone": "Файл тастау аймағы",
     "documents.field_added": "Алаң фотосы деп белгіленді",
     "documents.field_image_hint": "Бұл кескінді жобаның Фото жолағында көрсету (алаң/дала дәлелі).",
+    "documents.revision_code": "Қайта қарау",
+    "documents.drawing_number": "Сызба нөмірі",
     "documents.field_image_off": "Алаң фотосы деп белгілеу",
     "documents.field_image_on": "Алаң фотосы",
     "documents.field_removed": "Алаң фотоларынан алынып тасталды",

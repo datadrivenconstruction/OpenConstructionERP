@@ -26569,6 +26569,8 @@ const resource = {
     "documents.drop_zone": "Filslippzone",
     "documents.field_added": "Merket som stedfoto",
     "documents.field_image_hint": "Vis dette bildet i prosjektets fotostrimmel (felt/stedsbevis).",
+    "documents.revision_code": "Revisjon",
+    "documents.drawing_number": "Tegningsnummer",
     "documents.field_image_off": "Merk som stedfoto",
     "documents.field_image_on": "Stedfoto",
     "documents.field_removed": "Fjernet fra stedfoto",

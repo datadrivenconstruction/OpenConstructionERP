@@ -26753,6 +26753,8 @@ const resource = {
     "documents.drop_zone": "Zona de drop de ficheiro",
     "documents.field_added": "Marcado como foto do site",
     "documents.field_image_hint": "Mostre esta imagem na faixa Photo do projeto (evidência de campo/site).",
+    "documents.revision_code": "Revisão",
+    "documents.drawing_number": "Número do desenho",
     "documents.field_image_off": "Marcar como foto do site",
     "documents.field_image_on": "Foto do site",
     "documents.field_removed": "Removido das fotos do site",

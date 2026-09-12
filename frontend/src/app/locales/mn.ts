@@ -26097,6 +26097,8 @@ const resource = {
     "documents.drop_zone": "Файл унаж буулгах бүс",
     "documents.field_added": "Сайт зургийн хэмжээнд тэмдэглэгдсэн",
     "documents.field_image_hint": "Энэ зургийг төслийн фото туузан дээр (сайт/сайтын баримт) харуулах.",
+    "documents.revision_code": "Хянан засвар",
+    "documents.drawing_number": "Зургийн дугаар",
     "documents.field_image_off": "Сайт зургийн хэмжээнд тэмдэглэх",
     "documents.field_image_on": "Сайт зураг",
     "documents.field_removed": "Сайт фотоноос арилгасан",

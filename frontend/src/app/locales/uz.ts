@@ -27221,6 +27221,8 @@ const resource = {
     "documents.drop_zone": "Fayl tashlash zonasi",
     "documents.field_added": "Sayt fotosurati deb belgilandi",
     "documents.field_image_hint": "Bu tasvirni loyiha Foto lentasida koʻrsatish (dala/sayt dalili).",
+    "documents.revision_code": "Qayta ko'rib chiqish",
+    "documents.drawing_number": "Chizma raqami",
     "documents.field_image_off": "Sayt fotosurati deb belgilash",
     "documents.field_image_on": "Sayt fotosurati",
     "documents.field_removed": "Sayt fotosuratlaridan olib tashlandi",

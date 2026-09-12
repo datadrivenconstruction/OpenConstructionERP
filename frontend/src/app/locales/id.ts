@@ -26653,6 +26653,8 @@ const resource = {
     "documents.drop_zone": "Zona penjatuhan file",
     "documents.field_added": "Ditandai sebagai foto lokasi",
     "documents.field_image_hint": "Tampilkan gambar ini di strip Foto proyek (bukti lapangan/lokasi).",
+    "documents.revision_code": "Revisi",
+    "documents.drawing_number": "Nomor gambar",
     "documents.field_image_off": "Tandai sebagai foto lokasi",
     "documents.field_image_on": "Foto lokasi",
     "documents.field_removed": "Dihapus dari foto lokasi",

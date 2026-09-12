@@ -26674,6 +26674,8 @@ const resource = {
     "documents.drop_zone": "Tiedostojen pudotusalue",
     "documents.field_added": "Merkitty kenttävalokuvaksi",
     "documents.field_image_hint": "Näytä tämä kuva projektin valokuvanauhassa (kenttä/sivustojen todisteet).",
+    "documents.revision_code": "Revisio",
+    "documents.drawing_number": "Piirrostusnumero",
     "documents.field_image_off": "Merkitse sivustojen valokuvaksi",
     "documents.field_image_on": "Sivustojen valokuva",
     "documents.field_removed": "Poistettu sivustojen valokuvista",

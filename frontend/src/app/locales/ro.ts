@@ -26741,6 +26741,8 @@ const resource = {
     "documents.drop_zone": "Zonă de plasare fișiere",
     "documents.field_added": "Marcat ca fotografie de șantier",
     "documents.field_image_hint": "Afișați această imagine în panglica Fotografie a proiectului (dovadă de șantier).",
+    "documents.revision_code": "Revizie",
+    "documents.drawing_number": "Număr desen",
     "documents.field_image_off": "Marcați ca fotografie de șantier",
     "documents.field_image_on": "Fotografie de șantier",
     "documents.field_removed": "Eliminat din fotografiile șantierului",

@@ -26702,6 +26702,8 @@ const resource = {
     "documents.drop_zone": "เขตวางไฟล์",
     "documents.field_added": "ทำเครื่องหมายเป็นภาพไซต์",
     "documents.field_image_hint": "แสดงรูปภาพนี้ในแถบรูปภาพโครงการ (หลักฐาน ไซต์/สนาม)",
+    "documents.revision_code": "แก้ไข",
+    "documents.drawing_number": "หมายเลขแบบ",
     "documents.field_image_off": "ทำเครื่องหมายเป็นภาพไซต์",
     "documents.field_image_on": "ภาพไซต์",
     "documents.field_removed": "นำออกจากรูปภาพไซต์",

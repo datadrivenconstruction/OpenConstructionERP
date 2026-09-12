@@ -24413,6 +24413,8 @@ const resource = {
     "documents.field_image_on": "Site photo",
     "documents.field_image_off": "Mark as site photo",
     "documents.field_image_hint": "Show this image in the project Photo strip (field/site evidence).",
+    "documents.revision_code": "Revision",
+    "documents.drawing_number": "Drawing number",
     "photos.lightbox": "Photo viewer",
     "photos.previous": "Previous photo",
     "photos.next": "Next photo",

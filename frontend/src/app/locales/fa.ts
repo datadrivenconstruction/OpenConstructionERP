@@ -25956,6 +25956,8 @@ const resource = {
     "documents.drop_zone": "ناحیه رهاسازی فایل",
     "documents.field_added": "به‌عنوان عکس کارگاه علامت‌گذاری شد",
     "documents.field_image_hint": "این تصویر را در نوار عکس پروژه نشان بده (شواهد میدانی/کارگاه).",
+    "documents.revision_code": "ویرایش",
+    "documents.drawing_number": "شماره نقشه",
     "documents.field_image_off": "علامت‌گذاری به‌عنوان عکس کارگاه",
     "documents.field_image_on": "عکس کارگاه",
     "documents.field_removed": "از عکس‌های کارگاه حذف شد",
