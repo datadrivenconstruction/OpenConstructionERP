@@ -149,7 +149,7 @@ export function TimelinePage() {
             placeholder={t('timeline.search', { defaultValue: 'Search actions, modules, entities...' })}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 ps-10 pe-4 text-sm
               focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500
               dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />

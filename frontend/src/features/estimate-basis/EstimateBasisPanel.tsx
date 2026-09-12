@@ -485,7 +485,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           </Button>
           {/* OC-09: brief "Saved" confirmation after a successful save. */}
           {savedAt && !dirty && !saveMutation.isPending && (
-            <span className="flex items-center gap-1 text-xs text-semantic-success animate-in fade-in duration-300">
+            <span className="flex items-center gap-1 text-xs text-semantic-success transition-opacity duration-300">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
               {t('estimateBasis.saved', { defaultValue: 'Saved' })}
             </span>

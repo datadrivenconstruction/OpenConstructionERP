@@ -2,15 +2,17 @@
 """Check that the vendored NSIS installer template is upstream plus our edits.
 
 ``desktop/src-tauri/windows/installer.nsi`` is a copy of the template that ships
-inside the Tauri bundler, carrying five deliberate changes, all of them on the
-reinstall page a user meets when a previous version is already installed. The
-second radio button, "Do not uninstall", starts selected on an upgrade. The WiX
+inside the Tauri bundler, carrying seven deliberate changes. Four are on the
+reinstall page a user meets when a previous version is already installed: the
+second radio button, "Do not uninstall", starts selected on an upgrade; the WiX
 migration branch obeys whichever button was selected rather than uninstalling
-regardless. The old uninstaller is run with a five-minute timeout via nsExec
+regardless; the old uninstaller is run with a five-minute timeout via nsExec
 instead of an unbounded ExecWait, so a hanging pre-v15.9.0 uninstaller cannot
-freeze the upgrade forever. And a file the old uninstaller left behind after
-reporting success no longer aborts the install. The reasons are written at length
-in that file.
+freeze the upgrade forever; and a file the old uninstaller left behind after
+reporting success no longer aborts the install. Two more are in the Uninstall
+section: the main executable and the uninstaller binary are deleted with
+/REBOOTOK so that a locked file is scheduled for removal on reboot rather than
+silently surviving. The reasons are written at length in that file.
 
 Vendoring it costs something, and this script is the payment. The template is a
 Handlebars template, not plain NSI: blocks like each-resources and each-binaries
@@ -341,12 +343,41 @@ LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of four (wa
       MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(unableToUninstall)$\n$\n$R5$\n$\nThe installer can continue and overwrite the existing files. Continue?" /SD IDYES IDYES reinst_done
 """
 
+# ── Edit five: /REBOOTOK on main exe delete ──────────────────────────────────
+# If the executable is still locked (antivirus, indexer) after hooks have run,
+# NSIS schedules it for deletion on the next reboot instead of silently
+# leaving it on disk. Without it the directory cannot be removed.
+
+REBOOTOK_EXE_BEFORE = r"""  ; Delete the app directory and its content from disk
+  ; Copy main executable
+  Delete "$INSTDIR\${MAINBINARYNAME}.exe"
+"""
+
+REBOOTOK_EXE_AFTER = r"""  ; Delete the app directory and its content from disk.
+  ; /REBOOTOK: if the executable is still locked (antivirus, indexer), Windows
+  ; schedules it for deletion on the next reboot instead of silently failing.
+  ; Without it the file stays behind and the directory cannot be removed.
+  Delete /REBOOTOK "$INSTDIR\${MAINBINARYNAME}.exe"
+"""
+
+# ── Edit six: /REBOOTOK on uninstaller delete ────────────────────────────────
+
+REBOOTOK_UNINST_BEFORE = r"""  ; Delete uninstaller
+  Delete "$INSTDIR\uninstall.exe"
+"""
+
+REBOOTOK_UNINST_AFTER = r"""  ; Delete uninstaller
+  Delete /REBOOTOK "$INSTDIR\uninstall.exe"
+"""
+
 # Applied in this order, which is the order they appear in the file.
 PATCHES: tuple[tuple[str, str, str], ...] = (
     ("the reinstall page default", REINSTALL_DEFAULT_BEFORE, REINSTALL_DEFAULT_AFTER),
     ("the WiX branch honouring the selection", WIX_SELECTION_BEFORE, WIX_SELECTION_AFTER),
     ("the old uninstaller timeout", UNINSTALL_TIMEOUT_BEFORE, UNINSTALL_TIMEOUT_AFTER),
     ("a leftover file not being fatal", LEFTOVER_FILE_BEFORE, LEFTOVER_FILE_AFTER),
+    ("/REBOOTOK on the main executable", REBOOTOK_EXE_BEFORE, REBOOTOK_EXE_AFTER),
+    ("/REBOOTOK on the uninstaller binary", REBOOTOK_UNINST_BEFORE, REBOOTOK_UNINST_AFTER),
 )
 
 HANDLEBARS = re.compile(r"\{\{.*?\}\}", re.DOTALL)

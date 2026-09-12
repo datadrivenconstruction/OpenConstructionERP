@@ -940,9 +940,11 @@ Section Uninstall
 
   !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
 
-  ; Delete the app directory and its content from disk
-  ; Copy main executable
-  Delete "$INSTDIR\${MAINBINARYNAME}.exe"
+  ; Delete the app directory and its content from disk.
+  ; /REBOOTOK: if the executable is still locked (antivirus, indexer), Windows
+  ; schedules it for deletion on the next reboot instead of silently failing.
+  ; Without it the file stays behind and the directory cannot be removed.
+  Delete /REBOOTOK "$INSTDIR\${MAINBINARYNAME}.exe"
 
   ; Delete resources
   {{#each resources}}
@@ -971,7 +973,7 @@ Section Uninstall
 
 
   ; Delete uninstaller
-  Delete "$INSTDIR\uninstall.exe"
+  Delete /REBOOTOK "$INSTDIR\uninstall.exe"
 
   {{#each resources_ancestors}}
   RMDir /REBOOTOK "$INSTDIR\\{{this}}"

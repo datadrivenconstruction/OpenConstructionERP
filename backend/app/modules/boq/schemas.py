@@ -1404,9 +1404,13 @@ class SnapshotResponse(BaseModel):
     name: str
     description: str = ""
     position_count: int | None = None
-    grand_total: float | None = None
+    grand_total: Decimal | None = None
     created_at: datetime
     created_by: UUID | None = None
+
+    @field_serializer("grand_total", when_used="json")
+    def _ser_grand_total(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
 
 class SnapshotDetail(SnapshotResponse):
@@ -2585,11 +2589,15 @@ class ImportPreviewPosition(BaseModel):
     description: str = ""
     unit: str = "pcs"
     quantity: float = 0.0
-    unit_rate: float = 0.0
-    total: float = 0.0
+    unit_rate: Decimal = Decimal("0")
+    total: Decimal = Decimal("0")
     is_section: bool = False
     classification: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_serializer("unit_rate", "total", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
 
 
 class ImportPreviewResponse(BaseModel):

@@ -2884,11 +2884,11 @@ async def compare_boqs(
 
 def _snap_to_response(s: "BOQSnapshot") -> SnapshotResponse:
     """Build a SnapshotResponse from a BOQSnapshot ORM instance."""
-    grand_total: float | None = None
+    grand_total: Decimal | None = None
     if s.total_value is not None:
         try:
-            grand_total = float(s.total_value)
-        except (ValueError, TypeError):
+            grand_total = Decimal(str(s.total_value))
+        except (InvalidOperation, ValueError, TypeError):
             grand_total = None
     return SnapshotResponse(
         id=s.id,
