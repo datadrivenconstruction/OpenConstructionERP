@@ -2461,6 +2461,10 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "residential-shenzhen": "Residential",
     "renovation-guangzhou": "Renovation",
     "villa-suzhou": "Residential",
+    "residential-berlin": "Residential",
+    "school-paris": "Education",
+    "warehouse-dubai": "Industrial",
+    "medical-us": "Healthcare",
 }
 
 
