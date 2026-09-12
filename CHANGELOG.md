@@ -5,6 +5,28 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [17.5.0] - 2026-09-12
+
+Platform improvements driven by the Landshut V01 R02 review. Twelve items from the observation list are resolved.
+
+Creating a project through the address autocomplete now carries the ISO 3166-1 country code into the project record so downstream features that depend on it, like AIA G702 eligibility, work from the first save instead of requiring a follow-up patch.
+
+The estimate basis headline shows "Not yet estimated" instead of 0.00 EUR when a bill of quantities has no items, so a concept-stage project does not look like a free building. A client budget target can now sit next to the calculated figure with its own amount, gross/net mode and contingency handling, so a reviewer sees both numbers without hunting through notes.
+
+Auto-generated exclusions and assumptions on an empty bill are drafted unchecked. Before this, every absent trade appeared as a confirmed scope boundary, which on an empty estimate was every trade. The bulk check/uncheck button on each qualification section lets an estimator accept or clear all template lines in one click, and a save status indicator next to the Save button confirms the save succeeded. Navigating away with unsaved changes now triggers a browser warning.
+
+Standard conditions (exclusions, assumptions and dynamic phrases) are generated in the project's locale. Thirteen languages are covered: German, French, Spanish, Italian, Portuguese, Dutch, Russian, Chinese, Arabic, Japanese, Korean, Turkish and Polish. Switching the UI language does not rewrite an agreed condition because the text is stored at draft time.
+
+An open assumption can now link to a review task with its own assignee and deadline. Closing the task does not auto-remove the assumption until the evidence is confirmed, which is the point of having the assumption in the first place.
+
+The project name pill in the header is widened from 180px to 220px so names like "Landshut Wohnanlage" stay readable at 125% zoom, and the full name is accessible via a tooltip on both the project name and the module title.
+
+The update notification banner now persists its dismiss state in localStorage instead of sessionStorage, so dismissing it once keeps it down until a new version appears. Errors and save failures remain visible regardless.
+
+A standalone change order created on a project with active variation orders now carries a warning in its detail view, so the estimator knows the scope may overlap with an existing variation. A variation request can reference its source document, revision and page, so a decision traces back to the page that prompted it instead of a free-text note.
+
+The Windows installer now offers to continue when the old uninstaller fails instead of aborting, so a machine whose previous uninstaller hangs can still complete an upgrade.
+
 ## [17.4.1] - 2026-09-11
 
 Importing a BOQ file now opens a preview wizard instead of posting the file immediately. The wizard shows the parsed positions in a scrollable table with section headings, quantities, rates and totals, the detected format and currency, any warnings the parser raised and a count of skipped rows, so the person importing can see exactly what will land in the bill before confirming. The preview parses but does not persist, and the confirm step calls the same import endpoint that ran before.

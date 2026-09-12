@@ -46,6 +46,13 @@ interface ChangelogEntry {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '17.5.0',
+    date: '2026-09-12',
+    tag: 'NEW',
+    summary:
+      'Twelve platform improvements from the Landshut review. Country code wired into project creation, estimate basis shows "Not yet estimated" for empty bills, conditions generated in the project language (13 locales), bulk check/uncheck for template conditions, save indicator, budget target alongside the estimate, location precision on geocoded addresses, persistent notification dismiss, document reference on variations, linked review tasks on assumptions, and standalone CO overlap warning.',
+  },
+  {
     version: '17.4.1',
     date: '2026-09-11',
     tag: 'NEW',
