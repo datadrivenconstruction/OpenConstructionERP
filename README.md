@@ -934,30 +934,27 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
 
 ---
 
-## Project Growth
-
-<div align="center">
+## Project growth
 
 ### Stars
 
-[![Star History Chart](https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date)](https://star-history.com/#datadrivenconstruction/OpenConstructionERP&Date)
+<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date&theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date">
+    <img alt="OpenConstructionERP star history" src="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" width="720">
+  </picture>
+</a>
 
-### Release Downloads
+### Release downloads
 
-[![Downloads per release](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/total?style=for-the-badge&color=brightgreen&label=total%20downloads)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases)
-
-| Release | Windows | macOS | Linux | Total |
-|---|---|---|---|---|
-| Latest | [![](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/latest/OpenConstructionERP_17.5.0_x64-setup.exe?label=.exe)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) | [![](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/latest/OpenConstructionERP_17.5.0_aarch64.dmg?label=.dmg)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) | [![](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/latest/OpenConstructionERP_17.5.0_amd64.deb?label=.deb)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) | [![](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/latest/total?label=latest)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) |
-
-### Commit Activity
-
-[![Commit activity](https://img.shields.io/github/commit-activity/m/datadrivenconstruction/OpenConstructionERP?style=for-the-badge&label=commits%20per%20month&color=blue)](https://github.com/datadrivenconstruction/OpenConstructionERP/graphs/commit-activity)
-[![Contributors](https://img.shields.io/github/contributors/datadrivenconstruction/OpenConstructionERP?style=for-the-badge&color=orange)](https://github.com/datadrivenconstruction/OpenConstructionERP/graphs/contributors)
-[![Code size](https://img.shields.io/github/languages/code-size/datadrivenconstruction/OpenConstructionERP?style=for-the-badge&color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP)
-[![Repo size](https://img.shields.io/github/repo-size/datadrivenconstruction/OpenConstructionERP?style=for-the-badge&color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP)
-
-</div>
+<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/download-history-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://openconstructionerp.com/assets/charts/download-history-light.svg">
+    <img alt="OpenConstructionERP release download history" src="https://openconstructionerp.com/assets/charts/download-history-light.svg" width="720">
+  </picture>
+</a>
 
 ---
 
