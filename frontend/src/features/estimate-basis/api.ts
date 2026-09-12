@@ -162,7 +162,7 @@ export interface EstimateBasisDocument {
   market_conditions: string;
   contingency_rationale: string;
   /** OC-03: client budget target, separate from the calculated estimate. */
-  budget_target: BudgetTarget | null;
+  budget_target?: BudgetTarget | null;
   generated_at: string | null;
   created_at: string | null;
   updated_at: string | null;
