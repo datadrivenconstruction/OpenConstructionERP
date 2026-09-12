@@ -12649,6 +12649,8 @@ const resource = {
     "timeline.load_error": "Не удалось загрузить ленту событий",
     "timeline.empty": "Событий пока нет",
     "timeline.empty_desc": "События будут появляться здесь по мере работы над проектом.",
+    "timeline.no_project": "Выберите проект",
+    "timeline.no_project_desc": "Выберите проект в шапке, чтобы увидеть ленту событий.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Аналитика",
     "nav.schedule": "4D График",

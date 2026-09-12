@@ -11632,6 +11632,8 @@ const resource = {
     "timeline.load_error": "无法加载动态日志",
     "timeline.empty": "暂无动态",
     "timeline.empty_desc": "随着您在此项目上的操作，动态将显示在这里。",
+    "timeline.no_project": "请选择项目",
+    "timeline.no_project_desc": "从顶部标题选择一个项目，查看其活动记录。",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "数据分析",
     "nav.schedule": "4D 进度",

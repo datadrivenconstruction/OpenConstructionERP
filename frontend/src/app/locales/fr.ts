@@ -10609,6 +10609,8 @@ const resource = {
     "timeline.load_error": "Impossible de charger l'historique",
     "timeline.empty": "Aucune activité pour l'instant",
     "timeline.empty_desc": "L'activité apparaîtra ici au fur et à mesure de votre travail sur ce projet.",
+    "timeline.no_project": "Sélectionnez un projet",
+    "timeline.no_project_desc": "Choisissez un projet dans l'en-tête pour voir son historique d'activité.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analytique",
     "nav.schedule": "Planning 4D",

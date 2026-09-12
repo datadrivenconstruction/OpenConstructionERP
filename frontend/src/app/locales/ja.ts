@@ -11628,6 +11628,8 @@ const resource = {
     "timeline.load_error": "タイムラインを読み込めませんでした",
     "timeline.empty": "まだ操作履歴がありません",
     "timeline.empty_desc": "このプロジェクトで作業を進めると、ここに履歴が表示されます。",
+    "timeline.no_project": "プロジェクトを選択",
+    "timeline.no_project_desc": "ヘッダーからプロジェクトを選択して、活動の履歴を表示してください。",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "分析",
     "nav.schedule": "4Dスケジュール",

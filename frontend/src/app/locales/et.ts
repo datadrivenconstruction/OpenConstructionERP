@@ -12410,6 +12410,8 @@ const resource = {
     "timeline.load_error": "Ajajoone laadimine ebaõnnestus",
     "timeline.empty": "Tegevusi pole veel",
     "timeline.empty_desc": "Tegevused ilmuvad siia, kui töötate selle projektiga.",
+    "timeline.no_project": "Valige projekt",
+    "timeline.no_project_desc": "Valige päisest projekt, et näha selle tegevuste ajajoont.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analüütika",
     "nav.architecture": "Arhitektuurikaart",

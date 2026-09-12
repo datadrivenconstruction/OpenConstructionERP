@@ -11583,6 +11583,8 @@ const resource = {
     "timeline.load_error": "Nie udało się załadować dziennika aktywności",
     "timeline.empty": "Brak aktywności",
     "timeline.empty_desc": "Aktywność będzie widoczna tutaj podczas pracy z projektem.",
+    "timeline.no_project": "Wybierz projekt",
+    "timeline.no_project_desc": "Wybierz projekt w nagłówku, aby zobaczyć oś czasu aktywności.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analityka",
     "nav.schedule": "Harmonogram 4D",

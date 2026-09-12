@@ -11722,6 +11722,8 @@ const resource = {
     "timeline.load_error": "ٹائم لائن لوڈ نہیں ہو سکی",
     "timeline.empty": "ابھی کوئی سرگرمی نہیں",
     "timeline.empty_desc": "جیسے جیسے آپ اس پروجیکٹ پر کام کریں گے، سرگرمی یہاں ظاہر ہوگی۔",
+    "timeline.no_project": "ایک پروجیکٹ منتخب کریں",
+    "timeline.no_project_desc": "سرگرمی کی timeline دیکھنے کے لیے ہیڈر سے پروجیکٹ چنیں۔",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "تجزیات",
     "nav.architecture": "آرکیٹیکچر نقشہ",

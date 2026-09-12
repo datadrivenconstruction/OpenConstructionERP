@@ -9485,6 +9485,8 @@ const resource = {
     "timeline.load_error": "Tarixni yuklashda xatolik yuz berdi",
     "timeline.empty": "Hali faoliyat yo'q",
     "timeline.empty_desc": "Loyiha ustida ishlash davomida faoliyat bu yerda ko'rinadi.",
+    "timeline.no_project": "Loyihani tanlang",
+    "timeline.no_project_desc": "Faoliyat tarixini ko'rish uchun sarlavhadan loyihani tanlang.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Tahlillar",
     "nav.settings": "Sozlamalar",

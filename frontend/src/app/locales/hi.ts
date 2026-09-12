@@ -11660,6 +11660,8 @@ const resource = {
     "timeline.load_error": "टाइमलाइन लोड नहीं हो सकी",
     "timeline.empty": "अभी कोई गतिविधि नहीं",
     "timeline.empty_desc": "जैसे-जैसे आप इस परियोजना पर काम करेंगे, गतिविधि यहाँ दिखाई देगी।",
+    "timeline.no_project": "एक परियोजना चुनें",
+    "timeline.no_project_desc": "गतिविधि timeline देखने के लिए हेडर से कोई परियोजना चुनें।",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "एनालिटिक्स",
     "nav.schedule": "4D शेड्यूल",

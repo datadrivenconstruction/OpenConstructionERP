@@ -9443,6 +9443,8 @@ const resource = {
     "timeline.load_error": "Не вдалося завантажити журнал подій",
     "timeline.empty": "Подій поки немає",
     "timeline.empty_desc": "Події з'являтимуться тут під час роботи над проектом.",
+    "timeline.no_project": "Оберіть проект",
+    "timeline.no_project_desc": "Оберіть проект у шапці, щоб побачити стрічку подій.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Аналітика",
     "nav.settings": "Налаштування",

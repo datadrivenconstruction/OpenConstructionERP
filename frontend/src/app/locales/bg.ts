@@ -11788,6 +11788,8 @@ const resource = {
     "timeline.load_error": "Хронологията не може да се зареди",
     "timeline.empty": "Все още няма дейност",
     "timeline.empty_desc": "Дейностите ще се появят тук, докато работите по проекта.",
+    "timeline.no_project": "Изберете проект",
+    "timeline.no_project_desc": "Изберете проект от заглавната лента, за да видите лентата с дейности.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Анализи",
     "nav.schedule": "4D График",

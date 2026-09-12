@@ -10975,6 +10975,8 @@ const resource = {
     "timeline.load_error": "A tevékenységnapló nem tölthető be",
     "timeline.empty": "Még nincs tevékenység",
     "timeline.empty_desc": "A tevékenységek itt jelennek meg, amint elkezd dolgozni a projekten.",
+    "timeline.no_project": "Válasszon projektet",
+    "timeline.no_project_desc": "Válasszon egy projektet a fejlécből a tevékenységek idővonalának megtekintéséhez.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Elemzés",
     "nav.schedule": "4D ütemterv",

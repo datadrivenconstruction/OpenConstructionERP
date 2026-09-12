@@ -11685,6 +11685,8 @@ const resource = {
     "timeline.load_error": "Hindi ma-load ang timeline",
     "timeline.empty": "Wala pang aktibidad",
     "timeline.empty_desc": "Lalabas ang aktibidad dito habang nagtatrabaho ka sa proyektong ito.",
+    "timeline.no_project": "Pumili ng proyekto",
+    "timeline.no_project_desc": "Pumili ng proyekto mula sa header upang makita ang timeline ng aktibidad nito.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analitika",
     "nav.architecture": "Mapa ng Arkitektura",

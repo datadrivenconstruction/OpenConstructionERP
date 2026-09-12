@@ -11727,6 +11727,8 @@ const resource = {
     "timeline.load_error": "টাইমলাইন লোড করা যায়নি",
     "timeline.empty": "এখনো কোনো কার্যক্রম নেই",
     "timeline.empty_desc": "এই প্রকল্পে কাজ করার সাথে সাথে কার্যক্রম এখানে দেখা যাবে।",
+    "timeline.no_project": "একটি প্রকল্প নির্বাচন করুন",
+    "timeline.no_project_desc": "কার্যক্রমের টাইমলাইন দেখতে হেডার থেকে একটি প্রকল্প বেছে নিন।",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "অ্যানালিটিক্স",
     "nav.architecture": "আর্কিটেকচার ম্যাপ",

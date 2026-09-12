@@ -9904,6 +9904,8 @@ const resource = {
     "timeline.load_error": "Tijek se nije mogao učitati",
     "timeline.empty": "Još nema aktivnosti",
     "timeline.empty_desc": "Aktivnosti će se prikazivati ovdje dok radite na projektu.",
+    "timeline.no_project": "Odaberite projekt",
+    "timeline.no_project_desc": "Odaberite projekt u zaglavlju kako biste pregledali tijek aktivnosti.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analitika",
     "nav.schedule": "4D raspored",

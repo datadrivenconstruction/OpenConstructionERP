@@ -11674,6 +11674,8 @@ const resource = {
     "timeline.load_error": "Etkinlik günlüğü yüklenemedi",
     "timeline.empty": "Henüz etkinlik yok",
     "timeline.empty_desc": "Bu projede çalıştıkça etkinlikler burada görünecek.",
+    "timeline.no_project": "Bir proje seçin",
+    "timeline.no_project_desc": "Etkinlik geçmişini görmek için üstteki başlıktan bir proje seçin.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analitik",
     "nav.schedule": "4D Takvim",

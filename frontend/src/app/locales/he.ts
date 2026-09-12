@@ -11734,6 +11734,8 @@ const resource = {
     "timeline.load_error": "טעינת ציר הזמן נכשלה",
     "timeline.empty": "אין פעילות עדיין",
     "timeline.empty_desc": "הפעילות תופיע כאן בזמן שתעבוד על הפרויקט.",
+    "timeline.no_project": "בחר פרויקט",
+    "timeline.no_project_desc": "בחר פרויקט מהכותרת כדי לראות את ציר הזמן של הפעילות שלו.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "אנליטיקה",
     "nav.architecture": "מפת ארכיטקטורה",

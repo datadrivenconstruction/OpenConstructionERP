@@ -11555,6 +11555,8 @@ const resource = {
     "timeline.load_error": "Aktivitetsloggen kunde inte läsas in",
     "timeline.empty": "Ingen aktivitet än",
     "timeline.empty_desc": "Aktivitet visas här allt eftersom du arbetar med det här projektet.",
+    "timeline.no_project": "Välj ett projekt",
+    "timeline.no_project_desc": "Välj ett projekt i sidhuvudet för att se dess aktivitetstidslinje.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analys",
     "nav.schedule": "4D-tidplan",

@@ -12084,6 +12084,8 @@ const resource = {
     "timeline.load_error": "Он цагийн хэлхээг ачаалж чадсангүй",
     "timeline.empty": "Одоохондоо үйл ажиллагаа байхгүй",
     "timeline.empty_desc": "Энэ төсөл дээр ажиллах тусам үйл ажиллагаа эндэ харагдана.",
+    "timeline.no_project": "Төсөл сонгоно уу",
+    "timeline.no_project_desc": "Үйл ажиллагааны он цагийн хэлхээг харахын тулд толгой хэсгээс төсөл сонгоно уу.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Аналитик",
     "nav.architecture": "Архитектурын зураг",

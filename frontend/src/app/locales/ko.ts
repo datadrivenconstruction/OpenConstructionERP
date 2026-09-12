@@ -11627,6 +11627,8 @@ const resource = {
     "timeline.load_error": "타임라인을 불러올 수 없습니다",
     "timeline.empty": "아직 활동 내역이 없습니다",
     "timeline.empty_desc": "이 프로젝트 작업을 진행하면 여기에 활동이 표시됩니다.",
+    "timeline.no_project": "프로젝트를 선택하세요",
+    "timeline.no_project_desc": "헤더에서 프로젝트를 선택하면 활동 타임라인을 볼 수 있습니다.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "분석",
     "nav.schedule": "4D 일정",

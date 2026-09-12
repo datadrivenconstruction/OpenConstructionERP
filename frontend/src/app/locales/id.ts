@@ -9932,6 +9932,8 @@ const resource = {
     "timeline.load_error": "Linimasa tidak dapat dimuat",
     "timeline.empty": "Belum ada aktivitas",
     "timeline.empty_desc": "Aktivitas akan muncul di sini saat Anda mengerjakan proyek ini.",
+    "timeline.no_project": "Pilih proyek",
+    "timeline.no_project_desc": "Pilih proyek dari header untuk melihat linimasa aktivitasnya.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analitik",
     "nav.schedule": "Jadwal 4D",

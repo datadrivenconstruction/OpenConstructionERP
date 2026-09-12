@@ -10683,6 +10683,8 @@ const resource = {
     "timeline.load_error": "Não foi possível carregar o histórico",
     "timeline.empty": "Ainda sem atividade",
     "timeline.empty_desc": "A atividade aparecerá aqui à medida que trabalha neste projeto.",
+    "timeline.no_project": "Selecione um projeto",
+    "timeline.no_project_desc": "Escolha um projeto no cabeçalho para ver o registo de atividade.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Análises",
     "nav.schedule": "Cronograma 4D",

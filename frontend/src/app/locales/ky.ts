@@ -7106,6 +7106,8 @@ const resource = {
     "timeline.load_error": "Хронологияны жүктөө мүмкүн болгон жок",
     "timeline.empty": "Азырынча эч кандай иш-аракет жок",
     "timeline.empty_desc": "Долбоордо иштеген сайын иш-аракеттер бул жерде пайда болот.",
+    "timeline.no_project": "Долбоорду тандаңыз",
+    "timeline.no_project_desc": "Иш-аракеттер хронологиясын көрүү үчүн аталыштан долбоор тандаңыз.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Аналитика",
     "nav.schedule": "4D график",

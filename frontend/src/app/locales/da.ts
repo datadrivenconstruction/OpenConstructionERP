@@ -11591,6 +11591,8 @@ const resource = {
     "timeline.load_error": "Tidslinjen kunne ikke indlæses",
     "timeline.empty": "Ingen aktivitet endnu",
     "timeline.empty_desc": "Aktivitet vises her, efterhånden som du arbejder med projektet.",
+    "timeline.no_project": "Vælg et projekt",
+    "timeline.no_project_desc": "Vælg et projekt i overskriften for at se dets aktivitetstidslinje.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analyse",
     "nav.schedule": "4D-tidsplan",

@@ -10772,6 +10772,8 @@ const resource = {
     "timeline.load_error": "Impossibile caricare la cronologia",
     "timeline.empty": "Nessuna attività al momento",
     "timeline.empty_desc": "Le attività appariranno qui man mano che lavori su questo progetto.",
+    "timeline.no_project": "Seleziona un progetto",
+    "timeline.no_project_desc": "Scegli un progetto dall'intestazione per visualizzare il registro attività.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analisi",
     "nav.schedule": "Programma 4D",

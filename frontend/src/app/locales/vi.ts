@@ -9932,6 +9932,8 @@ const resource = {
     "timeline.load_error": "Không thể tải nhật ký hoạt động",
     "timeline.empty": "Chưa có hoạt động",
     "timeline.empty_desc": "Hoạt động sẽ xuất hiện ở đây khi bạn làm việc với dự án này.",
+    "timeline.no_project": "Chọn một dự án",
+    "timeline.no_project_desc": "Chọn một dự án từ thanh tiêu đề để xem nhật ký hoạt động.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Phân tích",
     "nav.schedule": "Lịch 4D",

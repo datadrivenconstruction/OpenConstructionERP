@@ -9515,6 +9515,8 @@ const resource = {
     "timeline.load_error": "Verlauf konnte nicht geladen werden",
     "timeline.empty": "Noch keine Aktivität",
     "timeline.empty_desc": "Aktivitäten erscheinen hier, sobald Sie an diesem Projekt arbeiten.",
+    "timeline.no_project": "Projekt auswählen",
+    "timeline.no_project_desc": "Wählen Sie ein Projekt in der Kopfzeile, um dessen Aktivitätsverlauf anzuzeigen.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analytik",
     "nav.settings": "Einstellungen",

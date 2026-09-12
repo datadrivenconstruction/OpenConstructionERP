@@ -10651,6 +10651,8 @@ const resource = {
     "timeline.load_error": "Activiteitenlog kon niet worden geladen",
     "timeline.empty": "Nog geen activiteit",
     "timeline.empty_desc": "Activiteiten verschijnen hier naarmate u aan dit project werkt.",
+    "timeline.no_project": "Selecteer een project",
+    "timeline.no_project_desc": "Kies een project in de koptekst om het activiteitenlogboek te bekijken.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analyses",
     "nav.schedule": "4D Planning",

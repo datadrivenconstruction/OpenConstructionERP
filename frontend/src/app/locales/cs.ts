@@ -11616,6 +11616,8 @@ const resource = {
     "timeline.load_error": "Průběh se nepodařilo načíst",
     "timeline.empty": "Zatím žádná aktivita",
     "timeline.empty_desc": "Aktivity se zobrazí zde, jakmile začnete pracovat na projektu.",
+    "timeline.no_project": "Vyberte projekt",
+    "timeline.no_project_desc": "Vyberte projekt v záhlaví a zobrazte časovou osu jeho aktivit.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analytika",
     "nav.schedule": "4D Harmonogram",

@@ -11582,6 +11582,8 @@ const resource = {
     "timeline.load_error": "Aikajanan lataaminen epäonnistui",
     "timeline.empty": "Ei vielä toimintoja",
     "timeline.empty_desc": "Toiminnot ilmestyvät tähän, kun työstät tätä projektia.",
+    "timeline.no_project": "Valitse projekti",
+    "timeline.no_project_desc": "Valitse projekti otsikosta nähdäksesi sen toimintojen aikajanan.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analytiikka",
     "nav.schedule": "4D-aikataulu",

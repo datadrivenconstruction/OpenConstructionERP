@@ -12575,6 +12575,8 @@ const resource = {
     "timeline.load_error": "تعذّر تحميل الجدول الزمني",
     "timeline.empty": "لا يوجد نشاط بعد",
     "timeline.empty_desc": "سيظهر النشاط هنا أثناء عملك في هذا المشروع.",
+    "timeline.no_project": "اختر مشروعاً",
+    "timeline.no_project_desc": "اختر مشروعاً من الرأس لعرض لقطة نشاطه.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "التحليلات",
     "nav.architecture": "خريطة الهيكل",

@@ -11085,6 +11085,8 @@ const resource = {
     "timeline.load_error": "No se pudo cargar el historial",
     "timeline.empty": "Sin actividad aún",
     "timeline.empty_desc": "La actividad aparecerá aquí mientras trabaja en este proyecto.",
+    "timeline.no_project": "Seleccione un proyecto",
+    "timeline.no_project_desc": "Elija un proyecto en el encabezado para ver su historial de actividad.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analítica",
     "nav.schedule": "Cronograma 4D",

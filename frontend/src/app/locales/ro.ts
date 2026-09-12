@@ -9931,6 +9931,8 @@ const resource = {
     "timeline.load_error": "Jurnalul de activitate nu a putut fi încărcat",
     "timeline.empty": "Nicio activitate încă",
     "timeline.empty_desc": "Activitatea va apărea aici pe măsură ce lucrați la acest proiect.",
+    "timeline.no_project": "Selectați un proiect",
+    "timeline.no_project_desc": "Alegeți un proiect din antet pentru a vedea jurnalul de activitate.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analiză",
     "nav.schedule": "Program 4D",

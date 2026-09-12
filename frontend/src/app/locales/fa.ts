@@ -11686,6 +11686,8 @@ const resource = {
     "timeline.load_error": "بارگذاری تایم‌لاین ناموفق بود",
     "timeline.empty": "هنوز فعالیتی ثبت نشده",
     "timeline.empty_desc": "فعالیت‌ها در اینجا نمایش داده می‌شوند با پیشرفت کار بر روی پروژه.",
+    "timeline.no_project": "یک پروژه انتخاب کنید",
+    "timeline.no_project_desc": "برای مشاهده تایم‌لاین فعالیت‌ها، یک پروژه از سربرگ انتخاب کنید.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "تحلیل‌ها",
     "nav.architecture": "نقشه معماری",

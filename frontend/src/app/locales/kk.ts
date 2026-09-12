@@ -11722,6 +11722,8 @@ const resource = {
     "timeline.load_error": "Хронологияны жүктеу мүмкін болмады",
     "timeline.empty": "Әзірге ешқандай іс-қимыл жоқ",
     "timeline.empty_desc": "Жобада жұмыс жасаған сайын іс-қимыл осында пайда болады.",
+    "timeline.no_project": "Жоба таңдаңыз",
+    "timeline.no_project_desc": "Іс-қимыл хронологиясын көру үшін тақырыптан жоба таңдаңыз.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Аналитика",
     "nav.architecture": "Архитектура Картасы",

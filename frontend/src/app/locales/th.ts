@@ -9962,6 +9962,8 @@ const resource = {
     "timeline.load_error": "ไม่สามารถโหลดไทม์ไลน์ได้",
     "timeline.empty": "ยังไม่มีกิจกรรม",
     "timeline.empty_desc": "กิจกรรมจะแสดงที่นี่เมื่อคุณทำงานในโครงการนี้",
+    "timeline.no_project": "เลือกโครงการ",
+    "timeline.no_project_desc": "เลือกโครงการจากส่วนหัวเพื่อดูไทม์ไลน์กิจกรรม",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "การวิเคราะห์",
     "nav.schedule": "ตารางเวลา 4D",

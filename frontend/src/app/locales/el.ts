@@ -11771,6 +11771,8 @@ const resource = {
     "timeline.load_error": "Αδυναμία φόρτωσης χρονολογίου",
     "timeline.empty": "Δεν υπάρχει ακόμα δραστηριότητα",
     "timeline.empty_desc": "Η δραστηριότητα θα εμφανιστεί εδώ καθώς εργάζεστε στο έργο.",
+    "timeline.no_project": "Επιλέξτε έργο",
+    "timeline.no_project_desc": "Επιλέξτε ένα έργο από την κεφαλίδα για να δείτε το χρονολόγιο δραστηριοτήτων του.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Αναλυτικά στοιχεία",
     "nav.architecture": "Χάρτης Αρχιτεκτονικής",
