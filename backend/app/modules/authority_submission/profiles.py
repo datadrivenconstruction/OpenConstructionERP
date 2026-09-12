@@ -130,6 +130,160 @@ BUILTIN_PROFILES: list[dict[str, Any]] = [
             },
         ],
     },
+    # ── Regional profiles (OC-19) ──────────────────────────────────────────
+    #
+    # Each profile names a jurisdiction so the frontend can filter by country.
+    # The document_checklist array is a soft requirement list: names the
+    # documents the jurisdiction typically requires, and the user checks them
+    # off when the document has been attached. The platform does not enforce
+    # submission - "internally registered" is the furthest it goes without a
+    # proven external integration.
+    {
+        "name": "Bauantrag / Bauvoranfrage (Germany)",
+        "jurisdiction": "DE",
+        "format_key": "bauantrag_xml",
+        "schema_version": "1.0",
+        "root_element": "Bauantrag",
+        "description": (
+            "German building permit application. Lists the documents a "
+            "Bauaufsichtsbehorde typically requires: site plan, floor plans, "
+            "sections, structural analysis, energy certificate, fire safety "
+            "concept, statistics form. Mark each document as attached when "
+            "its revision is ready. No automatic submission to the authority - "
+            "the platform registers the package internally."
+        ),
+        "field_spec": [
+            {"name": "project_name", "type": "string", "required": True, "xml_tag": "Projektbezeichnung"},
+            {"name": "bauherr", "type": "string", "required": True, "xml_tag": "Bauherr", "label": "Building owner"},
+            {
+                "name": "entwurfsverfasser",
+                "type": "string",
+                "required": False,
+                "xml_tag": "Entwurfsverfasser",
+                "label": "Architect / designer",
+            },
+            {
+                "name": "gemarkung",
+                "type": "string",
+                "required": False,
+                "xml_tag": "Gemarkung",
+                "label": "Cadastral district",
+            },
+            {
+                "name": "flurstueck",
+                "type": "string",
+                "required": False,
+                "xml_tag": "Flurstueck",
+                "label": "Plot number",
+            },
+            {
+                "name": "bauvorhaben",
+                "type": "string",
+                "required": True,
+                "xml_tag": "Bauvorhaben",
+                "label": "Description of works",
+            },
+            {
+                "name": "antragsdatum",
+                "type": "date",
+                "required": False,
+                "xml_tag": "Antragsdatum",
+                "label": "Application date",
+            },
+            {
+                "name": "document_checklist",
+                "type": "array",
+                "required": False,
+                "xml_tag": "Unterlagen",
+                "item_tag": "Unterlage",
+                "label": "Required documents",
+                "fields": [
+                    {
+                        "name": "document_name",
+                        "type": "string",
+                        "required": True,
+                        "xml_tag": "Bezeichnung",
+                        "label": "Document",
+                    },
+                    {"name": "revision", "type": "string", "required": False, "xml_tag": "Revision"},
+                    {
+                        "name": "attached",
+                        "type": "boolean",
+                        "required": False,
+                        "xml_tag": "Beigefuegt",
+                        "label": "Attached",
+                    },
+                    {"name": "notes", "type": "string", "required": False, "xml_tag": "Anmerkung", "label": "Notes"},
+                ],
+                "default_items": [
+                    {"document_name": "Lageplan (site plan)", "attached": False},
+                    {"document_name": "Grundrisse (floor plans)", "attached": False},
+                    {"document_name": "Schnitte (sections)", "attached": False},
+                    {"document_name": "Ansichten (elevations)", "attached": False},
+                    {"document_name": "Baubeschreibung (building description)", "attached": False},
+                    {"document_name": "Statik / Standsicherheitsnachweis (structural analysis)", "attached": False},
+                    {"document_name": "Waermeschutznachweis / Energieausweis (energy certificate)", "attached": False},
+                    {"document_name": "Brandschutzkonzept (fire safety concept)", "attached": False},
+                    {"document_name": "Schallschutznachweis (acoustic report)", "attached": False},
+                    {"document_name": "Statistik-Formblatt (statistics form)", "attached": False},
+                    {"document_name": "Entwasserungsplan (drainage plan)", "attached": False},
+                    {"document_name": "Freiflachenplan (landscape plan)", "attached": False},
+                ],
+            },
+        ],
+    },
+    {
+        "name": "Document submission package (generic)",
+        "jurisdiction": None,
+        "format_key": "doc_package_xml",
+        "schema_version": "1.0",
+        "root_element": "SubmissionPackage",
+        "description": (
+            "A jurisdiction-neutral document package. List the documents your "
+            "authority or client requires, check them off as attached, and "
+            "record the submission reference when you hand the package over. "
+            "No legal promises - the completeness is what you mark it as."
+        ),
+        "field_spec": [
+            {"name": "package_title", "type": "string", "required": True, "xml_tag": "PackageTitle"},
+            {
+                "name": "recipient",
+                "type": "string",
+                "required": False,
+                "xml_tag": "Recipient",
+                "label": "Authority / recipient",
+            },
+            {
+                "name": "reference_number",
+                "type": "string",
+                "required": False,
+                "xml_tag": "ReferenceNumber",
+                "label": "External reference",
+            },
+            {"name": "submission_date", "type": "date", "required": False, "xml_tag": "SubmissionDate"},
+            {"name": "responsible_person", "type": "string", "required": False, "xml_tag": "ResponsiblePerson"},
+            {
+                "name": "document_checklist",
+                "type": "array",
+                "required": False,
+                "xml_tag": "Documents",
+                "item_tag": "Document",
+                "label": "Document checklist",
+                "fields": [
+                    {
+                        "name": "document_name",
+                        "type": "string",
+                        "required": True,
+                        "xml_tag": "Name",
+                        "label": "Document",
+                    },
+                    {"name": "revision", "type": "string", "required": False, "xml_tag": "Revision"},
+                    {"name": "attached", "type": "boolean", "required": False, "xml_tag": "Attached"},
+                    {"name": "notes", "type": "string", "required": False, "xml_tag": "Notes"},
+                ],
+            },
+        ],
+    },
 ]
 
 

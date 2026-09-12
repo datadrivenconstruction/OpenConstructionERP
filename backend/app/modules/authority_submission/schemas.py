@@ -21,6 +21,8 @@ FORMAT_KEYS: tuple[str, ...] = (
     "cobie",  # asset-handover register
     "eplan",  # US e-Plan submission
     "generic_xml",  # jurisdiction-neutral fallback
+    "bauantrag_xml",  # DE Bauantrag / Bauvoranfrage
+    "doc_package_xml",  # generic document submission package
     "custom",
 )
 
