@@ -27,6 +27,8 @@ class QualificationItem(BaseModel):
     basis: str = Field(default="", description="Why the line was drafted: present/absent/flag/standard.")
     source: Literal["auto", "manual"] = "auto"
     enabled: bool = True
+    linked_task_id: str | None = Field(default=None, description="OC-14: linked review task id.")
+
 
 
 class TradePresenceOut(BaseModel):

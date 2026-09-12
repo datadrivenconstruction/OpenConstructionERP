@@ -21,6 +21,8 @@ export interface QualificationItem {
   basis: string;
   source: 'auto' | 'manual';
   enabled: boolean;
+  /** OC-14: linked review task id. */
+  linked_task_id?: string | null;
 }
 
 export interface TradePresence {

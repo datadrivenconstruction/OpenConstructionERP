@@ -842,10 +842,15 @@ class Qualification:
     basis: str = ""  # why the line was drafted: "present" | "absent" | "flag" | "standard"
     source: str = "auto"  # "auto" (drafted) | "manual" (user-added)
     enabled: bool = True
+    # OC-14: optional link to a review task. When an open assumption is
+    # linked to a task, the task carries the assignee, deadline and evidence.
+    # Closing the task does not auto-remove the assumption — a person must
+    # confirm the evidence before the assumption is retired.
+    linked_task_id: str | None = None
 
     def to_dict(self) -> dict:
         """Serialise to the JSON shape stored on the model / returned to the UI."""
-        return {
+        d = {
             "id": self.id,
             "category": self.category,
             "text": self.text,
@@ -855,6 +860,9 @@ class Qualification:
             "source": self.source,
             "enabled": self.enabled,
         }
+        if self.linked_task_id:
+            d["linked_task_id"] = self.linked_task_id
+        return d
 
 
 @dataclass
