@@ -30,7 +30,6 @@ class QualificationItem(BaseModel):
     linked_task_id: str | None = Field(default=None, description="OC-14: linked review task id.")
 
 
-
 class TradePresenceOut(BaseModel):
     """A trade present in the estimate, with its rollup."""
 
