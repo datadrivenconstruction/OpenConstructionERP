@@ -201,6 +201,8 @@ async def upload_document(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str = Query(default="other"),
+    revision_code: str | None = Query(default=None, max_length=20),
+    drawing_number: str | None = Query(default=None, max_length=100),
     file: UploadFile = File(...),
     content_length: int | None = Header(default=None),
     user_id: CurrentUserId = "",  # type: ignore[assignment]
@@ -245,6 +247,13 @@ async def upload_document(
     # No upload size cap - per product policy.
     try:
         doc = await service.upload_document(project_id, file, category, user_id)
+        if revision_code is not None:
+            doc.revision_code = revision_code
+        if drawing_number is not None:
+            doc.drawing_number = drawing_number
+        if revision_code is not None or drawing_number is not None:
+            session.add(doc)
+            await session.flush()
         return _doc_to_response(doc)
     except HTTPException:
         raise
@@ -1793,6 +1802,7 @@ async def upload_document_revision(
     session: SessionDep,
     file: UploadFile = File(...),
     notes: str | None = Form(default=None),
+    revision_code: str | None = Form(default=None),
     user_id: CurrentUserId = "",  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("documents.update")),
     service: DocumentService = Depends(_get_service),
@@ -1855,6 +1865,10 @@ async def upload_document_revision(
 
     try:
         doc = await service.upload_document_revision(document_id, file, str(user_id) if user_id else "", notes=notes)
+        if revision_code is not None:
+            doc.revision_code = revision_code
+            session.add(doc)
+            await session.flush()
         return _doc_to_response(doc)
     except HTTPException:
         raise

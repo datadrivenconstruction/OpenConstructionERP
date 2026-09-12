@@ -1347,6 +1347,16 @@ export function DocumentsPage() {
                         })}
                       </Badge>
                       {doc.version > 1 && <Badge variant="blue" size="sm">v{doc.version}</Badge>}
+                      {doc.revision_code && (
+                        <Badge variant="neutral" size="sm" title={t('documents.revision_code', { defaultValue: 'Revision' })}>
+                          Rev {doc.revision_code}
+                        </Badge>
+                      )}
+                      {doc.drawing_number && (
+                        <span className="text-2xs font-mono text-content-tertiary" title={t('documents.drawing_number', { defaultValue: 'Drawing number' })}>
+                          {doc.drawing_number}
+                        </span>
+                      )}
                       {doc.cde_state && (
                         <Badge variant={CDE_STATE_COLORS[doc.cde_state] ?? 'neutral'} size="sm">
                           {doc.cde_state.toUpperCase()}
