@@ -6,6 +6,10 @@ is priced in, and the summary cascade it is totalled through. Built from
 Hungarian workbooks in production use rather than from a description of them,
 so a Hungarian estimator opening a bill recognises it on the first screen.
 
+> Developed in collaboration with **Kocsis Tamas** /
+> [BIM Control](https://www.bimcontrol.hu/) — domain expertise for Hungarian
+> construction standards, item orders and estimating workflows.
+
 ## What makes a Hungarian bill Hungarian
 
 Two things, and both are in this pack.
@@ -99,11 +103,10 @@ pretend to have done it.
 ## Review status
 
 The item orders, the code shapes and the money structure are derived from
-Hungarian workbooks in production use, and state what those files state. The
-statutory references are drawn from public sources and are pending review by a
-Hungarian quantity surveyor before they are relied on for a tender. Nothing in
-this pack reproduces a third party's cost catalogue, item texts or software
-identifiers.
+Hungarian workbooks in production use, developed in collaboration with
+Kocsis Tamas ([BIM Control](https://www.bimcontrol.hu/)). The statutory
+references are drawn from public sources. Nothing in this pack reproduces a
+third party's cost catalogue, item texts or software identifiers.
 
 ## License
 

@@ -11,7 +11,7 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 MANIFEST = PartnerPackManifest(
     slug="hungary-hu",
     partner_name="Hungary Construction Pack",
-    partner_url=None,
+    partner_url="https://www.bimcontrol.hu/",
     pack_version="0.1.0",
     pack_type="country",
     description=(
@@ -65,7 +65,7 @@ MANIFEST = PartnerPackManifest(
         accent_color="#477050",  # green of the national flag
         logo_path=None,  # no partner logo; the UI draws the country monogram
         favicon_path=None,
-        powered_by_text=None,  # use the default co-branding string
+        powered_by_text="Developed in collaboration with Kocsis Tamás / BIM Control",
     ),
     onboarding_script_path="onboarding.yaml",
     metadata={
@@ -106,11 +106,17 @@ MANIFEST = PartnerPackManifest(
         "vat_standard_rate": 27,
         "vat_reduced_rate": 5,
         "currency_decimals": 0,
+        "collaboration": {
+            "partner": "Kocsis Tamás",
+            "organization": "BIM Control",
+            "url": "https://www.bimcontrol.hu/",
+            "role": "Domain expert for Hungarian construction standards and item orders",
+        },
         "review_status": (
             "Item orders and the money structure are derived from Hungarian "
-            "workbooks in production use. The statutory references are drawn "
-            "from public sources and are pending review by a Hungarian "
-            "quantity surveyor before they are relied on for a tender."
+            "workbooks in production use. Developed in collaboration with "
+            "Kocsis Tamás (BIM Control, bimcontrol.hu). The statutory "
+            "references are drawn from public sources."
         ),
         "support_email": "info@datadrivenconstruction.io",
     },
