@@ -182,11 +182,11 @@ function OptionStatusChip({ status }: { status: DesignOptionStatus }) {
  * already has. Documents are added by the picker itself and must not be
  * repeated.
  *
- * `dwg_drawing` is deliberately absent even though the file manager collects
- * it: attach-model takes a BIM model id or a document id, and a drawing id is
- * neither, so a drawing row would be a choice that could only fail.
+ * OC-07: the picker now includes ``document`` so PDF drawings can serve as
+ * the design basis when no 3D model exists yet. ``dwg_drawing`` remains
+ * excluded because the attach-model endpoint does not accept drawing ids.
  */
-const DESIGN_OPTION_PICKER_KINDS: readonly FileKind[] = ['bim_model'];
+const DESIGN_OPTION_PICKER_KINDS: readonly FileKind[] = ['bim_model', 'document'];
 
 /** One row of the sources panel: what the option points at, if anything. */
 function SourceRow({
@@ -1233,7 +1233,7 @@ function OptionSetDetail({ setId }: { setId: string }) {
             title={t('designOptions.compareGateTitle', { defaultValue: 'Price two options to compare' })}
             description={t('designOptions.compareGateDesc', {
               defaultValue:
-                'Attach a model to at least two options and generate their priced estimates. The side-by-side comparison appears here.',
+                'Attach a model or PDF drawing to at least two options and generate their priced estimates. The side-by-side comparison appears here.',
             })}
           />
         ) : comparisonQuery.isLoading ? (

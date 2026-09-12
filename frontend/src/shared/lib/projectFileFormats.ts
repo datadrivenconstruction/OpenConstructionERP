@@ -267,25 +267,25 @@ export const BIM_VIEWER_FORMATS: readonly AcceptedFormat[] = [
 ];
 
 /**
- * Design options. Source: what ``POST /design-options/options/{id}/attach-model/``
- * can actually accept — an already-converted BIM model, or a project document
- * the BIM hub can convert into one.
+ * Design options. The picker offers two families:
  *
- * Deliberately narrower than the old upload input, which advertised meshes,
- * spreadsheets and PDFs. None of those becomes a quantified model, so the
- * option could never be priced from one and offering them promised something
- * the module cannot do. Every format here is conversion-gated because the
- * platform never parses RVT/IFC natively — the DDC cad2data pipeline produces
- * the canonical data — and the picker labels them accordingly.
+ *   1. CAD/BIM formats that the DDC cad2data pipeline can convert into a
+ *      quantified model — every entry with ``needsConversion: true``.
+ *   2. PDF/DWG drawings that serve as the design basis when the project
+ *      is at a concept stage and no 3D model exists yet. A user attaches
+ *      the drawing, describes the option in text, and may later replace it
+ *      with a priced model. This is the common early-stage workflow
+ *      (OC-07) and not offering it forced the user through a model-centric
+ *      path they could not complete.
  */
 export const DESIGN_OPTION_SOURCE_FORMATS: readonly AcceptedFormat[] = [
-  '.rvt',
-  '.ifc',
-  '.dwg',
-  '.dxf',
-  '.dgn',
-  '.rfa',
-].map((ext) => ({ ext, needsConversion: true }));
+  // BIM/CAD — conversion-gated
+  ...(['.rvt', '.ifc', '.dwg', '.dxf', '.dgn', '.rfa'] as const).map(
+    (ext) => ({ ext, needsConversion: true }) as AcceptedFormat,
+  ),
+  // Drawings / plans — direct documents, no conversion needed
+  { ext: '.pdf' },
+];
 
 /** Point cloud viewer. Source: ``features/pointcloud/api.ts``
  *  ACCEPTED_SCAN_FORMATS, which itself mirrors the backend module. */
