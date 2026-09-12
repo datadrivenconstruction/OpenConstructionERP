@@ -662,9 +662,10 @@ function CompanyProfilesTab() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {presets?.map((preset) => {
+          {[...(presets ?? [])].sort((a, b) => (a.key === 'full_enterprise' ? -1 : b.key === 'full_enterprise' ? 1 : 0)).map((preset) => {
             const Icon = getPresetIcon(preset.icon);
             const isActive = preset.key === activeProfileKey;
+            const isFull = preset.key === 'full_enterprise';
             return (
               <button
                 key={preset.key}
@@ -675,14 +676,16 @@ function CompanyProfilesTab() {
                   'text-left rounded-xl border p-4 transition-all',
                   isActive
                     ? 'border-oe-blue bg-oe-blue-subtle ring-1 ring-oe-blue/30'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-xs',
+                    : isFull
+                      ? 'border-emerald-300 bg-emerald-50/60 hover:border-emerald-400 hover:shadow-xs dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:border-emerald-600'
+                      : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-xs',
                 )}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={clsx(
                       'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                      isActive ? 'bg-oe-blue/10 text-oe-blue' : 'bg-surface-secondary text-content-secondary',
+                      isActive ? 'bg-oe-blue/10 text-oe-blue' : isFull ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-surface-secondary text-content-secondary',
                     )}
                   >
                     <Icon size={20} />
