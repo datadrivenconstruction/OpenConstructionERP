@@ -2,7 +2,7 @@
 """Check that the vendored NSIS installer template is upstream plus our edits.
 
 ``desktop/src-tauri/windows/installer.nsi`` is a copy of the template that ships
-inside the Tauri bundler, carrying four deliberate changes, all of them on the
+inside the Tauri bundler, carrying five deliberate changes, all of them on the
 reinstall page a user meets when a previous version is already installed. The
 second radio button, "Do not uninstall", starts selected on an upgrade. The WiX
 migration branch obeys whichever button was selected rather than uninstalling
@@ -322,12 +322,23 @@ LEFTOVER_FILE_AFTER = r"""    ; OpenConstructionERP fork, edit three of four (wa
         Abort
       ${EndIf}
 
+      ; OpenConstructionERP fork. When the old uninstaller fails for any reason
+      ; other than user cancellation (codes 1 / 1602 above), continue with the
+      ; install instead of aborting. The install writes over every file in
+      ; $INSTDIR, NSIS_HOOK_PREINSTALL stops running processes, and the new
+      ; uninstaller replaces the broken one. Aborting here leaves the user
+      ; stuck: the old uninstaller is broken, the new installer refuses to
+      ; proceed, and the only way forward is manual removal via Windows Settings.
+      ;
+      ; We still tell them what happened so they are not surprised, and we
+      ; proceed on Yes rather than forcing the issue. Code -1 in the field has
+      ; been traced to old hooks (pre-v15.9) whose PowerShell fails under
+      ; antivirus or group policy on specific machines.
       ${If} ${FileExists} "$INSTDIR\${MAINBINARYNAME}.exe"
         StrCpy $R5 "$R5$\nIt left $INSTDIR\${MAINBINARYNAME}.exe behind."
       ${EndIf}
 
-      ; Other errors? say what happened and return to select un/reinstall page
-      MessageBox MB_ICONEXCLAMATION "$(unableToUninstall)$\n$\n$R5$\n$\nOpen Windows Settings, go to Apps, remove ${PRODUCTNAME} there, then run this installer again."
+      MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(unableToUninstall)$\n$\n$R5$\n$\nThe installer can continue and overwrite the existing files. Continue?" /SD IDYES IDYES reinst_done
 """
 
 # Applied in this order, which is the order they appear in the file.
