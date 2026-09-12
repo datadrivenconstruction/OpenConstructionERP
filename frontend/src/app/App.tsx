@@ -277,6 +277,10 @@ const ClashProfileManager = lazy(() => import('@/features/clash/ClashProfileMana
 const UserManagementPage = lazy(() =>
   import('@/features/users/UserManagementPage').then((m) => ({ default: m.UserManagementPage }))
 );
+// Project-scoped activity timeline — cross-module feed of every change.
+const TimelinePage = lazy(() =>
+  import('@/features/timeline').then((m) => ({ default: m.TimelinePage }))
+);
 // Admin: read-only audit-log timeline (`audit.view` Manager+).
 const AuditLogPage = lazy(() =>
   import('@/features/admin/AuditLogPage').then((m) => ({ default: m.AuditLogPage }))
@@ -1175,6 +1179,7 @@ export default function App() {
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
         <Route path="/projects/:projectId" element={<P title="Project"><ProjectDetailPage /></P>} />
         <Route path="/projects/:projectId/settings" element={<P title="Project Settings"><ProjectSettingsPage /></P>} />
+        <Route path="/projects/:projectId/timeline" element={<P title="Project Timeline"><TimelinePage /></P>} />
         <Route path="/projects/:projectId/boq/new" element={<P title="New BOQ"><CreateBOQPage /></P>} />
         <Route path="/projects/:projectId/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
 
@@ -1233,6 +1238,7 @@ export default function App() {
         <Route path="/analytics" element={<P title="Analytics"><AnalyticsPage /></P>} />
 
         <Route path="/inbox" element={<P title="Inbox"><InboxPage /></P>} />
+        <Route path="/timeline" element={<P title="Timeline"><TimelinePage /></P>} />
         <Route path="/dashboards" element={<P title="Dashboards"><SnapshotsPage /></P>} />
         <Route path="/projects/:projectId/dashboards" element={<P title="Dashboards"><SnapshotsPage /></P>} />
 

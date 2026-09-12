@@ -229,6 +229,7 @@ export const navGroups: NavGroup[] = [
       // together with a decision about the name itself.
       { labelKey: 'nav.documents', to: '/files', icon: HardDrive },
       { labelKey: 'nav.inbox', defaultLabel: 'Inbox', to: '/inbox', icon: Inbox },
+      { labelKey: 'nav.timeline', defaultLabel: 'Timeline', to: '/timeline', icon: Activity },
     ],
   },
   // ── 2. TAKEOFF ─────────────────────────────────────────────────────
