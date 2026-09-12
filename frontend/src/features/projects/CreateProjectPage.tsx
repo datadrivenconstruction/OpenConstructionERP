@@ -23,6 +23,7 @@ import {
   projectsApi,
   type CreateProjectData,
   type Project,
+  type ProjectAddress,
   type WizardPreset,
   type ProfileSpec,
 } from './api';
@@ -561,6 +562,8 @@ export function CreateProjectModal({
   const [addressLon, setAddressLon] = useState<number | null>(null);
   // ISO 3166-1 alpha-2 resolved from geocoder or manual country input.
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  // OC-11: precision of the geocoded location.
+  const [locationPrecision, setLocationPrecision] = useState<string | null>(null);
 
   function applyAutocompleteSelection(sel: AddressAutocompleteSelection) {
     const parts = sel.address_parts ?? {};
@@ -577,6 +580,23 @@ export function CreateProjectModal({
     if (parts.postcode) setAddressPostal(parts.postcode);
     // Resolve ISO country code from geocoder — Nominatim returns lowercase.
     if (sel.country_code) setCountryCode(sel.country_code.toUpperCase());
+    // OC-11: derive location precision from Nominatim addresstype.
+    if (sel.addresstype) {
+      const at = sel.addresstype.toLowerCase();
+      if (['house', 'building', 'place', 'amenity', 'shop'].includes(at)) {
+        setLocationPrecision('address');
+      } else if (['road', 'street', 'pedestrian', 'residential'].includes(at)) {
+        setLocationPrecision('street');
+      } else if (['city', 'town', 'village', 'hamlet', 'suburb', 'neighbourhood', 'borough', 'municipality'].includes(at)) {
+        setLocationPrecision('city');
+      } else if (['state', 'province', 'region', 'county'].includes(at)) {
+        setLocationPrecision('region');
+      } else if (at === 'country') {
+        setLocationPrecision('country');
+      } else {
+        setLocationPrecision('city'); // conservative default
+      }
+    }
     // Stash the geocoded point so the saved address carries coordinates and
     // the map anchors without a second round-trip. Guard against NaN/out of
     // range so we never persist a pin on null island.
@@ -872,6 +892,7 @@ export function CreateProjectModal({
         // extra geocoding (#284). Omitted (null) for hand-typed addresses.
         lat: addressLat,
         lng: addressLon,
+        location_precision: locationPrecision as ProjectAddress['location_precision'] ?? null,
       };
       // Coordinates alone shouldn't count as "has an address" for the
       // null-vs-object decision; only the text parts do. (Coords are never

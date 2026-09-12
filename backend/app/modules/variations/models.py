@@ -154,6 +154,15 @@ class VariationRequest(Base):
     # Change intelligence: who owes the next action and by when.
     ball_in_court: Mapped[str | None] = mapped_column(String(36), nullable=True)
     response_due_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # OC-06: document reference for decision traceability. The decision
+    # itself is recorded in decision_notes / decision_at / decided_by, but
+    # the source document that prompted or justified the change was only
+    # available as a free-text note. These fields give the decision a
+    # clickable provenance: the document, its revision and the page that
+    # matters, so a reviewer can follow the chain without hunting.
+    source_document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    source_revision: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    source_page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

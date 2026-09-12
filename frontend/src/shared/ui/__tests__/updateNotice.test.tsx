@@ -77,7 +77,6 @@ function urlsAsked(mock: ReturnType<typeof vi.fn>): string[] {
 
 beforeEach(() => {
   localStorage.clear();
-  sessionStorage.clear();
 });
 
 afterEach(() => {
@@ -268,7 +267,7 @@ describe('a dismissal is about one version', () => {
     // reads "Dismiss" rather than its key.
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
     await waitFor(() => expect(screen.queryByText(/v15\.1\.0/)).toBeNull());
-    expect(sessionStorage.getItem(DISMISS_KEY)).toBe('15.1.0');
+    expect(localStorage.getItem(DISMISS_KEY)).toBe('15.1.0');
     first.unmount();
 
     renderNotice(client);
@@ -276,7 +275,7 @@ describe('a dismissal is about one version', () => {
   });
 
   it('speaks up again when a later version appears', async () => {
-    sessionStorage.setItem(DISMISS_KEY, '15.1.0');
+    localStorage.setItem(DISMISS_KEY, '15.1.0');
     vi.stubGlobal('fetch', answering(versionCheck({ latest_version: '15.2.0' })));
 
     renderNotice();

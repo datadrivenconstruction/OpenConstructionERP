@@ -12,6 +12,8 @@ export interface ProjectAddress {
    *  the client doesn't re-hit Nominatim on every project open. */
   lat?: number | null;
   lng?: number | null;
+  /** OC-11: precision of the geocoded location (city/street/address). */
+  location_precision?: 'city' | 'street' | 'address' | 'region' | 'country' | null;
 }
 
 /** RFC 37 §3 — single FX rate row attached to a project.

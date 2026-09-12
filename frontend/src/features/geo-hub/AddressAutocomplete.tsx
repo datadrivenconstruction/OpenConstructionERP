@@ -43,6 +43,8 @@ export interface AddressAutocompleteSelection {
   bbox: [number, number, number, number] | null;
   /** Structured address parts when Nominatim returned them. */
   address_parts: Record<string, string> | null;
+  /** OC-11: Nominatim addresstype for location precision (city/street/building). */
+  addresstype: string | null;
 }
 
 interface AddressAutocompleteProps {
@@ -232,6 +234,7 @@ export function AddressAutocomplete({
         country_code: suggestion.country_code,
         bbox,
         address_parts: suggestion.address_parts ?? null,
+        addresstype: suggestion.addresstype ?? null,
       });
       setIsOpen(false);
       setHighlighted(-1);

@@ -104,9 +104,10 @@ const VERSION_CHECK_URL = '/api/system/version-check';
 /** Matches the server's own cache window, so holding the answer here costs
  *  the server nothing and asking again inside it would gain nothing. */
 const VERSION_CHECK_TTL_MS = 4 * 60 * 60 * 1000;
-// Dismiss now lives in sessionStorage — every fresh app open shows the
-// banner again, but the user can hide it for the current tab/session.
-const DISMISS_KEY = 'oe_update_dismissed_version_session';
+// OC-16: dismiss state persists across sessions via localStorage so the
+// banner does not reappear on every page load. The guard is version-scoped:
+// dismissing v17.4.1 does not suppress a later v17.5.0 notification.
+const DISMISS_KEY = 'oe_update_dismissed_version';
 /** The endpoint truncates the release body at this many characters, so notes
  *  arriving at exactly this length are a cut, not a short release. */
 const NOTES_CAP = 500;
@@ -472,7 +473,7 @@ export function UpdateNotification({ forceShow = false, hideDismiss = false }: U
   // another route with the answer already cached.
   const [dismissedVersion, setDismissedVersion] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem(DISMISS_KEY);
+      return localStorage.getItem(DISMISS_KEY);
     } catch {
       return null;
     }
@@ -483,7 +484,7 @@ export function UpdateNotification({ forceShow = false, hideDismiss = false }: U
     if (!release) return;
     setDismissedVersion(release.latest_version);
     try {
-      sessionStorage.setItem(DISMISS_KEY, release.latest_version);
+      localStorage.setItem(DISMISS_KEY, release.latest_version);
     } catch {
       /* storage unavailable — the card simply reappears next mount */
     }
