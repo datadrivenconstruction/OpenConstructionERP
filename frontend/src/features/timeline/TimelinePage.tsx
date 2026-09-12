@@ -8,8 +8,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Activity,
   ArrowRight,
-  BarChart3,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   Clock,
