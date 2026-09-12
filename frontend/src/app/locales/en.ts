@@ -6967,6 +6967,8 @@ const resource = {
     "timeline.load_error": "Could not load timeline",
     "timeline.empty": "No activity yet",
     "timeline.empty_desc": "Activity will appear here as you work with this project.",
+    "timeline.no_project": "Select a project",
+    "timeline.no_project_desc": "Choose a project from the header to see its activity timeline.",
     "timeline.showing": "{{from}}-{{to}} of {{total}}",
     "nav.analytics": "Analytics",
     "nav.schedule": "4D Schedule",

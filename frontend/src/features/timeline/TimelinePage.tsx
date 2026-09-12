@@ -62,8 +62,9 @@ function relativeTime(iso: string | null): string {
 
 export function TimelinePage() {
   const { t } = useTranslation();
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const project = useProjectStore((s) => s.activeProject);
+  const projectId = routeProjectId || project?.id;
 
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
@@ -111,6 +112,27 @@ export function TimelinePage() {
 
   const pageCount = Math.ceil(total / LIMIT);
   const currentPage = Math.floor(offset / LIMIT) + 1;
+
+  if (!projectId) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-6">
+        <PageHeader
+          title={t('timeline.title', { defaultValue: 'Project Timeline' })}
+          subtitle={t('timeline.subtitle', {
+            defaultValue: 'Activity feed across all modules for this project',
+          })}
+          icon={Activity}
+        />
+        <EmptyState
+          icon={Activity}
+          title={t('timeline.no_project', { defaultValue: 'Select a project' })}
+          description={t('timeline.no_project_desc', {
+            defaultValue: 'Choose a project from the header to see its activity timeline.',
+          })}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
