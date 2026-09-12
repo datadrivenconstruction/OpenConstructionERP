@@ -154,8 +154,12 @@ export function TimelinePage() {
               dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+              aria-label={t('common.clear_search', { defaultValue: 'Clear search' })}
+            >
+              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" aria-hidden />
             </button>
           )}
         </div>
@@ -221,16 +225,18 @@ export function TimelinePage() {
               onClick={() => setOffset(Math.max(0, offset - LIMIT))}
               disabled={offset === 0}
               className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+              aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" aria-hidden />
             </button>
             <span className="px-2 py-1">{currentPage} / {pageCount}</span>
             <button
               onClick={() => setOffset(offset + LIMIT)}
               disabled={offset + LIMIT >= total}
               className="rounded p-1.5 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+              aria-label={t('common.next_page', { defaultValue: 'Next page' })}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </div>

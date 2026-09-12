@@ -68,6 +68,7 @@ const resource = {
     "modules.catalog.documents": "Documents",
     "modules.catalog.dwg_takeoff": "DWG Takeoff",
     "modules.catalog.eac": "EAC v2 Engine",
+    "modules.catalog.einvoice": "E-invoice",
     "modules.catalog.einvoice_clearance": "E-invoice clearance",
     "modules.catalog.enterprise_workflows": "Enterprise Workflows",
     "modules.catalog.equipment": "Equipment & Fleet Management",
