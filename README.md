@@ -936,16 +936,6 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
 
 ## Project growth
 
-### Stars
-
-<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date&theme=dark">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date">
-    <img alt="OpenConstructionERP star history" src="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" width="720">
-  </picture>
-</a>
-
 ### Release downloads
 
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
@@ -953,6 +943,16 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
     <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/download-history-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://openconstructionerp.com/assets/charts/download-history-light.svg">
     <img alt="OpenConstructionERP release download history" src="https://openconstructionerp.com/assets/charts/download-history-light.svg" width="720">
+  </picture>
+</a>
+
+### Stars
+
+<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/star-history-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://openconstructionerp.com/assets/charts/star-history-light.svg">
+    <img alt="OpenConstructionERP star history" src="https://openconstructionerp.com/assets/charts/star-history-light.svg" width="720">
   </picture>
 </a>
 
