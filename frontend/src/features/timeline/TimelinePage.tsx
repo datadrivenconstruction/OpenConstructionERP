@@ -8,18 +8,16 @@ import { useParams } from 'react-router-dom';
 import {
   Activity,
   ArrowRight,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Filter,
   Search,
   User as UserIcon,
   X,
 } from 'lucide-react';
 import { Badge, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { useProjectStore } from '@/stores/useProjectStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchProjectTimeline, type TimelineEntry, type TimelineFilters } from './api';
 
 const LIMIT = 50;
@@ -63,8 +61,8 @@ function relativeTime(iso: string | null): string {
 export function TimelinePage() {
   const { t } = useTranslation();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
-  const project = useProjectStore((s) => s.activeProject);
-  const projectId = routeProjectId || project?.id;
+  const activeProjectId = useProjectContextStore((s: { activeProjectId: string | null }) => s.activeProjectId);
+  const projectId = routeProjectId || activeProjectId;
 
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
@@ -117,14 +115,13 @@ export function TimelinePage() {
     return (
       <div className="mx-auto max-w-6xl px-4 py-6">
         <PageHeader
-          title={t('timeline.title', { defaultValue: 'Project Timeline' })}
+          srTitle={t('timeline.title', { defaultValue: 'Project Timeline' })}
           subtitle={t('timeline.subtitle', {
             defaultValue: 'Activity feed across all modules for this project',
           })}
-          icon={Activity}
         />
         <EmptyState
-          icon={Activity}
+          icon={<Activity className="h-12 w-12" />}
           title={t('timeline.no_project', { defaultValue: 'Select a project' })}
           description={t('timeline.no_project_desc', {
             defaultValue: 'Choose a project from the header to see its activity timeline.',
@@ -137,11 +134,10 @@ export function TimelinePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <PageHeader
-        title={t('timeline.title', { defaultValue: 'Project Timeline' })}
+        srTitle={t('timeline.title', { defaultValue: 'Project Timeline' })}
         subtitle={t('timeline.subtitle', {
           defaultValue: 'Activity feed across all modules for this project',
         })}
-        icon={Activity}
       />
 
       {/* Filter bar */}
@@ -193,7 +189,7 @@ export function TimelinePage() {
 
       {!isLoading && !error && filtered.length === 0 && (
         <EmptyState
-          icon={Activity}
+          icon={<Activity className="h-12 w-12" />}
           title={t('timeline.empty', { defaultValue: 'No activity yet' })}
           description={t('timeline.empty_desc', {
             defaultValue: 'Activity will appear here as you work with this project.',
@@ -260,7 +256,7 @@ function TimelineRow({ entry }: { entry: TimelineEntry }) {
             {formatAction(entry.action)}
           </span>
           {entry.module && (
-            <Badge variant="secondary" className="text-xs">{entry.module}</Badge>
+            <Badge variant="blue" className="text-xs">{entry.module}</Badge>
           )}
           <span className="text-xs text-gray-500">{entry.entity_type}</span>
           {entry.from_status && entry.to_status && (
