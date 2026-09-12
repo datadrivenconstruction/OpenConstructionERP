@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { apiGet } from '@/shared/lib/api';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -117,6 +118,17 @@ export function TimelinePage() {
 
   const entries = data?.entries ?? [];
   const total = data?.total ?? 0;
+
+  // Resolve actor UUIDs to display names (OC-15)
+  const { data: userList = [] } = useQuery<{ id: string; email: string; full_name: string }[]>({
+    queryKey: ['users-search'],
+    queryFn: () => apiGet('/v1/users/?limit=100&is_active=true'),
+    staleTime: 60_000,
+  });
+  const userMap = useMemo(
+    () => new Map(userList.map((u) => [u.id, u.full_name || u.email])),
+    [userList],
+  );
 
   const modules = useMemo(() => {
     const set = new Set<string>();
@@ -398,6 +410,7 @@ export function TimelinePage() {
                 const route = entityRoute(entry);
                 if (route) navigate(route);
               }}
+              userMap={userMap}
             />
           ))}
         </div>
@@ -420,7 +433,7 @@ export function TimelinePage() {
             <div><span className="text-gray-500">{t('timeline.detail_entity_type', { defaultValue: 'Entity Type' })}:</span> <span className="font-medium">{selectedEntry.entity_type ?? '-'}</span></div>
             <div><span className="text-gray-500">{t('timeline.detail_entity_id', { defaultValue: 'Entity ID' })}:</span> <span className="font-mono text-xs">{selectedEntry.entity_id ?? '-'}</span></div>
             <div><span className="text-gray-500">{t('timeline.detail_timestamp', { defaultValue: 'Timestamp' })}:</span> <span className="font-medium">{fullDateTime(selectedEntry.created_at)}</span></div>
-            <div><span className="text-gray-500">{t('timeline.detail_actor', { defaultValue: 'Actor' })}:</span> <span className="font-mono text-xs">{selectedEntry.actor_id ?? t('timeline.system', { defaultValue: 'System' })}</span></div>
+            <div><span className="text-gray-500">{t('timeline.detail_actor', { defaultValue: 'Actor' })}:</span> <span className="text-sm font-medium">{selectedEntry.actor_id ? (userMap.get(selectedEntry.actor_id) ?? selectedEntry.actor_id.slice(0, 8) + '...') : t('timeline.system', { defaultValue: 'System' })}</span></div>
             {selectedEntry.from_status && selectedEntry.to_status && (
               <div className="sm:col-span-2">
                 <span className="text-gray-500">{t('timeline.detail_status_change', { defaultValue: 'Status Change' })}:</span>{' '}
@@ -491,12 +504,14 @@ export function TimelinePage() {
   );
 }
 
-function TimelineRow({ entry, isSelected, onSelect, onNavigate }: {
+function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
   entry: TimelineEntry;
   isSelected: boolean;
   onSelect: () => void;
   onNavigate: () => void;
+  userMap: Map<string, string>;
 }) {
+  const actorName = entry.actor_id ? userMap.get(entry.actor_id) : null;
   const route = entityRoute(entry);
   return (
     <div
@@ -510,7 +525,7 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate }: {
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
     >
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800" title={actorName ?? undefined}>
         {entry.actor_id ? (
           <UserIcon className="h-4 w-4 text-gray-500" />
         ) : (
@@ -519,6 +534,9 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate }: {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
+          {actorName && (
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{actorName}</span>
+          )}
           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${actionColor(entry.action)}`}>
             {formatAction(entry.action)}
           </span>
