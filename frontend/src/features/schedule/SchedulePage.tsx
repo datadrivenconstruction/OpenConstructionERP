@@ -36,7 +36,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { scheduleApi } from './api';
@@ -100,11 +100,7 @@ interface CreateActivityForm {
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(getIntlLocale(), {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  return fmtDate(dateStr, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 /**

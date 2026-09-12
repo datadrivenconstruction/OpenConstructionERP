@@ -9,7 +9,7 @@
  */
 
 import type { Position, Markup } from './api';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { formatCurrency } from '@/shared/lib/money';
 import { apiGet, apiPatch } from '@/shared/lib/api';
@@ -605,7 +605,7 @@ export function formatTimeAgo(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString(getIntlLocale());
+  return fmtDate(dateStr);
 }
 
 /**

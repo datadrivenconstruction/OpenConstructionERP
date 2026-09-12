@@ -69,7 +69,7 @@ import {
   type RFIFormData,
 } from './RFIPage';
 import { ApprovalInstanceCard } from '@/features/approval-routes';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 
 // English fallbacks for the computed `rfi.status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -145,17 +145,12 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
+/** Format a date value. Delegates to the shared ``fmtDate`` which pins
+ *  date-only strings (``YYYY-MM-DD``) to UTC so they don't shift across
+ *  timezones (OC-18). */
 function formatDate(value: string | null | undefined): string {
   if (!value) return '—';
-  try {
-    return new Date(value).toLocaleDateString(getIntlLocale(), {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return '—';
-  }
+  return fmtDate(value);
 }
 
 function formatDateTime(value: string | null | undefined): string {
@@ -530,11 +525,13 @@ export function RFIDetailPage() {
   const statusCfg = STATUS_CONFIG[rfi.status] ?? STATUS_CONFIG.draft;
   const isOverdue =
     rfi.is_overdue ??
-    !!(
-      rfi.response_due_date &&
-      rfi.status === 'open' &&
-      new Date(rfi.response_due_date) < new Date()
-    );
+    (() => {
+      if (!rfi.response_due_date || rfi.status !== 'open') return false;
+      // OC-18: compare as calendar dates, not timestamps, so a date-only
+      // string like "2026-10-01" is not shifted by the local timezone.
+      const d = new Date(rfi.response_due_date + 'T23:59:59Z');
+      return d < new Date();
+    })();
   // Compute ball-in-court side relative to the viewer so the hero shows
   // a "With you / With them / Answered / Closed" pill — matches the row
   // chip on the list page, helping the operator instantly know whether

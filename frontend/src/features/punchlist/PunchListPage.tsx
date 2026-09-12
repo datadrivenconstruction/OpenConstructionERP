@@ -78,7 +78,7 @@ import { punchlistGuide } from './punchlistGuide';
 import { PunchDetailDrawer } from './PunchDetailDrawer';
 import { AssigneeLabel } from './assignee';
 import { VoiceEntry, getField } from '@/features/voice';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 
 // The pin board pulls in the PDF renderer (pdfjs-dist), which is heavy. Keep it
 // off the punchlist page's initial chunk so users who only use the list and
@@ -884,10 +884,7 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
             >
               {isOverdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
               <span>
-                {new Date(item.due_date).toLocaleDateString(getIntlLocale(), {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {fmtDate(item.due_date, { month: 'short', day: 'numeric' })}
               </span>
             </div>
           )}
@@ -1916,15 +1913,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
 
   const formattedDueDate = useMemo(() => {
     if (!item.due_date) return '-';
-    try {
-      return new Date(item.due_date).toLocaleDateString(getIntlLocale(), {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return item.due_date;
-    }
+    return fmtDate(item.due_date);
   }, [item.due_date]);
 
   return (
