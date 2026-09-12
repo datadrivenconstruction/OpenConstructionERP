@@ -39228,6 +39228,7 @@ const resource = {
   "estimateBasis.headline.markups": "Mga markup",
   "estimateBasis.headline.mixedCurrency": "Pinagsasama ng bill ang higit sa isang currency. Ang kabuuan sa itaas ay na-convert sa rate ng proyekto at hindi ligtas na basahin bilang panghuli.",
   "estimateBasis.headline.noClassYet": "Hangga't hindi nasasabi ang isang class, ang estimate na ito ay walang saklaw ng katumpakan, at hindi maipagkakaiba ng isang reviewer ang konseptong numero mula sa naka-tender na numero.",
+  "estimateBasis.headline.notEstimated": "Hindi pa natantya",
   "estimateBasis.headline.pricedAt": "Kasalukuyang presyo simula {{date}}",
   "estimateBasis.headline.rangePending": "I-save para muling kalkulahin ang inaasahang saklaw laban sa kabuuan ng estimate.",
   "estimateBasis.headline.rangeTo": "hanggang",

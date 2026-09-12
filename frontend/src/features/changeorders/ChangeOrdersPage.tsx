@@ -1575,6 +1575,14 @@ function DetailView({
 
         <WorkflowStepper status={order.status} t={t} />
 
+        {/* Issue #435: warn when a standalone CO exists alongside active VOs */}
+        {(order.metadata as Record<string, unknown>)?.standalone_overlap_warning && (
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
+            <span>{String((order.metadata as Record<string, unknown>).standalone_overlap_warning)}</span>
+          </div>
+        )}
+
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">

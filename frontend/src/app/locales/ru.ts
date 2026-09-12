@@ -41520,6 +41520,7 @@ const resource = {
     "estimateBasis.headline.markups": "Наценки",
     "estimateBasis.headline.mixedCurrency": "Смета смешивает несколько валют. Итог выше пересчитан по курсу проекта, и его нельзя считать окончательным.",
     "estimateBasis.headline.noClassYet": "Пока класс не указан, у сметы нет диапазона точности, и проверяющий не может отличить концептуальную цифру от тендерной.",
+    "estimateBasis.headline.notEstimated": "Ещё не рассчитано",
     "estimateBasis.headline.pricedAt": "Цены актуальны на {{date}}",
     "estimateBasis.headline.rangePending": "Сохраните, чтобы пересчитать ожидаемый диапазон по итогу сметы.",
     "estimateBasis.headline.rangeTo": "до",

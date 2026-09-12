@@ -40023,6 +40023,7 @@ const resource = {
     "estimateBasis.headline.markups": "Opslagen",
     "estimateBasis.headline.mixedCurrency": "De raming mengt meer dan één valuta. Het totaal hierboven is omgerekend tegen de projectkoers en is niet betrouwbaar als eindcijfer.",
     "estimateBasis.headline.noClassYet": "Zolang er geen klasse is opgegeven, draagt deze raming geen nauwkeurigheidsbandbreedte, en kan een beoordelaar een conceptcijfer niet onderscheiden van een aanbestedingscijfer.",
+    "estimateBasis.headline.notEstimated": "Nog niet geraamd",
     "estimateBasis.headline.pricedAt": "Prijzen actueel per {{date}}",
     "estimateBasis.headline.rangePending": "Bewaar om de verwachte bandbreedte tegen het ramingstotaal te herberekenen.",
     "estimateBasis.headline.rangeTo": "tot",

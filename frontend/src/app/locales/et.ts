@@ -39354,6 +39354,7 @@ const resource = {
   "estimateBasis.headline.markups": "Juurdehindlused",
   "estimateBasis.headline.mixedCurrency": "Mahutabelis segunevad mitu valuutat. Ülaltoodud kogusumma on teisendatud projekti kursi alusel ja seda pole ohutu lugeda lõplikuna.",
   "estimateBasis.headline.noClassYet": "Kuni klassi pole määratud, ei kanna see eelarvestus täpsusvahemikku ning ülevaataja ei suuda eristada kontseptsiooninumbrit pakkumisnumbrist.",
+  "estimateBasis.headline.notEstimated": "Pole veel hinnatud",
   "estimateBasis.headline.pricedAt": "Hinnad kehtivad seisuga {{date}}",
   "estimateBasis.headline.rangePending": "Salvesta, et arvutada eeldatav vahemik uuesti eelarvestuse kogusumma alusel.",
   "estimateBasis.headline.rangeTo": "kuni",

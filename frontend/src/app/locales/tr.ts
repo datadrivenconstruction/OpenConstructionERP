@@ -40257,6 +40257,7 @@ const resource = {
   "estimateBasis.headline.markups": "İlaveler",
   "estimateBasis.headline.mixedCurrency": "Keşif birden fazla para birimini karıştırıyor. Yukarıdaki toplam proje kurundan çevrilmiştir ve kesin olarak okunması güvenli değildir.",
   "estimateBasis.headline.noClassYet": "Bir sınıf belirtilmedikçe bu keşif bir doğruluk aralığı taşımaz ve bir denetçi bir kavram rakamını bir ihale rakamından ayırt edemez.",
+  "estimateBasis.headline.notEstimated": "Henüz keşfedilmedi",
   "estimateBasis.headline.pricedAt": "Fiyatların geçerlilik tarihi {{date}}",
   "estimateBasis.headline.rangePending": "Beklenen aralığı keşif toplamına göre yeniden hesaplamak için kaydedin.",
   "estimateBasis.headline.rangeTo": "ile",

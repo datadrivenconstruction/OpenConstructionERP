@@ -39304,6 +39304,7 @@ const resource = {
   "estimateBasis.headline.markups": "मार्कअप",
   "estimateBasis.headline.mixedCurrency": "बिल एक से अधिक मुद्रा मिलाता है। ऊपर का कुल प्रोजेक्ट दर पर परिवर्तित है और इसे अंतिम मानकर पढ़ना सुरक्षित नहीं है।",
   "estimateBasis.headline.noClassYet": "जब तक कोई श्रेणी नहीं बताई जाती, इस एस्टिमेट में कोई सटीकता सीमा नहीं होती और एक समीक्षक एक अवधारणा आंकड़े को निविदा किए गए आंकड़े से अलग नहीं बता सकता।",
+  "estimateBasis.headline.notEstimated": "अभी तक अनुमान नहीं",
   "estimateBasis.headline.pricedAt": "मूल्य {{date}} तक वर्तमान",
   "estimateBasis.headline.rangePending": "एस्टिमेट कुल के विरुद्ध अपेक्षित सीमा फिर से गणना करने के लिए सहेजें।",
   "estimateBasis.headline.rangeTo": "से",

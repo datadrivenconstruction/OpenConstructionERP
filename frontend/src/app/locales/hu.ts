@@ -41133,6 +41133,7 @@ const resource = {
     "estimateBasis.headline.markups": "Felárak",
     "estimateBasis.headline.mixedCurrency": "A költségvetés több pénznemet kever. A fenti összeg a projekt árfolyamán van átváltva, és nem biztonságos véglegesként olvasni.",
     "estimateBasis.headline.noClassYet": "Amíg egy osztályt meg nem adnak, ez a becslés nem hordoz pontossági tartományt, és egy felülvizsgáló nem tudja megkülönböztetni a koncepcionális számot a tenderre benyújtottól.",
+    "estimateBasis.headline.notEstimated": "Még nem kalkulált",
     "estimateBasis.headline.pricedAt": "Árak érvényesek {{date}} időponttól",
     "estimateBasis.headline.rangePending": "Mentsen, hogy újraszámítsa a várható tartományt a becslés végösszegéhez képest.",
     "estimateBasis.headline.rangeTo": "-",

@@ -39357,6 +39357,7 @@ const resource = {
   "estimateBasis.headline.markups": "اضافی اخراجات",
   "estimateBasis.headline.mixedCurrency": "بل ایک سے زیادہ کرنسیوں کو ملاتا ہے۔ اوپر کا مجموعہ پروجیکٹ کی شرح پر تبدیل کیا گیا ہے اور اسے حتمی سمجھ کر پڑھنا محفوظ نہیں۔",
   "estimateBasis.headline.noClassYet": "جب تک کوئی کلاس بیان نہیں کی جاتی، اس تخمینے میں کوئی درستگی کا دائرہ موجود نہیں ہوتا اور جائزہ لینے والا ایک تصوراتی عدد کو ٹینڈر شدہ عدد سے الگ نہیں کر سکتا۔",
+  "estimateBasis.headline.notEstimated": "ابھی تخمینہ نہیں لگایا",
   "estimateBasis.headline.pricedAt": "قیمتیں {{date}} تک رائج",
   "estimateBasis.headline.rangePending": "تخمینے کے مجموعے کے مطابق متوقع دائرہ دوبارہ شمار کرنے کے لیے محفوظ کریں۔",
   "estimateBasis.headline.rangeTo": "تا",

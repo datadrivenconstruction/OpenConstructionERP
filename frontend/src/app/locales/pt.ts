@@ -41870,6 +41870,7 @@ const resource = {
     "estimateBasis.headline.markups": "Encargos",
     "estimateBasis.headline.mixedCurrency": "O orçamento mistura mais de uma moeda. O total acima está convertido à taxa do projeto e não é seguro lê-lo como definitivo.",
     "estimateBasis.headline.noClassYet": "Enquanto não for indicada uma classe, este orçamento não tem intervalo de exatidão, e um revisor não consegue distinguir um valor de anteprojeto de um de concurso.",
+    "estimateBasis.headline.notEstimated": "Ainda não estimado",
     "estimateBasis.headline.pricedAt": "Preços atualizados em {{date}}",
     "estimateBasis.headline.rangePending": "Guarde para recalcular o intervalo esperado em relação ao total do orçamento.",
     "estimateBasis.headline.rangeTo": "a",

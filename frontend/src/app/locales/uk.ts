@@ -40821,6 +40821,7 @@ const resource = {
     "estimateBasis.headline.markups": "Націнки",
     "estimateBasis.headline.mixedCurrency": "Кошторис поєднує кілька валют. Підсумок вище перераховано за курсом проєкту, і його не можна вважати остаточним.",
     "estimateBasis.headline.noClassYet": "Поки клас не вказано, кошторис не має діапазону точності, і перевіряючий не може відрізнити концептуальну цифру від тендерної.",
+    "estimateBasis.headline.notEstimated": "Ще не розраховано",
     "estimateBasis.headline.pricedAt": "Ціни чинні на {{date}}",
     "estimateBasis.headline.rangePending": "Збережіть, щоб перерахувати очікуваний діапазон за підсумком кошторису.",
     "estimateBasis.headline.rangeTo": "до",

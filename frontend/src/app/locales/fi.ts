@@ -39253,6 +39253,7 @@ const resource = {
   "estimateBasis.headline.markups": "Lisäkustannukset",
   "estimateBasis.headline.mixedCurrency": "Määräluettelossa on useita valuuttoja. Yllä oleva summa on muunnettu projektin kurssiin eikä sitä ole turvallista lukea lopullisena.",
   "estimateBasis.headline.noClassYet": "Kunnes luokka on ilmoitettu, tällä laskelmalla ei ole julkaistua tarkkuusväliä, eikä katselmoija voi erottaa käsitteellistä lukua tarjottua lukua vastaavasta.",
+  "estimateBasis.headline.notEstimated": "Ei vielä arvioitu",
   "estimateBasis.headline.pricedAt": "Hinnat voimassa {{date}} asti",
   "estimateBasis.headline.rangePending": "Tallenna laskeaksesi odotetun vaihteluvälin uudelleen laskelman summan mukaan.",
   "estimateBasis.headline.rangeTo": "-",

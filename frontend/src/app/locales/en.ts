@@ -35796,6 +35796,7 @@ const resource = {
     "estimateBasis.headline.markups": "Markups",
     "estimateBasis.headline.mixedCurrency": "The bill blends more than one currency. The total above is converted at the project rate and is not safe to read as final.",
     "estimateBasis.headline.noClassYet": "Until a class is stated this estimate carries no accuracy range, and a reviewer cannot tell a concept figure from a tendered one.",
+    "estimateBasis.headline.notEstimated": "Not yet estimated",
     "estimateBasis.headline.pricedAt": "Prices current as of {{date}}",
     "estimateBasis.headline.rangePending": "Save to recalculate the expected range against the estimate total.",
     "estimateBasis.headline.rangeTo": "to",

@@ -39119,6 +39119,7 @@ const resource = {
   "estimateBasis.headline.markups": "Нэмэлт зардал",
   "estimateBasis.headline.mixedCurrency": "Ажлын жагсаалтад олон валют холилдсон байна. Дээрх нийлбэрийг төслийн ханшаар хөрвүүлсэн бөгөөд түүнийг эцсийн гэж унших аюулгүй биш.",
   "estimateBasis.headline.noClassYet": "Анги заагаагүй л бол энэ тооцоонд нийтлэгдсэн нарийвчлалын хязгаар байхгүй бөгөөд хянагч ойлголтын тоог тендерийн тооноос ялгаж чадахгүй.",
+  "estimateBasis.headline.notEstimated": "Одоогоор тооцоолоогүй",
   "estimateBasis.headline.pricedAt": "Үнэ {{date}} хүртэл хүчинтэй",
   "estimateBasis.headline.rangePending": "Тооцооны нийлбэрийн дагуу хүлээгдэж буй хязгаарыг дахин тооцохын тулд хадгална уу.",
   "estimateBasis.headline.rangeTo": "хүртэл",

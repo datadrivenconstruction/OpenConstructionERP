@@ -71,6 +71,8 @@ export interface CreateProjectData {
   regional_factor?: number;
   /** Optional postal address — used to anchor the project map + weather. */
   address?: ProjectAddress | null;
+  /** ISO 3166-1 alpha-2 country code resolved from address or manual input. */
+  country_code?: string | null;
   /** Phase-12 expansion fields — all optional on the backend schema. */
   project_code?: string | null;
   project_type?: string | null;

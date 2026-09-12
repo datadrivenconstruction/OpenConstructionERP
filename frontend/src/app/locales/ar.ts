@@ -41203,6 +41203,7 @@ const resource = {
     "estimateBasis.headline.markups": "الزيادات",
     "estimateBasis.headline.mixedCurrency": "يمزج الجدول أكثر من عملة واحدة. الإجمالي أعلاه محوَّل بسعر المشروع، وليس آمناً كقراءة نهائية.",
     "estimateBasis.headline.noClassYet": "إلى أن تُحدَّد فئة، لا يحمل هذا التقدير نطاق دقة، ولا يمكن للمراجع تمييز رقم مبدئي عن رقم مُناقَص عليه.",
+    "estimateBasis.headline.notEstimated": "لم يُقدَّر بعد",
     "estimateBasis.headline.pricedAt": "الأسعار سارية حتى {{date}}",
     "estimateBasis.headline.rangePending": "احفظ لإعادة حساب النطاق المتوقع مقابل إجمالي التقدير.",
     "estimateBasis.headline.rangeTo": "إلى",

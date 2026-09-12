@@ -39156,6 +39156,7 @@ const resource = {
   "estimateBasis.headline.markups": "Markup",
   "estimateBasis.headline.mixedCurrency": "Daftar volume mencampur lebih dari satu mata uang. Total di atas dikonversi pada kurs proyek dan tidak aman dibaca sebagai final.",
   "estimateBasis.headline.noClassYet": "Selama kelas belum dinyatakan, estimasi ini tidak memiliki rentang akurasi dan peninjau tidak dapat membedakan angka konsep dari angka tender.",
+  "estimateBasis.headline.notEstimated": "Belum diestimasi",
   "estimateBasis.headline.pricedAt": "Harga berlaku per {{date}}",
   "estimateBasis.headline.rangePending": "Simpan untuk menghitung ulang rentang yang diharapkan terhadap total estimasi.",
   "estimateBasis.headline.rangeTo": "sampai",

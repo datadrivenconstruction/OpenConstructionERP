@@ -39228,6 +39228,7 @@ const resource = {
   "estimateBasis.headline.markups": "اضافات",
   "estimateBasis.headline.mixedCurrency": "صورت مقادیر بیش از یک ارز را ترکیب میکند. جمع بالا با نرخ پروژه تبدیل شده و خواندن آن به‌عنوان رقم نهایی امن نیست.",
   "estimateBasis.headline.noClassYet": "تا زمانی که رده‌ای بیان نشود، این برآورد بازه دقتی ندارد و یک بازبین نمیتواند یک رقم مفهومی را از یک رقم مناقصهای تشخیص دهد.",
+  "estimateBasis.headline.notEstimated": "هنوز برآورد نشده",
   "estimateBasis.headline.pricedAt": "قیمتها معتبر از تاریخ {{date}}",
   "estimateBasis.headline.rangePending": "برای محاسبه دوباره بازه مورد انتظار در برابر جمع برآورد، ذخیره کنید.",
   "estimateBasis.headline.rangeTo": "تا",

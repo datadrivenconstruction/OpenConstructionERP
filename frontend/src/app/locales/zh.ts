@@ -41808,6 +41808,7 @@ const resource = {
   "estimateBasis.headline.markups": "费用附加项",
   "estimateBasis.headline.mixedCurrency": "该清单混用了多种货币。以上合计已按项目汇率折算,不宜作为最终金额读取。",
   "estimateBasis.headline.noClassYet": "在等级注明之前,该估算不带精度区间,审核人也无法区分概念性数字和投标数字。",
+  "estimateBasis.headline.notEstimated": "暂无估算",
   "estimateBasis.headline.pricedAt": "价格截至 {{date}}",
   "estimateBasis.headline.rangePending": "保存后即可依据估算总额重新计算预期区间。",
   "estimateBasis.headline.rangeTo": "至",

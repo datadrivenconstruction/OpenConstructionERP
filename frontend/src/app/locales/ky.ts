@@ -39404,6 +39404,7 @@ const resource = {
   "estimateBasis.headline.markups": "Кошумча чыгымдар",
   "estimateBasis.headline.mixedCurrency": "Сметада бир нече валюта аралашкан. Жогорудагы сумма долбоордун курсу боюнча которулган жана аны акыркы деп окуу коопсуз эмес.",
   "estimateBasis.headline.noClassYet": "Класс көрсөтүлмөйүнчө, бул сметада жарыяланган тактык диапазону болбойт, жана карап чыгуучу түшүнүктүк санды тендерлик сандан ажырата албайт.",
+  "estimateBasis.headline.notEstimated": "Азырынча баалана элек",
   "estimateBasis.headline.pricedAt": "Баалар {{date}} чейин колдонулат",
   "estimateBasis.headline.rangePending": "Сметанын суммасына ылайык күтүлгөн диапазонду кайра эсептөө үчүн сактаңыз.",
   "estimateBasis.headline.rangeTo": "чейин",

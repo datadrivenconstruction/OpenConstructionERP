@@ -39869,6 +39869,7 @@ const resource = {
   "estimateBasis.headline.markups": "부대비용",
   "estimateBasis.headline.mixedCurrency": "내역서에 둘 이상의 통화가 섞여 있습니다. 위 합계는 프로젝트 환율로 환산된 것으로, 확정 금액으로 읽는 것은 안전하지 않습니다.",
   "estimateBasis.headline.noClassYet": "등급이 지정되기 전까지 이 견적에는 정확도 범위가 없으며, 검토자는 개념 수치와 입찰 수치를 구분할 수 없습니다.",
+  "estimateBasis.headline.notEstimated": "미견적",
   "estimateBasis.headline.pricedAt": "가격 기준일 {{date}}",
   "estimateBasis.headline.rangePending": "견적 합계 기준으로 예상 범위를 다시 계산하려면 저장하세요.",
   "estimateBasis.headline.rangeTo": "~",

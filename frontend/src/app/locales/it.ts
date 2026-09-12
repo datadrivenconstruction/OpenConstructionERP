@@ -40094,6 +40094,7 @@ const resource = {
     "estimateBasis.headline.markups": "Ricarichi",
     "estimateBasis.headline.mixedCurrency": "Il computo mescola più di una valuta. Il totale sopra è convertito al cambio di progetto e non è affidabile come cifra definitiva.",
     "estimateBasis.headline.noClassYet": "Finché non è dichiarata una classe, questo computo non porta un intervallo di accuratezza, e chi lo revisiona non può distinguere una cifra di massima da una di gara.",
+    "estimateBasis.headline.notEstimated": "Non ancora stimato",
     "estimateBasis.headline.pricedAt": "Prezzi aggiornati al {{date}}",
     "estimateBasis.headline.rangePending": "Salva per ricalcolare l'intervallo atteso rispetto al totale del computo.",
     "estimateBasis.headline.rangeTo": "a",

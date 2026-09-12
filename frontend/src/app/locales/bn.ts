@@ -39669,6 +39669,7 @@ const resource = {
   "estimateBasis.headline.markups": "অতিরিক্ত খরচ",
   "estimateBasis.headline.mixedCurrency": "বিলে একাধিক মুদ্রা মিশ্রিত আছে। উপরের মোট প্রকল্পের হারে রূপান্তরিত এবং এটিকে চূড়ান্ত হিসেবে পড়া নিরাপদ নয়।",
   "estimateBasis.headline.noClassYet": "যতক্ষণ না কোনো ক্লাস উল্লেখ করা হয়, এই প্রাক্কলনে কোনো নির্ভুলতার পরিসর থাকে না এবং রিভিউকারী একটি ধারণাগত সংখ্যাকে টেন্ডার করা সংখ্যা থেকে আলাদা করতে পারে না।",
+  "estimateBasis.headline.notEstimated": "এখনো প্রাক্কলন করা হয়নি",
   "estimateBasis.headline.pricedAt": "দাম {{date}} পর্যন্ত কার্যকর",
   "estimateBasis.headline.rangePending": "প্রাক্কলনের মোট অনুযায়ী প্রত্যাশিত পরিসর পুনরায় গণনা করতে সংরক্ষণ করুন।",
   "estimateBasis.headline.rangeTo": "থেকে",

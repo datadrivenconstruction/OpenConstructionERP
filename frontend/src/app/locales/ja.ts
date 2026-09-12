@@ -40762,6 +40762,7 @@ const resource = {
   "estimateBasis.headline.markups": "割増費目",
   "estimateBasis.headline.mixedCurrency": "内訳書は複数通貨が混在しています。上記合計はプロジェクトレートで換算されており、確定額として読むのは安全ではありません。",
   "estimateBasis.headline.noClassYet": "クラスが指定されるまで、この見積には精度レンジがなく、レビューアは概算値と入札値を区別できません。",
+  "estimateBasis.headline.notEstimated": "未見積",
   "estimateBasis.headline.pricedAt": "価格の基準日: {{date}}",
   "estimateBasis.headline.rangePending": "見積合計に対して想定レンジを再計算するには保存してください。",
   "estimateBasis.headline.rangeTo": "〜",

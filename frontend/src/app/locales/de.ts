@@ -41870,6 +41870,7 @@ const resource = {
     "estimateBasis.headline.markups": "Zuschläge",
     "estimateBasis.headline.mixedCurrency": "Das LV mischt mehr als eine Währung. Die Summe oben ist zum Projektkurs umgerechnet und nicht als endgültig zu lesen.",
     "estimateBasis.headline.noClassYet": "Solange keine Klasse angegeben ist, trägt diese Kalkulation keine Genauigkeitsbandbreite, und ein Prüfer kann eine Konzeptzahl nicht von einer Angebotszahl unterscheiden.",
+    "estimateBasis.headline.notEstimated": "Noch nicht kalkuliert",
     "estimateBasis.headline.pricedAt": "Preise gültig zum {{date}}",
     "estimateBasis.headline.rangePending": "Speichern Sie, um die erwartete Bandbreite gegen die Kalkulationssumme neu zu berechnen.",
     "estimateBasis.headline.rangeTo": "bis",

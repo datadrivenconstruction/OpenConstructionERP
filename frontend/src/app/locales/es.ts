@@ -41877,6 +41877,7 @@ const resource = {
     "estimateBasis.headline.markups": "Márgenes",
     "estimateBasis.headline.mixedCurrency": "El presupuesto mezcla más de una moneda. El total de arriba está convertido al tipo de cambio del proyecto y no debe leerse como definitivo.",
     "estimateBasis.headline.noClassYet": "Mientras no se indique una clase, este presupuesto no lleva rango de precisión, y un revisor no puede distinguir una cifra de concepto de una de licitación.",
+    "estimateBasis.headline.notEstimated": "Sin estimar aún",
     "estimateBasis.headline.pricedAt": "Precios vigentes a fecha de {{date}}",
     "estimateBasis.headline.rangePending": "Guarde para recalcular el rango esperado sobre el total del presupuesto.",
     "estimateBasis.headline.rangeTo": "a",

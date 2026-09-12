@@ -39209,6 +39209,7 @@ const resource = {
     "estimateBasis.headline.markups": "Προσαυξήσεις",
     "estimateBasis.headline.mixedCurrency": "Η επιμέτρηση αναμειγνύει περισσότερα από ένα νομίσματα. Το παραπάνω σύνολο έχει μετατραπεί με τη συναλλαγματική ισοτιμία του έργου και δεν είναι ασφαλές να διαβάζεται ως τελικό.",
     "estimateBasis.headline.noClassYet": "Μέχρι να δηλωθεί κλάση, αυτή η εκτίμηση δεν φέρει εύρος ακρίβειας, και ο ελεγκτής δεν μπορεί να ξεχωρίσει ένα νούμερο ιδέας από ένα νούμερο διαγωνισμού.",
+    "estimateBasis.headline.notEstimated": "Δεν εκτιμήθηκε ακόμα",
     "estimateBasis.headline.pricedAt": "Τιμές ενημερωμένες στις {{date}}",
     "estimateBasis.headline.rangePending": "Αποθηκεύστε για να επανυπολογιστεί το αναμενόμενο εύρος σε σχέση με το σύνολο της εκτίμησης.",
     "estimateBasis.headline.rangeTo": "έως",

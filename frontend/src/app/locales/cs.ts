@@ -39992,6 +39992,7 @@ const resource = {
     "estimateBasis.headline.markups": "Přirážky",
     "estimateBasis.headline.mixedCurrency": "Rozpočet kombinuje více měn. Součet výše je přepočten kurzem projektu a nelze jej považovat za konečný.",
     "estimateBasis.headline.noClassYet": "Dokud není uvedena třída, rozpočet nemá rozpětí přesnosti a kontrolor nedokáže odlišit koncepční číslo od nabídkového.",
+    "estimateBasis.headline.notEstimated": "Zatím nezkalkulováno",
     "estimateBasis.headline.pricedAt": "Ceny platné ke dni {{date}}",
     "estimateBasis.headline.rangePending": "Uložte, chcete-li přepočítat očekávané rozpětí podle součtu rozpočtu.",
     "estimateBasis.headline.rangeTo": "do",

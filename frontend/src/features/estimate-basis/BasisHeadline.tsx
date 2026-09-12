@@ -91,20 +91,26 @@ export function BasisHeadline({
               {t('estimateBasis.headline.total', { defaultValue: 'Estimate total' })}
             </div>
             <div className="text-2xl font-semibold tabular-nums text-content-primary">
-              {formatCurrency(financials?.grand_total ?? '0', currency)}
+              {!financials || financials.boq_count === 0
+                ? <span className="text-content-tertiary italic">{t('estimateBasis.headline.notEstimated', { defaultValue: 'Not yet estimated' })}</span>
+                : formatCurrency(financials.grand_total ?? '0', currency)}
             </div>
           </div>
           <div className="text-xs text-content-tertiary">
             <div>
               {t('estimateBasis.headline.directCost', { defaultValue: 'Direct cost' })}{' '}
               <span className="tabular-nums text-content-secondary">
-                {formatCurrency(financials?.direct_cost ?? '0', currency)}
+                {!financials || financials.boq_count === 0
+                  ? '—'
+                  : formatCurrency(financials.direct_cost ?? '0', currency)}
               </span>
             </div>
             <div>
               {t('estimateBasis.headline.markups', { defaultValue: 'Markups' })}{' '}
               <span className="tabular-nums text-content-secondary">
-                {formatCurrency(financials?.markups_total ?? '0', currency)}
+                {!financials || financials.boq_count === 0
+                  ? '—'
+                  : formatCurrency(financials.markups_total ?? '0', currency)}
               </span>
               {financials?.markup_count ? (
                 <span className="text-content-quaternary">

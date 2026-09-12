@@ -39230,6 +39230,7 @@ const resource = {
     "estimateBasis.headline.markups": "Tillæg",
     "estimateBasis.headline.mixedCurrency": "Tilbudslisten blander mere end én valuta. Summen ovenfor er omregnet til projektkursen og er ikke sikker at læse som endelig.",
     "estimateBasis.headline.noClassYet": "Så længe der ikke er angivet en klasse, bærer dette overslag intet nøjagtighedsinterval, og en gennemgår kan ikke skelne et konceptbeløb fra et udbudsbeløb.",
+    "estimateBasis.headline.notEstimated": "Endnu ikke estimeret",
     "estimateBasis.headline.pricedAt": "Priser aktuelle pr. {{date}}",
     "estimateBasis.headline.rangePending": "Gem for at genberegne det forventede interval mod overslagets sum.",
     "estimateBasis.headline.rangeTo": "til",

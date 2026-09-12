@@ -39845,6 +39845,7 @@ const resource = {
     "estimateBasis.headline.markups": "Påslag",
     "estimateBasis.headline.mixedCurrency": "Mängdförteckningen blandar mer än en valuta. Totalen ovan är omräknad till projektkursen och är inte säker att läsa som slutgiltig.",
     "estimateBasis.headline.noClassYet": "Så länge ingen klass är angiven saknar denna kalkyl ett noggrannhetsintervall, och en granskare kan inte skilja en konceptsiffra från en anbudssiffra.",
+    "estimateBasis.headline.notEstimated": "Inte estimerat ännu",
     "estimateBasis.headline.pricedAt": "Priser aktuella per {{date}}",
     "estimateBasis.headline.rangePending": "Spara för att räkna om det förväntade intervallet mot kalkylens totalsumma.",
     "estimateBasis.headline.rangeTo": "till",

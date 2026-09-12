@@ -40256,6 +40256,7 @@ const resource = {
     "estimateBasis.headline.markups": "Narzuty",
     "estimateBasis.headline.mixedCurrency": "Kosztorys łączy więcej niż jedną walutę. Powyższa suma jest przeliczona wg kursu projektu i nie należy jej traktować jako ostatecznej.",
     "estimateBasis.headline.noClassYet": "Dopóki klasa nie zostanie podana, kosztorys nie ma przedziału dokładności, a osoba weryfikująca nie może odróżnić liczby koncepcyjnej od przetargowej.",
+    "estimateBasis.headline.notEstimated": "Jeszcze nie skalkulowane",
     "estimateBasis.headline.pricedAt": "Ceny aktualne na dzień {{date}}",
     "estimateBasis.headline.rangePending": "Zapisz, aby przeliczyć oczekiwany przedział względem sumy kosztorysu.",
     "estimateBasis.headline.rangeTo": "do",

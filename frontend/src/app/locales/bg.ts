@@ -39234,6 +39234,7 @@ const resource = {
     "estimateBasis.headline.markups": "Надценки",
     "estimateBasis.headline.mixedCurrency": "Сметката смесва повече от една валута. Общата сума по-горе е преизчислена по курса на проекта и не е безопасно да се чете като окончателна.",
     "estimateBasis.headline.noClassYet": "Докато не бъде зададен клас, тази смета не носи диапазон на точност, и рецензентът не може да различи концептуална цифра от тръжна.",
+    "estimateBasis.headline.notEstimated": "Все още не е оценено",
     "estimateBasis.headline.pricedAt": "Цени актуални към {{date}}",
     "estimateBasis.headline.rangePending": "Запазете, за да преизчислите очаквания диапазон спрямо общата сума на сметката.",
     "estimateBasis.headline.rangeTo": "до",

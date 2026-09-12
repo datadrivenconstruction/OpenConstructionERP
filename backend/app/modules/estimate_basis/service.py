@@ -309,6 +309,14 @@ class EstimateBasisService:
         summary.grand_total = fmt_decimal(grand)
         return summary
 
+    async def _resolve_locale(self, project_id: uuid.UUID) -> str:
+        """Return the project's locale for condition-text generation."""
+        from app.modules.projects.models import Project
+
+        stmt = select(Project.locale).where(Project.id == project_id)
+        found = (await self.session.execute(stmt)).scalar()
+        return str(found or "en").strip()
+
     async def _resolve_currency(self, project_id: uuid.UUID, currency: str) -> str:
         """Return the stated currency, or the project's when none was stated.
 
@@ -451,6 +459,7 @@ class EstimateBasisService:
             markup_count=len(markups.lines),
         )
 
+        project_locale = await self._resolve_locale(project_id)
         draft = draft_basis(
             coverage,
             currency=resolved_currency,
@@ -460,6 +469,7 @@ class EstimateBasisService:
             pricing_base_date=pricing_base_date,
             provenance=provenance,
             markups=markups,
+            locale=project_locale,
         )
 
         doc = EstimateBasis(

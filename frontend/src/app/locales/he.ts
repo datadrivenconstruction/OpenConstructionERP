@@ -39341,6 +39341,7 @@ const resource = {
     "estimateBasis.headline.markups": "תוספות",
     "estimateBasis.headline.mixedCurrency": "כתב הכמויות משלב יותר ממטבע אחד. הסכום שלמעלה מומר בשער הפרויקט ואינו בטוח לקריאה כסופי.",
     "estimateBasis.headline.noClassYet": "עד שתצוין דרגה, האומדן הזה אינו נושא טווח דיוק, ומעריך אינו יכול להבחין בין מספר קונספטואלי למספר שהוצע במכרז.",
+    "estimateBasis.headline.notEstimated": "טרם הוערך",
     "estimateBasis.headline.pricedAt": "המחירים בתוקף החל מ-{{date}}",
     "estimateBasis.headline.rangePending": "שמרו כדי לחשב מחדש את הטווח הצפוי מול סך האומדן.",
     "estimateBasis.headline.rangeTo": "עד",

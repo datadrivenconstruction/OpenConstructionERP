@@ -39240,6 +39240,7 @@ const resource = {
     "estimateBasis.headline.markups": "Marže",
     "estimateBasis.headline.mixedCurrency": "Troškovnik kombinira više valuta. Zbroj iznad preračunat je prema tečaju projekta i ne treba ga smatrati konačnim.",
     "estimateBasis.headline.noClassYet": "Dok klasa nije navedena, troškovnik nema raspon točnosti, a onaj tko provjerava ne može razlikovati konceptualnu brojku od natječajne.",
+    "estimateBasis.headline.notEstimated": "Još nije procijenjeno",
     "estimateBasis.headline.pricedAt": "Cijene vrijede na dan {{date}}",
     "estimateBasis.headline.rangePending": "Spremite kako biste ponovno izračunali očekivani raspon prema zbroju troškovnika.",
     "estimateBasis.headline.rangeTo": "do",

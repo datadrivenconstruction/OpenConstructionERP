@@ -39270,6 +39270,7 @@ const resource = {
   "estimateBasis.headline.markups": "Қосымша шығындар",
   "estimateBasis.headline.mixedCurrency": "Сметада бірнеше валюта араласқан. Жоғарыдағы сома жобаның бағамымен түрлендірілген және оны түпкілікті деп оқу қауіпсіз емес.",
   "estimateBasis.headline.noClassYet": "Класс көрсетілмейінше, бұл сметада жарияланған дәлдік диапазоны болмайды, және тексеруші тұжырымдамалық санды тендерлік саннан ажырата алмайды.",
+  "estimateBasis.headline.notEstimated": "Әлі бағаланбаған",
   "estimateBasis.headline.pricedAt": "Бағалар {{date}} дейін қолданыста",
   "estimateBasis.headline.rangePending": "Сметаның сомасына сай күтілетін диапазонды қайта есептеу үшін сақтаңыз.",
   "estimateBasis.headline.rangeTo": "дейін",

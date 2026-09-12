@@ -559,6 +559,8 @@ export function CreateProjectModal({
   // geocode in ProjectGeoPage still anchors it - backward compatible).
   const [addressLat, setAddressLat] = useState<number | null>(null);
   const [addressLon, setAddressLon] = useState<number | null>(null);
+  // ISO 3166-1 alpha-2 resolved from geocoder or manual country input.
+  const [countryCode, setCountryCode] = useState<string | null>(null);
 
   function applyAutocompleteSelection(sel: AddressAutocompleteSelection) {
     const parts = sel.address_parts ?? {};
@@ -573,6 +575,8 @@ export function CreateProjectModal({
     if (city) setAddressCity(city);
     if (parts.country) setAddressCountry(parts.country);
     if (parts.postcode) setAddressPostal(parts.postcode);
+    // Resolve ISO country code from geocoder — Nominatim returns lowercase.
+    if (sel.country_code) setCountryCode(sel.country_code.toUpperCase());
     // Stash the geocoded point so the saved address carries coordinates and
     // the map anchors without a second round-trip. Guard against NaN/out of
     // range so we never persist a pin on null island.
@@ -902,6 +906,7 @@ export function CreateProjectModal({
         budget_estimate: budgetEstimate.trim() || null,
         planned_start_date: plannedStart.trim() || null,
         planned_end_date: plannedEnd.trim() || null,
+        country_code: countryCode || null,
       };
 
       // Edit mode (Slice 4): the project already exists — patch its

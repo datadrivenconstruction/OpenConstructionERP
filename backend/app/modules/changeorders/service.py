@@ -654,6 +654,7 @@ class ChangeOrderService:
             )
             try:
                 order = await self.repo.create(order)
+                await self._warn_standalone_overlap(order)
                 logger.info(
                     "Change order created: %s for project %s (attempt %d)",
                     code,
@@ -675,6 +676,47 @@ class ChangeOrderService:
                 f"{_MAX_RETRIES} attempts (concurrent contention). Please retry."
             ),
         ) from last_exc
+
+    async def _warn_standalone_overlap(
+        self,
+        order: ChangeOrder,
+    ) -> None:
+        """Tag a standalone CO when active Variation Orders exist on the project.
+
+        Issue #435 lifecycle enforcement. A standalone CO created alongside
+        active VOs risks duplicating scope and commercial values. We attach a
+        warning to the order's metadata so the UI can surface it. This is
+        deliberately a warning, not a block: construction workflows are diverse
+        and the estimator may have a valid reason to raise a standalone CO.
+        """
+        if mirrored_variation_order_id(order):
+            return  # This CO was created by VO conversion - no overlap concern.
+
+        from sqlalchemy import func, select
+
+        try:
+            from app.modules.variations.models import VariationOrder
+        except ImportError:
+            return  # Variations module not installed.
+
+        stmt = (
+            select(func.count())
+            .select_from(VariationOrder)
+            .where(
+                VariationOrder.project_id == order.project_id,
+                VariationOrder.status.notin_(["rejected", "cancelled", "voided"]),
+            )
+        )
+        active_vo_count = (await self.session.execute(stmt)).scalar() or 0
+        if active_vo_count > 0:
+            metadata = dict(order.metadata_) if order.metadata_ else {}
+            metadata["standalone_overlap_warning"] = (
+                f"This project has {active_vo_count} active variation order(s). "
+                "If this change order covers scope already handled by a variation, "
+                "consider linking it to the variation order instead to avoid "
+                "duplicate commercial values."
+            )
+            order.metadata_ = metadata
 
     async def _resolve_currency(
         self,

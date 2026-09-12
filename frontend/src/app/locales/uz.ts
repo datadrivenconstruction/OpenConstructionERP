@@ -40195,6 +40195,7 @@ const resource = {
     "estimateBasis.headline.markups": "Ustamalar",
     "estimateBasis.headline.mixedCurrency": "Smetada bir nechta valyuta aralashgan. Yuqoridagi jami loyiha kursi boʻyicha aylantirilgan va uni yakuniy deb oʻqish xavfli.",
     "estimateBasis.headline.noClassYet": "Sinf koʻrsatilmaguncha bu smetada aniqlik oraligʻi boʻlmaydi, va tekshiruvchi kontseptual raqamni tenderdan ajrata olmaydi.",
+    "estimateBasis.headline.notEstimated": "Hali baholanmagan",
     "estimateBasis.headline.pricedAt": "Narxlar {{date}} holatiga koʻra",
     "estimateBasis.headline.rangePending": "Kutilgan oraliqni smeta jamiga nisbatan qayta hisoblash uchun saqlang.",
     "estimateBasis.headline.rangeTo": "dan",

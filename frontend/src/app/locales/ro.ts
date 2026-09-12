@@ -39306,6 +39306,7 @@ const resource = {
     "estimateBasis.headline.markups": "Adaosuri",
     "estimateBasis.headline.mixedCurrency": "Devizul combină mai multe valute. Totalul de mai sus este convertit la cursul proiectului și nu trebuie considerat definitiv.",
     "estimateBasis.headline.noClassYet": "Până la specificarea unei clase, devizul nu are un interval de precizie, iar un verificator nu poate distinge o cifră conceptuală de una de licitație.",
+    "estimateBasis.headline.notEstimated": "Neestimat încă",
     "estimateBasis.headline.pricedAt": "Prețuri valabile la data de {{date}}",
     "estimateBasis.headline.rangePending": "Salvați pentru a recalcula intervalul așteptat față de totalul devizului.",
     "estimateBasis.headline.rangeTo": "până la",

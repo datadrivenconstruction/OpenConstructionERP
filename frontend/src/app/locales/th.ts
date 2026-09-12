@@ -39339,6 +39339,7 @@ const resource = {
   "estimateBasis.headline.markups": "ค่าบวกเพิ่ม",
   "estimateBasis.headline.mixedCurrency": "รายการปริมาณงานมีมากกว่าหนึ่งสกุลเงินปนกัน ยอดรวมด้านบนแปลงด้วยอัตราของโครงการและไม่ควรอ่านว่าเป็นตัวเลขสุดท้าย",
   "estimateBasis.headline.noClassYet": "ตราบใดที่ยังไม่ได้ระบุระดับ ประมาณการนี้จะไม่มีช่วงความแม่นยำ และผู้ทบทวนจะแยกตัวเลขแนวคิดออกจากตัวเลขประมูลไม่ได้",
+  "estimateBasis.headline.notEstimated": "ยังไม่ได้ประมาณการ",
   "estimateBasis.headline.pricedAt": "ราคาถูกต้อง ณ วันที่ {{date}}",
   "estimateBasis.headline.rangePending": "บันทึกเพื่อคำนวณช่วงที่คาดการณ์ใหม่เทียบกับยอดรวมประมาณการ",
   "estimateBasis.headline.rangeTo": "ถึง",

@@ -41506,6 +41506,7 @@ const resource = {
     "estimateBasis.headline.markups": "Majorations",
     "estimateBasis.headline.mixedCurrency": "Le devis mélange plusieurs devises. Le total ci-dessus est converti au taux du projet et ne doit pas être lu comme définitif.",
     "estimateBasis.headline.noClassYet": "Tant qu'une classe n'est pas précisée, ce devis ne porte aucune fourchette de précision, et un vérificateur ne peut pas distinguer un chiffre de concept d'un chiffre d'appel d'offres.",
+    "estimateBasis.headline.notEstimated": "Pas encore estimé",
     "estimateBasis.headline.pricedAt": "Prix à jour au {{date}}",
     "estimateBasis.headline.rangePending": "Enregistrez pour recalculer la fourchette attendue par rapport au total du devis.",
     "estimateBasis.headline.rangeTo": "à",

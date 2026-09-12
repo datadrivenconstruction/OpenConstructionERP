@@ -39230,6 +39230,7 @@ const resource = {
     "estimateBasis.headline.markups": "Påslag",
     "estimateBasis.headline.mixedCurrency": "Mengdefortegnelsen blander mer enn én valuta. Summen over er omregnet til prosjektkursen og er ikke trygg å lese som endelig.",
     "estimateBasis.headline.noClassYet": "Så lenge ingen klasse er angitt, har denne kalkylen ikke noe nøyaktighetsintervall, og en gjennomgår kan ikke skille et konsepttall fra et anbudstall.",
+    "estimateBasis.headline.notEstimated": "Ikke estimert ennå",
     "estimateBasis.headline.pricedAt": "Priser aktuelle per {{date}}",
     "estimateBasis.headline.rangePending": "Lagre for å beregne det forventede intervallet mot kalkylens sum på nytt.",
     "estimateBasis.headline.rangeTo": "til",

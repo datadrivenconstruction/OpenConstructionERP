@@ -39347,6 +39347,7 @@ const resource = {
   "estimateBasis.headline.markups": "Các khoản phụ phí",
   "estimateBasis.headline.mixedCurrency": "Bảng khối lượng pha trộn nhiều hơn một loại tiền tệ. Tổng số ở trên được quy đổi theo tỷ giá của dự án và không an toàn để đọc như một con số cuối cùng.",
   "estimateBasis.headline.noClassYet": "Cho đến khi một mức được nêu rõ, dự toán này không mang khoảng chính xác nào, và người rà soát không thể phân biệt một con số ý tưởng với một con số đấu thầu.",
+  "estimateBasis.headline.notEstimated": "Chưa lập dự toán",
   "estimateBasis.headline.pricedAt": "Giá có hiệu lực tính đến {{date}}",
   "estimateBasis.headline.rangePending": "Lưu lại để tính lại khoảng dự kiến theo tổng dự toán.",
   "estimateBasis.headline.rangeTo": "đến",
