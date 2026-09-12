@@ -211,6 +211,10 @@ class UpdateRequest(BaseModel):
     accuracy_high_pct: str | None = Field(default=None, max_length=20)
     market_conditions: str | None = Field(default=None, max_length=8000)
     contingency_rationale: str | None = Field(default=None, max_length=8000)
+    budget_target: dict | None = Field(
+        default=None,
+        description="Client budget target: {type, amount, currency, gross_net, contingency_mode, contingency_amount, source, date, notes}.",
+    )
 
 
 class EstimateBasisResponse(BaseModel):
@@ -243,6 +247,10 @@ class EstimateBasisResponse(BaseModel):
     accuracy_high_amount: str = ""
     market_conditions: str = ""
     contingency_rationale: str = ""
+    budget_target: dict | None = Field(
+        default=None,
+        description="Client budget target alongside the calculated estimate.",
+    )
     generated_at: str | None
     created_at: str | None
     updated_at: str | None

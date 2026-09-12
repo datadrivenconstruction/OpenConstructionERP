@@ -666,6 +666,8 @@ class EstimateBasisService:
             doc.market_conditions = payload.market_conditions
         if payload.contingency_rationale is not None:
             doc.contingency_rationale = payload.contingency_rationale
+        if payload.budget_target is not None:
+            doc.budget_target = payload.budget_target
         self._apply_class(doc, payload)
         await self.session.flush()
         return doc
@@ -752,6 +754,7 @@ class EstimateBasisService:
             accuracy_high_amount=high_amount,
             market_conditions=doc.market_conditions or "",
             contingency_rationale=doc.contingency_rationale or "",
+            budget_target=doc.budget_target,
             generated_at=doc.generated_at,
             created_at=cls._iso(doc.created_at),
             updated_at=cls._iso(doc.updated_at),

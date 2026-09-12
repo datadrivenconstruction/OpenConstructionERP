@@ -410,7 +410,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                   aria-hidden
                 />
               )}
-              <span className="truncate">{translatedTitle}</span>
+              <span className="truncate" title={translatedTitle}>{translatedTitle}</span>
             </h1>
           </>
         )}
@@ -1744,7 +1744,9 @@ function ProjectSwitcher() {
           // Audit fix S5 (2026-06-06): cap the pill tighter on lg so the
           // MODULE NAME next to it stops truncating to "Carbo…"/"Takt Pl…"
           // at 1280-1440px; the pill gets its full 260px back on xl+.
-          'flex items-stretch rounded-lg border transition-all max-w-[180px] xl:max-w-[260px] overflow-hidden',
+          // OC-12: widened lg to 220px so names like "Landshut" stay readable
+          // at 125% zoom (180px rendered as ~144px, cutting anything > 10 chars).
+          'flex items-stretch rounded-lg border transition-all max-w-[220px] xl:max-w-[280px] overflow-hidden',
           activeProjectId
             ? 'bg-oe-blue-subtle border-oe-blue/30 hover:bg-oe-blue/10 hover:border-oe-blue/50 shadow-[0_1px_2px_rgba(0,122,255,0.05)]'
             : 'border-dashed border-oe-blue/40 bg-oe-blue/[0.04] hover:bg-oe-blue/[0.08] hover:border-oe-blue/60',
@@ -1783,10 +1785,13 @@ function ProjectSwitcher() {
               </span>
             </span>
           )}
-          <span className={clsx(
-            'truncate',
-            activeProjectId ? 'font-semibold' : 'font-medium',
-          )}>
+          <span
+            className={clsx(
+              'truncate',
+              activeProjectId ? 'font-semibold' : 'font-medium',
+            )}
+            title={activeProjectName || undefined}
+          >
             {activeProjectName || t('projects.select_active', { defaultValue: 'Select Project' })}
           </span>
         </button>

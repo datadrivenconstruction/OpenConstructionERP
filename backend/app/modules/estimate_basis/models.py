@@ -142,6 +142,17 @@ class EstimateBasis(Base):
     # the estimate was priced, and why the contingency is the size it is.
     market_conditions: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     contingency_rationale: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    # OC-03: the client's stated budget target, separate from the calculated
+    # estimate. A basis that shows only a calculated figure on a concept-stage
+    # project tells the reader nothing about what the client asked for. This JSON
+    # carries type ("client_target" / "budget" / "tender" / "contract"), amount,
+    # currency, gross_net mode, contingency handling and source/date, so a
+    # reviewer can see the two numbers side by side without hunting through notes.
+    budget_target: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+        default=None,
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

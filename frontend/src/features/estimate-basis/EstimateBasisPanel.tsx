@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
+  CheckSquare,
   ChevronDown,
   ChevronRight,
   ClipboardList,
@@ -38,6 +39,7 @@ import {
   Save,
   Send,
   ShieldCheck,
+  Square,
   Trash2,
 } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
@@ -150,6 +152,16 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [dirty, setDirty] = useState(false);
+  /** OC-09: timestamp of last successful save, drives the "Saved" indicator. */
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  // OC-09: warn on page close/refresh with unsaved changes.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [dirty]);
 
   const listQuery = useQuery({
     queryKey: ['estimate-basis', 'list', projectId],
@@ -227,6 +239,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
       queryClient.invalidateQueries({ queryKey: ['estimate-basis', 'list', projectId] });
       setDraft(draftFromDoc(updated));
       setDirty(false);
+      setSavedAt(Date.now());
     },
   });
 
@@ -250,6 +263,15 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
     patchItems(
       key,
       draft[key].map((it) => (it.id === id ? { ...it, enabled: !it.enabled } : it)),
+    );
+  }
+
+  /** OC-08: bulk toggle all auto-generated (template) items in a section. */
+  function toggleAllAuto(key: CategoryKey, enabled: boolean) {
+    if (!draft) return;
+    patchItems(
+      key,
+      draft[key].map((it) => (it.source === 'auto' ? { ...it, enabled } : it)),
     );
   }
 
@@ -461,6 +483,13 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           >
             {t('estimateBasis.save', { defaultValue: 'Save' })}
           </Button>
+          {/* OC-09: brief "Saved" confirmation after a successful save. */}
+          {savedAt && !dirty && !saveMutation.isPending && (
+            <span className="flex items-center gap-1 text-xs text-semantic-success animate-in fade-in duration-300">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              {t('estimateBasis.saved', { defaultValue: 'Saved' })}
+            </span>
+          )}
         </div>
       </div>
 
@@ -568,6 +597,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
               onText={(id, text) => updateItemText(key, id, text)}
               onRemove={(id) => removeItem(key, id)}
               onAdd={() => addItem(key)}
+              onToggleAllAuto={(enabled) => toggleAllAuto(key, enabled)}
               addLabel={t('estimateBasis.addLine', { defaultValue: 'Add line' })}
               emptyLabel={t('estimateBasis.sectionEmpty', { defaultValue: 'No lines yet.' })}
             />
@@ -863,6 +893,8 @@ interface SectionProps {
   onText: (id: string, text: string) => void;
   onRemove: (id: string) => void;
   onAdd: () => void;
+  /** OC-08: bulk enable/disable all auto-generated items. */
+  onToggleAllAuto: (enabled: boolean) => void;
   addLabel: string;
   emptyLabel: string;
 }
@@ -874,6 +906,7 @@ function Section({
   onText,
   onRemove,
   onAdd,
+  onToggleAllAuto,
   addLabel,
   emptyLabel,
 }: SectionProps) {
@@ -884,6 +917,10 @@ function Section({
   // not so the page can look tidy on arrival.
   const [open, setOpen] = useState(true);
   const enabledCount = items.filter((it) => it.enabled).length;
+  const autoItems = items.filter((it) => it.source === 'auto');
+  const autoEnabledCount = autoItems.filter((it) => it.enabled).length;
+  const hasAuto = autoItems.length > 0;
+  const allAutoEnabled = autoEnabledCount === autoItems.length;
 
   return (
     <Card>
@@ -913,9 +950,26 @@ function Section({
           </button>
         }
         action={
-          <Button variant="ghost" size="sm" onClick={onAdd} icon={<Plus className="h-4 w-4" aria-hidden />}>
-            {addLabel}
-          </Button>
+          <div className="flex items-center gap-1">
+            {hasAuto && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggleAllAuto(!allAutoEnabled)}
+                icon={allAutoEnabled
+                  ? <CheckSquare className="h-4 w-4" aria-hidden />
+                  : <Square className="h-4 w-4" aria-hidden />
+                }
+              >
+                {allAutoEnabled
+                  ? t('estimateBasis.uncheckTemplate', { defaultValue: 'Uncheck template' })
+                  : t('estimateBasis.checkTemplate', { defaultValue: 'Check template' })}
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onAdd} icon={<Plus className="h-4 w-4" aria-hidden />}>
+              {addLabel}
+            </Button>
+          </div>
         }
       />
       <CardContent className={`space-y-2 ${open ? '' : 'hidden'}`}>

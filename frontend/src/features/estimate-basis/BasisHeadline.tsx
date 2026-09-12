@@ -15,7 +15,7 @@
 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CalendarClock, Check, Gauge, Info } from 'lucide-react';
+import { AlertTriangle, CalendarClock, Check, Gauge, Info, Target } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
 import { fmtPercent } from '@/shared/lib/formatters';
@@ -134,6 +134,30 @@ export function BasisHeadline({
             </div>
           )}
         </div>
+
+        {/* ── OC-03: Budget target ──────────────────────────────────────── */}
+        {doc.budget_target && doc.budget_target.amount && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-light bg-surface-secondary/30 px-3 py-2">
+            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-content-tertiary">
+              <Target className="h-3.5 w-3.5" aria-hidden />
+              {t('estimateBasis.headline.budgetTarget', { defaultValue: 'Client budget target' })}
+            </div>
+            <span className="text-lg font-semibold tabular-nums text-content-primary">
+              {formatCurrency(doc.budget_target.amount, doc.budget_target.currency || currency)}
+            </span>
+            <span className="text-xs text-content-tertiary">
+              {doc.budget_target.gross_net === 'net'
+                ? t('estimateBasis.headline.netOfTax', { defaultValue: 'net of tax' })
+                : t('estimateBasis.headline.grossIncTax', { defaultValue: 'gross incl. tax' })}
+              {doc.budget_target.contingency_mode === 'included' && (
+                <> · {t('estimateBasis.headline.contingencyIncluded', { defaultValue: 'contingency included' })}</>
+              )}
+            </span>
+            {doc.budget_target.source && (
+              <span className="text-xs text-content-quaternary">{doc.budget_target.source}</span>
+            )}
+          </div>
+        )}
 
         {/* ── How firm it is ─────────────────────────────────────────────── */}
         <div className="rounded-lg border border-border-light bg-surface-secondary/40 p-3">
