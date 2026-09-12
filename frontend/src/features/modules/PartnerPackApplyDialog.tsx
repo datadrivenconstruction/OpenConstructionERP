@@ -27,6 +27,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import i18n, { loadLocaleResource, normalizePackLocale } from '@/app/i18n';
 import {
   AlertTriangle,
   Boxes,
@@ -282,6 +283,20 @@ export function PartnerPackApplyDialog({
       // clean single-client view appear immediately (mirrors deactivation).
       void qc.invalidateQueries({ queryKey: ['projects'] });
       if (ok) {
+        // Switch the UI language to match the pack's locale immediately.
+        // The usePartnerPackLocale hook in AppLayout also does this on
+        // data change, but the query refetch is async and the user sees
+        // the old language for a beat. Doing it here removes that gap.
+        if (plan?.default_locale) {
+          const target = normalizePackLocale(plan.default_locale);
+          if (target !== 'en' && target !== i18n.language) {
+            try {
+              window.localStorage.setItem('oce-pack-locale-active', slug);
+              window.localStorage.setItem('i18nextLng', target);
+            } catch { /* localStorage unavailable */ }
+            void loadLocaleResource(target).then(() => i18n.changeLanguage(target));
+          }
+        }
         addToast({
           type: 'success',
           title: t('modules.pack_applied_title', { defaultValue: 'Pack activated' }),
