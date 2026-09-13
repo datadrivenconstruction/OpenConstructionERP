@@ -100,7 +100,7 @@ Terms, or your violation of applicable law.
 ## 10. Termination
 
 You may stop using the Service at any time; on request, we will delete
-your account and associated personal data (see [PRIVACY.md](PRIVACY.md)).
+your account and associated personal data (see [PRIVACY.md](./PRIVACY.md)).
 
 DDC may suspend or terminate access for material breach of these Terms,
 after reasonable notice where practicable.

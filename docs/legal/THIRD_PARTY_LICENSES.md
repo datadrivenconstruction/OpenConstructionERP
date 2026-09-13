@@ -12,7 +12,7 @@ the dual-licensing model (AGPL-3.0-or-later / commercial),
 third-party trademarks (buildingSMART, DIN, GAEB, NRM,
 CSI MasterFormat, ISO), and the
 AI / cryptography / export-control notices, see
-[`./NOTICE`](./NOTICE).
+[`NOTICE`](../../NOTICE).
 
 ## Manual fallback
 
@@ -33,7 +33,7 @@ npx license-checker --production --markdown
 ## Non-exhaustive summary (maintained manually in NOTICE)
 
 See the **Third-Party Software** section of
-[`./NOTICE`](./NOTICE) for the human-curated non-exhaustive list
+[`NOTICE`](../../NOTICE) for the human-curated non-exhaustive list
 of primary dependencies and their SPDX identifiers.
 
 ## What the generated inventory covers, and what it does not

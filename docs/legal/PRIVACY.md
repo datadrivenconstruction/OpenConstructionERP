@@ -177,7 +177,7 @@ whether you have a basis to record and transmit it before you upload one.
 
 ## 7. Cookies
 
-See [COOKIES.md](COOKIES.md) for the cookie inventory.
+See [COOKIES.md](./COOKIES.md) for the cookie inventory.
 
 ## 8. Children
 

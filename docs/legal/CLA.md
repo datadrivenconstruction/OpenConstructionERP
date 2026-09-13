@@ -70,7 +70,7 @@ OpenConstructionERP (including your Contributions) under:
 
 - The **GNU Affero General Public License v3.0 or later**
   (AGPL-3.0-or-later) for the open-source community edition, AND
-- A **separate commercial licence** (see `COMMERCIAL-LICENSE.md`)
+- A **separate commercial licence** (see `./COMMERCIAL-LICENSE.md`)
   for organisations requiring proprietary deployment without AGPL
   obligations, indemnification, or an SLA.
 

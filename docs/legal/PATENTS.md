@@ -13,9 +13,9 @@ of the OpenConstructionERP project.
   artefacts under any of its licences
   (AGPL-3.0-or-later for the open-source edition; the
   DataDrivenConstruction commercial licence for customers who
-  elect that path - see [LICENSE](./LICENSE),
+  elect that path - see [LICENSE](../../LICENSE),
   [COMMERCIAL-LICENSE.md](./COMMERCIAL-LICENSE.md), and
-  [NOTICE](./NOTICE)).
+  [NOTICE](../../NOTICE)).
 - **"Patent Claim"** means any claim of a patent now owned,
   controlled, or licensable by Licensor anywhere in the world.
 
@@ -65,7 +65,7 @@ distributed.
 This policy covers patents owned or controlled by Licensor
 only. Patents held by upstream dependencies (FastAPI,
 SQLAlchemy, React, Vite, AG Grid, and other components listed
-in [NOTICE](./NOTICE) and in the generated
+in [NOTICE](../../NOTICE) and in the generated
 `THIRD_PARTY_LICENSES.md`) are governed by their respective
 licences.
 
