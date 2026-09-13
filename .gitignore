@@ -165,6 +165,7 @@ frontend/debug-bim/
 # which is the half that still applies if one is ever force-added.
 .claude/
 CLAUDE-DASHBOARDS.md
+AGENTS.md
 
 # Internal-only files: planning, strategy, QA artifacts, audits and runbooks.
 # Kept local, never published. Enforced by scripts/check_repo_hygiene.py at

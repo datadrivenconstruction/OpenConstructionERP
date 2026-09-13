@@ -93,7 +93,7 @@ ACCEPTED: dict[str, str] = {
         "AGPL-3.0-or-later, Artifex, dual sold. Accepted deliberately: it is a base "
         "dependency so PDF takeoff works on a stock install. This is the exception the "
         "whole gate exists to keep visible, not to hide. Documented for customers in "
-        "NOTICE 'AGPL Cascade' and COMMERCIAL-LICENSE.md section 4a, which tell a "
+        "NOTICE 'AGPL Cascade' and docs/legal/COMMERCIAL-LICENSE.md section 4a, which tell a "
         "commercial deployment it must either replace it or hold an Artifex licence. "
         "Removing this entry is how you make the gate red on purpose to test it."
     ),
@@ -261,7 +261,7 @@ def main() -> int:
             "\nEach of these has to be a decision, not an oversight. Either drop the "
             "package, or add it to ACCEPTED in this file with the reason it is "
             "acceptable, and say so in NOTICE where a customer will read it. If it is "
-            "AGPL or GPL and reaches a shipped artefact, COMMERCIAL-LICENSE.md has to "
+            "AGPL or GPL and reaches a shipped artefact, docs/legal/COMMERCIAL-LICENSE.md has to "
             "say what a commercial deployment must do about it.",
         )
         return 1

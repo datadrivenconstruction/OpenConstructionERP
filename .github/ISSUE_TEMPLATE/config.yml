@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Chat
+    url: https://t.me/datadrivenconstruction
+    about: Ask questions and share ideas in our Telegram community
+  - name: Security Vulnerability
+    url: https://github.com/datadrivenconstruction/OpenConstructionERP/security/advisories/new
+    about: Report security vulnerabilities privately
+  - name: Professional Support
+    url: https://datadrivenconstruction.io/contact-support/
+    about: Enterprise deployment, training and consulting

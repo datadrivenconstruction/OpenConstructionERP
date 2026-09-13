@@ -1,7 +1,7 @@
 # Developing on OpenConstructionERP, with or without an AI assistant
 
 This file exists because the platform is large and its shape is not obvious from the outside.
-There are 190 backend modules and around 180 frontend feature directories, and a newcomer who starts
+There are 191 backend modules and around 180 frontend feature directories, and a newcomer who starts
 by reading files at random will spend a week learning things that fit on a few pages. What
 follows is that few pages. It is written for a competent developer who wants to run the
 platform, change it for their own market, and be right about how it works rather than
@@ -89,7 +89,7 @@ afternoon here: a module directory with no `manifest.py` is invisible. It is not
 scan simply does not find it, the module does not load, and nothing anywhere says so. If you
 scaffolded a module and its endpoints are not there, check that first.
 
-There are 193 directories under `backend/app/modules/` at the time of writing and 190 of them
+There are 193 directories under `backend/app/modules/` at the time of writing and 191 of them
 carry a manifest. Count them yourself when it matters, with a scan for `manifest.py` one level
 down, because the answer moves as modules land, and both of those numbers had already moved by
 one between this file being drafted and being reviewed.

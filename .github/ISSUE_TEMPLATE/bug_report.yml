@@ -13,7 +13,7 @@ body:
     attributes:
       label: App Version
       description: What version of OpenConstructionERP are you using? (visible in Settings > About)
-      placeholder: "0.1.0"
+      placeholder: "17.5.0"
     validations:
       required: true
 
@@ -26,14 +26,23 @@ body:
         - BOQ Editor
         - Resource Management
         - Cost Database / Catalog
-        - Schedule (4D)
+        - Schedule (4D) / Timeline
         - Cost Model (5D)
         - Risk Register
-        - Change Orders
-        - Tendering
+        - Change Orders / Variations
+        - Tendering / Procurement
         - Validation
         - Reports / Export
         - Document Management
+        - Contracts
+        - Finance / Invoicing
+        - Property Development
+        - Punch List / Snag List
+        - Daily Diary / Site Records
+        - Clash Detection
+        - BIM Viewer / 3D
+        - DWG / PDF Takeoff
+        - Coordination Hub
         - Authentication / Users
         - AI Features (Advisor, Quick Estimate, Smart Actions)
         - Onboarding Wizard
@@ -41,6 +50,7 @@ body:
         - UI / Frontend
         - API / Backend
         - Docker / Deployment
+        - Desktop App
         - Other
     validations:
       required: true
@@ -118,23 +128,41 @@ body:
       description: Which language was the app set to when the bug occurred?
       options:
         - English
-        - Deutsch
-        - Francais
-        - Espanol
-        - Portugues
-        - Russian
-        - Chinese
-        - Arabic
-        - Hindi
-        - Turkish
-        - Italian
-        - Dutch
-        - Polish
-        - Czech
-        - Japanese
-        - Korean
-        - Swedish
-        - Norwegian
-        - Danish
-        - Finnish
+        - Deutsch (German)
+        - Français (French)
+        - Español (Spanish)
+        - Português (Portuguese)
+        - Русский (Russian)
+        - 中文 (Chinese)
+        - العربية (Arabic)
+        - हिन्दी (Hindi)
+        - Türkçe (Turkish)
+        - Italiano (Italian)
+        - Nederlands (Dutch)
+        - Polski (Polish)
+        - Čeština (Czech)
+        - 日本語 (Japanese)
+        - 한국어 (Korean)
+        - Svenska (Swedish)
+        - Norsk (Norwegian)
+        - Dansk (Danish)
+        - Suomi (Finnish)
+        - Български (Bulgarian)
+        - Hrvatski (Croatian)
+        - Magyar (Hungarian)
+        - Bahasa Indonesia
+        - Română (Romanian)
+        - ภาษาไทย (Thai)
+        - Tiếng Việt (Vietnamese)
+        - Кыргызча (Kyrgyz)
+        - Eesti (Estonian)
+        - বাংলা (Bengali)
+        - Қазақ (Kazakh)
+        - Filipino
+        - اردو (Urdu)
+        - فارسی (Persian)
+        - עברית (Hebrew)
+        - Ελληνικά (Greek)
+        - Українська (Ukrainian)
+        - O'zbek (Uzbek)
         - Other

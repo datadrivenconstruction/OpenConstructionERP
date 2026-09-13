@@ -1276,7 +1276,7 @@ export function AboutPage() {
           right before the Changelog so the page moves from gratitude into the
           release history. Sponsors and donors lead the wall when present;
           otherwise a single inviting line asks for the first backer. Kept in
-          sync with /ACKNOWLEDGMENTS.md via acknowledgments.ts. */}
+          sync with /docs/legal/ACKNOWLEDGMENTS.md via acknowledgments.ts. */}
       <Card className="animate-card-in" style={{ animationDelay: '280ms' }}>
         <div className="p-6" data-community-anchor style={{ scrollMarginTop: '80px' }}>
           <div className="flex items-center gap-2.5 mb-2">

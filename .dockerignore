@@ -156,17 +156,17 @@ docs
 !backend/NOTICE
 CHANGELOG.md
 SECURITY.md
-TERMS.md
-PRIVACY.md
-COOKIES.md
-COMMERCIAL-LICENSE.md
-CLA.md
+docs/legal/TERMS.md
+docs/legal/PRIVACY.md
+docs/legal/COOKIES.md
+docs/legal/COMMERCIAL-LICENSE.md
+docs/legal/CLA.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
-PATENTS.md
-THIRD_PARTY_LICENSES.md
-TRADEMARK.md
-ACCESSIBILITY.md
+docs/legal/PATENTS.md
+docs/legal/THIRD_PARTY_LICENSES.md
+docs/legal/TRADEMARK.md
+docs/legal/ACCESSIBILITY.md
 
 # ── Misc archives ───────────────────────────────────────────────────
 *.tar

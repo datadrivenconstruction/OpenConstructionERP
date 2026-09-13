@@ -51,7 +51,7 @@ rather than a recurring one.
 TWO MODES, ONE INVENTORY
 
 ``--markdown`` emits the ``## Bundled assets`` section that
-``.github/workflows/sbom-and-licenses.yml`` appends to THIRD_PARTY_LICENSES.md.
+``.github/workflows/sbom-and-licenses.yml`` appends to docs/legal/THIRD_PARTY_LICENSES.md.
 The gate and the generator therefore build their inventory with the same code
 and cannot disagree about what we ship. A separate generator that walked the
 tree its own way would be a second source of truth, and the point of the whole
@@ -381,7 +381,7 @@ def main() -> int:
     parser.add_argument(
         "--markdown",
         action="store_true",
-        help="emit the THIRD_PARTY_LICENSES.md section instead of checking",
+        help="emit the docs/legal/THIRD_PARTY_LICENSES.md section instead of checking",
     )
     args = parser.parse_args()
     return markdown() if args.markdown else check()

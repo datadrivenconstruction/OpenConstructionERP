@@ -14,19 +14,19 @@
 # Root-level legal and policy files
 /LICENSE                                @datadrivenconstruction
 /NOTICE                                 @datadrivenconstruction
-/CLA.md                                 @datadrivenconstruction
-/COMMERCIAL-LICENSE.md                  @datadrivenconstruction
+/docs/legal/CLA.md                      @datadrivenconstruction
+/docs/legal/COMMERCIAL-LICENSE.md       @datadrivenconstruction
 /SECURITY.md                            @datadrivenconstruction
-/PRIVACY.md                             @datadrivenconstruction
-/TERMS.md                               @datadrivenconstruction
-/COOKIES.md                             @datadrivenconstruction
+/docs/legal/PRIVACY.md                  @datadrivenconstruction
+/docs/legal/TERMS.md                    @datadrivenconstruction
+/docs/legal/COOKIES.md                  @datadrivenconstruction
 /CODE_OF_CONDUCT.md                     @datadrivenconstruction
 /CONTRIBUTING.md                        @datadrivenconstruction
 /README.md                              @datadrivenconstruction
-/PATENTS.md                             @datadrivenconstruction
-/TRADEMARK.md                           @datadrivenconstruction
-/ACCESSIBILITY.md                       @datadrivenconstruction
-/THIRD_PARTY_LICENSES.md                @datadrivenconstruction
+/docs/legal/PATENTS.md                  @datadrivenconstruction
+/docs/legal/TRADEMARK.md                @datadrivenconstruction
+/docs/legal/ACCESSIBILITY.md            @datadrivenconstruction
+/docs/legal/THIRD_PARTY_LICENSES.md     @datadrivenconstruction
 
 # Source trees
 /backend/                               @datadrivenconstruction

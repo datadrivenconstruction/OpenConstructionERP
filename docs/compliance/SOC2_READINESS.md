@@ -58,7 +58,7 @@ against the AICPA Trust Services Criteria (TSC) 2017 (revised
 
 | Control ID | Description | Implementation |
 |---|---|---|
-| C1.1 | Identification of confidential information | Documented in PRIVACY.md and in the internal data-classification matrix. |
+| C1.1 | Identification of confidential information | Documented in docs/legal/PRIVACY.md and in the internal data-classification matrix. |
 | C1.2 | Handling of confidential information | Encryption in transit (TLS); encryption at rest recommended (deployer responsibility in self-hosting context). |
 
 ### 2.4 Processing Integrity — PI series (for accounting / DATEV / ELSTER modules)
@@ -73,8 +73,8 @@ against the AICPA Trust Services Criteria (TSC) 2017 (revised
 
 | Control ID | Description | Implementation |
 |---|---|---|
-| P1.1 | Notice to data subjects | PRIVACY.md published at the hosted instance. |
-| P2.1 | Consent capture | Cookie-banner consent (see COOKIES.md); AI-interaction opt-in. |
+| P1.1 | Notice to data subjects | docs/legal/PRIVACY.md published at the hosted instance. |
+| P2.1 | Consent capture | Cookie-banner consent (see docs/legal/COOKIES.md); AI-interaction opt-in. |
 | P4.1 | Access | GDPR Art. 15 handled within 30 days via info@datadrivenconstruction.io. |
 | P5.1 | Disclosure to third parties | Sub-processor list maintained; notification on material change (30-day advance notice for the hosted instance). |
 | P6.2 | Incident response | GDPR Art. 33 72-hour supervisory-authority notification; Art. 34 data-subject notification when required. |

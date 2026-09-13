@@ -8,7 +8,7 @@ or later (AGPL-3.0-or-later). See the LICENSE file for the full license text.
 A commercial licence is available that lifts the AGPL obligations on
 OpenConstructionERP itself. It cannot lift them on code we do not own, and
 one dependency present in every install, PyMuPDF, is separately AGPL: see
-"AGPL Cascade" below and section 4a of COMMERCIAL-LICENSE.md. Contact
+"AGPL Cascade" below and section 4a of docs/legal/COMMERCIAL-LICENSE.md. Contact
 info@datadrivenconstruction.io.
 
 ------------------------------------------------------------------------
@@ -19,7 +19,7 @@ This distribution contains or depends on third-party open-source software.
 A full license inventory is generated for each release and attached to that
 release on the GitHub releases page as three files:
 
-    THIRD_PARTY_LICENSES.md    aggregated, human-readable
+    docs/legal/THIRD_PARTY_LICENSES.md    aggregated, human-readable
     sbom-backend.cdx.json      CycloneDX SBOM, Python dependencies
     sbom-frontend.cdx.json     CycloneDX SBOM, bundled frontend packages
 
@@ -227,7 +227,7 @@ Artifex sells PyMuPDF commercially alongside the AGPL offer and pursues
 commercial licensing actively, so this is a live question for a
 commercial deployment rather than a theoretical one. What that means for
 a customer, and what the options are, is written out in
-COMMERCIAL-LICENSE.md under "AGPL components inside the Software".
+docs/legal/COMMERCIAL-LICENSE.md under "AGPL components inside the Software".
 
 These are the features that read PDFs through PyMuPDF, so that a reader
 can tell whether their own deployment touches it at all:
@@ -631,7 +631,7 @@ HarfBuzz, inside uharfbuzz
     Licence text: backend/app/core/licenses/LICENSE_HARFBUZZ
 
     uharfbuzz, the Python wrapper, is licensed under the Apache License
-    2.0 and declares it, so THIRD_PARTY_LICENSES.md lists it from
+    2.0 and declares it, so docs/legal/THIRD_PARTY_LICENSES.md lists it from
     metadata without help. HarfBuzz itself, which is statically linked
     into that extension module, is licensed under the so-called "Old
     MIT" licence, which is neither Apache-2.0 nor the modern MIT text.

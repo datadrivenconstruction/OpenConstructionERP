@@ -12,7 +12,7 @@ interface AIDisclaimerBannerProps {
 /**
  * Legal disclaimer shown on AI-powered features. Ensures users understand
  * that AI output is advisory only, shifting contractual liability back to
- * the estimator. Referenced by TERMS.md §4 and NOTICE (AI section).
+ * the estimator. Referenced by docs/legal/TERMS.md §4 and NOTICE (AI section).
  */
 export function AIDisclaimerBanner({ variant = 'full', className }: AIDisclaimerBannerProps) {
   const { t } = useTranslation();

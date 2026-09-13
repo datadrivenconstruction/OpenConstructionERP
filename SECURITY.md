@@ -41,13 +41,11 @@ publish a mitigation advisory as soon as one is available.
 
 ## Supported Versions
 
-| Version track          | Security updates                                    |
-|------------------------|-----------------------------------------------------|
-| `0.1.x` (current)      | Yes                                                 |
-| Earlier 0.x releases   | No - upgrade path published in release notes        |
-
-Once a `1.0.0` line is released, this matrix will be updated to
-keep the latest stable plus the previous minor for six months.
+| Version track           | Security updates                                    |
+|-------------------------|-----------------------------------------------------|
+| Latest release (17.x)   | Yes                                                 |
+| Previous minor          | Critical fixes only, for six months after superseded |
+| Older releases          | No - upgrade path published in release notes         |
 
 ## Scope
 

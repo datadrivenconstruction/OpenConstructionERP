@@ -42,7 +42,7 @@ Contributor License Agreement (CLA). The CLA grants Artem Boiko -
 and any successor legal entity (UG (haftungsbeschränkt) or GmbH
 formed by Artem Boiko) - the right to distribute contributions
 under both the AGPL-3.0-or-later license and a separate commercial
-license. See CLA.md for the full agreement.
+license. See docs/legal/CLA.md for the full agreement.
 
 ---
 
@@ -52,6 +52,6 @@ A commercial license is available for organizations that cannot
 comply with the AGPL-3.0 terms (e.g., proprietary SaaS deployments
 without source-code disclosure, embedding in closed-source products,
 or deployments requiring indemnification / SLA). See
-COMMERCIAL-LICENSE.md for the template.
+docs/legal/COMMERCIAL-LICENSE.md for the template.
 
 Contact: info@datadrivenconstruction.io

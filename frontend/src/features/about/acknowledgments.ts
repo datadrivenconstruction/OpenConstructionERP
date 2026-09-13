@@ -4,7 +4,7 @@
  * Community acknowledgments - the people who shaped OpenConstructionERP by
  * reporting issues, asking questions and funding the work.
  *
- * Keep this file in sync with /ACKNOWLEDGMENTS.md at the repo root. When a new
+ * Keep this file in sync with /docs/legal/ACKNOWLEDGMENTS.md. When a new
  * reporter row is added there, add the person here too, deduplicated by handle
  * (one entry per person, even when they filed several issues).
  *
@@ -32,7 +32,7 @@ export function acknowledgedUrl(entry: Acknowledged): string | undefined {
 /**
  * Contributors and reporters - community members who opened issues,
  * discussions or questions that improved the platform. Deduplicated by
- * handle and ordered by first appearance in /ACKNOWLEDGMENTS.md.
+ * handle and ordered by first appearance in /docs/legal/ACKNOWLEDGMENTS.md.
  */
 export const CONTRIBUTORS: Acknowledged[] = [
   { name: 'AliK', handle: 'alikhalilx' },

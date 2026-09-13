@@ -29,12 +29,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           path-to-signatures: "signatures/cla.json"
-          path-to-document: "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/CLA.md"
+          path-to-document: "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/legal/CLA.md"
           branch: "main"
           allowlist: "boikoartem,datadrivenconstruction,dependabot[bot],github-actions[bot]"
           custom-notsigned-prcomment: |
             Thank you for your pull request! Before we can merge it, you need to sign our
-            [Contributor License Agreement (CLA)](https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/CLA.md).
+            [Contributor License Agreement (CLA)](https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/legal/CLA.md).
 
             To sign, please comment on this PR with:
 

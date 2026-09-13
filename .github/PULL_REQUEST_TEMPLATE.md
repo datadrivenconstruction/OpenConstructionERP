@@ -1,39 +1,33 @@
+> **External pull requests are not merged.** This project does not accept code contributions via pull request for supply-chain security reasons. If you found a bug or have a feature idea, please [open an issue](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) instead - the team will implement it and credit you. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
 ## Summary
 
 <!-- Brief description of changes (1-3 sentences) -->
 
 ## Type of Change
 
-- [ ] Bug fix (non-breaking change fixing an issue)
-- [ ] New feature (non-breaking change adding functionality)
-- [ ] Breaking change (fix or feature causing existing functionality to change)
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
 - [ ] Documentation update
-- [ ] Refactoring (no functional changes)
-- [ ] CI/CD or infrastructure change
+- [ ] Refactoring
+- [ ] CI/CD or infrastructure
 
 ## Related Issues
 
-<!-- Link related issues: Closes #123, Fixes #456 -->
+<!-- Closes #123, Fixes #456 -->
 
 ## Changes Made
 
-<!-- Bullet list of key changes -->
-
 -
 
-## Author Checklist
+## Checklist
 
-- [ ] Code follows project style guidelines (ruff on the backend, ESLint on the frontend)
-- [ ] Tests added/updated for changes
+- [ ] Code follows project style guidelines
+- [ ] Tests added/updated
 - [ ] All CI checks pass
-- [ ] Documentation updated if needed
 - [ ] No secrets or credentials in code
-- [ ] i18n: user-facing strings use translation keys
-- [ ] Conventional commit message used
-
-## Reviewer Checklist
-
-- [ ] Code is clear and well-structured
-- [ ] Tests cover the key scenarios
-- [ ] No security concerns
-- [ ] No performance regressions
+- [ ] User-facing strings use i18n translation keys
+- [ ] Conventional commit message
