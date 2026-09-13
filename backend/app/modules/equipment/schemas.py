@@ -9,7 +9,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 # Reused enum-like patterns
 _ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
@@ -645,6 +645,44 @@ class EquipmentDashboardResponse(BaseModel):
     expiring_inspections: int = 0
     blocked: bool = False
     last_telemetry_at: datetime | None = None
+
+
+class EquipmentCostSummaryResponse(BaseModel):
+    """Aggregated cost breakdown for one machine, optionally scoped to a project.
+
+    Returned by ``GET /equipment/{id}/cost-summary``. Each bucket is a
+    Decimal-as-string so the frontend can format it in the project currency
+    without float rounding.
+    """
+
+    equipment_id: UUID
+    project_id: UUID | None = None
+    rental_cost: Decimal = Decimal("0")
+    rental_days: int = 0
+    fuel_cost: Decimal = Decimal("0")
+    fuel_litres: Decimal = Decimal("0")
+    maintenance_cost: Decimal = Decimal("0")
+    maintenance_orders: int = 0
+    parts_cost: Decimal = Decimal("0")
+    total_cost: Decimal = Decimal("0")
+    plant_hours: Decimal = Decimal("0")
+    cost_per_hour: Decimal | None = None
+
+    @field_serializer(
+        "rental_cost",
+        "fuel_cost",
+        "fuel_litres",
+        "maintenance_cost",
+        "parts_cost",
+        "total_cost",
+        "plant_hours",
+        "cost_per_hour",
+        when_used="json",
+    )
+    def _ser(self, v: Decimal | None) -> str | None:
+        if v is None:
+            return None
+        return str(v.quantize(Decimal("0.01")))
 
 
 class FleetDashboardResponse(BaseModel):

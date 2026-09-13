@@ -53,6 +53,7 @@ from app.modules.equipment.repository import (
 )
 from app.modules.equipment.schemas import (
     DamageReportCreate,
+    EquipmentCostSummaryResponse,
     EquipmentCreate,
     EquipmentDashboardResponse,
     EquipmentRentalCreate,
@@ -1012,6 +1013,86 @@ class EquipmentService:
             expiring_inspections=expiring_for_unit,
             blocked=blocked,
             last_telemetry_at=equipment.last_telemetry_at,
+        )
+
+    async def equipment_cost_summary(
+        self,
+        equipment_id: uuid.UUID,
+        project_id: uuid.UUID | None = None,
+    ) -> EquipmentCostSummaryResponse:
+        """Aggregate all cost buckets for one machine, optionally per project."""
+        await self.get_equipment(equipment_id)
+
+        # Rental cost: sum of (days * daily_rate)
+        rentals, _ = await self.rental_repo.list_(equipment_id=equipment_id, limit=10_000)
+        rental_cost = Decimal("0")
+        rental_days = 0
+        for r in rentals:
+            if project_id and r.project_id != project_id:
+                continue
+            start = date.fromisoformat(r.start_date) if r.start_date else date.today()
+            end = date.fromisoformat(r.end_date) if r.end_date else date.today()
+            d = max((end - start).days, 0)
+            rental_days += d
+            rate = r.internal_rate_per_day or Decimal("0")
+            rental_cost += rate * d
+
+        # Fuel cost (FuelLog has no project_id, so project filter is skipped)
+        fuel_logs, _ = await self.fuel_repo.list_for_equipment(equipment_id, limit=10_000)
+        fuel_cost = Decimal("0")
+        fuel_litres = Decimal("0")
+        for f in fuel_logs:
+            fuel_cost += f.cost or Decimal("0")
+            fuel_litres += f.fuel_liters or Decimal("0")
+
+        # Maintenance work order costs (WO has a single `cost` field)
+        work_orders, _ = await self.workorder_repo.list_(equipment_id=equipment_id, limit=10_000)
+        maintenance_cost = Decimal("0")
+        wo_count = len(work_orders)
+        for wo in work_orders:
+            maintenance_cost += wo.cost or Decimal("0")
+
+        # Parts cost from PartsLog (quantity * unit_cost)
+        parts_list, _ = await self.parts_repo.list_for_equipment(equipment_id, limit=10_000)
+        parts_cost = Decimal("0")
+        for p in parts_list:
+            parts_cost += (p.quantity or Decimal("1")) * (p.unit_cost or Decimal("0"))
+
+        total = rental_cost + fuel_cost + maintenance_cost + parts_cost
+
+        # Plant hours from field_time (if available)
+        plant_hours = Decimal("0")
+        try:
+            from sqlalchemy import func as sa_func
+            from sqlalchemy import select as sa_select
+
+            from app.modules.field_time.models import FieldTimesheetLine
+
+            q = sa_select(sa_func.coalesce(sa_func.sum(FieldTimesheetLine.hours), 0)).where(
+                FieldTimesheetLine.equipment_id == equipment_id,
+            )
+            if project_id:
+                q = q.where(FieldTimesheetLine.project_id == project_id)
+            result = await self.session.execute(q)
+            plant_hours = Decimal(str(result.scalar_one()))
+        except Exception:
+            pass
+
+        cost_per_hour = (total / plant_hours).quantize(Decimal("0.01")) if plant_hours > 0 else None
+
+        return EquipmentCostSummaryResponse(
+            equipment_id=equipment_id,
+            project_id=project_id,
+            rental_cost=rental_cost,
+            rental_days=rental_days,
+            fuel_cost=fuel_cost,
+            fuel_litres=fuel_litres,
+            maintenance_cost=maintenance_cost,
+            maintenance_orders=wo_count,
+            parts_cost=parts_cost,
+            total_cost=total,
+            plant_hours=plant_hours,
+            cost_per_hour=cost_per_hour,
         )
 
     async def fleet_dashboard(self) -> FleetDashboardResponse:

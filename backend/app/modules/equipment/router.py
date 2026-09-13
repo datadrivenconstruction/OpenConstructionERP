@@ -74,6 +74,7 @@ from app.modules.equipment.schemas import (
     DamageReportCreate,
     DamageReportResponse,
     DamageReportUpdate,
+    EquipmentCostSummaryResponse,
     EquipmentCreate,
     EquipmentDashboardResponse,
     EquipmentFleetListResponse,
@@ -272,6 +273,24 @@ async def equipment_dashboard(
     service: EquipmentService = Depends(_get_service),
 ) -> EquipmentDashboardResponse:
     return await service.equipment_dashboard(equipment_id)
+
+
+@router.get(
+    "/equipment/{equipment_id}/cost-summary",
+    response_model=EquipmentCostSummaryResponse,
+)
+async def equipment_cost_summary(
+    equipment_id: uuid.UUID,
+    project_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("equipment.read")),
+    service: EquipmentService = Depends(_get_service),
+) -> EquipmentCostSummaryResponse:
+    """Aggregated cost breakdown for one machine.
+
+    Pass ``project_id`` to scope the breakdown to a single project.
+    Without it, costs from all projects are summed.
+    """
+    return await service.equipment_cost_summary(equipment_id, project_id)
 
 
 # ── Predictive maintenance ───────────────────────────────────────────────

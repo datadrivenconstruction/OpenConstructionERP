@@ -246,6 +246,21 @@ export interface EquipmentDashboard {
   last_telemetry_at?: string | null;
 }
 
+export interface EquipmentCostSummary {
+  equipment_id: string;
+  project_id: string | null;
+  rental_cost: string;
+  rental_days: number;
+  fuel_cost: string;
+  fuel_litres: string;
+  maintenance_cost: string;
+  maintenance_orders: number;
+  parts_cost: string;
+  total_cost: string;
+  plant_hours: string;
+  cost_per_hour: string | null;
+}
+
 /* ── Predictive maintenance / fleet analytics ──────────────────────────── */
 
 export type HealthBand = 'green' | 'amber' | 'red';
@@ -352,6 +367,16 @@ export function deleteEquipment(id: string): Promise<void> {
 
 export function getEquipmentDashboard(id: string): Promise<EquipmentDashboard> {
   return apiGet<EquipmentDashboard>(`/v1/equipment/equipment/${id}/dashboard`);
+}
+
+export function getEquipmentCostSummary(
+  id: string,
+  projectId?: string,
+): Promise<EquipmentCostSummary> {
+  const qs = projectId ? `?project_id=${projectId}` : '';
+  return apiGet<EquipmentCostSummary>(
+    `/v1/equipment/equipment/${id}/cost-summary${qs}`,
+  );
 }
 
 export function getHealthAnalytics(id: string): Promise<HealthAnalytics> {

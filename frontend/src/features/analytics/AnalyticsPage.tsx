@@ -69,6 +69,9 @@ interface ProjectAnalytics {
   variance_pct: number | null;
   boq_count: number;
   status: 'on_budget' | 'over_budget';
+  gross_floor_area?: number | null;
+  cost_per_sqm?: number | null;
+  phase?: string | null;
 }
 
 interface CurrencyTotal {
@@ -90,7 +93,7 @@ interface AnalyticsOverview {
   projects: ProjectAnalytics[];
 }
 
-type SortField = 'name' | 'budget' | 'actual' | 'variance' | 'variance_pct';
+type SortField = 'name' | 'budget' | 'actual' | 'variance' | 'variance_pct' | 'cost_per_sqm';
 type SortDir = 'asc' | 'desc';
 
 /* ── Component ────────────────────────────────────────────────────────── */
@@ -180,6 +183,7 @@ export function AnalyticsPage() {
       t('analytics.col_actual', { defaultValue: 'Actual' }),
       t('analytics.col_variance', { defaultValue: 'Variance' }),
       t('analytics.col_variance_pct', { defaultValue: 'Var. %' }),
+      t('analytics.col_cost_per_sqm', { defaultValue: 'Cost/m²' }),
       t('analytics.col_status', { defaultValue: 'Status' }),
     ];
     const rows = sortedProjects.map(p => [
@@ -190,6 +194,7 @@ export function AnalyticsPage() {
       Number(p.actual).toFixed(0),
       Number(p.variance).toFixed(0),
       p.variance_pct == null ? '' : fmtPercent(Number(p.variance_pct)),
+      p.cost_per_sqm != null ? Number(p.cost_per_sqm).toFixed(0) : '',
       p.status,
     ].join(','));
     const csv = [headers.join(','), ...rows].join('\n');
@@ -611,6 +616,14 @@ export function AnalyticsPage() {
                     onClick={handleSort}
                     align="right"
                   />
+                  <SortHeader
+                    field="cost_per_sqm"
+                    label={t('analytics.col_cost_per_sqm', { defaultValue: 'Cost/m²' })}
+                    current={sortField}
+                    dir={sortDir}
+                    onClick={handleSort}
+                    align="right"
+                  />
                   <th className="px-4 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider">
                     {t('analytics.col_status', { defaultValue: 'Status' })}
                   </th>
@@ -673,6 +686,13 @@ export function AnalyticsPage() {
                           {p.variance_pct >= 0 ? '+' : ''}
                           {fmtNumber(p.variance_pct, 1)}%
                         </>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap text-content-secondary">
+                      {p.cost_per_sqm != null ? (
+                        <>{fmtNumber(p.cost_per_sqm, 0)} {p.currency}/m²</>
+                      ) : (
+                        <span className="text-content-tertiary">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">

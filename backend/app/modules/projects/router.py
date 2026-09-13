@@ -2165,6 +2165,17 @@ async def analytics_overview(
         # BOQ count from pre-fetched map (single grouped query above)
         boq_count = boq_counts_map.get(pid, 0)
 
+        gfa = None
+        cost_per_sqm = None
+        try:
+            gfa_raw = getattr(p, "gross_floor_area", None)
+            if gfa_raw is not None and str(gfa_raw).strip():
+                gfa = float(gfa_raw)
+                if gfa > 0 and actual > 0:
+                    cost_per_sqm = round(actual / gfa, 2)
+        except (ValueError, TypeError):
+            pass
+
         projects_data.append(
             {
                 "id": pid,
@@ -2178,6 +2189,9 @@ async def analytics_overview(
                 "variance_pct": variance_pct,
                 "boq_count": boq_count,
                 "status": "over_budget" if outturn > planned else "on_budget",
+                "gross_floor_area": gfa,
+                "cost_per_sqm": cost_per_sqm,
+                "phase": getattr(p, "phase", None),
             }
         )
 
