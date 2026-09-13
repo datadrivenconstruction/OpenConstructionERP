@@ -943,6 +943,10 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
 
 ### Release downloads
 
+<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads from <a href="https://openconstructionerp.com/download">openconstructionerp.com</a>.</sub>
+
+[![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
+
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/download-history-dark.svg">
@@ -950,10 +954,6 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
     <img alt="OpenConstructionERP release download history" src="https://openconstructionerp.com/assets/charts/download-history-light.svg" width="720">
   </picture>
 </a>
-
-<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads from <a href="https://openconstructionerp.com/download">openconstructionerp.com</a>.</sub>
-
-[![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 
 ### Stars
 
