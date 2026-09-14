@@ -42,7 +42,7 @@
     "isomorphic-dompurify": "^3.18.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^1.44.0",
     "maplibre-gl": "^6.9.0",
     "pdfjs-dist": "^6.3.289",
     "react": "^18.3.1",
