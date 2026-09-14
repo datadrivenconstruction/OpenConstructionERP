@@ -74,7 +74,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.5.5",
     "eslint": "^9.39.4",
-    "jest-axe": "^10.0.0",
+    "jest-axe": "^11.0.0",
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
     "openapi-typescript": "^7.13.0",
