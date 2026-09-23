@@ -1457,7 +1457,7 @@ def first_line_not_redrawn[T](was: list[T], now: list[T]) -> T | None:
     return None
 
 
-def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring() -> None:
+def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring(monkeypatch: pytest.MonkeyPatch) -> None:
     """The claim the wiring commit made about itself, checked rather than asserted.
 
     Facing a helper that every cell of the schedule passes through could quietly
@@ -1494,8 +1494,7 @@ def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring() -
     was drawn, with new lines allowed to appear between them.
 
     What the replacement still catches: a run that moves sideways, changes size,
-    changes its words or stops being drawn; a cell that re-wraps, because that
-    regroups runs onto different lines; a row deleted; two rows swapped. A
+    changes its words or stops being drawn; a row deleted; two rows swapped. A
     restyle lands here because a restyled run is a differently wide run, and
     anything centred or right aligned starts somewhere else the moment its width
     changes.
@@ -1506,6 +1505,23 @@ def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring() -
     page boundary; colour; a face swap that changes neither a run's width nor
     the set of faces the file embeds; and, as before, an operator level rewrite
     that leaves every run where it was.
+
+    A cell that re-wraps belongs on neither list without a qualifier, and the
+    first control below is where that was learned. A wrapped cell in a bottom
+    aligned row keeps its last line on the row's own baseline, beside the label
+    and the date, and puts the overflow on a new line above it. The row survives
+    intact and the extra line is an insertion, which this forgives. What the
+    comparison sees of a wrap is the words: the run that used to say the whole
+    string now says a part of it. So a re-wrap is caught wherever the text is
+    compared and invisible wherever it is stripped out.
+
+    One thing this rests on is not in the document at all: the reader has to
+    agree about which runs share a baseline, because that agreement is what
+    makes a line. Both sides are rendered and read in one process, so a reader's
+    quirks cancel - unless the two documents differ in whether a cell wraps,
+    which is exactly when the reader gets to decide the grouping on one side
+    only. That is not a hypothetical. It is what killed the control that the
+    first one below replaces.
 
     The face comparison below is untouched by all of this and is the wiring
     property proper: a Latin document that had escalated to the Chinese pack
@@ -1529,7 +1545,9 @@ def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring() -
     on the bytes.
     """
     import reportlab.rl_config as rl_config
+    from reportlab.lib.enums import TA_LEFT
 
+    from app.modules.contracts import aia_pdf
     from app.modules.contracts.aia_pdf import render_aia_application_pdf
 
     source = source_before_the_wiring("backend/app/modules/contracts/aia_pdf.py", "pdf_style_for_text")
@@ -1560,21 +1578,37 @@ def test_a_latin_payment_application_is_laid_out_as_it_was_before_the_wiring() -
         )
 
         # Three controls. The first says this comparison can tell two documents
-        # apart by how they are drawn and not merely by what they say. A
-        # certifier name long enough to wrap splits its row, and the label and
-        # the date fall away from the first fragment onto the second line, so
-        # the block stops drawing one of the two three-run lines it used to and
-        # the comparison rejects it with the strings taken back out. Comparing a
-        # renumbered application would not do: APP-777 and APP-014 start at the
-        # same point, so the lines would differ by a run's text alone and the
-        # control would hold over a comparison blind to position.
-        wrapped = aia_payload(description="Substructure and ground floor slab")
-        wrapped["certification"]["architect_certified_by"] = (
-            "Ortega Architects and Associates, Consulting Engineers and Surveyors"
+        # apart by where their runs start, and not merely by what they say. The
+        # same payload is rendered again with the right aligned styles told to
+        # draw left: a real change to the page, in which the money column's runs
+        # begin at a different x with not one character, size or face different
+        # anywhere on it. It is paired with a plain second render that has to be
+        # accepted, so that the rejection cannot be explained by two renders
+        # never agreeing with one another in the first place.
+        #
+        # This was a certifier name long enough to wrap until 2026-09-23, and
+        # that control was dead rather than miscalibrated. It rejected on the
+        # count of the label-name-date shape, which the short document draws
+        # twice, architect and owner, and the wrapped one drew once: the
+        # multiplicity of a shape that is not unique on the page. And it drew it
+        # once only because pypdf up to 6.16.1 reported the wrapped cell's second
+        # line eighty-four points below its own row. The page never drew it
+        # there. Both fragments sit under one cm at Tm 0 16 with a leading of 12,
+        # the label and the date do not move, and the second fragment comes down
+        # to join them on the row's own baseline. Read correctly, which 6.16.2
+        # does, the wrap only inserts a line above an intact row,
+        # first_line_not_redrawn forgives insertion by design, and there was
+        # nothing left for the control to catch. So a control here may not rest
+        # on a wrap, and may not rest on how many times a repeating shape occurs.
+        unmoved = drawn_lines(render_aia_application_pdf(latin), ignore_size=7)
+        assert first_line_not_redrawn(without_words(after), without_words(unmoved)) is None, (
+            "the same payload rendered twice did not agree with itself, so the control below proves nothing"
         )
-        drawn_wrapped = drawn_lines(render_aia_application_pdf(wrapped), ignore_size=7)
-        assert first_line_not_redrawn(without_words(after), without_words(drawn_wrapped)) is not None, (
-            "a certifier name long enough to wrap was drawn in exactly the shapes a short one was, "
+        with monkeypatch.context() as drawn_left:
+            drawn_left.setattr(aia_pdf, "TA_RIGHT", TA_LEFT)
+            moved = drawn_lines(render_aia_application_pdf(latin), ignore_size=7)
+        assert first_line_not_redrawn(without_words(after), without_words(moved)) is not None, (
+            "the money column drawn left began at exactly the x it begins at when drawn right, "
             "so this comparison cannot see where anything is drawn"
         )
         # The second holds the order half of the comparison to account, which no
