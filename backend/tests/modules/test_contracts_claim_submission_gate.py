@@ -195,6 +195,10 @@ async def test_with_no_other_module_registered_the_claim_is_checked_and_submits(
         # block, so a provider may not replace either.
         "totals",
         "cap",
+        # The ceiling on retention, which is a second thing entirely from the
+        # not-to-exceed cap above it: one bounds what the job may bill, the
+        # other bounds what may be withheld from what it bills.
+        "retention_cap",
     }
     submitted = await svc.transition_claim(claim.id, "submitted")
     assert submitted.status == "submitted"

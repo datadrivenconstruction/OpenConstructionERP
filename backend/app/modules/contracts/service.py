@@ -809,6 +809,31 @@ def generate_tm_claim(
     }
 
 
+def _subdivision_caps_declared(country: str | None) -> bool:
+    """Whether a country's state or province packs carry retainage statutes.
+
+    The prior question to "is this claim over the cap": are there caps to
+    miss. ``resolve_progress_billing`` answers about a subdivision only when
+    it is handed an ISO 3166-2 code, and nothing on a project holds one, so
+    the state caps are unreachable from the contracts module today. This reads
+    the pack listing directly to say whether that silence is costing anything
+    on this contract's country, which it does in the United States and nowhere
+    else so far.
+    """
+    if not country:
+        return False
+    from app.core.regional_packs import packs_for_country  # noqa: PLC0415
+
+    for config in packs_for_country(country):
+        if not config.get("parent_pack"):
+            continue  # A national pack. Only a subdivision carries state law.
+        rules = config.get("state_rules")
+        retainage = rules.get("retainage") if isinstance(rules, dict) else None
+        if isinstance(retainage, list) and retainage:
+            return True
+    return False
+
+
 def _tm_cap_context(contract: Contract, claim: ProgressClaim, ordered: list[ProgressClaim]) -> dict[str, str] | None:
     """What a T&M claim would put against the not-to-exceed cap, or None.
 
@@ -1633,6 +1658,17 @@ class ContractsService:
             },
             "parties": party_rows,
             "securities": [{"security_type": s.security_type, "status": s.status} for s in securities],
+            # The engine applies the newest schedule that carries tiers and
+            # ignores the rest without saying so, which is fine as a rule and
+            # bad as a surprise. The rule that reads this says out loud that
+            # more than one exists and which one is in force.
+            "retention_schedules": [
+                {
+                    "id": str(s.id),
+                    "has_tiers": bool(isinstance(s.accrual_rule, dict) and s.accrual_rule.get("tiers")),
+                }
+                for s in await self._retention_schedules(contract)
+            ],
             "eot_claims": [
                 {
                     "id": str(e.id),
@@ -1750,6 +1786,11 @@ class ContractsService:
             # Gate passed - stamp the audit trail onto the contract metadata.
             meta = dict(contract.metadata_ or {})
             meta["compliance_validation"] = audit_entry
+            # The country's retention ladder is frozen onto the contract here
+            # for the same reason the contract value above it is. Both stamps
+            # go into the one dict: a second assignment to fields["metadata_"]
+            # would drop the compliance audit without saying so.
+            meta["retention_policy_seed"] = await self.seed_retention_schedule(contract)
             fields["metadata_"] = meta
             fields["signed_at"] = datetime.now(UTC).isoformat()
             event_bus.publish_detached(
@@ -2391,6 +2432,7 @@ class ContractsService:
                 "previous_certificates_now": str((await self.previous_certificates(claim))[0]),
             },
             "cap": _tm_cap_context(contract, claim, ordered),
+            "retention_cap": await self._claim_retention_cap_context(claim, contract),
         }
 
         # What other modules add (the subcontractor pay apps rolled into this
@@ -2405,6 +2447,35 @@ class ContractsService:
             raise RuntimeError(f"claim context providers may not replace core keys: {', '.join(clash)}")
         context.update(extra)
         return context
+
+    async def _claim_retention_cap_context(self, claim: ProgressClaim, contract: Contract) -> dict[str, Any]:
+        """The ceiling on retention, the figure it binds, and where there is none.
+
+        Two kinds of cap and only one of them is readable from here. The
+        policy carries its own, written by the parties or by a national pack,
+        and that is checkable on every claim. The other is state or province
+        law, which the subdivision packs hold: reading it needs an ISO 3166-2
+        code and a project has no field for one, so those caps cannot be
+        applied at all. That is worth saying out loud on a claim in a country
+        that has them rather than passing in silence, which is why the country
+        and whether it declares any travel with the figures.
+
+        Unlike :meth:`_claim_retention_context` this answers for every claim,
+        including the flat-retention shapes. A cost-plus claim holds retention
+        too, and a cap binds what is held however it was worked out.
+        """
+        policy = await self.retention_policy(contract)
+        country = ((await self._progress_billing(contract)) or {}).get("country_code")
+        held = getattr(claim, "retention_held_to_date", None)
+        return {
+            "held": None if held is None else str(held),
+            "contract_sum": str(contract.total_value or 0),
+            "cap_percent": (
+                None if policy.cap_percent_of_contract_sum is None else str(policy.cap_percent_of_contract_sum)
+            ),
+            "country_code": country,
+            "subdivision_caps_declared": _subdivision_caps_declared(country),
+        }
 
     async def _claim_retention_context(self, claim: ProgressClaim, contract: Contract) -> dict[str, Any] | None:
         """What the claim stores for retention beside what its policy gives now.
@@ -3383,6 +3454,104 @@ class ContractsService:
             if claim.status not in ("draft", "rejected"):
                 return claim
         return None
+
+    #: Why a contract was, or was not, given its country's retention ladder as
+    #: it was signed. Recorded on ``metadata_["retention_policy_seed"]``.
+    RETENTION_SEED_REASONS: tuple[str, ...] = (
+        "seeded",
+        "pack_silent",
+        "pack_declares_no_tiers",
+        "pack_policy_unreadable",
+        "policy_already_set",
+        "flat_retention_contract_type",
+        "contract_rate_differs",
+    )
+
+    async def seed_retention_schedule(self, contract: Contract) -> dict[str, Any]:
+        """Freeze the country's retention ladder onto a contract as it is signed.
+
+        The packs declare a retention policy per country and the engine applies
+        one only from a :class:`RetentionSchedule` row, which nothing ever
+        wrote. So a United States contract retained its opening rate to the end
+        of the job while the pack said the rate halves at half complete: the
+        rule was declared and never applied. This writes it onto the contract
+        at the moment it is signed, for the same reason
+        ``original_contract_value`` is frozen there. A later correction to a
+        pack, or a change to the project's country, then cannot rewrite what an
+        already signed contract withholds.
+
+        Nothing is written unless the pack's opening rate is the rate the
+        parties agreed. Equality, not a bound: a ladder opening below the
+        agreed rate releases money early, one opening above it withholds more
+        than was agreed, and those are as wrong as each other. Where they
+        agree, the parties took the country's standard opening rate and the
+        country's standard step-down goes with it, which from there can only
+        reduce what is held.
+
+        ``release_rule`` is left empty deliberately. Releases already resolve
+        through the pack on every read, and a release rule frozen here would
+        outlive a correction to the documents an event requires, which is the
+        half of this our packs are still young enough to get wrong.
+
+        Returns:
+            The audit stamp for ``metadata_["retention_policy_seed"]``:
+            ``seeded``, a ``reason`` from :data:`RETENTION_SEED_REASONS`, and
+            the country and schedule id where there is one.
+        """
+
+        def skipped(reason: str, **extra: Any) -> dict[str, Any]:
+            return {"seeded": False, "reason": reason, **extra}
+
+        if contract.contract_type in FLAT_RETENTION_CONTRACT_TYPES:
+            # No schedule of values, so percent complete has nothing to measure
+            # against and the ladder is never consulted. Writing one would make
+            # this stamp say the contract steps down when it does not.
+            return skipped("flat_retention_contract_type")
+        for existing in await self._retention_schedules(contract):
+            rule = existing.accrual_rule if isinstance(existing.accrual_rule, dict) else {}
+            if rule.get("tiers"):
+                # Somebody has already written a policy for this contract.
+                # Read through retention_policy() this would refuse the signing
+                # over a malformed schedule, which signing is not about.
+                return skipped("policy_already_set", retention_schedule_id=str(existing.id))
+        billing = await self._progress_billing(contract)
+        country = (billing or {}).get("country_code")
+        pack_rule = (billing or {}).get("retention_policy")
+        if not isinstance(pack_rule, dict):
+            return skipped("pack_silent", country_code=country)
+        if not pack_rule.get("tiers"):
+            return skipped("pack_declares_no_tiers", country_code=country)
+        agreed = Decimal(str(contract.retention_percent or 0))
+        try:
+            policy = policy_from_rule(pack_rule, fallback_rate=agreed)
+        except ValueError as exc:
+            # The pack is wrong. A contract nobody can sign is a worse answer
+            # than a contract on its own flat rate, so this is recorded and
+            # the signing goes through.
+            return skipped("pack_policy_unreadable", country_code=country, message=str(exc))
+        opening = policy.tiers[0].rate
+        if opening != agreed:
+            # Both written at the scale of the column the agreed rate lives in.
+            # Decimal comparison ignores scale but str does not, and a stamp
+            # that reads "5" or "5.00" depending on whether the row had been
+            # read back from the database is a poor thing to audit against.
+            places = Decimal("0.01")
+            return skipped(
+                "contract_rate_differs",
+                country_code=country,
+                pack_opening_rate=f"{opening.quantize(places):f}",
+                contract_rate=f"{agreed.quantize(places):f}",
+            )
+        row = await self.retention_repo.create(
+            RetentionSchedule(contract_id=contract.id, accrual_rule=dict(pack_rule), release_rule={})
+        )
+        return {
+            "seeded": True,
+            "reason": "seeded",
+            "country_code": country,
+            "retention_schedule_id": str(row.id),
+            "tier_count": len(policy.tiers),
+        }
 
     async def retention_policy_view(self, contract: Contract) -> dict[str, Any]:
         """The accrual policy in force, and what about it can still change.

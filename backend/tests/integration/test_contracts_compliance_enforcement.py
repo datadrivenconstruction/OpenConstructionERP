@@ -60,6 +60,26 @@ class _StubLineRepo:
         return list(self.lines)
 
 
+class _StubRetentionRepo:
+    """Signing now reads the contract's retention schedules and may write one.
+
+    See ``ContractsService.seed_retention_schedule``: the country's retention
+    ladder is frozen onto the contract at the same moment the contract value
+    is. These stubs have no country between them, so nothing is written here,
+    but the repo has to exist for the gate to be reached at all.
+    """
+
+    def __init__(self) -> None:
+        self.rows: list[Any] = []
+
+    async def list_for_contract(self, _contract_id: uuid.UUID) -> list[Any]:
+        return list(self.rows)
+
+    async def create(self, item: Any) -> Any:
+        self.rows.append(item)
+        return item
+
+
 class _StubSession:
     def __init__(self, project: Any | None = None) -> None:
         self._project = project
@@ -105,6 +125,7 @@ def _make_service(*, contract: Any, lines: list[Any], project: Any) -> Any:
     svc.contract_repo = _StubContractRepo()
     svc.contract_repo.rows[contract.id] = contract
     svc.line_repo = _StubLineRepo(lines)
+    svc.retention_repo = _StubRetentionRepo()
     return svc
 
 
@@ -115,6 +136,12 @@ def _draft_contract() -> SimpleNamespace:
         project_id=uuid.uuid4(),
         status="draft",
         signed_at=None,
+        # Signing freezes the contract value, and has since well before this
+        # stub carried one: both tests that reach the transition have been red
+        # on the missing attribute rather than on anything they assert.
+        total_value=Decimal("2500"),
+        contract_type="lump_sum",
+        retention_percent=Decimal("10"),
         metadata_={},
     )
 
@@ -182,6 +209,13 @@ async def test_sign_succeeds_when_compliant() -> None:
     assert audit["blocked"] is False
     assert audit["status"] in ("passed", "warnings")
     assert audit["counts"]["errors"] == 0
+    # The retention seed stamp goes into the same metadata dict and must not
+    # displace the audit above. This project names a market rather than a
+    # country, DACH being three of them, so no pack answers for it and nothing
+    # is written - which is the stamp saying so, not the stamp being absent.
+    seed = result.metadata_["retention_policy_seed"]
+    assert seed == {"seeded": False, "reason": "pack_silent", "country_code": None}
+    assert svc.retention_repo.rows == []
 
 
 # ── 3. Parent (roll-up) lines are treated as sections, not leaves ─────────

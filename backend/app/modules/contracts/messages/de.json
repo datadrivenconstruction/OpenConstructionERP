@@ -57,6 +57,12 @@
       "fail": "Abschlagsrechnung {claim} weist {held} Sicherheitseinbehalt aus, nach der Einbehaltsregel sind es jetzt {expected}: Eine frühere Abschlagsrechnung, eine Freigabe oder die Regel hat sich geändert, nachdem diese Abschlagsrechnung berechnet wurde",
       "suggestion": "Führen Sie „Aus Leistungsstand befüllen“ erneut aus oder speichern Sie eine beliebige Position dieser Abschlagsrechnung, dann wird der Einbehalt neu berechnet"
     },
+    "retention_above_cap": {
+      "fail": "Abschlagsrechnung {claim} weist {held} Sicherheitseinbehalt aus und liegt damit über der in der Einbehaltsregel festgelegten Grenze von {percent}%, die bei diesem Vertrag {cap} beträgt",
+      "suggestion": "Berechnen Sie die Abschlagsrechnung neu oder heben Sie die Grenze in der Einbehaltsregel des Vertrags an, wenn die Parteien einen höheren Betrag vereinbart haben",
+      "state_cap_unread": "Abschlagsrechnung {claim}: Die Einbehaltsregel nennt keine Obergrenze, und in {country} begrenzt das Recht der Bundesstaaten den Einbehalt. Der Bundesstaat ließ sich nicht bestimmen, weil das Projekt keinen Subdivision-Code führt, daher wurde keine gesetzliche Obergrenze geprüft",
+      "state_cap_suggestion": "Tragen Sie die Grenze des Bundesstaats als Obergrenze in die Einbehaltsregel des Vertrags ein, dann wird jede Abschlagsrechnung dieses Vertrags daran geprüft"
+    },
     "retention_release_within_held": {
       "fail": "Die bis einschließlich Abschlagsrechnung {claim} abgerechneten Freigaben zahlen {released} aus, mehr als die bis dahin einbehaltenen {accrued}",
       "suggestion": "Stornieren Sie die zu hohe Freigabe oder rechnen Sie sie in einer späteren Abschlagsrechnung ab, wenn mehr einbehalten ist"

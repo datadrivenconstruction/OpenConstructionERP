@@ -150,21 +150,37 @@ def policy_from_rule(rule: Mapping[str, Any] | None, *, fallback_rate: Any) -> R
     engine quietly replaced with a flat rate would retain the wrong amount
     with nothing on screen to say so.
 
+    Every refusal is a ``ValueError``, including the shapes that are not
+    tiers at all. That is load-bearing rather than tidy: three callers guard
+    this with ``except ValueError`` and act on the refusal, one of them by
+    declining to write the row. A rule that raised something else would walk
+    straight through all three, be stored, and then answer 500 on the route
+    whose whole point is to answer 422.
+
     Raises:
-        ValueError: tiers that are not numbers, a negative or over-100 rate,
-            a first tier that does not start at 0, two tiers on one
-            threshold, or an unknown ``tier_mode``.
+        ValueError: tiers that are not a list, a tier that is not an object,
+            tiers that are not numbers, a negative or over-100 rate, a first
+            tier that does not start at 0, two tiers on one threshold, or an
+            unknown ``tier_mode``.
     """
     if not rule or not rule.get("tiers"):
         return flat_policy(fallback_rate)
 
+    declared = rule["tiers"]
+    if not isinstance(declared, list):
+        # A mapping iterates as its keys and a string as its characters, so
+        # without this the next line asks a str for .get and the caller sees
+        # an AttributeError it is not catching.
+        raise ValueError("retention tiers must be a list")
+    if any(not isinstance(tier, Mapping) for tier in declared):
+        raise ValueError("every retention tier must be an object naming from_percent_complete and rate")
     tiers = sorted(
         (
             RetentionTier(
                 _decimal(tier.get("from_percent_complete", 0), name="from_percent_complete"),
                 _decimal(tier.get("rate"), name="rate"),
             )
-            for tier in rule["tiers"]
+            for tier in declared
         ),
         key=lambda tier: tier.from_percent_complete,
     )

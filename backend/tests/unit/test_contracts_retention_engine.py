@@ -155,6 +155,18 @@ def test_a_rule_without_tiers_is_the_contracts_flat_rate_and_says_so() -> None:
         ({"tiers": [{"from_percent_complete": "0", "rate": "110"}]}, "between 0 and 100"),
         ({"tiers": [{"from_percent_complete": "0", "rate": "ten"}]}, "not a number"),
         ({**STEP_DOWN, "tier_mode": "averaged"}, "tier_mode"),
+        # The shapes that are not tiers at all. They belong in this list and
+        # not in one of their own, because what the callers rely on is not
+        # that the rule is refused, it is that the refusal is a ValueError:
+        # all three guard with except ValueError, and one of them declines to
+        # write the row on it. A mapping iterates as its keys and a string as
+        # its characters, so each of these used to reach .get on something
+        # that has none and raise an AttributeError straight past the guard.
+        ({"tiers": "10"}, "must be a list"),
+        ({"tiers": {"from_percent_complete": "0", "rate": "10"}}, "must be a list"),
+        ({"tiers": ["10"]}, "must be an object"),
+        ({"tiers": [10]}, "must be an object"),
+        ({"tiers": [[0, 10]]}, "must be an object"),
     ],
 )
 def test_a_policy_that_cannot_be_read_is_refused_not_replaced(rule: dict, message: str) -> None:

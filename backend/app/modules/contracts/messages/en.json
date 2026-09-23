@@ -57,6 +57,12 @@
       "fail": "Claim {claim} holds {held} in retention, but its retention policy gives {expected} now: an earlier claim, a release or the policy changed after this claim was worked out",
       "suggestion": "Run Populate from progress again, or save any line of this claim, and its retention is worked out again"
     },
+    "retention_above_cap": {
+      "fail": "Claim {claim} holds {held} in retention, above the {percent}% cap its retention policy sets, which is {cap} on this contract",
+      "suggestion": "Work the claim out again, or raise the cap on the contract's retention policy if the parties agreed a higher one",
+      "state_cap_unread": "Claim {claim}: its retention policy sets no cap, and {country} limits retainage by state law. No state could be resolved because the project carries no subdivision code, so no statutory cap was checked",
+      "state_cap_suggestion": "Write the state's limit into the contract's retention policy as a cap, and every claim on this contract is checked against it"
+    },
     "retention_release_within_held": {
       "fail": "The releases billed up to claim {claim} pay back {released}, more than the {accrued} of retention held up to it",
       "suggestion": "Void the release that is too large, or bill it on a later claim once more retention is held"

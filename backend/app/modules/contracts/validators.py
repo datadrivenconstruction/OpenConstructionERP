@@ -287,6 +287,51 @@ class ContractPerformanceBondRule(ValidationRule):
         ]
 
 
+class ContractRetentionPolicySingleRule(ValidationRule):
+    """A contract should carry one retention policy, because only one is applied.
+
+    The engine takes the newest schedule that carries tiers and ignores every
+    other row without a word. That is a reasonable rule and a poor surprise:
+    two schedules on a contract are usually somebody's correction sitting
+    beside the thing it was meant to correct, and the money follows whichever
+    was written last, which is not always the one being read on screen.
+    """
+
+    rule_id = "contracts.retention_policy_single"
+    name = "One retention policy on the contract"
+    standard = CONTRACTS_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "A contract with more than one retention schedule applies only the newest one carrying tiers"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        contract = _contract(context)
+        schedules = _rows(context, "retention_schedules")
+        if not schedules:
+            return []
+        passed = len(schedules) == 1
+        tiered = sum(1 for s in schedules if _truthy(s.get("has_tiers")))
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=passed,
+                message=(
+                    "OK"
+                    if passed
+                    else (
+                        f"The contract carries {len(schedules)} retention schedules, "
+                        f"{tiered} of them with tiers, and only the newest one with tiers is applied"
+                    )
+                ),
+                element_ref=str(contract.get("id", "")),
+                suggestion=(None if passed else "Delete the schedules that are not in force, or fold them into one"),
+            )
+        ]
+
+
 class EOTDaysRule(ValidationRule):
     """An EOT claim must never grant more days than were claimed."""
 
@@ -477,13 +522,18 @@ class _ClaimRule(ValidationRule):
         element_ref: str,
         fail_key: str = "",
         suggestion_key: str = "",
+        severity: Severity | None = None,
         **params: Any,
     ) -> RuleResult:
         locale = _locale(context)
         return RuleResult(
             rule_id=self.rule_id,
             rule_name=self.name,
-            severity=self.severity,
+            # A rule usually speaks at one severity, and one of them does not:
+            # the cap rule blocks on a cap it can read and only remarks where
+            # it cannot read one at all. The report reads severity off the
+            # result, so this is what decides whether a finding blocks.
+            severity=severity or self.severity,
             category=self.category,
             passed=passed,
             message=translate("common.ok", locale=locale) if passed else translate(fail_key, locale=locale, **params),
@@ -803,6 +853,79 @@ class ClaimRetentionMatchesPolicyRule(_ClaimRule):
         ]
 
 
+class ClaimRetentionAboveCapRule(_ClaimRule):
+    """Retention held above the ceiling its policy sets, and a word where no ceiling can be read.
+
+    A cap is the last thing the engine applies, so a claim it worked out is
+    never over one. A claim gets its figures from elsewhere too: the header
+    edited by hand, a policy whose cap was tightened after the claim was
+    written, a contract sum that fell. The check is on the stored figure for
+    that reason, not on a fresh computation.
+
+    The second branch is about a cap this module cannot read at all. Several
+    states of the United States limit retainage by statute and the state packs
+    carry those limits, but reading one needs an ISO 3166-2 code and nothing
+    on a project holds one. On a contract in a country whose packs declare
+    such limits, that is said once per claim as information rather than
+    passed over: a check that is silent about the law it cannot see is
+    indistinguishable from a contract that has no law to meet.
+    """
+
+    rule_id = "pay_application.retention_above_cap"
+    name = "Retention within the cap"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Retention held on a claim stays within the cap its retention policy sets"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        claim = _section(context, "claim")
+        cap = _section(context, "retention_cap")
+        if not claim or not cap:
+            return []
+        ref = str(claim.get("id", ""))
+        currency = str(_data(context).get("currency") or "")
+        percent = cap.get("cap_percent")
+        if percent in (None, ""):
+            if not cap.get("subdivision_caps_declared"):
+                # No cap in the policy and none in the country's law either.
+                # Nothing to check, and saying so on every claim in the world
+                # would bury the countries where there is something to say.
+                return []
+            return [
+                self._result(
+                    context,
+                    passed=False,
+                    severity=Severity.INFO,
+                    element_ref=ref,
+                    fail_key="pay_application.retention_above_cap.state_cap_unread",
+                    suggestion_key="pay_application.retention_above_cap.state_cap_suggestion",
+                    claim=_claim_label(claim),
+                    country=str(cap.get("country_code") or ""),
+                )
+            ]
+        held = cap.get("held")
+        if held in (None, ""):
+            # Nothing stored to measure. The claim has not been worked out.
+            return []
+        held_amount = _money(held)
+        ceiling = _money(cap.get("contract_sum")) * _money(percent) / Decimal("100")
+        if held_amount <= ceiling + _MONEY_EPSILON:
+            return [self._result(context, passed=True, element_ref=ref)]
+        return [
+            self._result(
+                context,
+                passed=False,
+                element_ref=ref,
+                fail_key="pay_application.retention_above_cap.fail",
+                suggestion_key="pay_application.retention_above_cap.suggestion",
+                claim=_claim_label(claim),
+                held=sentence_amount(held_amount, currency),
+                cap=sentence_amount(ceiling, currency),
+                percent=_percent(percent),
+            )
+        ]
+
+
 class ClaimRetentionReleaseWithinHeldRule(_ClaimRule):
     """The releases billed up to a claim do not pay back more than was held.
 
@@ -1008,6 +1131,7 @@ PAY_APPLICATION_RULES: tuple[type[ValidationRule], ...] = (
     ClaimPriorMatchesEarlierClaimsRule,
     ClaimWithinNTECapRule,
     ClaimRetentionMatchesPolicyRule,
+    ClaimRetentionAboveCapRule,
     ClaimRetentionReleaseWithinHeldRule,
 )
 
@@ -1116,6 +1240,7 @@ def register_contracts_validation_rules() -> None:
     """Register the contracts rules with the platform rule registry."""
     rule_registry.register(ContractPartyRolesRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractPerformanceBondRule(), [CONTRACTS_RULE_SET])
+    rule_registry.register(ContractRetentionPolicySingleRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(EOTDaysRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractTemplatePinnedRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractTemplateClausesRule(), [CONTRACTS_RULE_SET])
