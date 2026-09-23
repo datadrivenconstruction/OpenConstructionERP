@@ -115,7 +115,7 @@ export function DockTabsRow({
               onKeyDown={onKeyDown}
               data-testid={`floating-chat-tab-${tab}`}
               className={clsx(
-                'inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors',
+                'inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                 selected
                   ? 'bg-[color:var(--chat-bg)] text-[color:var(--chat-text-primary)] shadow-xs'
@@ -155,7 +155,7 @@ export function DockTabsRow({
         data-testid="floating-chat-project-chip"
         data-has-project={hasProject ? 'true' : 'false'}
         className={clsx(
-          'ms-auto inline-flex h-7 min-w-0 max-w-[60%] items-center gap-1.5 rounded-full border px-2.5 text-xs transition-colors',
+          'ms-auto inline-flex h-7 min-w-0 max-w-[60%] items-center gap-1.5 rounded-full border px-2.5 text-[12px] transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
           hasProject
             ? 'border-[color:var(--chat-border)] bg-[color:var(--chat-bg)] font-medium text-[color:var(--chat-text-primary)] hover:border-oe-blue'

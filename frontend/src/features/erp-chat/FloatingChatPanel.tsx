@@ -55,7 +55,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
-  ClipboardCheck,
   ExternalLink,
   HelpCircle,
   History,
@@ -77,7 +76,6 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { aiApi, type AISettings } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
-import { ApiError } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
 import {
@@ -161,6 +159,18 @@ const HARD_LIMIT = 4000;
 
 function uid(): string {
   return uuid();
+}
+
+/** Back to the composer's own two rows once what grew it is sent. */
+function resetComposerHeight(el: HTMLTextAreaElement | null): void {
+  if (el) el.style.height = '';
+}
+
+function lastIndexWhere<T>(items: readonly T[], test: (item: T) => boolean): number {
+  for (let i = items.length - 1; i >= 0; i -= 1) {
+    if (test(items[i] as T)) return i;
+  }
+  return -1;
 }
 
 // No suggestion is locked by role. Chips that read like a write action used
@@ -457,92 +467,130 @@ function renderMarkdown(text: string): string {
   return html;
 }
 
-// ── Tool call card (compact variant for the panel) ─────────────────────────
+// ── Tool calls ─────────────────────────────────────────────────────────────
+/**
+ * One tool call of an assistant turn.
+ *
+ * A prepared change is the answer, so it renders as its card with no row
+ * around it. A lookup is supporting detail: one quiet line ("Looked up: BOQ
+ * positions") that opens onto what was found, closed by default so the answer
+ * stays in view. A change the assistant could not prepare says so, with the
+ * reason, and calmly: the assistant reads the same reason and usually asks for
+ * what it needs, so it is not a failure of the chat.
+ */
 function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(true);
+  const bodyId = useId();
   const renderer = tool.result?.renderer;
-  const RendererComp = renderer ? RENDERERS[renderer] : null;
+  const RendererComp = renderer ? RENDERERS[renderer] : undefined;
   const data = tool.result?.data;
   const summary = tool.result?.summary;
+  // The retired direct-write tool, still in older conversations. Its card is
+  // the record it created, worth seeing without a click.
+  const legacyWrite = tool.name === 'create_boq_item';
+  const [open, setOpen] = useState(legacyWrite);
 
-  const statusLabel =
-    tool.status === 'running'
-      ? t('chat.panel.tool_running', {
-          defaultValue: 'Running {{name}}...',
-          name: tool.name,
-        })
-      : tool.status === 'error'
-      ? t('chat.panel.tool_failed', {
-          defaultValue: 'Tool {{name}} failed',
-          name: tool.name,
-        })
-      : tool.name;
+  if (renderer === 'action_proposal' && RendererComp && data !== undefined) {
+    return (
+      <div className="my-2">
+        <RendererComp data={data} />
+      </div>
+    );
+  }
+
+  const change = legacyWrite || isProposalTool(tool.name);
+  const running = tool.status === 'running';
+  const failed = tool.status === 'error';
+  const label = toolLabel(tool.name, t);
+  let text: string;
+  if (change) {
+    text = running
+      ? t('erp_chat.tool.preparing', { defaultValue: 'Preparing a change: {{label}}…', label })
+      : failed
+        ? t('erp_chat.tool.not_prepared', {
+            defaultValue: 'Change not prepared: {{label}}',
+            // The retired tool's label names its outcome ("created"), which a
+            // failure must not repeat.
+            label: legacyWrite ? toolLabel('propose_add_boq_position', t) : label,
+          })
+        : label;
+  } else {
+    text = running
+      ? t('erp_chat.tool.looking_up', { defaultValue: 'Looking up: {{label}}…', label })
+      : failed
+        ? t('erp_chat.tool.lookup_failed', { defaultValue: 'Could not look up: {{label}}', label })
+        : t('erp_chat.tool.looked_up', { defaultValue: 'Looked up: {{label}}', label });
+  }
+  // Why a change was not prepared, in the server's words, localized when the
+  // server named a key.
+  const reason = change && failed ? toolRefusalText(data, t) : null;
+  const expandable = !running && !failed && !!RendererComp && data !== undefined;
+  const Icon = running ? Loader2 : failed ? CircleAlert : change ? Check : Search;
+
+  const head = (
+    <>
+      <Icon
+        size={13}
+        aria-hidden
+        className={clsx(
+          'mt-px shrink-0',
+          running && 'animate-spin text-[color:var(--chat-tool-running)]',
+          failed && 'text-[color:var(--chat-tool-error)]',
+          !running && !failed && 'text-[color:var(--chat-text-secondary)]',
+        )}
+      />
+      <span className="min-w-0 truncate font-medium">{text}</span>
+      {expandable && summary && (
+        <span
+          className="min-w-0 flex-1 truncate text-[color:var(--chat-text-secondary)] opacity-90"
+          title={summary}
+        >
+          · {summary}
+        </span>
+      )}
+      {expandable && (
+        <span className="ms-auto shrink-0">
+          {open ? (
+            <ChevronDown size={13} aria-hidden />
+          ) : (
+            <ChevronRight size={13} aria-hidden className="rtl:rotate-180" />
+          )}
+        </span>
+      )}
+    </>
+  );
 
   return (
     <div
-      style={{
-        margin: '6px 0',
-        border: '1px solid var(--chat-border-subtle)',
-        borderRadius: 8,
-        background: 'var(--chat-surface-2)',
-        overflow: 'hidden',
-      }}
+      className={clsx(
+        'my-1 rounded-lg text-[12px] text-[color:var(--chat-text-secondary)]',
+        reason && 'border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-1)]',
+      )}
+      data-testid="floating-chat-tool"
+      data-tool={tool.name}
+      data-tool-status={tool.status}
     >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '6px 10px',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: 12,
-          fontFamily: 'var(--chat-font-body)',
-          color: 'var(--chat-text-secondary)',
-          textAlign: 'left',
-        }}
-        aria-expanded={open}
-      >
-        {tool.status === 'running' && (
-          <Loader2 size={12} className="animate-spin" style={{ color: 'var(--chat-tool-running)' }} />
-        )}
-        <span
-          style={{
-            color:
-              tool.status === 'error'
-                ? 'var(--chat-tool-error)'
-                : tool.status === 'done'
-                ? 'var(--chat-tool-done)'
-                : 'var(--chat-text-secondary)',
-            fontWeight: 500,
-          }}
+      {expandable ? (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={open ? bodyId : undefined}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-[color:var(--chat-surface-2)] hover:text-[color:var(--chat-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
         >
-          {statusLabel}
-        </span>
-        {summary && (
-          <span
-            style={{
-              color: 'var(--chat-text-tertiary)',
-              fontSize: 11,
-              marginLeft: 'auto',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 160,
-            }}
-            title={summary}
-          >
-            {summary}
-          </span>
-        )}
-      </button>
-      {open && RendererComp && data !== undefined && (
-        <div style={{ padding: 8, borderTop: '1px solid var(--chat-border-subtle)' }}>
+          {head}
+        </button>
+      ) : (
+        <div className="flex items-center gap-2 px-2 py-1.5">{head}</div>
+      )}
+      {reason && (
+        <p className="px-2 pb-2 ps-[29px] leading-snug text-[color:var(--chat-text-primary)]">{reason}</p>
+      )}
+      {expandable && open && RendererComp && (
+        <div
+          id={bodyId}
+          className="mt-1 rounded-lg border border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-2)] p-2"
+        >
           <RendererComp data={data} />
         </div>
       )}
@@ -550,174 +598,186 @@ function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
   );
 }
 
-// ── Empty-state suggestion chips ───────────────────────────────────────────
+// ── Empty state ────────────────────────────────────────────────────────────
 function SuggestionChip({
   text,
   onPick,
   testIdSuffix,
-  locked = false,
+  kind,
+  describedBy,
 }: {
   text: string;
   onPick: (text: string) => void;
   testIdSuffix: string;
-  /** Write action that the current user cannot perform. We still render the
-   *  chip so users discover the feature, but lock the click and surface the
-   *  manager-required tooltip. */
-  locked?: boolean;
+  /** `do` is an example instruction to adjust, `ask` a question to send. */
+  kind: 'do' | 'ask';
+  describedBy?: string;
 }) {
-  const { t } = useTranslation();
-  const lockedTooltip = t('chat.error.manager_required', {
-    defaultValue: 'Requires manager permission',
-  });
+  const Icon = kind === 'do' ? PenLine : HelpCircle;
   return (
     <button
-      key={text}
       type="button"
-      onClick={() => {
-        if (locked) return;
-        onPick(text);
-      }}
-      aria-disabled={locked || undefined}
-      title={locked ? lockedTooltip : undefined}
+      onClick={() => onPick(text)}
+      aria-describedby={describedBy}
       data-testid={`floating-chat-suggestion-${testIdSuffix}`}
-      data-locked={locked || undefined}
-      style={{
-        textAlign: 'left',
-        padding: '8px 12px',
-        fontSize: 13,
-        fontFamily: 'var(--chat-font-body)',
-        background: 'var(--chat-surface-2)',
-        border: '1px solid var(--chat-border-subtle)',
-        borderRadius: 8,
-        color: locked ? 'var(--chat-text-tertiary)' : 'var(--chat-text-primary)',
-        cursor: locked ? 'not-allowed' : 'pointer',
-        opacity: locked ? 0.75 : 1,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        transition: 'border-color 0.15s, background 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        if (locked) return;
-        (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--chat-accent)';
-      }}
-      onMouseLeave={(e) => {
-        if (locked) return;
-        (e.currentTarget as HTMLButtonElement).style.borderColor =
-          'var(--chat-border-subtle)';
-      }}
-    >
-      {locked && (
-        <Lock
-          size={11}
-          strokeWidth={1.85}
-          aria-hidden
-          style={{ color: 'var(--chat-text-tertiary)', flexShrink: 0 }}
-        />
+      className={clsx(
+        'flex w-full items-start gap-2 rounded-lg border px-3 text-start leading-snug transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
+        'border-[color:var(--chat-border-subtle)] text-[color:var(--chat-text-primary)] hover:border-oe-blue',
+        kind === 'do'
+          ? 'bg-[color:var(--chat-bg)] py-2 text-sm shadow-xs'
+          : 'bg-[color:var(--chat-surface-2)] py-1.5 text-sm',
       )}
-      <span style={{ flex: 1, minWidth: 0 }}>{text}</span>
+    >
+      <Icon
+        size={kind === 'do' ? 14 : 13}
+        aria-hidden
+        className={clsx(
+          'mt-px shrink-0',
+          kind === 'do' ? 'text-oe-blue' : 'text-[color:var(--chat-text-secondary)]',
+        )}
+      />
+      <span className="min-w-0 flex-1">{text}</span>
     </button>
   );
 }
 
+function GroupHeading({ id, icon, children }: { id: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <h3
+      id={id}
+      className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--chat-text-secondary)]"
+    >
+      {icon}
+      {children}
+    </h3>
+  );
+}
+
+/**
+ * What a first-time user sees: what the assistant does in one sentence, the
+ * three steps of every change, and two groups of starting points. "Make a
+ * change" holds example instructions for this page, which fill the composer
+ * to be adjusted (a real site has its own levels and dates). "Ask a question"
+ * holds questions, which are sent at once.
+ */
 function EmptyState({
-  onPick,
   pathname,
-  canWrite,
+  onAsk,
+  onDraft,
 }: {
-  onPick: (text: string) => void;
   pathname: string;
-  /** Caller's role permits write tools. When false, chips that look like
-   *  write actions render with a lock icon + tooltip instead of being
-   *  clickable. */
-  canWrite: boolean;
+  /** Send a question as it is. */
+  onAsk: (text: string) => void;
+  /** Put an example instruction into the composer. */
+  onDraft: (text: string) => void;
 }) {
   const { t } = useTranslation();
+  const doHeadingId = useId();
+  const doHintId = useId();
+  const askHeadingId = useId();
   const suggestions = useDefaultSuggestions();
   const contextualSuggestions = useContextualSuggestions(pathname);
+  const doSuggestions = useDoSuggestions(pathname);
   const hasContextual = contextualSuggestions.length > 0;
+  const steps = [
+    t('chat.dock.step_ask', { defaultValue: 'Ask' }),
+    t('chat.dock.step_review', { defaultValue: 'Review' }),
+    t('chat.dock.step_apply', { defaultValue: 'Apply' }),
+  ];
 
   return (
-    <div style={{ padding: '16px 14px' }}>
-      <div
-        style={{
-          fontSize: 13,
-          color: 'var(--chat-text-secondary)',
-          lineHeight: 1.55,
-          marginBottom: 12,
-        }}
-      >
-        {t('chat.panel.empty_state', {
-          defaultValue:
-            'Ask anything about your projects - BOQs, validation, clashes, costs - or run an action like "create RFI for clash 32".',
+    <div className="px-4 pb-4 pt-5" data-testid="floating-chat-empty">
+      <p className="text-[15px] font-semibold leading-snug text-[color:var(--chat-text-primary)]">
+        {t('chat.dock.empty_title', {
+          defaultValue: 'Tell me what to do. I prepare the changes, you approve them.',
         })}
-      </div>
+      </p>
 
-      {hasContextual && (
-        <>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'var(--chat-text-tertiary)',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginBottom: 6,
-            }}
-            data-testid="floating-chat-contextual-label"
-          >
-            {t('chat.panel.contextual_label', {
-              defaultValue: 'For this page',
-            })}
-          </div>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}
-            data-testid="floating-chat-contextual-chips"
-          >
-            {contextualSuggestions.map((s, i) => (
-              <SuggestionChip
-                key={s}
-                text={s}
-                onPick={onPick}
-                testIdSuffix={`ctx-${i}`}
-                locked={!canWrite && chipIsWriteAction(s)}
+      <ol
+        aria-label={t('chat.dock.steps_label', { defaultValue: 'How it works' })}
+        className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1"
+        data-testid="floating-chat-steps"
+      >
+        {steps.map((step, i) => (
+          <li key={i} className="flex items-center gap-1.5">
+            <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-[color:var(--chat-surface-2)] pe-2.5 ps-1 text-[12px] font-medium text-[color:var(--chat-text-primary)]">
+              <span
+                aria-hidden
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-[10px] font-semibold leading-none text-content-inverse"
+              >
+                {i + 1}
+              </span>
+              {step}
+            </span>
+            {i < steps.length - 1 && (
+              <ChevronRight
+                size={12}
+                aria-hidden
+                className="shrink-0 text-[color:var(--chat-text-secondary)] rtl:rotate-180"
               />
-            ))}
-          </div>
-          <div
-            style={{
-              height: 1,
-              background: 'var(--chat-border-subtle)',
-              margin: '0 0 12px',
-            }}
-            aria-hidden
-          />
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'var(--chat-text-tertiary)',
-              textTransform: 'uppercase',
-              letterSpacing: 0.5,
-              marginBottom: 6,
-            }}
-          >
-            {t('chat.panel.generic_label', { defaultValue: 'Anywhere' })}
-          </div>
-        </>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {suggestions.map((s, i) => (
-          <SuggestionChip
-            key={s}
-            text={s}
-            onPick={onPick}
-            testIdSuffix={`generic-${i}`}
-            locked={!canWrite && chipIsWriteAction(s)}
-          />
+            )}
+          </li>
         ))}
-      </div>
+      </ol>
+      <p className="mt-2 flex items-center gap-1.5 text-[12px] text-[color:var(--chat-text-secondary)]">
+        <ShieldCheck size={13} aria-hidden className="shrink-0" />
+        {t('chat.dock.steps_note', { defaultValue: 'Every change is logged in the project history.' })}
+      </p>
+
+      <section aria-labelledby={doHeadingId} className="mt-5">
+        <GroupHeading id={doHeadingId} icon={<PenLine size={12} aria-hidden />}>
+          {t('chat.dock.group_do', { defaultValue: 'Make a change' })}
+        </GroupHeading>
+        <p id={doHintId} className="mt-0.5 text-[12px] text-[color:var(--chat-text-secondary)]">
+          {t('chat.dock.group_do_hint', {
+            defaultValue: 'Pick an example and adjust it before you send it.',
+          })}
+        </p>
+        <div className="mt-2 flex flex-col gap-2" data-testid="floating-chat-do-chips">
+          {doSuggestions.map((s, i) => (
+            <SuggestionChip
+              key={s}
+              text={s}
+              kind="do"
+              onPick={onDraft}
+              describedBy={doHintId}
+              testIdSuffix={`do-${i}`}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby={askHeadingId} className="mt-5">
+        <GroupHeading id={askHeadingId} icon={<HelpCircle size={12} aria-hidden />}>
+          {t('chat.dock.group_ask', { defaultValue: 'Ask a question' })}
+        </GroupHeading>
+        {/* The page's own questions come first, above the ones that work
+            anywhere (the order is pinned by e2e/floating-chat-onboarding). */}
+        {hasContextual && (
+          <>
+            <p
+              className="mt-2 text-[12px] font-medium text-[color:var(--chat-text-secondary)]"
+              data-testid="floating-chat-contextual-label"
+            >
+              {t('chat.panel.contextual_label', { defaultValue: 'For this page' })}
+            </p>
+            <div className="mt-1.5 flex flex-col gap-1.5" data-testid="floating-chat-contextual-chips">
+              {contextualSuggestions.map((s, i) => (
+                <SuggestionChip key={s} text={s} kind="ask" onPick={onAsk} testIdSuffix={`ctx-${i}`} />
+              ))}
+            </div>
+            <p className="mt-3 text-[12px] font-medium text-[color:var(--chat-text-secondary)]">
+              {t('chat.panel.generic_label', { defaultValue: 'Anywhere' })}
+            </p>
+          </>
+        )}
+        <div className="mt-1.5 flex flex-col gap-1.5">
+          {suggestions.map((s, i) => (
+            <SuggestionChip key={s} text={s} kind="ask" onPick={onAsk} testIdSuffix={`generic-${i}`} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -985,17 +1045,72 @@ function ErrorCard({
   );
 }
 
+// ── A past conversation being read back ────────────────────────────────────
+function HistoryLoading() {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      className="flex items-center justify-center gap-2 px-4 py-10 text-[12px] text-[color:var(--chat-text-secondary)]"
+      data-testid="floating-chat-history-loading"
+    >
+      <Loader2 size={14} aria-hidden className="animate-spin" />
+      {t('chat.dock.history_loading', { defaultValue: 'Loading the conversation…' })}
+    </div>
+  );
+}
+
+function HistoryError({ onRetry, onNew }: { onRetry: () => void; onNew: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="alert"
+      className="m-1 flex items-start gap-2.5 rounded-lg border border-[color:var(--chat-border)] bg-[color:var(--chat-surface-1)] px-3 py-3"
+      data-testid="floating-chat-history-error"
+    >
+      <AlertTriangle size={16} aria-hidden className="mt-px shrink-0 text-[color:var(--chat-tool-error)]" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-[color:var(--chat-text-primary)]">
+          {t('chat.dock.history_failed', { defaultValue: 'This conversation could not be loaded.' })}
+        </p>
+        <div className="mt-2.5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            data-testid="floating-chat-history-retry"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-oe-blue px-3 text-[12px] font-semibold text-content-inverse transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2"
+          >
+            <RotateCw size={12} aria-hidden />
+            {t('chat.dock.history_retry', { defaultValue: 'Try again' })}
+          </button>
+          <button
+            type="button"
+            onClick={onNew}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[color:var(--chat-border)] px-3 text-[12px] font-medium text-[color:var(--chat-text-primary)] transition-colors hover:bg-[color:var(--chat-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+          >
+            <MessageSquarePlus size={12} aria-hidden />
+            {t('chat.dock.history_new', { defaultValue: 'Start a new chat' })}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Sessions dropdown ──────────────────────────────────────────────────────
 function SessionsMenu({
   open,
   onClose,
   onPick,
   onNew,
+  activeId,
 }: {
   open: boolean;
   onClose: () => void;
-  onPick: (id: string) => void;
+  onPick: (id: string, title: string) => void;
   onNew: () => void;
+  /** The conversation on screen, marked in the list. */
+  activeId: string | null;
 }) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -1094,39 +1209,45 @@ function SessionsMenu({
           {t('chat.panel.no_sessions', { defaultValue: 'No previous sessions yet.' })}
         </div>
       )}
-      {sessions.map((s) => (
-        <button
-          key={s.id}
-          type="button"
-          onClick={() => {
-            onPick(s.id);
-            onClose();
-          }}
-          style={{
-            width: '100%',
-            display: 'block',
-            padding: '6px 12px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 12,
-            color: 'var(--chat-text-primary)',
-            textAlign: 'left',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'var(--chat-surface-2)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-          }}
-          title={s.title}
-        >
-          {s.title || t('chat.panel.untitled', { defaultValue: '(untitled)' })}
-        </button>
-      ))}
+      {sessions.map((s) => {
+        const current = s.id === activeId;
+        return (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => {
+              onPick(s.id, s.title);
+              onClose();
+            }}
+            aria-current={current ? 'true' : undefined}
+            data-testid={`floating-chat-session-${s.id}`}
+            style={{
+              width: '100%',
+              display: 'block',
+              padding: '6px 12px',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: current ? 600 : 400,
+              color: 'var(--chat-text-primary)',
+              textAlign: 'start',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--chat-surface-2)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            }}
+            title={s.title}
+          >
+            {s.title || t('chat.panel.untitled', { defaultValue: '(untitled)' })}
+          </button>
+        );
+      })}
       {!loading && sessions.length > 0 && (
         <div style={{ padding: '4px 12px 8px' }}>
           <TruncationNotice page={{ items: sessions, total: sessionsTotal }} />
@@ -1332,7 +1453,7 @@ function DockResizeHandle({
 
 // ── Main panel ─────────────────────────────────────────────────────────────
 export function FloatingChatPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const isOpen = useFloatingChatStore((s) => s.isOpen);
@@ -1365,12 +1486,19 @@ export function FloatingChatPanel() {
   });
   const resolvedTheme = useThemeStore((s) => s.resolved);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
-  // Role is decoded from the JWT on login (useAuthStore). Drives the
-  // chip-lock UX — backend always re-checks via ``check_tool_permission``.
-  const userRole = useAuthStore((s) => s.userRole);
-  const canWrite = isManagerOrAbove(userRole);
+  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
+  const setConversationActionIds = useFloatingChatStore((s) => s.setConversationActionIds);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [activeTab, setActiveTab] = useState<DockTab>('chat');
+  // The Changes tab asks the server for its list, so it mounts the first time
+  // it is opened, not with the dock, and then stays mounted (hidden) so its
+  // filters and scroll position survive a look back at the chat.
+  const [changesMounted, setChangesMounted] = useState(false);
+  // A past conversation being read back from the server.
+  const [historyLoad, setHistoryLoad] = useState<
+    { status: 'idle' } | { status: 'loading' | 'error'; sessionId: string; title: string }
+  >({ status: 'idle' });
   const [isStreaming, setIsStreaming] = useState(false);
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
   const [value, setValue] = useState('');
@@ -1386,14 +1514,72 @@ export function FloatingChatPanel() {
 
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Scroll memory. A hidden tab panel, like a closed dock, drops its layout
+  // and with it the scroll position, so both lists keep theirs here. The
+  // transcript follows new messages while the reader is at its end and stays
+  // put when they scrolled up to read.
+  const stickToBottomRef = useRef(true);
+  const transcriptScrollTopRef = useRef(0);
+  const changesScrollTopRef = useRef(0);
+  const changesListRef = useRef<HTMLDivElement | null>(null);
+  const transcriptObserverRef = useRef<ResizeObserver | null>(null);
+  // Only the latest history request may fill the transcript.
+  const historySeqRef = useRef(0);
 
   // Push mode is not modal: Tab moves freely between the page and the dock.
   // Overlay mode keeps focus inside. Either way focus returns to where it
   // was when the dock closes, if it was still inside the dock.
   useDockFocus(containerRef, { open: dockOpen, modal: overlay });
+
+  // Read by handlers registered once (the open focus, Alt+A) without making
+  // them re-register, and re-run, on every tab switch.
+  const activeTabRef = useRef<DockTab>(activeTab);
+  useLayoutEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  // Where focus lands when the user enters the dock: the composer on the
+  // Chat tab, the selected tab on the Changes tab (a hidden composer cannot
+  // take focus, and the tab is where the Changes view starts).
+  const focusDockEntry = useCallback(() => {
+    const composer = textareaRef.current;
+    const tab = activeTabRef.current;
+    if (tab === 'chat' && composer && !composer.disabled) {
+      composer.focus();
+      return;
+    }
+    const tabButton = document.getElementById(dockTabId(tab));
+    if (tabButton) tabButton.focus();
+    else containerRef.current?.focus();
+  }, []);
+
+  const selectTab = useCallback((tab: DockTab) => {
+    setActiveTab(tab);
+    if (tab === 'changes') setChangesMounted(true);
+  }, []);
+
+  // The proposals of this conversation, as the transcript delivered them.
+  // Same array while none arrives or changes, so the store sync below and the
+  // tray do not redo their work on every streamed word.
+  const proposalsRef = useRef<ChatAction[]>([]);
+  const conversationProposals = useMemo(() => {
+    const next = proposalsInTranscript(messages);
+    const prev = proposalsRef.current;
+    if (next.length === prev.length && next.every((a, i) => a === prev[i])) return prev;
+    proposalsRef.current = next;
+    return next;
+  }, [messages]);
+  // Their current status: the shared store follows every Apply, Reject and
+  // Undo, wherever it was pressed. This also puts the proposals into the
+  // store, which is what the round button counts from, so the panel keeps
+  // doing it while closed (it stays mounted, it only renders nothing).
+  const liveProposals = useLiveChatActions(conversationProposals);
+  const waitingProposals = useMemo(() => pendingActions(liveProposals), [liveProposals]);
+  useEffect(() => {
+    setConversationActionIds(conversationProposals.map((a) => a.id));
+  }, [conversationProposals, setConversationActionIds]);
 
   // The exit ends on the dock's OWN animationend, not one bubbling up from a
   // message or a spinner inside it. A native listener rather than React's
@@ -1447,8 +1633,8 @@ export function FloatingChatPanel() {
   }, [dockOpen, overlay, sessionsOpen, close]);
 
   // Alt+A (Option+A on a Mac): open the dock; when it is open and focus is
-  // in the page, move focus to the composer; when focus is already in the
-  // dock, close it. Silent on /chat and while another modal is open, so it
+  // in the page, move focus into it (the composer, or the selected tab on the
+  // Changes tab); when focus is already in the dock, close it. Silent on /chat and while another modal is open, so it
   // never pulls focus out from under a dialog. Capture phase, so viewers
   // with single-letter keys (walk mode binds A) never see the chord.
   useEffect(() => {
@@ -1473,20 +1659,18 @@ export function FloatingChatPanel() {
         close();
         return;
       }
-      const composer = textareaRef.current;
-      if (composer && !composer.disabled) composer.focus();
-      else container?.focus();
+      focusDockEntry();
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [suppressed, openDock, close]);
+  }, [suppressed, openDock, close, focusDockEntry]);
 
-  // Focus the textarea right after the panel opens.
+  // Focus the composer (or the selected tab) right after the panel opens.
   useEffect(() => {
     if (!isOpen) return;
-    const id = window.setTimeout(() => textareaRef.current?.focus(), 80);
+    const id = window.setTimeout(focusDockEntry, 80);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, [isOpen, focusDockEntry]);
 
   // Consume a staged prompt (e.g. from the BIM viewer's "Ask AI about this
   // element" button): prefill the composer, grow it to fit and place the
@@ -1495,6 +1679,7 @@ export function FloatingChatPanel() {
   // is already open too (dep on `pendingPrompt`), not only on first open.
   useEffect(() => {
     if (!isOpen || !pendingPrompt) return;
+    setActiveTab('chat');
     setValue(pendingPrompt);
     clearPendingPrompt();
     const id = window.requestAnimationFrame(() => {
@@ -1509,10 +1694,63 @@ export function FloatingChatPanel() {
     return () => window.cancelAnimationFrame(id);
   }, [isOpen, pendingPrompt, clearPendingPrompt]);
 
-  // Auto-scroll on new messages.
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth' });
-  }, [messages, isStreaming]);
+  // The transcript. A callback ref, because the element comes and goes with
+  // the dock. The observer keeps the end in view while the reader is there
+  // and something changes the room the messages have: the review tray
+  // appearing above the composer, the composer growing, a card expanding.
+  const setTranscriptEl = useCallback((el: HTMLDivElement | null) => {
+    scrollRef.current = el;
+    transcriptObserverRef.current?.disconnect();
+    transcriptObserverRef.current = null;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      if (stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+    });
+    observer.observe(el);
+    if (el.firstElementChild) observer.observe(el.firstElementChild);
+    transcriptObserverRef.current = observer;
+  }, []);
+
+  const onTranscriptScroll = useCallback(() => {
+    const el = scrollRef.current;
+    // A hidden panel reports no size; it has not been scrolled.
+    if (!el || el.clientHeight === 0) return;
+    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 32;
+    transcriptScrollTopRef.current = el.scrollTop;
+  }, []);
+
+  // The Changes list, handed to ChangesView; its scroll is saved as it happens.
+  const onChangesScroll = useCallback((e: Event) => {
+    const el = e.currentTarget as HTMLDivElement;
+    if (el.clientHeight > 0) changesScrollTopRef.current = el.scrollTop;
+  }, []);
+  const setChangesListEl = useCallback(
+    (el: HTMLDivElement | null) => {
+      changesListRef.current?.removeEventListener('scroll', onChangesScroll);
+      changesListRef.current = el;
+      el?.addEventListener('scroll', onChangesScroll, { passive: true });
+    },
+    [onChangesScroll],
+  );
+
+  // New messages: follow them while the reader is at the end. Before paint,
+  // so the transcript never flashes at the old position.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el && stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+  }, [messages, isStreaming, historyLoad.status]);
+
+  // Back on a tab, or back in a reopened dock: where the reader left it.
+  useLayoutEffect(() => {
+    if (!presence.rendered) return;
+    if (activeTab === 'chat') {
+      const el = scrollRef.current;
+      if (!el) return;
+      el.scrollTop = stickToBottomRef.current ? el.scrollHeight : transcriptScrollTopRef.current;
+    } else if (changesListRef.current) {
+      changesListRef.current.scrollTop = changesScrollTopRef.current;
+    }
+  }, [activeTab, presence.rendered]);
 
   // Probe AI configuration (so we can show the onboarding card instead of
   // hitting the API with a 500).
@@ -1560,6 +1798,10 @@ export function FloatingChatPanel() {
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
       if (trimmed.length > HARD_LIMIT) return;
+      // A conversation being read back would overwrite the new turn.
+      if (historyLoad.status === 'loading') return;
+      // Whoever sends wants to see the answer, wherever they had scrolled.
+      stickToBottomRef.current = true;
 
       if (aiConfigured === false) {
         const userMsg: ChatMessage = {
@@ -1581,6 +1823,7 @@ export function FloatingChatPanel() {
         };
         setMessages((prev) => [...prev, userMsg, onboardingMsg]);
         setValue('');
+        resetComposerHeight(textareaRef.current);
         return;
       }
 
@@ -1601,6 +1844,7 @@ export function FloatingChatPanel() {
 
       setMessages((prev) => [...prev, userMsg, aiMsg]);
       setValue('');
+      resetComposerHeight(textareaRef.current);
       setIsStreaming(true);
 
       const aiMsgId = aiMsg.id;
@@ -1620,6 +1864,13 @@ export function FloatingChatPanel() {
               message: trimmed,
               session_id: activeSessionId,
               project_id: activeProjectId,
+              // The reply follows the interface language, and the assistant
+              // knows which page the user is looking at when they say "this".
+              locale: i18n.language,
+              client_context: {
+                route: location.pathname,
+                project_id: activeProjectId ?? null,
+              },
             }),
             signal: controller.signal,
           });
@@ -1731,7 +1982,9 @@ export function FloatingChatPanel() {
                 }
                 case 'tool_result': {
                   const result = payload.result as ToolCallInfo['result'] | undefined;
+                  const resultTool = typeof payload.tool === 'string' ? payload.tool : null;
                   const isErrorResult = result?.renderer === 'error';
+                  const status: ToolCallInfo['status'] = isErrorResult ? 'error' : 'done';
                   // The backend's permission-denied card carries a
                   // machine-readable ``i18n_key`` in ``data`` — pluck it
                   // out so the ErrorCard can render the localized message
@@ -1747,27 +2000,34 @@ export function FloatingChatPanel() {
                   setMessages((prev) =>
                     prev.map((m) => {
                       if (m.id !== aiMsgId) return m;
-                      let matched = false;
-                      const toolCalls = (m.toolCalls ?? [])
-                        .slice()
-                        .reverse()
-                        .map((tc) => {
-                          if (!matched && tc.status === 'running') {
-                            matched = true;
-                            return {
-                              ...tc,
-                              status: (isErrorResult ? 'error' : 'done') as
-                                | 'error'
-                                | 'done',
-                              result,
-                              durationMs: Date.now() - tc.startedAt,
-                            };
-                          }
-                          return tc;
-                        })
-                        .reverse();
+                      const calls = m.toolCalls ?? [];
+                      // Tools run one after another, so the result belongs to
+                      // the latest running call, of the same tool when the
+                      // event names it.
+                      let index = resultTool
+                        ? lastIndexWhere(calls, (tc) => tc.status === 'running' && tc.name === resultTool)
+                        : -1;
+                      if (index === -1) index = lastIndexWhere(calls, (tc) => tc.status === 'running');
+                      const toolCalls =
+                        index === -1
+                          ? // A result without its start still shows, a proposal above all.
+                            [
+                              ...calls,
+                              { id: uid(), name: resultTool ?? 'tool', status, result, startedAt: Date.now() },
+                            ]
+                          : calls.map((tc, i) =>
+                              i === index
+                                ? { ...tc, status, result, durationMs: Date.now() - tc.startedAt }
+                                : tc,
+                            );
+                      const toolName = resultTool ?? (index === -1 ? null : calls[index]?.name ?? null);
                       const next: typeof m = { ...m, toolCalls };
-                      if (isErrorResult && !m.errorText) {
+                      // A refused proposal (missing or invalid details) is
+                      // addressed to the model, which reads the reason and
+                      // asks the user; its own row says what happened. Only
+                      // other tool errors become the message's error card.
+                      const refusedProposal = !!toolName && isProposalTool(toolName);
+                      if (isErrorResult && !m.errorText && !refusedProposal) {
                         // Promote the error renderer's summary or data
                         // string into a friendly card.
                         const errMsg =
@@ -1835,13 +2095,16 @@ export function FloatingChatPanel() {
     },
     [
       isStreaming,
+      historyLoad.status,
       activeSessionId,
       activeProjectId,
+      location.pathname,
       aiConfigured,
       bumpUnread,
       setActiveSession,
       refreshAiConfigured,
       t,
+      i18n,
     ],
   );
 
@@ -1888,31 +2151,89 @@ export function FloatingChatPanel() {
 
   const newSession = useCallback(() => {
     if (abortRef.current) abortRef.current.abort();
+    historySeqRef.current += 1;
+    setHistoryLoad({ status: 'idle' });
     setMessages([]);
     setIsStreaming(false);
     setActiveSession(null);
+    setActiveTab('chat');
+    stickToBottomRef.current = true;
     // Back to the unnamed state, which renders as the default in whatever
     // language is active when it is read.
     setTitle(null);
   }, [setActiveSession]);
 
+  // A past conversation, read back from the server when the user picks it:
+  // its messages, what the assistant looked up, and its proposals as cards
+  // that re-read their current status. Only on an explicit pick; the dock
+  // never fetches history on its own.
   const pickSession = useCallback(
-    (id: string) => {
-      // We don't pre-load past messages here (keeps the widget light) — the
-      // backend resumes context server-side via session_id. The user will see
-      // their next reply in the context of that session.
+    (id: string, sessionTitle: string) => {
       if (abortRef.current) abortRef.current.abort();
+      const seq = (historySeqRef.current += 1);
       setMessages([]);
       setIsStreaming(false);
       setActiveSession(id);
+      setTitle(sessionTitle.trim() ? sessionTitle : null);
+      setActiveTab('chat');
+      stickToBottomRef.current = true;
+      setHistoryLoad({ status: 'loading', sessionId: id, title: sessionTitle });
+      // Through a resolved promise, so a call that throws before it returns
+      // one lands in the error state like a failed request.
+      Promise.resolve()
+        .then(() => fetchSessionMessages(id))
+        .then((rows) => {
+          if (seq !== historySeqRef.current) return;
+          setMessages(transcriptFromPersisted(rows));
+          setHistoryLoad({ status: 'idle' });
+        })
+        .catch(() => {
+          if (seq !== historySeqRef.current) return;
+          setHistoryLoad({ status: 'error', sessionId: id, title: sessionTitle });
+        });
     },
     [setActiveSession],
   );
 
+  const openProject = useCallback(() => {
+    const target = activeProjectId ? `/projects/${encodeURIComponent(activeProjectId)}` : '/projects';
+    // The overlay covers the page, so it steps aside for the project.
+    if (overlay) close();
+    navigate(target);
+  }, [activeProjectId, overlay, close, navigate]);
+
   const charCount = value.length;
   const overSoft = charCount > SOFT_LIMIT;
   const overHard = charCount > HARD_LIMIT;
-  const canSend = value.trim().length > 0 && !isStreaming && !overHard;
+  const historyLoading = historyLoad.status === 'loading';
+  const canSend = value.trim().length > 0 && !isStreaming && !overHard && !historyLoading;
+
+  // An example instruction from the empty state: into the composer, caret at
+  // the end, to be adjusted and sent by the user.
+  const draftInstruction = useCallback((text: string) => {
+    setValue(text);
+    window.requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+      el.focus();
+      const end = el.value.length;
+      el.setSelectionRange(end, end);
+    });
+  }, []);
+
+  // The tray's Review: scroll to the first waiting card and focus it. The
+  // transcript stops following new messages, the reader is looking up.
+  const reviewWaiting = useCallback(() => {
+    stickToBottomRef.current = false;
+    revealFirstWaitingAction(scrollRef.current ?? document);
+  }, []);
+
+  const composerNoteId = useId();
+  const composerKeysId = useId();
+  // The count matters only once a message gets long.
+  const showCounter = charCount >= HARD_LIMIT / 2;
 
   // Resize preview: while the handle is dragged the width goes straight to
   // the DOM (the dock's own width, the widget offset and, in push mode, the
@@ -2074,174 +2395,209 @@ export function FloatingChatPanel() {
             onClose={() => setSessionsOpen(false)}
             onPick={pickSession}
             onNew={newSession}
+            activeId={activeSessionId}
           />
         </div>
 
-        {/* Body — aria-live=polite so screen readers announce streaming
-            assistant text + tool results as they arrive */}
-        <div
-          ref={scrollRef}
-          role="log"
-          aria-live="polite"
-          aria-relevant="additions text"
-          aria-label={t('chat.panel.transcript_aria', {
-            defaultValue: 'Conversation transcript',
-          })}
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: messages.length === 0 ? 0 : '12px 12px 4px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 6,
-          }}
-        >
-          {messages.length === 0 ? (
-            <EmptyState
-              onPick={sendMessage}
-              pathname={location.pathname}
-              canWrite={canWrite}
-            />
-          ) : (
-            <>
-              {messages.map((msg) => (
-                <MessageRow
-                  key={msg.id}
-                  msg={msg}
-                  onConfigureAI={handleConfigureAI}
-                  onRetry={handleRetryFromError}
-                />
-              ))}
-              {isStreaming && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 12,
-                    color: 'var(--chat-text-tertiary)',
-                    padding: '4px 4px 8px',
-                  }}
-                >
-                  <span className="floating-chat-dots" aria-hidden>
-                    <span />
-                    <span />
-                    <span />
-                  </span>
-                  {t('chat.panel.streaming', { defaultValue: 'Thinking...' })}
-                </div>
-              )}
-              <div ref={bottomRef} />
-            </>
-          )}
-        </div>
+        <DockTabsRow
+          active={activeTab}
+          onSelect={selectTab}
+          waitingCount={waitingProposals.length}
+          projectId={activeProjectId}
+          projectName={activeProjectName}
+          onOpenProject={openProject}
+        />
 
-        {/* Proactive "no AI configured" onboarding banner — visible above the
-            input until the user either configures a key (event-driven re-fetch
-            clears it) or hits Skip for this browser session. */}
-        {aiConfigured === false && !onboardingBannerDismissed && (
-          <NoAIBanner
-            onConfigure={handleConfigureAI}
-            onSkip={dismissOnboardingBanner}
-          />
-        )}
-
-        {/* Input */}
+        {/* Chat tab: the conversation, the tray of changes waiting for a
+            decision, and the composer. The inactive panel is `hidden` (so it
+            leaves the focus order and the accessibility tree) but stays
+            mounted with everything in it. */}
         <div
-          style={{
-            borderTop: '1px solid var(--chat-border-subtle)',
-            padding: '10px 12px 12px',
-            background: 'var(--chat-surface-1)',
-          }}
+          role="tabpanel"
+          id={dockTabPanelId('chat')}
+          aria-labelledby={dockTabId('chat')}
+          hidden={activeTab !== 'chat'}
+          className={activeTab === 'chat' ? 'flex min-h-0 flex-1 flex-col' : undefined}
+          data-testid="floating-chat-chat-panel"
         >
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            disabled={isStreaming}
-            data-testid="floating-chat-input"
-            placeholder={t('chat.panel.input_placeholder', {
-              defaultValue: 'Ask anything about your projects, BOQs, costs, clashes...',
-            })}
-            rows={1}
-            style={{
-              width: '100%',
-              resize: 'none',
-              padding: '8px 10px',
-              fontSize: 13,
-              fontFamily: 'var(--chat-font-body)',
-              color: 'var(--chat-text-primary)',
-              background: 'var(--chat-surface-2)',
-              border: `1px solid ${
-                overHard
-                  ? 'var(--chat-tool-error, #ef4444)'
-                  : overSoft
-                  ? '#f59e0b'
-                  : 'var(--chat-border)'
-              }`,
-              borderRadius: 'var(--chat-radius)',
-              outline: 'none',
-              lineHeight: 1.5,
-              maxHeight: 160,
-              overflow: 'auto',
-            }}
-          />
+          {/* aria-live=polite so screen readers announce streaming assistant
+              text and tool results as they arrive. */}
           <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: 6,
-              fontSize: 11,
-              // Promote to --chat-text-secondary for WCAG AA contrast on
-              // a near-white surface (the input bar is --chat-surface-1).
-              color: 'var(--chat-text-secondary)',
-              fontFamily: 'var(--chat-font-mono)',
-            }}
+            ref={setTranscriptEl}
+            onScroll={onTranscriptScroll}
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions text"
+            aria-busy={historyLoading || undefined}
+            aria-label={t('chat.panel.transcript_aria', {
+              defaultValue: 'Conversation transcript',
+            })}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            data-testid="floating-chat-transcript"
           >
-            <span>
+            <div
+              className={
+                messages.length === 0 && historyLoad.status === 'idle'
+                  ? undefined
+                  : 'flex flex-col gap-1.5 px-3 pb-2 pt-3'
+              }
+            >
+              {historyLoad.status === 'loading' ? (
+                <HistoryLoading />
+              ) : historyLoad.status === 'error' ? (
+                <HistoryError
+                  onRetry={() => pickSession(historyLoad.sessionId, historyLoad.title)}
+                  onNew={newSession}
+                />
+              ) : messages.length === 0 ? (
+                <EmptyState pathname={location.pathname} onAsk={sendMessage} onDraft={draftInstruction} />
+              ) : (
+                <>
+                  {messages.map((msg) => (
+                    <MessageRow
+                      key={msg.id}
+                      msg={msg}
+                      onConfigureAI={handleConfigureAI}
+                      onRetry={handleRetryFromError}
+                    />
+                  ))}
+                  {isStreaming && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        fontSize: 12,
+                        color: 'var(--chat-text-secondary)',
+                        padding: '4px 4px 8px',
+                      }}
+                    >
+                      <span className="floating-chat-dots" aria-hidden>
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                      {t('chat.panel.streaming', { defaultValue: 'Thinking...' })}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Proactive "no AI configured" onboarding banner — visible above the
+              input until the user either configures a key (event-driven re-fetch
+              clears it) or hits Skip for this browser session. */}
+          {aiConfigured === false && !onboardingBannerDismissed && (
+            <NoAIBanner
+              onConfigure={handleConfigureAI}
+              onSkip={dismissOnboardingBanner}
+            />
+          )}
+
+          {/* Pinned above the composer while this conversation has changes
+              nobody has decided on. The transcript keeps its end in view when
+              the tray takes its room. */}
+          {waitingProposals.length > 0 && (
+            <div className="shrink-0 px-3 pb-2 pt-1">
+              <ActionsReviewTray actions={conversationProposals} onReview={reviewWaiting} />
+            </div>
+          )}
+
+          {/* Composer */}
+          <div className="shrink-0 border-t border-[color:var(--chat-border-subtle)] bg-[color:var(--chat-surface-1)] px-3 pb-2.5 pt-2.5">
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                disabled={isStreaming || historyLoading}
+                data-testid="floating-chat-input"
+                aria-label={t('chat.dock.composer_label', { defaultValue: 'Message to the assistant' })}
+                aria-describedby={`${composerNoteId} ${composerKeysId}`}
+                placeholder={t('chat.dock.composer_placeholder', {
+                  defaultValue: 'Tell me what to do, e.g. "Create a task: check the formwork on level 3 by Friday"',
+                })}
+                rows={2}
+                className={clsx(
+                  'max-h-40 min-w-0 flex-1 resize-none overflow-auto rounded-lg border bg-[color:var(--chat-bg)] px-2.5 py-2 text-sm text-[color:var(--chat-text-primary)] outline-none transition-colors',
+                  'placeholder:text-[color:var(--chat-text-secondary)] focus:border-oe-blue focus-visible:ring-2 focus-visible:ring-oe-blue/30',
+                  'disabled:cursor-not-allowed disabled:opacity-70',
+                  overHard
+                    ? 'border-semantic-error'
+                    : overSoft
+                      ? 'border-semantic-warning'
+                      : 'border-[color:var(--chat-border)]',
+                )}
+                style={{ fontFamily: 'var(--chat-font-body)' }}
+              />
+              <button
+                type="button"
+                onClick={() => sendMessage(value)}
+                disabled={!canSend}
+                data-testid="floating-chat-send"
+                aria-label={t('chat.panel.send', { defaultValue: 'Send' })}
+                title={t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
+                className={clsx(
+                  'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
+                  canSend
+                    ? 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover'
+                    : 'cursor-not-allowed border border-[color:var(--chat-border)] bg-[color:var(--chat-surface-2)] text-[color:var(--chat-text-secondary)]',
+                )}
+              >
+                <ArrowUp size={16} strokeWidth={2.25} aria-hidden />
+              </button>
+            </div>
+            <div className="mt-1.5 flex items-center gap-1.5 text-[12px] leading-4 text-[color:var(--chat-text-secondary)]">
+              <ShieldCheck size={13} aria-hidden className="shrink-0" />
+              <span id={composerNoteId} className="min-w-0 flex-1">
+                {t('chat.dock.composer_note', {
+                  defaultValue: 'Changes are only saved after you approve them.',
+                })}
+              </span>
+              {showCounter && (
+                <span
+                  className={clsx(
+                    'shrink-0 tabular-nums',
+                    overHard && 'font-medium text-semantic-error',
+                    !overHard && overSoft && 'font-medium text-semantic-warning',
+                  )}
+                  data-testid="floating-chat-counter"
+                >
+                  {overHard
+                    ? t('chat.panel.token_over', { defaultValue: 'Too long - please shorten' })
+                    : overSoft
+                      ? t('chat.panel.token_warn', { defaultValue: 'Long message' })
+                      : `${charCount}/${HARD_LIMIT}`}
+                </span>
+              )}
+            </div>
+            <span id={composerKeysId} className="sr-only">
               {t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
             </span>
-            <span
-              style={{
-                color: overHard
-                  ? 'var(--chat-tool-error, #ef4444)'
-                  : overSoft
-                  ? '#b45309' // darker amber for WCAG AA against light surface
-                  : 'var(--chat-text-secondary)',
-              }}
-            >
-              {overHard
-                ? t('chat.panel.token_over', { defaultValue: 'Too long - please shorten' })
-                : overSoft
-                ? t('chat.panel.token_warn', { defaultValue: 'Long message' })
-                : `${charCount}/${HARD_LIMIT}`}
-            </span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={() => sendMessage(value)}
-              disabled={!canSend}
-              data-testid="floating-chat-send"
-              aria-label={t('chat.panel.send', { defaultValue: 'Send' })}
-              style={{
-                padding: '6px 16px',
-                fontSize: 13,
-                fontWeight: 600,
-                fontFamily: 'var(--chat-font-body)',
-                color: canSend ? '#ffffff' : 'var(--chat-text-tertiary)',
-                background: canSend ? 'var(--chat-accent)' : 'var(--chat-surface-3)',
-                border: 'none',
-                borderRadius: 'var(--chat-radius)',
-                cursor: canSend ? 'pointer' : 'not-allowed',
-                transition: 'background 0.15s',
-              }}
-            >
-              {t('chat.panel.send', { defaultValue: 'Send' })}
-            </button>
-          </div>
+        </div>
+
+        {/* Changes tab: the assistant's ledger. Mounted the first time the tab
+            is opened (it fetches its list), then kept. */}
+        <div
+          role="tabpanel"
+          id={dockTabPanelId('changes')}
+          aria-labelledby={dockTabId('changes')}
+          hidden={activeTab !== 'changes'}
+          className={activeTab === 'changes' ? 'flex min-h-0 flex-1 flex-col' : undefined}
+          data-testid="floating-chat-changes-panel"
+        >
+          {changesMounted && (
+            <ChangesView
+              projectId={activeProjectId}
+              projectName={activeProjectName || undefined}
+              className="min-h-0 flex-1"
+              listRef={setChangesListEl}
+            />
+          )}
         </div>
 
         {/* Local styles — kept inline so the component is fully self-contained
@@ -2313,7 +2669,12 @@ function MessageRow({
             background: 'var(--chat-surface-3)',
             color: 'var(--chat-text-primary)',
             padding: '8px 12px',
-            borderRadius: '14px 14px 4px 14px',
+            // Logical corners: the tail sits at the bottom inline-end corner,
+            // on the right in LTR and on the left in RTL.
+            borderStartStartRadius: 14,
+            borderStartEndRadius: 14,
+            borderEndEndRadius: 4,
+            borderEndStartRadius: 14,
             maxWidth: '85%',
             fontSize: 13,
             lineHeight: 1.55,
@@ -2333,7 +2694,7 @@ function MessageRow({
         style={{
           textAlign: 'center',
           fontSize: 11,
-          color: 'var(--chat-text-tertiary)',
+          color: 'var(--chat-text-secondary)',
           fontFamily: 'var(--chat-font-mono)',
           padding: '2px 0',
         }}
@@ -2343,12 +2704,14 @@ function MessageRow({
     );
   }
 
+  // Full width: a proposal card needs the room for its field table. The
+  // accent rule is on the inline-start side, so it follows RTL.
   return (
     <div
       style={{
-        borderLeft: '2px solid var(--chat-accent)',
-        paddingLeft: 10,
-        maxWidth: '92%',
+        borderInlineStart: '2px solid var(--chat-accent)',
+        paddingInlineStart: 10,
+        minWidth: 0,
       }}
     >
       {msg.toolCalls && msg.toolCalls.length > 0 && (

@@ -13,7 +13,7 @@
  * its Changes tab never asks for it. Rows read the shared store, so a change
  * applied in the chat shows as applied here at once.
  */
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useNavigate } from 'react-router-dom';
@@ -59,6 +59,13 @@ export interface ChangesViewProps {
   projectId: string | null;
   /** Its name, shown on the scope toggle. */
   projectName?: string;
+  /** Classes for the outer section, for example a height from the host. */
+  className?: string;
+  /**
+   * The scrolling list, for a host that hides this view and wants the reader
+   * back where they were (a hidden element forgets its scroll position).
+   */
+  listRef?: Ref<HTMLDivElement>;
 }
 
 export type ChangesFilter = 'proposed' | 'applied' | 'rejected' | 'reverted' | 'failed' | 'all';
@@ -359,7 +366,7 @@ function countFor(filter: ChangesFilter, counts: ChatActionCounts | undefined): 
   return counts[filter as ActionStatus];
 }
 
-export function ChangesView({ projectId, projectName }: ChangesViewProps) {
+export function ChangesView({ projectId, projectName, className, listRef }: ChangesViewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const headingId = useId();
@@ -415,7 +422,7 @@ export function ChangesView({ projectId, projectName }: ChangesViewProps) {
 
   return (
     <section
-      className="oe-act flex min-h-0 flex-col text-[var(--act-text)]"
+      className={clsx('oe-act flex min-h-0 flex-col text-[var(--act-text)]', className)}
       aria-labelledby={headingId}
       data-testid="changes-view"
     >
@@ -516,7 +523,14 @@ export function ChangesView({ projectId, projectName }: ChangesViewProps) {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1" aria-busy={loadingFirst || refreshing || undefined}>
+      {/* Only the rows scroll: the filters above and the history link below
+          stay in place, and the day headings stick to the top of this list. */}
+      <div
+        ref={listRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        aria-busy={loadingFirst || refreshing || undefined}
+        data-testid="changes-list"
+      >
         {loadingFirst && (
           <>
             <span className="sr-only" role="status">

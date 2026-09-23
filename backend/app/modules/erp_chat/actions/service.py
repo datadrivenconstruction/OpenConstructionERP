@@ -306,35 +306,49 @@ class ChatActionService:
     # ── Abilities ─────────────────────────────────────────────────────────
 
     def _spec(self, action: ChatAction) -> ActionSpec:
+        """The spec of a stored action, refused while the module it writes to is switched off."""
         spec = get_spec(action.action_type)
         if spec is None:
             raise ActionConflictError(code="unknown_action", params={"action_type": action.action_type})
+        if not is_available(spec):
+            raise ActionConflictError(code="module_unavailable", params={"action_type": action.action_type})
         return spec
 
     def abilities(self, action: ChatAction, viewer: Viewer) -> Abilities:
-        """What ``viewer`` may do with ``action`` now, under the record's own REST gates."""
+        """What ``viewer`` may do with ``action`` now, under the record's own REST gates.
+
+        While the module an action writes to is switched off, its REST routes
+        are gone, so nobody may apply, edit or undo it; the person who asked,
+        or anyone entitled to apply it, may still reject it.
+        """
         spec = get_spec(action.action_type)
+        available = spec is not None and is_available(spec)
         ctx = viewer.ctx
         opens_project = viewer.can_open_project(action.project_id)
-        may_apply = spec is not None and opens_project and all(ctx.has_permission(p) for p in spec.apply_permissions)
+        entitled = spec is not None and opens_project and all(ctx.has_permission(p) for p in spec.apply_permissions)
+        may_apply = entitled and available
         asked = action.requested_by == viewer.user_id
         pending = action.status in PENDING
         can_apply = pending and may_apply
-        can_edit = action.status == "proposed" and opens_project and (asked or may_apply)
-        can_reject = pending and (asked or may_apply)
+        can_edit = action.status == "proposed" and available and opens_project and (asked or may_apply)
+        can_reject = pending and (asked or entitled)
         can_revert = (
             action.status == "applied"
             and spec is not None
             and spec.reversible
+            and available
             and opens_project
             and all(ctx.has_permission(p) for p in spec.revert_permissions)
         )
+        blocked_by = None
+        if pending and not can_apply:
+            blocked_by = "permission" if available else "module_unavailable"
         return Abilities(
             can_apply=can_apply,
             can_edit=can_edit,
             can_reject=can_reject,
             can_revert=can_revert,
-            blocked=pending and not can_apply,
+            blocked_by=blocked_by,
         )
 
     # ── Edit, reject ──────────────────────────────────────────────────────
@@ -348,9 +362,9 @@ class ChatActionService:
         action = await self.get_visible(action_id, viewer)
         if action.status != "proposed":
             raise ActionConflictError(code="not_editable")
+        spec = self._spec(action)
         if not self.abilities(action, viewer).can_edit:
             raise ActionPermissionError(code="forbidden")
-        spec = self._spec(action)
         editable = {f.get("key") for f in (action.preview or {}).get("fields", []) if f.get("editable")}
         allowed = editable | set(spec.patch_aliases)
         unknown = sorted(set(patch) - allowed)
@@ -661,7 +675,8 @@ class ChatActionService:
         hint_text = None
         if hint_key:
             hint_text = labels.REVERT_HINTS.get(hint_key.removeprefix(labels.REVERT_HINT_PREFIX))
-        blocked_key = f"{labels.BLOCKED_PREFIX}permission" if abilities.blocked else None
+        blocked_by = abilities.blocked_by
+        blocked_key = f"{labels.BLOCKED_PREFIX}{blocked_by}" if blocked_by else None
         edited = (
             spec.edit_view(action.payload or {}) != spec.edit_view(action.original_payload or {})
             if spec is not None
@@ -702,7 +717,7 @@ class ChatActionService:
             can_reject=abilities.can_reject,
             can_revert=abilities.can_revert,
             blocked_reason_key=blocked_key,
-            blocked_reason=labels.BLOCKED["permission"] if blocked_key else None,
+            blocked_reason=labels.BLOCKED[blocked_by] if blocked_by else None,
             revert_hint_key=hint_key,
             revert_hint=hint_text,
             batch_id=action.batch_id,
