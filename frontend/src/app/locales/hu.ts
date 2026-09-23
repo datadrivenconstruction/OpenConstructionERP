@@ -18276,6 +18276,7 @@ const resource = {
     "contracts.no_project_desc": "Válasszon ki fent egy projektet a szerződéseinek megtekintéséhez.",
     "contracts.no_sov": "Még nincs elszámolási tételjegyzék.",
     "contracts.sov_locked": "Az aláírt szerződés ezeken a sorokon számláz, ezért itt nem módosíthatók vagy törölhetők. Az alkalmazási kört pótmunkával módosítsa.",
+    "contracts.sov_billed_locked": "Azok a sorok, amelyekre már előrehaladási elszámolás számlázott, itt nem módosíthatók vagy törölhetők, mert az elszámolás rájuk épül. Az alkalmazási kört pótmunkával módosítsa.",
     "contracts.original_value": "Eredeti érték",
     "contracts.outstanding": "Hátralék",
     "contracts.paid_to_date": "Eddig kifizetve",

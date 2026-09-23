@@ -18421,6 +18421,7 @@ const resource = {
     "contracts.no_project_desc": "Seleziona un progetto sopra per visualizzarne i contratti.",
     "contracts.no_sov": "Nessun preventivo lavori.",
     "contracts.sov_locked": "Un contratto firmato viene fatturato su queste righe, quindi non possono essere modificate o rimosse qui. Adegua l'ambito con una variante.",
+    "contracts.sov_billed_locked": "Le righe su cui è già stato fatturato uno stato di avanzamento non possono essere modificate o rimosse qui, perché lo stato di avanzamento si basa su di esse. Adegua l'ambito con una variante.",
     "contracts.original_value": "Valore originale",
     "contracts.outstanding": "Da incassare",
     "contracts.paid_to_date": "Pagato a oggi",

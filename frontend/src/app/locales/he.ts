@@ -17913,6 +17913,7 @@ const resource = {
     "contracts.claim_lines_locked": "אפשר לשנות את השורות רק כשהתביעה במצב טיוטה.",
     "contracts.claim_lines_locked_reopen": "דחו את התביעה כדי להחזיר אותה לטיוטה.",
     "contracts.sov_locked": "חוזה חתום מחויב על פי השורות האלה, ולכן אי אפשר לשנות או למחוק אותן כאן. כדי לשנות את ההיקף השתמשו בשינוי.",
+    "contracts.sov_billed_locked": "אי אפשר לשנות או למחוק כאן שורות שתביעת התקדמות כבר חויבה לפיהן, כי התביעה מבוססת עליהן. כדי לשנות את ההיקף השתמשו בשינוי.",
     "contracts.delete_line_title": "הסרת השורה הזו",
     "contracts.delete_line_message": "השורה תוסר מלוח הערכים וסך החוזה יירד בסכום שלה.",
     "contracts.claim_add_line": "הוספת שורה ידנית",

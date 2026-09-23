@@ -86,6 +86,7 @@ import {
   createContractLine,
   updateContractLine,
   deleteContractLine,
+  sovLineRefusal,
   createProgressClaim,
   suspendContract,
   resumeContract,
@@ -1497,6 +1498,25 @@ function invalidateSoV(qc: QueryClient, contractId: string): void {
   qc.invalidateQueries({ queryKey: ['contracts', 'compliance-gate', contractId] });
 }
 
+/**
+ * Why the lines of a signed contract cannot be changed here. Said under the
+ * table, and again if the server refuses a write the screen still offered.
+ */
+function sovLockedText(t: TFunction): string {
+  return t('contracts.sov_locked', {
+    defaultValue:
+      'A signed contract is billed on these lines, so they cannot be changed or removed here. Adjust the scope with a variation.',
+  });
+}
+
+/** The same for a line a progress claim has billed on, signed contract or not. */
+function sovBilledLockedText(t: TFunction): string {
+  return t('contracts.sov_billed_locked', {
+    defaultValue:
+      'Lines a progress claim has billed on cannot be changed or removed here, because the claim is built on them. Adjust the scope with a variation.',
+  });
+}
+
 const lineInputCls =
   'w-full rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm';
 
@@ -1518,6 +1538,11 @@ function lineDraftOf(line: ContractLine) {
  * a rate is fixed and how a line that the compliance gate refuses to sign
  * over gets its unit. So the controls sit on the row rather than behind a
  * drawer, and only the fields that changed are sent.
+ *
+ * `editable` says the contract is still a draft, which is when the table has
+ * a column for the controls at all. A line a claim has billed on keeps that
+ * cell empty: the server refuses to change or delete it, and a row without
+ * its cell would slide its figures under the wrong headings.
  */
 function SoVLineRow({
   line,
@@ -1536,6 +1561,30 @@ function SoVLineRow({
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [draft, setDraft] = useState(() => lineDraftOf(line));
+  const billed = line.billed === true;
+
+  // The listing this row was drawn from can be older than the server's
+  // answer: a claim may have billed on the line since, or the contract been
+  // signed. The refusal is then said in the reader's language, in the same
+  // sentence the note under the table uses, and the lines are read again so
+  // the row locks itself instead of offering the same write twice.
+  const onWriteFailed = (err: unknown) => {
+    const refusal = sovLineRefusal(err);
+    if (refusal === null) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+      return;
+    }
+    addToast({
+      type: 'error',
+      title: refusal === 'contract_line_billed' ? sovBilledLockedText(t) : sovLockedText(t),
+    });
+    setEditing(false);
+    invalidateSoV(qc, contractId);
+    // Signed under this screen: the drawer reads the status off the list.
+    if (refusal === 'contract_lines_frozen') {
+      qc.invalidateQueries({ queryKey: ['contracts', 'list'] });
+    }
+  };
 
   const saveMut = useMutation({
     mutationFn: () => {
@@ -1552,7 +1601,7 @@ function SoVLineRow({
       invalidateSoV(qc, contractId);
       setEditing(false);
     },
-    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+    onError: onWriteFailed,
   });
 
   const deleteMut = useMutation({
@@ -1563,7 +1612,7 @@ function SoVLineRow({
     },
     onError: (err) => {
       setConfirming(false);
-      addToast({ type: 'error', title: getErrorMessage(err) });
+      onWriteFailed(err);
     },
   });
 
@@ -1656,7 +1705,8 @@ function SoVLineRow({
       <td className="py-1 text-right font-medium">
         <MoneyDisplay amount={toNum(line.total_value)} currency={currency || undefined} />
       </td>
-      {editable && (
+      {editable && billed && <td className="py-1" />}
+      {editable && !billed && (
         <td className="py-1 text-right">
           <div className="flex gap-1 justify-end">
             <Button
@@ -1890,11 +1940,14 @@ export function ContractDetailDrawer({
   // A draft's schedule of values is still being written, and correcting it is
   // the ordinary thing to do: the compliance gate refuses to sign over a line
   // with no unit, and the person who typed the rate wrong has to be able to
-  // fix it. Once the contract is signed the lines are what is billed on, a
-  // claim line deleted with its SoV line is deleted for good (the foreign key
-  // cascades, and the server does not refuse it), so the screen stops here
-  // and the variation is the instrument.
+  // fix it. Once the contract is signed the lines are what is billed on, so
+  // the server refuses to change or delete them and the variation is the
+  // instrument. The same holds line by line on a draft: nothing ties a claim
+  // to the contract's status, so a draft can carry claims, and a line one has
+  // billed on is refused too, because a claim line goes with its SoV line
+  // (the foreign key cascades). The listing says which lines those are.
   const linesEditable = contract.status === 'draft';
+  const someLineBilled = (linesQ.data ?? []).some((l) => l.billed === true);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -2322,10 +2375,17 @@ export function ContractDetailDrawer({
                 className="mt-2 text-xs text-content-tertiary"
                 data-testid="sov-lines-locked"
               >
-                {t('contracts.sov_locked', {
-                  defaultValue:
-                    'A signed contract is billed on these lines, so they cannot be changed or removed here. Adjust the scope with a variation.',
-                })}
+                {sovLockedText(t)}
+              </p>
+            )}
+            {/* On a draft the signed-contract sentence would be false, so a
+                billed line gets its own reason. */}
+            {linesEditable && someLineBilled && (
+              <p
+                className="mt-2 text-xs text-content-tertiary"
+                data-testid="sov-lines-billed"
+              >
+                {sovBilledLockedText(t)}
               </p>
             )}
           </Card>

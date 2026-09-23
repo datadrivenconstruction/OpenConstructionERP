@@ -18436,6 +18436,7 @@ const resource = {
     "contracts.claim_lines_locked": "기성 청구가 초안 상태일 때만 항목을 변경할 수 있습니다.",
     "contracts.claim_lines_locked_reopen": "기성 청구를 반려하면 다시 초안 상태로 돌아갑니다.",
     "contracts.sov_locked": "서명된 계약은 이 항목들을 기준으로 청구되므로 여기서는 변경하거나 삭제할 수 없습니다. 범위를 조정하려면 변경으로 처리하세요.",
+    "contracts.sov_billed_locked": "기성 청구에 이미 반영된 항목은 청구의 근거가 되므로 여기서는 변경하거나 삭제할 수 없습니다. 범위를 조정하려면 변경으로 처리하세요.",
     "contracts.delete_line_title": "이 항목 삭제",
     "contracts.delete_line_message": "이 항목은 기성 산출 명세에서 제거되며, 계약 합계가 그 금액만큼 줄어듭니다.",
     "contracts.claim_add_line": "항목을 직접 추가",

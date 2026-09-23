@@ -18847,6 +18847,7 @@ const resource = {
     "contracts.no_project_desc": "Wählen Sie oben ein Projekt aus, um seine Verträge anzuzeigen.",
     "contracts.no_sov": "Noch kein Zahlungsplan.",
     "contracts.sov_locked": "Ein unterzeichneter Vertrag wird auf diesen Positionen abgerechnet, daher können sie hier nicht geändert oder entfernt werden. Passen Sie den Leistungsumfang mit einem Nachtrag an.",
+    "contracts.sov_billed_locked": "Positionen, auf denen bereits eine Abschlagsforderung abgerechnet wurde, können hier nicht geändert oder entfernt werden, weil die Forderung auf ihnen aufbaut. Passen Sie den Leistungsumfang mit einem Nachtrag an.",
     "contracts.original_value": "Ursprünglicher Wert",
     "contracts.outstanding": "Offen",
     "contracts.paid_to_date": "Bisher bezahlt",

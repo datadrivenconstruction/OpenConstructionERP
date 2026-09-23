@@ -18259,6 +18259,7 @@ const resource = {
     "contracts.no_project_desc": "Kies hierboven een project om de contracten te bekijken.",
     "contracts.no_sov": "Nog geen hoeveelhedenstaat.",
     "contracts.sov_locked": "Een ondertekend contract wordt op deze regels gefactureerd, dus kunnen ze hier niet worden gewijzigd of verwijderd. Pas de omvang aan met een meerwerk.",
+    "contracts.sov_billed_locked": "Regels waarop al een voortgangsclaim is gefactureerd, kunnen hier niet worden gewijzigd of verwijderd, omdat de claim erop steunt. Pas de omvang aan met een meerwerk.",
     "contracts.original_value": "Oorspronkelijke waarde",
     "contracts.outstanding": "Openstaand",
     "contracts.paid_to_date": "Betaald tot heden",

@@ -18436,6 +18436,7 @@ const resource = {
     "contracts.claim_lines_locked": "出来高請求がドラフト状態のときだけ、明細を変更できます。",
     "contracts.claim_lines_locked_reopen": "出来高請求を却下すると、ドラフトの状態に戻ります。",
     "contracts.sov_locked": "署名済みの契約はこれらの明細に基づいて請求されるため、ここでは変更や削除ができません。範囲を調整するには変更で対応してください。",
+    "contracts.sov_billed_locked": "出来高請求で請求済みの明細は、その請求の根拠となっているため、ここでは変更や削除ができません。範囲を調整するには変更で対応してください。",
     "contracts.delete_line_title": "この明細を削除",
     "contracts.delete_line_message": "この明細は出来高内訳から削除され、契約の合計はその金額分減少します。",
     "contracts.claim_add_line": "明細を手動で追加",
