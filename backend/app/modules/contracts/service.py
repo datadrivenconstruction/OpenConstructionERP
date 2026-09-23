@@ -2096,6 +2096,48 @@ class ContractsService:
             },
         )
 
+    async def _assert_contract_line_not_billed(self, line_ids: list[uuid.UUID]) -> None:
+        """Raise 409 when a progress claim has billed on any of these lines.
+
+        This is a fact about the line, not about the contract, which is why it
+        is a separate check from :meth:`_assert_contract_lines_editable` and
+        runs after it. Nothing ties a claim to the contract's status, so a
+        contract still in draft can carry claims, and the draft rule alone let
+        both writes through underneath them.
+
+        Deleting a billed line destroys the claim's breakdown.
+        ``ProgressClaimLine.contract_line_id`` cascades and has no ORM
+        relationship, so the database deletes every claim line on the schedule
+        line and the claim is left holding a gross, retention and net due that
+        nothing explains any more. Changing a billed line restates it: the
+        total is recomputed from quantity and rate, and percent complete,
+        column D and the continuation sheet all read that value, including on
+        a certificate the payer already holds.
+
+        Changing the foreign key to RESTRICT would reach fresh installs only,
+        because an upgraded install keeps the constraint it was created with.
+        This check is what reaches every running install.
+        """
+        billed = await self.claim_line_repo.claims_billing_lines(line_ids)
+        if not billed:
+            return
+        claim_numbers = sorted({number for numbers in billed.values() for number in numbers if number})
+        named = f" ({', '.join(claim_numbers)})" if claim_numbers else ""
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "contract_line_billed",
+                "message": (
+                    f"A progress claim{named} has billed on this schedule of values line, so it cannot be "
+                    "changed or removed: the claim's lines point at it and would be restated or deleted "
+                    "with it. If the claim is still a draft, take the line off the claim first; otherwise "
+                    "raise a change order."
+                ),
+                "contract_line_ids": [str(line_id) for line_id in line_ids if line_id in billed],
+                "claim_numbers": claim_numbers,
+            },
+        )
+
     async def create_line(self, data: Any) -> ContractLine:
         qty = Decimal(str(data.quantity or 0))
         rate = Decimal(str(data.unit_rate or 0))
@@ -2154,6 +2196,7 @@ class ContractsService:
         if line is None:
             raise HTTPException(status_code=404, detail="Contract line not found")
         await self._assert_contract_lines_editable(line.contract_id)
+        await self._assert_contract_line_not_billed([line.id])
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
@@ -2179,6 +2222,7 @@ class ContractsService:
             # anything.
             return
         await self._assert_contract_lines_editable(line.contract_id)
+        await self._assert_contract_line_not_billed([line.id])
         await self.line_repo.delete(line_id)
 
     # ── Progress claims ──────────────────────────────────────────────────
