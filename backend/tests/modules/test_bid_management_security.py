@@ -530,7 +530,8 @@ async def test_bidder_impersonation_submission_same_package_allowed() -> None:
     """Happy path: a submission with bidder belonging to the same package
     as the invitation must succeed (regression guard)."""
     svc = _make_service()
-    pkg_a = _seed_package(svc, project_id=PROJECT_A, code="A-OK")
+    # Out to tender: a draft package takes no bids at all.
+    pkg_a = _seed_package(svc, project_id=PROJECT_A, code="A-OK", status="open")
     inv_a = _seed_invitation(svc, package_id=pkg_a.id)
     bidder_a = _seed_bidder(svc, package_id=pkg_a.id)
 
@@ -630,7 +631,8 @@ async def test_cross_package_line_item_on_submission_line_rejected() -> None:
     project-B's line items into a project-A submission.
     """
     svc = _make_service()
-    pkg_a = _seed_package(svc, project_id=PROJECT_A, code="A-LI")
+    # Out to tender, so the submission the line hangs off can be recorded.
+    pkg_a = _seed_package(svc, project_id=PROJECT_A, code="A-LI", status="open")
     pkg_b = _seed_package(svc, project_id=PROJECT_B, code="B-LI")
     inv_a = _seed_invitation(svc, package_id=pkg_a.id)
     bidder_a = _seed_bidder(svc, package_id=pkg_a.id)
@@ -1125,10 +1127,43 @@ async def test_record_submission_on_decided_package_is_refused(package_status: s
     assert inv.status == "sent"
 
 
+# A package takes bids only while it is out to tender. A draft package has not
+# been published, so nobody was asked to price it yet. A closed package has
+# stopped taking bids: ``close_package`` ends the bidding window after the
+# opening, and the award is made from what was in by then. A bid recorded
+# against either state is a bid outside the contest.
+
+
 @pytest.mark.asyncio
-async def test_record_submission_on_open_package_is_allowed() -> None:
+@pytest.mark.parametrize("package_status", ["draft", "closed"])
+async def test_record_submission_outside_the_tender_window_is_refused(package_status: str) -> None:
+    """Same 409 and message shape as a decided package, and nothing is written."""
     svc = _make_service()
-    pkg = _seed_package(svc, project_id=PROJECT_A, status="open")
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+    inv = _seed_invitation(svc, package_id=pkg.id)
+    bidder = _seed_bidder(svc, package_id=pkg.id)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.record_submission(
+            BidSubmissionCreate(
+                invitation_id=inv.id,
+                bidder_id=bidder.id,
+                total_amount=Decimal("950.00"),
+                currency="EUR",
+            )
+        )
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == f"Package is '{package_status}' and accepts no new submissions"
+    assert svc.submission_repo.rows == {}
+    assert inv.status == "sent"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["published", "open"])
+async def test_record_submission_on_open_package_is_allowed(package_status: str) -> None:
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
     inv = _seed_invitation(svc, package_id=pkg.id)
     bidder = _seed_bidder(svc, package_id=pkg.id)
 

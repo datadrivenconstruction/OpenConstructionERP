@@ -1058,6 +1058,9 @@ async def test_submission_locked_after_award() -> None:
 
         bidder = Bidder(package_id=pkg.id, company_name="LK Co")
         await svc.bidder_repo.create(bidder)
+        # A new package is a draft, and a draft takes no bids: put it out to
+        # tender first.
+        pkg.status = "open"
         sub = await svc.record_submission(
             BidSubmissionCreate(
                 invitation_id=inv.id,
@@ -1066,7 +1069,7 @@ async def test_submission_locked_after_award() -> None:
                 currency="EUR",
             )
         )
-        # Editable while draft.
+        # Editable while the package is undecided.
         await svc.update_submission(sub.id, BidSubmissionUpdate(total_amount=Decimal("1100")))
         # Lock once package is awarded.
         pkg.status = "awarded"
