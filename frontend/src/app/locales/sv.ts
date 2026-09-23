@@ -9466,6 +9466,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maximal nästningsdjup på {{max}} nivåer uppnått, platta ut strukturen eller använd färre undernivåer.",
     "boq.resource_link_propagated_msg": "Den delade resursen uppdaterades på {{count}} annan/andra position(er) i projektet.",
     "boq.resource_link_propagated_title": "Resursdefinition spridd",
+    "boq.link_locked_skipped_msg": "{{count}} länkade post(er) i låsta kalkyler behöll den gamla definitionen: {{bills}}. Lås upp kalkylerna eller skapa en revision för att ta in ändringen.",
+    "boq.link_locked_skipped_title": "Låsta kalkyler lämnades oförändrade",
     "boq.link_role_instance": "Länkad instans",
     "boq.link_role_master": "Master (definitionskälla)",
     "boq.link_unlinked_msg": "Din redigering ändrade denna länkade kopia, så den följer inte längre den delade koden. Om du inte avsåg att avvika, ändra koden tillbaka istället.",

@@ -14710,6 +14710,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "已达到最大嵌套层级 {{max}}，请扁平化结构或减少子层级。",
     "boq.resource_link_propagated_msg": "共享资源已在本项目中另 {{count}} 个清单项上更新。",
     "boq.resource_link_propagated_title": "资源定义已传播",
+    "boq.link_locked_skipped_msg": "已锁定估算中的 {{count}} 个关联清单项保留了原定义：{{bills}}。如需应用此更改，请解锁这些估算或创建修订版本。",
+    "boq.link_locked_skipped_title": "已锁定的估算未更改",
     "boq.link_role_instance": "关联实例",
     "boq.link_role_master": "主项(基准定义)",
     "boq.link_unlinked_msg": "您的编辑改变了该关联副本,因此它不再遵循共享代码。如不打算让其分歧,请将代码改回原值。",

@@ -14678,6 +14678,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maksimisisäkkäisyystaso {{max}} saavutettu, litistä rakennetta tai käytä vähemmän alitasoja.",
     "boq.resource_link_propagated_msg": "Päivitettiin jaettu resurssi {{count}} muussa nimikkeessä tässä projektissa.",
     "boq.resource_link_propagated_title": "Resurssimääritys levitetty",
+    "boq.link_locked_skipped_msg": "Lukituissa arvioissa {{count}} linkitettyä riviä säilytti vanhan määrityksen: {{bills}}. Avaa näiden arvioiden lukitus tai luo revisio, jotta muutos tulee voimaan.",
+    "boq.link_locked_skipped_title": "Lukitut arviot jätettiin ennalleen",
     "boq.link_role_instance": "Linkitetty instanssi",
     "boq.link_role_master": "Master (virallinen määritelmä)",
     "boq.link_unlinked_msg": "Muokkauksesi muutti tätä linkitettyä kopiota, joten se ei enää seuraa jaettua koodia. Jos et tarkoittanut eriyttää sitä, vaihda sen koodi takaisin.",

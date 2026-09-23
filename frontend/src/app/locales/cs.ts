@@ -14759,6 +14759,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Dosažena maximální hloubka vnoření {{max}} úrovní, zploštěte strukturu nebo použijte méně podúrovní.",
     "boq.resource_link_propagated_msg": "Aktualizováno sdíleno zdroj na {{count}} jiné položka(s) napříč tento projekt.",
     "boq.resource_link_propagated_title": "Definice zdroje rozšířena",
+    "boq.link_locked_skipped_msg": "Propojené položky v uzamčených rozpočtech ({{count}}) si ponechaly původní definici: {{bills}}. Chcete-li změnu převzít, odemkněte tyto rozpočty nebo vytvořte revizi.",
+    "boq.link_locked_skipped_title": "Uzamčené rozpočty zůstaly beze změny",
     "boq.link_role_instance": "Propojená instance",
     "boq.link_role_master": "Hlavní (definition z record)",
     "boq.link_unlinked_msg": "Vaše úprava změnila tuto propojenou kopii, takže už nesleduje sdílený kód. Pokud jste ji rozejít nechtěli, vraťte jí původní kód.",
