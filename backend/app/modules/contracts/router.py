@@ -1486,7 +1486,10 @@ async def export_aia_application_pdf(
 
     await _verify_claim_access(session, claim_id, user_id)
     service = ContractsService(session)
-    payload = await service.build_aia_application(claim_id)
+    # English, like every other word on the form and the Content-Language
+    # below. The request's language would have printed one row in German or
+    # Russian on an English page.
+    payload = await service.build_aia_application(claim_id, locale="en")
     pdf_bytes = render_aia_application_pdf(payload)
     safe_num = "".join(c for c in str(payload.get("application_number") or "app") if c.isalnum() or c in "-_") or "app"
     filename = f"AIA_G702_{safe_num}.pdf"
