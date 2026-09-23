@@ -75,7 +75,7 @@ export function BackgroundInstallBanner() {
     void qc.invalidateQueries({ queryKey: ['partner-pack-applied'] });
     // Applying a pack enables and disables modules, and the backend scopes the
     // project listing to the pack the instant it is applied.
-    void qc.invalidateQueries({ queryKey: ['modules'] });
+    void qc.invalidateQueries({ queryKey: ['system-modules'] });
     void qc.invalidateQueries({ queryKey: ['projects'] });
   }, [settledSteps, qc]);
 

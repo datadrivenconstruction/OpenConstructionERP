@@ -277,7 +277,7 @@ export function PartnerPackApplyDialog({
       void qc.invalidateQueries({ queryKey: ['partner-pack'] });
       // Applying a pack enables and disables modules, so the navigation and the
       // dashboard are holding a module list that just changed under them.
-      void qc.invalidateQueries({ queryKey: ['modules'] });
+      void qc.invalidateQueries({ queryKey: ['system-modules'] });
       // The backend hides other-pack projects from the listing the instant a
       // pack is applied, so drop the cached project list to make the updated
       // view appear immediately (mirrors deactivation).

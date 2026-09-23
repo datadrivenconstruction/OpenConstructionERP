@@ -133,7 +133,7 @@ function useInvalidatePackQueries() {
     // co-brand hook ('current') and the header chip ('installed'). Naming one
     // of the two siblings has left the other serving a stale answer.
     void qc.invalidateQueries({ queryKey: ['partner-pack'] });
-    void qc.invalidateQueries({ queryKey: ['modules'] });
+    void qc.invalidateQueries({ queryKey: ['system-modules'] });
   };
 }
 
