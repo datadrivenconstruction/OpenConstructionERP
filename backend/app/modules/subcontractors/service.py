@@ -1436,6 +1436,30 @@ class SubcontractorService:
             )
 
     async def delete_agreement(self, agreement_id: uuid.UUID) -> None:
+        """Delete a subcontract agreement. Refused once money has moved under it.
+
+        The delete cascades to the agreement's work packages, its payment
+        applications with their lines, and its retention ledger. Those are the
+        records :meth:`delete_subcontractor` refuses to take away, and they go
+        just the same when the agreement is deleted instead of the firm. So an
+        agreement that holds any payment application or retention entry is
+        kept, and one that is over is closed through its status (completed or
+        terminated). Deleting an agreement that is not there stays a no-op.
+        """
+        entity = await self.agreements.get_by_id(agreement_id)
+        if entity is None:
+            return
+        payments = await self.payments.list_for_agreement(agreement_id)
+        ledger = await self.retention.list_for_agreement(agreement_id)
+        if payments or ledger:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"This agreement holds {len(payments)} payment application(s) and {len(ledger)} "
+                    "retention entry(ies) and cannot be deleted, because they would go with it. "
+                    "Close it through its status (completed or terminated) instead."
+                ),
+            )
         await self.agreements.delete(agreement_id)
 
     # ── Work packages ──────────────────────────────────────────────────
@@ -1477,6 +1501,23 @@ class SubcontractorService:
         return entity
 
     async def delete_work_package(self, wp_id: uuid.UUID) -> None:
+        """Delete a work package nothing has been billed against.
+
+        Every payment application line billed against the package cascades
+        with it, which changes what an approved or paid pay application, and
+        the GC claim that bills it, says it contained. That is the change
+        :meth:`update_payment_application_line` refuses once the claim has
+        moved on, so a package that carries any billed line is kept.
+        """
+        billed_lines = await self.payment_lines.count_for_work_package(wp_id)
+        if billed_lines:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"This work package is billed on {billed_lines} payment application line(s) and "
+                    "cannot be deleted, because those lines would go with it."
+                ),
+            )
         await self.work_packages.delete(wp_id)
 
     # ── Payment applications ───────────────────────────────────────────
