@@ -229429,10 +229429,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 128,
+      "ts_files": 129,
       "css_files": 0,
-      "test_files": 57,
-      "total_files": 128
+      "test_files": 58,
+      "total_files": 129
     },
     {
       "name": "buyer-portal",
@@ -231869,7 +231869,7 @@
     "total_schemas": 3457,
     "total_python_files": 2181,
     "frontend_features": 188,
-    "frontend_ts_files": 2618,
+    "frontend_ts_files": 2619,
     "frontend_backend_mapped": 168
   },
   "frontend_backend_mapping": {
