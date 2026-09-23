@@ -90,5 +90,10 @@
       "approval_blocked": "This retention release cannot be approved until these are resolved: {findings}",
       "rules_unavailable": "The retention release rules are not loaded on this deployment, so this release cannot be checked before it is approved."
     }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Billed work not carried by any schedule of values line"
+    }
   }
 }

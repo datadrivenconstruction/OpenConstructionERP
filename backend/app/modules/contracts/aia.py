@@ -321,17 +321,64 @@ def sheet_sov_lines(
     ]
 
 
+#: Column C on the row carrying work billed outside the schedule of values.
+#:
+#: That money has no scheduled value of its own: either nobody planned a line
+#: for it, or the lines that were planned had no room left to hold it. The
+#: three cells measured against C are decided here and nowhere else, so the
+#: presentation can change in one edit once the question is settled.
+#:
+#: Zero is a placeholder, not an answer. With it, C and column H both read
+#: truthfully - H goes negative because more has been done than was
+#: scheduled, which is unusual and informative rather than wrong - but the
+#: percent reads 0 against a non-zero G, because ``_fill_row`` gives up on a
+#: zero C. That one cell is known to be wrong. Blank is what these three
+#: want, and blanks need ``scheduled_value``, ``percent_complete`` and
+#: ``balance_to_finish`` to accept None in the response schema first.
+OUT_OF_SCHEDULE_SCHEDULED_VALUE = DEC_ZERO
+
+#: Column A on that row. Empty rather than borrowed: the cost-of-work row
+#: prints the contract's own code, and a reader has to be able to tell the
+#: two apart, which is the ambiguity this row exists to remove.
+OUT_OF_SCHEDULE_ITEM_NUMBER = ""
+
+
 def build_g703(
     contract_lines: list[Any],
     claim_lines_by_contract_line: dict[Any, Any],
     *,
     retainage_percent: Decimal,
     prior_by_line: dict[Any, Decimal] | None = None,
+    prior_without_schedule: Decimal = DEC_ZERO,
+    out_of_schedule_label: str = "",
 ) -> list[dict[str, Any]]:
     """Build the full G703 continuation sheet, one row per SoV line.
 
     ``prior_by_line`` is what the earlier claims billed per SoV line, column D
     for a line this claim does not bill.
+
+    ``prior_without_schedule`` is what earlier claims billed that no schedule
+    line carries. It gets a row of its own because column D here is assembled
+    from claim lines, so money with no line behind it is invisible to the
+    column while remaining visible on line 7, and line 8 then subtracts a
+    certificate the columns never added. The row carries the figure in column
+    D and its share of retainage, so line 4 and line 5 both see it;
+    ``out_of_schedule_label`` is its description, resolved by the caller
+    because this module is pure and holds no strings.
+
+    Two different things arrive here and the row has to be honest about both.
+    An earlier claim may have had no lines at all, billed from cost on a
+    contract that can bill either way. Or there was a schedule and the claim
+    outran it, and the remainder its gross could not be placed against is
+    money no line carries either. Do not describe this row as work billed
+    without a schedule: that is true of the first and false of the second.
+
+    Its retainage is worked out at this sheet's ``retainage_percent``, which
+    equals what those earlier claims actually held only while the rate has not
+    moved. A contract that steps its rate down partway would need the
+    retention those claims stored instead. Untested either way: every fixture
+    that reaches this row retains at one rate throughout, so the two answers
+    are the same number and nothing here distinguishes them.
 
     The columns are rounded to cents across the whole sheet rather than row by
     row, so the sheet adds up to the same figures the claim itself holds.
@@ -351,14 +398,36 @@ def build_g703(
         )
         for cl in contract_lines
     ]
+    captions = [
+        (_item_number(cl, idx), getattr(cl, "description", "") or "") for idx, cl in enumerate(contract_lines, start=1)
+    ]
+
+    outside = _dec(prior_without_schedule)
+    if outside > DEC_ZERO:
+        # Appended before the cent allocation rather than after, so this row
+        # is rounded with the rest of the column and the sheet still totals
+        # to the figures the claim holds.
+        exact.append(
+            {
+                "scheduled": OUT_OF_SCHEDULE_SCHEDULED_VALUE,
+                "previous": outside,
+                "this_period": DEC_ZERO,
+                "stored": DEC_ZERO,
+                "total": outside,
+                "retainage": retainage_percent * outside / DEC_HUNDRED,
+                "retainage_stored": DEC_ZERO,
+            }
+        )
+        captions.append((OUT_OF_SCHEDULE_ITEM_NUMBER, out_of_schedule_label))
+
     totals = _allocate_to_cents([columns["total"] for columns in exact])
     retainages = _allocate_to_cents([columns["retainage"] for columns in exact])
     stored_retainages = _allocate_to_cents([columns["retainage_stored"] for columns in exact])
     return [
         _fill_row(
             line_number=idx,
-            item_number=_item_number(cl, idx),
-            description=getattr(cl, "description", "") or "",
+            item_number=item_number,
+            description=description,
             scheduled=columns["scheduled"],
             previous=_q(columns["previous"]),
             stored=_q(columns["stored"]),
@@ -366,8 +435,8 @@ def build_g703(
             retainage=retainage,
             retainage_stored=retainage_stored,
         )
-        for idx, (cl, columns, total, retainage, retainage_stored) in enumerate(
-            zip(contract_lines, exact, totals, retainages, stored_retainages, strict=True), start=1
+        for idx, ((item_number, description), columns, total, retainage, retainage_stored) in enumerate(
+            zip(captions, exact, totals, retainages, stored_retainages, strict=True), start=1
         )
     ]
 
@@ -421,6 +490,14 @@ def apply_retention_snapshot(
     up to line 5 exactly, before and after a release takes it down. Rows are
     changed in place and returned; ``rows`` and ``contract_lines`` are in the
     same order, as :func:`build_g703` builds them.
+
+    The two are walked strictly in step, so they have to be the same length.
+    Pass the schedule rows only. ``held`` is measured on the schedule, so an
+    out-of-schedule row put in front of this would be reconciled into the same
+    total: it would draw a share of what is left of line 5 and lose the
+    retention held on the month it carries, which is money the certificate
+    then pays out on line 8. Such a row already carries the column I
+    :func:`build_g703` rounded for it, and keeps it by staying out of here.
     """
     work: dict[int, Decimal] = {}
     stored: dict[int, Decimal] = {}

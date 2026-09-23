@@ -90,5 +90,10 @@
       "approval_blocked": "Diese Freigabe des Einbehalts kann erst genehmigt werden, wenn Folgendes behoben ist: {findings}",
       "rules_unavailable": "Die Prüfregeln für Freigaben des Einbehalts sind in dieser Installation nicht geladen, daher kann diese Freigabe vor der Genehmigung nicht geprüft werden."
     }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Abgerechnete Leistung ohne Position im Zahlungsplan"
+    }
   }
 }

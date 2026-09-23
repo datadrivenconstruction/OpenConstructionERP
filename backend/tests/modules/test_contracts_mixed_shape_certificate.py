@@ -16,6 +16,14 @@ earlier claim actually certified. A month that billed with no lines is
 invisible to column D and fully visible to line 7, so line 8 subtracts a
 certificate that was never added.
 
+The first two cases here are fixed and now pass. The sheet carries a row for
+what earlier claims billed that no schedule line carries, and that row stays
+out of the retention snapshot, which reconciles to a line 5 measured on the
+schedule alone. Both halves were needed: line 8 is floored at zero, so the
+certificate could only ever report this as nothing due however large it was,
+and column D on its own moved these cases from underpaying to overpaying by
+the retention held on the lineless month.
+
 The same divergence has a second entrance, which nothing can reach today: a
 stored material value counts in line 4 and does not count in the claim's
 gross. No request schema accepts the field, so the tests that use it write
@@ -30,7 +38,8 @@ branch in ``roll_claim_retention`` and not the certificate builder. Without
 that case a reader can conclude ``build_aia_application`` is broken in
 general and go and change the wrong file.
 
-The xfail marks are strict, so the fix cannot land without removing them.
+One xfail mark is left, on the stored-material case, and it is strict, so
+that fix cannot land without removing it.
 """
 
 from __future__ import annotations
@@ -191,14 +200,6 @@ async def test_a_cost_plus_certificate_agrees_when_every_month_has_lines(session
 # ── It breaks the moment the shapes differ ────────────────────────────────
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "A month billed with no claim lines is invisible to column D and visible to line 7, "
-        "so line 8 subtracts a certificate the columns never added. Certificate says 0.00, "
-        "claim bills 9000.0000."
-    ),
-)
 async def test_a_cost_plus_certificate_agrees_when_the_months_differ_in_shape(session) -> None:
     """March generated from costs, April billed off the schedule of values."""
     job = await _job(session, "cost_plus")
@@ -214,14 +215,6 @@ async def test_a_cost_plus_certificate_agrees_when_the_months_differ_in_shape(se
     assert summary["current_payment_due"] == april.net_due
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "The same divergence reached from the screens: populate-from-progress has no "
-        "contract-type guard and the claim page gates its button on draft status alone. "
-        "Certificate says 1800.00, claim bills 10800.0000."
-    ),
-)
 async def test_a_cost_plus_claim_populated_from_progress_agrees_with_its_certificate(session) -> None:
     """Reachability, not arithmetic: the defect above without touching the API by hand.
 

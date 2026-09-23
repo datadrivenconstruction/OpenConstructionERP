@@ -33,7 +33,8 @@ from types import SimpleNamespace
 import pytest
 
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaimLine
-from app.modules.contracts.schemas import AutoGenerateClaimRequest
+from app.modules.contracts.router import create_claim_line
+from app.modules.contracts.schemas import AutoGenerateClaimRequest, ProgressClaimLineCreate
 from app.modules.contracts.service import ContractsService
 from app.modules.projects.models import Project
 from app.modules.users.models import User
@@ -297,3 +298,112 @@ async def test_a_cost_plus_sheet_reads_the_same_once_the_month_before_is_certifi
     assert summary["retainage"] == Decimal("8000.00")
     assert summary["current_payment_due"] == Decimal("27000.00")
     assert summary["current_payment_due"] == Decimal(str(second.net_due)).quantize(Decimal("0.01"))
+
+
+async def test_a_month_off_the_schedule_reaches_the_sheet_of_the_month_billed_on_it(pg_session) -> None:
+    """A contract billed from cost one month and off its schedule the next.
+
+    Column D on the schedule rows is assembled from claim lines, so a month
+    billed with no lines is invisible to it while line 7 still carries that
+    month's certificate, and line 8 used to subtract money the columns never
+    added. The work goes on a row of its own instead.
+
+    The second month is certified as well, which is the shape that matters
+    here rather than a detail of the fixture. A certified claim carries a
+    retention snapshot, and that snapshot is reconciled against the claim's
+    stored line 5, which is frozen from the schedule alone. So the row for the
+    cost month has to stay out of the reconciliation: inside it, the row draws
+    a share of a total that never counted the month it stands for, and the
+    retention held on that month vanishes from line 5. Line 8 pays it out.
+
+    Nothing else in the suite bills one month each way AND certifies both,
+    which is why this reached a release. Getting only column D right is worse
+    than it sounds rather than merely incomplete: line 8 is floored at zero,
+    so before the fix the contractor was shown nothing due against 27000
+    genuinely owed, and with column D alone the same certificate would have
+    called for 32000.
+    """
+    svc = ContractsService(pg_session)
+    job = await _job(pg_session, [("A", "60000"), ("B", "40000")], contract_type="cost_plus")
+
+    first = await svc.auto_generate_claim_lines(
+        (await _claim(svc, job, 1)).id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("50000")),
+    )
+    await svc.claim_repo.update_fields(first.id, status="approved")
+    first = await svc.transition_claim(first.id, "certified", "certifier")
+
+    # Billed off the schedule through the endpoint the editor calls, because
+    # auto-generation on a cost-plus contract reads actual costs and ignores a
+    # completion map, which would have left this month lineless too and the
+    # test green against a sheet that never had two shapes on it.
+    second = await _claim(svc, job, 2)
+    await create_claim_line(
+        ProgressClaimLineCreate(
+            progress_claim_id=second.id,
+            contract_line_id=job.lines["A"].id,
+            period_completed_qty=Decimal("1"),
+            period_completed_value=Decimal("30000"),
+            period_completed_pct=Decimal("0"),
+        ),
+        pg_session,
+        str(job.project.owner_id),
+    )
+    await pg_session.refresh(second)
+    await svc.claim_repo.update_fields(second.id, status="approved")
+    second = await svc.transition_claim(second.id, "certified", "certifier")
+    assert Decimal(str(second.gross_amount)) == Decimal("30000.0000")
+
+    app = await svc.build_aia_application(second.id)
+    summary = app["summary"]
+
+    # The month billed from cost is on the sheet, on a row of its own, and it
+    # is not confusable with a schedule line: it carries no item number.
+    outside = [row for row in app["lines"] if row["item_number"] == ""]
+    assert len(outside) == 1
+    assert outside[0]["previous_value"] == Decimal("50000.00")
+    assert outside[0]["this_period_value"] == Decimal("0.00")
+
+    # Line 4 counts both months, and line 7 is the certificate of the month
+    # billed from cost, so the two are now on the same basis.
+    assert summary["total_completed_stored"] == Decimal("80000.00")
+    assert summary["previous_certificates_total"] == Decimal("45000.00")
+    assert summary["previous_certificates_basis"] == "snapshot"
+
+    # Column I, asserted by where each part of it comes from. The schedule
+    # rows are reconciled to the claim's stored line 5 and add up to it
+    # exactly, which is the property the snapshot exists to keep. The
+    # out-of-schedule row is not in that reconciliation and keeps the
+    # retainage the builder rounded for it. Checking only the column total
+    # against line 5 would prove neither half, because line 5 is summed from
+    # these same rows and the two sides cannot disagree.
+    schedule_rows = [row for row in app["lines"] if row["item_number"] != ""]
+    assert sum(row["retainage"] for row in schedule_rows) == Decimal("3000.00")
+    assert Decimal(str(second.retention_held_to_date)) == Decimal("3000.0000")
+    assert outside[0]["retainage"] == Decimal("5000.00")
+    assert summary["retainage"] == Decimal("8000.00")
+
+    # Why line 5 has to be assembled from two places rather than read off the
+    # claim. Both months freeze their figures at certification through
+    # claim_completed_and_held, which measures a lineless month by summing the
+    # claims around it and a month with lines by rolling up build_g703. So the
+    # cost month counts the whole job and the schedule month counts only the
+    # schedule, and a contract that changes shape halfway stores line 7 on one
+    # basis and line 5 on the other.
+    assert Decimal(str(first.completed_stored_to_date)) == Decimal("50000.0000")
+    assert Decimal(str(first.retention_held_to_date)) == Decimal("5000.0000")
+    assert Decimal(str(second.completed_stored_to_date)) == Decimal("30000.0000")
+
+    # The face closes: earned to date less held equals certified before plus
+    # what this claim is owed. That identity is what makes line 8 right rather
+    # than merely different from what it was, and it is the assertion that
+    # would catch the out-of-schedule row being given a retainage that only
+    # looks correct because both months happen to retain at 10 percent.
+    # Retention on this contract is flat, so the claim's own net is measured
+    # on the same basis as the face; on a ladder contract the stored net is
+    # schedule-scoped and this would not hold.
+    assert Decimal(str(second.net_due)) == Decimal("27000.0000")
+    assert summary["total_completed_stored"] - summary["retainage"] == (
+        summary["previous_certificates_total"] + Decimal(str(second.net_due)).quantize(Decimal("0.01"))
+    )
+    assert summary["current_payment_due"] == Decimal("27000.00")

@@ -4838,6 +4838,7 @@ class ContractsService:
             build_g703,
             sheet_sov_lines,
         )
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
 
         claim = await self.claim_repo.get_by_id(claim_id)
         if claim is None:
@@ -4883,11 +4884,14 @@ class ContractsService:
 
         retainage_percent = Decimal(str(contract.retention_percent or 0))
         prior_by_line = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
+        # Both branches need the prior claims, so they are read once. The two
+        # calls answer the same population: prior_period_value_by_line resolves
+        # "prior" through this very method, rejected claims left out.
+        prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         if bills_without_schedule(claim, claim_lines):
             # The claim's own figures go on a single cost-of-work row. What
             # makes a claim this shape is decided once, in aia.py, because
             # certification freezes the same two figures the sheet prints.
-            prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
             held = (
                 Decimal(str(claim.retention_held_to_date))
                 if claim.retention_held_to_date is not None
@@ -4905,6 +4909,46 @@ class ContractsService:
                 )
             ]
         else:
+            # What earlier claims billed with no lines at all. Column D here is
+            # assembled from claim lines, so a lineless earlier claim is
+            # invisible to it while line 7 still carries its certificate, and
+            # line 8 then subtracts money the columns never added.
+            #
+            # The residual finds it without asking any claim what basis it
+            # used, which matters because the answer was never recorded for
+            # claims that already exist: it is gross that no line of that
+            # claim carries.
+            #
+            # Floored per claim rather than on the total, and the difference
+            # is worth the query. Today a claim with lines has a gross equal
+            # to their sum, so every term is zero or positive and the two
+            # forms agree exactly. That equality is not a property of the
+            # data though, it is forced: create_claim_line and the claim line
+            # PATCH both end by recomputing gross from the lines. That
+            # recompute is being removed, so that a claim billed from cost
+            # keeps its cost-derived gross when somebody adds a line by hand.
+            # After that the two are independent in both directions, and a
+            # claim whose gross falls below its own lines contributes a
+            # negative term. Flooring the total would let it cancel a real
+            # remainder from another claim: column D would understate, line 8
+            # would overpay, and nothing would go red. A seeded claim whose
+            # gross outran its schedule already contributes a positive
+            # remainder here, which is the same money and belongs on the row.
+            prior_line_totals: dict[Any, Decimal] = {}
+            for prior_line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract.id):
+                prior_line_totals[owning_claim.id] = prior_line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
+                    str(prior_line.period_completed_value or 0)
+                )
+            prior_without_schedule = sum(
+                (
+                    max(
+                        Decimal(str(prior_claim.gross_amount or 0)) - prior_line_totals.get(prior_claim.id, DEC_ZERO),
+                        DEC_ZERO,
+                    )
+                    for prior_claim in prior_claims
+                ),
+                DEC_ZERO,
+            )
             # Which lines the sheet lists, roll-up parents excluded, is decided
             # once in aia.py so this and the certification freeze cannot drift.
             sov_lines = sheet_sov_lines(contract_lines, by_contract_line, prior_by_line)
@@ -4913,11 +4957,27 @@ class ContractsService:
                 by_contract_line,
                 retainage_percent=retainage_percent,
                 prior_by_line=prior_by_line,
+                prior_without_schedule=prior_without_schedule,
+                out_of_schedule_label=contracts_translate("aia.g703.billed_not_on_a_schedule_line"),
             )
             if claim.retention_held_to_date is not None:
                 # Worked out by the retention engine: column I and line 5 are the
                 # claim's certified figures, with any release billed on it taken off.
-                apply_retention_snapshot(g703, sov_lines, by_contract_line, held=claim.retention_held_to_date)
+                #
+                # Only the schedule rows are handed over, which is also why the
+                # two lists stay the same length. That stored line 5 measures
+                # the schedule and nothing else, so putting the out-of-schedule
+                # row in front of it spreads the row's own retainage back into
+                # the same total and loses the retention held on the month it
+                # carries: line 5 then under-states by exactly that, and line 8
+                # over-pays by it. The slice is shallow and the snapshot writes
+                # through to the row dictionaries the sheet keeps.
+                apply_retention_snapshot(
+                    g703[: len(sov_lines)],
+                    sov_lines,
+                    by_contract_line,
+                    held=claim.retention_held_to_date,
+                )
 
         g702 = build_g702_summary(
             g703,
