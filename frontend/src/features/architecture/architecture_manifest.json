@@ -52919,6 +52919,12 @@
               "nullable": true
             },
             {
+              "name": "gross_basis",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "metadata_",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
@@ -231863,7 +231869,7 @@
     "backend_modules": 195,
     "modules_with_manifests": 193,
     "total_models": 616,
-    "total_columns": 7062,
+    "total_columns": 7063,
     "total_relationships": 234,
     "total_routes": 3688,
     "total_schemas": 3457,
