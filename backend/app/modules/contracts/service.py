@@ -2301,7 +2301,19 @@ class ContractsService:
         them accrued. A claim with lines is rolled up through
         :func:`build_g703`, the same function the sheet uses, so the figure
         frozen here is the figure the sheet prints, down to the cent and
-        including how the retainage column is rounded.
+        including how the retainage column is rounded, for a contract whose
+        months all carry schedule lines.
+
+        Where they part is a contract that changed shape partway. The sheet
+        also carries what earlier claims billed that no schedule line
+        carries, which :func:`build_g703` takes as ``prior_without_schedule``
+        and this method does not pass, so what is frozen here measures the
+        schedule alone. That is deliberate rather than pending: the residual
+        belongs in line 5 once, and :meth:`build_aia_application` assembles
+        it there from this figure plus that row. Passing it here as well
+        would count it twice. The consequence to know is that on such a
+        contract the stored figure is smaller than the line 4 the sheet
+        prints, and neither is wrong; they answer different questions.
 
         Args:
             claim: the claim to measure.
@@ -4919,21 +4931,28 @@ class ContractsService:
             # claims that already exist: it is gross that no line of that
             # claim carries.
             #
-            # Floored per claim rather than on the total, and the difference
-            # is worth the query. Today a claim with lines has a gross equal
-            # to their sum, so every term is zero or positive and the two
-            # forms agree exactly. That equality is not a property of the
-            # data though, it is forced: create_claim_line and the claim line
-            # PATCH both end by recomputing gross from the lines. That
-            # recompute is being removed, so that a claim billed from cost
-            # keeps its cost-derived gross when somebody adds a line by hand.
-            # After that the two are independent in both directions, and a
-            # claim whose gross falls below its own lines contributes a
-            # negative term. Flooring the total would let it cancel a real
-            # remainder from another claim: column D would understate, line 8
-            # would overpay, and nothing would go red. A seeded claim whose
-            # gross outran its schedule already contributes a positive
-            # remainder here, which is the same money and belongs on the row.
+            # Floored per claim rather than on the total. The two forms differ
+            # only when some claim's gross is below its own lines, and the
+            # point is which of them depends on that never happening: this one
+            # is right whether or not the list of writers is complete, and the
+            # aggregate form is right only if it is. Do not simplify it back
+            # on the grounds that the totals currently agree.
+            #
+            # They currently agree because a claim's gross is held equal to
+            # the sum of its lines by force, not by nature: create_claim_line
+            # and the claim line PATCH both end by recomputing it from the
+            # lines. That recompute is what turns a claim billed from cost
+            # into the value of one hand-added line, so it is being removed.
+            # After that the two figures are independent in both directions,
+            # and a claim whose gross falls below its lines contributes a
+            # negative term that a floor on the total would net off against a
+            # real remainder from another claim. Column D would understate,
+            # line 8 would overpay, and nothing would go red anywhere.
+            #
+            # A seeded claim whose gross outran its schedule already
+            # contributes a positive remainder here, because apportionment
+            # clamps downward and leaves the rest unplaced. That is the same
+            # money in the same position and it belongs on the row.
             prior_line_totals: dict[Any, Decimal] = {}
             for prior_line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract.id):
                 prior_line_totals[owning_claim.id] = prior_line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
