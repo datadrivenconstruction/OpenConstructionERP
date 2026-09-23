@@ -838,8 +838,12 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
 
 # ── Company-size presets ──────────────────────────────────────────────────────
 # A parallel dimension to the role grid above. Where ``COMPANY_PRESETS`` answers
-# "what kind of work do you do", these answer "how big is your team" - a much
-# quicker first cut for a new user who does not want to scan the full role list.
+# "what kind of work do you do", these answer "how big is your team". The
+# onboarding wizard no longer offers them: team size says how many people use
+# the tool, not which tools they use, so the wizard asks what the company does.
+# They stay served and saveable because accounts that picked one keep its key
+# as their ``company_type`` (and ``company_size``), and a stored answer has to
+# read back and save again unchanged.
 #
 # They reuse the exact same machinery: a size maps to a functional-module set
 # which ``modules_for`` turns into the ``module_preferences`` map the sidebar
@@ -912,6 +916,23 @@ def get_preset(company_type: str) -> CompanyPreset | None:
 def get_size_preset(company_size: str) -> CompanyPreset | None:
     """Return a company-size preset by key, or ``None`` if unknown."""
     return SIZE_PRESETS.get(company_size)
+
+
+def is_saveable_company_type(key: str) -> bool:
+    """Whether ``key`` may be saved as a user's ``company_type``.
+
+    Both catalogues count. The onboarding wizard offers only the company
+    profiles now, but accounts that chose a team size in an earlier release
+    carry a ``size_*`` key as their ``company_type``, and a client built
+    before that change still sends one. Refusing those would turn an answer
+    the user already gave into an error on their next save.
+    """
+    return key in COMPANY_PRESETS or key in SIZE_PRESETS
+
+
+def is_saveable_company_size(key: str) -> bool:
+    """Whether ``key`` may be saved as a user's ``company_size``."""
+    return key in SIZE_PRESETS
 
 
 def get_all_presets() -> list[dict[str, Any]]:

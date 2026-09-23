@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
+from app.core.onboarding_presets import is_saveable_company_size, is_saveable_company_type
+
 
 def _sanitize_name(name: str) -> str:
     """Strip HTML tags from a name to prevent XSS."""
@@ -506,19 +508,25 @@ class APIKeyCreatedResponse(APIKeyResponse):
 class OnboardingRequest(BaseModel):
     """Save onboarding wizard choices."""
 
-    company_type: str = Field(
+    company_type: str | None = Field(
         ...,
-        # Any profile-key slug. Kept loose on purpose so the company-profile
-        # catalogue can grow in ``core/onboarding_presets.py`` without the
-        # request schema drifting out of sync with it.
-        pattern=r"^[a-z][a-z0-9_]{1,48}$",
-        description="Selected company type preset key",
+        # Required, so a client cannot leave it out by accident, but nullable:
+        # null is the answer of a user who chose their modules one by one
+        # without a profile. A string must name a preset in
+        # ``core/onboarding_presets.py``; the check reads the catalogue itself,
+        # so it grows with it and cannot drift. It used to accept any slug,
+        # which stored a typo as the user's profile and left every screen that
+        # reads it to guess.
+        max_length=64,
+        description="Selected company profile preset key, or null for modules chosen without a profile",
     )
     company_size: str | None = Field(
         default=None,
         # Optional parallel dimension to ``company_type``: the company-size
-        # preset key (``size_solo`` .. ``size_large``). Same slug shape.
-        pattern=r"^[a-z][a-z0-9_]{1,48}$",
+        # preset key (``size_solo`` .. ``size_large``). The wizard no longer
+        # asks for it; older clients and stored accounts still carry one. Left
+        # out of a request, the stored value is kept (see ``save_onboarding``).
+        max_length=64,
         description="Selected company-size preset key (optional)",
     )
     enabled_modules: list[str] = Field(
@@ -540,6 +548,20 @@ class OnboardingRequest(BaseModel):
         default=True,
         description="Whether onboarding is considered complete",
     )
+
+    @field_validator("company_type")
+    @classmethod
+    def _company_type_is_a_preset(cls, value: str | None) -> str | None:
+        if value is not None and not is_saveable_company_type(value):
+            raise ValueError("company_type must be one of the onboarding profile presets")
+        return value
+
+    @field_validator("company_size")
+    @classmethod
+    def _company_size_is_a_preset(cls, value: str | None) -> str | None:
+        if value is not None and not is_saveable_company_size(value):
+            raise ValueError("company_size must be one of the company-size presets")
+        return value
 
 
 class OnboardingResponse(BaseModel):
