@@ -13570,6 +13570,8 @@ const resource = {
     "boq.link_finance": "बजट देखें",
     "boq.link_validation": "सत्यापन चलाएं",
     "boq.linked_geometry": "लिंक्ड ज्यामिति",
+    "boq.list_load_failed_projects": "ये परियोजनाएँ पढ़ी नहीं जा सकीं: {{projects}}। पृष्ठ खुलने के बाद से इन्हें संग्रहीत या हटाया गया हो सकता है, या इन तक आपकी पहुँच हटा दी गई हो सकती है। कुछ भी सूचीबद्ध नहीं है, ताकि कोई भी कुल योग इन्हें छोड़ न दे।",
+    "boq.list_load_failed_title": "अनुमान लोड नहीं हो सके",
     "boq.list_subtitle_count": "{{projectCount}} परियोजनाओं में {{boqCount}} अनुमान",
     "boq.loading_element_data": "एलिमेंट डेटा लोड हो रहा है...",
     "boq.loading_full_properties": "पूर्ण विशेषताएं लोड हो रही हैं…",

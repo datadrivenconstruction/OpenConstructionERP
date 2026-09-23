@@ -4195,6 +4195,8 @@ const resource = {
     "boq.linked_positions_none": "This position is standalone, no other position shares its code.",
     "boq.linked_positions_subtitle": "Code {{code}}, viewing from position {{ordinal}}",
     "boq.linked_positions_title": "Linked positions",
+    "boq.list_load_failed_projects": "These projects could not be read: {{projects}}. They may have been archived or deleted, or your access removed, since this page opened. Nothing is listed, so that no total leaves them out.",
+    "boq.list_load_failed_title": "Estimates could not be loaded",
     "boq.list_subtitle_count": "{{boqCount}} estimates across {{projectCount}} projects",
     "boq.loading_element_data": "Loading element data...",
     "boq.loading_full_properties": "Loading full properties…",

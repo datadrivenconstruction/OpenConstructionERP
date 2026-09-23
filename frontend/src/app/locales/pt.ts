@@ -12870,6 +12870,8 @@ const resource = {
     "boq.link_finance": "Ver Orçamento",
     "boq.link_validation": "Executar Validação",
     "boq.linked_geometry": "Geometria Ligada",
+    "boq.list_load_failed_projects": "Não foi possível ler estes projetos: {{projects}}. Desde que a página foi aberta, podem ter sido arquivados ou eliminados, ou o seu acesso pode ter sido removido. Nada é listado, para que nenhum total os deixe de fora.",
+    "boq.list_load_failed_title": "Não foi possível carregar as estimativas",
     "boq.list_subtitle_count": "{{boqCount}} estimativas em {{projectCount}} projectos",
     "boq.loading_element_data": "A carregar dados do elemento...",
     "boq.loading_full_properties": "A carregar propriedades completas…",

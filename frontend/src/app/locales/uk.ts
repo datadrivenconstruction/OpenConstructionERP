@@ -13729,6 +13729,8 @@ const resource = {
     "boq.link_finance": "Переглянути бюджет",
     "boq.link_validation": "Запустити валідацію",
     "boq.linked_geometry": "Пов'язана геометрія",
+    "boq.list_load_failed_projects": "Не вдалося прочитати ці проєкти: {{projects}}. Можливо, відтоді як сторінку відкрили, їх заархівували або видалили чи вам скасували доступ. Нічого не показано, щоб жоден підсумок їх не пропустив.",
+    "boq.list_load_failed_title": "Не вдалося завантажити кошториси",
     "boq.list_subtitle_count": "Кошторисів: {{boqCount}} у проєктах: {{projectCount}}",
     "boq.loading_element_data": "Завантаження даних елемента...",
     "boq.loading_full_properties": "Завантаження всіх властивостей…",

@@ -8668,6 +8668,8 @@ const resource = {
     "boq.link_finance": "הצגת תקציב",
     "boq.link_validation": "הרצת אימות",
     "boq.linked_geometry": "גאומטריה מקושרת",
+    "boq.list_load_failed_projects": "לא הצלחנו לקרוא את הפרויקטים האלה: {{projects}}. ייתכן שמאז פתיחת הדף הם הועברו לארכיון או נמחקו, או שהגישה שלכם אליהם הוסרה. לא מוצג דבר, כדי שאף סכום כולל לא ישמיט אותם.",
+    "boq.list_load_failed_title": "לא הצלחנו לטעון את האומדנים",
     "boq.list_subtitle_count": "{{boqCount}} אומדנים ב-{{projectCount}} פרויקטים",
     "boq.load_more": "טעינת עוד",
     "boq.loaded_n_of_m": "{{loaded}} מתוך {{total}} פריטים",

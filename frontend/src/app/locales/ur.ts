@@ -8659,6 +8659,8 @@ const resource = {
     "boq.link_finance": "بجٹ دیکھیں",
     "boq.link_validation": "تصدیق چلائیں",
     "boq.linked_geometry": "جڑی جیومیٹری",
+    "boq.list_load_failed_projects": "یہ پروجیکٹس پڑھے نہیں جا سکے: {{projects}}۔ ممکن ہے اس صفحے کے کھلنے کے بعد انہیں آرکائیو یا حذف کر دیا گیا ہو، یا ان تک آپ کی رسائی ختم کر دی گئی ہو۔ کچھ بھی درج نہیں کیا گیا، تاکہ کوئی کل رقم انہیں چھوڑ نہ دے۔",
+    "boq.list_load_failed_title": "تخمینے لوڈ نہیں ہو سکے",
     "boq.list_subtitle_count": "{{projectCount}} پروجیکٹس میں {{boqCount}} تخمینے",
     "boq.load_more": "مزید لوڈ کریں",
     "boq.loaded_n_of_m": "{{total}} میں سے {{loaded}} آئٹمز",

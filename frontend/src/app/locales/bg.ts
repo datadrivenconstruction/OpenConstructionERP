@@ -13617,6 +13617,8 @@ const resource = {
     "boq.link_finance": "Виж бюджет",
     "boq.link_validation": "Стартирай валидация",
     "boq.linked_geometry": "Свързана геометрия",
+    "boq.list_load_failed_projects": "Тези проекти не можаха да бъдат прочетени: {{projects}}. Възможно е след отварянето на страницата да са архивирани или изтрити или достъпът ви до тях да е премахнат. Нищо не се показва, за да не ги пропусне някоя обща сума.",
+    "boq.list_load_failed_title": "Калкулациите не можаха да бъдат заредени",
     "boq.list_subtitle_count": "{{boqCount}} оферти в {{projectCount}} проекта",
     "boq.loading_element_data": "Зареждане на данните за елемента...",
     "boq.loading_full_properties": "Зареждане на пълните свойства…",

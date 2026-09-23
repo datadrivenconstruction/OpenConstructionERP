@@ -8623,6 +8623,8 @@ const resource = {
     "boq.link_finance": "نمایش بودجه",
     "boq.link_validation": "اجرای اعتبارسنجی",
     "boq.linked_geometry": "هندسه پیوندشده",
+    "boq.list_load_failed_projects": "خواندن این پروژه‌ها ممکن نشد: {{projects}}. ممکن است از زمان باز شدن این صفحه بایگانی یا حذف شده باشند، یا دسترسی شما به آن‌ها برداشته شده باشد. چیزی فهرست نمی‌شود تا هیچ جمعی آن‌ها را از قلم نیندازد.",
+    "boq.list_load_failed_title": "بارگذاری برآوردها ممکن نشد",
     "boq.list_subtitle_count": "{{boqCount}} برآورد در {{projectCount}} پروژه",
     "boq.load_more": "بارگذاری بیشتر",
     "boq.loaded_n_of_m": "{{loaded}} از {{total}} قلم",
