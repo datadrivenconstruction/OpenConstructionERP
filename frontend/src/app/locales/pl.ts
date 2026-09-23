@@ -13875,6 +13875,8 @@ const resource = {
     "boq.link_finance": "Widok Budżet",
     "boq.link_validation": "Uruchom Walidacja",
     "boq.linked_geometry": "Powiązana geometria",
+    "boq.list_load_failed_projects": "Nie udało się odczytać tych projektów: {{projects}}. Od otwarcia strony mogły zostać zarchiwizowane lub usunięte albo odebrano Ci do nich dostęp. Nic nie jest wyświetlane, aby żadna suma ich nie pominęła.",
+    "boq.list_load_failed_title": "Nie udało się wczytać kosztorysów",
     "boq.list_subtitle_count": "{{boqCount}} kosztorysy przez {{projectCount}} projekty",
     "boq.loading_element_data": "ładowanie element dane...",
     "boq.loading_full_properties": "ładowanie pełne nieruchomości…",

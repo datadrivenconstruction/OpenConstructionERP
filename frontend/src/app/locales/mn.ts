@@ -9074,6 +9074,8 @@ const resource = {
     "boq.link_finance": "Үзэх Төсөв",
     "boq.link_validation": "Шалгалт ажиллуулах",
     "boq.linked_geometry": "Холбосон геометр",
+    "boq.list_load_failed_projects": "Эдгээр төслийг уншиж чадсангүй: {{projects}}. Хуудсыг нээснээс хойш тэдгээрийг архивласан эсвэл устгасан, эсвэл таны хандах эрхийг хассан байж магадгүй. Ямар ч нийлбэр тэдгээрийг орхигдуулахгүйн тулд юу ч жагсаагаагүй.",
+    "boq.list_load_failed_title": "Тооцоонуудыг ачаалж чадсангүй",
     "boq.list_subtitle_count": "{{boqCount}} тооцоонууд хооронд {{projectCount}} төслүүд",
     "boq.load_more": "Илүү ачаалах",
     "boq.loaded_n_of_m": "{{loaded}} -н {{total}} зүйлс",

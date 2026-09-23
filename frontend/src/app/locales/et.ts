@@ -9338,6 +9338,8 @@ const resource = {
     "boq.link_finance": "Vaata eelarvet",
     "boq.link_validation": "Käivita valideerimine",
     "boq.linked_geometry": "Seotud geomeetria",
+    "boq.list_load_failed_projects": "Neid projekte ei õnnestunud lugeda: {{projects}}. Pärast lehe avamist võidi need arhiveerida või kustutada või teie juurdepääs eemaldada. Midagi ei kuvata, et ükski kogusumma neid välja ei jätaks.",
+    "boq.list_load_failed_title": "Kalkulatsioonide laadimine ebaõnnestus",
     "boq.list_subtitle_count": "{{boqCount}} kalkulatsiooni {{projectCount}} projektis",
     "boq.load_more": "Laadi veel",
     "boq.loaded_n_of_m": "{{loaded}} / {{total}} kirjet",

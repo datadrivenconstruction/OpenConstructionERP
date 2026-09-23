@@ -12931,6 +12931,8 @@ const resource = {
     "boq.link_finance": "Ver presupuesto",
     "boq.link_validation": "Ejecutar validación",
     "boq.linked_geometry": "Geometría vinculada",
+    "boq.list_load_failed_projects": "No se pudieron leer estos proyectos: {{projects}}. Es posible que, desde que se abrió la página, se hayan archivado o eliminado, o que se haya retirado su acceso. No se muestra nada, para que ningún total los deje fuera.",
+    "boq.list_load_failed_title": "No se pudieron cargar los presupuestos",
     "boq.list_subtitle_count": "{{boqCount}} presupuestos en {{projectCount}} proyectos",
     "boq.loading_element_data": "Cargando datos del elemento...",
     "boq.loading_full_properties": "Cargando propiedades completas...",

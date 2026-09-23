@@ -13514,6 +13514,8 @@ const resource = {
     "boq.link_finance": "예산 보기",
     "boq.link_validation": "검증 실행",
     "boq.linked_geometry": "연결된 형상",
+    "boq.list_load_failed_projects": "다음 프로젝트를 읽을 수 없습니다: {{projects}}. 이 페이지를 연 이후 보관 또는 삭제되었거나 접근 권한이 해제되었을 수 있습니다. 합계에서 누락되지 않도록 아무것도 표시하지 않습니다.",
+    "boq.list_load_failed_title": "견적을 불러올 수 없습니다",
     "boq.list_subtitle_count": "{{projectCount}}개 프로젝트의 견적 {{boqCount}}건",
     "boq.loading_element_data": "요소 데이터 로드 중...",
     "boq.loading_full_properties": "전체 속성 로드 중…",

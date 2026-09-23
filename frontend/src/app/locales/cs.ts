@@ -13560,6 +13560,8 @@ const resource = {
     "boq.link_finance": "Pohled Rozpočet",
     "boq.link_validation": "Spustit Validace",
     "boq.linked_geometry": "Propojená geometrie",
+    "boq.list_load_failed_projects": "Tyto projekty se nepodařilo přečíst: {{projects}}. Od otevření stránky mohly být archivovány nebo smazány, případně vám k nim byl odebrán přístup. Nic se nezobrazuje, aby je žádný součet nevynechal.",
+    "boq.list_load_failed_title": "Rozpočty se nepodařilo načíst",
     "boq.list_subtitle_count": "{{boqCount}} rozpočty napříč {{projectCount}} projekty",
     "boq.loading_element_data": "Načítání prvek data...",
     "boq.loading_full_properties": "Načítání úplné nemovitosti…",

@@ -13456,6 +13456,8 @@ const resource = {
     "boq.link_finance": "Lihat Anggaran",
     "boq.link_validation": "Jalankan Validasi",
     "boq.linked_geometry": "Geometri Terkait",
+    "boq.list_load_failed_projects": "Proyek-proyek ini tidak dapat dibaca: {{projects}}. Sejak halaman ini dibuka, proyek tersebut mungkin telah diarsipkan atau dihapus, atau akses Anda telah dicabut. Tidak ada yang ditampilkan, agar tidak ada total yang melewatkannya.",
+    "boq.list_load_failed_title": "Estimasi tidak dapat dimuat",
     "boq.list_subtitle_count": "{{boqCount}} estimasi di {{projectCount}} proyek",
     "boq.loading_element_data": "Memuat data elemen...",
     "boq.loading_full_properties": "Memuat properti lengkap…",

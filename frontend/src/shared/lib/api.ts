@@ -112,6 +112,16 @@ export interface ApiRequestInit extends RequestInit {
    * must not consume the one toast other requests on the screen are entitled to.
    */
   suppressTimeoutToast?: boolean;
+  /**
+   * The POST is a read. It travels as a POST only because its question does
+   * not fit in a URL, such as a batch of ids, and it changes nothing.
+   *
+   * Offline it is treated as the GET it stands in for: the answer a previous
+   * call left in the cache is served, and the call is never queued for replay.
+   * Queueing it would tell the reader that a list they merely opened was
+   * "saved offline", and hand the screen `undefined` for its data.
+   */
+  readOnly?: boolean;
 }
 
 /** Retrieve the stored JWT token from the auth store. */
@@ -507,6 +517,15 @@ async function request<TResponse>(
     path = path.slice(BASE_URL.length);
   }
 
+  // A read is a GET, or a POST that says it is one (see `readOnly`). Only
+  // reads are cached for offline use and only non-reads are queued offline.
+  // A POST read's answer depends on its body, so the body is part of its
+  // cache key; a GET keeps the bare path it has always been cached under.
+  // Nothing is computed for a request that did not opt in, so every other
+  // caller behaves exactly as before.
+  const isRead = method === 'GET' || (method === 'POST' && init?.readOnly === true);
+  const cacheKey = isRead && method !== 'GET' ? `POST ${path} ${JSON.stringify(body ?? null)}` : path;
+
   // Abort budget: fast by default, long only when explicitly opted in for
   // heavy import / AI / CAD work. GET and mutations get distinct defaults.
   // An explicit `timeoutMs` outranks both, for the few endpoints whose server
@@ -585,13 +604,13 @@ async function request<TResponse>(
     );
     // Network error — likely offline
     if (!navigator.onLine) {
-      // For GET requests: try to serve from IndexedDB cache
-      if (method === 'GET') {
-        const cached = await getCachedResponse<TResponse>(path);
+      // For reads: try to serve from IndexedDB cache
+      if (isRead) {
+        const cached = await getCachedResponse<TResponse>(cacheKey);
         if (cached !== null) return cached;
       }
       // For mutating requests: queue for later replay
-      if (method !== 'GET') {
+      if (!isRead) {
         await queueMutation({
           method: method as 'POST' | 'PUT' | 'PATCH' | 'DELETE',
           path,
@@ -682,9 +701,9 @@ async function request<TResponse>(
 
   const data = (await response.json()) as TResponse;
 
-  // Cache successful GET responses for offline use
-  if (method === 'GET') {
-    cacheResponse(path, data).catch(() => {});
+  // Cache successful reads for offline use
+  if (isRead) {
+    cacheResponse(cacheKey, data).catch(() => {});
   }
 
   return data;

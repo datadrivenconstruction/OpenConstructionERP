@@ -13457,6 +13457,8 @@ const resource = {
     "boq.link_finance": "Xem Ngân Sách",
     "boq.link_validation": "Chạy Kiểm Tra",
     "boq.linked_geometry": "Hình Học Liên Kết",
+    "boq.list_load_failed_projects": "Không thể đọc các dự án sau: {{projects}}. Kể từ khi trang này được mở, chúng có thể đã bị lưu trữ hoặc xóa, hoặc quyền truy cập của bạn đã bị thu hồi. Không có gì được liệt kê, để không tổng nào bỏ sót chúng.",
+    "boq.list_load_failed_title": "Không thể tải dự toán",
     "boq.list_subtitle_count": "{{boqCount}} dự toán trong {{projectCount}} dự án",
     "boq.loading_element_data": "Đang tải dữ liệu cấu kiện...",
     "boq.loading_full_properties": "Đang tải đầy đủ thuộc tính…",

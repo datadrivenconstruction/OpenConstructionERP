@@ -9468,6 +9468,8 @@ const resource = {
     "boq.linked_positions_none": "Denna post är fristående, ingen annan post delar dess kod.",
     "boq.linked_positions_subtitle": "Kod {{code}}, visas från post {{ordinal}}",
     "boq.linked_positions_title": "Länkade positioner",
+    "boq.list_load_failed_projects": "De här projekten kunde inte läsas: {{projects}}. De kan ha arkiverats eller tagits bort, eller din åtkomst återkallats, sedan sidan öppnades. Inget visas, så att ingen summa utelämnar dem.",
+    "boq.list_load_failed_title": "Kalkylerna kunde inte läsas in",
     "boq.list_subtitle_count": "{{boqCount}} kalkyler i {{projectCount}} projekt",
     "boq.loading_element_data": "Läser in elementdata…",
     "boq.loading_full_properties": "Laddar fullständiga egenskaper…",

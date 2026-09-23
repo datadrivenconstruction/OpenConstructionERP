@@ -13188,6 +13188,8 @@ const resource = {
     "boq.link_finance": "Költségkeret megtekintése",
     "boq.link_validation": "Validálás futtatása",
     "boq.linked_geometry": "Kapcsolt geometria",
+    "boq.list_load_failed_projects": "Ezeket a projekteket nem sikerült beolvasni: {{projects}}. Az oldal megnyitása óta talán archiválták vagy törölték őket, vagy megvonták a hozzáférését. Semmi sem jelenik meg, hogy egyetlen összeg se hagyja ki őket.",
+    "boq.list_load_failed_title": "A kalkulációkat nem sikerült betölteni",
     "boq.list_subtitle_count": "{{boqCount}} kalkuláció {{projectCount}} projektben",
     "boq.loading_element_data": "Elemadatok betöltése…",
     "boq.loading_full_properties": "Teljes tulajdonságkészlet betöltése…",

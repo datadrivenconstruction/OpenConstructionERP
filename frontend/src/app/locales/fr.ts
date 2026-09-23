@@ -12808,6 +12808,8 @@ const resource = {
     "boq.link_finance": "Voir le budget",
     "boq.link_validation": "Lancer la validation",
     "boq.linked_geometry": "Géométrie liée",
+    "boq.list_load_failed_projects": "Impossible de lire ces projets : {{projects}}. Depuis l'ouverture de la page, ils ont peut-être été archivés ou supprimés, ou votre accès a été retiré. Rien n'est affiché, afin qu'aucun total ne les omette.",
+    "boq.list_load_failed_title": "Impossible de charger les estimations",
     "boq.list_subtitle_count": "{{boqCount}} estimations sur {{projectCount}} projets",
     "boq.loading_element_data": "Chargement des données d'élément…",
     "boq.loading_full_properties": "Chargement des propriétés complètes…",

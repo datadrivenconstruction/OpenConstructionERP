@@ -8653,6 +8653,8 @@ const resource = {
     "boq.link_finance": "বাজেট দেখুন",
     "boq.link_validation": "ভ্যালিডেশন চালান",
     "boq.linked_geometry": "লিংক করা জ্যামিতি",
+    "boq.list_load_failed_projects": "এই প্রকল্পগুলো পড়া যায়নি: {{projects}}। পৃষ্ঠাটি খোলার পর সেগুলো হয়তো আর্কাইভ বা মুছে ফেলা হয়েছে, অথবা সেগুলোতে আপনার অ্যাক্সেস সরিয়ে নেওয়া হয়েছে। কিছুই দেখানো হচ্ছে না, যাতে কোনো মোট অঙ্ক সেগুলো বাদ না দেয়।",
+    "boq.list_load_failed_title": "এস্টিমেট লোড করা যায়নি",
     "boq.list_subtitle_count": "{{projectCount}}টি প্রকল্প জুড়ে {{boqCount}}টি এস্টিমেট",
     "boq.load_more": "আরও লোড করুন",
     "boq.loaded_n_of_m": "{{total}}-এর মধ্যে {{loaded}}টি আইটেম",

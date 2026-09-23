@@ -13515,6 +13515,8 @@ const resource = {
     "boq.link_finance": "查看预算",
     "boq.link_validation": "运行校验",
     "boq.linked_geometry": "关联几何体",
+    "boq.list_load_failed_projects": "无法读取以下项目：{{projects}}。自本页面打开以来，它们可能已被归档或删除，或者您的访问权限已被移除。为避免任何合计遗漏它们，此处不列出任何内容。",
+    "boq.list_load_failed_title": "无法加载估价单",
     "boq.list_subtitle_count": "{{projectCount}} 个项目中的 {{boqCount}} 份估价单",
     "boq.loading_element_data": "正在加载构件数据...",
     "boq.loading_full_properties": "正在加载完整属性…",

@@ -9491,6 +9491,8 @@ const resource = {
     "boq.link_finance": "عرض الميزانية",
     "boq.link_validation": "تشغيل التحقق",
     "boq.linked_geometry": "هندسة مرتبطة",
+    "boq.list_load_failed_projects": "تعذّرت قراءة هذه المشاريع: {{projects}}. ربما أُرشفت أو حُذفت، أو سُحبت صلاحية وصولك إليها، منذ فتح هذه الصفحة. لا يُعرض شيء، حتى لا يغفلها أي إجمالي.",
+    "boq.list_load_failed_title": "تعذّر تحميل التقديرات",
     "boq.list_subtitle_count": "{{boqCount}} تقديرات عبر {{projectCount}} مشاريع",
     "boq.load_more": "تحميل المزيد",
     "boq.loaded_n_of_m": "{{loaded}} من {{total}} عنصر",

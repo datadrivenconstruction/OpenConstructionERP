@@ -13396,6 +13396,8 @@ const resource = {
     "boq.link_finance": "Pogled Budžet",
     "boq.link_validation": "Pokreni Validacija",
     "boq.linked_geometry": "Povezana geometrija",
+    "boq.list_load_failed_projects": "Ove projekte nije moguće pročitati: {{projects}}. Od otvaranja stranice možda su arhivirani ili izbrisani, ili vam je uklonjen pristup. Ništa se ne prikazuje, kako ih nijedan zbroj ne bi izostavio.",
+    "boq.list_load_failed_title": "Procjene nije moguće učitati",
     "boq.list_subtitle_count": "{{boqCount}} procjene kroz {{projectCount}} projekti",
     "boq.loading_element_data": "Učitavanje element podaci...",
     "boq.loading_full_properties": "Učitavanje puno nekretnine…",

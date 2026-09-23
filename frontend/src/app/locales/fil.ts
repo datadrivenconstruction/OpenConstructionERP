@@ -8611,6 +8611,8 @@ const resource = {
     "boq.link_finance": "Tingnan ang Badyet",
     "boq.link_validation": "Patakbuhin ang Pagsusuri",
     "boq.linked_geometry": "Naka-link na Geometry",
+    "boq.list_load_failed_projects": "Hindi mabasa ang mga proyektong ito: {{projects}}. Maaaring na-archive o nabura ang mga ito, o inalis ang access mo, mula nang buksan ang page na ito. Walang ipinapakita, para walang kabuuang lumaktaw sa mga ito.",
+    "boq.list_load_failed_title": "Hindi ma-load ang mga estimate",
     "boq.list_subtitle_count": "{{boqCount}} estimate sa {{projectCount}} proyekto",
     "boq.load_more": "Mag-load pa",
     "boq.loaded_n_of_m": "{{loaded}} sa {{total}} item",
