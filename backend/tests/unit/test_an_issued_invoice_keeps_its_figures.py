@@ -19,17 +19,20 @@ from __future__ import annotations
 import uuid
 from decimal import Decimal
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 from fastapi import HTTPException
 
 from app.modules.finance.schemas import InvoiceCreate, InvoiceLineItemCreate, InvoiceUpdate
+from app.modules.finance.service import FinanceService
 from tests.unit.test_finance_service import _make_service
 
 
-async def _invoice(status: str) -> tuple[object, object]:
+async def _invoice(status: str) -> tuple[FinanceService, Any]:
+    """A receivable of 1,000 plus 190 tax in EUR with one line, put in ``status``."""
     service = _make_service()
-    invoice = await service.create_invoice(
+    invoice: Any = await service.create_invoice(
         InvoiceCreate(
             project_id=uuid.uuid4(),
             invoice_direction="receivable",
@@ -39,8 +42,8 @@ async def _invoice(status: str) -> tuple[object, object]:
             currency_code="EUR",
         )
     )
-    invoice.line_items = [SimpleNamespace(amount=Decimal("1000"))]  # type: ignore[attr-defined]
-    invoice.status = status  # type: ignore[attr-defined]
+    invoice.line_items = [SimpleNamespace(amount=Decimal("1000"))]
+    invoice.status = status
     return service, invoice
 
 
@@ -54,7 +57,7 @@ def _line(amount: str) -> InvoiceLineItemCreate:
 async def test_control_a_paid_invoice_cannot_go_back_to_draft() -> None:
     service, invoice = await _invoice("paid")
     with pytest.raises(HTTPException) as exc:
-        await service.update_invoice(invoice.id, InvoiceUpdate(status="draft"))  # type: ignore[attr-defined]
+        await service.update_invoice(invoice.id, InvoiceUpdate(status="draft"))
     assert exc.value.status_code == 400
 
 
@@ -74,17 +77,17 @@ async def test_control_a_paid_invoice_cannot_go_back_to_draft() -> None:
 async def test_an_issued_invoice_keeps_its_figures_and_parties(status: str, change: dict[str, str]) -> None:
     service, invoice = await _invoice(status)
     with pytest.raises(HTTPException) as exc:
-        await service.update_invoice(invoice.id, InvoiceUpdate(**change))  # type: ignore[attr-defined]
+        await service.update_invoice(invoice.id, InvoiceUpdate(**change))
     assert exc.value.status_code == 409
-    assert Decimal(invoice.amount_total) == Decimal("1190")  # type: ignore[attr-defined]
-    assert invoice.currency_code == "EUR"  # type: ignore[attr-defined]
+    assert Decimal(invoice.amount_total) == Decimal("1190")
+    assert invoice.currency_code == "EUR"
 
 
 async def test_an_issued_invoice_keeps_its_lines() -> None:
     service, invoice = await _invoice("sent")
     with pytest.raises(HTTPException) as exc:
         await service.update_invoice(
-            invoice.id,  # type: ignore[attr-defined]
+            invoice.id,
             InvoiceUpdate(amount_subtotal="1500", tax_amount="285", line_items=[_line("1500")]),
         )
     assert exc.value.status_code == 409
@@ -97,7 +100,7 @@ async def test_the_edit_form_sending_the_stored_figures_back_is_not_a_change() -
     """The finance page resends subtotal, tax, total, currency and its one line on every save."""
     service, invoice = await _invoice("sent")
     updated = await service.update_invoice(
-        invoice.id,  # type: ignore[attr-defined]
+        invoice.id,
         InvoiceUpdate(
             amount_subtotal="1000.00",
             tax_amount="190.00",
@@ -118,7 +121,7 @@ async def test_the_edit_form_sending_the_stored_figures_back_is_not_a_change() -
 async def test_a_draft_invoice_still_takes_new_figures() -> None:
     service, invoice = await _invoice("draft")
     updated = await service.update_invoice(
-        invoice.id,  # type: ignore[attr-defined]
+        invoice.id,
         InvoiceUpdate(amount_subtotal="2000", tax_amount="380"),
     )
     assert Decimal(updated.amount_total) == Decimal("2380")
@@ -127,7 +130,7 @@ async def test_a_draft_invoice_still_takes_new_figures() -> None:
 async def test_a_cancelled_invoice_reopened_as_a_draft_may_be_corrected_in_the_same_write() -> None:
     service, invoice = await _invoice("cancelled")
     updated = await service.update_invoice(
-        invoice.id,  # type: ignore[attr-defined]
+        invoice.id,
         InvoiceUpdate(status="draft", amount_subtotal="2000", tax_amount="380"),
     )
     assert updated.status == "draft"
