@@ -31,6 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Database, X } from 'lucide-react';
 
+import { apiGet } from '@/shared/lib/api';
 import { APP_VERSION } from '@/shared/lib/version';
 
 const DISMISS_KEY = 'oe.v6_pg_notice_dismissed';
@@ -55,7 +56,7 @@ export function PostgresMigrationNotice() {
   // life of the deployment, so staleTime Infinity is correct.
   const { data } = useQuery<SystemStatus>({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()),
+    queryFn: () => apiGet<SystemStatus>('/system/status'),
     retry: false,
     staleTime: Infinity,
   });

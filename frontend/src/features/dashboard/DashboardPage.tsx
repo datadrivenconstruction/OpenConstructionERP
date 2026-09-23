@@ -2290,7 +2290,7 @@ function DashboardPageInner() {
   // never fire competing fetches against the expensive status endpoint.
   const { data: systemStatus } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => apiGet<SystemStatusData>('/system/status'),
     retry: false,
     staleTime: 60_000,
   });
@@ -3373,7 +3373,7 @@ function SystemStatus() {
 
   const { data: status } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => apiGet<SystemStatusData>('/system/status'),
     retry: false,
     // The vector-DB probe behind this endpoint is comparatively expensive
     // (it pings LanceDB/Qdrant). Keep both ``['system-status']`` observers

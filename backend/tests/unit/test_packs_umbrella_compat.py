@@ -25,6 +25,7 @@ from app.core.partner_pack import state as pack_state
 from app.core.partner_pack.discovery import get_active_pack, reset_cache
 from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 from app.core.partner_pack.router import alias_router, router
+from app.dependencies import get_current_user_payload
 
 
 class FakeEP:
@@ -178,7 +179,22 @@ class TestRouteAlias:
         app = FastAPI()
         app.include_router(router)
         app.include_router(alias_router)
+        app.dependency_overrides[get_current_user_payload] = lambda: {"sub": "pack-reader"}
         return TestClient(app)
+
+    def test_both_spellings_refuse_a_caller_who_has_not_signed_in(self) -> None:
+        """The alias copies each route's dependencies, so it cannot become a way round the sign-in."""
+        app = FastAPI()
+        app.include_router(router)
+        app.include_router(alias_router)
+        anonymous = TestClient(app)
+        for path in (
+            "/api/v1/partner-pack/current",
+            "/api/v1/packs/current",
+            "/api/v1/partner-pack/installed",
+            "/api/v1/packs/installed",
+        ):
+            assert anonymous.get(path).status_code == 401, path
 
     def test_old_and_new_routes_return_same_data(self, client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
         reset_cache()

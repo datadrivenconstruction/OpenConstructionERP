@@ -19,6 +19,7 @@ from app.core.partner_pack.manifest import (
     PartnerPackManifest,
 )
 from app.core.partner_pack.router import router as partner_pack_router
+from app.dependencies import get_current_user_payload
 
 
 @pytest.fixture
@@ -47,6 +48,9 @@ def sample_manifest() -> PartnerPackManifest:
 def client(sample_manifest: PartnerPackManifest) -> TestClient:
     app = FastAPI()
     app.include_router(partner_pack_router)
+    # ``/current`` and ``/installed`` answer signed-in callers only; these
+    # tests are about what they say, so the caller is stood in for.
+    app.dependency_overrides[get_current_user_payload] = lambda: {"sub": "pack-reader"}
     return TestClient(app)
 
 
