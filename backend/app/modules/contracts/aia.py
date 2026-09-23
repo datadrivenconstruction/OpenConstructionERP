@@ -492,12 +492,21 @@ def apply_retention_snapshot(
     same order, as :func:`build_g703` builds them.
 
     The two are walked strictly in step, so they have to be the same length.
-    Pass the schedule rows only. ``held`` is measured on the schedule, so an
-    out-of-schedule row put in front of this would be reconciled into the same
-    total: it would draw a share of what is left of line 5 and lose the
-    retention held on the month it carries, which is money the certificate
-    then pays out on line 8. Such a row already carries the column I
-    :func:`build_g703` rounded for it, and keeps it by staying out of here.
+    Pass the schedule rows only. A row with no contract line behind it has
+    nothing to pair with and raises here, and it would in any case be read as
+    a line this claim did not bill and drawn a pro rata share of what is left
+    of line 5, losing the column I :func:`build_g703` rounded for it, which is
+    money the certificate then pays out on line 8.
+
+    Do not read ``held`` as a figure measured on the schedule. It ratchets:
+    the engine takes ``before + max(required - before, 0) - released``, floored
+    at zero, where ``required`` is the schedule position and ``before`` sums
+    ``retention_amount`` over every prior claim, a claim level field and not a
+    line level one. So when an earlier month billed with no schedule line
+    behind it, ``before`` exceeds ``required``, the accrual floors at zero and
+    ``held`` carries that month's retention into a total this function then
+    spreads over schedule rows alone. Nothing here corrects that; this
+    distributes whatever line 5 says.
     """
     work: dict[int, Decimal] = {}
     stored: dict[int, Decimal] = {}
