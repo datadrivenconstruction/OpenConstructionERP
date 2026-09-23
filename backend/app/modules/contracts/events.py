@@ -70,69 +70,10 @@ EOT_DECIDED = "contracts.eot.decided"
 
 __all__ = ["CLAIM_POPULATED", "EOT_DECIDED", "EOT_SUBMITTED"]
 
-# ── Cross-module subscriber: VO rollup into contract value ──────────────
-
-import logging
-
-_logger = logging.getLogger(__name__)
-
-
-async def _on_vo_contract_sum_updated(payload: dict) -> None:
-    """Bump Contract.total_value when a VO completes with a cost impact.
-
-    Subscribes to ``variations.contract_sum.updated`` which the variations
-    module emits when a VO transitions to ``completed`` with a non-zero
-    ``final_cost_impact`` and an ``affected_contract_id`` set.
-    """
-    from decimal import Decimal
-
-    contract_id = payload.get("contract_id")
-    delta_str = payload.get("delta_amount")
-    if not contract_id or not delta_str:
-        return
-
-    try:
-        delta = Decimal(str(delta_str))
-    except Exception:
-        _logger.warning("VO rollup: bad delta_amount %r for contract %s", delta_str, contract_id)
-        return
-
-    if delta == 0:
-        return
-
-    import uuid
-
-    from sqlalchemy import select
-
-    from app.database import async_session_factory
-    from app.modules.contracts.models import Contract
-
-    try:
-        cid = uuid.UUID(str(contract_id))
-    except ValueError:
-        return
-
-    async with async_session_factory() as session:
-        result = await session.execute(select(Contract).where(Contract.id == cid))
-        contract = result.scalar_one_or_none()
-        if contract is None:
-            _logger.warning("VO rollup: contract %s not found", contract_id)
-            return
-
-        old_value = contract.total_value or Decimal("0")
-        contract.total_value = old_value + delta
-        await session.commit()
-        _logger.info(
-            "VO rollup: contract %s total_value %s -> %s (delta %s)",
-            contract_id,
-            old_value,
-            contract.total_value,
-            delta,
-        )
-
-
-def register_contract_event_handlers() -> None:
-    """Wire up cross-module event subscriptions for oe_contracts."""
-    from app.core.events import event_bus
-
-    event_bus.subscribe_once("variations.contract_sum.updated", _on_vo_contract_sum_updated)
+# The completed-variation rollup into ``Contract.total_value`` is owned by one
+# subscriber, ``_on_variation_completed`` in
+# ``app.modules.notifications._wave5_cross_module_subscribers``. It carries the
+# redelivery key, the project, currency and closed-contract guards and the
+# mirrored change order dedupe. Do not add a second writer for
+# ``variations.contract_sum.updated`` here: any second writer that works posts
+# the same variation to the contract twice.
