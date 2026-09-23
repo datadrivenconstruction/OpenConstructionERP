@@ -45,7 +45,10 @@ APP_ROOT = pathlib.Path(app_pkg.__file__).resolve().parent
 #: Each entry is ``module path relative to app/`` -> function name.
 RENDERING_ROUTES: dict[str, set[str]] = {
     "core/branding_router.py": {"get_document_appearance_sample", "get_document_type_sample"},
-    "modules/boq/router.py": {"export_boq_pdf"},
+    # The Excel export is not a PDF, but it builds a document in the request, and
+    # the search below finds it through a comment that mentions the PDF export.
+    # Listing it here rather than narrowing the search keeps the search broad.
+    "modules/boq/router.py": {"export_boq_pdf", "export_boq_excel"},
     "modules/contracts/router.py": {"export_aia_application_pdf"},
     "modules/daily_diary/router.py": {"diary_pdf"},
     "modules/einvoice/router.py": {"generate_invoice"},

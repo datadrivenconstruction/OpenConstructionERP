@@ -4526,6 +4526,11 @@ async def export_boq_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": attachment_disposition(filename),
+            # The sheet's own text, the column headers and the project line, is
+            # written in English literals and the route takes no locale. Declaring
+            # it stops the Accept-Language middleware from labelling the workbook
+            # with the language the reader asked for.
+            "Content-Language": "en",
         },
     )
 
