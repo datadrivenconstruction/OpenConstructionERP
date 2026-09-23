@@ -49,6 +49,23 @@
         "social_security_clearance": "Unbedenklichkeitsbescheinigung der Sozialversicherung",
         "employers_liability_clearance": "Unbedenklichkeitsbescheinigung der Berufsgenossenschaft"
       }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} wurde am {paid_on} für die Abschlagsrechnung {pay_app} bezahlt, ohne dass ein Nachweis vorlag: {document}. {withholding}",
+      "fail_expired": "{subcontractor} wurde am {paid_on} für die Abschlagsrechnung {pay_app} bezahlt, der Nachweis {document} war aber bereits am {lapsed_on} abgelaufen. {withholding}",
+      "fail_revoked": "{subcontractor} wurde am {paid_on} für die Abschlagsrechnung {pay_app} bezahlt, der Nachweis {document} war aber widerrufen. {withholding}",
+      "fail_undated": "Die Abschlagsrechnung {pay_app} von {subcontractor} ist als bezahlt markiert, trägt aber kein Zahlungsdatum. Ob der Nachweis {document} die Zahlung abdeckte, lässt sich daher nicht prüfen. {withholding}",
+      "fail_pending": "Die Abschlagsrechnung {pay_app} von {subcontractor} ist noch nicht bezahlt. Der Nachweis {document} zählt am Tag der Zahlung, nicht zum Ende des Abrechnungszeitraums; der vorliegende gilt bis {valid_until}. {withholding}",
+      "fail_pending_open": "Die Abschlagsrechnung {pay_app} von {subcontractor} ist noch nicht bezahlt. Der Nachweis {document} zählt am Tag der Zahlung, nicht zum Ende des Abrechnungszeitraums; der vorliegende ist unbefristet. {withholding}",
+      "fail_pending_invalid": "Die Abschlagsrechnung {pay_app} von {subcontractor} ist noch nicht bezahlt, und es liegt kein gültiger Nachweis {document} vor, in dessen Laufzeit eine Zahlung nach dem Ende des Abrechnungszeitraums fallen könnte. {withholding}",
+      "suggestion": "Prüfen Sie, ob die Bescheinigung am Tag der Zahlung gültig ist, und fordern Sie beim Nachunternehmer eine aktuelle an, wenn nicht. Die Steuer wird hier nicht einbehalten: Fällt eine Zahlung nicht in die Laufzeit einer gültigen Bescheinigung, liegen Abzug und Anmeldung bei Ihnen.",
+      "withholding": {
+        "gross_limit": "Ohne sie sind {rate} % der Gegenleistung einschließlich Umsatzsteuer einzubehalten und an das Finanzamt abzuführen, es sei denn, die Zahlungen an diesen Nachunternehmer bleiben im Kalenderjahr innerhalb von {limit} ({reference}).",
+        "gross": "Ohne sie sind {rate} % der Gegenleistung einschließlich Umsatzsteuer einzubehalten und an das Finanzamt abzuführen ({reference}).",
+        "net_limit": "Ohne sie sind {rate} % der Zahlung ohne Umsatzsteuer einzubehalten und an das Finanzamt abzuführen, es sei denn, die Zahlungen an diesen Nachunternehmer bleiben im Kalenderjahr innerhalb von {limit} ({reference}).",
+        "net": "Ohne sie sind {rate} % der Zahlung ohne Umsatzsteuer einzubehalten und an das Finanzamt abzuführen ({reference}).",
+        "unknown": "Ohne sie kann für die Zahlung ein Steuerabzug fällig sein."
+      }
     }
   }
 }

@@ -35408,6 +35408,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Đã duyệt",
     "subcontractors.rollup_chip_certs_lapsed": "Chứng chỉ đã hết hạn",
     "subcontractors.rollup_chip_certs_ok": "Chứng chỉ còn hiệu lực",
+    "subcontractors.rollup_chip_certs_on_payment": "Chứng chỉ được kiểm tra vào ngày thanh toán",
     "subcontractors.rollup_chip_certs_unchecked": "Chưa kiểm tra chứng chỉ: không có ngày kết thúc kỳ",
     "subcontractors.rollup_chip_paid": "Đã thanh toán",
     "subcontractors.rollup_chip_received": "Đã nhận, chưa duyệt",

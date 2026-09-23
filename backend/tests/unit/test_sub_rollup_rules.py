@@ -260,6 +260,13 @@ async def test_every_message_key_a_rule_can_ask_for_exists_in_english() -> None:
         "pay_application.sub_certificate_lapsed.fail_expired",
         "pay_application.sub_certificate_lapsed.fail_revoked",
     ]
+    from app.modules.subcontractors.validators import PAYMENT_DATE_STATES
+
+    keys += [f"pay_application.sub_certificate_payment_date.fail_{state}" for state in PAYMENT_DATE_STATES]
+    keys += [
+        f"pay_application.sub_certificate_payment_date.withholding.{kind}"
+        for kind in ("gross_limit", "gross", "net_limit", "net", "unknown")
+    ]
     missing = [key for key in keys if not is_key_present(key, "en")]
     assert missing == []
 

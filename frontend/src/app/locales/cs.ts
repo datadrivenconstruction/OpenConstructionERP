@@ -35535,6 +35535,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Schváleno",
     "subcontractors.rollup_chip_certs_lapsed": "Certifikát propadl",
     "subcontractors.rollup_chip_certs_ok": "Certifikáty platné",
+    "subcontractors.rollup_chip_certs_on_payment": "Certifikát se ověří k datu platby",
     "subcontractors.rollup_chip_certs_unchecked": "Certifikáty nezkontrolovány: chybí konec období",
     "subcontractors.rollup_chip_paid": "Zaplaceno",
     "subcontractors.rollup_chip_received": "Přijato, neschváleno",

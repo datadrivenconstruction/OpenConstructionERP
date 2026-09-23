@@ -35560,6 +35560,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Approvata",
     "subcontractors.rollup_chip_certs_lapsed": "Certificato scaduto",
     "subcontractors.rollup_chip_certs_ok": "Certificati validi",
+    "subcontractors.rollup_chip_certs_on_payment": "Certificato verificato alla data di pagamento",
     "subcontractors.rollup_chip_certs_unchecked": "Certificati non verificati: nessuna fine periodo",
     "subcontractors.rollup_chip_paid": "Pagata",
     "subcontractors.rollup_chip_received": "Ricevuta, non approvata",

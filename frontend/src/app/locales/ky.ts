@@ -31351,6 +31351,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Бекитилди",
     "subcontractors.rollup_chip_certs_lapsed": "Сертификаттын мөөнөтү бүттү",
     "subcontractors.rollup_chip_certs_ok": "Сертификаттар жарактуу",
+    "subcontractors.rollup_chip_certs_on_payment": "Сертификат төлөм күнүнө карата текшерилет",
     "subcontractors.rollup_chip_certs_unchecked": "Сертификаттар текшерилген жок: мезгилдин аягы жок",
     "subcontractors.rollup_chip_paid": "Төлөндү",
     "subcontractors.rollup_chip_received": "Алынды, бекитилген жок",

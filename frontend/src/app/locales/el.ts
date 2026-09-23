@@ -34584,6 +34584,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Εγκρίθηκε",
     "subcontractors.rollup_chip_certs_lapsed": "Το πιστοποιητικό έληξε",
     "subcontractors.rollup_chip_certs_ok": "Τα πιστοποιητικά είναι έγκυρα",
+    "subcontractors.rollup_chip_certs_on_payment": "Το πιστοποιητικό ελέγχεται την ημερομηνία πληρωμής",
     "subcontractors.rollup_chip_certs_unchecked": "Τα πιστοποιητικά δεν ελέγχθηκαν: δεν υπάρχει λήξη περιόδου",
     "subcontractors.rollup_chip_paid": "Πληρώθηκε",
     "subcontractors.rollup_chip_received": "Παραλήφθηκε, δεν εγκρίθηκε",

@@ -35660,6 +35660,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "معتمد",
     "subcontractors.rollup_chip_certs_lapsed": "الشهادة منتهية",
     "subcontractors.rollup_chip_certs_ok": "الشهادات سارية",
+    "subcontractors.rollup_chip_certs_on_payment": "تُفحص الشهادة في تاريخ الدفع",
     "subcontractors.rollup_chip_certs_unchecked": "لم يتم التحقق من الشهادات: لا يوجد تاريخ نهاية الفترة",
     "subcontractors.rollup_chip_paid": "مدفوع",
     "subcontractors.rollup_chip_received": "مستلم، غير معتمد",

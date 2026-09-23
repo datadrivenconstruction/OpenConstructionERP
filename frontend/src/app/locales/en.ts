@@ -32168,6 +32168,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Approved",
     "subcontractors.rollup_chip_certs_lapsed": "Certificate lapsed",
     "subcontractors.rollup_chip_certs_ok": "Certificates valid",
+    "subcontractors.rollup_chip_certs_on_payment": "Certificate checked on the payment date",
     "subcontractors.rollup_chip_certs_unchecked": "Certificates not checked: no period end",
     "subcontractors.rollup_chip_paid": "Paid",
     "subcontractors.rollup_chip_received": "Received, not approved",

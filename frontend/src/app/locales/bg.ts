@@ -35412,6 +35412,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Одобрено",
     "subcontractors.rollup_chip_certs_lapsed": "Сертификатът е изтекъл",
     "subcontractors.rollup_chip_certs_ok": "Сертификатите са валидни",
+    "subcontractors.rollup_chip_certs_on_payment": "Сертификатът се проверява към датата на плащане",
     "subcontractors.rollup_chip_certs_unchecked": "Сертификатите не са проверени: няма край на периода",
     "subcontractors.rollup_chip_paid": "Платено",
     "subcontractors.rollup_chip_received": "Получено, не одобрено",

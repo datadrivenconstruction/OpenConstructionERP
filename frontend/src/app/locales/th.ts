@@ -35184,6 +35184,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "อนุมัติแล้ว",
     "subcontractors.rollup_chip_certs_lapsed": "ใบรับรองหมดอายุ",
     "subcontractors.rollup_chip_certs_ok": "ใบรับรองยังใช้ได้",
+    "subcontractors.rollup_chip_certs_on_payment": "ตรวจสอบใบรับรอง ณ วันที่ชำระเงิน",
     "subcontractors.rollup_chip_certs_unchecked": "ยังไม่ตรวจสอบใบรับรอง: ไม่มีวันสิ้นงวด",
     "subcontractors.rollup_chip_paid": "จ่ายแล้ว",
     "subcontractors.rollup_chip_received": "ได้รับแล้ว ยังไม่อนุมัติ",

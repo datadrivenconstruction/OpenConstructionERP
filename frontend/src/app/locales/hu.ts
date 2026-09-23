@@ -35222,6 +35222,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Jóváhagyva",
     "subcontractors.rollup_chip_certs_lapsed": "Tanúsítvány lejárt",
     "subcontractors.rollup_chip_certs_ok": "Tanúsítványok érvényesek",
+    "subcontractors.rollup_chip_certs_on_payment": "A tanúsítványt a fizetés napján ellenőrizzük",
     "subcontractors.rollup_chip_certs_unchecked": "Tanúsítványok nincsenek ellenőrizve: nincs időszakvég",
     "subcontractors.rollup_chip_paid": "Kifizetve",
     "subcontractors.rollup_chip_received": "Beérkezett, nincs jóváhagyva",

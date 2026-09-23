@@ -35275,6 +35275,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Kinnitatud",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikaat aegunud",
     "subcontractors.rollup_chip_certs_ok": "Sertifikaadid kehtivad",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifikaati kontrollitakse maksepäeval",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikaate ei kontrollitud: perioodi lõppu pole",
     "subcontractors.rollup_chip_paid": "Makstud",
     "subcontractors.rollup_chip_received": "Saadud, kinnitamata",

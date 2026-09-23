@@ -35635,6 +35635,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Onaylandı",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikanın süresi doldu",
     "subcontractors.rollup_chip_certs_ok": "Sertifikalar geçerli",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifika ödeme tarihinde kontrol edilir",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikalar kontrol edilmedi: dönem sonu yok",
     "subcontractors.rollup_chip_paid": "Ödendi",
     "subcontractors.rollup_chip_received": "Alındı, onaylanmadı",

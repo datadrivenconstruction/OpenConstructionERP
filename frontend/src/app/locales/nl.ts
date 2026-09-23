@@ -35408,6 +35408,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Goedgekeurd",
     "subcontractors.rollup_chip_certs_lapsed": "Certificaat verlopen",
     "subcontractors.rollup_chip_certs_ok": "Certificaten geldig",
+    "subcontractors.rollup_chip_certs_on_payment": "Certificaat gecontroleerd op de betaaldatum",
     "subcontractors.rollup_chip_certs_unchecked": "Certificaten niet gecontroleerd: geen periode-einde",
     "subcontractors.rollup_chip_paid": "Betaald",
     "subcontractors.rollup_chip_received": "Ontvangen, niet goedgekeurd",
