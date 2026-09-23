@@ -37,7 +37,14 @@ TRANSLATED_LOCALES = [locale for locale in SHIPPED_LOCALES if locale != "en"]
 #: Top-level segments of every key this bundle answers. The contracts source
 #: carries many other dotted strings (permission names, event names), and only
 #: these prefixes are message keys.
-KEY_PREFIXES = ("pay_application.", "retention_release.")
+#:
+#: A prefix missing from here is invisible in both directions, and one of them
+#: is quiet in a way the other is not. A key the source asks for and the bundle
+#: lacks goes unchecked, so the raw key reaches a reader. A key the bundle
+#: carries and this list cannot see is reported as unused, which is a red test
+#: about a key that is fine. The certificate label arrived under "aia." and was
+#: read as the second of those. Add the prefix with the first key that uses it.
+KEY_PREFIXES = ("aia.", "pay_application.", "retention_release.")
 
 
 def message_keys() -> set[str]:
@@ -76,6 +83,9 @@ def test_the_source_really_yields_the_keys_this_file_then_checks() -> None:
     # The retention release gate, and the document names read from a table.
     assert "retention_release.errors.approval_blocked" in keys
     assert "retention_release.document_roles.consent_of_surety" in keys
+    # The certificate's own labels, so dropping the prefix that carries them
+    # fails here rather than showing up as a key nobody asks for.
+    assert "aia.g703.billed_not_on_a_schedule_line" in keys
 
 
 @pytest.mark.parametrize("locale", SHIPPED_LOCALES)
