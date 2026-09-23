@@ -4074,6 +4074,32 @@ async def export_boq_csv(
     )
 
 
+def _project_line(project: Any) -> str | None:
+    """The project line printed under the title of an exported sheet.
+
+    The title is the bill's own name, which says which bill this is and not
+    which job it belongs to, under which classification standard or in which
+    region. A recipient outside the company has none of that context, so it is
+    either named on the sheet or nowhere.
+
+    Args:
+        project: The project row, or ``None`` when it could not be read.
+
+    Returns:
+        The line, or ``None`` when the project answers none of the three, so a
+        caller prints nothing rather than an empty line.
+    """
+    if project is None:
+        return None
+    labels = (("Project", "name"), ("Standard", "classification_standard"), ("Region", "region"))
+    parts = []
+    for label, attr in labels:
+        value = str(getattr(project, attr, "") or "").strip()
+        if value:
+            parts.append(f"{label}: {value}")
+    return "  |  ".join(parts) or None
+
+
 @router.get(
     "/boqs/{boq_id}/export/excel",
     summary="Export BOQ as Excel (no-slash alias)",
@@ -4463,9 +4489,15 @@ async def export_boq_excel(
     # finds the header row under a letterhead, so the round-trip holds.
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
+    from app.modules.projects.repository import ProjectRepository
+
+    # Which job this bill belongs to, as the PDF export's cover page already
+    # names it. The sheet is read by whoever receives it, and the bill's name
+    # alone does not tell them.
+    project = await ProjectRepository(session).get_by_id(boq_data.project_id)
 
     store_strings_as_text(ws)
-    apply_company_header(ws, title=boq_data.name)
+    apply_company_header(ws, title=boq_data.name, subtitle=_project_line(project))
 
     # ── Workbook origin metadata ──────────────────────────────────────────
     # Stamp docProps/core.xml + docProps/app.xml so a downloaded BOQ .xlsx

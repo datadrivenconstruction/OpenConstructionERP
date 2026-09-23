@@ -75,7 +75,6 @@ import { SensitivityChart } from './SensitivityChart';
 import { CostRiskPanel } from './CostRiskPanel';
 import { MarkupPanel } from './MarkupPanel';
 import BOQGrid from './BOQGrid';
-import { exportBOQToExcel } from './exportExcel';
 import { generateBOQPdf } from './pdfReport';
 import type { BOQGridHandle } from './BOQGrid';
 import { allResourcesExpanded, type ResourceExpansionState } from './resourceExpansion';
@@ -257,9 +256,11 @@ export function BOQEditorPage() {
   // the demo projects at all.
   const locale = useNumberLocale();
   // Issue #270 - the user's measurement-system preference, threaded into the
-  // client-side Excel/PDF exports so quantities + unit labels print in the
-  // chosen system (storage stays metric-canonical; only the export boundary
-  // converts).
+  // client-side PDF export so quantities + unit labels print in the chosen
+  // system (storage stays metric-canonical; only the export boundary
+  // converts). The PDF only: this said "Excel/PDF" while the Excel call never
+  // passed it, and Excel is now the server's, which documents itself as
+  // canonical metric whatever this preference says.
   const measurementSystem = usePreferencesStore((s) => s.measurementSystem);
   // Issue #287: display<->metric conversion seam for batch write actions. The
   // grid renders/edits in the chosen system while storage stays canonical, so
@@ -2326,8 +2327,8 @@ export function BOQEditorPage() {
    * printed under a "Grand Total" label — ``vatRate`` resolves a single tax
    * markup, so a BOQ with two tax lines (Brazil BDI) or a fixed-amount tax
    * loses the rest. It stays client-side because the grid footer and the
-   * client Excel/PDF exports need net / VAT / gross as three separate rows
-   * that react to a cell edit instantly, which a server round-trip cannot do.
+   * client PDF export need net / VAT / gross as three separate rows that
+   * react to a cell edit instantly, which a server round-trip cannot do.
    * The authority for the total of everything is the server's
    * ``cost-breakdown.grand_total`` (see the ``costBreakdown`` query above),
    * which is what the toolbar card, the Markup panel and the Cost Breakdown
@@ -2984,39 +2985,15 @@ export function BOQEditorPage() {
   /** Actually perform the export (download file). */
   const doExport = useCallback(
     async (format: string) => {
-      // Client-side Excel export via SheetJS
-      if (format === 'excel' && positions.length > 0) {
-        try {
-          const markupTotalsForExport = markupTotals.map((m) => ({
-            name: m.name,
-            percentage: m.percentage,
-            amount: m.amount,
-          }));
-          await exportBOQToExcel({
-            boqTitle: boq?.name ?? 'BOQ',
-            projectName: project?.name,
-            classificationStandard: project?.classification_standard,
-            region: project?.region,
-            // Use the project base currency ISO code (was a stray ``boq.currency``
-            // that doesn't exist \u2192 always fell back to "\u20ac"). Issue #150: also
-            // thread the base currency + FX rates so foreign-currency resources
-            // are converted to base in the export exactly as in the grid.
-            currency: currencyCode,
-            baseCurrency: currencyCode,
-            fxRates,
-            positions,
-            markupTotals: markupTotalsForExport,
-            netTotal,
-            vatRate,
-            vatAmount,
-            grossTotal,
-          });
-          addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
-          return;
-        } catch {
-          // Fall through to server-side export
-        }
-      }
+      /* Excel is asked of the server, like CSV, GAEB and BC3, and unlike the
+       * PDF below. The workbook a customer receives carries the company
+       * letterhead, the header block the importers read back, a Position ID
+       * column that survives a round trip, per-row currencies and the frozen
+       * FX table, and the server is the only place any of that is written. A
+       * browser-built spreadsheet had none of it: its second row was the
+       * product name, its money came from the client net / VAT / gross chain
+       * below, which is documented there as not authoritative and loses a
+       * second tax line, and a letterhead assembled in two places drifts. */
 
       // Client-side PDF export via jsPDF (skip for very large BOQs to avoid
       // browser memory issues — let the server handle them with a simplified report)
@@ -3084,7 +3061,18 @@ export function BOQEditorPage() {
         addToast({ type: 'error', title: errorMsg });
       }
     },
-    [boqId, boq, positions, markups, directCost, netTotal, addToast, t, measurementSystem],
+    /* Everything the body reads. The project and the four values derived from
+     * it used to be missing, and the project query is gated on the bill having
+     * arrived, so it always resolves after this callback was last built: the
+     * export printed no project name, no currency and no rates. It was not a
+     * race that sometimes went the other way, because nothing else changes
+     * when the project lands unless the bill holds foreign-currency rows,
+     * whose converted direct cost is what would rebuild this. */
+    [
+      boqId, boq, positions, markups, project, currencySymbol, currencyCode, fxRates, locale,
+      directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal,
+      addToast, t, measurementSystem,
+    ],
   );
 
   /** Pre-export validation check: warn if quality < 60%, GAEB preview before export. */
