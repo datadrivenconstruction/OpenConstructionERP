@@ -14710,6 +14710,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "최대 중첩 깊이 {{max}}단계에 도달했습니다, 구조를 평탄화하거나 하위 단계를 줄이세요.",
     "boq.resource_link_propagated_msg": "이 프로젝트의 다른 {{count}}건의 항목에서 공유 리소스를 업데이트했습니다.",
     "boq.resource_link_propagated_title": "리소스 정의가 전파되었습니다",
+    "boq.link_locked_skipped_msg": "잠긴 견적에 있는 링크된 항목 {{count}}건은 이전 정의를 유지합니다: {{bills}}. 변경 사항을 적용하려면 해당 견적의 잠금을 해제하거나 개정본을 만드세요.",
+    "boq.link_locked_skipped_title": "잠긴 견적은 변경되지 않았습니다",
     "boq.link_role_instance": "링크된 인스턴스",
     "boq.link_role_master": "마스터 (기준 정의)",
     "boq.link_unlinked_msg": "편집으로 인해 이 링크된 사본이 변경되어 공유 코드를 더 이상 따르지 않습니다. 분기를 의도하지 않았다면 코드를 원래대로 되돌리세요.",

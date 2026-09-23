@@ -14388,6 +14388,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Profundidad de anidamiento máxima de {{max}} niveles alcanzada, aplane la estructura o use menos sub-niveles.",
     "boq.resource_link_propagated_msg": "Recurso compartido actualizado en {{count}} otra(s) partida(s) del proyecto.",
     "boq.resource_link_propagated_title": "Definición de recurso propagada",
+    "boq.link_locked_skipped_msg": "{{count}} partida(s) vinculada(s) en presupuestos bloqueados conservan la definición anterior: {{bills}}. Desbloquee esos presupuestos o cree una revisión para aplicar el cambio.",
+    "boq.link_locked_skipped_title": "Presupuestos bloqueados sin cambios",
     "boq.link_role_instance": "Instancia vinculada",
     "boq.link_role_master": "Maestra (definición de referencia)",
     "boq.link_unlinked_msg": "Su edición cambió esta copia vinculada, por lo que ya no sigue al código compartido. Si no quería separarla, vuelva a su código original.",

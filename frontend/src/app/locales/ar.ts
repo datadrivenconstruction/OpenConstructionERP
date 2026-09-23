@@ -15137,6 +15137,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "تم الوصول إلى أقصى عمق تداخل ({{max}} مستويات)، قم بتسطيح الهيكل أو استخدم مستويات فرعية أقل.",
     "boq.resource_link_propagated_msg": "تم تحديث المورد المشترك على {{count}} بند آخر في هذا المشروع.",
     "boq.resource_link_propagated_title": "تم نشر تعريف المورد",
+    "boq.link_locked_skipped_msg": "احتفظ {{count}} بند مرتبط في التقديرات المقفلة بالتعريف القديم: {{bills}}. افتح قفل هذه التقديرات أو أنشئ مراجعة لتطبيق التغيير.",
+    "boq.link_locked_skipped_title": "لم تتغير التقديرات المقفلة",
     "boq.link_role_instance": "نسخة مرتبطة",
     "boq.link_role_master": "الأصل (التعريف المعتمد)",
     "boq.link_unlinked_msg": "أدى تعديلك إلى تغيير هذه النسخة المرتبطة، فلم تعد تتبع الكود المشترك. إذا لم يكن التباين مقصودًا، فأعد الكود إلى ما كان عليه.",

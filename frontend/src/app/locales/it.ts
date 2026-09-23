@@ -14264,6 +14264,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Profondità massima di {{max}} livelli raggiunta, semplifica la struttura o usa meno sotto-livelli.",
     "boq.resource_link_propagated_msg": "Risorsa condivisa aggiornata su {{count}} altre voci del progetto.",
     "boq.resource_link_propagated_title": "Definizione di risorsa propagata",
+    "boq.link_locked_skipped_msg": "{{count}} voci collegate in stime bloccate mantengono la definizione precedente: {{bills}}. Sblocca queste stime o crea una revisione per applicare la modifica.",
+    "boq.link_locked_skipped_title": "Stime bloccate non modificate",
     "boq.link_role_instance": "Istanza collegata",
     "boq.link_role_master": "Master (definizione di riferimento)",
     "boq.link_unlinked_msg": "La tua modifica ha cambiato questa copia collegata, quindi non segue più il codice condiviso. Se non volevi farla divergere, ripristina il codice.",

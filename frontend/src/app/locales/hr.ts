@@ -14656,6 +14656,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Dostignuta maksimalna dubina ugniježđenja od {{max}} razina, spljoštite strukturu ili koristite manje podrazina.",
     "boq.resource_link_propagated_msg": "Ažurirano dijeljeno resurs na {{count}} ostalo stavka(s) kroz ovaj projekt.",
     "boq.resource_link_propagated_title": "Definicija resursa propagirana",
+    "boq.link_locked_skipped_msg": "Povezane stavke u zaključanim troškovnicima ({{count}}) zadržale su staru definiciju: {{bills}}. Otključajte te troškovnike ili izradite reviziju kako biste preuzeli promjenu.",
+    "boq.link_locked_skipped_title": "Zaključani troškovnici ostali su nepromijenjeni",
     "boq.link_role_instance": "Povezana instanca",
     "boq.link_role_master": "Glavni (definition od record)",
     "boq.link_unlinked_msg": "Vaša je izmjena promijenila ovu povezanu kopiju pa ona više ne prati zajednički kod. Ako je niste namjeravali odvojiti, vratite joj izvorni kod.",

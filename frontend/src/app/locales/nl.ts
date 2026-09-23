@@ -14027,6 +14027,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maximale nestingsdiepte van {{max}} niveaus bereikt, vereenvoudig de structuur of gebruik minder subniveaus.",
     "boq.resource_link_propagated_msg": "Gedeelde resource bijgewerkt op {{count}} andere post(en) in dit project.",
     "boq.resource_link_propagated_title": "Resourcedefinitie gepropageerd",
+    "boq.link_locked_skipped_msg": "{{count}} gekoppelde post(en) in vergrendelde begrotingen behouden de oude definitie: {{bills}}. Ontgrendel die begrotingen of maak een revisie aan om de wijziging over te nemen.",
+    "boq.link_locked_skipped_title": "Vergrendelde begrotingen ongewijzigd",
     "boq.link_role_instance": "Gekoppelde instantie",
     "boq.link_role_master": "Master (referentiedefinitie)",
     "boq.link_unlinked_msg": "Uw wijziging heeft deze gekoppelde kopie aangepast, daarom volgt zij de gedeelde code niet meer. Als u geen afwijking wilde, herstel dan haar code.",

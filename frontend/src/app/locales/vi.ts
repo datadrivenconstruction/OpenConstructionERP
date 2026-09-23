@@ -14668,6 +14668,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Đã đạt độ sâu lồng tối đa {{max}} cấp, làm phẳng cấu trúc hoặc dùng ít cấp con hơn.",
     "boq.resource_link_propagated_msg": "Đã cập nhật tài nguyên dùng chung trên {{count}} hạng mục khác trong dự án này.",
     "boq.resource_link_propagated_title": "Đã lan truyền định nghĩa tài nguyên",
+    "boq.link_locked_skipped_msg": "{{count}} hạng mục đã liên kết trong các dự toán đã khóa vẫn giữ định nghĩa cũ: {{bills}}. Hãy mở khóa các dự toán đó hoặc tạo phiên bản để áp dụng thay đổi.",
+    "boq.link_locked_skipped_title": "Các dự toán đã khóa không bị thay đổi",
     "boq.link_role_instance": "Bản liên kết",
     "boq.link_role_master": "Bản gốc (định nghĩa chuẩn)",
     "boq.link_unlinked_msg": "Chỉnh sửa của bạn đã làm thay đổi bản sao liên kết này nên nó không còn theo mã dùng chung. Nếu không cố ý tách, hãy đặt lại mã.",
