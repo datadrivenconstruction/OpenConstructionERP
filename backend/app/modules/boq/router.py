@@ -5,6 +5,7 @@
 Endpoints:
     POST   /boqs/                              - Create a new BOQ
     GET    /boqs/?project_id=xxx               - List BOQs for a project
+    POST   /boqs/by-projects/                  - List BOQs for several projects in one call
     GET    /boqs/templates                     - List available BOQ templates
     POST   /boqs/from-template                 - Create a BOQ from a template
     GET    /boqs/{boq_id}                      - Get BOQ with all positions
@@ -64,7 +65,7 @@ import re
 import tempfile
 import uuid
 import zipfile
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -73,7 +74,7 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from app.modules.boq.copilot_service import BOQCopilotService
     from app.modules.boq.importers import ImportedBOQ
-    from app.modules.boq.models import BOQSnapshot
+    from app.modules.boq.models import BOQ, BOQSnapshot
 
 from fastapi import (
     APIRouter,
@@ -129,6 +130,7 @@ from app.modules.boq.schemas import (
     BOQCompareResponse,
     BOQCreate,
     BOQFromTemplateRequest,
+    BOQListByProjectsRequest,
     BOQListItem,
     BOQResponse,
     BOQStatisticsResponse,
@@ -320,6 +322,98 @@ async def _verify_project_owner_for_boq(
     )
 
 
+async def _verify_projects_readable_for_boq(
+    session: SessionDep,
+    project_ids: list[uuid.UUID],
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Apply :func:`_verify_project_owner_for_boq` to many projects at once.
+
+    The rules and the statuses are the same, project by project: one that does
+    not exist or is archived is 404 (for an admin too), one the caller neither
+    owns nor is a team member of is 403. What is added is that a single failing
+    project refuses the whole request. Answering for the projects that passed
+    and leaving out the rest would hand the bill register a list, and a money
+    total across it, that looks complete and is not, so the refusal names every
+    project that failed instead, and the client can say which ones.
+
+    It costs one statement for the projects and, only when the caller is not an
+    admin and does not own every project asked about, one more for the team
+    memberships, however many projects there are.
+
+    Raises:
+        HTTPException: 404 when any project is missing or archived, otherwise
+            403 when any is not readable by the caller. The detail carries
+            ``error``, an English ``message`` naming the projects, and the ids
+            themselves: ``project_ids`` (every failing id, in request order),
+            ``not_found`` and ``forbidden``.
+    """
+    if not project_ids:
+        return
+    from sqlalchemy import select
+
+    from app.modules.projects.models import Project
+
+    rows = (
+        await session.execute(
+            select(Project.id, Project.owner_id, Project.status).where(Project.id.in_(project_ids)),
+        )
+    ).all()
+    owner_by_project = {row[0]: row[1] for row in rows if row[2] != "archived"}
+    not_found = [pid for pid in project_ids if pid not in owner_by_project]
+
+    forbidden: list[uuid.UUID] = []
+    is_admin = bool(payload and payload.get("role") == "admin")
+    foreign = [pid for pid in project_ids if pid in owner_by_project and str(owner_by_project[pid]) != user_id]
+    if foreign and not is_admin:
+        try:
+            uid: uuid.UUID | None = uuid.UUID(str(user_id))
+        except (ValueError, TypeError):
+            uid = None
+        member_of: set[uuid.UUID] = set()
+        if uid is not None:
+            from app.modules.teams.access import member_project_ids_subquery
+
+            # Fails closed like ``is_project_member``: a membership lookup that
+            # cannot run answers "not a member", never "a member".
+            try:
+                member_of = set(
+                    (
+                        await session.execute(
+                            select(Project.id).where(
+                                Project.id.in_(foreign),
+                                Project.id.in_(member_project_ids_subquery(uid)),
+                            ),
+                        )
+                    ).scalars()
+                )
+            except Exception:  # noqa: BLE001
+                _log.debug("Team membership lookup failed for the bill register", exc_info=True)
+        forbidden = [pid for pid in foreign if pid not in member_of]
+
+    if not not_found and not forbidden:
+        return
+    failing = set(not_found) | set(forbidden)
+    parts: list[str] = []
+    if not_found:
+        parts.append(
+            f"{translate('errors.project_not_found', locale=get_locale())}: {', '.join(str(p) for p in not_found)}."
+        )
+    if forbidden:
+        parts.append(f"You do not have access to these projects: {', '.join(str(p) for p in forbidden)}.")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND if not_found else status.HTTP_403_FORBIDDEN,
+        detail={
+            "error": "projects_not_found" if not_found else "projects_forbidden",
+            "message": " ".join(parts),
+            "project_ids": [str(p) for p in project_ids if p in failing],
+            "not_found": [str(p) for p in not_found],
+            "forbidden": [str(p) for p in forbidden],
+        },
+    )
+
+
 async def _log_activity(
     service: BOQService,
     *,
@@ -503,19 +597,81 @@ async def list_boqs(
     """List all BOQs for a given project with computed grand totals."""
     await _verify_project_owner_for_boq(session, project_id, _user_id, payload)
     boqs, _ = await service.list_boqs_for_project(project_id, offset=offset, limit=limit)
-    # Compute grand totals + position counts via aggregate queries
-    boq_ids = [b.id for b in boqs]
-    # ``compute_boq_totals`` returns the full breakdown so list and detail
-    # endpoints stay in lockstep (BUG-008) AND converts every foreign-currency
-    # position into the project base before summing (Issue #111 sibling), so a
-    # mixed-currency BOQ no longer reports a blended, meaningless grand total.
-    breakdown = await service.compute_boq_totals(boq_ids)
+    return await _boq_list_items(service, boqs)
 
-    # Position counts per BOQ. The service owns the definition of a section
-    # header; this endpoint used to open-code it as ``unit != ""`` and so
-    # counted the headers of every imported bill, which spell it "section",
-    # as priced lines.
-    pos_counts = await service.count_line_items(boq_ids)
+
+@router.post(
+    "/boqs/by-projects/",
+    response_model=dict[str, list[BOQListItem]],
+    summary="List BOQs of several projects",
+    description=(
+        "The bill register of every project in the body, in one call, keyed by project id. Each "
+        "project's list is exactly what GET /boqs/?project_id= returns for it with the same offset "
+        "and limit, which apply per project. Every requested project appears as a key, with an empty "
+        "list when it has no bills. If any project is missing or archived the request answers 404, "
+        "otherwise if any is not readable by the caller it answers 403, and in both cases the detail "
+        "names every failing id. Nothing is answered for the others."
+    ),
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_boqs_by_projects(
+    body: BOQListByProjectsRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    service: BOQService = Depends(_get_service),
+) -> dict[str, list[BOQListItem]]:
+    """List the BOQs of many projects at once, for the bill register page.
+
+    The page used to ask ``GET /boqs/?project_id=`` once per project. A browser
+    runs six requests to a host at a time over HTTP/1.1, and the desktop app
+    has nothing better, so on a workspace with forty projects most of the wait
+    was queueing rather than work. This answers the same question in one
+    request and a fixed number of statements.
+    """
+    project_ids = list(dict.fromkeys(body.project_ids))
+    if not project_ids:
+        return {}
+    await _verify_projects_readable_for_boq(session, project_ids, _user_id, payload)
+    by_project = await service.list_boqs_for_projects(project_ids, offset=offset, limit=limit)
+    items = await _boq_list_items(service, [boq for pid in project_ids for boq in by_project.get(pid, [])])
+    register: dict[str, list[BOQListItem]] = {str(pid): [] for pid in project_ids}
+    for item in items:
+        register[str(item.project_id)].append(item)
+    return register
+
+
+#: Most BOQs one pass of the list rollup reads the positions of. It is the most
+#: a single project's page can hold (``limit`` is capped at 100), so the one
+#: project listing is always one pass, exactly as before, and the many project
+#: listing never holds more positions in memory at once than one project's
+#: largest page already did.
+_LIST_ROLLUP_CHUNK = 100
+
+
+async def _boq_list_items(service: BOQService, boqs: "Sequence[BOQ]") -> list[BOQListItem]:
+    """Build the list rows of a page of BOQs, with their money and line counts.
+
+    Shared by the one project and the many projects listing, so the two cannot
+    report different figures for the same bill.
+    """
+    boq_ids = [b.id for b in boqs]
+    breakdown: dict[uuid.UUID, dict[str, Any]] = {}
+    pos_counts: dict[uuid.UUID, int] = {}
+    for start in range(0, len(boq_ids), _LIST_ROLLUP_CHUNK):
+        chunk = boq_ids[start : start + _LIST_ROLLUP_CHUNK]
+        # ``compute_boq_totals`` returns the full breakdown so list and detail
+        # endpoints stay in lockstep (BUG-008) AND converts every foreign-currency
+        # position into the project base before summing (Issue #111 sibling), so a
+        # mixed-currency BOQ no longer reports a blended, meaningless grand total.
+        breakdown.update(await service.compute_boq_totals(chunk))
+        # Position counts per BOQ. The service owns the definition of a section
+        # header; this endpoint used to open-code it as ``unit != ""`` and so
+        # counted the headers of every imported bill, which spell it "section",
+        # as priced lines.
+        pos_counts.update(await service.count_line_items(chunk))
 
     results: list[BOQListItem] = []
     for b in boqs:
