@@ -125,7 +125,20 @@ class RetentionPolicy:
     effective_date: str | None = None
 
     def rate_at(self, percent_complete: Decimal) -> Decimal:
-        """The rate of the last tier whose threshold ``percent_complete`` has reached."""
+        """The rate of the last tier whose threshold ``percent_complete`` has reached.
+
+        A threshold belongs to the tier that starts at it. A claim that lands
+        exactly on it, say 50% complete on a ladder that steps from 10% to 5%
+        at 50, is already at the lower rate: stored materials take 5%, and in
+        recompute mode all work does, so the step-down release falls on that
+        claim. In prospective mode the work itself is unaffected, because all
+        of it lies in the band below the threshold and is held at 10%.
+
+        Nobody chose this reading. It is what the comparison below has always
+        done, and contracts have been signed under it. Changing it would
+        rewrite what a signed contract withholds, so it is pinned by the
+        boundary tests in ``test_contracts_retention_engine.py`` instead.
+        """
         rate = self.tiers[0].rate
         for tier in self.tiers:
             if percent_complete >= tier.from_percent_complete:
