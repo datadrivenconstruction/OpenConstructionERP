@@ -15124,6 +15124,7 @@ const resource = {
     "contracts.claim_lines_locked": "Only a draft claim's lines can be changed.",
     "contracts.claim_lines_locked_reopen": "Reject the claim to put it back in draft.",
     "contracts.sov_locked": "A signed contract is billed on these lines, so they cannot be changed or removed here. Adjust the scope with a variation.",
+    "contracts.sov_billed_locked": "Lines a progress claim has billed on cannot be changed or removed here, because the claim is built on them. Adjust the scope with a variation.",
     "contracts.delete_line_title": "Remove this line",
     "contracts.delete_line_message": "The line leaves the schedule of values and the contract total drops by its amount.",
     "contracts.claim_add_line": "Add a line by hand",

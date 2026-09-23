@@ -43411,6 +43411,7 @@ const resource = {
     "boq.import_preview.upload_hint": "Bu metrajlara aktarmadan önce önizlemek için bir dosya seçin.",
     "boq.import_preview.warnings_title": "{{count}} uyarı",
     "contracts.sov_locked": "İmzalanmış bir sözleşme bu satırlar üzerinden faturalandığı için burada değiştirilemez veya kaldırılamazlar. Kapsamı bir değişiklikle ayarlayın.",
+    "contracts.sov_billed_locked": "Bir ilerleme hakedişinin faturalandığı satırlar, hakediş bunlara dayandığı için burada değiştirilemez veya kaldırılamaz. Kapsamı bir değişiklikle ayarlayın.",
     "contracts.delete_line_title": "Bu satırı kaldır",
     "contracts.delete_line_message": "Satır değer cetvelinden çıkar ve sözleşme toplamı bu tutar kadar azalır.",
     "contracts.claim_add_line": "Elle satır ekle",

@@ -18557,6 +18557,7 @@ const resource = {
     "contracts.no_project_desc": "Velg et prosjekt over for å se kontraktene.",
     "contracts.no_sov": "Ingen verdiplan ennå.",
     "contracts.sov_locked": "En signert kontrakt faktureres på disse linjene, så de kan ikke endres eller fjernes her. Juster omfanget med et endringsarbeid.",
+    "contracts.sov_billed_locked": "Linjer som et fremdriftskrav allerede er fakturert på, kan ikke endres eller fjernes her, fordi kravet bygger på dem. Juster omfanget med et endringsarbeid.",
     "contracts.original_value": "Opprinnelig verdi",
     "contracts.outstanding": "Utestående",
     "contracts.paid_to_date": "Betalt til dato",

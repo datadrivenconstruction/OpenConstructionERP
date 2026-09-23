@@ -18543,6 +18543,7 @@ const resource = {
     "contracts.no_project_desc": "Výběrem projektu výše zobrazíte jeho smlouvy.",
     "contracts.no_sov": "Zatím žádný rozpis hodnot.",
     "contracts.sov_locked": "Podepsaná smlouva se fakturuje podle těchto položek, proto je zde nelze měnit ani odstranit. Upravte rozsah změnou.",
+    "contracts.sov_billed_locked": "Položky, podle kterých už byl fakturován nárok na postupovou platbu, zde nelze měnit ani odstranit, protože nárok na nich stojí. Upravte rozsah změnou.",
     "contracts.original_value": "Původní hodnota",
     "contracts.outstanding": "Nesplaceno",
     "contracts.paid_to_date": "Uhrazeno k dnešnímu dni",

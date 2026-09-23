@@ -42504,6 +42504,7 @@ const resource = {
     "about.team_role": "Otomasi, data, dan standar terbuka untuk konstruksi",
     "about.team_linkedin": "DataDrivenConstruction di LinkedIn",
     "contracts.sov_locked": "Kontrak yang telah ditandatangani ditagih berdasarkan baris-baris ini, sehingga tidak dapat diubah atau dihapus di sini. Sesuaikan lingkup dengan variasi.",
+    "contracts.sov_billed_locked": "Baris yang sudah ditagih dalam klaim progres tidak dapat diubah atau dihapus di sini, karena klaim tersebut didasarkan padanya. Sesuaikan lingkup dengan variasi.",
     "contracts.delete_line_title": "Hapus baris ini",
     "contracts.delete_line_message": "Baris ini akan keluar dari jadwal nilai dan jumlah kontrak berkurang sebesar nilainya.",
     "contracts.claim_add_line": "Tambah baris secara manual",
