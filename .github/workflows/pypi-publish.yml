@@ -218,10 +218,17 @@ jobs:
               # actually going out that week. A wheel count cannot tell those
               # apart; that is the whole reason the cadence is measured below.
               #
-              # The floor exists because the day estimate needs a rate and a
-              # long enough quiet spell drives that toward zero, which would
-              # report a runway of years while two wheels fit. Under two, warn
-              # whatever the arithmetic says.
+              # There is no second threshold on the wheel count, and there was
+              # one until it was checked. It read "under two wheels, warn
+              # whatever the arithmetic says", to cover a quiet spell driving
+              # the measured rate toward zero and the day estimate toward
+              # infinity. That cannot happen. The rate below adds one for the
+              # release being published right now, in every window including
+              # the three day one, so it can never come out below a third of a
+              # release a day. Days are therefore never more than three times
+              # the wheel count, under two wheels is always under six days, and
+              # the day threshold has already fired. A guard that cannot fire,
+              # justified by a paragraph that is false, is worse than no guard.
               #
               # Take the fastest rate sustained over any recent window rather
               # than one average, because the averaging window decides the
@@ -240,7 +247,6 @@ jobs:
                   if f["filename"].endswith(".whl")
               )
               WARN_DAYS = 14
-              WARN_WHEELS_FLOOR = 2
 
               fits = left / size
               runway = f"{fits:.1f} more wheels this size"
@@ -261,7 +267,7 @@ jobs:
                       f"(the {window} day one)"
                   )
               print(f"room for {runway}")
-              if days < WARN_DAYS or fits < WARN_WHEELS_FLOOR:
+              if days < WARN_DAYS:
                   print(
                       f"::warning::PyPI project storage is running out: room for {runway}. "
                       f"The wheel cannot shrink enough to matter here, so this needs "
