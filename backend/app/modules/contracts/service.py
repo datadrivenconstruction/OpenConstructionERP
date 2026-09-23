@@ -1143,6 +1143,13 @@ class ContractsService:
         entire claim history away with no confirmation of any kind. A contract
         that has left draft is closed or terminated through its status, not
         deleted. This mirrors the guard change orders already applies.
+
+        Being a draft is not enough on its own. Nothing ties a claim to the
+        contract's status, so a draft can carry claims that were certified and
+        paid, and the cascade would take them and their lines away whole.
+        Deleting the contract deletes every schedule line on it, so it asks
+        the same question a single line delete asks, over all of them, and a
+        line a claim has billed on refuses it with the same 409.
         """
         contract = await self.get_contract(contract_id)
 
@@ -1154,6 +1161,8 @@ class ContractsService:
                     f"'{contract.status}'; terminate or complete it instead."
                 ),
             )
+        lines = await self.line_repo.list_for_contract(contract_id)
+        await self._assert_contract_line_not_billed([ln.id for ln in lines], whole_contract=True)
 
         await self.contract_repo.delete(contract_id)
         logger.info("Contract deleted: %s", contract_id)
@@ -2063,6 +2072,28 @@ class ContractsService:
     #: agreed.
     _LINE_EDITABLE_CONTRACT_STATUSES = frozenset({"draft"})
 
+    async def _assert_line_may_change(self, line: ContractLine) -> None:
+        """Raise 409 unless this schedule of values line may be rewritten or removed.
+
+        This is the one rule every writer that rewrites or removes an existing
+        line goes through. A line may change only while both halves hold: its
+        contract is still a draft, and no progress claim has billed on it. The
+        halves are separate checks because they are facts about different
+        things, the contract and the line, and a draft contract can carry
+        claims, certified ones included, because nothing ties a claim to the
+        contract's status.
+
+        The contract is asked first, so a signed contract always answers
+        ``contract_lines_frozen`` whatever its claims, and
+        ``contract_line_billed`` is only ever seen on a draft. Each refusal
+        therefore names the one remedy that applies to it and the two never
+        say different things about the same line. Deleting a whole draft
+        contract takes every line with it and asks the billed half over all of
+        them, see :meth:`delete_contract`.
+        """
+        await self._assert_contract_lines_editable(line.contract_id)
+        await self._assert_contract_line_not_billed([line.id])
+
     async def _assert_contract_lines_editable(self, contract_id: uuid.UUID) -> None:
         """Raise 409 unless this contract's schedule of values is still a draft.
 
@@ -2076,10 +2107,11 @@ class ContractsService:
         for changing a signed scope is a change order, which is a document
         both sides see, so the refusal names it rather than only saying no.
 
-        The contract screen already enables line editing only for a draft, so
-        this is not a new rule, it is the same rule on the side that cannot be
-        bypassed by calling the route directly. A guard that lives only in the
-        client is a guard against the client.
+        The contract screen offers line editing only on a draft, and there
+        only on the lines the listing does not report as billed, so this is
+        the same rule on the side that cannot be bypassed by calling the route
+        directly. A guard that lives only in the client is a guard against the
+        client.
         """
         contract = await self.get_contract(contract_id)
         if contract.status in self._LINE_EDITABLE_CONTRACT_STATUSES:
@@ -2096,7 +2128,12 @@ class ContractsService:
             },
         )
 
-    async def _assert_contract_line_not_billed(self, line_ids: list[uuid.UUID]) -> None:
+    async def _assert_contract_line_not_billed(
+        self,
+        line_ids: list[uuid.UUID],
+        *,
+        whole_contract: bool = False,
+    ) -> None:
         """Raise 409 when a progress claim has billed on any of these lines.
 
         This is a fact about the line, not about the contract, which is why it
@@ -2104,6 +2141,10 @@ class ContractsService:
         runs after it. Nothing ties a claim to the contract's status, so a
         contract still in draft can carry claims, and the draft rule alone let
         both writes through underneath them.
+
+        ``whole_contract`` is set by :meth:`delete_contract`, which removes
+        every line at once. The refusal is the same 409 with the same code and
+        fields; only its sentence speaks of the contract instead of one line.
 
         Deleting a billed line destroys the claim's breakdown.
         ``ProgressClaimLine.contract_line_id`` cascades and has no ORM
@@ -2123,16 +2164,25 @@ class ContractsService:
             return
         claim_numbers = sorted({number for numbers in billed.values() for number in numbers if number})
         named = f" ({', '.join(claim_numbers)})" if claim_numbers else ""
+        if whole_contract:
+            message = (
+                f"A progress claim{named} has billed on this contract's schedule of values, so the "
+                "contract cannot be deleted: its claims and their lines would be deleted with it. If "
+                "the claim is still a draft, take the lines off the claim first; otherwise terminate "
+                "the contract rather than delete it."
+            )
+        else:
+            message = (
+                f"A progress claim{named} has billed on this schedule of values line, so it cannot be "
+                "changed or removed: the claim's lines point at it and would be restated or deleted "
+                "with it. If the claim is still a draft, take the line off the claim first; otherwise "
+                "raise a change order."
+            )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
                 "error": "contract_line_billed",
-                "message": (
-                    f"A progress claim{named} has billed on this schedule of values line, so it cannot be "
-                    "changed or removed: the claim's lines point at it and would be restated or deleted "
-                    "with it. If the claim is still a draft, take the line off the claim first; otherwise "
-                    "raise a change order."
-                ),
+                "message": message,
                 "contract_line_ids": [str(line_id) for line_id in line_ids if line_id in billed],
                 "claim_numbers": claim_numbers,
             },
@@ -2195,8 +2245,7 @@ class ContractsService:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
             raise HTTPException(status_code=404, detail="Contract line not found")
-        await self._assert_contract_lines_editable(line.contract_id)
-        await self._assert_contract_line_not_billed([line.id])
+        await self._assert_line_may_change(line)
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
@@ -2221,8 +2270,7 @@ class ContractsService:
             # for a line that exists, which is the only case that can destroy
             # anything.
             return
-        await self._assert_contract_lines_editable(line.contract_id)
-        await self._assert_contract_line_not_billed([line.id])
+        await self._assert_line_may_change(line)
         await self.line_repo.delete(line_id)
 
     # ── Progress claims ──────────────────────────────────────────────────
