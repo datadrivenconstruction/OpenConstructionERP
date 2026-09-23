@@ -25,6 +25,7 @@ import {
   MessageSquareQuote,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { apiGet } from '@/shared/lib/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import {
   reviewAskShownWithin,
@@ -137,7 +138,7 @@ export function SupportUsButton({ condensed = false }: { condensed?: boolean } =
   // queryFn match DemoBanner.tsx). React Query dedupes by key.
   const { data: sysInfo } = useQuery<{ demo_mode?: boolean }>({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()),
+    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
     staleTime: Infinity,
     retry: false,
   });

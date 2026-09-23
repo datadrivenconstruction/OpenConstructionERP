@@ -114,7 +114,13 @@ class BrandingUpdate(BaseModel):
 @router.get("/branding/", response_model=BrandingResponse)
 @router.get("/branding", response_model=BrandingResponse, include_in_schema=False)
 async def get_branding() -> BrandingResponse:
-    """Public: the workspace brand for the login page and the app shell."""
+    """Public: the workspace brand for the login page and the app shell.
+
+    Deliberately answered without a token. The login page and the app's first
+    render ask for it before anyone has signed in, so that the sign-in screen
+    already carries the workspace's logo and name. It answers nothing but the
+    logo, the name and which of the two to show.
+    """
     return BrandingResponse(**read_branding())
 
 

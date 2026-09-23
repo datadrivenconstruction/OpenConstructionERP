@@ -39,7 +39,7 @@ import {
   Sparkles, X, ExternalLink, Copy, Check,
   Plus, Wrench, Palette, Loader2, Download, RotateCcw,
 } from 'lucide-react';
-import { apiGet, apiPost, ApiError } from '@/shared/lib/api';
+import { apiGet, apiPost, ApiError, getAuthToken } from '@/shared/lib/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { isTauri, openExternalUrl, openInNewTab } from '@/shared/lib/desktop';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -265,7 +265,12 @@ function pickInstaller(assets: ReleaseAsset[], platform: InstallerPlatform): Rel
  */
 async function fetchVersionCheck(): Promise<VersionCheck | null> {
   try {
-    const r = await fetch(VERSION_CHECK_URL, { headers: { Accept: 'application/json' } });
+    // The endpoint answers signed-in callers only, and this notice lives
+    // inside the signed-in shell, so the session's token goes with it.
+    const token = getAuthToken();
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const r = await fetch(VERSION_CHECK_URL, { headers });
     if (!r.ok) return null;
     const data: unknown = await r.json();
     if (!data || typeof data !== 'object') return null;

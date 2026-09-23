@@ -3011,8 +3011,14 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/api/system/status", tags=["System"])
-    async def system_status() -> dict[str, Any]:
-        """Full system status: database, vector DB, AI providers."""
+    async def system_status(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
+        """Full system status: database, vector DB, AI providers.
+
+        Signed-in callers only. Nothing shown before sign-in reads it, and it
+        names the AI providers and storage engines this server runs.
+        """
         # Public hosted demo flag - set OE_DEMO_MODE=true on the VPS
         # systemd unit so the frontend can show the "demo only" warning
         # banner and the /users page can strip personal data from the
@@ -3241,8 +3247,13 @@ def create_app() -> FastAPI:
         return left + (0,) * (width - len(left)) == right + (0,) * (width - len(right))
 
     @app.get("/api/system/version-check", tags=["System"])
-    async def check_version() -> dict:
+    async def check_version(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict:
         """Return current vs latest published version.
+
+        Signed-in callers only: the update notice lives inside the signed-in
+        shell, and nothing before sign-in asks for it.
 
         Source of truth is **PyPI** (more reliable than GitHub releases -
         Trusted-Publisher OIDC always produces a wheel, GitHub release

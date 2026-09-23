@@ -188,8 +188,8 @@ class TestHealthAndSystem:
                 f"health is degraded for a cause this environment does not explain: {data}"
             )
 
-    async def test_system_status_has_all_sections(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/system/status")
+    async def test_system_status_has_all_sections(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/system/status", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         for key in ("api", "database", "vector_db", "ai", "cache"):
@@ -728,45 +728,45 @@ class TestRFIFlow:
 class TestModuleSystem:
     """List modules, get detail, dependency tree."""
 
-    async def test_list_all_modules(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/modules/")
+    async def test_list_all_modules(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/v1/modules/", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert isinstance(data, list)
         assert len(data) > 0
 
-    async def test_get_module_detail(self, client: AsyncClient) -> None:
+    async def test_get_module_detail(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # First list to get a real module name
-        resp = await client.get("/api/v1/modules/")
+        resp = await client.get("/api/v1/modules/", headers=auth_headers)
         modules = resp.json()
         assert len(modules) > 0
         module_name = modules[0]["name"]
 
         # Get detail
-        resp = await client.get(f"/api/v1/modules/{module_name}")
+        resp = await client.get(f"/api/v1/modules/{module_name}", headers=auth_headers)
         assert resp.status_code == 200
         detail = resp.json()
         assert detail["name"] == module_name
 
-    async def test_get_nonexistent_module(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/modules/nonexistent_module_xyz")
+    async def test_get_nonexistent_module(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/v1/modules/nonexistent_module_xyz", headers=auth_headers)
         assert resp.status_code == 404
 
-    async def test_dependency_tree(self, client: AsyncClient) -> None:
+    async def test_dependency_tree(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
         # Get a module name first
-        resp = await client.get("/api/v1/modules/")
+        resp = await client.get("/api/v1/modules/", headers=auth_headers)
         modules = resp.json()
         module_name = modules[0]["name"]
 
-        resp = await client.get(f"/api/v1/modules/dependency-tree/{module_name}")
+        resp = await client.get(f"/api/v1/modules/dependency-tree/{module_name}", headers=auth_headers)
         assert resp.status_code == 200
 
-    async def test_dependency_tree_nonexistent(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/modules/dependency-tree/fake_module_abc")
+    async def test_dependency_tree_nonexistent(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/v1/modules/dependency-tree/fake_module_abc", headers=auth_headers)
         assert resp.status_code == 404
 
-    async def test_modules_have_required_fields(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/modules/")
+    async def test_modules_have_required_fields(self, client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        resp = await client.get("/api/v1/modules/", headers=auth_headers)
         modules = resp.json()
         for mod in modules[:5]:
             assert "name" in mod, f"Module missing 'name': {mod}"

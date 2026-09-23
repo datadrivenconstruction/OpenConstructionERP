@@ -30,6 +30,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+from app.dependencies import get_current_user_id
 from app.main import create_app
 
 PYPI = "pypi.org"
@@ -97,12 +98,16 @@ async def ask():
     empty, and the lifespan is deliberately not run: this route reads no
     database, and starting one would tie a metadata test to a cluster.
 
+    The route answers signed-in callers only, and who is asking is not what
+    this file tests, so the caller is stood in for rather than signed in.
+
     The client is constructed before ``httpx.AsyncClient`` is replaced, so the
     transport this test speaks over stays real while the route gets the fake.
     """
 
     async def _ask(monkeypatch: pytest.MonkeyPatch, routes: dict[str, _Response]) -> dict[str, Any]:
         app = create_app()
+        app.dependency_overrides[get_current_user_id] = lambda: "version-check-reader"
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             _FakeClient.routes = routes

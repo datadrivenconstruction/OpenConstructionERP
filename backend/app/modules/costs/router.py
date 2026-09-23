@@ -917,8 +917,12 @@ def _invalidate_cost_cache() -> None:
 @router.get("/regions/", response_model=list[str])
 async def list_loaded_regions(
     session: SessionDep,
+    _user_id: CurrentUserId,
 ) -> list[str]:
-    """List distinct regions that have cost items loaded."""
+    """List distinct regions that have cost items loaded.
+
+    Signed-in callers only, like its sibling ``/regions/stats/``.
+    """
     now = _time.monotonic()
     if _region_cache["regions"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
         return _region_cache["regions"]
@@ -945,8 +949,13 @@ async def list_loaded_regions(
 @router.get("/regions/stats/")
 async def region_stats(
     session: SessionDep,
+    _user_id: CurrentUserId,
 ) -> list[dict]:
-    """Return item count per loaded region. Cached for 30s."""
+    """Return item count per loaded region. Cached for 30s.
+
+    Signed-in callers only: every screen that shows these counts is behind
+    sign-in, and nothing before it asks for them.
+    """
     now = _time.monotonic()
     if _region_cache["stats"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
         return _region_cache["stats"]
