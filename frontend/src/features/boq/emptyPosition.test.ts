@@ -6,9 +6,10 @@
  * "Add Position" creates the row on the server immediately and opens its
  * description cell, so a bill legitimately holds rows carrying nothing yet.
  * The server leaves them out of its position counts and out of every export
- * it renders; the browser builds its own Excel and PDF from the same data and
- * has to reach the same answer, or the same bill downloads with a different
- * number of lines depending on which button the estimator pressed.
+ * it renders; the browser still builds its own PDF from the same data and has
+ * to reach the same answer, or the same bill downloads with a different number
+ * of lines depending on which button the estimator pressed. Excel is the
+ * server's own export now, so only the shared filter is tested here.
  *
  * The assertions carry a denominator on purpose: "the blank row is absent" is
  * satisfied by an export containing nothing at all, so every case below names
@@ -16,7 +17,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { buildBOQSheetData, type ExportOptions } from './exportExcel';
 import { isEmptyPosition, exportablePositions, type Position } from './api';
 
 /* ── Fixtures ─────────────────────────────────────────────────────────── */
@@ -54,20 +54,6 @@ function untouchedRow(over: Partial<Position> = {}): Position {
     sort_order: 20,
     ...over,
   });
-}
-
-function baseOptions(over: Partial<ExportOptions> = {}): ExportOptions {
-  return {
-    boqTitle: 'Test BOQ',
-    currency: 'EUR',
-    positions: [],
-    markupTotals: [],
-    netTotal: 0,
-    vatRate: 0,
-    vatAmount: 0,
-    grossTotal: 0,
-    ...over,
-  };
 }
 
 /* ── The predicate ────────────────────────────────────────────────────── */
@@ -108,37 +94,5 @@ describe('exportablePositions', () => {
     const kept = exportablePositions([header, priced, untouchedRow({ ordinal: '01.20' })]);
 
     expect(kept.map((p) => p.ordinal)).toEqual(['01', '01.10']);
-  });
-});
-
-/* ── The workbook the browser hands the estimator ─────────────────────── */
-
-describe('buildBOQSheetData', () => {
-  it('omits the blank row from the sheet and keeps the priced one', () => {
-    const priced = pos({ ordinal: '01.10', description: 'Excavate to reduced level' });
-    const rows = buildBOQSheetData(
-      baseOptions({ positions: [priced, untouchedRow({ ordinal: '01.20' })] }),
-    ).rows;
-    const cells = rows.flat().filter((c): c is string => typeof c === 'string');
-
-    expect(cells).toContain('01.10');
-    expect(cells).not.toContain('01.20');
-  });
-
-  it('does not count the blank row in the sheet header statistics', () => {
-    const one = buildBOQSheetData(baseOptions({ positions: [pos({ ordinal: '01.10' })] }));
-    const two = buildBOQSheetData(
-      baseOptions({ positions: [pos({ ordinal: '01.10' }), untouchedRow({ ordinal: '01.20' })] }),
-    );
-
-    const stats = (built: { rows: (string | number | null)[][] }): string =>
-      built.rows
-        .flat()
-        .filter((c): c is string => typeof c === 'string')
-        .find((c) => c.includes('positions')) ?? '';
-
-    // The bill has one position either way, so the stats line must not move.
-    expect(stats(two)).toBe(stats(one));
-    expect(stats(one)).toContain('1 positions');
   });
 });
