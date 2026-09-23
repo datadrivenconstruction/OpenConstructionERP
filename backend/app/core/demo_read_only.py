@@ -187,6 +187,7 @@ _AUTHENTICATION_ENDPOINTS = (
 #: Reads that post a body because the query does not fit in a URL. Refusing
 #: these would put a refusal dialog behind the Search button.
 _READ_ONLY_ENDPOINTS = (
+    "app.modules.boq.router:list_boqs_by_projects",
     "app.modules.boq.router:search_cost_items",
     "app.modules.boq.router:suggest_rate",
     "app.modules.boq.router:suggest_prerequisites",

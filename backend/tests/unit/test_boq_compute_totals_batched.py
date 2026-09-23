@@ -10,8 +10,10 @@ a hot path.
 
 The fix keeps the currency-aware money math identical (Issue #111) but:
 
-* resolves the project FX table ONCE per distinct project via
-  ``_resolve_project_fx_by_project``,
+* resolves the FX tables of every distinct project in ONE lookup via
+  ``_resolve_project_fx_for_projects`` (it used to be one
+  ``_resolve_project_fx_by_project`` per project, which the bill register of
+  many projects would have paid once per project),
 * loads every position for the whole set in a single ``boq_id IN (...)``
   query (``list_all_for_boqs``) grouped in Python.
 
@@ -211,26 +213,33 @@ async def test_fx_resolved_once_and_positions_batched(session, monkeypatch):
     """Finding #8 regression: no per-BOQ FX query, no per-BOQ position load.
 
     Counts the data-access calls compute_boq_totals makes. The fixed code
-    resolves FX ONCE per distinct project (one ``_resolve_project_fx_by_project``
-    for the single shared project) and loads positions in ONE batched
-    ``list_all_for_boqs`` call. The original per-BOQ loop instead called the
-    per-BOQ ``_resolve_project_fx`` and ``list_all_for_boq`` once each PER BOQ
-    and never touched the batched helpers - so these assertions fail on it.
+    resolves FX in ONE batched ``_resolve_project_fx_for_projects`` lookup for
+    every distinct project (never one ``_resolve_project_fx_by_project`` per
+    project) and loads positions in ONE batched ``list_all_for_boqs`` call.
+    The original per-BOQ loop instead called the per-BOQ
+    ``_resolve_project_fx`` and ``list_all_for_boq`` once each PER BOQ and
+    never touched the batched helpers - so these assertions fail on it.
     """
     boq1_id, boq2_id = await _make_two_boq_project(session)
     service = BOQService(session)
 
     calls = {
+        "fx_batched": 0,
         "fx_by_project": 0,
         "fx_by_boq": 0,
         "positions_batched": 0,
         "positions_per_boq": 0,
     }
 
+    orig_fx_batched = service._resolve_project_fx_for_projects
     orig_fx_by_project = service._resolve_project_fx_by_project
     orig_fx_by_boq = service._resolve_project_fx
     orig_pos_batched = service.position_repo.list_all_for_boqs
     orig_pos_per_boq = service.position_repo.list_all_for_boq
+
+    async def spy_fx_batched(project_ids):
+        calls["fx_batched"] += 1
+        return await orig_fx_batched(project_ids)
 
     async def spy_fx_by_project(project_id):
         calls["fx_by_project"] += 1
@@ -248,6 +257,7 @@ async def test_fx_resolved_once_and_positions_batched(session, monkeypatch):
         calls["positions_per_boq"] += 1
         return await orig_pos_per_boq(boq_id)
 
+    monkeypatch.setattr(service, "_resolve_project_fx_for_projects", spy_fx_batched)
     monkeypatch.setattr(service, "_resolve_project_fx_by_project", spy_fx_by_project)
     monkeypatch.setattr(service, "_resolve_project_fx", spy_fx_by_boq)
     monkeypatch.setattr(service.position_repo, "list_all_for_boqs", spy_pos_batched)
@@ -255,8 +265,9 @@ async def test_fx_resolved_once_and_positions_batched(session, monkeypatch):
 
     await service.compute_boq_totals([boq1_id, boq2_id])
 
-    # FX resolved exactly once for the single shared project (not per BOQ).
-    assert calls["fx_by_project"] == 1
+    # FX resolved in one lookup for every project, never per project or per BOQ.
+    assert calls["fx_batched"] == 1
+    assert calls["fx_by_project"] == 0
     assert calls["fx_by_boq"] == 0
     # Positions loaded in a single batched query (not one full load per BOQ).
     assert calls["positions_batched"] == 1

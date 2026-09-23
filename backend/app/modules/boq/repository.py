@@ -131,6 +131,17 @@ BOQ_HEADER_COLUMNS = (
     BOQ.variation_request_id,
 )
 
+#: Which bills make up a project's bill register. See ``list_for_project`` for
+#: why a variation request's own bill is not one of them. Shared by the one
+#: project and the many projects listing, so the two cannot disagree about it.
+_IN_BILL_REGISTER = BOQ.variation_request_id.is_(None)
+
+#: The order of a bill register, newest first. The id breaks a tie between two
+#: bills created in the same instant, which otherwise the database may order
+#: differently from one query to the next, so a page boundary could show one of
+#: them twice and the other never.
+_BILL_REGISTER_ORDER = (BOQ.created_at.desc(), BOQ.id.desc())
+
 
 class BOQRepository:
     """Data access for BOQ model."""
@@ -175,7 +186,7 @@ class BOQRepository:
         and by id like any other bill. Rows written before that column existed
         carry NULL, so nothing that is listed today stops being listed.
         """
-        base = select(BOQ).where(BOQ.project_id == project_id, BOQ.variation_request_id.is_(None))
+        base = select(BOQ).where(BOQ.project_id == project_id, _IN_BILL_REGISTER)
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
@@ -184,7 +195,7 @@ class BOQRepository:
         # Fetch - skip eager loading of positions/markups for list queries
         stmt = (
             base.options(noload(BOQ.positions), noload(BOQ.markups))
-            .order_by(BOQ.created_at.desc())
+            .order_by(*_BILL_REGISTER_ORDER)
             .offset(offset)
             .limit(limit)
         )
@@ -192,6 +203,51 @@ class BOQRepository:
         boqs = list(result.scalars().all())
 
         return boqs, total
+
+    async def list_for_projects(
+        self,
+        project_ids: list[uuid.UUID],
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> dict[uuid.UUID, list[BOQ]]:
+        """The bill register of several projects, paginated per project, in one query.
+
+        Each project gets exactly the page :meth:`list_for_project` would give
+        it with the same ``offset`` and ``limit``: the same bills, in the same
+        order, with the same bills left out. The page is cut per project by
+        numbering each project's bills in register order and keeping the
+        numbers ``offset + 1`` to ``offset + limit``, so one busy project
+        cannot use up another project's page, which a single ``LIMIT`` over
+        the union would do.
+
+        Args:
+            project_ids: Projects to list. Access is the caller's business.
+            offset: Bills to skip at the head of each project's register.
+            limit: Most bills returned for each project.
+
+        Returns:
+            ``{project_id: [bill, ...]}`` in register order. A project with no
+            bill on the requested page is absent rather than present and empty.
+        """
+        if not project_ids:
+            return {}
+
+        place = func.row_number().over(partition_by=BOQ.project_id, order_by=_BILL_REGISTER_ORDER).label("place")
+        ranked = (
+            select(BOQ.id.label("boq_id"), place).where(BOQ.project_id.in_(project_ids), _IN_BILL_REGISTER).subquery()
+        )
+        stmt = (
+            select(BOQ)
+            .join(ranked, ranked.c.boq_id == BOQ.id)
+            .where(ranked.c.place > offset, ranked.c.place <= offset + limit)
+            .options(noload(BOQ.positions), noload(BOQ.markups))
+            .order_by(BOQ.project_id, ranked.c.place)
+        )
+        grouped: dict[uuid.UUID, list[BOQ]] = {}
+        for boq in (await self.session.execute(stmt)).scalars().all():
+            grouped.setdefault(boq.project_id, []).append(boq)
+        return grouped
 
     async def active_markups_for_boqs(
         self,
