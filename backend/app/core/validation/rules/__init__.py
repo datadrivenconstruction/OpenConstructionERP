@@ -2166,10 +2166,31 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
             f"BOQ position(s) use {wrong_label} units (e.g. {first_unit} on "
             f"position {first_ordinal})."
         )
+        # The suggestion names the field the reader can actually go and look
+        # at. It used to say "update the project's unit_system", and no such
+        # field exists: not on ``Project``, not in ``ProjectCreate`` or
+        # ``ProjectUpdate``, and nowhere in the interface. The column of that
+        # name is added by the migration chain alone, which no supported
+        # install walks, so the advice sent the reader hunting for a setting
+        # that is not there on any install.
+        #
+        # What decides the value instead is the project's country: the payload
+        # key comes from ``project_context._measurement_system``, which asks
+        # ``regional_packs.resolve_measurement_system`` for the system the pack
+        # claiming ``Project.country_code`` declares, falling back to
+        # ``Project.region`` when no pack claims the country. So the derivation
+        # is stated as a fact rather than as an instruction to go and change
+        # the country: the country is chosen when the project is created and
+        # the project settings page does not offer it, and re-countrying a
+        # project to change its units would move its compliance pack and its
+        # payment-application gate with it. Converting the units is the action
+        # that is always available, so that is what leads.
         suggestion = (
-            f"Convert {wrong_label} units to {project_system} equivalents "
-            f"or update the project's unit_system if {wrong_label} is "
-            f"actually intended."
+            f"Convert the {wrong_label} units to {project_system} equivalents. A project has no "
+            f"unit-system field to switch instead: the measurement system is the one declared by "
+            f"the regional pack that claims the project's country, and its region is read only "
+            f"when no pack claims the country. So {wrong_label} units are intended here only if "
+            f"the project's country is wrong."
         )
         return [
             RuleResult(

@@ -44,6 +44,28 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
+#: The field the suggestion is allowed to send a reader to, and the one it is
+#: not. ``unit_system`` is the name the advice used to give: a column the
+#: migration chain adds and no supported install has, absent from ``Project``,
+#: from ``ProjectCreate`` and ``ProjectUpdate``, and from every screen. What
+#: actually decides the answer is the project's country, through the regional
+#: pack that claims it. Both halves are pinned because only the second one was
+#: ever wrong, and an unpinned field name is free to go wrong again.
+#:
+#: The banned spelling is the underscored column name. Prose that says a
+#: project has no "unit-system field" is the opposite claim and is welcome; it
+#: is the identifier that must not come back.
+_DECIDING_FIELD = "country"
+_ABANDONED_FIELD = "unit_system"
+
+
+def _names_the_deciding_field(suggestion: str | None) -> bool:
+    """True when ``suggestion`` sends the reader to the country, not to a phantom field."""
+    if not suggestion:
+        return False
+    lowered = suggestion.lower()
+    return _DECIDING_FIELD in lowered and _ABANDONED_FIELD not in lowered
+
 
 @pytest_asyncio.fixture(scope="module")
 async def shared_client():
@@ -166,13 +188,28 @@ async def test_boq_unit_system_consistency_rule_fires_warning(
     # this test is for - it fired, and it fired as a WARNING rather than an
     # ERROR that would block the bill.
     assert result["status"] == "warning", f"Expected a WARNING, got status={result['status']}: {result['message']}"
-    assert "imperial" in result["message"].lower() or "metric" in result["message"].lower(), (
-        f"Expected unit system name in message: {result['message']}"
+    # Both system names, plus the offending unit. The rule's own comment claims
+    # exactly this of its message, and until now the claim was unbacked: the
+    # assertion here read "imperial OR metric", which a message naming only one
+    # of the two would have satisfied. An unbacked claim about a string is what
+    # let the suggestion beside it name a field that does not exist.
+    lowered = result["message"].lower()
+    assert "imperial" in lowered and "metric" in lowered, (
+        f"Expected both unit system names in message: {result['message']}"
+    )
+    assert "m3" in lowered or "01.001" in lowered, (
+        f"Expected the offending unit or its ordinal in message: {result['message']}"
     )
     assert result["details"].get("mismatch_count") == 1, f"Expected 1 mismatch, got: {result['details']}"
     # The pack's declared value, not anything this test sent.
     assert result["details"].get("project_unit_system") == "imperial", (
         f"Unit system should have come from us_pack, got: {result['details']}"
+    )
+    # The advice travels to the caller too, and it has to name something the
+    # caller can go and look at - see test_suggestion_names_the_field_that
+    # _decides_the_unit_system below for why this is asserted at all.
+    assert _names_the_deciding_field(result.get("suggestion")), (
+        f"Suggestion must name the project's country, not a unit_system field: {result.get('suggestion')}"
     )
 
 
@@ -216,6 +253,48 @@ async def test_metric_project_metric_units_passes(shared_client: AsyncClient, au
     )
     results = await rule.validate(ctx)
     assert results[0].passed is True, f"Should pass for metric units in metric project: {results[0].message}"
+
+
+@pytest.mark.asyncio
+async def test_suggestion_names_the_field_that_decides_the_unit_system() -> None:
+    """The advice on a mismatch must name the country, never a ``unit_system`` field.
+
+    No database and no client: the rule is handed a payload directly, so this
+    runs wherever pytest does and can be proved before the change is pushed.
+
+    What it guards is a defect that no verdict-level assertion can see. The
+    rule fired correctly the whole time it was telling readers to "update the
+    project's unit_system", because a suggestion changes no verdict - it is
+    read by a person, who then goes looking for a field that is on no screen,
+    in no schema and, on every supported install, in no table either.
+    """
+    from app.core.validation.engine import Severity, ValidationContext
+    from app.core.validation.rules import BOQUnitSystemConsistencyRule
+
+    rule = BOQUnitSystemConsistencyRule()
+    ctx = ValidationContext(
+        data={
+            "positions": [{"ordinal": "01.001", "unit": "m3"}],
+            "project_unit_system": "imperial",
+        }
+    )
+    results = await rule.validate(ctx)
+    assert len(results) == 1, f"Expected one result, got {len(results)}"
+    result = results[0]
+    # The verdict half is asserted here as well, so a later edit to the wording
+    # cannot quietly arrive with a changed severity or a flipped pass.
+    assert result.passed is False, "a metric unit on an imperial project is a mismatch"
+    assert result.severity is Severity.WARNING, f"must stay a WARNING, got {result.severity}"
+    assert _names_the_deciding_field(result.suggestion), (
+        f"Suggestion must name the project's country, not a unit_system field: {result.suggestion}"
+    )
+    # Naming the country is not enough on its own: the reader also has to be
+    # told the conversion is the move that is always open to them, because the
+    # country is picked when the project is created and no settings screen
+    # offers it afterwards.
+    assert "convert" in (result.suggestion or "").lower(), (
+        f"Suggestion must lead with the action the reader can always take: {result.suggestion}"
+    )
 
 
 def _verdicts(results: list[dict]) -> dict[str, bool]:

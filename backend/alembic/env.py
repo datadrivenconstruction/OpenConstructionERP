@@ -77,11 +77,38 @@ back.
 # Tables only the migrations create, absent from Base.metadata and so absent
 # from every create_all install:
 #   oe_tender_addendum    (v3085_tendering_addendum_leveling)
-#   oe_translation_cache  (v280_translation_cache)
 #
-# Columns only the migrations add, absent from create_all:
+# ``oe_translation_cache`` (v280_translation_cache) was listed here too and is
+# not a divergence. What this file can see is not the whole metadata: asked on
+# 2026-09-23 with only ``app.modules.*.models`` imported, the way the loop
+# below imports them, the registry holds 636 tables and the cache is not among
+# them - which is exactly why it read as missing. Import ``app.main`` and call
+# ``create_app()`` and the registry holds 638 and it is there, because
+# ``app/core/translation/cache.py`` declares the table ON ``Base.metadata``
+# and ``create_app`` pulls that module in with the translation router. So the
+# boot path does create it, and the module self-creates it lazily as well with
+# ``create(checkfirst=True)``. Measure a table's absence under the import set
+# that builds the schema, not under this one.
+#
+# Columns only the migrations add, absent from create_all under both of the
+# import sets above:
 #   oe_boq_boq.tax_rate            oe_projects_project.unit_system
 #   oe_tendering_bid.leveled_amount    oe_tendering_bid.leveling_notes
+#
+# "Latent" above means no code reads them, and that holds: the ORM cannot
+# reference a column that is not on a model, and no raw SQL in ``app/`` names
+# one. It does not mean harmless, because a phantom column's NAME travels even
+# when its data cannot. ``BOQUnitSystemConsistencyRule`` spent its life
+# advising readers to "update the project's unit_system" - a setting on no
+# screen, in no schema and in no table on any supported install. It now names
+# what actually decides the value, the project's country through its regional
+# pack. ``tax_rate`` escaped the same way and was answered the same way at
+# ``app/modules/boq/schemas.py`` (TAX_RATE_NOT_STORED_MESSAGE).
+# ``leveled_amount`` and ``leveling_notes`` never escaped: every occurrence of
+# those names in ``app/`` belongs to the computed
+# ``tendering.BidLevelingSummary``, which is a Pydantic rollup and not the bid
+# row. So before adding a column here, ask not only whether code reads it but
+# whether anything quotes its name at a user.
 
 import importlib
 import os
