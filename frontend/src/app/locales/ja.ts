@@ -14701,6 +14701,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "最大ネスト深さ {{max}} 階層に達しました、構造を平坦化するか、下位階層を減らしてください。",
     "boq.resource_link_propagated_msg": "プロジェクト内の他 {{count}} 件の明細で共有リソースを更新しました。",
     "boq.resource_link_propagated_title": "リソース定義を伝播しました",
+    "boq.link_locked_skipped_msg": "ロックされた見積内の {{count}} 件のリンク済み明細は旧定義のままです: {{bills}}。変更を反映するには、これらの見積のロックを解除するか、リビジョンを作成してください。",
+    "boq.link_locked_skipped_title": "ロックされた見積は変更されていません",
     "boq.link_role_instance": "リンクインスタンス",
     "boq.link_role_master": "マスター(正本)",
     "boq.link_unlinked_msg": "編集によりこのリンクコピーが変更されたため、共有コードに従わなくなりました。分岐させたくない場合は、コードを元に戻してください。",

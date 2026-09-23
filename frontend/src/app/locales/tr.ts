@@ -14990,6 +14990,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maksimum yuvalama derinliği {{max}} seviyeye ulaşıldı, yapıyı düzleştirin veya daha az alt seviye kullanın.",
     "boq.resource_link_propagated_msg": "Bu projedeki {{count}} diğer kalemde paylaşılan kaynak güncellendi.",
     "boq.resource_link_propagated_title": "Kaynak tanımı yayıldı",
+    "boq.link_locked_skipped_msg": "Kilitli keşiflerdeki {{count}} bağlı kalem eski tanımı korudu: {{bills}}. Değişikliği almak için bu keşiflerin kilidini açın veya revizyon oluşturun.",
+    "boq.link_locked_skipped_title": "Kilitli keşifler değiştirilmedi",
     "boq.link_role_instance": "Bağlı kopya",
     "boq.link_role_master": "Ana (resmi tanım)",
     "boq.link_unlinked_msg": "Düzenlemeniz bu bağlı kopyayı değiştirdi, artık paylaşılan kodu izlemiyor. Ayrıştırma kasıtlı değilse kodu eski haline getirin.",

@@ -14932,6 +14932,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Saavutati maksimaalne pesastussügavus ({{max}} taset), lamendage struktuur või kasutage vähem alamtasemeid.",
     "boq.resource_link_propagated_msg": "Uuendati jagatud ressurssi veel {{count}} positsioonil selles projektis.",
     "boq.resource_link_propagated_title": "Ressursi definitsioon levitatud",
+    "boq.link_locked_skipped_msg": "Lukustatud kalkulatsioonides säilitasid {{count}} seotud positsiooni vana definitsiooni: {{bills}}. Muudatuse rakendamiseks avage nende kalkulatsioonide lukustus või looge redaktsioon.",
+    "boq.link_locked_skipped_title": "Lukustatud kalkulatsioonid jäid muutmata",
     "boq.link_role_instance": "Seotud eksemplar",
     "boq.link_role_master": "Algallikas (ametlik definitsioon)",
     "boq.link_unlinked_msg": "Teie muudatus muutis seda seotud koopiat, mistõttu see enam ei järgi jagatud koodi. Kui te ei kavatsenud seda lahutada, muutke selle kood tagasi.",

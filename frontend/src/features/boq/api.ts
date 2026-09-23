@@ -114,6 +114,11 @@ export interface LinkPropagationMeta {
   /** Issue #133 — count of linked RESOURCE instances a master resource
    *  definition edit was fanned out to (separate from position links). */
   resource_propagated_to?: number;
+  /** Linked lines (positions or resources) that live in LOCKED bills and so
+   *  kept the old definition. Absent when nothing was skipped. */
+  locked_skipped?: number;
+  /** The locked bills those lines are in, sorted by name. */
+  locked_boqs?: { id: string; name: string }[];
 }
 
 /** One member of a reference-code link group. */

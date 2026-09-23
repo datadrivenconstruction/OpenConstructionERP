@@ -13986,6 +13986,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Profondeur d'imbrication maximale de {{max}} niveaux atteinte, aplatir la structure ou utiliser moins de sous-niveaux.",
     "boq.resource_link_propagated_msg": "La ressource partagée a été mise à jour sur {{count}} autre(s) position(s) du projet.",
     "boq.resource_link_propagated_title": "Définition de ressource propagée",
+    "boq.link_locked_skipped_msg": "{{count}} position(s) liée(s) dans des estimations verrouillées conservent l'ancienne définition : {{bills}}. Déverrouillez ces estimations ou créez une révision pour appliquer la modification.",
+    "boq.link_locked_skipped_title": "Estimations verrouillées inchangées",
     "boq.link_role_instance": "Instance liée",
     "boq.link_role_master": "Maître (définition de référence)",
     "boq.link_unlinked_msg": "Votre modification a changé cette copie liée, elle ne suit donc plus le code partagé. Si vous ne souhaitiez pas la faire diverger, rétablissez son code d'origine.",

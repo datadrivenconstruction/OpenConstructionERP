@@ -14190,6 +14190,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Naabot na ang max na lalim ng nesting na {{max}} level, i-flatten ang structure o gumamit ng mas kaunting sub-level.",
     "boq.resource_link_propagated_msg": "Na-update ang shared resource sa {{count}} ibang position sa buong proyektong ito.",
     "boq.resource_link_propagated_title": "Naipalaganap ang resource definition",
+    "boq.link_locked_skipped_msg": "Pinanatili ng {{count}} naka-link na position sa mga naka-lock na estimate ang lumang definition: {{bills}}. I-unlock ang mga estimate na iyon o gumawa ng rebisyon para matanggap ang pagbabago.",
+    "boq.link_locked_skipped_title": "Hindi binago ang mga naka-lock na estimate",
     "boq.link_role_instance": "Naka-link na instance",
     "boq.link_role_master": "Master (opisyal na definition)",
     "boq.link_unlinked_msg": "Binago ng iyong edit ang naka-link na kopyang ito, kaya hindi na ito sumusunod sa shared code. Kung hindi mo intensyong ihiwalay ito, ibalik na lang ang code nito.",

@@ -14258,6 +14258,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "הגעתם לעומק קינון מקסימלי של {{max}} רמות, שטחו את המבנה או השתמשו בפחות תת-רמות.",
     "boq.resource_link_propagated_msg": "עודכן המשאב המשותף ב-{{count}} סעיפים אחרים בפרויקט זה.",
     "boq.resource_link_propagated_title": "הגדרת המשאב הופצה",
+    "boq.link_locked_skipped_msg": "{{count}} סעיפים מקושרים באומדנים נעולים שמרו על ההגדרה הקודמת: {{bills}}. בטלו את נעילת האומדנים האלה או צרו מהדורה כדי להחיל את השינוי.",
+    "boq.link_locked_skipped_title": "אומדנים נעולים נותרו ללא שינוי",
     "boq.link_role_instance": "מופע מקושר",
     "boq.link_role_master": "מאסטר (הגדרת הרשומה)",
     "boq.link_unlinked_msg": "העריכה שלכם שינתה את העותק המקושר הזה, ולכן הוא כבר לא עוקב אחר הקוד המשותף. אם לא התכוונתם לסטות אותו, שנו את הקוד שלו בחזרה במקום זאת.",

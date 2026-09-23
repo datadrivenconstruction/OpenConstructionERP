@@ -15109,6 +15109,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maksimal ichma-ich joylashish chuqurligi {{max}} darajaga yetdi, tuzilmani tekislang yoki kamroq quyi darajalardan foydalaning.",
     "boq.resource_link_propagated_msg": "Bu loyiha boʻylab boshqa {{count}} ta bandda umumiy resurs yangilandi.",
     "boq.resource_link_propagated_title": "Resurs taʼrifi tarqatildi",
+    "boq.link_locked_skipped_msg": "Qulflangan smetalardagi {{count}} ta bogʻlangan band eski taʼrifni saqlab qoldi: {{bills}}. Oʻzgarishni qabul qilish uchun ushbu smetalarni qulfdan chiqaring yoki reviziya yarating.",
+    "boq.link_locked_skipped_title": "Qulflangan smetalar oʻzgartirilmadi",
     "boq.link_role_instance": "Bogʻlangan nusxa",
     "boq.link_role_master": "Asosiy (rasmiy taʼrif)",
     "boq.link_unlinked_msg": "Tahriringiz bu bogʻlangan nusxani oʻzgartirdi, shuning uchun u endi umumiy kodga ergashmaydi. Agar uni ajratishni maqsad qilmagan boʻlsangiz, kodini orqaga qaytaring.",
