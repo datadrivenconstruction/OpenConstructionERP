@@ -717,10 +717,11 @@ function PayAppRow({
   const { t } = useTranslation();
   const lapsed = fmtList([
     ...payApp.certificate_findings.map((f) => f.document_type),
-    // A payment-date certificate that did not cover a payment already made.
-    // One still waiting for its payment is not lapsed, and the chip says so.
+    // A payment-date certificate that did not cover a payment already made,
+    // or that nothing on file could cover. One that is merely waiting for its
+    // payment day is not lapsed, and the chip says so.
     ...(payApp.payment_date_findings ?? [])
-      .filter((f) => !f.state.startsWith('pending'))
+      .filter((f) => f.state !== 'pending' && f.state !== 'pending_open')
       .map((f) => f.document_type),
   ]);
   return (
