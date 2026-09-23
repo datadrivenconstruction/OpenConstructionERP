@@ -18630,6 +18630,7 @@ const resource = {
     "contracts.no_project_desc": "Välj ett projekt ovan för att se dess kontrakt.",
     "contracts.no_sov": "Ingen värdeplan än.",
     "contracts.sov_locked": "Ett signerat kontrakt faktureras på dessa rader, så de kan inte ändras eller tas bort här. Justera omfattningen med ett ÄTA-arbete.",
+    "contracts.sov_billed_locked": "Rader som ett lägesavrop redan har fakturerats på kan inte ändras eller tas bort här, eftersom avropet bygger på dem. Justera omfattningen med ett ÄTA-arbete.",
     "contracts.original_value": "Ursprungligt värde",
     "contracts.outstanding": "Utestående",
     "contracts.paid_to_date": "Betalt hittills",

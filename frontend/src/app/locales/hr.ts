@@ -42678,6 +42678,7 @@ const resource = {
     "boq.import_preview.upload_hint": "Odaberite datoteku za pregled prije uvoza u ovaj troškovnik.",
     "boq.import_preview.warnings_title": "{{count}} upozorenje/a",
     "contracts.sov_locked": "Potpisani ugovor se naplaćuje prema ovim stavkama, pa se ovdje ne mogu mijenjati ni uklanjati. Prilagodite opseg izmjenom.",
+    "contracts.sov_billed_locked": "Stavke prema kojima je već naplaćen zahtjev za napredovanje ovdje se ne mogu mijenjati ni uklanjati jer se zahtjev temelji na njima. Prilagodite opseg izmjenom.",
     "contracts.delete_line_title": "Ukloni ovu stavku",
     "contracts.delete_line_message": "Stavka izlazi iz troškovnika, a ugovorni iznos se smanjuje za njezin iznos.",
     "contracts.claim_add_line": "Dodaj stavku ručno",

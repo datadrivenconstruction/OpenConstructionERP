@@ -18579,6 +18579,7 @@ const resource = {
     "contracts.no_project_desc": "Alegeți un proiect de mai sus pentru a vedea contractele sale.",
     "contracts.no_sov": "Nu există încă o listă de cantități.",
     "contracts.sov_locked": "Un contract semnat este facturat pe aceste linii, deci nu pot fi modificate sau șterse aici. Ajustați obiectul contractului printr-o variație.",
+    "contracts.sov_billed_locked": "Liniile pe care s-a facturat deja o situație de plată nu pot fi modificate sau șterse aici, deoarece situația se bazează pe ele. Ajustați obiectul contractului printr-o variație.",
     "contracts.original_value": "Valoare inițială",
     "contracts.outstanding": "De încasat",
     "contracts.paid_to_date": "Plătit până în prezent",

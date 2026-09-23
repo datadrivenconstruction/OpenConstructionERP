@@ -131,6 +131,12 @@ export interface ContractLine {
   total_value: number | string;
   order_index: number;
   metadata: Record<string, unknown>;
+  /**
+   * A progress claim has billed on this line. The server then refuses to
+   * change or delete it whatever the contract's status, so the editor does
+   * not offer either. Set by the line listing; absent elsewhere.
+   */
+  billed?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -502,13 +508,37 @@ export function updateContractLine(
 /**
  * Remove a line.
  *
- * The claim lines billed on it are removed with it: the foreign key cascades,
- * and nothing on the server refuses the delete for a line that has been
- * billed. Callers must therefore keep this to a draft contract, which cannot
- * have claims because a claim needs an active one.
+ * The server refuses with 409 once the contract is signed
+ * (`contract_lines_frozen`) or once a progress claim has billed on the line
+ * (`contract_line_billed`), the second on a draft contract too, because a
+ * draft can carry claims. The claim lines billed on a line would otherwise go
+ * with it: the foreign key cascades. The same two refusals answer
+ * {@link updateContractLine}; {@link sovLineRefusal} reads them.
  */
 export function deleteContractLine(lineId: string): Promise<void> {
   return apiDelete(`/v1/contracts/contracts/lines/${lineId}`);
+}
+
+/** Why the server refused to change or remove a schedule of values line. */
+export type SoVLineRefusal = 'contract_line_billed' | 'contract_lines_frozen';
+
+/**
+ * Narrow a thrown ApiError to one of the two schedule line refusals, or null
+ * for anything else, so the caller can say why in the reader's language
+ * instead of passing on the server's English sentence.
+ */
+export function sovLineRefusal(err: unknown): SoVLineRefusal | null {
+  if (!err || typeof err !== 'object') return null;
+  const body = (err as { body?: unknown }).body;
+  const detail =
+    body && typeof body === 'object'
+      ? (body as { detail?: unknown }).detail
+      : undefined;
+  const code =
+    detail && typeof detail === 'object'
+      ? (detail as { error?: unknown }).error
+      : undefined;
+  return code === 'contract_line_billed' || code === 'contract_lines_frozen' ? code : null;
 }
 
 /* ── Progress claims ──────────────────────────────────────────────────── */

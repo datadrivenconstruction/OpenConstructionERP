@@ -18618,6 +18618,7 @@ const resource = {
     "contracts.no_project_desc": "Vælg et projekt ovenfor for at se dets kontrakter.",
     "contracts.no_sov": "Intet værdiskema endnu.",
     "contracts.sov_locked": "En underskrevet kontrakt faktureres på disse linjer, så de kan ikke ændres eller fjernes her. Justér omfanget med et ekstraarbejde.",
+    "contracts.sov_billed_locked": "Linjer, som et fremdriftskrav er faktureret på, kan ikke ændres eller fjernes her, fordi kravet bygger på dem. Justér omfanget med et ekstraarbejde.",
     "contracts.original_value": "Oprindelig værdi",
     "contracts.outstanding": "Udestående",
     "contracts.paid_to_date": "Betalt til dato",

@@ -33,19 +33,25 @@ vi.mock('@/shared/lib/api', async () => {
   return { ...actual, ...api };
 });
 
+// One spy for every toast, so a test can read what the person was told.
+const toast = vi.hoisted(() => ({ addToast: vi.fn() }));
+
 vi.mock('@/stores/useToastStore', () => ({
-  useToastStore: (sel: (s: { addToast: () => void }) => unknown) => sel({ addToast: vi.fn() }),
+  useToastStore: (sel: (s: { addToast: typeof toast.addToast }) => unknown) =>
+    sel({ addToast: toast.addToast }),
 }));
 
+import { ApiError } from '@/shared/lib/api';
 import {
   ContractDetailDrawer,
   CreateContractModal,
   NewClaimModal,
 } from './ContractsPage';
-import type { ContractItem, ContractLine } from './api';
+import type { ContractItem, ContractLine, ProgressClaimItem } from './api';
 
 const CONTRACT_ID = 'ctr-1';
 const LINE_ID = 'line-1';
+const OTHER_LINE_ID = 'line-2';
 
 function contract(overrides: Partial<ContractItem> = {}): ContractItem {
   return {
@@ -98,19 +104,45 @@ function line(overrides: Partial<ContractLine> = {}): ContractLine {
   };
 }
 
+/** A certified claim on the contract, the kind the payer already holds. */
+function claim(overrides: Partial<ProgressClaimItem> = {}): ProgressClaimItem {
+  return {
+    id: 'claim-1',
+    contract_id: CONTRACT_ID,
+    claim_number: 'PC-1',
+    period_start: '2026-05-01',
+    period_end: '2026-05-31',
+    claim_date: null,
+    gross_amount: '250',
+    retention_amount: '12.5',
+    prior_claims_total: '0',
+    net_due: '237.5',
+    status: 'certified',
+    submitted_at: null,
+    approved_at: null,
+    paid_at: null,
+    currency: 'USD',
+    metadata: {},
+    created_at: '2026-06-01T00:00:00Z',
+    updated_at: '2026-06-01T00:00:00Z',
+    ...overrides,
+  };
+}
+
 /**
  * Answer the two reads these tests are about; `lines` is the schedule of
- * values. Everything else the drawer asks for - the dashboard, the analytics
- * panels, the retention ledger - is refused rather than answered with an
- * invented body: a panel given the wrong shape either throws or, worse,
- * renders something that reads like data. Refused, each panel shows its own
- * empty state and the schedule of values is left to be tested.
+ * values and `claims` the contract's claim history. Everything else the
+ * drawer asks for - the dashboard, the analytics panels, the retention
+ * ledger - is refused rather than answered with an invented body: a panel
+ * given the wrong shape either throws or, worse, renders something that
+ * reads like data. Refused, each panel shows its own empty state and the
+ * schedule of values is left to be tested.
  */
-function seedReads(lines: ContractLine[]) {
+function seedReads(lines: ContractLine[], claims: ProgressClaimItem[] = []) {
   api.apiGet.mockImplementation((path: string) => {
     if (path.endsWith('/lines')) return Promise.resolve(lines);
     if (path.startsWith('/v1/contracts/progress-claims/?'))
-      return Promise.resolve({ items: [], total: 0, offset: 0, limit: 200 });
+      return Promise.resolve({ items: claims, total: claims.length, offset: 0, limit: 200 });
     return Promise.reject(new Error(`not mocked: ${path}`));
   });
 }
@@ -131,8 +163,21 @@ beforeEach(() => {
   api.apiPost.mockReset();
   api.apiPatch.mockReset();
   api.apiDelete.mockReset();
+  toast.addToast.mockReset();
   seedReads([]);
 });
+
+/** How many times the schedule of values has been read so far. */
+function lineReads(): number {
+  return api.apiGet.mock.calls.filter(([path]) => String(path).endsWith('/lines')).length;
+}
+
+/** The server's refusal, shaped the way the API client throws it. */
+function refusal(error: string): ApiError {
+  return new ApiError(409, 'Conflict', {
+    detail: { error, message: 'The server explains itself in English here.' },
+  });
+}
 
 afterEach(() => cleanup());
 
@@ -199,9 +244,8 @@ describe('a line of the schedule of values', () => {
   });
 
   it('is left alone once the contract is signed, and says why', async () => {
-    // A claim line is deleted with the SoV line it bills (the foreign key
-    // cascades and the server does not refuse it), and a rate rewritten under
-    // a certified claim changes what was already paid on.
+    // A signed scope is changed with a variation, which both sides see. The
+    // server refuses the edit and the delete on a signed contract as well.
     seedReads([line()]);
     renderDrawer(contract({ status: 'active' }));
 
@@ -209,6 +253,102 @@ describe('a line of the schedule of values', () => {
     const row = screen.getByTestId(`sov-row-${LINE_ID}`);
     expect(within(row).queryByRole('button', { name: /^Edit$/i })).toBeNull();
     expect(within(row).queryByRole('button', { name: /^Delete$/i })).toBeNull();
+  });
+
+  it('is left alone once a claim has billed on it, even on a draft contract', async () => {
+    // Nothing ties a claim to the contract's status, so a draft can carry a
+    // certified claim. Deleting the line would take the claim's lines with it
+    // (the foreign key cascades), and a new rate would restate what the
+    // certificate says was done. The server refuses both; the screen must
+    // not offer them and then show the refusal as an error.
+    seedReads([line({ billed: true })], [claim()]);
+    renderDrawer(contract({ status: 'draft' }));
+
+    const note = await screen.findByTestId('sov-lines-billed');
+    const row = screen.getByTestId(`sov-row-${LINE_ID}`);
+    expect(within(row).queryByRole('button', { name: /^Edit$/i })).toBeNull();
+    expect(within(row).queryByRole('button', { name: /^Delete$/i })).toBeNull();
+    // The signed-contract sentence would be false here: the contract is not
+    // signed. The note names the claim as the reason instead.
+    expect(screen.queryByTestId('sov-lines-locked')).toBeNull();
+    expect(note.textContent).toMatch(/progress claim/i);
+    expect(note.textContent).not.toMatch(/signed/i);
+  });
+
+  it('still corrects the lines no claim has billed on, next to one that is', async () => {
+    // The lock is a fact about each line, not about the contract. A line
+    // added after the first claim, or one the claim did not bill, is still
+    // the draft it looks like, and the server lets it be changed.
+    seedReads(
+      [line({ billed: true }), line({ id: OTHER_LINE_ID, code: 'A2', billed: false })],
+      [claim()],
+    );
+    renderDrawer(contract({ status: 'draft' }));
+
+    const other = await screen.findByTestId(`sov-row-${OTHER_LINE_ID}`);
+    expect(within(other).getByRole('button', { name: /^Edit$/i })).toBeTruthy();
+    expect(within(other).getByRole('button', { name: /^Delete$/i })).toBeTruthy();
+    const billed = screen.getByTestId(`sov-row-${LINE_ID}`);
+    expect(within(billed).queryByRole('button', { name: /^Edit$/i })).toBeNull();
+    // A locked row keeps its cell, so its figures stay under their headings.
+    expect(billed.querySelectorAll('td')).toHaveLength(other.querySelectorAll('td').length);
+  });
+
+  it('says why in the reader’s words when a claim billed on it after the list was read', async () => {
+    // The listing said unbilled; a claim billed on the line since. The server
+    // refuses the delete, and the person is told the reason the note gives,
+    // not the server's English sentence, and the lines are read again so the
+    // row stops offering what was just refused.
+    seedReads([line()]);
+    api.apiDelete.mockRejectedValue(refusal('contract_line_billed'));
+    renderDrawer(contract());
+
+    const row = await screen.findByTestId(`sov-row-${LINE_ID}`);
+    const readsBefore = lineReads();
+    fireEvent.click(within(row).getByRole('button', { name: /^Delete$/i }));
+    const dialog = await screen.findByRole('alertdialog', { name: /Remove this line/i });
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Delete$/i }));
+
+    await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
+    const told = toast.addToast.mock.calls[0][0] as { type: string; title: string };
+    expect(told.type).toBe('error');
+    expect(told.title).toMatch(/progress claim has billed/i);
+    expect(told.title).not.toMatch(/explains itself/i);
+    await waitFor(() => expect(lineReads()).toBeGreaterThan(readsBefore));
+  });
+
+  it('says the contract was signed when the server refuses a correction for that', async () => {
+    seedReads([line()]);
+    api.apiPatch.mockRejectedValue(refusal('contract_lines_frozen'));
+    renderDrawer(contract());
+
+    const row = await screen.findByTestId(`sov-row-${LINE_ID}`);
+    fireEvent.click(within(row).getByRole('button', { name: /^Edit$/i }));
+    fireEvent.change(screen.getByLabelText('Rate'), { target: { value: '120' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+
+    await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
+    const told = toast.addToast.mock.calls[0][0] as { title: string };
+    expect(told.title).toMatch(/signed contract/i);
+    expect(told.title).not.toMatch(/explains itself/i);
+    // The edit is closed rather than left open on a write that cannot land.
+    await waitFor(() => expect(screen.queryByLabelText('Rate')).toBeNull());
+  });
+
+  it('still passes on any other failure as it came', async () => {
+    seedReads([line()]);
+    api.apiDelete.mockRejectedValue(
+      new ApiError(500, 'Internal Server Error', { detail: 'Disk full' }),
+    );
+    renderDrawer(contract());
+
+    const row = await screen.findByTestId(`sov-row-${LINE_ID}`);
+    fireEvent.click(within(row).getByRole('button', { name: /^Delete$/i }));
+    const dialog = await screen.findByRole('alertdialog', { name: /Remove this line/i });
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Delete$/i }));
+
+    await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
+    expect((toast.addToast.mock.calls[0][0] as { title: string }).title).toMatch(/Disk full/);
   });
 });
 

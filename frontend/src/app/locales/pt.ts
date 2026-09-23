@@ -18371,6 +18371,7 @@ const resource = {
     "contracts.no_project_desc": "Escolha um projeto acima para ver os seus contratos.",
     "contracts.no_sov": "Ainda não há mapa de valores.",
     "contracts.sov_locked": "Um contrato assinado é faturado sobre estas linhas, pelo que não podem ser alteradas ou eliminadas aqui. Ajuste o âmbito com uma variação.",
+    "contracts.sov_billed_locked": "As linhas sobre as quais um pedido de progresso já foi faturado não podem ser alteradas ou eliminadas aqui, porque o pedido se baseia nelas. Ajuste o âmbito com uma variação.",
     "contracts.original_value": "Valor original",
     "contracts.outstanding": "Em dívida",
     "contracts.paid_to_date": "Pago até à data",

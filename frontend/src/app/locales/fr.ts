@@ -18138,6 +18138,7 @@ const resource = {
     "contracts.no_project_desc": "Sélectionnez un projet ci-dessus pour afficher ses contrats.",
     "contracts.no_sov": "Aucun tableau des valeurs pour le moment.",
     "contracts.sov_locked": "Un contrat signé est facturé sur ces lignes, elles ne peuvent donc pas être modifiées ou supprimées ici. Ajustez le périmètre par un avenant.",
+    "contracts.sov_billed_locked": "Les lignes sur lesquelles une demande d'acompte a déjà été facturée ne peuvent pas être modifiées ou supprimées ici, car la demande repose sur elles. Ajustez le périmètre par un avenant.",
     "contracts.original_value": "Valeur initiale",
     "contracts.outstanding": "Restant dû",
     "contracts.paid_to_date": "Payé à ce jour",

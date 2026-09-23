@@ -18420,6 +18420,7 @@ const resource = {
     "contracts.claim_lines_locked": "Chỉ có thể thay đổi các dòng khi yêu cầu thanh toán đang ở trạng thái bản nháp.",
     "contracts.claim_lines_locked_reopen": "Từ chối yêu cầu thanh toán để đưa nó về lại trạng thái bản nháp.",
     "contracts.sov_locked": "Hợp đồng đã ký được tính phí theo các dòng này, nên không thể thay đổi hoặc xóa tại đây. Điều chỉnh phạm vi bằng một khoản phát sinh.",
+    "contracts.sov_billed_locked": "Các dòng đã được tính phí trong một yêu cầu thanh toán theo tiến độ không thể thay đổi hoặc xóa tại đây, vì yêu cầu thanh toán dựa trên chúng. Điều chỉnh phạm vi bằng một khoản phát sinh.",
     "contracts.delete_line_title": "Xóa dòng này",
     "contracts.delete_line_message": "Dòng này sẽ bị xóa khỏi bảng giá trị công việc và tổng giá trị hợp đồng giảm đúng bằng số tiền đó.",
     "contracts.claim_add_line": "Thêm dòng thủ công",
