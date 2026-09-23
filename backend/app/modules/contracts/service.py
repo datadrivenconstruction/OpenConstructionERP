@@ -4132,6 +4132,11 @@ class ContractsService:
 
         Those keep the flat retention their generator worked out: there is no
         schedule of values for the engine to measure percent complete on.
+
+        The lineless claim is held at the contract's flat retention percent
+        even where a retention schedule sets a ladder, because the ladder
+        measures percent complete on schedule lines and this money is on none
+        of them (see the flat branch of :meth:`roll_claim_retention`).
         """
         if contract.contract_type in FLAT_RETENTION_CONTRACT_TYPES:
             return True
@@ -4263,6 +4268,18 @@ class ContractsService:
             # direction of paying out too much. The ladder branch below already
             # restates retention in full, so the flat branch preserving it was
             # the odd one out rather than a decision.
+            #
+            # The rate is the contract's own flat percentage, and that holds
+            # for a claim with a gross and no lines on a contract whose
+            # retention the engine otherwise works out, on a ladder too. That
+            # is a decision, not a gap. A ladder is a rate against percent
+            # complete on the schedule of values, and money no schedule line
+            # carries is not on that measure: whether the ladder has stepped
+            # down says nothing about it. So it is held at the rate the
+            # contract states, even past the point where the ladder has
+            # stopped retaining on the schedule, and the certificate carries
+            # it on a row of its own that a release pays back like any other
+            # retention (outside_schedule_retention_held).
             rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
             retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
             billed_here = await self.release_repo.billed_on_claims([claim.id])
