@@ -64,26 +64,45 @@ classifiers = [
     "Framework :: FastAPI",
 ]
 
+# Every runtime dependency, here and in the extras below, carries an upper
+# bound at the next major version, so a new major upstream reaches a user's
+# install only after someone raised the bound on purpose. The bounds added on
+# 2026-09-23 all sit above the newest stable release PyPI served that day, and
+# this file resolved to the same versions with and without them, so adding them
+# moved no install. The one bound below PyPI's newest is pixeltable-pgserver,
+# older than the rest and held on purpose, see its line. For a 0.x project the
+# next minor stands in for the major where the project breaks things in minor
+# releases (asyncpg, pdfplumber, defusedxml, lazrs, fastembed, lancedb, and the
+# embedded server); other 0.x projects are bounded <1. structlog uses calendar
+# versions, so its bound is next year's. Raising a bound is a deliberate
+# change: run the suites that touch the package against the new major first,
+# the way pandas 3 was let in. The dev extra stays open: it is test and build
+# tooling that CI installs, not something a user's install runs.
 dependencies = [
     "fastapi>=0.116.0,<1",
     "uvicorn[standard]>=0.32.0,<1",
-    "python-multipart>=0.0.27",
+    "python-multipart>=0.0.27,<1",
     "sqlalchemy[asyncio]>=2.0.36,<2.1",
     # Embedded PostgreSQL 16 is the runtime database: a real in-process cluster
     # with no Docker, plus the async/sync drivers it speaks through. PostgreSQL
     # is the only supported relational backend (external PG via DATABASE_URL or
     # the embedded cluster); there is no SQLite fallback anymore.
+    #
+    # Held below 0.6 although 0.6.0 is on PyPI. 0.6.0 makes PostgreSQL 18 the
+    # default engine and ships an upgrade path from 16, so taking it moves every
+    # embedded cluster to a new PostgreSQL major. That is a data migration with
+    # its own release note and test run, not a routine dependency bump.
     "pixeltable-pgserver>=0.5.1,<0.6",
-    "asyncpg>=0.30.0",
-    "psycopg2-binary>=2.9.10",
+    "asyncpg>=0.30.0,<0.32",
+    "psycopg2-binary>=2.9.10,<3",
     "alembic>=1.14.0,<2",
     "pydantic>=2.10.0,<3",
     "pydantic-settings>=2.6.0,<3",
-    "email-validator>=2.1.0",
-    "python-jose[cryptography]>=3.3.0",
-    "bcrypt>=4.0.0",
-    "openpyxl>=3.1.0",
-    "reportlab>=4.0.0",
+    "email-validator>=2.1.0,<3",
+    "python-jose[cryptography]>=3.3.0,<4",
+    "bcrypt>=4.0.0,<6",
+    "openpyxl>=3.1.0,<4",
+    "reportlab>=4.0.0,<6",
     # Text shaping for Thai and Devanagari, the two bundled scripts a font alone
     # renders wrongly rather than not at all (app/core/pdf_fonts.py explains
     # what each gets wrong). reportlab picks it up by import when present, so
@@ -94,15 +113,15 @@ dependencies = [
     # it from source. Apache-2.0 itself; it statically links HarfBuzz, which is
     # under the separate "Old MIT" licence and carries no notice of its own
     # inside the wheel, so ours is in app/core/licenses/LICENSE_HARFBUZZ.
-    "uharfbuzz>=0.56.0",
-    "pdfplumber>=0.11.0",
+    "uharfbuzz>=0.56.0,<1",
+    "pdfplumber>=0.11.0,<0.12",
     # PDF page-overlay / merge: the approval stamp-burn (app/core/pdf_stamp.py,
     # used by file_approvals) merges a reportlab-drawn overlay onto every page
     # of the source PDF, and property_dev counts pages off generated PDFs.
     # pypdf was imported but never declared, so a clean install only had it by
     # accident (transitively present in some environments, absent in others) -
     # which silently degraded the PDF stamp to the JSON sidecar fallback.
-    "pypdf>=4.0.0",
+    "pypdf>=4.0.0,<7",
     # PDF takeoff works out of the box. PyMuPDF reads a page's vector drawings
     # (page.get_drawings) for the deterministic vector detector, and
     # opencv-python-headless powers the room/wall detector on scanned/raster
@@ -111,15 +130,15 @@ dependencies = [
     # extra, which left vector recognition dead on a plain install and could
     # never be installed at all in the frozen desktop app. The heavy OCR
     # engine (paddleocr) stays optional - it only adds dimension-text reading.
-    "pymupdf>=1.25.0",
-    "opencv-python-headless>=4.10.0",
+    "pymupdf>=1.25.0,<2",
+    "opencv-python-headless>=4.10.0,<6",
     "httpx>=0.28.0,<1",
-    "orjson>=3.10.0",
-    "python-dateutil>=2.9.0",
-    "hijridate>=2.5.0",
-    "structlog>=24.4.0",
-    "pyyaml>=6.0",
-    "defusedxml>=0.7.1",
+    "orjson>=3.10.0,<4",
+    "python-dateutil>=2.9.0,<3",
+    "hijridate>=2.5.0,<3",
+    "structlog>=24.4.0,<27",
+    "pyyaml>=6.0,<7",
+    "defusedxml>=0.7.1,<0.8",
     # pandas 3 is allowed. It was capped below 3.0 while the dashboards
     # integrity detector sniffed values only for object columns, which pandas 3
     # no longer produces for text (it gives the str dtype), so a CSV whose
@@ -130,13 +149,13 @@ dependencies = [
     # deliberate run before it is let in.
     "pandas>=2.2.0,<4",
     "pyarrow>=23.0.1,<26",
-    "trimesh>=4.0.0",
+    "trimesh>=4.0.0,<6",
     # trimesh's COLLADA loader is a thin wrapper over pycollada (imported as
     # "collada"); without it trimesh.load() of a .dae raises ImportError and the
     # BIM Hub DAE-to-GLB conversion silently degrades to serving the larger raw
     # DAE. Required so the GLB path actually runs.
-    "pycollada>=0.8",
-    "ezdxf>=0.18.0",
+    "pycollada>=0.8,<1",
+    "ezdxf>=0.18.0,<2",
     # Point-cloud viewing works out of the box for the open LAS/LAZ/COPC family:
     # laspy reads LAS, the lazrs backend decompresses LAZ/COPC, and both feed the
     # server-side decimator (app/modules/pointcloud/decode.py) that hands the
@@ -145,15 +164,15 @@ dependencies = [
     # (upload succeeded, then the viewer answered 501). numpy (the readers' array
     # path) is already a base dep transitively via pandas/pyarrow. Only E57
     # (pye57, a heavier native libE57 wheel) stays in the optional extra.
-    "laspy>=2.5.0",
-    "lazrs>=0.6.0",
+    "laspy>=2.5.0,<3",
+    "lazrs>=0.6.0,<0.9",
     "duckdb>=1.2.0,<2",
-    "rapidfuzz>=3.0.0",
+    "rapidfuzz>=3.0.0,<4",
     # Imported at module load by the smart_views (signed share links) and eac
     # (safe expression evaluation) modules, so they must be base dependencies;
     # a clean install otherwise cannot import those modules.
-    "itsdangerous>=2.1.0",
-    "simpleeval>=0.9.13",
+    "itsdangerous>=2.1.0,<3",
+    "simpleeval>=0.9.13,<2",
 ]
 [project.scripts]
 openestimate = "app.cli:main"
@@ -171,14 +190,14 @@ Changelog = "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/
 # PostgreSQL drivers (asyncpg / psycopg2) and the embedded server moved to the
 # base dependencies in v6.0.0, so this extra is now just Celery + boto3.
 server = [
-    "celery[redis]>=5.4.0",
-    "boto3>=1.35.0",
+    "celery[redis]>=5.4.0,<6",
+    "boto3>=1.35.0,<2",
 ]
 # Embedded vector search (LanceDB)
 # pyarrow is now in base deps (was here before v1.3.13).
 vector = [
-    "lancedb>=0.17.0",
-    "fastembed>=0.4.0",
+    "lancedb>=0.17.0,<0.40",
+    "fastembed>=0.4.0,<0.9",
 ]
 # The vector-store client, without any embedding model. qdrant-client talks to
 # the CWICR match store (app/modules/costs/qdrant_adapter.py) and was reachable
@@ -232,8 +251,8 @@ vector = [
 # because a shipped default nobody installed does not save the megabytes, it
 # moves the failure from build time to the user's first query.
 semantic-clients = [
-    "qdrant-client>=1.12.0",
-    "lancedb>=0.17.0",
+    "qdrant-client>=1.12.0,<2",
+    "lancedb>=0.17.0,<0.40",
 ]
 # The vector-store client plus a local encoder, and nothing else. This is what
 # the desktop build installs, and it exists because the encoder download became
@@ -258,7 +277,7 @@ semantic-clients = [
 # the 3 GB server resolve that one, and they must keep resolving it without torch.
 semantic-encoder = [
     "openconstructionerp[semantic-clients]",
-    "sentence-transformers>=3.3.0",
+    "sentence-transformers>=3.3.0,<7",
 ]
 # Semantic search: Qdrant vector DB + sentence-transformers embeddings.
 # Used by the cost-database semantic-match endpoints and the RAG layer.
@@ -277,14 +296,14 @@ semantic = [
     # and `resources` (top-12 unique resources of the rate). Wheels are
     # ~700 MB INT8 ONNX (gpahal/bge-m3-onnx-int8) so the VPS path stays
     # viable; FP32 path is fine on workstations.
-    "FlagEmbedding>=1.3.0",
+    "FlagEmbedding>=1.3.0,<2",
     # Lazy parquet reader for the CWICR 84-column rate-data lookup. The
     # Qdrant payload is intentionally minimal (rate_code + filter columns)
     # and the heavy fields (prices, labor, resources, budget sums) live in
     # `<region>_workitems_costs_resources_DDC_CWICR.parquet`. polars'
     # `pl.scan_parquet()` mmap-backed lazy frame keeps lookup-by-rate_code
     # under 50 ms across 50K-row catalogues without loading everything.
-    "polars>=1.0.0",
+    "polars>=1.0.0,<2",
 ]
 # Backwards-compat alias. Deprecated since v1.3.14 — prefer `[semantic]`.
 # Kept so existing `pip install openconstructionerp[ai]` commands still work.
@@ -297,8 +316,8 @@ ai = [
 # Installing it adds PaddleOCR, which reads dimension strings and annotation
 # text off the page on top of the geometry the base install already detects.
 cv = [
-    "paddleocr>=2.9.0",
-    "Pillow>=12.1.1",
+    "paddleocr>=2.9.0,<4",
+    "Pillow>=12.1.1,<13",
 ]
 # E57 reader for the Point Cloud module (app/modules/pointcloud). The open
 # LAS/LAZ/COPC family is decoded out of the box (laspy + lazrs are base deps),
@@ -309,7 +328,7 @@ cv = [
 # sniff.py / decode.py degrade gracefully rather than crash. Install with
 # ``pip install openconstructionerp[pointcloud]`` to add E57 support.
 pointcloud = [
-    "pye57>=0.4.0",
+    "pye57>=0.4.0,<1",
 ]
 # Coordinate transforms outside the built-in pairs, plus upstream EPSG display
 # names. Two shipped modules already read pyproj and both degrade rather than
@@ -327,7 +346,7 @@ pointcloud = [
 # The floor is measured rather than guessed: 3.6.1 is the first release with
 # cp312 wheels, and this backend requires Python >= 3.12.
 geo = [
-    "pyproj>=3.6.1",
+    "pyproj>=3.6.1,<4",
 ]
 # Deprecated alias since v2.5.0 — `duckdb` is in base deps now.
 # Kept so existing `pip install openconstructionerp[analytics]` commands
@@ -337,7 +356,7 @@ analytics = []
 # DigitalOcean Spaces).  Enables ``storage_backend=s3`` in settings so
 # BIM/CAD blobs live in a bucket instead of the local filesystem.
 s3 = [
-    "aioboto3>=12.0.0",
+    "aioboto3>=12.0.0,<16",
 ]
 # Everything
 all = [
