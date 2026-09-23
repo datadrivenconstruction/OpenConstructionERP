@@ -4953,6 +4953,15 @@ class ContractsService:
             # contributes a positive remainder here, because apportionment
             # clamps downward and leaves the rest unplaced. That is the same
             # money in the same position and it belongs on the row.
+            # A cost to know before anyone optimises this path: the call below
+            # hydrates every claim line on the contract, on every certificate
+            # build, to produce one sum per claim. It stands because it is a
+            # single round trip and reuses the query the SoV rollup already
+            # needs, where a per-claim aggregate would be a third query beside
+            # that one and prior_period_value_by_line. On a long schedule
+            # billed over years it is thousands of rows for a handful of
+            # numbers, and the right fix is a second aggregate on
+            # prior_period_value_by_line's statement rather than a new method.
             prior_line_totals: dict[Any, Decimal] = {}
             for prior_line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract.id):
                 prior_line_totals[owning_claim.id] = prior_line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
