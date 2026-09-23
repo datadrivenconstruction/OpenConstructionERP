@@ -974,3 +974,171 @@ def test_package_response_decimal_default_serializes_as_string() -> None:
     payload = resp.model_dump(mode="json")
     assert isinstance(payload["total_budget_estimate"], str)
     assert payload["total_budget_estimate"] == "0"
+
+
+# ── 11. A decided package keeps its bids: no delete, no new submission ───
+#
+# ``_assert_submission_mutable`` stops a bid's figures being rewritten once its
+# package is awarded or cancelled, and ``withdraw_submission`` says it mirrors
+# update_submission / update_submission_line for that reason. Deleting the
+# submission, or one of its priced lines, rewrites the same figures more
+# thoroughly than an edit does, and recording a fresh submission against an
+# awarded package adds a bid to a contest that is already decided. Each refusal
+# is paired with the guard that already worked (update_submission on the same
+# awarded package) and with the same call on an open package, which must still
+# go through.
+
+
+def _seed_submission(svc: BidManagementService, *, package_status: str) -> tuple[Any, Any]:
+    """A package in ``package_status`` holding one submission with one priced line.
+
+    Returns (submission, line).
+    """
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+    inv = _seed_invitation(svc, package_id=pkg.id, status="submitted")
+    bidder = _seed_bidder(svc, package_id=pkg.id)
+    item = _seed_line_item(svc, package_id=pkg.id)
+    sub = SimpleNamespace(
+        id=uuid.uuid4(),
+        invitation_id=inv.id,
+        bidder_id=bidder.id,
+        total_amount="1000.00",
+        currency="EUR",
+        is_valid=True,
+        envelope_payload={},
+    )
+    svc.submission_repo.rows[sub.id] = sub
+    line = SimpleNamespace(
+        id=uuid.uuid4(),
+        submission_id=sub.id,
+        line_item_id=item.id,
+        unit_price="10.00",
+        quantity_priced="100",
+        total_price="1000.00",
+    )
+    svc.submission_line_repo.rows[line.id] = line
+    return sub, line
+
+
+@pytest.mark.asyncio
+async def test_control_update_submission_on_awarded_package_is_refused() -> None:
+    """The guard that already worked, on the package state this section seeds."""
+    from app.modules.bid_management.schemas import BidSubmissionUpdate
+
+    svc = _make_service()
+    sub, _line = _seed_submission(svc, package_status="awarded")
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.update_submission(sub.id, BidSubmissionUpdate(total_amount=Decimal("1.00")))
+
+    assert exc.value.status_code == 409
+    assert sub.total_amount == "1000.00"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+async def test_delete_submission_on_decided_package_is_refused(package_status: str) -> None:
+    svc = _make_service()
+    sub, _line = _seed_submission(svc, package_status=package_status)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.delete_submission(sub.id)
+
+    assert exc.value.status_code == 409
+    assert sub.id in svc.submission_repo.rows
+
+
+@pytest.mark.asyncio
+async def test_delete_submission_on_open_package_is_allowed() -> None:
+    svc = _make_service()
+    sub, _line = _seed_submission(svc, package_status="open")
+
+    await svc.delete_submission(sub.id)
+
+    assert sub.id not in svc.submission_repo.rows
+
+
+@pytest.mark.asyncio
+async def test_delete_unknown_submission_is_404() -> None:
+    svc = _make_service()
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.delete_submission(uuid.uuid4())
+
+    assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+async def test_delete_submission_line_on_decided_package_is_refused(package_status: str) -> None:
+    svc = _make_service()
+    _sub, line = _seed_submission(svc, package_status=package_status)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.delete_submission_line(line.id)
+
+    assert exc.value.status_code == 409
+    assert line.id in svc.submission_line_repo.rows
+
+
+@pytest.mark.asyncio
+async def test_delete_submission_line_on_open_package_is_allowed() -> None:
+    svc = _make_service()
+    _sub, line = _seed_submission(svc, package_status="open")
+
+    await svc.delete_submission_line(line.id)
+
+    assert line.id not in svc.submission_line_repo.rows
+
+
+@pytest.mark.asyncio
+async def test_delete_unknown_submission_line_is_404() -> None:
+    svc = _make_service()
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.delete_submission_line(uuid.uuid4())
+
+    assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+async def test_record_submission_on_decided_package_is_refused(package_status: str) -> None:
+    """A new bid against a package that is already decided is refused, and nothing is written."""
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+    inv = _seed_invitation(svc, package_id=pkg.id)
+    bidder = _seed_bidder(svc, package_id=pkg.id)
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.record_submission(
+            BidSubmissionCreate(
+                invitation_id=inv.id,
+                bidder_id=bidder.id,
+                total_amount=Decimal("950.00"),
+                currency="EUR",
+            )
+        )
+
+    assert exc.value.status_code == 409
+    assert svc.submission_repo.rows == {}
+    assert inv.status == "sent"
+
+
+@pytest.mark.asyncio
+async def test_record_submission_on_open_package_is_allowed() -> None:
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status="open")
+    inv = _seed_invitation(svc, package_id=pkg.id)
+    bidder = _seed_bidder(svc, package_id=pkg.id)
+
+    sub = await svc.record_submission(
+        BidSubmissionCreate(
+            invitation_id=inv.id,
+            bidder_id=bidder.id,
+            total_amount=Decimal("950.00"),
+            currency="EUR",
+        )
+    )
+
+    assert sub.id in svc.submission_repo.rows

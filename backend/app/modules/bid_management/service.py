@@ -92,6 +92,13 @@ PACKAGE_TRANSITIONS: dict[str, set[str]] = {
     "cancelled": set(),
 }
 
+#: Package states in which the contest is decided. A bid on a package in one of
+#: these is frozen: it cannot be edited, withdrawn or deleted, and no new
+#: submission can be recorded against the package. One set, read by both
+#: ``_assert_submission_mutable`` and ``record_submission``, so the two cannot
+#: drift apart.
+DECIDED_PACKAGE_STATES: frozenset[str] = frozenset({"awarded", "cancelled"})
+
 INVITATION_TRANSITIONS: dict[str, set[str]] = {
     "pending": {"sent", "expired"},
     "sent": {"opened", "declined", "submitted", "expired"},
@@ -1493,6 +1500,14 @@ class BidManagementService:
                 status_code=404,
                 detail="Bidder not found for this invitation's package",
             )
+        # A decided package takes no new bids. Same states, same 409 as the
+        # guard that freezes an existing submission (_assert_submission_mutable).
+        package = await self.package_repo.get_by_id(inv_for_bidder.package_id)
+        if package is not None and package.status in DECIDED_PACKAGE_STATES:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Package is '{package.status}' and accepts no new submissions",
+            )
         sub = BidSubmission(
             invitation_id=data.invitation_id,
             bidder_id=data.bidder_id,
@@ -1554,7 +1569,7 @@ class BidManagementService:
         been awarded or cancelled breaks the audit trail / award integrity.
         """
         package = await self._package_for_submission(submission_id)
-        if package is not None and package.status in ("awarded", "cancelled"):
+        if package is not None and package.status in DECIDED_PACKAGE_STATES:
             raise HTTPException(
                 status_code=409,
                 detail=(f"Submission is locked - package is '{package.status}'"),
@@ -1591,6 +1606,13 @@ class BidManagementService:
         return sub
 
     async def delete_submission(self, submission_id: uuid.UUID) -> None:
+        sub = await self.submission_repo.get_by_id(submission_id)
+        if sub is None:
+            raise HTTPException(status_code=404, detail=translate("errors.submission_not_found", locale=get_locale()))
+        # Deleting a bid removes its figures outright, which is more than an
+        # edit does, so it honours the same awarded/cancelled lock as
+        # update_submission and withdraw_submission.
+        await self._assert_submission_mutable(submission_id)
         await self.submission_repo.delete(submission_id)
 
     # ── Submission lines ──────────────────────────────────────────────
@@ -1677,6 +1699,12 @@ class BidManagementService:
         return line
 
     async def delete_submission_line(self, line_id: uuid.UUID) -> None:
+        line = await self.submission_line_repo.get_by_id(line_id)
+        if line is None:
+            raise HTTPException(status_code=404, detail="Submission line not found")
+        # Same lock as update_submission_line: a priced line of a bid on a
+        # decided package is part of the record the award was made on.
+        await self._assert_submission_mutable(line.submission_id)
         await self.submission_line_repo.delete(line_id)
 
     # ── Q&A ───────────────────────────────────────────────────────────

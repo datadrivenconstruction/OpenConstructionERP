@@ -280,6 +280,11 @@ async def test_record_submission_integrity_error_surfaces_409() -> None:
     svc.bidder_repo = MagicMock()
     svc.bidder_repo.get_by_id = AsyncMock(return_value=bidder_obj)
 
+    # record_submission refuses a decided package, so it reads the package;
+    # an open one lets the insert (and its race) happen.
+    svc.package_repo = MagicMock()
+    svc.package_repo.get_by_id = AsyncMock(return_value=SimpleNamespace(id=package_id, status="open"))
+
     svc.session = MagicMock()
     svc.session.flush = AsyncMock()
     svc.session.rollback = AsyncMock()
