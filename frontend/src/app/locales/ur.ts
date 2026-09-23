@@ -18035,6 +18035,8 @@ const resource = {
     "contracts.release_open_items_counted": "پراجیکٹ پر {{count}} کھلے آئٹمز ہیں، جن میں سے {{without}} کی کوئی لاگت نہیں۔",
     "contracts.release_open_items_counted_one": "پراجیکٹ پر {{count}} کھلا آئٹم ہے، جس کی {{without}} لاگت نہیں۔",
     "contracts.release_open_items_counted_other": "پراجیکٹ پر {{count}} کھلے آئٹمز ہیں، جن میں سے {{without}} کی کوئی لاگت نہیں۔",
+    "contracts.release_open_items_project_wide_one": "کھلے آئٹمز پورے پراجیکٹ کی سطح پر شمار کیے جاتے ہیں اور اس پراجیکٹ میں {{count}} کنٹریکٹ ہے، اس لیے یہ روک ان آئٹمز کو بھی شامل کرتی ہے جو کسی دوسرے پر بل کیے گئے کام سے متعلق ہیں۔ اگر آپ جانتے ہیں کہ اس کنٹریکٹ کے کھلے آئٹمز کی مالیت کتنی ہے تو رقم خود درج کریں۔",
+    "contracts.release_open_items_project_wide_other": "کھلے آئٹمز پورے پراجیکٹ کی سطح پر شمار کیے جاتے ہیں اور اس پراجیکٹ میں {{count}} کنٹریکٹ ہیں، اس لیے یہ روک ان آئٹمز کو بھی شامل کرتی ہے جو کسی دوسرے پر بل کیے گئے کام سے متعلق ہیں۔ اگر آپ جانتے ہیں کہ اس کنٹریکٹ کے کھلے آئٹمز کی مالیت کتنی ہے تو رقم خود درج کریں۔",
     "contracts.release_open_items_unavailable": "پنچ لسٹ نصب نہیں ہے، اس لیے کوئی کھلے آئٹمز شمار نہیں کیے گئے۔",
     "contracts.release_documents_needed": "منظوری کے لیے درکار",
     "contracts.release_no_documents_needed": "اس کنٹریکٹ پر اس ایونٹ کے لیے کوئی دستاویز درکار نہیں۔",

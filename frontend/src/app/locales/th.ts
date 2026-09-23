@@ -18623,6 +18623,7 @@ const resource = {
     "contracts.release_rule_source.request": "ตารางที่ส่งมาพร้อมคำขอ",
     "contracts.release_rule_source.default": "ค่าเริ่มต้นในตัวระบบ ไม่ใช่กฎของประเทศใดประเทศหนึ่ง",
     "contracts.release_open_items_counted": "มีรายการที่เปิดอยู่ {{count}} รายการในโครงการ โดย {{without}} รายการยังไม่มีค่าใช้จ่าย",
+    "contracts.release_open_items_project_wide_other": "รายการที่เปิดอยู่นับรวมทั้งโครงการ และโครงการนี้มีสัญญา {{count}} ฉบับ เงินที่กันไว้นี้จึงครอบคลุมรายการของงานที่เบิกในสัญญาอื่นด้วย หากคุณทราบว่ารายการที่เปิดอยู่ในสัญญานี้มีมูลค่าเท่าใด ให้กรอกจำนวนเงินเอง",
     "contracts.release_open_items_unavailable": "ยังไม่ได้ติดตั้งรายการงานที่ต้องแก้ไข จึงไม่ได้นับรายการที่เปิดอยู่",
     "contracts.release_documents_needed": "สิ่งที่ต้องมีเพื่ออนุมัติ",
     "contracts.release_no_documents_needed": "เหตุการณ์นี้ไม่ต้องใช้เอกสารใดในสัญญานี้",

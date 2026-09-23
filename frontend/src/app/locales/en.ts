@@ -15265,6 +15265,8 @@ const resource = {
     "contracts.release_rule_source.request": "The schedule sent with the request",
     "contracts.release_rule_source.default": "The built-in default, not a national rule",
     "contracts.release_open_items_counted": "{{count}} open items on the project, {{without}} of them without a cost.",
+    "contracts.release_open_items_project_wide_one": "Open items are counted across the whole project, and this project has {{count}} contract, so this withholding covers items that belong to work billed on another one. Enter the amount yourself if you know what the open items on this contract are worth.",
+    "contracts.release_open_items_project_wide_other": "Open items are counted across the whole project, and this project has {{count}} contracts, so this withholding covers items that belong to work billed on another one. Enter the amount yourself if you know what the open items on this contract are worth.",
     "contracts.release_open_items_unavailable": "The punch list is not installed, so no open items were counted.",
     "contracts.release_documents_needed": "Approval needs",
     "contracts.release_no_documents_needed": "This event needs no documents on this contract.",

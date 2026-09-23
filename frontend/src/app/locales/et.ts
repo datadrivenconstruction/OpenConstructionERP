@@ -18678,6 +18678,8 @@ const resource = {
     "contracts.release_rule_source.request": "Päringuga saadetud ajakava",
     "contracts.release_rule_source.default": "Sisseehitatud vaikeväärtus, mitte riiklik reegel",
     "contracts.release_open_items_counted": "Avatud puudusi projektis: {{count}}, millest ilma maksumuseta: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Avatud puudusi loetakse kogu projekti peale ja sellel projektil on {{count}} leping, seega katab see kinnipidamine ka puudusi, mis kuuluvad teise lepingu alusel arveldatud töö juurde. Sisestage summa ise, kui teate, kui palju on selle lepingu avatud puudused väärt.",
+    "contracts.release_open_items_project_wide_other": "Avatud puudusi loetakse kogu projekti peale ja sellel projektil on {{count}} lepingut, seega katab see kinnipidamine ka puudusi, mis kuuluvad teise lepingu alusel arveldatud töö juurde. Sisestage summa ise, kui teate, kui palju on selle lepingu avatud puudused väärt.",
     "contracts.release_open_items_unavailable": "Puuduste nimekiri pole paigaldatud, seega avatud punkte ei loetud.",
     "contracts.release_documents_needed": "Kinnitamiseks on vaja",
     "contracts.release_no_documents_needed": "See sündmus ei vaja selle lepingu dokumente.",

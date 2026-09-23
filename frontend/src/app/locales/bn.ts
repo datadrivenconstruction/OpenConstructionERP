@@ -17980,6 +17980,8 @@ const resource = {
     "contracts.release_open_items_counted": "প্রকল্পে {{count}}টি খোলা আইটেম আছে, যার মধ্যে {{without}}টির কোনো খরচ নেই।",
     "contracts.release_open_items_counted_one": "প্রকল্পে {{count}}টি খোলা আইটেম আছে, যার মধ্যে {{without}}টির কোনো খরচ নেই।",
     "contracts.release_open_items_counted_other": "প্রকল্পে {{count}}টি খোলা আইটেম আছে, যার মধ্যে {{without}}টির কোনো খরচ নেই।",
+    "contracts.release_open_items_project_wide_one": "খোলা আইটেম পুরো প্রকল্পের জন্য গণনা করা হয় এবং এই প্রকল্পে {{count}}টি চুক্তি আছে, তাই এই ধারণ সেই আইটেমগুলোও অন্তর্ভুক্ত করে যেগুলো অন্য একটিতে বিল করা কাজের সঙ্গে যুক্ত। এই চুক্তির খোলা আইটেমের মূল্য জানা থাকলে পরিমাণ নিজে লিখুন।",
+    "contracts.release_open_items_project_wide_other": "খোলা আইটেম পুরো প্রকল্পের জন্য গণনা করা হয় এবং এই প্রকল্পে {{count}}টি চুক্তি আছে, তাই এই ধারণ সেই আইটেমগুলোও অন্তর্ভুক্ত করে যেগুলো অন্য একটিতে বিল করা কাজের সঙ্গে যুক্ত। এই চুক্তির খোলা আইটেমের মূল্য জানা থাকলে পরিমাণ নিজে লিখুন।",
     "contracts.release_open_items_unavailable": "পাঞ্চ লিস্ট ইনস্টল করা নেই, তাই কোনো খোলা আইটেম গণনা করা হয়নি।",
     "contracts.release_documents_needed": "অনুমোদনের জন্য প্রয়োজনীয়",
     "contracts.release_no_documents_needed": "এই চুক্তিতে এই ইভেন্টের জন্য কোনো নথির প্রয়োজন নেই।",

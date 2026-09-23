@@ -18308,6 +18308,8 @@ const resource = {
     "contracts.release_rule_source.request": "Het schema dat met de aanvraag is verzonden",
     "contracts.release_rule_source.default": "De ingebouwde standaardwaarde, geen nationale regel",
     "contracts.release_open_items_counted": "Openstaande opname-items in het project: {{count}}, zonder kosten: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Openstaande opname-items worden over het hele project geteld en dit project heeft {{count}} contract, dus deze inhouding dekt ook items die horen bij werk dat op een ander wordt gefactureerd. Voer het bedrag zelf in als u weet wat de openstaande items op dit contract waard zijn.",
+    "contracts.release_open_items_project_wide_other": "Openstaande opname-items worden over het hele project geteld en dit project heeft {{count}} contracten, dus deze inhouding dekt ook items die horen bij werk dat op een ander wordt gefactureerd. Voer het bedrag zelf in als u weet wat de openstaande items op dit contract waard zijn.",
     "contracts.release_open_items_unavailable": "De opnamelijst is niet geïnstalleerd, dus er zijn geen openstaande opname-items geteld.",
     "contracts.release_documents_needed": "Goedkeuring vereist",
     "contracts.release_no_documents_needed": "Voor deze gebeurtenis zijn geen documenten op dit contract nodig.",

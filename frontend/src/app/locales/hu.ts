@@ -18325,6 +18325,8 @@ const resource = {
     "contracts.release_rule_source.request": "Az igényléssel küldött ütemezés",
     "contracts.release_rule_source.default": "A beépített alapértelmezés, nem országos szabály",
     "contracts.release_open_items_counted": "Nyitott hiánylista-tételek a projektben: {{count}}, ebből költség nélkül: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "A nyitott tételeket a teljes projektre számoljuk, és ebben a projektben {{count}} szerződés van, ezért ez a visszatartás olyan tételeket is fedez, amelyek egy másik szerződésen elszámolt munkához tartoznak. Ha tudja, mennyit érnek a nyitott tételek ezen a szerződésen, adja meg maga az összeget.",
+    "contracts.release_open_items_project_wide_other": "A nyitott tételeket a teljes projektre számoljuk, és ebben a projektben {{count}} szerződés van, ezért ez a visszatartás olyan tételeket is fedez, amelyek egy másik szerződésen elszámolt munkához tartoznak. Ha tudja, mennyit érnek a nyitott tételek ezen a szerződésen, adja meg maga az összeget.",
     "contracts.release_open_items_unavailable": "A hiánylista nincs telepítve, ezért nem számoltunk nyitott tételeket.",
     "contracts.release_documents_needed": "A jóváhagyáshoz szükséges",
     "contracts.release_no_documents_needed": "Ehhez az eseményhez nem szükséges dokumentum ezen a szerződésen.",

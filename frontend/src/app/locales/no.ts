@@ -18606,6 +18606,8 @@ const resource = {
     "contracts.release_rule_source.request": "Tidsplanen som ble sendt med kravet",
     "contracts.release_rule_source.default": "Den innebygde standardverdien, ikke en nasjonal regel",
     "contracts.release_open_items_counted": "Åpne mangler i prosjektet: {{count}}, hvorav uten kostnad: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Åpne mangler telles på hele prosjektet, og dette prosjektet har {{count}} kontrakt, så denne tilbakeholdelsen dekker også mangler som hører til arbeid som faktureres på en annen. Skriv inn beløpet selv hvis du vet hva de åpne manglene på denne kontrakten er verdt.",
+    "contracts.release_open_items_project_wide_other": "Åpne mangler telles på hele prosjektet, og dette prosjektet har {{count}} kontrakter, så denne tilbakeholdelsen dekker også mangler som hører til arbeid som faktureres på en annen. Skriv inn beløpet selv hvis du vet hva de åpne manglene på denne kontrakten er verdt.",
     "contracts.release_open_items_unavailable": "Mangellisten er ikke installert, så ingen åpne mangler ble talt.",
     "contracts.release_documents_needed": "Godkjenningen krever",
     "contracts.release_no_documents_needed": "Denne hendelsen krever ingen dokumenter på denne kontrakten.",

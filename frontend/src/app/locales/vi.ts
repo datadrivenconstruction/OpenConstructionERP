@@ -18561,6 +18561,7 @@ const resource = {
     "contracts.release_rule_source.request": "Lịch trình được gửi kèm yêu cầu",
     "contracts.release_rule_source.default": "Giá trị mặc định tích hợp sẵn, không phải quy định của một quốc gia cụ thể",
     "contracts.release_open_items_counted": "Có {{count}} mục đang mở trên dự án, trong đó {{without}} mục chưa có chi phí.",
+    "contracts.release_open_items_project_wide_other": "Các mục đang mở được đếm trên toàn dự án, và dự án này có {{count}} hợp đồng, nên khoản giữ lại này bao gồm cả các mục thuộc phần việc được thanh toán theo hợp đồng khác. Hãy tự nhập số tiền nếu bạn biết giá trị các mục đang mở trên hợp đồng này.",
     "contracts.release_open_items_unavailable": "Danh sách lỗi chưa được cài đặt, nên không có mục đang mở nào được đếm.",
     "contracts.release_documents_needed": "Yêu cầu để phê duyệt",
     "contracts.release_no_documents_needed": "Sự kiện này không cần tài liệu nào trên hợp đồng này.",

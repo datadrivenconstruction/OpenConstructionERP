@@ -18577,6 +18577,7 @@ const resource = {
     "contracts.release_rule_source.request": "요청과 함께 전송된 일정",
     "contracts.release_rule_source.default": "내장된 기본값이며, 특정 국가의 규정이 아닙니다",
     "contracts.release_open_items_counted": "프로젝트에 미처리 항목이 {{count}}건 있으며, 그중 {{without}}건은 비용이 없습니다.",
+    "contracts.release_open_items_project_wide_other": "미처리 항목은 프로젝트 전체를 기준으로 집계되며 이 프로젝트에는 계약이 {{count}}건 있으므로, 이 유보금에는 다른 계약으로 청구된 공사에 속한 항목도 포함됩니다. 이 계약의 미처리 항목 금액을 알고 있다면 금액을 직접 입력하세요.",
     "contracts.release_open_items_unavailable": "펀치 리스트가 설치되어 있지 않아 미처리 항목을 집계하지 않았습니다.",
     "contracts.release_documents_needed": "승인에 필요한 서류",
     "contracts.release_no_documents_needed": "이 이벤트는 이 계약에서 서류가 필요하지 않습니다.",

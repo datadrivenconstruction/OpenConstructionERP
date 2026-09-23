@@ -18512,6 +18512,7 @@ const resource = {
     "contracts.release_rule_source.request": "Jadwal yang dikirim bersama permintaan",
     "contracts.release_rule_source.default": "Nilai bawaan sistem, bukan aturan nasional",
     "contracts.release_open_items_counted": "{{count}} item terbuka pada proyek, {{without}} di antaranya tanpa biaya.",
+    "contracts.release_open_items_project_wide_other": "Item terbuka dihitung untuk seluruh proyek, dan proyek ini memiliki {{count}} kontrak, sehingga retensi ini juga mencakup item milik pekerjaan yang ditagih pada kontrak lain. Masukkan sendiri nilainya jika Anda tahu berapa nilai item terbuka pada kontrak ini.",
     "contracts.release_open_items_unavailable": "Daftar punch tidak terpasang, sehingga item terbuka tidak dihitung.",
     "contracts.release_documents_needed": "Diperlukan untuk persetujuan",
     "contracts.release_no_documents_needed": "Kejadian ini tidak memerlukan dokumen pada kontrak ini.",

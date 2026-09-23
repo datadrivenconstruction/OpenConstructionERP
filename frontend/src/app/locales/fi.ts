@@ -18538,6 +18538,8 @@ const resource = {
     "contracts.release_rule_source.request": "Pyynnön mukana lähetetty aikataulu",
     "contracts.release_rule_source.default": "Sisäänrakennettu oletusarvo, ei kansallinen sääntö",
     "contracts.release_open_items_counted": "Avoimia puutteita hankkeessa: {{count}}, joista ilman kustannusta: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Avoimia puutteita lasketaan koko hankkeen tasolla, ja tässä hankkeessa on {{count}} sopimus, joten tämä pidätys kattaa myös puutteita, jotka kuuluvat toisella sopimuksella laskutettuun työhön. Syötä summa itse, jos tiedät, minkä arvoisia tämän sopimuksen avoimet puutteet ovat.",
+    "contracts.release_open_items_project_wide_other": "Avoimia puutteita lasketaan koko hankkeen tasolla, ja tässä hankkeessa on {{count}} sopimusta, joten tämä pidätys kattaa myös puutteita, jotka kuuluvat toisella sopimuksella laskutettuun työhön. Syötä summa itse, jos tiedät, minkä arvoisia tämän sopimuksen avoimet puutteet ovat.",
     "contracts.release_open_items_unavailable": "Puutelistaa ei ole otettu käyttöön, joten avoimia kohteita ei laskettu.",
     "contracts.release_documents_needed": "Hyväksyntä vaatii",
     "contracts.release_no_documents_needed": "Tämä tapahtuma ei vaadi asiakirjoja tässä sopimuksessa.",

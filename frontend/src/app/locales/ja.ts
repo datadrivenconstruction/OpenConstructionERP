@@ -18577,6 +18577,7 @@ const resource = {
     "contracts.release_rule_source.request": "リクエストと一緒に送られたスケジュール",
     "contracts.release_rule_source.default": "組み込みの既定値であり、特定の国のルールではありません",
     "contracts.release_open_items_counted": "プロジェクトには未対応項目が{{count}}件あり、そのうち{{without}}件は費用が未設定です。",
+    "contracts.release_open_items_project_wide_other": "未対応項目はプロジェクト全体で集計され、このプロジェクトには契約が{{count}}件あるため、この保留額には別の契約で請求された工事に属する項目も含まれます。この契約の未対応項目の金額が分かっている場合は、ご自身で金額を入力してください。",
     "contracts.release_open_items_unavailable": "パンチリストがインストールされていないため、未対応項目は集計されませんでした。",
     "contracts.release_documents_needed": "承認に必要な書類",
     "contracts.release_no_documents_needed": "このイベントにはこの契約で書類は不要です。",

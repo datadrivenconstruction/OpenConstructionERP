@@ -18886,6 +18886,8 @@ const resource = {
     "contracts.release_rule_source.request": "Talep ile birlikte gönderilen cetvel",
     "contracts.release_rule_source.default": "Yerleşik varsayılan değer, ulusal bir kural değil",
     "contracts.release_open_items_counted": "Projedeki açık eksiklik sayısı: {{count}}, bunlardan maliyetsiz olan: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Açık eksiklikler projenin tamamında sayılır ve bu projede {{count}} sözleşme var, bu yüzden bu kesinti başka bir sözleşmede hakedişe giren işlere ait eksiklikleri de kapsar. Bu sözleşmedeki açık eksikliklerin tutarını biliyorsanız tutarı kendiniz girin.",
+    "contracts.release_open_items_project_wide_other": "Açık eksiklikler projenin tamamında sayılır ve bu projede {{count}} sözleşme var, bu yüzden bu kesinti başka bir sözleşmede hakedişe giren işlere ait eksiklikleri de kapsar. Bu sözleşmedeki açık eksikliklerin tutarını biliyorsanız tutarı kendiniz girin.",
     "contracts.release_open_items_unavailable": "Eksiklik listesi kurulu değil, bu yüzden açık kalem sayılmadı.",
     "contracts.release_documents_needed": "Onay için gerekli",
     "contracts.release_no_documents_needed": "Bu olay bu sözleşmede belge gerektirmiyor.",

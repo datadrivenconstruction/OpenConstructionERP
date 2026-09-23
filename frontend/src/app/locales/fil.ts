@@ -17986,6 +17986,8 @@ const resource = {
     "contracts.release_open_items_counted": "May {{count}} bukas na item sa proyekto, {{without}} sa mga ito ay walang halaga.",
     "contracts.release_open_items_counted_one": "May {{count}} bukas na item sa proyekto, {{without}} sa mga ito ay walang halaga.",
     "contracts.release_open_items_counted_other": "May {{count}} bukas na item sa proyekto, {{without}} sa mga ito ay walang halaga.",
+    "contracts.release_open_items_project_wide_one": "Binibilang ang mga bukas na item sa buong proyekto, at may {{count}} kontrata ang proyektong ito, kaya sakop din ng hinawakang halagang ito ang mga item na kabilang sa trabahong sinisingil sa iba. Ilagay mismo ang halaga kung alam mo kung magkano ang halaga ng mga bukas na item sa kontratang ito.",
+    "contracts.release_open_items_project_wide_other": "Binibilang ang mga bukas na item sa buong proyekto, at may {{count}} kontrata ang proyektong ito, kaya sakop din ng hinawakang halagang ito ang mga item na kabilang sa trabahong sinisingil sa iba. Ilagay mismo ang halaga kung alam mo kung magkano ang halaga ng mga bukas na item sa kontratang ito.",
     "contracts.release_open_items_unavailable": "Hindi naka-install ang punch list, kaya walang bukas na item na nabilang.",
     "contracts.release_documents_needed": "Kailangan para sa pag-apruba",
     "contracts.release_no_documents_needed": "Walang kailangang dokumento ang event na ito sa kontratang ito.",

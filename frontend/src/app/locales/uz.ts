@@ -18920,6 +18920,8 @@ const resource = {
     "contracts.release_rule_source.request": "Soʻrov bilan yuborilgan jadval",
     "contracts.release_rule_source.default": "Ichki standart qiymat, milliy qoida emas",
     "contracts.release_open_items_counted": "Loyihadagi ochiq kamchiliklar: {{count}}, ulardan narxi yoʻqlari: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Ochiq kamchiliklar butun loyiha boʻyicha sanaladi va bu loyihada {{count}} shartnoma bor, shuning uchun bu ushlab qolish boshqa shartnoma boʻyicha toʻlovga qoʻyilgan ishga tegishli kamchiliklarni ham qamrab oladi. Ushbu shartnomaning ochiq kamchiliklari qancha turishini bilsangiz, summani oʻzingiz kiriting.",
+    "contracts.release_open_items_project_wide_other": "Ochiq kamchiliklar butun loyiha boʻyicha sanaladi va bu loyihada {{count}} shartnoma bor, shuning uchun bu ushlab qolish boshqa shartnoma boʻyicha toʻlovga qoʻyilgan ishga tegishli kamchiliklarni ham qamrab oladi. Ushbu shartnomaning ochiq kamchiliklari qancha turishini bilsangiz, summani oʻzingiz kiriting.",
     "contracts.release_open_items_unavailable": "Kamchiliklar roʻyxati ulanmagan, shuning uchun ochiq bandlar sanalmadi.",
     "contracts.release_documents_needed": "Tasdiqlash uchun kerak",
     "contracts.release_no_documents_needed": "Bu hodisa uchun shu shartnomada hujjat kerak emas.",

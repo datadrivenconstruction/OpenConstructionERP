@@ -18896,6 +18896,8 @@ const resource = {
     "contracts.release_rule_source.request": "Der mit der Anfrage gesendete Plan",
     "contracts.release_rule_source.default": "Die integrierte Standardeinstellung, keine nationale Regel",
     "contracts.release_open_items_counted": "Offene Mängel im Projekt: {{count}}, davon ohne Kosten: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Offene Mängel werden für das gesamte Projekt gezählt, und dieses Projekt hat {{count}} Vertrag, daher deckt dieser Mängeleinbehalt auch Mängel ab, die zu Leistungen gehören, die über einen anderen abgerechnet werden. Geben Sie den Betrag selbst ein, wenn Sie wissen, was die offenen Mängel dieses Vertrags wert sind.",
+    "contracts.release_open_items_project_wide_other": "Offene Mängel werden für das gesamte Projekt gezählt, und dieses Projekt hat {{count}} Verträge, daher deckt dieser Mängeleinbehalt auch Mängel ab, die zu Leistungen gehören, die über einen anderen abgerechnet werden. Geben Sie den Betrag selbst ein, wenn Sie wissen, was die offenen Mängel dieses Vertrags wert sind.",
     "contracts.release_open_items_unavailable": "Die Mängelliste ist nicht installiert, daher wurden keine offenen Mängel gezählt.",
     "contracts.release_documents_needed": "Genehmigung erfordert",
     "contracts.release_no_documents_needed": "Für dieses Ereignis sind keine Dokumente auf diesem Vertrag erforderlich.",

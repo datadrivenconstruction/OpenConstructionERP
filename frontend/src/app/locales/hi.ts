@@ -18672,6 +18672,8 @@ const resource = {
     "contracts.release_open_items_counted": "प्रोजेक्ट पर {{count}} खुली मदें हैं, जिनमें से {{without}} की लागत तय नहीं है।",
     "contracts.release_open_items_counted_one": "प्रोजेक्ट पर {{count}} खुली मद है, जिसमें से {{without}} की लागत तय नहीं है।",
     "contracts.release_open_items_counted_other": "प्रोजेक्ट पर {{count}} खुली मदें हैं, जिनमें से {{without}} की लागत तय नहीं है।",
+    "contracts.release_open_items_project_wide_one": "खुली मदें पूरे प्रोजेक्ट के स्तर पर गिनी जाती हैं और इस प्रोजेक्ट में {{count}} अनुबंध है, इसलिए यह रोक उन मदों को भी कवर करती है जो किसी दूसरे पर बिल किए गए काम से जुड़ी हैं। यदि आप जानते हैं कि इस अनुबंध की खुली मदों का मूल्य क्या है, तो राशि स्वयं दर्ज करें।",
+    "contracts.release_open_items_project_wide_other": "खुली मदें पूरे प्रोजेक्ट के स्तर पर गिनी जाती हैं और इस प्रोजेक्ट में {{count}} अनुबंध हैं, इसलिए यह रोक उन मदों को भी कवर करती है जो किसी दूसरे पर बिल किए गए काम से जुड़ी हैं। यदि आप जानते हैं कि इस अनुबंध की खुली मदों का मूल्य क्या है, तो राशि स्वयं दर्ज करें।",
     "contracts.release_open_items_unavailable": "पंच सूची इंस्टॉल नहीं है, इसलिए कोई खुली मदें नहीं गिनी गईं।",
     "contracts.release_documents_needed": "स्वीकृति के लिए आवश्यक",
     "contracts.release_no_documents_needed": "इस अनुबंध पर इस इवेंट के लिए कोई दस्तावेज़ आवश्यक नहीं है।",

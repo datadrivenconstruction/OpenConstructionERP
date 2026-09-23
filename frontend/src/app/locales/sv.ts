@@ -18679,6 +18679,8 @@ const resource = {
     "contracts.release_rule_source.request": "Tidsplanen som skickades med avropet",
     "contracts.release_rule_source.default": "Den inbyggda standardinställningen, inte en nationell regel",
     "contracts.release_open_items_counted": "Öppna anmärkningar i projektet: {{count}}, varav utan kostnad: {{without}}.",
+    "contracts.release_open_items_project_wide_one": "Öppna anmärkningar räknas för hela projektet, och det här projektet har {{count}} kontrakt, så denna innehållning täcker även anmärkningar som hör till arbete som faktureras på ett annat. Ange beloppet själv om du vet vad de öppna anmärkningarna på det här kontraktet är värda.",
+    "contracts.release_open_items_project_wide_other": "Öppna anmärkningar räknas för hela projektet, och det här projektet har {{count}} kontrakt, så denna innehållning täcker även anmärkningar som hör till arbete som faktureras på ett annat. Ange beloppet själv om du vet vad de öppna anmärkningarna på det här kontraktet är värda.",
     "contracts.release_open_items_unavailable": "Anmärkningslistan är inte installerad, så inga öppna anmärkningar räknades.",
     "contracts.release_documents_needed": "Godkännandet kräver",
     "contracts.release_no_documents_needed": "Denna händelse kräver inga dokument på detta kontrakt.",

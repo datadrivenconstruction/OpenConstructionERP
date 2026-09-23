@@ -18625,6 +18625,7 @@ const resource = {
     "contracts.release_rule_source.request": "随请求发送的规则",
     "contracts.release_rule_source.default": "内置默认值，并非某国规则",
     "contracts.release_open_items_counted": "项目上有 {{count}} 项待处理事项，其中 {{without}} 项没有费用。",
+    "contracts.release_open_items_project_wide_other": "待处理事项按整个项目统计，而本项目有 {{count}} 份合同，因此此项扣留也包含属于其他合同所结算工程的事项。如果您知道本合同上待处理事项的金额，请自行填写。",
     "contracts.release_open_items_unavailable": "未安装整改清单，因此未统计待处理事项。",
     "contracts.release_documents_needed": "批准所需",
     "contracts.release_no_documents_needed": "此事件在本合同上不需要任何文件。",
