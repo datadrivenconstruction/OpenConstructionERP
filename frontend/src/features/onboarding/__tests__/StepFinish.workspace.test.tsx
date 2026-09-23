@@ -116,7 +116,6 @@ function renderFinish(companyType: string) {
           companyType={companyType}
           enabledModules={new Set(PRESETS.find((p) => p.key === companyType)!.enabled_modules)}
           presets={PRESETS}
-          sizePresets={[]}
         />
         <Location />
       </MemoryRouter>
