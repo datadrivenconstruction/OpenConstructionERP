@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -423,6 +423,23 @@ DEFAULT_RELEASE_RULE: dict[str, Any] = {
         {"event": "defects_period_end", "release_percent_of_held": "100"},
     ],
 }
+
+
+def _release_share_outside_schedule(released: Decimal, *, schedule_pool: Decimal, outside_pool: Decimal) -> Decimal:
+    """The part of the releases billed to date that comes off retention held outside the schedule.
+
+    Pro rata to what each pool has accrued: ``schedule_pool`` is the retention
+    accrued on schedule lines to date, ``outside_pool`` the retention earlier
+    claims held on money no schedule line carries. Rounded to the cent and
+    never more than ``outside_pool``, so a release beyond everything held
+    lands on the schedule's side, where ``retention_release_within_held``
+    reports it.
+    """
+    if released <= DEC_ZERO or outside_pool <= DEC_ZERO:
+        return DEC_ZERO
+    pool = max(schedule_pool, DEC_ZERO) + outside_pool
+    share = (released * outside_pool / pool).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return min(share, outside_pool)
 
 
 def boq_position_id_for_line(line: ContractLine | Any) -> uuid.UUID | None:
@@ -955,6 +972,9 @@ class ContractsService:
         # Memo for prior_gross_without_schedule_lines, which a certificate
         # build asks twice. Per request, like the service itself.
         self._prior_without_lines_cache: dict[tuple[Any, Any], Decimal] = {}
+        # Its retention twin, prior_retention_without_schedule_lines. Same
+        # key shape, its own dict, so neither can answer for the other.
+        self._prior_retention_without_lines_cache: dict[tuple[Any, Any], Decimal] = {}
         self.final_account_repo = FinalAccountRepository(session)
         self.party_repo = ContractPartyRepository(session)
         self.security_repo = ContractSecurityRepository(session)
@@ -2375,30 +2395,173 @@ class ContractsService:
         cache_key = (contract_id, before_claim_id)
         if cache_key in self._prior_without_lines_cache:
             return self._prior_without_lines_cache[cache_key]
-        # This hydrates every claim line on the contract to produce one sum
-        # per claim, and a certificate build asks for it twice: once here on
-        # behalf of line 7, once for the sheet's own row. The answer cannot
-        # change inside one request, so it is kept. The service is built per
-        # request, so the cache dies with it and never spans a write.
+        # A certificate build asks for this twice: once here on behalf of
+        # line 7, once for the sheet's own row. The answer cannot change
+        # inside one request, so it is kept. The service is built per request,
+        # so the cache dies with it and never spans a write.
         #
-        # It stands unoptimised because it is a single round trip reusing the
-        # query the schedule of values rollup already needs, where a
-        # per-claim aggregate would be a third query beside that one and
-        # prior_period_value_by_line. On a long schedule billed over years it
-        # is thousands of rows for a handful of numbers, and the right fix is
-        # a second aggregate on prior_period_value_by_line's statement rather
-        # than a new method.
-        line_totals: dict[Any, Decimal] = {}
-        for line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract_id):
-            line_totals[owning_claim.id] = line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
-                str(line.period_completed_value or 0)
-            )
+        # One sum per claim, from an aggregate. It used to hydrate every claim
+        # line on the contract to add them up here, thousands of rows on a
+        # long schedule billed over years, and the retention twin of this
+        # method below reads the same sums.
+        line_totals = await self.claim_line_repo.period_value_by_claim(contract_id)
         residual = sum(
             (max(Decimal(str(c.gross_amount or 0)) - line_totals.get(c.id, DEC_ZERO), DEC_ZERO) for c in prior),
             DEC_ZERO,
         )
         self._prior_without_lines_cache[cache_key] = residual
         return residual
+
+    async def prior_retention_without_schedule_lines(
+        self,
+        contract_id: uuid.UUID,
+        *,
+        before_claim_id: uuid.UUID | None,
+        prior_claims: list[Any] | None = None,
+    ) -> Decimal:
+        """Retention earlier claims held on the gross no line of theirs accounts for.
+
+        The retention half of :meth:`prior_gross_without_schedule_lines`, over
+        the same claims and the same residual: per claim, the gross its own
+        lines do not carry, floored at zero, and of the retention that claim
+        stored the same share, ``retention_amount x residual / gross``. A claim
+        with no lines gives all of its retention, a claim whose lines carry its
+        whole gross gives none.
+
+        It is what the continuation sheet's row for that money holds in
+        column I before any release, and what the retention engine leaves out
+        of the retention it measures the schedule against. Read off what each
+        claim stored rather than worked out at a rate, because the stored
+        figure is what the claim actually held, and a ladder or an edited
+        contract rate makes the two differ.
+
+        Memoised per request like its sibling, in a dict of its own, and for
+        the same reason it cannot go stale: every writer of a claim's gross or
+        retention refuses a claim that is not a draft, and the claims this
+        measures come before the one being worked on.
+
+        Returns: the retention, at cents, never negative.
+        """
+        prior = (
+            prior_claims
+            if prior_claims is not None
+            else await self.claim_repo.prior_claims(contract_id, before_claim_id=before_claim_id)
+        )
+        if not prior:
+            return DEC_ZERO
+        cache_key = (contract_id, before_claim_id)
+        if cache_key in self._prior_retention_without_lines_cache:
+            return self._prior_retention_without_lines_cache[cache_key]
+        line_totals = await self.claim_line_repo.period_value_by_claim(contract_id)
+        held = DEC_ZERO
+        for c in prior:
+            gross = Decimal(str(c.gross_amount or 0))
+            if gross <= DEC_ZERO:
+                continue
+            residual = max(gross - line_totals.get(c.id, DEC_ZERO), DEC_ZERO)
+            held += Decimal(str(c.retention_amount or 0)) * residual / gross
+        held = max(held, DEC_ZERO).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        self._prior_retention_without_lines_cache[cache_key] = held
+        return held
+
+    async def _retention_before(
+        self,
+        claim: ProgressClaim,
+        contract_id: uuid.UUID,
+        prior: list[Any],
+    ) -> tuple[Decimal, Decimal, Decimal]:
+        """What the claims before ``claim`` accrued, by where it sits, and every release billed so far.
+
+        Returns ``(on_schedule, outside_schedule, released)``: the retention
+        the earlier claims accrued on schedule lines, the retention they held
+        on money no line of theirs carries (see
+        :meth:`prior_retention_without_schedule_lines`), and the releases
+        billed on them and on ``claim``.
+        """
+        accrued = sum((Decimal(str(c.retention_amount or 0)) for c in prior), DEC_ZERO)
+        outside = await self.prior_retention_without_schedule_lines(
+            contract_id,
+            before_claim_id=claim.id,
+            prior_claims=prior,
+        )
+        billed = await self.release_repo.billed_on_claims([c.id for c in prior] + [claim.id])
+        released = sum((Decimal(str(r.amount or 0)) for r in billed), DEC_ZERO)
+        return accrued - outside, outside, released
+
+    async def outside_schedule_retention_held(
+        self,
+        claim: ProgressClaim,
+        contract: Contract,
+        *,
+        schedule_accrual: Decimal,
+        releases_come_off_it: bool,
+        prior_claims: list[Any] | None = None,
+    ) -> Decimal:
+        """G703 column I on the row for money no schedule line carries.
+
+        The retention the earlier claims held on that money (see
+        :meth:`prior_retention_without_schedule_lines`), less its share of the
+        releases billed to date. A release is claim level, it pays back
+        retention rather than the retention of a particular row, so it comes
+        off the two pools pro rata to what each has accrued: the schedule's,
+        which is what the earlier claims accrued on schedule lines plus
+        ``schedule_accrual``, this claim's own, and this row's. The engine
+        takes the schedule's share off the retention it holds on the schedule
+        (:meth:`claim_retention_figures`), so line 5, the two added up, is
+        everything withheld to date less everything released, and a release
+        of all of it clears both.
+
+        The split is worked out afresh at every claim from the pools as they
+        stand, which needs no history and keeps the two pools in the same
+        proportion; the total is what the money depends on, the split
+        between the rows is presentation.
+
+        ``releases_come_off_it`` is False where nothing takes a release off
+        the schedule's column I: a contract on flat retention prints it at the
+        flat rate whatever has been released, and so does a claim the engine
+        has not worked out. This row then does the same rather than be the
+        one row a release reaches.
+        """
+        prior = (
+            prior_claims
+            if prior_claims is not None
+            else await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
+        )
+        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior)
+        if outside <= DEC_ZERO or not releases_come_off_it:
+            return outside
+        share = _release_share_outside_schedule(
+            released,
+            schedule_pool=on_schedule.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) + schedule_accrual,
+            outside_pool=outside,
+        )
+        return max(outside - share, DEC_ZERO)
+
+    async def _engine_net_due(
+        self,
+        claim: ProgressClaim,
+        contract: Contract,
+        figures: ClaimRetention,
+        prior_certified: Decimal,
+    ) -> Decimal:
+        """G702 line 8 for a claim the retention engine works out: line 6 less line 7.
+
+        ``figures`` measure the schedule alone, while line 7 is every earlier
+        certificate, the ones for money no schedule line carries included. So
+        that money goes back in on both sides, its gross into what has been
+        earned and the retention held on it into what is kept, exactly as the
+        sheet adds it to line 4 and line 5. Without it the figure the
+        certified event carries fell short of line 8 by that money's net.
+        """
+        outside_gross = await self.prior_gross_without_schedule_lines(contract.id, before_claim_id=claim.id)
+        outside_held = await self.outside_schedule_retention_held(
+            claim,
+            contract,
+            schedule_accrual=figures.accrual,
+            releases_come_off_it=True,
+        )
+        earned_less_retention = (figures.completed_stored_to_date + outside_gross) - (figures.held + outside_held)
+        return max(earned_less_retention - prior_certified, DEC_ZERO)
 
     async def claim_completed_and_held(
         self,
@@ -3220,7 +3383,8 @@ class ContractsService:
             net = gross - retention
         else:
             retention = figures.accrual
-            net = figures.completed_stored_to_date - figures.held - prior_certified
+            # The net the commit will write, worked out the same way.
+            net = await self._engine_net_due(claim, contract, figures, prior_certified)
         if net < DEC_ZERO:
             net = DEC_ZERO
         return {
@@ -3974,6 +4138,19 @@ class ContractsService:
         Work to date per SoV line is the claim's own line where it has one and
         what the earlier claims billed where it has not, so a claim that bills
         only a release still measures the whole contract.
+
+        Everything here measures the schedule, on both sides of the accrual.
+        What the policy requires is worked out on schedule lines, so what the
+        earlier claims already accrued is taken on schedule lines too: the
+        retention they held on money no line of theirs carries is left out
+        (:meth:`prior_retention_without_schedule_lines`), and so is that
+        money's share of the releases (:meth:`outside_schedule_retention_held`).
+        It used to measure the schedule's requirement against everything the
+        earlier claims held. A month billed with no line behind it then either
+        ratcheted into the schedule's held figure, which the sheet then
+        printed a second time on the row carrying that month, or was taken off
+        this claim's accrual, which under-accrued it. The sheet and the net
+        due add that money back on both sides (:meth:`_engine_net_due`).
         """
         contract = contract or await self.get_contract(claim.contract_id)
         if lines is None:
@@ -3995,15 +4172,21 @@ class ContractsService:
             stored_by_line=stored,
         )
         prior = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
-        accrued_before = sum((Decimal(str(c.retention_amount or 0)) for c in prior), DEC_ZERO)
-        billed = await self.release_repo.billed_on_claims([c.id for c in prior] + [claim.id])
-        released = sum((Decimal(str(r.amount or 0)) for r in billed), DEC_ZERO)
+        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior)
+        on_schedule = on_schedule.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        # claim_retention accrues max(required - before, 0), so the schedule
+        # has accrued the larger of the two once this claim is counted.
+        released_outside = _release_share_outside_schedule(
+            released,
+            schedule_pool=max(position.total, on_schedule),
+            outside_pool=outside,
+        )
         return claim_retention(
             position,
             completed_by_line=completed,
             stored_by_line=stored,
-            accrued_before=accrued_before,
-            released_to_date=released,
+            accrued_before=on_schedule,
+            released_to_date=released - released_outside,
         )
 
     async def roll_claim_retention(
@@ -4091,8 +4274,7 @@ class ContractsService:
                 retention_rate=share.retention_rate,
             )
         gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
-        earned_less_retention = figures.completed_stored_to_date - figures.held
-        net = max(earned_less_retention - prior_certified, DEC_ZERO)
+        net = await self._engine_net_due(claim, contract, figures, prior_certified)
         await self.claim_repo.update_fields(
             claim.id,
             gross_amount=gross,
@@ -5109,6 +5291,25 @@ class ContractsService:
                 before_claim_id=claim.id,
                 prior_claims=prior_claims,
             )
+            # Column I on that row: what the earlier claims actually held on
+            # that money, less its share of the releases where a release
+            # comes off line 5 at all. The same method the net due is worked
+            # out with, so the sheet and the claim cannot disagree about it.
+            # schedule_accrual is this claim's own accrual as stored, which
+            # is what the engine accrued when it last worked the claim out;
+            # nothing is worked out again for a claim already certified.
+            out_of_schedule_retainage = None
+            if prior_without_schedule > DEC_ZERO:
+                out_of_schedule_retainage = await self.outside_schedule_retention_held(
+                    claim,
+                    contract,
+                    schedule_accrual=Decimal(str(claim.retention_amount or 0)),
+                    releases_come_off_it=(
+                        claim.retention_held_to_date is not None
+                        and contract.contract_type not in FLAT_RETENTION_CONTRACT_TYPES
+                    ),
+                    prior_claims=prior_claims,
+                )
             # Which lines the sheet lists, roll-up parents excluded, is decided
             # once in aia.py so this and the certification freeze cannot drift.
             sov_lines = sheet_sov_lines(contract_lines, by_contract_line, prior_by_line)
@@ -5118,6 +5319,7 @@ class ContractsService:
                 retainage_percent=retainage_percent,
                 prior_by_line=prior_by_line,
                 prior_without_schedule=prior_without_schedule,
+                out_of_schedule_retainage=out_of_schedule_retainage,
                 out_of_schedule_label=contracts_translate(
                     "aia.g703.billed_not_on_a_schedule_line",
                     locale=locale or get_locale(),
