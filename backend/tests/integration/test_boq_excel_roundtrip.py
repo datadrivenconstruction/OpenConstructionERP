@@ -201,14 +201,122 @@ async def test_export_excel_contains_position_id_column(
     wb = load_workbook(io.BytesIO(resp.content), read_only=True, data_only=True)
     ws = wb.active
     rows = list(ws.iter_rows(values_only=True))
-    header = [str(c) if c is not None else "" for c in rows[0]]
+    # The header is found the way the importer finds it, not assumed to be
+    # row one: the project line sits above it.
+    header_at = _header_row_number(rows)
+    header = [str(c) if c is not None else "" for c in rows[header_at - 1]]
     assert "Position ID" in header, f"header missing Position ID: {header}"
     id_col = header.index("Position ID")
 
     # The exported UUID must appear in the id column of some data row.
-    stamped = {str(r[id_col]) for r in rows[1:] if id_col < len(r) and r[id_col]}
+    stamped = {str(r[id_col]) for r in rows[header_at:] if id_col < len(r) and r[id_col]}
     assert pid in stamped, f"exported id column {stamped} missing position {pid}"
     wb.close()
+
+
+# ── The workbook itself goes back in, with and without a letterhead ─────────
+
+
+def _header_row_number(rows: list[tuple]) -> int:
+    """The 1-based row the BOQ importer reads as the header of a sheet."""
+    from app.core.sheet_header import find_header_row
+    from app.modules.boq.importers.excel import _match_column
+
+    return find_header_row(iter(rows), _match_column).number
+
+
+#: A company profile with enough on it for a letterhead of five lines.
+_PROFILE = {
+    "legal_name": "Acme & Sons Construction GmbH",
+    "address": "Hauptstrasse 1\n10115 Berlin\nGermany",
+    "phone": "+49 30 1234567",
+    "email": "office@acme.example",
+}
+
+
+def _use_profile(monkeypatch: pytest.MonkeyPatch, profile: dict[str, str] | None) -> None:
+    """Set the company profile through the PDF layer's readers, where the
+    letterhead decision is made; ``None`` is a workspace with none."""
+    from app.core import pdf_branding
+    from app.core.company_profile import DEFAULT_COMPANY_PROFILE
+
+    full = dict(DEFAULT_COMPANY_PROFILE)
+    full.update(profile or {})
+    monkeypatch.setattr(pdf_branding, "_read_company_profile", lambda *_a, **_kw: dict(full))
+    monkeypatch.setattr(pdf_branding, "_read_branding", lambda *_a, **_kw: {})
+    monkeypatch.setattr(pdf_branding, "_read_appearance", lambda *_a, **_kw: {})
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("profile", [None, _PROFILE], ids=["no_profile", "letterhead"])
+async def test_the_exported_workbook_names_its_project_and_imports_back_unchanged(
+    shared_client: AsyncClient,
+    shared_auth: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    profile: dict[str, str] | None,
+) -> None:
+    """Export, then upload that very file: the sheet says which job it is for,
+    and the re-import matches every line in place and changes none.
+
+    The project line is written by the export itself, in the row above the
+    header, so it is on the sheet whether or not a company profile draws a
+    letterhead over it. Both are rows above the table that the importer has to
+    get past to find the header.
+    """
+    from openpyxl import load_workbook
+
+    _use_profile(monkeypatch, profile)
+    boq_id = await _create_boq(shared_client, shared_auth)
+    p1 = await _add_position(
+        shared_client, shared_auth, boq_id, ordinal="01.001", description="Concrete slab", quantity=10, unit_rate=120
+    )
+    p2 = await _add_position(
+        shared_client, shared_auth, boq_id, ordinal="01.002", description="Rebar", unit="kg", quantity=500, unit_rate=2
+    )
+    before = {p["id"]: p for p in await _positions(shared_client, shared_auth, boq_id)}
+
+    resp = await shared_client.get(f"/api/v1/boq/boqs/{boq_id}/export/excel/", headers=shared_auth)
+    assert resp.status_code == 200, resp.text
+
+    wb = load_workbook(io.BytesIO(resp.content), read_only=True, data_only=True)
+    rows = list(wb.active.iter_rows(values_only=True))
+    wb.close()
+    header_at = _header_row_number(rows)
+    assert header_at > 1, "the header row was not found below the project line"
+    project_line = str(rows[header_at - 2][0] or "")
+    assert project_line.startswith("Project: Round-Trip Project "), rows[: header_at - 1]
+    assert "Standard: din276" in project_line
+    assert "Region: DACH" in project_line
+    printed = [str(c) for row in rows[: header_at - 1] for c in row if c is not None]
+    assert sum(1 for c in printed if c.startswith("Project: ")) == 1, f"project line printed twice: {printed}"
+    if profile is None:
+        assert header_at == 2, "without a letterhead the project line is the only row above the table"
+    else:
+        assert "Acme & Sons Construction GmbH" in printed, "the letterhead did not draw"
+
+    upload = await shared_client.post(
+        f"/api/v1/boq/boqs/{boq_id}/import/excel/",
+        files={
+            "file": (
+                "roundtrip.xlsx",
+                resp.content,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        },
+        headers=shared_auth,
+    )
+    assert upload.status_code == 200, f"import failed: {upload.status_code} {upload.text[:400]}"
+    body = upload.json()
+    assert body["round_trip"] is True, body
+    assert body["created"] == 0, body
+    assert body["updated"] == 0, body
+    assert body["unchanged"] == 2, body
+
+    after = {p["id"]: p for p in await _positions(shared_client, shared_auth, boq_id)}
+    assert set(after) == {p1, p2}
+    for pid in (p1, p2):
+        for field in ("ordinal", "description", "unit", "quantity", "unit_rate", "total"):
+            assert after[pid][field] == before[pid][field], (pid, field)
 
 
 # ── Update-in-place + create + foreign-id safety ─────────────────────────────
