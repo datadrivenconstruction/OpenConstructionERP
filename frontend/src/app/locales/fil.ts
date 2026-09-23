@@ -17843,6 +17843,7 @@ const resource = {
     "contracts.claim_lines_locked": "Mababago lang ang mga linya kung ang claim ay nasa katayuang draft.",
     "contracts.claim_lines_locked_reopen": "Tanggihan ang claim para maibalik ito sa draft.",
     "contracts.sov_locked": "Ang nilagdaang kontrata ay binibilyan batay sa mga linyang ito, kaya hindi ito puwedeng baguhin o alisin dito. Iayos ang saklaw sa pamamagitan ng isang pagbabago.",
+    "contracts.sov_billed_locked": "Ang mga linyang nabilyan na ng isang progress claim ay hindi puwedeng baguhin o alisin dito, dahil nakabatay sa mga ito ang claim. Iayos ang saklaw sa pamamagitan ng isang pagbabago.",
     "contracts.delete_line_title": "Alisin ang linyang ito",
     "contracts.delete_line_message": "Aalisin ang linya sa iskedyul ng halaga at bababa ang kabuuan ng kontrata ng halaga nito.",
     "contracts.claim_add_line": "Magdagdag ng linya nang manu-mano",
