@@ -2248,6 +2248,17 @@ class AiEstimatorService:
             target = await self.session.get(BOQ, boq_id)
             if target is None or target.project_id != run.project_id:
                 raise HTTPException(status_code=404, detail="Target BOQ not found.")
+            # The BOQ service refuses every position write on a locked bill
+            # (``BOQService._ensure_not_locked`` reads ``is_locked``); the estimate
+            # is written straight into the bill here, so it has to ask the same.
+            if target.is_locked:
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "The target BOQ is locked and cannot take new positions. "
+                        "Apply the estimate to a new BOQ or to a revision of this one."
+                    ),
+                )
         else:
             project = await self.session.get(Project, run.project_id)
             label = getattr(project, "name", None) or f"Project {str(run.project_id)[:8]}"
