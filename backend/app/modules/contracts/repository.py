@@ -375,6 +375,33 @@ class ProgressClaimLineRepository(_CRUDBase):
         await self.session.flush()
         return lines
 
+    async def claims_billing_lines(self, contract_line_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[str]]:
+        """Which of these schedule of values lines a claim has billed on, and which claims.
+
+        Returns each billed line's id mapped to the numbers of the claims whose
+        lines point at it, sorted; a line no claim line references is absent.
+        This is the single definition of "billed" for a schedule line: the
+        service refuses to rewrite or delete a line that appears here, and the
+        line listing reports the same set, so the screen and the server cannot
+        disagree about which lines are locked.
+
+        Every claim status counts, a draft or a rejected one included. The
+        foreign key from the claim line cascades, so deleting the schedule line
+        takes the claim's lines with it whatever state the claim is in.
+        """
+        if not contract_line_ids:
+            return {}
+        stmt = (
+            select(ProgressClaimLine.contract_line_id, ProgressClaim.claim_number)
+            .join(ProgressClaim, ProgressClaim.id == ProgressClaimLine.progress_claim_id)
+            .where(ProgressClaimLine.contract_line_id.in_(set(contract_line_ids)))
+            .distinct()
+        )
+        billed: dict[uuid.UUID, list[str]] = {}
+        for line_id, claim_number in (await self.session.execute(stmt)).all():
+            billed.setdefault(line_id, []).append(claim_number or "")
+        return {line_id: sorted(numbers) for line_id, numbers in billed.items()}
+
     async def delete_for_claim(self, claim_id: uuid.UUID) -> int:
         """Delete every claim line belonging to ``claim_id``.
 
