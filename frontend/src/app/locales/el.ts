@@ -8708,6 +8708,8 @@ const resource = {
     "boq.link_finance": "Προβολή Προϋπολογισμού",
     "boq.link_validation": "Εκτέλεση επικύρωσης",
     "boq.linked_geometry": "Συνδεδεμένη Γεωμετρία",
+    "boq.list_load_failed_projects": "Δεν ήταν δυνατή η ανάγνωση αυτών των έργων: {{projects}}. Από τότε που άνοιξε η σελίδα, μπορεί να αρχειοθετήθηκαν ή να διαγράφηκαν ή να αφαιρέθηκε η πρόσβασή σας. Δεν εμφανίζεται τίποτα, ώστε κανένα σύνολο να μην τα παραλείπει.",
+    "boq.list_load_failed_title": "Δεν ήταν δυνατή η φόρτωση των εκτιμήσεων",
     "boq.list_subtitle_count": "{{boqCount}} εκτιμήσεις σε {{projectCount}} έργα",
     "boq.load_more": "Φόρτωση περισσότερων",
     "boq.loaded_n_of_m": "{{loaded}} από {{total}} στοιχεία",

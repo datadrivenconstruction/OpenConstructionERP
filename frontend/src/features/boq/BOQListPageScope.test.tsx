@@ -38,14 +38,19 @@ vi.mock('react-router-dom', async () => {
 });
 
 /* ── API ──────────────────────────────────────────────────────────────
-   Only `apiGet` is replaced; the rest of the module stays real so the
-   feature-local `./api` keeps its imports. */
+   Only `apiGet` and `apiPost` are replaced; the rest of the module stays
+   real so the feature-local `./api` keeps its imports. The bills of every
+   project arrive in one POST, keyed by project id. */
 
-const api = vi.hoisted(() => ({ get: vi.fn() }));
+const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
 
 vi.mock('@/shared/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/shared/lib/api')>('@/shared/lib/api');
-  return { ...actual, apiGet: (url: string) => api.get(url) };
+  return {
+    ...actual,
+    apiGet: (url: string) => api.get(url),
+    apiPost: (url: string, body: unknown) => api.post(url, body),
+  };
 });
 
 /* ── Inner components that carry their own data or canvas ─────────── */
@@ -98,11 +103,15 @@ beforeEach(() => {
   routerState.params = {};
   useProjectContextStore.setState({ activeProjectId: null, activeProjectName: '' });
   api.get.mockImplementation((url: string) => {
-    if (url === '/v1/projects/') return Promise.resolve(PROJECTS);
+    if (url.startsWith('/v1/projects/')) return Promise.resolve(PROJECTS);
     if (url === '/v1/documents/file-types-by-project/') return Promise.resolve({});
-    const match = /\/v1\/boq\/boqs\/\?project_id=(.+)$/.exec(url);
-    if (match) return Promise.resolve(boqPayload(match[1]!));
     return Promise.resolve([]);
+  });
+  api.post.mockImplementation((url: string, body: { project_ids: string[] }) => {
+    if (url === '/v1/boq/boqs/by-projects/') {
+      return Promise.resolve(Object.fromEntries(body.project_ids.map((id) => [id, boqPayload(id)])));
+    }
+    return Promise.resolve({});
   });
 });
 

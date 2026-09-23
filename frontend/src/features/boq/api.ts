@@ -29,6 +29,33 @@ export interface BOQ {
   updated_at: string;
 }
 
+/** One bill as the bill register lists it, with its money and line count. */
+export interface BOQListRow {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  /** Money arrives as a Decimal string (v3 §10); coerce before arithmetic. */
+  direct_cost_total: number | string;
+  markups_total: number | string;
+  grand_total: number | string | null;
+  position_count: number;
+}
+
+/**
+ * The projects a refused `boqApi.listForProjects` call named, in request order:
+ * missing, archived, or not readable by this user. Empty for any other error,
+ * such as a network failure or a missing permission, which name no project.
+ */
+export function failedBoqListProjectIds(error: unknown): string[] {
+  const detail = (error as { body?: { detail?: { project_ids?: unknown } } } | null)?.body?.detail;
+  const ids = detail && typeof detail === 'object' ? detail.project_ids : undefined;
+  return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+}
+
 /**
  * Linked-position role (Issue #127 — reuse the same code across a project).
  *  - `master`   — the definition-of-record for a shared `reference_code`.
@@ -1737,6 +1764,20 @@ export function fetchCategoryTree(
 export const boqApi = {
   /* BOQ CRUD */
   list: (projectId: string) => apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${projectId}`),
+  /**
+   * The bill register of several projects in one request, keyed by project id.
+   * Each project's rows are what `GET /boqs/?project_id=` returns for it, with
+   * the page (50 bills by default) cut per project. Every requested project is
+   * a key. One missing, archived or unreadable project refuses the whole call
+   * (404 or 403) and the error body names it: read it with
+   * {@link failedBoqListProjectIds}.
+   */
+  listForProjects: (projectIds: string[]) =>
+    apiPost<Record<string, BOQListRow[]>, { project_ids: string[] }>(
+      '/v1/boq/boqs/by-projects/',
+      { project_ids: projectIds },
+      { readOnly: true },
+    ),
   get: (boqId: string) => apiGet<BOQWithPositions>(`/v1/boq/boqs/${boqId}`),
   create: (data: CreateBOQData) => apiPost<BOQ>('/v1/boq/boqs/', data),
   deleteBoq: (boqId: string) => apiDelete(`/v1/boq/boqs/${boqId}`),

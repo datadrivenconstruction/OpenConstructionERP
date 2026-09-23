@@ -19,6 +19,7 @@ import { useNameCollator } from '@/shared/lib/collator';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
 import { resourceAwareTotalInBase, getCurrencyCode } from './boqHelpers';
+import { BOQListLoadError } from './BOQListLoadError';
 import { projectsApi, type ProjectFxRate } from '@/features/projects/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -617,45 +618,51 @@ export function BOQListPage() {
     ? projects?.filter((p) => p.id === projectIdFromUrl)
     : projects;
 
-  const { data: allBoqs, isLoading: boqLoading } = useQuery({
+  const {
+    data: boqData,
+    isLoading: boqLoading,
+    isError: boqError,
+    error: boqErrorValue,
+  } = useQuery({
     queryKey: ['all-boqs', scopedProjects?.map((p) => p.id).join(',')],
     queryFn: async () => {
       if (!scopedProjects || scopedProjects.length === 0) return [];
 
-      // Fetch all BOQs in parallel (one request per project, no N+1 for grand_total)
-      const fetches = scopedProjects.map(async (p) => {
-        try {
-          const boqs = await apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${p.id}`);
-          return boqs.map((b) => {
-            // v3 §10 contract: money fields arrive as Decimal-as-string. The
-            // TypeScript `number` annotation lies — reducing across them
-            // string-concatenates ("634204086.52" + "528523" → "634…528…"),
-            // and `Number(multi-dot-string)` → NaN. Coerce once at the
-            // boundary so every downstream consumer (reduce, comparator,
-            // `currencyFmt.format`, threshold checks) sees a finite number.
-            const gtRaw = b.grand_total;
-            const gtNum =
-              typeof gtRaw === 'number' ? gtRaw : Number(gtRaw ?? 0);
-            return {
-              ...b,
-              projectName: p.name,
-              currency: p.currency,
-              positionCount: b.position_count ?? 0,
-              grandTotal: Number.isFinite(gtNum) ? gtNum : 0,
-              classificationStandard: p.classification_standard,
-            } as BOQWithProject;
-          });
-        } catch (err) {
-          if (import.meta.env.DEV) console.error(`Failed to fetch BOQs for project ${p.id}:`, err);
-          return [] as BOQWithProject[];
-        }
-      });
-
-      const results = await Promise.all(fetches);
-      return results.flat();
+      // One request for every project's bills. The page used to send one per
+      // project, and HTTP/1.1 runs six at a time to a host, so on forty
+      // projects most of the wait was queueing. A project the server cannot
+      // read now fails the whole request instead of being dropped, because a
+      // list with one project quietly missing puts a total on screen that
+      // looks complete and is not.
+      const byProject = await boqApi.listForProjects(scopedProjects.map((p) => p.id));
+      return scopedProjects.flatMap((p) =>
+        (byProject[p.id] ?? []).map((b) => {
+          // v3 §10 contract: money fields arrive as Decimal-as-string. The
+          // TypeScript `number` annotation lies — reducing across them
+          // string-concatenates ("634204086.52" + "528523" → "634…528…"),
+          // and `Number(multi-dot-string)` → NaN. Coerce once at the
+          // boundary so every downstream consumer (reduce, comparator,
+          // `currencyFmt.format`, threshold checks) sees a finite number.
+          const gtRaw = b.grand_total;
+          const gtNum =
+            typeof gtRaw === 'number' ? gtRaw : Number(gtRaw ?? 0);
+          return {
+            ...b,
+            projectName: p.name,
+            currency: p.currency,
+            positionCount: b.position_count ?? 0,
+            grandTotal: Number.isFinite(gtNum) ? gtNum : 0,
+            classificationStandard: p.classification_standard,
+          } as BOQWithProject;
+        }),
+      );
     },
     enabled: !!scopedProjects && scopedProjects.length > 0,
   });
+  // A failed refetch keeps the previous answer in `data`. Nothing on this page
+  // may go on showing it, the stat cards included, once the list is known to
+  // be out of date, so the page reads no data at all while the query is in error.
+  const allBoqs = boqError ? undefined : boqData;
 
   // Seed demo presence when collaboration module is enabled and BOQs load
   const isCollabEnabled = useModuleStore((s) => s.isModuleEnabled('collaboration'));
@@ -876,11 +883,15 @@ export function BOQListPage() {
           */
           isLoading
             ? t('common.loading')
-            : t('boq.list_subtitle_count', {
-                defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
-                boqCount: allBoqs?.length ?? 0,
-                projectCount: scopedProjects?.length ?? 0,
-              })
+            : boqError
+              ? // No count when the bills could not be read: "0 estimates"
+                // over the error card below would be a figure, and a wrong one.
+                undefined
+              : t('boq.list_subtitle_count', {
+                  defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
+                  boqCount: allBoqs?.length ?? 0,
+                  projectCount: scopedProjects?.length ?? 0,
+                })
         }
         actions={
           <>
@@ -1157,6 +1168,18 @@ export function BOQListPage() {
         // yet", hiding the real auth/permission/server error — surface a
         // recovery affordance instead.
         <RecoveryCard error={projErrorValue} onRetry={() => refetchProjects()} />
+      ) : boqError ? (
+        // The bills could not be read. Retry asks for the projects first,
+        // because the usual cause is a project archived or unshared since
+        // this page loaded its project list: a fresh list leaves it out and
+        // the bills are then asked for under the new set of projects.
+        <BOQListLoadError
+          error={boqErrorValue}
+          projects={scopedProjects}
+          onRetry={() => {
+            void refetchProjects().then(() => queryClient.invalidateQueries({ queryKey: ['all-boqs'] }));
+          }}
+        />
       ) : filtered.length === 0 && (searchQuery || statusFilter || userProjectFilter) ? (
         <EmptyState
           icon={<Search size={28} strokeWidth={1.5} />}

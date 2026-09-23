@@ -8659,6 +8659,8 @@ const resource = {
     "boq.link_finance": "Бюджетті Көру",
     "boq.link_validation": "Тексеруді Жүргізу",
     "boq.linked_geometry": "Байланысты Геометрия",
+    "boq.list_load_failed_projects": "Бұл жобаларды оқу мүмкін болмады: {{projects}}. Бет ашылғаннан бері олар мұрағатталған немесе жойылған, не сіздің оларға қолжетімділігіңіз алынып тасталған болуы мүмкін. Ешбір жиынтық оларды өткізіп алмауы үшін ештеңе көрсетілмейді.",
+    "boq.list_load_failed_title": "Сметаларды жүктеу мүмкін болмады",
     "boq.list_subtitle_count": "{{projectCount}} жоба бойынша {{boqCount}} смета",
     "boq.load_more": "Тағы жүктеу",
     "boq.loaded_n_of_m": "{{total}}-ден {{loaded}} позиция",

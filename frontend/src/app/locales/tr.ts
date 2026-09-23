@@ -13748,6 +13748,8 @@ const resource = {
     "boq.link_finance": "Bütçeyi Görüntüle",
     "boq.link_validation": "Doğrulamayı Çalıştır",
     "boq.linked_geometry": "Bağlı Geometri",
+    "boq.list_load_failed_projects": "Bu projeler okunamadı: {{projects}}. Sayfa açıldığından beri arşivlenmiş veya silinmiş ya da erişiminiz kaldırılmış olabilir. Hiçbir toplamın bunları dışarıda bırakmaması için hiçbir şey listelenmiyor.",
+    "boq.list_load_failed_title": "Keşifler yüklenemedi",
     "boq.list_subtitle_count": "{{projectCount}} proje genelinde {{boqCount}} keşif",
     "boq.loading_element_data": "Eleman verisi yükleniyor...",
     "boq.loading_full_properties": "Tüm özellikler yükleniyor…",

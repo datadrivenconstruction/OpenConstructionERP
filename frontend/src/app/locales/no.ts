@@ -9447,6 +9447,8 @@ const resource = {
     "boq.linked_positions_none": "Denne posisjonen er frittstående - ingen annen posisjon deler dens kode.",
     "boq.linked_positions_subtitle": "Kode {{code}} - visning fra posisjon {{ordinal}}",
     "boq.linked_positions_title": "Tilknyttede posisjoner",
+    "boq.list_load_failed_projects": "Disse prosjektene kunne ikke leses: {{projects}}. De kan ha blitt arkivert eller slettet, eller tilgangen din kan være fjernet, etter at siden ble åpnet. Ingenting vises, slik at ingen sum utelater dem.",
+    "boq.list_load_failed_title": "Kalkylene kunne ikke lastes inn",
     "boq.list_subtitle_count": "{{boqCount}} kalkyler fordelt på {{projectCount}} prosjekter",
     "boq.loading_element_data": "Laster elementdata…",
     "boq.loading_full_properties": "Laster fullstendige egenskaper...",

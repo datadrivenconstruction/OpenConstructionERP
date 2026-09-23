@@ -9515,6 +9515,8 @@ const resource = {
     "boq.linked_positions_none": "Denne post er selvstændig, ingen andre poster deler dens kode.",
     "boq.linked_positions_subtitle": "Kode {{code}}, vises fra post {{ordinal}}",
     "boq.linked_positions_title": "Tilknyttede positioner",
+    "boq.list_load_failed_projects": "Disse projekter kunne ikke læses: {{projects}}. De kan være blevet arkiveret eller slettet, eller din adgang kan være fjernet, efter at siden blev åbnet. Intet vises, så ingen total udelader dem.",
+    "boq.list_load_failed_title": "Overslagene kunne ikke indlæses",
     "boq.list_subtitle_count": "{{boqCount}} overslag på tværs af {{projectCount}} projekter",
     "boq.loading_element_data": "Indlæser elementdata…",
     "boq.loading_full_properties": "Indlæser alle egenskaber…",
