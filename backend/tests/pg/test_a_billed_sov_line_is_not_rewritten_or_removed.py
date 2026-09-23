@@ -257,3 +257,56 @@ async def test_the_listing_marks_the_same_lines_the_server_refuses(session) -> N
     await _claim_billing(session, contract, billed, status="draft")
 
     assert await svc.claim_line_repo.claims_billing_lines([billed.id, unbilled.id]) == {billed.id: ["PC-1"]}
+
+
+async def _claims_on(session, contract_id: uuid.UUID) -> int:
+    stmt = select(func.count()).select_from(ProgressClaim).where(ProgressClaim.contract_id == contract_id)
+    return (await session.execute(stmt)).scalar_one()
+
+
+async def _contracts_with_id(session, contract_id: uuid.UUID) -> int:
+    stmt = select(func.count()).select_from(Contract).where(Contract.id == contract_id)
+    return (await session.execute(stmt)).scalar_one()
+
+
+@pytest.mark.parametrize("claim_status", CLAIM_STATUSES)
+async def test_a_draft_contract_a_claim_has_billed_on_is_not_deleted(session, claim_status: str) -> None:
+    """Deleting the contract deletes every line on it, so it asks the same question.
+
+    Only a draft contract may be deleted at all, and that used to be the whole
+    check. A draft can carry claims, though, and the cascade from the contract
+    took them away whole, a certified and paid one included: the claim, its
+    lines and the schedule line they billed on, in one call.
+    """
+    svc = ContractsService(session)
+    contract = await _draft_contract(session)
+    line = await _line(session, contract, "1")
+    await _claim_billing(session, contract, line, status=claim_status)
+
+    refused: HTTPException | None = None
+    try:
+        await svc.delete_contract(contract.id)
+    except HTTPException as exc:
+        refused = exc
+
+    # Before the guard every one of these read 0.
+    assert await _contracts_with_id(session, contract.id) == 1
+    assert await _claims_on(session, contract.id) == 1
+    assert await _claim_lines_on(session, line.id) == 1
+    assert refused is not None
+    assert refused.status_code == 409
+    assert refused.detail["error"] == "contract_line_billed"
+    assert refused.detail["contract_line_ids"] == [str(line.id)]
+    assert refused.detail["claim_numbers"] == ["PC-1"]
+
+
+async def test_a_draft_contract_nothing_has_billed_on_still_deletes(session) -> None:
+    """The control: a draft's lines are still its own until a claim bills them."""
+    svc = ContractsService(session)
+    contract = await _draft_contract(session)
+    line = await _line(session, contract, "1")
+
+    await svc.delete_contract(contract.id)
+
+    assert await _contracts_with_id(session, contract.id) == 0
+    assert await _lines_with_id(session, line.id) == 0

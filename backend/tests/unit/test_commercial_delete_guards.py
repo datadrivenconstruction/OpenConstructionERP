@@ -53,11 +53,27 @@ class _Contract:
         self.code = "C-001"
 
 
+class _NoLines:
+    """A draft with no schedule lines, so nothing on it can have been billed."""
+
+    async def list_for_contract(self, _contract_id: uuid.UUID) -> list[Any]:
+        return []
+
+
+class _NothingBilled:
+    async def claims_billing_lines(self, _line_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[str]]:
+        return {}
+
+
 def _contracts_service(contract: _Contract) -> tuple[ContractsService, _RecordingRepo]:
     service = ContractsService.__new__(ContractsService)
     service.session = _StubSession()
     repo = _RecordingRepo()
     service.contract_repo = repo
+    # A draft's delete also asks whether a claim has billed on its lines; the
+    # PG test for that lives in tests/pg, this file only pins the status rule.
+    service.line_repo = _NoLines()
+    service.claim_line_repo = _NothingBilled()
 
     async def _get(_contract_id: uuid.UUID) -> _Contract:
         return contract
