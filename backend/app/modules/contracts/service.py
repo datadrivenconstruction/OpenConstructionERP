@@ -2054,6 +2054,45 @@ class ContractsService:
 
     # ── ContractLines ────────────────────────────────────────────────────
 
+    #: Contract statuses in which the schedule of values may still be edited
+    #: in place. Draft alone: every other status means the contract is signed,
+    #: and "suspended" is signed work that has stopped, not work not yet
+    #: agreed.
+    _LINE_EDITABLE_CONTRACT_STATUSES = frozenset({"draft"})
+
+    async def _assert_contract_lines_editable(self, contract_id: uuid.UUID) -> None:
+        """Raise 409 unless this contract's schedule of values is still a draft.
+
+        The contract lines are what every claim bills against. A claim line
+        points at one of them, the certificate's "completed from previous
+        applications" column is assembled per line from what earlier claims
+        billed, and percent complete is measured against the line's scheduled
+        value. Editing a line on a signed contract restates all of that
+        underneath certificates that have already gone to the payer, and
+        nothing on the contract records that anything moved. The instrument
+        for changing a signed scope is a change order, which is a document
+        both sides see, so the refusal names it rather than only saying no.
+
+        The contract screen already enables line editing only for a draft, so
+        this is not a new rule, it is the same rule on the side that cannot be
+        bypassed by calling the route directly. A guard that lives only in the
+        client is a guard against the client.
+        """
+        contract = await self.get_contract(contract_id)
+        if contract.status in self._LINE_EDITABLE_CONTRACT_STATUSES:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "contract_lines_frozen",
+                "message": (
+                    "The schedule of values can only be edited while the contract is a draft; "
+                    f"this contract is {contract.status!r}. Raise a change order to alter a signed scope."
+                ),
+                "contract_status": contract.status,
+            },
+        )
+
     async def create_line(self, data: Any) -> ContractLine:
         qty = Decimal(str(data.quantity or 0))
         rate = Decimal(str(data.unit_rate or 0))
@@ -2111,6 +2150,7 @@ class ContractsService:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
             raise HTTPException(status_code=404, detail="Contract line not found")
+        await self._assert_contract_lines_editable(line.contract_id)
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
@@ -2130,7 +2170,12 @@ class ContractsService:
     async def delete_line(self, line_id: uuid.UUID) -> None:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
+            # Deleting what is not there stays a no-op rather than a 404, so a
+            # retried delete is not an error. The guard below is reached only
+            # for a line that exists, which is the only case that can destroy
+            # anything.
             return
+        await self._assert_contract_lines_editable(line.contract_id)
         await self.line_repo.delete(line_id)
 
     # ── Progress claims ──────────────────────────────────────────────────
