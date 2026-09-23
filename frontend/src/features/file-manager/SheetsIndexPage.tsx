@@ -29,6 +29,7 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { splitPdfIntoSheets } from './api';
@@ -224,7 +225,7 @@ export function SheetsIndexPage() {
   // Pick a working project id (route → store → first available).
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
 

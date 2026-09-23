@@ -11,6 +11,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 
 const BASE = '/v1/norm-expansion';
 
@@ -497,7 +498,7 @@ export interface BoqPickerPosition {
 
 /** List the tenant's projects for the BOQ picker. */
 export async function listBoqPickerProjects(): Promise<BoqPickerProject[]> {
-  return apiGet<BoqPickerProject[]>('/v1/projects/');
+  return fetchProjectList<BoqPickerProject[]>();
 }
 
 /** List the BOQs of one project for the picker. */

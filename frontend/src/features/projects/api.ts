@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { fetchProjectList, fetchProjectListByStatus } from '@/shared/lib/projectList';
 
 export interface ProjectAddress {
   street?: string | null;
@@ -254,16 +255,16 @@ export interface ProjectStatusHistoryEntry {
 export const projectsApi = {
   // NOTE: kept as a zero-arg fn so it can be passed straight as a
   // react-query `queryFn` (callers do `queryFn: projectsApi.list`). For a
-  // server-side status filter use `listByStatus` instead.
-  list: () => apiGet<Project[]>('/v1/projects/'),
+  // server-side status filter use `listByStatus` instead. Both read every
+  // page; the server's default page is 50 projects.
+  list: () => fetchProjectList<Project[]>(),
   /**
    * List projects filtered by status. Pass a concrete status (e.g.
    * 'archived') to return only those, or 'all' to include every status
    * (archived projects are excluded by the default `list`). The backend
    * accepts the `status` query param added for #274.
    */
-  listByStatus: (status: string) =>
-    apiGet<Project[]>(`/v1/projects/?status=${encodeURIComponent(status)}`),
+  listByStatus: (status: string) => fetchProjectListByStatus<Project[]>(status),
   get: (id: string) => apiGet<Project>(`/v1/projects/${id}`),
   create: (data: CreateProjectData) => apiPost<Project>('/v1/projects/', data),
   update: (id: string, data: UpdateProjectData) =>

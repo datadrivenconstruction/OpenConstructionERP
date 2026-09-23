@@ -41,7 +41,8 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -441,7 +442,7 @@ export function CvrPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

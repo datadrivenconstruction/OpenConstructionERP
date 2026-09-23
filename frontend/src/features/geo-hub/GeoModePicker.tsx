@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { Globe2, Building2, Boxes, X } from 'lucide-react';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 
 // English fallbacks for the computed `geo_hub.picker.project_status_*` keys.
 // The default only replaced the underscores, so until the keys land in a locale
@@ -230,9 +231,7 @@ function ContextPickerDialog({ kind, onClose, onPick }: ContextPickerDialogProps
     const load = async () => {
       try {
         if (kind === 'project') {
-          const rows = await apiGet<Array<{ id: string; name: string; status?: string }>>(
-            '/v1/projects/',
-          );
+          const rows = await fetchProjectList<Array<{ id: string; name: string; status?: string }>>();
           if (cancelled) return;
           setItems(
             rows.map((r) => ({

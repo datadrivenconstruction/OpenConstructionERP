@@ -44,6 +44,7 @@ import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1513,7 +1514,7 @@ export function MarkupsPage() {
   // Data queries
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

@@ -25,6 +25,7 @@ import type { DocumentItem } from '@/features/documents/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { apiGet, apiPost, ApiError, getErrorMessage, extractErrorMessageFromBody } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { uuid } from '@/shared/lib/browser';
 import {
   describeSession,
@@ -2877,7 +2878,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     enabled: open,
     staleTime: 5 * 60_000,
   });
@@ -3363,7 +3364,7 @@ function SaveDialog({
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     staleTime: 5 * 60_000,
   });
 
@@ -3450,7 +3451,7 @@ function SaveToProjectDialog({
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     staleTime: 5 * 60_000,
   });
 

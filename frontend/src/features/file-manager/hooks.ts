@@ -11,6 +11,7 @@ import {
   keepPreviousData,
 } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchFavorites,
@@ -342,7 +343,7 @@ interface ProjectLite {
 export function useProjectsLite() {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
 }

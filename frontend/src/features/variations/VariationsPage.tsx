@@ -62,7 +62,8 @@ import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -239,7 +240,7 @@ interface ProjectStub {
  * wrong, and it sends them off to fix a problem they do not have.
  */
 function listProjectsLite(): Promise<ProjectStub[]> {
-  return apiGet<ProjectStub[]>('/v1/projects/?limit=200');
+  return fetchProjectList<ProjectStub[]>();
 }
 
 /**

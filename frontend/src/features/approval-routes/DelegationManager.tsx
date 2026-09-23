@@ -26,6 +26,7 @@ import {
   WideModalSection,
 } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   approvalRoutesKeys,
@@ -112,7 +113,7 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
   });
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectResult[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectResult[]>(),
     staleTime: 5 * 60_000,
     enabled: open,
   });

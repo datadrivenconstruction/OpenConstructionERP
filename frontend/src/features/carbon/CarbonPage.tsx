@@ -53,6 +53,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import {
   listInventories,
@@ -242,7 +243,10 @@ export function CarbonPage() {
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/').catch(() => []),
+    // No catch to an empty list: this entry is shared with the header switcher,
+    // which would read a cached [] as "every project is gone". A failed read
+    // leaves the data undefined, which this page already treats as no projects.
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
   const projects = projectsQ.data ?? [];

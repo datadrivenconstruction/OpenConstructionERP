@@ -43,7 +43,8 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo } from '@/shared/ui/DismissibleInfo';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import {
   listKpis,
   getKpiHistory,
@@ -243,7 +244,7 @@ export function BIDashboardsPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectRef[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectRef[]>(),
     staleTime: 5 * 60_000,
     enabled: Boolean(projectId),
   });

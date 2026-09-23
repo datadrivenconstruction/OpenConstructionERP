@@ -34,6 +34,7 @@ import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, Bre
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { PlanningCrossLinks } from '@/features/schedule/PlanningCrossLinks';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -2778,7 +2779,7 @@ export function CostModelPage() {
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

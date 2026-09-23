@@ -55,6 +55,7 @@ import { Badge, Button, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { CountryFlag, hasFlagArt } from '@/shared/ui/CountryFlag';
 import { apiGet, downloadWithAuth, getAuthToken } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { regionDisplayName } from '@/features/cases/regions';
@@ -174,7 +175,7 @@ export default function RegionalExchangeHubPage() {
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
   });
 
   const { data: boqs = [] } = useQuery<BOQ[]>({
