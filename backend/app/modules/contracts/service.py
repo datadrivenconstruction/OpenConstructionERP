@@ -2278,6 +2278,21 @@ class ContractsService:
         it held. It used to be the prior claims' gross alone, which left their
         retention in line 7 and under-billed line 8 by it every month.
 
+        Which earlier claims count is a decision, not an oversight: every
+        application that was not rejected, submitted and approved ones
+        included, rather than only those already certified or paid as the
+        form's wording reads. A claim's net due is worked out when it is
+        generated and is not worked out again at certification, and nothing
+        stops the next claim being generated while this one is still with the
+        owner. A line 7 of certified claims only would leave the pending
+        claim's net inside the next claim's line 8, and once both are
+        certified that work is paid twice. Counting it can only err the other
+        way, when the pending claim is later rejected, and then the claim
+        after picks the work up again: an underpayment for a month, never a
+        double payment. Reading line 7 as certified claims only needs
+        certification to refuse or re-work an overlapping claim first
+        (test_overlapping_claims_never_pay_the_same_work_twice).
+
         Returns the amount and the basis it was worked out on. ``"snapshot"``
         when the previous claim stores its certificate: line 7 is then its
         line 6, lines 4 less 5 as it certified them, which is what the form
