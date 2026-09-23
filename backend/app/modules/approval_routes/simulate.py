@@ -94,7 +94,12 @@ def step_cleared(
 
 
 def min_approvals_to_clear(step: StepLike) -> int:
-    """Fewest clean approvals (no rejections) that would clear ``step``."""
+    """Fewest clean approvals (no rejections) that would clear ``step``.
+
+    A step that names a user needs that one approval whatever its count says,
+    exactly as :func:`step_cleared` decides it; see
+    :func:`named_approver_quorum_conflict` for why such a count is refused.
+    """
     if step.approver_user_id is not None:
         return 1
     quorum = step.required_approver_count
@@ -108,6 +113,26 @@ def min_approvals_to_clear(step: StepLike) -> int:
     if quorum is not None and quorum >= 1:
         return quorum
     return 2
+
+
+def named_approver_quorum_conflict(step: StepLike) -> str | None:
+    """Why a step's approver count can never be honoured, or ``None``.
+
+    A step that names a user is cleared by that user's approval alone:
+    :func:`step_cleared` never reads the count for it, and one person can
+    record only one decision on a step. A ``required_approver_count`` above
+    one on such a step therefore promises a gate the engine does not keep.
+    It is refused when a route is saved, and the dry run repeats this text
+    for any step saved before that check existed.
+    """
+    count = step.required_approver_count
+    if step.approver_user_id is None or count is None or count <= 1:
+        return None
+    return (
+        f"Step {step.ordinal} names a single approver and also sets required_approver_count {count}. "
+        f"One named person gives one approval, so the step clears on that one approval and the count "
+        f"is never reached. Use approver_role with required_approver_count {count}, or remove the count."
+    )
 
 
 def _needs_multiple_approvers(step: StepLike) -> bool:
@@ -165,6 +190,9 @@ def _build_steps(steps: list[StepLike]) -> tuple[list[SimulatedStep], list[str]]
                 f"approvers because no required_approver_count is set. Set a count, "
                 f"pin a user, or use mode 'any' if one approval should be enough."
             )
+        conflict = named_approver_quorum_conflict(step)
+        if conflict is not None:
+            warnings.append(conflict)
         if step.approver_user_id is None and step.mode == "majority" and step.required_approver_count == 1:
             warnings.append(
                 f"Step {step.ordinal} is 'majority' with required_approver_count 1, "
