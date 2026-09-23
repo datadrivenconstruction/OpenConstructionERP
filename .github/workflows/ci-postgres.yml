@@ -50,6 +50,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Same reason as ci.yml: a release candidate branch can be gated by hand.
+  workflow_dispatch:
 
 jobs:
   backend-postgres:

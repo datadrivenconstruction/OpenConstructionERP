@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
   workflow_call:
+  # A release candidate is assembled on a branch and gated here before any of it
+  # lands on main, so the full matrix can be asked for by hand against that branch.
+  workflow_dispatch:
 
 # We commit straight to main at a high rate, so nearly every run is a main push
 # and, with nothing superseding them, twenty jobs per commit pile up behind each
