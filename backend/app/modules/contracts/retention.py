@@ -170,9 +170,22 @@ def policy_from_rule(rule: Mapping[str, Any] | None, *, fallback_rate: Any) -> R
         # cover the rule ITSELF being the wrong shape, and this value arrives
         # from a JSON column and from a pack's own file, so it can be any JSON
         # value at all. A string, a list, a number and a bool each reached .get
-        # on the line above and raised AttributeError straight past the three
-        # callers that guard with except ValueError, which is the one failure
-        # this function exists to prevent. Measured on all four before fixing.
+        # on the line above and raised AttributeError rather than the ValueError
+        # the docstring promises. Measured on all four before fixing.
+        #
+        # How reachable that is today, stated because the first version of this
+        # comment implied more than it had shown. Every caller happens to check
+        # the shape before calling: schemas.py annotates the field as a dict so
+        # Pydantic refuses a non-dict before the validator runs, and the three
+        # in service.py each either build the mapping locally or guard with
+        # isinstance first. So no live path reaches this line, and the four
+        # shapes were measured by calling the function directly.
+        #
+        # That does not make it decoration. The promise is this function's, not
+        # its callers', three of them act on the refusal and one declines to
+        # write a row on it, and a guard held up by four separate coincidences
+        # elsewhere is one tidy-up away from gone. It is here so those checks
+        # are free to be removed rather than load bearing.
         #
         # It sits after the falsy check rather than before it so that None, an
         # empty mapping and an empty string keep standing in the flat rate the
