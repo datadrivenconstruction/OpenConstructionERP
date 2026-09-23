@@ -96,6 +96,8 @@ import {
   type CountryPack,
 } from './countryPacks';
 import { resolveCountryOffer } from './countryOffer';
+import { groupProfilePresets } from './profileGroups';
+import { profileShapes } from '@/features/modules/profileDifference';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 import {
@@ -471,80 +473,6 @@ function presetModuleSet(preset: ApiCompanyPreset): Set<string> {
     return new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key));
   }
   return new Set(preset.enabled_modules);
-}
-
-// ── Company-size presets ────────────────────────────────────────────────────
-// A parallel dimension to the role catalogue above, answering "how big is your
-// team" rather than "what kind of work do you do". Same shape, same machinery:
-// a chosen size maps to a functional-module set the backend turns into the
-// module_preferences map the sidebar honours. Served by the sibling endpoint
-// ``GET /v1/users/onboarding-presets/sizes/`` (SIZE_PRESETS in
-// ``backend/app/core/onboarding_presets.py``, the single source of truth).
-
-// Minimal fallback used only if the size-presets endpoint is unreachable. The
-// backend is authoritative; these mirror it so the four cards still render and
-// still select a sensible module set in the (practically impossible for a
-// same-origin SPA) offline case.
-const FALLBACK_SIZE_PRESETS: ApiCompanyPreset[] = [
-  {
-    key: 'size_solo',
-    label: 'Solo / Freelancer',
-    description: 'Just me - quick takeoff, a priced BoQ and a clean report, without the overhead.',
-    icon: 'HardHat',
-    tags: ['Takeoff', 'BOQ', 'Reports'],
-    enabled_modules: ['boq', 'takeoff', 'validation', 'ai', 'reporting'],
-    module_count: 5,
-  },
-  {
-    key: 'size_small',
-    label: 'Small Team',
-    description:
-      'A handful of us - estimating, a schedule, procurement and the day-to-day paperwork.',
-    icon: 'Briefcase',
-    tags: ['Estimating', 'Schedule', 'Procurement'],
-    enabled_modules: [
-      'boq', 'validation', 'cost_match', 'match', 'takeoff', 'dwg_takeoff', 'ai',
-      'schedule', 'tasks', 'procurement', 'changeorders', 'contracts', 'variations',
-      'documents', 'markups', 'reporting',
-    ],
-    module_count: 16,
-  },
-  {
-    key: 'size_medium',
-    label: 'Mid-sized Company',
-    description:
-      'A full contractor - estimating, site, procurement, quality and cost control end to end.',
-    icon: 'Building2',
-    tags: ['Site', 'Finance', 'Quality'],
-    enabled_modules: [
-      'boq', 'costs', 'assemblies', 'catalog', 'validation', 'takeoff', 'dwg_takeoff',
-      'schedule', 'tasks', 'costmodel', 'finance', 'procurement', 'changeorders',
-      'contracts', 'variations', 'equipment', 'resources', 'daily_diary', 'subcontractors',
-      'payroll', 'field_diary', 'meetings', 'rfi', 'submittals', 'transmittals', 'documents',
-      'cde', 'markups', 'inspections', 'ncr', 'safety', 'punchlist', 'risk', 'qms', 'moc',
-      'fieldreports', 'reporting', 'project_controls',
-    ],
-    module_count: 38,
-  },
-  {
-    key: 'size_large',
-    label: 'Large Enterprise',
-    description: 'The whole organisation - every module across the full construction lifecycle.',
-    icon: 'Boxes',
-    tags: ['Enterprise', 'All modules', 'Lifecycle'],
-    enabled_modules: ALL_MODULES.filter((m) => !m.core).map((m) => m.key),
-    module_count: ALL_MODULES.filter((m) => !m.core).length,
-  },
-];
-
-/** Fetch the company-size presets (parallel to the role-presets query). */
-function useOnboardingSizePresets(): ApiCompanyPreset[] {
-  const { data } = useQuery({
-    queryKey: ['onboarding-size-presets'],
-    queryFn: () => apiGet<ApiCompanyPreset[]>('/v1/users/onboarding-presets/sizes/'),
-    staleTime: 5 * 60 * 1000,
-  });
-  return data && data.length > 0 ? data : FALLBACK_SIZE_PRESETS;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1296,8 +1224,8 @@ function StepStartChoice({
             {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
           </h3>
           <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
-            {t('onboarding.choose_profile_desc', {
-              defaultValue: 'Select your role and customize which modules you need.',
+            {t('onboarding.choose_profile_company_desc', {
+              defaultValue: 'Tell us what your company does and review the modules it needs.',
             })}
           </p>
         </button>
@@ -1959,297 +1887,58 @@ function ReadyPackProgressPanel({
   );
 }
 
-// ── Step 3: Company Profile (industry cards) ────────────────────────────────
+// ── Step 2: Company profile ─────────────────────────────────────────────────
+// "What does your company do?" is the one first cut. A card per kind of
+// business, grouped and ordered by ./profileGroups, with the job profiles
+// folded into a secondary group underneath for the person setting the tool up
+// for their own job. Picking a card writes the companyType / enabledModules
+// state the module step then shows for review.
+//
+// It replaced a first cut by team size (solo, small, mid-sized, large). Size
+// says how many people use the tool, not which tools they use: a five-person
+// MEP installer and a five-person cost consultancy need different menus, and
+// the size tiers handed both the same one. The size presets are still served
+// by the backend, because accounts that picked one keep that key as their
+// company_type; nothing in the wizard offers them any more.
 
-// ── Step 2 (primary): Company Size ──────────────────────────────────────────
-// The quick first cut for a new user: four size tiers that reuse the same
-// preset machinery as the role grid below. Picking a tier writes the same
-// companyType / enabledModules state a role pick would. A quiet link swaps in
-// the detailed role grid for anyone who would rather choose by trade.
-
-// Wizard key -> its i18n label key, so a size preset's ``enabled_modules`` can
-// be rendered as friendly, translated module names in the size step.
+// Wizard key -> its i18n label key, so a preset's ``enabled_modules`` can be
+// rendered as friendly, translated module names on the cards and the preview.
 const MODULE_LABEL_KEY_BY_KEY: Record<string, string> = Object.fromEntries(
   ALL_MODULES.map((m) => [m.key, m.labelKey]),
 );
 
-// A short, recognisable foundation every company gets regardless of size, so
-// the preview can reassure a solo user that the basics are always on.
-const SIZE_FOUNDATION_KEYS = ['projects', 'dashboards', 'costs', 'catalog'];
+// A short, recognisable foundation every profile gets, so the preview can say
+// that the basics are on whatever the reader picks.
+const PROFILE_FOUNDATION_KEYS = ['projects', 'dashboards', 'costs', 'catalog'];
 
-// English fallbacks for the per-tier team-size hint. Localised via
-// ``onboarding.<size_key>_people``; a tier with no entry simply hides the pill.
-const DEFAULT_PEOPLE_HINT: Record<string, string> = {
-  size_solo: 'Just you',
-  size_small: 'Up to 5 people',
-  size_medium: '5 to 50 people',
-  size_large: '50+ people',
-};
-
-// How many module chips to show before collapsing into "+N more".
-const SIZE_MAIN_CHIP_CAP = 14;
-const SIZE_GROWS_CHIP_CAP = 10;
+// How many module names a card names, and how many chips the preview shows
+// before collapsing the rest into "+N more".
+const PROFILE_CARD_HIGHLIGHTS = 3;
+const PROFILE_PREVIEW_CHIP_CAP = 18;
 
 function prettifyModuleKey(key: string): string {
   return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function StepCompanySize({
-  onNext,
-  onBack,
-  sizePresets,
-  selectedType,
-  onSelectType,
-  onChooseByRole,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  sizePresets: ApiCompanyPreset[];
-  selectedType: string | null;
-  onSelectType: (key: string) => void;
-  onChooseByRole: () => void;
-}) {
+/** A module key as the reader sees it, in the wizard's own vocabulary. */
+function useModuleLabel(): (key: string) => string {
   const { t } = useTranslation();
-  // Hovering a card previews its modules without committing the choice, so a
-  // user can scan all four tiers quickly before picking one.
-  const [hoverKey, setHoverKey] = useState<string | null>(null);
-
-  // Size cards resolve their copy from ``onboarding.<size_key>`` (e.g.
-  // ``onboarding.size_solo`` / ``onboarding.size_solo_desc``), falling back to
-  // the backend's English label when a locale string is not present.
-  const sizeLabel = (p: ApiCompanyPreset) =>
-    t(`onboarding.${p.key}`, { defaultValue: p.label });
-  const sizeDesc = (p: ApiCompanyPreset) =>
-    t(`onboarding.${p.key}_desc`, { defaultValue: p.description });
-  const peopleHint = (p: ApiCompanyPreset) =>
-    t(`onboarding.${p.key}_people`, { defaultValue: DEFAULT_PEOPLE_HINT[p.key] ?? '' });
-  const moduleLabel = (key: string) => {
-    const labelKey = MODULE_LABEL_KEY_BY_KEY[key];
-    return labelKey ? t(labelKey, { defaultValue: prettifyModuleKey(key) }) : prettifyModuleKey(key);
-  };
-
-  // What to preview: the hovered tier, else the selected one, else the first
-  // (smallest) tier so the panel is informative the moment the step opens.
-  const previewKey = hoverKey ?? selectedType ?? sizePresets[0]?.key ?? null;
-  const previewPreset = sizePresets.find((p) => p.key === previewKey) ?? null;
-  const previewIndex = previewPreset
-    ? sizePresets.findIndex((p) => p.key === previewPreset.key)
-    : -1;
-  const nextPreset = previewIndex >= 0 ? sizePresets[previewIndex + 1] : undefined;
-
-  const mainKeys = previewPreset?.enabled_modules ?? [];
-  const mainShown = mainKeys.slice(0, SIZE_MAIN_CHIP_CAP);
-  const mainExtra = Math.max(0, mainKeys.length - mainShown.length);
-  const mainSet = new Set(mainKeys);
-
-  // "Grows into" = the modules the next tier up adds on top of this one.
-  const growsKeys = nextPreset
-    ? nextPreset.enabled_modules.filter((k) => !mainSet.has(k))
-    : [];
-  const growsShown = growsKeys.slice(0, SIZE_GROWS_CHIP_CAP);
-  const growsExtra = Math.max(0, growsKeys.length - growsShown.length);
-  const foundationLabels = fmtList(SIZE_FOUNDATION_KEYS.map(moduleLabel));
-
-  return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold text-content-primary text-center">
-        {t('onboarding.size_title', { defaultValue: 'How big is your team?' })}
-      </h2>
-      <p className="mt-2 max-w-lg text-center text-sm text-content-secondary">
-        {t('onboarding.size_subtitle', {
-          defaultValue:
-            "We switch on exactly the modules a team your size needs, and show what you grow into. You can fine-tune everything next.",
-        })}
-      </p>
-
-      {/* Four size tiers: one column on mobile, two on tablet, four on desktop. */}
-      <div className="mt-6 grid w-full max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {sizePresets.map((preset) => {
-          const isSelected = selectedType === preset.key;
-          const Icon = presetIcon(preset.icon);
-          const hint = peopleHint(preset);
-
-          return (
-            <button
-              key={preset.key}
-              type="button"
-              onClick={() => onSelectType(preset.key)}
-              onMouseEnter={() => setHoverKey(preset.key)}
-              onMouseLeave={() => setHoverKey(null)}
-              onFocus={() => setHoverKey(preset.key)}
-              onBlur={() => setHoverKey(null)}
-              aria-pressed={isSelected}
-              className={clsx(
-                'group relative flex flex-col items-start rounded-2xl p-5 text-start',
-                'transition-all duration-300 ease-oe',
-                isSelected
-                  ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
-                  : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
-              )}
-            >
-              <div className="mb-3 flex w-full items-center gap-2">
-                <div
-                  className={clsx(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300',
-                    isSelected
-                      ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
-                      : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary',
-                  )}
-                >
-                  <Icon size={20} />
-                </div>
-                {isSelected && <CheckCircle2 size={16} className="ms-auto text-oe-blue" />}
-              </div>
-
-              <h3
-                className={clsx(
-                  'text-base font-bold transition-colors',
-                  isSelected ? 'text-oe-blue' : 'text-content-primary',
-                )}
-              >
-                {sizeLabel(preset)}
-              </h3>
-              <p className="mt-1 text-sm leading-snug text-content-secondary">
-                {sizeDesc(preset)}
-              </p>
-
-              {/* Team-size hint + module count */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                {hint && (
-                  <span className="inline-flex items-center rounded-full bg-oe-blue-subtle/50 px-2.5 py-0.5 text-2xs font-semibold text-oe-blue">
-                    {hint}
-                  </span>
-                )}
-                <span className="inline-flex items-center rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
-                  {preset.module_count}{' '}
-                  {t('onboarding.modules_label', { defaultValue: 'modules' })}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Live preview: the modules this size switches on now, and what it grows
-          into next. Reacts to the hovered (or selected) tier. */}
-      {previewPreset && mainShown.length > 0 && (
-        <div className="mt-6 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-secondary/40 p-5 text-start">
-          <div className="flex items-center gap-2">
-            <Package size={16} className="shrink-0 text-oe-blue" />
-            <h4 className="text-sm font-semibold text-content-primary">
-              {t('onboarding.size_you_get', {
-                defaultValue: 'What {{name}} switches on',
-                name: sizeLabel(previewPreset),
-              })}
-            </h4>
-            <span className="ms-auto shrink-0 rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
-              {previewPreset.module_count}{' '}
-              {t('onboarding.modules_label', { defaultValue: 'modules' })}
-            </span>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {mainShown.map((key) => (
-              <span
-                key={key}
-                className="inline-flex items-center gap-1 rounded-lg bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary shadow-sm shadow-black/[0.03]"
-              >
-                <Check size={12} className="shrink-0 text-oe-blue" />
-                {moduleLabel(key)}
-              </span>
-            ))}
-            {mainExtra > 0 && (
-              <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium text-content-tertiary">
-                +{mainExtra} {t('onboarding.more', { defaultValue: 'more' })}
-              </span>
-            )}
-          </div>
-
-          {growsShown.length > 0 && (
-            <div className="mt-4 border-t border-border-light pt-3">
-              <div className="flex items-center gap-2">
-                <Sparkles size={14} className="shrink-0 text-content-tertiary" />
-                <h5 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-                  {t('onboarding.size_grows', { defaultValue: 'Grows with you' })}
-                </h5>
-              </div>
-              <p className="mt-1 text-xs text-content-tertiary">
-                {t('onboarding.size_grows_hint', {
-                  defaultValue: 'Switch these on in one click as your team grows.',
-                })}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {growsShown.map((key) => (
-                  <span
-                    key={key}
-                    className="inline-flex items-center rounded-lg border border-dashed border-border-medium px-2.5 py-1 text-xs text-content-tertiary"
-                  >
-                    {moduleLabel(key)}
-                  </span>
-                ))}
-                {growsExtra > 0 && (
-                  <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs text-content-quaternary">
-                    +{growsExtra} {t('onboarding.more', { defaultValue: 'more' })}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {growsKeys.length === 0 && previewPreset.key === 'size_large' && (
-            <p className="mt-3 border-t border-border-light pt-3 text-xs text-content-tertiary">
-              {t('onboarding.size_everything', {
-                defaultValue:
-                  'Everything is included, the whole platform across the full construction lifecycle.',
-              })}
-            </p>
-          )}
-
-          <p className="mt-4 flex items-start gap-1.5 text-2xs text-content-quaternary">
-            <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-content-tertiary" />
-            <span>
-              {t('onboarding.size_foundation', {
-                defaultValue: 'Always included: {{list}}',
-                list: foundationLabels,
-              })}
-            </span>
-          </p>
-        </div>
-      )}
-
-      {/* Escape hatch to the detailed role grid (writes the same state). */}
-      <button
-        type="button"
-        onClick={onChooseByRole}
-        className="mt-4 text-sm font-medium text-oe-blue transition-colors hover:underline"
-      >
-        {t('onboarding.size_choose_role', {
-          defaultValue: 'Choose by detailed role instead',
-        })}
-      </button>
-
-      <p className="mt-2 text-xs text-content-tertiary">
-        {t('onboarding.size_change_note', {
-          defaultValue: 'You can change this anytime in Settings.',
-        })}
-      </p>
-
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button
-          variant="primary"
-          onClick={onNext}
-          disabled={!selectedType}
-          icon={<ArrowRight size={16} />}
-          iconPosition="right"
-        >
-          {t('common.continue', { defaultValue: 'Continue' })}
-        </Button>
-      </div>
-    </div>
+  return useCallback(
+    (key: string) => {
+      const labelKey = MODULE_LABEL_KEY_BY_KEY[key];
+      return labelKey
+        ? t(labelKey, { defaultValue: prettifyModuleKey(key) })
+        : prettifyModuleKey(key);
+    },
+    [t],
   );
+}
+
+/** How many modules the module step reports active once this preset is
+ *  picked: its own modules plus the core ones everybody has, each counted
+ *  once (several presets re-list a core key). */
+function presetActiveCount(preset: ApiCompanyPreset): number {
+  return new Set([...presetModuleSet(preset), ...CORE_MODULE_KEYS]).size;
 }
 
 /**
@@ -2298,6 +1987,77 @@ function ProfileMark({
   );
 }
 
+/** One profile card: what the business is, and what picking it switches on. */
+function ProfileCard({
+  preset,
+  selected,
+  onSelect,
+  highlights,
+}: {
+  preset: ApiCompanyPreset;
+  selected: boolean;
+  onSelect: (key: string) => void;
+  /** Module keys worth naming on the card, already chosen by the caller. */
+  highlights: string[];
+}) {
+  const { t } = useTranslation();
+  const text = usePresetText();
+  const moduleLabel = useModuleLabel();
+  const Icon = presetIcon(preset.icon);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(preset.key)}
+      aria-pressed={selected}
+      data-testid={`profile-card-${preset.key}`}
+      className={clsx(
+        'group relative flex min-w-0 flex-col items-start rounded-2xl p-5 text-start',
+        'transition-all duration-300 ease-oe',
+        selected
+          ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
+          : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
+      )}
+    >
+      <div className="mb-3 flex w-full items-center gap-2">
+        <ProfileMark presetKey={preset.key} icon={Icon} selected={selected} />
+        {preset.key === 'general_contractor' && (
+          <Badge variant="blue" size="sm">
+            {t('onboarding.popular', { defaultValue: 'Popular' })}
+          </Badge>
+        )}
+        {selected && <CheckCircle2 size={16} className="ms-auto shrink-0 text-oe-blue" />}
+      </div>
+
+      <h3
+        className={clsx(
+          'text-base font-bold break-words transition-colors',
+          selected ? 'text-oe-blue' : 'text-content-primary',
+        )}
+      >
+        {text.label(preset)}
+      </h3>
+      <p className="mt-1 text-sm leading-snug text-content-secondary break-words">
+        {text.description(preset)}
+      </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
+          {presetActiveCount(preset)} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+        </span>
+      </div>
+      {highlights.length > 0 && (
+        <p className="mt-2 text-2xs leading-snug text-content-tertiary break-words">
+          {t('onboarding.bizprofile_highlights', {
+            defaultValue: 'Includes {{list}}',
+            list: fmtList(highlights.map(moduleLabel)),
+          })}
+        </p>
+      )}
+    </button>
+  );
+}
+
 function StepCompanyProfile({
   onNext,
   onBack,
@@ -2315,133 +2075,108 @@ function StepCompanyProfile({
 }) {
   const { t } = useTranslation();
   const text = usePresetText();
+  const moduleLabel = useModuleLabel();
 
-  const handleSelect = useCallback(
-    (key: string) => {
-      onSelectType(key);
-    },
-    [onSelectType],
+  const { companies, roles, everything } = useMemo(() => groupProfilePresets(presets), [presets]);
+
+  // The job profiles start folded away. A reader coming back from the module
+  // step with one of them picked finds the group open, so the selection is
+  // never on a card they cannot see.
+  const selectedIsRole = selectedType !== null && roles.some((p) => p.key === selectedType);
+  const [rolesOpen, setRolesOpen] = useState(selectedIsRole);
+  const showRoles = rolesOpen || selectedIsRole;
+
+  // What each card names: the modules few other profiles carry, the same
+  // signature the Modules page prints, so the two screens describe a profile
+  // alike. A profile with no such module names its first few instead.
+  const shapes = useMemo(
+    () => profileShapes(presets, Array.from(CORE_MODULE_KEYS)),
+    [presets],
   );
+  const highlightsFor = useCallback(
+    (preset: ApiCompanyPreset): string[] => {
+      const shape = shapes.get(preset.key);
+      if (!shape) return [];
+      const named = shape.rare.length > 0 ? shape.rare : shape.modules;
+      return named.slice(0, PROFILE_CARD_HIGHLIGHTS);
+    },
+    [shapes],
+  );
+
+  const selectedPreset = presets.find((p) => p.key === selectedType) ?? null;
+  const previewKeys = selectedPreset
+    ? Array.from(presetModuleSet(selectedPreset)).filter((k) => !CORE_MODULE_KEYS.has(k))
+    : [];
+  const previewShown = previewKeys.slice(0, PROFILE_PREVIEW_CHIP_CAP);
+  const previewExtra = previewKeys.length - previewShown.length;
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.profile_title', { defaultValue: 'What best describes your work?' })}
+      <h2 className="text-center text-2xl font-bold text-content-primary">
+        {t('onboarding.bizprofile_title', { defaultValue: 'What does your company do?' })}
       </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.profile_subtitle', {
-          defaultValue: "We'll pre-select the right modules. You can always change this later.",
+      <p className="mt-2 max-w-lg text-center text-sm text-content-secondary">
+        {t('onboarding.bizprofile_subtitle', {
+          defaultValue:
+            'Pick the profile closest to your business. We switch on the modules it works with, and you review them on the next step.',
         })}
       </p>
 
-      {/* Profile cards: three columns on desktop, matching the width of the
-          earlier start-choice step, two on tablet, one on mobile. */}
-      <div className="mt-6 w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {presets.filter((p) => p.key !== 'full_enterprise').map((preset) => {
-          const isSelected = selectedType === preset.key;
-          const Icon = presetIcon(preset.icon);
-          const moduleCount = preset.module_count;
-          const visibleTags = preset.tags.slice(0, 3);
-          const extraCount = moduleCount - visibleTags.length;
-
-          return (
-            <button
-              key={preset.key}
-              onClick={() => handleSelect(preset.key)}
-              className={clsx(
-                'group relative flex flex-col items-start rounded-2xl p-5 text-left',
-                'transition-all duration-300 ease-oe',
-                isSelected
-                  ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
-                  : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
-              )}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <ProfileMark presetKey={preset.key} icon={Icon} selected={isSelected} />
-                {preset.key === 'general_contractor' && (
-                  <Badge variant="blue" size="sm">
-                    {t('onboarding.popular', { defaultValue: 'Popular' })}
-                  </Badge>
-                )}
-                {isSelected && (
-                  <CheckCircle2 size={16} className="text-oe-blue ml-auto" />
-                )}
-              </div>
-
-              <h3
-                className={clsx(
-                  'text-base font-bold transition-colors',
-                  isSelected ? 'text-oe-blue' : 'text-content-primary',
-                )}
-              >
-                {text.label(preset)}
-              </h3>
-              <p className="mt-1 text-sm text-content-secondary leading-snug">
-                {text.description(preset)}
-              </p>
-
-              {/* Module tags */}
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {visibleTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-secondary"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {extraCount > 0 && (
-                  <span className="inline-flex items-center rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
-                    +{extraCount} {t('onboarding.more', { defaultValue: 'more' })}
-                  </span>
-                )}
-              </div>
-            </button>
-          );
-        })}
+      {/* Businesses: three columns on desktop, two on tablet, one on mobile. */}
+      <div
+        className="mt-6 grid w-full max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        data-testid="profile-companies"
+      >
+        {companies.map((preset) => (
+          <ProfileCard
+            key={preset.key}
+            preset={preset}
+            selected={selectedType === preset.key}
+            onSelect={onSelectType}
+            highlights={highlightsFor(preset)}
+          />
+        ))}
       </div>
 
-      {/* Full Enterprise — wide card */}
-      {(() => {
-        const enterprise = presets.find((p) => p.key === 'full_enterprise');
-        if (!enterprise) return null;
-        const isSelected = selectedType === 'full_enterprise';
-        const Icon = presetIcon(enterprise.icon);
-
+      {/* Everything: one wide card under the businesses. */}
+      {everything && (() => {
+        const isSelected = selectedType === everything.key;
+        const Icon = presetIcon(everything.icon);
         return (
           <button
-            onClick={() => handleSelect('full_enterprise')}
+            type="button"
+            onClick={() => onSelectType(everything.key)}
+            aria-pressed={isSelected}
+            data-testid={`profile-card-${everything.key}`}
             className={clsx(
-              'mt-3 w-full max-w-2xl group relative flex items-center gap-4 rounded-2xl p-5 text-left',
+              'group relative mt-3 flex w-full max-w-2xl items-center gap-4 rounded-2xl p-5 text-start',
               'transition-all duration-300 ease-oe',
               isSelected
                 ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
                 : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
             )}
           >
-            <ProfileMark presetKey="full_enterprise" icon={Icon} selected={isSelected} />
+            <ProfileMark presetKey={everything.key} icon={Icon} selected={isSelected} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h3
                   className={clsx(
-                    'text-base font-bold transition-colors',
+                    'text-base font-bold break-words transition-colors',
                     isSelected ? 'text-oe-blue' : 'text-content-primary',
                   )}
                 >
-                  {text.label(enterprise)}
+                  {text.label(everything)}
                 </h3>
-                {isSelected && <CheckCircle2 size={16} className="text-oe-blue" />}
+                {isSelected && <CheckCircle2 size={16} className="shrink-0 text-oe-blue" />}
               </div>
-              <p className="mt-0.5 text-sm text-content-secondary">
-                {text.description(enterprise)}
+              <p className="mt-0.5 text-sm text-content-secondary break-words">
+                {text.description(everything)}
               </p>
             </div>
             <span
               className={clsx(
                 'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
-                isSelected
-                  ? 'bg-oe-blue text-white'
-                  : 'bg-surface-secondary text-content-tertiary',
+                isSelected ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary',
               )}
             >
               {t('onboarding.all_modules', {
@@ -2453,13 +2188,114 @@ function StepCompanyProfile({
         );
       })()}
 
-      {/* Configure individually button */}
+      {/* Job profiles: for one person setting the tool up for their own job. */}
+      {roles.length > 0 && (
+        <div className="mt-5 flex w-full max-w-5xl flex-col items-center">
+          <button
+            type="button"
+            onClick={() => setRolesOpen((open) => !open)}
+            aria-expanded={showRoles}
+            aria-controls="onboarding-role-profiles"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue transition-colors hover:underline"
+          >
+            {showRoles ? (
+              <ChevronDown size={15} className="shrink-0" aria-hidden />
+            ) : (
+              <ChevronRight size={15} className="shrink-0 rtl:rotate-180" aria-hidden />
+            )}
+            {t('onboarding.bizprofile_roles_toggle', { defaultValue: 'Or pick by your role' })}
+          </button>
+          {showRoles && (
+            <div id="onboarding-role-profiles" className="mt-3 w-full">
+              <p className="mb-3 text-center text-xs text-content-tertiary">
+                {t('onboarding.bizprofile_roles_hint', {
+                  defaultValue:
+                    'For one person setting up the tool for their own job, such as a planner or a site manager.',
+                })}
+              </p>
+              <div
+                className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                data-testid="profile-roles"
+              >
+                {roles.map((preset) => (
+                  <ProfileCard
+                    key={preset.key}
+                    preset={preset}
+                    selected={selectedType === preset.key}
+                    onSelect={onSelectType}
+                    highlights={highlightsFor(preset)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* What the picked profile switches on, in module names. */}
+      {selectedPreset && previewShown.length > 0 && (
+        <div
+          className="mt-6 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-secondary/40 p-5 text-start"
+          data-testid="profile-preview"
+        >
+          <div className="flex items-center gap-2">
+            <Package size={16} className="shrink-0 text-oe-blue" />
+            <h4 className="min-w-0 text-sm font-semibold text-content-primary break-words">
+              {t('onboarding.bizprofile_you_get', {
+                defaultValue: 'What {{name}} switches on',
+                name: text.label(selectedPreset),
+              })}
+            </h4>
+            <span className="ms-auto shrink-0 rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
+              {presetActiveCount(selectedPreset)}{' '}
+              {t('onboarding.modules_label', { defaultValue: 'modules' })}
+            </span>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {previewShown.map((key) => (
+              <span
+                key={key}
+                className="inline-flex items-center gap-1 rounded-lg bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary shadow-sm shadow-black/[0.03]"
+              >
+                <Check size={12} className="shrink-0 text-oe-blue" />
+                {moduleLabel(key)}
+              </span>
+            ))}
+            {previewExtra > 0 && (
+              <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium text-content-tertiary">
+                +{previewExtra} {t('onboarding.more', { defaultValue: 'more' })}
+              </span>
+            )}
+          </div>
+
+          <p className="mt-4 flex items-start gap-1.5 text-2xs text-content-quaternary">
+            <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-content-tertiary" />
+            <span>
+              {t('onboarding.bizprofile_foundation', {
+                defaultValue: 'Always included: {{list}}',
+                list: fmtList(PROFILE_FOUNDATION_KEYS.map(moduleLabel)),
+              })}
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* Straight to the module list, for a reader who would rather choose
+          module by module than start from a profile. */}
       <button
+        type="button"
         onClick={onConfigureIndividually}
-        className="mt-4 text-sm font-medium text-oe-blue hover:underline transition-colors"
+        className="mt-4 text-sm font-medium text-oe-blue transition-colors hover:underline"
       >
         {t('onboarding.configure_individually', { defaultValue: 'Configure individually' })}
       </button>
+
+      <p className="mt-2 text-center text-xs text-content-tertiary">
+        {t('onboarding.bizprofile_change_note', {
+          defaultValue: 'You can switch profile or turn modules on and off later in Settings.',
+        })}
+      </p>
 
       <div className="mt-6 flex items-center gap-3">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
@@ -4377,16 +4213,12 @@ export function StepFinish({
   companyType,
   enabledModules,
   presets,
-  sizePresets,
   packInstalled = false,
 }: {
   onBack: () => void;
   companyType: string | null;
   enabledModules: Set<string>;
   presets: ApiCompanyPreset[];
-  /** Company-size presets, so the summary label resolves when the user picked
-   *  a size tier (whose key lives here, not in the role ``presets``). */
-  sizePresets: ApiCompanyPreset[];
   /** A ready-made pack already provisioned modules + regional config + sample
    *  data server-side. When true, Finish must NOT overwrite those module
    *  preferences or re-POST a generic onboarding payload, and it lands on the
@@ -4408,18 +4240,7 @@ export function StepFinish({
   const selectedPreset = companyType
     ? presets.find((p) => p.key === companyType)
     : undefined;
-  // A size tier's key lives in ``sizePresets`` (not the role ``presets``), and
-  // its copy resolves from ``onboarding.<size_key>`` rather than the role
-  // ``onboarding.company_<key>`` namespace, so resolve it separately.
-  const selectedSize =
-    companyType && !selectedPreset
-      ? sizePresets.find((p) => p.key === companyType)
-      : undefined;
-  const presetLabel = selectedPreset
-    ? text.label(selectedPreset)
-    : selectedSize
-      ? t(`onboarding.${selectedSize.key}`, { defaultValue: selectedSize.label })
-      : null;
+  const presetLabel = selectedPreset ? text.label(selectedPreset) : null;
 
   const enabledCount = enabledModules.size + CORE_MODULE_KEYS.size;
 
@@ -4455,14 +4276,8 @@ export function StepFinish({
     //    into the canonical module_preferences map, which is what the sidebar,
     //    module routes and Project Journey read back to reshape the menu.
     try {
-      // When the user picked a size tier, companyType holds the size key; pass
-      // it as the optional company_size dimension too so the choice round-trips.
-      const companySize = sizePresets.some((p) => p.key === companyType)
-        ? companyType
-        : null;
       const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
         company_type: companyType ?? 'full_enterprise',
-        company_size: companySize,
         enabled_modules: Array.from(enabledModules),
         completed: true,
       });
@@ -4492,7 +4307,6 @@ export function StepFinish({
   }, [
     companyType,
     enabledModules,
-    sizePresets,
     navigate,
     packInstalled,
     queryClient,
@@ -4632,7 +4446,6 @@ export function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
   const presets = useOnboardingPresets();
-  const sizePresets = useOnboardingSizePresets();
   const [companyType, setCompanyType] = useState<string | null>(null);
   const [enabledModules, setEnabledModules] = useState<Set<string>>(
     () => new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)),
@@ -4663,12 +4476,6 @@ export function OnboardingWizard() {
   const [quickStart, setQuickStart] = useState(false);
   // Track whether module config step should be shown
   const [showModuleConfig, setShowModuleConfig] = useState(false);
-  // Step 2 shows the company-SIZE grid by default (the quick first cut). This
-  // flag swaps in the detailed company-ROLE grid when the user asks for it.
-  // Both grids write the same companyType / enabledModules state, so switching
-  // never loses the selection. Persistent across step navigation so returning
-  // from the module step lands the user back on whichever grid they used.
-  const [roleView, setRoleView] = useState(false);
   // Ready-made pack flow: when true, step 1 swaps its choice cards for the
   // pack picker. ``packInstalledSlug`` records the slug once a pack is fully
   // installed so the Finish step shows pack-appropriate copy and does not
@@ -4706,14 +4513,11 @@ export function OnboardingWizard() {
   const handleSelectCompanyType = useCallback(
     (key: string) => {
       setCompanyType(key);
-      // Apply the preset's module set. The key can be either a role preset or a
-      // size preset - both share the ApiCompanyPreset shape and the same
-      // module-set machinery (full_enterprise = every non-core module).
-      const preset =
-        presets.find((p) => p.key === key) ?? sizePresets.find((p) => p.key === key);
+      // Apply the preset's module set (full_enterprise = every non-core module).
+      const preset = presets.find((p) => p.key === key);
       if (preset) setEnabledModules(presetModuleSet(preset));
     },
-    [presets, sizePresets],
+    [presets],
   );
 
   const handleToggleModule = useCallback((key: string) => {
@@ -4929,20 +4733,10 @@ export function OnboardingWizard() {
                   onBack={() => setReadyPackView(false)}
                 />
               )}
-              {step === 2 && !roleView && (
-                <StepCompanySize
-                  onNext={handleNextFromProfile}
-                  onBack={() => setStep(1)}
-                  sizePresets={sizePresets}
-                  selectedType={companyType}
-                  onSelectType={handleSelectCompanyType}
-                  onChooseByRole={() => setRoleView(true)}
-                />
-              )}
-              {step === 2 && roleView && (
+              {step === 2 && (
                 <StepCompanyProfile
                   onNext={handleNextFromProfile}
-                  onBack={() => setRoleView(false)}
+                  onBack={() => setStep(1)}
                   presets={presets}
                   selectedType={companyType}
                   onSelectType={handleSelectCompanyType}
@@ -4974,7 +4768,6 @@ export function OnboardingWizard() {
                   companyType={companyType}
                   enabledModules={enabledModules}
                   presets={presets}
-                  sizePresets={sizePresets}
                   packInstalled={packInstalledSlug !== null}
                 />
               )}
