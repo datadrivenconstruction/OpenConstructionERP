@@ -13524,6 +13524,8 @@ const resource = {
     "boq.link_finance": "予算を表示",
     "boq.link_validation": "検証を実行",
     "boq.linked_geometry": "リンクされたジオメトリ",
+    "boq.list_load_failed_projects": "次のプロジェクトを読み取れませんでした：{{projects}}。このページを開いた後に、アーカイブまたは削除されたか、アクセス権が削除された可能性があります。合計から漏れることがないよう、何も表示していません。",
+    "boq.list_load_failed_title": "見積を読み込めませんでした",
     "boq.list_subtitle_count": "{{projectCount}} 件のプロジェクトで {{boqCount}} 件の見積",
     "boq.loading_element_data": "要素データを読み込み中…",
     "boq.loading_full_properties": "全プロパティを読み込み中…",

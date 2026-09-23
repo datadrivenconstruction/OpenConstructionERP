@@ -14100,6 +14100,8 @@ const resource = {
     "boq.link_finance": "Открыть бюджет",
     "boq.link_validation": "Запустить проверку",
     "boq.linked_geometry": "Связанная геометрия",
+    "boq.list_load_failed_projects": "Не удалось прочитать эти проекты: {{projects}}. Возможно, с момента открытия страницы они были архивированы или удалены либо у вас отозван доступ. Ничего не показано, чтобы ни один итог их не упустил.",
+    "boq.list_load_failed_title": "Не удалось загрузить сметы",
     "boq.list_subtitle_count": "{{boqCount}} смет в {{projectCount}} проектах",
     "boq.loading_element_data": "Загрузка данных элементов...",
     "boq.loading_full_properties": "Загрузка полных свойств…",

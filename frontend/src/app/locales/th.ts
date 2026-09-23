@@ -13507,6 +13507,8 @@ const resource = {
     "boq.link_finance": "ดูงบประมาณ",
     "boq.link_validation": "เรียกใช้การตรวจสอบ",
     "boq.linked_geometry": "รูปทรงที่เชื่อมโยง",
+    "boq.list_load_failed_projects": "ไม่สามารถอ่านโครงการเหล่านี้ได้: {{projects}} โครงการอาจถูกเก็บถาวรหรือลบ หรือสิทธิ์การเข้าถึงของคุณอาจถูกเพิกถอนตั้งแต่เปิดหน้านี้ ไม่มีการแสดงรายการใด ๆ เพื่อไม่ให้ยอดรวมใดตกหล่นโครงการเหล่านี้",
+    "boq.list_load_failed_title": "โหลดประมาณการไม่สำเร็จ",
     "boq.list_subtitle_count": "{{boqCount}} ประมาณการใน {{projectCount}} โครงการ",
     "boq.loading_element_data": "กำลังโหลดข้อมูลองค์ประกอบ...",
     "boq.loading_full_properties": "กำลังโหลดคุณสมบัติทั้งหมด…",

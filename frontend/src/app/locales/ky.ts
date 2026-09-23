@@ -4345,6 +4345,8 @@ const resource = {
     "boq.linked_positions_none": "Бул позиция өз алдынча, анын кодун башка эч бир позиция ортоктошпойт.",
     "boq.linked_positions_subtitle": "Код {{code}}, {{ordinal}} позициясынан көрүлүүдө",
     "boq.linked_positions_title": "Байланышкан позициялар",
+    "boq.list_load_failed_projects": "Бул долбоорлорду окуу мүмкүн болбоду: {{projects}}. Барак ачылгандан бери алар архивделген же өчүрүлгөн, же сиздин аларга мүмкүнчүлүгүңүз алынып салынган болушу мүмкүн. Эч бир жыйынтык аларды калтырып кетпеши үчүн эч нерсе көрсөтүлгөн жок.",
+    "boq.list_load_failed_title": "Сметаларды жүктөө мүмкүн болбоду",
     "boq.list_subtitle_count": "{{projectCount}} долбоордо {{boqCount}} смета",
     "boq.loading_element_data": "Элемент маалыматтары жүктөлүүдө...",
     "boq.loading_full_properties": "Толук касиеттер жүктөлүүдө…",

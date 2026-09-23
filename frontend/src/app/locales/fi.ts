@@ -13473,6 +13473,8 @@ const resource = {
     "boq.link_finance": "Näytä budjetti",
     "boq.link_validation": "Suorita validointi",
     "boq.linked_geometry": "Linkitetty geometria",
+    "boq.list_load_failed_projects": "Näitä projekteja ei voitu lukea: {{projects}}. Ne on ehkä arkistoitu tai poistettu, tai käyttöoikeutesi on poistettu sivun avaamisen jälkeen. Mitään ei näytetä, jotta mikään summa ei jättäisi niitä pois.",
+    "boq.list_load_failed_title": "Kustannusarvioita ei voitu ladata",
     "boq.list_subtitle_count": "{{boqCount}} arviota {{projectCount}} projektissa",
     "boq.loading_element_data": "Ladataan elementtidataa...",
     "boq.loading_full_properties": "Ladataan täydet ominaisuudet…",

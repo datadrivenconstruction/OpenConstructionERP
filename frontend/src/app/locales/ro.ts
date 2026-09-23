@@ -13491,6 +13491,8 @@ const resource = {
     "boq.link_finance": "Vedere Buget",
     "boq.link_validation": "Rulează Validare",
     "boq.linked_geometry": "Geometrie legată",
+    "boq.list_load_failed_projects": "Aceste proiecte nu au putut fi citite: {{projects}}. De la deschiderea paginii, este posibil să fi fost arhivate sau șterse ori să vi se fi retras accesul. Nu se afișează nimic, pentru ca niciun total să nu le omită.",
+    "boq.list_load_failed_title": "Devizele nu au putut fi încărcate",
     "boq.list_subtitle_count": "{{boqCount}} devize în {{projectCount}} proiecte",
     "boq.loading_element_data": "Se încarcă element date...",
     "boq.loading_full_properties": "Se încarcă complet proprietăți…",

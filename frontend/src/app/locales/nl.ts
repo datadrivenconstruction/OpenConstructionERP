@@ -12837,6 +12837,8 @@ const resource = {
     "boq.link_finance": "Budget bekijken",
     "boq.link_validation": "Validatie uitvoeren",
     "boq.linked_geometry": "Gekoppelde geometrie",
+    "boq.list_load_failed_projects": "Deze projecten konden niet worden gelezen: {{projects}}. Sinds deze pagina werd geopend, zijn ze mogelijk gearchiveerd of verwijderd, of is uw toegang ingetrokken. Er wordt niets weergegeven, zodat geen enkel totaal ze weglaat.",
+    "boq.list_load_failed_title": "De begrotingen konden niet worden geladen",
     "boq.list_subtitle_count": "{{boqCount}} begrotingen in {{projectCount}} projecten",
     "boq.loading_element_data": "Elementgegevens laden...",
     "boq.loading_full_properties": "Volledige eigenschappen laden...",

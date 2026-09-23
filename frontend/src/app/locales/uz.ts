@@ -13933,6 +13933,8 @@ const resource = {
     "boq.link_finance": "Byudjetni Koʻrish",
     "boq.link_validation": "Validationni Ishga Tushirish",
     "boq.linked_geometry": "Bogʻlangan Geometriya",
+    "boq.list_load_failed_projects": "Bu loyihalarni oʻqib boʻlmadi: {{projects}}. Sahifa ochilganidan beri ular arxivlangan yoki oʻchirilgan, yoxud ularga kirish huquqingiz olib tashlangan boʻlishi mumkin. Hech bir jami ularni tashlab ketmasligi uchun hech narsa koʻrsatilmayapti.",
+    "boq.list_load_failed_title": "Smetalarni yuklab boʻlmadi",
     "boq.list_subtitle_count": "{{projectCount}} ta loyihada {{boqCount}} ta smeta",
     "boq.loading_element_data": "Element maʼlumotlari yuklanmoqda...",
     "boq.loading_full_properties": "Toʻliq xususiyatlar yuklanmoqda…",
