@@ -2732,30 +2732,50 @@ class BOQService:
         the project BASE before summing. Best-effort: any failure returns
         ``("", {})`` so the widget degrades to raw sums rather than a 500.
         """
+        resolved = await self._resolve_project_fx_for_projects([project_id])
+        return resolved.get(project_id, ("", {}))
+
+    async def _resolve_project_fx_for_projects(
+        self,
+        project_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, tuple[str, dict[str, str]]]:
+        """Resolve ``(base_currency, {code: rate})`` for a set of projects in one query.
+
+        Batched sibling of :meth:`_resolve_project_fx_by_project`, for a rollup
+        that spans several projects at once (the bill register of many
+        projects), which would otherwise pay one lookup per project. Same
+        best-effort contract: a project that is missing, or every project when
+        the lookup fails, is absent from the mapping, and callers default an
+        absent project to ``("", {})``.
+        """
+        wanted = list(dict.fromkeys(project_ids))
+        if not wanted:
+            return {}
         try:
             from app.modules.projects.models import Project
 
-            row = (
+            rows = (
                 await self.session.execute(
-                    select(Project.currency, Project.fx_rates).where(Project.id == project_id),
+                    select(Project.id, Project.currency, Project.fx_rates).where(Project.id.in_(wanted)),
                 )
-            ).first()
+            ).all()
         except Exception:  # noqa: BLE001 - never break a widget on this lookup
-            logger.debug("Project FX lookup failed for project %s", project_id, exc_info=True)
-            return "", {}
-        if not row:
-            return "", {}
-        base = str(row[0]).strip()[:3].upper() if row[0] else ""
-        raw = row[1] if isinstance(row[1], list) else []
-        fx_map: dict[str, str] = {}
-        for entry in raw:
-            if not isinstance(entry, dict):
-                continue
-            code = str(entry.get("code") or "").strip().upper()
-            rate = str(entry.get("rate") or "").strip()
-            if code and rate:
-                fx_map[code] = rate
-        return base, fx_map
+            logger.debug("Project FX lookup failed for projects %s", wanted, exc_info=True)
+            return {}
+        resolved: dict[uuid.UUID, tuple[str, dict[str, str]]] = {}
+        for project_id, currency, fx_rates in rows:
+            base = str(currency).strip()[:3].upper() if currency else ""
+            raw = fx_rates if isinstance(fx_rates, list) else []
+            fx_map: dict[str, str] = {}
+            for entry in raw:
+                if not isinstance(entry, dict):
+                    continue
+                code = str(entry.get("code") or "").strip().upper()
+                rate = str(entry.get("rate") or "").strip()
+                if code and rate:
+                    fx_map[code] = rate
+            resolved[project_id] = (base, fx_map)
+        return resolved
 
     async def _find_content_duplicate(
         self,
@@ -2814,6 +2834,21 @@ class BOQService:
     ) -> tuple[list[BOQ], int]:
         """List BOQs for a given project with pagination."""
         return await self.boq_repo.list_for_project(project_id, offset=offset, limit=limit)
+
+    async def list_boqs_for_projects(
+        self,
+        project_ids: list[uuid.UUID],
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> dict[uuid.UUID, list[BOQ]]:
+        """List the BOQs of several projects, paginated per project, in one query.
+
+        Each project's page is the one :meth:`list_boqs_for_project` returns for
+        the same ``offset`` and ``limit``. A project with no BOQ on its page is
+        absent from the mapping.
+        """
+        return await self.boq_repo.list_for_projects(project_ids, offset=offset, limit=limit)
 
     async def count_line_items(self, boq_ids: list[uuid.UUID]) -> dict[uuid.UUID, int]:
         """Count the priced line items of each BOQ, excluding section headers.
@@ -2932,10 +2967,11 @@ class BOQService:
         #  * Every position for the whole set in one ``boq_id IN (...)`` query,
         #    grouped by BOQ (same no-limit / no-eager-load rollup contract as
         #    ``list_all_for_boq``).
-        #  * The owning project id per BOQ in one query, then the project FX
-        #    table resolved ONCE per distinct project (every BOQ on a list page
-        #    shares the same project - Issue #111 conversion is unchanged, it
-        #    only stops re-running the identical FX lookup per BOQ).
+        #  * The owning project id per BOQ in one query, then the FX tables of
+        #    every distinct project in one more (Issue #111 conversion is
+        #    unchanged, it only stops re-running the identical FX lookup per
+        #    BOQ, and per project when the bills span several projects, as the
+        #    many-project bill register does).
         markups_by_boq = await self.boq_repo.active_markups_for_boqs(boq_ids)
         # A bill the caller did not hand over is read here, so a partial dict
         # can never report a bill as empty.
@@ -2944,9 +2980,7 @@ class BOQService:
         positions_by_boq = {**handed, **(await self.position_repo.list_all_for_boqs(missing) if missing else {})}
         project_by_boq = await self.position_repo.project_ids_for_boqs(boq_ids)
 
-        fx_by_project: dict[uuid.UUID, tuple[str, dict[str, str]]] = {}
-        for project_id in set(project_by_boq.values()):
-            fx_by_project[project_id] = await self._resolve_project_fx_by_project(project_id)
+        fx_by_project = await self._resolve_project_fx_for_projects(list(set(project_by_boq.values())))
 
         for boq_id in boq_ids:
             project_id = project_by_boq.get(boq_id)
