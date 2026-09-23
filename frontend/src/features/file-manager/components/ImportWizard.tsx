@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { X, Loader2, Upload, ChevronLeft, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import clsx from 'clsx';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { validateImport, commitImport } from '../api';
 import type { ImportMode, ImportPreview, ImportResult } from '../types';
@@ -54,7 +54,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
   // a step where they need to pick a target project.
   const { data: projects } = useQuery({
     queryKey: ['file-manager-projects-list'],
-    queryFn: () => apiGet<ProjectListItem[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectListItem[]>(),
     enabled: open && step === 'mode' && (mode === 'merge_into_existing' || mode === 'replace_existing'),
     staleTime: 30_000,
   });

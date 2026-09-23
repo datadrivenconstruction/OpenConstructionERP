@@ -18,7 +18,8 @@ import { useParams } from 'react-router-dom';
 import { AlertTriangle, Download, Layers, ShieldCheck } from 'lucide-react';
 import { Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate } from '@/shared/lib/formatters';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getEvidencePack } from './api';
@@ -82,7 +83,7 @@ export function ClaimsEvidencePage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
 

@@ -30,7 +30,8 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { useToastStore } from '@/stores/useToastStore';
-import { getErrorMessage, apiGet } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { getCountry } from '@/shared/lib/countries';
 import {
   deleteHouseTypeCatalogue,
@@ -50,7 +51,7 @@ export interface ProjectStub {
 }
 
 function listProjectsLite(): Promise<ProjectStub[]> {
-  return apiGet<ProjectStub[]>('/v1/projects/?limit=200').catch(
+  return fetchProjectList<ProjectStub[]>().catch(
     () => [] as ProjectStub[],
   );
 }

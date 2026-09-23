@@ -47,7 +47,8 @@ import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { SectionIntro } from '@/features/validation';
-import { apiGet, getAuthToken, getErrorMessage, triggerDownload } from '@/shared/lib/api';
+import { getAuthToken, getErrorMessage, triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import {
@@ -296,7 +297,7 @@ export function QMSPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
 

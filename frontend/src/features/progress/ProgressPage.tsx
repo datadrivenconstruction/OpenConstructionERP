@@ -29,7 +29,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtPercent } from '@/shared/lib/formatters';
 import {
   Badge,
@@ -375,7 +375,7 @@ export function ProgressPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = activeProjectId || projects[0]?.id || '';

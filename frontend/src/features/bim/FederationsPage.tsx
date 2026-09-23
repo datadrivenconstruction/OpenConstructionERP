@@ -29,6 +29,7 @@ import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { Network, Layers, Activity, Boxes, ScanSearch, ArrowRight } from 'lucide-react';
 
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import {
   Badge,
   BetaBanner,
@@ -167,7 +168,7 @@ const DISCIPLINE_ORDER: FederationDiscipline[] = [
 const BASE = '/v1/bim-hub/federations';
 
 async function fetchProjects(): Promise<ProjectLite[]> {
-  return apiGet<ProjectLite[]>('/v1/projects/');
+  return fetchProjectList<ProjectLite[]>();
 }
 
 async function fetchFederations(projectId: string): Promise<FederationListPayload> {

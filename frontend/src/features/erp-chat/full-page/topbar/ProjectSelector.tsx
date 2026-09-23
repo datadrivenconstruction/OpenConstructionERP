@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 interface ProjectOption {
@@ -25,10 +25,8 @@ export default function ProjectSelector() {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    apiGet<{ items?: ProjectOption[] }>('/v1/projects/')
-      .then((res) => {
-        setProjects(res.items ?? (Array.isArray(res) ? (res as ProjectOption[]) : []));
-      })
+    fetchProjectList<ProjectOption[]>()
+      .then((rows) => setProjects(rows))
       .catch(() => setProjects([]))
       .finally(() => setLoading(false));
   }, [open]);

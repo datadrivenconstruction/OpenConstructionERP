@@ -12,6 +12,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import type { FileRow, FileKind } from '../types';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -109,7 +110,7 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
   // currently-active one (global /files view).
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
     staleTime: 5 * 60_000,
   });
   const [pathCopied, setPathCopied] = useState(false);

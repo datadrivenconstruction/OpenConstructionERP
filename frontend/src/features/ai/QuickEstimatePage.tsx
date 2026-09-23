@@ -52,6 +52,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CostMatch, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup, type CadGroupElementsResponse } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
 import {
   fmtList,
@@ -541,7 +542,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving, enrichedMatches = 0, e
 
   const { data: projects } = useQuery({
     queryKey: ['projects-list-simple'],
-    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
+    queryFn: () => fetchProjectList<ProjectSummary[]>(),
     enabled: open,
     staleTime: 5 * 60_000,
   });
@@ -2567,7 +2568,7 @@ export function QuickEstimatePage() {
 
   const { data: cadProjectsList } = useQuery({
     queryKey: ['projects-list-simple-cad'],
-    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
+    queryFn: () => fetchProjectList<ProjectSummary[]>(),
     enabled: !!cadGroupResult,
     staleTime: 5 * 60_000,
   });

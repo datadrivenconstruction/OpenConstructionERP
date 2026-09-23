@@ -19,6 +19,7 @@ import { Breadcrumb, Card, CardHeader, CardContent, Button, EmptyState, Skeleton
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { sustainabilityGuide } from './sustainabilityGuide';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useNumberLocale } from '@/stores/usePreferencesStore';
@@ -220,7 +221,10 @@ export function SustainabilityPage() {
   // Projects & BOQs
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/').catch(() => []),
+    // No catch to an empty list: this entry is shared with the header switcher,
+    // which would read a cached [] as "every project is gone". A failed read
+    // leaves the data undefined, which this page already treats as no projects.
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
   const { data: boqs, isLoading: boqsLoading } = useQuery({

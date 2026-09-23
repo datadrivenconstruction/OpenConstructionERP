@@ -23,6 +23,7 @@ import { Button, Card, Badge, EmptyState, Skeleton, Breadcrumb, DismissibleInfo,
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { validationGuide } from './validationGuide';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -818,7 +819,7 @@ export function ValidationPage() {
   // Fetch projects
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { APP_VERSION } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -2088,6 +2089,9 @@ export function DashboardPage() {
   );
 }
 
+/** Stable stand-in for a failed project list read, so effects do not re-run. */
+const NO_PROJECTS: ProjectSummary[] = [];
+
 function DashboardPageInner() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -2186,12 +2190,17 @@ function DashboardPageInner() {
     void hydrateDashboardLayoutFromServer();
   }, []);
 
-  const { data: projects } = useQuery({
+  // No catch to an empty list in the queryFn: ['projects'] is shared with the
+  // header switcher, which would read a cached [] as "every project is gone"
+  // and clear the active project. A failed read shows as no projects here,
+  // as it did before, without reaching the cache.
+  const { data: projectsData, isError: projectsFailed } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
+    queryFn: () => fetchProjectList<ProjectSummary[]>(),
     retry: false,
     staleTime: 5 * 60_000,
   });
+  const projects = projectsData ?? (projectsFailed ? NO_PROJECTS : undefined);
 
   // Per-user onboarding state from the server. This, and not the presence of
   // demo projects, is what decides whether the first-run wizard should show.
