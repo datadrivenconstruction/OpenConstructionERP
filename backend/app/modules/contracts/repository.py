@@ -466,6 +466,25 @@ class ProgressClaimLineRepository(_CRUDBase):
         result = await self.session.execute(stmt)
         return {row[0]: Decimal(str(row[1] or 0)) for row in result.all()}
 
+    async def period_value_by_claim(self, contract_id: uuid.UUID) -> dict[uuid.UUID, Decimal]:
+        """What each claim's own lines bill this period, summed per claim, for every claim on a contract.
+
+        One aggregate rather than every claim line hydrated to add up a
+        handful of numbers. A claim with no lines is absent, which reads as
+        zero. Returns ``{progress_claim_id: Decimal}``.
+        """
+        stmt = (
+            select(
+                ProgressClaimLine.progress_claim_id,
+                func.coalesce(func.sum(ProgressClaimLine.period_completed_value), 0),
+            )
+            .join(ProgressClaim, ProgressClaim.id == ProgressClaimLine.progress_claim_id)
+            .where(ProgressClaim.contract_id == contract_id)
+            .group_by(ProgressClaimLine.progress_claim_id)
+        )
+        result = await self.session.execute(stmt)
+        return {row[0]: Decimal(str(row[1] or 0)) for row in result.all()}
+
     async def lines_with_claim_for_contract(
         self,
         contract_id: uuid.UUID,

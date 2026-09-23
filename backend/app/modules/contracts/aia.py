@@ -368,6 +368,7 @@ def build_g703(
     retainage_percent: Decimal,
     prior_by_line: dict[Any, Decimal] | None = None,
     prior_without_schedule: Decimal = DEC_ZERO,
+    out_of_schedule_retainage: Decimal | None = None,
     out_of_schedule_label: str = "",
 ) -> list[dict[str, Any]]:
     """Build the full G703 continuation sheet, one row per SoV line.
@@ -392,12 +393,12 @@ def build_g703(
     money no line carries either. Do not describe this row as work billed
     without a schedule: that is true of the first and false of the second.
 
-    Its retainage is worked out at this sheet's ``retainage_percent``, which
-    equals what those earlier claims actually held only while the rate has not
-    moved. A contract that steps its rate down partway would need the
-    retention those claims stored instead. Untested either way: every fixture
-    that reaches this row retains at one rate throughout, so the two answers
-    are the same number and nothing here distinguishes them.
+    Its retainage is ``out_of_schedule_retainage``, what the caller worked
+    out those earlier claims actually held on that money less its share of
+    any release. The certificate always passes it. Without it the row falls
+    back to this sheet's ``retainage_percent``, which equals what those
+    claims held only while the rate has not moved: a ladder or an edited
+    contract rate makes the two differ, and a release could never reach it.
 
     The columns are rounded to cents across the whole sheet rather than row by
     row, so the sheet adds up to the same figures the claim itself holds.
@@ -435,7 +436,11 @@ def build_g703(
                 "this_period": DEC_ZERO,
                 "stored": DEC_ZERO,
                 "total": outside,
-                "retainage": retainage_percent * outside / DEC_HUNDRED,
+                "retainage": (
+                    retainage_percent * outside / DEC_HUNDRED
+                    if out_of_schedule_retainage is None
+                    else _dec(out_of_schedule_retainage)
+                ),
                 "retainage_stored": DEC_ZERO,
             }
         )
@@ -519,15 +524,14 @@ def apply_retention_snapshot(
     of line 5, losing the column I :func:`build_g703` rounded for it, which is
     money the certificate then pays out on line 8.
 
-    Do not read ``held`` as a figure measured on the schedule. It ratchets:
-    the engine takes ``before + max(required - before, 0) - released``, floored
-    at zero, where ``required`` is the schedule position and ``before`` sums
-    ``retention_amount`` over every prior claim, a claim level field and not a
-    line level one. So when an earlier month billed with no schedule line
-    behind it, ``before`` exceeds ``required``, the accrual floors at zero and
-    ``held`` carries that month's retention into a total this function then
-    spreads over schedule rows alone. Nothing here corrects that; this
-    distributes whatever line 5 says.
+    ``held`` measures the schedule and nothing else: the engine takes
+    ``before + max(required - before, 0) - released``, floored at zero, with
+    all three on schedule lines. Retention an earlier claim held on money no
+    line of its own carries, and that money's share of the releases, are left
+    out of it and printed on the out-of-schedule row instead. It used to take
+    ``before`` over every prior claim, so such a month ratcheted into ``held``
+    and this function spread it over the schedule rows while that row
+    printed it again.
     """
     work: dict[int, Decimal] = {}
     stored: dict[int, Decimal] = {}
