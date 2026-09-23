@@ -2110,6 +2110,36 @@ def _copy_definition_metadata(master_meta: dict[str, Any] | None) -> dict[str, A
     return out
 
 
+class _LockedSkips:
+    """Linked lines one definition edit left alone because their bill is locked.
+
+    A shared code reaches every bill of the project, but a locked bill keeps
+    its approved figures until someone unlocks or revises it. The #127, #132
+    and #133 passes of one edit each report the lines they skipped here, and
+    ``update_position`` puts the total on the response so the editor can say
+    which bills still carry the old definition. A line is counted once even
+    when two passes would both have rewritten it.
+    """
+
+    def __init__(self) -> None:
+        self._lines: set[uuid.UUID] = set()
+        self._bills: dict[uuid.UUID, str] = {}
+
+    def add(self, position_id: uuid.UUID, boq_id: uuid.UUID, name: str) -> None:
+        self._lines.add(position_id)
+        self._bills[boq_id] = name
+
+    def as_info(self) -> dict[str, Any]:
+        """``locked_skipped`` and ``locked_boqs`` (sorted by name), or nothing."""
+        if not self._lines:
+            return {}
+        ordered = sorted(self._bills.items(), key=lambda kv: (kv[1], str(kv[0])))
+        return {
+            "locked_skipped": len(self._lines),
+            "locked_boqs": [{"id": str(boq_id), "name": name} for boq_id, name in ordered],
+        }
+
+
 class BOQService:
     """Business logic for BOQ, Position, and Markup operations."""
 
@@ -2136,9 +2166,10 @@ class BOQService:
         ``refresh_quantity_links`` (records drift, applies nothing), and the
         writers of snapshots, quantity links and activity rows. ``delete_boq``
         is guarded: it would remove a locked bill with all its positions and
-        markups. Not yet decided: the linked-master and resource-code
-        propagation reached from ``update_position`` writes into OTHER bills of
-        the project without reading their lock.
+        markups. The linked-master and resource-code propagation reached from
+        ``update_position`` writes into OTHER bills of the project; it does not
+        refuse the edit but skips every line in a locked bill and reports the
+        skip on the response (:meth:`_locked_bills_among`, ``_LockedSkips``).
 
         Returns:
             The loaded BOQ (so callers can reuse it instead of fetching twice).
@@ -2179,6 +2210,19 @@ class BOQService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="BOQ is locked and cannot be modified. Create a revision to make changes.",
             )
+
+    async def _locked_bills_among(self, boq_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
+        """The locked bills among ``boq_ids``, as ``{id: name}``, in one query.
+
+        For the writers that reach into OTHER bills of the project (linked
+        definition propagation, link bookkeeping) and must leave a locked one
+        alone. An empty input asks nothing of the database.
+        """
+        ids = {boq_id for boq_id in boq_ids if boq_id is not None}
+        if not ids:
+            return {}
+        rows = await self.session.execute(select(BOQ.id, BOQ.name).where(BOQ.id.in_(ids), BOQ.is_locked.is_(True)))
+        return {boq_id: name or "" for boq_id, name in rows.all()}
 
     async def _validate_parent_id(
         self,
@@ -4377,7 +4421,14 @@ class BOQService:
         # never propagate). Each affected position + its BOQ totals are
         # recomputed, the position-changed event fires per instance, and
         # ONE audit entry records the fan-out.
+        #
+        # A line in a LOCKED bill is never rewritten here or in the two passes
+        # below: an approved bill keeps its figures until someone unlocks or
+        # revises it. The edit itself goes through (its own bill passed the lock
+        # guard); the skipped lines are collected and reported on the response.
         _propagated_count = 0
+        _locked_skips = _LockedSkips()
+        _editor_boq_id = position.boq_id
         if _link_role_before == "master" and _link_group_before is not None and not _did_unlink_instance and fields:
             # Resolve the definition fields whose persisted value changed.
             _changed_def_payload: dict[str, Any] = {}
@@ -4427,6 +4478,10 @@ class BOQService:
                     # ``_link_src`` anywhere; they keep the original
                     # group-flat behaviour so existing links never regress.
                     _group_has_src = any("_link_src" in s["meta"] for s in _grp_snap)
+                    # The editor's own bill passed the lock guard; ask about the others.
+                    _grp_locked = await self._locked_bills_among(
+                        {s["boq_id"] for s in _grp_snap if s["boq_id"] != _editor_boq_id}
+                    )
                     affected_boqs: set[uuid.UUID] = set()
                     for _snap in _grp_snap:
                         _inst_id = _snap["id"]
@@ -4447,6 +4502,9 @@ class BOQService:
                         # children (``_link_src`` = their own master child)
                         # are handled by the master-child pass below.
                         if _group_has_src and str(_inst_meta.get("_link_src")) != str(position_id):
+                            continue
+                        if _inst_boq_id in _grp_locked:
+                            _locked_skips.add(_inst_id, _inst_boq_id, _grp_locked[_inst_boq_id])
                             continue
                         inst_fields: dict[str, Any] = {}
                         for k, v in _changed_def_payload.items():
@@ -4604,6 +4662,9 @@ class BOQService:
                             }
                             for _c in _mc_group
                         ]
+                        _mc_locked = await self._locked_bills_among(
+                            {s["boq_id"] for s in _mc_snap if s["boq_id"] != _editor_boq_id}
+                        )
                         _mc_affected: set[uuid.UUID] = set()
                         for _cs in _mc_snap:
                             _ci_id = _cs["id"]
@@ -4621,6 +4682,9 @@ class BOQService:
                             # Per-node correspondence: only the instance
                             # children cloned from THIS master child.
                             if str(_ci_meta.get("_link_src")) != str(position_id):
+                                continue
+                            if _ci_boq_id in _mc_locked:
+                                _locked_skips.add(_ci_id, _ci_boq_id, _mc_locked[_ci_boq_id])
                                 continue
                             _ci_fields: dict[str, Any] = {}
                             for k, v in _mc_changed.items():
@@ -4807,6 +4871,7 @@ class BOQService:
                         editor_position=position,
                         changed_by_code=_res_delta,
                         actor_id=actor_id,
+                        locked_skips=_locked_skips,
                     )
                     # The propagation rewrote sibling rows and may have rolled
                     # a value back onto this one; re-hydrate ``position`` so the
@@ -4827,13 +4892,17 @@ class BOQService:
         # Stashed on a NON-mapped attribute so the request-session commit
         # in ``get_session`` never persists it (mutating the mapped
         # ``metadata_`` column here would flush the transient key into the
-        # DB). The router merges it into the response metadata.
-        if _propagated_count or _did_unlink_instance or _resource_propagated:
+        # DB). The router merges it into the response metadata. A skip in a
+        # locked bill is reported even when nothing else was written, so the
+        # editor never reads silence as "every bill took the change".
+        _skip_info = _locked_skips.as_info()
+        if _propagated_count or _did_unlink_instance or _resource_propagated or _skip_info:
             try:
                 position._link_propagation_info = {  # type: ignore[attr-defined]
                     "propagated_to": _propagated_count,
                     "unlinked": _did_unlink_instance,
                     "resource_propagated_to": _resource_propagated,
+                    **_skip_info,
                 }
             except Exception:  # noqa: BLE001 - purely cosmetic
                 pass
@@ -7053,9 +7122,13 @@ class BOQService:
         editor_position: Position,
         changed_by_code: dict[str, dict[str, Any]],
         actor_id: uuid.UUID | None,
+        locked_skips: _LockedSkips | None = None,
     ) -> int:
         """Issue #133 - fan a master resource's definition edit out to the
         linked resource instances across the project.
+
+        A carrier in a LOCKED bill is left as it is and, when ``locked_skips``
+        is given, recorded there, so the edit's response can name it.
 
         ``editor_position`` is the just-saved position. For each changed
         resource ``code`` it only propagates when ``editor_position`` holds
@@ -7139,6 +7212,15 @@ class BOQService:
             if not owned_codes:
                 return 0
             owned_cf = {c.casefold() for c in owned_codes}
+            # The locked bills among the other carriers of an owned code. The
+            # editor's own bill passed the lock guard before this was reached.
+            locked_bills = await self._locked_bills_among(
+                {
+                    s["boq_id"]
+                    for s in snap
+                    if s["boq_id"] != editor_boq_id and any(_has_code(s["meta"], c) for c in owned_codes)
+                }
+            )
 
             updated = 0
             affected_boqs: set[uuid.UUID] = set()
@@ -7180,6 +7262,11 @@ class BOQService:
                     r["total"] = round(r_qty * r_rate, 2)
                     touched = True
                 if not touched:
+                    continue
+                if s["boq_id"] in locked_bills:
+                    # Would have changed, but the bill is approved: leave it.
+                    if locked_skips is not None:
+                        locked_skips.add(s["id"], s["boq_id"], locked_bills[s["boq_id"]])
                     continue
                 new_meta = dict(meta)
                 new_meta["resources"] = new_res

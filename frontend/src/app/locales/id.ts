@@ -14667,6 +14667,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Kedalaman penyusunan maksimum {{max}} tingkat tercapai, ratakan struktur atau gunakan sub-tingkat lebih sedikit.",
     "boq.resource_link_propagated_msg": "Memperbarui sumber daya bersama pada {{count}} item lain di proyek ini.",
     "boq.resource_link_propagated_title": "Definisi sumber daya disebarkan",
+    "boq.link_locked_skipped_msg": "{{count}} item tertaut di estimasi terkunci tetap memakai definisi lama: {{bills}}. Buka kunci estimasi tersebut atau buat revisi untuk menerapkan perubahan.",
+    "boq.link_locked_skipped_title": "Estimasi terkunci tidak diubah",
     "boq.link_role_instance": "Instansi tertaut",
     "boq.link_role_master": "Master (definisi resmi)",
     "boq.link_unlinked_msg": "Pengeditan Anda mengubah salinan tertaut ini sehingga tidak lagi mengikuti kode bersama. Jika Anda tidak bermaksud memisahkannya, kembalikan kodenya.",

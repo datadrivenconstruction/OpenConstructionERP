@@ -723,6 +723,8 @@ export function BOQEditorPage() {
             propagated_to?: number;
             unlinked?: boolean;
             resource_propagated_to?: number;
+            locked_skipped?: number;
+            locked_boqs?: { id: string; name: string }[];
           }
         | undefined;
 
@@ -765,6 +767,31 @@ export function BOQEditorPage() {
             count: prop.resource_propagated_to,
           }),
         });
+      }
+
+      // (a3) Linked lines in LOCKED bills are never rewritten: an approved
+      // bill keeps its money until someone unlocks or revises it. Say how
+      // many kept the old definition and in which bills, so the estimator
+      // does not assume the whole project follows the new one.
+      if (prop && typeof prop.locked_skipped === 'number' && prop.locked_skipped > 0) {
+        const bills = Array.isArray(prop.locked_boqs)
+          ? prop.locked_boqs.map((b) => b.name)
+          : [];
+        addToast(
+          {
+            type: 'warning',
+            title: t('boq.link_locked_skipped_title', {
+              defaultValue: 'Locked estimates left unchanged',
+            }),
+            message: t('boq.link_locked_skipped_msg', {
+              defaultValue:
+                '{{count}} linked position(s) in locked estimates kept the old definition: {{bills}}. Unlock those estimates or create a revision to take the change.',
+              count: prop.locked_skipped,
+              bills: fmtList(bills, 'prose'),
+            }),
+          },
+          { duration: 9000 },
+        );
       }
 
       // (b) Editing a linked INSTANCE's definition diverged it — the backend

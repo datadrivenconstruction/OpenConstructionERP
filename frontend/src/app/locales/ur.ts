@@ -14249,6 +14249,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "{{max}} سطحوں کی زیادہ سے زیادہ nesting گہرائی پہنچ گئی، ڈھانچے کو flatten کریں یا کم ذیلی سطحیں استعمال کریں۔",
     "boq.resource_link_propagated_msg": "اس پروجیکٹ میں {{count}} دیگر پوزیشنز پر مشترکہ resource اپ ڈیٹ ہو گیا۔",
     "boq.resource_link_propagated_title": "Resource تعریف پھیلا دی گئی",
+    "boq.link_locked_skipped_msg": "لاک شدہ تخمینوں میں {{count}} جڑی پوزیشنوں نے پرانی تعریف برقرار رکھی: {{bills}}۔ تبدیلی لاگو کرنے کے لیے ان تخمینوں کو اَن لاک کریں یا ایک ریویژن بنائیں۔",
+    "boq.link_locked_skipped_title": "لاک شدہ تخمینے تبدیل نہیں کیے گئے",
     "boq.link_role_instance": "جڑا instance",
     "boq.link_role_master": "Master (ریکارڈ کی تعریف)",
     "boq.link_unlinked_msg": "آپ کی ترمیم نے اس جڑی کاپی کو تبدیل کر دیا، اس لیے یہ اب مشترکہ کوڈ کی پیروی نہیں کرتی۔ اگر آپ کا اسے الگ کرنے کا ارادہ نہیں تھا، تو اس کا کوڈ واپس تبدیل کریں۔",

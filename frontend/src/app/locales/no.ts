@@ -9434,6 +9434,8 @@ const resource = {
     "boq.max_depth_reached_tooltip": "Maksimalt nøstningsnivå på {{max}} nivåer er nådd - flat ut strukturen eller bruk færre undernivåer.",
     "boq.resource_link_propagated_msg": "Den delte ressursen ble oppdatert på {{count}} andre posisjon(er) i prosjektet.",
     "boq.resource_link_propagated_title": "Ressursdefinisjon spredt",
+    "boq.link_locked_skipped_msg": "{{count}} koblede posisjon(er) i låste kalkyler beholdt den gamle definisjonen: {{bills}}. Lås opp kalkylene eller opprett en revisjon for å ta i bruk endringen.",
+    "boq.link_locked_skipped_title": "Låste kalkyler er uendret",
     "boq.link_role_instance": "Tilknyttet instans",
     "boq.link_role_master": "Master (definisjonens kilde)",
     "boq.link_unlinked_msg": "Redigeringen din endret denne koblede kopien, slik at den ikke lenger følger den delte koden. Hvis du ikke mente å avvike, endre koden tilbake.",
