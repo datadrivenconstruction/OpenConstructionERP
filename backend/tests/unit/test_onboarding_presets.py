@@ -27,9 +27,12 @@ from app.core.onboarding_presets import (
     _CORE_MODULES,
     _REGIONAL,
     COMPANY_PRESETS,
+    SIZE_PRESETS,
     get_core_modules,
     get_preset,
     is_core_module,
+    is_saveable_company_size,
+    is_saveable_company_type,
     modules_for,
 )
 
@@ -280,3 +283,55 @@ def test_every_core_module_is_in_the_registry() -> None:
         "a regional pack cannot also be core: core is forced True and regional "
         "is left alone, and the two rules cannot both apply to one key"
     )
+
+
+# ── Every id a profile names resolves ────────────────────────────────────────
+#
+# A preset is a list of strings, and nothing between the list and the screen
+# checks them. ``modules_for`` walks the registry and asks whether each key was
+# chosen, so a key the registry does not carry is dropped without a word: a
+# profile listing "fieldreport" would ship with its field reports switched off
+# and every test above still green. These close that from both ends, the
+# registry the presets draw on and the module packages on disk.
+
+_MODULES_DIR = pathlib.Path(__file__).resolve().parents[2] / "app" / "modules"
+_ALL_PRESETS = {**COMPANY_PRESETS, **SIZE_PRESETS}
+
+
+@pytest.mark.parametrize("key", sorted(_ALL_PRESETS))
+def test_every_module_a_preset_names_is_in_the_registry(key: str) -> None:
+    preset = _ALL_PRESETS[key]
+    unknown = sorted(set(preset.enabled_modules) - set(_ALL_MODULES))
+    assert unknown == [], f"preset {key} names modules the registry does not know: {unknown}"
+    # And each one survives into the map the sidebar reads, switched on.
+    prefs = modules_for(preset.enabled_modules)
+    assert all(prefs[m] is True for m in preset.enabled_modules)
+
+
+def test_every_registry_key_is_a_module_package_on_disk() -> None:
+    """Each key is the ``oe_<key>`` manifest of a package under ``app/modules``."""
+    if not _MODULES_DIR.exists():  # pragma: no cover - source checkout only
+        pytest.skip("backend module tree not present")
+    missing: list[str] = []
+    misnamed: list[str] = []
+    for key in _ALL_MODULES:
+        manifest = _MODULES_DIR / key / "manifest.py"
+        if not manifest.exists():
+            missing.append(key)
+            continue
+        if f'name="oe_{key}"' not in manifest.read_text(encoding="utf-8"):
+            misnamed.append(key)
+    assert missing == [], f"registry keys with no module package: {missing}"
+    assert misnamed == [], f"module packages whose manifest name is not oe_<key>: {misnamed}"
+
+
+def test_every_preset_key_is_saveable_and_filed_under_its_own_name() -> None:
+    assert not set(COMPANY_PRESETS) & set(SIZE_PRESETS), "a key cannot be both a profile and a size"
+    for key, preset in _ALL_PRESETS.items():
+        assert preset.key == key
+        assert is_saveable_company_type(key)
+    for key in SIZE_PRESETS:
+        assert is_saveable_company_size(key)
+    # A profile is not a size, and nothing outside the two catalogues is either.
+    assert not is_saveable_company_size("general_contractor")
+    assert not is_saveable_company_type("demolition_contractor")

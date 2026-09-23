@@ -1291,9 +1291,22 @@ async def save_onboarding(
     user's metadata JSON under the ``onboarding`` key.  Also syncs the
     chosen modules into ``module_preferences`` so the sidebar reflects
     the selection immediately.
+
+    ``company_type`` is checked against the preset catalogue by the request
+    schema, so an unknown profile is a 422 and never reaches storage. A null
+    ``company_type`` is a module selection made without a profile and is
+    saved exactly as sent.
     """
     user = await service.get_user(uuid.UUID(user_id))
     metadata: dict[str, Any] = dict(user.metadata_ or {})
+    previous: dict[str, Any] = dict(metadata.get("onboarding") or {})
+
+    # A client that does not send ``company_size`` says nothing about it, so
+    # the stored answer stands. The wizard stopped asking for a team size and
+    # the Modules page never did, and both used to wipe the size an account
+    # had picked every time they saved a profile. An explicit null still
+    # clears it.
+    company_size = data.company_size if "company_size" in data.model_fields_set else previous.get("company_size")
 
     # "Full Enterprise" means the whole platform. Pin it to the backend's own
     # authoritative functional-module list rather than trusting whatever set the
@@ -1319,7 +1332,7 @@ async def save_onboarding(
 
     metadata["onboarding"] = {
         "company_type": data.company_type,
-        "company_size": data.company_size,
+        "company_size": company_size,
         "enabled_modules": effective_modules,
         "interface_mode": data.interface_mode,
         "completed": data.completed,
@@ -1335,7 +1348,7 @@ async def save_onboarding(
     return OnboardingResponse(
         completed=data.completed,
         company_type=data.company_type,
-        company_size=data.company_size,
+        company_size=company_size,
         enabled_modules=effective_modules,
         interface_mode=data.interface_mode,
     )
