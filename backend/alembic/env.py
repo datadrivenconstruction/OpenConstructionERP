@@ -85,10 +85,13 @@ back.
 # them - which is exactly why it read as missing. Import ``app.main`` and call
 # ``create_app()`` and the registry holds 638 and it is there, because
 # ``app/core/translation/cache.py`` declares the table ON ``Base.metadata``
-# and ``create_app`` pulls that module in with the translation router. So the
-# boot path does create it, and the module self-creates it lazily as well with
+# and ``create_app`` pulls that module in with the translation router. Two
+# import sets build the schema and they differ: the serve path goes through
+# ``create_app`` and does create the table, while ``init-db`` in ``app/cli.py``
+# imports the module models plus audit, audit_log and data_repairs only, so on
+# that path the table waits for the first serve or for the module's own lazy
 # ``create(checkfirst=True)``. Measure a table's absence under the import set
-# that builds the schema, not under this one.
+# that builds the schema, and say which one, rather than under this one.
 #
 # Columns only the migrations add, absent from create_all under both of the
 # import sets above:
