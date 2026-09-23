@@ -313,6 +313,29 @@ async def test_region_filter_changes_results(http_client, auth_headers):
     assert {it["code"] for it in de["items"]}.isdisjoint({it["code"] for it in gb["items"]})
 
 
+@pytest.mark.asyncio
+async def test_lite_rows_are_trimmed_and_the_default_stays_full(http_client, auth_headers):
+    """``lite=1`` answers slim rows; the default keeps the full public shape.
+
+    Every list in the app asks for ``lite=1``. The default is left full on
+    purpose, because the endpoint is public REST and scripts read that shape.
+    """
+    lite = await http_client.get(
+        "/api/v1/costs/", params={"limit": 3, "lite": 1, "region": "DE_BERLIN"}, headers=auth_headers
+    )
+    full = await http_client.get("/api/v1/costs/", params={"limit": 3, "region": "DE_BERLIN"}, headers=auth_headers)
+    assert lite.status_code == 200, lite.text
+    assert full.status_code == 200, full.text
+    lite_items = lite.json()["items"]
+    full_items = full.json()["items"]
+    assert [it["code"] for it in lite_items] == [it["code"] for it in full_items]
+    for slim, whole in zip(lite_items, full_items, strict=True):
+        assert slim["components"] == []
+        assert slim["components_count"] == len(whole["components"])
+        assert "components_count" not in whole
+        assert set(slim) == set(whole) | {"components_count"}
+
+
 # ── Category tree ─────────────────────────────────────────────────────────
 
 

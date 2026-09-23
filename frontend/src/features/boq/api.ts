@@ -1668,6 +1668,12 @@ export async function fetchCostSearch(
   if (params.source) qs.set('source', params.source);
   if (params.classification_path) qs.set('classification_path', params.classification_path);
   if (params.cursor) qs.set('cursor', params.cursor);
+  // Slim rows: a CWICR row's component breakdown and variant catalogues run
+  // to tens of kilobytes each and the list renders neither (it shows the
+  // variant count from ``metadata_.variant_stats``, which the slim row keeps).
+  // The modal's add flow reads the picked items in full from
+  // ``GET /v1/costs/{id}`` before it builds resources or opens a picker.
+  qs.set('lite', '1');
 
   const raw = await apiGet<{
     items: CostSearchItem[];

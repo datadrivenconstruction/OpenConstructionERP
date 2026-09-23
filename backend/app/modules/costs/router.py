@@ -588,6 +588,40 @@ async def create_cost_item(
 
 # ── Search / List ─────────────────────────────────────────────────────────
 
+# The ``metadata_`` keys a slim (``lite=true``) list row keeps: the small ones
+# the list views render or copy onto a new BOQ position. It drops ``variants``
+# (a CWICR row's alternate price catalogue, kilobytes per row) and any other
+# large array; a caller that needs them reads ``GET /v1/costs/{id}``.
+_LITE_METADATA_KEYS: tuple[str, ...] = (
+    "variant_stats",
+    "labor_cost",
+    "material_cost",
+    "equipment_cost",
+    "other_cost",
+    "labor_hours",
+    "workers_per_unit",
+    "scope_of_work",
+)
+
+
+def _slim_list_row(payload: dict[str, Any]) -> dict[str, Any]:
+    """Trim one serialised list row to its ``lite`` shape, in place.
+
+    A CWICR row is mostly its component breakdown (with a variant catalogue on
+    every abstract-resource component) and ``metadata_.variants``. A list
+    renders neither, so the slim row empties ``components``, keeps their count
+    in ``components_count`` for the "has breakdown" badge, and keeps only the
+    ``_LITE_METADATA_KEYS`` of ``metadata_``. Every other field is unchanged,
+    so a slim row is the full row minus its bulk.
+    """
+    comps = payload.get("components") or []
+    payload["components_count"] = len(comps)
+    payload["components"] = []
+    md = payload.get("metadata_") or {}
+    if isinstance(md, dict):
+        payload["metadata_"] = {k: md[k] for k in _LITE_METADATA_KEYS if k in md}
+    return payload
+
 
 @router.get("/")
 async def search_cost_items(
@@ -830,28 +864,7 @@ async def search_cost_items(
             resolved_locale,
         )
         if lite:
-            comps = payload.get("components") or []
-            payload["components_count"] = len(comps)
-            payload["components"] = []
-            md = payload.get("metadata_") or {}
-            if isinstance(md, dict):
-                # Whitelist tiny keys the list view + BOQ-add synth path
-                # actually consume. Drops ``variants`` (~6 KB / row of
-                # alternate price entries) and any other large arrays.
-                payload["metadata_"] = {
-                    k: md[k]
-                    for k in (
-                        "variant_stats",
-                        "labor_cost",
-                        "material_cost",
-                        "equipment_cost",
-                        "other_cost",
-                        "labor_hours",
-                        "workers_per_unit",
-                        "scope_of_work",
-                    )
-                    if k in md
-                }
+            payload = _slim_list_row(payload)
         return payload
 
     serialized = [_serialize(i) for i in items]
