@@ -61,12 +61,19 @@ async def test_delete_boq_scrubs_orphaned_position_refs(monkeypatch: pytest.Monk
     # stand-in carrying just project_id (all delete_boq reads off it).
     service.boq_repo.get_by_id = AsyncMock(return_value=SimpleNamespace(project_id=project_id))
     service.boq_repo.delete = AsyncMock()
+    # The lock guard is one more read on the session; stub it so the
+    # ``execute`` above stays the delete's own position-id SELECT. The locked
+    # case has its own test on a real database
+    # (tests/modules/boq/test_a_locked_bill_cannot_be_deleted.py).
+    writable = AsyncMock()
+    service._ensure_boq_writable = writable  # type: ignore[method-assign]
     scrub = AsyncMock()
     service._scrub_activity_position_refs = scrub  # type: ignore[method-assign]
     monkeypatch.setattr("app.modules.boq.service._safe_publish", AsyncMock())
 
     await service.delete_boq(boq_id)
 
+    writable.assert_awaited_once_with(boq_id)
     scrub.assert_awaited_once()
     args, kwargs = scrub.call_args
     # boq_id positional, the captured ids as strings, project id forwarded
@@ -88,6 +95,8 @@ async def test_delete_boq_skips_scrub_when_no_positions(monkeypatch: pytest.Monk
     service = BOQService(session)
     service.boq_repo.get_by_id = AsyncMock(return_value=SimpleNamespace(project_id=uuid.uuid4()))
     service.boq_repo.delete = AsyncMock()
+    writable = AsyncMock()
+    service._ensure_boq_writable = writable  # type: ignore[method-assign]
     scrub = AsyncMock()
     service._scrub_activity_position_refs = scrub  # type: ignore[method-assign]
     monkeypatch.setattr("app.modules.boq.service._safe_publish", AsyncMock())
