@@ -28,6 +28,8 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useAuthStore } from '@/stores/useAuthStore';
+
 import { UpdateNotification } from '../UpdateChecker';
 
 const DISMISS_KEY = 'oe_update_dismissed_version';
@@ -93,6 +95,22 @@ describe('where the update notice gets its answer', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(urlsAsked(fetchMock)).toContain(ENDPOINT);
     expect(urlsAsked(fetchMock).some((u) => u.includes('api.github.com'))).toBe(false);
+  });
+
+  it("sends the session's token, because the endpoint answers signed-in callers only", async () => {
+    useAuthStore.setState({ accessToken: 'token-for-the-notice' });
+    try {
+      const fetchMock = answering(versionCheck());
+      vi.stubGlobal('fetch', fetchMock);
+
+      renderNotice();
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      const init = fetchMock.mock.calls[0]?.[1] as { headers?: Record<string, string> } | undefined;
+      expect(init?.headers?.Authorization).toBe('Bearer token-for-the-notice');
+    } finally {
+      useAuthStore.setState({ accessToken: null });
+    }
   });
 
   it('shows the newer version the server names', async () => {

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 
+import { apiGet } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -230,7 +231,7 @@ export function AgentsPage(): JSX.Element {
   // request, and only offer the sample-seed action when demo_mode is on.
   const systemStatusQuery = useQuery<{ demo_mode?: boolean }>({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()),
+    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
     retry: false,
     staleTime: Infinity,
   });

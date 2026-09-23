@@ -104,8 +104,8 @@ async def test_health(client):
 
 
 @pytest.mark.asyncio
-async def test_system_status(client):
-    resp = await client.get("/api/system/status")
+async def test_system_status(client, auth_headers):
+    resp = await client.get("/api/system/status", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert "api" in data
@@ -267,6 +267,35 @@ async def test_cost_search_requires_auth(client):
     """Cost search should return 401 without authentication."""
     resp = await client.get("/api/v1/costs/?limit=5")
     assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_a_signed_out_caller_reaches_only_what_the_sign_in_screen_needs(client):
+    """The sign-in screen reads the workspace branding and nothing else.
+
+    Every other route below used to answer without a token. None of them is
+    read before sign-in, and together they described the server to anyone who
+    could reach the port: its AI providers and storage engines, its module
+    catalogue, the packs installed on it and the cost databases loaded into it.
+    """
+    for path in (
+        "/api/system/status",
+        "/api/system/version-check",
+        "/api/v1/modules/",
+        "/api/v1/modules/costs",
+        "/api/v1/modules/dependency-tree/costs",
+        "/api/v1/partner-pack/current",
+        "/api/v1/partner-pack/installed",
+        "/api/v1/packs/current",
+        "/api/v1/packs/installed",
+        "/api/v1/costs/regions/",
+        "/api/v1/costs/regions/stats/",
+    ):
+        resp = await client.get(path)
+        assert resp.status_code == 401, f"{path} answered {resp.status_code} without a token"
+
+    branding = await client.get("/api/v1/branding/")
+    assert branding.status_code == 200, branding.text
 
 
 @pytest.mark.asyncio

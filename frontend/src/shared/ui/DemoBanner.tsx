@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Gauge, X, Download, ExternalLink } from 'lucide-react';
+import { apiGet } from '@/shared/lib/api';
 
 const SESSION_KEY = 'oe_demo_modal_dismissed';
 
@@ -33,7 +34,7 @@ export function DemoBanner() {
   // for the life of the deployment and the query is invalidated on logout.
   const { data } = useQuery<{ demo_mode?: boolean }>({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()),
+    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
     retry: false,
     staleTime: Infinity,
   });

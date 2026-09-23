@@ -37,7 +37,7 @@ from app.core.partner_pack.full_install import (
     full_install_stream,
 )
 from app.core.partner_pack.state import PackStateWriteError
-from app.dependencies import RequireRole
+from app.dependencies import RequireRole, get_current_user_payload
 
 _IMAGE_MEDIA_TYPES = {
     "svg": "image/svg+xml",
@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/partner-pack", tags=["partner-pack"])
 
 
-@router.get("/current", summary="Active partner pack manifest")
+@router.get("/current", summary="Active partner pack manifest", dependencies=[Depends(get_current_user_payload)])
 def current_pack() -> dict[str, Any]:
     """Return the active pack's public manifest, or ``{"active": false}``.
 
@@ -65,7 +65,11 @@ def current_pack() -> dict[str, Any]:
     return {"active": True, "manifest": active.to_public_dict()}
 
 
-@router.get("/installed", summary="All discovered packs (admin view)")
+@router.get(
+    "/installed",
+    summary="All discovered packs (admin view)",
+    dependencies=[Depends(get_current_user_payload)],
+)
 def list_installed() -> dict[str, Any]:
     """Return the list of all installed packs and which one is active."""
     active = get_active_pack()

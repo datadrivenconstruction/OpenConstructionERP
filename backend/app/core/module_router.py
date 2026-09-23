@@ -14,20 +14,25 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.core.module_loader import module_loader
-from app.dependencies import RequirePermission
+from app.dependencies import RequirePermission, get_current_user_payload
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/modules", tags=["Module Management"])
 
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(get_current_user_payload)])
 async def list_all_modules() -> list[dict[str, Any]]:
-    """List all discovered modules with enabled/disabled status."""
+    """List all discovered modules with enabled/disabled status.
+
+    Signed-in callers only, like ``/api/system/modules``, which returns the
+    same list. The sidebar asks for it once the user is authenticated, and no
+    screen before sign-in needs the catalogue.
+    """
     return module_loader.list_modules()
 
 
-@router.get("/{module_name}")
+@router.get("/{module_name}", dependencies=[Depends(get_current_user_payload)])
 async def get_module_detail(module_name: str) -> dict[str, Any]:
     """Get detailed info about a module."""
     try:
@@ -91,7 +96,7 @@ async def disable_module(module_name: str, request: Request) -> dict[str, Any]:
         )
 
 
-@router.get("/dependency-tree/{module_name}")
+@router.get("/dependency-tree/{module_name}", dependencies=[Depends(get_current_user_payload)])
 async def get_dependency_tree(module_name: str) -> dict[str, Any]:
     """Show which modules depend on this module."""
     try:
