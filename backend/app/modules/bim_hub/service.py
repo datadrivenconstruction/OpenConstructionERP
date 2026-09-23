@@ -1958,7 +1958,12 @@ class BIMHubService:
                 break
             offset += page_size
 
-        xlsx = build_cobie_workbook(model, elements)
+        # The rows are loaded; building and saving the workbook is CPU work
+        # that grows with the model (the fifty-thousand-element case takes
+        # seconds), so it runs in a worker thread and the event loop keeps
+        # serving everyone else meanwhile. The builder reads loaded column
+        # values only and never touches the session.
+        xlsx = await asyncio.to_thread(build_cobie_workbook, model, elements)
         safe_name = (model.name or "model").replace(" ", "_").replace("/", "_")
         filename = f"COBie_{safe_name}.xlsx"
         return xlsx, filename
@@ -2018,7 +2023,8 @@ class BIMHubService:
                 elements = [e for e in elements if _element_matches_filters(e, filters)]
 
         opts = BoqExportOptions(group_by=group_by, title=title)
-        xlsx = build_boq_workbook(model, elements, opts)
+        # Off the event loop, for the reason ``export_cobie`` gives.
+        xlsx = await asyncio.to_thread(build_boq_workbook, model, elements, opts)
         safe_name = (model.name or "model").replace(" ", "_").replace("/", "_")
         filename = f"BOQ_{safe_name}.xlsx"
         return xlsx, filename

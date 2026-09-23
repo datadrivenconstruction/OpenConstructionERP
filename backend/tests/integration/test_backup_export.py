@@ -13,8 +13,11 @@ from __future__ import annotations
 
 import io
 import json
+import threading
 import uuid
 import zipfile
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 import pytest_asyncio
@@ -133,6 +136,50 @@ async def test_export_unknown_module_surfaces_warning(client: AsyncClient, admin
     zf = zipfile.ZipFile(io.BytesIO(resp.content))
     manifest = json.loads(zf.read("manifest.json"))
     assert any("this_module_does_not_exist" in w for w in manifest.get("warnings", [])), manifest
+
+
+@pytest.mark.asyncio
+async def test_export_renders_the_archive_off_the_event_loop(
+    client: AsyncClient, admin_headers: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Encoding, deflating, hashing and spooling run in worker threads.
+
+    A backup is bounded only by the account, and on the event loop its CPU
+    work froze every other request on the worker for seconds at a time. The
+    queries stay on the loop with their session; each piece of pure
+    rendering is recorded here with the thread it ran on, and none of them
+    may be the loop's own thread, which is the thread this test runs on.
+    """
+    from app.modules.backup import router as backup_router
+    from app.modules.backup import service as backup_service
+
+    loop_thread = threading.get_ident()
+    seen: dict[str, set[int]] = {"member": set(), "finalize": set(), "spool": set()}
+
+    def _recording(name: str, real: Callable[..., Any]) -> Callable[..., Any]:
+        def spy(*args: Any, **kwargs: Any) -> Any:
+            seen[name].add(threading.get_ident())
+            return real(*args, **kwargs)
+
+        return spy
+
+    monkeypatch.setattr(backup_service, "_write_json_member", _recording("member", backup_service._write_json_member))
+    monkeypatch.setattr(backup_service, "_finalize_archive", _recording("finalize", backup_service._finalize_archive))
+    monkeypatch.setattr(backup_router, "spool_to_disk", _recording("spool", backup_router.spool_to_disk))
+
+    resp = await client.post(
+        "/api/v1/backup/export/",
+        headers=admin_headers,
+        json={"include_modules": ["projects", "boqs"]},
+    )
+
+    assert resp.status_code == 200, resp.text
+    zf = zipfile.ZipFile(io.BytesIO(resp.content))
+    assert zf.testzip() is None
+    assert {"projects.json", "boqs.json", "manifest.json"} <= set(zf.namelist())
+    for name, threads in seen.items():
+        assert threads, f"{name} never ran, so the spy proves nothing"
+        assert loop_thread not in threads, f"{name} ran on the event loop thread"
 
 
 @pytest.mark.asyncio
