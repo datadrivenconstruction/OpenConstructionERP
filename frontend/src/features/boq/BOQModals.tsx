@@ -125,6 +125,33 @@ interface BOQSectionOption {
   childCount: number;
 }
 
+/**
+ * Read the picked cost items in full before the add flow uses them.
+ *
+ * The search list arrives slim (``fetchCostSearch`` sends ``lite=1``): its
+ * rows carry ``components: []`` and only the small ``metadata_`` keys, because
+ * a CWICR row's component breakdown and variant catalogues are tens of
+ * kilobytes each and the list renders neither. The add flow is the one place
+ * that needs them, to build the position's resources and to offer the variant
+ * pickers. Each list row keeps its own fields and takes only those two from
+ * ``GET /v1/costs/{id}``, which is the row the unslimmed list used to carry.
+ *
+ * All or nothing: when any read fails the promise rejects and the caller adds
+ * nothing, rather than posting positions that silently lost their resources.
+ */
+async function loadCostItemsForAdd(listItems: CostSearchItem[]): Promise<CostSearchItem[]> {
+  return Promise.all(
+    listItems.map(async (item) => {
+      const full = await apiGet<ApiCostSearchItem>(`/v1/costs/${encodeURIComponent(item.id)}`);
+      return {
+        ...item,
+        components: Array.isArray(full?.components) ? full.components : item.components ?? [],
+        metadata_: (full?.metadata_ ?? item.metadata_) as CostSearchItem['metadata_'],
+      };
+    }),
+  );
+}
+
 /* ── AssemblyPickerModal ─────────────────────────────────────────────── */
 
 export function AssemblyPickerModal({
@@ -713,7 +740,21 @@ export function CostDatabaseSearchModal({
     // stamp `metadata.resources[i].variant`/`variant_default` for backend
     // snapshotting via `_stamp_resource_variant_snapshots`.
     if (onSelectForResources) {
-      const selectedItems = items.filter((i) => selected.has(i.id));
+      let selectedItems: CostSearchItem[];
+      setIsAdding(true);
+      try {
+        selectedItems = await loadCostItemsForAdd(items.filter((i) => selected.has(i.id)));
+      } catch (err) {
+        if (import.meta.env.DEV) console.error('Add-from-cost-DB item read failed:', err);
+        addToast({
+          type: 'error',
+          title: t('boq.add_failed', { defaultValue: 'Failed to add positions' }),
+          message: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      } finally {
+        setIsAdding(false);
+      }
 
       const pickVariantForResource = (
         item: CostSearchItem,
@@ -740,6 +781,10 @@ export function CostDatabaseSearchModal({
     setIsAdding(true);
 
     try {
+      // Full rows first, before anything is posted: a failed read lands in
+      // the outer catch below with nothing added.
+      const selectedItems = await loadCostItemsForAdd(items.filter((i) => selected.has(i.id)));
+
       // Resolve the parent context. When the user chose a section in the
       // footer dropdown, new positions land under that section with
       // section-relative ordinals (`<section>.<NNN+1>`). Otherwise we fall
@@ -778,8 +823,6 @@ export function CostDatabaseSearchModal({
           /* ignore — start at 1 */
         }
       }
-
-      const selectedItems = items.filter((i) => selected.has(i.id));
 
       // Promise wrapper around the single-slot variant picker — used when
       // a cost item has exactly one top-level variant slot. Cancelling
