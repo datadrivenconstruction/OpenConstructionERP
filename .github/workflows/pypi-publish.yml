@@ -206,21 +206,32 @@ jobs:
               # request answered by a person on their own schedule. Neither is
               # something to start on the release that fails.
               #
-              # The numbers that set the threshold: at 17.8.3 the project had
-              # room for 5.8 more wheels, and four releases had gone out in the
-              # previous two days. The one-wheel rule would have printed for the
-              # first time about half a day before uploads began returning 400.
-              # Six wheels is roughly a week at that cadence, which is enough to
-              # open a support request and wait for it.
+              # The threshold is therefore stated in days rather than wheels,
+              # because days are what the remedy needs and wheels only stand in
+              # for them. Fourteen days is the number, and it is chosen against
+              # the slower of the two remedies: a support request is answered by
+              # a volunteer on their own schedule, so a week is optimistic.
+              #
+              # Counting wheels instead would set the lead time by accident. At
+              # 17.8.3 the project had room for 5.8 of them, which is a month if
+              # releases are monthly and under four days at the rate they were
+              # actually going out that week. A wheel count cannot tell those
+              # apart; that is the whole reason the cadence is measured below.
+              #
+              # The floor exists because the day estimate needs a rate and a
+              # long enough quiet spell drives that toward zero, which would
+              # report a runway of years while two wheels fit. Under two, warn
+              # whatever the arithmetic says.
+              #
               # Take the fastest rate sustained over any recent window rather
               # than one average, because the averaging window decides the
               # answer and a single long one hides exactly the burst that
-              # empties the quota. Measured here: over the last 14 wheels the
-              # rate is 0.6 a day and the runway reads 9 days, while over the
-              # three days around 17.8.3 it is nearer 1.7 a day and the runway
-              # is 3. Understating the rate is the dangerous direction for a
-              # warning about running out, so the windows disagreeing means
-              # take the worst of them and say which one it came from.
+              # empties the quota. Measured against the index as it stood when
+              # 17.8.3 published: the last fourteen wheels average 0.6 a day and
+              # put the runway at nine days, while the three day window gives
+              # 1.33 a day and just under four. Understating the rate is the
+              # dangerous direction for a warning about running out, so the
+              # windows disagreeing means take the worst and name which it was.
               now = datetime.now(timezone.utc)
               ages = sorted(
                   (now - datetime.fromisoformat(f["upload_time_iso_8601"].replace("Z", "+00:00"))).total_seconds() / 86400
@@ -228,22 +239,29 @@ jobs:
                   for f in fs
                   if f["filename"].endswith(".whl")
               )
+              WARN_DAYS = 14
+              WARN_WHEELS_FLOOR = 2
+
               fits = left / size
               runway = f"{fits:.1f} more wheels this size"
               rates = [
-                  # +1 counts the release being published right now.
+                  # The +1 is the release being published right now, which is not
+                  # on the index yet when this runs on a tag. Re-running this
+                  # script by hand after a release counts that wheel twice and
+                  # reads high; subtract it if you are checking between tags.
                   ((sum(1 for a in ages if a <= w) + 1) / w, w)
                   for w in (3, 7, 14, 30)
               ]
               per_day, window = max(rates)
+              days = fits / per_day if per_day > 0 else float("inf")
               if per_day > 0:
                   runway += (
-                      f", about {fits / per_day:.0f} days at {per_day:.1f} releases a "
+                      f", about {days:.0f} days at {per_day:.2f} releases a "
                       f"day, the fastest of the last 3, 7, 14 and 30 day windows "
                       f"(the {window} day one)"
                   )
               print(f"room for {runway}")
-              if fits < 6:
+              if days < WARN_DAYS or fits < WARN_WHEELS_FLOOR:
                   print(
                       f"::warning::PyPI project storage is running out: room for {runway}. "
                       f"The wheel cannot shrink enough to matter here, so this needs "
