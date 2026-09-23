@@ -2194,14 +2194,16 @@ function PackageDrawer({
                       // An invitation that already produced a submission cannot
                       // be recorded again (the backend enforces one submission
                       // per invitation with a UNIQUE constraint → 409).
+                      // A bid is taken only inside the tender window, the
+                      // same two states the backend accepts: not on a draft
+                      // that has not gone out, not once the package is closed.
                       const hasSubmission = (subsQ.data ?? []).some(
                         (s) => s.invitation_id === inv.id,
                       );
                       const canRecord =
                         !hasSubmission &&
                         !!inv.bidder_ref_id &&
-                        pkg.status !== 'awarded' &&
-                        pkg.status !== 'cancelled';
+                        (pkg.status === 'published' || pkg.status === 'open');
                       return (
                         <li
                           key={inv.id}

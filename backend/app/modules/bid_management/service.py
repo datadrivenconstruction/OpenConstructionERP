@@ -93,11 +93,17 @@ PACKAGE_TRANSITIONS: dict[str, set[str]] = {
 }
 
 #: Package states in which the contest is decided. A bid on a package in one of
-#: these is frozen: it cannot be edited, withdrawn or deleted, and no new
-#: submission can be recorded against the package. One set, read by both
-#: ``_assert_submission_mutable`` and ``record_submission``, so the two cannot
-#: drift apart.
+#: these is frozen: it cannot be edited, withdrawn or deleted
+#: (``_assert_submission_mutable``).
 DECIDED_PACKAGE_STATES: frozenset[str] = frozenset({"awarded", "cancelled"})
+
+#: Package states in which a NEW bid may be recorded: the tender window, from
+#: publication until the package is closed. A draft package has not gone out to
+#: bidders yet, and closing a package ends the bidding so the bids can be
+#: levelled and one awarded; a bid recorded after that would enter a contest
+#: that is already being decided. The decided states are outside it as well, so
+#: ``record_submission`` reads this set alone.
+OPEN_FOR_SUBMISSION_STATES: frozenset[str] = frozenset({"published", "open"})
 
 INVITATION_TRANSITIONS: dict[str, set[str]] = {
     "pending": {"sent", "expired"},
@@ -1500,10 +1506,11 @@ class BidManagementService:
                 status_code=404,
                 detail="Bidder not found for this invitation's package",
             )
-        # A decided package takes no new bids. Same states, same 409 as the
-        # guard that freezes an existing submission (_assert_submission_mutable).
+        # A bid is recorded only inside the tender window: not on a draft that
+        # has not gone out, not on a closed package whose bids are being
+        # levelled, and not on a decided one. Same 409 for all of them.
         package = await self.package_repo.get_by_id(inv_for_bidder.package_id)
-        if package is not None and package.status in DECIDED_PACKAGE_STATES:
+        if package is not None and package.status not in OPEN_FOR_SUBMISSION_STATES:
             raise HTTPException(
                 status_code=409,
                 detail=f"Package is '{package.status}' and accepts no new submissions",
