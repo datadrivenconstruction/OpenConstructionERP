@@ -4075,12 +4075,13 @@ async def export_boq_csv(
 
 
 def _project_line(project: Any) -> str | None:
-    """The project line printed under the title of an exported sheet.
+    """The project line printed above the table of an exported sheet.
 
-    The title is the bill's own name, which says which bill this is and not
-    which job it belongs to, under which classification standard or in which
-    region. A recipient outside the company has none of that context, so it is
-    either named on the sheet or nowhere.
+    The bill's own name says which bill this is and not which job it belongs
+    to, under which classification standard or in which region. A recipient
+    outside the company has none of that context, so it is either named on the
+    sheet or nowhere. The Excel export writes it itself, in the row above the
+    header, so it is there whether or not the company has set up a letterhead.
 
     Args:
         project: The project row, or ``None`` when it could not be read.
@@ -4163,6 +4164,24 @@ async def export_boq_excel(
     ws = wb.active
     ws.title = "BOQ"
 
+    # ── Project line ─────────────────────────────────────────────────────
+    # Which job this bill belongs to, as the PDF export's cover page already
+    # names it. The sheet is read by whoever receives it, and the bill's name
+    # alone does not tell them. Written here, in the row above the header,
+    # rather than handed to the letterhead: the letterhead is drawn only when
+    # the company has a profile, and which job a bill is for has nothing to do
+    # with whether anyone uploaded a logo. The importers find the header row by
+    # its column names, so one more row above it does not stop a re-import.
+    from app.modules.projects.repository import ProjectRepository
+
+    project = await ProjectRepository(session).get_by_id(boq_data.project_id)
+    project_line = _project_line(project)
+    header_row = 1
+    if project_line:
+        line_cell = ws.cell(row=1, column=1, value=neutralise_formula(project_line))
+        line_cell.font = Font(size=10, color="666666")
+        header_row = 2
+
     # ── Header row: standard + custom ────────────────────────────────────
     # Extended set preserves roundtrip data (BUG-163-175) while keeping
     # the classic first-seven columns stable for backwards compatibility.
@@ -4205,12 +4224,12 @@ async def export_boq_excel(
     right_align = Alignment(horizontal="right")
 
     for col_idx, header in enumerate(headers, start=1):
-        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell = ws.cell(row=header_row, column=col_idx, value=header)
         cell.font = bold_font
         cell.fill = gray_fill
 
-    # ── Freeze header row ────────────────────────────────────────────────
-    ws.freeze_panes = "A2"
+    # ── Freeze header row (and the project line above it) ────────────────
+    ws.freeze_panes = f"A{header_row + 1}"
 
     # ── Build section lookup for subtotal insertion ───────────────────────
     section_map: dict[str, tuple[str, str, float]] = {}
@@ -4218,7 +4237,7 @@ async def export_boq_excel(
         section_map[str(sec.id)] = (sec.ordinal, sec.description, sec.subtotal)
 
     # ── Position rows (with section headers and subtotals) ───────────────
-    current_row = 2
+    current_row = header_row + 1
     current_section_id: str | None = None
 
     def _write_subtotal(row: int, sec_ordinal: str, sec_desc: str, subtotal: float) -> int:
@@ -4463,10 +4482,13 @@ async def export_boq_excel(
         last_row = rate_row
 
     # ── Auto-width columns ────────────────────────────────────────────────
+    # From the first data row: the project line above the header is one long
+    # cell that runs across the empty cells beside it, and sizing column A to
+    # it would push the table off screen.
     for col_idx in range(1, len(headers) + 1):
         max_length = len(str(headers[col_idx - 1]))
         for row in ws.iter_rows(
-            min_row=2,
+            min_row=header_row + 1,
             max_row=last_row,
             min_col=col_idx,
             max_col=col_idx,
@@ -4479,25 +4501,21 @@ async def export_boq_excel(
         ws.column_dimensions[get_column_letter(col_idx)].width = adjusted
 
     # Align numeric columns to the right
-    for row in ws.iter_rows(min_row=2, max_row=total_row, min_col=4, max_col=6):
+    for row in ws.iter_rows(min_row=header_row + 1, max_row=total_row, min_col=4, max_col=6):
         for cell in row:
             cell.alignment = right_align
 
     # ── Company letterhead ────────────────────────────────────────────────
     # Last, once every row above is final: it moves the table down under the
-    # letterhead. Nothing changes without a company profile, and the importer
-    # finds the header row under a letterhead, so the round-trip holds.
+    # letterhead, the project line with it. Nothing changes without a company
+    # profile, and the importer finds the header row under a letterhead, so the
+    # round-trip holds. No subtitle: the project line is already on the sheet,
+    # and passing it here as well would print it twice.
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
-    from app.modules.projects.repository import ProjectRepository
-
-    # Which job this bill belongs to, as the PDF export's cover page already
-    # names it. The sheet is read by whoever receives it, and the bill's name
-    # alone does not tell them.
-    project = await ProjectRepository(session).get_by_id(boq_data.project_id)
 
     store_strings_as_text(ws)
-    apply_company_header(ws, title=boq_data.name, subtitle=_project_line(project))
+    apply_company_header(ws, title=boq_data.name)
 
     # ── Workbook origin metadata ──────────────────────────────────────────
     # Stamp docProps/core.xml + docProps/app.xml so a downloaded BOQ .xlsx
