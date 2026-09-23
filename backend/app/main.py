@@ -645,8 +645,13 @@ def _emit_server_fail(exc: BaseException) -> None:
         pass
 
 
+# The stdlib console handler ``configure_logging`` owns, found again by name.
+_CONSOLE_HANDLER_NAME = "openconstructionerp.console"
+_CONSOLE_LOG_FORMAT = "%(asctime)s %(levelname)s [%(request_id)s] %(name)s: %(message)s"
+
+
 def configure_logging(settings: Settings) -> None:
-    """Configure structured logging."""
+    """Configure structured logging without disturbing handlers the host installed."""
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
@@ -669,19 +674,33 @@ def configure_logging(settings: Settings) -> None:
     # ``RequestIDLogFilter`` (defaults to "-" off-request).
     from app.middleware.request_id import RequestIDLogFilter
 
-    logging.basicConfig(
-        level=getattr(logging, settings.log_level),
-        format="%(asctime)s %(levelname)s [%(request_id)s] %(name)s: %(message)s",
-        force=True,
-    )
-    _rid_filter = RequestIDLogFilter()
+    # Configure only the handler we own. ``logging.basicConfig(force=True)``
+    # used to do this job, and ``force`` removes AND closes every handler
+    # already on the root logger: the one a desktop shell installs to keep its
+    # log file, pytest's ``caplog`` capture, anything a host process set up
+    # before it imported us. The loss was silent, the host simply stopped
+    # receiving records. So the console handler is named, a repeat call (the
+    # test suite builds the app many times) swaps out only the handler carrying
+    # that name, and every foreign handler is left exactly as it was found.
     root_logger = logging.getLogger()
-    # Attach to root so every handler inherits the filter; also attach
-    # directly to existing handlers since logging.Filter does not propagate
-    # through ``Logger.addFilter`` to already-attached handlers reliably.
-    root_logger.addFilter(_rid_filter)
-    for handler in root_logger.handlers:
-        handler.addFilter(_rid_filter)
+    root_logger.setLevel(getattr(logging, settings.log_level))
+    for existing in list(root_logger.handlers):
+        if existing.get_name() == _CONSOLE_HANDLER_NAME:
+            root_logger.removeHandler(existing)
+            existing.close()
+    # Same stream, format and level basicConfig gave us: stderr, bound when the
+    # handler is built.
+    console = logging.StreamHandler()
+    console.set_name(_CONSOLE_HANDLER_NAME)
+    console.setFormatter(logging.Formatter(_CONSOLE_LOG_FORMAT))
+    # The filter goes on the handler, not only on the root logger: a filter on
+    # a logger sees records logged on that logger alone, never the ones that
+    # propagate up from ``app.*`` children, and without it the formatter cannot
+    # resolve ``%(request_id)s`` for them.
+    console.addFilter(RequestIDLogFilter())
+    root_logger.addHandler(console)
+    if not any(isinstance(f, RequestIDLogFilter) for f in root_logger.filters):
+        root_logger.addFilter(RequestIDLogFilter())
 
 
 def _init_vector_db() -> None:
