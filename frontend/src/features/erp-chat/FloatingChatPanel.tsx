@@ -18,6 +18,13 @@
  * consumes Escape itself (an inline edit form, a menu) must call
  * `preventDefault()` on the event, and the dock then leaves it alone.
  *
+ * Under the header a slim row holds two tabs, Chat and Changes (the
+ * assistant's ledger, mounted the first time it is opened), and the project
+ * the assistant works in. The assistant never writes on its own: its tools
+ * return PROPOSALS, rendered as cards with Apply / Edit / Reject, and a tray
+ * above the composer counts the ones still waiting while the conversation
+ * has any.
+ *
  * The panel intentionally owns its own conversation state (mirroring
  * `useChatFullPage`) rather than sharing state with the full-page chat —
  * this way the user can keep a long-running full-page conversation open in
@@ -28,6 +35,8 @@
 import {
   useCallback,
   useEffect,
+  useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -38,17 +47,27 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import clsx from 'clsx';
 import {
   X,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  CircleAlert,
+  ClipboardCheck,
   ExternalLink,
+  HelpCircle,
   History,
   MessageSquarePlus,
   Loader2,
   KeyRound,
   AlertTriangle,
+  PenLine,
   RotateCw,
-  Lock,
+  Search,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
@@ -58,6 +77,7 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { aiApi, type AISettings } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
+import { ApiError } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
 import {
@@ -77,8 +97,15 @@ import {
   widthFromDrag,
   widthFromKey,
 } from './useFloatingChat';
-import { fetchChatSessions } from './api';
+import { fetchChatSessions, fetchSessionMessages } from './api';
 import type { ChatMessage, ChatSession, ToolCallInfo } from './types';
+import { DockTabsRow, dockTabId, dockTabPanelId, type DockTab } from './DockTabsRow';
+import { isProposalTool, toolLabel, toolRefusalText } from './toolLabels';
+import { proposalsInTranscript, transcriptFromPersisted } from './transcript';
+import { ActionsReviewTray, revealFirstWaitingAction } from './actions/ActionsReviewTray';
+import { ChangesView } from './actions/ChangesView';
+import { pendingActions, useLiveChatActions } from './actions/useChatActions';
+import type { ChatAction } from './actions/types';
 
 // Reuse the full-page renderer registry so the tool-result cards inside the
 // floating panel look identical to /chat. The single shared RENDERER_REGISTRY

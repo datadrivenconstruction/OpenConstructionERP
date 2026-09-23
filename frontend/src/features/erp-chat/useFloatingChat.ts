@@ -137,6 +137,15 @@ interface FloatingChatState {
   setWidth: (width: number, options?: { persist?: boolean }) => void;
   /** Back to DOCK_DEFAULT_WIDTH (double-click on the resize handle). */
   resetWidth: () => void;
+  /**
+   * Ids of the proposals in the dock's current conversation. The panel
+   * publishes them (it stays mounted while closed) so the round button can
+   * show how many still wait for review without owning the transcript. Not
+   * persisted: after a reload the panel publishes them again once it has
+   * restored the conversation.
+   */
+  conversationActionIds: readonly string[];
+  setConversationActionIds: (ids: readonly string[]) => void;
   open: () => void;
   close: () => void;
   toggle: () => void;
@@ -230,6 +239,14 @@ export const useFloatingChatStore = create<FloatingChatState>((set, get) => ({
   resetWidth: () => {
     set({ width: DOCK_DEFAULT_WIDTH });
     writeDockWidth(DOCK_DEFAULT_WIDTH);
+  },
+
+  conversationActionIds: [],
+
+  setConversationActionIds: (ids: readonly string[]) => {
+    const current = get().conversationActionIds;
+    if (current.length === ids.length && current.every((id, i) => id === ids[i])) return;
+    set({ conversationActionIds: ids });
   },
 
   open: () => {
