@@ -120,13 +120,56 @@ describe('the places that finish a pack install', () => {
     ).toEqual([]);
   });
 
-  it.each(SITES)('%s refreshes the project list and the module list too', (relative) => {
-    // Applying a pack enables and disables modules, and the backend scopes the
-    // project listing to the active pack the instant it is applied. A header
-    // that updates over a stale sidebar is only half the report.
-    const lines = invalidations(relative);
-    expect(lines.some((l) => l.includes("queryKey: ['modules']"))).toBe(true);
+  it.each(SITES)('%s refreshes the project list too', (relative) => {
+    // The backend scopes the project listing to the active pack the instant it
+    // is applied.
     if (relative.includes('partnerPacks.ts')) return; // shared helper, no project view
+    const lines = invalidations(relative);
     expect(lines.some((l) => l.includes("queryKey: ['projects']"))).toBe(true);
+  });
+
+  // Applying a pack enables and disables modules. A header that updates over a
+  // stale sidebar is only half the report, so every site has to reach the
+  // query the sidebar actually reads its module list through.
+  //
+  // This used to assert that each site named ['modules'], and it passed while
+  // the sidebar read ['system-modules']. Prefix matching does not cross those
+  // two keys, so the invalidation the test guarded never reached the sidebar.
+  // The key is therefore read out of the sidebar's own source here, and the
+  // match is left to React Query rather than to a string comparison.
+  const literalKey = (text: string): unknown[] | null => {
+    try {
+      const parsed: unknown = JSON.parse(text.replace(/'/g, '"'));
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null; // a key built from a variable, not a literal
+    }
+  };
+
+  const sidebarModulesKey = (): unknown[] => {
+    const src = source('src/app/layout/Sidebar.tsx');
+    const m = src.match(/queryKey:\s*(\[[^\]]*\]),\s*queryFn:\s*\(\)\s*=>\s*apiGet<[^>]*>\('\/v1\/modules\/'\)/);
+    if (!m) throw new Error('Sidebar.tsx no longer reads the module list the way this test expects');
+    const key = literalKey(m[1]);
+    if (!key) throw new Error(`Sidebar.tsx module list key is not a literal: ${m[1]}`);
+    return key;
+  };
+
+  it.each(SITES)('%s reaches the module list the sidebar reads', (relative) => {
+    const sidebarKey = sidebarModulesKey();
+    const qc = new QueryClient();
+    qc.setQueryData(sidebarKey, []);
+    const keys = invalidations(relative)
+      .map((l) => l.match(/queryKey:\s*(\[[^\]]*\])/)?.[1])
+      .filter((k): k is string => Boolean(k))
+      .map(literalKey)
+      .filter((k): k is unknown[] => k !== null);
+    const reached = keys.some((k) =>
+      qc
+        .getQueryCache()
+        .findAll({ queryKey: k })
+        .some((q) => JSON.stringify(q.queryKey) === JSON.stringify(sidebarKey)),
+    );
+    expect(reached).toBe(true);
   });
 });
