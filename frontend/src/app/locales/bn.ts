@@ -34628,6 +34628,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "অনুমোদিত",
     "subcontractors.rollup_chip_certs_lapsed": "সার্টিফিকেট মেয়াদোত্তীর্ণ",
     "subcontractors.rollup_chip_certs_ok": "সার্টিফিকেট বৈধ",
+    "subcontractors.rollup_chip_certs_on_payment": "সার্টিফিকেট পরিশোধের তারিখে যাচাই হবে",
     "subcontractors.rollup_chip_certs_unchecked": "সার্টিফিকেট যাচাই করা হয়নি: মেয়াদ শেষের তারিখ নেই",
     "subcontractors.rollup_chip_paid": "পরিশোধিত",
     "subcontractors.rollup_chip_received": "গৃহীত, অনুমোদিত নয়",

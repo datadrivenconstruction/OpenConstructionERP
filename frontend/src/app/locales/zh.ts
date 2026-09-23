@@ -35404,6 +35404,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "已批准",
     "subcontractors.rollup_chip_certs_lapsed": "证书已过期",
     "subcontractors.rollup_chip_certs_ok": "证书有效",
+    "subcontractors.rollup_chip_certs_on_payment": "证书按付款日核查",
     "subcontractors.rollup_chip_certs_unchecked": "证书未核查：无期末日期",
     "subcontractors.rollup_chip_paid": "已付款",
     "subcontractors.rollup_chip_received": "已收到，未批准",

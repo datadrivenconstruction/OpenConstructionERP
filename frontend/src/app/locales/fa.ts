@@ -34654,6 +34654,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "تأییدشده",
     "subcontractors.rollup_chip_certs_lapsed": "گواهی منقضی شده",
     "subcontractors.rollup_chip_certs_ok": "گواهی معتبر",
+    "subcontractors.rollup_chip_certs_on_payment": "گواهی در تاریخ پرداخت بررسی می‌شود",
     "subcontractors.rollup_chip_certs_unchecked": "گواهی بررسی نشده: تاریخ پایان دوره ندارد",
     "subcontractors.rollup_chip_paid": "پرداخت‌شده",
     "subcontractors.rollup_chip_received": "دریافت‌شده، تأیید نشده",

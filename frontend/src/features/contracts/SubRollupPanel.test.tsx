@@ -352,6 +352,63 @@ describe('SubRollupPanel', () => {
     expect(screen.getByText('insurance')).toBeInTheDocument();
   });
 
+  it('says a payment-date certificate waits for the payment rather than calling it valid or unchecked', async () => {
+    rollupMock.mockResolvedValue(
+      rollup({
+        included: [
+          payApp({
+            progress_claim_id: 'claim-1',
+            certificates_ok: null,
+            paid_on: null,
+            certificates_pending_payment: true,
+            payment_date_findings: [
+              {
+                document_type: 'construction_tax_exemption',
+                state: 'pending',
+                judged_on: null,
+                lapsed_on: null,
+                valid_until: '2026-12-31',
+              },
+            ],
+          }),
+        ],
+      }),
+    );
+    renderPanel();
+    expect(await screen.findByText('Certificate checked on the payment date')).toBeInTheDocument();
+    expect(screen.queryByText('Certificates valid')).toBeNull();
+    expect(screen.queryByText(/Certificates not checked/)).toBeNull();
+    expect(screen.queryByText('construction_tax_exemption')).toBeNull();
+  });
+
+  it('lists a payment-date certificate that did not cover a payment already made', async () => {
+    rollupMock.mockResolvedValue(
+      rollup({
+        included: [
+          payApp({
+            progress_claim_id: 'claim-1',
+            status: 'paid',
+            certificates_ok: false,
+            paid_on: '2026-05-05',
+            certificates_pending_payment: false,
+            payment_date_findings: [
+              {
+                document_type: 'construction_tax_exemption',
+                state: 'expired',
+                judged_on: '2026-05-05',
+                lapsed_on: '2026-04-30',
+                valid_until: '2026-04-30',
+              },
+            ],
+          }),
+        ],
+      }),
+    );
+    renderPanel();
+    expect(await screen.findByText('Certificate lapsed')).toBeInTheDocument();
+    expect(screen.getByText('construction_tax_exemption')).toBeInTheDocument();
+  });
+
   it('removes itself when the subcontractors module is not there', async () => {
     rollupMock.mockRejectedValue(new ApiError(404, 'Not Found', { detail: 'Not Found' }));
     const { container } = renderPanel();

@@ -35358,6 +35358,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "承認済み",
     "subcontractors.rollup_chip_certs_lapsed": "証明書が失効",
     "subcontractors.rollup_chip_certs_ok": "証明書は有効",
+    "subcontractors.rollup_chip_certs_on_payment": "証明書は支払日に確認",
     "subcontractors.rollup_chip_certs_unchecked": "証明書未確認：期末日なし",
     "subcontractors.rollup_chip_paid": "支払い済み",
     "subcontractors.rollup_chip_received": "受領済み、未承認",

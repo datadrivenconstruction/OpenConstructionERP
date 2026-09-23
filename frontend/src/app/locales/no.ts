@@ -35313,6 +35313,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Godkjent",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikat utløpt",
     "subcontractors.rollup_chip_certs_ok": "Sertifikater gyldige",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifikatet kontrolleres på betalingsdatoen",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikater ikke kontrollert: ingen periodeslutt",
     "subcontractors.rollup_chip_paid": "Betalt",
     "subcontractors.rollup_chip_received": "Mottatt, ikke godkjent",
