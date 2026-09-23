@@ -32,6 +32,19 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
 
+
+def _export_header_row(ws) -> int:  # noqa: ANN001 - an openpyxl worksheet
+    """The 1-based row the BOQ importer reads as the header of an exported sheet.
+
+    The export writes the project line above the header, so the header is not
+    row one; it is wherever the importer's own rule finds it.
+    """
+    from app.core.sheet_header import find_header_row
+    from app.modules.boq.importers.excel import _match_column
+
+    return find_header_row(ws.iter_rows(values_only=True), _match_column).number
+
+
 # ── Shared fixtures (module-scoped to avoid rate-limiter) ────────────────────
 
 
@@ -339,8 +352,10 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     ws = wb.active
     assert ws is not None
 
-    # Header row check
-    headers_row = [ws.cell(row=1, column=c).value for c in range(1, 8)]
+    # Header row check, found the way the importer finds it: the project
+    # line sits above it.
+    header_at = _export_header_row(ws)
+    headers_row = [ws.cell(row=header_at, column=c).value for c in range(1, 8)]
     assert "Pos." in headers_row
     assert "Description" in headers_row
     assert "Total" in headers_row
@@ -354,8 +369,8 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     assert grand_label.value == "Grand Total"
     assert grand_label.font.bold is True
 
-    # Freeze panes
-    assert ws.freeze_panes == "A2", f"Freeze panes should be 'A2', got '{ws.freeze_panes}'"
+    # Freeze panes: everything down to the header row stays in view
+    assert ws.freeze_panes == f"A{header_at + 1}", f"Freeze panes should sit under the header, got '{ws.freeze_panes}'"
 
     # Numeric cells have number format
     for data_row in range(2, max_row):
@@ -717,9 +732,10 @@ async def test_excel_export_quality(shared_client: AsyncClient, shared_auth: dic
     wb = load_workbook(io.BytesIO(resp.content))
     ws = wb.active
 
-    # 1. Header freeze
+    # 1. Header freeze, just under the header row the importer finds
     assert ws.freeze_panes is not None, "Header row should be frozen"
-    assert ws.freeze_panes == "A2", f"Freeze panes should be 'A2', got '{ws.freeze_panes}'"
+    header_at = _export_header_row(ws)
+    assert ws.freeze_panes == f"A{header_at + 1}", f"Freeze panes should sit under the header, got '{ws.freeze_panes}'"
 
     # 2. Number formatting on data cells
     for row_idx in range(2, ws.max_row + 1):
