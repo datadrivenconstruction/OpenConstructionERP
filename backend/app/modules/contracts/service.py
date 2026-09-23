@@ -4786,7 +4786,6 @@ class ContractsService:
         (the claim inherits the contract currency); no currency is ever blended.
         """
         from app.modules.contracts.aia import (  # noqa: PLC0415
-            OUT_OF_SCHEDULE_LINE,
             apply_retention_snapshot,
             bills_without_schedule,
             build_cost_of_work_row,
@@ -4794,7 +4793,6 @@ class ContractsService:
             build_g703,
             sheet_sov_lines,
         )
-        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
 
         claim = await self.claim_repo.get_by_id(claim_id)
         if claim is None:
@@ -4840,14 +4838,11 @@ class ContractsService:
 
         retainage_percent = Decimal(str(contract.retention_percent or 0))
         prior_by_line = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
-        # Both branches need the prior claims, so they are read once. The two
-        # calls answer the same population: prior_period_value_by_line resolves
-        # "prior" through this very method, rejected claims left out.
-        prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         if bills_without_schedule(claim, claim_lines):
             # The claim's own figures go on a single cost-of-work row. What
             # makes a claim this shape is decided once, in aia.py, because
             # certification freezes the same two figures the sheet prints.
+            prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
             held = (
                 Decimal(str(claim.retention_held_to_date))
                 if claim.retention_held_to_date is not None
@@ -4865,24 +4860,6 @@ class ContractsService:
                 )
             ]
         else:
-            # What earlier claims billed with no lines at all. Column D here is
-            # assembled from claim lines, so a lineless earlier claim is
-            # invisible to it while line 7 still carries its certificate, and
-            # line 8 then subtracts money the columns never added.
-            #
-            # The residual finds it without asking any claim what basis it used,
-            # which matters because the answer was never recorded for claims
-            # that already exist. It holds on an invariant worth naming: every
-            # path that writes gross_amount sets it to the sum of the claim's
-            # own period_completed_value, the same field prior_by_line sums,
-            # and only a claim with no lines keeps a gross of its own. So the
-            # difference is exactly what was billed outside the schedule.
-            # Floored at zero: a legacy row whose gross was never recomputed
-            # from its lines would otherwise invent a negative row.
-            prior_gross_total = sum((Decimal(str(c.gross_amount or 0)) for c in prior_claims), DEC_ZERO)
-            prior_without_schedule = prior_gross_total - sum(prior_by_line.values(), DEC_ZERO)
-            if prior_without_schedule < DEC_ZERO:
-                prior_without_schedule = DEC_ZERO
             # Which lines the sheet lists, roll-up parents excluded, is decided
             # once in aia.py so this and the certification freeze cannot drift.
             sov_lines = sheet_sov_lines(contract_lines, by_contract_line, prior_by_line)
@@ -4891,19 +4868,11 @@ class ContractsService:
                 by_contract_line,
                 retainage_percent=retainage_percent,
                 prior_by_line=prior_by_line,
-                prior_without_schedule=prior_without_schedule,
-                out_of_schedule_label=contracts_translate("aia.g703.billed_without_schedule"),
             )
             if claim.retention_held_to_date is not None:
                 # Worked out by the retention engine: column I and line 5 are the
                 # claim's certified figures, with any release billed on it taken off.
-                #
-                # The snapshot walks rows beside lines strictly in step, so the
-                # out-of-schedule row needs a stand-in. Counted off the rows the
-                # builder returned rather than by re-asking whether a residual
-                # existed, because two copies of that question can disagree.
-                snapshot_lines = [*sov_lines, *([OUT_OF_SCHEDULE_LINE] * (len(g703) - len(sov_lines)))]
-                apply_retention_snapshot(g703, snapshot_lines, by_contract_line, held=claim.retention_held_to_date)
+                apply_retention_snapshot(g703, sov_lines, by_contract_line, held=claim.retention_held_to_date)
 
         g702 = build_g702_summary(
             g703,
