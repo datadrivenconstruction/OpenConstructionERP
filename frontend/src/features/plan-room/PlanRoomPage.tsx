@@ -25,7 +25,8 @@ import {
   Lock,
   Map as MapIcon,
 } from 'lucide-react';
-import { ApiError, apiGet, getErrorMessage } from '@/shared/lib/api';
+import { ApiError, getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { Badge, EmptyState } from '@/shared/ui';
 import { CollapsibleSection } from '@/shared/ui/CollapsibleSection';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -92,7 +93,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
   /* ── Project + drawings ────────────────────────────────────────────── */
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = activeProjectId || projects[0]?.id || '';

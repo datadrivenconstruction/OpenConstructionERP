@@ -31,6 +31,7 @@ import clsx from 'clsx';
 import { Button, Badge, Card, Input, Breadcrumb, ConfirmDialog, DismissibleInfo } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtPercent } from '@/shared/lib/formatters';
 import { currencyFractionDigits } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1585,7 +1586,7 @@ function ApplyToBOQModal({
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
     retry: false,
     staleTime: 5 * 60_000,
   });

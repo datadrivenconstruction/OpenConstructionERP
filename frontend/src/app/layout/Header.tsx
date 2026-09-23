@@ -17,6 +17,7 @@ import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { copyToClipboard } from '@/shared/lib/browser';
 import {
   exportErrorReport,
@@ -1647,10 +1648,13 @@ function ProjectSwitcher() {
 
   // Pre-fetch so the dropdown renders an instant list when the user opens
   // it (no race between open → fetch → render that used to flash
-  // "No projects yet" for half a second).
+  // "No projects yet" for half a second). The same entry every page's project
+  // picker reads, so a page and the header share one request. The purge
+  // below trusts this list to be complete, which is why nothing reading
+  // ['projects'] may cache a partial list or an empty one on error.
   const { data: projects, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ['projects-switcher'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=500'),
+    queryKey: ['projects'],
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
     staleTime: 60_000,
     // Enabled as soon as the component mounts — the Header is always on
     // screen after login, so the list is warm by the time the user clicks.

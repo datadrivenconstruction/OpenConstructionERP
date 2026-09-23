@@ -42,6 +42,7 @@ import { Button, Card, Badge, EmptyState, SkeletonTable, CountryFlag, CountryFla
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { ApiError, apiGet, apiPost, apiPatch, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtList, fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { formatCurrency, type FormatCurrencyOptions } from '@/shared/lib/money';
 import { copyToClipboard } from '@/shared/lib/browser';
@@ -2009,7 +2010,7 @@ function AddToBOQModal({
   // Fetch projects
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     retry: false,
     staleTime: 5 * 60_000,
   });
@@ -2421,7 +2422,7 @@ function CreateAssemblyFromCostsModal({
   // the user is forced into an explicit choice at the next surface.
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     retry: false,
     staleTime: 5 * 60_000,
   });
@@ -2772,7 +2773,7 @@ function CreateCostItemModal({
   const unitOptions = useMemo(() => getUnitsForLocale(i18n.language), [i18n.language]);
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     retry: false,
     staleTime: 5 * 60_000,
   });

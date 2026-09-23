@@ -39,7 +39,8 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { SectionIntro } from '@/features/validation';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiPost } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fetchAllPages } from '@/shared/lib/apiHelpers';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1169,7 +1170,7 @@ export function NCRPage() {
   // Data
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

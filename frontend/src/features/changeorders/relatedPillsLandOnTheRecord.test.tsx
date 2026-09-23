@@ -152,7 +152,8 @@ function order(metadata: Record<string, unknown>) {
 
 function setTransport(record: ReturnType<typeof order>): void {
   apiGetMock.mockImplementation((url: string) => {
-    if (url === '/v1/projects/') {
+    // The list, read through fetchProjectList, not the project detail.
+    if (url.startsWith('/v1/projects/?')) {
       return Promise.resolve([{ id: 'proj-1', name: 'Riverside', currency: 'EUR' }]);
     }
     if (url.startsWith('/v1/changeorders/co-1')) return Promise.resolve(record);

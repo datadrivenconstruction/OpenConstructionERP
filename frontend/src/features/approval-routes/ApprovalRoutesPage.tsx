@@ -33,7 +33,7 @@ import {
   RecoveryCard,
   SkeletonTable,
 } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   approvalRoutesKeys,
@@ -96,7 +96,7 @@ export function ApprovalRoutesPage() {
   // already uses).
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     staleTime: 5 * 60_000,
   });
   const projectName = useMemo(() => {

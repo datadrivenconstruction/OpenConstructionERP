@@ -40,7 +40,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -208,7 +208,7 @@ function RegisterInner() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';

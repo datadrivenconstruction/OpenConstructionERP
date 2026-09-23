@@ -242,7 +242,8 @@ function chain(approverAtCursor: string): ApprovalRow[] {
 function setTransport(boqs: unknown[]): void {
   apiGetMock.mockImplementation((url: string) => {
     if (url.startsWith('/v1/boq/boqs/')) return Promise.resolve(boqs);
-    if (url === '/v1/projects/') {
+    // The list, read through fetchProjectList, not the project detail.
+    if (url.startsWith('/v1/projects/?')) {
       return Promise.resolve([{ id: 'proj-1', name: 'Riverside', currency: 'EUR' }]);
     }
     if (url.startsWith('/v1/changeorders/co-1')) return Promise.resolve(ORDER);

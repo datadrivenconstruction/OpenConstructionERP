@@ -204,11 +204,14 @@ If your module `depends: ['boq']`, then:
 ```tsx
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 
-// Fetch projects
+// Fetch projects. Always through fetchProjectList: the endpoint pages at 50
+// by default, and ['projects'] is shared with the header switcher, so the
+// queryFn must return the whole list and must not catch errors into [].
 const { data: projects = [] } = useQuery({
   queryKey: ['projects'],
-  queryFn: () => apiGet<Project[]>('/v1/projects/'),
+  queryFn: () => fetchProjectList<Project[]>(),
 });
 
 // Fetch BOQs for a project

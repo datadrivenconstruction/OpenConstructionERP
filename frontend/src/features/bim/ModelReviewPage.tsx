@@ -52,6 +52,7 @@ import { isDone, primaryViewpoint } from '@/features/bcf/issueStatus';
 import { listAnchors } from '@/features/geo-hub/api';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { Button, DismissibleInfo, EmptyState, ModuleGuideButton } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
@@ -860,7 +861,7 @@ export function ModelReviewPage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
   });
   const projectId = activeProjectId || projects[0]?.id || '';
   return (

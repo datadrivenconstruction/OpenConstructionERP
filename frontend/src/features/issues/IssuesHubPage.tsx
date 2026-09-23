@@ -44,7 +44,7 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAllIssues, SOURCE_ORDER } from './useAllIssues';
 import {
@@ -129,7 +129,7 @@ export function IssuesHubPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

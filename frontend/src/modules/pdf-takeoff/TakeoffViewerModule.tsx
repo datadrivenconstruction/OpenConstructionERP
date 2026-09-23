@@ -84,6 +84,7 @@ import {
   type ConfidenceThresholds,
 } from '../../features/takeoff/lib/confidenceBand';
 import { apiGet, apiPost } from '../../shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { formatFileSize, fmtFixed, fmtNumberForInput } from '../../shared/lib/formatters';
 import { convertBetween } from '../../shared/lib/unitConversion';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
@@ -5676,7 +5677,7 @@ export default function TakeoffViewerModule({
       }
     }
     try {
-      const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
+      const projects = await fetchProjectList<{ id: string; name: string }[]>();
       setExportProjects(projects);
     } catch (err) {
       setExportProjects([]);
@@ -5813,7 +5814,7 @@ export default function TakeoffViewerModule({
 
     // Always (re-)load the project list lazily so the user can switch.
     try {
-      const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
+      const projects = await fetchProjectList<{ id: string; name: string }[]>();
       setLinkPickerProjects(projects);
     } catch {
       setLinkPickerProjects([]);
@@ -6231,7 +6232,7 @@ export default function TakeoffViewerModule({
     setLinkPickerProjectId(seedProject);
     setLinkPickerBoqId(seedBoq);
     try {
-      const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
+      const projects = await fetchProjectList<{ id: string; name: string }[]>();
       setLinkPickerProjects(projects);
     } catch {
       setLinkPickerProjects([]);

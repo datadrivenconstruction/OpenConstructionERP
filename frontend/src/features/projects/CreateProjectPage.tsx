@@ -964,10 +964,9 @@ export function CreateProjectModal({
       return project;
     },
     onSuccess: (project) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      // The header project switcher caches under its own key; without this
+      // The header project switcher reads this same entry. Without the refetch
       // its stale-list purge effect clears the just-activated project.
-      queryClient.invalidateQueries({ queryKey: ['projects-switcher'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['project', project.id] });
       queryClient.invalidateQueries({
         queryKey: ['project-profile', project.id],

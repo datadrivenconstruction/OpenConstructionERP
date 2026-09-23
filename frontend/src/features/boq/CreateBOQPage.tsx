@@ -8,7 +8,7 @@ import { ChevronDown, X, FileSpreadsheet, FilePlus2, Upload, FileUp } from 'luci
 import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { boqApi } from './api';
 
 interface Project {
@@ -59,7 +59,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

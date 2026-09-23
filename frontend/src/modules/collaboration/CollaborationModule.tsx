@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { apiGet, apiPost, getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { CommentThread } from '@/shared/ui/CommentThread';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -93,7 +94,7 @@ export default function CollaborationModule() {
 
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 
