@@ -34,6 +34,7 @@ replay quirk that broke ``StreamingResponse``.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import io
 import json
@@ -475,11 +476,16 @@ async def build_backup(
                         rows = []
                     else:
                         rows = (await session.execute(select(model_cls).where(clause))).scalars().all()
+                    # Reading the loaded rows stays here, next to the session
+                    # that owns them. Encoding and deflating them is pure CPU
+                    # that grows with the account, so it runs in a worker
+                    # thread: on the loop it froze every other request on this
+                    # worker for seconds at a time. The zip is only ever
+                    # touched by one call at a time, each awaited in turn.
                     serialised = [
                         {k: v for k, v in serialize_row(r).items() if not _is_sensitive_field(k)} for r in rows
                     ]
-                    payload = json.dumps(serialised, indent=2, ensure_ascii=False, default=str)
-                    zf.writestr(f"{backup_key}.json", payload)
+                    await asyncio.to_thread(_write_json_member, zf, f"{backup_key}.json", serialised)
                     record_counts[backup_key] = len(serialised)
 
                     if include_files:
@@ -520,6 +526,32 @@ async def build_backup(
                 json.dumps(manifest, indent=2, ensure_ascii=False),
             )
 
+    # Hashing and re-deflating the whole archive touches no database, so it
+    # runs off the event loop in one piece.
+    size = await asyncio.to_thread(_finalize_archive, spool, manifest, compression, compression_level)
+    return spool, manifest, size
+
+
+def _write_json_member(zf: zipfile.ZipFile, name: str, rows: list[dict[str, Any]]) -> None:
+    """Encode ``rows`` and write them into ``zf`` as ``name``.
+
+    Synchronous on purpose: :func:`build_backup` runs it in a worker thread.
+    """
+    zf.writestr(name, json.dumps(rows, indent=2, ensure_ascii=False, default=str))
+
+
+def _finalize_archive(
+    spool: tempfile.SpooledTemporaryFile,
+    manifest: dict[str, Any],
+    compression: int,
+    compression_level: int,
+) -> int:
+    """Stamp the archive checksum into ``manifest`` and rewrite the archive with it.
+
+    Returns the archive size and leaves ``spool`` rewound. Synchronous on
+    purpose: :func:`build_backup` runs it in a worker thread, since it reads,
+    hashes and re-deflates every member of the archive.
+    """
     # Re-open zip read-only to compute checksum and rewrite manifest with it.
     spool.seek(0)
     raw = spool.read()
@@ -552,7 +584,7 @@ async def build_backup(
     spool.flush()
     size = spool.tell()
     spool.seek(0)
-    return spool, manifest, size
+    return size
 
 
 async def _embed_module_files(zf: zipfile.ZipFile, backup_key: str, rows: list[Any]) -> tuple[int, list[str]]:
@@ -583,7 +615,9 @@ async def _embed_module_files(zf: zipfile.ZipFile, backup_key: str, rows: list[A
             except Exception as exc:
                 warnings.append(f"{backup_key}: failed to read {key}: {str(exc)[:200]}")
                 break
-            zf.writestr(f"files/{backup_key}/{key.lstrip('/')}", payload)
+            # A blob can be a drawing or a model; deflating it is CPU work the
+            # event loop must not carry. Reads above stay awaited here.
+            await asyncio.to_thread(zf.writestr, f"files/{backup_key}/{key.lstrip('/')}", payload)
             embedded += 1
             break
     return embedded, warnings

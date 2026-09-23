@@ -9,6 +9,7 @@ session + repositories.
 
 from __future__ import annotations
 
+import asyncio
 import html
 import logging
 import re
@@ -6808,7 +6809,8 @@ async def _svc_generate_regulator_report(
         summary["regulator_law"] = "ФЗ № 214 от 30.12.2004"
     else:
         title = f"{regulator} Disclosure"
-    pdf_bytes = _render_regulator_pdf(
+    pdf_bytes = await asyncio.to_thread(
+        _render_regulator_pdf,
         regulator=title,
         development_name=dev.name or dev.code,
         development_code=dev.code,
@@ -6979,6 +6981,11 @@ async def _svc_generate_document(
             detail=f"Unknown doc_type: {doc_type}",
         )
 
+    # The entity graph is read here, on the event loop with its session; each
+    # render below then runs in a worker thread. Laying out a contract and
+    # embedding a logo is seconds of CPU, and the bulk regenerate path calls
+    # this up to 500 times in one request, which on the loop froze every other
+    # user of the worker until the batch was done.
     if doc_type == "reservation_receipt":
         if reservation_id is None:
             raise HTTPException(status_code=400, detail="reservation_id required")
@@ -6996,7 +7003,8 @@ async def _svc_generate_document(
             buyer = await svc.buyers.get_by_id(reservation.buyer_id)
             if buyer is not None:
                 buyers.append(buyer)
-        return render_reservation_receipt_pdf(
+        return await asyncio.to_thread(
+            render_reservation_receipt_pdf,
             reservation,
             plot,
             development,
@@ -7029,7 +7037,8 @@ async def _svc_generate_document(
                 b = await svc.buyers.get_by_id(p.buyer_id)
                 if b is not None:
                     buyer_lookup[p.buyer_id] = b
-        return render_sales_contract_pdf(
+        return await asyncio.to_thread(
+            render_sales_contract_pdf,
             contract,
             payment_schedule,
             instalments,
@@ -7056,7 +7065,8 @@ async def _svc_generate_document(
             )
         plot = await svc.plots.get_by_id(contract.plot_id)
         development = await svc.developments.get_by_id(plot.development_id) if plot is not None else None
-        return render_payment_receipt_pdf(
+        return await asyncio.to_thread(
+            render_payment_receipt_pdf,
             instalment,
             contract,
             payment_method or "",
@@ -7103,7 +7113,8 @@ async def _svc_generate_document(
             open_snags = int((await svc.session.execute(cnt_stmt)).scalar() or 0)
         except Exception:  # noqa: BLE001 - best-effort snag count
             open_snags = int(_attr(handover, "snag_count_at_handover", 0) or 0)
-        return render_handover_certificate_pdf(
+        return await asyncio.to_thread(
+            render_handover_certificate_pdf,
             handover,
             contract,
             open_snags,
@@ -7127,7 +7138,8 @@ async def _svc_generate_document(
         stmt = _select(_SC).where(_SC.plot_id == handover.plot_id).order_by(_SC.revision_number.desc())
         rows = (await svc.session.execute(stmt)).scalars().all()
         contract = next(iter(rows), None)
-        return render_warranty_certificate_pdf(
+        return await asyncio.to_thread(
+            render_warranty_certificate_pdf,
             contract,
             handover,
             int(structural_warranty_years),
@@ -7149,7 +7161,8 @@ async def _svc_generate_document(
         if plot is None:
             raise HTTPException(status_code=404, detail=translate("errors.plot_not_found", locale=get_locale()))
         development = await svc.developments.get_by_id(plot.development_id)
-        return render_no_objection_certificate_pdf(
+        return await asyncio.to_thread(
+            render_no_objection_certificate_pdf,
             contract,
             plot,
             development,

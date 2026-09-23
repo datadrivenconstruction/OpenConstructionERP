@@ -20,6 +20,7 @@ streams into a ``tempfile.SpooledTemporaryFile``) and exposes a typed
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 
@@ -90,7 +91,9 @@ async def export_backup(
         include_files=body.include_files,
         compression_level=body.compression_level,
     )
-    path = spool_to_disk(spool)
+    # A plain file copy, and past the 16 MiB rollover a disk-to-disk one: off
+    # the event loop like the build itself.
+    path = await asyncio.to_thread(spool_to_disk, spool)
 
     timestamp = manifest["created_at"].replace("-", "").replace(":", "")[:15]
     filename = f"openconstructionerp_backup_{timestamp}.zip"
