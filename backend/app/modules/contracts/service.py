@@ -2300,6 +2300,31 @@ class ContractsService:
         )
         return await self.claim_repo.create(claim)
 
+    async def delete_progress_claim(self, claim_id: uuid.UUID) -> None:
+        """Delete a claim while it is still a draft, and refuse it after.
+
+        A claim's lines go with it, because the foreign key from the claim
+        line cascades, so deleting a claim deletes its breakdown. The claim
+        line routes already refuse to add, change or remove a line once the
+        claim has left draft. The claim's own delete route called the
+        repository directly and removed a certified or paid claim, lines and
+        all. A later claim sums its previous applications and its column D
+        from the claims before it, so its certificate would then be worked
+        out as if the deleted one had never been issued.
+
+        The refusal is the one the claim line routes give, with the same way
+        back. A draft still deletes: it has gone nowhere.
+
+        Raises:
+            HTTPException: 404 when there is no such claim, 422
+                ``claim_not_editable`` when it has left draft.
+        """
+        claim = await self.claim_repo.get_by_id(claim_id)
+        if claim is None:
+            raise HTTPException(status_code=404, detail=translate("errors.claim_not_found", locale=get_locale()))
+        self._assert_claim_editable(claim)
+        await self.claim_repo.delete(claim_id)
+
     #: What a claim bills for, and the number it bills under. Once the claim
     #: has left draft these are part of the application the payer is reading,
     #: and the period is what puts the claim in billing order: moving a
