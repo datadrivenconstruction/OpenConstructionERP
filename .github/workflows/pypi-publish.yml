@@ -104,6 +104,7 @@ jobs:
         run: |
           python - <<'PY'
           import glob, json, os, sys, urllib.error, urllib.request
+          from datetime import datetime, timezone
 
           # PyPI rejects any single file over 100 MiB, and it rejects it at
           # upload, which here is after the tag is already public. Nothing
@@ -194,11 +195,61 @@ jobs:
                   )
               left = LIMIT_BYTES - after
               print(f"OK: fits, with {left/1048576:,.1f} MiB left after this upload")
-              if left < size:
+
+              # How much warning that headroom is worth depends entirely on how
+              # fast we release, so measure the cadence instead of assuming it.
+              #
+              # This used to warn only when less than one more wheel fit. That is
+              # a true statement but it arrives too late to act on. Freeing space
+              # means deleting old releases, which breaks anyone pinned to them,
+              # or asking PyPI to raise the project limit, which is a support
+              # request answered by a person on their own schedule. Neither is
+              # something to start on the release that fails.
+              #
+              # The numbers that set the threshold: at 17.8.3 the project had
+              # room for 5.8 more wheels, and four releases had gone out in the
+              # previous two days. The one-wheel rule would have printed for the
+              # first time about half a day before uploads began returning 400.
+              # Six wheels is roughly a week at that cadence, which is enough to
+              # open a support request and wait for it.
+              # Take the fastest rate sustained over any recent window rather
+              # than one average, because the averaging window decides the
+              # answer and a single long one hides exactly the burst that
+              # empties the quota. Measured here: over the last 14 wheels the
+              # rate is 0.6 a day and the runway reads 9 days, while over the
+              # three days around 17.8.3 it is nearer 1.7 a day and the runway
+              # is 3. Understating the rate is the dangerous direction for a
+              # warning about running out, so the windows disagreeing means
+              # take the worst of them and say which one it came from.
+              now = datetime.now(timezone.utc)
+              ages = sorted(
+                  (now - datetime.fromisoformat(f["upload_time_iso_8601"].replace("Z", "+00:00"))).total_seconds() / 86400
+                  for fs in meta["releases"].values()
+                  for f in fs
+                  if f["filename"].endswith(".whl")
+              )
+              fits = left / size
+              runway = f"{fits:.1f} more wheels this size"
+              rates = [
+                  # +1 counts the release being published right now.
+                  ((sum(1 for a in ages if a <= w) + 1) / w, w)
+                  for w in (3, 7, 14, 30)
+              ]
+              per_day, window = max(rates)
+              if per_day > 0:
+                  runway += (
+                      f", about {fits / per_day:.0f} days at {per_day:.1f} releases a "
+                      f"day, the fastest of the last 3, 7, 14 and 30 day windows "
+                      f"(the {window} day one)"
+                  )
+              print(f"room for {runway}")
+              if fits < 6:
                   print(
-                      f"::warning::after this release the project has {left/1048576:,.1f} "
-                      f"MiB left, less than one more wheel. The NEXT release will not "
-                      f"publish unless the wheel shrinks or PyPI space is freed."
+                      f"::warning::PyPI project storage is running out: room for {runway}. "
+                      f"The wheel cannot shrink enough to matter here, so this needs "
+                      f"either old releases deleted, which breaks anyone pinned to them, "
+                      f"or a support request to raise the project limit. Both want a "
+                      f"human and neither is instant."
                   )
           PY
 
