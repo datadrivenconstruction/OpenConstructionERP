@@ -2133,9 +2133,10 @@ class BOQService:
         ``create_boq_from_template``), ``update_boq`` (header fields only),
         ``refresh_quantity_links`` (records drift, applies nothing), and the
         writers of snapshots, quantity links and activity rows. Not yet
-        decided: the linked-master and resource-code propagation reached from
-        ``update_position`` writes into OTHER bills of the project without
-        reading their lock.
+        decided: ``delete_boq`` removes a locked bill with all its positions
+        and markups, and the linked-master and resource-code propagation
+        reached from ``update_position`` writes into OTHER bills of the project
+        without reading their lock.
 
         Returns:
             The loaded BOQ (so callers can reuse it instead of fetching twice).
