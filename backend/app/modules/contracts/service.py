@@ -4997,7 +4997,7 @@ class ContractsService:
             )
         return project
 
-    async def build_aia_application(self, claim_id: uuid.UUID) -> dict[str, Any]:
+    async def build_aia_application(self, claim_id: uuid.UUID, *, locale: str | None = None) -> dict[str, Any]:
         """Assemble the AIA G702 summary + G703 continuation for one claim.
 
         Reuses the existing SoV lines (``ContractLine``) and the claim's lines
@@ -5006,6 +5006,14 @@ class ContractsService:
         the engine has worked it out, else the contract's flat rate. Country-gated by the caller via
         :meth:`assert_contract_aia_eligible`. Single-currency by construction
         (the claim inherits the contract currency); no currency is ever blended.
+
+        ``locale`` is the language the application is read in, and the one
+        string written here, the description of the row for money no schedule
+        line carries, follows it. It defaults to the request's language, which
+        is what the screen shows every other label in. The printed form is
+        drawn from English literals and declares itself English, so its route
+        passes ``"en"`` and the row reads in the same language as the rest of
+        the page.
         """
         from app.modules.contracts.aia import (  # noqa: PLC0415
             apply_retention_snapshot,
@@ -5110,7 +5118,10 @@ class ContractsService:
                 retainage_percent=retainage_percent,
                 prior_by_line=prior_by_line,
                 prior_without_schedule=prior_without_schedule,
-                out_of_schedule_label=contracts_translate("aia.g703.billed_not_on_a_schedule_line"),
+                out_of_schedule_label=contracts_translate(
+                    "aia.g703.billed_not_on_a_schedule_line",
+                    locale=locale or get_locale(),
+                ),
             )
             if claim.retention_held_to_date is not None:
                 # Worked out by the retention engine: column I and line 5 are the
