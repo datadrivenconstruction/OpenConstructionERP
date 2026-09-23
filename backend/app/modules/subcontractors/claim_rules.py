@@ -33,6 +33,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from app.core.currency_registry import sentence_amount
 from app.core.validation.engine import (
     RuleCategory,
     RuleResult,
@@ -275,6 +276,64 @@ class SubCertificateLapsedRule(_SubRollupRule):
         return params
 
 
+class SubCertificatePaymentDateRule(_SubRollupRule):
+    """A certificate the law reads on the payment day must be valid on that day.
+
+    Only packs that mark a certificate ``valid_at: "payment_date"`` produce
+    anything for this rule; on every other claim it returns no row at all. It
+    warns and never blocks, and it deducts nothing: the finding names the
+    withholding the law requires on a payment the certificate did not cover,
+    and a person decides what to do about it. An unpaid pay application gets
+    a note, because its payment day has not come and "met" would be a claim
+    nobody checked.
+    """
+
+    rule_id = "pay_application.sub_certificate_payment_date"
+    name = "Payment-date certificates cover the payment"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "Flags an included subcontractor pay application paid while a certificate the law reads on the "
+        "payment date was not valid, and notes the ones not paid yet"
+    )
+    check_name = "check_sub_certificate_payment_date"
+
+    def _judged(self, rollup: dict[str, Any]) -> bool:
+        # The key exists only when the pack judges a certificate on the
+        # payment date; without it this rule checked nothing.
+        return any("payment_date_findings" in row for row in _rows(rollup, "included"))
+
+    def _fail_key(self, finding: checks.Finding) -> str:
+        state = str(finding.details.get("state") or "missing")
+        if state not in checks.PAYMENT_DATE_STATES:
+            state = "missing"
+        return f"{self.rule_id}.fail_{state}"
+
+    def _severity_of(self, finding: checks.Finding) -> Severity:
+        return Severity.INFO if finding.details.get("severity") == "info" else Severity.WARNING
+
+    def _params(self, finding: checks.Finding, locale: str) -> dict[str, str]:
+        params = dict(finding.params)
+        params["document"] = _token(f"{SubCertificateLapsedRule.rule_id}.documents", params.get("document", ""), locale)
+        params["withholding"] = self._withholding(finding.details.get("withholding"), locale)
+        return params
+
+    def _withholding(self, terms: Any, locale: str) -> str:
+        """The sentence that says what the law takes from a payment the certificate does not cover."""
+        base = f"{self.rule_id}.withholding"
+        if not isinstance(terms, dict) or not terms.get("rate_pct"):
+            return translate(f"{base}.unknown", locale=locale)
+        kind = "gross" if terms.get("vat_included") else "net"
+        limit = checks.parse_money(terms.get("annual_limit"))
+        params = {
+            "rate": str(terms["rate_pct"]),
+            "reference": str(terms.get("reference") or terms.get("scheme") or "?"),
+            "limit": sentence_amount(limit, str(terms.get("currency") or "")) if limit is not None else "",
+        }
+        key = f"{base}.{kind}_limit" if limit is not None else f"{base}.{kind}"
+        return translate(key, locale=locale, **params)
+
+
 #: The subcontract rules, in the order a reader meets the findings: what is
 #: being billed, then the paper behind it, then how it lands on the SOV.
 SUB_ROLLUP_RULES: tuple[type[ValidationRule], ...] = (
@@ -282,6 +341,7 @@ SUB_ROLLUP_RULES: tuple[type[ValidationRule], ...] = (
     SubWaiverMissingRule,
     SubPriorUnconditionalMissingRule,
     SubCertificateLapsedRule,
+    SubCertificatePaymentDateRule,
     SubLineUnmappedRule,
     SubExceedsGcLineRule,
 )

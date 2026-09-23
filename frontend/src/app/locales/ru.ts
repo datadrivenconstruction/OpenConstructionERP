@@ -35554,6 +35554,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Утверждена",
     "subcontractors.rollup_chip_certs_lapsed": "Сертификат истёк",
     "subcontractors.rollup_chip_certs_ok": "Сертификаты действительны",
+    "subcontractors.rollup_chip_certs_on_payment": "Сертификат проверяется на дату оплаты",
     "subcontractors.rollup_chip_certs_unchecked": "Сертификаты не проверены: нет даты окончания периода",
     "subcontractors.rollup_chip_paid": "Оплачена",
     "subcontractors.rollup_chip_received": "Получена, не утверждена",

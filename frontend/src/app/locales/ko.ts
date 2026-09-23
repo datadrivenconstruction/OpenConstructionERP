@@ -35358,6 +35358,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "승인됨",
     "subcontractors.rollup_chip_certs_lapsed": "증명서 만료",
     "subcontractors.rollup_chip_certs_ok": "증명서 유효",
+    "subcontractors.rollup_chip_certs_on_payment": "증명서는 지급일 기준으로 확인",
     "subcontractors.rollup_chip_certs_unchecked": "증명서 미확인: 기간 종료일 없음",
     "subcontractors.rollup_chip_paid": "지급 완료",
     "subcontractors.rollup_chip_received": "접수됨, 미승인",

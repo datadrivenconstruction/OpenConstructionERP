@@ -563,10 +563,23 @@ export interface SubRollupPayApp {
   in_period: boolean | null;
   requires_lien_waiver: boolean;
   waiver: SubWaiverState;
-  /** null when the claim has no period end to judge certificates on. */
+  /** null when the claim has no period end to judge certificates on, or while a payment-date certificate waits for the payment. */
   certificates_ok: boolean | null;
   certificate_findings: SubCertificateFinding[];
   foreign_currency: boolean;
+  /** Present only when the national pack reads a certificate on the payment date. */
+  paid_on?: string | null;
+  payment_date_findings?: SubPaymentDateFinding[] | null;
+  certificates_pending_payment?: boolean | null;
+}
+
+export interface SubPaymentDateFinding {
+  document_type: string;
+  /** 'missing' | 'expired' | 'revoked' | 'undated' | 'pending' | 'pending_open' | 'pending_invalid' */
+  state: string;
+  judged_on: string | null;
+  lapsed_on: string | null;
+  valid_until: string | null;
 }
 
 export interface SubRollupRow {
@@ -582,6 +595,7 @@ export interface SubRollupRow {
   waiver_state: string;
   waiver_covers_net: boolean;
   certificates_ok: boolean | null;
+  certificates_pending_payment?: boolean | null;
 }
 
 export interface SubRollupLine {

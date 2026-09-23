@@ -34628,6 +34628,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Naaprubahan",
     "subcontractors.rollup_chip_certs_lapsed": "Nag-expire ang sertipiko",
     "subcontractors.rollup_chip_certs_ok": "Valid ang mga sertipiko",
+    "subcontractors.rollup_chip_certs_on_payment": "Susuriin ang sertipiko sa petsa ng pagbabayad",
     "subcontractors.rollup_chip_certs_unchecked": "Hindi na-check ang mga sertipiko: walang katapusan ng panahon",
     "subcontractors.rollup_chip_paid": "Nabayaran",
     "subcontractors.rollup_chip_received": "Natanggap, hindi pa naaprubahan",

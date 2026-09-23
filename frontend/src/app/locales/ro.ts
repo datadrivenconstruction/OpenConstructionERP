@@ -35508,6 +35508,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Aprobată",
     "subcontractors.rollup_chip_certs_lapsed": "Certificat expirat",
     "subcontractors.rollup_chip_certs_ok": "Certificate valabile",
+    "subcontractors.rollup_chip_certs_on_payment": "Certificatul se verifică la data plății",
     "subcontractors.rollup_chip_certs_unchecked": "Certificate neverificate: fără sfârșit de perioadă",
     "subcontractors.rollup_chip_paid": "Plătită",
     "subcontractors.rollup_chip_received": "Primită, neaprobată",

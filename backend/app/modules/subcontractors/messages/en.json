@@ -49,6 +49,23 @@
         "social_security_clearance": "social security clearance certificate",
         "employers_liability_clearance": "employers' liability clearance certificate"
       }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} was paid on {paid_on} for pay application {pay_app} with no {document} on file. {withholding}",
+      "fail_expired": "{subcontractor} was paid on {paid_on} for pay application {pay_app}, but their {document} had run out on {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} was paid on {paid_on} for pay application {pay_app}, but their {document} had been revoked. {withholding}",
+      "fail_undated": "Pay application {pay_app} of {subcontractor} is marked paid but carries no payment date, so whether the {document} covered the payment cannot be checked. {withholding}",
+      "fail_pending": "Pay application {pay_app} of {subcontractor} is not paid yet. The {document} counts on the day it is paid, not at the end of the period, and the one on file is valid until {valid_until}. {withholding}",
+      "fail_pending_open": "Pay application {pay_app} of {subcontractor} is not paid yet. The {document} counts on the day it is paid, not at the end of the period; the one on file has no end date. {withholding}",
+      "fail_pending_invalid": "Pay application {pay_app} of {subcontractor} is not paid yet, and there is no valid {document} on file that a payment after the period end could fall within. {withholding}",
+      "suggestion": "Check that the certificate is valid on the day you pay, and get a current one from the subcontractor if it is not. The tax is not deducted here: where a payment falls outside a valid certificate, making and reporting the deduction is up to you.",
+      "withholding": {
+        "gross_limit": "Without it, {rate}% of the payment, VAT included, has to be withheld and paid to the tax office, unless everything paid to this subcontractor in the calendar year stays within {limit} ({reference}).",
+        "gross": "Without it, {rate}% of the payment, VAT included, has to be withheld and paid to the tax office ({reference}).",
+        "net_limit": "Without it, {rate}% of the payment, VAT excluded, has to be withheld and paid to the tax office, unless everything paid to this subcontractor in the calendar year stays within {limit} ({reference}).",
+        "net": "Without it, {rate}% of the payment, VAT excluded, has to be withheld and paid to the tax office ({reference}).",
+        "unknown": "Without it, the payment may be subject to tax withholding."
+      }
     }
   }
 }

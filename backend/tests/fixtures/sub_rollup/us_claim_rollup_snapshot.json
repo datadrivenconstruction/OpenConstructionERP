@@ -1,0 +1,456 @@
+{
+ "rollup": {
+  "as_of": "2026-03-31",
+  "candidates": [
+   {
+    "agreement_id": "00000000-0000-0000-0000-00000000000c",
+    "agreement_title": "Steel subcontract",
+    "application_number": "PA-8",
+    "approved_amount": "0",
+    "certificate_findings": [
+     {
+      "document_type": "license",
+      "lapsed_on": null,
+      "source": "certificate",
+      "state": "revoked"
+     }
+    ],
+    "certificates_ok": false,
+    "certified_amount": "0",
+    "claimed_amount": "0",
+    "currency": "USD",
+    "foreign_currency": false,
+    "gross_amount": "1000.00",
+    "in_period": true,
+    "line_count": 0,
+    "net_amount": "900.00",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002c",
+    "period_end": "2026-03-31",
+    "period_start": "2026-03-01",
+    "progress_claim_id": null,
+    "requires_lien_waiver": false,
+    "status": "submitted",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000016",
+    "subcontractor_name": "Example Steel",
+    "waiver": {
+     "amount_covered": "0",
+     "covers_net": false,
+     "state": "none",
+     "through_date": null,
+     "through_date_basis": null
+    }
+   }
+  ],
+  "currency": "USD",
+  "gc_period_total": "20000",
+  "included": [
+   {
+    "agreement_id": "00000000-0000-0000-0000-00000000000b",
+    "agreement_title": "Concrete subcontract",
+    "application_number": "PA-1",
+    "approved_amount": "9000",
+    "certificate_findings": [
+     {
+      "document_type": "insurance",
+      "lapsed_on": "2026-03-15",
+      "source": "certificate",
+      "state": "expired"
+     }
+    ],
+    "certificates_ok": false,
+    "certified_amount": "9500",
+    "claimed_amount": "10000",
+    "currency": "USD",
+    "foreign_currency": false,
+    "gross_amount": "10000.00",
+    "in_period": true,
+    "line_count": 1,
+    "net_amount": "9000.00",
+    "payment_application_id": "00000000-0000-0000-0000-000000000029",
+    "period_end": "2026-03-31",
+    "period_start": "2026-03-01",
+    "progress_claim_id": "00000000-0000-0000-0000-0000000003e7",
+    "requires_lien_waiver": true,
+    "status": "finance_approved",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+    "subcontractor_name": "Example Concrete",
+    "waiver": {
+     "amount_covered": "9000",
+     "covers_net": true,
+     "state": "conditional",
+     "through_date": "2026-03-31",
+     "through_date_basis": "through_date"
+    }
+   },
+   {
+    "agreement_id": "00000000-0000-0000-0000-00000000000c",
+    "agreement_title": "Steel subcontract",
+    "application_number": "PA-7",
+    "approved_amount": "4000",
+    "certificate_findings": [
+     {
+      "document_type": "license",
+      "lapsed_on": null,
+      "source": "certificate",
+      "state": "revoked"
+     }
+    ],
+    "certificates_ok": false,
+    "certified_amount": "5000",
+    "claimed_amount": "5000",
+    "currency": "USD",
+    "foreign_currency": false,
+    "gross_amount": "5000.00",
+    "in_period": true,
+    "line_count": 1,
+    "net_amount": "4500.00",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002a",
+    "period_end": "2026-03-31",
+    "period_start": "2026-03-01",
+    "progress_claim_id": "00000000-0000-0000-0000-0000000003e7",
+    "requires_lien_waiver": false,
+    "status": "paid",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000016",
+    "subcontractor_name": "Example Steel",
+    "waiver": {
+     "amount_covered": "0",
+     "covers_net": false,
+     "state": "none",
+     "through_date": null,
+     "through_date_basis": null
+    }
+   }
+  ],
+  "lines": [
+   {
+    "code": "03.10",
+    "contract_line_id": "00000000-0000-0000-0000-000000000001",
+    "description": "Line 03.10",
+    "exceeds_scheduled_value": false,
+    "gc_period_value": "20000",
+    "scheduled_value": "100000",
+    "sub_approved_to_date": "12000",
+    "sub_period_approved": "9000",
+    "subs": [
+     {
+      "agreement_id": "00000000-0000-0000-0000-00000000000b",
+      "application_number": "PA-1",
+      "approved_amount": "9000",
+      "certificates_ok": false,
+      "certified_amount": "9500",
+      "claimed_amount": "10000",
+      "payment_application_id": "00000000-0000-0000-0000-000000000029",
+      "status": "finance_approved",
+      "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+      "subcontractor_name": "Example Concrete",
+      "waiver_covers_net": true,
+      "waiver_state": "conditional"
+     }
+    ],
+    "variance": "11000"
+   },
+   {
+    "code": "05.20",
+    "contract_line_id": "00000000-0000-0000-0000-000000000002",
+    "description": "Line 05.20",
+    "exceeds_scheduled_value": false,
+    "gc_period_value": "0",
+    "scheduled_value": "50000",
+    "sub_approved_to_date": "4000",
+    "sub_period_approved": "4000",
+    "subs": [
+     {
+      "agreement_id": "00000000-0000-0000-0000-00000000000c",
+      "application_number": "PA-7",
+      "approved_amount": "4000",
+      "certificates_ok": false,
+      "certified_amount": "5000",
+      "claimed_amount": "5000",
+      "payment_application_id": "00000000-0000-0000-0000-00000000002a",
+      "status": "paid",
+      "subcontractor_id": "00000000-0000-0000-0000-000000000016",
+      "subcontractor_name": "Example Steel",
+      "waiver_covers_net": false,
+      "waiver_state": "none"
+     }
+    ],
+    "variance": "-4000"
+   }
+  ],
+  "pack_requires_lien_waiver": true,
+  "prior_paid": [
+   {
+    "application_number": "PA-0",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002b",
+    "period_end": "2026-02-28",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+    "subcontractor_name": "Example Concrete",
+    "unconditional_through": "2026-02-28"
+   }
+  ],
+  "requirements": {
+   "certificate_types": [
+    "insurance",
+    "license"
+   ],
+   "lien_waiver_required": true,
+   "reference": "AIA A201-2017 § 9.3.1",
+   "source": "pack"
+  },
+  "skipped_foreign_currency": 0,
+  "sub_period_approved_total": "13000",
+  "unmapped_lines": []
+ },
+ "rule_context": {
+  "as_of": "2026-03-31",
+  "currency": "USD",
+  "included": [
+   {
+    "agreement_id": "00000000-0000-0000-0000-00000000000b",
+    "agreement_title": "Concrete subcontract",
+    "application_number": "PA-1",
+    "approved_amount": "9000",
+    "certificate_findings": [
+     {
+      "document_type": "insurance",
+      "lapsed_on": "2026-03-15",
+      "source": "certificate",
+      "state": "expired"
+     }
+    ],
+    "certificates_ok": false,
+    "certified_amount": "9500",
+    "claimed_amount": "10000",
+    "currency": "USD",
+    "foreign_currency": false,
+    "gross_amount": "10000.00",
+    "in_period": true,
+    "line_count": 1,
+    "net_amount": "9000.00",
+    "payment_application_id": "00000000-0000-0000-0000-000000000029",
+    "period_end": "2026-03-31",
+    "period_start": "2026-03-01",
+    "progress_claim_id": "00000000-0000-0000-0000-0000000003e7",
+    "requires_lien_waiver": true,
+    "status": "finance_approved",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+    "subcontractor_name": "Example Concrete",
+    "waiver": {
+     "amount_covered": "9000",
+     "covers_net": true,
+     "state": "conditional",
+     "through_date": "2026-03-31",
+     "through_date_basis": "through_date"
+    }
+   },
+   {
+    "agreement_id": "00000000-0000-0000-0000-00000000000c",
+    "agreement_title": "Steel subcontract",
+    "application_number": "PA-7",
+    "approved_amount": "4000",
+    "certificate_findings": [
+     {
+      "document_type": "license",
+      "lapsed_on": null,
+      "source": "certificate",
+      "state": "revoked"
+     }
+    ],
+    "certificates_ok": false,
+    "certified_amount": "5000",
+    "claimed_amount": "5000",
+    "currency": "USD",
+    "foreign_currency": false,
+    "gross_amount": "5000.00",
+    "in_period": true,
+    "line_count": 1,
+    "net_amount": "4500.00",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002a",
+    "period_end": "2026-03-31",
+    "period_start": "2026-03-01",
+    "progress_claim_id": "00000000-0000-0000-0000-0000000003e7",
+    "requires_lien_waiver": false,
+    "status": "paid",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000016",
+    "subcontractor_name": "Example Steel",
+    "waiver": {
+     "amount_covered": "0",
+     "covers_net": false,
+     "state": "none",
+     "through_date": null,
+     "through_date_basis": null
+    }
+   }
+  ],
+  "lines": [
+   {
+    "code": "03.10",
+    "contract_line_id": "00000000-0000-0000-0000-000000000001",
+    "description": "Line 03.10",
+    "exceeds_scheduled_value": false,
+    "gc_period_value": "20000",
+    "scheduled_value": "100000",
+    "sub_approved_to_date": "12000",
+    "sub_period_approved": "9000",
+    "subs": [
+     {
+      "agreement_id": "00000000-0000-0000-0000-00000000000b",
+      "application_number": "PA-1",
+      "approved_amount": "9000",
+      "certificates_ok": false,
+      "certified_amount": "9500",
+      "claimed_amount": "10000",
+      "payment_application_id": "00000000-0000-0000-0000-000000000029",
+      "status": "finance_approved",
+      "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+      "subcontractor_name": "Example Concrete",
+      "waiver_covers_net": true,
+      "waiver_state": "conditional"
+     }
+    ],
+    "variance": "11000"
+   },
+   {
+    "code": "05.20",
+    "contract_line_id": "00000000-0000-0000-0000-000000000002",
+    "description": "Line 05.20",
+    "exceeds_scheduled_value": false,
+    "gc_period_value": "0",
+    "scheduled_value": "50000",
+    "sub_approved_to_date": "4000",
+    "sub_period_approved": "4000",
+    "subs": [
+     {
+      "agreement_id": "00000000-0000-0000-0000-00000000000c",
+      "application_number": "PA-7",
+      "approved_amount": "4000",
+      "certificates_ok": false,
+      "certified_amount": "5000",
+      "claimed_amount": "5000",
+      "payment_application_id": "00000000-0000-0000-0000-00000000002a",
+      "status": "paid",
+      "subcontractor_id": "00000000-0000-0000-0000-000000000016",
+      "subcontractor_name": "Example Steel",
+      "waiver_covers_net": false,
+      "waiver_state": "none"
+     }
+    ],
+    "variance": "-4000"
+   }
+  ],
+  "pack_requires_lien_waiver": true,
+  "prior_paid": [
+   {
+    "application_number": "PA-0",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002b",
+    "period_end": "2026-02-28",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000015",
+    "subcontractor_name": "Example Concrete",
+    "unconditional_through": "2026-02-28"
+   }
+  ],
+  "requirements": {
+   "certificate_types": [
+    "insurance",
+    "license"
+   ],
+   "lien_waiver_required": true,
+   "reference": "AIA A201-2017 § 9.3.1",
+   "source": "pack"
+  },
+  "unmapped_lines": []
+ },
+ "rule_results": [
+  {
+   "category": "consistency",
+   "details": {},
+   "element_ref": null,
+   "message": "OK",
+   "passed": true,
+   "rule_id": "pay_application.sub_unapproved_included",
+   "severity": "warning",
+   "suggestion": null
+  },
+  {
+   "category": "compliance",
+   "details": {
+    "amount_covered": "0",
+    "net_amount": "4500.00",
+    "payment_application_id": "00000000-0000-0000-0000-00000000002a",
+    "period_end": "2026-03-31",
+    "reason": "amount",
+    "severity": "warning",
+    "through_date": null,
+    "waiver_state": "none"
+   },
+   "element_ref": "PA-7 (Example Steel)",
+   "message": "Subcontractor pay application PA-7 (Example Steel) nets 4,500.00 USD, but the lien waivers on file for it cover only 0.00 USD",
+   "passed": false,
+   "rule_id": "pay_application.sub_waiver_missing",
+   "severity": "warning",
+   "suggestion": "Collect a lien waiver covering the full net amount through the end of the period, or exclude the pay application from this claim"
+  },
+  {
+   "category": "compliance",
+   "details": {},
+   "element_ref": null,
+   "message": "OK",
+   "passed": true,
+   "rule_id": "pay_application.sub_prior_unconditional_missing",
+   "severity": "warning",
+   "suggestion": null
+  },
+  {
+   "category": "compliance",
+   "details": {
+    "as_of": "2026-03-31",
+    "document_type": "insurance",
+    "lapsed_on": "2026-03-15",
+    "state": "expired",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000015"
+   },
+   "element_ref": "Example Concrete",
+   "message": "Example Concrete's insurance certificate was no longer valid on 2026-03-31, the end of this claim's period",
+   "passed": false,
+   "rule_id": "pay_application.sub_certificate_lapsed",
+   "severity": "error",
+   "suggestion": "Obtain a current certificate from the subcontractor, or exclude their pay applications from this claim"
+  },
+  {
+   "category": "compliance",
+   "details": {
+    "as_of": "2026-03-31",
+    "document_type": "license",
+    "lapsed_on": null,
+    "state": "revoked",
+    "subcontractor_id": "00000000-0000-0000-0000-000000000016"
+   },
+   "element_ref": "Example Steel",
+   "message": "Example Steel's license was revoked and was not valid on 2026-03-31, the end of this claim's period",
+   "passed": false,
+   "rule_id": "pay_application.sub_certificate_lapsed",
+   "severity": "error",
+   "suggestion": "Obtain a current certificate from the subcontractor, or exclude their pay applications from this claim"
+  },
+  {
+   "category": "consistency",
+   "details": {},
+   "element_ref": null,
+   "message": "OK",
+   "passed": true,
+   "rule_id": "pay_application.sub_line_unmapped",
+   "severity": "warning",
+   "suggestion": null
+  },
+  {
+   "category": "consistency",
+   "details": {},
+   "element_ref": null,
+   "message": "OK",
+   "passed": true,
+   "rule_id": "pay_application.sub_exceeds_gc_line",
+   "severity": "warning",
+   "suggestion": null
+  }
+ ]
+}

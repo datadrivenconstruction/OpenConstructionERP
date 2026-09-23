@@ -35310,6 +35310,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Hyväksytty",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikaatti vanhentunut",
     "subcontractors.rollup_chip_certs_ok": "Sertifikaatit voimassa",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifikaatti tarkistetaan maksupäivänä",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikaatteja ei tarkistettu: ei kauden loppupäivää",
     "subcontractors.rollup_chip_paid": "Maksettu",
     "subcontractors.rollup_chip_received": "Vastaanotettu, ei hyväksytty",

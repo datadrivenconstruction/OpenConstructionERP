@@ -34744,6 +34744,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "אושר",
     "subcontractors.rollup_chip_certs_lapsed": "התעודה פגה",
     "subcontractors.rollup_chip_certs_ok": "התעודות בתוקף",
+    "subcontractors.rollup_chip_certs_on_payment": "התעודה נבדקת בתאריך התשלום",
     "subcontractors.rollup_chip_certs_unchecked": "התעודות לא נבדקו: אין תאריך סיום תקופה",
     "subcontractors.rollup_chip_paid": "שולם",
     "subcontractors.rollup_chip_received": "התקבל, לא אושר",

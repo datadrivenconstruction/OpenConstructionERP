@@ -35820,6 +35820,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Zatwierdzony",
     "subcontractors.rollup_chip_certs_lapsed": "Certyfikat wygasł",
     "subcontractors.rollup_chip_certs_ok": "Certyfikaty ważne",
+    "subcontractors.rollup_chip_certs_on_payment": "Certyfikat sprawdzany na dzień płatności",
     "subcontractors.rollup_chip_certs_unchecked": "Certyfikaty niesprawdzone: brak końca okresu",
     "subcontractors.rollup_chip_paid": "Zapłacony",
     "subcontractors.rollup_chip_received": "Otrzymany, niezatwierdzony",
