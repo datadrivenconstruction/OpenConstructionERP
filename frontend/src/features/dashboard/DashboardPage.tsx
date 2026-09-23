@@ -1734,9 +1734,13 @@ function SystemStatusSummary({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { data: modules } = useQuery({
-    queryKey: ['modules'],
-    queryFn: () => apiGet<{ modules: unknown[] }>('/system/modules').catch(() => ({ modules: [] })),
+  // The same catalogue the sidebar reads, under its key and route, so one
+  // request serves both. No catch inside the queryFn: this entry is shared,
+  // and a cached empty list would reach the Modules page as a real answer.
+  // A failed read falls back to 0 below instead.
+  const { data: modules, isError: modulesFailed } = useQuery({
+    queryKey: ['system-modules'],
+    queryFn: () => apiGet<unknown[]>('/v1/modules/'),
     retry: false,
     staleTime: 60_000,
   });
@@ -1755,10 +1759,11 @@ function SystemStatusSummary({
   });
 
   // FA-0005: `undefined` data means the query is still PENDING - every
-  // queryFn above settles errors to a concrete fallback ([], {modules: []}),
-  // so we can safely treat `undefined` as "loading" and render a skeleton
-  // pulse instead of a misleading "0" on a cold server. `null` = pending.
-  const moduleCount = modules ? modules.modules?.length ?? 0 : null;
+  // queryFn above settles errors to a concrete fallback, or (the module
+  // catalogue) reports them through isError, so we can safely treat
+  // `undefined` as "loading" and render a skeleton pulse instead of a
+  // misleading "0" on a cold server. `null` = pending.
+  const moduleCount = Array.isArray(modules) ? modules.length : modulesFailed ? 0 : null;
   const projectCount = projects ? projects.length : null;
   const boqBadgeCount = boqsLoading ? null : boqCount ?? 0;
   const userCount = canListUsers ? (usersList ? usersList.length : null) : 0;
@@ -3369,9 +3374,11 @@ function SystemStatus() {
     refetchInterval: 60_000,
   });
 
-  const { data: modules } = useQuery({
-    queryKey: ['modules'],
-    queryFn: () => apiGet<{ modules: unknown[] }>('/system/modules').catch(() => ({ modules: [] })),
+  // Shared with the sidebar, see the module count above for why there is no
+  // catch in the queryFn.
+  const { data: modules, isError: modulesFailed } = useQuery({
+    queryKey: ['system-modules'],
+    queryFn: () => apiGet<unknown[]>('/v1/modules/'),
     retry: false,
   });
 
@@ -3479,7 +3486,7 @@ function SystemStatus() {
       >
         <span className="text-sm text-content-secondary">{t('dashboard.modules_loaded')}</span>
         <span className="text-sm font-semibold text-content-primary tabular-nums">
-          {modules?.modules?.length ?? '\u2014'}
+          {Array.isArray(modules) ? modules.length : modulesFailed ? 0 : '\u2014'}
         </span>
       </div>
       <div
