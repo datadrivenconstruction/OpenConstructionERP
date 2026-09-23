@@ -27,6 +27,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.fsm.registry import RFQ_FSM
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
@@ -95,6 +96,25 @@ _SCOPE_EDITABLE_STATUSES: frozenset[str] = frozenset({"draft"})
 # taken, and an adjustment added afterwards would move a comparison that has
 # already been acted on.
 _RFQ_CLOSED_STATUSES: frozenset[str] = frozenset({"awarded", "cancelled", "completed", "po_issued"})
+
+# Header fields that go out with the RFQ and define what vendors price and how
+# their quotes are judged: the scope text, the currency to quote in, whether a
+# partial quote counts, and the evaluation method and weight. They are frozen
+# for the same reason the scope lines are (``_SCOPE_EDITABLE_STATUSES``): change
+# them after the RFQ is out and the quotes answer a different question, or the
+# ranking the award rests on moves underneath it.
+_RFQ_BASIS_FIELDS: tuple[str, ...] = (
+    "scope_of_work",
+    "currency_code",
+    "require_full_scope",
+    "evaluation_method",
+    "technical_weight",
+)
+
+# Statuses a PATCH may not set because a dedicated action owns the move and does
+# more than write the column: ``issue_rfq`` runs the issue rule set, and
+# ``award_bid`` checks the role and the comparison and writes the award record.
+_RFQ_STATUS_OWNED_BY_ACTION: dict[str, str] = {"published": "issue", "awarded": "award"}
 
 
 class RFQService:
@@ -287,10 +307,18 @@ class RFQService:
         rfq_id: uuid.UUID,
         data: RFQUpdate,
     ) -> RFQ:
-        """Update RFQ fields."""
+        """Update RFQ fields.
+
+        Raises:
+            HTTPException: 409 when the PATCH moves the status somewhere the
+                lifecycle does not allow or that a dedicated action owns, or
+                changes what vendors priced once the RFQ has gone out. See
+                :meth:`_refuse_an_unsafe_rfq_patch`.
+        """
         rfq = await self.get_rfq(rfq_id)  # 404 check
 
         fields = data.model_dump(exclude_unset=True)
+        self._refuse_an_unsafe_rfq_patch(rfq, fields)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (
@@ -309,9 +337,74 @@ class RFQService:
         logger.info("RFQ updated: %s", rfq_id)
         return updated
 
+    @staticmethod
+    def _refuse_an_unsafe_rfq_patch(rfq: RFQ, fields: dict[str, Any]) -> None:
+        """Keep a PATCH from walking around the scope and decision guards.
+
+        The scope lines are frozen once the RFQ is out and a quote is frozen
+        once the RFQ is decided, but both guards read the status, and this is
+        the one writer that sets it. Writing any status it was sent let a PATCH
+        to ``draft`` reopen the scope of an awarded RFQ and a PATCH to
+        ``published`` reopen bidding on one. So a status change here must be a
+        move the RFQ lifecycle allows, and the two moves a dedicated action owns
+        (``_RFQ_STATUS_OWNED_BY_ACTION``) go through that action. Sending the
+        current status again is not a move.
+
+        The header fields that define what vendors priced and how their quotes
+        are ranked (``_RFQ_BASIS_FIELDS``) follow the scope lines: editable
+        while the RFQ is a draft, or in the PATCH that reopens a cancelled one
+        as a draft, and not after. Only a real change counts, so a client that
+        sends the whole form back unchanged is not refused.
+        """
+        current = rfq.status
+        target = fields.get("status")
+        if target is not None and target != current:
+            action = _RFQ_STATUS_OWNED_BY_ACTION.get(target)
+            if action is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"An RFQ is moved to '{target}' by its {action} action, not by editing its status.",
+                )
+            if not RFQ_FSM.has_transition(current, target):
+                allowed = ", ".join(RFQ_FSM.allowed_from(current)) or "none"
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Cannot move an RFQ from '{current}' to '{target}'. Allowed: {allowed}.",
+                )
+        resulting = target if target is not None else current
+        changed = [name for name in _RFQ_BASIS_FIELDS if name in fields and fields[name] != getattr(rfq, name)]
+        if changed and current not in _SCOPE_EDITABLE_STATUSES and resulting not in _SCOPE_EDITABLE_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Cannot change {', '.join(changed)} of an RFQ in status '{current}'; "
+                    "vendors have already been asked to price it."
+                ),
+            )
+
     async def delete_rfq(self, rfq_id: uuid.UUID) -> None:
-        """Delete an RFQ and all its bids."""
-        await self.get_rfq(rfq_id)  # 404 check
+        """Delete a draft RFQ, with its scope lines.
+
+        Deleting an RFQ takes its quotes, their priced lines and adjustments
+        and the award record with it, since all of them cascade. Once the RFQ
+        has gone out those rows are the record of who was asked, what they
+        quoted and who won, so only a draft, which no vendor has seen and which
+        cannot hold a quote, is deleted. The RFQ screen already offers delete on
+        a draft only; this is the same rule on the side a direct call reaches.
+
+        Raises:
+            HTTPException: 404 when the RFQ does not exist, 409 when it is not
+                a draft.
+        """
+        rfq = await self.get_rfq(rfq_id)  # 404 check
+        if rfq.status not in _SCOPE_EDITABLE_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Only a draft RFQ can be deleted; this one is '{rfq.status}'. "
+                    "Once an RFQ has gone out, its quotes and award are kept as the record of the tender."
+                ),
+            )
         await self.rfqs.delete(rfq_id)
         logger.info("RFQ deleted: %s", rfq_id)
 
@@ -808,8 +901,12 @@ class RFQService:
         ``float()``, which was both a second implementation of an already
         enforced rule and the one place in this module where money-adjacent
         arithmetic left Decimal.
+
+        A score is part of the ranking the award is taken on, so once the RFQ
+        is decided a quote is no longer rescored, the same as it is no longer
+        withdrawn or disqualified (:meth:`_bid_for_open_rfq`).
         """
-        await self.get_bid(bid_id)  # 404 check
+        await self._bid_for_open_rfq(bid_id, "score a quote")
 
         fields = data.model_dump(exclude_unset=True)
         if fields:
