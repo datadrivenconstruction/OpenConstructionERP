@@ -55,7 +55,7 @@ import pytest_asyncio
 from app.core.events import event_bus
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
 from app.modules.contracts.router import create_claim_line
-from app.modules.contracts.schemas import AutoGenerateClaimRequest, ProgressClaimLineCreate
+from app.modules.contracts.schemas import AIAApplicationResponse, AutoGenerateClaimRequest, ProgressClaimLineCreate
 from app.modules.contracts.service import BOQ_POSITION_META_KEY, ContractsService
 from app.modules.projects.models import Project
 from app.modules.users.models import User
@@ -213,6 +213,36 @@ async def test_a_cost_plus_certificate_agrees_when_the_months_differ_in_shape(se
     # Line 7 carries March's certificate, so column D has to carry March's work.
     assert summary["previous_certificates_total"] == Decimal("9000.00")
     assert summary["current_payment_due"] == april.net_due
+
+
+async def test_the_row_carrying_march_leaves_scheduled_percent_and_balance_empty(session) -> None:
+    """The same two months, read as the endpoint returns them.
+
+    March's 10,000 has no schedule line, so its row has no scheduled value to
+    measure a percent or a balance against, and prints those cells empty
+    rather than as zero. The endpoint validates the payload through the
+    response model, which is why the model has to accept the empty cells.
+    """
+    job = await _job(session, "cost_plus")
+    await _certify(session, await _generated(session, job, "PC-1", 3, "10000"))
+    april = await _with_line(session, job, "PC-2", 4, "10000")
+
+    payload = await ContractsService(session).build_aia_application(april.id)
+    lines = AIAApplicationResponse.model_validate(payload).model_dump(mode="json")["lines"]
+
+    assert len(lines) == 2
+    schedule, march = lines
+    assert Decimal(schedule["scheduled_value"]) == Decimal("60000.00")
+    assert Decimal(schedule["total_completed_stored"]) == Decimal("10000.00")
+    assert Decimal(schedule["percent_complete"]) == Decimal("16.67")
+    assert Decimal(schedule["balance_to_finish"]) == Decimal("50000.00")
+
+    assert march["scheduled_value"] is None
+    assert march["percent_complete"] is None
+    assert march["balance_to_finish"] is None
+    assert Decimal(march["previous_value"]) == Decimal("10000.00")
+    assert Decimal(march["total_completed_stored"]) == Decimal("10000.00")
+    assert payload["summary"]["total_completed_stored"] == Decimal("20000.00")
 
 
 async def test_a_cost_plus_claim_populated_from_progress_agrees_with_its_certificate(session) -> None:
