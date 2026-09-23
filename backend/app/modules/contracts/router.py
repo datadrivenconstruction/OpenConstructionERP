@@ -218,7 +218,7 @@ def _contract_to_response(item: Contract) -> ContractResponse:
     )
 
 
-def _line_to_response(item: ContractLine) -> ContractLineResponse:
+def _line_to_response(item: ContractLine, *, billed: bool = False) -> ContractLineResponse:
     return ContractLineResponse(
         id=item.id,
         contract_id=item.contract_id,
@@ -233,6 +233,7 @@ def _line_to_response(item: ContractLine) -> ContractLineResponse:
         total_value=item.total_value,
         order_index=item.order_index,
         metadata=getattr(item, "metadata_", {}) or {},
+        billed=billed,
         created_at=item.created_at,
         updated_at=item.updated_at,
     )
@@ -611,7 +612,10 @@ async def list_contract_lines(
     await _verify_contract_access(session, contract_id, user_id)
     service = ContractsService(session)
     lines = await service.line_repo.list_for_contract(contract_id)
-    return [_line_to_response(ln) for ln in lines]
+    # The same query the service's refusal runs, so a line the screen shows
+    # as editable is one the server will let it edit.
+    billed = await service.claim_line_repo.claims_billing_lines([ln.id for ln in lines])
+    return [_line_to_response(ln, billed=ln.id in billed) for ln in lines]
 
 
 @router.post(

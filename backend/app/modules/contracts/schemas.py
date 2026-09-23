@@ -209,6 +209,12 @@ class ContractLineResponse(BaseModel):
     total_value: Decimal
     order_index: int
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # True when a progress claim has billed on this line. The server then
+    # refuses to change or delete it whatever the contract's status, and the
+    # screen reads this to stop offering either. Filled in by the listing;
+    # every other response describes a line just created or just changed,
+    # which a billed line cannot be, so False is the truth there.
+    billed: bool = False
     created_at: datetime
     updated_at: datetime
 
