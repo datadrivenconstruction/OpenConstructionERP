@@ -11,6 +11,7 @@ import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -200,6 +201,52 @@ _INVOICE_STATUS_TRANSITIONS: dict[str, set[str]] = {
 }
 
 _VALID_INVOICE_STATUSES = set(_INVOICE_STATUS_TRANSITIONS.keys())
+
+#: Statuses in which an invoice's figures are still being drawn up. Past them
+#: the invoice has been approved, sent, paid or cancelled, and what it charges,
+#: to whom and in which currency is the record.
+_INVOICE_EDITABLE_STATUSES: frozenset[str] = frozenset({"draft", "pending"})
+
+#: The amounts an issued invoice keeps, compared to the cent so that a form
+#: sending the stored figures back is not read as a change.
+_INVOICE_KEPT_AMOUNTS: tuple[str, ...] = ("amount_subtotal", "tax_amount", "retention_amount", "amount_total")
+
+#: The parties and terms an issued invoice keeps, compared as text.
+_INVOICE_KEPT_TERMS: tuple[str, ...] = ("currency_code", "tax_config_id", "contact_id", "invoice_direction")
+
+
+def _cents(value: Any) -> Decimal | None:
+    """An amount rounded to the cent for comparison, ``None`` when unreadable."""
+    try:
+        return Decimal(str(value if value not in (None, "") else "0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+
+
+def _issued_invoice_changes(invoice: Any, fields: dict[str, Any], new_lines: Sequence[Any] | None) -> list[str]:
+    """Name what a patch would change about an invoice's figures, parties or lines.
+
+    Only real changes count: a field sent back with the value it already has is
+    not one. Replacement lines count when their number or their amounts differ
+    from the stored ones; a reworded description does not move money.
+    """
+    changed = [
+        name
+        for name in _INVOICE_KEPT_AMOUNTS
+        if name in fields and _cents(fields[name]) != _cents(getattr(invoice, name, None))
+    ]
+    for name in _INVOICE_KEPT_TERMS:
+        if name not in fields:
+            continue
+        new, old = (fields[name] or ""), (getattr(invoice, name, None) or "")
+        if str(new).strip().upper() != str(old).strip().upper():
+            changed.append(name)
+    if new_lines is not None:
+        old_amounts = sorted(_cents(getattr(item, "amount", None)) or Decimal("0") for item in invoice.line_items or [])
+        new_amounts = sorted(_cents(getattr(item, "amount", None)) or Decimal("0") for item in new_lines)
+        if old_amounts != new_amounts:
+            changed.append("line_items")
+    return changed
 
 
 def _parse_decimal(value: str, field_name: str = "value") -> Decimal:
@@ -635,6 +682,22 @@ class FinanceService:
                     detail=(
                         f"Cannot transition invoice from '{invoice.status}' to '{new_status}'. "
                         f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
+
+        # An approved, sent, paid or cancelled invoice keeps its figures, its
+        # parties and its lines. The status can still move along the table
+        # above, and a patch that reopens a cancelled invoice as a draft may
+        # correct it in the same write.
+        resulting_status = fields.get("status") or invoice.status
+        if invoice.status not in _INVOICE_EDITABLE_STATUSES and resulting_status not in _INVOICE_EDITABLE_STATUSES:
+            changed = _issued_invoice_changes(invoice, fields, data.line_items)
+            if changed:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"This invoice is {invoice.status}, so its {', '.join(changed)} can no longer change. "
+                        "Cancel it and reopen it as a draft to correct it, or issue a credit note if it is paid."
                     ),
                 )
 
