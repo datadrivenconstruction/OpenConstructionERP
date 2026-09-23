@@ -3792,8 +3792,37 @@ class VariationsService:
         fa_id: uuid.UUID,
         data: FinalAccountUpdate,
     ) -> FinalAccount:
+        """Edit an open final account and recompute it.
+
+        A closed account is the settlement a manager signed off through
+        :meth:`close_final_account`, and the lifecycle leaves ``closed`` with no
+        way out, so it is not edited here at all. On an open account a status
+        change follows ``FA_TRANSITIONS``, except that ``closed`` is reached only
+        through the close action, which is MANAGER-only and records the signer.
+        """
         fa = await self.get_final_account(fa_id)
+        if fa.status == "closed":
+            raise HTTPException(
+                status_code=http_status.HTTP_409_CONFLICT,
+                detail="The final account is closed and is kept at the value it was closed at.",
+            )
         fields = data.model_dump(exclude_unset=True)
+        target = fields.get("status")
+        if target is not None and target != fa.status:
+            if target == "closed":
+                raise HTTPException(
+                    status_code=http_status.HTTP_409_CONFLICT,
+                    detail="A final account is closed through its close action, not by editing its status.",
+                )
+            allowed = allowed_final_account_transitions(fa.status)
+            if target not in allowed:
+                raise HTTPException(
+                    status_code=http_status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Cannot move a final account from {fa.status} to {target}. "
+                        f"Allowed: {', '.join(allowed) or 'none'}."
+                    ),
+                )
         for money_key in (
             "original_contract_value",
             "variations_total",
@@ -3912,6 +3941,10 @@ class VariationsService:
         fa = await self.final_account_repo.for_project(project_id)
         if fa is None:
             return None
+        if fa.status == "closed":
+            # The signed settlement keeps the totals it was closed at; a variation
+            # completed afterwards does not move it.
+            return fa
 
         fa_currency = (fa.currency or "").strip()
 
