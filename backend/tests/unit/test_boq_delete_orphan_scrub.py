@@ -134,6 +134,12 @@ async def test_restore_snapshot_scrubs_old_position_refs() -> None:
     session.flush = AsyncMock()
 
     service = BOQService(session)
+    # The lock guard is one more read on the session; stub it so the
+    # ``execute`` sequence above stays the restore's own. The locked case has
+    # its own test on a real database
+    # (tests/modules/boq/test_a_locked_bill_refuses_restore_and_duplicate.py).
+    writable = AsyncMock()
+    service._ensure_boq_writable = writable  # type: ignore[method-assign]
     scrub = AsyncMock()
     service._scrub_activity_position_refs = scrub  # type: ignore[method-assign]
     # restore_snapshot ends by reloading the BOQ for serialization - stub it.
@@ -141,6 +147,7 @@ async def test_restore_snapshot_scrubs_old_position_refs() -> None:
 
     await service.restore_snapshot(boq_id, uuid.uuid4())
 
+    writable.assert_awaited_once_with(boq_id)
     scrub.assert_awaited_once()
     args, _kwargs = scrub.call_args
     # The BOQ survives a restore, so the helper resolves project scope from

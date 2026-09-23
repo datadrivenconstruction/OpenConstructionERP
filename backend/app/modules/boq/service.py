@@ -2128,6 +2128,15 @@ class BOQService:
         should call this before proceeding.  Read-only methods do not
         need the guard.
 
+        Deliberately unguarded: the writers that build a NEW bill
+        (``create_boq``, ``duplicate_boq``, ``create_scenario``,
+        ``create_boq_from_template``), ``update_boq`` (header fields only),
+        ``refresh_quantity_links`` (records drift, applies nothing), and the
+        writers of snapshots, quantity links and activity rows. Not yet
+        decided: the linked-master and resource-code propagation reached from
+        ``update_position`` writes into OTHER bills of the project without
+        reading their lock.
+
         Returns:
             The loaded BOQ (so callers can reuse it instead of fetching twice).
 
@@ -6659,6 +6668,7 @@ class BOQService:
 
         Raises:
             HTTPException 404 if source position not found.
+            HTTPException 409 if the BOQ is locked.
         """
         source = await self.position_repo.get_by_id(position_id)
         if source is None:
@@ -6666,6 +6676,9 @@ class BOQService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=translate("errors.position_not_found", locale=get_locale()),
             )
+        # A duplicate adds a priced line (and its subtree) to the bill, so a
+        # locked bill refuses it like any other position write.
+        await self._ensure_boq_writable(source.boq_id)
 
         # Issue #127: a duplicate is a one-time clone - UNLINKED, with its
         # own fresh internal reference_code (no future propagation). It now
@@ -8599,9 +8612,19 @@ class BOQService:
         Deletes all current positions and markups, then recreates them from
         the snapshot - including hierarchical parent_id relationships and
         markup lines.
+
+        Raises:
+            HTTPException 404: BOQ or snapshot not found.
+            HTTPException 409: BOQ is locked and cannot be modified.
         """
         from sqlalchemy import delete as sa_delete
         from sqlalchemy import select
+
+        # Restore replaces every position and markup, so a locked bill refuses
+        # it. The one-column guard on purpose: ``_ensure_not_locked`` loads the
+        # BOQ with both selectin collections, which would sit in the identity
+        # map across the bulk DELETE below.
+        await self._ensure_boq_writable(boq_id)
 
         # Load snapshot
         stmt = select(BOQSnapshot).where(
