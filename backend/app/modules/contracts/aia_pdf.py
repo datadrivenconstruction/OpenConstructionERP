@@ -122,6 +122,22 @@ def _pct(value: Any) -> str:
     return f"{d.quantize(Decimal('0.01'))}%"
 
 
+def _amount_or_blank(value: Any, currency: str = "") -> str:
+    """A continuation sheet amount that may have no answer: None prints nothing.
+
+    Only for column C and column H, which are None on the row carrying money no
+    schedule line carries. An empty cell says there is no answer; a zero says
+    the answer is zero. :func:`_amount` keeps reading None as zero, which is
+    right for every other figure on the form.
+    """
+    return "" if value is None else _amount(value, currency)
+
+
+def _pct_or_blank(value: Any) -> str:
+    """The percent column, empty on a row with no scheduled value to measure it against."""
+    return "" if value is None else _pct(value)
+
+
 def _txt(value: Any) -> str:
     """Format a value for a plain string table cell.
 
@@ -398,13 +414,13 @@ def render_aia_application_pdf(app: dict[str, Any]) -> bytes:
             [
                 _safe_para(ln.get("item_number"), cell_l),
                 _safe_para(ln.get("description"), cell_l),
-                Paragraph(_amount(ln.get("scheduled_value"), currency), cell_r),
+                Paragraph(_amount_or_blank(ln.get("scheduled_value"), currency), cell_r),
                 Paragraph(_amount(ln.get("previous_value"), currency), cell_r),
                 Paragraph(_amount(ln.get("this_period_value"), currency), cell_r),
                 Paragraph(_amount(ln.get("materials_stored"), currency), cell_r),
                 Paragraph(_amount(ln.get("total_completed_stored"), currency), cell_r),
-                Paragraph(_pct(ln.get("percent_complete")), cell_r),
-                Paragraph(_amount(ln.get("balance_to_finish"), currency), cell_r),
+                Paragraph(_pct_or_blank(ln.get("percent_complete")), cell_r),
+                Paragraph(_amount_or_blank(ln.get("balance_to_finish"), currency), cell_r),
                 Paragraph(_amount(ln.get("retainage"), currency), cell_r),
             ]
         )
@@ -415,8 +431,17 @@ def render_aia_application_pdf(app: dict[str, Any]) -> bytes:
     # contract sum, which is the column C total only while the sheet lists
     # every SoV line, and line 9 carries the retainage that column H leaves
     # out, so the sheet printed a balance to finish 6,000 above its own rows.
+    #
+    # A cell with no answer is left out of its column's total on purpose, not
+    # read as a zero that happens to add nothing. Only C and H have such cells,
+    # on the row for money no schedule line carries. The C total is therefore
+    # the schedule's, as it was when that row printed a zero. The H total is the
+    # balance left on the schedule lines, higher than the placeholder's by that
+    # row's G, and it no longer equals the C total less the G total on a sheet
+    # carrying the row: the gap is that row's G, which has no balance to finish.
     def _column_total(key: str) -> str:
-        return _amount(sum((_dec_amount(ln.get(key)) for ln in lines), Decimal("0")), currency)
+        answered = (_dec_amount(ln.get(key)) for ln in lines if ln.get(key) is not None)
+        return _amount(sum(answered, Decimal("0")), currency)
 
     data.append(
         [

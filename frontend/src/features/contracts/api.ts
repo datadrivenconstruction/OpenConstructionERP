@@ -1249,13 +1249,15 @@ export interface AIAG703Line {
   line_number: number;
   item_number: string;
   description: string;
-  scheduled_value: string;
+  /** Null on the row for money no schedule line carries, and so are the
+   *  percent and the balance: there is nothing to measure them against. */
+  scheduled_value: string | null;
   previous_value: string;
   this_period_value: string;
   materials_stored: string;
   total_completed_stored: string;
-  percent_complete: string;
-  balance_to_finish: string;
+  percent_complete: string | null;
+  balance_to_finish: string | null;
   retainage: string;
   /** Column I split the way G702 lines 5a and 5b split it. */
   retainage_completed_work?: string;
