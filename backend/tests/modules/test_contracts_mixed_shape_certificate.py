@@ -44,6 +44,7 @@ that fix cannot land without removing it.
 
 from __future__ import annotations
 
+import io
 import uuid
 from datetime import date
 from decimal import Decimal
@@ -53,8 +54,9 @@ import pytest
 import pytest_asyncio
 
 from app.core.events import event_bus
+from app.core.i18n import get_locale, load_translations, set_locale
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
-from app.modules.contracts.router import create_claim_line
+from app.modules.contracts.router import create_claim_line, export_aia_application_pdf, get_aia_application
 from app.modules.contracts.schemas import AIAApplicationResponse, AutoGenerateClaimRequest, ProgressClaimLineCreate
 from app.modules.contracts.service import BOQ_POSITION_META_KEY, ContractsService
 from app.modules.projects.models import Project
@@ -243,6 +245,75 @@ async def test_the_row_carrying_march_leaves_scheduled_percent_and_balance_empty
     assert Decimal(march["previous_value"]) == Decimal("10000.00")
     assert Decimal(march["total_completed_stored"]) == Decimal("10000.00")
     assert payload["summary"]["total_completed_stored"] == Decimal("20000.00")
+
+
+def _read_in(locale: str) -> None:
+    """Put the request in ``locale`` the way the language middleware does.
+
+    In the app the catalogues are loaded at startup, before any request sets
+    a language, and set_locale falls back to English for a language with no
+    catalogue loaded. So they are loaded here first: without them every
+    locale below would quietly read English, and a test for German would
+    prove nothing about German.
+    """
+    load_translations()
+    set_locale(locale)
+    assert get_locale() == locale
+
+
+@pytest.mark.parametrize(
+    ("locale", "label"),
+    [
+        ("en", "Billed work not carried by any schedule of values line"),
+        ("de", "Abgerechnete Leistung ohne Position im Zahlungsplan"),
+        ("ru", "Выставленные к оплате работы, не отнесённые ни к одной позиции ведомости стоимости"),
+    ],
+)
+async def test_the_row_carrying_march_is_described_in_the_language_of_the_screen(session, locale, label) -> None:
+    """Every other label on the screen is in the reader's language, and the row's description follows it.
+
+    It is the one string on the application the server writes, and it used to
+    be resolved with no language at all, so it read English in every
+    deployment.
+    """
+    job = await _job(session, "cost_plus")
+    await _certify(session, await _generated(session, job, "PC-1", 3, "10000"))
+    april = await _with_line(session, job, "PC-2", 4, "10000")
+
+    _read_in(locale)
+    try:
+        response = await get_aia_application(april.id, session, str(OWNER_ID))
+    finally:
+        set_locale("en")
+
+    march = response.lines[-1]
+    assert march.item_number == ""
+    assert march.description == label
+
+
+async def test_the_printed_form_describes_that_row_in_english_like_the_rest_of_the_page(session) -> None:
+    """The printed form is drawn in English and declares it, so a German reader still gets that row in English."""
+    import pdfplumber
+
+    job = await _job(session, "cost_plus")
+    await _certify(session, await _generated(session, job, "PC-1", 3, "10000"))
+    april = await _with_line(session, job, "PC-2", 4, "10000")
+
+    _read_in("de")
+    try:
+        response = await export_aia_application_pdf(april.id, session, str(OWNER_ID))
+        chunks: list[bytes] = []
+        async for chunk in response.body_iterator:
+            chunks.append(chunk.encode() if isinstance(chunk, str) else bytes(chunk))
+        pdf = b"".join(chunks)
+    finally:
+        set_locale("en")
+
+    with pdfplumber.open(io.BytesIO(pdf)) as doc:
+        words = {word["text"] for page in doc.pages for word in page.extract_words()}
+    assert response.headers["content-language"] == "en"
+    assert "Billed" in words
+    assert "Abgerechnete" not in words
 
 
 async def test_a_cost_plus_claim_populated_from_progress_agrees_with_its_certificate(session) -> None:
