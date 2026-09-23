@@ -7,7 +7,11 @@
 
 const preloaders: Record<string, () => void> = {
   // ── Estimation & BOQ ──
-  '/boq': () => void import('@/features/boq/BOQEditorPage'),
+  // No '/boq' entry. That route renders BOQListPage, which App.tsx imports
+  // statically, so it is already in the main bundle. The entry used to preload
+  // BOQEditorPage instead, and with it ag-grid, three.js and the PDF export
+  // vendor: about 900 KB fetched on every hover of the BOQ menu item, queued
+  // ahead of the list's own requests, for an editor the user had not opened.
   '/takeoff': () => void import('@/features/takeoff/TakeoffPage'),
   '/dwg-takeoff': () => void import('@/features/dwg-takeoff/DwgTakeoffPage'),
   '/catalog': () => void import('@/features/catalog/CatalogPage'),
