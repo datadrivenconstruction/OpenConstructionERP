@@ -163,7 +163,22 @@ def policy_from_rule(rule: Mapping[str, Any] | None, *, fallback_rate: Any) -> R
             tier that does not start at 0, two tiers on one threshold, or an
             unknown ``tier_mode``.
     """
-    if not rule or not rule.get("tiers"):
+    if not rule:
+        return flat_policy(fallback_rate)
+    if not isinstance(rule, Mapping):
+        # The guard below covers rule["tiers"] being the wrong shape. It did not
+        # cover the rule ITSELF being the wrong shape, and this value arrives
+        # from a JSON column and from a pack's own file, so it can be any JSON
+        # value at all. A string, a list, a number and a bool each reached .get
+        # on the line above and raised AttributeError straight past the three
+        # callers that guard with except ValueError, which is the one failure
+        # this function exists to prevent. Measured on all four before fixing.
+        #
+        # It sits after the falsy check rather than before it so that None, an
+        # empty mapping and an empty string keep standing in the flat rate the
+        # way they always have. Only the four shapes that used to leak change.
+        raise ValueError("a retention rule must be an object naming tiers")
+    if not rule.get("tiers"):
         return flat_policy(fallback_rate)
 
     declared = rule["tiers"]

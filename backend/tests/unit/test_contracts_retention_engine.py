@@ -167,9 +167,19 @@ def test_a_rule_without_tiers_is_the_contracts_flat_rate_and_says_so() -> None:
         ({"tiers": ["10"]}, "must be an object"),
         ({"tiers": [10]}, "must be an object"),
         ({"tiers": [[0, 10]]}, "must be an object"),
+        # And the rule itself being the wrong shape, which is a layer above the
+        # five cases before it and leaked the same AttributeError for the same
+        # reason after they were fixed. The value is a JSON column and a pack
+        # file, so every one of these is a thing JSON can hold. None, {} and ""
+        # are deliberately absent: they are falsy, they mean no rule, and they
+        # go on standing in the contract's flat rate.
+        ("10 percent", "must be an object"),
+        ([{"from_percent_complete": "0", "rate": "10"}], "must be an object"),
+        (10, "must be an object"),
+        (True, "must be an object"),
     ],
 )
-def test_a_policy_that_cannot_be_read_is_refused_not_replaced(rule: dict, message: str) -> None:
+def test_a_policy_that_cannot_be_read_is_refused_not_replaced(rule: object, message: str) -> None:
     with pytest.raises(ValueError, match=message):
         policy_from_rule(rule, fallback_rate="10")
 
