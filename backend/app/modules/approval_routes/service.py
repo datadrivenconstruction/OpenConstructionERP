@@ -62,7 +62,7 @@ from app.modules.approval_routes.schemas import (
     RouteUpdate,
     StepCreate,
 )
-from app.modules.approval_routes.simulate import min_approvals_to_clear, step_cleared
+from app.modules.approval_routes.simulate import min_approvals_to_clear, named_approver_quorum_conflict, step_cleared
 from app.modules.approval_routes.timeline import compute_timeline
 
 logger = logging.getLogger(__name__)
@@ -144,6 +144,18 @@ def _validate_step_mode(mode: str) -> None:
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Unknown step mode: {mode!r}",
         )
+
+
+def _validate_step_quorum(step: StepCreate) -> None:
+    """Refuse a named approver asked for more than one approval.
+
+    Checked here rather than on :class:`StepCreate` because ``clone_route``
+    rebuilds that schema from stored rows, and a validation error raised
+    there would surface as a 500 instead of this 422.
+    """
+    conflict = named_approver_quorum_conflict(step)
+    if conflict is not None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=conflict)
 
 
 def _safe_publish(name: str, data: dict[str, object]) -> None:
@@ -244,6 +256,7 @@ class ApprovalRouteService:
         _validate_target_kind(payload.target_kind)
         for step in payload.steps:
             _validate_step_mode(step.mode)
+            _validate_step_quorum(step)
 
         route = Route(
             project_id=payload.project_id,
@@ -356,6 +369,7 @@ class ApprovalRouteService:
         if payload.steps is not None:
             for step in payload.steps:
                 _validate_step_mode(step.mode)
+                _validate_step_quorum(step)
             existing = await self.repo.list_instances(route_id=route_id, limit=1)
             if existing:
                 raise HTTPException(

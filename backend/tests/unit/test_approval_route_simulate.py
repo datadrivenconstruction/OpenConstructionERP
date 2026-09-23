@@ -20,6 +20,7 @@ import pytest
 from app.modules.approval_routes.schemas import SimulateDecision
 from app.modules.approval_routes.simulate import (
     min_approvals_to_clear,
+    named_approver_quorum_conflict,
     simulate_route,
     step_cleared,
 )
@@ -205,6 +206,45 @@ def test_min_approvals_to_clear(step: SimpleNamespace, expected: int) -> None:
     assert min_approvals_to_clear(step) == expected
 
 
+def test_a_named_approver_with_a_count_clears_on_one_approval_in_both_places() -> None:
+    # The engine asks only whether the named person approved and never reads
+    # the count on such a step, so the dry run's minimum of 1 is the truth,
+    # not an oversight. The count of 2 is what is wrong, and it is refused
+    # on save (see named_approver_quorum_conflict).
+    step = _step(1, user_id=uuid.uuid4(), count=2)
+    assert min_approvals_to_clear(step) == 1
+    engine_says = step_cleared(
+        mode=step.mode,
+        user_pinned=True,
+        pinned_user_approved=True,
+        approvals=1,
+        distinct_approvers=1,
+        rejections=0,
+        total_acted=1,
+        quorum=step.required_approver_count,
+    )
+    assert engine_says is True
+
+
+@pytest.mark.parametrize(
+    ("step", "conflict"),
+    [
+        (_step(3, user_id=uuid.uuid4(), count=2), True),
+        (_step(3, user_id=uuid.uuid4(), mode="majority", count=5), True),
+        (_step(3, user_id=uuid.uuid4(), count=1), False),
+        (_step(3, user_id=uuid.uuid4(), count=None), False),
+        (_step(3, mode="all", count=3), False),
+        (_step(3, mode="any", count=3), False),
+    ],
+)
+def test_only_a_named_approver_with_a_count_above_one_is_a_conflict(step: SimpleNamespace, conflict: bool) -> None:
+    message = named_approver_quorum_conflict(step)
+    assert (message is not None) is conflict
+    if conflict:
+        assert "Step 3" in message
+        assert f"required_approver_count {step.required_approver_count}" in message
+
+
 # ── simulate_route: happy path, warnings, scenarios ──────────────────
 
 
@@ -237,6 +277,17 @@ def test_role_all_without_count_warns_needs_multiple_approvers() -> None:
     assert res.steps[0].needs_multiple_approvers is True
     assert any("at least two different approvers" in w for w in res.warnings)
     # Happy path still completes because it supplies the two approvers.
+    assert res.happy_path.outcome == "completed"
+
+
+def test_a_saved_named_approver_with_a_count_is_explained_by_the_dry_run() -> None:
+    # Such steps can no longer be saved, but rows written before that still
+    # exist, and the dry run shows a count of 2 beside a minimum of 1. The
+    # warning says why instead of leaving the author to guess.
+    res = _simulate([_step(1, user_id=uuid.uuid4(), count=2)])
+    assert res.steps[0].quorum_required == 2
+    assert res.steps[0].min_approvals_to_clear == 1
+    assert any("required_approver_count 2" in w for w in res.warnings)
     assert res.happy_path.outcome == "completed"
 
 
