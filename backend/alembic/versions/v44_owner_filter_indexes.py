@@ -2,6 +2,21 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """perf: index the owner/tenancy columns that a page load actually filters on.
 
+This migration MUST be RUN (``alembic upgrade``), not merely stamped
+--------------------------------------------------------------------
+Prod builds the schema with ``create_all`` plus ``alembic stamp <head>`` and
+never walks the chain (``.claude/rules/env-config.md``, ``alembic/env.py``,
+``app/core/alembic_version_table.py``). ``create_all`` decides table by table:
+it skips a table that already exists and therefore never adds an index to one.
+So on an install that is already running, NEITHER half of this change arrives
+on its own - the model declaration is skipped with the table, and the stamp
+marks this revision applied without executing it.
+
+An existing database gets these seven indexes only when someone runs this
+revision against it by hand. A fresh install gets them from ``create_all``,
+which is why the model declaration stays: it is the only half a fresh install
+ever sees, exactly as the migration is the only half an existing one can get.
+
 Background
 ----------
 An audit of every ownership-style column in the schema (project_id, user_id,
