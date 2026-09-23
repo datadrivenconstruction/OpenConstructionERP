@@ -7,6 +7,10 @@
  * location maps), so this paints instantly. Renders:
  *
  *   * project pins (clickable - deep-link into a project) ;
+ *   * in project mode, the project's own pin, its safety / punch / site
+ *     photo pins, and a click-to-place mode for setting its location. That
+ *     mode also opens on the site, tilted, so the style's extruded
+ *     buildings stand up ;
  *   * the transient address-search pin ;
  *   * georeferenced drawing overlays (PDF / DWG / image rasters) placed by
  *     their four corner coordinates - the same overlays the 3D view shows ;
@@ -27,8 +31,10 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin } from 'lucide-react';
 import Map, {
@@ -82,12 +88,32 @@ interface MapLibreViewerProps {
   onPinSelect?: (sel: { tag: string; clusterProjectIds?: string[] }) => void;
   onMouseMove?: (coords: GeoCursorCoords | null) => void;
   onCameraChange?: (state: GeoCameraState) => void;
+  /**
+   * Project mode only: the project's own location. The map opens on it,
+   * draws its pin, and flies to it again whenever it moves (a pin placed
+   * by hand, or one geocoded from the address after mount).
+   */
+  anchor?: { lat: number; lon: number; label?: string } | null;
+  /** While true a click on the map is handed to ``onMapClick``. */
+  pickMode?: boolean;
+  onMapClick?: (coords: { lat: number; lon: number }) => void;
 }
 
 // Initial camera: whole-world for the global view, tighter once we have a
 // focus. The page flies to projects/search results after mount.
 const WORLD_VIEW = { longitude: 12, latitude: 30, zoom: 1.4 };
 const FOCUS_ZOOM = 15;
+
+// A project map opens on the site itself, close enough that the streets
+// style draws building footprints and named roads (both appear from about
+// z14), and tilted so the style's extruded buildings read as houses rather
+// than as flat outlines. The globe engine cannot show either: its imagery is
+// shaded relief, see ./CesiumViewer.
+const PROJECT_ZOOM = 16;
+const PROJECT_PITCH = 45;
+
+// Pin colours match the ones the globe engine uses for the same layers.
+const PIN_COLOURS = { hse: '#dc2626', punch: '#f97316', diary: '#1e90ff' } as const;
 
 /**
  * Rough eye-altitude estimate from the map zoom so the shared HUD (built
@@ -130,12 +156,68 @@ export function MapLibreViewer({
   onPinSelect,
   onMouseMove,
   onCameraChange,
+  anchor,
+  pickMode = false,
+  onMapClick,
 }: MapLibreViewerProps) {
+  const { t } = useTranslation();
   const mapRef = useRef<MapRef>(null);
   const rafRef = useRef<number | null>(null);
   const meta = basemapMeta(basemap);
 
   const projects = pins?.projects ?? [];
+  const isProject = mode === 'project';
+  const anchorLat = isProject && anchor ? Number(anchor.lat) : NaN;
+  const anchorLon = isProject && anchor ? Number(anchor.lon) : NaN;
+  const hasAnchor = Number.isFinite(anchorLat) && Number.isFinite(anchorLon);
+
+  // Read once, on mount: react-map-gl takes ``initialViewState`` a single
+  // time, and a later anchor is reached by the fly-to effect below.
+  const [initialView] = useState(() =>
+    hasAnchor
+      ? { longitude: anchorLon, latitude: anchorLat, zoom: PROJECT_ZOOM, pitch: PROJECT_PITCH }
+      : WORLD_VIEW,
+  );
+
+  // The anchor moved after mount, a pin placed by hand or a location
+  // geocoded from the address. Skips the position the map opened on, so
+  // the first paint does not animate from the site to the site.
+  const flownToRef = useRef<string | null>(hasAnchor ? `${anchorLat},${anchorLon}` : null);
+  useEffect(() => {
+    if (!hasAnchor) return;
+    const key = `${anchorLat},${anchorLon}`;
+    if (flownToRef.current === key) return;
+    flownToRef.current = key;
+    mapRef.current?.flyTo({
+      center: [anchorLon, anchorLat],
+      zoom: PROJECT_ZOOM,
+      pitch: PROJECT_PITCH,
+      duration: 1200,
+    });
+  }, [hasAnchor, anchorLat, anchorLon]);
+
+  const crossModulePins = useMemo(() => {
+    if (!isProject || !pins) return [];
+    const out: { tag: string; lat: number; lon: number; colour: string; title: string }[] = [];
+    const push = (tag: string, lat: unknown, lon: unknown, colour: string, title: string) => {
+      const la = Number(lat);
+      const lo = Number(lon);
+      if (Number.isFinite(la) && Number.isFinite(lo)) out.push({ tag, lat: la, lon: lo, colour, title });
+    };
+    const hseLabel = t('geo_hub.legend.hse', { defaultValue: 'Safety incidents' });
+    const punchLabel = t('geo_hub.legend.punchlist', { defaultValue: 'Punch list' });
+    const diaryLabel = t('geo_hub.legend.diary', { defaultValue: 'Site photos' });
+    for (const p of pins.hse ?? []) {
+      push(`hse:${p.incident_id}`, p.lat, p.lon, PIN_COLOURS.hse, `${hseLabel}: ${p.title || p.incident_number}`);
+    }
+    for (const p of pins.punchlist ?? []) {
+      push(`punch:${p.item_id}`, p.lat, p.lon, PIN_COLOURS.punch, `${punchLabel}: ${p.title}`);
+    }
+    for (const p of pins.diary ?? []) {
+      push(`diary:${p.photo_id}`, p.lat, p.lon, PIN_COLOURS.diary, diaryLabel);
+    }
+    return out;
+  }, [isProject, pins, t]);
 
   // Drawing overlays (raster PDFs / DWGs / images) for the project in
   // context. Only visible overlays - hidden ones never paint here.
@@ -234,28 +316,42 @@ export function MapLibreViewer({
     [onCameraChange],
   );
 
+  const handleClick = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (!pickMode || !onMapClick) return;
+      onMapClick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
+    },
+    [pickMode, onMapClick],
+  );
+
   return (
     <div
       className="relative h-full w-full"
       style={{ backgroundColor: BASEMAP_BACKDROP[basemap] }}
       data-testid="geo-maplibre-viewer"
       data-basemap={basemap}
+      data-mode={mode}
+      data-pick-mode={pickMode ? 'on' : 'off'}
     >
       <Map
         ref={mapRef}
-        initialViewState={WORLD_VIEW}
+        initialViewState={initialView}
         mapStyle={buildBasemapStyle(basemap)}
         style={{ width: '100%', height: '100%' }}
-        dragRotate={false}
-        pitchWithRotate={false}
-        touchZoomRotate={false}
+        cursor={pickMode ? 'crosshair' : undefined}
+        // The global view stays flat "like paper". A project map may tilt
+        // and turn, which is what makes the extruded buildings useful.
+        dragRotate={isProject}
+        pitchWithRotate={isProject}
+        touchZoomRotate={isProject}
         attributionControl={false}
         transformRequest={transformRequest}
         onMouseMove={handleMouseMove}
         onMouseOut={() => onMouseMove?.(null)}
         onMove={handleMove}
+        onClick={handleClick}
       >
-        <NavigationControl position="top-right" showCompass={false} />
+        <NavigationControl position="top-right" showCompass={isProject} visualizePitch={isProject} />
         <ScaleControl position="bottom-right" />
         {!meta.offline && (
           <AttributionControl
@@ -315,6 +411,47 @@ export function MapLibreViewer({
               </Marker>
             );
           })}
+
+        {/* Safety, punch and site-photo pins. Tags use the ``kind:id`` form
+            the page's pin handler splits, the same as the globe's. */}
+        {crossModulePins.map((p) => (
+          <Marker
+            key={p.tag}
+            longitude={p.lon}
+            latitude={p.lat}
+            anchor="center"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              if (!pickMode) onPinSelect?.({ tag: p.tag });
+            }}
+          >
+            <button
+              type="button"
+              className="block h-3.5 w-3.5 rounded-full shadow ring-2 ring-white focus:outline-none focus-visible:ring-oe-blue"
+              style={{ backgroundColor: p.colour }}
+              title={p.title}
+              aria-label={p.title}
+              data-testid={`geo-2d-pin-${p.tag.split(':')[0]}`}
+            />
+          </Marker>
+        ))}
+
+        {/* The project's own location. */}
+        {hasAnchor && (
+          <Marker longitude={anchorLon} latitude={anchorLat} anchor="bottom">
+            <div
+              className="relative flex h-8 w-8 items-center justify-center"
+              title={anchor?.label}
+              aria-label={anchor?.label}
+              data-testid="geo-2d-project-pin"
+            >
+              <span className="absolute inset-0 rounded-full bg-oe-blue/25 animate-ping" />
+              <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-oe-blue text-white shadow-lg shadow-oe-blue/40 ring-2 ring-white">
+                <MapPin size={14} fill="currentColor" strokeWidth={0} />
+              </span>
+            </div>
+          </Marker>
+        )}
 
         {/* Transient address-search pin. */}
         {searchPin &&

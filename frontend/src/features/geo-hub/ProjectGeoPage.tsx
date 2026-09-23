@@ -2,8 +2,12 @@
 /**
  * Project-scoped Geo Hub page — /projects/:projectId/geo.
  *
- * Renders the lazy-loaded Cesium viewer scoped to one project's
- * anchor, imagery, tilesets, overlays and viewpoints. Layout:
+ * Opens on the 2D street map (MapLibre over OpenStreetMap vector data),
+ * centred and tilted on the project's anchor, because that is the view
+ * that shows the site: roads, names and buildings. The lazy-loaded Cesium
+ * globe, scoped to the same anchor plus the project's 3D tilesets and
+ * viewpoints, is the second engine, picked in the header or automatically
+ * for a 3D model deep link and for drawing-corner editing. Layout:
  *
  * ```
  *   ┌──── header (title · anchor · scope picker) ──────┐
@@ -59,6 +63,9 @@ import {
   updateAnchor,
 } from './api';
 import type { GeoCameraState, GeoCursorCoords } from './CesiumViewer';
+import { BasemapPicker } from './BasemapPicker';
+import { EngineModePicker, type GeoEngine } from './EngineModePicker';
+import { readBasemap, BASEMAP_LS_KEY, type BasemapId } from './mapStyles';
 import { GeoEmptyState, type GeoEmptyKind } from './GeoEmptyState';
 import { GeoModePicker } from './GeoModePicker';
 import { PlaceOnMapPicker } from './PlaceOnMapPicker';
@@ -72,6 +79,42 @@ import type { GeoPinBundle, Tileset } from './types';
 const CesiumViewer = lazy(() =>
   import('./CesiumViewer').then((m) => ({ default: m.CesiumViewer })),
 );
+
+const MapLibreViewer = lazy(() =>
+  import('./MapLibreViewer').then((m) => ({ default: m.MapLibreViewer })),
+);
+
+// Which engine a project map opens with. The 2D map is the default because
+// it is the one that shows the site: streets, named roads and buildings,
+// drawn from OpenStreetMap vector data. The globe's imagery is shaded relief
+// with no streets at any zoom (see CesiumViewer), so a project map that
+// opened on the globe showed its users landform where they expected a
+// neighbourhood. The globe is one click away and is chosen automatically
+// where only it can help: a 3D model deep link, and drawing-corner editing.
+//
+// Its own key rather than the global hub's ``geoHub.engine``: somebody who
+// prefers the globe for browsing every project at once has not said they
+// want it for looking at one site.
+const PROJECT_ENGINE_LS_KEY = 'geoHub.project.engine';
+
+function readProjectEngine(): GeoEngine {
+  if (typeof window === 'undefined') return '2d';
+  try {
+    const v = window.localStorage.getItem(PROJECT_ENGINE_LS_KEY);
+    if (v === '2d' || v === '3d') return v;
+  } catch {
+    /* localStorage disabled / quota - fall through to default */
+  }
+  return '2d';
+}
+
+function rememberProjectEngine(engine: GeoEngine) {
+  try {
+    window.localStorage.setItem(PROJECT_ENGINE_LS_KEY, engine);
+  } catch {
+    /* localStorage disabled / quota full - the choice still holds in memory */
+  }
+}
 
 // Persisted across reloads so the user's preferred chrome density
 // survives navigation. Versioned (`v1`) so a future incompatible rename
@@ -199,6 +242,32 @@ export function ProjectGeoPage() {
   const focusedDevId = searchParams.get('dev_id') ?? searchParams.get('development');
   const phaseFilter = searchParams.get('phase');
   const blockFilter = searchParams.get('block');
+
+  // A deep link to a 3D model or plot needs the globe, the only engine that
+  // loads tilesets. Such an open is not a stated preference, so it is not
+  // written back: the next plain visit opens on whatever the user chose.
+  const wantsGlobe = Boolean(focusedModelId || focusedPlotId);
+  const [engine, setEngine] = useState<GeoEngine>(() =>
+    wantsGlobe ? '3d' : readProjectEngine(),
+  );
+  useEffect(() => {
+    if (wantsGlobe) setEngine('3d');
+  }, [wantsGlobe]);
+  const chooseEngine = useCallback((next: GeoEngine) => {
+    setEngine(next);
+    rememberProjectEngine(next);
+  }, []);
+  // Shared with the global hub on purpose: the basemap is a style choice,
+  // not a statement about which projects to look at.
+  const [basemap, setBasemap] = useState<BasemapId>(readBasemap);
+  const chooseBasemap = useCallback((next: BasemapId) => {
+    setBasemap(next);
+    try {
+      window.localStorage.setItem(BASEMAP_LS_KEY, next);
+    } catch {
+      /* localStorage disabled / quota full - the choice still holds in memory */
+    }
+  }, []);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['geo-hub', 'map-config', projectId],
@@ -528,9 +597,23 @@ export function ProjectGeoPage() {
       return true;
     });
   }, [allTilesets, phaseFilter, blockFilter, focusedDevId]);
-  const emptyKind = useMemo(
-    () => emptyStateFor(Boolean(data?.anchor), tilesets),
-    [data?.anchor, tilesets],
+  // "No 3D models" and "every model failed" describe the globe's content.
+  // On the street map the site itself is the content, so an anchored
+  // project with no models is not empty there, and a card saying it is
+  // would sit over the very streets the page opened to show.
+  const emptyKind = useMemo(() => {
+    if (engine === '2d') return data?.anchor ? null : 'no_anchor';
+    return emptyStateFor(Boolean(data?.anchor), tilesets);
+  }, [engine, data?.anchor, tilesets]);
+
+  // Moving or cropping a drawing's corners runs on the globe's handles, so
+  // asking for it on the street map brings the globe up first.
+  const changeOverlayEditMode = useCallback(
+    (mode: OverlayEditMode) => {
+      setOverlayEditMode(mode);
+      if (mode !== 'idle') setEngine('3d');
+    },
+    [],
   );
 
   // Resolve ``?model=...`` to a Tileset.id by matching either the
@@ -590,6 +673,84 @@ export function ProjectGeoPage() {
       </div>
     );
   }
+
+  // Chrome that floats over either engine's canvas. The tileset rail and
+  // the drawing-corner handles belong to the globe alone and are added in
+  // its branch below; the street map paints the drawings itself.
+  const chromeHud = (
+    <GeoOverlayHud
+      cursorLat={cursorCoords?.lat ?? null}
+      cursorLon={cursorCoords?.lon ?? null}
+      altitudeM={cameraState?.cameraAltitudeM ?? null}
+      headingDeg={cameraState?.headingDeg ?? null}
+      active
+    />
+  );
+  const chromeOverlayPanel = (
+    <OverlayPanel
+      projectId={projectId}
+      activeOverlayId={activeOverlayId}
+      editMode={overlayEditMode}
+      onSelectOverlay={(id) => {
+        setActiveOverlayId(id);
+        if (id === null) setOverlayEditMode('idle');
+      }}
+      onChangeEditMode={changeOverlayEditMode}
+    />
+  );
+  const chromeRest = (
+    <>
+      {/* Placement mode banner - while the user is dropping the
+          anchor pin (from the no-anchor empty state's "Place a
+          pin on the map"), replace the empty card with a clear
+          "click the map" instruction + Cancel, so the card never
+          sits between the cursor and the globe. */}
+      {anchorDragMode && !data?.anchor && (
+        <AnchorPlacementBanner
+          onCancel={() => setAnchorDragMode(false)}
+        />
+      )}
+      {/* While auto-geocoding the project address, show a brief
+          "locating" hint instead of the manual empty card so we
+          don't flash "anchor manually" then replace it with a pin. */}
+      {emptyKind === 'no_anchor' &&
+        !anchorDragMode &&
+        autoAnchorRunning && <AnchorLocatingHint />}
+      {emptyKind &&
+        !(anchorDragMode && emptyKind === 'no_anchor') &&
+        !(emptyKind === 'no_anchor' && autoAnchorRunning) && (
+          <GeoEmptyState
+            kind={emptyKind}
+            projectId={projectId}
+            onPlaceOnMap={() => setPickerOpen(true)}
+            // Manual anchoring drops a pin in-map instead of
+            // navigating to the project settings page (#284).
+            onPlaceManually={
+              emptyKind === 'no_anchor'
+                ? () => setAnchorDragMode(true)
+                : undefined
+            }
+          />
+        )}
+      {data?.anchor && !emptyKind && (
+        <AnchorAdjustPanel
+          projectId={projectId}
+          anchor={data.anchor}
+          dragMode={anchorDragMode}
+          onToggleDragMode={() => setAnchorDragMode((v) => !v)}
+          projectAddressText={projectAddressText}
+        />
+      )}
+      {/* Layer legend — feature counts + breakdowns per layer,
+          with deep-links into the source module for empty
+          layers. Only meaningful once the project is locatable
+          (a real or address-derived anchor); the no-anchor
+          empty state owns the canvas otherwise. */}
+      {data?.anchor && !emptyKind && (
+        <MapLayerLegend projectId={projectId} />
+      )}
+    </>
+  );
 
   return (
     // Full-bleed layout — negate AppLayout's <main> padding (px-4 pt-6 pb-4 sm:px-7)
@@ -659,6 +820,10 @@ export function ProjectGeoPage() {
               {t('geo_hub.place.header_cta', { defaultValue: 'Place on map' })}
             </button>
           )}
+          {engine === '2d' && (
+            <BasemapPicker current={basemap} onChange={chooseBasemap} />
+          )}
+          <EngineModePicker current={engine} onChange={chooseEngine} />
           <GeoModePicker current="project" projectId={projectId} />
         </div>
       </header>
@@ -721,7 +886,48 @@ export function ProjectGeoPage() {
             </span>
           </div>
         )}
-        {!error && data && (
+        {!error && data && engine === '2d' && (
+          <Suspense
+            fallback={
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-300">
+                <Loader2 size={20} className="animate-spin text-emerald-300" />
+                <span className="font-medium">
+                  {t('geo_hub.loading_map_title', { defaultValue: 'Loading map' })}
+                </span>
+              </div>
+            }
+          >
+            <MapLibreViewer
+              mode="project"
+              pins={pins}
+              basemap={basemap}
+              anchor={
+                data.anchor
+                  ? {
+                      lat: Number(data.anchor.lat),
+                      lon: Number(data.anchor.lon),
+                      label: projectQuery.data?.name,
+                    }
+                  : null
+              }
+              flyToTarget={overlayFlyTarget}
+              overlayProjectId={projectId}
+              pickMode={anchorDragMode}
+              onMapClick={handleAnchorMapClick}
+              onPinSelect={handlePinSelect}
+              onMouseMove={setCursorCoords}
+              onCameraChange={setCameraState}
+              overlay={
+                <>
+                  {chromeHud}
+                  {chromeOverlayPanel}
+                  {chromeRest}
+                </>
+              }
+            />
+          </Suspense>
+        )}
+        {!error && data && engine === '3d' && (
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center text-sm text-slate-300">
@@ -746,13 +952,7 @@ export function ProjectGeoPage() {
               onViewerReady={setCesiumRuntime}
               overlay={
                 <>
-                  <GeoOverlayHud
-                    cursorLat={cursorCoords?.lat ?? null}
-                    cursorLon={cursorCoords?.lon ?? null}
-                    altitudeM={cameraState?.cameraAltitudeM ?? null}
-                    headingDeg={cameraState?.headingDeg ?? null}
-                    active
-                  />
+                  {chromeHud}
                   <TilesetSidebar
                     variant="overlay"
                     collapsed={panelCollapsed}
@@ -766,16 +966,7 @@ export function ProjectGeoPage() {
                     getOpacity={tilesetOverlay.getOpacity}
                     onChangeOpacity={tilesetOverlay.setOpacity}
                   />
-                  <OverlayPanel
-                    projectId={projectId}
-                    activeOverlayId={activeOverlayId}
-                    editMode={overlayEditMode}
-                    onSelectOverlay={(id) => {
-                      setActiveOverlayId(id);
-                      if (id === null) setOverlayEditMode('idle');
-                    }}
-                    onChangeEditMode={setOverlayEditMode}
-                  />
+                  {chromeOverlayPanel}
                   <OverlayLayer
                     projectId={projectId}
                     cesium={cesiumRuntime?.cesium ?? null}
@@ -785,55 +976,7 @@ export function ProjectGeoPage() {
                     onSelectOverlay={setActiveOverlayId}
                     onChangeEditMode={setOverlayEditMode}
                   />
-                  {/* Placement mode banner - while the user is dropping the
-                      anchor pin (from the no-anchor empty state's "Place a
-                      pin on the map"), replace the empty card with a clear
-                      "click the map" instruction + Cancel, so the card never
-                      sits between the cursor and the globe. */}
-                  {anchorDragMode && !data?.anchor && (
-                    <AnchorPlacementBanner
-                      onCancel={() => setAnchorDragMode(false)}
-                    />
-                  )}
-                  {/* While auto-geocoding the project address, show a brief
-                      "locating" hint instead of the manual empty card so we
-                      don't flash "anchor manually" then replace it with a pin. */}
-                  {emptyKind === 'no_anchor' &&
-                    !anchorDragMode &&
-                    autoAnchorRunning && <AnchorLocatingHint />}
-                  {emptyKind &&
-                    !(anchorDragMode && emptyKind === 'no_anchor') &&
-                    !(emptyKind === 'no_anchor' && autoAnchorRunning) && (
-                      <GeoEmptyState
-                        kind={emptyKind}
-                        projectId={projectId}
-                        onPlaceOnMap={() => setPickerOpen(true)}
-                        // Manual anchoring drops a pin in-map instead of
-                        // navigating to the project settings page (#284).
-                        onPlaceManually={
-                          emptyKind === 'no_anchor'
-                            ? () => setAnchorDragMode(true)
-                            : undefined
-                        }
-                      />
-                    )}
-                  {data?.anchor && !emptyKind && (
-                    <AnchorAdjustPanel
-                      projectId={projectId}
-                      anchor={data.anchor}
-                      dragMode={anchorDragMode}
-                      onToggleDragMode={() => setAnchorDragMode((v) => !v)}
-                      projectAddressText={projectAddressText}
-                    />
-                  )}
-                  {/* Layer legend — feature counts + breakdowns per layer,
-                      with deep-links into the source module for empty
-                      layers. Only meaningful once the project is locatable
-                      (a real or address-derived anchor); the no-anchor
-                      empty state owns the canvas otherwise. */}
-                  {data?.anchor && !emptyKind && (
-                    <MapLayerLegend projectId={projectId} />
-                  )}
+                  {chromeRest}
                 </>
               }
             />
