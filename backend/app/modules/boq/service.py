@@ -2170,6 +2170,10 @@ class BOQService:
         ``update_position`` writes into OTHER bills of the project; it does not
         refuse the edit but skips every line in a locked bill and reports the
         skip on the response (:meth:`_locked_bills_among`, ``_LockedSkips``).
+        The link bookkeeping that also reaches other bills never writes into a
+        locked one either: a master leaving its group hands over to a line in
+        an open bill (:meth:`_hand_over_link_group`), and a new link that would
+        promote an owner in a locked bill is refused.
 
         Returns:
             The loaded BOQ (so callers can reuse it instead of fetching twice).
@@ -2223,6 +2227,31 @@ class BOQService:
             return {}
         rows = await self.session.execute(select(BOQ.id, BOQ.name).where(BOQ.id.in_(ids), BOQ.is_locked.is_(True)))
         return {boq_id: name or "" for boq_id, name in rows.all()}
+
+    async def _hand_over_link_group(self, survivors: Sequence[Position]) -> uuid.UUID | None:
+        """Give a link group whose master is leaving a new master, sparing locked bills.
+
+        ``survivors`` are the members that stay, oldest first. The oldest one in
+        a bill that is NOT locked becomes the master, or, when it is the only
+        member left, a plain line with no group. A line in a locked bill is
+        never written: a lone survivor there keeps its role and group, and a
+        group whose every survivor is locked is left without a master, so a new
+        link to that code is refused until the bill is unlocked.
+
+        Returns:
+            The id of the line that was rewritten, or None when none was.
+        """
+        if not survivors:
+            return None
+        locked = await self._locked_bills_among({p.boq_id for p in survivors})
+        heir = next((p for p in survivors if p.boq_id not in locked), None)
+        if heir is None:
+            return None
+        if len(survivors) == 1:
+            await self.position_repo.update_fields(heir.id, link_role=None, link_group_id=None)
+        else:
+            await self.position_repo.update_fields(heir.id, link_role="master")
+        return heir.id
 
     async def _validate_parent_id(
         self,
@@ -3459,6 +3488,25 @@ class BOQService:
         master_ordinal = master.ordinal
         master_link_group_id = master.link_group_id
         master_link_role = master.link_role
+        master_boq_id = master.boq_id
+
+        # The owner may sit in another bill of the project. Linking to a plain
+        # owner promotes it to master, and linking to a group member that lost
+        # its role gives the role back; both write into the owner's bill. A
+        # locked bill does not change at all, so that link is refused here,
+        # before anything is written. Joining a group whose owner is already
+        # the master writes nothing into its bill and goes ahead, as does a copy.
+        if not as_copy and (master_link_group_id is None or master_link_role != "master"):
+            locked = await self._locked_bills_among({master_boq_id})
+            if master_boq_id in locked:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Code '{reference_code}' is defined by a line in the locked bill "
+                        f"'{locked[master_boq_id]}', and linking to it would change that bill. "
+                        "Unlock that bill first, or enter the line under a new code."
+                    ),
+                )
 
         # Resolve / create the link group (only for the linked path).
         link_group_id: uuid.UUID | None = None
@@ -5528,18 +5576,8 @@ class BOQService:
                 # Survivors = group members not in the delete set (cascade
                 # may have removed instances too).
                 survivors = [p for p in group if str(p.id) not in _deleted_ids_set]
-                if survivors:
-                    # list_link_group is ordered oldest-first → promote head.
-                    _promote_id = survivors[0].id
-                    await self.position_repo.update_fields(_promote_id, link_role="master")
-                    if len(survivors) == 1:
-                        # Only one left - collapse to a standalone owner so
-                        # we don't keep a one-member group around.
-                        await self.position_repo.update_fields(
-                            _promote_id,
-                            link_role=None,
-                            link_group_id=None,
-                        )
+                _promote_id = await self._hand_over_link_group(survivors)
+                if _promote_id is not None:
                     logger.info(
                         "Promoted position %s to master of group %s (old master %s deleted)",
                         _promote_id,
@@ -6865,12 +6903,7 @@ class BOQService:
             try:
                 group = await self.position_repo.list_link_group(group_id)
                 survivors = [p for p in group if p.id != position_id]
-                if survivors:
-                    new_master = survivors[0]
-                    if len(survivors) == 1:
-                        await self.position_repo.update_fields(new_master.id, link_role=None, link_group_id=None)
-                    else:
-                        await self.position_repo.update_fields(new_master.id, link_role="master")
+                await self._hand_over_link_group(survivors)
             except Exception:  # noqa: BLE001 - never block the unlink
                 logger.exception(
                     "Survivor-promotion failed unlinking master %s",
