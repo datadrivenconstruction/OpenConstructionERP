@@ -57134,7 +57134,7 @@
             },
             {
               "name": "scheduled_value",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "previous_value",
@@ -57154,11 +57154,11 @@
             },
             {
               "name": "percent_complete",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "balance_to_finish",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "retainage",

@@ -949,13 +949,17 @@ class AIAG703Line(BaseModel):
     line_number: int
     item_number: str
     description: str
-    scheduled_value: Decimal
+    # None on the row for money no schedule line carries: it has no scheduled
+    # value, so nothing to measure a percent or a balance against. Printed as
+    # empty cells, never as zero. Required all the same, so a row that forgets
+    # them fails here rather than printing a blank nobody meant.
+    scheduled_value: Decimal | None
     previous_value: Decimal
     this_period_value: Decimal
     materials_stored: Decimal
     total_completed_stored: Decimal
-    percent_complete: Decimal
-    balance_to_finish: Decimal
+    percent_complete: Decimal | None
+    balance_to_finish: Decimal | None
     retainage: Decimal
     # Column I split into work and stored materials; they add up to it.
     retainage_completed_work: Decimal = Decimal("0")

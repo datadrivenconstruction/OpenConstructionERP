@@ -249,7 +249,7 @@ def _fill_row(
     line_number: int,
     item_number: str,
     description: str,
-    scheduled: Decimal,
+    scheduled: Decimal | None,
     previous: Decimal,
     stored: Decimal,
     total: Decimal,
@@ -262,8 +262,20 @@ def _fill_row(
     than a rounding of its own, so the row a person reads adds up: D + E + F
     is always exactly G. The percent and column H follow the printed G for the
     same reason.
+
+    ``scheduled`` is None only on the row for money no schedule line carries
+    (see :data:`OUT_OF_SCHEDULE_SCHEDULED_VALUE`). The percent and column H
+    are then None as well, since there is nothing to measure them against. A
+    schedule line whose value is zero is a different thing and keeps printing
+    its zero C, zero percent and its balance.
     """
-    scheduled = _q(scheduled)
+    if scheduled is None:
+        percent: Decimal | None = None
+        balance: Decimal | None = None
+    else:
+        scheduled = _q(scheduled)
+        percent = _q(total / scheduled * DEC_HUNDRED) if scheduled > DEC_ZERO else DEC_ZERO
+        balance = scheduled - total
     return {
         "line_number": line_number,
         "item_number": item_number,
@@ -273,8 +285,8 @@ def _fill_row(
         "this_period_value": total - previous - stored,
         "materials_stored": stored,
         "total_completed_stored": total,
-        "percent_complete": _q(total / scheduled * DEC_HUNDRED) if scheduled > DEC_ZERO else DEC_ZERO,
-        "balance_to_finish": scheduled - total,
+        "percent_complete": percent,
+        "balance_to_finish": balance,
         "retainage": retainage,
         "retainage_completed_work": retainage - retainage_stored,
         "retainage_stored_materials": retainage_stored,
@@ -324,18 +336,24 @@ def sheet_sov_lines(
 #: Column C on the row carrying work billed outside the schedule of values.
 #:
 #: That money has no scheduled value of its own: either nobody planned a line
-#: for it, or the lines that were planned had no room left to hold it. The
-#: three cells measured against C are decided here and nowhere else, so the
-#: presentation can change in one edit once the question is settled.
+#: for it, or the lines that were planned had no room left to hold it. So
+#: column C on that row is None, and :func:`_fill_row` then leaves the two
+#: cells measured against C, the percent and column H, as None too. Every
+#: reader prints the three as empty cells.
 #:
-#: Zero is a placeholder, not an answer. With it, C and column H both read
-#: truthfully - H goes negative because more has been done than was
-#: scheduled, which is unusual and informative rather than wrong - but the
-#: percent reads 0 against a non-zero G, because ``_fill_row`` gives up on a
-#: zero C. That one cell is known to be wrong. Blank is what these three
-#: want, and blanks need ``scheduled_value``, ``percent_complete`` and
-#: ``balance_to_finish`` to accept None in the response schema first.
-OUT_OF_SCHEDULE_SCHEDULED_VALUE = DEC_ZERO
+#: The founder decided this (question 11). An empty cell says there is no
+#: answer; a zero says the answer is zero. The row used to carry a zero here
+#: as a placeholder, which printed a percent of 0 against a non-zero G and a
+#: column H of minus G, two answers to a question the row cannot be asked.
+#: Column G still carries the money, and D, E, F and I are what they were.
+#:
+#: The printed totals row adds up only the cells that have an answer. Its C
+#: total is unchanged, because this row used to add a zero. Its H total is the
+#: balance left on the schedule lines, which is this row's G higher than the
+#: placeholder printed, so on a sheet carrying this row the H total is no
+#: longer the C total less the G total. That is accepted, as is column C not
+#: tying to the contract sum on a contract billed both ways.
+OUT_OF_SCHEDULE_SCHEDULED_VALUE: Decimal | None = None
 
 #: Column A on that row. Empty rather than borrowed: the cost-of-work row
 #: prints the contract's own code, and a reader has to be able to tell the
@@ -362,7 +380,8 @@ def build_g703(
     from claim lines, so money with no line behind it is invisible to the
     column while remaining visible on line 7, and line 8 then subtracts a
     certificate the columns never added. The row carries the figure in column
-    D and its share of retainage, so line 4 and line 5 both see it;
+    D and its share of retainage, so line 4 and line 5 both see it, and
+    None in column C, the percent and column H, which have no answer on it;
     ``out_of_schedule_label`` is its description, resolved by the caller
     because this module is pure and holds no strings.
 
@@ -389,7 +408,9 @@ def build_g703(
     D + E + F = G.
     """
     prior = prior_by_line or {}
-    exact = [
+    # Any rather than Decimal: the out-of-schedule row appended below has no
+    # column C, and says so with None.
+    exact: list[dict[str, Any]] = [
         _exact_columns(
             cl,
             claim_lines_by_contract_line.get(getattr(cl, "id", None)),
