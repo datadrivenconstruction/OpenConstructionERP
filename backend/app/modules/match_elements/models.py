@@ -312,7 +312,9 @@ class MatchTemplate(Base):
         DateTime(timezone=True),
         nullable=True,
     )
-    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Indexed because the templates panel lists a non-admin's own rows with
+    # ``created_by = ?`` alone - that path never touches the tenant index.
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

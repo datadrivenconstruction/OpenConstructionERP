@@ -238,8 +238,12 @@ class BIMQuantityMap(Base):
 
     __tablename__ = "oe_bim_quantity_map"
 
-    org_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Both scope columns are indexed: the quantity-rules page lists through
+    # ``list_scoped`` on mount, which filters on project_id (plus the
+    # IS NULL global-template branch), and ``list_active`` filters on both
+    # during element mapping. The table carried no index at all before.
+    org_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     name_translations: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     element_type_filter: Mapped[str | None] = mapped_column(String(100), nullable=True)

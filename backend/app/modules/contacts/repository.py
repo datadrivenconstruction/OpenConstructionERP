@@ -22,7 +22,16 @@ def _tenant_scope(owner_id: str):  # type: ignore[no-untyped-def]
 
     Prefers the ``tenant_id`` column (populated from v2.3.1 onwards) and
     falls back to ``created_by`` so rows inserted before the migration
-    backfill still resolve correctly. Both branches are indexed.
+    backfill still resolve correctly.
+
+    Both branches are indexed, and both have to stay that way. PostgreSQL
+    can only turn an ``OR`` of two equality tests into a BitmapOr when it
+    has an index for each side; drop either one and the planner gives up on
+    both and scans the table. ``created_by`` carried no index until the
+    2026-09-23 perf pass, which is what made this clause a sequential scan
+    on every load of the contacts list. This docstring claimed both were
+    indexed for some time before it was true - if you remove an index here,
+    fix the sentence too.
     """
     owner = str(owner_id)
     return or_(Contact.tenant_id == owner, Contact.created_by == owner)

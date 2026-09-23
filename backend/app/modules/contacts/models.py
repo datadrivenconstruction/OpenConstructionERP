@@ -116,7 +116,12 @@ class Contact(Base):
     # audit field (who inserted the row), ``tenant_id`` is the access
     # gate. Indexed so the list endpoint stays O(log n) at scale.
     tenant_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Indexed for the same reason ``tenant_id`` is, and it has to be: the
+    # scope clause is ``tenant_id = ? OR created_by = ?`` for rows written
+    # before the v2.3.1 backfill, and PostgreSQL can only combine the two
+    # branches into a BitmapOr when BOTH are indexed. With one side missing
+    # the planner dropped to a sequential scan for the whole clause.
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

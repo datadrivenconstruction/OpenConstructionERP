@@ -69,7 +69,10 @@ class Task(Base):
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default="normal")
     result: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_private: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Indexed to match ``responsible_id``: the my-tasks list filters
+    # ``responsible_id = ? OR created_by = ?`` and PostgreSQL needs an index
+    # on both sides to BitmapOr them instead of scanning the table.
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     # Task dependency: this task can only be completed after `depends_on` is completed.
     # ON DELETE SET NULL - deleting the predecessor doesn't delete dependents.
     depends_on: Mapped[uuid.UUID | None] = mapped_column(

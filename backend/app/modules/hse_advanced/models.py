@@ -275,10 +275,13 @@ class PPEIssue(Base):
 
     __tablename__ = "oe_hse_advanced_ppe_issue"
 
+    # Indexed because the PPE tab lists by recipient; a foreign key does not
+    # create an index in PostgreSQL, so the filter was a sequential scan.
     recipient_user_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     recipient_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     recipient_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -409,10 +412,13 @@ class SafetyCertification(Base):
 
     __tablename__ = "oe_hse_advanced_certification"
 
+    # Indexed because the certifications tab lists by holder; the foreign key
+    # alone gives PostgreSQL nothing to seek on.
     owner_user_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     owner_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     owner_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
