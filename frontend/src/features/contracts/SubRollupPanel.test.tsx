@@ -381,6 +381,33 @@ describe('SubRollupPanel', () => {
     expect(screen.queryByText('construction_tax_exemption')).toBeNull();
   });
 
+  it('names a payment-date certificate that nothing on file could cover, even before the payment', async () => {
+    rollupMock.mockResolvedValue(
+      rollup({
+        included: [
+          payApp({
+            progress_claim_id: 'claim-1',
+            certificates_ok: null,
+            paid_on: null,
+            certificates_pending_payment: true,
+            payment_date_findings: [
+              {
+                document_type: 'construction_tax_exemption',
+                state: 'pending_invalid',
+                judged_on: null,
+                lapsed_on: null,
+                valid_until: null,
+              },
+            ],
+          }),
+        ],
+      }),
+    );
+    renderPanel();
+    expect(await screen.findByText('Certificate checked on the payment date')).toBeInTheDocument();
+    expect(screen.getByText('construction_tax_exemption')).toBeInTheDocument();
+  });
+
   it('lists a payment-date certificate that did not cover a payment already made', async () => {
     rollupMock.mockResolvedValue(
       rollup({
