@@ -44,6 +44,10 @@
       "fail": "Zahlungsantrag {claim} fordert {gross}, die zugehörigen Positionen ergeben aber {lines_total}: der Antrag wurde nach der Änderung seiner Positionen nicht neu berechnet",
       "suggestion": "Speichern Sie eine beliebige Position dieses Antrags oder führen Sie die Übernahme aus dem Baufortschritt erneut aus, dann folgen die Summen"
     },
+    "totals_below_lines": {
+      "fail": "Zahlungsantrag {claim} fordert {gross} auf Basis erfasster Kosten, weniger als die {lines_total}, die seine eigenen Positionen ergeben: die Aufgliederung kann nicht mehr fordern als der Antrag selbst",
+      "suggestion": "Bei einem auf Kostenbasis abgerechneten Antrag sind die Positionen eine Aufgliederung des Betrags und nicht dessen Quelle. Verringern oder entfernen Sie die Positionen, die ihn übersteigen, oder erzeugen Sie den Antrag erneut aus den erfassten Kosten, damit beide übereinstimmen"
+    },
     "prior_matches_earlier_claims": {
       "line_fail": "Zahlungsantrag {claim} weist {stored} als bisher abgerechnet für Position {line} aus, die früheren Anträge rechnen dafür jetzt {now} ab",
       "total_fail": "Zahlungsantrag {claim} weist {stored} als bisher bescheinigt aus, die früheren Anträge bescheinigen jetzt {now}",

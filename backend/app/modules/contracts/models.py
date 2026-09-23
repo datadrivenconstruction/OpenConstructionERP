@@ -455,6 +455,21 @@ class ProgressClaim(Base):
     # and say so.
     completed_stored_to_date: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
     retention_held_to_date: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    # ── What the gross is made of (v45) ──────────────────────────────────
+    # ``"cost"`` for a claim billed off recorded cost of work, which carries a
+    # gross with no schedule of values behind it, and ``"lines"`` for a claim
+    # whose gross is the sum of its own period values. It decides one thing:
+    # whether a later line write may re-read the gross from the lines. For a
+    # cost claim it may not, or fifty thousand of recorded cost becomes the
+    # value of whatever single line somebody typed in.
+    #
+    # NULL means not recorded, not "lines". Every claim written before this
+    # column existed carries NULL and keeps exactly the behaviour it had, and
+    # the basis cannot be reconstructed for them: by the time anyone looks, a
+    # cost claim that was overwritten from its lines is indistinguishable from
+    # a line claim that always said that. Readers must treat NULL as "do what
+    # we did before" rather than guessing.
+    gross_basis: Mapped[str | None] = mapped_column(String(10), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

@@ -34,7 +34,7 @@ import pytest
 import pytest_asyncio
 from fastapi import HTTPException
 
-from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
+from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
 from app.modules.contracts.router import delete_claim_line
 from app.modules.contracts.schemas import AutoGenerateClaimRequest, ProgressClaimUpdate
 from app.modules.contracts.service import ContractsService
@@ -309,3 +309,98 @@ async def test_a_claim_whose_totals_do_not_add_up_is_blocked(session, world) -> 
     march = await svc.roll_claim_retention(march.id)
     assert march.gross_amount == Decimal("46000")
     assert _failures(await _validate(svc, march.id), "pay_application.totals_match_lines") == []
+
+
+@pytest_asyncio.fixture
+async def cost_world(session):
+    """A cost-plus contract that still has a schedule of values behind it.
+
+    The lines exist so a claim billed off recorded cost can be given one by
+    hand, which is the whole point: on this contract type the lines are a
+    breakdown of money that came from somewhere else.
+    """
+    project = Project(id=uuid.uuid4(), name="Cost basis", owner_id=OWNER_ID, currency="USD", country_code="US")
+    session.add(project)
+    await session.flush()
+    contract = Contract(
+        id=uuid.uuid4(),
+        code=f"C-{uuid.uuid4().hex[:8]}",
+        title="Cost of work",
+        project_id=project.id,
+        contract_type="cost_plus",
+        currency="USD",
+        total_value=Decimal("100000"),
+        original_contract_value=Decimal("100000"),
+        retention_percent=Decimal("10"),
+        # Zero fee keeps the arithmetic about the cost of work and nothing else.
+        terms={"fee_percent": "0"},
+        status="active",
+    )
+    session.add(contract)
+    await session.flush()
+    line = ContractLine(
+        id=uuid.uuid4(),
+        contract_id=contract.id,
+        code="A",
+        description="Line A",
+        quantity=Decimal("1"),
+        unit_rate=Decimal("100000"),
+        total_value=Decimal("100000"),
+        order_index=0,
+    )
+    session.add(line)
+    await session.flush()
+    return SimpleNamespace(project=project, contract=contract, a=line)
+
+
+async def test_a_cost_claim_is_held_to_its_breakdown_not_to_equality(session, cost_world) -> None:
+    """The same rule, the weaker statement, and it still blocks one direction.
+
+    A claim billed off recorded cost may carry lines that add up to less than
+    it bills, because they are a breakdown of the money rather than its
+    source. It may not carry lines that add up to more, because then the
+    continuation sheet draws columns the header does not cover and the
+    certificate says two things.
+
+    Both directions are asserted here. Without the second, the widening would
+    read as "cost claims are exempt", which is not what it says.
+    """
+    svc = ContractsService(session)
+    claim = await _claim(session, cost_world, "PC-1", 3)
+    generated = await svc.auto_generate_claim_lines(
+        claim.id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("50000")),
+    )
+    assert generated.gross_amount == Decimal("50000")
+
+    # A breakdown of part of it. The claim keeps its cost basis and the rule
+    # is satisfied, where a claim made of lines would be blocked for exactly
+    # this difference.
+    await svc.claim_line_repo.create(
+        ProgressClaimLine(
+            progress_claim_id=claim.id,
+            contract_line_id=cost_world.a.id,
+            period_completed_value=Decimal("1000"),
+            cumulative_completed_value=Decimal("1000"),
+        )
+    )
+    await svc.roll_claim_retention(claim.id, gross_follows_lines=True)
+    await session.refresh(claim)
+    assert claim.gross_amount == Decimal("50000")
+    assert _failures(await _validate(svc, claim.id), "pay_application.totals_match_lines") == []
+    # Nothing else in the set objects either, so the red below is this rule.
+    await svc.transition_claim(claim.id, "submitted")
+    await svc.claim_repo.update_fields(claim.id, status="draft")
+
+    # A breakdown asking for more than the claim does.
+    [line] = await svc.claim_line_repo.list_for_claim(claim.id)
+    await svc.claim_line_repo.update_fields(line.id, period_completed_value=Decimal("60000"))
+    [finding] = _failures(await _validate(svc, claim.id), "pay_application.totals_match_lines")
+    assert finding["severity"] == "error"
+    with pytest.raises(HTTPException) as refused:
+        await svc.transition_claim(claim.id, "submitted")
+    assert refused.value.status_code == 422
+    # And the gross was not quietly raised to cover it, which would be the
+    # re-read from lines this basis exists to stop, under another name.
+    await session.refresh(claim)
+    assert claim.gross_amount == Decimal("50000")

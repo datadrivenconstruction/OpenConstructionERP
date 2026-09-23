@@ -975,6 +975,22 @@ class ClaimTotalsMatchLinesRule(_ClaimRule):
 
     A claim with no lines behind it is not checked: cost-plus and time and
     materials bill actual cost, and there is nothing here to add up.
+
+    What the equality means depends on what the gross is made of, and the
+    claim now records that rather than leaving it to be guessed from the
+    presence of lines. A claim made of lines, which is every claim that does
+    not say otherwise and every claim written before the basis was recorded,
+    must equal them exactly. A claim billed off recorded cost may carry lines
+    as a partial breakdown of a gross that did not come from them, so it is
+    held to the weaker statement that the breakdown cannot exceed the money.
+
+    The weaker half still blocks, and it is not decoration. A gross below its
+    own lines is a contradiction in the claim's money: the continuation sheet
+    draws its columns from the lines while the header asks for less than they
+    add up to, so line 4 and net due stop agreeing and the certificate goes
+    out saying two things. It is reported rather than corrected upward,
+    because correcting it would be the same re-read of the gross from the
+    lines that the basis exists to stop, arriving under a different name.
     """
 
     rule_id = "pay_application.totals_match_lines"
@@ -990,6 +1006,21 @@ class ClaimTotalsMatchLinesRule(_ClaimRule):
             return []
         currency = str(_data(context).get("currency") or "")
         gross, lines_total = _money(totals.get("gross_amount")), _money(totals.get("lines_total"))
+        if str(totals.get("gross_basis") or "") == "cost":
+            if lines_total - gross <= _MONEY_EPSILON:
+                return [self._result(context, passed=True, element_ref=str(claim.get("id", "")))]
+            return [
+                self._result(
+                    context,
+                    passed=False,
+                    element_ref=str(claim.get("id", "")),
+                    fail_key="pay_application.totals_below_lines.fail",
+                    suggestion_key="pay_application.totals_below_lines.suggestion",
+                    claim=_claim_label(claim),
+                    gross=sentence_amount(gross, currency),
+                    lines_total=sentence_amount(lines_total, currency),
+                )
+            ]
         if abs(gross - lines_total) <= _MONEY_EPSILON:
             return [self._result(context, passed=True, element_ref=str(claim.get("id", "")))]
         return [

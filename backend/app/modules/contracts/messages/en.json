@@ -44,6 +44,10 @@
       "fail": "Claim {claim} asks for {gross}, but the lines behind it add up to {lines_total}: the claim was not worked out again after its lines changed",
       "suggestion": "Save any line of this claim, or run Populate from progress again, and its totals follow"
     },
+    "totals_below_lines": {
+      "fail": "Claim {claim} bills {gross} from recorded cost, less than the {lines_total} its own lines add up to: the breakdown cannot ask for more than the claim does",
+      "suggestion": "On a claim billed from cost the lines are a breakdown of the money, not the source of it. Lower or remove the lines that overstate it, or generate the claim again from the cost of work so the two agree"
+    },
     "prior_matches_earlier_claims": {
       "line_fail": "Claim {claim} carries {stored} as previously billed on line {line}, but the earlier claims bill {now} on it now",
       "total_fail": "Claim {claim} carries {stored} as previously certified, but the earlier claims certify {now} now",

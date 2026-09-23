@@ -2486,6 +2486,11 @@ class ContractsService:
                     sum((Decimal(str(line.period_completed_value or 0)) for line in claim_lines), DEC_ZERO)
                 ),
                 "has_lines": bool(claim_lines),
+                # What the gross is made of, because "gross equals its lines"
+                # is the rule for a claim made of lines and the wrong question
+                # for one billed off recorded cost. Empty string for a claim
+                # written before the column existed, which reads as the former.
+                "gross_basis": claim.gross_basis or "",
                 "previous_certificates_now": str((await self.previous_certificates(claim))[0]),
             },
             "cap": _tm_cap_context(contract, claim, ordered),
@@ -2806,6 +2811,14 @@ class ContractsService:
         )
 
         result: dict[str, Any]
+        # What the gross about to be written is made of, recorded rather than
+        # inferred later. "lines" is the default because every branch below
+        # sums the claim's own period values into the gross; the two that do
+        # not say so themselves, beside the empty line list that is the same
+        # fact stated differently. Set here from the branch taken rather than
+        # from the contract type at the bottom, so a branch that changes shape
+        # has to say what it now means instead of inheriting an answer.
+        gross_basis = "lines"
         # Every generator bills this period and nets it to gross less
         # retention; cost-plus and T&M have no SoV lines behind them.
         if contract.contract_type == "lump_sum":
@@ -2831,6 +2844,7 @@ class ContractsService:
                 Decimal(str(payload.actual_costs_total or 0)),
             )
             result["claim_lines"] = []
+            gross_basis = "cost"
         elif contract.contract_type == "tm":
             # A not-to-exceed cap is lifetime billing, so it counts every
             # other claim on the contract that went out and was not rejected,
@@ -2859,6 +2873,7 @@ class ContractsService:
                     detail={"error": "nte_cap_exceeded", "message": str(exc)},
                 ) from exc
             result["claim_lines"] = []
+            gross_basis = "cost"
         else:
             # GMP / design_build / combination - default to lump-sum semantics
             result = generate_lump_sum_claim(
@@ -2907,6 +2922,7 @@ class ContractsService:
             retention_amount=Decimal(str(result["retention"])),
             prior_claims_total=prior_claims_total,
             net_due=Decimal(str(result["net"])),
+            gross_basis=gross_basis,
         )
         await self.record_percent_regressed(claim, list(result.get("percent_regressed") or []))
         # The generator's flat figures stand for cost-plus and T&M; on a
@@ -3206,6 +3222,15 @@ class ContractsService:
             retention_amount=retention,
             prior_claims_total=prior_certified,
             net_due=net,
+            # This path just made the gross the sum of the claim's lines, so
+            # it says so, including on a claim generated from cost: nothing
+            # stops a populate on a cost-plus contract that also carries a
+            # schedule of values, and a claim that records a basis it no
+            # longer has would be held to the wrong rule for the rest of its
+            # life. Adding one line by hand is the opposite case and leaves
+            # the basis alone, because a breakdown row is not a decision to
+            # rebuild the claim from the schedule.
+            gross_basis="lines",
         )
         # Findings on the lines left alone still stand; the ticked lines get
         # this commit's.
@@ -3897,11 +3922,28 @@ class ContractsService:
             # wrong. A cost-plus or T&M claim generated from costs carries a
             # gross with nothing to add up, and keeps it.
             gross = Decimal(str(claim.gross_amount or 0))
-            retention = Decimal(str(claim.retention_amount or 0))
-            if lines or gross_follows_lines:
+            # A claim that recorded a cost basis keeps its figures whatever
+            # lines it has. Its lines are a breakdown somebody typed against a
+            # gross that came from costs, not the thing the gross is made of,
+            # and summing them replaces a measured fifty thousand with the
+            # value of one hand-written row. This is the only place the basis
+            # is read; every other caller of this method is unaffected because
+            # a claim made of lines records "lines" and a claim written before
+            # the column existed records nothing and behaves as it always did.
+            if (lines or gross_follows_lines) and claim.gross_basis != "cost":
                 gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
-                rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
-                retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
+            # Retention is derived from the gross and the contract's rate here
+            # rather than read back off the claim. It used to be preserved
+            # whenever the gross was, which is the same number for every claim
+            # any current writer produces, because every generator computes it
+            # with this formula. What it is not is a guarantee: a future writer
+            # that sets a gross and forgets the retention would have billed the
+            # whole gross with nothing held and said nothing about it, in the
+            # direction of paying out too much. The ladder branch below already
+            # restates retention in full, so the flat branch preserving it was
+            # the odd one out rather than a decision.
+            rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
+            retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
             billed_here = await self.release_repo.billed_on_claims([claim.id])
             released_here = sum((Decimal(str(r.amount or 0)) for r in billed_here), DEC_ZERO)
             net = gross - retention + released_here
