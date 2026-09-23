@@ -497,6 +497,11 @@ class PaymentApplicationLineRepository(_BaseRepo):
         stmt = base.order_by(PaymentApplicationLine.id).offset(offset).limit(limit)
         return list((await self.session.execute(stmt)).scalars().all()), total
 
+    async def count_for_work_package(self, work_package_id: uuid.UUID) -> int:
+        """How many pay application lines are billed against one work package."""
+        stmt = select(func.count()).where(PaymentApplicationLine.work_package_id == work_package_id)
+        return int((await self.session.execute(stmt)).scalar_one())
+
     async def list_for_applications(
         self,
         payment_application_ids: list[uuid.UUID],
