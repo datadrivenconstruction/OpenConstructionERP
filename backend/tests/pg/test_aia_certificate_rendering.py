@@ -41,7 +41,7 @@ from app.modules.users.models import User
 
 pytestmark = pytest.mark.asyncio
 
-PERIODS = [("2026-03-01", "2026-03-31"), ("2026-04-01", "2026-04-30")]
+PERIODS = [("2026-03-01", "2026-03-31"), ("2026-04-01", "2026-04-30"), ("2026-05-01", "2026-05-31")]
 
 
 async def _job(session, lines, *, contract_type="lump_sum"):
@@ -292,7 +292,13 @@ async def test_a_cost_plus_sheet_reads_the_same_once_the_month_before_is_certifi
         AutoGenerateClaimRequest(actual_costs_total=Decimal("30000")),
     )
     summary = (await svc.build_aia_application(second.id))["summary"]
-    assert summary["previous_certificates_basis"] == "snapshot"
+    # Reconstructed, not snapshot, and the figure is the same either way here.
+    # Month one billed with no lines, so previous_certificates refuses the
+    # snapshot: that branch reads a cumulative assembled from schedule lines,
+    # which cannot see a month no line carries. On two months it would have
+    # agreed, because the only prior claim IS the lineless one and its frozen
+    # pair happens to cover the whole job. It stops agreeing at three.
+    assert summary["previous_certificates_basis"] == "reconstructed"
     assert summary["previous_certificates_total"] == Decimal("45000.00")
     assert summary["total_completed_stored"] == Decimal("80000.00")
     assert summary["retainage"] == Decimal("8000.00")
@@ -368,7 +374,7 @@ async def test_a_month_off_the_schedule_reaches_the_sheet_of_the_month_billed_on
     # billed from cost, so the two are now on the same basis.
     assert summary["total_completed_stored"] == Decimal("80000.00")
     assert summary["previous_certificates_total"] == Decimal("45000.00")
-    assert summary["previous_certificates_basis"] == "snapshot"
+    assert summary["previous_certificates_basis"] == "reconstructed"
 
     # Column I, asserted by where each part of it comes from. The schedule
     # rows are reconciled to the claim's stored line 5 and add up to it
@@ -407,3 +413,49 @@ async def test_a_month_off_the_schedule_reaches_the_sheet_of_the_month_billed_on
         summary["previous_certificates_total"] + Decimal(str(second.net_due)).quantize(Decimal("0.01"))
     )
     assert summary["current_payment_due"] == Decimal("27000.00")
+
+    # A third month, and it is the reason this fixture does not stop at two.
+    # Month two's line 7 read month one, which was lineless and whose frozen
+    # figures therefore cover the whole job, so two months agree whatever the
+    # snapshot does. Month three reads a snapshot frozen by a claim that HAD
+    # lines, which measures the schedule alone, and that is where the two
+    # bases separate. Fixing line 4 without line 7 made this certificate call
+    # for 54000 against 9000 owed, where before either fix it was right by
+    # accident: line 4 and line 7 were wrong by the same 50000 and cancelled.
+    third = await _claim(svc, job, 3)
+    await create_claim_line(
+        ProgressClaimLineCreate(
+            progress_claim_id=third.id,
+            contract_line_id=job.lines["B"].id,
+            period_completed_qty=Decimal("1"),
+            period_completed_value=Decimal("10000"),
+            period_completed_pct=Decimal("0"),
+        ),
+        pg_session,
+        str(job.project.owner_id),
+    )
+    await pg_session.refresh(third)
+    await svc.claim_repo.update_fields(third.id, status="approved")
+    third = await svc.transition_claim(third.id, "certified", "certifier")
+
+    third_app = await svc.build_aia_application(third.id)
+    third_summary = third_app["summary"]
+
+    # The cost month is still on the sheet and still counted once.
+    assert third_summary["total_completed_stored"] == Decimal("90000.00")
+    assert third_summary["retainage"] == Decimal("9000.00")
+
+    # Line 7 is what the first two months actually certified, 45000 and
+    # 27000. The snapshot would have said 27000, month two's schedule-only
+    # cumulative, so the basis is asserted as well as the figure: reading the
+    # right number off the wrong basis would pass the line below and break
+    # again the moment a fourth month asked.
+    assert third_summary["previous_certificates_basis"] == "reconstructed"
+    assert third_summary["previous_certificates_total"] == Decimal("72000.00")
+
+    # And the face closes again, on the month where it previously did not.
+    assert Decimal(str(third.net_due)) == Decimal("9000.0000")
+    assert third_summary["current_payment_due"] == Decimal("9000.00")
+    assert third_summary["total_completed_stored"] - third_summary["retainage"] == (
+        third_summary["previous_certificates_total"] + Decimal(str(third.net_due)).quantize(Decimal("0.01"))
+    )

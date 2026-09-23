@@ -952,6 +952,9 @@ class ContractsService:
         self.ld_repo = LDClauseRepository(session)
         self.claim_repo = ProgressClaimRepository(session)
         self.claim_line_repo = ProgressClaimLineRepository(session)
+        # Memo for prior_gross_without_schedule_lines, which a certificate
+        # build asks twice. Per request, like the service itself.
+        self._prior_without_lines_cache: dict[tuple[Any, Any], Decimal] = {}
         self.final_account_repo = FinalAccountRepository(session)
         self.party_repo = ContractPartyRepository(session)
         self.security_repo = ContractSecurityRepository(session)
@@ -2263,9 +2266,36 @@ class ContractsService:
         and retention plus the releases billed on it, which is exact for
         claims generated since the claim basis fix and carries the old double
         count for claims generated before it.
+
+        The snapshot is also refused, in favour of reconstruction, when some
+        earlier claim billed gross that no line of its own accounts for. The
+        two are not the same quantity. A snapshot is one claim's cumulative
+        to date, which is assembled from schedule lines, so a month carried
+        by no line is missing from it permanently. Reconstruction sums each
+        claim's own gross, so that month is counted once, on the claim that
+        billed it. The snapshot is not a cheaper reconstruction, it is a
+        lossier one that happens to agree whenever every month has lines,
+        which is why it survived: that is the whole population anyone had.
+
+        Both read values that are frozen when a claim is certified. Every
+        writer of ``gross_amount`` and ``retention_amount`` requires the
+        claim to be a draft, a release can only be billed onto a draft claim
+        and cannot be voided off a locked one, and ``certified`` leads only
+        to ``paid``. So reconstruction is no more exposed to a later edit
+        than the snapshot is; it is simply the more complete of the two.
         """
         prior = await self.claim_repo.prior_claims(claim.contract_id, before_claim_id=claim.id)
-        if prior and prior[-1].completed_stored_to_date is not None and prior[-1].retention_held_to_date is not None:
+        outside = await self.prior_gross_without_schedule_lines(
+            claim.contract_id,
+            before_claim_id=claim.id,
+            prior_claims=prior,
+        )
+        if (
+            prior
+            and outside <= DEC_ZERO
+            and prior[-1].completed_stored_to_date is not None
+            and prior[-1].retention_held_to_date is not None
+        ):
             last = prior[-1]
             certified = Decimal(str(last.completed_stored_to_date)) - Decimal(str(last.retention_held_to_date))
             return certified.quantize(Decimal("0.0001")), PREVIOUS_CERTIFICATES_SNAPSHOT
@@ -2276,6 +2306,99 @@ class ContractsService:
         released = await self.release_repo.billed_on_claims([c.id for c in prior]) if prior else []
         total += sum((Decimal(str(r.amount or 0)) for r in released), DEC_ZERO)
         return total.quantize(Decimal("0.0001")), PREVIOUS_CERTIFICATES_RECONSTRUCTED
+
+    async def prior_gross_without_schedule_lines(
+        self,
+        contract_id: uuid.UUID,
+        *,
+        before_claim_id: uuid.UUID | None,
+        prior_claims: list[Any] | None = None,
+    ) -> Decimal:
+        """Gross on earlier claims that no line of those claims accounts for.
+
+        The G703 continuation sheet is assembled per schedule line, and so is
+        every cumulative figure frozen on a claim. Money billed with no line
+        behind it is therefore invisible to both, while remaining fully
+        visible to what the claim certified. This is that money, and it is
+        the one definition of it: the sheet puts it on a row of its own and
+        :meth:`previous_certificates` refuses the snapshot on the strength of
+        it, so the quantity and the condition that depends on it cannot drift
+        apart into two answers.
+
+        Two different things arrive in this figure and it is deliberately
+        blind to which. A claim may have had no lines at all, billed from
+        cost. Or its gross outran the schedule it was apportioned across and
+        the remainder was left unplaced. Both are gross that no line carries.
+
+        Floored per claim rather than on the total. The two forms differ only
+        when some claim's gross is below its own lines, and which of them
+        depends on that never happening is the point: this one is correct
+        whether or not the list of writers is complete, the aggregate form is
+        correct only if it is. They agree on every shape measured today,
+        because a recompute on each line write holds gross equal to the sum
+        of the lines, and that recompute is being removed so a claim billed
+        from cost keeps its basis when somebody adds a line by hand.
+
+        Memoised on the service, which lives for one request, keyed on
+        ``(contract_id, before_claim_id)``. That key is the whole input: the
+        residual is a function of the prior claims of one claim on one
+        contract, and ``prior_claims`` is only ever those same claims handed
+        in to save resolving them twice.
+
+        The memo cannot go stale inside a request, and it is worth saying why
+        because the code shows only that it is fast. What it reads is the
+        stored gross of claims BEFORE this one, and every writer of that
+        column refuses a claim that is not a draft, while nothing that writes
+        it goes on to draw a certificate in the same request. The certificate
+        path itself only reads. Certification does write, but it writes the
+        claim being certified, which by construction is not among the claims
+        this is measuring. So no request both populates this and then changes
+        what it answers.
+
+        Args:
+            contract_id: the contract to measure.
+            before_claim_id: claims strictly before this one in billing
+                order, rejected ones left out; ``None`` counts every
+                non-rejected claim.
+            prior_claims: the same claims when the caller already has them,
+                to save resolving them twice.
+
+        Returns: the residual, never negative.
+        """
+        prior = (
+            prior_claims
+            if prior_claims is not None
+            else await self.claim_repo.prior_claims(contract_id, before_claim_id=before_claim_id)
+        )
+        if not prior:
+            return DEC_ZERO
+        cache_key = (contract_id, before_claim_id)
+        if cache_key in self._prior_without_lines_cache:
+            return self._prior_without_lines_cache[cache_key]
+        # This hydrates every claim line on the contract to produce one sum
+        # per claim, and a certificate build asks for it twice: once here on
+        # behalf of line 7, once for the sheet's own row. The answer cannot
+        # change inside one request, so it is kept. The service is built per
+        # request, so the cache dies with it and never spans a write.
+        #
+        # It stands unoptimised because it is a single round trip reusing the
+        # query the schedule of values rollup already needs, where a
+        # per-claim aggregate would be a third query beside that one and
+        # prior_period_value_by_line. On a long schedule billed over years it
+        # is thousands of rows for a handful of numbers, and the right fix is
+        # a second aggregate on prior_period_value_by_line's statement rather
+        # than a new method.
+        line_totals: dict[Any, Decimal] = {}
+        for line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract_id):
+            line_totals[owning_claim.id] = line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
+                str(line.period_completed_value or 0)
+            )
+        residual = sum(
+            (max(Decimal(str(c.gross_amount or 0)) - line_totals.get(c.id, DEC_ZERO), DEC_ZERO) for c in prior),
+            DEC_ZERO,
+        )
+        self._prior_without_lines_cache[cache_key] = residual
+        return residual
 
     async def claim_completed_and_held(
         self,
@@ -4963,61 +5086,20 @@ class ContractsService:
                 )
             ]
         else:
-            # What earlier claims billed with no lines at all. Column D here is
-            # assembled from claim lines, so a lineless earlier claim is
+            # What earlier claims billed that no line of their own carries.
+            # Column D here is assembled from claim lines, so that money is
             # invisible to it while line 7 still carries its certificate, and
-            # line 8 then subtracts money the columns never added.
+            # line 8 then subtracts a certificate the columns never added.
             #
-            # The residual finds it without asking any claim what basis it
-            # used, which matters because the answer was never recorded for
-            # claims that already exist: it is gross that no line of that
-            # claim carries.
-            #
-            # Floored per claim rather than on the total. The two forms differ
-            # only when some claim's gross is below its own lines, and the
-            # point is which of them depends on that never happening: this one
-            # is right whether or not the list of writers is complete, and the
-            # aggregate form is right only if it is. Do not simplify it back
-            # on the grounds that the totals currently agree.
-            #
-            # They currently agree because a claim's gross is held equal to
-            # the sum of its lines by force, not by nature: create_claim_line
-            # and the claim line PATCH both end by recomputing it from the
-            # lines. That recompute is what turns a claim billed from cost
-            # into the value of one hand-added line, so it is being removed.
-            # After that the two figures are independent in both directions,
-            # and a claim whose gross falls below its lines contributes a
-            # negative term that a floor on the total would net off against a
-            # real remainder from another claim. Column D would understate,
-            # line 8 would overpay, and nothing would go red anywhere.
-            #
-            # A seeded claim whose gross outran its schedule already
-            # contributes a positive remainder here, because apportionment
-            # clamps downward and leaves the rest unplaced. That is the same
-            # money in the same position and it belongs on the row.
-            # A cost to know before anyone optimises this path: the call below
-            # hydrates every claim line on the contract, on every certificate
-            # build, to produce one sum per claim. It stands because it is a
-            # single round trip and reuses the query the SoV rollup already
-            # needs, where a per-claim aggregate would be a third query beside
-            # that one and prior_period_value_by_line. On a long schedule
-            # billed over years it is thousands of rows for a handful of
-            # numbers, and the right fix is a second aggregate on
-            # prior_period_value_by_line's statement rather than a new method.
-            prior_line_totals: dict[Any, Decimal] = {}
-            for prior_line, owning_claim in await self.claim_line_repo.lines_with_claim_for_contract(contract.id):
-                prior_line_totals[owning_claim.id] = prior_line_totals.get(owning_claim.id, DEC_ZERO) + Decimal(
-                    str(prior_line.period_completed_value or 0)
-                )
-            prior_without_schedule = sum(
-                (
-                    max(
-                        Decimal(str(prior_claim.gross_amount or 0)) - prior_line_totals.get(prior_claim.id, DEC_ZERO),
-                        DEC_ZERO,
-                    )
-                    for prior_claim in prior_claims
-                ),
-                DEC_ZERO,
+            # Asked of the one method that defines it, which is also what
+            # previous_certificates consults before it trusts a snapshot. The
+            # sheet and line 7 therefore cannot end up with two answers to the
+            # same question, which is how this defect stayed hidden: line 4 and
+            # line 7 were wrong by the same amount and cancelled.
+            prior_without_schedule = await self.prior_gross_without_schedule_lines(
+                contract.id,
+                before_claim_id=claim.id,
+                prior_claims=prior_claims,
             )
             # Which lines the sheet lists, roll-up parents excluded, is decided
             # once in aia.py so this and the certification freeze cannot drift.

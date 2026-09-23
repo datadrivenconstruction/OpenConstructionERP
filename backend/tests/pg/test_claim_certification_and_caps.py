@@ -278,8 +278,16 @@ async def test_certifying_a_cost_plus_claim_freezes_what_the_certificate_said(se
     # Re-rendered after certification, the certificate says what it said.
     assert (await _certificate(svc, march))["summary"]["total_earned_less_retainage"] == Decimal("18000.00")
 
+    # Reconstructed rather than snapshot, and the amount is the same either
+    # way here. March billed from cost and has no claim lines, so the
+    # cumulative frozen on it is assembled from a schedule that has nothing
+    # on it, and previous_certificates declines that basis. The two agree
+    # while March is the only prior claim, because a lineless month freezes
+    # the whole job anyway. They separate as soon as a month with lines sits
+    # between: that month freezes the schedule alone and the snapshot then
+    # loses March permanently.
     april = await _claim(session, contract, "PC-2", 4)
-    assert await svc.previous_certificates(april) == (Decimal("18000.0000"), "snapshot")
+    assert await svc.previous_certificates(april) == (Decimal("18000.0000"), "reconstructed")
 
 
 async def test_a_cost_plus_claim_outside_the_aia_countries_still_certifies(session) -> None:
@@ -303,9 +311,11 @@ async def test_a_cost_plus_claim_outside_the_aia_countries_still_certifies(sessi
         Decimal("2000.00"),
     )
     # The same figures an American project would have frozen, and the same
-    # ones the next claim reads as previously certified.
+    # ones the next claim reads as previously certified. Reconstructed for
+    # the reason given on the test above: March has no claim lines, so the
+    # cumulative frozen on it is not a basis line 7 can trust.
     april = await _claim(session, contract, "PC-2", 4)
-    assert await svc.previous_certificates(april) == (Decimal("18000.0000"), "snapshot")
+    assert await svc.previous_certificates(april) == (Decimal("18000.0000"), "reconstructed")
 
     # The form itself is still American only: nothing here opened it up.
     with pytest.raises(HTTPException) as refused:
