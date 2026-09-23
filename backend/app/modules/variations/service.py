@@ -119,6 +119,15 @@ VR_TRANSITIONS: dict[str, list[str]] = {
     "converted_to_vo": [],
 }
 
+#: Variation request statuses in which the request is a decided, frozen record:
+#: no edit and no delete. Read by ``update_request`` and ``delete_request``.
+_VR_FROZEN_STATUSES: frozenset[str] = frozenset({"approved", "rejected", "converted_to_vo"})
+
+#: Variation order statuses in which the order is closed: completed (its money
+#: has moved) or voided. No edit and no delete. Read by ``update_order`` and
+#: ``delete_order``.
+_VO_CLOSED_STATUSES: frozenset[str] = frozenset({"completed", "voided"})
+
 VO_TRANSITIONS: dict[str, list[str]] = {
     "issued": ["in_progress", "voided"],
     "in_progress": ["completed", "voided"],
@@ -1472,7 +1481,7 @@ class VariationsService:
         # its scope or cost after approval/rejection destroys the audit
         # trail (and silently moves money once it is a VO). Lifecycle
         # changes go through ``transition_variation_request``, not here.
-        if vr.status in {"approved", "rejected", "converted_to_vo"}:
+        if vr.status in _VR_FROZEN_STATUSES:
             raise HTTPException(
                 status_code=http_status.HTTP_409_CONFLICT,
                 detail=(f"Variation request is {vr.status} and can no longer be edited; create a new request instead"),
@@ -1738,7 +1747,20 @@ class VariationsService:
         return vr
 
     async def delete_request(self, vr_id: uuid.UUID) -> None:
-        await self.get_request(vr_id)
+        """Delete a variation request that has not been decided yet.
+
+        A decided request is the frozen commercial record ``update_request``
+        refuses to edit, and deleting it rewrites more than an edit would: the
+        variation order converted from it keeps pointing at nothing (the link
+        is ``SET NULL``). So the same statuses that stop an edit stop a delete.
+        A rejected request can be sent back to draft and deleted from there.
+        """
+        vr = await self.get_request(vr_id)
+        if vr.status in _VR_FROZEN_STATUSES:
+            raise HTTPException(
+                status_code=http_status.HTTP_409_CONFLICT,
+                detail=(f"Variation request is {vr.status} and is kept as the record of that decision"),
+            )
         await self.vr_repo.delete(vr_id)
 
     # ── Variation request BOQ (Issue #435) ────────────────────────────────
@@ -2708,7 +2730,7 @@ class VariationsService:
         # must not be silently rewritten - that would desync the final
         # account on the next recompute. Status moves via
         # ``transition_variation_order`` only.
-        if vo.status in {"completed", "voided"}:
+        if vo.status in _VO_CLOSED_STATUSES:
             raise HTTPException(
                 status_code=http_status.HTTP_409_CONFLICT,
                 detail=(f"Variation order is {vo.status} and is no longer editable"),
@@ -2792,7 +2814,21 @@ class VariationsService:
         return vo
 
     async def delete_order(self, vo_id: uuid.UUID) -> None:
-        await self.get_order(vo_id)
+        """Delete a variation order that is still open.
+
+        A completed order has already moved money: completing it bumped the
+        contract sum, and the final account counts its ``final_cost_impact``.
+        Deleting it drops it from the final account on the next recompute
+        while the contract sum stays bumped, which is a bigger rewrite than the
+        edit ``update_order`` refuses. A voided order is a closed record. Both
+        are refused here for the same reason they are refused there.
+        """
+        vo = await self.get_order(vo_id)
+        if vo.status in _VO_CLOSED_STATUSES:
+            raise HTTPException(
+                status_code=http_status.HTTP_409_CONFLICT,
+                detail=(f"Variation order is {vo.status} and is kept as a closed record"),
+            )
         await self.vo_repo.delete(vo_id)
 
     async def convert_vr_to_vo(
