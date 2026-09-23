@@ -1852,11 +1852,6 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("ncr.created", _notify_ncr_created)
     event_bus.subscribe_once("document.uploaded", _notify_document_uploaded)
 
-    # Cross-module: VO completion -> contract total_value rollup
-    from app.modules.contracts.events import _on_vo_contract_sum_updated
-
-    event_bus.subscribe_once("variations.contract_sum.updated", _on_vo_contract_sum_updated)
-
     # 24. Outgoing webhooks - wildcard handler forwards all events
     event_bus.subscribe_once("*", _dispatch_to_webhooks)
 
