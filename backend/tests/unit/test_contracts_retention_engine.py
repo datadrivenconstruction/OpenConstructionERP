@@ -107,6 +107,55 @@ def test_stored_materials_follow_the_rate_in_force_unless_the_policy_names_one()
     assert at_forty.rate_now == Decimal("10")
 
 
+# A claim that lands exactly on a threshold. Contracts have been signed under
+# what the engine does there, so these pin it rather than choose it: the
+# threshold belongs to the tier that starts at it. Changing any of these
+# figures rewrites what a signed contract withholds.
+
+
+def test_on_the_threshold_the_rate_in_force_is_the_tier_that_starts_there() -> None:
+    policy = _policy()
+    assert policy.rate_at(Decimal("49.9999")) == Decimal("10")
+    assert policy.rate_at(Decimal("50")) == Decimal("5")
+    assert policy.rate_at(Decimal("50.0000")) == Decimal("5")
+
+
+def test_a_prospective_claim_on_the_threshold_holds_all_its_work_at_the_old_rate() -> None:
+    # 50,000 of 100,000 is exactly 50%. Every dollar of it sits in the band
+    # below the threshold, so it is held at 10%, while the rate in force,
+    # which is what stored materials take, is already 5%.
+    position = compute_retention({"a": "50000"}, contract_sum=SUM, policy=_policy(), stored_by_line={"a": "4000"})
+    assert position.percent_complete == Decimal("50.0000")
+    assert position.rate_now == Decimal("5")
+    assert position.work_retention == Decimal("5000.00")
+    assert position.stored_retention == Decimal("200.00")
+    # One cent short of the threshold, stored materials still take 10%.
+    below = compute_retention({"a": "49999.99"}, contract_sum=SUM, policy=_policy(), stored_by_line={"a": "4000"})
+    assert below.rate_now == Decimal("10")
+    assert below.work_retention == Decimal("5000.00")
+    assert below.stored_retention == Decimal("400.00")
+
+
+def test_a_recompute_claim_on_the_threshold_already_takes_the_lower_rate_on_all_work() -> None:
+    recompute = _policy(tier_mode="recompute")
+    at_threshold = compute_retention({"a": "50000"}, contract_sum=SUM, policy=recompute)
+    assert at_threshold.rate_now == Decimal("5")
+    assert at_threshold.work_retention == Decimal("2500.00")
+    just_below = compute_retention({"a": "49999.99"}, contract_sum=SUM, policy=recompute)
+    assert just_below.rate_now == Decimal("10")
+    assert just_below.work_retention == Decimal("5000.00")
+    # So the step-down is released on the claim that reaches the threshold
+    # exactly: 4,000 held at 40% complete, 2,500 required at 50%.
+    freed = step_down_release(
+        recompute,
+        held_before="4000",
+        required_now=at_threshold.total,
+        rate_before=recompute.rate_at(Decimal("40")),
+        rate_now=at_threshold.rate_now,
+    )
+    assert freed == Decimal("1500.00")
+
+
 def test_line_figures_add_up_to_the_contract_figure_to_the_cent() -> None:
     completed = {"a": "33333.33", "b": "33333.33", "c": "13333.34", "credit": "-5000"}
     stored = {"b": "1234.56", "d": "999.99"}
