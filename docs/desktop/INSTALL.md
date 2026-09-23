@@ -6,7 +6,7 @@ This guide walks you through installing it and signing in for the first time.
 
 ## Where to download
 
-The installers live on the project's GitHub Releases page. Open the latest release and pick the file that matches your computer. Windows gets a `.exe`, macOS gets a `.dmg`, and Linux gets either a `.deb` or an `.AppImage`. Each release is built automatically and the files are attached right there.
+The installers live on the project's GitHub Releases page. Open the latest release and pick the file that matches your computer. Windows gets a `.exe`, macOS gets a `.dmg`, and Linux gets either a `.deb` or an `.AppImage`. Each release is built automatically and the files are attached right there. The macOS build is for Apple Silicon (M1 and later) only; there is no build for Intel Macs, so on an Intel Mac use the pip or Docker route from the README instead.
 
 ## Download and install
 
@@ -20,7 +20,7 @@ When it finishes you will find OpenConstructionERP in the Start Menu and as a sh
 
 ### macOS
 
-Download the `.dmg`, open it, and drag OpenConstructionERP into your Applications folder. You need macOS 10.15 or later.
+Download the `.dmg`, open it, and drag OpenConstructionERP into your Applications folder. You need a Mac with Apple Silicon, since the `.dmg` will not start on an Intel Mac.
 
 This build is ad-hoc signed but not yet notarized by Apple, so the first time you open it macOS may say it "is damaged and can't be opened" or otherwise block it. The app is not damaged. macOS quarantines anything downloaded from the web, and an app that Apple has not notarized trips that check. To clear it, open Terminal and run this once, then open the app normally:
 
