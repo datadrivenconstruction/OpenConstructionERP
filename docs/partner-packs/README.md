@@ -568,8 +568,12 @@ cd backend
 uvicorn app.main:create_app --factory --reload --port 8000
 # Expect log line: "Active partner pack (env-selected): your-pack"
 
-# 5. Hit the API
-curl http://localhost:8000/api/v1/partner-pack/current | jq
+# 5. Hit the API. The pack routes answer signed-in callers, so sign in first
+#    with any account on this install.
+TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/users/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "your-password"}' | jq -r '.access_token')
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/partner-pack/current | jq
 ```
 
 ### Unit tests
