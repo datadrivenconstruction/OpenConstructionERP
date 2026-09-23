@@ -35148,6 +35148,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "स्वीकृत",
     "subcontractors.rollup_chip_certs_lapsed": "प्रमाणपत्र समाप्त",
     "subcontractors.rollup_chip_certs_ok": "प्रमाणपत्र मान्य",
+    "subcontractors.rollup_chip_certs_on_payment": "प्रमाणपत्र की जाँच भुगतान की तारीख पर होगी",
     "subcontractors.rollup_chip_certs_unchecked": "प्रमाणपत्र जाँचे नहीं गए: अवधि की समाप्ति तिथि नहीं",
     "subcontractors.rollup_chip_paid": "भुगतान हो गया",
     "subcontractors.rollup_chip_received": "प्राप्त, स्वीकृत नहीं",

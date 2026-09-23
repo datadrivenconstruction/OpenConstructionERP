@@ -614,3 +614,71 @@ def check_sub_certificate_lapsed(rollup: dict[str, Any]) -> list[Finding]:
                 )
             )
     return findings
+
+
+#: Payment-date states of a pay application that is not paid yet. Only
+#: ``pending`` and ``pending_open`` are notes; ``pending_invalid`` already knows
+#: that no certificate on file could cover the payment.
+_PAYMENT_DATE_NOTE_STATES = frozenset({"pending", "pending_open"})
+
+#: Every state the payment-date check words. Anything else is worded as missing.
+PAYMENT_DATE_STATES = ("missing", "expired", "revoked", "undated", "pending", "pending_open", "pending_invalid")
+
+
+def check_sub_certificate_payment_date(rollup: dict[str, Any]) -> list[Finding]:
+    """A certificate the law reads on the payment day must be valid on that day.
+
+    For these certificates the period end says nothing: a German exemption
+    certificate valid on the last day of March and expired on the day the
+    money went in May exempts nothing, and the payer owes the withholding.
+    So each included pay application is read on its own payment day, one
+    finding per pay application and document, because two payments to the
+    same sub fall on two different days.
+
+    Nothing here blocks a submission and nothing is deducted. A paid pay
+    application the certificate did not cover is a warning that names the
+    withholding the law then requires. An unpaid one is not "met": its day has
+    not come, so it is a note that says the certificate is read on the payment
+    date, or a warning when nothing on file could cover that date.
+    ``details["severity"]`` carries which.
+    """
+    findings: list[Finding] = []
+    for row in _rollup_rows(rollup, "included"):
+        for problem in row.get("payment_date_findings") or []:
+            if not isinstance(problem, dict):
+                continue
+            document = str(problem.get("document_type") or "?")
+            state = str(problem.get("state") or "missing")
+            if state not in PAYMENT_DATE_STATES:
+                state = "missing"
+            judged_on = parse_date(problem.get("judged_on"))
+            lapsed = parse_date(problem.get("lapsed_on"))
+            valid_until = parse_date(problem.get("valid_until"))
+            withholding = problem.get("withholding") if isinstance(problem.get("withholding"), dict) else None
+            name = str(row.get("subcontractor_name") or "").strip() or "?"
+            number = str(row.get("application_number") or row.get("payment_application_id") or "?")
+            findings.append(
+                Finding(
+                    element_ref=_pay_app_ref(row),
+                    params={
+                        "subcontractor": name,
+                        "pay_app": number,
+                        "document": document,
+                        "paid_on": judged_on.isoformat() if judged_on else "?",
+                        "lapsed_on": lapsed.isoformat() if lapsed else "?",
+                        "valid_until": valid_until.isoformat() if valid_until else "?",
+                    },
+                    details={
+                        "payment_application_id": row.get("payment_application_id"),
+                        "subcontractor_id": row.get("subcontractor_id"),
+                        "document_type": document,
+                        "state": state,
+                        "severity": "info" if state in _PAYMENT_DATE_NOTE_STATES else "warning",
+                        "paid_on": judged_on.isoformat() if judged_on else None,
+                        "lapsed_on": lapsed.isoformat() if lapsed else None,
+                        "valid_until": valid_until.isoformat() if valid_until else None,
+                        "withholding": dict(withholding) if withholding else None,
+                    },
+                )
+            )
+    return findings

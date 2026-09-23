@@ -457,12 +457,15 @@ function StatusChips({
   waiverCovers,
   waiverRequired,
   certificatesOk,
+  pendingPayment,
 }: {
   status: string;
   waiverState: string;
   waiverCovers: boolean;
   waiverRequired: boolean;
   certificatesOk: boolean | null;
+  /** A certificate the pack reads on the payment date, and the payment is still to come. */
+  pendingPayment?: boolean | null;
 }) {
   const { t } = useTranslation();
   const approved = status === 'foreman_approved' || status === 'finance_approved' || status === 'paid';
@@ -504,6 +507,12 @@ function StatusChips({
         <Badge variant="error" size="sm">
           {t('subcontractors.rollup_chip_certs_lapsed', { defaultValue: 'Certificate lapsed' })}
         </Badge>
+      ) : pendingPayment ? (
+        // Not "valid" and not "unchecked": the law reads this certificate on
+        // the day of payment, and that day has not come yet.
+        <Badge variant="warning" size="sm">
+          {t('subcontractors.rollup_chip_certs_on_payment', { defaultValue: 'Certificate checked on the payment date' })}
+        </Badge>
       ) : (
         <Badge variant="neutral" size="sm">
           {t('subcontractors.rollup_chip_certs_unchecked', { defaultValue: 'Certificates not checked: no period end' })}
@@ -526,6 +535,7 @@ function SubRowChips({ row }: { row: SubRollupRow }) {
         waiverCovers={row.waiver_covers_net}
         waiverRequired={false}
         certificatesOk={row.certificates_ok}
+        pendingPayment={row.certificates_pending_payment}
       />
     </span>
   );
@@ -705,7 +715,14 @@ function PayAppRow({
   footer?: ReactNode;
 }) {
   const { t } = useTranslation();
-  const lapsed = fmtList(payApp.certificate_findings.map((f) => f.document_type));
+  const lapsed = fmtList([
+    ...payApp.certificate_findings.map((f) => f.document_type),
+    // A payment-date certificate that did not cover a payment already made.
+    // One still waiting for its payment is not lapsed, and the chip says so.
+    ...(payApp.payment_date_findings ?? [])
+      .filter((f) => !f.state.startsWith('pending'))
+      .map((f) => f.document_type),
+  ]);
   return (
     <li
       className="flex flex-wrap items-center gap-2 rounded-md border border-border-light px-2 py-1.5 text-xs"
@@ -751,6 +768,7 @@ function PayAppRow({
         waiverCovers={payApp.waiver.covers_net}
         waiverRequired={payApp.requires_lien_waiver}
         certificatesOk={payApp.certificates_ok}
+        pendingPayment={payApp.certificates_pending_payment}
       />
       {lapsed && (
         <span className="text-rose-600" title={lapsed}>

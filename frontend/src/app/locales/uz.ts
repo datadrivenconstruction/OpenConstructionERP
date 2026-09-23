@@ -36042,6 +36042,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Tasdiqlangan",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikat muddati tugagan",
     "subcontractors.rollup_chip_certs_ok": "Sertifikatlar amal qilmoqda",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifikat toʻlov sanasida tekshiriladi",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikatlar tekshirilmagan: davr oxiri yoʻq",
     "subcontractors.rollup_chip_paid": "Toʻlangan",
     "subcontractors.rollup_chip_received": "Qabul qilingan, tasdiqlanmagan",

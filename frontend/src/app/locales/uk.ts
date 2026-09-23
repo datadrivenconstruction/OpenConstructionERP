@@ -35882,6 +35882,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Затверджено",
     "subcontractors.rollup_chip_certs_lapsed": "Сертифікат прострочено",
     "subcontractors.rollup_chip_certs_ok": "Сертифікати дійсні",
+    "subcontractors.rollup_chip_certs_on_payment": "Сертифікат перевіряється на дату оплати",
     "subcontractors.rollup_chip_certs_unchecked": "Сертифікати не перевірено: немає кінця періоду",
     "subcontractors.rollup_chip_paid": "Оплачено",
     "subcontractors.rollup_chip_received": "Отримано, не затверджено",

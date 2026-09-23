@@ -34708,6 +34708,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "منظور شدہ",
     "subcontractors.rollup_chip_certs_lapsed": "سرٹیفکیٹ کی میعاد ختم",
     "subcontractors.rollup_chip_certs_ok": "سرٹیفکیٹس درست",
+    "subcontractors.rollup_chip_certs_on_payment": "سرٹیفکیٹ ادائیگی کی تاریخ پر چیک ہوگا",
     "subcontractors.rollup_chip_certs_unchecked": "سرٹیفکیٹس چیک نہیں ہوئے: مدت کی آخری تاریخ نہیں",
     "subcontractors.rollup_chip_paid": "ادا شدہ",
     "subcontractors.rollup_chip_received": "موصول، منظور نہیں",

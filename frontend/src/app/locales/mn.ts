@@ -34624,6 +34624,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Батлагдсан",
     "subcontractors.rollup_chip_certs_lapsed": "Гэрчилгээний хугацаа дууссан",
     "subcontractors.rollup_chip_certs_ok": "Гэрчилгээ хүчинтэй",
+    "subcontractors.rollup_chip_certs_on_payment": "Гэрчилгээг төлбөрийн өдрөөр шалгана",
     "subcontractors.rollup_chip_certs_unchecked": "Гэрчилгээ шалгагдаагүй: үеийн төгсгөл огноо алга",
     "subcontractors.rollup_chip_paid": "Төлөгдсөн",
     "subcontractors.rollup_chip_received": "Хүлээн авсан, батлагдаагүй",

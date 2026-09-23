@@ -8,7 +8,8 @@ GC progress claim it takes the subcontractor pay applications a person included
 in it, maps each of their lines onto the GC's schedule of values, and reports
 per GC line what the subs claimed, what was certified and approved, whether a
 lien waiver covers it and whether the sub's certificates held through the
-period end.
+period end, or, for a certificate the national pack reads on the day of
+payment, on that day.
 
 It suggests; it never writes a claim line. The amounts it derives reach the
 claim only through the contracts module's existing preview and commit path,
@@ -39,7 +40,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -65,36 +66,95 @@ _REJECTED_CLAIM_STATUS = "rejected"
 _PAID_STATUS = "paid"
 
 
+#: The ``valid_at`` a pack gives a certificate that counts on the day the sub is
+#: paid rather than at the claim's period end.
+_VALID_AT_PAYMENT_DATE = "payment_date"
+
+
+@dataclass(frozen=True)
+class PaymentDateRequirement:
+    """A certificate the law reads on the day the sub is paid, not at the period end.
+
+    The German exemption certificate is the case this exists for: section 48b
+    EStG exempts a payment only when the certificate is valid on the day the
+    payment is made. A certificate that held on the last day of the claim's
+    period and ran out before the money went is no exemption at all.
+
+    Attributes:
+        cert_type: The certificate type, as the certificate register spells it.
+        withholding_scheme: The tax withholding scheme that applies to a
+            payment the certificate does not cover, when the pack names one.
+        reference: The statute the pack cites for this requirement.
+    """
+
+    cert_type: str
+    withholding_scheme: str | None = None
+    reference: str | None = None
+
+
 @dataclass(frozen=True)
 class SubPaymentRequirements:
     """What a subcontractor must hold before being paid on this project.
 
     Attributes:
-        certificate_types: Certificate types that must be valid through the
-            period end.
+        certificate_types: Certificate types the sub must hold. Every one of
+            them is judged at the period end except those in ``payment_date``.
         lien_waiver_required: Whether the national practice expects a lien
             waiver with every payment, independently of the agreement's own
             ``requires_lien_waiver`` switch.
         source: ``pack`` when a national regional pack supplied these,
             ``fallback`` when none did and the module's built-in list applies.
         reference: The statute or source the pack cites, when it cites one.
+        payment_date: The certificates the pack says are judged on the
+            payment date (``valid_at: "payment_date"``). Empty for every pack
+            that judges all of them at the period end.
     """
 
     certificate_types: tuple[str, ...] = REQUIRED_CERT_TYPES_FOR_PAYMENT
     lien_waiver_required: bool = False
     source: str = "fallback"
     reference: str | None = None
+    payment_date: tuple[PaymentDateRequirement, ...] = ()
+
+    @property
+    def period_end_types(self) -> tuple[str, ...]:
+        """The certificate types judged at the claim's period end."""
+        on_payment = {req.cert_type for req in self.payment_date}
+        return tuple(t for t in self.certificate_types if t not in on_payment)
+
+
+def _payment_date_requirements(raw: Any) -> tuple[PaymentDateRequirement, ...]:
+    """The pack's certificate requirements whose ``valid_at`` is the payment date."""
+    if not isinstance(raw, list | tuple):
+        return ()
+    found: list[PaymentDateRequirement] = []
+    for item in raw:
+        if not isinstance(item, Mapping) or item.get("valid_at") != _VALID_AT_PAYMENT_DATE:
+            continue
+        cert_type = str(item.get("cert_type") or "").strip()
+        if not cert_type or any(req.cert_type == cert_type for req in found):
+            continue
+        scheme = str(item.get("withholding_scheme") or "").strip()
+        reference = str(item.get("statute_reference") or "").strip()
+        found.append(PaymentDateRequirement(cert_type, scheme or None, reference or None))
+    return tuple(found)
 
 
 def requirements_from_pack(progress_billing: Mapping[str, Any] | None) -> SubPaymentRequirements:
     """Read the ``sub_payment_requirements`` block of a pack's ``progress_billing``.
 
     The expected shape is ``{"certificate_types": [...], "lien_waiver_required":
-    bool, "statute_reference" | "source": str}``. When the pack answers nothing,
-    or answers without a certificate list, the built-in
+    bool, "statute_reference" | "source": str, "requirements": [...]}``. When the
+    pack answers nothing, or answers without a certificate list, the built-in
     ``REQUIRED_CERT_TYPES_FOR_PAYMENT`` applies and the result says so in
     ``source``, so a reader can tell a country's rule from this module's
     default rather than taking the default for law.
+
+    Each entry of ``requirements`` may say when its certificate counts
+    (``valid_at``). ``period_end`` is what ``certificate_types`` has always
+    meant. ``payment_date`` entries are collected into
+    :attr:`SubPaymentRequirements.payment_date` and judged on the day the sub
+    is paid instead.
     """
     block = progress_billing.get("sub_payment_requirements") if isinstance(progress_billing, Mapping) else None
     if not isinstance(block, Mapping):
@@ -107,7 +167,50 @@ def requirements_from_pack(progress_billing: Mapping[str, Any] | None) -> SubPay
         lien_waiver_required=block.get("lien_waiver_required") is True,
         source="pack" if types else "fallback",
         reference=str(reference) if reference else None,
+        payment_date=_payment_date_requirements(block.get("requirements")),
     )
+
+
+def withholding_terms(scheme_code: str | None, reference: str | None = None) -> dict[str, Any] | None:
+    """What the withholding scheme takes from a payment no certificate covers.
+
+    Read from the shipped scheme catalogue of the tax withholding module: the
+    rate a payee without the certificate is deducted at, whether the base
+    includes VAT, and the small-amount limit per calendar year where the
+    scheme has one. ``reference`` is the statute the pack cites and wins over
+    the catalogue's shorter one.
+
+    ``None`` when the pack names no scheme, the scheme is not shipped, or the
+    tax withholding module is not installed. The caller then still says that
+    withholding may apply, only without a figure it cannot vouch for.
+    """
+    if not scheme_code:
+        return None
+    try:
+        from app.modules.tax_withholding.data import regime_by_scheme  # noqa: PLC0415
+    except ModuleNotFoundError as exc:
+        # Only the absence of the module is a normal install.
+        if exc.name not in ("app.modules.tax_withholding", "app.modules.tax_withholding.data"):
+            raise
+        return None
+    regime = regime_by_scheme(scheme_code)
+    if not regime:
+        return None
+    band = next(
+        (b for b in regime.get("bands") or [] if b.get("code") == regime.get("default_band_code")),
+        None,
+    )
+    if band is None or band.get("rate_pct") in (None, ""):
+        return None
+    limit = regime.get("threshold_amount")
+    return {
+        "scheme": scheme_code,
+        "rate_pct": str(band["rate_pct"]),
+        "vat_included": not regime.get("vat_excluded", False),
+        "annual_limit": str(limit) if limit not in (None, "") else None,
+        "currency": str(regime.get("currency_code") or ""),
+        "reference": reference or str(regime.get("legal_reference") or "") or None,
+    }
 
 
 # ── Small pure helpers ───────────────────────────────────────────────────────
@@ -316,6 +419,76 @@ def earlier_claim_ids(claims: Iterable[Any], claim_id: uuid.UUID) -> list[uuid.U
     return ids[: ids.index(claim_id)]
 
 
+# ── Certificates judged on the payment date ──────────────────────────────────
+
+#: Payment-date states that are not a verdict yet: the pay application is
+#: unpaid, so the day the certificate is read on does not exist.
+PENDING_PAYMENT_STATES = frozenset({"pending", "pending_open", "pending_invalid"})
+
+
+def payment_day(pay_app: Any) -> date | None:
+    """The day a paid pay application was paid, or ``None`` while it is not.
+
+    The day is the UTC calendar day of ``paid_at``, which is when a person
+    marked the pay application paid in this platform. That is the closest
+    record of the payment it keeps; the bank's value date is not recorded. A
+    ``paid_at`` without a timezone is read as UTC, which is how it is stored.
+    """
+    if getattr(pay_app, "status", None) != _PAID_STATUS:
+        return None
+    paid_at = getattr(pay_app, "paid_at", None)
+    if isinstance(paid_at, datetime):
+        if paid_at.tzinfo is not None:
+            paid_at = paid_at.astimezone(UTC)
+        return paid_at.date()
+    return _as_date(paid_at)
+
+
+def _judge_on_payment_date(
+    pay_app: Any,
+    certificates: Sequence[Any],
+    requirement: PaymentDateRequirement,
+    *,
+    paid_on: date | None,
+    as_of: date | None,
+) -> dict[str, Any] | None:
+    """One payment-date certificate for one pay application; ``None`` when it covered the payment.
+
+    Paid, the certificate is judged on the payment day with the module's own
+    per-type reading (inclusive boundary, a renewal counts). Unpaid, there is
+    no verdict yet and the finding says so: ``pending`` with the end date of
+    the certificate on file, ``pending_open`` when that one has no end date,
+    and ``pending_invalid`` when nothing on file could cover a payment made
+    after the period end, because it is missing, revoked or already ran out.
+    """
+    held = [c for c in certificates if getattr(c, "cert_type", None) == requirement.cert_type]
+    live = [c for c in held if not getattr(c, "revoked", False)]
+    open_ended = any(getattr(c, "valid_until", None) is None for c in live)
+    ends = [c.valid_until for c in live if getattr(c, "valid_until", None) is not None]
+    valid_until = None if open_ended or not ends else max(ends)
+    lapsed_on: date | None = None
+    if getattr(pay_app, "status", None) == _PAID_STATUS:
+        if paid_on is None:
+            state = "undated"
+        else:
+            verdict = evaluate_required_certificates(held, as_at=paid_on, required_types=(requirement.cert_type,))
+            if not verdict:
+                return None
+            state, lapsed_on = verdict[0].state, verdict[0].lapsed_on
+    elif not live or (not open_ended and as_of is not None and valid_until is not None and valid_until < as_of):
+        state = "pending_invalid"
+    else:
+        state = "pending_open" if open_ended else "pending"
+    return {
+        "document_type": requirement.cert_type,
+        "state": state,
+        "judged_on": paid_on,
+        "lapsed_on": lapsed_on,
+        "valid_until": valid_until,
+        "withholding": withholding_terms(requirement.withholding_scheme, requirement.reference),
+    }
+
+
 # ── The rollup ───────────────────────────────────────────────────────────────
 
 
@@ -332,7 +505,15 @@ def _pay_app_summary(
     currency: str,
     period: tuple[date | None, date | None],
 ) -> dict[str, Any]:
-    """One pay application as the claim sees it: totals, waiver and certificates."""
+    """One pay application as the claim sees it: totals, waiver and certificates.
+
+    A pack whose certificates are all judged at the period end gets exactly
+    the keys it always got. Only a pack with payment-date certificates adds
+    ``paid_on``, ``payment_date_findings`` and ``certificates_pending_payment``,
+    and folds that verdict into ``certificates_ok``: ``False`` when a paid
+    pay application was not covered on its payment day, ``None`` while the
+    payment is still to come.
+    """
     sub_id = getattr(agreement, "subcontractor_id", None)
     findings: list[dict[str, Any]] = []
     certificates_ok: bool | None = None
@@ -351,10 +532,29 @@ def _pay_app_summary(
             for f in evaluate_required_certificates(
                 certificates,
                 as_at=as_of,
-                required_types=requirements.certificate_types,
+                required_types=requirements.period_end_types,
             )
         ]
         certificates_ok = not findings
+    on_payment: dict[str, Any] = {}
+    if requirements.payment_date:
+        paid_on = payment_day(pay_app)
+        judged = [
+            _judge_on_payment_date(pay_app, certificates, req, paid_on=paid_on, as_of=as_of)
+            for req in requirements.payment_date
+        ]
+        payment_findings = [f for f in judged if f is not None]
+        pending = any(f["state"] in PENDING_PAYMENT_STATES for f in payment_findings)
+        not_covered = any(f["state"] not in PENDING_PAYMENT_STATES for f in payment_findings)
+        if findings or not_covered:
+            certificates_ok = False
+        elif pending:
+            certificates_ok = None
+        on_payment = {
+            "paid_on": paid_on,
+            "payment_date_findings": payment_findings,
+            "certificates_pending_payment": pending,
+        }
     return {
         "payment_application_id": pay_app.id,
         "application_number": pay_app.application_number,
@@ -382,6 +582,7 @@ def _pay_app_summary(
         "certificates_ok": certificates_ok,
         "certificate_findings": findings,
         "foreign_currency": currencies_differ(pay_app_currency(pay_app, agreement), currency),
+        **on_payment,
     }
 
 
@@ -415,7 +616,10 @@ def build_claim_rollup(
         waivers_by_pa: Lien waivers by pay application id.
         certs_by_sub: Certificates by subcontractor id.
         as_of: The claim's period end, the date certificates are judged on;
-            ``None`` when the claim has none, which leaves them unjudged.
+            ``None`` when the claim has none, which leaves them unjudged. A
+            certificate the pack judges on the payment date is read on each
+            pay application's payment day instead, and is judged even when
+            the claim has no period end.
         requirements: What a sub must hold before being paid.
         currency: The claim's currency. Pay applications in another one are
             counted in ``skipped_foreign_currency`` and nowhere else.
@@ -520,6 +724,13 @@ def build_claim_rollup(
                     "waiver_state": info["waiver"]["state"],
                     "waiver_covers_net": info["waiver"]["covers_net"],
                     "certificates_ok": info["certificates_ok"],
+                    # Only where the pack judges a certificate on the payment
+                    # date, so every other rollup keeps the keys it had.
+                    **(
+                        {"certificates_pending_payment": info["certificates_pending_payment"]}
+                        if "certificates_pending_payment" in info
+                        else {}
+                    ),
                 },
             )
             row["claimed_amount"] += _dec(line.claimed_amount)
@@ -599,6 +810,11 @@ def build_claim_rollup(
             "lien_waiver_required": requirements.lien_waiver_required,
             "source": requirements.source,
             "reference": requirements.reference,
+            **(
+                {"payment_date_types": [req.cert_type for req in requirements.payment_date]}
+                if requirements.payment_date
+                else {}
+            ),
         },
     }
 

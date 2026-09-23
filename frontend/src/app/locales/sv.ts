@@ -35448,6 +35448,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Godkänd",
     "subcontractors.rollup_chip_certs_lapsed": "Certifikat har gått ut",
     "subcontractors.rollup_chip_certs_ok": "Certifikat giltiga",
+    "subcontractors.rollup_chip_certs_on_payment": "Certifikatet kontrolleras på betalningsdagen",
     "subcontractors.rollup_chip_certs_unchecked": "Certifikat inte kontrollerade: inget periodslut",
     "subcontractors.rollup_chip_paid": "Betald",
     "subcontractors.rollup_chip_received": "Mottagen, inte godkänd",

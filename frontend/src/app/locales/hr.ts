@@ -35414,6 +35414,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Odobreno",
     "subcontractors.rollup_chip_certs_lapsed": "Certifikat istekao",
     "subcontractors.rollup_chip_certs_ok": "Certifikati vrijede",
+    "subcontractors.rollup_chip_certs_on_payment": "Certifikat se provjerava na datum plaćanja",
     "subcontractors.rollup_chip_certs_unchecked": "Certifikati nisu provjereni: nema kraja razdoblja",
     "subcontractors.rollup_chip_paid": "Plaćeno",
     "subcontractors.rollup_chip_received": "Primljeno, nije odobreno",

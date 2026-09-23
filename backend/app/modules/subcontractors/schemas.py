@@ -1177,6 +1177,38 @@ class SubWaiverState(BaseModel):
     through_date_basis: str | None = None
 
 
+class SubWithholdingTerms(BaseModel):
+    """What a withholding scheme takes from a payment no certificate covers."""
+
+    scheme: str
+    rate_pct: str
+    vat_included: bool = True
+    # Small-amount limit per payee and calendar year, when the scheme has one.
+    annual_limit: Decimal | None = None
+    currency: str = ""
+    reference: str | None = None
+
+
+class SubPaymentDateFinding(BaseModel):
+    """A certificate the law reads on the payment day, judged for one pay application.
+
+    ``state`` is ``missing``, ``expired`` or ``revoked`` for a paid pay
+    application the certificate did not cover on ``judged_on``; ``undated``
+    for one marked paid without a payment date; and, while it is unpaid,
+    ``pending`` (the certificate on file runs until ``valid_until``),
+    ``pending_open`` (it has no end date) or ``pending_invalid`` (nothing on
+    file could cover a payment made after the period end). Nothing is
+    deducted: ``withholding`` states what the law takes, a person acts on it.
+    """
+
+    document_type: str
+    state: str
+    judged_on: date | None = None
+    lapsed_on: date | None = None
+    valid_until: date | None = None
+    withholding: SubWithholdingTerms | None = None
+
+
 class SubRollupPayApp(BaseModel):
     """One subcontractor pay application as the GC's claim sees it."""
 
@@ -1208,6 +1240,11 @@ class SubRollupPayApp(BaseModel):
     certificates_ok: bool | None = None
     certificate_findings: list[ComplianceDetail] = Field(default_factory=list)
     foreign_currency: bool = False
+    # Set only when the national pack reads a certificate on the payment day.
+    # ``paid_on`` is the UTC day the pay application was marked paid.
+    paid_on: date | None = None
+    payment_date_findings: list[SubPaymentDateFinding] | None = None
+    certificates_pending_payment: bool | None = None
 
 
 class SubRollupRow(BaseModel):
@@ -1225,6 +1262,8 @@ class SubRollupRow(BaseModel):
     waiver_state: str = "none"
     waiver_covers_net: bool = False
     certificates_ok: bool | None = None
+    # ``True`` while a certificate read on the payment day waits for that day.
+    certificates_pending_payment: bool | None = None
 
 
 class SubRollupLine(BaseModel):
@@ -1284,6 +1323,8 @@ class SubPaymentRequirementsResponse(BaseModel):
     # module's built-in list applied because no pack did.
     source: str = "fallback"
     reference: str | None = None
+    # The certificate types read on the payment day rather than the period end.
+    payment_date_types: list[str] = Field(default_factory=list)
 
 
 class ClaimSubRollupResponse(BaseModel):

@@ -35257,6 +35257,7 @@ const resource = {
     "subcontractors.rollup_chip_approved": "Disetujui",
     "subcontractors.rollup_chip_certs_lapsed": "Sertifikat kedaluwarsa",
     "subcontractors.rollup_chip_certs_ok": "Sertifikat berlaku",
+    "subcontractors.rollup_chip_certs_on_payment": "Sertifikat diperiksa pada tanggal pembayaran",
     "subcontractors.rollup_chip_certs_unchecked": "Sertifikat belum diperiksa: tidak ada akhir periode",
     "subcontractors.rollup_chip_paid": "Dibayar",
     "subcontractors.rollup_chip_received": "Diterima, belum disetujui",
