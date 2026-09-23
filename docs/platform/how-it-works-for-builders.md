@@ -395,6 +395,9 @@ at `/api/v1/modules`:
   module still depends on it, and core modules cannot be disabled at all.
 - `GET /api/v1/modules/dependency-tree/{name}` shows who depends on a module.
 
+The three reads answer any signed-in user; none of them answers without a
+token.
+
 The add-on marketplace catalog lives in `backend/app/core/marketplace.py` and is
 served at `GET /api/marketplace`. It is a curated catalog of installable add-ons,
 regional cost databases, resource catalogs, vector indices, language packs,
