@@ -42509,6 +42509,7 @@ const resource = {
     "boq.import_preview.upload_hint": "Valige fail eelvaatamiseks enne selle importimist sellesse mahuarvutusse.",
     "boq.import_preview.warnings_title": "{{count}} hoiatus(t)",
     "contracts.sov_locked": "Allkirjastatud lepingut arveldatakse nende ridade alusel, seega ei saa neid siin muuta ega eemaldada. Kohanda ulatust muudatusega.",
+    "contracts.sov_billed_locked": "Ridu, mille alusel on edenemisnõue juba arveldatud, ei saa siin muuta ega eemaldada, sest nõue põhineb neil. Kohanda ulatust muudatusega.",
     "contracts.delete_line_title": "Eemalda see rida",
     "contracts.delete_line_message": "Rida kaob väärtuste ajakavast ja lepingusumma väheneb selle võrra.",
     "contracts.claim_add_line": "Lisa rida käsitsi",

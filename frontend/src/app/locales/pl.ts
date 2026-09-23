@@ -18792,6 +18792,7 @@ const resource = {
     "contracts.no_project_desc": "Wybierz projekt powyżej, aby zobaczyć jego umowy.",
     "contracts.no_sov": "Brak harmonogramu wartości.",
     "contracts.sov_locked": "Podpisana umowa jest fakturowana na podstawie tych pozycji, więc nie można ich tu zmieniać ani usuwać. Dostosuj zakres zmianą.",
+    "contracts.sov_billed_locked": "Pozycji, na podstawie których zafakturowano już roszczenie częściowe, nie można tu zmieniać ani usuwać, ponieważ roszczenie się na nich opiera. Dostosuj zakres zmianą.",
     "contracts.original_value": "Pierwotna wartość",
     "contracts.outstanding": "Zaległe",
     "contracts.paid_to_date": "Zapłacone do tej pory",

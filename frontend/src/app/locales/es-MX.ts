@@ -18038,6 +18038,7 @@ const resource = {
     "contracts.no_project_desc": "Selecciona un proyecto arriba para ver sus contratos.",
     "contracts.no_sov": "Aún no hay cuadro de valores.",
     "contracts.sov_locked": "Un contrato firmado se factura sobre estas líneas, así que no se pueden modificar ni eliminar aquí. Ajuste el alcance con una variación.",
+    "contracts.sov_billed_locked": "Las líneas sobre las que ya se facturó una certificación de avance no se pueden modificar ni eliminar aquí, porque la certificación se basa en ellas. Ajuste el alcance con una variación.",
     "contracts.original_value": "Valor original",
     "contracts.outstanding": "Pendiente",
     "contracts.paid_to_date": "Pagado a la fecha",

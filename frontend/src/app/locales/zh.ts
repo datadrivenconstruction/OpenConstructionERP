@@ -18484,6 +18484,7 @@ const resource = {
     "contracts.claim_lines_locked": "只有草稿状态的结算申请才能修改其行项。",
     "contracts.claim_lines_locked_reopen": "驳回该结算申请，使其恢复为草稿状态。",
     "contracts.sov_locked": "已签署的合同按这些行项计费，此处不能修改或删除。如需调整范围，请通过变更处理。",
+    "contracts.sov_billed_locked": "已有进度结算计费的行项是该结算的依据，此处不能修改或删除。如需调整范围，请通过变更处理。",
     "contracts.delete_line_title": "删除此行项",
     "contracts.delete_line_message": "该行项将从计量价目表中移除，合同合计相应减少其金额。",
     "contracts.claim_add_line": "手动添加行项",
