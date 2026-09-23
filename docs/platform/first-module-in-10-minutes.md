@@ -333,10 +333,15 @@ curl http://localhost:8000/api/v1/site-log/
 # {"module":"oe_site_log","status":"active"}
 ```
 
-The module management API reports it as discovered, loaded and routed:
+The module management API reports it as discovered, loaded and routed. It
+answers signed-in callers only, so sign in first with any account on this
+install:
 
 ```bash
-curl http://localhost:8000/api/v1/modules/
+TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/users/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "password": "your-password"}' | jq -r '.access_token')
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/modules/
 # [ ... {"name":"oe_site_log","loaded":true,"has_router":true,"enabled":true,...} ... ]
 ```
 
