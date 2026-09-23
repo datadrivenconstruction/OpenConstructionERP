@@ -2130,7 +2130,9 @@ class BOQService:
 
         Deliberately unguarded: the writers that build a NEW bill
         (``create_boq``, ``duplicate_boq``, ``create_scenario``,
-        ``create_boq_from_template``), ``update_boq`` (header fields only),
+        ``create_boq_from_template``), ``update_boq`` for header fields (it
+        refuses a status change on a locked bill, since status and lock move
+        together through the lock and unlock endpoints),
         ``refresh_quantity_links`` (records drift, applies nothing), and the
         writers of snapshots, quantity links and activity rows. Not yet
         decided: ``delete_boq`` removes a locked bill with all its positions
@@ -3025,10 +3027,21 @@ class BOQService:
 
         Raises:
             HTTPException 404 if BOQ not found.
+            HTTPException 409 if the BOQ is locked and the status would change.
         """
         boq = await self.get_boq(boq_id)
 
         fields = data.model_dump(exclude_unset=True)
+        # Status and lock move together, and only through the lock and unlock
+        # endpoints: locking approves the bill and sets it ``final``, unlocking
+        # (admin or manager only) puts it back to ``draft``. Moving a LOCKED
+        # bill's status here would make it read as a draft or an archive while
+        # every writer still refuses it, and would skip the unlock endpoint's
+        # role check. An echo of the current status is not a change and passes,
+        # and so do the other header fields. On an unlocked bill the editor's
+        # review flow (draft to final and back) is untouched.
+        if "status" in fields and fields["status"] != boq.status:
+            await self._ensure_boq_writable(boq_id)
         # Map 'metadata' key to the model's 'metadata_' column.
         # MERGE the incoming metadata into the row's existing JSON instead of
         # replacing the whole column - a PATCH that carries only a couple of
