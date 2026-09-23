@@ -4,6 +4,12 @@
 
 Supports Anthropic and OpenAI APIs with tool-calling (function calling).
 Other providers fall back to plain text via the shared ai_client.call_ai().
+
+The model reads through the tools in ``tools.py`` and changes nothing. A
+change is a ``propose_*`` tool from ``actions.registry``: the call stores a
+proposal, which is committed before its ``tool_result`` frame so the card's
+Apply request (another session) finds it, and the person applies it through
+``/erp_chat/actions/`` under the record's own REST gates.
 """
 
 import asyncio
@@ -12,16 +18,22 @@ import logging
 import time
 import uuid
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
+from fastapi import HTTPException
 from sqlalchemy import case, func, select
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.erp_chat.actions import registry as action_registry
+from app.modules.erp_chat.actions.base import ActionConflictError
+from app.modules.erp_chat.actions.service import ChatActionService, propose_tool_result
 from app.modules.erp_chat.models import ChatMessage, ChatSession, ChatTurnFeedback
-from app.modules.erp_chat.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_NO_TOOLS
+from app.modules.erp_chat.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_NO_TOOLS, build_context_block
 from app.modules.erp_chat.schemas import StreamChatRequest
 from app.modules.erp_chat.tools import (
     TOOL_DEFINITIONS,

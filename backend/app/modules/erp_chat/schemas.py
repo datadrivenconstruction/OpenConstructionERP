@@ -2,15 +2,56 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """ERP Chat Pydantic schemas - request/response models."""
 
+import re
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+#: A BCP-47-like language tag as the UI sends it: "de", "pt-BR", "fil", "zh-Hant-TW".
+_LOCALE_TAG = re.compile(r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*")
+MAX_LOCALE_LENGTH = 16
+MAX_ROUTE_LENGTH = 200
+
+
+class ChatClientContext(BaseModel):
+    """Where the person is in the app when they send a message.
+
+    A hint for the prompt and never a reason to refuse the message, so a value
+    that does not fit is dropped or cut rather than rejected with a 422. The
+    server checks ``project_id`` against the person's access before the model
+    sees anything about that project.
+    """
+
+    route: str | None = Field(default=None, description="Current path in the app; cut to 200 characters.")
+    project_id: UUID | None = Field(default=None, description="Project open in the app, if any.")
+
+    @field_validator("route", mode="before")
+    @classmethod
+    def _cut_route(cls, value: Any) -> str | None:
+        if not isinstance(value, str):
+            return None
+        return value.strip()[:MAX_ROUTE_LENGTH] or None
+
+    @field_validator("project_id", mode="before")
+    @classmethod
+    def _drop_malformed_project_id(cls, value: Any) -> UUID | None:
+        if isinstance(value, UUID):
+            return value
+        try:
+            return UUID(str(value)) if value else None
+        except ValueError:
+            return None
 
 
 class StreamChatRequest(BaseModel):
-    """Request body for the streaming chat endpoint."""
+    """Request body for the streaming chat endpoint.
+
+    ``locale`` and ``client_context`` describe the person's screen (UI language,
+    current route, open project). Like the context itself they are hints: a
+    malformed locale is ignored instead of failing the request.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,6 +59,23 @@ class StreamChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=5000)
     project_id: UUID | None = None
     conversation_history: list[dict] | None = None
+    locale: str | None = Field(default=None, description="UI language as a BCP-47 tag, e.g. 'de' or 'pt-BR'.")
+    client_context: ChatClientContext | None = None
+
+    @field_validator("locale", mode="before")
+    @classmethod
+    def _normalise_locale(cls, value: Any) -> str | None:
+        if not isinstance(value, str):
+            return None
+        tag = value.strip().replace("_", "-")
+        if len(tag) > MAX_LOCALE_LENGTH or not _LOCALE_TAG.fullmatch(tag):
+            return None
+        return tag
+
+    @field_validator("client_context", mode="before")
+    @classmethod
+    def _drop_malformed_context(cls, value: Any) -> Any:
+        return value if isinstance(value, dict | ChatClientContext) else None
 
 
 class ChatSessionResponse(BaseModel):
@@ -51,10 +109,13 @@ class ChatMessageResponse(BaseModel):
     session_id: UUID
     role: str
     content: str | None = None
-    tool_calls: dict | None = None
-    tool_results: dict | None = None
+    # The stream stores one entry per tool call, so these are lists; a dict is
+    # still accepted for a row written in the single-object shape.
+    tool_calls: list[dict[str, Any]] | dict[str, Any] | None = None
+    tool_results: list[dict[str, Any]] | dict[str, Any] | None = None
     renderer: str | None = None
-    renderer_data: dict | None = None
+    # The primary tool result's ``data``: a list for table-like tools.
+    renderer_data: dict[str, Any] | list[Any] | None = None
     tokens_used: int = 0
     created_at: datetime
 
