@@ -59,7 +59,8 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
+import { extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { formatDuration } from '@/shared/lib/duration';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -2053,7 +2054,7 @@ export function MeetingsPage() {
   // Data
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

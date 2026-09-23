@@ -64,7 +64,7 @@ import clsx from 'clsx';
 
 import { Badge, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { FolderOpen } from 'lucide-react';
 import BIMRequirementsImport from './BIMRequirementsImport';
@@ -2962,11 +2962,8 @@ function NoProjectPicker() {
   useEffect(() => {
     if (!open || projects.length > 0) return;
     setLoading(true);
-    apiGet<{ items?: ProjectOption[] } | ProjectOption[]>('/v1/projects/')
-      .then((res) => {
-        const items = Array.isArray(res) ? res : res.items ?? [];
-        setProjects(items);
-      })
+    fetchProjectList<ProjectOption[]>()
+      .then((rows) => setProjects(rows))
       .catch(() => setProjects([]))
       .finally(() => setLoading(false));
   }, [open, projects.length]);

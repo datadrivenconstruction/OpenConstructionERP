@@ -69,7 +69,7 @@ import { SectionIntro } from '@/features/validation';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { toNum, formatCurrency } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1378,7 +1378,7 @@ export function MoCPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

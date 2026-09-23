@@ -43,7 +43,7 @@ import {
   StatCard,
 } from '@/shared/ui';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate } from '@/shared/lib/formatters';
 import { formatCurrency } from '@/shared/lib/money';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -154,7 +154,7 @@ export function FundingPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = activeProjectId || projects[0]?.id || '';

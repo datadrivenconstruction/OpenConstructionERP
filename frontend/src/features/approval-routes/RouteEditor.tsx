@@ -23,6 +23,7 @@ import clsx from 'clsx';
 import { Button, WideModal, WideModalSection } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { approvalRoutesKeys, createRoute, getMeta, updateRoute } from './api';
 import { kindLabel } from './labels';
 import type {
@@ -199,7 +200,7 @@ export function RouteEditor({
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectResult[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectResult[]>(),
     staleTime: 5 * 60_000,
     enabled: open,
   });

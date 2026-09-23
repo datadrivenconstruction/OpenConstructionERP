@@ -117,7 +117,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
 import { useDwgUploadStore } from '@/stores/useDwgUploadStore';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import {
   fetchBIMModels,
@@ -2162,7 +2162,7 @@ export function BIMPage() {
   // list and use the first as a last resort.
   const { data: projectsList = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
     staleTime: 5 * 60_000,
   });
   const projectId = urlProjectId || contextProjectId || projectsList[0]?.id || '';

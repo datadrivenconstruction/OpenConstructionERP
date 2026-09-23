@@ -47,7 +47,8 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildReviewAuthorityInsights } from './reviewAuthorityInsights';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { triggerDownload } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -1484,7 +1485,7 @@ export function ReviewAuthorityPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
 

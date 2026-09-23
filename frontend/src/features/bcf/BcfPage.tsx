@@ -9,7 +9,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BcfIssuesPanel } from './BcfIssuesPanel';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
@@ -18,7 +18,7 @@ export function BcfPage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
   });
   const projectId = activeProjectId || projects[0]?.id || '';
   return (

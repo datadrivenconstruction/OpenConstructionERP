@@ -39,7 +39,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildCommissioningInsights } from './commissioningInsights';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import { apiGet } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -1188,7 +1188,7 @@ export function CommissioningPage() {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<{ id: string; name: string }[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = activeProjectId || projects[0]?.id || '';

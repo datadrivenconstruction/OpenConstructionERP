@@ -56,7 +56,8 @@ import {
   ModuleGuideButton,
 } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
-import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -3446,7 +3447,7 @@ export function ChangeIntelligencePage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiGet<ProjectLite[]>('/v1/projects/'),
+    queryFn: () => fetchProjectList<ProjectLite[]>(),
     staleTime: 5 * 60_000,
   });
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';

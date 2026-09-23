@@ -46,6 +46,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
+import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
@@ -200,7 +201,7 @@ function listProjectsLite(): Promise<ProjectStub[]> {
   // list that did not load look exactly like an account with no projects, and
   // the page then told the user to go and create one they may well already
   // have.
-  return apiGet<ProjectStub[]>('/v1/projects/?limit=200');
+  return fetchProjectList<ProjectStub[]>();
 }
 
 function listInvitationsForPackage(packageId: string): Promise<BidInvitation[]> {
