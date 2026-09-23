@@ -11,6 +11,7 @@ Stateless service layer. Handles:
 - Event publishing on create/update/delete/status-transition (slice E)
 """
 
+import asyncio
 import logging
 import uuid
 from collections.abc import Iterable, Mapping
@@ -778,10 +779,15 @@ class PunchListService:
         # column cannot even be clicked.
         names = await self.resolve_party_names(item.assigned_to for item in items)
 
+        # The list has no limit and the rich renderer reads a photo from disk
+        # and draws it for every item, so a large snag list is seconds of
+        # rendering. It runs in a worker thread; the event loop keeps serving
+        # every other request meanwhile. The renderers read the loaded rows
+        # and the name map only, never the session.
         if _REPORTLAB_AVAILABLE:
-            pdf = _build_reportlab_pdf(project_id, items, names)
+            pdf = await asyncio.to_thread(_build_reportlab_pdf, project_id, items, names)
         else:
-            pdf = _build_minimal_pdf(_render_punchlist_text(project_id, items, names))
+            pdf = await asyncio.to_thread(_build_minimal_pdf, _render_punchlist_text(project_id, items, names))
 
         logger.info(
             "Punch list PDF exported for project %s (%d items, reportlab=%s)",

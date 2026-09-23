@@ -14,6 +14,7 @@ local-upload copy logic from ``property_dev/service.py``.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import io
 import json
@@ -829,7 +830,7 @@ class CloseoutService:
         }
         cover_pdf: bytes | None = None
         try:
-            cover_pdf = render_cover_pdf(cover_summary)
+            cover_pdf = await asyncio.to_thread(render_cover_pdf, cover_summary)
         except Exception as exc:  # noqa: BLE001 - never abort the export
             logger.warning("closeout: cover PDF render failed for package %s: %s", package.id, exc)
             notes.append(f"cover.pdf not generated ({exc.__class__.__name__})")
@@ -860,20 +861,14 @@ class CloseoutService:
         }
 
         # ── Assemble the ZIP (bundle_export.py pattern) ──────────────────
-        buf = io.BytesIO()
-        total_bytes = 0
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-            if cover_pdf is not None:
-                zf.writestr("cover.pdf", cover_pdf)
-                index.append(self._index_entry("cover.pdf", cover_pdf))
-                total_bytes += len(cover_pdf)
-            for arc, data in documents + generated:
-                zf.writestr(arc, data)
-                index.append(self._index_entry(arc, data))
-                total_bytes += len(data)
-            zf.writestr("index.json", json.dumps(index, indent=2, ensure_ascii=False))
-            zf.writestr("manifest.json", json.dumps(manifest_obj, indent=2, ensure_ascii=False))
-            zf.writestr("README.md", self._readme_md(project_name, package, completeness_pct, ready, gaps))
+        # Hashing and deflating every bound document is CPU work that grows
+        # with the package, so it runs in a worker thread. This build runs
+        # as an in-process job on the same event loop as the requests, which
+        # is why it matters even though no request waits on it.
+        readme = self._readme_md(project_name, package, completeness_pct, ready, gaps)
+        zip_bytes, total_bytes = await asyncio.to_thread(
+            self._assemble_zip, cover_pdf, documents + generated, index, manifest_obj, readme
+        )
 
         build_summary = {
             "size_bytes": total_bytes,
@@ -883,7 +878,37 @@ class CloseoutService:
             "generated_count": len(generated),
             "notes": notes,
         }
-        return buf.getvalue(), build_summary
+        return zip_bytes, build_summary
+
+    @classmethod
+    def _assemble_zip(
+        cls,
+        cover_pdf: bytes | None,
+        members: list[tuple[str, bytes]],
+        index: list[dict[str, Any]],
+        manifest_obj: dict[str, Any],
+        readme: str,
+    ) -> tuple[bytes, int]:
+        """Write the package ZIP and return ``(zip_bytes, total_member_bytes)``.
+
+        Appends one entry per binary member to ``index``. Synchronous on
+        purpose: :meth:`_build_zip_blob` runs it in a worker thread.
+        """
+        buf = io.BytesIO()
+        total_bytes = 0
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            if cover_pdf is not None:
+                zf.writestr("cover.pdf", cover_pdf)
+                index.append(cls._index_entry("cover.pdf", cover_pdf))
+                total_bytes += len(cover_pdf)
+            for arc, data in members:
+                zf.writestr(arc, data)
+                index.append(cls._index_entry(arc, data))
+                total_bytes += len(data)
+            zf.writestr("index.json", json.dumps(index, indent=2, ensure_ascii=False))
+            zf.writestr("manifest.json", json.dumps(manifest_obj, indent=2, ensure_ascii=False))
+            zf.writestr("README.md", readme)
+        return buf.getvalue(), total_bytes
 
     @staticmethod
     def _index_entry(arc: str, data: bytes) -> dict[str, Any]:
@@ -966,7 +991,7 @@ class CloseoutService:
         if candidate is None:
             return None, None, f"{label} (file missing)"
         try:
-            data = candidate.read_bytes()
+            data = await asyncio.to_thread(candidate.read_bytes)
         except OSError:
             return None, None, f"{label} (unreadable)"
         leaf = f"documents/{_safe_zip_name(slot.slot_key)}/{_safe_zip_name(candidate.name, 'document')}"
@@ -1000,7 +1025,8 @@ class CloseoutService:
             (await self.session.execute(select(BIMElement).where(BIMElement.model_id == model.id))).scalars().all()
         )
         try:
-            return build_cobie_workbook(model, elements)
+            # Off the event loop: the workbook grows with the model.
+            return await asyncio.to_thread(build_cobie_workbook, model, elements)
         except Exception as exc:  # noqa: BLE001
             notes.append(f"COBie not generated ({exc.__class__.__name__})")
             return None
@@ -1034,7 +1060,7 @@ class CloseoutService:
             "gaps": [it.title for it in items if (it.status or "").lower() not in ("closed", "verified")][:50],
             "slots": rows,
         }
-        return render_cover_pdf(summary)
+        return await asyncio.to_thread(render_cover_pdf, summary)
 
     async def _render_inspection_certs(self, project_id: uuid.UUID, notes: list[str]) -> bytes | None:
         """Render a final-inspection certificate PDF from passed inspections."""
@@ -1075,7 +1101,7 @@ class CloseoutService:
             ],
             "slots": rows,
         }
-        return render_cover_pdf(summary)
+        return await asyncio.to_thread(render_cover_pdf, summary)
 
     async def _project_name(self, project_id: uuid.UUID) -> str:
         try:
