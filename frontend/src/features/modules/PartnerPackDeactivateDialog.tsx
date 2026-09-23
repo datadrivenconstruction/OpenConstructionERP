@@ -172,7 +172,7 @@ export function PartnerPackDeactivateDialog({
     void qc.invalidateQueries({ queryKey: ['partner-pack'] });
     void qc.invalidateQueries({ queryKey: ['partner-packs'] });
     void qc.invalidateQueries({ queryKey: ['partner-pack-applied'] });
-    void qc.invalidateQueries({ queryKey: ['modules'] });
+    void qc.invalidateQueries({ queryKey: ['system-modules'] });
     setStep('workspace', 'ok');
 
     setFinished({ ok: true });
