@@ -36,6 +36,9 @@ You do not have to read them in order. The order below follows one common path: 
 10. [Field and site operations](./field-and-site.md)
    Keep the daily diary, run inspections and safety, book deliveries, and build the contemporaneous record that protects the project.
 
+11. [The AI assistant](./ai-assistant.md)
+   Tell the assistant what needs doing and it prepares the change, a BOQ position, a task, an RFI, a risk, a punch item or schedule progress, for you to check and apply, with every change logged.
+
 ## A note on AI features
 
-Several workflows offer AI help: drafting an estimate from a description or a photo, suggesting a cost match, ranking clashes, answering questions about your project data. In every case the platform shows a confidence score and asks a person to confirm before anything lands in your estimate. Treat AI output as a fast first draft that a qualified estimator checks, not as a final answer. You connect your own model provider with an API key, and the AI features degrade gracefully when no key is set, so the rest of the platform works without them.
+Several workflows offer AI help: drafting an estimate from a description or a photo, suggesting a cost match, ranking clashes, answering questions about your project data, preparing changes you describe to the [AI assistant](./ai-assistant.md). In every case the platform shows a confidence score and asks a person to confirm before anything lands in your estimate. Treat AI output as a fast first draft that a qualified estimator checks, not as a final answer. You connect your own model provider with an API key, and the AI features degrade gracefully when no key is set, so the rest of the platform works without them.

@@ -174,6 +174,7 @@ class BOQAddPositionSpec(ActionSpec):
     apply_permissions: ClassVar[tuple[str, ...]] = ("boq.update",)
     revert_permissions: ClassVar[tuple[str, ...]] = ("boq.delete",)
     reversible: ClassVar[bool] = True
+    modules: ClassVar[tuple[str, ...]] = ("oe_boq",)
 
     def merge_patch(self, payload: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
         """A typed position number is kept as typed; clearing it numbers the line automatically again."""

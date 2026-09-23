@@ -163,50 +163,14 @@ function uid(): string {
   return uuid();
 }
 
-// ── Role helpers ───────────────────────────────────────────────────────────
-// Mirrors the backend ``Role`` hierarchy: admin > manager > editor > viewer.
-// Project-team aliases (``owner`` / ``project_manager``) and the legacy
-// ``superuser`` alias also count as manager+. We deliberately err on the
-// side of "show the action and let the backend reject it" — the chip
-// guard is UX-only; the source of truth lives in
-// ``backend/app/modules/erp_chat/tools.py`` ``check_tool_permission``.
-const MANAGER_OR_ABOVE_ROLES = new Set([
-  'admin',
-  'manager',
-  'superuser',
-  'owner',
-  'project_manager',
-]);
-
-function isManagerOrAbove(role: string | null | undefined): boolean {
-  if (!role) return false;
-  return MANAGER_OR_ABOVE_ROLES.has(role.toLowerCase().trim());
-}
-
-// Heuristic — does this suggestion chip's text imply a write action?
-// Used to lock chips like "Create a draft RFI from the latest clash" for
-// non-manager users. Conservative: matches only verbs at the start of the
-// sentence to avoid false positives on read-only chips that mention
-// "create" in passing (e.g. "Show me what tools can create…").
-const WRITE_VERB_PREFIXES = [
-  'create ',
-  'draft ',
-  'add ',
-  'insert ',
-  'update ',
-  'edit ',
-  'delete ',
-  'remove ',
-  'mark ',
-  'approve ',
-  'reject ',
-];
-
-function chipIsWriteAction(text: string): boolean {
-  if (!text) return false;
-  const lc = text.trim().toLowerCase();
-  return WRITE_VERB_PREFIXES.some((v) => lc.startsWith(v));
-}
+// No suggestion is locked by role. Chips that read like a write action used
+// to be greyed out below manager, guessed from their first word, because a
+// write tool used to write at once. The assistant now only PREPARES a change:
+// preparing one touches nothing, and Apply runs the same checks as the
+// record's own page (who may apply is decided per record, not per role
+// name), so the card itself says when this person cannot apply it and who
+// can. A lock here would only hide the feature from people who may still
+// prepare a change and hand it to a colleague.
 
 // ── Suggestion prompts ─────────────────────────────────────────────────────
 function useDefaultSuggestions(): string[] {
@@ -218,11 +182,65 @@ function useDefaultSuggestions(): string[] {
       defaultValue: "Find all walls > 30cm in current project's BIM",
     }),
     t('chat.panel.sugg_validate_boq', { defaultValue: 'Validate the current BOQ' }),
-    t('chat.panel.sugg_draft_rfi', {
-      defaultValue: 'Create a draft RFI from the latest clash',
+    // A question, like the rest of this group: requests to change something
+    // live in the "Make a change" group above it.
+    t('chat.dock.sugg_open_rfis', {
+      defaultValue: 'Which RFIs are still waiting for an answer?',
     }),
     t('chat.panel.sugg_critical_path', { defaultValue: "What's the schedule critical path?" }),
   ];
+}
+
+/**
+ * Example instructions for the "Make a change" group, tuned to the page.
+ *
+ * Each one names a change the assistant can prepare (a `propose_*` tool) in
+ * the words a site manager would use with a colleague. They are examples to
+ * adjust, not commands: picking one fills the composer instead of sending.
+ */
+function useDoSuggestions(pathname: string): string[] {
+  const { t } = useTranslation();
+  return useMemo(() => {
+    const task = t('chat.dock.do.task', {
+      defaultValue: 'Create a task: check the formwork on level 3 by Friday',
+    });
+    const risk = t('chat.dock.do.risk', {
+      defaultValue: 'Log a risk: the steel delivery may slip by two weeks',
+    });
+    const rfi = t('chat.dock.do.rfi', {
+      defaultValue: 'Raise an RFI: which fire rating applies to the stair doors?',
+    });
+    if (/^\/boq\/[^/]+/.test(pathname)) {
+      return [
+        t('chat.dock.do.boq_add', {
+          defaultValue: 'Add a position: 25 m³ of C30/37 concrete for the ground slab',
+        }),
+        t('chat.dock.do.boq_quantity', {
+          defaultValue: 'Set the quantity of the formwork position to 140 m²',
+        }),
+      ];
+    }
+    if (/^\/schedule(\/|$)/.test(pathname)) {
+      return [
+        t('chat.dock.do.schedule_progress', {
+          defaultValue: 'Set the progress of the foundations activity to 60%',
+        }),
+        task,
+      ];
+    }
+    if (/^\/(projects\/[^/]+\/)?tasks(\/|$)/.test(pathname)) return [task];
+    if (/^\/(projects\/[^/]+\/)?rfi(\/|$)/.test(pathname)) return [rfi];
+    if (/^\/risks(\/|$)/.test(pathname)) return [risk];
+    if (/^\/punchlist(\/|$)/.test(pathname)) {
+      return [
+        t('chat.dock.do.punch', {
+          defaultValue: 'Add a punch item: cracked tile in bathroom 2.04',
+        }),
+      ];
+    }
+    if (/^\/projects\/[^/]+/.test(pathname)) return [task, risk, rfi];
+    return [task, risk];
+  }, [pathname, t]);
 }
 
 /**

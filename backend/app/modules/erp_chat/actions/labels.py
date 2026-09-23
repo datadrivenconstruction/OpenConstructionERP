@@ -98,8 +98,12 @@ ERRORS: dict[str, str] = {
     "position_ambiguous": "Several positions match. Say which bill of quantities it is in.",
     "position_is_section": "That line is a section heading, not a priced position.",
     "no_change": "The proposed values are the same as the current ones, so there is nothing to change.",
+    # Read by the person on the card and by the model at propose and undo time. Only an admin or a
+    # manager may unlock a bill (``POST /boq/boqs/{id}/unlock/``), while anyone who can open the
+    # bill may create a revision of it, so the text names both ways out.
     "locked": (
-        "This bill of quantities is locked, so nothing was changed. Unlock it in the BOQ editor, then apply again."
+        "This bill of quantities is locked, so nothing was changed. Only an admin or a manager can unlock it. "
+        "Ask one of them, or create a revision of the bill and make the change there."
     ),
     "target_changed": (
         "Someone changed this record after the assistant prepared the change, so nothing was applied. "
@@ -118,6 +122,9 @@ ERRORS: dict[str, str] = {
     "domain_error": "The change could not be saved.",
     "internal_error": "Something went wrong while saving the change.",
     "unknown_action": "This kind of change is not supported.",
+    "module_unavailable": (
+        "The part of the platform this change belongs to is switched off, so the change cannot be made now."
+    ),
 }
 
 FIELD_ERRORS: dict[str, str] = {
@@ -135,6 +142,10 @@ FIELD_ERRORS: dict[str, str] = {
 BLOCKED: dict[str, str] = {
     "permission": (
         "You do not have permission to make this change. Someone with the right role in this project can apply it."
+    ),
+    "module_unavailable": (
+        "The part of the platform this change belongs to is switched off, so nobody can apply it until an "
+        "administrator switches it on again."
     ),
 }
 

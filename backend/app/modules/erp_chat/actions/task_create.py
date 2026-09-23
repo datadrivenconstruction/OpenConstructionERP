@@ -176,6 +176,7 @@ class TaskCreateSpec(ActionSpec):
     apply_permissions: ClassVar[tuple[str, ...]] = ("tasks.create",)
     revert_permissions: ClassVar[tuple[str, ...]] = ("tasks.delete",)
     reversible: ClassVar[bool] = True
+    modules: ClassVar[tuple[str, ...]] = ("oe_tasks",)
     patch_aliases: ClassVar[frozenset[str]] = frozenset({"responsible_id"})
 
     def merge_patch(self, payload: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:

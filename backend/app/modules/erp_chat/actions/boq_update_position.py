@@ -156,6 +156,7 @@ class BOQUpdatePositionSpec(ActionSpec):
     apply_permissions: ClassVar[tuple[str, ...]] = ("boq.update",)
     revert_permissions: ClassVar[tuple[str, ...]] = ("boq.update",)
     reversible: ClassVar[bool] = True
+    modules: ClassVar[tuple[str, ...]] = ("oe_boq",)
 
     async def build(
         self,

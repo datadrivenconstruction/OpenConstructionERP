@@ -158,7 +158,7 @@ export function messageForCode(code: string | null, t: TFunction): string | null
       return String(
         t('erp_chat.action.request_error.locked', {
           defaultValue:
-            'This bill of quantities is locked, so nothing was changed. Create a revision of the bill to make changes.',
+            'This bill of quantities is locked, so nothing was changed. Only an admin or a manager can unlock it. Ask one of them, or create a revision of the bill and make the change there.',
         }),
       );
     case 'target_changed':

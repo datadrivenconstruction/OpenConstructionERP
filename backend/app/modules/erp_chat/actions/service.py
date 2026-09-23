@@ -49,7 +49,12 @@ from app.modules.erp_chat.actions.base import (
     coerce_uuid,
     error_from_http,
 )
-from app.modules.erp_chat.actions.registry import get_spec, get_spec_for_tool
+from app.modules.erp_chat.actions.registry import (
+    get_registered_spec_for_tool,
+    get_spec,
+    get_spec_for_tool,
+    is_available,
+)
 from app.modules.erp_chat.models import ChatAction
 from app.modules.erp_chat.schemas import (
     ActionEntityRef,
@@ -124,13 +129,18 @@ class Viewer:
 
 @dataclass(frozen=True)
 class Abilities:
-    """What the viewer may do with one action now."""
+    """What the viewer may do with one action now.
+
+    ``blocked_by`` says why a pending action cannot be applied by this viewer:
+    ``"permission"`` (their role or project access) or ``"module_unavailable"``
+    (the module it writes to is switched off, so nobody can). None otherwise.
+    """
 
     can_apply: bool
     can_edit: bool
     can_reject: bool
     can_revert: bool
-    blocked: bool
+    blocked_by: str | None
 
 
 class ChatActionService:
@@ -178,8 +188,11 @@ class ChatActionService:
         Raises:
             ActionError: Validation, access or state problems, for the model to act on.
         """
-        spec = get_spec_for_tool(tool_name) or get_spec(tool_name)
+        spec = get_spec_for_tool(tool_name) or get_spec(tool_name, available_only=True)
         if spec is None:
+            known = get_registered_spec_for_tool(tool_name) or get_spec(tool_name)
+            if known is not None:
+                raise ActionConflictError(code="module_unavailable", params={"action_type": known.action_type})
             raise ActionValidationError(code="unknown_action", params={"tool": tool_name})
         clean = dict(args or {})
         confidence = _clamp_confidence(clean.pop("confidence", None))

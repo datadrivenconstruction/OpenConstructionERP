@@ -594,6 +594,9 @@ class ActionSpec(ABC):
     apply_permissions: ClassVar[tuple[str, ...]]
     revert_permissions: ClassVar[tuple[str, ...]] = ()
     reversible: ClassVar[bool] = False
+    # Manifest names of the modules the change is written to (``"oe_rfi"``). The registry offers
+    # the tool, and the service applies the change, only while all of them are loaded and enabled.
+    modules: ClassVar[tuple[str, ...]] = ()
 
     @property
     def title(self) -> str:
