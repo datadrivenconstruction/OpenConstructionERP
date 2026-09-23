@@ -3,7 +3,7 @@
 """ERP Chat Pydantic schemas - request/response models."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -134,3 +134,180 @@ class AdminStatsResponse(BaseModel):
     cache_hit_rate_pct: float  # % of turns where provider reported cache_hit=True
     top_negative_prompts: list[NegativePromptSnippet]
     daily_breakdown: list[DailyChatStat]
+
+
+# ── AI actions: proposals a person applies, rejects or undoes ─────────────
+#
+# The contract the dock renders. Values in ``ActionField.value`` / ``before``
+# are raw data, never pre-formatted: numbers and money are JSON numbers, dates
+# are ISO ``YYYY-MM-DD`` strings, enums carry their stored value and the option
+# list carries the labels. The frontend formats them in the reader's locale.
+
+ActionStatus = Literal["proposed", "applied", "rejected", "failed", "reverted"]
+ActionFieldKind = Literal["text", "longtext", "number", "money", "date", "enum", "percent", "ref"]
+
+
+class ActionFieldOption(BaseModel):
+    """One choice of an ``enum`` field.
+
+    A fixed choice (a priority, a task type) has an i18n ``label_key``. A data
+    choice (a project member) has none, and its ``label`` is shown as it is.
+    """
+
+    value: str
+    label_key: str | None = None
+    label: str
+
+
+class ActionField(BaseModel):
+    """One row of a proposal's field table.
+
+    ``key`` is the payload key a PATCH writes to. ``before`` is set only for an
+    edit of an existing record and holds the value the proposal was based on.
+    """
+
+    key: str
+    label_key: str
+    label: str
+    kind: ActionFieldKind
+    value: Any = None
+    before: Any = None
+    currency: str | None = None
+    unit: str | None = None
+    options: list[ActionFieldOption] | None = None
+    editable: bool = False
+    required: bool = False
+
+
+class ActionNote(BaseModel):
+    """Something the person should know before applying, shown under the fields.
+
+    ``key`` is an i18n key; ``text`` is its English rendering with ``params``
+    already filled in, and ``params`` are passed to the translation as-is.
+    ``field`` names the field the note is about, when there is one.
+    """
+
+    key: str
+    text: str
+    params: dict[str, Any] = Field(default_factory=dict)
+    field: str | None = None
+    tone: Literal["info", "warning"] = "info"
+
+
+class ActionEntityRef(BaseModel):
+    """A record an action points at (its target) or produced (its result)."""
+
+    entity_type: str
+    entity_id: str
+    label: str | None = None
+    url: str | None = None
+
+
+class ActionUserRef(BaseModel):
+    """A person in an action's story, with the name to show."""
+
+    id: UUID
+    name: str
+
+
+class ChatActionCounts(BaseModel):
+    """How many visible actions sit in each status (under the same filters)."""
+
+    proposed: int = 0
+    applied: int = 0
+    rejected: int = 0
+    failed: int = 0
+    reverted: int = 0
+
+
+class ChatActionResponse(BaseModel):
+    """A proposal and its lifecycle, as the dock renders it.
+
+    ``can_*`` are computed for the caller: they are what the caller may do
+    now, under the same gates the record's REST route would run for them.
+    ``blocked_reason_key`` explains a pending action the caller cannot apply.
+    """
+
+    id: UUID
+    session_id: UUID | None = None
+    message_id: UUID | None = None
+    project_id: UUID | None = None
+    project_name: str | None = None
+    action_type: str
+    status: ActionStatus
+    title: str
+    title_key: str
+    summary: str | None = None
+    subtitle: str | None = None
+    fields: list[ActionField] = Field(default_factory=list)
+    notes: list[ActionNote] = Field(default_factory=list)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    original_payload: dict[str, Any] = Field(default_factory=dict)
+    edited: bool = False
+    confidence: float | None = None
+    rationale: str | None = None
+    target: ActionEntityRef | None = None
+    result: ActionEntityRef | None = None
+    requested_by: ActionUserRef | None = None
+    decided_by: ActionUserRef | None = None
+    decided_at: datetime | None = None
+    reverted_by: ActionUserRef | None = None
+    reverted_at: datetime | None = None
+    decision_note: str | None = None
+    revert_note: str | None = None
+    error: str | None = None
+    error_code: str | None = None
+    can_apply: bool = False
+    can_edit: bool = False
+    can_reject: bool = False
+    can_revert: bool = False
+    blocked_reason_key: str | None = None
+    blocked_reason: str | None = None
+    revert_hint_key: str | None = None
+    revert_hint: str | None = None
+    batch_id: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatActionListResponse(BaseModel):
+    """A page of visible actions plus per-status counts for the filter pills."""
+
+    items: list[ChatActionResponse]
+    total: int
+    counts: ChatActionCounts
+
+
+class ChatActionPatchRequest(BaseModel):
+    """Human edits to a pending proposal: a partial payload, merged and re-validated."""
+
+    payload: dict[str, Any] = Field(..., description="Partial payload; keys must be editable fields.")
+
+
+class ChatActionDecisionRequest(BaseModel):
+    """Optional note for a reject or an undo."""
+
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class ChatActionBatchRequest(BaseModel):
+    """Apply several proposals; each one succeeds or fails on its own."""
+
+    ids: list[UUID] = Field(..., min_length=1, max_length=50)
+
+
+class ChatActionBatchError(BaseModel):
+    """Why one id of a batch was not applied (the others are unaffected)."""
+
+    id: UUID
+    status_code: int
+    code: str
+    message: str
+    message_key: str
+
+
+class ChatActionBatchResponse(BaseModel):
+    """Result of an apply-all: every visible action in its new state, plus refusals."""
+
+    items: list[ChatActionResponse]
+    errors: list[ChatActionBatchError] = Field(default_factory=list)

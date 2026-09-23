@@ -377,3 +377,8 @@ router.include_router(
         write_permission=None,
     )
 )
+
+# ── Assistant proposals: review, apply, reject, undo (/actions/) ─────────
+from app.modules.erp_chat.actions.router import router as _actions_router  # noqa: E402
+
+router.include_router(_actions_router)

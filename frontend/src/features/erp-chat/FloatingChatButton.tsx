@@ -10,21 +10,23 @@
  * The unread badge is driven by `useFloatingChatStore.unreadCount`, which the
  * panel bumps every time the assistant produces a message while the panel is
  * closed. Opening the panel resets the counter.
+ *
+ * While the dock is open the button is hidden: the dock occupies the same
+ * corner and has its own close button (and Alt+A / Escape). It stays in the
+ * DOM, only `hidden`, so the dock can hand focus back to it on close.
  */
 
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MessageCircle } from 'lucide-react';
-import { useFloatingChatStore } from './useFloatingChat';
+import {
+  DOCK_SHORTCUT_ARIA,
+  DOCK_SHORTCUT_KEYS,
+  isFloatingChatHiddenOn,
+  useFloatingChatStore,
+} from './useFloatingChat';
 import { useAuthStore } from '@/stores/useAuthStore';
-
-const HIDE_ON_PREFIXES = [
-  '/chat',          // full-page chat — don't duplicate
-  '/login',
-  '/onboarding',
-  '/license-request',
-];
 
 export function FloatingChatButton() {
   const { t } = useTranslation();
@@ -41,7 +43,7 @@ export function FloatingChatButton() {
     // poke sessionStorage directly only flip the token, not isAuthenticated,
     // until the next React render cycle.
     if (!isAuthenticated && !accessToken) return true;
-    return HIDE_ON_PREFIXES.some((p) => location.pathname.startsWith(p));
+    return isFloatingChatHiddenOn(location.pathname);
   }, [location.pathname, isAuthenticated, accessToken]);
 
   if (hidden) return null;
@@ -51,6 +53,9 @@ export function FloatingChatButton() {
     defaultValue: '{{count}} new',
     count: unreadCount,
   });
+  // Key names are not translated anywhere in the app (the shortcuts dialog
+  // prints them as-is), so the tooltip appends the chord verbatim.
+  const shortcut = DOCK_SHORTCUT_KEYS.join('+');
 
   return (
     <button
@@ -59,11 +64,13 @@ export function FloatingChatButton() {
       data-testid="floating-chat-button"
       aria-label={label}
       aria-expanded={isOpen}
-      title={label}
+      aria-keyshortcuts={DOCK_SHORTCUT_ARIA}
+      title={`${label} (${shortcut})`}
       className={[
         'fixed bottom-4 right-4 z-50',
         'h-14 w-14 rounded-full',
-        'flex items-center justify-center',
+        isOpen ? 'hidden' : 'flex',
+        'items-center justify-center',
         'text-white shadow-lg',
         'bg-gradient-to-br from-oe-blue to-oe-blue-dark',
         'transition-all duration-200 ease-out',

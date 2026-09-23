@@ -119,7 +119,7 @@ export function DwgUploadIndicator() {
         type="button"
         data-testid="dwg-upload-dock"
         onClick={() => setExpanded(true)}
-        className="fixed bottom-36 right-4 z-[60] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all max-w-xs"
+        className="oe-dock-aware fixed bottom-36 right-4 z-[60] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all max-w-xs"
       >
         {isActive ? (
           <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
@@ -159,7 +159,7 @@ export function DwgUploadIndicator() {
   // Expanded panel
   return (
     <div
-      className="fixed bottom-36 right-4 z-[60] w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in"
+      className="oe-dock-aware fixed bottom-36 right-4 z-[60] w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in"
       data-testid="dwg-upload-dock-expanded"
     >
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-secondary/50 border-b border-border-light">

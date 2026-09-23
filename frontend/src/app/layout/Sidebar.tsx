@@ -2400,7 +2400,7 @@ export function FloatingRecentButton() {
 
   return (
     // Smaller, slightly higher than the Chat FAB so they stack visually
-    <div className="fixed bottom-24 end-4 z-40">
+    <div className="oe-dock-aware fixed bottom-24 end-4 z-40">
       {/* Popover */}
       {open && (
         <div className="absolute bottom-12 end-0 w-72 rounded-xl border border-border-light bg-surface-primary shadow-xl overflow-hidden">

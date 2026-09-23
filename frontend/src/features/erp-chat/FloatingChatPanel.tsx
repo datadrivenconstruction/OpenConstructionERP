@@ -1,10 +1,22 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Floating chat panel — sliding side drawer (or full-screen sheet on
- * mobile) that talks to the same backend SSE endpoint as the full-page
- * chat. Reuses the renderer registry so tool results render exactly the
- * same way as on /chat.
+ * Floating chat panel — the AI dock. A side panel on the inline-end edge
+ * (right in LTR, left in RTL) that talks to the same backend SSE endpoint as
+ * the full-page chat. Reuses the renderer registry so tool results render
+ * exactly the same way as on /chat.
+ *
+ * Two modes, decided by the screen (useDockGeometry in useFloatingChat.ts):
+ *   - push: wide screens. The page reflows next to the dock through
+ *     `--oe-ai-dock-offset`; not modal, no backdrop, Tab moves freely, and
+ *     Escape closes only when focus is inside the dock.
+ *   - overlay: everything else. Backdrop, modal, focus kept inside; full
+ *     width below 640px.
+ * The width is resizable from the handle on the dock's inline-start edge.
+ *
+ * Escape contract for anything rendered inside the dock: a component that
+ * consumes Escape itself (an inline edit form, a menu) must call
+ * `preventDefault()` on the event, and the dock then leaves it alone.
  *
  * The panel intentionally owns its own conversation state (mirroring
  * `useChatFullPage`) rather than sharing state with the full-page chat —
@@ -21,6 +33,8 @@ import {
   useState,
   type ChangeEvent,
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +49,7 @@ import {
   RotateCw,
   Lock,
   ShieldAlert,
+  Sparkles,
 } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -42,10 +57,26 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { aiApi, type AISettings } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
-import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
+import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
-import { useFloatingChatStore, useIsMobileViewport } from './useFloatingChat';
+import {
+  DOCK_MIN_WIDTH,
+  DOCK_RESIZING_ATTR,
+  applyDockLayout,
+  isAnotherModalOpen,
+  isApplePlatform,
+  isDockShortcut,
+  isEditableElement,
+  isFloatingChatHiddenOn,
+  useDockFocus,
+  useDockGeometry,
+  useDockLayoutSync,
+  useDockPresence,
+  useFloatingChatStore,
+  widthFromDrag,
+  widthFromKey,
+} from './useFloatingChat';
 import { fetchChatSessions } from './api';
 import type { ChatMessage, ChatSession, ToolCallInfo } from './types';
 
@@ -960,7 +991,8 @@ function SessionsMenu({
       style={{
         position: 'absolute',
         top: 'calc(100% + 4px)',
-        right: 8,
+        // Logical, so the menu hangs under the header buttons in RTL too.
+        insetInlineEnd: 8,
         width: 260,
         maxHeight: 320,
         overflowY: 'auto',
@@ -1059,6 +1091,200 @@ function SessionsMenu({
   );
 }
 
+// ── Dock chrome ────────────────────────────────────────────────────────────
+
+/** DOM id of the dock, the target of the resize handle's aria-controls. */
+const DOCK_ELEMENT_ID = 'oe-ai-dock';
+
+function DockHeaderButton({
+  onClick,
+  label,
+  testId,
+  expanded,
+  children,
+}: {
+  onClick: () => void;
+  label: string;
+  testId: string;
+  /** Set for a button that opens a menu; omitted otherwise. */
+  expanded?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      aria-expanded={expanded}
+      aria-haspopup={expanded === undefined ? undefined : 'menu'}
+      data-testid={testId}
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[color:var(--chat-text-secondary)] transition-colors hover:bg-[color:var(--chat-surface-2)] hover:text-[color:var(--chat-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * The resize handle on the dock's inline-start edge: a 6px hit zone whose
+ * grip shows on hover and on keyboard focus.
+ *
+ * Pointer: drag with pointer capture, throttled to one update per animation
+ * frame, previewed straight into the DOM (`onPreview`) and committed to the
+ * store once on release. While dragging, `html[data-ai-dock-resizing]` turns
+ * off the page's padding transition so the page follows the cursor.
+ * Keyboard: Left/Right move 16px (the arrow towards the page widens, so they
+ * swap in RTL), Home/End jump to the narrowest/widest. Double-click resets.
+ */
+function DockResizeHandle({
+  width,
+  maxWidth,
+  controlsId,
+  onPreview,
+}: {
+  width: number;
+  maxWidth: number;
+  controlsId: string;
+  onPreview: (width: number) => void;
+}) {
+  const { t } = useTranslation();
+  const isRTL = useIsRTL();
+  const setWidth = useFloatingChatStore((s) => s.setWidth);
+  const resetWidth = useFloatingChatStore((s) => s.resetWidth);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startWidth: number;
+    latestX: number;
+    frame: number | null;
+  } | null>(null);
+
+  const widthForDrag = useCallback(
+    (drag: { startX: number; startWidth: number; latestX: number }) =>
+      widthFromDrag({
+        startWidth: drag.startWidth,
+        startX: drag.startX,
+        currentX: drag.latestX,
+        rtl: isRTL,
+        maxWidth,
+      }),
+    [isRTL, maxWidth],
+  );
+
+  const finishDrag = useCallback(() => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    dragRef.current = null;
+    if (drag.frame !== null) window.cancelAnimationFrame(drag.frame);
+    const finalWidth = widthForDrag(drag);
+    // Preview first: if the final width equals the stored one the store
+    // does not change and React does not re-render, so the DOM must already
+    // hold it rather than the last throttled frame.
+    onPreview(finalWidth);
+    document.documentElement.removeAttribute(DOCK_RESIZING_ATTR);
+    setDragging(false);
+    setWidth(finalWidth);
+  }, [widthForDrag, onPreview, setWidth]);
+
+  // A handle that unmounts mid-drag (the dock closed) must not leave the
+  // page stuck in resize mode with its transitions off.
+  useEffect(
+    () => () => {
+      const drag = dragRef.current;
+      if (drag && drag.frame !== null) window.cancelAnimationFrame(drag.frame);
+      dragRef.current = null;
+      document.documentElement.removeAttribute(DOCK_RESIZING_ATTR);
+    },
+    [],
+  );
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Not every environment supports capture; the drag still works while
+      // the pointer stays over the handle.
+    }
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startWidth: width,
+      latestX: e.clientX,
+      frame: null,
+    };
+    document.documentElement.setAttribute(DOCK_RESIZING_ATTR, '');
+    setDragging(true);
+  };
+
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    drag.latestX = e.clientX;
+    if (drag.frame !== null) return;
+    drag.frame = window.requestAnimationFrame(() => {
+      const current = dragRef.current;
+      if (!current) return;
+      current.frame = null;
+      onPreview(widthForDrag(current));
+    });
+  };
+
+  const onPointerEnd = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    finishDrag();
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const next = widthFromKey(e.key, { width, maxWidth, rtl: isRTL });
+    if (next === null) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setWidth(next);
+  };
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-valuenow={width}
+      aria-valuemin={DOCK_MIN_WIDTH}
+      aria-valuemax={maxWidth}
+      aria-controls={controlsId}
+      aria-label={t('chat.dock.resize_label', { defaultValue: 'Resize the assistant panel' })}
+      title={t('chat.dock.resize_hint', {
+        defaultValue: 'Drag to resize. Double-click to reset the width.',
+      })}
+      tabIndex={0}
+      data-testid="floating-chat-resize-handle"
+      data-dragging={dragging ? 'true' : undefined}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
+      onLostPointerCapture={onPointerEnd}
+      onDoubleClick={resetWidth}
+      onKeyDown={onKeyDown}
+      className="group absolute inset-y-0 start-0 z-10 w-[6px] cursor-col-resize touch-none select-none focus-visible:outline-none"
+    >
+      {/* Edge line: faint on hover, solid while dragging or focused. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 start-0 w-[2px] bg-oe-blue opacity-0 transition-opacity duration-fast group-hover:opacity-50 group-focus-visible:opacity-100 group-data-[dragging=true]:opacity-100"
+      />
+      {/* Grip: the "you can pull this" affordance. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute start-[1px] top-1/2 h-9 w-[4px] -translate-y-1/2 rounded-full bg-[color:var(--chat-text-tertiary)] opacity-0 transition-opacity duration-fast group-hover:opacity-70 group-focus-visible:bg-oe-blue group-focus-visible:opacity-100 group-data-[dragging=true]:bg-oe-blue group-data-[dragging=true]:opacity-100"
+      />
+    </div>
+  );
+}
+
 // ── Main panel ─────────────────────────────────────────────────────────────
 export function FloatingChatPanel() {
   const { t } = useTranslation();
@@ -1077,7 +1303,21 @@ export function FloatingChatPanel() {
   );
   const pendingPrompt = useFloatingChatStore((s) => s.pendingPrompt);
   const clearPendingPrompt = useFloatingChatStore((s) => s.clearPendingPrompt);
-  const isMobile = useIsMobileViewport(640);
+  const openDock = useFloatingChatStore((s) => s.open);
+  // The full-page chat (/chat) is the same conversation surface, so the dock
+  // stays closed there. `isOpen` is left alone: leave /chat and the dock is
+  // back exactly as it was.
+  const suppressed = isFloatingChatHiddenOn(location.pathname);
+  const dockOpen = isOpen && !suppressed;
+  const geometry = useDockGeometry();
+  const overlay = geometry.mode === 'overlay';
+  const presence = useDockPresence(dockOpen);
+  useDockLayoutSync({
+    open: dockOpen,
+    mode: geometry.mode,
+    width: geometry.width,
+    fullWidth: geometry.fullWidth,
+  });
   const resolvedTheme = useThemeStore((s) => s.resolved);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   // Role is decoded from the JWT on login (useAuthStore). Drives the
@@ -1105,22 +1345,96 @@ export function FloatingChatPanel() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Trap focus inside the panel while it is open so Tab navigation cannot
-  // escape into the rest of the page (a11y requirement).
-  useFocusTrap(containerRef, isOpen);
+  // Push mode is not modal: Tab moves freely between the page and the dock.
+  // Overlay mode keeps focus inside. Either way focus returns to where it
+  // was when the dock closes, if it was still inside the dock.
+  useDockFocus(containerRef, { open: dockOpen, modal: overlay });
 
-  // ESC closes the panel.
+  // The exit ends on the dock's OWN animationend, not one bubbling up from a
+  // message or a spinner inside it. A native listener rather than React's
+  // onAnimationEnd, which some engines route through a vendor-prefixed name.
+  const { closing: dockClosing, finishExit } = presence;
   useEffect(() => {
-    if (!isOpen) return;
+    const container = containerRef.current;
+    if (!dockClosing || !container) return;
+    const onEnd = (e: AnimationEvent) => {
+      if (e.target === container) finishExit();
+    };
+    container.addEventListener('animationend', onEnd);
+    return () => container.removeEventListener('animationend', onEnd);
+  }, [dockClosing, finishExit]);
+
+  // While it slides out nothing in the dock may take focus (Tab would land
+  // in a panel that is leaving). `inert` does that in the browser; the
+  // aria-hidden in the markup keeps it out of the accessibility tree where
+  // `inert` is missing. Set here because React 18 has no `inert` prop.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (dockClosing) container.setAttribute('inert', '');
+    else container.removeAttribute('inert');
+  }, [dockClosing]);
+
+  // Escape closes the dock only when focus is inside it: in push mode the
+  // user may be pressing Escape in the page to cancel a grid edit or a menu.
+  // In overlay mode focus sits inside anyway; <body> (after a click on a
+  // non-focusable spot) counts as inside too. An open sessions menu closes
+  // first. A component inside the dock that consumes Escape itself calls
+  // preventDefault(), and the dock then leaves the key alone.
+  useEffect(() => {
+    if (!dockOpen) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        close();
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      const container = containerRef.current;
+      const active = document.activeElement;
+      const focusInDock = !!container && !!active && container.contains(active);
+      const focusNowhere = !active || active === document.body;
+      if (!focusInDock && !(overlay && focusNowhere)) return;
+      e.stopPropagation();
+      if (sessionsOpen) {
+        setSessionsOpen(false);
+        return;
       }
+      close();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, close]);
+  }, [dockOpen, overlay, sessionsOpen, close]);
+
+  // Alt+A (Option+A on a Mac): open the dock; when it is open and focus is
+  // in the page, move focus to the composer; when focus is already in the
+  // dock, close it. Silent on /chat and while another modal is open, so it
+  // never pulls focus out from under a dialog. Capture phase, so viewers
+  // with single-letter keys (walk mode binds A) never see the chord.
+  useEffect(() => {
+    if (suppressed) return;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      const active = document.activeElement;
+      const matches = isDockShortcut(e, {
+        applePlatform: isApplePlatform(),
+        typingInField: isEditableElement(active),
+      });
+      if (!matches) return;
+      const container = containerRef.current;
+      if (isAnotherModalOpen(container)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const state = useFloatingChatStore.getState();
+      if (!state.isOpen) {
+        openDock();
+        return;
+      }
+      if (container && active && container.contains(active)) {
+        close();
+        return;
+      }
+      const composer = textareaRef.current;
+      if (composer && !composer.disabled) composer.focus();
+      else container?.focus();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [suppressed, openDock, close]);
 
   // Focus the textarea right after the panel opens.
   useEffect(() => {
@@ -1555,8 +1869,25 @@ export function FloatingChatPanel() {
   const overHard = charCount > HARD_LIMIT;
   const canSend = value.trim().length > 0 && !isStreaming && !overHard;
 
-  const widthClass = isMobile ? 'w-full' : 'w-[400px]';
-  const heightClass = isMobile ? 'h-full' : 'h-full max-h-screen';
+  // Resize preview: while the handle is dragged the width goes straight to
+  // the DOM (the dock's own width, the widget offset and, in push mode, the
+  // page offset), so a long conversation is not re-rendered on every
+  // animation frame. The store
+  // gets the final width once, on release, and React then renders the same
+  // value it finds.
+  const previewWidth = useCallback(
+    (next: number) => {
+      const container = containerRef.current;
+      if (container) container.style.width = `${next}px`;
+      applyDockLayout(document.documentElement, {
+        open: true,
+        mode: geometry.mode,
+        width: next,
+        fullWidth: geometry.fullWidth,
+      });
+    },
+    [geometry.mode, geometry.fullWidth],
+  );
 
   // Derived, not stored, so a language change re-reads it. `t` is in the
   // dependency list on purpose, not as padding: it is the only input to this
@@ -1570,121 +1901,129 @@ export function FloatingChatPanel() {
     [title, t],
   );
 
-  if (!isOpen) return null;
+  if (!presence.rendered) return null;
+
+  // `open` while shown, `closing` while it animates out (index.css keys the
+  // slide and the fade on it). Mounted either way, so the conversation state
+  // above survives a close.
+  const dockState = presence.closing ? 'closing' : 'open';
 
   return (
     <>
-      {/* Mobile backdrop — desktop has no backdrop so the user can still see /
-          interact with the page next to the chat. */}
-      {isMobile && (
+      {/* Overlay mode only: the dock is modal there, the backdrop says so and
+          a click on it closes. Push mode has none, the page stays usable. */}
+      {overlay && (
         <div
           aria-hidden
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in"
-          onClick={close}
+          data-testid="floating-chat-backdrop"
+          data-state={dockState}
+          className="oe-ai-dock-backdrop fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+          onClick={presence.closing ? undefined : close}
         />
       )}
       <div
         ref={containerRef}
+        id={DOCK_ELEMENT_ID}
         role="dialog"
-        aria-modal={isMobile ? 'true' : 'false'}
+        aria-modal={overlay ? 'true' : 'false'}
         aria-label={panelTitle}
+        aria-hidden={presence.closing ? true : undefined}
         data-testid="floating-chat-panel"
         data-chat-theme={resolvedTheme}
+        data-dock-mode={geometry.mode}
+        data-state={dockState}
         tabIndex={-1}
         className={[
-          'fixed z-50',
-          'top-0 right-0',
-          widthClass,
-          heightClass,
+          'oe-ai-dock fixed inset-y-0 end-0',
           'flex flex-col',
-          'shadow-2xl border-l border-border-light',
-          'animate-slide-in-right',
+          'border-s border-border-light',
+          // Push: below modals and drawers (z-50), part of the layout, a
+          // faint shadow is enough. Overlay: above the page, like a drawer.
+          overlay ? 'z-50 shadow-2xl' : 'z-40 shadow-[0_0_24px_rgba(15,23,42,0.08)]',
+          presence.closing ? 'pointer-events-none' : '',
+          'focus:outline-none',
         ].join(' ')}
         style={{
+          width: geometry.fullWidth ? '100%' : `${geometry.width}px`,
+          maxWidth: '100vw',
           background: 'var(--chat-bg)',
           color: 'var(--chat-text-primary)',
         }}
       >
-        {/* Header */}
+        {/* Header. Same height as the app header, so the two bottom lines
+            meet in one line across the screen. The title input stays the
+            FIRST input[aria-label] in the dialog (a test depends on it). */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '10px 12px',
+            gap: 4,
+            height: 'var(--oe-header-height, 52px)',
+            flexShrink: 0,
+            paddingInline: '12px 8px',
             borderBottom: '1px solid var(--chat-border)',
             background: 'var(--chat-surface-1)',
             position: 'relative',
           }}
         >
+          <span
+            aria-hidden
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              width: 28,
+              height: 28,
+              marginInlineEnd: 6,
+              borderRadius: 8,
+              color: '#ffffff',
+              background:
+                'linear-gradient(135deg, var(--oe-blue, #2563eb) 0%, var(--oe-blue-dark, #1d4ed8) 100%)',
+            }}
+          >
+            <Sparkles size={15} strokeWidth={2} />
+          </span>
           <input
             value={panelTitle}
             onChange={(e) => setTitle(e.target.value)}
             aria-label={t('chat.panel.title_edit', { defaultValue: 'Conversation title' })}
-            style={{
-              flex: 1,
-              fontSize: 13,
-              fontWeight: 600,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: 'var(--chat-text-primary)',
-              padding: 0,
-            }}
+            title={t('chat.panel.title_edit', { defaultValue: 'Conversation title' })}
+            className="min-w-0 flex-1 truncate rounded-md border-none bg-transparent px-1.5 py-1 text-[13.5px] font-semibold outline-none transition-colors hover:bg-[color:var(--chat-surface-2)] focus:bg-[color:var(--chat-surface-2)] focus-visible:ring-2 focus-visible:ring-oe-blue"
+            style={{ color: 'var(--chat-text-primary)' }}
           />
-          <button
-            type="button"
-            onClick={() => setSessionsOpen((v) => !v)}
-            aria-label={t('chat.panel.sessions_title', { defaultValue: 'Recent sessions' })}
-            title={t('chat.panel.sessions_title', { defaultValue: 'Recent sessions' })}
-            style={{
-              padding: 6,
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--chat-text-secondary)',
-              borderRadius: 4,
-            }}
-            data-testid="floating-chat-sessions-toggle"
+          <DockHeaderButton
+            onClick={newSession}
+            label={t('chat.panel.new_session', { defaultValue: 'New conversation' })}
+            testId="floating-chat-new"
           >
-            <History size={15} />
-          </button>
-          <button
-            type="button"
+            <MessageSquarePlus size={16} />
+          </DockHeaderButton>
+          <DockHeaderButton
+            onClick={() => setSessionsOpen((v) => !v)}
+            label={t('chat.panel.sessions_title', { defaultValue: 'Recent sessions' })}
+            testId="floating-chat-sessions-toggle"
+            expanded={sessionsOpen}
+          >
+            <History size={16} />
+          </DockHeaderButton>
+          <DockHeaderButton
             onClick={() => {
               close();
               navigate('/chat');
             }}
-            aria-label={t('chat.panel.open_full', { defaultValue: 'Open full page' })}
-            title={t('chat.panel.open_full', { defaultValue: 'Open full page' })}
-            style={{
-              padding: 6,
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--chat-text-secondary)',
-              borderRadius: 4,
-            }}
-            data-testid="floating-chat-open-full"
+            label={t('chat.panel.open_full', { defaultValue: 'Open full page' })}
+            testId="floating-chat-open-full"
           >
-            <ExternalLink size={15} />
-          </button>
-          <button
-            type="button"
+            <ExternalLink size={16} />
+          </DockHeaderButton>
+          <DockHeaderButton
             onClick={close}
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-            style={{
-              padding: 6,
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--chat-text-secondary)',
-              borderRadius: 4,
-            }}
-            data-testid="floating-chat-close"
+            label={t('common.close', { defaultValue: 'Close' })}
+            testId="floating-chat-close"
           >
-            <X size={16} />
-          </button>
+            <X size={17} />
+          </DockHeaderButton>
           <SessionsMenu
             open={sessionsOpen}
             onClose={() => setSessionsOpen(false)}
@@ -1881,22 +2220,25 @@ export function FloatingChatPanel() {
           }
           .floating-chat-dots > span:nth-child(2) { animation-delay: 0.15s; }
           .floating-chat-dots > span:nth-child(3) { animation-delay: 0.3s; }
-          @keyframes slide-in-right {
-            from { transform: translateX(100%); opacity: 0.5; }
-            to   { transform: translateX(0);   opacity: 1;   }
-          }
-          .animate-slide-in-right {
-            /* Material standard easing - 220ms slide for the floating chat panel */
-            animation: slide-in-right 220ms cubic-bezier(0.4, 0, 0.2, 1);
-          }
-          @keyframes fade-in {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-          }
-          .animate-fade-in {
-            animation: fade-in 150ms cubic-bezier(0.4, 0, 0.2, 1);
-          }
         `}</style>
+        {/* The dock's own slide and fade live in index.css under
+            .oe-ai-dock / .oe-ai-dock-backdrop. They used to be redefined
+            here as .animate-slide-in-right / .animate-fade-in, which are
+            GLOBAL Tailwind classes: while this panel was mounted, every
+            drawer and toast in the app that uses them was restyled too. */}
+
+        {/* Resize handle, last in the DOM so it is the last Tab stop rather
+            than the first; absolutely placed on the inline-start edge, INSIDE
+            the dock's box so nothing that clips the dock can clip it. Not
+            offered when the dock covers the whole screen. */}
+        {!geometry.fullWidth && !presence.closing && (
+          <DockResizeHandle
+            width={geometry.width}
+            maxWidth={geometry.maxWidth}
+            controlsId={DOCK_ELEMENT_ID}
+            onPreview={previewWidth}
+          />
+        )}
       </div>
     </>
   );
