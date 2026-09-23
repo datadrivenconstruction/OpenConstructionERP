@@ -388,6 +388,26 @@ class BOQListItem(BOQResponse):
         return _serialise_money(v)
 
 
+#: The most projects one ``POST /boqs/by-projects/`` may ask about. It is the
+#: ceiling ``GET /projects/`` puts on its own page, so a client that read its
+#: projects in one page can ask for all of their bills in one call.
+MAX_PROJECTS_PER_BOQ_LIST = 500
+
+
+class BOQListByProjectsRequest(BaseModel):
+    """The projects whose bill registers ``POST /boqs/by-projects/`` returns."""
+
+    project_ids: list[UUID] = Field(
+        ...,
+        max_length=MAX_PROJECTS_PER_BOQ_LIST,
+        description=(
+            "Projects to list the bills of. A repeated id is answered once. Every id must name a "
+            "live project the caller may read, or the whole request is refused and the refusal "
+            "names each id that failed."
+        ),
+    )
+
+
 # ── Position schemas ───────────────────────────────────────────────────────
 
 
