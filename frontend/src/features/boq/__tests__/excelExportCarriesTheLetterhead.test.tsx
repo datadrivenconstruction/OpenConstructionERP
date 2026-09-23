@@ -8,11 +8,12 @@
  *
  * Two separate causes, and the tests below separate them.
  *
- * The letterhead was never in the browser at all: exportExcel.ts writes the
- * product name into row two and has no letterhead and no logo, so the file the
- * button produced could not have carried one however the page was wired. The
- * fix is that Excel is asked of the server, which is where the one letterhead
- * lives, so there is no second assembly of it to drift.
+ * The letterhead was never in the browser at all: the browser's own Excel
+ * builder wrote the product name into row two and had no letterhead and no
+ * logo, so the file the button produced could not have carried one however
+ * the page was wired. The fix is that Excel is asked of the server, which is
+ * where the one letterhead lives, and the browser builder has since been
+ * deleted, so there is no second assembly of it to drift.
  *
  * The project name, standard, region and currency were absent for a different
  * reason: `doExport` closed over `project` while `project` was not in its
@@ -67,7 +68,6 @@ vi.mock('../BOQGrid', () => ({
   }),
 }));
 
-vi.mock('../exportExcel', () => ({ exportBOQToExcel: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('../pdfReport', () => ({ generateBOQPdf: vi.fn() }));
 vi.mock('@/features/bim/api', () => ({ fetchBIMModels: vi.fn().mockResolvedValue({ items: [] }) }));
 
@@ -147,7 +147,6 @@ vi.mock('@/features/projects/api', async (importOriginal) => {
   return { ...actual, projectsApi: { ...actual.projectsApi, get: vi.fn() } };
 });
 
-import { exportBOQToExcel } from '../exportExcel';
 import { generateBOQPdf } from '../pdfReport';
 import { triggerDownload } from '@/shared/lib/api';
 import { projectsApi } from '@/features/projects/api';
@@ -244,10 +243,6 @@ describe('exporting a bill of quantities to Excel', () => {
 
     await chooseExport('Excel (.xlsx)');
 
-    // Asserted before the server call, so a run against a browser-built export
-    // fails here and names what actually happened, rather than failing on an
-    // empty list of requests and leaving the reader to guess.
-    expect(exportBOQToExcel).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(serverExportCalls()).toContain(`/api/v1/boq/boqs/${BOQ_ID}/export/excel/`),
     );
@@ -267,7 +262,6 @@ describe('exporting a bill of quantities to Excel', () => {
 
     await chooseExport('Excel (.xlsx)');
 
-    expect(exportBOQToExcel).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(serverExportCalls()).toContain(`/api/v1/boq/boqs/${BOQ_ID}/export/excel/`),
     );

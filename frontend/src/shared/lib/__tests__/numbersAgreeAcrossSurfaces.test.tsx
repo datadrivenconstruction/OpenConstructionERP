@@ -462,7 +462,7 @@ function receiverOf(source: string, dot: number): string {
  * and a gate that cries wolf gets weakened by the next person to meet it.
  */
 /**
- * The eight files that build a document rather than a screen, and the number
+ * The seven files that build a document rather than a screen, and the number
  * of `toLocaleString` calls each one still hands the interface language.
  *
  * They are held deliberately. A screen is read by the person looking at it, so
@@ -471,12 +471,14 @@ function receiverOf(source: string, dot: number): string {
  * locale their figures should follow is the recipient's, which the record
  * already carries as a country code. That rule does not exist yet, so these
  * files keep the language they had rather than being moved somewhere they
- * would have to move again. Of the thirty six counted here, six are dates,
+ * would have to move again. Of the thirty five counted here, six are dates,
  * which keep the language whatever the document rule turns out to be, twenty
- * seven are numbers waiting on it, and three the gate declines to call either
- * way and counts as unjudged.
+ * six are numbers waiting on it, and three the gate declines to call either
+ * way and counts as unjudged. There were eight files and thirty six calls
+ * until the browser's own BOQ Excel builder was deleted with its one number,
+ * the gross total on its stats line; Excel is built on the server now.
  *
- * The list is closed against growth: a ninth file that formats a number on the
+ * The list is closed against growth: an eighth file that formats a number on the
  * language fails the screen test below, because the exemption is these names
  * and nothing else. Shrinking it is the direction still on trust, and the
  * counts are written down so that trust has a number attached rather than
@@ -486,7 +488,6 @@ function receiverOf(source: string, dot: number): string {
 const DOCUMENT_BUILDERS: readonly (readonly [string, number])[] = [
   ['features/bim/BIMFilterReportModal.tsx', 2],
   ['features/bim/printReport.ts', 1],
-  ['features/boq/exportExcel.ts', 1],
   ['features/contracts/ProgressClaimLineTable.tsx', 1],
   ['features/reporting/ReportingPage.tsx', 2],
   ['features/reports/ReportsPage.tsx', 26],
@@ -1038,9 +1039,11 @@ describe('there is one place the number locale comes from', () => {
     // subtracted. This file used to say six of the thirty six were dates and
     // "the other thirty are numbers", which was arithmetic rather than a
     // reading: the walk could recognise the six and had no way to look at the
-    // rest. Reading the options argument and the local declarations answers
-    // twenty seven of them outright and still cannot answer three, so the
-    // claim is now twenty seven numbers and three the gate declines to call.
+    // rest. Reading the options argument and the local declarations answered
+    // twenty seven of them outright and still could not answer three, so the
+    // claim became twenty seven numbers and three the gate declines to call.
+    // Deleting the browser's BOQ Excel builder took one of the numbers with
+    // it, so it is twenty six now.
     //
     // These are exact rather than floors, and that is safe here for a reason
     // that does not hold in the two rules above: `held` has already pinned the
@@ -1056,7 +1059,7 @@ describe('there is one place the number locale comes from', () => {
     // floors.
     const of = (v: Verdict) => counted.filter((c) => c === v).length;
     expect(of('date'), 'a date keeps the interface language whichever way the document rule goes').toBe(6);
-    expect(of('number'), 'these are the figures the recipient rule will have to move').toBe(27);
+    expect(of('number'), 'these are the figures the recipient rule will have to move').toBe(26);
     expect(of('unjudged'), 'the gate declines to call these, and says so rather than guessing').toBe(3);
   }, 60_000);
 
