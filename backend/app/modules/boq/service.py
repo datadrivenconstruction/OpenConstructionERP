@@ -2134,11 +2134,11 @@ class BOQService:
         refuses a status change on a locked bill, since status and lock move
         together through the lock and unlock endpoints),
         ``refresh_quantity_links`` (records drift, applies nothing), and the
-        writers of snapshots, quantity links and activity rows. Not yet
-        decided: ``delete_boq`` removes a locked bill with all its positions
-        and markups, and the linked-master and resource-code propagation
-        reached from ``update_position`` writes into OTHER bills of the project
-        without reading their lock.
+        writers of snapshots, quantity links and activity rows. ``delete_boq``
+        is guarded: it would remove a locked bill with all its positions and
+        markups. Not yet decided: the linked-master and resource-code
+        propagation reached from ``update_position`` writes into OTHER bills of
+        the project without reading their lock.
 
         Returns:
             The loaded BOQ (so callers can reuse it instead of fetching twice).
@@ -3070,9 +3070,15 @@ class BOQService:
     async def delete_boq(self, boq_id: uuid.UUID) -> None:
         """Delete a BOQ and all its positions.
 
-        Raises HTTPException 404 if not found.
+        A locked bill is refused like every other write to it: deleting it
+        would remove its approved figures in one step. Unlock it first.
+
+        Raises:
+            HTTPException 404: BOQ not found.
+            HTTPException 409: BOQ is locked and cannot be modified.
         """
         boq = await self.get_boq(boq_id)
+        await self._ensure_boq_writable(boq_id)
         project_uuid = boq.project_id
         project_id = str(project_uuid)
 
