@@ -1140,7 +1140,9 @@ async def delete_progress_claim(
 ) -> None:
     await _verify_claim_access(session, claim_id, user_id)
     service = ContractsService(session)
-    await service.claim_repo.delete(claim_id)
+    # Through the service, which refuses a claim past draft: its lines go
+    # with it, and the claim line routes already refuse exactly that.
+    await service.delete_progress_claim(claim_id)
 
 
 @router.get("/progress-claims/{claim_id}/validation")
