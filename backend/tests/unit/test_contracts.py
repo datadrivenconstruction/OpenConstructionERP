@@ -764,15 +764,20 @@ def test_compute_sov_status_aggregates_by_line() -> None:
     line_a = SimpleNamespace(id=uuid.uuid4(), quantity=Decimal("100"), unit_rate=Decimal("10"))
     line_b = SimpleNamespace(id=uuid.uuid4(), quantity=Decimal("50"), unit_rate=Decimal("20"))
     # 30 units billed on A in a paid claim, 10 units billed on B in submitted (earned not paid)
-    cl_a_paid = SimpleNamespace(
-        contract_line_id=line_a.id,
-        period_completed_value=Decimal("300"),
-        _claim_status="paid",
+    # Each line arrives paired with its claim; the status is read from there.
+    cl_a_paid = (
+        SimpleNamespace(
+            contract_line_id=line_a.id,
+            period_completed_value=Decimal("300"),
+        ),
+        SimpleNamespace(id=uuid.uuid4(), status="paid", claim_number="PC-0001"),
     )
-    cl_b_submitted = SimpleNamespace(
-        contract_line_id=line_b.id,
-        period_completed_value=Decimal("200"),
-        _claim_status="submitted",
+    cl_b_submitted = (
+        SimpleNamespace(
+            contract_line_id=line_b.id,
+            period_completed_value=Decimal("200"),
+        ),
+        SimpleNamespace(id=uuid.uuid4(), status="submitted", claim_number="PC-0002"),
     )
     result = compute_sov_status(
         [line_a, line_b],

@@ -439,17 +439,29 @@ class ProgressClaimLineRepository(_CRUDBase):
         result = await self.session.execute(stmt)
         return {row[0]: Decimal(str(row[1] or 0)) for row in result.all()}
 
-    async def lines_with_status_for_contract(
+    async def lines_with_claim_for_contract(
         self,
         contract_id: uuid.UUID,
-    ) -> list[tuple[ProgressClaimLine, str]]:
-        """All claim lines for a contract + their parent claim status.
+    ) -> list[tuple[ProgressClaimLine, ProgressClaim]]:
+        """All claim lines for a contract, each paired with its claim.
 
         Single JOIN query - replaces an N+1 (one claim-line query per
         progress claim) in the SoV-status rollup.
+
+        It used to return the claim's status and nothing else, which was all
+        the rollup needed while it only had to separate billed from paid. The
+        rollup now also has to know which claim is the latest in billing
+        order, and billing order is :func:`~app.modules.contracts.periods.claim_order_key`
+        over three of the claim's own columns. Returning the claim hands the
+        caller the whole ordering question instead of another column, and
+        saves tagging derived values onto the line rows on the way out.
+
+        No ORDER BY: the caller sorts by the shared key rather than by
+        whatever this statement happened to return, for the reason given on
+        :meth:`ProgressClaimRepository.ordered_for_contract`.
         """
         stmt = (
-            select(ProgressClaimLine, ProgressClaim.status)
+            select(ProgressClaimLine, ProgressClaim)
             .join(
                 ProgressClaim,
                 ProgressClaim.id == ProgressClaimLine.progress_claim_id,

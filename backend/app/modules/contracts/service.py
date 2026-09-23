@@ -63,7 +63,7 @@ from app.modules.contracts.models import (
     RetentionRelease,
     RetentionSchedule,
 )
-from app.modules.contracts.periods import claim_dates_for_write, claims_before
+from app.modules.contracts.periods import claim_dates_for_write, claim_order_key, claims_before
 from app.modules.contracts.repository import (
     ContractDocumentRepository,
     ContractLineRepository,
@@ -3413,19 +3413,12 @@ class ContractsService:
         """Build the Schedule-of-Values status: scheduled vs earned vs paid per line."""
         contract = await self.get_contract(contract_id)
         lines = await self.line_repo.list_for_contract(contract.id)
-        # Single JOIN instead of N+1 (one claim-line query per claim).
-        tagged_claim_lines: list[Any] = []
-        for cl, claim_status in await self.claim_line_repo.lines_with_status_for_contract(
-            contract.id,
-        ):
-            try:
-                cl._claim_status = claim_status
-            except AttributeError:
-                pass
-            tagged_claim_lines.append(cl)
+        # Single JOIN instead of N+1 (one claim-line query per claim). Each
+        # line arrives with its claim, so the status and the billing order are
+        # read from the claim rather than tagged onto the line here.
         return compute_sov_status(
             lines,
-            tagged_claim_lines,
+            await self.claim_line_repo.lines_with_claim_for_contract(contract.id),
             retention_percent=contract.retention_percent,
         )
 
@@ -4793,6 +4786,7 @@ class ContractsService:
         (the claim inherits the contract currency); no currency is ever blended.
         """
         from app.modules.contracts.aia import (  # noqa: PLC0415
+            OUT_OF_SCHEDULE_LINE,
             apply_retention_snapshot,
             bills_without_schedule,
             build_cost_of_work_row,
@@ -4800,6 +4794,7 @@ class ContractsService:
             build_g703,
             sheet_sov_lines,
         )
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
 
         claim = await self.claim_repo.get_by_id(claim_id)
         if claim is None:
@@ -4845,11 +4840,14 @@ class ContractsService:
 
         retainage_percent = Decimal(str(contract.retention_percent or 0))
         prior_by_line = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
+        # Both branches need the prior claims, so they are read once. The two
+        # calls answer the same population: prior_period_value_by_line resolves
+        # "prior" through this very method, rejected claims left out.
+        prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         if bills_without_schedule(claim, claim_lines):
             # The claim's own figures go on a single cost-of-work row. What
             # makes a claim this shape is decided once, in aia.py, because
             # certification freezes the same two figures the sheet prints.
-            prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
             held = (
                 Decimal(str(claim.retention_held_to_date))
                 if claim.retention_held_to_date is not None
@@ -4867,6 +4865,24 @@ class ContractsService:
                 )
             ]
         else:
+            # What earlier claims billed with no lines at all. Column D here is
+            # assembled from claim lines, so a lineless earlier claim is
+            # invisible to it while line 7 still carries its certificate, and
+            # line 8 then subtracts money the columns never added.
+            #
+            # The residual finds it without asking any claim what basis it used,
+            # which matters because the answer was never recorded for claims
+            # that already exist. It holds on an invariant worth naming: every
+            # path that writes gross_amount sets it to the sum of the claim's
+            # own period_completed_value, the same field prior_by_line sums,
+            # and only a claim with no lines keeps a gross of its own. So the
+            # difference is exactly what was billed outside the schedule.
+            # Floored at zero: a legacy row whose gross was never recomputed
+            # from its lines would otherwise invent a negative row.
+            prior_gross_total = sum((Decimal(str(c.gross_amount or 0)) for c in prior_claims), DEC_ZERO)
+            prior_without_schedule = prior_gross_total - sum(prior_by_line.values(), DEC_ZERO)
+            if prior_without_schedule < DEC_ZERO:
+                prior_without_schedule = DEC_ZERO
             # Which lines the sheet lists, roll-up parents excluded, is decided
             # once in aia.py so this and the certification freeze cannot drift.
             sov_lines = sheet_sov_lines(contract_lines, by_contract_line, prior_by_line)
@@ -4875,11 +4891,19 @@ class ContractsService:
                 by_contract_line,
                 retainage_percent=retainage_percent,
                 prior_by_line=prior_by_line,
+                prior_without_schedule=prior_without_schedule,
+                out_of_schedule_label=contracts_translate("aia.g703.billed_without_schedule"),
             )
             if claim.retention_held_to_date is not None:
                 # Worked out by the retention engine: column I and line 5 are the
                 # claim's certified figures, with any release billed on it taken off.
-                apply_retention_snapshot(g703, sov_lines, by_contract_line, held=claim.retention_held_to_date)
+                #
+                # The snapshot walks rows beside lines strictly in step, so the
+                # out-of-schedule row needs a stand-in. Counted off the rows the
+                # builder returned rather than by re-asking whether a residual
+                # existed, because two copies of that question can disagree.
+                snapshot_lines = [*sov_lines, *([OUT_OF_SCHEDULE_LINE] * (len(g703) - len(sov_lines)))]
+                apply_retention_snapshot(g703, snapshot_lines, by_contract_line, held=claim.retention_held_to_date)
 
         g702 = build_g702_summary(
             g703,
@@ -5866,7 +5890,7 @@ def apply_change_order_to_contract_pure(
 
 def compute_sov_status(
     lines: list[Any],
-    claim_lines: list[Any],
+    claim_lines: list[tuple[Any, Any]],
     *,
     retention_percent: Decimal | float | int = Decimal("0"),
 ) -> dict[str, Any]:
@@ -5882,10 +5906,18 @@ def compute_sov_status(
     claims. "paid" = sum across paid claims. This deliberately splits the
     two because in many contracts the certified-but-unpaid amount matters.
 
-    Caller groups claim_lines by claim_status (one list per status) via the
-    ``status`` attribute on the parent claim. To keep this fn pure we
-    expect claim_lines to carry a ``_claim_status`` attribute set by the
-    service-level call site.
+    ``claim_lines`` is a list of ``(claim_line, claim)`` pairs. The status and
+    the billing order are read from the claim, so this stays pure without the
+    caller tagging derived values onto the rows it passes in.
+
+    Retention is read from the claims rather than recomputed. Each claim line
+    carries ``retention_to_date``, what its claim certified to date on that
+    SoV line, which is the figure the payment application printed;
+    :mod:`~app.modules.contracts.aia` already prefers it the same way. The
+    figure is cumulative, so the rollup is the latest counted claim's and
+    never a sum. Where no claim recorded one, and only there, the contract's
+    flat rate is applied to what has been billed, which is what this did for
+    every contract before ladders existed.
     """
     pct = Decimal(str(retention_percent or 0))
     by_line: dict[str, dict[str, Decimal]] = {}
@@ -5902,12 +5934,18 @@ def compute_sov_status(
             "paid": DEC_ZERO,
         }
 
-    for cl in claim_lines:
+    # The latest claim, in billing order, that recorded a retention figure for
+    # a line: one for what has been billed and one for what has been paid,
+    # because the two answer different questions and can be different claims.
+    latest_billed_retention: dict[str, tuple[Any, Decimal]] = {}
+    latest_paid_retention: dict[str, tuple[Any, Decimal]] = {}
+
+    for cl, claim in claim_lines:
         lid = str(getattr(cl, "contract_line_id", "") or "")
         if lid not in by_line:
             continue
         value = Decimal(str(getattr(cl, "period_completed_value", 0) or 0))
-        claim_status = (getattr(cl, "_claim_status", "") or "").lower()
+        claim_status = (getattr(claim, "status", "") or "").lower()
         # Earned = anything that's at least submitted (i.e. recognised
         # as work-in-place by either party).
         if claim_status in (
@@ -5922,6 +5960,28 @@ def compute_sov_status(
         if claim_status == "paid":
             by_line[lid]["paid"] += value
 
+        held = getattr(cl, "retention_to_date", None)
+        if held is None:
+            # No figure recorded is not a figure of zero. A claim written
+            # before these columns existed, or by a route that does not fill
+            # them, leaves the line to the flat fallback below.
+            continue
+        # Ties are possible and have to break the same way every time:
+        # claim_number has no unique constraint and defaults to empty, so two
+        # claims raised together can match on all three parts of the key. The
+        # id is an arbitrary tiebreak but a stable one, and a figure that
+        # flips with the row order is worse than one that is merely wrong.
+        order = (claim_order_key(claim), str(getattr(claim, "id", "")))
+        for bucket, statuses in (
+            (latest_billed_retention, ("approved", "certified", "paid")),
+            (latest_paid_retention, ("paid",)),
+        ):
+            if claim_status not in statuses:
+                continue
+            current = bucket.get(lid)
+            if current is None or order > current[0]:
+                bucket[lid] = (order, Decimal(str(held)))
+
     rows: dict[str, dict[str, Any]] = {}
     totals: dict[str, Decimal] = {
         "scheduled": DEC_ZERO,
@@ -5935,8 +5995,12 @@ def compute_sov_status(
         earned = row["earned"]
         billed = row["billed"]
         paid = row["paid"]
-        retained = (billed * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
-        net_paid = paid - (paid * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
+        recorded = latest_billed_retention.get(lid)
+        recorded_paid = latest_paid_retention.get(lid)
+        held = recorded[1] if recorded is not None else billed * pct / DEC_HUNDRED
+        held_on_paid = recorded_paid[1] if recorded_paid is not None else paid * pct / DEC_HUNDRED
+        retained = held.quantize(Decimal("0.0001"))
+        net_paid = paid - held_on_paid.quantize(Decimal("0.0001"))
         percent_complete = float((earned / scheduled) * Decimal("100")) if scheduled > DEC_ZERO else 0.0
         rows[lid] = {
             "scheduled": scheduled,
