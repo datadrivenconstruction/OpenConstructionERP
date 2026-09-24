@@ -14,6 +14,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -218,6 +219,36 @@ class DelayAnalysisService:
         analysis.eot_claim_id = eot_claim_id
         await self.session.flush()
         return analysis
+
+    async def refuse_if_eot_claim_raised(self, analysis: DelayAnalysis, *, doing: str) -> None:
+        """Raise 409 while the EOT claim raised from this analysis still exists.
+
+        The claim points back at the analysis by ``delay_analysis_id`` with no
+        foreign key, so deleting the analysis would leave the claim citing
+        nothing, and raising a second claim would re-point ``eot_claim_id`` and
+        leave two drafts for one delay. A claim that was itself deleted no
+        longer holds the analysis.
+
+        Args:
+            analysis: The delay analysis.
+            doing: What the caller is refused, as it reads in the sentence.
+        """
+        if analysis.eot_claim_id is None:
+            return
+        try:
+            from app.modules.variations.models import ExtensionOfTimeClaim
+        except ImportError:
+            return
+        claim = await self.session.get(ExtensionOfTimeClaim, analysis.eot_claim_id)
+        if claim is None:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"An EOT claim was already raised from this analysis (id={claim.id}), "
+                f"so it cannot {doing}. Work on that claim instead."
+            ),
+        )
 
     # ── helpers ──────────────────────────────────────────────────────────────
 

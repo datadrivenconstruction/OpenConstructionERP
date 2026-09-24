@@ -295,6 +295,13 @@ class QMSService:
         item = await self.repo.get_itp_item(itp_item_id)
         if item is None:
             raise ValueError(f"ITP item {itp_item_id} not found")
+        # The same plan-status rule add_itp_item applies: a plan past active is
+        # the record of how the work was controlled, links included.
+        plan = await self.repo.get_itp_plan(item.itp_plan_id)
+        if plan is not None and plan.status not in ("draft", "active"):
+            raise ValueError(
+                f"Cannot relink an item of ITP plan in status '{plan.status}'",
+            )
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         pred_id = fields.get("predecessor_itp_item_id")
         if pred_id is not None:

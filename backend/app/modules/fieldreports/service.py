@@ -562,6 +562,13 @@ class FieldReportService:
         report can only ever reference documents inside its own project.
         """
         report = await self.get_report(report_id)
+        # The attachment list is part of what was submitted and approved, so it
+        # follows the same draft-only rule as update_report.
+        if report.status != "draft":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot link documents to a report with status '{report.status}' - only draft reports are editable",
+            )
         await self._reject_foreign_document_ids(report.project_id, document_ids)
 
         existing = list(report.document_ids or [])
