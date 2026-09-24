@@ -484,7 +484,10 @@ function FinanceSummaryCards({
       accent: 'bg-oe-blue',
     },
     {
-      label: t('finance.summary_total_invoiced', { defaultValue: 'Total Invoiced (Payable)' }),
+      // `total_payable` excludes paid and cancelled invoices
+      // (finance/repository.py:206), so this tile is what is still OWED, not
+      // what has been invoiced in total. Labelled to match the arithmetic.
+      label: t('finance.summary_total_invoiced', { defaultValue: 'Outstanding (Payable)' }),
       value: totalInvoiced,
       icon: <Receipt size={18} />,
       color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',

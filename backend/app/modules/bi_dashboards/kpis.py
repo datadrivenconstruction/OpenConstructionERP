@@ -364,6 +364,14 @@ class EVMSnapshot:
     ac: Decimal = Decimal("0")  # Actual cost (ACWP)
     record_count: int = 0
     currency: str = ""  # Project base currency for the money primitives
+    # False when PV could not be time-phased for this project (see
+    # ``_costmodel_evm_for_project``). PV=0 and "PV unknown" are different
+    # facts: the first is a real planned value of nothing, the second means
+    # we have no schedule baseline to measure against. Consumers that divide
+    # by PV (SPI) or subtract it (SV) MUST report "no data" rather than a
+    # number derived from an incomplete PV - a plausible-looking SPI built
+    # on a partial baseline is worse than a visible blank.
+    pv_known: bool = True
     breakdown: dict[str, Any] = field(default_factory=dict)
     # Portfolio-mode only: each money primitive grouped by the owning
     # project's ISO currency. Empty in single-project mode.
@@ -372,6 +380,109 @@ class EVMSnapshot:
     ev_by_currency: dict[str, Decimal] = field(default_factory=dict)
     ac_by_currency: dict[str, Decimal] = field(default_factory=dict)
     is_portfolio: bool = False
+
+
+def _pv_elapsed_fraction(start: _date | None, end: _date | None, today: _date) -> Decimal | None:
+    """Fraction of one budget line's period that has elapsed at ``today``.
+
+    Linear pro-rata inside the period, which is the standard BCWS spread when
+    no finer distribution curve is recorded. ``None`` means the line carries
+    no usable period - we cannot say how much of its planned amount was
+    *scheduled* to be earned by now, which is not the same as "none of it".
+
+    CAUTION - this is the one place in the EVM spine that reads the programme
+    calendar, so SPI and SV move whenever ``period_start`` / ``period_end``
+    move, and **nothing raises when they do**. EV and AC are pure amounts and
+    are unaffected, so CPI stays put while SPI swings; that asymmetry is the
+    tell. A demo shift of the hero programme by +245 days took SPI from 0.93 to
+    4.42 with no error and no log line, because it pushed most periods past
+    ``today`` and collapsed PV. If SPI looks implausible, re-read the
+    programme dates before touching this function.
+    """
+    if start is None or end is None:
+        return None
+    if today >= end:
+        return Decimal("1")
+    if today <= start:
+        return Decimal("0")
+    span = Decimal((end - start).days)
+    if span <= 0:
+        return Decimal("1")
+    return Decimal((today - start).days) / span
+
+
+async def _costmodel_evm_for_project(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    fx_map: dict[str, Decimal],
+    base_currency: str,
+    seen_codes: set[str],
+) -> dict[str, Any] | None:
+    """PV / EV / AC from ``oe_costmodel_budget_line``, or ``None`` if unusable.
+
+    The cost model is the only place on this platform that carries real EVM
+    quantities per budget line (``planned_amount`` / ``earned_amount`` /
+    ``actual_amount``). Returns ``None`` when the project has no budget lines
+    at all, so the caller falls back to the legacy task/payment/PO path and
+    no existing deployment regresses.
+
+    **PV is time-phased, and that is the whole point.** PV (BCWS) is the
+    planned value *to date*, not the budget at completion: summing
+    ``planned_amount`` outright yields BAC and makes SPI read like a schedule
+    catastrophe when it is really a units error. Each line contributes
+    ``planned_amount × elapsed_fraction(period_start, period_end)``.
+
+    **The partial-period rule.** If ANY line lacks a usable period, PV is
+    reported unknown (``pv_known=False``) rather than computed over the
+    subset that has one. PV is only meaningful measured over the same scope
+    as EV; a PV summed over 6 of 19 lines while EV covers all 19 is a units
+    mismatch, not a partial answer, and it inflates SPI silently. This
+    mirrors the module's existing convention for a missing baseline (see
+    ``budget_consumed_pct``: "greys out (no data) when no budget baseline
+    exists") instead of inventing a new one.
+    """
+    try:
+        from app.modules.costmodel.models import BudgetLine  # type: ignore
+
+        rows = (
+            await session.execute(select(BudgetLine).where(BudgetLine.project_id == project_id))
+        ).scalars().all()
+    except ImportError:
+        return None
+    except Exception:
+        logger.debug("evm: costmodel budget-line probe failed", exc_info=True)
+        return None
+    if not rows:
+        return None
+
+    today = _date.today()
+    pv = ev = ac = planned_total = Decimal("0")
+    pv_known = True
+    for row in rows:
+        code = str(getattr(row, "currency", "") or "")
+        if code:
+            seen_codes.add(code.upper())
+        planned = _amount_in_base(_to_decimal(getattr(row, "planned_amount", 0)), code, fx_map, base_currency)
+        planned_total += planned
+        ev += _amount_in_base(_to_decimal(getattr(row, "earned_amount", 0)), code, fx_map, base_currency)
+        ac += _amount_in_base(_to_decimal(getattr(row, "actual_amount", 0)), code, fx_map, base_currency)
+        fraction = _pv_elapsed_fraction(
+            _parse_date(getattr(row, "period_start", None)),
+            _parse_date(getattr(row, "period_end", None)),
+            today,
+        )
+        if fraction is None:
+            pv_known = False
+        else:
+            pv += planned * fraction
+    return {
+        "pv": pv if pv_known else Decimal("0"),
+        "ev": ev,
+        "ac": ac,
+        "planned_total": planned_total,
+        "count": len(rows),
+        "pv_known": pv_known,
+    }
 
 
 async def _evm_snapshot_for_project(
@@ -396,22 +507,42 @@ async def _evm_snapshot_for_project(
     base_currency, fx_map = await _project_currency_and_fx(session, project_id)
     snap.currency = base_currency
     seen_codes: set[str] = set()
-    # Tasks → PV + EV + count
-    try:
-        from app.modules.tasks.models import Task  # type: ignore
+    # PV / EV / AC come from the cost model when the project has one: it is
+    # the only source on this platform carrying real EVM quantities per
+    # budget line. Projects with no budget lines fall through to the legacy
+    # task/payment/PO path below so nothing regresses for them.
+    cm = await _costmodel_evm_for_project(session, project_id, fx_map, base_currency, seen_codes)
+    costmodel_planned_total = Decimal("0")
+    if cm is not None:
+        snap.pv = cm["pv"]
+        snap.ev = cm["ev"]
+        snap.ac = cm["ac"]
+        snap.pv_known = cm["pv_known"]
+        snap.record_count += cm["count"]
+        costmodel_planned_total = cm["planned_total"]
+    else:
+        # Legacy fallback: Tasks → PV + EV + count.
+        # NOTE: these attribute names are historical. ``Task`` does not
+        # define ``planned_value`` / ``earned_value`` on this schema, so both
+        # ``getattr`` calls take their default and PV = EV = 0 here. That is
+        # the bug the cost-model branch above exists to fix; this path is
+        # retained only so projects without budget lines behave exactly as
+        # they did before rather than changing under existing deployments.
+        try:
+            from app.modules.tasks.models import Task  # type: ignore
 
-        stmt = select(Task).where(Task.project_id == project_id)
-        rows = (await session.execute(stmt)).scalars().all()
-        for row in rows:
-            pv = _to_decimal(getattr(row, "planned_value", 0))
-            ev = _to_decimal(getattr(row, "earned_value", 0))
-            snap.pv += pv
-            snap.ev += ev
-            snap.record_count += 1
-    except ImportError:
-        pass
-    except Exception:
-        logger.debug("evm: tasks probe failed", exc_info=True)
+            stmt = select(Task).where(Task.project_id == project_id)
+            rows = (await session.execute(stmt)).scalars().all()
+            for row in rows:
+                pv = _to_decimal(getattr(row, "planned_value", 0))
+                ev = _to_decimal(getattr(row, "earned_value", 0))
+                snap.pv += pv
+                snap.ev += ev
+                snap.record_count += 1
+        except ImportError:
+            pass
+        except Exception:
+            logger.debug("evm: tasks probe failed", exc_info=True)
 
     # Project budget → BAC
     try:
@@ -442,53 +573,62 @@ async def _evm_snapshot_for_project(
             snap.bac = boq_baseline
             baseline_source = "boq"
     if snap.bac == 0:
-        snap.bac = snap.pv  # Fall back to Σ planned_value
+        # Last resort: the sum of the planned baseline. On the cost-model
+        # path that is Σ planned_amount, which IS budget-at-completion by
+        # definition - deliberately NOT the time-phased PV, which is a
+        # to-date partial and would understate the baseline.
+        snap.bac = costmodel_planned_total if cm is not None else snap.pv
         if snap.bac > 0:
-            baseline_source = "planned_value"
+            baseline_source = "costmodel_planned" if cm is not None else "planned_value"
 
-    # finance.Payment → AC (settled actual cost)
-    try:
-        from app.modules.finance.models import Invoice, Payment  # type: ignore
+    # AC from settled payments + committed POs, but ONLY when the cost model
+    # did not already supply it. Adding both would double-count the same
+    # spend: a cost model's ``actual_amount`` is normally posted FROM these
+    # very invoices and purchase orders.
+    if cm is None:
+        # finance.Payment → AC (settled actual cost)
+        try:
+            from app.modules.finance.models import Invoice, Payment  # type: ignore
 
-        # Payment has no project_id - it hangs off the Invoice, so scope
-        # via the parent invoice's project_id.
-        stmt = (
-            select(Payment)
-            .join(Invoice, Payment.invoice_id == Invoice.id)
-            .where(
-                Invoice.project_id == project_id,
+            # Payment has no project_id - it hangs off the Invoice, so scope
+            # via the parent invoice's project_id.
+            stmt = (
+                select(Payment)
+                .join(Invoice, Payment.invoice_id == Invoice.id)
+                .where(
+                    Invoice.project_id == project_id,
+                )
             )
-        )
-        rows = (await session.execute(stmt)).scalars().all()
-        for row in rows:
-            amt = _to_decimal(getattr(row, "amount", 0))
-            code = str(getattr(row, "currency_code", "") or "")
-            if code:
-                seen_codes.add(code.upper())
-            snap.ac += _amount_in_base(amt, code, fx_map, base_currency)
-            snap.record_count += 1
-    except ImportError:
-        pass
-    except Exception:
-        logger.debug("evm: finance payment probe failed", exc_info=True)
+            rows = (await session.execute(stmt)).scalars().all()
+            for row in rows:
+                amt = _to_decimal(getattr(row, "amount", 0))
+                code = str(getattr(row, "currency_code", "") or "")
+                if code:
+                    seen_codes.add(code.upper())
+                snap.ac += _amount_in_base(amt, code, fx_map, base_currency)
+                snap.record_count += 1
+        except ImportError:
+            pass
+        except Exception:
+            logger.debug("evm: finance payment probe failed", exc_info=True)
 
-    # procurement.PurchaseOrder → AC (committed cost)
-    try:
-        from app.modules.procurement.models import PurchaseOrder  # type: ignore
+        # procurement.PurchaseOrder → AC (committed cost)
+        try:
+            from app.modules.procurement.models import PurchaseOrder  # type: ignore
 
-        stmt = select(PurchaseOrder).where(PurchaseOrder.project_id == project_id)
-        rows = (await session.execute(stmt)).scalars().all()
-        for row in rows:
-            amt = _to_decimal(getattr(row, "amount_total", 0))
-            code = str(getattr(row, "currency_code", "") or "")
-            if code:
-                seen_codes.add(code.upper())
-            snap.ac += _amount_in_base(amt, code, fx_map, base_currency)
-            snap.record_count += 1
-    except ImportError:
-        pass
-    except Exception:
-        logger.debug("evm: procurement probe failed", exc_info=True)
+            stmt = select(PurchaseOrder).where(PurchaseOrder.project_id == project_id)
+            rows = (await session.execute(stmt)).scalars().all()
+            for row in rows:
+                amt = _to_decimal(getattr(row, "amount_total", 0))
+                code = str(getattr(row, "currency_code", "") or "")
+                if code:
+                    seen_codes.add(code.upper())
+                snap.ac += _amount_in_base(amt, code, fx_map, base_currency)
+                snap.record_count += 1
+        except ImportError:
+            pass
+        except Exception:
+            logger.debug("evm: procurement probe failed", exc_info=True)
 
     snap.breakdown = {
         "bac": str(snap.bac),
@@ -497,9 +637,14 @@ async def _evm_snapshot_for_project(
         "ac": str(snap.ac),
         "currency": base_currency,
         # Where BAC came from: "budget" (project budget/contract value),
-        # "boq" (priced estimate fallback - CONN-78) or "planned_value"
-        # (Σ task planned_value). "" when there is no baseline at all.
+        # "boq" (priced estimate fallback - CONN-78), "costmodel_planned"
+        # (Σ budget-line planned_amount) or "planned_value" (Σ task
+        # planned_value). "" when there is no baseline at all.
         "baseline_source": baseline_source,
+        # Which spine produced PV/EV/AC, so the drawer can explain a tile.
+        "evm_source": "costmodel" if cm is not None else "tasks",
+        # False → PV could not be time-phased; SPI/SV report "no data".
+        "pv_known": snap.pv_known,
     }
     missing = _missing_fx_codes(seen_codes, fx_map, base_currency)
     if missing:
@@ -600,6 +745,12 @@ async def _evm_snapshot_portfolio(
         if per.record_count == 0 and per.bac == 0:
             continue
         code = (per.currency or "").strip().upper() or "UNKNOWN"
+        # PV is only aggregatable if EVERY contributing project could
+        # time-phase it. One project with an unknown PV poisons the
+        # portfolio ratio, because its EV still lands in the numerator -
+        # so the portfolio reports no-data instead of a flattering SPI.
+        if not per.pv_known:
+            snap.pv_known = False
         snap.bac += per.bac
         snap.pv += per.pv
         snap.ev += per.ev
@@ -728,6 +879,16 @@ async def spi_kpi(
 ) -> KPIComputation:
     """Schedule Performance Index = EV / PV."""
     snap = await _evm_snapshot(session, project_id, allowed_project_ids)
+    if not snap.pv_known:
+        # No usable schedule baseline → SPI is UNDEFINED, not zero. Report
+        # no-data so the tile greys out, rather than publishing a ratio
+        # derived from a PV summed over fewer lines than EV covers.
+        return KPIComputation(
+            value=Decimal("0"),
+            unit="ratio",
+            source_record_count=0,
+            breakdown=snap.breakdown,
+        )
     value = _safe_div(snap.ev, snap.pv) if snap.pv > 0 else Decimal("0")
     return KPIComputation(
         value=value,
@@ -783,6 +944,15 @@ async def sv_kpi(
     **_: Any,
 ) -> KPIComputation:
     snap = await _evm_snapshot(session, project_id, allowed_project_ids)
+    if not snap.pv_known:
+        # Same rule as SPI: without a usable schedule baseline, EV - PV is
+        # not a variance of zero, it is unmeasurable. Report no-data.
+        return KPIComputation(
+            value=Decimal("0"),
+            unit="currency",
+            source_record_count=0,
+            breakdown=snap.breakdown,
+        )
     per_currency = {
         code: snap.ev_by_currency.get(code, Decimal("0")) - snap.pv_by_currency.get(code, Decimal("0"))
         for code in set(snap.ev_by_currency) | set(snap.pv_by_currency)
@@ -1118,6 +1288,33 @@ async def change_order_ratio_kpi(
             if proj is not None:
                 contract_value = _to_decimal(
                     getattr(proj, "contract_value", None) or getattr(proj, "budget", 0),
+                )
+        else:
+            # Portfolio scope. This branch did not exist: ``contract_value``
+            # stayed 0, fell into the ``<= 0`` guard below and returned a zero
+            # value while STILL reporting ``source_record_count``. Every
+            # roll-up board therefore read "0 %" over a real change-order
+            # count - a confident wrong number, not a visible gap.
+            #
+            # The denominator must span exactly the same projects as the
+            # numerator above, which is scoped by ``_scope_portfolio``, so the
+            # same ``allowed_project_ids`` gate is applied here. ``None`` means
+            # unrestricted (admin); an empty set matches nothing, which is the
+            # safe default - never fall back to "all projects".
+            stmt = select(Project)
+            if allowed_project_ids is not None:
+                stmt = stmt.where(Project.id.in_(allowed_project_ids))
+            for proj in (await session.execute(stmt)).scalars().all():
+                pcode = str(getattr(proj, "currency", "") or "")
+                if pcode:
+                    seen_codes.add(pcode.upper())
+                contract_value += _amount_in_base(
+                    _to_decimal(
+                        getattr(proj, "contract_value", None) or getattr(proj, "budget", 0),
+                    ),
+                    pcode,
+                    fx_map,
+                    base_currency,
                 )
     except ImportError:
         pass
@@ -2139,7 +2336,15 @@ async def risk_open_exposure_kpi(
                     row_base, row_fx = fx_cache[pid]
                 bucket_code = code or row_base or "UNKNOWN"
                 converted = _amount_in_base(amt, code, row_fx, row_base)
-                _add_currency_bucket(by_currency, converted, bucket_code, row_base)
+                # RAW ``amt``, not ``converted``. ``bucket_code`` is the row's
+                # OWN currency, so filing a base-converted number under it
+                # labels a USD figure "EUR" - the per-currency map is meant to
+                # answer "how much in each currency", and a converted amount
+                # has already left that currency. The five other call sites of
+                # this helper all pass the raw amount; these two did not.
+                # ``converted`` is still what the blended scalar below needs -
+                # two different questions, and they were conflated.
+                _add_currency_bucket(by_currency, amt, bucket_code, row_base)
                 scalar_exposure += converted
                 weighted += converted * prob
             else:
@@ -2297,9 +2502,13 @@ async def incident_count_kpi(
 ) -> KPIComputation:
     """Raw incident count, optionally windowed by ``incident_date``.
 
-    Uses the real ``SafetyIncident`` model (the ``safety_trir`` formula
-    imports a non-existent ``Incident`` alias and so silently counts zero;
-    this KPI is the working count surface).
+    Uses the real ``SafetyIncident`` model. This note used to say that
+    ``safety_trir`` imported a non-existent ``Incident`` alias and therefore
+    silently counted zero; that was true, and has since been fixed at the
+    source (``safety_trir_kpi`` now imports ``SafetyIncident as Incident``).
+    Left as a pointer rather than deleted, because the two KPIs must keep
+    counting off the same model: this one is the raw count, ``safety_trir``
+    the OSHA-200000 rate over the same rows.
     """
     count = 0
     try:
@@ -2379,7 +2588,13 @@ async def pending_variation_value_kpi(
                     row_base, row_fx = fx_cache[pid]
                 bucket_code = code or row_base or "UNKNOWN"
                 converted = _amount_in_base(amt, code, row_fx, row_base)
-                _add_currency_bucket(by_currency, converted, bucket_code, row_base)
+                # RAW ``amt`` - see the identical note in
+                # ``risk_open_exposure_kpi``. This is the site that actually
+                # reaches the screen: the hero's pending variations are EUR on
+                # a USD project, so the tile rendered the USD conversion
+                # 24,031.13 under the label EUR. Neither number on screen was
+                # right - the true EUR subtotal is 22,459.00.
+                _add_currency_bucket(by_currency, amt, bucket_code, row_base)
                 scalar_value += converted
             else:
                 if code:

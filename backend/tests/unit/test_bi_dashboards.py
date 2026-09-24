@@ -2039,3 +2039,498 @@ async def test_evaluate_dashboard_scopes_portfolio_to_allowed_projects(
     admin = await svc.evaluate_dashboard(dashboard.id, allowed_project_ids=None)
     assert admin is not None
     assert admin.widgets[0].value >= Decimal("2")
+
+
+# ── EVM spine sourced from the cost model (task #30) ───────────────────
+#
+# Before this, ``_evm_snapshot_for_project`` read ``planned_value`` /
+# ``earned_value`` off ``tasks.models.Task``. ``oe_tasks_task`` defines
+# NEITHER column, so both ``getattr`` calls took their default and EV = PV = 0
+# for every project on the platform -> cpi = spi = 0 unconditionally. Nothing
+# raised, so no test caught it: a ``getattr`` with a default never errors.
+# These tests pin the real source and, more importantly, the two ways the fix
+# itself could go wrong.
+
+
+async def _budget_line(session, project, **kw):
+    """One ``oe_costmodel_budget_line`` row with EVM amounts."""
+    from app.modules.costmodel.models import BudgetLine
+
+    line = BudgetLine(
+        project_id=project.id,
+        category=kw.pop("category", "general"),
+        description=kw.pop("description", ""),
+        currency=kw.pop("currency", project.currency),
+        **kw,
+    )
+    session.add(line)
+    await session.flush()
+    return line
+
+
+@pytest.mark.asyncio
+async def test_evm_sources_pv_ev_ac_from_costmodel_budget_lines(
+    finance_session: AsyncSession,
+) -> None:
+    """EV/AC come from the budget lines, and PV is time-phased by period.
+
+    Line A's period is fully elapsed (contributes all of its planned amount
+    to PV); line B's is entirely in the future (contributes none).
+    """
+    from app.modules.bi_dashboards import kpis
+
+    proj = await _make_project(finance_session, currency="USD")
+    await _budget_line(
+        finance_session, proj,
+        planned_amount="1000", earned_amount=Decimal("400"), actual_amount="500",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+    await _budget_line(
+        finance_session, proj,
+        planned_amount="1000", earned_amount=Decimal("0"), actual_amount="0",
+        period_start="2099-01-01", period_end="2099-12-31",
+    )
+
+    snap = await kpis._evm_snapshot(finance_session, proj.id)
+    assert snap.ev == Decimal("400")
+    assert snap.ac == Decimal("500")
+    assert snap.pv == Decimal("1000")      # elapsed line only
+    assert snap.pv_known is True
+    assert snap.breakdown["evm_source"] == "costmodel"
+    # No project budget/contract value and no BOQ -> BAC falls back to
+    # the sum of planned_amount, which IS budget-at-completion (not the PV).
+    assert snap.bac == Decimal("2000")
+    assert snap.breakdown["baseline_source"] == "costmodel_planned"
+
+    cpi = await kpis.compute("cpi", finance_session, project_id=proj.id)
+    spi = await kpis.compute("spi", finance_session, project_id=proj.id)
+    assert cpi.value == Decimal("0.8")     # 400 / 500
+    assert spi.value == Decimal("0.4")     # 400 / 1000
+    assert cpi.source_record_count > 0
+    assert spi.source_record_count > 0
+
+
+@pytest.mark.asyncio
+async def test_evm_pv_is_time_phased_not_budget_at_completion(
+    finance_session: AsyncSession,
+) -> None:
+    """THE TRAP: PV = sum(planned_amount) is BAC, not planned value to date.
+
+    Setting PV to the full planned total would divide EV by a number roughly
+    the size of the whole budget and report a schedule catastrophe that is
+    really a units error - an SPI that *looks* authoritative. PV must count
+    only the portion of each line whose period has elapsed.
+    """
+    from app.modules.bi_dashboards import kpis
+
+    proj = await _make_project(finance_session, currency="USD")
+    await _budget_line(
+        finance_session, proj,
+        planned_amount="1000", earned_amount=Decimal("500"), actual_amount="500",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+    await _budget_line(
+        finance_session, proj,
+        planned_amount="9000", earned_amount=Decimal("0"), actual_amount="0",
+        period_start="2099-01-01", period_end="2099-12-31",
+    )
+
+    snap = await kpis._evm_snapshot(finance_session, proj.id)
+    assert snap.pv == Decimal("1000"), "PV must be time-phased, not total planned"
+    assert snap.pv != snap.bac, "PV must not collapse onto BAC"
+    spi = await kpis.compute("spi", finance_session, project_id=proj.id)
+    assert spi.value == Decimal("0.5")     # 500 / 1000, NOT 500 / 10000 = 0.05
+
+
+@pytest.mark.asyncio
+async def test_spi_reports_no_data_when_any_budget_line_lacks_a_period(
+    finance_session: AsyncSession,
+) -> None:
+    """A PV summed over fewer lines than EV covers is a units mismatch.
+
+    Most projects on this platform carry budget lines with no period at all.
+    Pro-rating PV over only the lines that HAVE periods, while EV counts every
+    line, silently inflates SPI - the exact silent-wrong-number this module is
+    being cleaned of. So PV is reported unknown and SPI/SV grey out
+    (``source_record_count == 0``), matching the existing "no baseline -> no
+    data" convention rather than inventing a number.
+
+    CPI is unaffected: it divides EV by AC and never touches PV.
+    """
+    from app.modules.bi_dashboards import kpis
+
+    proj = await _make_project(finance_session, currency="USD")
+    await _budget_line(
+        finance_session, proj,
+        planned_amount="1000", earned_amount=Decimal("400"), actual_amount="500",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+    await _budget_line(   # no period -> PV unmeasurable for this project
+        finance_session, proj,
+        planned_amount="1000", earned_amount=Decimal("400"), actual_amount="500",
+    )
+
+    snap = await kpis._evm_snapshot(finance_session, proj.id)
+    assert snap.pv_known is False
+
+    spi = await kpis.compute("spi", finance_session, project_id=proj.id)
+    assert spi.source_record_count == 0, "SPI must report no-data, not a number"
+    sv = await kpis.compute("sv", finance_session, project_id=proj.id)
+    assert sv.source_record_count == 0
+
+    # CPI still reports: EV/AC needs no schedule baseline.
+    cpi = await kpis.compute("cpi", finance_session, project_id=proj.id)
+    assert cpi.source_record_count > 0
+    assert cpi.value == Decimal("0.8")     # 800 / 1000
+
+
+@pytest.mark.asyncio
+async def test_evm_falls_back_to_legacy_path_without_budget_lines(
+    finance_session: AsyncSession,
+) -> None:
+    """A project with no cost model keeps the old task/payment/PO behaviour,
+    so existing deployments do not change under them."""
+    from app.modules.bi_dashboards import kpis
+
+    proj = await _make_project(finance_session, currency="USD")
+    snap = await kpis._evm_snapshot(finance_session, proj.id)
+    assert snap.breakdown["evm_source"] == "tasks"
+    assert snap.pv_known is True
+
+
+# ── Render path honours the widget's own project scope (task #30) ──────
+
+
+@pytest.mark.asyncio
+async def test_render_dashboard_scopes_widget_to_config_json_project_id(
+    finance_session: AsyncSession,
+) -> None:
+    """``render_dashboard`` must pass ``config_json["project_id"]`` into the
+    KPI. It previously did not, so a pinned widget silently rendered the
+    portfolio roll-up - ``update_widget_snapshot`` did the right thing but is
+    unreachable, which made the bug easy to miss by reading."""
+    from app.modules.bi_dashboards.schemas import DashboardCreate, WidgetCreate
+    from app.modules.bi_dashboards.service import BIDashboardsService
+
+    svc = BIDashboardsService(finance_session)
+    a = await _make_project(finance_session, currency="USD")
+    b = await _make_project(finance_session, currency="USD")
+    await _budget_line(
+        finance_session, a,
+        planned_amount="1000", earned_amount=Decimal("400"), actual_amount="500",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+    await _budget_line(
+        finance_session, b,
+        planned_amount="1000", earned_amount=Decimal("900"), actual_amount="900",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+
+    dashboard = await svc.create_dashboard(
+        DashboardCreate(name="pinned", scope="global", refresh_interval_seconds=3600),
+        owner_user_id=None,
+    )
+    await svc.create_widget(
+        WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi",
+                     config_json={"project_id": str(a.id)}),
+    )
+    await svc.create_widget(   # same KPI, no scope -> portfolio
+        WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi"),
+    )
+
+    rendered = await svc.render_dashboard(dashboard.id, allowed_project_ids=None)
+    assert rendered is not None
+    pinned = next(w for w in rendered.widgets if w.widget.config_json)
+    unpinned = next(w for w in rendered.widgets if not w.widget.config_json)
+    assert pinned.value == Decimal("0.8"), "pinned widget must read project A only"
+    assert unpinned.value != pinned.value, "unscoped widget must stay a roll-up"
+
+
+@pytest.mark.asyncio
+async def test_render_dashboard_refuses_widget_scoped_to_inaccessible_project(
+    finance_session: AsyncSession,
+) -> None:
+    """Scoping must never widen authorisation.
+
+    ``kpis._scope_portfolio`` no-ops once ``project_id`` is set ("already
+    gated"), so feeding it an unvalidated ``config_json`` value would turn any
+    stored widget into a cross-tenant read. The render path checks the
+    configured project against ``allowed_project_ids`` first, and renders an
+    empty tile rather than falling back to the portfolio - a fallback would
+    quietly answer a different question than the tile asks.
+    """
+    from app.modules.bi_dashboards.schemas import DashboardCreate, WidgetCreate
+    from app.modules.bi_dashboards.service import BIDashboardsService
+
+    svc = BIDashboardsService(finance_session)
+    a = await _make_project(finance_session, currency="USD")
+    b = await _make_project(finance_session, currency="USD")
+    await _budget_line(
+        finance_session, a,
+        planned_amount="1000", earned_amount=Decimal("400"), actual_amount="500",
+        period_start="2020-01-01", period_end="2020-12-31",
+    )
+
+    dashboard = await svc.create_dashboard(
+        DashboardCreate(name="idor", scope="global", refresh_interval_seconds=3600),
+        owner_user_id=None,
+    )
+    await svc.create_widget(
+        WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi",
+                     config_json={"project_id": str(a.id)}),
+    )
+
+    # Caller may see only project B; the widget names project A.
+    rendered = await svc.render_dashboard(dashboard.id, allowed_project_ids={b.id})
+    assert rendered is not None
+    assert rendered.widgets[0].value == Decimal("0")
+    assert rendered.widgets[0].breakdown.get("error") == "forbidden_project_scope"
+
+
+# ── change_order_ratio at portfolio scope (task #32) ───────────────────
+
+
+@pytest.mark.asyncio
+async def test_change_order_ratio_computes_denominator_at_portfolio_scope(
+    finance_session: AsyncSession,
+) -> None:
+    """The contract-value probe used to have no ``else`` branch.
+
+    At portfolio scope ``contract_value`` stayed 0, tripped the
+    ``contract_value <= 0`` guard and returned value 0 *while still reporting*
+    ``source_record_count`` - it summed every change order and divided by a
+    denominator it never computed. Every roll-up board read "0 %" over a real
+    change-order count, which is a confident wrong number rather than a
+    visible gap.
+    """
+    from app.modules.bi_dashboards import kpis
+    from app.modules.changeorders.models import ChangeOrder
+
+    a = await _make_project(finance_session, currency="USD")
+    b = await _make_project(finance_session, currency="USD")
+    a.contract_value = "1000"
+    b.contract_value = "3000"
+    finance_session.add_all(
+        [
+            ChangeOrder(project_id=a.id, code="CO-A", title="a",
+                        approved_amount="20", currency="USD"),
+            ChangeOrder(project_id=b.id, code="CO-B", title="b",
+                        approved_amount="20", currency="USD"),
+        ],
+    )
+    await finance_session.flush()
+
+    # Scoped: 20 / 1000 = 2%.
+    scoped = await kpis.compute("change_order_ratio", finance_session, project_id=a.id)
+    assert scoped.value == Decimal("2")
+
+    # Portfolio: 40 / 4000 = 1%. Before the fix this was 0 with count 2.
+    port = await kpis.compute("change_order_ratio", finance_session, project_id=None)
+    assert port.source_record_count == 2
+    assert port.value == Decimal("1"), "portfolio denominator must be computed"
+
+
+@pytest.mark.asyncio
+async def test_change_order_ratio_portfolio_denominator_honours_idor_gate(
+    finance_session: AsyncSession,
+) -> None:
+    """The denominator must span exactly the projects the numerator spans.
+
+    ``allowed_project_ids`` scopes the change-order query, so summing contract
+    value over *every* project would divide an accessible numerator by an
+    inaccessible denominator and silently under-report the ratio.
+    """
+    from app.modules.bi_dashboards import kpis
+    from app.modules.changeorders.models import ChangeOrder
+
+    a = await _make_project(finance_session, currency="USD")
+    b = await _make_project(finance_session, currency="USD")
+    a.contract_value = "1000"
+    b.contract_value = "9000"
+    finance_session.add_all(
+        [
+            ChangeOrder(project_id=a.id, code="CO-A", title="a",
+                        approved_amount="20", currency="USD"),
+            ChangeOrder(project_id=b.id, code="CO-B", title="b",
+                        approved_amount="900", currency="USD"),
+        ],
+    )
+    await finance_session.flush()
+
+    # Caller may see only project A: 20 / 1000 = 2%, NOT 20 / 10000.
+    res = await kpis.compute(
+        "change_order_ratio", finance_session,
+        project_id=None, allowed_project_ids={a.id},
+    )
+    assert res.source_record_count == 1
+    assert res.value == Decimal("2")
+
+
+# ── Chart widgets carry their history (render path) ────────────────────
+#
+# ``render_dashboard`` calls ``_kpis.compute`` directly, and that returns a
+# single current value. The trend list is assembled by ``compute_kpi``, which
+# the render path never calls - so ``line_chart``/``bar_chart`` tiles arrived
+# at the frontend with no ``breakdown["trend"]`` and the Sparkline fell back
+# to a one-element ``[value]``, drawing a single dot no matter how much
+# history had been persisted. These two pin the fix and its gating.
+
+
+@pytest.mark.asyncio
+async def test_render_attaches_trend_history_to_chart_widgets(
+    session: AsyncSession,
+) -> None:
+    from datetime import timedelta
+
+    from app.modules.bi_dashboards.models import KPIValue
+    from app.modules.bi_dashboards.schemas import DashboardCreate, WidgetCreate
+    from app.modules.bi_dashboards.service import BIDashboardsService
+
+    svc = BIDashboardsService(session)
+    dashboard = await svc.create_dashboard(
+        DashboardCreate(name="charts", refresh_interval_seconds=300),
+        owner_user_id=None,
+    )
+    await svc.create_widget(
+        WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi", widget_type="line_chart"),
+    )
+
+    now = datetime.now(UTC)
+    base_day = now.date()
+    # Insert newest-first so the assertion below also proves the render path
+    # hands back chronological points rather than raw query order - drawing
+    # them reversed would invert the curve and raise nothing.
+    for week in (0, 1, 2):
+        period_end = base_day - timedelta(weeks=week)
+        session.add(
+            KPIValue(
+                kpi_code="cpi",
+                project_id=None,
+                period_start=period_end - timedelta(days=6),
+                period_end=period_end,
+                value=Decimal(str(week)),
+                unit="ratio",
+                computed_at=now,
+                source_record_count=1,
+            ),
+        )
+    await session.flush()
+
+    result = await svc.render_dashboard(dashboard.id)
+    assert result is not None
+    chart = result.widgets[0]
+    trend = chart.breakdown["trend"]
+    assert len(trend) == 3
+    # week 2 is the oldest and carries value 2; chronological order means it
+    # comes FIRST and the newest (value 0) comes last.
+    assert [p["value"] for p in trend] == ["2.000000", "1.000000", "0.000000"]
+
+
+@pytest.mark.asyncio
+async def test_render_does_not_attach_trend_to_kpi_cards(
+    session: AsyncSession,
+) -> None:
+    """The history query is gated on widget_type, for two reasons.
+
+    It keeps the added cost at one query per CHART rather than per widget on
+    a board that may carry a dozen tiles, and it leaves ``kpi_card`` output
+    byte-identical - the card reads the same key to decide whether to draw a
+    delta chip, so attaching a trend here would silently add chips to tiles
+    that have never had one.
+    """
+    from app.modules.bi_dashboards.schemas import DashboardCreate, WidgetCreate
+    from app.modules.bi_dashboards.service import BIDashboardsService
+
+    svc = BIDashboardsService(session)
+    dashboard = await svc.create_dashboard(
+        DashboardCreate(name="cards", refresh_interval_seconds=300),
+        owner_user_id=None,
+    )
+    await svc.create_widget(
+        WidgetCreate(dashboard_id=dashboard.id, kpi_code="cpi", widget_type="kpi_card"),
+    )
+    result = await svc.render_dashboard(dashboard.id)
+    assert result is not None
+    assert "trend" not in (result.widgets[0].breakdown or {})
+
+
+# ── Per-currency buckets must hold RAW amounts, not base conversions ───
+#
+# ``_add_currency_bucket`` files an amount under an ISO code. Two of its seven
+# call sites passed the BASE-CONVERTED amount while labelling the bucket with
+# the row's OWN currency, so the tile rendered a USD number badged "EUR". The
+# other five pass the raw amount, which is the intended contract.
+
+
+@pytest.mark.asyncio
+async def test_pending_variation_value_buckets_raw_amount_under_source_currency(
+    finance_session: AsyncSession,
+) -> None:
+    """A EUR variation on a USD project buckets 22,459 EUR - not its USD value.
+
+    This is the on-screen defect: the hero project is USD, its pending
+    variations are EUR, and the tile showed the USD conversion 24,031.13
+    under the label EUR. Neither number was correct for its label.
+    """
+    from app.modules.bi_dashboards import kpis
+    from app.modules.variations.models import VariationRequest
+
+    proj = await _make_project(
+        finance_session,
+        currency="USD",
+        fx=[{"code": "EUR", "rate": "1.07", "label": "Euro"}],
+    )
+    finance_session.add(
+        VariationRequest(
+            project_id=proj.id,
+            code="VR-1",
+            title="t",
+            estimated_cost_impact="22459",
+            currency="EUR",
+            status="submitted",
+        ),
+    )
+    await finance_session.flush()
+
+    result = await kpis.compute("pending_variation_value", finance_session, project_id=None)
+    by_cur = result.breakdown.get("by_currency", {})
+    # 22459 EUR stays 22459 EUR. The pre-fix value here was 24031.13 - the
+    # USD conversion, filed under "EUR".
+    assert Decimal(by_cur["EUR"]) == Decimal("22459")
+    assert result.breakdown.get("currency") == "EUR"
+
+
+@pytest.mark.asyncio
+async def test_risk_open_exposure_buckets_raw_amount_under_source_currency(
+    finance_session: AsyncSession,
+) -> None:
+    """Same defect, same fix, on the tile sitting beside it.
+
+    This one was latent: the hero's risks are already USD, so the conversion
+    was the identity and the label was right BY ACCIDENT. It would misprice
+    the moment a non-USD risk was seeded, which is what this pins.
+    """
+    from app.modules.bi_dashboards import kpis
+    from app.modules.risk.models import RiskItem
+
+    proj = await _make_project(
+        finance_session,
+        currency="USD",
+        fx=[{"code": "EUR", "rate": "1.07", "label": "Euro"}],
+    )
+    finance_session.add(
+        RiskItem(
+            project_id=proj.id,
+            code="R-1",
+            title="t",
+            impact_cost="10000",
+            currency="EUR",
+            status="identified",
+            probability="0.5",
+        ),
+    )
+    await finance_session.flush()
+
+    result = await kpis.compute("risk_open_exposure", finance_session, project_id=None)
+    by_cur = result.breakdown.get("by_currency", {})
+    assert Decimal(by_cur["EUR"]) == Decimal("10000")

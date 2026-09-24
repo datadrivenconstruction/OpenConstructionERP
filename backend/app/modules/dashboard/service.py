@@ -86,10 +86,19 @@ async def accessible_projects(
 ) -> list[Project]:
     """Return Project rows the caller may see.
 
-    Admins see all (non-archived). Regular users see only their own.
+    Admins see all (non-archived). Regular users see projects they own **or
+    are a team member of** - the same rule the projects module itself uses
+    (``projects/repository.py`` ``list_projects``, ``projects/router.py``).
     When ``requested_ids`` is provided we silently drop ids that are
     not accessible - never raise 403, the parent router returns 404 /
     empty per the IDOR posture.
+
+    The membership arm is not optional polish: without it a user who is a
+    member of a project but does not own it saw a dashboard of zeros while
+    ``/projects/`` listed the very same project, because only this function
+    scoped by ownership alone. Every rollup widget then returned its
+    ``not project_ids`` empty branch, so "Total Value" read 0.00 next to a
+    project card showing the real bill.
     """
     admin = await is_admin(session, user_id)
     stmt = select(Project).where(Project.status != "archived")
@@ -103,7 +112,25 @@ async def accessible_projects(
             uid = uuid.UUID(str(user_id))
         except (ValueError, TypeError):
             return []
-        stmt = stmt.where(Project.owner_id == uid)
+        visible = Project.owner_id == uid
+        # Team membership grants project access platform-wide. Imported here
+        # (not at module scope) so the dashboard stays loadable when the
+        # optional teams module is disabled - in that case ownership alone
+        # remains the rule, exactly as before.
+        try:
+            from app.modules.teams.access import member_project_ids_subquery  # noqa: PLC0415
+
+            visible = visible | Project.id.in_(member_project_ids_subquery(uid))
+        except ImportError:
+            # Only "the module is not installed" is tolerable here. Any other
+            # failure must surface: silently falling back to ownership-only
+            # scoping is what made this dashboard render all-zero for every
+            # non-owner in the first place, and a debug line nobody reads is
+            # not a way to learn that it regressed.
+            logger.warning(
+                "teams module unavailable; scoping dashboard by ownership only",
+            )
+        stmt = stmt.where(visible)
     if requested_ids:
         stmt = stmt.where(Project.id.in_(requested_ids))
     rows = await session.execute(stmt)
@@ -160,6 +187,10 @@ async def compute_boq_summary(
     per project (v4.6.2 N+1 nuke 2026-05-24).
     """
     from app.modules.boq.models import BOQ, Position  # noqa: PLC0415
+    from app.modules.boq.service import (  # noqa: PLC0415
+        _position_total_in_base,
+        _project_fx_map,
+    )
 
     project_ids = [p.id for p in projects]
     if not project_ids:
@@ -244,10 +275,28 @@ async def compute_boq_summary(
         ),
         else_=_qty * _rate,
     )
+    # A position may be priced in a currency other than its project's base -
+    # a bill can carry USD, EUR, JPY and TRY packages at once - and the home
+    # currency lives in the position's own metadata. Summing those stored
+    # totals straight into one scalar is issue #111 / #131 all over again
+    # (fixed there for the grid path and the CSV/Excel/PDF export path); this
+    # rollup was the third and last place with the defect. Grouping by the
+    # position currency lets the conversion happen once per (BOQ, currency)
+    # bucket in Python below, with the project's own rate table, instead of
+    # adding TRY to USD and reporting the sum as dollars.
+    _pos_currency = func.upper(
+        func.coalesce(
+            Position.metadata_["currency"].as_string(),
+            Position.metadata_["position_currency"].as_string(),
+            Position.metadata_["project_currency"].as_string(),
+            "",
+        ),
+    )
     pos_agg_stmt = (
         select(
             BOQ.id,
             BOQ.project_id,
+            _pos_currency,
             func.count(Position.id),
             func.sum(_row_total),
             func.sum(case((_qty == 0, 1), else_=0)),
@@ -255,7 +304,7 @@ async def compute_boq_summary(
         )
         .join(BOQ, BOQ.id == Position.boq_id)
         .where(BOQ.project_id.in_(project_ids))
-        .group_by(BOQ.id, BOQ.project_id)
+        .group_by(BOQ.id, BOQ.project_id, _pos_currency)
     )
     pos_agg_rows = (await session.execute(pos_agg_stmt)).all()
 
@@ -268,14 +317,29 @@ async def compute_boq_summary(
         },
     )
     per_boq: dict[uuid.UUID, dict[str, Any]] = {}
-    for boq_id, project_id, positions, total_sum, missing_qty, zero_price in pos_agg_rows:
-        total = _to_decimal(total_sum)
+    # Each project's own rate table converts its foreign-priced positions.
+    # Same helpers the BOQ module's grid and export paths use, so a bill's
+    # grand total reads identically on /boq and on the dashboard.
+    fx_by_project = {p.id: _project_fx_map(p) for p in projects}
+    base_by_project = {p.id: (getattr(p, "currency", "") or "").strip().upper() for p in projects}
+
+    # One row per (BOQ, position currency) now, so both accumulators add
+    # rather than assign - a bill in four currencies arrives as four rows.
+    for boq_id, project_id, pos_currency, positions, total_sum, missing_qty, zero_price in pos_agg_rows:
+        total = _position_total_in_base(
+            total_sum,
+            pos_currency,
+            fx_by_project.get(project_id),
+            base_by_project.get(project_id, ""),
+        )
         bucket = per_project[project_id]
         bucket["positions"] += int(positions or 0)
         bucket["total"] += total
         bucket["missing_qty"] += int(missing_qty or 0)
         bucket["zero_price"] += int(zero_price or 0)
-        per_boq[boq_id] = {"total": total, "positions": int(positions or 0)}
+        boq_bucket = per_boq.setdefault(boq_id, {"total": Decimal("0"), "positions": 0})
+        boq_bucket["total"] += total
+        boq_bucket["positions"] += int(positions or 0)
 
     by_project: list[dict[str, Any]] = []
     overall_total = Decimal("0")

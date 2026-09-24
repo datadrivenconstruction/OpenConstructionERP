@@ -73,6 +73,43 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
+def _widget_scope_project_id(
+    widget: Any,
+    allowed_project_ids: set[uuid.UUID] | None,
+) -> tuple[uuid.UUID | None, bool]:
+    """Resolve a widget's configured project scope, IDOR-checked.
+
+    Returns ``(project_id, permitted)``.
+
+    ``project_id`` is ``None`` when the widget carries no usable
+    ``config_json["project_id"]`` - that is a portfolio tile and is left
+    exactly as it was.
+
+    ``permitted`` is ``False`` when the widget names a project the caller
+    may not access. **The check has to happen here.**
+    ``kpis._scope_portfolio`` deliberately no-ops once ``project_id`` is set
+    ("single-project, already gated"), so handing an unvalidated
+    ``config_json`` value to ``compute`` would turn any stored widget into a
+    cross-tenant read. Scoping and authorisation are separate concerns:
+    ``config_json`` says which project a tile is *about*,
+    ``allowed_project_ids`` says which projects the caller may *see*, and
+    the first must never widen the second.
+    """
+    config = widget.config_json if isinstance(widget.config_json, dict) else {}
+    raw = config.get("project_id")
+    if raw in (None, ""):
+        return None, True
+    try:
+        project_id = raw if isinstance(raw, uuid.UUID) else uuid.UUID(str(raw))
+    except (AttributeError, TypeError, ValueError):
+        # Malformed id → treat as unscoped rather than failing the tile,
+        # matching the pre-existing behaviour for widgets with no scope.
+        return None, True
+    if allowed_project_ids is not None and project_id not in allowed_project_ids:
+        return project_id, False
+    return project_id, True
+
+
 # ── Scheduling helpers ─────────────────────────────────────────────────
 
 
@@ -398,7 +435,21 @@ class BIDashboardsService:
         self,
         widget_id: uuid.UUID,
     ) -> dict[str, Any] | None:
-        """Recompute the widget's KPI and write a fresh snapshot."""
+        """Recompute the widget's KPI and write a fresh snapshot.
+
+        ⚠️ **UNREACHABLE — no route or job calls this.** Its only reference
+        outside this definition is ``tests/unit/test_bi_dashboards.py``. It
+        is easy to mistake for the live tile path and cite as evidence that
+        widgets honour ``config_json["project_id"]``; they did not, until
+        :meth:`render_dashboard` was fixed to do the same thing. If you are
+        tracing how a tile gets its number, read ``render_dashboard``.
+
+        Kept because it is correct and is the natural home for an explicit
+        "refresh this widget" endpoint should one be added. Note it does NOT
+        apply the ``allowed_project_ids`` IDOR gate that
+        :func:`_widget_scope_project_id` applies on the render path - wiring
+        it to a route means adding that check first.
+        """
         widget = await self.repo.get_widget(widget_id)
         if widget is None:
             return None
@@ -528,32 +579,93 @@ class BIDashboardsService:
                 breakdown = payload.get("breakdown", {}) or {}
                 from_cache = True
             elif widget.kpi_code is not None:
-                # Compute live (portfolio calls scoped to the caller's
-                # accessible projects so a non-admin never aggregates across
-                # every tenant's projects) + write snapshot for admins only.
-                result = await _kpis.compute(
-                    widget.kpi_code,
-                    self.session,
-                    allowed_project_ids=allowed_project_ids,
+                # Compute live + write snapshot for admins only.
+                #
+                # Two INDEPENDENT concerns, deliberately not conflated:
+                #  * ``project_id`` (the widget's own config_json) is
+                #    SCOPING - which project this tile is about. Absent, the
+                #    tile is a portfolio roll-up, which is a valid choice.
+                #  * ``allowed_project_ids`` is the IDOR defence - which
+                #    projects the caller may see at all. It keeps applying
+                #    to portfolio calls so a non-admin never aggregates
+                #    across every tenant's projects.
+                scope_project_id, scope_permitted = _widget_scope_project_id(
+                    widget,
+                    allowed_project_ids,
                 )
-                value = result.value
-                unit = result.unit
-                breakdown = result.breakdown
-                if use_snapshot_cache:
-                    valid_until = now + timedelta(
-                        seconds=dashboard.refresh_interval_seconds,
+                if not scope_permitted:
+                    # The widget names a project this caller cannot access.
+                    # Render an empty tile rather than its numbers, and
+                    # never fall back to the portfolio - that would silently
+                    # answer a different question than the tile asks.
+                    value = Decimal("0")
+                    unit = None
+                    breakdown = {"error": "forbidden_project_scope"}
+                else:
+                    result = await _kpis.compute(
+                        widget.kpi_code,
+                        self.session,
+                        project_id=scope_project_id,
+                        allowed_project_ids=allowed_project_ids,
                     )
-                    await self.repo.write_snapshot(
-                        widget_id=widget.id,
-                        value_json={
-                            "value": str(result.value),
-                            "unit": result.unit,
-                            "breakdown": result.breakdown,
-                            "source_record_count": result.source_record_count,
-                        },
-                        computed_at=now,
-                        valid_until=valid_until,
-                    )
+                    value = result.value
+                    unit = result.unit
+                    breakdown = result.breakdown
+                    # Chart widgets need HISTORY, and this is the only place
+                    # that can attach it. ``_kpis.compute`` returns a single
+                    # current value; the trend list is built by
+                    # ``compute_kpi``, which the render path does not call.
+                    # So a ``line_chart`` rendered on a dashboard had no
+                    # ``breakdown["trend"]`` at all and the frontend fell
+                    # through to ``<Sparkline values={[value]} />`` - one
+                    # point, drawn as a single dot, on every dashboard in
+                    # the product. Seeding ``oe_bi_dashboards_kpi_value``
+                    # does not fix it on its own: nothing was reading those
+                    # rows on this path.
+                    #
+                    # Gated on ``widget_type`` so this costs one extra query
+                    # per CHART, not per widget - and so ``kpi_card`` tiles
+                    # keep rendering exactly as before (the card reads the
+                    # same key to decide whether to show a delta chip).
+                    if widget.widget_type in ("line_chart", "bar_chart"):
+                        history = await self.repo.list_kpi_values(
+                            widget.kpi_code,
+                            project_id=scope_project_id,
+                            limit=12,
+                            allowed_project_ids=allowed_project_ids,
+                        )
+                        breakdown = dict(breakdown or {})
+                        breakdown["trend"] = [
+                            {
+                                "period_start": h.period_start.isoformat(),
+                                "period_end": h.period_end.isoformat(),
+                                "value": str(h.value),
+                            }
+                            for h in history
+                        ]
+                    # Inside the permitted branch on purpose: a forbidden
+                    # tile must never be cached, or the next admin read
+                    # would serve a value we just refused to compute.
+                    if use_snapshot_cache:
+                        valid_until = now + timedelta(
+                            seconds=dashboard.refresh_interval_seconds,
+                        )
+                        await self.repo.write_snapshot(
+                            widget_id=widget.id,
+                            value_json={
+                                # ``breakdown``, not ``result.breakdown`` -
+                                # the cached payload must carry the trend
+                                # too, or an admin's cached render would
+                                # draw a flat tile while a non-admin's live
+                                # render of the same widget draws a curve.
+                                "value": str(result.value),
+                                "unit": result.unit,
+                                "breakdown": breakdown,
+                                "source_record_count": result.source_record_count,
+                            },
+                            computed_at=now,
+                            valid_until=valid_until,
+                        )
 
             results.append(
                 WidgetRenderResult(

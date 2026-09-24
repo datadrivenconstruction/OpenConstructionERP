@@ -106,11 +106,22 @@ export function EstimateResourceCard() {
             },
           ]}
         />
+        {/* Coverage, stated on the card itself. "Resource cost" is the subtotal
+            of the positions that carry a resource breakdown - never the bill's
+            grand total - because lump-sum and subcontract lines are priced
+            without one. Unlabelled, that subtotal reads as a contradiction of
+            the BOQ total shown elsewhere on this same dashboard. */}
+        <p className="mt-2 text-2xs text-content-tertiary">
+          {t('dashboard.estimate_resources_coverage', {
+            defaultValue: 'From {{count}} positions with a resource breakdown',
+            count: data.position_count,
+          })}
+        </p>
         <InfoHint
           className="mt-3"
           text={t('dashboard.estimate_resources_help', {
             defaultValue:
-              'Rolled up from every position in the estimate: the total labour hours, the combined cost of all resources (labour, materials, plant and subcontractors) and how many distinct resources are demanded.',
+              'Rolled up from the positions that carry a resource breakdown, not from the whole bill: their total labour hours, the combined cost of all resources (labour, materials, plant and subcontractors) and how many distinct resources are demanded. Lump-sum and subcontract lines priced without a breakdown are excluded, so this figure is a subtotal of the estimate rather than its grand total.',
           })}
         />
       </CardContent>

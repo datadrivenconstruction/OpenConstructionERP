@@ -7204,7 +7204,7 @@ const resource = {
     "finance.summary_receivable": "Receivable",
     "finance.summary_remaining": "Remaining Budget",
     "finance.summary_total_budget": "Total Budget",
-    "finance.summary_total_invoiced": "Total Invoiced (Payable)",
+    "finance.summary_total_invoiced": "Outstanding (Payable)",
     "finance.tax": "Tax",
     "finance.title": "Finance",
     "finance.total": "Total",
@@ -12957,6 +12957,10 @@ const resource = {
     "bi.schedule_ran": "Schedule run",
     "bi.schedule_updated": "Schedule updated",
     "bi.schedules_hint": "Schedules deliver a report automatically on the chosen cadence. \"Run now\" generates it immediately.",
+    "bi.scope_short_global": "Global",
+    "bi.scope_short_personal": "Personal",
+    "bi.scope_short_project": "Project",
+    "bi.scope_short_role": "Role",
     "bi.sev_critical_v2": "Critical, urgent",
     "bi.sev_info_v2": "Info, informational",
     "bi.sev_warning_v2": "Warning, needs attention",
@@ -17452,6 +17456,10 @@ const resource = {
     "contracts.retention_ledger_unavailable": "Retention ledger is unavailable right now.",
     "contracts.retention_ledger_empty": "No retention held or scheduled yet.",
     "contracts.retention_scope_col": "Scope",
+    "cvr.payapp_status_certified": "Certified",
+    "cvr.payapp_status_draft": "Draft",
+    "cvr.payapp_status_paid": "Paid",
+    "cvr.payapp_status_submitted": "Submitted",
   }
 } as { translation: Record<string, string> };
 

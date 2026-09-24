@@ -1658,14 +1658,23 @@ function SystemStatusSummary({
     staleTime: 60_000,
   });
 
-  // `/v1/users/` requires the `users.list` permission which viewers don't
-  // have (v2.0.0 BUG-327/386 security hardening). Skip the fetch for them
-  // so the team-count badge doesn't log a red 403 in the browser console.
+  // `/v1/users/` requires the `users.list` permission (v2.0.0 BUG-327/386
+  // security hardening). Skip the fetch for roles that will be refused, so
+  // the badge doesn't log a red 403 in the browser console.
+  //
+  // Roles are admin | manager | editor | viewer (users/schemas.py:222).
+  // Measured against this backend: admin and manager get 200, editor and
+  // viewer get 403. The previous list here was `admin || editor` - backwards
+  // on both counts, which is why the badge read "0 Users" on an instance
+  // with nine of them.
   const userRole = useAuthStore((s) => s.userRole);
-  const canListUsers = userRole === 'admin' || userRole === 'editor';
+  const canListUsers = userRole === 'admin' || userRole === 'manager';
   const { data: usersList } = useQuery({
+    // Settling a refusal to `[]` would be the same lie by another route: an
+    // empty list means "there are none", and a 403 means "you may not ask".
+    // `null` keeps them distinct so the badge can be dropped instead.
     queryKey: ['dashboard-users-count'],
-    queryFn: () => apiGet<{ id: string }[]>('/v1/users/').catch(() => []),
+    queryFn: () => apiGet<{ id: string }[]>('/v1/users/').catch(() => null),
     retry: false,
     staleTime: 60_000,
     enabled: canListUsers,
@@ -1678,7 +1687,15 @@ function SystemStatusSummary({
   const moduleCount = modules ? modules.modules?.length ?? 0 : null;
   const projectCount = projects ? projects.length : null;
   const boqCount = boqsLoading ? null : boqs?.length ?? 0;
-  const userCount = canListUsers ? (usersList ? usersList.length : null) : 0;
+  // Three distinct states, which the old single ternary collapsed into one
+  // number: still loading -> null (skeleton pulse, per FA-0005 below);
+  // refused or not attempted -> undefined, badge dropped entirely; a real
+  // list -> its length. Only the last of the three is a fact about users.
+  const userCount = !canListUsers || usersList === null
+    ? undefined
+    : usersList === undefined
+      ? null
+      : usersList.length;
 
   const badges = [
     {
@@ -1713,7 +1730,7 @@ function SystemStatusSummary({
       bg: 'bg-[#16a34a]/10',
       to: '/users',
     },
-  ];
+  ].filter((b) => b.value !== undefined);
 
   return (
     <div

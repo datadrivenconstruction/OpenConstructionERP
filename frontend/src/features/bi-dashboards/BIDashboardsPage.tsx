@@ -553,7 +553,9 @@ function DashboardsGrid({
             >
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold text-content-primary truncate">{d.name}</h3>
-                <Badge variant={SCOPE_VARIANT[d.scope]}>{d.scope}</Badge>
+                <Badge variant={SCOPE_VARIANT[d.scope]}>
+                  {t(`bi.scope_short_${d.scope}`, { defaultValue: d.scope })}
+                </Badge>
               </div>
               {d.description && (
                 <p className="mt-1 text-xs text-content-secondary line-clamp-2">{d.description}</p>
@@ -2122,6 +2124,14 @@ function WidgetCard({
   onCellClick?: (row?: Record<string, unknown>) => void;
 }) {
   const { t } = useTranslation();
+  // A widget carries only `kpi_code` — `WidgetRead` has no name field — so the
+  // card heading otherwise renders the raw enum (CASH_IN_30D, DSO). The KPI
+  // catalogue is the only source of a human label. The query key matches the
+  // one the KPIs tab and the Add-widget modal already use, so TanStack serves
+  // this from cache instead of issuing one request per card.
+  const kpiCatalogQ = useQuery({ queryKey: ['bi', 'kpis'], queryFn: () => listKpis() });
+  const kpiTitle =
+    kpiCatalogQ.data?.find((k) => k.code === widget.widget.kpi_code)?.name ?? null;
   const type = widget.widget.widget_type;
   const value = toNumber(widget.value);
   const currency = widgetCurrency(widget.breakdown);
@@ -2151,7 +2161,7 @@ function WidgetCard({
         className={cardClickable ? 'cursor-pointer' : undefined}
       >
         <p className="text-xs uppercase tracking-wide text-content-tertiary">
-          {widget.widget.kpi_code || t('bi.kpi', { defaultValue: 'KPI' })}
+          {kpiTitle || widget.widget.kpi_code || t('bi.kpi', { defaultValue: 'KPI' })}
         </p>
         <div className="mt-2 flex items-end justify-between">
           <p className="text-3xl font-semibold">
@@ -2174,7 +2184,7 @@ function WidgetCard({
         className={cardClickable ? 'cursor-pointer' : undefined}
       >
         <p className="text-xs uppercase tracking-wide text-content-tertiary">
-          {widget.widget.kpi_code || t('bi.chart', { defaultValue: 'Chart' })}
+          {kpiTitle || widget.widget.kpi_code || t('bi.chart', { defaultValue: 'Chart' })}
         </p>
         <div className="mt-2">
           {type === 'line_chart' ? (
@@ -2197,7 +2207,7 @@ function WidgetCard({
         className={cardClickable ? 'cursor-pointer' : undefined}
       >
         <p className="text-xs uppercase tracking-wide text-content-tertiary">
-          {widget.widget.kpi_code || t('bi.gauge', { defaultValue: 'Gauge' })}
+          {kpiTitle || widget.widget.kpi_code || t('bi.gauge', { defaultValue: 'Gauge' })}
         </p>
         <HalfGauge value={value} threshold={threshold || Math.max(1, value * 1.5)} />
         <p className="mt-1 text-center text-sm font-semibold">
@@ -2215,7 +2225,7 @@ function WidgetCard({
     return (
       <Card padding="md" className="md:col-span-2">
         <p className="text-xs uppercase tracking-wide text-content-tertiary mb-2">
-          {widget.widget.kpi_code || t('bi.table', { defaultValue: 'Table' })}
+          {kpiTitle || widget.widget.kpi_code || t('bi.table', { defaultValue: 'Table' })}
         </p>
         {rows.length === 0 ? (
           <p className="text-xs text-content-tertiary">
