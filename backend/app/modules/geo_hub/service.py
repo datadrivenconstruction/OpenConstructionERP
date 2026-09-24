@@ -2143,7 +2143,9 @@ class GeoHubService:
                     Project.id.in_(member_project_ids_subquery(user_id)),
                 )
             )
-        stmt = stmt.order_by(Project.created_at.desc()).limit(limit)
+        # ``id`` breaks ties on ``created_at``, so which projects fall under
+        # ``limit`` does not change from one request to the next.
+        stmt = stmt.order_by(Project.created_at.desc(), Project.id.desc()).limit(limit)
 
         result = await self.session.execute(stmt)
         rows = result.all()
