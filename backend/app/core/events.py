@@ -353,17 +353,30 @@ def publish_after_commit(
         _publish()
         return
 
-    # ``once=True`` makes this listener a no-op after it fires; it does not
-    # clear the slot, so a second deferral on the same session keeps its own
-    # listener and still fires. The two-deferral case is covered by
-    # tests/integration/test_event_after_commit_visibility.py.
+    # SQLAlchemy dispatches ``after_commit`` for a nested transaction too, when
+    # its SAVEPOINT is released, and at that moment the outer transaction is
+    # still open and nothing is durable. The listener therefore ignores every
+    # call made while the session is still inside a nested transaction and
+    # fires on the first root commit. ``create_project`` defers an event and
+    # then opens ``begin_nested()`` for the default team, and a ``once=True``
+    # listener fired on that release, handing the geo_hub subscriber a project
+    # no other connection could see yet.
     #
-    # ``once`` is documented by SQLAlchemy as private, deprecated API
-    # (sqlalchemy/event/api.py). Nothing public replaces it, so it stays; if a
-    # version bump removes it, the equivalent is a listener that unregisters
-    # itself with ``sa_event.remove`` on its first call.
-    @sa_event.listens_for(sync_session, "after_commit", once=True)
-    def _fire(_session: Any) -> None:
+    # One-shot by a flag rather than ``once=True``, because ``once`` spends
+    # itself on the first call, the savepoint's. Not by ``sa_event.remove``
+    # from inside the listener either: that mutates the listener collection
+    # while ``after_commit`` is being dispatched from it. A second deferral on
+    # the same session registers its own listener and fires on its own, which
+    # tests/integration/test_event_after_commit_visibility.py covers along with
+    # the savepoint case.
+    fired = False
+
+    @sa_event.listens_for(sync_session, "after_commit")
+    def _fire(session_: Any) -> None:
+        nonlocal fired
+        if fired or session_.in_nested_transaction():
+            return
+        fired = True
         try:
             _publish()
         except Exception:
