@@ -151,15 +151,16 @@ def test_the_verdict_is_written_only_where_the_heal_actually_runs() -> None:
 
     The tests above set the state by hand, which proves what the endpoint does
     with each answer but not that a non-PostgreSQL deployment produces the
-    unknown one. That comes from where the writes sit: the two verdicts are
-    written inside the ``postgresql`` branch of the startup and nowhere else, so
-    a run that does not enter that branch keeps the ``None`` the application was
-    built with. Read from the source because running a real startup to learn it
-    would need the very database whose absence is the case under test.
+    unknown one. That comes from where the writes sit: the verdicts are written
+    by ``run_schema_heal`` and nowhere else, and the startup calls it inside the
+    ``postgresql`` branch and nowhere else, so a run that does not enter that
+    branch keeps the ``None`` the application was built with. Read from the
+    source because running a real startup to learn it would need the very
+    database whose absence is the case under test.
     """
     import inspect
 
-    from app.main import create_app
+    from app.main import create_app, run_schema_heal
 
     lines = inspect.getsource(create_app).splitlines()
 
@@ -168,14 +169,15 @@ def test_the_verdict_is_written_only_where_the_heal_actually_runs() -> None:
     guard_line = guards[0]
     guard_indent = len(lines[guard_line]) - len(lines[guard_line].lstrip())
 
-    writes = [(i, line) for i, line in enumerate(lines) if "app.state.schema_heal_failed =" in line]
-    initialisers = [line for _, line in writes if line.strip().endswith("= None")]
-    verdicts = [(i, line) for i, line in writes if not line.strip().endswith("= None")]
+    writes = [line for line in lines if "app.state.schema_heal_failed =" in line]
+    assert len(writes) == 1, "the startup itself must only establish the unknown state"
+    assert writes[0].strip().endswith("= None"), "the unknown state must be established when the app is built"
 
-    assert len(initialisers) == 1, "the unknown state must be established exactly once, when the app is built"
-    assert verdicts, "nothing records a verdict any more"
-    for index, line in verdicts:
-        assert index > guard_line, f"a verdict is written before the heal's guard: {line.strip()!r}"
-        assert len(line) - len(line.lstrip()) > guard_indent, (
-            f"a verdict is written outside the heal's guard: {line.strip()!r}"
-        )
+    calls = [(i, line) for i, line in enumerate(lines) if "await run_schema_heal(" in line]
+    assert len(calls) == 1, "the heal must be run, and its verdict recorded, from exactly one place"
+    index, line = calls[0]
+    assert index > guard_line, f"the heal runs before its guard: {line.strip()!r}"
+    assert len(line) - len(line.lstrip()) > guard_indent, f"the heal runs outside its guard: {line.strip()!r}"
+
+    heal_source = inspect.getsource(run_schema_heal)
+    assert "app.state.schema_heal_failed = False" in heal_source, "nothing records a verdict any more"
