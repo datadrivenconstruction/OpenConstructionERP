@@ -366,9 +366,9 @@ describe('ProgressClaimDetailPage', () => {
     await waitFor(() => expect(screen.getByTestId('claim-lines-locked')).toBeTruthy());
     expect(screen.queryByTestId('populate-button')).toBeNull();
     expect(screen.queryByText(/^Edit$/i)).toBeNull();
-    // A submitted claim can be put back in draft; say so rather than leave
-    // the reader looking for the button.
-    expect(screen.getByTestId('claim-lines-locked').textContent).toMatch(/back in draft/i);
+    // A rejected claim stays rejected, so the way to corrected figures is a
+    // new draft claim; say so rather than leave the reader looking for it.
+    expect(screen.getByTestId('claim-lines-locked').textContent).toMatch(/new draft claim/i);
   });
 
   it.each(['paid', 'rejected', 'certified'])(
@@ -382,7 +382,7 @@ describe('ProgressClaimDetailPage', () => {
       // the hint would be an instruction nobody can follow - and on a claim
       // already rejected it would be nonsense.
       const note = await screen.findByTestId('claim-lines-locked');
-      expect(note.textContent).not.toMatch(/back in draft/i);
+      expect(note.textContent).not.toMatch(/new draft claim/i);
     },
   );
 
