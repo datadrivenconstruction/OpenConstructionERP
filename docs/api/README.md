@@ -77,6 +77,8 @@ It returns a small JSON document you can poll from a load balancer or uptime mon
   "database": "ok",
   "alembic_head_matches": true,
   "schema_heal_failed": false,
+  "schema_heal_incomplete": false,
+  "schema_heal_skipped_count": 0,
   "schema_matches_models": true,
   "data_repairs_failed": false,
   "data_repair_ledger_failed": false,
@@ -104,12 +106,28 @@ have it and stops. That one publishes no field of its own, it is
 `modules_enabled` above `modules_loaded`, and which module is missing is in
 the boot log.
 
+`schema_heal_incomplete` true is the one schema signal that does NOT degrade
+the status, and it is the one to alert on for an external PostgreSQL. The
+boot-time schema repair runs each statement on its own, so a database role
+that may read and write rows but may not change the schema has every statement
+refused one by one while the repair as a whole succeeds. `schema_heal_failed`
+then stays `false`, and requests that read a column the release added fail.
+`schema_heal_skipped_count` says how many statements were refused. Which ones,
+and the exact SQL to run as the owner of the tables, are in one ERROR line in
+the boot log and in `GET /api/system/upgrade/status` (admin only); this
+endpoint is unauthenticated and names nothing. No restart is needed after
+running that SQL, but the field describes this start's repair and clears on
+the next one. It does not degrade `status`, because a restart cannot give the
+role the right it is missing, and a watchdog that restarts on `degraded` would
+only loop.
+
 Watch the polarity, because it is not the same on every field. On
-`schema_heal_failed`, `data_repairs_failed` and `data_repair_ledger_failed`,
-`true` is the bad news; on `schema_matches_models` and `alembic_head_matches`
-it is `false`. On all five, `null` means this deployment could not tell and is
-not a fault, so alert on the exact value rather than on truthiness or a check
-would fire on every deployment whose database is not PostgreSQL.
+`schema_heal_failed`, `schema_heal_incomplete`, `data_repairs_failed` and
+`data_repair_ledger_failed`, `true` is the bad news; on `schema_matches_models`
+and `alembic_head_matches` it is `false`. On all six, `null` means this
+deployment could not tell and is not a fault, so alert on the exact value
+rather than on truthiness or a check would fire on every deployment whose
+database is not PostgreSQL.
 
 A pending migration does NOT degrade the status, which is deliberate. The
 product never runs `alembic upgrade`; the schema moves through `create_all`
