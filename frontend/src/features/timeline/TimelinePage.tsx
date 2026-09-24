@@ -24,6 +24,7 @@ import { Badge, CollapsibleSection, EmptyState } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchProjectTimeline, type TimelineEntry, type TimelineFilters } from './api';
+import { ASSISTANT_MODULE, assistantRecordRoute } from './assistantRoute';
 
 const LIMIT = 50;
 
@@ -51,6 +52,11 @@ function formatAction(action: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function moduleLabel(module: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  if (module === ASSISTANT_MODULE) return t('timeline.mod_erp_chat', { defaultValue: 'AI assistant' });
+  return module;
+}
+
 function relativeTime(iso: string | null, t: (k: string, o?: Record<string, unknown>) => string): string {
   if (!iso) return '';
   const d = new Date(iso);
@@ -75,6 +81,7 @@ function fullDateTime(iso: string | null): string {
 function entityRoute(entry: TimelineEntry): string | null {
   if (!entry.entity_id || !entry.module) return null;
   const mod = entry.module.toLowerCase();
+  if (mod === ASSISTANT_MODULE) return assistantRecordRoute(entry);
   // Map module names to routes
   const routeMap: Record<string, string> = {
     boq: 'boq', projects: 'projects', variations: 'variations',
@@ -381,7 +388,7 @@ export function TimelinePage() {
         >
           <option value="">{t('timeline.all_modules', { defaultValue: 'All modules' })}</option>
           {modules.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>{moduleLabel(m, t)}</option>
           ))}
         </select>
 
@@ -520,7 +527,7 @@ export function TimelinePage() {
           </div>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <div><span className="text-gray-500">{t('timeline.detail_action', { defaultValue: 'Action' })}:</span> <span className="font-medium">{formatAction(selectedEntry.action)}</span></div>
-            <div><span className="text-gray-500">{t('timeline.detail_module', { defaultValue: 'Module' })}:</span> <span className="font-medium">{selectedEntry.module ?? '-'}</span></div>
+            <div><span className="text-gray-500">{t('timeline.detail_module', { defaultValue: 'Module' })}:</span> <span className="font-medium">{selectedEntry.module ? moduleLabel(selectedEntry.module, t) : '-'}</span></div>
             <div><span className="text-gray-500">{t('timeline.detail_entity_type', { defaultValue: 'Entity Type' })}:</span> <span className="font-medium">{selectedEntry.entity_type ?? '-'}</span></div>
             <div><span className="text-gray-500">{t('timeline.detail_entity_id', { defaultValue: 'Entity ID' })}:</span> <span className="font-mono text-xs">{selectedEntry.entity_id ?? '-'}</span></div>
             <div><span className="text-gray-500">{t('timeline.detail_timestamp', { defaultValue: 'Timestamp' })}:</span> <span className="font-medium">{fullDateTime(selectedEntry.created_at)}</span></div>
@@ -633,7 +640,7 @@ function TimelineRow({ entry, isSelected, onSelect, onNavigate, userMap }: {
             {formatAction(entry.action)}
           </span>
           {entry.module && (
-            <Badge variant="blue" className="text-xs">{entry.module}</Badge>
+            <Badge variant="blue" className="text-xs">{moduleLabel(entry.module, t)}</Badge>
           )}
           <span className="text-xs text-gray-500">{entry.entity_type}</span>
           {entry.from_status && entry.to_status && (

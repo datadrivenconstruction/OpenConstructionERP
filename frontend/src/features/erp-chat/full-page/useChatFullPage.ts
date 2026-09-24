@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { aiApi, type AISettings } from '@/features/ai/api';
@@ -11,6 +12,8 @@ import {
   fetchSessionMessages,
   deleteChatSession,
 } from '../api';
+import { isProposalTool } from '../toolLabels';
+import { toolCallsFromPersisted, type PersistedChatMessage } from '../transcript';
 import type { ChatMessage, ChatSession, DataPanelEntry, ToolCallInfo } from '../types';
 
 /** Shape of a persisted message row from GET /sessions/{id}/messages/. */
@@ -72,6 +75,26 @@ function panelEntriesFromMessages(rows: PersistedMessage[]): DataPanelEntry[] {
   for (const row of rows) {
     if (row.role !== 'assistant' || !row.renderer || row.renderer === 'error') continue;
     const ts = new Date(row.created_at).getTime() || Date.now();
+    // A proposal is shown as a card in the conversation itself, so the panel
+    // shows the turn's last lookup instead, if it had one.
+    if (row.renderer === 'action_proposal') {
+      const lookup = [...toolCallsFromPersisted(row as unknown as PersistedChatMessage)]
+        .reverse()
+        .find((tc) => {
+          const renderer = tc.result?.renderer;
+          return !!renderer && renderer !== 'error' && renderer !== 'action_proposal';
+        });
+      if (lookup?.result?.renderer) {
+        entries.push({
+          renderer: lookup.result.renderer,
+          data: lookup.result.data,
+          toolName: lookup.name,
+          summary: lookup.result.summary ?? '',
+          timestamp: ts,
+        });
+      }
+      continue;
+    }
     // Prefer the explicit renderer_data; fall back to the last tool result's
     // data so older rows (pre renderer_data column) still render.
     let data: unknown = row.renderer_data;
@@ -110,6 +133,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
   const abortRef = useRef<AbortController | null>(null);
 
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const { i18n } = useTranslation();
 
   // Check if any AI provider is configured
   useEffect(() => {
@@ -171,15 +195,12 @@ export function useChatFullPage(): UseChatFullPageReturn {
             role: r.role,
             content: r.content ?? '',
             ts: new Date(r.created_at),
-            toolCalls: Array.isArray(r.tool_results)
-              ? r.tool_results.map((tr) => ({
-                  id: uid(),
-                  name: tr.tool ?? 'tool',
-                  status: 'done' as const,
-                  result: tr.result,
-                  startedAt: 0,
-                }))
-              : undefined,
+            // Stored as a list or, in some rows, an object; a proposal comes
+            // back as its card, which re-reads its current status.
+            toolCalls:
+              r.role === 'assistant'
+                ? toolCallsFromPersisted(r as unknown as PersistedChatMessage)
+                : undefined,
           }));
         const entries = panelEntriesFromMessages(rows);
         setMessages(rebuilt);
@@ -306,6 +327,13 @@ export function useChatFullPage(): UseChatFullPageReturn {
               message: trimmed,
               session_id: sessionId,
               project_id: activeProjectId,
+              // Same context as the dock sends: the reply language and the
+              // page the question was asked on.
+              locale: i18n.language,
+              client_context: {
+                route: window.location.pathname,
+                project_id: activeProjectId ?? null,
+              },
             }),
             signal: controller.signal,
           });
@@ -436,34 +464,40 @@ export function useChatFullPage(): UseChatFullPageReturn {
                 case 'tool_result': {
                   // Backend payload: { tool, result }. There is no per-call
                   // id on the wire, so the most-recently-started running
-                  // tool call for this message is the one being resolved.
+                  // tool call for this message is the one being resolved
+                  // (of the same tool, when the payload names it).
                   const result = payload.result as ToolCallInfo['result'] | undefined;
+                  const resultTool = typeof payload.tool === 'string' ? payload.tool : null;
+                  // An error result is a failed call, so its card shows the
+                  // failure (and, for a proposal, the reason).
+                  const status = result?.renderer === 'error' ? ('error' as const) : ('done' as const);
                   setMessages((prev) =>
                     prev.map((m) => {
                       if (m.id !== aiMsgId) return m;
-                      let matched = false;
-                      const toolCalls = (m.toolCalls ?? [])
-                        .slice()
-                        .reverse()
-                        .map((tc) => {
-                          if (!matched && tc.status === 'running') {
-                            matched = true;
-                            return {
-                              ...tc,
-                              status: 'done' as const,
-                              result,
-                              durationMs: Date.now() - tc.startedAt,
-                            };
-                          }
-                          return tc;
-                        })
-                        .reverse();
+                      const calls = m.toolCalls ?? [];
+                      let index = -1;
+                      for (let i = calls.length - 1; i >= 0 && index === -1; i -= 1) {
+                        const tc = calls[i]!;
+                        if (tc.status === 'running' && (!resultTool || tc.name === resultTool)) index = i;
+                      }
+                      for (let i = calls.length - 1; i >= 0 && index === -1; i -= 1) {
+                        if (calls[i]!.status === 'running') index = i;
+                      }
+                      if (index === -1) return m;
+                      const toolCalls = calls.map((tc, i) =>
+                        i === index
+                          ? { ...tc, status, result, durationMs: Date.now() - tc.startedAt }
+                          : tc,
+                      );
                       return { ...m, toolCalls };
                     }),
                   );
 
-                  // Add to data panel entries
-                  if (result?.renderer) {
+                  // Add to data panel entries. A proposal is not one: it is
+                  // shown as a card in the conversation, with its buttons.
+                  const proposal =
+                    result?.renderer === 'action_proposal' || (!!resultTool && isProposalTool(resultTool));
+                  if (result?.renderer && !proposal) {
                     const entry: DataPanelEntry = {
                       renderer: result.renderer,
                       data: result.data,
@@ -543,7 +577,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
         }
       })();
     },
-    [isStreaming, sessionId, activeProjectId, aiConfigured, refreshSessions],
+    [isStreaming, sessionId, activeProjectId, aiConfigured, refreshSessions, i18n],
   );
 
   const clearChat = useCallback(() => {
