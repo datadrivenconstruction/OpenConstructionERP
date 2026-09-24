@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.0.0',
+    date: '2026-09-24',
+    tag: 'MILESTONE',
+    summary:
+      'The AI assistant now prepares changes to BOQ positions, tasks, RFIs, risks, punch items and schedule progress that a person reviews, applies, edits or undoes, and it sits beside the page with a Changes tab listing every proposal. The map inside a project opens on streets and buildings again, and onboarding asks what the company does instead of how big the team is. A payment certificate now adds up when a claim bills money that no schedule of values line carries, a contract retains at the ladder of its country from the day it is signed, and a German exemption certificate is read on the day of payment. Bills, bids, RFQs, purchase orders, invoices, subcontracts, variations and property sales keep their figures once they are approved, sent, paid or decided, and each refusal says what to do instead. The estimates list loads in one request and names a project it cannot read instead of dropping it from the totals, project pickers no longer stop at 50, heavy exports no longer stall the server, and the macOS installer is marked as Apple Silicon only.',
+  },
+  {
     version: '17.8.3',
     date: '2026-09-23',
     tag: 'NEW',
