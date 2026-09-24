@@ -38,6 +38,10 @@ from app.modules.contracts.models import (
 )
 from app.modules.contracts.periods import claim_order_key, claims_before
 
+#: Claim metadata flag stamped when a claim leaves draft. Its "previous"
+#: claims leave drafts out; see :meth:`ProgressClaimRepository.prior_claims`.
+PRIOR_EXCLUDES_DRAFTS_KEY = "prior_excludes_drafts"
+
 
 class _CRUDBase:
     """Common CRUD operations shared by all contracts repositories."""
@@ -310,10 +314,27 @@ class ProgressClaimRepository(_CRUDBase):
         contract" is the reading this replaces, and it counted a later claim as
         previous whenever an earlier one was re-rendered or regenerated.
         ``None`` (a claim not stored yet) sees every claim on the contract.
+
+        Draft claims are left out too, for a certificate still being built: a
+        draft has not left the contractor, so it certified nothing either, and
+        counting it put work nobody had applied for into "previous
+        certificates". A claim already issued is not restated, though. Its
+        application is drawn again from this method every time it is printed,
+        so it keeps the rule it was built under: drafts are left out for a
+        claim that is a draft, for one stamped with
+        :data:`PRIOR_EXCLUDES_DRAFTS_KEY` when it left draft, and for a claim
+        not stored yet; a claim that left draft before the stamp existed still
+        counts them, as it did when it was issued.
         """
         ordered = await self.ordered_for_contract(contract_id)
         earlier = claims_before(ordered, before_claim_id) if before_claim_id is not None else ordered
-        return [claim for claim in earlier if claim.status != "rejected"]
+        target = next((claim for claim in ordered if claim.id == before_claim_id), None)
+        drop_drafts = (
+            target is None or target.status == "draft" or bool((target.metadata_ or {}).get(PRIOR_EXCLUDES_DRAFTS_KEY))
+        )
+        return [
+            claim for claim in earlier if claim.status != "rejected" and not (drop_drafts and claim.status == "draft")
+        ]
 
     async def claim_numbers_past_draft(self, contract_id: uuid.UUID) -> list[str]:
         """The numbers of the claims on a contract that have left draft, sorted.
