@@ -421,6 +421,54 @@ def parse_enum(
     return value
 
 
+_YES: frozenset[str] = frozenset({"yes", "true", "y", "1", "on"})
+_NO: frozenset[str] = frozenset({"no", "false", "n", "0", "off"})
+
+
+def parse_flag(args: dict[str, Any], key: str, errors: FieldErrors, *, default: bool = False) -> bool:
+    """A yes/no value from a JSON boolean (the model) or the card's ``yes`` / ``no`` option."""
+    if not _present(args, key):
+        return default
+    raw = args[key]
+    if isinstance(raw, bool):
+        return raw
+    text = str(raw).strip().lower()
+    if text in _YES:
+        return True
+    if text in _NO:
+        return False
+    errors.add(key, "invalid_option", f"{labels.FIELD_ERRORS['invalid_option']} (yes, no)")
+    return default
+
+
+def flag_option(value: bool) -> str:
+    """The ``yes_no`` option a flag is shown and stored as."""
+    return "yes" if value else "no"
+
+
+def parse_whole(args: dict[str, Any], key: str, errors: FieldErrors, *, required: bool = False) -> int | None:
+    """A whole, non-negative number (days, counts), or None when absent."""
+    number = parse_decimal(args, key, errors, required=required)
+    if number is None:
+        return None
+    if number != number.to_integral_value():
+        errors.add(key, "not_whole_number")
+        return None
+    return int(number)
+
+
+def parse_percent(args: dict[str, Any], key: str, errors: FieldErrors, *, required: bool = False) -> Decimal | None:
+    """Percentage points from 0 to 100, read from ``60``, ``"60"``, ``"60 %"`` or ``"60,5"``."""
+    raw = args.get(key)
+    if isinstance(raw, str):
+        args = {**args, key: raw.strip().removesuffix("%")}
+    number = parse_decimal(args, key, errors, required=required)
+    if number is not None and number > 100:
+        errors.add(key, "percent_range")
+        return None
+    return number
+
+
 def decimal_str(value: Decimal | str | int | float | None) -> str | None:
     """Canonical plain string of a number: no exponent, no trailing zeros (``"120"``, ``"12.5"``)."""
     if value is None:

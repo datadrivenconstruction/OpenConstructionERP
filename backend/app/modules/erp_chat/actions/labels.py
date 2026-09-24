@@ -25,6 +25,7 @@ TITLES: dict[str, str] = {
     "boq.add_position": "Add BOQ position",
     "boq.update_position": "Change BOQ position",
     "task.create": "Create task",
+    "rfi.create": "Create RFI",
 }
 
 FIELDS: dict[str, str] = {
@@ -40,6 +41,15 @@ FIELDS: dict[str, str] = {
     "priority": "Priority",
     "due_date": "Due date",
     "assignee": "Assignee",
+    # rfi.create
+    "subject": "Subject",
+    "question": "Question",
+    "discipline": "Discipline",
+    "response_due_date": "Response due date",
+    "cost_impact": "Cost impact",
+    "cost_impact_value": "Cost exposure",
+    "schedule_impact": "Schedule impact",
+    "schedule_impact_days": "Schedule slip (days)",
 }
 
 OPTIONS: dict[str, dict[str, str]] = {
@@ -56,6 +66,26 @@ OPTIONS: dict[str, dict[str, str]] = {
         "decision": "Decision",
         "personal": "Personal",
     },
+    "yes_no": {
+        "yes": "Yes",
+        "no": "No",
+    },
+    # The RFI register's own scale: "critical" where tasks say "urgent".
+    "rfi_priority": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "critical": "Critical",
+    },
+    "rfi_discipline": {
+        "architectural": "Architectural",
+        "structural": "Structural",
+        "mep": "MEP",
+        "electrical": "Electrical",
+        "plumbing": "Plumbing",
+        "civil": "Civil",
+        "landscape": "Landscape",
+    },
 }
 
 NOTES: dict[str, str] = {
@@ -64,6 +94,10 @@ NOTES: dict[str, str] = {
         'Several project members match "{{name}}", so the task will be created without an assignee. '
         "Edit the assignee to pick one."
     ),
+    # The same two cases for any other person field (an RFI's assignee, a risk owner, ...); the note
+    # sits under the field it is about.
+    "member_unmatched": 'No project member matches "{{name}}", so this field is left empty.',
+    "member_ambiguous": 'Several project members match "{{name}}", so this field is left empty. Pick one from the list.',
     "linked_master": (
         "This line is the master of {{count}} linked lines. Changing its description, unit or rate "
         "changes those lines too."
@@ -82,6 +116,13 @@ REVERT_HINTS: dict[str, str] = {
     "position_unlinked": (
         "Applying this unlinked the line from its master. Undo restores the old values but does not link it again."
     ),
+    # RFI numbers are the project's highest number plus one, so undoing the newest RFI hands its
+    # number to the next one; the notification already sent names that number.
+    "rfi_notifications": (
+        "The assignee has already been notified. Undo deletes the RFI but cannot take that notification back, "
+        "and the next RFI may be given the same number."
+    ),
+    "rfi_number": "Undo deletes the RFI, and the next RFI may be given the same number.",
 }
 
 ERRORS: dict[str, str] = {
@@ -137,6 +178,8 @@ FIELD_ERRORS: dict[str, str] = {
     "not_editable": "This field cannot be edited.",
     "ordinal_taken": "This position number is already used in the bill.",
     "invalid_id": "This reference is not valid.",
+    "not_whole_number": "Enter a whole number.",
+    "percent_range": "Enter a percentage from 0 to 100.",
 }
 
 BLOCKED: dict[str, str] = {

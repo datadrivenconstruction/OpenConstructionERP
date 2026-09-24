@@ -2202,6 +2202,19 @@ export function FloatingChatPanel() {
     navigate(target);
   }, [activeProjectId, overlay, close, navigate]);
 
+  // The same for every other way out of the overlay to a page: a card's Open,
+  // a result's link. The page behind an overlay cannot be used, so a change of
+  // page while it is open came from inside it, and the reader wants to see
+  // where it led. Only the path counts: a page that rewrites its own query
+  // string does not close the dock. /chat is left out: the dock is only
+  // hidden there (see `suppressed`) and comes back as it was.
+  const lastPathRef = useRef(location.pathname);
+  useEffect(() => {
+    if (lastPathRef.current === location.pathname) return;
+    lastPathRef.current = location.pathname;
+    if (overlay && isOpen && !suppressed) close();
+  }, [location.pathname, overlay, isOpen, suppressed, close]);
+
   const charCount = value.length;
   const overSoft = charCount > SOFT_LIMIT;
   const overHard = charCount > HARD_LIMIT;

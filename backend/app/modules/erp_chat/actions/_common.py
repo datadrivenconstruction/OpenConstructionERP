@@ -1,11 +1,13 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Helpers the action specs share: the project in play and the actions still pending."""
+"""Helpers the action specs share: the project in play, the actions still pending, a record's state."""
 
 from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import select
@@ -15,6 +17,7 @@ from app.modules.erp_chat.actions.base import (
     ActionNotFoundError,
     ActionValidationError,
     coerce_uuid,
+    decimal_str,
 )
 
 PENDING_STATUSES: tuple[str, ...] = ("proposed", "failed")
@@ -79,3 +82,36 @@ async def pending_payloads(
     )
     rows = (await ctx.session.execute(stmt)).all()
     return [dict(payload or {}) for action_id, payload in rows if exclude_id is None or action_id != exclude_id]
+
+
+def state_value(value: Any) -> Any:
+    """A column value as it is kept in ``after_state`` and compared at undo time (JSON-safe)."""
+    if isinstance(value, uuid.UUID):
+        return str(value)
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return decimal_str(value)
+    return value
+
+
+async def read_state(
+    ctx: ActionContext,
+    model: Any,
+    entity_id: uuid.UUID | None,
+    keys: tuple[str, ...],
+) -> dict[str, Any] | None:
+    """The ``keys`` columns of one row as stored, or None when the row is gone.
+
+    Apply records a record's state with this read right after the service
+    call, and undo compares the same read with it, so both sides come from the
+    database in the same shape (a timestamp read back is timezone-aware even
+    when the value written was not).
+    """
+    if entity_id is None:
+        return None
+    columns = [getattr(model, key) for key in keys]
+    row = (await ctx.session.execute(select(*columns).where(model.id == entity_id))).one_or_none()
+    if row is None:
+        return None
+    return {key: state_value(value) for key, value in zip(keys, row, strict=True)}

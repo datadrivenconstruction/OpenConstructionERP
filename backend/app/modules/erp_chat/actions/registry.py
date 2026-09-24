@@ -55,9 +55,10 @@ def _ensure_builtins() -> None:
         return
     from app.modules.erp_chat.actions.boq_add_position import BOQAddPositionSpec
     from app.modules.erp_chat.actions.boq_update_position import BOQUpdatePositionSpec
+    from app.modules.erp_chat.actions.rfi_create import RFICreateSpec
     from app.modules.erp_chat.actions.task_create import TaskCreateSpec
 
-    for spec in (BOQAddPositionSpec(), BOQUpdatePositionSpec(), TaskCreateSpec()):
+    for spec in (BOQAddPositionSpec(), BOQUpdatePositionSpec(), TaskCreateSpec(), RFICreateSpec()):
         if spec.action_type not in _SPECS:
             register_spec(spec)
     _BUILTINS_LOADED = True

@@ -1,32 +1,36 @@
-"""RBAC gate around the erp_chat tool registry.
+"""Access around the erp_chat tools: reads for every caller, changes only as proposals.
 
-The floating-chat tools split into READ (anyone authenticated) and WRITE
-(manager+ on the referenced project). The dispatcher in
-``ERPChatService._tool_loop`` enforces the split BEFORE invoking the
-handler so a member cannot mutate via the AI chat what they could not
-mutate via the regular HTTP endpoints.
+The chat once had one tool that wrote: ``create_boq_item`` added a BOQ line on
+the model's word, behind a manager-only gate in the dispatcher. It is gone. A
+change is now a ``propose_*`` tool from the action registry. It stores a
+proposal and nothing else, and a person applies it later from its card, under
+the gates of the record's own REST route. So the dispatcher gate no longer
+decides who may change what; the person who clicks Apply does. Covered here:
 
-Coverage in this module:
+* a project member who is not a manager can propose, and the proposal writes
+  no domain row: the BOQ has no new line until someone applies it;
+* a stranger to the project gets the 404-style access error, the same card as
+  for a project that does not exist, never the manager card, and nothing is
+  stored;
+* read tools stay open to any caller (their handlers check project access);
+* no tool is marked ``write`` any more, and the manager gate is still the
+  fail-closed default for one that would be.
 
-* manager calling ``create_boq_item`` succeeds (handler runs).
-* member calling ``create_boq_item`` is refused with the
-  ``manager_permission_required`` card — the BOQ position is NOT created.
-* member calling ``get_boq_items`` succeeds (reads are open).
-* cross-tenant manager calling ``create_boq_item`` for someone else's
-  project gets the 404-style "project not found" card — never the role
-  card, never a leak of project existence.
-
-Tests run against a throwaway PostgreSQL database (cloned from a
-schema-loaded template by ``tests._pg.isolated_engine``) — no FastAPI app
-boot, no migrations.
+The turns run through ``ERPChatService.stream_response`` with only the provider
+faked, on a throwaway PostgreSQL database (``tests._pg.isolated_engine``), so the
+stream commits for real and a second session reads what it committed.
 """
 
 from __future__ import annotations
 
+import json
 import uuid
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from tests._pg import isolated_engine
@@ -39,16 +43,25 @@ async def session_factory():
     """Per-test throwaway PostgreSQL database, cloned from the schema-loaded
     template.
 
-    The helpers below open several independent sessions from this factory and
-    commit through one to read through another, so the test needs a real
-    database with cross-connection commit visibility (not a savepoint-rolled-
-    back shared session). The template already carries every module table, so
-    Project / User / Team / TeamMembership / BOQ rows can coexist — the tools
-    touch all of them.
+    The turns below commit on the stream's session and are read back through
+    another one, so the test needs a real database with cross-connection
+    commit visibility (not a savepoint-rolled-back shared session). The
+    template already carries every module table, so Project / User / Team /
+    TeamMembership / BOQ / ChatAction rows can coexist.
     """
     async with isolated_engine() as engine:
         maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         yield maker
+
+
+@pytest.fixture(autouse=True)
+def _permissions() -> None:
+    """The permission registry the proposal card reads; the app fills it on startup, tests do not boot it."""
+    from app.modules.boq.permissions import register_boq_permissions
+    from app.modules.tasks.permissions import register_tasks_permissions
+
+    register_boq_permissions()
+    register_tasks_permissions()
 
 
 async def _make_user(maker, *, email: str, role: str) -> str:
@@ -77,6 +90,7 @@ async def _make_project(maker, *, owner_id: str, name: str) -> str:
         project = Project(
             name=name,
             owner_id=uuid.UUID(owner_id),
+            currency="EUR",
         )
         session.add(project)
         await session.flush()
@@ -84,9 +98,20 @@ async def _make_project(maker, *, owner_id: str, name: str) -> str:
         return str(project.id)
 
 
+async def _make_member(maker, *, project_id: str, user_id: str) -> None:
+    """Put a user on the project's team with the plain ``member`` role."""
+    from app.modules.teams.models import Team, TeamMembership
+
+    async with maker() as session:
+        team = Team(project_id=uuid.UUID(project_id), name="Site team")
+        session.add(team)
+        await session.flush()
+        session.add(TeamMembership(team_id=team.id, user_id=uuid.UUID(user_id), role="member"))
+        await session.commit()
+
+
 async def _make_boq(maker, *, project_id: str, name: str = "Default BOQ") -> str:
-    """Insert an empty BOQ on a project so ``create_boq_item`` has somewhere
-    to add its position. Returns BOQ UUID string."""
+    """Insert an empty BOQ on a project so a proposed line has a bill to go to. Returns BOQ UUID string."""
     from app.modules.boq.models import BOQ
 
     async with maker() as session:
@@ -100,122 +125,133 @@ async def _make_boq(maker, *, project_id: str, name: str = "Default BOQ") -> str
         return str(boq.id)
 
 
-# ── Test cases ─────────────────────────────────────────────────────────────
+async def _count(maker, model, *where) -> int:
+    async with maker() as session:
+        stmt = select(func.count()).select_from(model)
+        if where:
+            stmt = stmt.where(*where)
+        return int((await session.execute(stmt)).scalar_one())
 
 
-@pytest.mark.asyncio
-async def test_manager_can_create_boq_item(session_factory):
-    """Global-manager user passes the write gate AND mutates the BOQ."""
-    from sqlalchemy import select
+def _frames(chunks: list[str], event: str) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for block in "".join(chunks).split("\n\n"):
+        lines = block.strip().splitlines()
+        if len(lines) >= 2 and lines[0] == f"event: {event}":
+            out.append(json.loads(lines[1][len("data:") :].strip()))
+    return out
 
-    from app.modules.boq.models import Position
-    from app.modules.erp_chat.tools import (
-        TOOL_PERMISSIONS,
-        ToolPermissionDenied,
-        check_tool_permission,
-        handle_create_boq_item,
-    )
 
-    assert TOOL_PERMISSIONS["create_boq_item"] == "write"
+async def _turn(maker, user_id: str, tool_name: str, args: dict[str, Any]) -> list[str]:
+    """One chat turn in which the model calls ``tool_name`` once, then answers."""
+    from app.modules.erp_chat.schemas import StreamChatRequest
+    from app.modules.erp_chat.service import ERPChatService
 
-    manager_id = await _make_user(
-        session_factory,
-        email="mgr@test.io",
-        role="manager",
-    )
-    project_id = await _make_project(
-        session_factory,
-        owner_id=manager_id,
-        name="Mgr Project",
-    )
-    await _make_boq(session_factory, project_id=project_id)
+    rounds = [
+        {"content": [{"type": "tool_use", "id": "tu-1", "name": tool_name, "input": args}], "usage": {}},
+        {"content": [{"type": "text", "text": "Prepared; it waits for your approval."}], "usage": {}},
+    ]
 
-    args = {
+    async with maker() as session:
+        service = ERPChatService(session)
+
+        async def _resolve(_uid: str):
+            return "anthropic", "test-key", None
+
+        async def _anthropic(api_key, messages, preferred_model):  # noqa: ARG001
+            return rounds.pop(0), 10
+
+        with (
+            patch.object(service, "_resolve_ai", new=_resolve),
+            patch.object(service, "_call_anthropic", new=_anthropic),
+        ):
+            chunks = [c async for c in service.stream_response(user_id, StreamChatRequest(message="add a line"))]
+        await session.commit()
+    return chunks
+
+
+def _line_args(project_id: str) -> dict[str, Any]:
+    return {
         "project_id": project_id,
         "description": "Concrete wall C30/37",
         "unit": "m2",
         "quantity": 12.5,
         "unit_rate": 95.50,
+        "confidence": 0.9,
+        "rationale": "The user gave all four values.",
     }
 
-    async with session_factory() as session:
-        # Permission check first — must not raise.
-        await check_tool_permission(session, "create_boq_item", args, manager_id)
 
-        # Handler call then succeeds.
-        result = await handle_create_boq_item(session, args, manager_id)
-        await session.commit()
-
-    assert result["renderer"] == "boq_item_created", result
-    assert result["data"]["description"] == "Concrete wall C30/37"
-
-    async with session_factory() as session:
-        rows = (await session.execute(select(Position))).scalars().all()
-        assert len(rows) == 1
-        assert rows[0].description == "Concrete wall C30/37"
-
-    # Sanity: ToolPermissionDenied is the exception type we use.
-    assert issubclass(ToolPermissionDenied, Exception)
+# ── Test cases ─────────────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_member_cannot_create_boq_item(session_factory):
-    """Non-manager (``editor``) user is blocked by the write gate."""
-    from sqlalchemy import select
-
+async def test_a_project_member_can_propose_and_nothing_is_written(session_factory):
+    """A plain team member (global role editor) proposes a BOQ line; the bill stays unchanged."""
     from app.modules.boq.models import Position
-    from app.modules.erp_chat.tools import (
-        ToolPermissionDenied,
-        check_tool_permission,
-    )
+    from app.modules.erp_chat.models import ChatAction, ChatSession
 
-    # Owner = admin (so the project exists + member can read it later).
-    admin_id = await _make_user(
-        session_factory,
-        email="owner@test.io",
-        role="admin",
-    )
-    project_id = await _make_project(
-        session_factory,
-        owner_id=admin_id,
-        name="Shared Project",
-    )
+    owner_id = await _make_user(session_factory, email="owner@test.io", role="admin")
+    project_id = await _make_project(session_factory, owner_id=owner_id, name="Shared Project")
     await _make_boq(session_factory, project_id=project_id)
+    member_id = await _make_user(session_factory, email="member@test.io", role="editor")
+    await _make_member(session_factory, project_id=project_id, user_id=member_id)
 
-    member_id = await _make_user(
-        session_factory,
-        email="member@test.io",
-        role="editor",
-    )
+    chunks = await _turn(session_factory, member_id, "propose_add_boq_position", _line_args(project_id))
 
-    args = {
-        "project_id": project_id,
-        "description": "Should not land",
-        "unit": "m",
-        "quantity": 1,
-        "unit_rate": 1,
-    }
+    [result] = _frames(chunks, "tool_result")
+    assert result["result"]["renderer"] == "action_proposal", result
+    card = result["result"]["data"]
+    assert card["status"] == "proposed"
+    assert (result["result"].get("data") or {}).get("i18n_key") != "chat.error.manager_required"
 
-    # The gate raises — the dispatcher catches and emits the error card.
     async with session_factory() as session:
-        with pytest.raises(ToolPermissionDenied) as ei:
-            await check_tool_permission(
-                session,
-                "create_boq_item",
-                args,
-                member_id,
-            )
-        assert ei.value.i18n_key == "chat.error.manager_required"
+        action = (await session.execute(select(ChatAction))).scalar_one()
+        chat = (await session.execute(select(ChatSession))).scalar_one()
+    assert str(action.id) == card["id"]
+    assert str(action.requested_by) == member_id
+    assert str(action.project_id) == project_id
+    assert action.session_id == chat.id
+    assert action.status == "proposed"
+    assert action.payload["description"] == "Concrete wall C30/37"
+    # The domain table is untouched until a person applies the card.
+    assert await _count(session_factory, Position) == 0
 
-    # And no Position row was created (gate ran before handler).
-    async with session_factory() as session:
-        rows = (await session.execute(select(Position))).scalars().all()
-        assert rows == []
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_a_stranger_gets_the_access_error_and_nothing_is_stored(session_factory):
+    """IDOR posture: a manager of another tenant proposing on this project gets
+    the same 404-style card as for a missing project - never the manager card,
+    never the project's name - and no proposal row."""
+    from app.modules.boq.models import Position
+    from app.modules.erp_chat.models import ChatAction
+
+    tenant_a_id = await _make_user(session_factory, email="tenant-a@test.io", role="admin")
+    project_id = await _make_project(session_factory, owner_id=tenant_a_id, name="Tenant A Secret Tower")
+    await _make_boq(session_factory, project_id=project_id)
+    tenant_b_id = await _make_user(session_factory, email="tenant-b@test.io", role="manager")
+
+    chunks = await _turn(session_factory, tenant_b_id, "propose_add_boq_position", _line_args(project_id))
+    missing = await _turn(session_factory, tenant_b_id, "propose_add_boq_position", _line_args(str(uuid.uuid4())))
+
+    [result] = _frames(chunks, "tool_result")
+    assert result["result"]["renderer"] == "error", result
+    payload = result["result"]["data"]
+    assert payload["error"] == "project_not_found"
+    assert payload.get("i18n_key") != "chat.error.manager_required"
+    assert "Secret Tower" not in json.dumps(result)
+    # Indistinguishable from a project that does not exist.
+    [missing_result] = _frames(missing, "tool_result")
+    assert missing_result["result"]["data"]["error"] == payload["error"]
+
+    assert await _count(session_factory, ChatAction) == 0
+    assert await _count(session_factory, Position) == 0
 
 
 @pytest.mark.asyncio
 async def test_member_can_read_boq_items(session_factory):
-    """Read tools have ``permission='read'`` — any user passes the gate."""
+    """Read tools have ``permission='read'`` - any user passes the gate."""
     from app.modules.erp_chat.tools import (
         TOOL_PERMISSIONS,
         check_tool_permission,
@@ -247,122 +283,28 @@ async def test_member_can_read_boq_items(session_factory):
         await check_tool_permission(session, "get_boq_items", args, member_id)
 
 
-@pytest.mark.tenant_isolation
 @pytest.mark.asyncio
-async def test_cross_tenant_manager_gets_404_not_403(session_factory):
-    """IDOR posture: a manager whose project_id belongs to someone else
-    gets the standard 404-style 'project not found' error — never the
-    role-required card (which would leak the project's existence)."""
-    from app.modules.erp_chat.service import ERPChatService
-    from app.modules.erp_chat.tools import ToolAuthError, _require_project_access
-
-    # Tenant A owns the project.
-    tenant_a_id = await _make_user(
-        session_factory,
-        email="tenant-a@test.io",
-        role="admin",
-    )
-    project_id = await _make_project(
-        session_factory,
-        owner_id=tenant_a_id,
-        name="Tenant A Project",
-    )
-    await _make_boq(session_factory, project_id=project_id)
-
-    # Tenant B is a manager — but NOT on this project.
-    tenant_b_id = await _make_user(
-        session_factory,
-        email="tenant-b@test.io",
-        role="manager",
-    )
-
-    # The IDOR check (which the dispatcher runs FIRST for write tools)
-    # raises ToolAuthError — that becomes the 404-shaped error card and
-    # we never reach the role check.
-    async with session_factory() as session:
-        with pytest.raises(ToolAuthError) as ei:
-            await _require_project_access(
-                session,
-                uuid.UUID(project_id),
-                tenant_b_id,
-            )
-        # The message must not include the words "manager" or "permission"
-        # so the cross-tenant card is indistinguishable from "project
-        # missing" — that's the IDOR posture.
-        text = str(ei.value).lower()
-        assert "manager" not in text
-        assert "permission" not in text
-
-    # End-to-end through the dispatcher: simulate one tool round and assert
-    # the surfaced result is the IDOR card, NOT the role card.
-    args = {
-        "project_id": project_id,
-        "description": "X",
-        "unit": "m",
-        "quantity": 1,
-        "unit_rate": 1,
-    }
-    async with session_factory() as session:
-        service = ERPChatService(session)
-        result = await _dispatch_one(service, "create_boq_item", args, tenant_b_id)
-
-    assert result["renderer"] == "error", result
-    # IDOR-flavour error (carries the project_id in its message) — NOT the
-    # role-denied card with i18n_key "chat.error.manager_required".
-    payload = result.get("data") or {}
-    assert payload.get("i18n_key") != "chat.error.manager_required"
-
-
-# ── Helper: inline copy of the dispatcher logic from ``stream_response`` ───
-#
-# We don't drive the whole SSE generator because it would also try to
-# call out to Anthropic. The dispatcher's permission-gate block is a
-# self-contained piece of logic — we copy it here so the test runs the
-# exact same branch.
-
-
-async def _dispatch_one(service, tool_name, tool_args, user_id):
-    """Run one tool call through the same permission + handler logic
-    ``ERPChatService.stream_response`` uses, returning the tool_result
-    that would have been emitted on the SSE wire."""
+async def test_no_tool_writes_directly_and_the_gate_still_fails_closed(session_factory, monkeypatch):
+    """Nothing in the read-tool map writes; a handler marked ``write`` would still need manager+."""
     from app.modules.erp_chat.tools import (
+        TOOL_DEFINITIONS,
         TOOL_HANDLER_MAP,
         TOOL_PERMISSIONS,
-        ToolAuthError,
         ToolPermissionDenied,
-        _auth_error,
-        _extract_project_id,
-        _require_project_access,
         check_tool_permission,
-        manager_permission_error_result,
     )
 
-    handler = TOOL_HANDLER_MAP[tool_name]
-    is_write = TOOL_PERMISSIONS.get(tool_name, "read") == "write"
-    tool_result = None
+    assert "write" not in set(TOOL_PERMISSIONS.values())
+    assert "create_boq_item" not in TOOL_HANDLER_MAP
+    assert "create_boq_item" not in TOOL_PERMISSIONS
+    assert "create_boq_item" not in {t["name"] for t in TOOL_DEFINITIONS}
 
-    if is_write:
-        project_id = _extract_project_id(tool_name, tool_args)
-        if project_id is not None:
-            try:
-                await _require_project_access(
-                    service.session,
-                    project_id,
-                    user_id,
-                )
-            except ToolAuthError as te:
-                tool_result = _auth_error(str(te))
-        if tool_result is None:
-            try:
-                await check_tool_permission(
-                    service.session,
-                    tool_name,
-                    tool_args,
-                    user_id,
-                )
-            except ToolPermissionDenied:
-                tool_result = manager_permission_error_result()
+    admin_id = await _make_user(session_factory, email="gate-owner@test.io", role="admin")
+    project_id = await _make_project(session_factory, owner_id=admin_id, name="Gate Project")
+    editor_id = await _make_user(session_factory, email="gate-editor@test.io", role="editor")
 
-    if tool_result is None:
-        tool_result = await handler(service.session, tool_args, user_id)
-    return tool_result
+    monkeypatch.setitem(TOOL_PERMISSIONS, "hypothetical_direct_write", "write")
+    async with session_factory() as session:
+        with pytest.raises(ToolPermissionDenied) as ei:
+            await check_tool_permission(session, "hypothetical_direct_write", {"project_id": project_id}, editor_id)
+        assert ei.value.i18n_key == "chat.error.manager_required"

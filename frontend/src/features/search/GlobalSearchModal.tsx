@@ -211,7 +211,14 @@ export default function GlobalSearchModal() {
       className="fixed inset-0 z-[60] flex items-start justify-center bg-black/70 backdrop-blur-lg pt-[8vh] px-3 sm:px-4 pb-4"
       onClick={closeModal}
     >
+      {/* A modal dialog, and marked as one: the AI dock (and any other
+          focus trap under it) yields to an open aria-modal dialog, so Tab
+          and Alt+A stay in the search while it is open. It unmounts when
+          closed, so the mark never outlives it. */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('common.search', { defaultValue: 'Search' })}
         className="w-full max-w-3xl bg-surface-primary rounded-2xl shadow-2xl ring-1 ring-black/5 border border-border-light flex flex-col max-h-[85vh] min-h-0 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

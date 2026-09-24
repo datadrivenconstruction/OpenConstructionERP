@@ -8,6 +8,17 @@ Endpoints:
     POST   /erp_chat/sessions/                      - Create a new chat session
     GET    /erp_chat/sessions/{session_id}/messages/ - Get messages for a session
     DELETE /erp_chat/sessions/{session_id}/          - Delete a chat session
+
+Assistant proposals (``actions/router.py``, included at the end of this file).
+The model's ``propose_*`` tools store a proposal and nothing else; a person
+reviews it and applies it here, under the gates of the record's own REST route:
+    GET    /erp_chat/actions/                       - List proposals (filters, counts)
+    GET    /erp_chat/actions/{id}/                  - One proposal
+    PATCH  /erp_chat/actions/{id}/                  - Edit a proposal before applying it
+    POST   /erp_chat/actions/{id}/apply/            - Apply it as the caller
+    POST   /erp_chat/actions/{id}/reject/           - Reject it
+    POST   /erp_chat/actions/{id}/revert/           - Undo an applied proposal
+    POST   /erp_chat/actions/apply-batch/           - Apply several, each on its own
 """
 
 import logging
@@ -63,7 +74,14 @@ async def stream_chat(
     interacts badly with StreamingResponse and cancels the dependency session
     between chunks, killing every ``await session.flush()`` inside the agent
     loop with ``CancelledError``. Instead the generator opens its own session
-    whose lifetime matches the stream.
+    whose lifetime matches the stream. The service commits on it mid-stream
+    when the model proposes a change, so the card's Apply request (another
+    session) sees the proposal as soon as the card is on screen.
+
+    ``project_id`` and ``client_context.project_id`` are what the browser
+    claims. The service checks the project against the caller's access before
+    naming it to the model or storing it on a new chat session; a project the
+    caller cannot open is dropped, and the chat answers without it.
     """
     from app.database import async_session_factory
 
