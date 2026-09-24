@@ -858,6 +858,10 @@ _REMOVAL_HOLDER_LABELS: dict[str, tuple[str, str]] = {
     "handover": ("completed handover", "completed handovers"),
     "warranty_claim": ("warranty claim", "warranty claims"),
     "escrow_transaction": ("escrow transaction", "escrow transactions"),
+    "settled_escrow_transaction": (
+        "matched or disputed escrow transaction",
+        "matched or disputed escrow transactions",
+    ),
     "commission_accrual": ("broker commission accrual", "broker commission accruals"),
     "locked_selection": ("locked option selection", "locked option selections"),
 }
@@ -6533,6 +6537,73 @@ async def _svc_reconcile_escrow_transaction(
     return updated  # type: ignore[return-value]
 
 
+#: Reconciliation states in which an escrow transaction is part of the ledger
+#: the bank statement and the regulator report agree on (or argue about), and
+#: so can no longer be removed. An unreconciled entry is still a data-entry
+#: record and may be deleted to correct a mistake.
+_SETTLED_ESCROW_STATES = ("matched", "disputed")
+
+
+async def _svc_delete_escrow_transaction(
+    svc: PropertyDevService,
+    tx_id: uuid.UUID,
+) -> None:
+    """Delete an escrow transaction that has not been matched to the bank yet.
+
+    A matched or disputed transaction is refused (409). Its amount and
+    direction are already immutable (the update schema does not carry them),
+    so deleting the row was the one way left to change the escrow balance
+    after the bank had confirmed it.
+    """
+    tx = await svc.escrow_transactions.get_by_id(tx_id)
+    if tx is None:
+        raise HTTPException(status_code=404, detail=translate("errors.escrow_not_found", locale=get_locale()))
+    if tx.reconciliation_state in _SETTLED_ESCROW_STATES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"An escrow transaction in reconciliation state '{tx.reconciliation_state}' cannot be deleted, "
+                "it is part of the ledger the bank statement was matched against. Record a correcting "
+                "transaction in the opposite direction instead."
+            ),
+        )
+    await svc.escrow_transactions.delete(tx_id)
+
+
+async def _svc_delete_escrow_account(
+    svc: PropertyDevService,
+    account_id: uuid.UUID,
+) -> None:
+    """Delete an escrow account whose ledger holds nothing the bank has confirmed.
+
+    The account's transactions cascade with it, so the delete is refused (409)
+    while any of them is matched or disputed, the same rows
+    :func:`_svc_delete_escrow_transaction` refuses one at a time.
+    """
+    from sqlalchemy import func, select
+
+    account = await _svc_get_escrow_account(svc, account_id)
+    holders = await svc._count_removal_holders(
+        [
+            (
+                "settled_escrow_transaction",
+                select(func.count())
+                .select_from(EscrowTransaction)
+                .where(
+                    EscrowTransaction.escrow_account_id == account_id,
+                    EscrowTransaction.reconciliation_state.in_(_SETTLED_ESCROW_STATES),
+                ),
+            )
+        ]
+    )
+    _refuse_removal(
+        f"Escrow account {account.regulator_account_number or account.iban}".rstrip(),
+        holders,
+        "Deactivate the account instead, which keeps its ledger.",
+    )
+    await svc.escrow_accounts.delete(account_id)
+
+
 async def _svc_compute_escrow_balance(
     svc: PropertyDevService,
     account_id: uuid.UUID,
@@ -7112,6 +7183,10 @@ PropertyDevService.create_escrow_transaction = (  # type: ignore[attr-defined]
 PropertyDevService.reconcile_escrow_transaction = (  # type: ignore[attr-defined]
     _svc_reconcile_escrow_transaction
 )
+PropertyDevService.delete_escrow_transaction = (  # type: ignore[attr-defined]
+    _svc_delete_escrow_transaction
+)
+PropertyDevService.delete_escrow_account = _svc_delete_escrow_account  # type: ignore[attr-defined]
 PropertyDevService.compute_escrow_balance = _svc_compute_escrow_balance  # type: ignore[attr-defined]
 PropertyDevService.create_price_matrix = _svc_create_price_matrix  # type: ignore[attr-defined]
 PropertyDevService.get_price_matrix = _svc_get_price_matrix  # type: ignore[attr-defined]

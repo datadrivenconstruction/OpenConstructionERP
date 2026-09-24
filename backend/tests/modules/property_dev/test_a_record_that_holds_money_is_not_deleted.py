@@ -5,7 +5,9 @@ instalment. A development cascades to its plots, buyers, escrow accounts and
 broker commissions. Each of those records is kept read-only by its own service
 method once it holds money or a party relies on it, yet a delete one or two
 levels up removed it anyway, and so did rebuilding a suspended payment schedule
-and deleting a draft sales contract that had already been paid against.
+and deleting a draft sales contract that had already been paid against. An
+escrow transaction the bank statement was matched against could be deleted
+outright, although its amount can no longer be edited.
 
 Each group pairs the guard that was already there with the new refusal and
 with the delete or rebuild that must still go through.
@@ -41,6 +43,7 @@ from app.modules.property_dev.models import (
     SalesContract,
     WarrantyClaim,
 )
+from app.modules.property_dev.schemas import EscrowTransactionUpdate
 from app.modules.property_dev.service import PropertyDevService
 from tests._pg import transactional_session
 
@@ -356,3 +359,50 @@ async def test_a_locked_selection_is_not_deleted_and_a_submitted_one_is(session:
     assert "Cancel it instead" in detail
     assert await _exists(session, BuyerSelection, locked.id)
     assert not await _exists(session, BuyerSelection, submitted.id)
+
+
+# ── Escrow ledger ────────────────────────────────────────────────────────────
+
+
+async def _escrow(session: AsyncSession, state: str) -> tuple[EscrowAccount, EscrowTransaction]:
+    account = await _add(
+        session,
+        EscrowAccount(development_id=(await _development(session)).id, regulator_account_number="ESC-1"),
+    )
+    tx = await _add(
+        session,
+        EscrowTransaction(escrow_account_id=account.id, amount=Decimal("50000.00"), reconciliation_state=state),
+    )
+    return account, tx
+
+
+async def test_control_an_escrow_amount_cannot_be_edited() -> None:
+    """The guard that was already there: the update schema carries no amount, direction or state."""
+    assert not {"amount", "direction", "reconciliation_state"} & set(EscrowTransactionUpdate.model_fields)
+
+
+@pytest.mark.parametrize("state", ["matched", "disputed"])
+async def test_a_bank_matched_escrow_transaction_is_not_deleted(session: AsyncSession, state: str) -> None:
+    svc: Any = PropertyDevService(session)
+    account, tx = await _escrow(session, state)
+
+    detail = await _refused(svc.delete_escrow_transaction(tx.id))
+    detail_account = await _refused(svc.delete_escrow_account(account.id))
+
+    assert "correcting transaction" in detail
+    assert "1 matched or disputed escrow transaction" in detail_account
+    assert await _exists(session, EscrowTransaction, tx.id)
+    assert await _exists(session, EscrowAccount, account.id)
+
+
+async def test_an_unreconciled_escrow_entry_and_its_account_are_deleted(session: AsyncSession) -> None:
+    svc: Any = PropertyDevService(session)
+    account, tx = await _escrow(session, "unreconciled")
+    _, other = await _escrow(session, "unreconciled")
+
+    await svc.delete_escrow_transaction(tx.id)
+    await svc.delete_escrow_account(account.id)
+
+    assert not await _exists(session, EscrowTransaction, tx.id)
+    assert not await _exists(session, EscrowAccount, account.id)
+    assert await _exists(session, EscrowTransaction, other.id)
