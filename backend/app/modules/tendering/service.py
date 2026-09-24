@@ -24,6 +24,8 @@ _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 # ── Lifecycle state machine ──────────────────────────────────────────────────
 # Package status transitions. ``closed`` is terminal; ``awarded`` may still be
 # closed for archival but never re-opened. Anything not listed is rejected.
+# ``evaluating -> awarded`` is the lifecycle step, but only ``apply_winner``
+# takes it: ``update_package`` refuses a PATCH to ``awarded``.
 _PACKAGE_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"draft", "issued", "closed"},
     "issued": {"issued", "collecting", "closed"},
@@ -527,6 +529,20 @@ class TenderingService:
 
         # Validate status transition before persisting anything.
         new_status = fields.get("status")
+        if new_status == "awarded" and package.status in _AWARDABLE_PACKAGE_STATES:
+            # Awarding is a decision with consequences, not a label: apply_winner
+            # names the winning bid, writes its rates into the BOQ, rejects the
+            # other bids and announces the award. A PATCH would do none of that
+            # and leave a package that reads as awarded with no winner, which
+            # apply_winner then refuses for good. It also needs tendering.award,
+            # which this route does not ask for.
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "A package is awarded by applying the winning bid, which records the winner "
+                    "and writes its rates into the BOQ. Use apply-winner instead of changing the status."
+                ),
+            )
         if new_status is not None and new_status != package.status:
             allowed = _PACKAGE_TRANSITIONS.get(package.status, set())
             if new_status not in allowed:
