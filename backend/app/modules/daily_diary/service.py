@@ -17,6 +17,7 @@ Events emitted:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -1341,7 +1342,10 @@ class DailyDiaryService:
         project_name = await self._project_name(diary.project_id)
         supervisor_name = await self._user_display_name(diary.site_supervisor_id)
 
-        pdf_bytes = render_diary_pdf(
+        # ReportLab layout of every entry runs off the event loop. The rows are
+        # already loaded and the renderer only reads plain attributes.
+        pdf_bytes = await asyncio.to_thread(
+            render_diary_pdf,
             diary,
             project_name=project_name,
             entries=list(entries),
