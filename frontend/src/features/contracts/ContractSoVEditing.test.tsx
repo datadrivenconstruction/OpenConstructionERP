@@ -310,7 +310,7 @@ describe('a line of the schedule of values', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /^Delete$/i }));
 
     await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
-    const told = toast.addToast.mock.calls[0][0] as { type: string; title: string };
+    const told = toast.addToast.mock.calls[0]![0] as { type: string; title: string };
     expect(told.type).toBe('error');
     expect(told.title).toMatch(/progress claim has billed/i);
     expect(told.title).not.toMatch(/explains itself/i);
@@ -328,7 +328,7 @@ describe('a line of the schedule of values', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
 
     await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
-    const told = toast.addToast.mock.calls[0][0] as { title: string };
+    const told = toast.addToast.mock.calls[0]![0] as { title: string };
     expect(told.title).toMatch(/signed contract/i);
     expect(told.title).not.toMatch(/explains itself/i);
     // The edit is closed rather than left open on a write that cannot land.
@@ -348,7 +348,7 @@ describe('a line of the schedule of values', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /^Delete$/i }));
 
     await waitFor(() => expect(toast.addToast).toHaveBeenCalledTimes(1));
-    expect((toast.addToast.mock.calls[0][0] as { title: string }).title).toMatch(/Disk full/);
+    expect((toast.addToast.mock.calls[0]![0] as { title: string }).title).toMatch(/Disk full/);
   });
 });
 
