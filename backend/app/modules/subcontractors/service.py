@@ -319,6 +319,10 @@ def next_payment_blocked(
 # tax-form exclusion rather than an allow-list keeps this correct if new lien
 # variants are added to ``_VALID_WAIVER_TYPES``.
 _TAX_FORM_WAIVER_TYPES: frozenset[str] = frozenset({"w9", "w8"})
+# Waivers that release lien rights for the whole subcontract, which is what a
+# retention release is paying out.
+_FINAL_WAIVER_TYPES: frozenset[str] = frozenset({"conditional_final", "unconditional_final"})
+_NO_FINAL_WAIVER_NOTE = "Released without a final lien waiver on file."
 
 
 def _is_payment_waiver(waiver_type: str) -> bool:
@@ -1899,6 +1903,19 @@ class SubcontractorService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Cannot reject a payment in status {entity.status}",
             )
+        # A pay application billed on a GC claim that is past editing is part
+        # of what that claim says it contained; exclude_payment_application
+        # refuses to take it out for the same reason, and rejecting it would
+        # also reverse its retention under a claim that already counted it.
+        if entity.progress_claim_id is not None:
+            claim = await PrimeContractReader(self.session).get_claim(entity.progress_claim_id)
+            if claim is not None and claim.status not in self._CLAIM_EDITABLE_STATUSES:
+                raise self._refuse(
+                    status.HTTP_409_CONFLICT,
+                    "claim_not_editable",
+                    f"The pay application is billed on a claim that is {claim.status!r} and can no longer be rejected.",
+                    claim_status=claim.status,
+                )
         await self.payments.update_fields(
             payment_id,
             status="rejected",
@@ -2444,6 +2461,15 @@ class SubcontractorService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(f"Cannot release {amount}: exceeds the outstanding retention balance of {balance}"),
             )
+        # A missing final lien waiver is a warning, not a block: the release
+        # goes ahead, and the ledger row and the event say what it went ahead
+        # without so the gap stays visible after the money moved.
+        warnings = await self.retention_release_warnings(agreement_id)
+        if warnings:
+            logger.warning(
+                "Retention released on agreement %s without a final lien waiver on file",
+                agreement_id,
+            )
         entry = RetentionLedger(
             agreement_id=agreement_id,
             payment_application_id=None,
@@ -2451,6 +2477,7 @@ class SubcontractorService:
             released_amount=amount,
             released_at=datetime.now(UTC),
             release_reason=reason,
+            notes=_NO_FINAL_WAIVER_NOTE if warnings else None,
         )
         await self.retention.create(entry)
         event_bus.publish_detached(
@@ -2459,10 +2486,31 @@ class SubcontractorService:
                 "agreement_id": str(agreement_id),
                 "amount": str(amount),
                 "reason": reason,
+                "warnings": warnings,
             },
             source_module="subcontractors",
         )
         return entry
+
+    async def retention_release_warnings(self, agreement_id: uuid.UUID) -> list[str]:
+        """Codes for what a retention release on this agreement would go ahead without.
+
+        Only agreements that require lien waivers are checked. For those, a
+        final waiver (conditional or unconditional) filed against any of the
+        agreement's own pay applications clears it; a waiver filed for another
+        agreement of the same subcontractor does not.
+
+        Returns:
+            ``["no_final_lien_waiver"]`` when the waiver is missing, else ``[]``.
+        """
+        agreement = await self.agreements.get_by_id(agreement_id)
+        if agreement is None or not getattr(agreement, "requires_lien_waiver", False):
+            return []
+        pay_apps = await self.payments.list_for_agreement(agreement_id)
+        waivers = await self.lien_waivers.list_for_payment_apps([p.id for p in pay_apps])
+        if any(w.waiver_type in _FINAL_WAIVER_TYPES for w in waivers):
+            return []
+        return ["no_final_lien_waiver"]
 
     async def retention_balance(self, agreement_id: uuid.UUID) -> Decimal:
         entries = await self.retention.list_for_agreement(agreement_id)

@@ -97,6 +97,9 @@ _INSPECTION_DELETE_LOCKED_STATUSES = frozenset({"passed", "failed", "closed", "v
 # and its NCR keeps it on the register), but never into them.
 _INSPECTION_RESULT_STATUSES = frozenset({"passed", "failed"})
 _TEST_DELETE_LOCKED_STATUSES = frozenset({"recorded", "void"})
+# The fields a tolerance verdict is computed from. They freeze once any record
+# was judged against the criterion; text such as the title stays editable.
+_CRITERION_BOUND_FIELDS = frozenset({"unit", "acceptance_rule", "nominal_value", "tolerance_lower", "tolerance_upper"})
 
 
 def _is_date_past(value: str | None) -> bool:
@@ -187,6 +190,27 @@ class ConstructionControlService:
         fields = self._merge_metadata_patch(data.model_dump(exclude_unset=True), criterion)
         if not fields:
             return criterion
+        # Records judged against the criterion keep only its id, so moving the
+        # bounds would silently change what their recorded verdicts mean. Only
+        # real changes count, so a form that sends the stored bounds back still
+        # saves its other fields.
+        moved = sorted(k for k in _CRITERION_BOUND_FIELDS if k in fields and fields[k] != getattr(criterion, k))
+        if moved:
+            judged = (
+                await self.holders.count_inspections_using_criterion(criterion_id)
+                + await self.holders.count_materials_using_criterion(criterion_id)
+                + await self.holders.count_tests_using_criterion(criterion_id)
+                + await self.holders.count_asbuilt_using_criterion(criterion_id)
+            )
+            if judged:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Acceptance criterion {criterion.code} has {judged} record(s) judged against it, "
+                        f"so its {', '.join(moved)} cannot change. Create a new criterion with the new bounds "
+                        "and clear the is_active flag on this one."
+                    ),
+                )
         await self.criteria.update_fields(criterion_id, **fields)
         await self.session.refresh(criterion)
         return criterion

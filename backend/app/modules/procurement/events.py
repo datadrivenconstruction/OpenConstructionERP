@@ -95,6 +95,11 @@ async def _find_existing_po(
     tender and bid_management paths converge on a single PO when they both
     reference the same tendering package.
 
+    A cancelled PO does not count. Withdrawing an award is refused while its
+    PO stands, so the way to re-award is to cancel that PO first, and the
+    re-award must then raise a PO for the new supplier rather than find the
+    cancelled one and skip.
+
     Args:
         session: Active async session.
         project_id: Project to scope the scan to.
@@ -109,6 +114,8 @@ async def _find_existing_po(
         return None
     rows = (await session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == project_id))).scalars().all()
     for po in rows:
+        if po.status == "cancelled":
+            continue
         md = po.metadata_ if isinstance(po.metadata_, dict) else {}
         for field, value in wanted.items():
             if md.get(field) == value:
