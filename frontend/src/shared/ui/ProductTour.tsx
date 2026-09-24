@@ -52,11 +52,13 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { X, ArrowLeft, ArrowRight, MapPin, Check } from 'lucide-react';
 import clsx from 'clsx';
 
 import { ConfirmDialog } from './ConfirmDialog';
 import { apiGet, apiPut } from '@/shared/lib/api';
+import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
@@ -1203,22 +1205,33 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
    * finished or skipped, otherwise the spotlight overlay lands on top of
    * the setup wizard (the two distinct first-run experiences collide).
    *
-   * Seeded from the persisted flag so a returning user (who finished
-   * onboarding long ago, or whose flag the dashboard primed from the
-   * server) is gated open immediately. Flipped true the instant onboarding
-   * completes via the `oe:onboarding-completed` event, so the tour begins
-   * the moment the wizard closes instead of waiting for a reload. Also
-   * re-checked on route change (the auto-start effect lists it as a dep)
-   * which covers the dashboard's server-flag priming path.
+   * The per-user server flag decides, the same entry the dashboard's
+   * first-run redirect reads. The localStorage flag used to decide on its
+   * own, and it outlives a server-side onboarding reset: the tour armed on
+   * the dashboard from the stale `true`, the server answer then sent the
+   * user to /onboarding, and the tour opened on top of the wizard. The
+   * local flag is only the fallback when the server cannot be asked.
+   *
+   * `completedThisSession` is flipped the instant onboarding completes via
+   * the `oe:onboarding-completed` event (or another tab's flag), so the tour
+   * begins the moment the wizard closes instead of waiting for the cached
+   * server answer to go stale.
    */
-  const [onboardingDone, setOnboardingDone] = useState<boolean>(() => isOnboardingDone());
+  const onboardingQueryKey = useMeOnboardingQueryKey();
+  const { data: serverOnboarding } = useQuery({
+    queryKey: onboardingQueryKey,
+    queryFn: () => apiGet<{ completed: boolean }>('/v1/users/me/onboarding/').catch(() => null),
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+  const [completedThisSession, setCompletedThisSession] = useState(false);
   useEffect(() => {
-    const onDone = () => setOnboardingDone(true);
+    const onDone = () => setCompletedThisSession(true);
     window.addEventListener(ONBOARDING_COMPLETED_EVENT, onDone);
-    // Cross-tab / dashboard-primed flag: pick up a flip we didn't fire.
+    // Cross-tab flag: pick up a completion another tab fired.
     const onStorage = (e: StorageEvent) => {
       if (e.key === ONBOARDING_COMPLETED_KEY && e.newValue === 'true') {
-        setOnboardingDone(true);
+        setCompletedThisSession(true);
       }
     };
     window.addEventListener('storage', onStorage);
@@ -1241,10 +1254,14 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
     // new user lands on the dashboard with neither flag set; the dashboard
     // first-run redirect then sends them to /onboarding. Without this guard
     // the 600ms timer below armed on the dashboard and the tour popped on
-    // top of the wizard. Re-check live (not just the seeded state) so a flag
-    // primed between renders is honoured. Manual launches via the
+    // top of the wizard. The server answer wins over the local flag, and
+    // until it arrives nothing starts. Manual launches via the
     // `oe:start-tour` event are unaffected; they live in a separate effect.
-    if (!onboardingDone && !isOnboardingDone()) return;
+    if (!completedThisSession) {
+      if (serverOnboarding === undefined) return;
+      const onboardingDone = serverOnboarding ? serverOnboarding.completed === true : isOnboardingDone();
+      if (!onboardingDone) return;
+    }
 
     let completed = 'false';
     try {
@@ -1270,7 +1287,19 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
       setActive(true);
     }, 600);
     return () => window.clearTimeout(id);
-  }, [active, location.pathname, defaultTourId, serverHydrated, onboardingDone]);
+  }, [active, location.pathname, defaultTourId, serverHydrated, serverOnboarding, completedThisSession]);
+
+  /* ── Never over the onboarding wizard ────────────────────────────────── */
+  /**
+   * A tour already open when the route becomes /onboarding (the dashboard's
+   * first-run redirect, or a manual launch there) is closed without being
+   * marked dismissed or completed, so it can still start once onboarding is
+   * done.
+   */
+  const onOnboarding = location.pathname.startsWith('/onboarding');
+  useEffect(() => {
+    if (active && onOnboarding) setActive(false);
+  }, [active, onOnboarding]);
 
   /* ── Navigation handlers ─────────────────────────────────────────────── */
   const handleNext = useCallback(() => {
@@ -1308,7 +1337,7 @@ export function ProductTour({ steps, defaultTourId = 'global' }: ProductTourProp
     };
   }, [step, t, currentStep, totalSteps]);
 
-  if (!active || !step || !resolved) return null;
+  if (!active || onOnboarding || !step || !resolved) return null;
 
   const SHADOW_SPREAD = 9999; // px — large enough to dim the entire viewport.
   // Dark-mode darker scrim + bright cyan accent ring around the cutout so
