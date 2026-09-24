@@ -177,3 +177,68 @@ async def test_tool_turn_persists_renderer_and_returns_its_message_id(session_fa
         }
         # And done.message_id points at that row.
         assert done["message_id"] == str(assistant.id)
+
+
+@pytest.mark.asyncio
+async def test_a_proposal_turn_attaches_its_message_to_its_proposals(session_factory):
+    """The proposals of one turn share a batch and point at the assistant
+    message that carried them, the same id ``done`` hands the client - so the
+    card in a reloaded conversation and the row in the Changes list are one."""
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.erp_chat.models import ChatAction
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    async with session_factory() as session:
+        user = User(
+            email=f"est-{uuid.uuid4().hex[:6]}@test.io", hashed_password="x", full_name="Estimator", role="editor"
+        )
+        session.add(user)
+        await session.flush()
+        project = Project(name="Residential House", owner_id=user.id, currency="EUR")
+        session.add(project)
+        await session.flush()
+        session.add(BOQ(project_id=project.id, name="Shell and core"))
+        await session.flush()
+
+        service = ERPChatService(session)
+        line = {"description": "Concrete wall C30/37", "unit": "m2", "quantity": 12.5, "unit_rate": 95.5}
+        rounds = [
+            {
+                "content": [
+                    {"type": "tool_use", "id": "tu-1", "name": "propose_add_boq_position", "input": line},
+                    {
+                        "type": "tool_use",
+                        "id": "tu-2",
+                        "name": "propose_add_boq_position",
+                        "input": {**line, "description": "Formwork for the wall", "unit_rate": 30},
+                    },
+                ],
+                "usage": {},
+            },
+            {"content": [{"type": "text", "text": "Two lines are waiting for your approval."}], "usage": {}},
+        ]
+
+        async def _fake_resolve(_uid: str):
+            return "anthropic", "test-key", None
+
+        async def _fake_anthropic(api_key, messages, preferred_model):  # noqa: ARG001
+            return rounds.pop(0), 12
+
+        with (
+            patch.object(service, "_resolve_ai", new=_fake_resolve),
+            patch.object(service, "_call_anthropic", new=_fake_anthropic),
+        ):
+            # The project comes from the page the person is on, not from the tool arguments.
+            req = StreamChatRequest(message="add the wall and its formwork", client_context={"project_id": project.id})
+            chunks = [c async for c in service.stream_response(str(user.id), req)]
+        await session.commit()
+
+        done = _parse_done_payload("".join(chunks))
+        actions = (await session.execute(select(ChatAction).order_by(ChatAction.created_at))).scalars().all()
+        assert len(actions) == 2, "".join(chunks)
+        assert {a.status for a in actions} == {"proposed"}
+        assert {str(a.message_id) for a in actions} == {done["message_id"]}
+        assert len({a.batch_id for a in actions}) == 1 and actions[0].batch_id
+        assert {a.project_id for a in actions} == {project.id}
+        assert (await session.execute(select(Position))).scalars().all() == []

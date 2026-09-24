@@ -4,6 +4,12 @@
 
 Supports Anthropic and OpenAI APIs with tool-calling (function calling).
 Other providers fall back to plain text via the shared ai_client.call_ai().
+
+The model reads through the tools in ``tools.py`` and changes nothing. A
+change is a ``propose_*`` tool from ``actions.registry``: the call stores a
+proposal, which is committed before its ``tool_result`` frame so the card's
+Apply request (another session) finds it, and the person applies it through
+``/erp_chat/actions/`` under the record's own REST gates.
 """
 
 import asyncio
@@ -12,16 +18,22 @@ import logging
 import time
 import uuid
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
+from fastapi import HTTPException
 from sqlalchemy import case, func, select
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.erp_chat.actions import registry as action_registry
+from app.modules.erp_chat.actions.base import ActionConflictError
+from app.modules.erp_chat.actions.service import ChatActionService, propose_tool_result
 from app.modules.erp_chat.models import ChatMessage, ChatSession, ChatTurnFeedback
-from app.modules.erp_chat.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_NO_TOOLS
+from app.modules.erp_chat.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_NO_TOOLS, build_context_block
 from app.modules.erp_chat.schemas import StreamChatRequest
 from app.modules.erp_chat.tools import (
     TOOL_DEFINITIONS,
@@ -122,20 +134,71 @@ def _truncate_tool_result(result: Any) -> Any:
     return result
 
 
+def _result_for_model(result: Any) -> Any:
+    """The part of a tool result the model reads back on its next round.
+
+    A proposal's full DTO (option lists, i18n keys, flags for the caller) is
+    for the card and for the stored history. The model gets the proposal's id,
+    status and summary, which already names every field and says the change is
+    not saved. Re-feeding the DTO cost tokens on every later round, and past
+    ``MAX_TOOL_RESULT_CHARS`` the truncation kept only the first 1000
+    characters of the summary, which can cut off exactly that sentence.
+    """
+    if not isinstance(result, dict) or result.get("renderer") != "action_proposal":
+        return result
+    data = result.get("data") if isinstance(result.get("data"), dict) else {}
+    return {
+        "renderer": "action_proposal",
+        "action_id": data.get("id"),
+        "status": data.get("status"),
+        "summary": result.get("summary"),
+    }
+
+
 def _sse(event_type: str, data: dict[str, Any]) -> str:
     """Format a Server-Sent Event string."""
     return f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
 
 
+def _proposal_tools(openai_shape: bool) -> list[dict[str, Any]]:
+    """The registry's ``propose_*`` tools, read at request time.
+
+    The registry decides which actions are available right now (an action's
+    module can be switched off), so the set is never frozen at import. A
+    broken registry costs the proposal tools, not the read tools with them.
+    """
+    try:
+        if openai_shape:
+            return action_registry.openai_tool_definitions()
+        return action_registry.tool_definitions()
+    except Exception:
+        logger.exception("erp_chat: the action registry failed; offering the read tools only")
+        return []
+
+
+def _proposal_spec(tool_name: str) -> Any:
+    """The action spec behind ``tool_name``, or None when it is not a proposal tool."""
+    try:
+        return action_registry.get_spec_for_tool(tool_name)
+    except Exception:
+        logger.exception("erp_chat: the action registry failed to look up %s", tool_name)
+        return None
+
+
+def _anthropic_tool_schema() -> list[dict[str, Any]]:
+    """Every tool the model may call, in Anthropic's shape: the read tools, then the proposal tools."""
+    return [*TOOL_DEFINITIONS, *_proposal_tools(openai_shape=False)]
+
+
 def _openai_tool_schema() -> list[dict[str, Any]]:
-    """Convert ``TOOL_DEFINITIONS`` from the Anthropic shape to OpenAI's.
+    """The same tools as :func:`_anthropic_tool_schema`, as OpenAI ``function`` entries.
 
     Returns:
         The tool schema as OpenAI ``function`` entries. One builder shared by
         every provider on that wire protocol, so admitting a provider cannot
         quietly hand it a different set of tools.
     """
-    return [
+    read_tools = [
         {
             "type": "function",
             "function": {
@@ -146,6 +209,22 @@ def _openai_tool_schema() -> list[dict[str, Any]]:
         }
         for t in TOOL_DEFINITIONS
     ]
+    return [*read_tools, *_proposal_tools(openai_shape=True)]
+
+
+@dataclass(frozen=True)
+class _TurnContext:
+    """What the prompt may say about the person's screen, resolved on the server.
+
+    ``project_id`` is set only for a project the person can open, so the
+    project's name and currency never reach the prompt for anyone else.
+    """
+
+    project_id: uuid.UUID | None = None
+    project_name: str | None = None
+    project_currency: str | None = None
+    route: str | None = None
+    locale: str | None = None
 
 
 class ERPChatService:
@@ -164,6 +243,11 @@ class ERPChatService:
             "cache_hit": None,
             "latency_ms": 0,
         }
+        # The system prompts of this turn. ``stream_response`` appends the
+        # request's context block (date, language, open project, page); a
+        # provider call made outside a turn sends the bare prompts.
+        self._system_prompt = SYSTEM_PROMPT
+        self._system_prompt_no_tools = SYSTEM_PROMPT_NO_TOOLS
 
     def _record_turn_metrics(
         self,
@@ -279,6 +363,87 @@ class ERPChatService:
         provider, api_key, model_override = resolve_provider_key_model(settings)
         return provider, api_key, model_override
 
+    # ── Request context and mid-turn commits ─────────────────────────────
+
+    async def _resolve_turn_context(self, user_id: str, request: StreamChatRequest) -> _TurnContext:
+        """The page, language and open project of this request, the project checked against access.
+
+        ``client_context.project_id`` wins over the older ``project_id`` field.
+        Both are only what the browser claims, so the project goes through the
+        platform's project access rule first. A project the person cannot open
+        is dropped rather than refused: the chat still answers, and nothing
+        about that project reaches the prompt or a new chat session row, not
+        even whether it exists.
+        """
+        client = request.client_context
+        dropped = _TurnContext(route=client.route if client else None, locale=request.locale)
+        candidate = (client.project_id if client else None) or request.project_id
+        if candidate is None:
+            return dropped
+
+        from app.dependencies import verify_project_access
+        from app.modules.projects.models import Project
+
+        try:
+            # A savepoint, because the check swallows some lookup errors and a
+            # failed statement would otherwise leave the turn's transaction
+            # unusable for everything after it.
+            async with self.session.begin_nested():
+                await verify_project_access(candidate, user_id, self.session)
+                row = (
+                    await self.session.execute(select(Project.name, Project.currency).where(Project.id == candidate))
+                ).one_or_none()
+        except HTTPException:
+            logger.info("erp_chat: project %s is not open to user %s; answering without it", candidate, user_id)
+            return dropped
+        except Exception:
+            logger.warning("erp_chat: could not resolve project %s; answering without it", candidate, exc_info=True)
+            return dropped
+        if row is None:
+            return dropped
+        return _TurnContext(
+            project_id=candidate,
+            project_name=row[0],
+            project_currency=row[1],
+            route=dropped.route,
+            locale=dropped.locale,
+        )
+
+    async def _commit_turn(self, chat_session: ChatSession) -> bool:
+        """Commit what the turn wrote so far, so another request can read it now.
+
+        A proposal must be visible to the Apply request of its card, which runs
+        on another connection, as soon as the card is on screen; the stream
+        otherwise commits only after its last frame. Returns False, after a
+        rollback, when the commit fails.
+        """
+        try:
+            await asyncio.shield(self.session.commit())
+        except Exception:
+            logger.exception("erp_chat: commit inside the turn failed")
+            await self.session.rollback()
+            return False
+        # The stream's own session keeps its objects loaded across a commit
+        # (expire_on_commit=False). One that expires them would turn the next
+        # attribute read into a lazy load, which async IO cannot do.
+        state = sa_inspect(chat_session, raiseerr=False)
+        if state is not None and state.expired_attributes:
+            await self.session.refresh(chat_session)
+        return True
+
+    async def _attach_proposals(self, batch_id: str, message_id: uuid.UUID) -> None:
+        """Point this turn's proposals at the assistant message that carried them.
+
+        In a savepoint: when it fails, the proposals stay committed and in the
+        Changes list, only without their message, and the rest of the turn's
+        tail still runs on a usable transaction.
+        """
+        try:
+            async with self.session.begin_nested():
+                await ChatActionService(self.session).attach_message(batch_id=batch_id, message_id=message_id)
+        except Exception:
+            logger.exception("erp_chat: could not attach message %s to proposal batch %s", message_id, batch_id)
+
     # ── Main streaming entry point ───────────────────────────────────────
 
     async def stream_response(self, user_id: str, request: StreamChatRequest) -> AsyncGenerator[str, None]:
@@ -287,8 +452,28 @@ class ERPChatService:
         Yields SSE-formatted strings: session_id, tool_start, tool_result, text, done events.
         """
         try:
+            # 0. Where the person is: page, language, and the open project,
+            # which only counts once the access check has passed. A new chat
+            # session stores that checked project, never the raw request field.
+            turn = await self._resolve_turn_context(user_id, request)
+            context_block = build_context_block(
+                now=datetime.now(UTC),
+                locale=turn.locale,
+                project_id=turn.project_id,
+                project_name=turn.project_name,
+                project_currency=turn.project_currency,
+                route=turn.route,
+            )
+            self._system_prompt = SYSTEM_PROMPT + context_block
+            self._system_prompt_no_tools = SYSTEM_PROMPT_NO_TOOLS + context_block
+            # One batch per user turn: the proposals of this turn share it, so
+            # the card tray can offer "apply all" and the assistant message can
+            # be attached to them once it is stored.
+            batch_id = str(uuid.uuid4())
+            proposals_stored = 0
+
             # 1. Get or create session
-            chat_session = await self.get_or_create_session(user_id, request.session_id, request.project_id)
+            chat_session = await self.get_or_create_session(user_id, request.session_id, turn.project_id)
             yield _sse("session_id", {"session_id": str(chat_session.id)})
 
             # 1b. Enforce per-user 24h token budget. Rate-limit handles
@@ -414,7 +599,30 @@ class ERPChatService:
                     yield _sse("tool_start", {"tool": tool_name, "args": tool_args})
 
                     handler = TOOL_HANDLER_MAP.get(tool_name)
-                    if handler:
+                    if _proposal_spec(tool_name) is not None:
+                        # A proposal stores a pending card and writes nothing
+                        # else, so it skips the manager gate below, which exists
+                        # for tools that write directly. The assistant never has
+                        # more rights than the person who clicks Apply; apply
+                        # re-runs the REST gates. Project access is still
+                        # checked in the spec's build, for the person asking.
+                        tool_result = await propose_tool_result(
+                            self.session,
+                            tool_name=tool_name,
+                            args=tool_args if isinstance(tool_args, dict) else {},
+                            user_id=user_id,
+                            chat_session_id=chat_session.id,
+                            project_id=turn.project_id,
+                            batch_id=batch_id,
+                        )
+                        if tool_result.get("renderer") == "action_proposal":
+                            # Committed before the card reaches the screen, so
+                            # its Apply request (another connection) finds it.
+                            if await self._commit_turn(chat_session):
+                                proposals_stored += 1
+                            else:
+                                tool_result = ActionConflictError(code="internal_error").to_tool_result()
+                    elif handler:
                         # RBAC gate: write tools require manager+ on the
                         # referenced project. IDOR posture must be
                         # preserved - non-existent / inaccessible projects
@@ -426,6 +634,8 @@ class ERPChatService:
                         #   2. Role check (manager+ for write tools).
                         # 1 fails → handler's 404-shaped error result.
                         # 2 fails → manager_permission_required card.
+                        # No handler in TOOL_HANDLER_MAP writes today; the gate
+                        # stays as the fail-closed default for one that would.
                         tool_result = None
                         is_write = TOOL_PERMISSIONS.get(tool_name, "read") == "write"
 
@@ -551,6 +761,8 @@ class ERPChatService:
                     total_tokens,
                 )
             )
+            if proposals_stored and assistant_message_id is not None:
+                await self._attach_proposals(batch_id, assistant_message_id)
 
             # Structured cost log - one INFO line per chat turn carries the
             # full per-turn observability split. Operators tail this for
@@ -558,7 +770,7 @@ class ERPChatService:
             logger.info(
                 "erp_chat.turn user=%s session=%s project=%s provider=%s "
                 "tokens_in=%d tokens_out=%d total=%d cache_hit=%s latency_ms=%d "
-                "tool_calls=%d",
+                "tool_calls=%d proposals=%d",
                 user_id,
                 str(chat_session.id),
                 str(chat_session.project_id) if chat_session.project_id else "-",
@@ -569,6 +781,7 @@ class ERPChatService:
                 self._last_turn.get("cache_hit"),
                 self._last_turn.get("latency_ms") or 0,
                 len(all_tool_calls),
+                proposals_stored,
             )
 
             # Auto-title from first user message
@@ -578,6 +791,13 @@ class ERPChatService:
                     title += "..."
                 chat_session.title = title
                 await asyncio.shield(self.session.flush())
+
+            if proposals_stored:
+                # The proposals themselves were committed as they were made.
+                # This commits the stored messages and the link to them before
+                # ``done``, so a card the person applies right after the turn
+                # already names its message.
+                await self._commit_turn(chat_session)
 
             yield _sse(
                 "done",
@@ -690,12 +910,14 @@ class ERPChatService:
         without changing the existing return-tuple shape every caller relies
         on.
         """
-        from app.modules.ai.ai_client import ANTHROPIC_MODEL
+        from app.modules.ai.ai_client import resolve_anthropic_model
 
-        # preferred_model is the user's per-provider model id override
-        # (Settings > AI). Honor it verbatim when set; otherwise use the
-        # built-in default. Issue #138.
-        model = preferred_model.strip() if preferred_model and preferred_model.strip() else ANTHROPIC_MODEL
+        # preferred_model is what Settings > AI holds for Anthropic: the
+        # dropdown alias ("claude-sonnet") unless the user typed a model id.
+        # The alias is not an API id, so it maps to one the way
+        # ``ai_client.call_anthropic`` maps it; a typed id passes verbatim and
+        # an empty one falls back to the default (issue #138).
+        model = resolve_anthropic_model(preferred_model)
 
         t0 = time.perf_counter()
         async with httpx.AsyncClient(timeout=AI_TIMEOUT) as client:
@@ -709,9 +931,9 @@ class ERPChatService:
                 json={
                     "model": model,
                     "max_tokens": 4096,
-                    "system": SYSTEM_PROMPT,
+                    "system": self._system_prompt,
                     "messages": messages,
-                    "tools": TOOL_DEFINITIONS,
+                    "tools": _anthropic_tool_schema(),
                 },
             )
             resp.raise_for_status()
@@ -754,7 +976,7 @@ class ERPChatService:
         # Convert Anthropic tool format to OpenAI format
         openai_tools = _openai_tool_schema()
 
-        openai_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + messages
+        openai_messages = [{"role": "system", "content": self._system_prompt}] + messages
 
         t0 = time.perf_counter()
         async with httpx.AsyncClient(timeout=AI_TIMEOUT) as client:
@@ -832,8 +1054,8 @@ class ERPChatService:
         data, total = await call_ai_tools(
             provider=provider,
             api_key=api_key,
-            system=SYSTEM_PROMPT,
-            system_without_tools=SYSTEM_PROMPT_NO_TOOLS,
+            system=self._system_prompt,
+            system_without_tools=self._system_prompt_no_tools,
             messages=messages,
             tools=_openai_tool_schema(),
             model=model,
@@ -887,7 +1109,7 @@ class ERPChatService:
         text, tokens = await call_ai(
             provider=provider,
             api_key=api_key,
-            system=SYSTEM_PROMPT_NO_TOOLS,
+            system=self._system_prompt_no_tools,
             prompt=message,
             model=model,
         )
@@ -993,7 +1215,7 @@ class ERPChatService:
                     {
                         "type": "tool_result",
                         "tool_use_id": tr["tool_id"],
-                        "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
+                        "content": json.dumps(_truncate_tool_result(_result_for_model(tr["result"])), default=str),
                     }
                 )
             messages.append({"role": "user", "content": tool_result_blocks})
@@ -1011,7 +1233,7 @@ class ERPChatService:
                     {
                         "role": "tool",
                         "tool_call_id": tr["tool_id"],
-                        "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
+                        "content": json.dumps(_truncate_tool_result(_result_for_model(tr["result"])), default=str),
                     }
                 )
 
