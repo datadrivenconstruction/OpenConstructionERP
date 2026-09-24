@@ -65,6 +65,7 @@ from app.modules.contracts.models import (
 )
 from app.modules.contracts.periods import claim_dates_for_write, claim_order_key, claims_before
 from app.modules.contracts.repository import (
+    PRIOR_EXCLUDES_DRAFTS_KEY,
     ContractDocumentRepository,
     ContractLineRepository,
     ContractMilestoneRepository,
@@ -2462,6 +2463,11 @@ class ContractsService:
         certification to refuse or re-work an overlapping claim first
         (test_overlapping_claims_never_pay_the_same_work_twice).
 
+        A draft is not an application: it has not left the contractor, so a
+        certificate built now leaves it out. A claim issued before that rule
+        keeps counting the drafts it counted; see
+        :meth:`ProgressClaimRepository.prior_claims`.
+
         Returns the amount and the basis it was worked out on. ``"snapshot"``
         when the previous claim stores its certificate: line 7 is then its
         line 6, lines 4 less 5 as it certified them, which is what the form
@@ -3159,6 +3165,10 @@ class ContractsService:
             await self.enforce_claim_rules(claim)
 
         fields: dict[str, Any] = {"status": target_status}
+        if claim.status == "draft":
+            # Its figures were worked out with draft claims left out of
+            # "previous"; the stamp keeps every later print of it that way.
+            fields["metadata_"] = {**(claim.metadata_ or {}), PRIOR_EXCLUDES_DRAFTS_KEY: True}
         now = datetime.now(UTC).isoformat()
         if target_status == "submitted":
             fields["submitted_at"] = now
