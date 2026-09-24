@@ -1200,16 +1200,23 @@ class ContractsService:
         is billed without a schedule of values, so a certified or paid one
         left the draft deletable and went with it. Any claim that has left
         draft refuses the delete with 409 ``contract_has_claims_past_draft``.
+
+        Every refusal carries an ``error`` code next to the English
+        ``message``, so the screen says it in the reader's language.
         """
         contract = await self.get_contract(contract_id)
 
         if contract.status != "draft":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Only draft contracts can be deleted. This contract is "
-                    f"'{contract.status}'; terminate or complete it instead."
-                ),
+                detail={
+                    "error": "contract_not_draft",
+                    "message": (
+                        "Only draft contracts can be deleted. This contract is "
+                        f"'{contract.status}'; terminate or complete it instead."
+                    ),
+                    "contract_status": contract.status,
+                },
             )
         claims_past_draft = await self.claim_repo.claim_numbers_past_draft(contract_id)
         if claims_past_draft:

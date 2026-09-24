@@ -459,8 +459,51 @@ export function updateContract(
   return apiPatch<ContractItem>(`/v1/contracts/contracts/${id}`, data);
 }
 
+/**
+ * Delete a draft contract.
+ *
+ * The server refuses a contract that has left draft (`contract_not_draft`),
+ * one whose claims have left draft (`contract_has_claims_past_draft`) and one
+ * a claim has billed on (`contract_line_billed`), because the delete cascades
+ * to every claim. {@link contractDeleteRefusal} reads the three.
+ */
 export function deleteContract(id: string): Promise<void> {
   return apiDelete(`/v1/contracts/contracts/${id}`);
+}
+
+/** Why the server refused to delete a contract. */
+export type ContractDeleteRefusal =
+  | 'contract_not_draft'
+  | 'contract_has_claims_past_draft'
+  | 'contract_line_billed';
+
+/**
+ * Narrow a thrown ApiError to one of the contract delete refusals, with the
+ * claim numbers it names, or null for anything else, so the caller can say
+ * why in the reader's language instead of passing on the server's English.
+ */
+export function contractDeleteRefusal(
+  err: unknown,
+): { code: ContractDeleteRefusal; claimNumbers: string[] } | null {
+  if (!err || typeof err !== 'object') return null;
+  const body = (err as { body?: unknown }).body;
+  const detail =
+    body && typeof body === 'object'
+      ? (body as { detail?: unknown }).detail
+      : undefined;
+  if (!detail || typeof detail !== 'object') return null;
+  const { error, claim_numbers } = detail as { error?: unknown; claim_numbers?: unknown };
+  if (
+    error !== 'contract_not_draft' &&
+    error !== 'contract_has_claims_past_draft' &&
+    error !== 'contract_line_billed'
+  ) {
+    return null;
+  }
+  const claimNumbers = Array.isArray(claim_numbers)
+    ? claim_numbers.filter((n): n is string => typeof n === 'string' && n.length > 0)
+    : [];
+  return { code: error, claimNumbers };
 }
 
 export function signContract(id: string): Promise<ContractItem> {
