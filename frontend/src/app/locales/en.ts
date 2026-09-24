@@ -15935,6 +15935,7 @@ const resource = {
   "payroll.intro_link_field_reports": "Field Reports",
   "payroll.intro_link_5d": "5D Cost",
     "procurement.currency_from_project": "Use project currency",
+    "procurement.edit_figures_locked": "This order is past draft, so its vendor, currency, lines and tax stay as they were approved. Notes, delivery date, payment terms and order type can still change here. To correct the figures, return an approved order to draft, or raise a separate order for the difference.",
     "procurement.edit_po": "Edit purchase order",
     "procurement.open_retainage": "Manage retainage",
     "procurement.open_scorecard": "Open supplier scorecard",

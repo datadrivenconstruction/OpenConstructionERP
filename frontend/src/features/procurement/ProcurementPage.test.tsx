@@ -47,10 +47,12 @@ vi.mock('@/shared/lib/api', async () => {
   return { ...actual, apiGet: vi.fn(), apiPost: vi.fn(), apiPatch: vi.fn() };
 });
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const mockGet = vi.mocked(apiGet);
 const mockPost = vi.mocked(apiPost);
+const mockPatch = vi.mocked(apiPatch);
 
 const PROJECT_ID = 'p1';
 
@@ -268,5 +270,107 @@ describe('the picked position reaching the server', () => {
     // value drops the key on serialisation, so the request carries no mention
     // of the field at all.
     expect(JSON.stringify(body)).not.toContain('boq_position_id');
+  });
+});
+
+// Past draft, the server holds an order's vendor, currency, lines and amounts
+// fixed and answers a change to them with a 409. The Edit form used to open
+// with all of them editable, so a buyer could type new figures into an issued
+// order and only learn at Save that it could not work. The draft case is the
+// control: the same form on a draft keeps every field open.
+describe('editing an order past draft', () => {
+  function servePO(status: string) {
+    const listed = {
+      id: 'po-1',
+      project_id: PROJECT_ID,
+      po_number: 'PO-0001',
+      vendor_name: 'Acme Supplies',
+      vendor_contact_id: 'c-1',
+      issue_date: '2026-09-01',
+      delivery_date: '2026-10-01',
+      amount_total: '1190.00',
+      currency_code: 'EUR',
+      status,
+      description: '',
+      line_items_count: 1,
+      created_at: '2026-09-01T00:00:00Z',
+    };
+    const full = {
+      ...listed,
+      po_type: 'standard',
+      amount_subtotal: '1000.00',
+      tax_amount: '190.00',
+      payment_terms: 'Net 30',
+      notes: '',
+      items: [
+        {
+          id: 'it-1',
+          description: 'Rebar B500B',
+          quantity: '10',
+          unit: 't',
+          unit_rate: '100.00',
+          amount: '1000.00',
+          boq_position_id: null,
+          sort_order: 0,
+        },
+      ],
+    };
+    mockGet.mockImplementation((path: string) => {
+      if (path === '/v1/procurement/po-1') return Promise.resolve(full);
+      if (path === '/v1/procurement/po-1/match-status/') return Promise.resolve({ overall_status: 'ok', lines: [] });
+      if (path.startsWith('/v1/procurement/?project_id=')) return Promise.resolve({ items: [listed], total: 1 });
+      if (path.includes('/spine/lines/')) return Promise.resolve([]);
+      if (path.includes('/v1/finance/dashboard/')) return Promise.resolve({ currency: 'EUR' });
+      return Promise.resolve({ items: [], total: 0 });
+    });
+  }
+
+  async function openEdit(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(await screen.findByRole('button', { name: 'Edit purchase order' }));
+    return screen.findByRole('dialog', { name: 'Edit purchase order' });
+  }
+
+  beforeEach(() => {
+    mockPatch.mockReset();
+    mockPatch.mockResolvedValue({});
+    useAuthStore.setState({ userRole: 'manager' });
+  });
+
+  it('locks the figures of an issued order and sends none of them on Save', async () => {
+    const user = userEvent.setup();
+    servePO('issued');
+    renderProcurementPage();
+
+    const dialog = await openEdit(user);
+    expect(within(dialog).getByRole('note')).toBeInTheDocument();
+    expect(within(dialog).getByLabelText(LINE_ONE_DESCRIPTION)).toBeDisabled();
+    expect(within(dialog).getByLabelText('Quantity for line 1')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Unit rate for line 1')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Remove line 1')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Tax')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Currency')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Vendor')).toBeDisabled();
+    expect(within(dialog).queryByRole('button', { name: 'Add Item' })).toBeNull();
+
+    // What stays open still saves.
+    await user.type(within(dialog).getByPlaceholderText('Optional notes or special instructions...'), 'Gate 3');
+    await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledTimes(1));
+    const [path, body] = mockPatch.mock.calls[0]!;
+    expect(path).toBe('/v1/procurement/po-1');
+    expect(body).toEqual({ notes: 'Gate 3' });
+  });
+
+  it('keeps every field open on a draft', async () => {
+    const user = userEvent.setup();
+    servePO('draft');
+    renderProcurementPage();
+
+    const dialog = await openEdit(user);
+    expect(within(dialog).queryByRole('note')).toBeNull();
+    expect(within(dialog).getByLabelText(LINE_ONE_DESCRIPTION)).toBeEnabled();
+    expect(within(dialog).getByLabelText('Tax')).toBeEnabled();
+    expect(within(dialog).getByLabelText('Currency')).toBeEnabled();
+    expect(within(dialog).getByRole('button', { name: 'Add Item' })).toBeInTheDocument();
   });
 });
