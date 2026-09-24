@@ -16,6 +16,7 @@ module carries 93, and all 64 of the difference are keys the backend has never
 heard of. The last test in this file is the gate that was missing.
 """
 
+import ast
 import pathlib
 import re
 
@@ -335,3 +336,73 @@ def test_every_preset_key_is_saveable_and_filed_under_its_own_name() -> None:
     # A profile is not a size, and nothing outside the two catalogues is either.
     assert not is_saveable_company_size("general_contractor")
     assert not is_saveable_company_type("demolition_contractor")
+
+
+# ── A profile brings what its modules need ────────────────────────────────────
+# A module manifest names the modules it is built on (``depends``). A profile
+# that switches a module on and leaves one of those off hands the user a page
+# whose links and lookups lead into a module missing from their menu: takeoff
+# without the CAD converter that feeds it, reporting without the model it
+# reports on. Nothing expands a preset at save time, the list is written as it
+# stands (``modules_for``), so the list itself has to be complete.
+
+
+def _manifest_depends(key: str) -> list[str]:
+    """The module keys ``app/modules/<key>/manifest.py`` declares it depends on."""
+    tree = ast.parse((_MODULES_DIR / key / "manifest.py").read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.keyword) and node.arg == "depends":
+            assert isinstance(node.value, ast.List), f"{key}: depends is not a literal list"
+            names = [ast.literal_eval(elt) for elt in node.value.elts]
+            return [name.removeprefix("oe_") for name in names]
+    return []
+
+
+def test_the_dependency_reader_sees_the_dependencies_it_is_asked_about() -> None:
+    """The instrument, checked on two manifests the presets below lean on."""
+    if not _MODULES_DIR.exists():  # pragma: no cover - source checkout only
+        pytest.skip("backend module tree not present")
+    assert "cad" in _manifest_depends("takeoff")
+    assert "bim_hub" in _manifest_depends("reporting")
+
+
+@pytest.mark.parametrize("key", sorted(_ALL_PRESETS))
+def test_every_preset_switches_on_what_its_modules_depend_on(key: str) -> None:
+    if not _MODULES_DIR.exists():  # pragma: no cover - source checkout only
+        pytest.skip("backend module tree not present")
+    # The map the save endpoint writes: core forced on, the preset's list on,
+    # every other profile-governed module off. A key the map does not carry is
+    # not governed by any profile and is always there.
+    prefs = modules_for(_ALL_PRESETS[key].enabled_modules)
+    unmet = sorted(
+        f"{module} needs {dep}"
+        for module, on in prefs.items()
+        if on
+        for dep in _manifest_depends(module)
+        if prefs.get(dep, True) is False
+    )
+    assert unmet == [], f"preset {key} switches a module on without what it depends on: {unmet}"
+
+
+#: What a profile's own work cannot do without, beyond what the manifests say.
+_PROFILE_MUST_INCLUDE: dict[str, list[str]] = {
+    # A trade contractor bills the main contractor through pay applications,
+    # which live in contracts.
+    "subcontractor": ["contracts"],
+    # The owner signs the contract and approves every change to it.
+    "owner_client": ["contracts", "changeorders"],
+    # Building services work is live electrical, hot work and working at height.
+    "mep_contractor": ["safety"],
+    # Roads and bridges run on the same RFI, submittal and meeting cycle as a
+    # building site.
+    "civil_infrastructure": ["rfi", "submittals", "meetings"],
+    # An estimator measures from the model and from drawings, and takeoff reads
+    # drawings through the CAD converter.
+    "estimator": ["bim_hub", "cad"],
+}
+
+
+@pytest.mark.parametrize("key", sorted(_PROFILE_MUST_INCLUDE))
+def test_a_profile_carries_the_modules_its_work_needs(key: str) -> None:
+    missing = sorted(set(_PROFILE_MUST_INCLUDE[key]) - set(COMPANY_PRESETS[key].enabled_modules))
+    assert missing == [], f"preset {key} leaves out {missing}"
