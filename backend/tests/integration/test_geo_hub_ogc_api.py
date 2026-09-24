@@ -545,7 +545,11 @@ class TestTileEndpointIsDiscoverable:
         assert path in operation.get("description", "")
         assert "XYZ" in operation.get("summary", "")
 
+        # Asked of ``served_paths`` rather than of ``app.routes``: from FastAPI
+        # 0.141 an included router is one marker entry in ``app.routes`` with
+        # no ``path`` of its own, so a scan of that list finds no module route
+        # at all and reports the alias missing while it serves.
+        from app.core.module_loader import served_paths
+
         alias = "/api/v1/geo-hub/tiles/{z}/{x}/{y}.png"
-        assert any(getattr(route, "path", None) == alias for route in app_instance.routes), (
-            "the older /tiles/ spelling must keep serving, hidden or not"
-        )
+        assert alias in set(served_paths(app_instance)), "the older /tiles/ spelling must keep serving, hidden or not"
