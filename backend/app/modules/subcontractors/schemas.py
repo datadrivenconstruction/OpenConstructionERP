@@ -784,6 +784,9 @@ class RetentionLedgerEntryResponse(BaseModel):
     notes: str | None = None
     created_at: datetime
     updated_at: datetime
+    # Set only on the response to a release: codes for what the release went
+    # ahead without, e.g. ``no_final_lien_waiver``. A warning, not a refusal.
+    warnings: list[str] = Field(default_factory=list)
 
 
 class RetentionReleasePayload(BaseModel):

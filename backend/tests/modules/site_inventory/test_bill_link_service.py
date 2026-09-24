@@ -395,6 +395,12 @@ async def test_update_item_parses_money_to_decimal() -> None:
 
     service.get_item = _get_item  # type: ignore[method-assign]
 
+    async def _no_movements(_project_id, _item_id):
+        return 0
+
+    # A cost change asks the ledger first; this item has never moved.
+    service._movement_count = _no_movements  # type: ignore[method-assign]
+
     await service.update_item(PROJECT_ID, ITEM_ID, StockItemUpdate(standard_unit_cost="18.75"))
     assert row.standard_unit_cost == Decimal("18.75")
 

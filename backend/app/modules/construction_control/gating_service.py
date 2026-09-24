@@ -321,7 +321,12 @@ class GatingService:
         await self._log(gate, action="gate_voided", from_status="pending", to_status="void", user_id=user_id)
         return gate
 
-    # ── Enforcement seam (consumed by schedule / handover) ────────────────────
+    # ── Enforcement seam ─────────────────────────────────────────────────────
+    # Only handover enforces a gate today: handover_service reads
+    # blocking_gates_for before it issues a package, and GET /gates/can-proceed
+    # reports the same list. assert_can_proceed has no caller, so a hold point
+    # on a schedule activity or an inspection is advisory until a writer in
+    # those modules calls it.
 
     async def blocking_gates_for(self, project_id: uuid.UUID, attached_kind: str, attached_id: str) -> list[HoldGate]:
         """Pending, blocking gates attached to one entity."""

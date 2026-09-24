@@ -142,6 +142,8 @@ async def test_delete_award_reverts_package_to_closed() -> None:
     # Stub session
     svc.session = MagicMock()
     svc.session.flush = AsyncMock()
+    # No purchase order was raised from this award.
+    svc._live_po_from_award = AsyncMock(return_value=None)
 
     with patch("app.modules.bid_management.service.event_bus") as mock_bus:
         mock_bus.publish_detached = MagicMock()
@@ -202,6 +204,8 @@ async def test_delete_award_non_awarded_package_status_unchanged() -> None:
     svc.package_repo.get_by_id = AsyncMock(return_value=pkg)
     svc.session = MagicMock()
     svc.session.flush = AsyncMock()
+    # No purchase order was raised from this award.
+    svc._live_po_from_award = AsyncMock(return_value=None)
 
     with patch("app.modules.bid_management.service.event_bus") as mock_bus:
         mock_bus.publish_detached = MagicMock()

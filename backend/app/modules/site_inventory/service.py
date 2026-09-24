@@ -265,10 +265,41 @@ class SiteInventoryService:
             if name in fields and fields[name] is not None:
                 fields[name] = _to_decimal(fields[name])
 
+        # Movements are recorded in the item's unit, and the standard cost is
+        # what a zero-cost movement is valued at, so once the item has moved
+        # both describe the ledger and freeze. Only real changes count.
+        moved_fields = []
+        if "unit" in fields and fields["unit"] != item.unit:
+            moved_fields.append("unit")
+        if "standard_unit_cost" in fields:
+            old_cost = None if item.standard_unit_cost is None else _to_decimal(item.standard_unit_cost)
+            if fields["standard_unit_cost"] != old_cost:
+                moved_fields.append("standard_unit_cost")
+        if moved_fields and await self._movement_count(project_id, item_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Stock item {item.name} has recorded movements, so its {' and '.join(moved_fields)} "
+                    "cannot change. Create a new item and clear the is_active flag on this one."
+                ),
+            )
+
         for name, value in fields.items():
             setattr(item, name, value)
         await self.session.flush()
         return item
+
+    async def _movement_count(self, project_id: uuid.UUID, item_id: uuid.UUID) -> int:
+        """How many movements the stock ledger holds for one item."""
+        return int(
+            (
+                await self.session.execute(
+                    select(func.count())
+                    .select_from(StockMovement)
+                    .where(StockMovement.project_id == project_id, StockMovement.item_id == item_id),
+                )
+            ).scalar_one()
+        )
 
     async def delete_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> None:
         """Delete a stock item that has never moved.
@@ -284,13 +315,7 @@ class SiteInventoryService:
         if item is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stock item not found in this project")
 
-        booked = (
-            await self.session.execute(
-                select(func.count())
-                .select_from(StockMovement)
-                .where(StockMovement.project_id == project_id, StockMovement.item_id == item_id),
-            )
-        ).scalar_one()
+        booked = await self._movement_count(project_id, item_id)
 
         _refuse_if_held(
             f"stock item {item.name}",
