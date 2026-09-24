@@ -318,7 +318,7 @@ Extract quantities from any source - drawings, models, text, or photos:
 - **AI Cost Advisor** - Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
 - **Cost matching** - After AI generates an estimate, match each item against your CWICR database to replace AI-guessed rates with real market prices
 
-The platform also includes 158-rule validation engine (DIN 276, NRM, MasterFormat, GAEB), 3D globe visualization (Cesium), property development lifecycle, accommodation management, AI-powered floating chat, BIM clash detection, 4D/5D scheduling, tendering and risk management, PDF markups, punch lists, daily diary with HSE tracking, and 30+ regional classification standards. See [MODULES.md](MODULES.md) for the full list of 193 modules.
+The platform also includes 158-rule validation engine (DIN 276, NRM, MasterFormat, GAEB), 3D globe visualization (Cesium), property development lifecycle, accommodation management, an AI assistant that prepares changes for a person to approve, BIM clash detection, 4D/5D scheduling, tendering and risk management, PDF markups, punch lists, daily diary with HSE tracking, and 30+ regional classification standards. See [MODULES.md](MODULES.md) for the full list of 193 modules.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> Guided Onboarding
 
