@@ -31,6 +31,7 @@ import GenericTableRendererC from './GenericTableRenderer';
 import ProjectSummaryRendererC from './ProjectSummaryRenderer';
 import SemanticSearchRendererC from './SemanticSearchRenderer';
 import BOQItemCreatedRendererC from './BOQItemCreatedRenderer';
+import { ActionProposalRenderer } from '../../../actions/ActionProposalCard';
 
 export const RENDERER_REGISTRY: Record<string, FC<{ data: unknown }>> = {
   // Backend renderer names (the source of truth).
@@ -44,6 +45,8 @@ export const RENDERER_REGISTRY: Record<string, FC<{ data: unknown }>> = {
   cost_model: CostModelRendererC,
   project_comparison: CompareRendererC,
   boq_item_created: BOQItemCreatedRendererC,
+  // A proposed change waiting for a person to apply it (erp_chat propose_* tools).
+  action_proposal: ActionProposalRenderer,
   semantic_search: SemanticSearchRendererC,
   generic_table: GenericTableRendererC,
   // Legacy aliases (kept so old persisted messages keep rendering).
