@@ -31,6 +31,9 @@ regexes = [
   # key: 'retention_pct_d180'. Lower-case snake only, on purpose: without that
   # anchor this also swallows key = "Xk7Qp2_Zr9Tm4Ws8Nv1Bh6Jd3Lc5Fg0".
   '''[Kk]ey['"]?\s*[:=]\s*['"][a-z][a-z0-9_]*(_[a-z0-9]+)+['"]''',
+  # DOCK_WIDTH_STORAGE_KEY = 'oe_ai_dock_width_v1': an upper-case constant
+  # naming a browser storage slot. Same lower-case snake anchor as above.
+  '''[A-Z_]*KEY\s*=\s*['"][a-z][a-z0-9_]*(_[a-z0-9]+)+['"]''',
 ]
 
 [[allowlists]]

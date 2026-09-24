@@ -464,7 +464,7 @@ async def export_methodology_excel(
     """Export the computed methodology estimate as a formatted .xlsx file."""
     await verify_project_access(project_id, user_id, session)
     data = await service.build_export_data(methodology_id, project_id, boq_id=boq_id)
-    # Workbook and PDF grow with the estimate; render off the event loop.
+    # The workbook grows with the estimate; build it off the event loop.
     content = await asyncio.to_thread(service.generate_excel_export, data)
     filename = service.export_filename(data, "xlsx")
     return StreamingResponse(

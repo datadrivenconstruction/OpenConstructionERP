@@ -233,7 +233,9 @@ describe('every translation keeps the placeholders its sentence needs', () => {
     // Measured at the time of writing: 31 zero forms, all Arabic, and 93
     // singular or dual forms that spell the number out. Headroom for growth,
     // not for a policy change: a jump past these means someone started
-    // dropping the number from forms that cover a range.
+    // dropping the number from forms that cover a range. 18.0.0 added the AI
+    // dock, whose `_one` sentences read "one change" in words in most
+    // languages, which took the singular count to 214.
     let zeroForms = 0;
     let spelledOut = 0;
     for (const { key, missing } of comparisons) {
@@ -242,6 +244,6 @@ describe('every translation keeps the placeholders its sentence needs', () => {
       else if (missing.length === 1 && missing[0] === 'count') spelledOut += 1;
     }
     expect(zeroForms, 'zero forms dropping a placeholder').toBeLessThanOrEqual(60);
-    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(150);
+    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(240);
   });
 });

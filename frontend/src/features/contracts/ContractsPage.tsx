@@ -116,7 +116,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildContractsInsights } from './contractsInsights';
 import { DEFAULT_CONTRACTS_TAB, isContractsTab, type ContractsTab } from './contractsTabs';
 import { ClaimPeriod } from './ClaimPeriod';
-import { fmtPercent } from '@/shared/lib/formatters';
+import { fmtList, fmtPercent } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 // English fallbacks for the computed `contracts.type_*` keys. The default used to be
@@ -1534,7 +1534,7 @@ function contractDeleteRefusalText(t: TFunction, err: unknown): string | null {
     return t('contracts.delete_refused_claims_past_draft', {
       defaultValue:
         'This contract has progress claims past draft ({{claims}}), so it cannot be deleted: they would be deleted with it. Terminate the contract instead.',
-      claims: refusal.claimNumbers.join(', '),
+      claims: fmtList(refusal.claimNumbers),
     });
   }
   return t('contracts.delete_refused_billed', {

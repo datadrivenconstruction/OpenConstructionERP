@@ -18181,7 +18181,9 @@
           ]
         }
       ],
-      "import_dependencies": []
+      "import_dependencies": [
+        "procurement"
+      ]
     },
     {
       "module_id": "bim_hub",
@@ -24057,7 +24059,7 @@
             {
               "name": "project_ids",
               "type": "list[UUID]",
-              "description": "Projects to list the bills of. A repeated id is answered once. Every id must name a live project the caller may read, or the whole request is refused and the refusal names each id that failed."
+              "description": "Projects to list the bills of. A repeated id is answered once. An archived project, or one the caller may not read, is left out of the answer. Every id must name a project, or the whole request is refused and the refusal names each id that named none."
             }
           ]
         },
@@ -91422,6 +91424,22 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "actions/__init__.py",
+        "actions/_boq.py",
+        "actions/_common.py",
+        "actions/_members.py",
+        "actions/base.py",
+        "actions/boq_add_position.py",
+        "actions/boq_update_position.py",
+        "actions/labels.py",
+        "actions/punch_create.py",
+        "actions/registry.py",
+        "actions/rfi_create.py",
+        "actions/risk_create.py",
+        "actions/router.py",
+        "actions/schedule_progress.py",
+        "actions/service.py",
+        "actions/task_create.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -91437,7 +91455,7 @@
         "name": "oe_erp_chat",
         "version": "0.1.0",
         "display_name": "ERP Chat",
-        "description": "AI-powered chat with tool-calling for construction ERP data",
+        "description": "AI chat over construction ERP data: reads through tools, proposes changes a person applies",
         "author": "OpenConstructionERP Core Team",
         "category": "core",
         "depends": [
@@ -91624,6 +91642,184 @@
               "back_populates": "feedback"
             }
           ]
+        },
+        {
+          "class_name": "ChatAction",
+          "tablename": "oe_erp_chat_action",
+          "docstring": "A change the assistant proposed, and what a person decided about it.\n\nThe assistant never writes a domain record itself. A write tool persists\none of these rows with status ``proposed`` and nothing else; the record it\ndescribes is created or changed only when a person applies the row, under\nthe same gates the record's own REST route runs for that person. The row\nthen keeps the whole story: who asked, what the model proposed\n(``original_payload``, never mutated), what the person changed before\napplying (``payload``), who approved and when, which record it produced,\nand whether it was undone.\n\nStatuses: ``proposed`` -> ``applied`` | ``rejected`` | ``failed``;\n``failed`` -> ``applied`` (retry) | ``rejected``; ``applied`` -> ``reverted``.\n\n``session_id`` is ``ON DELETE SET NULL`` rather than CASCADE on purpose:\ndeleting a conversation must not erase the record of a change that reached\nthe project. ``message_id`` carries no FK because the assistant message is\nwritten only when the turn ends, after its proposals already exist.",
+          "columns": [
+            {
+              "name": "session_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_erp_chat_session.id"
+            },
+            {
+              "name": "message_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "requested_by",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "action_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "summary",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "original_payload",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "payload",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "preview",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "confidence",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "rationale",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "target_entity_type",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "target_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "before_state",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "decided_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "decided_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "decision_note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "applied_entity_type",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "applied_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "result",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "error",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "error_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "reverted_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "reverted_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "revert_note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "batch_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -91677,11 +91873,30 @@
       ],
       "schemas": [
         {
+          "class_name": "ChatClientContext",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where the person is in the app when they send a message.\n\nA hint for the prompt and never a reason to refuse the message, so a value\nthat does not fit is dropped or cut rather than rejected with a 422. The\nserver checks ``project_id`` against the person's access before the model\nsees anything about that project.",
+          "fields": [
+            {
+              "name": "route",
+              "type": "str | None",
+              "description": "Current path in the app; cut to 200 characters."
+            },
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "description": "Project open in the app, if any."
+            }
+          ]
+        },
+        {
           "class_name": "StreamChatRequest",
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Request body for the streaming chat endpoint.",
+          "docstring": "Request body for the streaming chat endpoint.\n\n``locale`` and ``client_context`` describe the person's screen (UI language,\ncurrent route, open project). Like the context itself they are hints: a\nmalformed locale is ignored instead of failing the request.",
           "fields": [
             {
               "name": "session_id",
@@ -91700,6 +91915,16 @@
             {
               "name": "conversation_history",
               "type": "list[dict] | None",
+              "default": "None"
+            },
+            {
+              "name": "locale",
+              "type": "str | None",
+              "description": "UI language as a BCP-47 tag, e.g. 'de' or 'pt-BR'."
+            },
+            {
+              "name": "client_context",
+              "type": "ChatClientContext | None",
               "default": "None"
             }
           ]
@@ -91783,12 +92008,12 @@
             },
             {
               "name": "tool_calls",
-              "type": "dict | None",
+              "type": "list[dict[str, Any]] | dict[str, Any] | None",
               "default": "None"
             },
             {
               "name": "tool_results",
-              "type": "dict | None",
+              "type": "list[dict[str, Any]] | dict[str, Any] | None",
               "default": "None"
             },
             {
@@ -91798,7 +92023,7 @@
             },
             {
               "name": "renderer_data",
-              "type": "dict | None",
+              "type": "dict[str, Any] | list[Any] | None",
               "default": "None"
             },
             {
@@ -91984,6 +92209,502 @@
               "type": "list[DailyChatStat]"
             }
           ]
+        },
+        {
+          "class_name": "ActionFieldOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One choice of an ``enum`` field.\n\nA fixed choice (a priority, a task type) has an i18n ``label_key``. A data\nchoice (a project member) has none, and its ``label`` is shown as it is.",
+          "fields": [
+            {
+              "name": "value",
+              "type": "str"
+            },
+            {
+              "name": "label_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ActionField",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One row of a proposal's field table.\n\n``key`` is the payload key a PATCH writes to. ``before`` is set only for an\nedit of an existing record and holds the value the proposal was based on.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label_key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "ActionFieldKind"
+            },
+            {
+              "name": "value",
+              "type": "Any",
+              "default": "None"
+            },
+            {
+              "name": "before",
+              "type": "Any",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "options",
+              "type": "list[ActionFieldOption] | None",
+              "default": "None"
+            },
+            {
+              "name": "editable",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "required",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ActionNote",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Something the person should know before applying, shown under the fields.\n\n``key`` is an i18n key; ``text`` is its English rendering with ``params``\nalready filled in, and ``params`` are passed to the translation as-is.\n``field`` names the field the note is about, when there is one.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            },
+            {
+              "name": "params",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "field",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tone",
+              "type": "Literal['info', 'warning']",
+              "default": "'info'"
+            }
+          ]
+        },
+        {
+          "class_name": "ActionEntityRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A record an action points at (its target) or produced (its result).",
+          "fields": [
+            {
+              "name": "entity_type",
+              "type": "str"
+            },
+            {
+              "name": "entity_id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "url",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ActionUserRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A person in an action's story, with the name to show.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionCounts",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "How many visible actions sit in each status (under the same filters).",
+          "fields": [
+            {
+              "name": "proposed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "applied",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "rejected",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "failed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "reverted",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A proposal and its lifecycle, as the dock renders it.\n\n``can_*`` are computed for the caller: they are what the caller may do\nnow, under the same gates the record's REST route would run for them.\n``blocked_reason_key`` explains a pending action the caller cannot apply.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "session_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "message_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "project_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "action_type",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "ActionStatus"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "title_key",
+              "type": "str"
+            },
+            {
+              "name": "summary",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "subtitle",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "fields",
+              "type": "list[ActionField]"
+            },
+            {
+              "name": "notes",
+              "type": "list[ActionNote]"
+            },
+            {
+              "name": "payload",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "original_payload",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "edited",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "confidence",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "rationale",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target",
+              "type": "ActionEntityRef | None",
+              "default": "None"
+            },
+            {
+              "name": "result",
+              "type": "ActionEntityRef | None",
+              "default": "None"
+            },
+            {
+              "name": "requested_by",
+              "type": "ActionUserRef | None",
+              "default": "None"
+            },
+            {
+              "name": "decided_by",
+              "type": "ActionUserRef | None",
+              "default": "None"
+            },
+            {
+              "name": "decided_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "reverted_by",
+              "type": "ActionUserRef | None",
+              "default": "None"
+            },
+            {
+              "name": "reverted_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "decision_note",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "revert_note",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "error",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "error_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_apply",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "can_edit",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "can_reject",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "can_revert",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "blocked_reason_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "blocked_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "revert_hint_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "revert_hint",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A page of visible actions plus per-status counts for the filter pills.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ChatActionResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "counts",
+              "type": "ChatActionCounts"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionPatchRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Human edits to a pending proposal: a partial payload, merged and re-validated.",
+          "fields": [
+            {
+              "name": "payload",
+              "type": "dict[str, Any]",
+              "description": "Partial payload; keys must be editable fields."
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionDecisionRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Optional note for a reject or an undo.",
+          "fields": [
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionBatchRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Apply several proposals; each one succeeds or fails on its own.",
+          "fields": [
+            {
+              "name": "ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionBatchError",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Why one id of a batch was not applied (the others are unaffected).",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "status_code",
+              "type": "int"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "message_key",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ChatActionBatchResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Result of an apply-all: every visible action in its new state, plus refusals.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ChatActionResponse]"
+            },
+            {
+              "name": "errors",
+              "type": "list[ChatActionBatchError]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -91991,9 +92712,12 @@
         "boq",
         "costs",
         "projects",
+        "punchlist",
+        "rfi",
         "risk",
         "schedule",
         "search",
+        "tasks",
         "teams",
         "users",
         "validation"
@@ -205551,6 +206275,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[str]"
             }
           ]
         },
@@ -229861,10 +230589,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 44,
-      "css_files": 1,
-      "test_files": 4,
-      "total_files": 45
+      "ts_files": 70,
+      "css_files": 2,
+      "test_files": 12,
+      "total_files": 72
     },
     {
       "name": "esg",
@@ -230463,10 +231191,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "risk",
@@ -230512,10 +231240,10 @@
     },
     {
       "name": "search",
-      "ts_files": 4,
+      "ts_files": 5,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 4
+      "test_files": 3,
+      "total_files": 5
     },
     {
       "name": "service",
@@ -230673,10 +231401,10 @@
     },
     {
       "name": "timeline",
-      "ts_files": 3,
+      "ts_files": 5,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 5
     },
     {
       "name": "translation",
@@ -230841,6 +231569,7 @@
       "variations"
     ],
     "bid_management": [
+      "procurement",
       "projects",
       "users"
     ],
@@ -231233,9 +231962,12 @@
       "boq",
       "costs",
       "projects",
+      "punchlist",
+      "rfi",
       "risk",
       "schedule",
       "search",
+      "tasks",
       "teams",
       "users",
       "validation"
@@ -231994,14 +232726,14 @@
   "statistics": {
     "backend_modules": 195,
     "modules_with_manifests": 193,
-    "total_models": 616,
-    "total_columns": 7063,
+    "total_models": 617,
+    "total_columns": 7091,
     "total_relationships": 234,
     "total_routes": 3689,
-    "total_schemas": 3460,
-    "total_python_files": 2181,
+    "total_schemas": 3474,
+    "total_python_files": 2197,
     "frontend_features": 188,
-    "frontend_ts_files": 2627,
+    "frontend_ts_files": 2657,
     "frontend_backend_mapped": 168
   },
   "frontend_backend_mapping": {
