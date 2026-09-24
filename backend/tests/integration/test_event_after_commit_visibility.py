@@ -208,6 +208,55 @@ async def test_two_deferred_publishes_on_one_session_both_land():
     assert len(await _ncrs_for(second_id)) == 1, "the second deferred publish was dropped"
 
 
+async def test_a_savepoint_released_before_the_commit_does_not_fire_the_publish():
+    """Releasing a SAVEPOINT is not the commit the publish is waiting for.
+
+    SQLAlchemy dispatches ``after_commit`` for a nested transaction too, when
+    its SAVEPOINT is released, and at that moment nothing is durable yet. A
+    listener that takes the first ``after_commit`` it hears therefore fires
+    inside the still-open outer transaction. ``create_project`` does exactly
+    this: it defers ``projects.address_set`` and then creates the default team
+    in a ``begin_nested()`` block, so the geo_hub subscriber ran before the
+    project was committed and its anchor insert died on the foreign key.
+    """
+    from app.core.events import publish_after_commit
+
+    owner_id = await _committed_owner()
+
+    async with async_session_factory() as session:
+        project = _project(owner_id)
+        session.add(project)
+        await session.flush()
+        project_id = project.id
+
+        publish_after_commit(
+            session,
+            "validation.results.errors_found",
+            {
+                "report_id": str(uuid.uuid4()),
+                "project_id": str(project_id),
+                "target_type": "boq",
+                "target_id": str(uuid.uuid4()),
+                "rule_set": "boq_quality",
+                "error_count": 1,
+                "errors": [{"rule_id": "boq_quality.position_has_quantity", "message": "no quantity"}],
+            },
+            source_module="oe_validation",
+        )
+
+        async with session.begin_nested():
+            session.add(BOQ(project_id=project_id, name="Inside a savepoint"))
+
+        await asyncio.sleep(_SUBSCRIBER_GRACE_S)
+        assert not await _ncrs_for(project_id), "a SAVEPOINT release fired the publish before the commit"
+
+        await session.commit()
+
+    await asyncio.sleep(_SUBSCRIBER_GRACE_S)
+
+    assert len(await _ncrs_for(project_id)) == 1, "the publish did not fire on the real commit"
+
+
 async def test_publish_after_commit_fires_immediately_outside_a_transaction():
     """No open transaction means nothing to wait for - publish now.
 
