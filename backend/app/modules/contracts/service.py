@@ -4095,6 +4095,69 @@ class ContractsService:
                 return claim
         return None
 
+    async def _refuse_schedule_accrual_change(self, contract_id: uuid.UUID, action: str) -> None:
+        """409 ``retention_accrual_locked`` when a claim on the contract has left draft.
+
+        The schedule routes' side of the lock :meth:`set_retention_policy`
+        keeps: the engine reads the ladder from these rows, so adding,
+        changing or removing a schedule's accrual rule moves the ladder just
+        as the policy editor would. The detail has the same shape.
+        """
+        contract = await self.get_contract(contract_id)
+        lock = await self._accrual_lock(contract)
+        if lock is None:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "retention_accrual_locked",
+                "message": (
+                    f"This retention schedule's accrual rule cannot be {action}: claim "
+                    f"{lock.claim_number or lock.id} is {lock.status!r}, so the rule is already part of what it "
+                    "certified. Agree the change on a change order or the next contract; it does not apply to "
+                    "work already billed. The release rule and the notes can still be edited."
+                ),
+                "claim_id": str(lock.id),
+                "claim_number": lock.claim_number or "",
+                "claim_status": lock.status,
+                "locked_fields": ["accrual_rule"],
+            },
+        )
+
+    async def _retention_schedule_or_404(self, schedule_id: uuid.UUID) -> RetentionSchedule:
+        schedule = await self.retention_repo.get_by_id(schedule_id)
+        if schedule is None:
+            raise HTTPException(status_code=404, detail="Retention schedule not found")
+        return schedule
+
+    async def create_retention_schedule(self, data: Any) -> RetentionSchedule:
+        """Add a retention schedule; one carrying an accrual rule waits for the accrual lock."""
+        if data.accrual_rule:
+            await self._refuse_schedule_accrual_change(data.contract_id, "added")
+        return await self.retention_repo.create(RetentionSchedule(**data.model_dump()))
+
+    async def update_retention_schedule(self, schedule_id: uuid.UUID, data: Any) -> RetentionSchedule:
+        """Edit a retention schedule. Its accrual rule is held by the accrual lock, the rest is not.
+
+        Sending the accrual rule the schedule already has is no change to it.
+        Fields sent as null are not written.
+        """
+        schedule = await self._retention_schedule_or_404(schedule_id)
+        fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+        if "accrual_rule" in fields and fields["accrual_rule"] != (schedule.accrual_rule or {}):
+            await self._refuse_schedule_accrual_change(schedule.contract_id, "changed")
+        if fields:
+            await self.retention_repo.update_fields(schedule.id, **fields)
+            await self.session.refresh(schedule)
+        return schedule
+
+    async def delete_retention_schedule(self, schedule_id: uuid.UUID) -> None:
+        """Delete a retention schedule; one carrying an accrual rule waits for the accrual lock."""
+        schedule = await self._retention_schedule_or_404(schedule_id)
+        if schedule.accrual_rule:
+            await self._refuse_schedule_accrual_change(schedule.contract_id, "removed")
+        await self.retention_repo.delete(schedule.id)
+
     #: Why a contract was, or was not, given its country's retention ladder as
     #: it was signed. Recorded on ``metadata_["retention_policy_seed"]``.
     RETENTION_SEED_REASONS: tuple[str, ...] = (

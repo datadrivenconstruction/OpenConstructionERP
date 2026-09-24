@@ -54,7 +54,6 @@ from app.modules.contracts.models import (
     LDClause,
     ProgressClaim,
     ProgressClaimLine,
-    RetentionSchedule,
 )
 from app.modules.contracts.repository import (
     ContractDocumentRepository,
@@ -737,9 +736,9 @@ async def create_retention_schedule(
     _perm: None = Depends(RequirePermission("contracts.create")),
 ) -> RetentionScheduleResponse:
     await _verify_contract_access(session, data.contract_id, user_id)
-    repo = RetentionScheduleRepository(session)
-    obj = RetentionSchedule(**data.model_dump())
-    obj = await repo.create(obj)
+    # A schedule's accrual rule is the ladder the engine reads, so the service
+    # holds it to the accrual lock the retention policy editor keeps.
+    obj = await ContractsService(session).create_retention_schedule(data)
     return RetentionScheduleResponse.model_validate(obj)
 
 
@@ -777,10 +776,7 @@ async def update_retention_schedule(
     if obj is None:
         raise HTTPException(status_code=404, detail="Retention schedule not found")
     await _verify_contract_access(session, obj.contract_id, user_id)
-    fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
-    if fields:
-        await repo.update_fields(schedule_id, **fields)
-        await session.refresh(obj)
+    obj = await ContractsService(session).update_retention_schedule(schedule_id, data)
     return RetentionScheduleResponse.model_validate(obj)
 
 
@@ -799,7 +795,7 @@ async def delete_retention_schedule(
     if obj is None:
         raise HTTPException(status_code=404, detail="Retention schedule not found")
     await _verify_contract_access(session, obj.contract_id, user_id)
-    await repo.delete(schedule_id)
+    await ContractsService(session).delete_retention_schedule(schedule_id)
 
 
 # ── FeeStructure ─────────────────────────────────────────────────────────
