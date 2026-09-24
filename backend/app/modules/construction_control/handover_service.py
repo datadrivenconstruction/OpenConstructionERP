@@ -208,12 +208,21 @@ class HandoverService:
         ``gating_state`` becomes ``clear`` when both are zero, otherwise ``blocked`` -
         unless the gate was explicitly overridden, which is preserved (an override is a
         deliberate manager decision, not re-derived away on the next validate).
+
+        An issued or revoked package is not recomputed. Its gate fields are part of
+        the snapshot the certificate signature was taken over, so they are returned
+        as they stood when the certificate was issued. Before, every read of the gate
+        (the GET route, and issue or override refusing the package afterwards)
+        rewrote them, and an issued certificate could later show as issued over
+        blockers that appeared after it.
         """
         package = await self.get_package(package_id)
+        blocking_numbers = await self._package_blocking_gate_numbers(package)
+        if package.status in _HANDOVER_LOCKED_STATUSES:
+            return package, blocking_numbers
 
         open_ncr_count = await self._open_ncr_count(package.project_id)
         unreleased_hold_count = await self.gating.count_unreleased_holds(package.project_id)
-        blocking_numbers = await self._package_blocking_gate_numbers(package)
 
         clear = open_ncr_count == 0 and unreleased_hold_count == 0
         if package.gating_state == "overridden":
