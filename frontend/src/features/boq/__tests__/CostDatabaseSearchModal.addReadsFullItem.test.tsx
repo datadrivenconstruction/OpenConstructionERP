@@ -158,6 +158,9 @@ function detailReads() {
 describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // jsdom has no scrollIntoView; picking a row moves the keyboard cursor,
+    // and the modal scrolls the cursor row into view.
+    Element.prototype.scrollIntoView = vi.fn();
     for (const k of Object.keys(details)) delete details[k];
     useToastStore.setState({ toasts: [] });
     (fetchCategoryTree as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
