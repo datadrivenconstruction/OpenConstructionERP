@@ -4,8 +4,9 @@
 
 Working a claim's retention out used to write column I back one UPDATE per
 claim line, so generating a claim on a 500 line schedule of values sent 502
-statements where it now sends 21, and that round trip per line was most of
-the time generation took. The figures are all known before the first write,
+UPDATE statements where it now sends 3 (517 statements in all where it now
+sends 21), and that round trip per line was most of the time generation
+took. The figures are all known before the first write,
 so they now go out as one statement however long the schedule is.
 
 A statement that bypasses the ORM leaves the instances already in the session
