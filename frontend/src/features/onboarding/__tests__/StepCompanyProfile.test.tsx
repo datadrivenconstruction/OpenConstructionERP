@@ -95,13 +95,13 @@ async function openProfileStep() {
   await screen.findByTestId('profile-card-general_contractor');
 }
 
-/** The module step's switch for one module, found through the search box. */
+/** The module step's switch for one module, found through the search box and
+ *  then by the switch's own name, so a group header that reads the same as a
+ *  module cannot answer for it. */
 function moduleSwitch(key: string): HTMLElement {
   const search = screen.getByRole('searchbox', { name: 'Search modules' });
   fireEvent.change(search, { target: { value: key } });
-  const label = screen.getByText(key, { exact: true });
-  const row = label.closest('.justify-between') as HTMLElement;
-  return within(row).getByRole('switch');
+  return screen.getByRole('switch', { name: key });
 }
 
 const sizeFetches = () =>

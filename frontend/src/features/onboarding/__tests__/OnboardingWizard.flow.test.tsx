@@ -133,13 +133,14 @@ const heading = (name: string) => screen.findByRole('heading', { name });
 const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
 const stepLabel = () => screen.getByText(/^Step \d of 6$/).textContent;
 
-/** The module step's switch for one module, found through the search box. */
+/** The module step's switch for one module, found through the search box and
+ *  then by the switch's own name. Found by visible text instead, the finance
+ *  module collided with the finance group header, which the search also opens
+ *  and which the test locale names the same. */
 function moduleSwitch(key: string): HTMLElement {
   const search = screen.getByRole('searchbox', { name: 'Search modules' });
   fireEvent.change(search, { target: { value: key } });
-  const label = screen.getByText(key, { exact: true });
-  const row = label.closest('.justify-between') as HTMLElement;
-  return within(row).getByRole('switch');
+  return screen.getByRole('switch', { name: key });
 }
 
 /** Welcome -> start choice -> the profile step, catalogue loaded. */
