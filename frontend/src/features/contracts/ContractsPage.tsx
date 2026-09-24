@@ -1856,11 +1856,14 @@ export function ContractDetailDrawer({
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
 
+  // Close states no figures. Without a final account the server reads them
+  // from the contract and its claims; with one, the figures on it stand. The
+  // button used to restate the contract value, which overwrote a final account
+  // agreed at a negotiated figure, and an agreed one now refuses that.
   const closeMut = useMutation({
     mutationFn: () =>
       closeContract(contractId, {
         contract_id: contractId,
-        final_contract_value: toNum(contract?.total_value),
         status: 'agreed',
       }),
     onSuccess: () => {
@@ -2114,6 +2117,7 @@ export function ContractDetailDrawer({
                   icon={<Archive size={14} />}
                   onClick={() => closeMut.mutate()}
                   loading={closeMut.isPending}
+                  data-testid="contract-close"
                 >
                   {t('contracts.close', { defaultValue: 'Close' })}
                 </Button>
