@@ -270,6 +270,10 @@ async def test_correcting_a_quantity_does_not_strip_the_link(session: AsyncSessi
     Reading the committed aggregate rather than only the column is what makes
     this test discriminating: a resolver that runs on the edit path and returns
     null would leave the column exactly as an absent resolver does.
+
+    The correction is made while the order is still a draft and the order is
+    committed afterwards. A committed order's lines are frozen, so the draft is
+    the only place this edit path runs on its own.
     """
     position, cost_line = await make_position(session, project_id)
     assert cost_line is not None
@@ -277,8 +281,6 @@ async def test_correcting_a_quantity_does_not_strip_the_link(session: AsyncSessi
 
     service = ProcurementService(session)
     po = await service.create_po(po_payload(project_id, boq_position_id=str(position.id)))
-    await commit_po(session, po)
-    assert await committed(session, project_id) == {str(cost_line_id): Decimal("1800.00")}
 
     corrected = await service.update_po(
         po.id,
@@ -299,6 +301,7 @@ async def test_correcting_a_quantity_does_not_strip_the_link(session: AsyncSessi
         "correcting the quantity rebuilt the line without its cost line, so the order has silently "
         "left the committed report"
     )
+    await commit_po(session, corrected)
     assert await committed(session, project_id) == {str(cost_line_id): Decimal("2160.00")}
 
 

@@ -16,6 +16,7 @@ import logging
 import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -51,6 +52,7 @@ from app.modules.procurement.repository import (
 from app.modules.procurement.schemas import (
     GRCreate,
     POCreate,
+    POItemCreate,
     POUpdate,
     ProcurementStatsResponse,
     ProjectDeliveryPerformanceResponse,
@@ -191,6 +193,29 @@ _VALID_PO_STATUSES = set(_PO_STATUS_TRANSITIONS.keys())
 #: ``committed_from_po`` marker in finance, and the compensating event has to
 #: fire for all three, not only for ``approved``.
 _PO_COMMITTED_STATUSES = frozenset({"approved", "issued", "partially_received"})
+
+#: The only status in which a purchase order's amounts, currency, vendor and
+#: line items may still change in place. Approval is given to a sum, a vendor
+#: and a list of lines, and finance takes the commitment at that moment and
+#: later releases exactly what it took. Changing the figures afterwards would
+#: walk around the approval, and it would leave the finance commitment and the
+#: committed cost report (which reads the live lines) telling two different
+#: stories about the same order.
+_PO_EDITABLE_STATUSES = frozenset({"draft"})
+
+#: What a purchase order that has left draft is told to do instead of editing
+#: its figures in place, by the status it is in. Every remedy is a path the
+#: status machine really offers from there.
+_PO_FROZEN_REMEDIES = {
+    "approved": "Return it to draft to correct it (in the same request if you like) and approve it again.",
+    "issued": (
+        "Cancel it and reopen it as a draft to correct it, or raise a separate purchase order "
+        "for the difference if deliveries or invoices already refer to it."
+    ),
+    "partially_received": "Raise a separate purchase order for the difference.",
+    "completed": "Raise a separate purchase order for the difference.",
+    "cancelled": "Reopen it as a draft to correct it, in the same request if you like.",
+}
 
 #: Holder kinds a removal refusal can name, in the order a reader wants them:
 #: what was delivered, what was billed, what was paid out, what asked for it.
@@ -384,6 +409,106 @@ def _to_decimal(value: object) -> Decimal:
         return Decimal(str(value or "0"))
     except (InvalidOperation, ValueError, TypeError):
         return Decimal("0")
+
+
+def _cents(value: object) -> Decimal:
+    """A money figure rounded to the cent, so ``"1800"`` and ``"1800.00"`` compare equal."""
+    return _to_decimal(value).quantize(Decimal("0.01"))
+
+
+def _plain(value: object) -> str:
+    """A quantity or rate as one canonical string, whatever trailing zeros it arrived with."""
+    return format(_to_decimal(value).normalize(), "f")
+
+
+def _po_line_signature(
+    description: object,
+    unit: object,
+    quantity: object,
+    unit_rate: object,
+    amount: object,
+    cost_line_id: object,
+    wbs_id: object,
+    cost_category: object,
+) -> tuple[str, ...]:
+    """Everything a purchase order line commits to, in a form that compares by value.
+
+    An amount of zero means "derive it", the same rule the write path applies,
+    so a line sent back without its amount matches the stored line it came from.
+    """
+    effective = _to_decimal(amount)
+    if effective == 0:
+        effective = _to_decimal(quantity) * _to_decimal(unit_rate)
+    return (
+        str(description or "").strip(),
+        str(unit or "").strip(),
+        _plain(quantity),
+        _plain(unit_rate),
+        str(_cents(effective)),
+        str(cost_line_id or ""),
+        str(wbs_id or ""),
+        str(cost_category or ""),
+    )
+
+
+def _frozen_po_changes(
+    po: PurchaseOrder,
+    fields: dict[str, Any],
+    new_items: list[POItemCreate] | None,
+    new_item_cost_line_ids: list[uuid.UUID | None],
+) -> list[str]:
+    """Name what a PATCH would really change among the figures approval fixed.
+
+    Only real changes count. A client that sends back the stored amounts, the
+    same currency in another case or the same lines in another order is not
+    changing anything, and is not refused for it.
+    """
+    changed: list[str] = []
+    if any(
+        name in fields and _cents(fields[name]) != _cents(getattr(po, name, None))
+        for name in ("amount_subtotal", "tax_amount", "amount_total")
+    ):
+        changed.append("amounts")
+    if (
+        "currency_code" in fields
+        and (fields["currency_code"] or "").strip().upper() != (po.currency_code or "").strip().upper()
+    ):
+        changed.append("currency")
+    if (
+        "vendor_contact_id" in fields
+        and str(fields["vendor_contact_id"] or "").strip().lower() != str(po.vendor_contact_id or "").strip().lower()
+    ):
+        changed.append("vendor")
+    if new_items is not None:
+        stored = sorted(
+            _po_line_signature(
+                it.description,
+                it.unit,
+                it.quantity,
+                it.unit_rate,
+                it.amount,
+                it.cost_line_id,
+                it.wbs_id,
+                it.cost_category,
+            )
+            for it in (po.items or [])
+        )
+        incoming = sorted(
+            _po_line_signature(
+                it.description,
+                it.unit,
+                it.quantity,
+                it.unit_rate,
+                it.amount,
+                cost_line_id,
+                it.wbs_id,
+                it.cost_category,
+            )
+            for it, cost_line_id in zip(new_items, new_item_cost_line_ids, strict=True)
+        )
+        if stored != incoming:
+            changed.append("line items")
+    return changed
 
 
 def _fmt_qty(value: object) -> str:
@@ -802,6 +927,10 @@ class ProcurementService:
         subtotal or tax are changed. A PATCH that moves the PO into
         ``approved`` runs the same blocking ``procurement`` rule set as
         :meth:`approve_po`, so approval cannot be reached ungated.
+
+        Outside draft the amounts, currency, vendor and line items are frozen
+        (409 naming the way to correct them), unless the same PATCH returns the
+        order to draft. ``issued`` is reached only through :meth:`issue_po`.
         """
         po = await self.get_po(po_id)  # 404 check
         prior_status = po.status
@@ -845,6 +974,78 @@ class ProcurementService:
             # remedy: one check, called from both.
             if new_status == "cancelled" and po.status != "cancelled":
                 await self._refuse_if_po_is_held(po, action="cancel")
+            # ``issued`` has its own verb, and the verb is what re-checks the
+            # vendor's hard block at the moment the order goes out, writes the
+            # audit row and tells the listeners. A PATCH straight into
+            # ``issued`` did none of the three, so it is refused and pointed
+            # at the verb rather than taught to repeat it.
+            if new_status == "issued" and po.status != "issued":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        "A purchase order is issued through its issue action, which re-checks the vendor "
+                        "and records the issue. Use that action instead of changing the status directly."
+                    ),
+                )
+
+        # Guard the destructive replace: ``delete_by_po`` hard-deletes the
+        # existing PO line rows, and ``GoodsReceiptItem.po_item_id`` is an
+        # ``ON DELETE SET NULL`` FK back to them. So replacing items on a PO
+        # that already has goods receipts silently NULLs the po_item_id link
+        # on every received line, orphaning the received-quantity linkage and
+        # corrupting the over-receipt cap, the 3-way match, and the
+        # fully-received rollup (received quantities can no longer be tied to
+        # any PO line). Once deliveries exist the line items are no longer
+        # safe to mutate - refuse the replace with a 409. It is checked before
+        # anything is written and before the frozen-figures check below,
+        # because it is the more specific of the two explanations.
+        if data.items is not None and po.goods_receipts:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Cannot replace line items on a purchase order that already has goods receipts; "
+                    "the received quantities are linked to the existing line items."
+                ),
+            )
+
+        # Resolve the spine links before the existing rows are destroyed, for
+        # the same reason create_po resolves before the PO exists: a foreign
+        # position id must refuse the PATCH rather than take the old line items
+        # down with it. The frozen-figures check below compares the resolved
+        # links too, so it happens before that check as well.
+        #
+        # This replace is why the resolution cannot live only in create_po.
+        # The rows are rebuilt from scratch, so a rebuild that did not resolve
+        # would strip the cost line off every line of the order the first time
+        # somebody corrected a quantity, and that order would drop out of the
+        # committed report for good. The link has to be re-derived on every
+        # write that recreates the row, not only on the first one.
+        item_cost_line_ids: list[uuid.UUID | None] = []
+        if data.items is not None:
+            item_cost_line_ids = await resolve_cost_line_ids(
+                self.session,
+                po.project_id,
+                [(item.cost_line_id, item.boq_position_id) for item in data.items],
+            )
+
+        # Once an order leaves draft its amounts, currency, vendor and lines
+        # are the ones it was approved with, and finance holds a commitment for
+        # exactly that sum. A PATCH may still correct them on the way back to
+        # draft (the re-approval then gates and commits the corrected order),
+        # but not while the order stays approved, issued, received or
+        # cancelled. Notes, dates and payment terms stay editable throughout.
+        resulting_status = fields.get("status") or po.status
+        if po.status not in _PO_EDITABLE_STATUSES and resulting_status not in _PO_EDITABLE_STATUSES:
+            changed = _frozen_po_changes(po, fields, data.items, item_cost_line_ids)
+            if changed:
+                what = changed[0] if len(changed) == 1 else f"{', '.join(changed[:-1])} and {changed[-1]}"
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Purchase order {po.po_number} is {po.status.replace('_', ' ')}, so its {what} can no "
+                        f"longer change in place. {_PO_FROZEN_REMEDIES.get(po.status, '')}"
+                    ).strip(),
+                )
 
         # Recompute total if subtotal or tax changed
         new_subtotal = fields.get("amount_subtotal", po.amount_subtotal)
@@ -858,44 +1059,9 @@ class ProcurementService:
         if fields:
             await self.po_repo.update(po_id, **fields)
 
-        # Replace items if provided
+        # Replace items if provided. The goods-receipt refusal and the cost
+        # line resolution for this replace both run above, before any write.
         if data.items is not None:
-            # Guard the destructive replace: ``delete_by_po`` hard-deletes the
-            # existing PO line rows, and ``GoodsReceiptItem.po_item_id`` is an
-            # ``ON DELETE SET NULL`` FK back to them. So replacing items on a PO
-            # that already has goods receipts silently NULLs the po_item_id link
-            # on every received line, orphaning the received-quantity linkage and
-            # corrupting the over-receipt cap, the 3-way match, and the
-            # fully-received rollup (received quantities can no longer be tied to
-            # any PO line). Once deliveries exist the line items are no longer
-            # safe to mutate - refuse the replace with a 409. Header fields
-            # (notes, payment_terms, status, etc.) already applied above are
-            # unaffected; only the items[] payload is rejected.
-            if po.goods_receipts:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        "Cannot replace line items on a purchase order that already has goods receipts; "
-                        "the received quantities are linked to the existing line items."
-                    ),
-                )
-            # Resolve the spine links before the existing rows are destroyed,
-            # for the same reason create_po resolves before the PO exists: a
-            # foreign position id must refuse the PATCH rather than take the
-            # old line items down with it.
-            #
-            # This replace is why the resolution cannot live only in create_po.
-            # The rows are rebuilt from scratch, so a rebuild that did not
-            # resolve would strip the cost line off every line of the order the
-            # first time somebody corrected a quantity, and that order would
-            # drop out of the committed report for good. The link has to be
-            # re-derived on every write that recreates the row, not only on the
-            # first one.
-            item_cost_line_ids = await resolve_cost_line_ids(
-                self.session,
-                po.project_id,
-                [(item.cost_line_id, item.boq_position_id) for item in data.items],
-            )
             await self.po_item_repo.delete_by_po(po_id)
             item_amounts: list[Decimal] = []
             for idx, item_data in enumerate(data.items):
