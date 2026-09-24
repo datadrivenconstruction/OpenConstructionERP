@@ -1177,3 +1177,95 @@ async def test_record_submission_on_open_package_is_allowed(package_status: str)
     )
 
     assert sub.id in svc.submission_repo.rows
+
+
+# ── 12. A decided package keeps its parts: no delete of lines, bidders, invitations or the package ──
+#
+# Section 11 keeps a decided package's bids from being deleted one by one. The
+# same bids also go when something they hang off is deleted: a line item
+# cascades into every bid's priced line for it, an invitation into its
+# submission, a bidder into its submission, award and rejection, and the
+# package into all of them. Each of those deletes is refused on an awarded or
+# cancelled package, and each refusal is paired with the same delete on an open
+# package, which still goes through, and with an unknown id, which is a 404.
+
+_PART_DELETES = {
+    # name: (seed(svc, package_id) -> row, service method, repo attribute, plural in the detail)
+    "line": (lambda svc, pid: _seed_line_item(svc, package_id=pid), "delete_line", "line_repo", "line items"),
+    "bidder": (lambda svc, pid: _seed_bidder(svc, package_id=pid), "delete_bidder", "bidder_repo", "bidders"),
+    "invitation": (
+        lambda svc, pid: _seed_invitation(svc, package_id=pid),
+        "delete_invitation",
+        "invitation_repo",
+        "invitations",
+    ),
+}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+@pytest.mark.parametrize("part", sorted(_PART_DELETES))
+async def test_deleting_a_part_of_a_decided_package_is_refused(part: str, package_status: str) -> None:
+    seed, method, repo_attr, what = _PART_DELETES[part]
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+    row = seed(svc, pkg.id)
+
+    with pytest.raises(HTTPException) as exc:
+        await getattr(svc, method)(row.id)
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == f"Package is '{package_status}' and its {what} can no longer be deleted"
+    assert row.id in getattr(svc, repo_attr).rows
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["draft", "published", "open", "closed"])
+@pytest.mark.parametrize("part", sorted(_PART_DELETES))
+async def test_deleting_a_part_of_an_undecided_package_is_allowed(part: str, package_status: str) -> None:
+    seed, method, repo_attr, _what = _PART_DELETES[part]
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+    row = seed(svc, pkg.id)
+
+    await getattr(svc, method)(row.id)
+
+    assert row.id not in getattr(svc, repo_attr).rows
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("part", sorted(_PART_DELETES))
+async def test_deleting_an_unknown_part_is_404(part: str) -> None:
+    _seed, method, _repo_attr, _what = _PART_DELETES[part]
+    svc = _make_service()
+
+    with pytest.raises(HTTPException) as exc:
+        await getattr(svc, method)(uuid.uuid4())
+
+    assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+async def test_deleting_a_decided_package_is_refused(package_status: str) -> None:
+    svc = _make_service()
+    sub, _line = _seed_submission(svc, package_status=package_status)
+    pkg_id = svc.invitation_repo.rows[sub.invitation_id].package_id
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.delete_package(pkg_id)
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == f"Package is '{package_status}' and can no longer be deleted"
+    assert pkg_id in svc.package_repo.rows
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["draft", "published", "open", "closed"])
+async def test_deleting_an_undecided_package_is_allowed(package_status: str) -> None:
+    svc = _make_service()
+    pkg = _seed_package(svc, project_id=PROJECT_A, status=package_status)
+
+    await svc.delete_package(pkg.id)
+
+    assert pkg.id not in svc.package_repo.rows
