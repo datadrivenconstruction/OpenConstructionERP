@@ -880,16 +880,21 @@ function ToggleSwitch({
   enabled,
   onToggle,
   disabled,
+  label,
 }: {
   enabled: boolean;
   onToggle: () => void;
   disabled?: boolean;
+  /** What the switch turns on, read out by assistive tech. A row of unnamed
+   *  switches is announced as "switch, on" over and over. */
+  label?: string;
 }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={enabled}
+      aria-label={label}
       onClick={onToggle}
       disabled={disabled}
       className={clsx(
@@ -2517,6 +2522,7 @@ function StepModuleConfig({
                   {visible.map((mod) => {
                     const isCore = !!mod.core;
                     const isEnabled = isCore || enabledModules.has(mod.key);
+                    const modLabel = t(mod.labelKey, { defaultValue: mod.key });
                     return (
                       <div
                         key={mod.key}
@@ -2525,7 +2531,7 @@ function StepModuleConfig({
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-content-primary truncate">
-                              {t(mod.labelKey, { defaultValue: mod.key })}
+                              {modLabel}
                             </span>
                             {isCore && (
                               <Badge variant="blue" size="sm">
@@ -2541,6 +2547,7 @@ function StepModuleConfig({
                           enabled={isEnabled}
                           onToggle={() => !isCore && onToggleModule(mod.key)}
                           disabled={isCore}
+                          label={modLabel}
                         />
                       </div>
                     );
