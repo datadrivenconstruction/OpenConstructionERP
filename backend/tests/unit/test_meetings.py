@@ -52,7 +52,9 @@ class _StubSession:
         pass
 
     async def execute(self, stmt: Any) -> SimpleNamespace:
-        return SimpleNamespace(rowcount=0)
+        # Serves both the task scrub (an UPDATE) and the minutes lookup the
+        # delete makes first, which finds no minutes here.
+        return SimpleNamespace(rowcount=0, scalar_one_or_none=lambda: None)
 
 
 class _StubMeetingRepo:
