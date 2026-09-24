@@ -1554,5 +1554,19 @@
     ],
     "key_count_at_seed": 3,
     "note": "RFIs, the module name. Portuguese calls the module RFI throughout since the RFI wording pass replaced SDI; pt-BR inherits these keys from pt."
+  },
+  {
+    "locale_set": [
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "fr",
+      "pt",
+      "pt-BR",
+      "ro"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Total and Local, spelled the same in the Romance locales (erp_chat.action.field.total, login.mod.local, takeoff_viewer.local_only). Each of these locales translates the surrounding prose."
   }
 ]
