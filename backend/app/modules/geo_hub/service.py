@@ -68,6 +68,10 @@ from app.modules.geo_hub.tile_pipeline import (
 
 logger = logging.getLogger(__name__)
 
+#: Most projects one bulk auto-anchor sweep geocodes, so a large tenant cannot
+#: pin Nominatim for hours in a single request.
+BULK_ANCHOR_CAP = 200
+
 
 # ── FSMs ────────────────────────────────────────────────────────────────
 
@@ -398,7 +402,7 @@ class GeoHubService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication required",
             )
-        from sqlalchemy import select
+        from sqlalchemy import and_, or_, select
 
         from app.modules.projects.models import Project
 
@@ -412,12 +416,32 @@ class GeoHubService:
                 "results": [],
             }
 
-        stmt = select(Project).where(Project.status != "archived").where(Project.address.is_not(None))
+        # Only projects this sweep can still do something for: no anchor, or
+        # the (0, 0) placeholder. Projects that already carry a real anchor
+        # used to be fetched too and spent the cap below on a guaranteed
+        # skip, and with no ORDER BY the database handed back the same
+        # arbitrary 200 on every run. Past 200 anchored projects the sweep
+        # therefore never reached a new one, however often it was re-run.
+        stmt = (
+            select(Project)
+            .outerjoin(GeoAnchor, GeoAnchor.project_id == Project.id)
+            .where(Project.status != "archived")
+            .where(Project.address.is_not(None))
+            .where(
+                or_(
+                    GeoAnchor.id.is_(None),
+                    and_(GeoAnchor.lat == Decimal("0"), GeoAnchor.lon == Decimal("0")),
+                )
+            )
+        )
         if not is_admin:
             stmt = stmt.where(Project.owner_id == user_id)
-        # Hard cap so a runaway admin doesn't pin Nominatim for hours;
-        # callers can re-run if they need more.
-        stmt = stmt.limit(200)
+        # Hard cap so a runaway admin doesn't pin Nominatim for hours. Newest
+        # first so the slice is deterministic and a just-created project is
+        # always in it; each anchored project leaves the set, so a re-run
+        # reaches further. One anchor per project (uq_oe_geo_hub_anchor_project),
+        # so the outer join cannot repeat a project.
+        stmt = stmt.order_by(Project.created_at.desc(), Project.id).limit(BULK_ANCHOR_CAP)
         rows = (await self.session.execute(stmt)).scalars().all()
 
         # Prefetch every existing anchor for the fetched projects in ONE
