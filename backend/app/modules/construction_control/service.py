@@ -802,6 +802,17 @@ class ConstructionControlService:
                 ),
             )
         fields = data.model_dump(exclude_unset=True)
+        # ``recorded`` is set only by record_test_result, which stores the result
+        # and raises the NCR a fail needs. A PATCH to it left a test recorded with
+        # no result, which could then be neither recorded nor deleted.
+        if fields.get("status") == "recorded":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "A test result becomes recorded only by recording its outcome, which stores the "
+                    "result and raises the NCR a fail needs. Use the record-result action."
+                ),
+            )
         if fields.get("criterion_id") is not None:
             await self._assert_criterion_in_project(fields["criterion_id"], test.project_id)
             fields["criterion_id"] = str(fields["criterion_id"])

@@ -80,6 +80,9 @@ logger = logging.getLogger(__name__)
 
 _SUBSCRIBED_FLAG = "_property_dev_subscribers_registered"
 
+# SPA statuses from signature on, and a cancelled one kept as record.
+_SPA_SIGNED_STATUSES = frozenset({"signed", "countersigned", "registered", "cancelled"})
+
 
 # ── Helpers ────────────────────────────────────────────────────────────
 
@@ -241,6 +244,16 @@ async def _on_documents_uploaded(event: Event) -> dict[str, Any]:
             spa = await repo.get_by_id(spa_uuid)
             if spa is None:
                 return {"status": "ignored", "reason": "spa gone"}
+            # Once signed, the SPA's envelope is the one the parties signed
+            # through. A later upload may fill a missing link but never
+            # re-point an existing one.
+            if spa.status in _SPA_SIGNED_STATUSES and spa.e_sign_envelope_id and spa.e_sign_envelope_id != envelope_id:
+                logger.info(
+                    "property_dev._on_documents_uploaded: SPA %s is %s, keeping its signed envelope link",
+                    spa_uuid,
+                    spa.status,
+                )
+                return {"status": "ignored", "reason": "spa signed"}
             await repo.update_fields(spa_uuid, e_sign_envelope_id=envelope_id)
             await session.commit()
             return {"status": "ok", "envelope_id": envelope_id}

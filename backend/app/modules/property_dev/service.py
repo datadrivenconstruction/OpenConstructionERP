@@ -2484,6 +2484,21 @@ class PropertyDevService:
         sel = await self.get_selection(s_id)
         fields = _dump(data, sel)
         new_status = fields.get("status")
+        # Locking stamps locked_at and tells production through its event, so
+        # it happens only through lock_selection.
+        if new_status == "locked" and sel.status != "locked":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A selection is locked only through the lock action, which stamps the lock date.",
+            )
+        # A locked or cancelled selection is the agreed record; the item
+        # methods already freeze its lines, and only cancelling a locked one
+        # remains open to a PATCH.
+        if sel.status in {"locked", "cancelled"} and set(fields) - {"status"}:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Selection is {sel.status}",
+            )
         if new_status:
             _ensure_transition("selection", sel.status, new_status, allowed_selection_transitions)
         await self.selections.update_fields(s_id, **fields)
@@ -4788,6 +4803,14 @@ class PropertyDevService:
             raise HTTPException(
                 status_code=409,
                 detail=f"Instalment in status '{ins.status}' - no demand",
+            )
+        # A suspended or cancelled schedule is not collecting, so no demand
+        # letter goes to the buyer under it.
+        schedule = await self.get_payment_schedule(ins.schedule_id)
+        if schedule.status in {"suspended", "cancelled"}:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Payment schedule in status '{schedule.status}' - no demand",
             )
         # Snapshot every field the event payload below needs before any
         # update_fields() call in this function can expire this row - a

@@ -577,7 +577,25 @@ class ResourcesService:
         return resource
 
     async def delete_resource(self, resource_id: uuid.UUID) -> None:
-        await self.get_resource(resource_id)
+        """Delete a resource that has no worked assignment.
+
+        Assignments cascade with the resource, so a delete would take the
+        allocation history of work already done (in progress or completed,
+        timecard imports included) with it. Such a resource is set inactive.
+        """
+        resource = await self.get_resource(resource_id)
+        worked = 0
+        for worked_status in ("in_progress", "completed"):
+            _rows, count = await self.assignment_repo.list_for_resource(resource_id, status=worked_status, limit=1)
+            worked += count
+        if worked:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Resource {resource.code} has {worked} worked assignment(s) and cannot be deleted. "
+                    "Set its status to inactive instead."
+                ),
+            )
         await self.resource_repo.delete(resource_id)
         logger.info("Resource deleted: %s", resource_id)
 
