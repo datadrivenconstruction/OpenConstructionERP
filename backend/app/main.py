@@ -200,6 +200,69 @@ def publish_data_repair_verdict(app: FastAPI, report: "DataRepairReport | None")
     app.state.data_repair_ledger_failed = not report.ledger_written
 
 
+async def run_schema_heal(app: FastAPI, engine: Any, base: Any) -> None:
+    """Run the boot-time schema heal and record its verdict on ``app.state``.
+
+    Writes ``schema_heal_failed``, ``schema_heal_error``, ``schema_heal_skipped``
+    and ``schema_heal_incomplete``, which ``/api/health`` and the admin upgrade
+    status read. A module-level function rather than lifespan code so the
+    mapping from what the heal did to what health publishes can be driven on
+    its own.
+    """
+    from app.core.postgres_migrator import HealLockUnavailable, heal_is_incomplete, postgres_auto_migrate
+
+    _heal_skipped: list = []
+    _heal_raised = False
+    try:
+        migrated = await postgres_auto_migrate(engine, base, skipped=_heal_skipped)
+        if migrated:
+            logger.info("PostgreSQL auto-migration: %d schema objects (columns + indexes) added", migrated)
+        app.state.schema_heal_failed = False
+        app.state.schema_heal_error = None
+    except HealLockUnavailable as exc:
+        # Another worker held the heal lock past the wait, so nothing
+        # on this worker ran the heal or saw it finish. Not a failure:
+        # ``schema_heal_failed`` degrades the status, and a restart
+        # would only queue behind the same holder. Not clean either,
+        # which is what this worker used to publish by returning 0
+        # from a heal it skipped. Incomplete is the honest reading
+        # until a start that gets the lock says otherwise.
+        _heal_raised = True
+        app.state.schema_heal_failed = None
+        app.state.schema_heal_error = str(exc)
+        logger.warning("PostgreSQL schema heal not verified on this worker: %s", exc)
+    except Exception as exc:
+        _heal_error = f"{type(exc).__name__}: {exc}"
+        _heal_raised = True
+        app.state.schema_heal_failed = True
+        app.state.schema_heal_error = _heal_error
+        # Deliberately louder than the warning this replaces, and it
+        # names the cause inline rather than leaving it in a traceback.
+        # This is a heal that raised as a whole: the connection, the
+        # lock, the transaction. A role that cannot issue DDL does not
+        # land here. Its statements are refused one by one inside the
+        # heal, which names them in an ERROR line of its own and returns
+        # normally; that case is recorded just below.
+        logger.error(
+            "PostgreSQL schema heal FAILED (%s). The database is missing columns this "
+            "release expects and requests touching them will fail. If this role cannot "
+            "issue DDL, run the schema change as one that can; the application will keep "
+            "starting either way. /api/health reports schema_heal_failed=true, and this "
+            "line is where the cause is: that endpoint is unauthenticated and the message "
+            "carries the failing statement, so it is not published there.",
+            _heal_error,
+            exc_info=True,
+        )
+
+    # The flag above says whether the heal raised. What it could not
+    # do statement by statement is this list, which the heal has
+    # already logged with the SQL to run. Written only here, and the
+    # lifespan calls this only inside its PostgreSQL guard, so a deployment
+    # that never runs the heal keeps the None it was built with.
+    app.state.schema_heal_skipped = tuple(_heal_skipped)
+    app.state.schema_heal_incomplete = heal_is_incomplete(_heal_skipped, raised=_heal_raised)
+
+
 def _expected_alembic_head(ini_path: os.PathLike[str] | str) -> str | None:
     """The head revision the installed migration tree declares, parsed once.
 
@@ -4358,8 +4421,6 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.warning("Could not tell whether the database arrived unstamped (non-fatal)", exc_info=True)
 
-            from app.core.postgres_migrator import heal_is_incomplete, postgres_auto_migrate
-
             # Nothing in this codebase ever runs ``alembic upgrade``, here or
             # anywhere else, and that is a decision rather than an oversight.
             # The schema is moved by the heal below (ADD COLUMN / CREATE INDEX
@@ -4378,51 +4439,14 @@ def create_app() -> FastAPI:
             # while on the databases it would touch it is an unattended schema
             # rewrite during startup with no operator watching. It is enabled by
             # neither default. What is fixed instead is the visibility: the
-            # failure below is now recorded where a human reads it.
+            # heal's failure is recorded where a human reads it.
             #
-            # Both exits of this try/except record a verdict, and only these two
-            # do. A run that never gets here because its database is not
+            # Every exit of run_schema_heal records a verdict, and only it
+            # does. A run that never gets here because its database is not
             # PostgreSQL keeps the ``None`` this application was built with,
             # which is what lets /api/health say "never ran" instead of "healed
             # fine".
-            _heal_skipped: list = []
-            _heal_raised = False
-            try:
-                migrated = await postgres_auto_migrate(engine, Base, skipped=_heal_skipped)
-                if migrated:
-                    logger.info("PostgreSQL auto-migration: %d schema objects (columns + indexes) added", migrated)
-                app.state.schema_heal_failed = False
-                app.state.schema_heal_error = None
-            except Exception as exc:
-                _heal_error = f"{type(exc).__name__}: {exc}"
-                _heal_raised = True
-                app.state.schema_heal_failed = True
-                app.state.schema_heal_error = _heal_error
-                # Deliberately louder than the warning this replaces, and it
-                # names the cause inline rather than leaving it in a traceback.
-                # This is a heal that raised as a whole: the connection, the
-                # lock, the transaction. A role that cannot issue DDL does not
-                # land here. Its statements are refused one by one inside the
-                # heal, which names them in an ERROR line of its own and returns
-                # normally; that case is recorded just below.
-                logger.error(
-                    "PostgreSQL schema heal FAILED (%s). The database is missing columns this "
-                    "release expects and requests touching them will fail. If this role cannot "
-                    "issue DDL, run the schema change as one that can; the application will keep "
-                    "starting either way. /api/health reports schema_heal_failed=true, and this "
-                    "line is where the cause is: that endpoint is unauthenticated and the message "
-                    "carries the failing statement, so it is not published there.",
-                    _heal_error,
-                    exc_info=True,
-                )
-
-            # The flag above says whether the heal raised. What it could not
-            # do statement by statement is this list, which the heal has
-            # already logged with the SQL to run. Written here, inside the
-            # guard, so a deployment that never runs the heal keeps the None it
-            # was built with.
-            app.state.schema_heal_skipped = tuple(_heal_skipped)
-            app.state.schema_heal_incomplete = heal_is_incomplete(_heal_skipped, raised=_heal_raised)
+            await run_schema_heal(app, engine, Base)
 
             # Now ask whether it worked, which the flag above does not answer.
             # A heal that raised nothing still leaves the models and the

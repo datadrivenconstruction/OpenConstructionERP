@@ -49,7 +49,9 @@ open transaction, and wraps every statement in its own SAVEPOINT so a single
 failure cannot poison the rest of the heal.
 """
 
+import asyncio
 import logging
+import time
 from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal
@@ -65,6 +67,23 @@ logger = logging.getLogger(__name__)
 # database so they never issue concurrent ALTER / CREATE INDEX against the same
 # table. The value is arbitrary but must stay constant across releases.
 _HEAL_ADVISORY_LOCK_KEY = 826340271
+
+# How long a worker that finds the heal lock taken waits for it before giving
+# up, and how often it asks. The holder's heal is about ten seconds on a
+# 626-table schema, so a minute covers a slow one with room to spare while
+# staying well inside any supervisor's patience for a start.
+_HEAL_LOCK_WAIT_SECONDS = 60.0
+_HEAL_LOCK_POLL_SECONDS = 0.5
+
+
+class HealLockUnavailable(RuntimeError):
+    """Another worker held the heal lock for longer than this one would wait.
+
+    Raised instead of returning, because a return means "the heal ran here and
+    this is what it did", and a worker that never got the lock did not run it.
+    The call site records that as a heal nobody on this worker verified, which
+    is neither a failure nor a clean pass.
+    """
 
 
 @dataclass(frozen=True)
@@ -262,20 +281,26 @@ async def postgres_auto_migrate(engine: AsyncEngine, base, *, skipped: list[Skip
 
     async with engine.begin() as conn:
         # Serialise the heal across processes: on a shared external database
-        # several app workers (or replicas) can boot at once. Only one should
-        # run the idempotent DDL; the others skip and rely on the holder. The
+        # several app workers (or replicas) can boot at once, and only one at a
+        # time should run the idempotent DDL against the same tables. The
         # xact-scoped advisory lock auto-releases when this transaction ends, so
         # there is nothing to unlock by hand. On the single-process embedded
         # server the lock is always free, so this is a no-op there.
-        got_lock = (
-            await conn.execute(
-                text("SELECT pg_try_advisory_xact_lock(:k)"),
-                {"k": _HEAL_ADVISORY_LOCK_KEY},
-            )
-        ).scalar()
+        #
+        # A worker that finds the lock taken waits for it and then runs the heal
+        # itself. It used to return 0 at once, which read exactly like a heal
+        # that ran and found nothing to do: that worker published
+        # ``schema_heal_incomplete: false`` for a heal it never ran, whatever
+        # the holder's own heal had refused. Running it after the holder is its
+        # own verification, because every statement is idempotent: on a schema
+        # the holder completed it changes nothing, and on one the holder could
+        # not complete it collects the same refusals the holder did.
+        got_lock = await _take_heal_lock(conn)
         if not got_lock:
-            logger.info("PostgreSQL auto-migration: another worker holds the heal lock - skipping")
-            return 0
+            raise HealLockUnavailable(
+                f"another worker held the schema heal lock for more than {_HEAL_LOCK_WAIT_SECONDS:.0f}s, "
+                "so this worker could not run or verify the heal"
+            )
 
         # Never stall live traffic on a busy external database: cap how long any
         # single DDL waits to acquire its table lock. If the table is busy the
@@ -531,6 +556,32 @@ async def postgres_auto_migrate(engine: AsyncEngine, base, *, skipped: list[Skip
         )
 
     return sequences_added + columns_added + indexes_added + constraints_added + nulls_relaxed
+
+
+async def _take_heal_lock(conn) -> bool:
+    """Take the heal lock, waiting up to ``_HEAL_LOCK_WAIT_SECONDS`` for its holder.
+
+    Polls the non-blocking form rather than waiting in ``pg_advisory_xact_lock``,
+    so the wait is bounded by this function and not by whatever ``lock_timeout``
+    the role or the database carries, which may be none at all.
+    """
+    deadline = time.monotonic() + _HEAL_LOCK_WAIT_SECONDS
+    announced = False
+    while True:
+        got_lock = (
+            await conn.execute(
+                text("SELECT pg_try_advisory_xact_lock(:k)"),
+                {"k": _HEAL_ADVISORY_LOCK_KEY},
+            )
+        ).scalar()
+        if got_lock:
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        if not announced:
+            logger.info("PostgreSQL auto-migration: another worker holds the heal lock - waiting to verify after it")
+            announced = True
+        await asyncio.sleep(_HEAL_LOCK_POLL_SECONDS)
 
 
 async def not_null_divergences(engine: AsyncEngine, base) -> tuple[str, ...]:
