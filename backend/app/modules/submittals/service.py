@@ -38,6 +38,8 @@ _MAX_NUMBER_RETRIES = 5
 # endpoints so the role-gate and audit logging in those handlers cannot
 # be bypassed by a plain editor PATCHing ``status=approved`` directly.
 _PATCH_ALLOWED_STATUSES: frozenset[str] = frozenset({"draft", "submitted", "under_review"})
+# Decided submittals are the approval record and are never deleted.
+_DELETE_KEPT_STATUSES: frozenset[str] = frozenset({"approved", "approved_as_noted", "closed"})
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_submittals") -> None:
@@ -331,6 +333,16 @@ class SubmittalService:
 
     async def delete_submittal(self, submittal_id: uuid.UUID) -> None:
         submittal = await self.get_submittal(submittal_id)
+        # An approved or closed submittal is the approval record procurement
+        # and installation rely on; approve_submittal and update_submittal
+        # already treat those states as final.
+        if submittal.status in _DELETE_KEPT_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Cannot delete a submittal in status '{submittal.status}': it is the approval record and is kept."
+                ),
+            )
         project_id_s = str(submittal.project_id) if submittal.project_id is not None else ""
         await self.repo.delete(submittal_id)
         logger.info("Submittal deleted: %s", submittal_id)

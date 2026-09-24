@@ -511,6 +511,8 @@ _CAPA_ACTION_STATUSES: dict[str, str] = {
 # cancelled one not at all. Its verification notes carry the closure evidence
 # and the effectiveness results appended to it.
 _CAPA_TERMINAL_STATUSES = frozenset({"completed", "cancelled"})
+# A JSA from approval on is the signed record crews worked under.
+_JSA_KEPT_STATUSES = frozenset({"approved", "active", "archived"})
 
 
 def _refuse_capa_patch_past_its_actions(capa: Any, fields: dict[str, Any]) -> None:
@@ -845,6 +847,15 @@ class HSEAdvancedService:
         user_id: str | None = None,
     ) -> None:
         obj = await self.get_jsa(item_id)
+        # An approved JSA is the signed safety record crews worked under;
+        # update_jsa already freezes its content. It leaves the register by
+        # being archived, and an archived one stays as the record.
+        if obj.status in _JSA_KEPT_STATUSES:
+            remedy = "Archive it instead." if obj.status != "archived" else "It is kept as the record."
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"An {obj.status} JSA is the signed safety record and cannot be deleted. {remedy}",
+            )
         snapshot = {
             "project_id": str(obj.project_id),
             "status": obj.status,
@@ -1532,6 +1543,14 @@ class HSEAdvancedService:
         user_id: str | None = None,
     ) -> None:
         obj = await self.get_capa(item_id)
+        # A completed or cancelled CAPA is the closure record of the incident
+        # or finding it answered, verification notes and effectiveness check
+        # included. An open CAPA raised by mistake is cancelled, not deleted.
+        if obj.status in _CAPA_TERMINAL_STATUSES:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"A {obj.status} CAPA is the closure record of its finding and cannot be deleted.",
+            )
         snapshot = {
             "project_id": str(obj.project_id),
             "title": (obj.title or "")[:200],

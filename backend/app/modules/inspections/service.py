@@ -195,8 +195,19 @@ class InspectionService:
         return inspection
 
     async def delete_inspection(self, inspection_id: uuid.UUID) -> None:
-        """Delete an inspection."""
-        await self.get_inspection(inspection_id)
+        """Delete an inspection that has not been completed.
+
+        A completed inspection is the quality record: update_inspection locks
+        it, a failed result has already raised punch items from it, and NCRs
+        point at it by ``linked_inspection_id``. A scheduled one that will not
+        happen is cancelled instead.
+        """
+        inspection = await self.get_inspection(inspection_id)
+        if inspection.status == "completed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot delete a completed inspection: it is the quality record and is kept.",
+            )
         await self.repo.delete(inspection_id)
         logger.info("Inspection deleted: %s", inspection_id)
 
