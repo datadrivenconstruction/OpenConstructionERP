@@ -835,6 +835,49 @@ def _ensure_transition(
         )
 
 
+# ── Removal guards ──────────────────────────────────────────────────────
+#
+# Developments, plots, buyers and sales contracts sit on top of long cascade
+# chains: a plot takes its sales contracts with it, those take their payment
+# schedules and every instalment, a development takes its plots, buyers, escrow
+# accounts and broker commissions. Every record in those chains that holds money
+# or that another party relies on is kept read-only by its own service method,
+# and a delete one or two levels up used to remove it anyway. The deletes below
+# now count what they would take and refuse with a 409 that names each kind,
+# while a record with nothing of the sort under it still deletes as before.
+
+#: Instalment states that record money taken or formally forgiven.
+_SETTLED_INSTALMENT_STATUSES = ("paid", "waived")
+
+#: How a removal refusal names each kind of dependent record, singular and plural.
+_REMOVAL_HOLDER_LABELS: dict[str, tuple[str, str]] = {
+    "sales_contract": ("sales contract past draft", "sales contracts past draft"),
+    "settled_instalment": ("paid or waived instalment", "paid or waived instalments"),
+    "reservation_deposit": ("reservation with a deposit", "reservations with a deposit"),
+    "handover": ("completed handover", "completed handovers"),
+    "warranty_claim": ("warranty claim", "warranty claims"),
+    "escrow_transaction": ("escrow transaction", "escrow transactions"),
+    "commission_accrual": ("broker commission accrual", "broker commission accruals"),
+    "locked_selection": ("locked option selection", "locked option selections"),
+}
+
+
+def _refuse_removal(what: str, holders: dict[str, int], remedy: str) -> None:
+    """Raise a 409 naming every kind of record that still depends on ``what``.
+
+    Does nothing when ``holders`` is empty, so a caller can hand it the counts
+    unconditionally.
+    """
+    if not holders:
+        return
+    parts = [f"{count} {_REMOVAL_HOLDER_LABELS[kind][0 if count == 1 else 1]}" for kind, count in holders.items()]
+    described = parts[0] if len(parts) == 1 else f"{', '.join(parts[:-1])} and {parts[-1]}"
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail=f"{what} cannot be deleted. Records that depend on it: {described}. {remedy}",
+    )
+
+
 # ── Pure helpers ────────────────────────────────────────────────────────
 
 
@@ -1551,8 +1594,101 @@ class PropertyDevService:
         await self.developments.update_fields(dev_id, **fields)
         return await self.get_development(dev_id)
 
+    async def _count_removal_holders(self, checks: list[tuple[str, Any]]) -> dict[str, int]:
+        """Run each ``(kind, count statement)`` pair and keep the kinds that found rows."""
+        holders: dict[str, int] = {}
+        for kind, stmt in checks:
+            count = int((await self.session.execute(stmt)).scalar_one() or 0)
+            if count:
+                holders[kind] = count
+        return holders
+
+    @staticmethod
+    def _plot_removal_checks(plot_ids: Any) -> list[tuple[str, Any]]:
+        """Count what deleting these plots would cascade away that holds money or a party's record.
+
+        ``plot_ids`` is anything ``in_`` accepts: a list of ids or a select of them.
+        """
+        from sqlalchemy import func, or_, select
+
+        settled = or_(Instalment.amount_paid > 0, Instalment.status.in_(_SETTLED_INSTALMENT_STATUSES))
+        return [
+            (
+                "sales_contract",
+                select(func.count())
+                .select_from(SalesContract)
+                .where(SalesContract.plot_id.in_(plot_ids), SalesContract.status != "draft"),
+            ),
+            (
+                "settled_instalment",
+                select(func.count())
+                .select_from(Instalment)
+                .join(PaymentSchedule, Instalment.schedule_id == PaymentSchedule.id)
+                .join(SalesContract, PaymentSchedule.sales_contract_id == SalesContract.id)
+                .where(SalesContract.plot_id.in_(plot_ids), settled),
+            ),
+            (
+                "reservation_deposit",
+                select(func.count())
+                .select_from(Reservation)
+                .where(Reservation.plot_id.in_(plot_ids), Reservation.deposit_amount > 0),
+            ),
+            (
+                "handover",
+                select(func.count())
+                .select_from(Handover)
+                .where(
+                    Handover.plot_id.in_(plot_ids),
+                    or_(Handover.completed_at.is_not(None), Handover.keys_handed_over_at.is_not(None)),
+                ),
+            ),
+            (
+                "warranty_claim",
+                select(func.count()).select_from(WarrantyClaim).where(WarrantyClaim.plot_id.in_(plot_ids)),
+            ),
+        ]
+
     async def delete_development(self, dev_id: uuid.UUID) -> None:
-        await self.get_development(dev_id)
+        """Delete a development that has not yet taken money or made commitments.
+
+        Refused (409) while any of its plots carries a sales contract past
+        draft, a paid or waived instalment, a reservation deposit, a completed
+        handover or a warranty claim, or while the development itself has
+        escrow movements, broker commission accruals or a locked buyer
+        selection. The cascade would take every one of them with it.
+        """
+        from sqlalchemy import func, select
+
+        development = await self.get_development(dev_id)
+        checks = self._plot_removal_checks(select(Plot.id).where(Plot.development_id == dev_id))
+        checks += [
+            (
+                "escrow_transaction",
+                select(func.count())
+                .select_from(EscrowTransaction)
+                .join(EscrowAccount, EscrowTransaction.escrow_account_id == EscrowAccount.id)
+                .where(EscrowAccount.development_id == dev_id),
+            ),
+            (
+                "commission_accrual",
+                select(func.count())
+                .select_from(CommissionAccrual)
+                .join(CommissionAgreement, CommissionAccrual.agreement_id == CommissionAgreement.id)
+                .where(CommissionAgreement.development_id == dev_id),
+            ),
+            (
+                "locked_selection",
+                select(func.count())
+                .select_from(BuyerSelection)
+                .join(Buyer, BuyerSelection.buyer_id == Buyer.id)
+                .where(Buyer.development_id == dev_id, BuyerSelection.status == "locked"),
+            ),
+        ]
+        _refuse_removal(
+            f"Development {development.code}",
+            await self._count_removal_holders(checks),
+            "Set the development to completed or paused instead, which keeps these records.",
+        )
         await self.developments.delete(dev_id)
 
     # ── House Type ──────────────────────────────────────────────────────
@@ -1912,7 +2048,18 @@ class PropertyDevService:
         return await self.get_plot(plot_id)
 
     async def delete_plot(self, plot_id: uuid.UUID) -> None:
-        await self.get_plot(plot_id)
+        """Delete a plot that has no sales history.
+
+        Refused (409) while the plot carries a sales contract past draft, a
+        paid or waived instalment, a reservation deposit, a completed handover
+        or a warranty claim, all of which the delete would cascade away.
+        """
+        plot = await self.get_plot(plot_id)
+        _refuse_removal(
+            f"Plot {plot.plot_number}",
+            await self._count_removal_holders(self._plot_removal_checks([plot_id])),
+            "A plot with a sales history stays in the register so that history keeps its plot.",
+        )
         await self.plots.delete(plot_id)
 
     async def reserve_plot(self, plot_id: uuid.UUID, data: PlotReserveRequest) -> tuple[Plot, Buyer]:
@@ -2161,7 +2308,40 @@ class PropertyDevService:
         return updated
 
     async def delete_buyer(self, b_id: uuid.UUID) -> None:
-        await self.get_buyer(b_id)
+        """Delete a buyer that no contract, locked selection or warranty claim depends on.
+
+        The buyer's contract parties, option selections and warranty claims are
+        deleted with it, so the delete is refused (409) while the buyer is a
+        party to a sales contract past draft, holds a locked option selection
+        or has raised a warranty claim.
+        """
+        from sqlalchemy import func, select
+
+        buyer = await self.get_buyer(b_id)
+        checks: list[tuple[str, Any]] = [
+            (
+                "sales_contract",
+                select(func.count())
+                .select_from(ContractParty)
+                .join(SalesContract, ContractParty.sales_contract_id == SalesContract.id)
+                .where(ContractParty.buyer_id == b_id, SalesContract.status != "draft"),
+            ),
+            (
+                "locked_selection",
+                select(func.count())
+                .select_from(BuyerSelection)
+                .where(BuyerSelection.buyer_id == b_id, BuyerSelection.status == "locked"),
+            ),
+            (
+                "warranty_claim",
+                select(func.count()).select_from(WarrantyClaim).where(WarrantyClaim.buyer_id == b_id),
+            ),
+        ]
+        _refuse_removal(
+            f"Buyer {buyer.full_name}".rstrip(),
+            await self._count_removal_holders(checks),
+            "Cancel the buyer instead if the sale fell through, which keeps these records.",
+        )
         await self.buyers.delete(b_id)
 
     async def convert_buyer_to_contracted(self, buyer_id: uuid.UUID, data: BuyerContractRequest) -> Buyer:
@@ -2305,7 +2485,20 @@ class PropertyDevService:
         return await self.get_selection(s_id)
 
     async def delete_selection(self, s_id: uuid.UUID) -> None:
-        await self.get_selection(s_id)
+        """Delete an option selection that has not been locked.
+
+        A locked selection is the priced choice the buyer agreed to, and its
+        items are already frozen by the item methods, so it is refused (409).
+        """
+        sel = await self.get_selection(s_id)
+        if sel.status == "locked":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "A locked option selection cannot be deleted, it records the options and prices "
+                    "the buyer agreed to. Cancel it instead, which keeps it on record."
+                ),
+            )
         await self.selections.delete(s_id)
 
     async def add_selection_item(self, selection_id: uuid.UUID, data: BuyerSelectionItemCreate) -> BuyerSelectionItem:
@@ -3929,6 +4122,32 @@ class PropertyDevService:
                 status_code=409,
                 detail="Only draft SalesContracts can be deleted",
             )
+        # A draft is not necessarily free of money: converting a reservation
+        # creates the draft with an active schedule, and an instalment can be
+        # marked paid while the contract is still a draft. The schedule and its
+        # instalments cascade with the contract, so a draft that has taken
+        # money is refused as well.
+        from sqlalchemy import func, or_, select
+
+        settled = await self._count_removal_holders(
+            [
+                (
+                    "settled_instalment",
+                    select(func.count())
+                    .select_from(Instalment)
+                    .join(PaymentSchedule, Instalment.schedule_id == PaymentSchedule.id)
+                    .where(
+                        PaymentSchedule.sales_contract_id == spa_id,
+                        or_(Instalment.amount_paid > 0, Instalment.status.in_(_SETTLED_INSTALMENT_STATUSES)),
+                    ),
+                )
+            ]
+        )
+        _refuse_removal(
+            f"Sales contract {spa.contract_number}",
+            settled,
+            "Cancel it instead, which keeps the payment record.",
+        )
         await self.sales_contracts.delete(spa_id)
 
     async def send_spa_for_signature(
@@ -4204,7 +4423,9 @@ class PropertyDevService:
         schedule already exists for this SPA and is in ``active`` or
         ``completed`` state, the request fails 409 to avoid clobbering
         paid lines. A ``suspended``/``cancelled`` schedule is rebuilt in
-        place (its instalments are removed and re-created).
+        place (its instalments are removed and re-created), unless any of
+        its instalments is paid or waived: a schedule in any state that
+        records money is refused with 409.
         """
         if template_key not in PAYMENT_SCHEDULE_TEMPLATES:
             raise HTTPException(
@@ -4213,6 +4434,28 @@ class PropertyDevService:
             )
         spa = await self.get_spa(contract_id)
         existing = await self.payment_schedules.get_for_contract(spa.id)
+        if existing is not None:
+            # A rebuild deletes every instalment row and recreates them unpaid,
+            # so a row that records money taken or forgiven must never reach
+            # it, whatever state the schedule is in. The status check below
+            # used to be the only guard, and its own message told the user to
+            # suspend the schedule first, after which the rebuild erased the
+            # paid rows it had just protected.
+            existing_status = existing.status
+            settled_rows = sum(
+                1
+                for r in await self.instalments.list_for_schedule(existing.id)
+                if r.status in _SETTLED_INSTALMENT_STATUSES or (r.amount_paid and Decimal(str(r.amount_paid)) > 0)
+            )
+            if settled_rows:
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        f"PaymentSchedule in status '{existing_status}' has {settled_rows} paid or waived "
+                        f"instalment{'' if settled_rows == 1 else 's'}, and rebuilding it would erase them. "
+                        "Create a new SPA revision for the new terms instead."
+                    ),
+                )
         if existing is not None and existing.status in {"active", "completed"}:
             # The convert-reservation-to-spa flow always creates a default
             # ``active`` 1-line schedule (so finance has *something* to
@@ -4232,7 +4475,7 @@ class PropertyDevService:
                     status_code=409,
                     detail=(
                         f"PaymentSchedule in status '{existing.status}' is "
-                        "live with paid instalments - suspend it first or "
+                        "live - suspend it first or "
                         "create a new SPA revision."
                     ),
                 )
