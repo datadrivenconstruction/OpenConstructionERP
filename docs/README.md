@@ -31,6 +31,10 @@ Price, check, deliver:
 - [Planning and cost control](./user-guide/planning-and-cost-control.md) - 4D schedule, 5D cost model, earned value, forecasts and cash flow.
 - [Field and site operations](./user-guide/field-and-site.md) - daily diary, inspections, safety, logistics and the record that holds up later.
 
+Work with the assistant:
+
+- [The AI assistant](./user-guide/ai-assistant.md) - describe a change in plain words, check the prepared card, apply it, and find every AI change again in the ledger and the audit trail.
+
 ## Cost data
 
 - [World cost bases and multi-base comparison](./user-guide/world-cost-bases.md) - what the national cost databases are and how currency-aware pricing and cross-region comparison work.
