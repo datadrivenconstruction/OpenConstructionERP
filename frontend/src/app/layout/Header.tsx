@@ -16,7 +16,6 @@ import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
-import { apiGet } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { copyToClipboard } from '@/shared/lib/browser';
 import {

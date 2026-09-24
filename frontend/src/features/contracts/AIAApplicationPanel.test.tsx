@@ -133,29 +133,29 @@ describe('AIAApplicationPanel continuation sheet', () => {
   it('leaves scheduled value, percent and balance empty on the row no schedule line carries', async () => {
     renderPanel();
     const [, outside] = await tableRows();
-    const cells = within(outside).getAllByRole('cell');
+    const cells = within(outside!).getAllByRole('cell');
 
     expect(cells[1]).toHaveTextContent(OUTSIDE_LABEL);
-    expect(cells[C].textContent).toBe('');
-    expect(cells[PCT].textContent).toBe('');
-    expect(cells[H].textContent).toBe('');
+    expect(cells[C]!.textContent).toBe('');
+    expect(cells[PCT]!.textContent).toBe('');
+    expect(cells[H]!.textContent).toBe('');
   });
 
   it('still prints the money that row does carry', async () => {
     renderPanel();
     const [, outside] = await tableRows();
-    const cells = within(outside).getAllByRole('cell');
+    const cells = within(outside!).getAllByRole('cell');
 
     expect(cells[D]).toHaveTextContent('10,000.00');
     expect(cells[G]).toHaveTextContent('10,000.00');
     expect(cells[I]).toHaveTextContent('1,000.00');
-    expect(outside.textContent).not.toMatch(/NaN|null|undefined/);
+    expect(outside!.textContent).not.toMatch(/NaN|null|undefined/);
   });
 
   it('prints every figure on a schedule row, as before', async () => {
     renderPanel();
     const [schedule] = await tableRows();
-    const cells = within(schedule).getAllByRole('cell');
+    const cells = within(schedule!).getAllByRole('cell');
 
     expect(cells[C]).toHaveTextContent('60,000.00');
     expect(cells[PCT]).toHaveTextContent('60.0%');
@@ -168,7 +168,7 @@ describe('AIAApplicationPanel continuation sheet', () => {
     const outside = card(OUTSIDE_LABEL);
 
     const [, percent] = Array.from(outside.querySelectorAll('span'));
-    expect(percent.textContent).toBe('');
+    expect(percent!.textContent).toBe('');
     expect(cardValue(outside, 'Scheduled').textContent).toBe('');
     expect(cardValue(outside, 'Balance').textContent).toBe('');
     expect(cardValue(outside, 'Total')).toHaveTextContent('10,000.00');
