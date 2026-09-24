@@ -4484,8 +4484,17 @@ export function StepFinish({
 // ── Main Wizard ──────────────────────────────────────────────────────────────
 
 export function OnboardingWizard() {
-  const { t } = useTranslation();
+  const { t, i18n: i18nInstance } = useTranslation();
   const navigate = useNavigate();
+
+  // The wizard renders outside the app layout, which is what sets the tab
+  // title everywhere else, so the tab kept the previous page's title
+  // ("Dashboard", after the first-run redirect). Same suffix as the layout,
+  // and re-translated on a language switch in step 1.
+  const brandName = useBrandingStore((s) => (s.companyName.trim() ? s.companyName.trim() : null));
+  useEffect(() => {
+    document.title = `${t('onboarding.page_title', { defaultValue: 'Getting started' })} | ${brandName ?? 'OpenConstructionERP'}`;
+  }, [t, i18nInstance.language, brandName]);
   const [step, setStep] = useState(0);
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
   const presets = useOnboardingPresets();

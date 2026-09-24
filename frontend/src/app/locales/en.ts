@@ -7682,6 +7682,7 @@ const resource = {
     "onboarding.items_loaded": "items loaded",
     "onboarding.loading_database": "Importing database...",
     "onboarding.loading_database_hint": "Loading ~55,000 items. This takes 1-3 minutes.",
+    "onboarding.page_title": "Getting started",
     "onboarding.project_created": "Project created!",
     "onboarding.project_created_msg": "Your workspace is ready. Let",
     "onboarding.project_error": "Failed to create project",
