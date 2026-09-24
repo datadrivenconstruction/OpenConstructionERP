@@ -15135,7 +15135,7 @@ const resource = {
     "contracts.claim_validation.load_failed": "Could not run the submission check. Submit still runs it on the server.",
     "contracts.claim_validation.reconstructed": "Line 7 of the G702, previous certificates, is rebuilt from the earlier claims because the previous claim stores no certified totals yet. Check it against what was actually certified.",
     "contracts.claim_lines_locked": "Only a draft claim's lines can be changed.",
-    "contracts.claim_lines_locked_reopen": "Reject the claim to put it back in draft.",
+    "contracts.claim_lines_locked_reopen": "Reject it and raise a new draft claim for the corrected figures.",
     "contracts.sov_locked": "A signed contract is billed on these lines, so they cannot be changed or removed here. Adjust the scope with a variation.",
     "contracts.sov_billed_locked": "Lines a progress claim has billed on cannot be changed or removed here, because the claim is built on them. Adjust the scope with a variation.",
     "contracts.delete_line_title": "Remove this line",
