@@ -546,9 +546,10 @@ async def test_openrouter_receives_a_tool_schema_and_the_tool_prompt(
     assert all(t.get("type") == "function" for t in tools)
     assert all(t["function"].get("name") and t["function"].get("parameters") for t in tools)
 
+    # The tool prompt, followed by this request's context block (date, page).
     system = _system_of(requests[0])
-    assert system == SYSTEM_PROMPT
-    assert system != SYSTEM_PROMPT_NO_TOOLS
+    assert system.startswith(SYSTEM_PROMPT)
+    assert not system.startswith(SYSTEM_PROMPT_NO_TOOLS)
     assert "without tool support" not in system
 
 
@@ -679,7 +680,7 @@ async def test_a_retired_slug_is_retried_and_the_retry_still_carries_tools(
     assert requests[0]["payload"]["model"] == _SLUG
     assert requests[1]["payload"]["model"] == "openrouter/auto"
     assert requests[1]["payload"].get("tools"), "the #148 retry dropped the tool schema"
-    assert _system_of(requests[1]) == SYSTEM_PROMPT
+    assert _system_of(requests[1]).startswith(SYSTEM_PROMPT)
 
     assert not _frames(chunks, "error")
     assert persist["assistant_text"] == "Recovered."
@@ -709,12 +710,14 @@ async def test_a_tools_rejection_retries_once_without_tools_and_still_answers(
     assert len(requests) == 2, f"expected exactly one retry, saw {len(requests)} requests"
 
     assert requests[0]["payload"].get("tools"), "the first attempt did not try tools at all"
-    assert _system_of(requests[0]) == SYSTEM_PROMPT
+    assert _system_of(requests[0]).startswith(SYSTEM_PROMPT)
 
     assert "tools" not in requests[1]["payload"], "the retry kept the schema the provider just refused"
-    assert _system_of(requests[1]) == SYSTEM_PROMPT_NO_TOOLS, (
+    assert _system_of(requests[1]).startswith(SYSTEM_PROMPT_NO_TOOLS), (
         "the retry dropped the tool schema but kept the prompt advertising tools - that is issue #417"
     )
+    # Both prompts carry the same request context block after them.
+    assert _system_of(requests[0])[len(SYSTEM_PROMPT) :] == _system_of(requests[1])[len(SYSTEM_PROMPT_NO_TOOLS) :]
     # The retry stays on the user's model: a tools rejection says nothing
     # about the slug, so this must not silently swap what they configured.
     assert requests[1]["payload"]["model"] == _SLUG
