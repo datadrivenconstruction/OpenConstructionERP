@@ -20,6 +20,9 @@ import * as path from 'path';
 const API = process.env.OE_TEST_API_URL ?? 'http://127.0.0.1:8000';
 const DEMO_EMAIL = process.env.OE_TEST_DEMO_EMAIL ?? 'demo@openconstructionerp.com';
 
+// Exact text WebKit and Chromium raise as a pageerror; see the handler below.
+const RESIZE_OBSERVER_LOOP = 'ResizeObserver loop completed with undelivered notifications.';
+
 interface Route {
   slug: string;
   path: string;
@@ -189,6 +192,10 @@ for (const route of ROUTES) {
       if (t.includes('[ErrorBoundary] Caught render error')) crashes.push(t.slice(0, 500));
     });
     page.on('pageerror', (e) => {
+      // The browser reports a ResizeObserver callback that resized its own
+      // target as an uncaught error. Nothing threw and nothing unmounted, so it
+      // is not a crash; comprehensive/full-e2e.spec.ts treats it as benign too.
+      if (e.message === RESIZE_OBSERVER_LOOP) return;
       crashes.push(`pageerror: ${String(e).slice(0, 500)}`);
     });
     page.on('response', (r) => {
