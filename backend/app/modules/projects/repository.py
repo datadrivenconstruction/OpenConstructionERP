@@ -74,14 +74,18 @@ class ProjectRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch - skip eager loading of relationships for list queries
+        # Fetch - skip eager loading of relationships for list queries.
+        # ``id`` breaks ties on ``created_at``: projects created in one
+        # transaction (a seed, a pack install, a bulk import) share a
+        # timestamp, and without a total order the database may hand the
+        # same row to two pages and none to another.
         stmt = (
             base.options(
                 noload(Project.wbs_nodes),
                 noload(Project.milestones),
                 noload(Project.children),
             )
-            .order_by(Project.created_at.desc())
+            .order_by(Project.created_at.desc(), Project.id.desc())
             .offset(offset)
             .limit(limit)
         )
