@@ -1258,7 +1258,13 @@ class MeetingService:
 
         Blocks while a required agenda item is unaddressed or no attendee is
         marked present. Issuing is the human-confirmed step; nothing is auto-issued.
+        Issuing again is refused, so the issue stamp keeps who issued them and when.
         """
+        if row.status == "issued":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Minutes have already been issued for this meeting",
+            )
         content = row.content if isinstance(row.content, dict) else {}
         problems = logic.minutes_issue_problems(content)
         if problems:

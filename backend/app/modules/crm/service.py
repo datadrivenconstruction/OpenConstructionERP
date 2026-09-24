@@ -60,6 +60,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Leads still being worked. Disqualified and converted leads are history and do
+# not stop a fresh lead for the same person.
+_OPEN_LEAD_STATUSES = frozenset({"new", "qualifying", "qualified"})
+
 
 # ── PII redaction (GDPR Art. 5(1)(c) data-minimisation in logs) ────────────
 #
@@ -666,7 +670,7 @@ class CrmService:
             # Only block when the existing row is still in an "active" state.
             # disqualified / converted leads are historical and must not stop
             # a fresh inbound for the same person months later.
-            if existing is not None and existing.status in ("new", "qualifying", "qualified"):
+            if existing is not None and existing.status in _OPEN_LEAD_STATUSES:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=(
@@ -715,6 +719,21 @@ class CrmService:
         fields = data.model_dump(exclude_unset=True)
         if "status" in fields and fields["status"] != lead.status:
             self._check_lead_transition(lead.status, fields["status"])
+        # The same open-lead duplicate check create_lead applies, so an edit
+        # cannot give a lead the email another open lead already carries.
+        if fields.get("contact_email"):
+            normalised_email = fields["contact_email"].strip().lower()
+            fields["contact_email"] = normalised_email
+            if normalised_email != (lead.contact_email or "").lower():
+                existing = await self.lead_repo.find_by_email(normalised_email)
+                if existing is not None and existing.id != lead.id and existing.status in _OPEN_LEAD_STATUSES:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=(
+                            f"An active lead with email '{_redact_email(normalised_email)}' "
+                            f"already exists (id={existing.id})."
+                        ),
+                    )
         if fields:
             await self.lead_repo.update_fields(lead_id, **fields)
             await self.session.refresh(lead)
