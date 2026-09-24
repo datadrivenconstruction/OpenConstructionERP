@@ -218,6 +218,15 @@ AFFECTIVE_TERMS: tuple[str, ...] = (
 #: that is not here fails, which is the point.
 CLEARED_BY_READING: dict[tuple[str, str, str], str] = {
     (
+        "backend/app/modules/erp_chat/service.py",
+        "_call_fallback",
+        "self._system_prompt_no_tools",
+    ): (
+        "Set in __init__ to the module constant SYSTEM_PROMPT_NO_TOOLS and, per turn, to that "
+        "constant plus build_context_block(...), which states the time, locale, open project and "
+        "route as facts. The instruction text is the constant; the block adds no instruction."
+    ),
+    (
         "backend/app/modules/boq/router.py",
         "ai_chat_boq",
         "with_locale(BOQ_CHAT_SYSTEM_PROMPT, locale)",
