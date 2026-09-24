@@ -18,12 +18,12 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
 from fastapi import HTTPException
 
+from app.modules.finance.models import InvoiceLineItem
 from app.modules.finance.schemas import InvoiceCreate, InvoiceLineItemCreate, InvoiceUpdate
 from app.modules.finance.service import FinanceService
 from tests.unit.test_finance_service import _make_service
@@ -42,7 +42,9 @@ async def _invoice(status: str) -> tuple[FinanceService, Any]:
             currency_code="EUR",
         )
     )
-    invoice.line_items = [SimpleNamespace(amount=Decimal("1000"))]
+    # A real (transient) line model: ``line_items`` is an instrumented relationship, and
+    # assigning anything that is not a mapped instance fails on its backref.
+    invoice.line_items = [InvoiceLineItem(description="Works", amount=Decimal("1000"))]
     invoice.status = status
     return service, invoice
 
