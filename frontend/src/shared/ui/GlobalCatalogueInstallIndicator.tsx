@@ -99,7 +99,7 @@ export function GlobalCatalogueInstallIndicator() {
 
   // Stacked higher than BIM (bottom-20) / DWG (bottom-32-ish) docks so
   // all three are simultaneously visible if they all fire.
-  const pillPosition = 'fixed bottom-44 right-4 z-[60]';
+  const pillPosition = 'oe-dock-aware fixed bottom-44 right-4 z-[60]';
 
   if (!expanded) {
     const isActive = primary.status === 'downloading';

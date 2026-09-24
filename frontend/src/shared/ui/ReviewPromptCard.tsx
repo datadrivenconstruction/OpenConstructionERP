@@ -89,7 +89,7 @@ export function ReviewPromptCard() {
       aria-label={t('review_ask.aria_label', { defaultValue: 'Rate OpenConstructionERP' })}
       data-testid="review-prompt-card"
       className={clsx(
-        'fixed bottom-4 right-4 z-[60] w-[min(22rem,calc(100vw-2rem))]',
+        'oe-dock-aware fixed bottom-4 right-4 z-[60] w-[min(22rem,calc(100vw-2rem))]',
         'rounded-xl border p-3.5 shadow-lg animate-card-in',
         'border-amber-300/60 bg-surface-elevated',
         'dark:border-amber-500/30',
