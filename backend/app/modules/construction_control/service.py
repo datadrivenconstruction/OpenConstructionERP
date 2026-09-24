@@ -91,6 +91,11 @@ _MATERIAL_LOCKED_STATUSES = {"accepted", "rejected", "superseded"}
 # the row is the account of what was checked, and "in_progress" still counts as
 # open because no verdict exists yet.
 _INSPECTION_DELETE_LOCKED_STATUSES = frozenset({"passed", "failed", "closed", "void"})
+# Statuses only ``record_result`` may set: it stores the result, who performed the
+# inspection and when, and raises the NCR a failure needs. A PATCH may still move an
+# inspection out of them (reopening a failed one for re-inspection is a real workflow,
+# and its NCR keeps it on the register), but never into them.
+_INSPECTION_RESULT_STATUSES = frozenset({"passed", "failed"})
 _TEST_DELETE_LOCKED_STATUSES = frozenset({"recorded", "void"})
 
 
@@ -291,6 +296,39 @@ class ConstructionControlService:
             party_role=party_role,
         )
 
+    @staticmethod
+    def _refuse_result_change_by_patch(inspection: Inspection, fields: dict[str, Any]) -> None:
+        """Keep the recording of a result out of reach of the generic PATCH.
+
+        The PATCH accepted ``passed`` and ``failed`` as plain status values, so a failed
+        inspection could be flipped to passed with no result, no performer and no NCR,
+        and both a hold gate release and the handover evidence trust that status. While
+        a result stands, the criterion it was judged against is frozen with it; reopening
+        the inspection (in the same PATCH if you like) unfreezes both, and the next
+        result is recorded through the action again.
+        """
+        new_status = fields.get("status")
+        if new_status and new_status != inspection.status and new_status in _INSPECTION_RESULT_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"An inspection becomes {new_status} only by recording its result, which stores who "
+                    "performed it and raises the NCR a failure needs. Use the record-result action."
+                ),
+            )
+        if (
+            (new_status or inspection.status) in _INSPECTION_RESULT_STATUSES
+            and "criterion_id" in fields
+            and str(fields["criterion_id"] or "") != str(inspection.criterion_id or "")
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Inspection {inspection.inspection_number} carries a result judged against its criterion, "
+                    "so the criterion can no longer change. Reopen the inspection to re-inspect against another one."
+                ),
+            )
+
     async def update_inspection(self, inspection_id: uuid.UUID, data: InspectionUpdate) -> Inspection:
         inspection = await self.get_inspection(inspection_id)
         if inspection.status in ("closed", "void"):
@@ -304,6 +342,7 @@ class ConstructionControlService:
         fields = data.model_dump(exclude_unset=True)
         if "criterion_id" in fields and fields["criterion_id"] is not None:
             fields["criterion_id"] = str(fields["criterion_id"])
+        self._refuse_result_change_by_patch(inspection, fields)
         fields = self._merge_metadata_patch(fields, inspection)
         if not fields:
             return inspection
