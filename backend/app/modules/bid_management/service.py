@@ -1044,8 +1044,38 @@ class BidManagementService:
         return package
 
     async def delete_package(self, package_id: uuid.UUID) -> None:
-        await self.get_package(package_id)
+        """Delete a package with everything under it.
+
+        Raises:
+            HTTPException 404: Package not found.
+            HTTPException 409: The package is awarded or cancelled. Every child
+                row cascades on ``package_id``, so deleting it would take the
+                frozen bids and the award with it.
+        """
+        package = await self.get_package(package_id)
+        if package.status in DECIDED_PACKAGE_STATES:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Package is '{package.status}' and can no longer be deleted",
+            )
         await self.package_repo.delete(package_id)
+
+    async def _assert_package_parts_deletable(self, package_id: uuid.UUID, what: str) -> None:
+        """Refuse removing a line item, bidder or invitation of a decided package.
+
+        Each of them cascades into the bids recorded against it: a line item
+        into every bid's priced line for it, an invitation into its submission,
+        a bidder into its submission, award and rejection. On an awarded or
+        cancelled package that would remove frozen bids and the award, the
+        same removal ``_assert_submission_mutable`` refuses for
+        ``delete_submission``.
+        """
+        package = await self.package_repo.get_by_id(package_id)
+        if package is not None and package.status in DECIDED_PACKAGE_STATES:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Package is '{package.status}' and its {what} can no longer be deleted",
+            )
 
     async def _transition_package(self, package: BidPackage, new_status: str) -> None:
         if new_status not in allowed_package_transitions(package.status):
@@ -1327,6 +1357,10 @@ class BidManagementService:
         return line
 
     async def delete_line(self, line_id: uuid.UUID) -> None:
+        line = await self.line_repo.get_by_id(line_id)
+        if line is None:
+            raise HTTPException(status_code=404, detail="Line not found")
+        await self._assert_package_parts_deletable(line.package_id, "line items")
         await self.line_repo.delete(line_id)
 
     # ── Bidders ───────────────────────────────────────────────────────
@@ -1357,6 +1391,10 @@ class BidManagementService:
         return bidder
 
     async def delete_bidder(self, bidder_id: uuid.UUID) -> None:
+        bidder = await self.bidder_repo.get_by_id(bidder_id)
+        if bidder is None:
+            raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
+        await self._assert_package_parts_deletable(bidder.package_id, "bidders")
         await self.bidder_repo.delete(bidder_id)
 
     async def disqualify_bidder(self, bidder_id: uuid.UUID, reason: str) -> Bidder:
@@ -1464,6 +1502,10 @@ class BidManagementService:
         return inv
 
     async def delete_invitation(self, invitation_id: uuid.UUID) -> None:
+        inv = await self.invitation_repo.get_by_id(invitation_id)
+        if inv is None:
+            raise HTTPException(status_code=404, detail=translate("errors.invitation_not_found", locale=get_locale()))
+        await self._assert_package_parts_deletable(inv.package_id, "invitations")
         await self.invitation_repo.delete(invitation_id)
 
     # ── Submissions ───────────────────────────────────────────────────
