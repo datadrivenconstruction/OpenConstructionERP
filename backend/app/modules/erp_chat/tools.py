@@ -435,36 +435,9 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["project_id"],
         },
     },
-    {
-        "name": "create_boq_item",
-        "description": "Create a new BOQ position in a project's first BOQ. Returns the created item.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "project_id": {
-                    "type": "string",
-                    "description": "UUID of the project",
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Position description (e.g. 'Reinforced concrete wall C30/37')",
-                },
-                "unit": {
-                    "type": "string",
-                    "description": "Unit of measurement (m, m2, m3, kg, pcs, lsum)",
-                },
-                "quantity": {
-                    "type": "number",
-                    "description": "Quantity value",
-                },
-                "unit_rate": {
-                    "type": "number",
-                    "description": "Price per unit",
-                },
-            },
-            "required": ["project_id", "description", "unit", "quantity", "unit_rate"],
-        },
-    },
+    # Changes are not tools of this list. The ``propose_*`` tools come from
+    # ``app.modules.erp_chat.actions.registry`` and store a proposal the person
+    # applies; the chat service offers them next to these read tools.
     # ── Semantic memory tools (vector-backed) ─────────────────────────────
     #
     # These tools let the AI query the cross-module vector store via the
@@ -1163,62 +1136,6 @@ async def handle_run_validation(session: AsyncSession, args: dict[str, Any], use
         return {"renderer": "error", "data": {"error": str(exc)}, "summary": f"Error: {exc}"}
 
 
-async def handle_create_boq_item(session: AsyncSession, args: dict[str, Any], user_id: str) -> dict[str, Any]:
-    """Create a new BOQ position in a project's first BOQ."""
-    try:
-        from app.modules.boq.schemas import PositionCreate
-        from app.modules.boq.service import BOQService
-
-        try:
-            pid = _parse_uuid(args.get("project_id"), "project_id")
-            await _require_project_access(session, pid, user_id)
-        except ToolAuthError as _te:
-            return _auth_error(str(_te))
-        svc = BOQService(session)
-        boqs, _ = await svc.list_boqs_for_project(pid, limit=1)
-        if not boqs:
-            return {
-                "renderer": "error",
-                "data": {"error": "No BOQs found for this project"},
-                "summary": "Error: No BOQs found - create a BOQ first",
-            }
-
-        boq = boqs[0]
-
-        # Auto-generate ordinal
-        boq_data = await svc.get_boq_with_positions(boq.id)
-        next_ordinal = f"{len(boq_data.positions) + 1:03d}"
-
-        data = PositionCreate(
-            boq_id=boq.id,
-            ordinal=next_ordinal,
-            description=args.get("description", ""),
-            unit=args.get("unit", "pcs"),
-            quantity=args.get("quantity", 0),
-            unit_rate=args.get("unit_rate", 0),
-        )
-        position = await svc.add_position(data)
-        total = float(args.get("quantity", 0)) * float(args.get("unit_rate", 0))
-
-        return {
-            "renderer": "boq_item_created",
-            "data": {
-                "id": str(position.id),
-                "boq_id": str(boq.id),
-                "ordinal": next_ordinal,
-                "description": args.get("description", ""),
-                "unit": args.get("unit", "pcs"),
-                "quantity": float(args.get("quantity", 0)),
-                "unit_rate": float(args.get("unit_rate", 0)),
-                "total": total,
-            },
-            "summary": f"Created position {next_ordinal}: {args.get('description', '')} (total: {total:.2f})",
-        }
-    except Exception as exc:
-        logger.exception("handle_create_boq_item failed")
-        return {"renderer": "error", "data": {"error": str(exc)}, "summary": f"Error: {exc}"}
-
-
 # ── Semantic memory tool handlers ────────────────────────────────────────
 
 
@@ -1428,13 +1345,20 @@ async def handle_search_anything(session: AsyncSession, args: dict[str, Any], us
 
 
 # Permission classifier - keep in sync with TOOL_HANDLER_MAP below.
-# Reads (any authenticated user): all ``get_*`` / ``search_*`` /
-#   ``compare_projects`` / ``run_validation`` (the latter returns a report
-#   from the persisted ValidationReport table - no mutation, no side
-#   effects).
-# Writes (manager+): anything that creates / updates / deletes data.
-# When you add a new tool, add it here too - otherwise it defaults to
-# ``read`` which is wrong for any mutating handler.
+# Every handler here reads: all ``get_*`` / ``search_*`` / ``compare_projects``
+# / ``run_validation`` (the latter returns a report from the persisted
+# ValidationReport table - no mutation, no side effects).
+#
+# Changes are the ``propose_*`` tools of ``app.modules.erp_chat.actions``. They
+# are not in this map and never meet the manager gate: a proposal writes
+# nothing but a pending card, and the change happens when a person clicks
+# Apply, under the record's own REST gates evaluated for that person. The
+# assistant never has more rights than the person who clicks Apply; apply
+# re-runs the REST gates.
+#
+# ``write`` stays as the fail-closed class for a handler that would write
+# directly. None should exist (CLAUDE.md constraint 6): add an ActionSpec
+# instead. A new handler left out of this map defaults to ``read``.
 TOOL_PERMISSIONS: dict[str, ToolPermission] = {
     "get_all_projects": "read",
     "get_project_summary": "read",
@@ -1446,7 +1370,6 @@ TOOL_PERMISSIONS: dict[str, ToolPermission] = {
     "get_cost_model": "read",
     "compare_projects": "read",
     "run_validation": "read",
-    "create_boq_item": "write",
     "search_boq_positions": "read",
     "search_documents": "read",
     "search_tasks": "read",
@@ -1470,7 +1393,6 @@ TOOL_HANDLER_MAP: dict[str, Any] = {
     "get_cost_model": handle_get_cost_model,
     "compare_projects": handle_compare_projects,
     "run_validation": handle_run_validation,
-    "create_boq_item": handle_create_boq_item,
     "search_boq_positions": handle_search_boq_positions,
     "search_documents": handle_search_documents,
     "search_tasks": handle_search_tasks,
