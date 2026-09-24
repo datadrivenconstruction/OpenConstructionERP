@@ -9,15 +9,21 @@ call has to be a drop-in for those N calls, which is what these cases pin:
 
 * It answers, for every project, exactly what the single call answers, with
   ``offset`` and ``limit`` applied per project, never across the batch.
-* It keeps the single call's access rules, and when any one project fails them
-  it refuses the whole request and names the failing ids. A batch that quietly
-  answered for the rest would put a money total on the page that looks
-  complete and is not.
+* It keeps the single call's access rules. A project the single call refuses
+  because it is archived or not readable by the caller is left out of the
+  answer, never answered, and the missing key is how the page tells it apart
+  from a project with no bills and says which projects its totals exclude. The
+  page asks for exactly the projects its project list showed, so such a
+  project was archived or unshared while the page was open, and refusing the
+  whole register for it left the reader with no estimates at all.
+* An id that names no project at all still refuses the whole request, loudly,
+  and names the id: the page cannot have been shown it.
 * It reads nothing a caller could not read one project at a time: every user
-  and project pair answers the single call's status, and a batch holding one
-  project the single call refuses is refused. The admin is in that table on
-  purpose, because the admin bypass is the one branch where the two checks
-  could drift apart unseen.
+  and project pair either answers the single call's rows or answers nothing
+  for that project, and a batch holding one refused project answers exactly
+  what the batch without it answers. The admin is in that table on purpose,
+  because the admin bypass is the one branch where the two checks could drift
+  apart unseen.
 * Every project the project list shows a user can be batched, so the page's
   own request never fails for a reason the page cannot see.
 * It stays a read on the read-only demo.
@@ -298,7 +304,7 @@ async def test_more_than_the_projects_page_cap_is_refused(http_client, world):
     assert resp.status_code == 422
 
 
-# ── A bad id fails the whole call, loudly ──────────────────────────────────
+# ── An id that names no project fails the whole call, loudly ───────────────
 
 
 @pytest.mark.asyncio
@@ -312,6 +318,7 @@ async def test_unknown_project_fails_the_whole_batch_and_is_named(http_client, w
     assert detail["error"] == "projects_not_found"
     assert detail["project_ids"] == [ghost]
     assert detail["not_found"] == [ghost]
+    assert detail["forbidden"] == []
     assert ghost in detail["message"]
     # Nothing about the good projects travels with the refusal.
     assert "grand_total" not in resp.text
@@ -319,41 +326,52 @@ async def test_unknown_project_fails_the_whole_batch_and_is_named(http_client, w
 
 
 @pytest.mark.asyncio
-async def test_archived_project_fails_the_whole_batch(http_client, world):
-    single = await http_client.get(f"/api/v1/boq/boqs/?project_id={world['archived']}", headers=world["owner"])
-    assert single.status_code == 404, "the single call's answer the batch has to match"
-
-    ids = [world["single"], world["archived"]]
+async def test_an_unknown_id_is_refused_even_beside_a_skipped_one(http_client, world):
+    ghost = str(uuid.uuid4())
+    ids = [world["foreign"], world["busy"], world["archived"], ghost]
     resp = await http_client.post(BATCH_URL, json={"project_ids": ids}, headers=world["owner"])
     assert resp.status_code == 404, resp.text
-    assert resp.json()["detail"]["project_ids"] == [world["archived"]]
-
-
-@pytest.mark.asyncio
-async def test_another_users_project_fails_the_whole_batch(http_client, world):
-    single = await http_client.get(f"/api/v1/boq/boqs/?project_id={world['foreign']}", headers=world["owner"])
-    assert single.status_code == 403, "the single call's answer the batch has to match"
-
-    ids = [world["busy"], world["foreign"]]
-    resp = await http_client.post(BATCH_URL, json={"project_ids": ids}, headers=world["owner"])
-    assert resp.status_code == 403, resp.text
     detail = resp.json()["detail"]
-    assert detail["error"] == "projects_forbidden"
-    assert detail["project_ids"] == [world["foreign"]]
-    assert detail["forbidden"] == [world["foreign"]]
+    assert detail["project_ids"] == [ghost], "only the id that names nothing is named"
+    assert detail["not_found"] == [ghost]
+    assert detail["forbidden"] == []
     assert "grand_total" not in resp.text
 
 
+# ── A project archived or unshared since the page loaded is left out ───────
+
+
 @pytest.mark.asyncio
-async def test_every_failing_id_is_named_and_missing_wins_the_status(http_client, world):
-    ghost = str(uuid.uuid4())
-    ids = [world["foreign"], world["busy"], ghost]
+async def test_archived_project_is_left_out_and_the_rest_answered(http_client, world):
+    single = await http_client.get(f"/api/v1/boq/boqs/?project_id={world['archived']}", headers=world["owner"])
+    assert single.status_code == 404, "the single call still refuses it"
+
+    ids = [world["single"], world["archived"]]
     resp = await http_client.post(BATCH_URL, json={"project_ids": ids}, headers=world["owner"])
-    assert resp.status_code == 404, resp.text
-    detail = resp.json()["detail"]
-    assert detail["project_ids"] == [world["foreign"], ghost]
-    assert detail["not_found"] == [ghost]
-    assert detail["forbidden"] == [world["foreign"]]
+    assert resp.status_code == 200, resp.text
+    assert list(resp.json()) == [world["single"]], "the archived project is not a key"
+    assert resp.json()[world["single"]] == await _single(http_client, world["owner"], world["single"])
+    assert "Archived bill" not in resp.text
+
+
+@pytest.mark.asyncio
+async def test_another_users_project_is_left_out_and_the_rest_answered(http_client, world):
+    single = await http_client.get(f"/api/v1/boq/boqs/?project_id={world['foreign']}", headers=world["owner"])
+    assert single.status_code == 403, "the single call still refuses it"
+
+    ids = [world["busy"], world["foreign"]]
+    resp = await http_client.post(BATCH_URL, json={"project_ids": ids}, headers=world["owner"])
+    assert resp.status_code == 200, resp.text
+    assert list(resp.json()) == [world["busy"]], "the unreadable project is not a key"
+    assert "Foreign bill" not in resp.text
+
+
+@pytest.mark.asyncio
+async def test_a_batch_of_only_skipped_projects_answers_an_empty_register(http_client, world):
+    ids = [world["foreign"], world["archived"]]
+    resp = await http_client.post(BATCH_URL, json={"project_ids": ids}, headers=world["owner"])
+    assert resp.status_code == 200, resp.text
+    assert resp.json() == {}
 
 
 # ── Team membership counts, as it does for the single call ─────────────────
@@ -368,8 +386,9 @@ async def test_team_member_reads_the_project_shared_with_them(http_client, world
     resp = await http_client.post(
         BATCH_URL, json={"project_ids": [world["single"], world["busy"]]}, headers=world["member"]
     )
-    assert resp.status_code == 403, resp.text
-    assert resp.json()["detail"]["project_ids"] == [world["busy"]]
+    assert resp.status_code == 200, resp.text
+    assert list(resp.json()) == [world["single"]], "a project not shared with the member is not a key"
+    assert "Busy bill" not in resp.text
 
 
 # ── Exactly the single call's access rule, for every user ──────────────────
@@ -385,7 +404,11 @@ def _project_ids(world: dict) -> dict[str, str]:
 
 @pytest.mark.asyncio
 async def test_each_project_alone_answers_what_the_single_call_answers(http_client, world):
-    """User by project, the batch of one gives the single call's status, and its rows when it answers."""
+    """User by project, the batch of one gives the single call's rows, or nothing for a project it refuses.
+
+    A project the single call refuses and that exists is left out (200, empty
+    register); an id that names no project is 404 in both.
+    """
     ids = _project_ids(world)
     table: dict[tuple[str, str], int] = {}
     for user in _USERS:
@@ -393,14 +416,15 @@ async def test_each_project_alone_answers_what_the_single_call_answers(http_clie
             single = await http_client.get(f"/api/v1/boq/boqs/?project_id={pid}", headers=world[user])
             batch = await http_client.post(BATCH_URL, json={"project_ids": [pid]}, headers=world[user])
             table[(user, key)] = single.status_code
-            assert batch.status_code == single.status_code, (
-                f"{user} on {key}: the single call answered {single.status_code}, the batch "
-                f"{batch.status_code}: {batch.text[:300]}"
-            )
             if single.status_code == 200:
+                assert batch.status_code == 200, f"{user} on {key}: {batch.text[:300]}"
                 assert batch.json() == {pid: single.json()}
-            else:
+            elif key == "ghost":
+                assert batch.status_code == 404, f"{user} on {key}: {batch.text[:300]}"
                 assert "grand_total" not in batch.text
+            else:
+                assert batch.status_code == 200, f"{user} on {key}: {batch.text[:300]}"
+                assert batch.json() == {}, f"{user} read {key} through the batch: {batch.text[:300]}"
 
     print("\n[access] " + ", ".join(f"{u}/{k}={s}" for (u, k), s in table.items()))
     # The comparison proves something only if the table holds every answer.
@@ -415,8 +439,8 @@ async def test_each_project_alone_answers_what_the_single_call_answers(http_clie
 
 @pytest.mark.asyncio
 async def test_a_batch_reads_nothing_its_projects_do_not_read_alone(http_client, world):
-    """Adding one refused project to a batch that answers turns the whole answer into that refusal."""
-    ids = _project_ids(world)
+    """Adding one refused project to a batch that answers changes nothing in the answer."""
+    ids = {key: pid for key, pid in _project_ids(world).items() if key != "ghost"}
     for user in _USERS:
         readable: list[str] = []
         refused: list[str] = []
@@ -432,9 +456,8 @@ async def test_a_batch_reads_nothing_its_projects_do_not_read_alone(http_client,
 
         for pid in refused:
             resp = await http_client.post(BATCH_URL, json={"project_ids": [*readable, pid]}, headers=world[user])
-            assert resp.status_code in (403, 404), f"{user} read {pid} through the batch: {resp.text[:300]}"
-            assert resp.json()["detail"]["project_ids"] == [pid]
-            assert "grand_total" not in resp.text
+            assert resp.status_code == 200, f"{user} with {pid}: {resp.text[:300]}"
+            assert resp.json() == whole.json(), f"{user} read {pid} through the batch: {resp.text[:300]}"
 
 
 @pytest.mark.asyncio
