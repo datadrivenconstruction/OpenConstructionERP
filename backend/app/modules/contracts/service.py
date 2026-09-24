@@ -4412,16 +4412,21 @@ class ContractsService:
             await self.session.refresh(claim)
             return claim
 
+        # Column I for every line is known before the first write, so it goes
+        # out as one statement. A write per line cost a round trip each, which
+        # on a long schedule of values was most of what generating a claim
+        # took, every month it was billed.
+        column_i: dict[uuid.UUID, dict[str, Any]] = {}
         for line in lines:
             share = figures.lines.get(line.contract_line_id)
             if share is None:
                 continue
-            await self.claim_line_repo.update_fields(
-                line.id,
-                retention_to_date=share.retention_to_date,
-                retention_stored_to_date=share.retention_stored_to_date,
-                retention_rate=share.retention_rate,
-            )
+            column_i[line.id] = {
+                "retention_to_date": share.retention_to_date,
+                "retention_stored_to_date": share.retention_stored_to_date,
+                "retention_rate": share.retention_rate,
+            }
+        await self.claim_line_repo.update_fields_many(column_i)
         gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
         net = await self._engine_net_due(claim, contract, figures, prior_certified)
         await self.claim_repo.update_fields(

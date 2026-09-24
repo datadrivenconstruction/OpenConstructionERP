@@ -8,8 +8,9 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
+from sqlalchemy import bindparam, func, select, update
 from sqlalchemy import delete as sa_delete
-from sqlalchemy import func, select, update
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
@@ -401,6 +402,58 @@ class ProgressClaimLineRepository(_CRUDBase):
         for line_id, claim_number in (await self.session.execute(stmt)).all():
             billed.setdefault(line_id, []).append(claim_number or "")
         return {line_id: sorted(numbers) for line_id, numbers in billed.items()}
+
+    async def update_fields_many(self, fields_by_id: dict[uuid.UUID, dict[str, Any]]) -> None:
+        """Write the same columns on many claim lines in one statement.
+
+        :meth:`update_fields` for a batch. ``fields_by_id`` maps a line's id
+        to the values to write on it, and every entry names the same columns.
+        One UPDATE goes out with a parameter set per line, where a loop over
+        :meth:`update_fields` made a round trip per line, which on a long
+        schedule of values was most of the time a claim took to work out.
+
+        The values written are copied onto whichever of those lines the
+        session already holds, as :meth:`update_fields` does and for the same
+        reason: in an async session a stale attribute is not reloaded on
+        access, and the certificate reads column I straight off these
+        instances. Plain values only, since a SQL expression would leave the
+        in-memory copy unknown.
+
+        Raises:
+            ValueError: the entries name different columns, or a value is a
+                SQL expression.
+        """
+        if not fields_by_id:
+            return
+        names = sorted(next(iter(fields_by_id.values())))
+        for values in fields_by_id.values():
+            if sorted(values) != names:
+                raise ValueError("update_fields_many needs every line to name the same columns")
+            if any(isinstance(value, ClauseElement) for value in values.values()):
+                raise ValueError("update_fields_many writes plain values, not SQL expressions")
+        # Anything the unit of work still holds for these rows goes out first,
+        # so a later flush cannot write an older value over this one.
+        await self.session.flush()
+        table = self.model.__table__
+        columns = sa_inspect(self.model).columns
+        stmt = (
+            update(table)
+            .where(table.c.id == bindparam("row_id"))
+            .values({columns[name]: bindparam(f"new_{name}") for name in names})
+        )
+        await self.session.execute(
+            stmt,
+            [
+                {"row_id": row_id, **{f"new_{name}": values[name] for name in names}}
+                for row_id, values in fields_by_id.items()
+            ],
+        )
+        for row_id, values in fields_by_id.items():
+            instance = self.session.identity_map.get(identity_key(self.model, row_id))
+            if instance is None:
+                continue
+            for name, value in values.items():
+                set_committed_value(instance, name, value)
 
     async def delete_for_claim(self, claim_id: uuid.UUID) -> int:
         """Delete every claim line belonging to ``claim_id``.
