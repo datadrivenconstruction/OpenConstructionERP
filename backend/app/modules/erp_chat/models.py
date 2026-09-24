@@ -8,14 +8,18 @@ Tables:
     oe_erp_chat_session         - chat session per user, optionally scoped to a project
     oe_erp_chat_message         - individual messages within a session (user/assistant/tool/system)
     oe_erp_chat_turn_feedback   - per-(message, user) thumbs up/down feedback (T8)
+    oe_erp_chat_action          - a change the assistant proposed and what a person decided about it
 """
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -146,3 +150,85 @@ class ChatTurnFeedback(Base):
 
     def __repr__(self) -> str:
         return f"<ChatTurnFeedback {self.id} msg={self.message_id} r={self.rating}>"
+
+
+class ChatAction(Base):
+    """A change the assistant proposed, and what a person decided about it.
+
+    The assistant never writes a domain record itself. A write tool persists
+    one of these rows with status ``proposed`` and nothing else; the record it
+    describes is created or changed only when a person applies the row, under
+    the same gates the record's own REST route runs for that person. The row
+    then keeps the whole story: who asked, what the model proposed
+    (``original_payload``, never mutated), what the person changed before
+    applying (``payload``), who approved and when, which record it produced,
+    and whether it was undone.
+
+    Statuses: ``proposed`` -> ``applied`` | ``rejected`` | ``failed``;
+    ``failed`` -> ``applied`` (retry) | ``rejected``; ``applied`` -> ``reverted``.
+
+    ``session_id`` is ``ON DELETE SET NULL`` rather than CASCADE on purpose:
+    deleting a conversation must not erase the record of a change that reached
+    the project. ``message_id`` carries no FK because the assistant message is
+    written only when the turn ends, after its proposals already exist.
+    """
+
+    __tablename__ = "oe_erp_chat_action"
+
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_erp_chat_session.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    message_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    requested_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    action_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default="proposed",
+        server_default="proposed",
+        index=True,
+    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    original_payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    preview: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_entity_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    target_entity_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    before_state: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    decided_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decision_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    applied_entity_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    applied_entity_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reverted_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    reverted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revert_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    batch_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+
+    def __repr__(self) -> str:
+        return f"<ChatAction {self.id} {self.action_type} {self.status}>"
