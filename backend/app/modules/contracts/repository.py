@@ -315,6 +315,21 @@ class ProgressClaimRepository(_CRUDBase):
         earlier = claims_before(ordered, before_claim_id) if before_claim_id is not None else ordered
         return [claim for claim in earlier if claim.status != "rejected"]
 
+    async def claim_numbers_past_draft(self, contract_id: uuid.UUID) -> list[str]:
+        """The numbers of the claims on a contract that have left draft, sorted.
+
+        Read by the contract delete, which cascades to every claim. A claim
+        billed without a schedule of values (T&M, cost-plus) has no lines, so
+        the billed-line check cannot see it; this asks the claims directly.
+        """
+        result = await self.session.execute(
+            select(ProgressClaim.claim_number).where(
+                ProgressClaim.contract_id == contract_id,
+                ProgressClaim.status != "draft",
+            )
+        )
+        return sorted(number or "" for number in result.scalars().all())
+
     async def next_claim_number(self, contract_id: uuid.UUID) -> str:
         result = await self.session.execute(
             select(func.count()).select_from(ProgressClaim).where(ProgressClaim.contract_id == contract_id)
