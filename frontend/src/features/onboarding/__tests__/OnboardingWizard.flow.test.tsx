@@ -458,3 +458,37 @@ describe('module choices the user makes by hand survive Finish', () => {
     expect(body.enabled_modules).not.toContain('payroll');
   });
 });
+
+// Every partner-pack install route requires the admin role on the server. The
+// start step offered the Ready-made Pack card to every role, so an editor who
+// picked it got a 403, a "Could not finish" toast and a trip back to step 2.
+describe('the ready-made pack is offered to those who can install it', () => {
+  const askedForPacks = () =>
+    api.apiGet.mock.calls.some(([path]) => path === '/v1/partner-pack/installed');
+
+  it('an editor sees no Ready-made Pack card and no pack installer', async () => {
+    renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    click(/Get Started/);
+    await heading('How would you like to start?');
+    expect(screen.getByRole('button', { name: /Quick Start/ })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Ready-made Pack/ })).toBeNull();
+
+    click(/Quick Start/);
+    await heading('Data Setup');
+    expect(askedForPacks()).toBe(false);
+  });
+
+  it('an admin sees the Ready-made Pack card and the pack installer', async () => {
+    useAuthStore.setState({ userRole: 'admin' });
+    renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    click(/Get Started/);
+    await heading('How would you like to start?');
+    expect(screen.getByRole('button', { name: /Ready-made Pack/ })).toBeTruthy();
+
+    click(/Quick Start/);
+    await heading('Data Setup');
+    await waitFor(() => expect(askedForPacks()).toBe(true));
+  });
+});
