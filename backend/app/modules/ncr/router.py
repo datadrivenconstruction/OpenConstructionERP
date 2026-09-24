@@ -197,8 +197,10 @@ async def create_variation_from_ncr(
 ) -> dict:
     """Create a change order/variation pre-filled from an NCR with cost impact.
 
-    The NCR must have a non-empty cost_impact value.
+    The NCR must have a non-empty cost_impact value and must not be void.
     Pre-fills the change order with the NCR title, description, and cost impact.
+    Repeating the call returns the change order already linked to the NCR
+    instead of creating another one.
     """
     ncr = await service.get_ncr(ncr_id)
     # IDOR guard: ncr.update is a global role; without this any holder could
@@ -211,6 +213,15 @@ async def create_variation_from_ncr(
             detail="NCR has no cost impact - cannot create a variation.",
         )
 
+    # A void NCR was raised in error. It is frozen like a closed one, and unlike
+    # a closed one (whose cost is often recovered after the fix is verified) it
+    # has no cost to recover, so it does not become a change order.
+    if ncr.status == "void":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A void NCR was raised in error and has no cost to recover, so no change order is created from it.",
+        )
+
     # Lazy import changeorders module
     try:
         from sqlalchemy import select
@@ -220,6 +231,29 @@ async def create_variation_from_ncr(
         from app.modules.projects.models import Project
 
         repo = ChangeOrderRepository(session)
+
+        # One NCR, one change order. Every call used to mint another change
+        # order carrying the same cost and re-point the NCR at the newest,
+        # leaving the earlier ones in the project's change order register with
+        # metadata that still names this NCR, so a double click or a retry
+        # counted the cost twice. The RFI handoff already works this way: when
+        # the linked change order still exists it is returned unchanged, and a
+        # link whose change order was deleted falls through and mints afresh.
+        if ncr.change_order_id:
+            try:
+                existing_order_id = uuid.UUID(str(ncr.change_order_id))
+            except (ValueError, TypeError):
+                existing_order_id = None
+            existing_order = await repo.get_by_id(existing_order_id) if existing_order_id is not None else None
+            if existing_order is not None:
+                logger.info("NCR %s already linked to change order %s - returning it", ncr_id, existing_order.code)
+                return {
+                    "change_order_id": str(existing_order.id),
+                    "code": existing_order.code,
+                    "ncr_id": str(ncr_id),
+                    "title": existing_order.title,
+                }
+
         count = await repo.count_for_project(ncr.project_id)
         code = f"CO-{count + 1:03d}"
 
