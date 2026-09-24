@@ -9,10 +9,12 @@
 // The old page also caught each project's failure and listed the rest, so a
 // project archived or unshared under the reader's feet vanished from the list
 // and from every total above it, with nothing on screen to say so. The batched
-// call refuses the whole request instead and names the projects it could not
-// read. What is pinned for that case is what the reader sees: the names, no
-// estimates, no count and no totals, and a Retry that recovers once the
-// project list no longer carries the project.
+// call now leaves such a project out of its answer, and the page names it
+// above the totals, with a Refresh that clears the notice once the project
+// list no longer carries it. An id that names no project at all still refuses
+// the whole request; what is pinned for that case is what the reader sees:
+// the names, no estimates, no count and no totals, and a Retry that recovers
+// once the project list no longer carries the project.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
@@ -149,6 +151,45 @@ describe('BOQListPage asks for every project\'s bills in one request', () => {
       expect(screen.getByText(name)).toBeTruthy();
     }
     expect(screen.getByText('4 estimates across 3 projects')).toBeTruthy();
+  });
+
+  it('lists the rest and names a project the answer left out, above the totals', async () => {
+    // Bravo was archived after the project list loaded: the server answers
+    // for the other two and leaves Bravo out of the register.
+    api.post.mockImplementation((url: string, body: { project_ids: string[] }) => {
+      if (url !== BATCH_URL) return Promise.resolve({});
+      return Promise.resolve(register({ project_ids: body.project_ids.filter((id) => id !== 'proj-b') }));
+    });
+    mountList();
+
+    await waitFor(() => expect(screen.getByText('Charlie fit out')).toBeTruthy());
+    expect(screen.getByText('Alpha shell and core')).toBeTruthy();
+    expect(screen.queryByText('Bravo deck works')).toBeNull();
+    const notice = screen.getByRole('status');
+    expect(notice.textContent).toMatch(/Not included: Bravo Bridge\./);
+    // The count covers what is listed, not what was asked for.
+    expect(screen.getByText('2 estimates across 2 projects')).toBeTruthy();
+    expect(screen.queryByText('Estimates could not be loaded')).toBeNull();
+
+    // A project with no bills is a key with an empty list, not a skipped one.
+    expect(notice.textContent).not.toMatch(/Alpha Tower|Charlie Centre/);
+
+    projects = [ALPHA, CHARLIE];
+    fireEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+    // Charlie is on screen before the refresh too, so wait for both at once.
+    await waitFor(() => {
+      expect(screen.queryByText(/Not included:/)).toBeNull();
+      expect(screen.getByText('Charlie fit out')).toBeTruthy();
+    });
+    expect(screen.getByText('2 estimates across 2 projects')).toBeTruthy();
+  });
+
+  it('shows no notice when a project answers with no bills', async () => {
+    projects = [ALPHA, BRAVO, CHARLIE, { ...ALPHA, id: 'proj-empty', name: 'Empty Yard' }];
+    mountList();
+    await waitFor(() => expect(screen.getByText('Charlie fit out')).toBeTruthy());
+    expect(screen.queryByText(/Not included:/)).toBeNull();
+    expect(screen.getByText('4 estimates across 4 projects')).toBeTruthy();
   });
 
   it('names the project it could not read and lists nothing, rather than a short list', async () => {

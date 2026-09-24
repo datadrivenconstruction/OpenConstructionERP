@@ -2,14 +2,17 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * <BOQListLoadError> - what the bill register shows when its one batched
- * request for every project's bills is refused.
+ * request for every project's bills is refused, and <BOQListSkippedNotice> -
+ * what it shows above the list when the answer left projects out.
  *
  * The register used to ask once per project and quietly drop any project that
  * failed, so a total across the list could leave a project out and still look
- * complete. The batched call refuses instead, naming the projects it could not
- * read, and this puts those names in front of the reader with a way to retry.
- * Any other failure (network, server, a missing permission) names no project
- * and goes to the shared recovery card, which already knows those cases.
+ * complete. The batched call now leaves out a project archived or unshared
+ * since the page loaded, and the page names it above the totals. An id that
+ * names no project at all still refuses the whole call, and this puts those
+ * names in front of the reader with a way to retry. Any other failure
+ * (network, server, a missing permission) names no project and goes to the
+ * shared recovery card, which already knows those cases.
  */
 
 import { useTranslation } from 'react-i18next';
@@ -51,5 +54,34 @@ export function BOQListLoadError({ error, projects, onRetry }: BOQListLoadErrorP
         </Button>
       }
     />
+  );
+}
+
+export interface BOQListSkippedNoticeProps {
+  /** The projects the answer left out, with the names the page knows them by. */
+  projects: ReadonlyArray<{ id: string; name: string }>;
+  /** Reload the project list and then the bills. */
+  onRefresh: () => void;
+}
+
+export function BOQListSkippedNotice({ projects, onRefresh }: BOQListSkippedNoticeProps) {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center gap-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-xs text-content-secondary"
+    >
+      <AlertTriangle size={14} className="shrink-0 text-semantic-warning" aria-hidden />
+      <span className="min-w-0 flex-1">
+        {t('boq.list_projects_skipped', {
+          defaultValue:
+            'Not included: {{projects}}. These projects were archived or are no longer shared with you, so the estimates and totals here leave them out.',
+          projects: fmtList(projects.map((p) => p.name)),
+        })}
+      </span>
+      <Button variant="ghost" size="sm" onClick={onRefresh} icon={<RefreshCw size={14} />}>
+        {t('common.refresh', { defaultValue: 'Refresh' })}
+      </Button>
+    </div>
   );
 }
