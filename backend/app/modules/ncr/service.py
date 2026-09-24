@@ -266,7 +266,16 @@ class NCRService:
         return ncr
 
     async def delete_ncr(self, ncr_id: uuid.UUID) -> None:
-        await self.get_ncr(ncr_id)
+        ncr = await self.get_ncr(ncr_id)
+        # A closed NCR is the verified record update_ncr freezes, and a void
+        # one is how an NCR raised in error leaves the register. Change orders
+        # and MoC entries reference both by id, so they are kept.
+        if ncr.status in ("closed", "void"):
+            remedy = "" if ncr.status == "closed" else " Voiding already takes it out of the open register."
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot delete a {ncr.status} NCR: it is kept as the quality record.{remedy}",
+            )
         await self.repo.delete(ncr_id)
         logger.info("NCR deleted: %s", ncr_id)
 

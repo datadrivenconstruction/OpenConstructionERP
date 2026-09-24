@@ -1567,7 +1567,19 @@ class CarbonService:
         return await self.get_inventory(inventory_id)
 
     async def delete_inventory(self, inventory_id: uuid.UUID) -> None:
-        await self.get_inventory(inventory_id)
+        inv = await self.get_inventory(inventory_id)
+        # An archived inventory is the frozen footprint that targets and
+        # sustainability reports consumed; update_inventory refuses it for the
+        # same reason. Deleting it would cascade every entry behind a
+        # published figure and blank the report's inventory link.
+        if inv.status == "archived":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Cannot delete an archived inventory: it is the record behind "
+                    "the targets and reports that used it, so it is kept."
+                ),
+            )
         await self.inventory_repo.delete(inventory_id)
 
     async def finalize_inventory(

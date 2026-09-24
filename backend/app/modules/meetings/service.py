@@ -334,7 +334,28 @@ class MeetingService:
         auto-created via ``complete_meeting`` - preventing dangling FK
         pointers without destroying the user's task history.
         """
-        await self.get_meeting(meeting_id)  # Raises 404 if not found
+        meeting = await self.get_meeting(meeting_id)  # Raises 404 if not found
+
+        # A completed meeting and one whose minutes were issued are the record
+        # of what was decided; the minutes row cascades with the meeting, so a
+        # delete would take the issued document with it. A meeting that will
+        # not take place is cancelled instead.
+        if meeting.status == "completed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot delete a completed meeting: it is the record of what was decided and is kept.",
+            )
+        minutes = await self.get_minutes_row(meeting_id)
+        if minutes is not None and minutes.status == "issued":
+            remedy = (
+                " Cancel the meeting instead."
+                if "cancelled" in _MEETING_STATUS_TRANSITIONS.get(meeting.status, set())
+                else ""
+            )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot delete a meeting whose minutes were issued: they are kept as the record.{remedy}",
+            )
 
         # Clear the meeting_id FK on tasks that reference this meeting
         try:
