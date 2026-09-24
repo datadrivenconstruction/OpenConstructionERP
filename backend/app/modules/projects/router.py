@@ -17,22 +17,26 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile, status
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.background import BackgroundTask
 
 from app.core.content_disposition import attachment_disposition
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequireRole, SessionDep, SettingsDep
 from app.modules.finance.variance import expected_outturn
 from app.modules.projects import profile_service
 from app.modules.projects.bundle_export import (
-    export_bundle as fm_export_bundle,
+    export_bundle_to_file as fm_export_bundle_to_file,
 )
 from app.modules.projects.bundle_export import (
     filename_for_bundle as fm_bundle_filename,
 )
 from app.modules.projects.bundle_export import (
     preview_bundle as fm_preview_bundle,
+)
+from app.modules.projects.bundle_export import (
+    remove_bundle_file as fm_remove_bundle_file,
 )
 from app.modules.projects.bundle_import import (
     BundleError,
@@ -2859,10 +2863,12 @@ async def post_export_bundle(
 
     The wizard hits ``/export/preview/`` first to show sizes; this endpoint
     does the real packing and may take several seconds for large BIM scopes.
+    The archive is built in a temp file and sent from disk, which is deleted
+    once the response is sent, so a full scope never sits in memory whole.
     """
     project = await _verify_project_owner(service, project_id, user_id, payload)
     user_email = (payload or {}).get("email") if payload else None
-    raw = await fm_export_bundle(
+    path = await fm_export_bundle_to_file(
         session,
         str(project_id),
         getattr(project, "name", "project"),
@@ -2871,14 +2877,15 @@ async def post_export_bundle(
         options,
     )
     fname = fm_bundle_filename(getattr(project, "name", "project"), options.scope)
-    return Response(
-        content=raw,
+    return FileResponse(
+        path,
         media_type="application/zip",
         headers={
             "Content-Disposition": attachment_disposition(fname),
             "X-Bundle-Format": "ocep",
             "X-Bundle-Scope": options.scope,
         },
+        background=BackgroundTask(fm_remove_bundle_file, path),
     )
 
 
