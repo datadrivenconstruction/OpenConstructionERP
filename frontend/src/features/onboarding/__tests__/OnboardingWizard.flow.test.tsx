@@ -492,3 +492,14 @@ describe('the ready-made pack is offered to those who can install it', () => {
     await waitFor(() => expect(askedForPacks()).toBe(true));
   });
 });
+
+// The wizard renders outside the app layout, which sets the tab title
+// everywhere else, so the tab used to keep the previous page's title.
+describe('the browser tab on the wizard', () => {
+  it('names the wizard, not the page before it', async () => {
+    document.title = 'Dashboard | OpenConstructionERP';
+    renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    expect(document.title).toBe('Getting started | OpenConstructionERP');
+  });
+});
