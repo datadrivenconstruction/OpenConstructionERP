@@ -1,7 +1,7 @@
 {
   "name": "openconstructionerp-frontend",
   "private": true,
-  "version": "17.8.3",
+  "version": "18.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
