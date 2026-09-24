@@ -1,0 +1,64 @@
+/*
+ * Proposal cards, the review tray and the Changes ledger.
+ *
+ * Every colour comes from the chat tokens (full-page/chat-tokens.css), which
+ * are themselves aliases of the app's --oe-* tokens, so the surfaces follow
+ * light and dark mode and match the rest of the dock. Each --act-* token
+ * falls back to the --oe-* token the chat token aliases, so a card rendered
+ * outside a [data-chat-theme] root still gets the right colours instead of
+ * none at all.
+ */
+.oe-act {
+  --act-bg: var(--chat-bg, var(--oe-bg));
+  --act-surface: var(--chat-surface-1, var(--oe-bg-secondary));
+  --act-surface-2: var(--chat-surface-2, var(--oe-bg-tertiary));
+  --act-accent-subtle: var(--chat-surface-3, var(--oe-blue-subtle));
+  --act-border: var(--chat-border, var(--oe-border));
+  --act-border-subtle: var(--chat-border-subtle, var(--oe-border-light));
+  --act-text: var(--chat-text-primary, var(--oe-text-primary));
+  --act-text-2: var(--chat-text-secondary, var(--oe-text-secondary));
+  --act-text-3: var(--chat-text-tertiary, var(--oe-text-tertiary));
+  --act-accent: var(--chat-accent, var(--oe-blue));
+  --act-success: var(--chat-tool-done, var(--oe-success));
+  --act-error: var(--chat-tool-error, var(--oe-error));
+  --act-warning: var(--oe-warning);
+  --act-radius: 10px;
+  font-family: var(--chat-font-body, var(--oe-font-sans));
+}
+
+/* A card or row slides in once, so a proposal arriving mid-stream is noticed. */
+@keyframes oeActIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.oe-act-enter {
+  animation: oeActIn 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* A status change (applied, undone, ...) is confirmed with a short glow. */
+@keyframes oeActSettle {
+  from {
+    box-shadow: 0 0 0 3px var(--act-accent-subtle);
+  }
+  to {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.oe-act-settle {
+  animation: oeActSettle 900ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oe-act-enter,
+  .oe-act-settle {
+    animation: none;
+  }
+}

@@ -3,23 +3,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ToolCallInfo } from '../../types';
+import { isProposalTool, toolLabel, toolRefusalText } from '../../toolLabels';
+import { RENDERER_REGISTRY } from '../right/renderers';
 import { fmtFixed } from '@/shared/lib/formatters';
-
-const TOOL_LABELS: Record<string, string> = {
-  get_all_projects: 'All projects',
-  get_boq_items: 'BOQ items',
-  get_schedule: 'Schedule',
-  get_validation_results: 'Validation results',
-  get_risk_register: 'Risk register',
-  search_cwicr_database: 'CWICR search',
-  get_cost_model: 'Cost model',
-  compare_projects: 'Project comparison',
-  get_project_summary: 'Project summary',
-  run_validation: 'Run validation',
-  create_boq_item: 'Create BOQ item',
-  match_boq_prices_cwicr: 'Match prices',
-  generate_schedule_from_boq: 'Generate schedule',
-};
 
 function formatDuration(ms: number | undefined): string {
   if (ms === undefined) return '';
@@ -52,7 +38,33 @@ function StatusIcon({ status }: { status: ToolCallInfo['status'] }) {
 export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const label = TOOL_LABELS[tool.name] ?? tool.name;
+
+  // A prepared change is shown as its card, with Apply / Edit / Reject, the
+  // same card as in the dock. It is the answer, not a detail to expand, and
+  // its raw payload is no use to the reader.
+  const ProposalCard = RENDERER_REGISTRY.action_proposal;
+  if (tool.result?.renderer === 'action_proposal' && ProposalCard && tool.result.data !== undefined) {
+    return (
+      <div style={{ marginBottom: 6 }}>
+        <ProposalCard data={tool.result.data} />
+      </div>
+    );
+  }
+
+  const proposal = isProposalTool(tool.name);
+  const name = toolLabel(tool.name, t);
+  const label =
+    proposal && tool.status === 'running'
+      ? t('erp_chat.tool.preparing', { defaultValue: 'Preparing a change: {{label}}…', label: name })
+      : proposal && tool.status === 'error'
+        ? t('erp_chat.tool.not_prepared', { defaultValue: 'Change not prepared: {{label}}', label: name })
+        : name;
+  // A refused proposal's summary is written for the model ("fix the
+  // arguments, then call the tool again"); the reader gets the reason.
+  const summary =
+    proposal && tool.status === 'error'
+      ? toolRefusalText(tool.result?.data, t) ?? undefined
+      : tool.result?.summary;
 
   return (
     <div
@@ -72,6 +84,7 @@ export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
       <button
         type="button"
         onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -82,14 +95,14 @@ export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
           border: 'none',
           color: 'var(--chat-text-primary)',
           cursor: 'pointer',
-          textAlign: 'left',
+          textAlign: 'start',
           fontFamily: 'inherit',
           fontSize: 'inherit',
         }}
       >
         <StatusIcon status={tool.status} />
         <span style={{ color: 'var(--chat-accent)', fontWeight: 500 }}>{label}</span>
-        {tool.result?.summary && (
+        {summary && (
           <span
             style={{
               color: 'var(--chat-text-secondary)',
@@ -98,8 +111,9 @@ export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
+            title={summary}
           >
-            {tool.result.summary}
+            {summary}
           </span>
         )}
         {tool.durationMs !== undefined && (
@@ -108,6 +122,7 @@ export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
           </span>
         )}
         <span
+          aria-hidden
           style={{
             color: 'var(--chat-text-tertiary)',
             fontSize: 10,
