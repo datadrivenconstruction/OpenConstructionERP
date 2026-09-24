@@ -1722,6 +1722,14 @@ class HSEAdvancedService:
         if len(payload.steps) > 10:
             raise HTTPException(422, "5-Whys chain capped at 10 steps")
         obj = await self.get_capa(item_id)
+        # The root-cause chain is part of the closure record, like the
+        # verification notes the CAPA patch already freezes.
+        if obj.status in _CAPA_TERMINAL_STATUSES:
+            remedy = " Record a failed effectiveness check to reopen it." if obj.status == "completed" else ""
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"The 5-Whys of a {obj.status} CAPA is part of its closure record and cannot be rewritten.{remedy}",
+            )
         await self.capa_repo.update_fields(
             item_id,
             five_whys=[s.model_dump() for s in payload.steps],

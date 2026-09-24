@@ -311,6 +311,21 @@ async def ensure_contact_for_buyer(
     return contact
 
 
+async def _email_held_by_another(session: AsyncSession, email: str, contact_id: uuid.UUID) -> bool:
+    """Whether an active contact other than ``contact_id`` already uses ``email``.
+
+    create_contact and update_contact refuse a duplicate email among active
+    contacts. The mirrors below run inside another module's save, so rather
+    than fail that save they leave the contact's email as it is.
+    """
+    stmt = (
+        select(Contact.id)
+        .where(Contact.primary_email == email, Contact.is_active.is_(True), Contact.id != contact_id)
+        .limit(1)
+    )
+    return (await session.execute(stmt)).scalar_one_or_none() is not None
+
+
 async def mirror_lead_fields_to_contact(
     session: AsyncSession,
     lead: Lead,
@@ -335,8 +350,14 @@ async def mirror_lead_fields_to_contact(
     if lead.email:
         normalised = lead.email.strip().lower() or None
         if normalised and contact.primary_email != normalised:
-            contact.primary_email = normalised
-            changed = True
+            if await _email_held_by_another(session, normalised, contact.id):
+                logger.info(
+                    "Not mirroring lead email onto contact %s: another active contact already holds it",
+                    contact.id,
+                )
+            else:
+                contact.primary_email = normalised
+                changed = True
     if lead.phone is not None and contact.primary_phone != lead.phone:
         contact.primary_phone = lead.phone or None
         changed = True
@@ -367,8 +388,14 @@ async def mirror_buyer_fields_to_contact(
     if buyer.email:
         normalised = buyer.email.strip().lower() or None
         if normalised and contact.primary_email != normalised:
-            contact.primary_email = normalised
-            changed = True
+            if await _email_held_by_another(session, normalised, contact.id):
+                logger.info(
+                    "Not mirroring buyer email onto contact %s: another active contact already holds it",
+                    contact.id,
+                )
+            else:
+                contact.primary_email = normalised
+                changed = True
     if buyer.phone is not None and contact.primary_phone != buyer.phone:
         contact.primary_phone = buyer.phone or None
         changed = True

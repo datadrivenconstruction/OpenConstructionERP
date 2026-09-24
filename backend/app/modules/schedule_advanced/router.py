@@ -2562,6 +2562,7 @@ async def delete_delay_analysis(
     analysis = await _load_delay_analysis(analysis_id, svc, user_id, session)
     if analysis.status == "issued":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An issued analysis cannot be deleted.")
+    await svc.refuse_if_eot_claim_raised(analysis, doing="be deleted")
     await svc.delete_analysis(analysis)
 
 
@@ -2798,6 +2799,7 @@ async def raise_eot_claim(
             status_code=status.HTTP_409_CONFLICT,
             detail="Compute the analysis before raising an EOT claim.",
         )
+    await svc.refuse_if_eot_claim_raised(analysis, doing="raise another")
     claim = ExtensionOfTimeClaim(
         project_id=analysis.project_id,
         raised_at=datetime.now(UTC).isoformat(),
