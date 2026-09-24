@@ -150,7 +150,7 @@ describe('the places that finish a pack install', () => {
     const src = source('src/app/layout/Sidebar.tsx');
     const m = src.match(/queryKey:\s*(\[[^\]]*\]),\s*queryFn:\s*\(\)\s*=>\s*apiGet<[^>]*>\('\/v1\/modules\/'\)/);
     if (!m) throw new Error('Sidebar.tsx no longer reads the module list the way this test expects');
-    const key = literalKey(m[1]);
+    const key = literalKey(m[1]!);
     if (!key) throw new Error(`Sidebar.tsx module list key is not a literal: ${m[1]}`);
     return key;
   };
