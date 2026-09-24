@@ -94,7 +94,7 @@ const GC_MODULES = [
   'variations', 'equipment', 'resources', 'daily_diary', 'subcontractors', 'payroll',
   'field_diary', 'meetings', 'rfi', 'submittals', 'transmittals', 'documents', 'cde', 'markups',
   'inspections', 'ncr', 'safety', 'punchlist', 'risk', 'qms', 'moc', 'fieldreports', 'reporting',
-  'project_controls',
+  'project_controls', 'bi_dashboards', 'bim_hub', 'cad',
 ];
 
 const PRESETS: Preset[] = [
@@ -241,7 +241,7 @@ describe('the onboarding wizard, first screen to the app', () => {
     expect(stepLabel()).toBe('Step 4 of 6');
     expect(screen.getByText(new RegExp(`^${expected} / ${ALL_MODULES.length}`))).toBeTruthy();
     expect(moduleSwitch('contracts').getAttribute('aria-checked')).toBe('true');
-    expect(moduleSwitch('bim_hub').getAttribute('aria-checked')).toBe('false');
+    expect(moduleSwitch('crm').getAttribute('aria-checked')).toBe('false');
 
     click('Continue');
     await heading('Data Setup');
