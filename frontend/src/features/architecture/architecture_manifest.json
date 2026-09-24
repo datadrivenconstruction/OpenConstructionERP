@@ -23189,6 +23189,13 @@
           "request_schema": "BOQService"
         },
         {
+          "method": "POST",
+          "path": "/boqs/by-projects/",
+          "handler": "list_boqs_by_projects",
+          "response_model": "dict[str, list[BOQListItem]]",
+          "request_schema": "BOQListByProjectsRequest"
+        },
+        {
           "method": "GET",
           "path": "/boqs/exchange-formats/",
           "handler": "list_exchange_formats",
@@ -24037,6 +24044,20 @@
               "name": "position_count",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BOQListByProjectsRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The projects whose bill registers ``POST /boqs/by-projects/`` returns.",
+          "fields": [
+            {
+              "name": "project_ids",
+              "type": "list[UUID]",
+              "description": "Projects to list the bills of. A repeated id is answered once. Every id must name a live project the caller may read, or the whole request is refused and the refusal names each id that failed."
             }
           ]
         },
@@ -55247,6 +55268,11 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "billed",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -57140,7 +57166,7 @@
             },
             {
               "name": "scheduled_value",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "previous_value",
@@ -57160,11 +57186,11 @@
             },
             {
               "name": "percent_complete",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "balance_to_finish",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "retainage",
@@ -206217,6 +206243,80 @@
           ]
         },
         {
+          "class_name": "SubWithholdingTerms",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a withholding scheme takes from a payment no certificate covers.",
+          "fields": [
+            {
+              "name": "scheme",
+              "type": "str"
+            },
+            {
+              "name": "rate_pct",
+              "type": "str"
+            },
+            {
+              "name": "vat_included",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "annual_limit",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "reference",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SubPaymentDateFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A certificate the law reads on the payment day, judged for one pay application.\n\n``state`` is ``missing``, ``expired`` or ``revoked`` for a paid pay\napplication the certificate did not cover on ``judged_on``; ``undated``\nfor one marked paid without a payment date; and, while it is unpaid,\n``pending`` (the certificate on file runs until ``valid_until``),\n``pending_open`` (it has no end date) or ``pending_invalid`` (nothing on\nfile could cover a payment made after the period end). Nothing is\ndeducted: ``withholding`` states what the law takes, a person acts on it.",
+          "fields": [
+            {
+              "name": "document_type",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "judged_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "lapsed_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "valid_until",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "withholding",
+              "type": "SubWithholdingTerms | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "SubRollupPayApp",
           "bases": [
             "BaseModel"
@@ -206325,6 +206425,21 @@
               "name": "foreign_currency",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "paid_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "payment_date_findings",
+              "type": "list[SubPaymentDateFinding] | None",
+              "default": "None"
+            },
+            {
+              "name": "certificates_pending_payment",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -206384,6 +206499,11 @@
             },
             {
               "name": "certificates_ok",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "certificates_pending_payment",
               "type": "bool | None",
               "default": "None"
             }
@@ -206551,6 +206671,10 @@
               "name": "reference",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "payment_date_types",
+              "type": "list[str]"
             }
           ]
         },
@@ -206778,7 +206902,8 @@
       ],
       "import_dependencies": [
         "contracts",
-        "projects"
+        "projects",
+        "tax_withholding"
       ]
     },
     {
@@ -222247,8 +222372,8 @@
           "fields": [
             {
               "name": "company_type",
-              "type": "str",
-              "description": "Selected company type preset key"
+              "type": "str | None",
+              "description": "Selected company profile preset key, or null for modules chosen without a profile"
             },
             {
               "name": "company_size",
@@ -229435,10 +229560,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 129,
+      "ts_files": 130,
       "css_files": 0,
-      "test_files": 58,
-      "total_files": 129
+      "test_files": 59,
+      "total_files": 130
     },
     {
       "name": "buyer-portal",
@@ -229575,10 +229700,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 43,
+      "ts_files": 45,
       "css_files": 0,
-      "test_files": 18,
-      "total_files": 43
+      "test_files": 20,
+      "total_files": 45
     },
     {
       "name": "coordination",
@@ -229911,10 +230036,10 @@
     },
     {
       "name": "geo-hub",
-      "ts_files": 44,
+      "ts_files": 45,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 44
+      "test_files": 11,
+      "total_files": 45
     },
     {
       "name": "global_presence",
@@ -230100,10 +230225,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 12,
+      "ts_files": 16,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 12
+      "test_files": 7,
+      "total_files": 16
     },
     {
       "name": "payment-clock",
@@ -231762,6 +231887,7 @@
       "contacts",
       "contracts",
       "projects",
+      "tax_withholding",
       "users"
     ],
     "submittals": [
@@ -231871,11 +231997,11 @@
     "total_models": 616,
     "total_columns": 7063,
     "total_relationships": 234,
-    "total_routes": 3688,
-    "total_schemas": 3457,
+    "total_routes": 3689,
+    "total_schemas": 3460,
     "total_python_files": 2181,
     "frontend_features": 188,
-    "frontend_ts_files": 2619,
+    "frontend_ts_files": 2627,
     "frontend_backend_mapped": 168
   },
   "frontend_backend_mapping": {
