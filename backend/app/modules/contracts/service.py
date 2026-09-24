@@ -4648,7 +4648,8 @@ class ContractsService:
                 "retention_stored_to_date": share.retention_stored_to_date,
                 "retention_rate": share.retention_rate,
             }
-        await self.claim_line_repo.update_fields_many(column_i)
+        if column_i:
+            await self.claim_line_repo.update_fields_many(column_i)
         gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
         net = await self._engine_net_due(claim, contract, figures, prior_certified)
         await self.claim_repo.update_fields(
