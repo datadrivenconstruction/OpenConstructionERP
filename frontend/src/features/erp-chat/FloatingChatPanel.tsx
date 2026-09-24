@@ -2163,6 +2163,14 @@ export function FloatingChatPanel() {
     setTitle(null);
   }, [setActiveSession]);
 
+  // What the person sees is what the assistant is told. After a reload the
+  // store still names the last conversation, but its transcript is not on
+  // screen, so continuing it would feed the model turns nobody can see. The
+  // next message starts a new conversation; the old one stays in the history.
+  useEffect(() => {
+    if (useFloatingChatStore.getState().activeSessionId) setActiveSession(null);
+  }, [setActiveSession]);
+
   // A past conversation, read back from the server when the user picks it:
   // its messages, what the assistant looked up, and its proposals as cards
   // that re-read their current status. Only on an explicit pick; the dock

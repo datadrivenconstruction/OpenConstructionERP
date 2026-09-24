@@ -193,7 +193,7 @@ function ReviewTrayBar({ waiting, onReview }: { waiting: ChatAction[]; onReview:
         title={String(
           t('erp_chat.tray.confirm_title', {
             count: applicable.length,
-            defaultValue: 'Apply this change?',
+            defaultValue: 'Apply {{count}} change?',
             defaultValue_other: 'Apply {{count}} changes?',
           }),
         )}

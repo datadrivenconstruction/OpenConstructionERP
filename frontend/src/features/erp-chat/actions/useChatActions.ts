@@ -359,10 +359,17 @@ export async function performBatchApply(qc: QueryClient, ids: readonly string[])
   return returned;
 }
 
+/**
+ * The card and the Changes row say why a write was refused, in their own
+ * words, so the app-wide error toast would only repeat it in English.
+ */
+const INLINE_ERRORS = { suppressGlobalErrorToast: true } as const;
+
 /** Write a proposal to the project. */
 export function useApplyChatAction() {
   const qc = useQueryClient();
   return useMutation({
+    meta: INLINE_ERRORS,
     mutationFn: (id: string) => performActionOp(qc, id, 'apply', () => applyChatAction(id)),
   });
 }
@@ -371,6 +378,7 @@ export function useApplyChatAction() {
 export function useRejectChatAction() {
   const qc = useQueryClient();
   return useMutation({
+    meta: INLINE_ERRORS,
     mutationFn: ({ id, note }: { id: string; note?: string }) =>
       performActionOp(qc, id, 'reject', () => rejectChatAction(id, note)),
   });
@@ -380,6 +388,7 @@ export function useRejectChatAction() {
 export function usePatchChatAction() {
   const qc = useQueryClient();
   return useMutation({
+    meta: INLINE_ERRORS,
     mutationFn: ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       performActionOp(qc, id, 'save', () => patchChatAction(id, payload)),
   });
@@ -389,6 +398,7 @@ export function usePatchChatAction() {
 export function useRevertChatAction() {
   const qc = useQueryClient();
   return useMutation({
+    meta: INLINE_ERRORS,
     mutationFn: ({ id, note }: { id: string; note?: string }) =>
       performActionOp(qc, id, 'revert', () => revertChatAction(id, note)),
   });
@@ -398,6 +408,7 @@ export function useRevertChatAction() {
 export function useApplyChatActionsBatch() {
   const qc = useQueryClient();
   return useMutation({
+    meta: INLINE_ERRORS,
     mutationFn: (ids: readonly string[]) => performBatchApply(qc, ids),
   });
 }

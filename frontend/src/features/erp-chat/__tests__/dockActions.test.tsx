@@ -369,6 +369,19 @@ describe('a message to the assistant', () => {
     await stream.end();
   });
 
+  it('starts a new conversation after a reload instead of continuing one the person cannot see', async () => {
+    // What a reload leaves behind: the store names the last conversation, the transcript is gone.
+    store.useFloatingChatStore.setState({ activeSessionId: 's-old' });
+    const stream = stubStream();
+    const ui = await mount();
+    await ui.send('Add a task for the site team');
+    expect(stream.body().session_id).toBeNull();
+    await stream.push('session_id', { session_id: 's-new' });
+    expect(store.useFloatingChatStore.getState().activeSessionId).toBe('s-new');
+    await stream.end();
+    expect(chatApi.fetchSessionMessages).not.toHaveBeenCalled();
+  });
+
   it('shows a streamed proposal as its card and pins the review tray above the composer', async () => {
     const stream = stubStream();
     const ui = await mount();
