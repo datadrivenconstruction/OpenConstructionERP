@@ -33,6 +33,7 @@ Endpoints:
     GET    /{methodology_id}/export/pdf?project_id=X   - Export estimate as PDF
 """
 
+import asyncio
 import logging
 import uuid
 from collections.abc import Iterator
@@ -463,7 +464,8 @@ async def export_methodology_excel(
     """Export the computed methodology estimate as a formatted .xlsx file."""
     await verify_project_access(project_id, user_id, session)
     data = await service.build_export_data(methodology_id, project_id, boq_id=boq_id)
-    content = service.generate_excel_export(data)
+    # Workbook and PDF grow with the estimate; render off the event loop.
+    content = await asyncio.to_thread(service.generate_excel_export, data)
     filename = service.export_filename(data, "xlsx")
     return StreamingResponse(
         iter([content]),
@@ -495,7 +497,7 @@ async def export_methodology_pdf(
     await verify_project_access(project_id, user_id, session)
     data = await service.build_export_data(methodology_id, project_id, boq_id=boq_id)
     try:
-        pdf_bytes = service.generate_pdf_export(data)
+        pdf_bytes = await asyncio.to_thread(service.generate_pdf_export, data)
     except Exception:
         # Mirror the BOQ exporter: a pathological methodology (e.g. a label
         # ReportLab's paraparser still rejects) must not surface as an opaque

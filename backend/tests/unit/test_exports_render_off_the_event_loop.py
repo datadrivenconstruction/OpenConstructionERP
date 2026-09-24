@@ -8,8 +8,9 @@ workbooks grow with the model, the punch list PDF draws a photo per item with
 no limit on items, the closeout package renders a COBie workbook and three
 PDFs and deflates every bound document, as an in-process job on that same loop,
 a bulk regenerate of property sales documents renders up to 500 PDFs in one
-request, and a full project bundle hashes and deflates every file the project
-holds.
+request, a full project bundle hashes and deflates every file the project
+holds, and a methodology estimate and a daily diary grow with the positions
+they price and the entries of the day.
 
 Each test swaps the renderer for a spy that records the thread it ran on and
 then calls the real renderer, and asserts that thread is not the loop's own
@@ -276,4 +277,70 @@ async def test_closeout_cobie_is_built_off_the_loop(monkeypatch: pytest.MonkeyPa
     blob = await CloseoutService(session)._render_cobie(uuid.uuid4(), notes)
 
     assert blob is not None and blob[:2] == b"PK", notes
+    assert seen and threading.get_ident() not in seen
+
+
+@pytest.mark.asyncio
+async def test_daily_diary_pdf_is_rendered_off_the_loop(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A diary lays out every entry of the day, and a busy site day has many.
+    import datetime
+
+    from app.modules.daily_diary import pdf_export
+    from app.modules.daily_diary.service import DailyDiaryService
+
+    seen: list[int] = []
+    monkeypatch.setattr(pdf_export, "generate_diary_pdf", _recording(seen, pdf_export.generate_diary_pdf))
+    diary = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
+        site_supervisor_id=None,
+        diary_date=datetime.date(2026, 9, 24).isoformat(),
+        status="open",
+        labour_count=12,
+        equipment_count=3,
+        weather_summary={},
+        notes="Slab pour on level 2",
+        pdf_translations=None,
+    )
+    service = DailyDiaryService(MagicMock())
+    monkeypatch.setattr(service, "get_diary", AsyncMock(return_value=diary))
+    monkeypatch.setattr(service, "weather_for_day", AsyncMock(return_value=[]))
+    monkeypatch.setattr(service, "_project_name", AsyncMock(return_value="Riverside Block C"))
+    monkeypatch.setattr(service, "_user_display_name", AsyncMock(return_value=""))
+    service.entry_repo = SimpleNamespace(list_for_diary=AsyncMock(return_value=[]))
+
+    pdf, _date = await service.generate_diary_pdf(diary.id)
+
+    assert pdf.startswith(b"%PDF")
+    assert seen and threading.get_ident() not in seen
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("route", "renderer", "blob"), [("pdf", "generate_pdf_export", b"%PDF"), ("excel", "generate_excel_export", b"PK")]
+)
+async def test_methodology_exports_are_rendered_off_the_loop(
+    monkeypatch: pytest.MonkeyPatch, route: str, renderer: str, blob: bytes
+) -> None:
+    # The methodology estimate carries a row per BOQ position it prices.
+    from app.modules.methodology import router
+
+    seen: list[int] = []
+    monkeypatch.setattr(router, "verify_project_access", AsyncMock(return_value=None))
+    service = SimpleNamespace(
+        build_export_data=AsyncMock(return_value={"rows": []}),
+        export_filename=lambda _data, ext: f"estimate.{ext}",
+    )
+    setattr(service, renderer, _recording(seen, lambda _data: blob))
+    handler = router.export_methodology_pdf if route == "pdf" else router.export_methodology_excel
+
+    await handler(
+        methodology_id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
+        user_id="u1",
+        session=MagicMock(),
+        boq_id=None,
+        service=service,
+    )
+
     assert seen and threading.get_ident() not in seen
