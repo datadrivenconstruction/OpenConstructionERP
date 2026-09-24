@@ -511,3 +511,74 @@ async def test_unauthenticated_anchor_from_address_returns_401_or_403(
     )
     # Auth dependency rejects with 401 (no token) or 403 (perm gate).
     assert res.status_code in (401, 403)
+
+
+@pytest.mark.asyncio
+async def test_bulk_sweep_is_not_spent_on_projects_that_already_have_an_anchor(
+    http_client,
+    tenant_a,
+    monkeypatch,
+):
+    """The cap counts projects the sweep can still anchor, not every project.
+
+    The sweep used to fetch every addressed project, anchored or not, cap the
+    list with no ORDER BY, and only then skip the anchored ones. On a database
+    holding more anchored projects than the cap, a project whose address was
+    just filled in was simply not in the slice, on this run or any re-run. The
+    full single-process suite reached that state with the real cap of 200, which
+    is how ``test_bulk_endpoint_returns_counts`` came to fail there and nowhere
+    else. The cap is lowered here so the same shape takes four projects.
+    """
+    import asyncio as _asyncio
+
+    from sqlalchemy import delete
+
+    from app.database import async_session_factory
+    from app.modules.geo_hub.models import GeoAnchor
+
+    monkeypatch.setenv("OE_GEOCODER_DISABLED", "true")
+
+    async def _addressed_project(label: str) -> str:
+        res = await http_client.post(
+            "/api/v1/projects/",
+            json={
+                "name": f"{label}-{uuid.uuid4().hex[:6]}",
+                "description": label,
+                "currency": "EUR",
+                "address": {"country": "Germany", "city": "Berlin"},
+            },
+            headers=tenant_a["headers"],
+        )
+        assert res.status_code == 201, res.text
+        return res.json()["id"]
+
+    # Oldest first: the one that needs an anchor, then projects that have one.
+    fresh = await _addressed_project("CapFresh")
+    anchored = [await _addressed_project(f"CapAnchored{i}") for i in range(3)]
+    await _asyncio.sleep(0.1)
+    async with async_session_factory() as session:
+        await session.execute(delete(GeoAnchor).where(GeoAnchor.project_id.in_([fresh, *anchored])))
+        await session.commit()
+    for project_id in anchored:
+        res = await http_client.post(
+            "/api/v1/geo-hub/anchors/",
+            json={"project_id": project_id, "lat": "52.5200", "lon": "13.4050", "epsg_code": 4326},
+            headers=tenant_a["headers"],
+        )
+        assert res.status_code in (200, 201), res.text
+
+    monkeypatch.delenv("OE_GEOCODER_DISABLED", raising=False)
+
+    async def fake(*_args, **_kwargs):
+        return _fake_result()
+
+    monkeypatch.setattr(geocoder_mod, "geocode_address", fake)
+    monkeypatch.setattr(geo_service, "geocode_address", fake, raising=False)
+    monkeypatch.setattr(geo_service, "BULK_ANCHOR_CAP", 2)
+
+    res = await http_client.post("/api/v1/geo-hub/anchors/from-address/bulk/", headers=tenant_a["headers"])
+    assert res.status_code == 200, res.text
+    by_pid = {row["project_id"]: row for row in res.json()["results"]}
+    assert by_pid.get(fresh, {}).get("status") == "ok", "the project that needed an anchor was not reached"
+    for project_id in anchored:
+        assert project_id not in by_pid, "an already-anchored project used up the cap"
