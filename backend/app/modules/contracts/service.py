@@ -3885,6 +3885,7 @@ class ContractsService:
 
     async def create_final_account(self, payload: Any) -> FinalAccount:
         """Create a final account; figures the request leaves out come from the ledger."""
+        self._assert_new_final_account_status(payload.status)
         contract = await self.get_contract(payload.contract_id)
         figures = await self.final_account_figures(contract, payload, None)
         final_account = FinalAccount(
@@ -3916,7 +3917,9 @@ class ContractsService:
         contract = await self.get_contract(contract_id)
         existing = await self.final_account_repo.get_for_contract(contract_id)
         status_after = payload.status
-        if existing is not None:
+        if existing is None:
+            self._assert_new_final_account_status(payload.status)
+        else:
             status_after = self._final_account_status_on_close(existing, payload.status)
             self._assert_settled_final_account_figures_stand(existing, payload)
         fields: dict[str, Any] = {
@@ -3980,6 +3983,30 @@ class ContractsService:
             return existing.status
         self._assert_final_account_move(existing, requested)
         return requested
+
+    @staticmethod
+    def _assert_new_final_account_status(requested: str) -> None:
+        """409 unless a new final account may start in ``requested``.
+
+        A final account is born a draft, so it may be created in draft or in a
+        status the lifecycle reaches from draft (agreed, disputed). Creating
+        one already closed skipped agreeing it, the same jump an existing
+        draft is refused, and a closed account can never be edited again.
+        """
+        if requested == "draft" or requested in allowed_final_account_transitions("draft"):
+            return
+        startable = ["draft", *sorted(allowed_final_account_transitions("draft"))]
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "final_account_initial_status_invalid",
+                "message": (
+                    f"A new final account cannot start as {requested}. It starts as "
+                    f"{', '.join(startable)}, and is closed once it has been agreed."
+                ),
+                "requested_status": requested,
+            },
+        )
 
     @staticmethod
     def _assert_final_account_move(existing: FinalAccount, requested: str) -> None:

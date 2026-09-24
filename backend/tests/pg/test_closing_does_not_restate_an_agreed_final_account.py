@@ -25,6 +25,7 @@ from decimal import Decimal
 import pytest
 import pytest_asyncio
 from fastapi import HTTPException
+from sqlalchemy import func, select
 
 from app.modules.contracts.models import Contract, FinalAccount
 from app.modules.contracts.schemas import FinalAccountCreate
@@ -207,4 +208,77 @@ async def test_a_draft_final_account_is_agreed_at_its_own_figures(session) -> No
     contract, account = await _reread(session, contract, account)
     assert account.status == "agreed"
     assert _figures(account) == (AGREED_VALUE, AGREED_PAID, AGREED_BALANCE)
+    assert contract.status == "completed"
+
+
+# ── A final account that does not exist yet ────────────────────────────────
+
+
+async def _contract_without_final_account(s) -> Contract:
+    project = Project(id=uuid.uuid4(), name="Close-out", owner_id=OWNER_ID, currency="EUR")
+    s.add(project)
+    await s.flush()
+    contract = Contract(
+        id=uuid.uuid4(),
+        code=f"C-{uuid.uuid4().hex[:8]}",
+        title="Main works",
+        project_id=project.id,
+        currency="EUR",
+        total_value=CONTRACT_SUM,
+        status="active",
+    )
+    s.add(contract)
+    await s.flush()
+    return contract
+
+
+async def _final_accounts_on(s, contract: Contract) -> int:
+    stmt = select(func.count()).select_from(FinalAccount).where(FinalAccount.contract_id == contract.id)
+    return (await s.execute(stmt)).scalar_one()
+
+
+async def test_close_does_not_create_a_final_account_already_closed(session) -> None:
+    """With no account yet, a close asking for ``closed`` skipped agreeing it."""
+    contract = await _contract_without_final_account(session)
+
+    with pytest.raises(HTTPException) as refused:
+        await ContractsService(session).close_contract(contract.id, _payload(contract, status="closed"), "u1")
+
+    assert refused.value.status_code == 409
+    assert refused.value.detail["error"] == "final_account_initial_status_invalid"
+    assert await _final_accounts_on(session, contract) == 0
+    await session.refresh(contract)
+    assert contract.status == "active"
+
+
+async def test_a_final_account_is_not_created_closed(session) -> None:
+    """``POST /final-accounts`` took the status it was sent, closed included."""
+    contract = await _contract_without_final_account(session)
+
+    with pytest.raises(HTTPException) as refused:
+        await ContractsService(session).create_final_account(_payload(contract, status="closed"))
+
+    assert refused.value.status_code == 409
+    assert refused.value.detail["error"] == "final_account_initial_status_invalid"
+    assert await _final_accounts_on(session, contract) == 0
+
+
+@pytest.mark.parametrize("status", ["draft", "agreed", "disputed"])
+async def test_a_final_account_starts_where_the_lifecycle_lets_it(session, status: str) -> None:
+    """The control: draft, and what draft moves to, still create."""
+    contract = await _contract_without_final_account(session)
+
+    account = await ContractsService(session).create_final_account(_payload(contract, status=status))
+
+    assert account.status == status
+    assert await _final_accounts_on(session, contract) == 1
+
+
+async def test_the_button_still_closes_a_contract_with_no_final_account_yet(session) -> None:
+    contract = await _contract_without_final_account(session)
+
+    final = await ContractsService(session).close_contract(contract.id, _button(contract), "u1")
+
+    assert final.status == "agreed"
+    await session.refresh(contract)
     assert contract.status == "completed"
