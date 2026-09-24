@@ -50,7 +50,7 @@ export function OfflineBanner() {
       role="status"
       aria-live="polite"
       data-testid="offline-banner"
-      className="sticky top-0 z-50 flex items-center justify-center gap-2 bg-amber-500/95 px-4 py-2 text-[13px] font-medium text-white shadow-sm backdrop-blur-sm"
+      className="oe-dock-aware sticky top-0 z-50 flex items-center justify-center gap-2 bg-amber-500/95 px-4 py-2 text-[13px] font-medium text-white shadow-sm backdrop-blur-sm"
     >
       <WifiOff size={14} strokeWidth={2.25} className="shrink-0" />
       <span className="text-center">

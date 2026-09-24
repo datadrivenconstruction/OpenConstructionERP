@@ -13,6 +13,8 @@ interface ShortcutsDialogProps {
 interface ShortcutEntry {
   keys: string[];
   descriptionKey: string;
+  /** English fallback for a key that is newer than some locale files. */
+  defaultValue?: string;
 }
 
 interface ShortcutGroup {
@@ -28,6 +30,14 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['Ctrl', 'K'], descriptionKey: 'shortcuts.command_palette' },
       { keys: ['?'], descriptionKey: 'shortcuts.show_help' },
       { keys: ['Esc'], descriptionKey: 'shortcuts.cancel' },
+      // Handled by the AI dock itself (features/erp-chat/useFloatingChat.ts
+      // `isDockShortcut`). From the page it opens the dock or moves focus
+      // into it; from inside the dock it closes it.
+      {
+        keys: ['Alt', 'A'],
+        descriptionKey: 'shortcuts.toggle_ai_assistant',
+        defaultValue: 'Open the AI assistant, press again to close',
+      },
     ],
   },
   {
@@ -143,7 +153,10 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    // z-[60], like the command palette: this dialog mounts early in the DOM
+    // (App.tsx GlobalShortcuts), so at z-50 it would open UNDER the AI dock
+    // and its backdrop when "?" is pressed with the dock open as an overlay.
+    <div className="fixed inset-0 z-[60] flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" />
 
@@ -200,7 +213,9 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
                       className="flex items-center justify-between py-1.5"
                     >
                       <span className="text-sm text-content-primary">
-                        {t(item.descriptionKey)}
+                        {item.defaultValue
+                          ? t(item.descriptionKey, { defaultValue: item.defaultValue })
+                          : t(item.descriptionKey)}
                       </span>
                       <div className="flex items-center gap-1 ml-4 shrink-0">
                         {item.keys.map((key, keyIdx) => (

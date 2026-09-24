@@ -175,7 +175,7 @@ export function GlobalUploadIndicator() {
     return (
       <button
         onClick={() => setExpanded(true)}
-        className="fixed bottom-20 right-4 z-[60] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all max-w-xs"
+        className="oe-dock-aware fixed bottom-20 right-4 z-[60] flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-elevated border border-border-light shadow-lg hover:shadow-xl transition-all max-w-xs"
       >
         {isActive ? (
           <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
@@ -224,7 +224,7 @@ export function GlobalUploadIndicator() {
 
   // Expanded panel
   return (
-    <div className="fixed bottom-20 right-4 z-[60] w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in">
+    <div className="oe-dock-aware fixed bottom-20 right-4 z-[60] w-80 rounded-xl bg-surface-elevated border border-border-light shadow-xl overflow-hidden animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-secondary/50 border-b border-border-light">
         <div className="flex items-center gap-2">

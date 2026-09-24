@@ -107,7 +107,7 @@ export function BackgroundInstallBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-4 right-4 z-[9998] w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-border-light/70 bg-surface-elevated/95 shadow-xl shadow-black/10 backdrop-blur-md dark:border-white/10"
+      className="oe-dock-aware fixed bottom-4 right-4 z-[9998] w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-border-light/70 bg-surface-elevated/95 shadow-xl shadow-black/10 backdrop-blur-md dark:border-white/10"
     >
       {/* Header row: status icon, headline, percent, collapse + dismiss. */}
       <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2">

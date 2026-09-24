@@ -55,6 +55,11 @@ export interface UseKeyboardShortcutsOptions {
  * Module-local shortcuts (handled per-page, not here):
  *   n   - Open "create new" form on list pages (tasks, meetings, RFI, contacts)
  *   s   - Save / recalculate on BOQ editor
+ *
+ * Chords handled elsewhere (this hook ignores every event with a modifier):
+ *   Ctrl+K       - command palette (App.tsx GlobalShortcuts)
+ *   Ctrl+Shift+K - semantic search (App.tsx GlobalShortcuts)
+ *   Alt+A        - AI assistant dock (features/erp-chat/useFloatingChat.ts)
  */
 export function useKeyboardShortcuts({
   onOpenSearch,
