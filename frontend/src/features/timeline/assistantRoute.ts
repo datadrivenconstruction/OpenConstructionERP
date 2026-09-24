@@ -15,12 +15,13 @@ const IN_APP_PATH = /^\/(?![/\\])/;
  * Such a row names the domain record it wrote (a BOQ line, a task), not a page
  * of the assistant, so the module-to-route map cannot build it. The record's
  * own link wins when the row carries one in ``metadata.url``; a task is
- * reachable from its project and id alone. Anything else gets no link rather
- * than a guessed one.
+ * reachable from its project and id alone, unless the row is the undo that
+ * deleted it. Anything else gets no link rather than a guessed one.
  */
 export function assistantRecordRoute(entry: TimelineEntry): string | null {
   const url = entry.metadata?.url;
   if (typeof url === 'string' && IN_APP_PATH.test(url)) return url;
+  if (entry.action === 'reverted') return null;
   if (entry.entity_type === 'task' && entry.entity_id && entry.parent_entity_id) {
     return `/projects/${entry.parent_entity_id}/tasks?id=${entry.entity_id}`;
   }

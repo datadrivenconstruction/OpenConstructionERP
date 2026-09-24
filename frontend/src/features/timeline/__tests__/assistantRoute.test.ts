@@ -39,6 +39,10 @@ describe('assistantRecordRoute', () => {
     expect(assistantRecordRoute(row({}))).toBe(`/projects/${PROJECT}/tasks?id=${TASK}`);
   });
 
+  it('gives the undo that deleted a task no link to the task it deleted', () => {
+    expect(assistantRecordRoute(row({ action: 'reverted' }))).toBeNull();
+  });
+
   it('gives a BOQ line without a stored link no link rather than a guessed one', () => {
     expect(assistantRecordRoute(row({ entity_type: 'position', entity_id: LINE }))).toBeNull();
   });

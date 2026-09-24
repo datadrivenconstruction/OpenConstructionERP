@@ -544,6 +544,11 @@
     "note": "German hybrid invoice standard name and version, see einvoice.profile.en16931",
     "reason_category": "standard_code"
   },
+  "erp_chat.action.option.rfi_discipline.mep": {
+    "en_value": "MEP",
+    "note": "acronym for the mechanical, electrical and plumbing discipline, kept as MEP by the same locales that keep coordination_hub.trade_mep (AI dock RFI discipline option)",
+    "reason_category": "acronym"
+  },
   "exchange.direction_export": {
     "en_value": "Export",
     "note": "cognate of the English word, spelled the same in cs, fr, ro and sv; the sibling import key is matched by a different and larger locale set (cs, da, et, fr, pl, ro, sv) because da, et and pl write Eksport for this one, and a shared leak mechanism could not produce two different sets for two words sitting side by side in the same tab strip",
