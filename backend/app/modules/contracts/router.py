@@ -1560,10 +1560,9 @@ async def update_final_account(
     if obj is None:
         raise HTTPException(status_code=404, detail=translate("errors.final_account_not_found", locale=get_locale()))
     await _verify_contract_access(session, obj.contract_id, user_id)
-    fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
-    if fields:
-        await repo.update_fields(account_id, **fields)
-        await session.refresh(obj)
+    # The service holds the status to the lifecycle and keeps the figures of an
+    # agreed or closed account, the same rule Close keeps.
+    obj = await ContractsService(session).update_final_account(account_id, data)
     return FinalAccountResponse.model_validate(obj)
 
 
@@ -1582,7 +1581,8 @@ async def delete_final_account(
     if obj is None:
         raise HTTPException(status_code=404, detail=translate("errors.final_account_not_found", locale=get_locale()))
     await _verify_contract_access(session, obj.contract_id, user_id)
-    await repo.delete(account_id)
+    # An agreed or closed account is refused; a draft or disputed one goes.
+    await ContractsService(session).delete_final_account(account_id)
 
 
 @router.post(

@@ -3749,20 +3749,24 @@ class ContractsService:
         )
         return final_account
 
-    @staticmethod
-    def _final_account_status_on_close(existing: FinalAccount, requested: str) -> str:
+    def _final_account_status_on_close(self, existing: FinalAccount, requested: str) -> str:
         """The status a Close leaves an existing final account in, or 409.
 
         The request names the status it wants, and the Close button always asks
-        for ``agreed``. The same status is no move. A closed account has been
-        agreed already, so asking for agreed keeps it closed instead of
-        reopening it. Any other request moves along the final-account
-        lifecycle or is refused.
+        for ``agreed``. A closed account has been agreed already, so asking
+        for agreed keeps it closed instead of reopening it. Any other request
+        is held to the lifecycle like an edit.
         """
-        if requested == existing.status:
-            return requested
         if existing.status == "closed" and requested == "agreed":
             return existing.status
+        self._assert_final_account_move(existing, requested)
+        return requested
+
+    @staticmethod
+    def _assert_final_account_move(existing: FinalAccount, requested: str) -> None:
+        """409 unless ``requested`` is the account's own status or a lifecycle move from it."""
+        if requested == existing.status:
+            return None
         try:
             assert_final_account_transition(existing.status, requested)
         except InvalidTransitionError as exc:
@@ -3787,12 +3791,12 @@ class ContractsService:
 
     @staticmethod
     def _assert_settled_final_account_figures_stand(existing: FinalAccount, payload: Any) -> None:
-        """Refuse a Close that restates a figure of an agreed or closed final account.
+        """Refuse a request that restates a figure of an agreed or closed final account.
 
         A figure the request leaves out is kept (see
         :meth:`final_account_figures`), and one it states equal to the
         signed-off figure changes nothing, so only a different figure is
-        refused.
+        refused. Close and the final-account edit share this check.
         """
         if existing.status not in _FINAL_ACCOUNT_SETTLED:
             return
@@ -3818,6 +3822,58 @@ class ContractsService:
                 "fields": restated,
             },
         )
+
+    async def _final_account_or_404(self, account_id: uuid.UUID) -> FinalAccount:
+        account = await self.final_account_repo.get_by_id(account_id)
+        if account is None:
+            raise HTTPException(
+                status_code=404, detail=translate("errors.final_account_not_found", locale=get_locale())
+            )
+        return account
+
+    async def update_final_account(self, account_id: uuid.UUID, data: Any) -> FinalAccount:
+        """Edit a final account within its lifecycle, keeping signed-off figures.
+
+        The same rule as :meth:`close_contract`: the status moves only along
+        the final-account lifecycle, and an agreed or closed account keeps its
+        figures, so reopening them means disputing the account first. The
+        sign-off and notes stay editable. Fields sent as null are not written.
+        """
+        account = await self._final_account_or_404(account_id)
+        fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+        if "status" in fields:
+            self._assert_final_account_move(account, fields["status"])
+        self._assert_settled_final_account_figures_stand(account, data)
+        if fields:
+            await self.final_account_repo.update_fields(account.id, **fields)
+            await self.session.refresh(account)
+        return account
+
+    async def delete_final_account(self, account_id: uuid.UUID) -> None:
+        """Delete a final account that is still a draft or in dispute.
+
+        An agreed or closed account is the record of what the parties signed
+        off, so it is refused with 409 ``final_account_settled``. An agreed one
+        can be disputed first if it has to be redone.
+        """
+        account = await self._final_account_or_404(account_id)
+        if account.status in _FINAL_ACCOUNT_SETTLED:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "final_account_settled",
+                    "message": (
+                        f"The final account is {account.status}, so it stays as the record of what was signed off. "
+                        + (
+                            "Dispute it first if it has to be redone."
+                            if account.status == "agreed"
+                            else "A closed final account is final."
+                        )
+                    ),
+                    "final_account_status": account.status,
+                },
+            )
+        await self.final_account_repo.delete(account.id)
 
     # ── SOV status (Schedule of Values per-line tracker) ────────────────
 
