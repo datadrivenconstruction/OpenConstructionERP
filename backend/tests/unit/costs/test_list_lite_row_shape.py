@@ -133,6 +133,7 @@ def _pack_row(seq: int) -> SimpleNamespace:
             "labor_cost": 118.4,
             "material_cost": 251.3,
             "equipment_cost": 42.67,
+            "other_cost": 0.0,
             "labor_hours": 3.2,
             "workers_per_unit": 2.0,
         },
@@ -162,7 +163,8 @@ def test_only_the_bulk_is_dropped() -> None:
     assert slim["components"] == []
     assert slim["components_count"] == 16
     assert "variants" not in slim["metadata_"]
-    assert set(slim["metadata_"]) <= set(_LITE_METADATA_KEYS)
+    # The fixture carries every whitelisted key, so each one is checked below.
+    assert set(slim["metadata_"]) == set(_LITE_METADATA_KEYS)
     # What the lists render or copy onto a BOQ position survives unchanged:
     # the variant count and common base, the cost split, the work steps.
     for key in _LITE_METADATA_KEYS:
