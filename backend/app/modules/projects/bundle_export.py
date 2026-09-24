@@ -40,10 +40,10 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import io
 import json
 import logging
 import os
+import tempfile
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -612,9 +612,63 @@ async def export_bundle(
 ) -> bytes:
     """Build the .ocep zip for one project and return its bytes.
 
-    For projects with multi-GB attachments callers should split scope -
-    e.g. ship metadata_only over email, then bim separately.
+    Holds the whole archive in memory, so it suits small scopes and tests.
+    The download route uses :func:`export_bundle_to_file` instead.
     """
+    path = await export_bundle_to_file(session, project_id, project_name, project_currency, user_email, options)
+    try:
+        return await asyncio.to_thread(Path(path).read_bytes)
+    finally:
+        remove_bundle_file(path)
+
+
+def remove_bundle_file(path: str) -> None:
+    """Best-effort delete of a bundle written by :func:`export_bundle_to_file`."""
+    try:
+        os.unlink(path)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        logger.debug("bundle export: failed to remove temp file %s", path, exc_info=True)
+
+
+async def export_bundle_to_file(
+    session: AsyncSession,
+    project_id: str,
+    project_name: str,
+    project_currency: str | None,
+    user_email: str | None,
+    options: ExportOptions,
+) -> str:
+    """Build the .ocep zip for one project in a temp file and return its path.
+
+    The archive is written straight to disk. A full scope carries every
+    document, photo, drawing and model of the project, and building it in
+    memory put the whole archive in RAM, then a second copy when the route
+    handed the bytes to the response, on a server that has 3 GB for
+    everything. The caller owns the file and deletes it once it is sent,
+    see :func:`remove_bundle_file`. On failure the file is removed here.
+    """
+    fd, path = tempfile.mkstemp(prefix="oe-bundle-", suffix=".ocep")
+    os.close(fd)
+    try:
+        await _write_bundle(path, session, project_id, project_name, project_currency, user_email, options)
+    except BaseException:
+        remove_bundle_file(path)
+        raise
+    return path
+
+
+async def _write_bundle(
+    path: str,
+    session: AsyncSession,
+    project_id: str,
+    project_name: str,
+    project_currency: str | None,
+    user_email: str | None,
+    options: ExportOptions,
+) -> None:
+    """Write the .ocep zip for one project to ``path``."""
     opts = _options_from_scope(options)
 
     # 1. Collect every table.
@@ -653,11 +707,10 @@ async def export_bundle(
         engine_version=ENGINE_VERSION,
     )
 
-    # 4. Stream into a zip.
-    buf = io.BytesIO()
+    # 4. Stream into a zip on disk.
     attachments_index: list[dict[str, Any]] = []
     total_bytes = 0
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zf:
         for key, rows in table_data.items():
             await asyncio.to_thread(_write_table, zf, key, rows)
 
@@ -730,7 +783,6 @@ async def export_bundle(
             "README.md",
             _readme_md(manifest, len(attachments)),
         )
-    return buf.getvalue()
 
 
 async def preview_bundle(
@@ -830,7 +882,9 @@ __all__ = [
     "BUNDLE_FORMAT",
     "BUNDLE_FORMAT_VERSION",
     "export_bundle",
+    "export_bundle_to_file",
     "preview_bundle",
+    "remove_bundle_file",
     "filename_for_bundle",
 ]
 
