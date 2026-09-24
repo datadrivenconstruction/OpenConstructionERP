@@ -51,6 +51,15 @@ _ASBUILT_LOCKED_STATUSES = {"recorded", "void"}
 # Deleting is refused one step earlier than editing: verification is the
 # conformity judgement and may already have raised a workmanship NCR.
 _ASBUILT_DELETE_LOCKED_STATUSES = frozenset({"verified", "recorded", "superseded", "void"})
+# Statuses a PATCH may not set, each with the action that does: the survey action
+# computes the tolerance result, the verify action judges it (MANAGER) and raises
+# the NCR an out-of-tolerance record needs.
+_ASBUILT_ACTION_STATUSES = {"surveyed": "record-survey", "verified": "verify"}
+# Judged statuses a PATCH may not leave, except verified -> superseded.
+_ASBUILT_JUDGED_STATUSES = frozenset({"verified", "superseded"})
+# Once surveyed, the measured value and the criterion are what the tolerance
+# result was computed from, so they change only through a new survey.
+_ASBUILT_MEASURED_STATUSES = frozenset({"surveyed", "verified", "superseded"})
 
 
 def _to_decimal(value: str | None) -> Decimal | None:
@@ -182,6 +191,60 @@ class AsBuiltService:
             source_kind=source_kind,
         )
 
+    @staticmethod
+    def _refuse_judgement_change_by_patch(record: AsBuiltRecord, fields: dict[str, Any]) -> None:
+        """Keep the survey and the verification out of reach of the generic PATCH.
+
+        The PATCH accepted ``surveyed`` and ``verified`` as plain status values, so a
+        draft could be marked verified without the tolerance check, the NCR an
+        out-of-tolerance record raises or the MANAGER permission on verify, and then be
+        signed into the legal record. It could also move a verified record back to
+        draft, where its delete lock no longer applied, or rewrite the measured value a
+        tolerance result had been computed from.
+        """
+        new_status = fields.get("status")
+        resulting = new_status or record.status
+        if new_status and new_status != record.status:
+            action = _ASBUILT_ACTION_STATUSES.get(new_status)
+            if action is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"An as-built becomes {new_status} only through its {action} action, which checks the "
+                        "measured value against the acceptance criterion. Use that action."
+                    ),
+                )
+            if record.status in _ASBUILT_JUDGED_STATUSES and not (
+                record.status == "verified" and new_status == "superseded"
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"As-built {record.record_number} is {record.status}, the judged record of what was "
+                        "built. A verified record can only be superseded; create a new as-built for any change."
+                    ),
+                )
+        if record.status in _ASBUILT_MEASURED_STATUSES and resulting != "draft":
+            changed = [
+                name
+                for name in ("measured_value", "criterion_id")
+                if name in fields and str(fields[name] or "") != str(getattr(record, name) or "")
+            ]
+            if changed:
+                remedy = (
+                    "Record the survey again to change it."
+                    if record.status == "surveyed"
+                    else "Create a new as-built for any change."
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"As-built {record.record_number} was surveyed against its criterion, so its "
+                        f"{' and '.join(n.replace('_id', '').replace('_', ' ') for n in changed)} can no longer "
+                        f"change in place. {remedy}"
+                    ),
+                )
+
     async def update_asbuilt(self, record_id: uuid.UUID, data: AsBuiltRecordUpdate) -> AsBuiltRecord:
         record = await self.get_asbuilt(record_id)
         if record.status in _ASBUILT_LOCKED_STATUSES:
@@ -196,6 +259,7 @@ class AsBuiltService:
         if fields.get("criterion_id") is not None:
             await self._get_criterion_in_project(fields["criterion_id"], record.project_id)
             fields["criterion_id"] = str(fields["criterion_id"])
+        self._refuse_judgement_change_by_patch(record, fields)
         fields = self._merge_metadata_patch(fields, record)
         if not fields:
             return record
