@@ -2010,6 +2010,21 @@ class BidManagementService:
         if award is None:
             return
         package = await self.package_repo.get_by_id(award.package_id)
+        # Procurement raises a purchase order from the award. Stepping the
+        # package back while that PO stands would let a re-award to another
+        # bidder leave the first supplier's order in place.
+        if package is not None:
+            po = await self._live_po_from_award(package)
+            if po is not None:
+                remedy = (
+                    "Cancel it in procurement first, then withdraw the award."
+                    if po.status != "completed"
+                    else "A completed order cannot be cancelled, so the award is kept."
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Purchase order {po.po_number} was raised from this award and is {po.status}. {remedy}",
+                )
         await self.award_repo.delete(award_id)
         # Revert FSM: awarded → closed so the package can be re-awarded.
         if package is not None and package.status == "awarded":
@@ -2025,6 +2040,31 @@ class BidManagementService:
                 },
                 source_module="bid_management",
             )
+
+    async def _live_po_from_award(self, package: Any) -> Any:
+        """The purchase order procurement raised from this package's award, unless cancelled.
+
+        Procurement stamps ``metadata.bid_package_id`` on the PO it creates
+        from a bid_management award. Returns ``None`` when the procurement
+        module is not installed.
+        """
+        try:
+            from sqlalchemy import select
+
+            from app.modules.procurement.models import PurchaseOrder
+        except ImportError:
+            return None
+        rows = (
+            (await self.session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == package.project_id)))
+            .scalars()
+            .all()
+        )
+        wanted = str(package.id)
+        for po in rows:
+            md = po.metadata_ if isinstance(po.metadata_, dict) else {}
+            if md.get("bid_package_id") == wanted and po.status != "cancelled":
+                return po
+        return None
 
     async def create_rejection(self, data: BidRejectionCreate) -> BidRejection:
         await self.get_package(data.package_id)

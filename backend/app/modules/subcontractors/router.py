@@ -1087,7 +1087,8 @@ async def release_retention(
         amount=payload.amount,
         reason=payload.reason,
     )
-    return RetentionLedgerEntryResponse.model_validate(entry)
+    warnings = await svc.retention_release_warnings(payload.agreement_id)
+    return RetentionLedgerEntryResponse.model_validate(entry).model_copy(update={"warnings": warnings})
 
 
 # ── Ratings ────────────────────────────────────────────────────────────
