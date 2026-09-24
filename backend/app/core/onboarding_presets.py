@@ -227,6 +227,9 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "fieldreports",
             "reporting",
             "project_controls",
+            "bi_dashboards",  # project_controls depends on it
+            "bim_hub",  # reporting depends on it
+            "cad",  # takeoff depends on it
         ],
     ),
     "estimator": CompanyPreset(
@@ -252,6 +255,9 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "supplier_catalogs",
             "documents",
             "reporting",
+            "bim_hub",  # measuring from the model
+            "cad",  # measuring from drawings
+            "procurement",  # supplier_catalogs depends on it
         ],
     ),
     "architecture_engineering": CompanyPreset(
@@ -282,6 +288,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "carbon",
             "reporting",
             "funding",
+            "cad",  # takeoff depends on it
+            "collaboration",  # opencde_api depends on it
         ],
     ),
     "construction_manager": CompanyPreset(
@@ -326,6 +334,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "bi_dashboards",
             "project_controls",
+            "bim_hub",  # reporting depends on it
+            "resources",  # payroll depends on it
         ],
     ),
     "real_estate_developer": CompanyPreset(
@@ -359,6 +369,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "carbon",
             "reporting",
             "bi_dashboards",
+            "bim_hub",  # reporting depends on it
         ],
     ),
     "subcontractor": CompanyPreset(
@@ -392,6 +403,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "documents",
             "funding",
             "markups",
+            "contracts",  # pay applications to the main contractor
+            "cad",  # takeoff depends on it
         ],
     ),
     "owner_client": CompanyPreset(
@@ -419,6 +432,9 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "boq",
             "costs",
             "risk",
+            "contracts",  # the owner signs the contract
+            "changeorders",  # and approves every change to it
+            "bim_hub",  # reporting depends on it
         ],
     ),
     "bim_vdc": CompanyPreset(
@@ -489,6 +505,11 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "project_controls",
             "reporting",
             "carbon",
+            "rfi",  # same RFI cycle as a building site
+            "submittals",  # same submittal cycle
+            "meetings",  # same site meetings
+            "bi_dashboards",  # project_controls depends on it
+            "bim_hub",  # reporting depends on it
         ],
     ),
     "mep_contractor": CompanyPreset(
@@ -526,6 +547,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "variations",
             "contracts",
             "reporting",
+            "safety",  # live electrical, hot work, work at height
+            "cad",  # takeoff depends on it
         ],
     ),
     "design_build": CompanyPreset(
@@ -564,6 +587,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "safety",
             "carbon",
             "reporting",
+            "cad",  # takeoff depends on it
+            "collaboration",  # opencde_api depends on it
         ],
     ),
     "homebuilder": CompanyPreset(
@@ -595,6 +620,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "documents",
             "markups",
             "reporting",
+            "bim_hub",  # reporting depends on it
+            "cad",  # takeoff depends on it
         ],
     ),
     "commercial_manager": CompanyPreset(
@@ -622,6 +649,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "bi_dashboards",
             "project_controls",
+            "bim_hub",  # reporting depends on it
         ],
     ),
     "procurement_manager": CompanyPreset(
@@ -645,6 +673,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "correspondence",
             "reporting",
             "bi_dashboards",
+            "bim_hub",  # reporting depends on it
         ],
     ),
     "scheduler_planner": CompanyPreset(
@@ -667,6 +696,9 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "funding",
             "bi_dashboards",
+            "bim_hub",  # reporting depends on it
+            "boq",  # bim_hub, costmodel, reporting, schedule depends on it
+            "finance",  # full_evm depends on it
         ],
     ),
     "site_supervisor": CompanyPreset(
@@ -695,6 +727,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "funding",
             "markups",
             "collaboration",
+            "boq",  # schedule depends on it
+            "contracts",  # subcontractors depends on it
         ],
     ),
     "quality_manager": CompanyPreset(
@@ -719,6 +753,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "fieldreports",
             "meetings",
             "reporting",
+            "bim_hub",  # reporting depends on it
+            "boq",  # bim_hub, reporting, validation depends on it
         ],
     ),
     "hse_manager": CompanyPreset(
@@ -744,6 +780,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "meetings",
             "reporting",
             "carbon",
+            "bim_hub",  # reporting depends on it
+            "boq",  # bim_hub, reporting depends on it
         ],
     ),
     "sustainability_esg": CompanyPreset(
@@ -764,6 +802,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "funding",
             "documents",
+            "boq",  # bim_hub, reporting, validation depends on it
         ],
     ),
     "facility_manager": CompanyPreset(
@@ -794,6 +833,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "bi_dashboards",
             "carbon",
+            "bim_hub",  # reporting depends on it
+            "boq",  # bim_hub, reporting, schedule depends on it
         ],
     ),
     "government_agency": CompanyPreset(
@@ -823,6 +864,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "reporting",
             "bi_dashboards",
             "project_controls",
+            "bim_hub",  # reporting depends on it
+            "procurement",  # rfq_bidding depends on it
         ],
     ),
     "full_enterprise": CompanyPreset(
@@ -859,7 +902,15 @@ SIZE_PRESETS: dict[str, CompanyPreset] = {
         description="Just me - quick takeoff, a priced BoQ and a clean report, without the overhead.",
         icon="HardHat",
         tags=["Takeoff", "BOQ", "Reports"],
-        enabled_modules=["boq", "takeoff", "validation", "ai", "reporting"],
+        enabled_modules=[
+            "boq",
+            "takeoff",
+            "validation",
+            "ai",
+            "reporting",
+            "bim_hub",  # reporting depends on it
+            "cad",  # takeoff depends on it
+        ],
     ),
     "size_small": CompanyPreset(
         key="size_small",
@@ -884,6 +935,8 @@ SIZE_PRESETS: dict[str, CompanyPreset] = {
             "documents",
             "markups",
             "reporting",
+            "bim_hub",  # reporting depends on it
+            "cad",  # takeoff depends on it
         ],
     ),
     "size_medium": CompanyPreset(
