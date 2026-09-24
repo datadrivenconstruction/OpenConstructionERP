@@ -206,6 +206,13 @@
   --oe-sidebar-width: 248px;
   --oe-header-height: 52px;
   --oe-content-max-width: 1440px;
+  /* Room the AI dock takes from the page: its width while open in push
+     mode, 0px otherwise. Written inline on :root by useDockLayoutSync
+     (features/erp-chat/useFloatingChat.ts); see "AI dock" below. */
+  --oe-ai-dock-offset: 0px;
+  /* How far fixed widgets step aside: the dock width while it is open in
+     either mode, 0px when closed or full screen. Same writer. */
+  --oe-ai-dock-widget-offset: 0px;
 }
 
 /* ── Dark Mode ─────────────────────────────────────────────────────────── */
@@ -1728,5 +1735,123 @@ html.oe-nav-pending body {
 @container (max-width: 1024px) {
   .takeoff-toolbar-label {
     display: none;
+  }
+}
+
+/* ── AI dock (features/erp-chat/FloatingChatPanel.tsx) ────────────────────
+   The assistant docks on the inline-end edge (right in LTR, left in RTL).
+   PUSH mode (wide screens): the app shell pads itself by
+   --oe-ai-dock-offset, which useDockLayoutSync (useFloatingChat.ts) writes
+   on :root the way Sidebar.tsx writes --oe-sidebar-width, so the page
+   reflows next to the dock instead of being covered. OVERLAY mode: the
+   offset stays 0px and the dock floats over a backdrop.
+   --oe-ai-dock-widget-offset is the dock width in BOTH modes (0px when the
+   dock is closed or covers the whole screen): fixed widgets step aside by
+   it, because in overlay mode the ones above the backdrop would otherwise
+   cover the dock.
+   html[data-ai-dock="push"|"overlay"] is set while the dock is open, and
+   html[data-ai-dock-resizing] while its resize handle is being dragged. */
+
+@layer components {
+  /* The AppLayout root, so the demo banner and everything under it shrink
+     together. padding-inline-end flips in RTL by itself and never meets the
+     RTL rule on .lg\:pl-sidebar, which sits on the inner wrapper. The timing
+     is the dock's slide (DOCK_ANIMATION_MS, ease-oe): in push mode the page
+     edge and the dock edge move as one. */
+  .oe-ai-dock-shell {
+    padding-inline-end: var(--oe-ai-dock-offset, 0px);
+    transition: padding-inline-end 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Viewport-fixed widgets anchored to the inline-end side (queue panel,
+     upload and install indicators, toasts, prompts) step aside for the
+     dock in both modes. In the components layer on purpose: a widget's own
+     transition utility (transition-all and friends) still wins, so its
+     hover effects keep working and the margin rides along with them. */
+  .oe-dock-aware {
+    margin-inline-end: var(--oe-ai-dock-widget-offset, 0px);
+    transition: margin-inline-end 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+}
+
+/* While the handle is dragged the page follows the pointer 1:1. */
+html[data-ai-dock-resizing] .oe-ai-dock-shell,
+html[data-ai-dock-resizing] .oe-dock-aware,
+html[data-ai-dock-resizing] .oe-ai-dock {
+  transition: none;
+}
+html[data-ai-dock-resizing],
+html[data-ai-dock-resizing] * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* Slide from the inline-end side plus a short fade. Scoped class names and
+   keyframes: the global .animate-slide-in-right / .animate-fade-in stay
+   what tailwind.config.js says they are for every other drawer. No fill
+   mode on the way in, so no transform lingers on the dock afterwards (a
+   transform would turn the dock into the containing block of any fixed
+   element rendered inside it). */
+.oe-ai-dock {
+  --oe-ai-dock-slide: 100%;
+  /* Keyboard resize and the double-click reset glide in step with the
+     page's padding; a pointer drag turns this off (below). */
+  transition: width 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+[dir='rtl'] .oe-ai-dock {
+  --oe-ai-dock-slide: -100%;
+}
+.oe-ai-dock[data-state='open'] {
+  animation: oeAiDockIn 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.oe-ai-dock[data-state='closing'] {
+  animation: oeAiDockOut 250ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+.oe-ai-dock-backdrop[data-state='open'] {
+  animation: oeAiDockFadeIn 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.oe-ai-dock-backdrop[data-state='closing'] {
+  animation: oeAiDockFadeOut 250ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+@keyframes oeAiDockIn {
+  from {
+    transform: translateX(var(--oe-ai-dock-slide));
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes oeAiDockOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(var(--oe-ai-dock-slide));
+    opacity: 0.6;
+  }
+}
+@keyframes oeAiDockFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes oeAiDockFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Reduced motion: the dock appears and leaves at once (the JS skips the
+   exit phase too) and the page does not glide. */
+@media (prefers-reduced-motion: reduce) {
+  .oe-ai-dock[data-state],
+  .oe-ai-dock-backdrop[data-state] {
+    animation: none;
+  }
+  .oe-ai-dock-shell,
+  .oe-dock-aware,
+  .oe-ai-dock {
+    transition: none;
   }
 }

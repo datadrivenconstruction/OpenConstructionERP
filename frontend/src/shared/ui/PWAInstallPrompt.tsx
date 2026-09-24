@@ -183,7 +183,7 @@ export function PWAInstallPrompt() {
         aria-live="polite"
         aria-label={t('pwa.install_prompt_title', { defaultValue: 'Install OCERP' })}
         data-testid="pwa-install-prompt-ios"
-        className="fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
+        className="oe-dock-aware fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
       >
         <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
           <Share size={16} />
@@ -228,7 +228,7 @@ export function PWAInstallPrompt() {
       aria-live="polite"
       aria-label={t('pwa.install_prompt_title', { defaultValue: 'Install OCERP' })}
       data-testid="pwa-install-prompt"
-      className="fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
+      className="oe-dock-aware fixed bottom-4 right-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-border-light bg-surface-elevated p-3 shadow-lg backdrop-blur-sm"
     >
       <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
         <Download size={16} />

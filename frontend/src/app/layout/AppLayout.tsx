@@ -65,8 +65,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
   // from the shell, unconditionally, and NOT from ReviewPromptCard: if the
   // day were recorded by the card, the counter would only advance on days
   // the card already rendered and could never reach its own threshold. The
-  // write is idempotent per day, so the per-route remount of AppLayout costs
-  // nothing after the first navigation.
+  // write is idempotent per day. AppLayout mounts once per signed-in session
+  // (App.tsx `AppShell` hoists it above the router outlet), so this effect
+  // runs when the shell mounts, not on every navigation.
   const recordActiveDay = useReviewPromptStore((s) => s.recordActiveDay);
   useEffect(() => {
     recordActiveDay();
@@ -110,7 +111,14 @@ export function AppLayout({ title, children }: AppLayoutProps) {
   });
 
   return (
-    <div className="min-h-screen">
+    // `oe-ai-dock-shell` (index.css) pads the whole shell by
+    // --oe-ai-dock-offset: the AI dock's width while it is open in push
+    // mode, 0 otherwise. On the ROOT rather than the `lg:pl-sidebar`
+    // wrapper, so the demo banner shrinks with the page and the RTL rule on
+    // that wrapper (which rewrites both of its horizontal paddings) is never
+    // in play. Full-bleed pages (`-mx-4 sm:-mx-7` inside <main>) follow the
+    // narrower wrapper and stay aligned.
+    <div className="min-h-screen oe-ai-dock-shell">
       {/* Single global backdrop — route-aware variant. Mounted at the
           AppLayout level (not per-page) so pages don't need a `relative
           isolate` wrapper, which would otherwise trap full-screen modals
@@ -188,11 +196,12 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       {/* Floating Recent button — bottom-right corner */}
       <FloatingRecentButton />
 
-      {/* Floating chat — always-visible button + slide-in panel that talks
-          to the erp_chat backend. The button hides itself on /chat (no
-          duplication of the full-page experience) and on auth-bypass routes
-          (/login, /onboarding). The panel is mounted at the layout level so
-          the conversation survives navigation. */}
+      {/* AI assistant — the round button and the dock it opens (Alt+A
+          toggles it too). The dock pushes the page aside on wide screens
+          (see `oe-ai-dock-shell` above) and floats over it otherwise. Both
+          stay out of /chat, which is the full-page version of the same
+          assistant. Mounted at the layout level so the conversation
+          survives navigation. */}
       <FloatingChatButton />
       <FloatingChatPanel />
 
@@ -200,16 +209,18 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           rather than at App.tsx top level on purpose: this shell is behind
           auth, and /login, /register, /forgot-password and /onboarding all
           render OUTSIDE it, so those surfaces are excluded structurally
-          instead of by a route blocklist that would rot. AppLayout remounts
-          per route, which is harmless because every piece of state the card
-          needs lives in useReviewPromptStore, not in the component. */}
+          instead of by a route blocklist that would rot. AppLayout mounts
+          once per signed-in session (App.tsx `AppShell`), and every piece of
+          state the card needs lives in useReviewPromptStore anyway, not in
+          the component. */}
       <ReviewPromptCard />
 
       {/* Global onboarding tour (ProductTour) mounts once at App.tsx
           top level — moving it out of here was the fix for
-          BUG-UI02-TOUR-PERSISTENT. When mounted inside AppLayout, it
-          remounted on every route change (the page wrapper ``P``
-          recreates the layout per Route), and a tour
+          BUG-UI02-TOUR-PERSISTENT. When it was mounted inside AppLayout,
+          it remounted on every route change (back then the page wrapper
+          ``P`` recreated the layout per Route; App.tsx `AppShell` has
+          since hoisted the layout so it mounts once), and a tour
           clicked-but-not-completed re-rendered from step 1 on every
           navigation. The legacy `OnboardingTour` (storage key
           `oe_tour_completed`, no dot) used to be mounted alongside it
