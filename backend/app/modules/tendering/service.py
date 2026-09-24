@@ -675,11 +675,12 @@ class TenderingService:
                 fields["metadata_"] = incoming_meta
 
         # Serialize line_items if present - JSON mode coerces Decimal to
-        # string so the persisted JSON value matches the wire contract.
-        if "line_items" in fields and fields["line_items"] is not None:
-            fields["line_items"] = [
-                item.model_dump(mode="json") if hasattr(item, "model_dump") else item for item in fields["line_items"]
-            ]
+        # string so the persisted JSON value matches the wire contract. The
+        # dump above has already turned each item into a dict that still holds
+        # Decimal values, so dump the models themselves, exactly as create_bid
+        # does; otherwise an unchanged line never equals its stored form.
+        if "line_items" in fields and data.line_items is not None:
+            fields["line_items"] = [item.model_dump(mode="json") for item in data.line_items]
 
         # Once the package is decided the bid's money is final. Compared in the
         # stored form, so a client that sends the bid back unchanged is not
