@@ -588,9 +588,19 @@ class TenderingService:
     # ── Bids ─────────────────────────────────────────────────────────────
 
     async def create_bid(self, package_id: uuid.UUID, data: BidCreate) -> TenderBid:
-        """Create a new bid for a package."""
-        # Verify package exists
-        await self.get_package(package_id)
+        """Create a new bid for a package.
+
+        Raises:
+            HTTPException 404: Package not found.
+            HTTPException 409: The package is awarded or closed; its tender is
+                over and a bid added now would join a decided comparison.
+        """
+        package = await self.get_package(package_id)
+        if package.status in _BID_FIGURES_FROZEN_STATES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Package is '{package.status}' and accepts no new bids",
+            )
 
         # v3 §10 - ``BidLineItem.unit_rate`` is Decimal; dump in JSON
         # mode so the serializer converts it to a string (the JSON DB
