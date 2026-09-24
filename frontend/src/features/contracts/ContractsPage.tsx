@@ -94,6 +94,7 @@ import {
   closeContract,
   cloneContract,
   deleteContract,
+  contractDeleteRefusal,
   listClauseTemplates,
   submitClaim,
   approveClaim,
@@ -1517,6 +1518,31 @@ function sovBilledLockedText(t: TFunction): string {
   });
 }
 
+/**
+ * Why the server refused to delete a contract, in the reader's language, or
+ * null when the refusal is not one of the three the delete gives.
+ */
+function contractDeleteRefusalText(t: TFunction, err: unknown): string | null {
+  const refusal = contractDeleteRefusal(err);
+  if (refusal === null) return null;
+  if (refusal.code === 'contract_not_draft') {
+    return t('contracts.delete_refused_not_draft', {
+      defaultValue: 'Only a draft contract can be deleted. Terminate or complete this one instead.',
+    });
+  }
+  if (refusal.code === 'contract_has_claims_past_draft') {
+    return t('contracts.delete_refused_claims_past_draft', {
+      defaultValue:
+        'This contract has progress claims past draft ({{claims}}), so it cannot be deleted: they would be deleted with it. Terminate the contract instead.',
+      claims: refusal.claimNumbers.join(', '),
+    });
+  }
+  return t('contracts.delete_refused_billed', {
+    defaultValue:
+      "A progress claim has billed on this contract's schedule of values, so it cannot be deleted. If the claim is still a draft, take the lines off it first; otherwise terminate the contract.",
+  });
+}
+
 const lineInputCls =
   'w-full rounded border border-border-light bg-surface-elevated px-2 py-1 text-sm';
 
@@ -1921,7 +1947,7 @@ export function ContractDetailDrawer({
     },
     onError: (err) => {
       setDeleteOpen(false);
-      addToast({ type: 'error', title: getErrorMessage(err) });
+      addToast({ type: 'error', title: contractDeleteRefusalText(t, err) ?? getErrorMessage(err) });
     },
   });
 

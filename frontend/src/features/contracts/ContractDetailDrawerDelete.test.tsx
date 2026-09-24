@@ -32,7 +32,10 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-vi.mock('./api', () => ({
+vi.mock('./api', async (importOriginal) => ({
+  // The real reader of the server's refusal, so the toast is checked against
+  // the codes the endpoint actually sends.
+  contractDeleteRefusal: (await importOriginal<typeof import('./api')>()).contractDeleteRefusal,
   listContracts: vi.fn(),
   listProgressClaims: vi.fn(),
   listContractLines: vi.fn(),
@@ -69,13 +72,16 @@ vi.mock('./ComplianceGate', () => ({
   ComplianceGate: () => <div data-testid="compliance-gate" />,
 }));
 
+const { addToastMock } = vi.hoisted(() => ({ addToastMock: vi.fn() }));
+
 vi.mock('@/stores/useToastStore', () => ({
-  useToastStore: (sel: (s: { addToast: () => void }) => unknown) =>
-    sel({ addToast: vi.fn() }),
+  useToastStore: (sel: (s: { addToast: typeof addToastMock }) => unknown) =>
+    sel({ addToast: addToastMock }),
 }));
 
 import { ContractDetailDrawer } from './ContractsPage';
 import * as api from './api';
+import { ApiError } from '@/shared/lib/api';
 import * as financeApi from '@/features/finance/api';
 import type { ContractItem, ContractStatus } from './api';
 
@@ -260,5 +266,31 @@ describe('<ContractDetailDrawer> delete', () => {
       expect(screen.queryByTestId('confirm-dialog-confirm')).not.toBeInTheDocument(),
     );
     expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  it('says why the server refused in the language of the screen', async () => {
+    // A certified T&M claim has no lines, and the server now refuses the
+    // delete for it. Its message is English; the toast is drawn from the code.
+    deleteMock.mockRejectedValue(
+      new ApiError(409, 'Conflict', {
+        detail: {
+          error: 'contract_has_claims_past_draft',
+          message: 'The server explains itself in English here.',
+          claim_numbers: ['PC-0003'],
+        },
+      }),
+    );
+    renderDrawer('draft');
+
+    fireEvent.click(deleteButton());
+    await waitFor(() => expect(confirmButton()).toBeInTheDocument());
+    fireEvent.click(confirmButton());
+
+    await waitFor(() => expect(addToastMock).toHaveBeenCalledTimes(1));
+    const [toast] = addToastMock.mock.calls[0] as [{ type: string; title: string }];
+    expect(toast.type).toBe('error');
+    expect(toast.title).not.toContain('The server explains itself');
+    expect(toast.title).toContain('PC-0003');
+    expect(toast.title).toContain('past draft');
   });
 });
