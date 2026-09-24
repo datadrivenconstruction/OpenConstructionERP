@@ -299,6 +299,47 @@ async def _seed_cwicr_items() -> list[uuid.UUID]:
     return ids
 
 
+async def _bind_project_to_vectorised_catalogue(
+    project_id: uuid.UUID,
+    cost_id: uuid.UUID,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Pin the project to the catalogue ``cost_id`` belongs to, and call it vectorised.
+
+    A vector run checks two things before it ranks anything: that the project
+    is bound to a catalogue, and that the catalogue has vectors. These tests
+    stub the vector search itself, so no vector store exists and both checks
+    come back empty. ``auto_bind_dominant_catalogue`` binds only a catalogue
+    that has vectors, and ``run_match`` then short-circuits with
+    ``no_catalogue_rows`` or ``catalog_not_vectorized`` before it ever reaches
+    the stubbed matcher, returning an empty list the assertions below cannot
+    tell from a broken pipeline.
+
+    So the project is bound the way a user who picked a catalogue in the
+    match settings is bound, and the vector store's answer is stubbed at the
+    same boundary as the search: the SQL rows are real, only the vector count
+    is supplied.
+    """
+    from app.core.match_service import ranker_qdrant
+    from app.database import async_session_factory
+    from app.modules.costs.models import CostItem
+    from app.modules.projects.service import get_or_create_match_settings
+
+    async with async_session_factory() as s:
+        item = await s.get(CostItem, cost_id)
+        assert item is not None
+        settings = await get_or_create_match_settings(s, project_id)
+        settings.cost_database_id = item.region
+        await s.commit()
+        region = item.region
+
+    async def _vectorised(db, catalog_id):
+        assert catalog_id == region
+        return "ok", 5, 5
+
+    monkeypatch.setattr(ranker_qdrant, "_resolve_catalog_status", _vectorised)
+
+
 # ═════════════════════════════════════════════════════════════════════════
 #  1. POST /sessions — happy path
 # ═════════════════════════════════════════════════════════════════════════
@@ -603,6 +644,7 @@ async def test_run_match_vector_returns_candidates(
         owner_id=a["user_id"],
     )
     cost_ids = await _seed_cwicr_items()
+    await _bind_project_to_vectorised_catalogue(project_id, cost_ids[0], monkeypatch)
     fake_cost_id = str(cost_ids[0])
 
     # Stub the embedder boundary. Return a single high-score candidate
@@ -1315,6 +1357,7 @@ async def test_progress_reflects_run_match_terminal_stage(
         owner_id=a["user_id"],
     )
     cost_ids = await _seed_cwicr_items()
+    await _bind_project_to_vectorised_catalogue(project_id, cost_ids[0], monkeypatch)
     fake_cost_id = str(cost_ids[0])
 
     from app.core.match_service.envelope import (
