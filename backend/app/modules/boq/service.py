@@ -2807,8 +2807,30 @@ class BOQService:
         the project BASE before summing. Best-effort: any failure returns
         ``("", {})`` so the widget degrades to raw sums rather than a 500.
         """
-        resolved = await self._resolve_project_fx_for_projects([project_id])
-        return resolved.get(project_id, ("", {}))
+        try:
+            from app.modules.projects.models import Project
+
+            row = (
+                await self.session.execute(
+                    select(Project.currency, Project.fx_rates).where(Project.id == project_id),
+                )
+            ).first()
+        except Exception:  # noqa: BLE001 - never break a widget on this lookup
+            logger.debug("Project FX lookup failed for project %s", project_id, exc_info=True)
+            return "", {}
+        if not row:
+            return "", {}
+        base = str(row[0]).strip()[:3].upper() if row[0] else ""
+        raw = row[1] if isinstance(row[1], list) else []
+        fx_map: dict[str, str] = {}
+        for entry in raw:
+            if not isinstance(entry, dict):
+                continue
+            code = str(entry.get("code") or "").strip().upper()
+            rate = str(entry.get("rate") or "").strip()
+            if code and rate:
+                fx_map[code] = rate
+        return base, fx_map
 
     async def _resolve_project_fx_for_projects(
         self,
