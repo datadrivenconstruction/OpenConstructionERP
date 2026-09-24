@@ -229,6 +229,26 @@ def allowed_claim_transitions(current: str) -> frozenset[str]:
     return _CLAIM_TRANSITIONS.get(current, frozenset())
 
 
+def claim_way_back(current: str) -> str:
+    """What the reader can do about a claim that has left draft, by what the API offers.
+
+    Written per status from the routes, not read off :data:`_CLAIM_TRANSITIONS`.
+    The machine lists ``rejected -> draft``, but no route has ever made that
+    move, so a rejected claim stays rejected. Advice that named it sent the
+    reader to a door that does not exist: every claim past draft except a
+    certified or paid one used to be told to "reject it to reopen", including
+    a claim already rejected. What does work is a new draft claim, which takes
+    the corrected figures; a rejected claim counts in no "previous" column.
+    A certified or paid claim has no way back at all, because the certificate
+    is out and the money has moved.
+    """
+    if current in ("certified", "paid"):
+        return "Correct it on the next claim, or credit the invoice."
+    if current == "rejected":
+        return "A rejected claim stays as it is; raise a new draft claim for the corrected figures."
+    return "Reject it and raise a new draft claim for the corrected figures."
+
+
 def allowed_final_account_transitions(current: str) -> frozenset[str]:
     """Return the set of statuses a final account may transition to."""
     return _FINAL_ACCOUNT_TRANSITIONS.get(current, frozenset())
@@ -2381,7 +2401,7 @@ class ContractsService:
                         "error": "claim_terms_locked",
                         "message": (
                             f"This claim is {claim.status!r}; its period and number are part of the application "
-                            "that went out. Reject it to reopen them, or correct the figures in the next claim."
+                            f"that went out. {claim_way_back(claim.status)}"
                         ),
                         "claim_status": claim.status,
                         "locked_fields": frozen,
@@ -3214,8 +3234,7 @@ class ContractsService:
                     "message": (
                         "Auto-generate is only valid for draft claims; the "
                         f"claim is currently in status {claim.status!r}. "
-                        "Create a new draft claim or reset this one via the "
-                        "rejected → draft transition."
+                        f"{claim_way_back(claim.status)}"
                     ),
                     "claim_status": claim.status,
                 },
@@ -3367,14 +3386,8 @@ class ContractsService:
         """Raise HTTP 422 unless the claim is in a line-editable status."""
         if claim.status not in self._CLAIM_EDITABLE_STATUSES:
             # What to do next depends on the status, and saying the wrong
-            # thing sends the reader into a door the server then holds shut:
-            # a certified or paid claim cannot be rejected back to draft,
-            # because the certificate is out and the money has moved.
-            way_back = (
-                "Correct it on the next claim, or credit the invoice."
-                if claim.status in ("certified", "paid")
-                else "Reject it to reopen the breakdown."
-            )
+            # thing sends the reader into a door the server then holds shut.
+            way_back = claim_way_back(claim.status)
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={
