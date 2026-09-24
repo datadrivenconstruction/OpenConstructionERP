@@ -40,6 +40,16 @@ _AWARDABLE_PACKAGE_STATES: set[str] = {"collecting", "evaluating"}
 # Bid statuses that disqualify a bid from being awarded.
 _NON_AWARDABLE_BID_STATES: set[str] = {"rejected"}
 
+# Package states in which a bid's figures are final. ``apply_winner`` copies
+# the winning bid's rates into the BOQ and records the award against them, and
+# a closed package has ended its tender either way; repricing any bid after
+# that would leave the award, the bill and the comparison describing figures
+# the bid no longer carries.
+_BID_FIGURES_FROZEN_STATES: frozenset[str] = frozenset({"awarded", "closed"})
+
+# The bid fields that carry its money.
+_BID_MONEY_FIELDS: tuple[str, ...] = ("total_amount", "currency", "line_items")
+
 _CENTS = Decimal("0.01")
 
 
@@ -617,7 +627,13 @@ class TenderingService:
         return await self.repo.list_bids_for_package(package_id)
 
     async def update_bid(self, bid_id: uuid.UUID, data: BidUpdate) -> TenderBid:
-        """Update bid fields. Raises 404 if not found."""
+        """Update bid fields.
+
+        Raises:
+            HTTPException 404: Bid not found.
+            HTTPException 409: The package is awarded or closed and the patch
+                would change the bid's total, currency or line items.
+        """
         bid = await self.get_bid(bid_id)
 
         fields = data.model_dump(exclude_unset=True)
@@ -638,6 +654,21 @@ class TenderingService:
             fields["line_items"] = [
                 item.model_dump(mode="json") if hasattr(item, "model_dump") else item for item in fields["line_items"]
             ]
+
+        # Once the package is decided the bid's money is final. Compared in the
+        # stored form, so a client that sends the bid back unchanged is not
+        # refused, and fields without money (notes, contact) stay editable.
+        changed_money = [f for f in _BID_MONEY_FIELDS if f in fields and fields[f] != getattr(bid, f, None)]
+        if changed_money:
+            package = await self.get_package(bid.package_id)
+            if package.status in _BID_FIGURES_FROZEN_STATES:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Bid is locked - package is '{package.status}'. "
+                        "Its total, currency and line items cannot change after the award or close."
+                    ),
+                )
 
         if not fields:
             return await self.get_bid(bid_id)
