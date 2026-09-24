@@ -193,6 +193,11 @@ _FINAL_ACCOUNT_TRANSITIONS: dict[str, frozenset[str]] = {
     "closed": frozenset(),
 }
 
+#: Final account statuses whose figures somebody has signed off. Closing the
+#: contract does not restate them: an agreed account is disputed first to
+#: reopen its figures, and a closed one is final.
+_FINAL_ACCOUNT_SETTLED = frozenset({"agreed", "closed"})
+
 # Extension-of-time claim FSM. A claim is raised (draft), submitted, optionally
 # moved under review, then decided (granted / partially_granted / rejected) or
 # withdrawn. Decisions and withdrawals are terminal.
@@ -3862,16 +3867,31 @@ class ContractsService:
 
         The final account's money comes from :meth:`final_account_figures`,
         so a Close that sends only the final value keeps the retention held.
+
+        An existing final account moves only along its own lifecycle, and one
+        that is already agreed or closed is not restated: a figure the request
+        states must be the signed-off figure, and the sign-off and notes it
+        leaves out stay as recorded. Both refusals are 409 and write nothing.
         """
         contract = await self.get_contract(contract_id)
         existing = await self.final_account_repo.get_for_contract(contract_id)
+        status_after = payload.status
+        if existing is not None:
+            status_after = self._final_account_status_on_close(existing, payload.status)
+            self._assert_settled_final_account_figures_stand(existing, payload)
         fields: dict[str, Any] = {
             **await self.final_account_figures(contract, payload, existing),
             "sign_off_date": payload.sign_off_date,
             "sign_off_by": payload.sign_off_by or actor_id,
-            "status": payload.status,
+            "status": status_after,
             "notes": payload.notes,
         }
+        if existing is not None and existing.status in _FINAL_ACCOUNT_SETTLED:
+            # Who signed the account off, when, and what they noted is part of
+            # what was agreed; a request that says nothing about it keeps it.
+            fields["sign_off_date"] = payload.sign_off_date or existing.sign_off_date
+            fields["sign_off_by"] = payload.sign_off_by or existing.sign_off_by or actor_id
+            fields["notes"] = payload.notes if payload.notes is not None else existing.notes
         if existing is None:
             final_account = FinalAccount(contract_id=contract_id, **fields)
             final_account = await self.final_account_repo.create(final_account)
@@ -3907,6 +3927,76 @@ class ContractsService:
             source_module="contracts",
         )
         return final_account
+
+    @staticmethod
+    def _final_account_status_on_close(existing: FinalAccount, requested: str) -> str:
+        """The status a Close leaves an existing final account in, or 409.
+
+        The request names the status it wants, and the Close button always asks
+        for ``agreed``. The same status is no move. A closed account has been
+        agreed already, so asking for agreed keeps it closed instead of
+        reopening it. Any other request moves along the final-account
+        lifecycle or is refused.
+        """
+        if requested == existing.status:
+            return requested
+        if existing.status == "closed" and requested == "agreed":
+            return existing.status
+        try:
+            assert_final_account_transition(existing.status, requested)
+        except InvalidTransitionError as exc:
+            reachable = sorted(allowed_final_account_transitions(existing.status))
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "final_account_transition_invalid",
+                    "message": (
+                        f"The final account is {existing.status} and cannot move to {requested}. "
+                        + (
+                            f"From {existing.status} it can move to {', '.join(reachable)}."
+                            if reachable
+                            else "A closed final account is final."
+                        )
+                    ),
+                    "final_account_status": existing.status,
+                    "requested_status": requested,
+                },
+            ) from exc
+        return requested
+
+    @staticmethod
+    def _assert_settled_final_account_figures_stand(existing: FinalAccount, payload: Any) -> None:
+        """Refuse a Close that restates a figure of an agreed or closed final account.
+
+        A figure the request leaves out is kept (see
+        :meth:`final_account_figures`), and one it states equal to the
+        signed-off figure changes nothing, so only a different figure is
+        refused.
+        """
+        if existing.status not in _FINAL_ACCOUNT_SETTLED:
+            return
+        restated = [
+            name
+            for name in FINAL_ACCOUNT_MONEY_FIELDS
+            if getattr(payload, name, None) is not None
+            and Decimal(str(getattr(payload, name))) != Decimal(str(getattr(existing, name) or 0))
+        ]
+        if not restated:
+            return
+        remedy = (
+            "Dispute it to reopen its figures, then agree the new ones."
+            if existing.status == "agreed"
+            else "A closed final account is final."
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "final_account_settled",
+                "message": f"The final account is {existing.status}, so its figures stand as signed off. {remedy}",
+                "final_account_status": existing.status,
+                "fields": restated,
+            },
+        )
 
     # ── SOV status (Schedule of Values per-line tracker) ────────────────
 
