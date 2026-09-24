@@ -1609,14 +1609,18 @@ function PackageDetail({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Plus size={14} />}
-              onClick={() => setShowAddBid(true)}
-            >
-              {t('tendering.add_bid', 'Add Bid')}
-            </Button>
+            {/* An awarded or closed tender is decided: the server refuses a
+                new bid there, so the button is not offered. */}
+            {pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Plus size={14} />}
+                onClick={() => setShowAddBid(true)}
+              >
+                {t('tendering.add_bid', 'Add Bid')}
+              </Button>
+            )}
             {pkg.boq_id && (
               <Button
                 variant="ghost"
