@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Closing a contract must not forget the retention it holds.
 
-The Close button posts the final value and a status and nothing else. The
+The Close button posted the final value and a status and nothing else. The
 schema filled the rest with 0, so closing a contract that held retention
 wrote a final account saying none was ever held, or overwrote an agreed one
 with zeros. The checklist reads retention from the final account once it
@@ -78,9 +78,9 @@ async def _contract_holding_retention(s) -> Contract:
 
 
 def _what_the_close_button_posts(contract: Contract) -> FinalAccountCreate:
-    return FinalAccountCreate.model_validate(
-        {"contract_id": str(contract.id), "final_contract_value": "10000", "status": "agreed"}
-    )
+    # A status and no figures: restating the contract value overwrote a final
+    # account agreed at a negotiated figure, so the button stopped sending it.
+    return FinalAccountCreate.model_validate({"contract_id": str(contract.id), "status": "agreed"})
 
 
 async def _retention_item(svc: ContractsService, contract: Contract) -> dict:
