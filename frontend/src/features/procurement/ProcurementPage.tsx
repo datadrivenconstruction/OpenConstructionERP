@@ -608,6 +608,14 @@ function PurchaseOrdersTab({
      order; otherwise it POSTs a new one. */
   const [showCreate, setShowCreate] = useState(false);
   const [editingPO, setEditingPO] = useState<string | null>(null);
+  // The status of the order being edited. Once an order leaves draft its
+  // vendor, currency, lines and amounts are the ones it was approved with,
+  // and the server refuses a change to them with a 409
+  // (`_PO_EDITABLE_STATUSES` in procurement/service.py). The form locks those
+  // fields for such an order instead of letting the buyer type into a save
+  // that cannot succeed. Notes, dates, payment terms and type stay editable.
+  const [editingPOStatus, setEditingPOStatus] = useState<string | null>(null);
+  const figuresLocked = editingPO !== null && editingPOStatus !== null && editingPOStatus !== 'draft';
   // True only while the create modal is showing lines handed over from the
   // Resource Summary buy-list (F4 interop), so we can surface a one-line hint
   // telling the buyer to add a supplier + rates. Reset whenever the modal closes.
@@ -653,6 +661,7 @@ function PurchaseOrdersTab({
   const closeModal = () => {
     setShowCreate(false);
     setEditingPO(null);
+    setEditingPOStatus(null);
     setPrefilledFromBuyList(false);
     setPoForm({ ...emptyPoForm, items: [{ ...emptyLine }] });
     setPoBase(null);
@@ -801,7 +810,9 @@ function PurchaseOrdersTab({
   });
 
   /* ── PO edit ──
-     Every field except `status` is freely editable here. Status transitions go
+     On a draft every field except `status` is editable here; past draft the
+     form locks the figures the server holds fixed (`figuresLocked`), so they
+     are never in the diff below. Status transitions go
      through the dedicated workflow actions (approve / issue / cancel /
      create-invoice), so we deliberately omit `status` from this body.
      Removal is its own affordance: `PORemovalDialog` deletes a never-issued
@@ -872,6 +883,7 @@ function PurchaseOrdersTab({
       setPoTaxInput(tax);
       setPoErrors({});
       setEditingPO(po.id);
+      setEditingPOStatus(po.status);
       setShowCreate(true);
     },
     onError: (e: Error) =>
@@ -1036,6 +1048,17 @@ function PurchaseOrdersTab({
             {/* F4 interop hint: shown only when the lines were pre-filled from
                 the Resource Summary buy-list, to explain the auto-opened modal
                 and prompt the buyer for the supplier + rates the buy-list omits. */}
+            {figuresLocked && (
+              <div
+                role="note"
+                className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3.5 py-2.5 text-xs text-content-secondary"
+              >
+                {t('procurement.edit_figures_locked', {
+                  defaultValue:
+                    'This order is past draft, so its vendor, currency, lines and tax stay as they were approved. Notes, delivery date, payment terms and order type can still change here. To correct the figures, return an approved order to draft, or raise a separate order for the difference.',
+                })}
+              </div>
+            )}
             {prefilledFromBuyList && !isEdit && (
               <div className="rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3.5 py-2.5 text-xs text-content-secondary">
                 {t('procurement.prefilled_from_buy_list', {
@@ -1060,14 +1083,25 @@ function PurchaseOrdersTab({
                   <label className="block text-sm font-medium text-content-primary mb-1.5">
                     {t('procurement.vendor', { defaultValue: 'Vendor' })}
                   </label>
-                  <ContactSearchInput
-                    value={poForm.vendor_contact_id}
-                    displayValue={poForm.vendor_display}
-                    onChange={(id, name) => setPoForm((f) => ({ ...f, vendor_contact_id: id, vendor_display: name }))}
-                    placeholder={t('procurement.search_vendor', { defaultValue: 'Search vendor...' })}
-                    showBrowse
-                    browseContactTypes={['supplier', 'subcontractor']}
-                  />
+                  {figuresLocked ? (
+                    <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={poForm.vendor_display || '-'}
+                      aria-label={t('procurement.vendor', { defaultValue: 'Vendor' })}
+                      className={clsx(inputCls, 'bg-surface-secondary/50 cursor-not-allowed')}
+                    />
+                  ) : (
+                    <ContactSearchInput
+                      value={poForm.vendor_contact_id}
+                      displayValue={poForm.vendor_display}
+                      onChange={(id, name) => setPoForm((f) => ({ ...f, vendor_contact_id: id, vendor_display: name }))}
+                      placeholder={t('procurement.search_vendor', { defaultValue: 'Search vendor...' })}
+                      showBrowse
+                      browseContactTypes={['supplier', 'subcontractor']}
+                    />
+                  )}
                 </div>
                 {/* Delivery date */}
                 <div>
@@ -1139,6 +1173,7 @@ function PurchaseOrdersTab({
                     <div className="flex flex-col gap-1">
                       <input
                         value={li.description}
+                        disabled={figuresLocked}
                         onChange={(e) => updateLineItem(idx, 'description', e.target.value)}
                         placeholder={t('procurement.item_desc_placeholder', { defaultValue: 'Item description' })}
                         aria-label={t('procurement.item_description_for', {
@@ -1152,12 +1187,14 @@ function PurchaseOrdersTab({
                         value={li.boq_position_id}
                         onChange={(boqPositionId) => setLinePosition(idx, boqPositionId)}
                         line={idx + 1}
+                        disabled={figuresLocked}
                       />
                     </div>
                     <input
                       type="number"
                       step="any"
                       value={li.quantity}
+                      disabled={figuresLocked}
                       onChange={(e) => updateLineItem(idx, 'quantity', e.target.value)}
                       placeholder="1"
                       aria-label={t('procurement.item_qty_for', {
@@ -1168,6 +1205,7 @@ function PurchaseOrdersTab({
                     />
                     <input
                       value={li.unit}
+                      disabled={figuresLocked}
                       onChange={(e) => updateLineItem(idx, 'unit', e.target.value)}
                       placeholder="pcs"
                       aria-label={t('procurement.item_unit_for', {
@@ -1180,6 +1218,7 @@ function PurchaseOrdersTab({
                       type="number"
                       step="0.01"
                       value={li.unit_rate}
+                      disabled={figuresLocked}
                       onChange={(e) => updateLineItem(idx, 'unit_rate', e.target.value)}
                       placeholder="0.00"
                       aria-label={t('procurement.item_rate_for', {
@@ -1203,7 +1242,8 @@ function PurchaseOrdersTab({
                     <button
                       type="button"
                       onClick={() => removeLineItem(idx)}
-                      className="flex h-9 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                      disabled={figuresLocked}
+                      className="flex h-9 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-40 disabled:pointer-events-none"
                       title={t('common.remove', { defaultValue: 'Remove' })}
                       aria-label={t('procurement.remove_line', {
                         defaultValue: 'Remove line {{line}}',
@@ -1214,15 +1254,17 @@ function PurchaseOrdersTab({
                     </button>
                   </div>
                 ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<Plus size={14} />}
-                  onClick={addLineItem}
-                  className="mt-1"
-                >
-                  {t('procurement.add_item', { defaultValue: 'Add Item' })}
-                </Button>
+                {!figuresLocked && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Plus size={14} />}
+                    onClick={addLineItem}
+                    className="mt-1"
+                  >
+                    {t('procurement.add_item', { defaultValue: 'Add Item' })}
+                  </Button>
+                )}
               </div>
               {poErrors.items && <p className="mt-1.5 text-xs text-semantic-error">{poErrors.items}</p>}
 
@@ -1242,6 +1284,8 @@ function PurchaseOrdersTab({
                       type="number"
                       step="0.01"
                       value={poTaxInput}
+                      disabled={figuresLocked}
+                      aria-label={t('procurement.tax', { defaultValue: 'Tax' })}
                       onChange={(e) => setPoTaxInput(e.target.value)}
                       className={clsx(inputCls, 'h-8 text-xs pl-10 text-right')}
                       placeholder="0.00"
@@ -1269,6 +1313,8 @@ function PurchaseOrdersTab({
                     </label>
                     <select
                       value={poForm.currency}
+                      disabled={figuresLocked}
+                      aria-label={t('procurement.currency', { defaultValue: 'Currency' })}
                       onChange={(e) => setPoForm((f) => ({ ...f, currency: e.target.value }))}
                       className={inputCls}
                     >
