@@ -17,9 +17,15 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtCompact, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
 import { useNameCollator } from '@/shared/lib/collator';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
-import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
+import {
+  boqApi,
+  type BOQWithPositions,
+  groupPositionsIntoSections,
+  type SectionGroup,
+  skippedBoqListProjectIds,
+} from './api';
 import { resourceAwareTotalInBase, getCurrencyCode } from './boqHelpers';
-import { BOQListLoadError } from './BOQListLoadError';
+import { BOQListLoadError, BOQListSkippedNotice } from './BOQListLoadError';
 import { projectsApi, type ProjectFxRate } from '@/features/projects/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -625,17 +631,19 @@ export function BOQListPage() {
     error: boqErrorValue,
   } = useQuery({
     queryKey: ['all-boqs', scopedProjects?.map((p) => p.id).join(',')],
-    queryFn: async () => {
-      if (!scopedProjects || scopedProjects.length === 0) return [];
+    queryFn: async (): Promise<{ rows: BOQWithProject[]; skippedProjectIds: string[] }> => {
+      if (!scopedProjects || scopedProjects.length === 0) return { rows: [], skippedProjectIds: [] };
 
       // One request for every project's bills. The page used to send one per
       // project, and HTTP/1.1 runs six at a time to a host, so on forty
-      // projects most of the wait was queueing. A project the server cannot
-      // read now fails the whole request instead of being dropped, because a
-      // list with one project quietly missing puts a total on screen that
-      // looks complete and is not.
-      const byProject = await boqApi.listForProjects(scopedProjects.map((p) => p.id));
-      return scopedProjects.flatMap((p) =>
+      // projects most of the wait was queueing. A project archived or
+      // unshared since the project list loaded comes back as no key at all,
+      // and the page names it above the list, because a list with one
+      // project quietly missing puts a total on screen that looks complete
+      // and is not.
+      const requested = scopedProjects.map((p) => p.id);
+      const byProject = await boqApi.listForProjects(requested);
+      const rows = scopedProjects.flatMap((p) =>
         (byProject[p.id] ?? []).map((b) => {
           // v3 §10 contract: money fields arrive as Decimal-as-string. The
           // TypeScript `number` annotation lies — reducing across them
@@ -656,13 +664,18 @@ export function BOQListPage() {
           } as BOQWithProject;
         }),
       );
+      return { rows, skippedProjectIds: skippedBoqListProjectIds(requested, byProject) };
     },
     enabled: !!scopedProjects && scopedProjects.length > 0,
   });
   // A failed refetch keeps the previous answer in `data`. Nothing on this page
   // may go on showing it, the stat cards included, once the list is known to
   // be out of date, so the page reads no data at all while the query is in error.
-  const allBoqs = boqError ? undefined : boqData;
+  const allBoqs = boqError ? undefined : boqData?.rows;
+  const skippedProjects = useMemo(() => {
+    const ids = boqError ? [] : (boqData?.skippedProjectIds ?? []);
+    return ids.map((id) => ({ id, name: scopedProjects?.find((p) => p.id === id)?.name || id }));
+  }, [boqError, boqData, scopedProjects]);
 
   // Seed demo presence when collaboration module is enabled and BOQs load
   const isCollabEnabled = useModuleStore((s) => s.isModuleEnabled('collaboration'));
@@ -890,7 +903,7 @@ export function BOQListPage() {
               : t('boq.list_subtitle_count', {
                   defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
                   boqCount: allBoqs?.length ?? 0,
-                  projectCount: scopedProjects?.length ?? 0,
+                  projectCount: (scopedProjects?.length ?? 0) - skippedProjects.length,
                 })
         }
         actions={
@@ -964,6 +977,19 @@ export function BOQListPage() {
             'List the work items, quantities and unit rates for a project and watch them roll up to a live total. Rates come from the cost database and quantities from BIM or PDF takeoff, and the finished estimate feeds validation, the budget and tender packages.',
         })}
       </DismissibleInfo>
+
+      {/* Projects the register left out because they were archived or
+          unshared after the project list loaded. Named above the totals, so
+          no total below reads as covering them. Refresh reloads the project
+          list, which no longer carries them, and the notice goes away. */}
+      {skippedProjects.length > 0 && (
+        <BOQListSkippedNotice
+          projects={skippedProjects}
+          onRefresh={() => {
+            void refetchProjects().then(() => queryClient.invalidateQueries({ queryKey: ['all-boqs'] }));
+          }}
+        />
+      )}
 
       {/* Stats cards — scoped to the SAME filtered set the list renders.
           When a filter narrows the set, an inline scope label says so.

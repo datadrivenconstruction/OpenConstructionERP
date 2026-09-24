@@ -322,35 +322,43 @@ async def _verify_project_owner_for_boq(
     )
 
 
-async def _verify_projects_readable_for_boq(
+async def _readable_projects_for_boq(
     session: SessionDep,
     project_ids: list[uuid.UUID],
     user_id: str,
     payload: dict | None = None,
-) -> None:
-    """Apply :func:`_verify_project_owner_for_boq` to many projects at once.
+) -> list[uuid.UUID]:
+    """The projects among ``project_ids`` whose bills the caller may read.
 
-    The rules and the statuses are the same, project by project: one that does
-    not exist or is archived is 404 (for an admin too), one the caller neither
-    owns nor is a team member of is 403. What is added is that a single failing
-    project refuses the whole request. Answering for the projects that passed
-    and leaving out the rest would hand the bill register a list, and a money
-    total across it, that looks complete and is not, so the refusal names every
-    project that failed instead, and the client can say which ones.
+    The rule is :func:`_verify_project_owner_for_boq`, project by project: an
+    archived project is not readable (for an admin too), and neither is one
+    the caller neither owns nor is a team member of. Those are left out of the
+    answer rather than refusing it. The bill register asks for exactly the
+    projects its project list showed, so such a project is one archived or
+    unshared since the page loaded; refusing the whole register for it left
+    the reader with no estimates at all. The client compares what it asked for
+    with what came back and says which projects are missing, so a total across
+    the rest is never shown as complete.
+
+    An id that names no project at all is different. The page cannot have been
+    shown it, so it is a client error, and it still refuses the whole request.
 
     It costs one statement for the projects and, only when the caller is not an
-    admin and does not own every project asked about, one more for the team
-    memberships, however many projects there are.
+    admin and does not own every live project asked about, one more for the
+    team memberships, however many projects there are.
+
+    Returns:
+        The readable ids, in request order.
 
     Raises:
-        HTTPException: 404 when any project is missing or archived, otherwise
-            403 when any is not readable by the caller. The detail carries
-            ``error``, an English ``message`` naming the projects, and the ids
-            themselves: ``project_ids`` (every failing id, in request order),
-            ``not_found`` and ``forbidden``.
+        HTTPException: 404 when any id names no project. The detail carries
+            ``error``, an English ``message`` naming the ids, and the ids
+            themselves: ``project_ids`` and ``not_found`` (both every unknown
+            id, in request order) and ``forbidden`` (always empty, kept so the
+            body keeps its shape).
     """
     if not project_ids:
-        return
+        return []
     from sqlalchemy import select
 
     from app.modules.projects.models import Project
@@ -360,8 +368,23 @@ async def _verify_projects_readable_for_boq(
             select(Project.id, Project.owner_id, Project.status).where(Project.id.in_(project_ids)),
         )
     ).all()
+    known = {row[0] for row in rows}
+    not_found = [pid for pid in project_ids if pid not in known]
+    if not_found:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "projects_not_found",
+                "message": (
+                    f"{translate('errors.project_not_found', locale=get_locale())}: "
+                    f"{', '.join(str(p) for p in not_found)}."
+                ),
+                "project_ids": [str(p) for p in not_found],
+                "not_found": [str(p) for p in not_found],
+                "forbidden": [],
+            },
+        )
     owner_by_project = {row[0]: row[1] for row in rows if row[2] != "archived"}
-    not_found = [pid for pid in project_ids if pid not in owner_by_project]
 
     forbidden: list[uuid.UUID] = []
     is_admin = bool(payload and payload.get("role") == "admin")
@@ -392,26 +415,8 @@ async def _verify_projects_readable_for_boq(
                 _log.debug("Team membership lookup failed for the bill register", exc_info=True)
         forbidden = [pid for pid in foreign if pid not in member_of]
 
-    if not not_found and not forbidden:
-        return
-    failing = set(not_found) | set(forbidden)
-    parts: list[str] = []
-    if not_found:
-        parts.append(
-            f"{translate('errors.project_not_found', locale=get_locale())}: {', '.join(str(p) for p in not_found)}."
-        )
-    if forbidden:
-        parts.append(f"You do not have access to these projects: {', '.join(str(p) for p in forbidden)}.")
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND if not_found else status.HTTP_403_FORBIDDEN,
-        detail={
-            "error": "projects_not_found" if not_found else "projects_forbidden",
-            "message": " ".join(parts),
-            "project_ids": [str(p) for p in project_ids if p in failing],
-            "not_found": [str(p) for p in not_found],
-            "forbidden": [str(p) for p in forbidden],
-        },
-    )
+    unreadable = set(forbidden)
+    return [pid for pid in project_ids if pid in owner_by_project and pid not in unreadable]
 
 
 async def _log_activity(
@@ -607,10 +612,11 @@ async def list_boqs(
     description=(
         "The bill register of every project in the body, in one call, keyed by project id. Each "
         "project's list is exactly what GET /boqs/?project_id= returns for it with the same offset "
-        "and limit, which apply per project. Every requested project appears as a key, with an empty "
-        "list when it has no bills. If any project is missing or archived the request answers 404, "
-        "otherwise if any is not readable by the caller it answers 403, and in both cases the detail "
-        "names every failing id. Nothing is answered for the others."
+        "and limit, which apply per project. Every readable project appears as a key, with an empty "
+        "list when it has no bills. A project that is archived, or that the caller may not read, is "
+        "left out of the answer, so the client can tell it apart from a project with no bills by the "
+        "missing key. If any id names no project at all the request answers 404, the detail names "
+        "every such id, and nothing is answered for the others."
     ),
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -633,10 +639,9 @@ async def list_boqs_by_projects(
     projects (the money rollup takes one pass per hundred bills, as one
     project's largest page already did).
     """
-    project_ids = list(dict.fromkeys(body.project_ids))
+    project_ids = await _readable_projects_for_boq(session, list(dict.fromkeys(body.project_ids)), _user_id, payload)
     if not project_ids:
         return {}
-    await _verify_projects_readable_for_boq(session, project_ids, _user_id, payload)
     by_project = await service.list_boqs_for_projects(project_ids, offset=offset, limit=limit)
     items = await _boq_list_items(service, [boq for pid in project_ids for boq in by_project.get(pid, [])])
     register: dict[str, list[BOQListItem]] = {str(pid): [] for pid in project_ids}

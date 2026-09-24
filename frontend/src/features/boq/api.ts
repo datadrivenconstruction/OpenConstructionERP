@@ -47,13 +47,26 @@ export interface BOQListRow {
 
 /**
  * The projects a refused `boqApi.listForProjects` call named, in request order:
- * missing, archived, or not readable by this user. Empty for any other error,
- * such as a network failure or a missing permission, which name no project.
+ * ids that name no project at all. Empty for any other error, such as a network
+ * failure or a missing permission, which name no project.
  */
 export function failedBoqListProjectIds(error: unknown): string[] {
   const detail = (error as { body?: { detail?: { project_ids?: unknown } } } | null)?.body?.detail;
   const ids = detail && typeof detail === 'object' ? detail.project_ids : undefined;
   return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+}
+
+/**
+ * The projects a `boqApi.listForProjects` answer left out, in request order.
+ * The server leaves out a project that is archived or no longer readable by
+ * this user, and answers every other one as a key, with an empty list when it
+ * has no bills, so a missing key is the only sign of a skipped project.
+ */
+export function skippedBoqListProjectIds(
+  requested: readonly string[],
+  register: Record<string, unknown>,
+): string[] {
+  return requested.filter((id) => !Object.prototype.hasOwnProperty.call(register, id));
 }
 
 /**
@@ -1767,9 +1780,10 @@ export const boqApi = {
   /**
    * The bill register of several projects in one request, keyed by project id.
    * Each project's rows are what `GET /boqs/?project_id=` returns for it, with
-   * the page (50 bills by default) cut per project. Every requested project is
-   * a key. One missing, archived or unreadable project refuses the whole call
-   * (404 or 403) and the error body names it: read it with
+   * the page (50 bills by default) cut per project. Every readable project is
+   * a key. An archived or unreadable project is left out: read which with
+   * {@link skippedBoqListProjectIds}. An id that names no project refuses the
+   * whole call (404) and the error body names it: read it with
    * {@link failedBoqListProjectIds}.
    */
   listForProjects: (projectIds: string[]) =>

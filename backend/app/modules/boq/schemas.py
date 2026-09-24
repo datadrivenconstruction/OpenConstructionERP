@@ -401,9 +401,9 @@ class BOQListByProjectsRequest(BaseModel):
         ...,
         max_length=MAX_PROJECTS_PER_BOQ_LIST,
         description=(
-            "Projects to list the bills of. A repeated id is answered once. Every id must name a "
-            "live project the caller may read, or the whole request is refused and the refusal "
-            "names each id that failed."
+            "Projects to list the bills of. A repeated id is answered once. An archived project, or "
+            "one the caller may not read, is left out of the answer. Every id must name a project, "
+            "or the whole request is refused and the refusal names each id that named none."
         ),
     )
 
