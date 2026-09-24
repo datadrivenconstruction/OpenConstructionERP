@@ -79,7 +79,7 @@ async def test_control_a_paid_invoice_cannot_go_back_to_draft() -> None:
 async def test_an_issued_invoice_keeps_its_figures_and_parties(status: str, change: dict[str, str]) -> None:
     service, invoice = await _invoice(status)
     with pytest.raises(HTTPException) as exc:
-        await service.update_invoice(invoice.id, InvoiceUpdate(**change))
+        await service.update_invoice(invoice.id, InvoiceUpdate.model_validate(change))
     assert exc.value.status_code == 409
     assert Decimal(invoice.amount_total) == Decimal("1190")
     assert invoice.currency_code == "EUR"
