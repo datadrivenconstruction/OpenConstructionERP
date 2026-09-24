@@ -35,7 +35,8 @@ The five things it proves, in order
    same missing set has to be empty. This is the check a NOT NULL column with
    no default fails, because the auto-migrate helper cannot add one to a table
    that has rows in it.
-4. The health signal agrees. ``schema_heal_failed`` must read false, not null.
+4. The health signal agrees. ``schema_heal_failed`` and ``schema_heal_incomplete``
+   must both read false, not null.
    What ``alembic_head_matches`` has to read depends on which cohort the aged
    database belongs to, because the two have genuinely different honest answers
    and a single expectation would make one of them unsatisfiable.
@@ -298,6 +299,18 @@ def main() -> int:
             heal_failed is False,
             f"schema_heal_failed reads {heal_failed!r}; false is the only healthy value, and null means the "
             "heal never ran at all",
+        )
+        # Failed only says the heal did not raise. A heal whose statements the
+        # database refused one by one returns normally, so failed reads false
+        # while the column it could not add answers 500. Incomplete is the
+        # field that sees that, with the same polarity and the same rule: false
+        # is the only pass, and null means the heal never ran.
+        heal_incomplete = body.get("schema_heal_incomplete")
+        check(
+            heal_incomplete is False,
+            f"schema_heal_incomplete reads {heal_incomplete!r} with "
+            f"{body.get('schema_heal_skipped_count')!r} statement(s) skipped; false is the only healthy value, "
+            "and null means the heal never ran at all",
         )
         head_matches = body.get("alembic_head_matches")
         with engine.connect() as conn:
