@@ -721,6 +721,27 @@ async def test_project_validate_catches_mixed_currencies(client: AsyncClient, he
 # ── seeding ─────────────────────────────────────────────────────────────────
 
 
+async def _global_names() -> set[str]:
+    """Names of the systems every tenant already sees, the ``tenant_id IS NULL`` rows.
+
+    Seeding for a tenant skips a starter system that exists globally, on
+    purpose (see ``FormworkSystemRepository.list_names_for_tenant``). Whether
+    any do depends on what ran before this module on the same database: the
+    demo installer seeds the catalogue globally, and in a full-suite run some
+    earlier test has usually done that. So the expected split between inserted
+    and skipped is read from the table rather than assumed to be all-inserted,
+    which only held when this module ran against an empty catalogue.
+    """
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.formwork.models import FormworkSystem
+
+    async with async_session_factory() as session:
+        rows = await session.execute(select(FormworkSystem.name).where(FormworkSystem.tenant_id.is_(None)))
+        return {row[0] for row in rows.all()}
+
+
 async def test_seeding_is_idempotent_and_counts_the_real_catalogue(
     client: AsyncClient,
     header: dict[str, str],
@@ -735,7 +756,9 @@ async def test_seeding_is_idempotent_and_counts_the_real_catalogue(
     """
     from app.modules.formwork.schemas import default_seed_systems
 
-    shipped = len(default_seed_systems())
+    names = {row["name"] for row in default_seed_systems()}
+    shipped = len(names)
+    preinstalled = len(names & await _global_names())
 
     tenant_id = str(uuid.uuid4())
     first = await client.post(
@@ -745,8 +768,8 @@ async def test_seeding_is_idempotent_and_counts_the_real_catalogue(
     )
     assert first.status_code == 201, first.text
     body = first.json()
-    assert body["inserted"] == shipped
-    assert body["skipped"] == 0
+    assert body["inserted"] == shipped - preinstalled
+    assert body["skipped"] == preinstalled
     assert body["total_after"] >= shipped
 
     second = await client.post(
@@ -787,8 +810,16 @@ async def test_seeded_systems_carry_the_full_rate_build_up(
         params={"tenant_id": tenant_id},
         headers=header,
     )
-    listing = await client.get("/api/v1/formwork/systems/", headers=header)
-    seeded = [s for s in listing.json() if s["tenant_id"] == tenant_id]
+    listing = await client.get("/api/v1/formwork/systems/", params={"limit": 500}, headers=header)
+    assert listing.status_code == 200, listing.text
+    # What this tenant sees for each starter name: its own row, or the global
+    # one that made the seed skip it. Both came through the same seeding path.
+    visible: dict[str, dict] = {}
+    for row in listing.json():
+        if row["name"] in catalogue and row["tenant_id"] in (tenant_id, None):
+            if row["tenant_id"] == tenant_id or row["name"] not in visible:
+                visible[row["name"]] = row
+    seeded = list(visible.values())
     assert seeded, "seeded systems should be visible in the catalogue"
     assert {s["name"] for s in seeded} == set(catalogue), "seeded names do not match the shipped catalogue"
     for system in seeded:
