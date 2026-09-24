@@ -2,20 +2,41 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """perf: index the owner/tenancy columns that a page load actually filters on.
 
-This migration MUST be RUN (``alembic upgrade``), not merely stamped
---------------------------------------------------------------------
+How an existing install gets them: the boot heal, not this revision
+-------------------------------------------------------------------
 Prod builds the schema with ``create_all`` plus ``alembic stamp <head>`` and
 never walks the chain (``.claude/rules/env-config.md``, ``alembic/env.py``,
-``app/core/alembic_version_table.py``). ``create_all`` decides table by table:
-it skips a table that already exists and therefore never adds an index to one.
-So on an install that is already running, NEITHER half of this change arrives
-on its own - the model declaration is skipped with the table, and the stamp
-marks this revision applied without executing it.
+``app/core/alembic_version_table.py``). ``create_all`` skips a table that
+already exists and so never adds an index to one, and the stamp marks this
+revision applied without executing it.
 
-An existing database gets these seven indexes only when someone runs this
-revision against it by hand. A fresh install gets them from ``create_all``,
-which is why the model declaration stays: it is the only half a fresh install
-ever sees, exactly as the migration is the only half an existing one can get.
+What delivers them is the boot-time heal. ``postgres_auto_migrate`` in
+``app/core/postgres_migrator.py`` compares the model-declared plain indexes
+with the live table and issues ``CREATE INDEX IF NOT EXISTS`` for each one
+that is missing, so an upgraded install has all seven after its first start
+with no manual step. Measured by starting this release on a database built by
+17.8.3: the heal created five and the other two were already there. Running
+this revision by hand is therefore not required. It stays for a database that
+is migrated with ``alembic upgrade``, and it is a no-op wherever the indexes
+exist.
+
+The two already there are the FK columns
+``oe_hse_advanced_ppe_issue.recipient_user_id`` and
+``oe_hse_advanced_certification.owner_user_id``. When ``create_all`` built
+those tables, the FK index pass (``_ensure_performance_indexes`` in
+``app/core/pg_optimizations.py``) indexed every foreign-key column no other
+index covered, as ``ix_<table>_<column>``, which is the same name the naming
+convention gives ``index=True``. That holds for a database whose tables the
+application built with ``create_all``; one built by ``alembic upgrade`` does
+not run that pass and may lack them.
+
+The heal issues a plain ``CREATE INDEX``, not ``CONCURRENTLY``, inside its boot
+transaction with a 3 s ``lock_timeout``. A database role that does not own the
+tables cannot create them at all. Either way the statement is skipped, the boot
+log carries one ERROR line naming it with the SQL to run, and ``/api/health``
+reports ``schema_heal_incomplete: true``. The list pages still answer without
+these indexes, only slower. A fresh install gets them from ``create_all``,
+which is why the model declaration stays.
 
 Background
 ----------
@@ -28,8 +49,10 @@ weight on every INSERT. Narrowing to columns that are both unindexed and
 actually filtered left 22, and narrowing again to the ones a user waits on
 left the seven indexes created here.
 
-Note that a foreign key does not create an index in PostgreSQL. Two of the
-columns below are FK columns that looked covered and were not.
+Note that a foreign key does not create an index in PostgreSQL by itself. For
+the two FK columns below, the application's own FK index pass had already
+built one on every database it created (see above), so the audit's "not
+covered" can hold only for a database built by ``alembic upgrade``.
 
 What each one is for
 --------------------

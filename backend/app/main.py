@@ -1822,11 +1822,12 @@ def create_app() -> FastAPI:
     # client included.
     #
     # The signal exists because the heal is deliberately non-fatal, and a
-    # non-fatal failure that only reaches the log is invisible on the deployment
-    # it actually ruins: an external PostgreSQL whose role has no DDL rights.
-    # There the heal cannot add a single column, the application starts and
-    # looks fine, and the first read of any table that gained a column since
-    # that database was created answers 500 with an undefined-column error.
+    # non-fatal failure that only reaches the log is invisible where it lands.
+    # It covers a heal that RAISED. It was first written for an external
+    # PostgreSQL whose role has no DDL rights, and that deployment does not make
+    # the heal raise: each statement is refused and caught on its own, the heal
+    # returns normally and this reads False while the first read of a column it
+    # could not add answers 500. That case is ``schema_heal_incomplete`` below.
     #
     # ``schema_heal_error`` holds the cause for the boot log and for an operator
     # with access to this process. It is deliberately NOT published by
@@ -1838,6 +1839,16 @@ def create_app() -> FastAPI:
     # would inherit the first one's verdict about a database it never opened.
     app.state.schema_heal_failed = None
     app.state.schema_heal_error = None
+
+    # ── Did the heal do everything it set out to do ──────────────────────
+    # ``schema_heal_incomplete`` is True when the heal raised or when it
+    # returned with statements the database refused, False when it did all of
+    # it, None when it never ran. ``schema_heal_skipped`` holds the refused
+    # statements as ``SkippedStatement`` records, SQL included, for the boot
+    # log and the admin-only upgrade status. Only the verdict and a count reach
+    # ``/api/health``, which is unauthenticated, and neither moves its status.
+    app.state.schema_heal_incomplete = None
+    app.state.schema_heal_skipped = ()
 
     # ── Does the schema still match the models ───────────────────────────
     # The field above says whether the heal RAISED. This one says whether the
@@ -2761,6 +2772,27 @@ def create_app() -> FastAPI:
         if _heal_failed is True:
             result["status"] = "degraded"
 
+        # Whether the heal did everything it set out to do, which the field
+        # above cannot say. The heal catches each refused statement so that one
+        # cannot stop the rest, so a role that may read and write rows but not
+        # change the schema has every statement refused while the heal returns
+        # normally and ``schema_heal_failed`` reads false. Measured on a 17.8.3
+        # database started by 18.0 under such a role: healthy, and a 500 on
+        # every read of a progress claim, for the column the heal could not add.
+        #
+        # A verdict and a count, nothing more. Which statements, and the SQL to
+        # run as the owner, are on ``app.state.schema_heal_skipped``, in one
+        # ERROR line in the boot log and in the admin-only upgrade status; this
+        # endpoint answers anybody. And it deliberately leaves ``status`` alone:
+        # a supervisor may restart on what this endpoint says, a restart cannot give
+        # the role the right it lacks, and degrading here would turn a missing
+        # privilege into a restart loop. ``null`` for both: the heal never ran.
+        _heal_incomplete = getattr(app.state, "schema_heal_incomplete", None)
+        result["schema_heal_incomplete"] = _heal_incomplete
+        result["schema_heal_skipped_count"] = (
+            None if _heal_incomplete is None else len(getattr(app.state, "schema_heal_skipped", ()) or ())
+        )
+
         # And whether it was enough. The field above says the heal did not
         # raise; this one says whether the database and the models actually
         # agree afterwards, which is a different question. The heal enforces a
@@ -3520,15 +3552,26 @@ def create_app() -> FastAPI:
         the upgrade itself asked for: the record lived in the memory of the
         process that was replaced. By then ``running_version`` is the thing
         worth reading anyway.
+
+        Also carries what this start's schema heal could not do:
+        ``schema_heal_incomplete`` and ``schema_heal_skipped``, one entry per
+        statement the database refused, each with the SQL to run as the owner
+        of the tables. They sit here rather than on ``/api/health`` because
+        they name tables and columns and that endpoint is unauthenticated.
         """
+        heal = {
+            "schema_heal_incomplete": getattr(app.state, "schema_heal_incomplete", None),
+            "schema_heal_skipped": [s.as_dict() for s in getattr(app.state, "schema_heal_skipped", ()) or ()],
+        }
         job = current_upgrade()
         if job is None:
             return {
                 "status": "idle",
                 "job_id": None,
                 "running_version": settings.app_version,
+                **heal,
             }
-        return job.as_dict()
+        return {**job.as_dict(), **heal}
 
     @app.get("/api/system/converters/version-check", tags=["System"])
     async def check_converter_versions(user: OptionalUserPayload = None) -> dict[str, Any]:
@@ -4285,7 +4328,7 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.warning("Could not tell whether the database arrived unstamped (non-fatal)", exc_info=True)
 
-            from app.core.postgres_migrator import postgres_auto_migrate
+            from app.core.postgres_migrator import heal_is_incomplete, postgres_auto_migrate
 
             # Nothing in this codebase ever runs ``alembic upgrade``, here or
             # anywhere else, and that is a decision rather than an oversight.
@@ -4312,21 +4355,26 @@ def create_app() -> FastAPI:
             # PostgreSQL keeps the ``None`` this application was built with,
             # which is what lets /api/health say "never ran" instead of "healed
             # fine".
+            _heal_skipped: list = []
+            _heal_raised = False
             try:
-                migrated = await postgres_auto_migrate(engine, Base)
+                migrated = await postgres_auto_migrate(engine, Base, skipped=_heal_skipped)
                 if migrated:
                     logger.info("PostgreSQL auto-migration: %d schema objects (columns + indexes) added", migrated)
                 app.state.schema_heal_failed = False
                 app.state.schema_heal_error = None
             except Exception as exc:
                 _heal_error = f"{type(exc).__name__}: {exc}"
+                _heal_raised = True
                 app.state.schema_heal_failed = True
                 app.state.schema_heal_error = _heal_error
                 # Deliberately louder than the warning this replaces, and it
                 # names the cause inline rather than leaving it in a traceback.
-                # An external database whose role cannot issue DDL fails here
-                # every single boot and nowhere else, and the operator meets the
-                # consequence as an undefined-column 500 in an unrelated module.
+                # This is a heal that raised as a whole: the connection, the
+                # lock, the transaction. A role that cannot issue DDL does not
+                # land here. Its statements are refused one by one inside the
+                # heal, which names them in an ERROR line of its own and returns
+                # normally; that case is recorded just below.
                 logger.error(
                     "PostgreSQL schema heal FAILED (%s). The database is missing columns this "
                     "release expects and requests touching them will fail. If this role cannot "
@@ -4337,6 +4385,14 @@ def create_app() -> FastAPI:
                     _heal_error,
                     exc_info=True,
                 )
+
+            # The flag above says whether the heal raised. What it could not
+            # do statement by statement is this list, which the heal has
+            # already logged with the SQL to run. Written here, inside the
+            # guard, so a deployment that never runs the heal keeps the None it
+            # was built with.
+            app.state.schema_heal_skipped = tuple(_heal_skipped)
+            app.state.schema_heal_incomplete = heal_is_incomplete(_heal_skipped, raised=_heal_raised)
 
             # Now ask whether it worked, which the flag above does not answer.
             # A heal that raised nothing still leaves the models and the
