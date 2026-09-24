@@ -66,6 +66,7 @@ import {
 } from '@/stores/useBackgroundInstallStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { normalizeRole } from '@/shared/lib/roles';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
@@ -1128,6 +1129,16 @@ function StepWelcome({
   );
 }
 
+/**
+ * Whether this user may install a ready-made partner pack. Every install
+ * route under `/v1/partner-pack/` requires the admin role on the server, so
+ * offering the pack to anyone else led to a 403, a "Could not finish" toast
+ * and a trip back to the start cards.
+ */
+function useCanInstallPartnerPacks(): boolean {
+  return normalizeRole(useAuthStore((s) => s.userRole)) === 'admin';
+}
+
 // ── Step 2: "How would you like to start?" ──────────────────────────────────
 
 function StepStartChoice({
@@ -1143,6 +1154,7 @@ function StepStartChoice({
   onBack: () => void;
 }) {
   const { t } = useTranslation();
+  const canInstallPacks = useCanInstallPartnerPacks();
 
   return (
     <div className="flex flex-col items-center">
@@ -1155,7 +1167,12 @@ function StepStartChoice({
         })}
       </p>
 
-      <div className="mt-10 w-full max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div
+        className={clsx(
+          'mt-10 w-full grid grid-cols-1 gap-5',
+          canInstallPacks ? 'max-w-5xl sm:grid-cols-3' : 'max-w-3xl sm:grid-cols-2',
+        )}
+      >
         {/* Quick Start card */}
         <button
           onClick={onQuickStart}
@@ -1184,7 +1201,9 @@ function StepStartChoice({
 
         {/* Ready-made pack card — a turnkey country starter pack that
             provisions modules, regional config and sample data in one click,
-            then skips straight to the finish step. */}
+            then skips straight to the finish step. Offered to admins only:
+            the server refuses the install to anyone else. */}
+        {canInstallPacks && (
         <button
           onClick={onReadyPack}
           className={clsx(
@@ -1210,6 +1229,7 @@ function StepStartChoice({
             })}
           </p>
         </button>
+        )}
 
         {/* Choose profile card */}
         <button
@@ -3390,6 +3410,7 @@ export function StepDataSetup({
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  const canInstallPartnerPacks = useCanInstallPartnerPacks();
 
   const suggestedRegion = getSuggestedRegion(selectedLang);
   const suggestedDemoId = getSuggestedDemo(selectedLang);
@@ -3929,8 +3950,9 @@ export function StepDataSetup({
             worked example project in one click. Offered after the manual base
             picker so the user chooses bases first. The example project is not
             decoration here, it is the only part of the install a new user can
-            actually read on arrival. */}
-        <PartnerPackInstaller onActivateLocale={applyLocale} />
+            actually read on arrival. The partner pack installer is offered
+            to admins only, like the Ready-made Pack card on the start step. */}
+        {canInstallPartnerPacks && <PartnerPackInstaller onActivateLocale={applyLocale} />}
         <CountryPackCard
           packs={COUNTRY_PACKS}
           selectedPack={selectedPack}
