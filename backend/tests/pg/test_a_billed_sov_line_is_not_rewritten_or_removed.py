@@ -310,3 +310,56 @@ async def test_a_draft_contract_nothing_has_billed_on_still_deletes(session) -> 
 
     assert await _contracts_with_id(session, contract.id) == 0
     assert await _lines_with_id(session, line.id) == 0
+
+
+async def _claim_without_lines(session, contract: Contract, *, status: str) -> ProgressClaim:
+    """A T&M or cost-plus claim: billed as a gross, with no schedule of values lines."""
+    claim = ProgressClaim(
+        id=uuid.uuid4(),
+        contract_id=contract.id,
+        claim_number="PC-7",
+        period_start="2026-03-01",
+        period_end="2026-03-31",
+        period_from=date(2026, 3, 1),
+        period_to=date(2026, 3, 31),
+        currency="USD",
+        gross_amount=Decimal("12000"),
+        retention_amount=Decimal("1200"),
+        net_due=Decimal("10800"),
+        status=status,
+    )
+    session.add(claim)
+    await session.flush()
+    return claim
+
+
+@pytest.mark.parametrize("claim_status", ["submitted", "certified", "paid", "rejected"])
+async def test_a_draft_contract_holding_a_claim_without_lines_is_not_deleted(session, claim_status: str) -> None:
+    """The billed-line question cannot see a claim that has no lines.
+
+    A certified T&M claim on a draft contract passed it, and the cascade took
+    the claim with the contract. Any claim past draft now refuses the delete.
+    """
+    svc = ContractsService(session)
+    contract = await _draft_contract(session)
+    await _claim_without_lines(session, contract, status=claim_status)
+
+    with pytest.raises(HTTPException) as caught:
+        await svc.delete_contract(contract.id)
+
+    assert caught.value.status_code == 409
+    assert caught.value.detail["error"] == "contract_has_claims_past_draft"
+    assert caught.value.detail["claim_numbers"] == ["PC-7"]
+    assert await _contracts_with_id(session, contract.id) == 1
+    assert await _claims_on(session, contract.id) == 1
+
+
+async def test_a_draft_contract_holding_only_a_draft_claim_without_lines_still_deletes(session) -> None:
+    """The control: a draft claim on a draft contract is still the draft's own."""
+    svc = ContractsService(session)
+    contract = await _draft_contract(session)
+    await _claim_without_lines(session, contract, status="draft")
+
+    await svc.delete_contract(contract.id)
+
+    assert await _contracts_with_id(session, contract.id) == 0
