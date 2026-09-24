@@ -23,6 +23,7 @@ cannot read/mutate contracts of projects they don't own. The catalog endpoint
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from decimal import Decimal
@@ -1486,7 +1487,9 @@ async def export_aia_application_pdf(
     # below. The request's language would have printed one row in German or
     # Russian on an English page.
     payload = await service.build_aia_application(claim_id, locale="en")
-    pdf_bytes = render_aia_application_pdf(payload)
+    # ReportLab layout is CPU-bound and synchronous; in a thread it does not
+    # stall every other request on the event loop while the form is drawn.
+    pdf_bytes = await asyncio.to_thread(render_aia_application_pdf, payload)
     safe_num = "".join(c for c in str(payload.get("application_number") or "app") if c.isalnum() or c in "-_") or "app"
     filename = f"AIA_G702_{safe_num}.pdf"
     return StreamingResponse(
