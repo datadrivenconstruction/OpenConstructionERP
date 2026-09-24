@@ -278,6 +278,14 @@ async def test_custom_position_saves_reusable_cost_item():
     from app.modules.costs.models import CostItem
 
     svc = get_service()
+    # ``source == "custom"`` is not a property of this test alone: other tests
+    # in the same database save custom rates too, and a full single-process run
+    # found three. The rows under test are the ones carrying this description,
+    # made unique per run so a database the test already ran against does not
+    # hand back the previous run's row either.
+    description = f"Reusable bespoke rate {uuid.uuid4().hex[:8]}"
+    ours = (CostItem.source == "custom") & (CostItem.description == description)
+
     project_id, model_id = await _seed_project_with_bim(region="DE", currency="EUR")
     session_id = await _new_session_with_groups(project_id, model_id)
 
@@ -292,7 +300,7 @@ async def test_custom_position_saves_reusable_cost_item():
             schemas.NoMatchRequest(
                 group_key=wall_key,
                 action="custom",
-                custom_description="Reusable bespoke rate",
+                custom_description=description,
                 custom_unit="m3",
                 custom_rate=Decimal("200.00"),
                 save_to_my_catalogue=True,
@@ -304,10 +312,10 @@ async def test_custom_position_saves_reusable_cost_item():
     assert detail.chosen_candidate_id is not None
 
     async with async_session_factory() as s:
-        items = (await s.execute(select(CostItem).where(CostItem.source == "custom"))).scalars().all()
+        items = (await s.execute(select(CostItem).where(ours))).scalars().all()
     assert len(items) == 1
     item = items[0]
-    assert item.description == "Reusable bespoke rate"
+    assert item.description == description
     assert item.unit == "m3"
     assert Decimal(item.rate) == Decimal("200.00")
     assert item.currency == "EUR"
@@ -334,7 +342,7 @@ async def test_custom_position_saves_reusable_cost_item():
             schemas.NoMatchRequest(
                 group_key=g2,
                 action="custom",
-                custom_description="Reusable bespoke rate",
+                custom_description=description,
                 custom_unit="m3",
                 custom_rate=Decimal("210.00"),
                 save_to_my_catalogue=True,
@@ -342,7 +350,7 @@ async def test_custom_position_saves_reusable_cost_item():
         )
         await s.commit()
     async with async_session_factory() as s:
-        items_after = (await s.execute(select(CostItem).where(CostItem.source == "custom"))).scalars().all()
+        items_after = (await s.execute(select(CostItem).where(ours))).scalars().all()
     # Still exactly one row for this description+region; rate refreshed.
     assert len(items_after) == 1
     assert Decimal(items_after[0].rate) == Decimal("210.00")
