@@ -1195,6 +1195,11 @@ class ContractsService:
         Deleting the contract deletes every schedule line on it, so it asks
         the same question a single line delete asks, over all of them, and a
         line a claim has billed on refuses it with the same 409.
+
+        The line check misses a claim with no lines. A T&M or cost-plus claim
+        is billed without a schedule of values, so a certified or paid one
+        left the draft deletable and went with it. Any claim that has left
+        draft refuses the delete with 409 ``contract_has_claims_past_draft``.
         """
         contract = await self.get_contract(contract_id)
 
@@ -1205,6 +1210,20 @@ class ContractsService:
                     "Only draft contracts can be deleted. This contract is "
                     f"'{contract.status}'; terminate or complete it instead."
                 ),
+            )
+        claims_past_draft = await self.claim_repo.claim_numbers_past_draft(contract_id)
+        if claims_past_draft:
+            named = ", ".join(number for number in claims_past_draft if number)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "contract_has_claims_past_draft",
+                    "message": (
+                        f"This contract has progress claims past draft{f' ({named})' if named else ''}, so it "
+                        "cannot be deleted: they would be deleted with it. Terminate the contract instead."
+                    ),
+                    "claim_numbers": claims_past_draft,
+                },
             )
         lines = await self.line_repo.list_for_contract(contract_id)
         await self._assert_contract_line_not_billed([ln.id for ln in lines], whole_contract=True)

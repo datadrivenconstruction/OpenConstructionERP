@@ -65,7 +65,19 @@ class _NothingBilled:
         return {}
 
 
-def _contracts_service(contract: _Contract) -> tuple[ContractsService, _RecordingRepo]:
+class _Claims:
+    """The numbers of the claims on the contract that have left draft."""
+
+    def __init__(self, past_draft: list[str]) -> None:
+        self.past_draft = past_draft
+
+    async def claim_numbers_past_draft(self, _contract_id: uuid.UUID) -> list[str]:
+        return self.past_draft
+
+
+def _contracts_service(
+    contract: _Contract, claims_past_draft: list[str] | None = None
+) -> tuple[ContractsService, _RecordingRepo]:
     service = ContractsService.__new__(ContractsService)
     service.session = _StubSession()
     repo = _RecordingRepo()
@@ -74,6 +86,7 @@ def _contracts_service(contract: _Contract) -> tuple[ContractsService, _Recordin
     # PG test for that lives in tests/pg, this file only pins the status rule.
     service.line_repo = _NoLines()
     service.claim_line_repo = _NothingBilled()
+    service.claim_repo = _Claims(claims_past_draft or [])
 
     async def _get(_contract_id: uuid.UUID) -> _Contract:
         return contract
@@ -105,6 +118,22 @@ async def test_a_draft_contract_is_still_deletable() -> None:
     await service.delete_contract(contract.id)
 
     assert repo.deleted == [contract.id]
+
+
+@pytest.mark.asyncio
+async def test_a_draft_holding_a_certified_claim_without_lines_is_not_deleted() -> None:
+    """A T&M or cost-plus claim has no lines, so the billed-line check never saw it."""
+    contract = _Contract("draft")
+    service, repo = _contracts_service(contract, claims_past_draft=["PC-0001", "PC-0002"])
+
+    with pytest.raises(HTTPException) as raised:
+        await service.delete_contract(contract.id)
+
+    assert raised.value.status_code == 409
+    detail: Any = raised.value.detail
+    assert detail["error"] == "contract_has_claims_past_draft"
+    assert detail["claim_numbers"] == ["PC-0001", "PC-0002"]
+    assert repo.deleted == [], "the delete must not have reached the repository"
 
 
 class _AgreementsRepo:
