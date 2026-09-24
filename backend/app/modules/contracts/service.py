@@ -1218,6 +1218,9 @@ class ContractsService:
                     "contract_status": contract.status,
                 },
             )
+        # Billed lines first: that refusal names the lines as well as the claims.
+        lines = await self.line_repo.list_for_contract(contract_id)
+        await self._assert_contract_line_not_billed([ln.id for ln in lines], whole_contract=True)
         claims_past_draft = await self.claim_repo.claim_numbers_past_draft(contract_id)
         if claims_past_draft:
             named = ", ".join(number for number in claims_past_draft if number)
@@ -1232,8 +1235,6 @@ class ContractsService:
                     "claim_numbers": claims_past_draft,
                 },
             )
-        lines = await self.line_repo.list_for_contract(contract_id)
-        await self._assert_contract_line_not_billed([ln.id for ln in lines], whole_contract=True)
 
         await self.contract_repo.delete(contract_id)
         logger.info("Contract deleted: %s", contract_id)
