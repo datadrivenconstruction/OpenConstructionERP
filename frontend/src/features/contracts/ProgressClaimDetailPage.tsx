@@ -415,7 +415,7 @@ export function ProgressClaimDetailPage() {
               <>
                 {' '}
                 {t('contracts.claim_lines_locked_reopen', {
-                  defaultValue: 'Reject the claim to put it back in draft.',
+                  defaultValue: 'Reject it and raise a new draft claim for the corrected figures.',
                 })}
               </>
             )}
