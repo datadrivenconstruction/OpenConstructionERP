@@ -37,6 +37,9 @@ import {
   awardBid,
   type RFQ,
   type RFQStatus,
+  RFQ_OPEN_STATUSES,
+  RFQ_AWARDED_STATUSES,
+  RFQ_FILTER_STATUSES,
   type RFQCreatePayload,
   type Bid,
   type ComparisonMatrix,
@@ -46,18 +49,30 @@ import {
 
 const STATUS_BADGE: Record<RFQStatus, BadgeVariant> = {
   draft: 'neutral',
+  published: 'blue',
+  bids_received: 'purple',
+  awarded: 'success',
+  po_issued: 'success',
+  completed: 'neutral',
+  cancelled: 'error',
   issued: 'blue',
   evaluating: 'purple',
-  awarded: 'success',
   closed: 'neutral',
 };
 
 function statusLabel(status: RFQStatus, t: (k: string, o?: Record<string, unknown>) => string): string {
   const labels: Record<RFQStatus, string> = {
     draft: t('rfq_bidding.status_draft', { defaultValue: 'Draft' }),
+    // The page's own verb for publishing is "Issue", so the published status
+    // reads as issued, under the key already translated for it.
+    published: t('rfq_bidding.status_issued', { defaultValue: 'Issued' }),
+    bids_received: t('rfq_bidding.status_bids_received', { defaultValue: 'Bids received' }),
+    awarded: t('rfq_bidding.status_awarded', { defaultValue: 'Awarded' }),
+    po_issued: t('rfq_bidding.status_po_issued', { defaultValue: 'PO issued' }),
+    completed: t('rfq_bidding.status_completed', { defaultValue: 'Completed' }),
+    cancelled: t('rfq_bidding.status_cancelled', { defaultValue: 'Cancelled' }),
     issued: t('rfq_bidding.status_issued', { defaultValue: 'Issued' }),
     evaluating: t('rfq_bidding.status_evaluating', { defaultValue: 'Evaluating' }),
-    awarded: t('rfq_bidding.status_awarded', { defaultValue: 'Awarded' }),
     closed: t('rfq_bidding.status_closed', { defaultValue: 'Closed' }),
   };
   return labels[status] ?? status;
@@ -213,8 +228,8 @@ export function RFQBiddingPage() {
 
   const stats = useMemo(() => {
     const total = rfqs.length;
-    const open = rfqs.filter((r) => r.status === 'issued' || r.status === 'evaluating').length;
-    const awarded = rfqs.filter((r) => r.status === 'awarded').length;
+    const open = rfqs.filter((r) => RFQ_OPEN_STATUSES.has(r.status)).length;
+    const awarded = rfqs.filter((r) => RFQ_AWARDED_STATUSES.has(r.status)).length;
     return { total, open, awarded };
   }, [rfqs]);
 
@@ -233,7 +248,7 @@ export function RFQBiddingPage() {
   // ── Award tracking data ───────────────────────────────────────────────
 
   const awardedRfqs = useMemo(
-    () => rfqs.filter((r) => r.status === 'awarded'),
+    () => rfqs.filter((r) => RFQ_AWARDED_STATUSES.has(r.status)),
     [rfqs],
   );
 
@@ -494,7 +509,7 @@ function RFQListPanel({
   onSelectForComparison: (id: string) => void;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
-  const ALL_STATUSES: RFQStatus[] = ['draft', 'issued', 'evaluating', 'awarded', 'closed'];
+  const ALL_STATUSES = RFQ_FILTER_STATUSES;
 
   return (
     <div className="space-y-3">
@@ -608,7 +623,7 @@ function RFQListPanel({
                     {t('rfq_bidding.issue', { defaultValue: 'Issue' })}
                   </button>
                 )}
-                {(rfq.status === 'issued' || rfq.status === 'evaluating') && (
+                {RFQ_OPEN_STATUSES.has(rfq.status) && (
                   <button
                     onClick={() => onSelectForComparison(rfq.id)}
                     className="flex items-center gap-1 rounded-lg border border-border-light px-2.5 py-1.5 text-xs
@@ -661,7 +676,7 @@ function ComparisonPanel({
 }) {
   // Only show RFQs that have bids to compare
   const comparableRfqs = rfqs.filter(
-    (r) => r.status === 'issued' || r.status === 'evaluating' || r.status === 'awarded',
+    (r) => RFQ_OPEN_STATUSES.has(r.status) || RFQ_AWARDED_STATUSES.has(r.status),
   );
 
   return (

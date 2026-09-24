@@ -5,7 +5,41 @@ import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/ap
 
 /* ── RFQ types ────────────────────────────────────────────────────────── */
 
-export type RFQStatus = 'draft' | 'issued' | 'evaluating' | 'awarded' | 'closed';
+/**
+ * The statuses the server's RFQ status machine uses (`rfq` in
+ * `backend/app/core/fsm/registry.py`). `issued`, `evaluating` and `closed`
+ * are older values the page used to count by; the server never writes
+ * `evaluating` or `closed`, and reads `issued` only as another open status,
+ * so they stay in the type for rows that may still carry them.
+ */
+export type RFQStatus =
+  | 'draft'
+  | 'published'
+  | 'bids_received'
+  | 'awarded'
+  | 'po_issued'
+  | 'completed'
+  | 'cancelled'
+  | 'issued'
+  | 'evaluating'
+  | 'closed';
+
+/** Statuses in which vendors may still bid. Mirrors `_BID_SUBMISSION_OPEN_STATUSES`. */
+export const RFQ_OPEN_STATUSES: ReadonlySet<RFQStatus> = new Set<RFQStatus>(['published', 'issued', 'bids_received']);
+
+/** Statuses of an RFQ that has been awarded, including the steps after the award. */
+export const RFQ_AWARDED_STATUSES: ReadonlySet<RFQStatus> = new Set<RFQStatus>(['awarded', 'po_issued', 'completed']);
+
+/** The status machine's statuses, in lifecycle order, for the status filter. */
+export const RFQ_FILTER_STATUSES: readonly RFQStatus[] = [
+  'draft',
+  'published',
+  'bids_received',
+  'awarded',
+  'po_issued',
+  'completed',
+  'cancelled',
+];
 
 export interface RFQ {
   id: string;
