@@ -280,6 +280,19 @@ export function deleteNotice(noticeId: string): Promise<void> {
   return apiDelete<void>(`${BASE}/notices/${noticeId}`);
 }
 
+/**
+ * Bring the breach register of one project up to today.
+ *
+ * Reads never write the register, so a deadline that passed since the last
+ * change to a clock is filed only when somebody asks for it here.
+ */
+export function refreshRegister(projectId: string): Promise<ClockEvent[]> {
+  return apiPost<ClockEvent[], Record<string, never>>(
+    `${BASE}/events/refresh${qs({ project_id: projectId })}`,
+    {},
+  );
+}
+
 export function listEvents(params: {
   projectId: string;
   eventType?: string;

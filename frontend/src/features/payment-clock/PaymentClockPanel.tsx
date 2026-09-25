@@ -8,10 +8,10 @@
  * payable and by when. That answer is `notified_sum`, so it leads the detail
  * pane rather than sitting at the bottom of a table.
  *
- * Reading a clock is what refreshes its breach register on the server, so the
- * register can gain rows from a plain read. That is deliberate upstream — a
- * deadline passes unattended — and it means the detail query must not be
- * cached so long that a reader sees a stale register.
+ * Reading a clock never writes its breach register. The server files breaches
+ * when a clock changes and when the register is refreshed on purpose, which is
+ * what the refresh button on the register does: a deadline passes unattended,
+ * so somebody has to ask for the register to be brought up to today.
  */
 
 import { useMemo, useState } from 'react';
@@ -40,6 +40,7 @@ import {
   listRegimes,
   openClock,
   recomputeClock,
+  refreshRegister,
 } from './api';
 import { isOverdue, severityVariant } from './clockStatus';
 
@@ -84,9 +85,25 @@ export function PaymentClockPanel() {
     queryKey: ['payment-clock', 'clock', selectedId],
     queryFn: () => getClock(selectedId as string),
     enabled: !!selectedId,
-    // Reading writes the register, so a long cache would show a register that
-    // is older than the answer printed beside it.
     staleTime: 0,
+  });
+
+  const refresh = useMutation({
+    mutationFn: () => refreshRegister(activeProjectId as string),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['payment-clock'] });
+      addToast({
+        type: 'success',
+        title: t('payment_clock.register_refreshed', { defaultValue: 'Breach register brought up to today.' }),
+      });
+    },
+    onError: (err: unknown) => {
+      addToast({
+        type: 'error',
+        title: t('payment_clock.register_refresh_failed', { defaultValue: 'Could not refresh the breach register' }),
+        message: getErrorMessage(err),
+      });
+    },
   });
 
   const recompute = useMutation({
@@ -241,18 +258,34 @@ export function PaymentClockPanel() {
         </section>
       </div>
 
-      {events.length > 0 && (
+      {applications.length > 0 && (
         <section aria-label={t('payment_clock.register_label', { defaultValue: 'Breach register' })}>
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
-            <AlertTriangle className="h-4 w-4 text-semantic-warning" />
-            {t('payment_clock.register_title', { defaultValue: 'Breach register' })}
-          </h3>
+          <div className="mb-2 flex flex-wrap items-center gap-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4 text-semantic-warning" />
+              {t('payment_clock.register_title', { defaultValue: 'Breach register' })}
+            </h3>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => refresh.mutate()}
+              loading={refresh.isPending}
+            >
+              <RefreshCw className="mr-1 h-4 w-4" />
+              {t('payment_clock.register_refresh', { defaultValue: 'Bring up to today' })}
+            </Button>
+          </div>
           <p className="mb-2 text-xs text-content-tertiary">
             {t('payment_clock.register_note', {
               defaultValue:
-                'Every row here was written by a validation rule when a clock was read. A quiet register on a project nobody opens is telling you about the reading, not about the payments.',
+                'Every row here was written by a validation rule when a clock changed or when the register was brought up to today. Opening a clock does not file anything, so a deadline that passed since then appears here only after a refresh.',
             })}
           </p>
+          {events.length === 0 && (
+            <p className="text-sm text-content-secondary">
+              {t('payment_clock.register_empty', { defaultValue: 'No breaches on record.' })}
+            </p>
+          )}
           <ul className="space-y-1">
             {events.map((ev) => (
               <li key={ev.id} className="flex flex-wrap items-center gap-2 text-sm">
