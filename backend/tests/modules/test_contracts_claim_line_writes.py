@@ -41,11 +41,20 @@ from app.modules.contracts.schemas import (
     ProgressClaimLineUpdate,
 )
 from app.modules.contracts.service import ContractsService
+from app.modules.contracts.validators import register_contracts_validation_rules
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 from tests._pg import transactional_session
 
 pytestmark = pytest.mark.asyncio
+
+
+@pytest.fixture(autouse=True)
+def _pay_application_rules() -> None:
+    # Submitting a claim runs the pay_application gate, which refuses when the
+    # rule set is not loaded; registering here keeps the file order-independent.
+    register_contracts_validation_rules()
+
 
 OWNER_ID = uuid.uuid4()
 
@@ -139,7 +148,9 @@ async def test_a_line_corrected_by_hand_moves_the_claim_it_belongs_to(session) -
     )
 
     # And what the next claim reads as previously certified is the corrected
-    # figure, which is where the old behaviour did its lasting damage.
+    # figure, which is where the old behaviour did its lasting damage. March
+    # goes out first: a draft is not a previous certificate.
+    await svc.transition_claim(march.id, "submitted")
     april = await svc.auto_generate_claim_lines(
         (await _claim(session, world, "PC-2", 4)).id,
         AutoGenerateClaimRequest(completion={str(world.a.id): Decimal("60"), str(world.b.id): Decimal("60")}),

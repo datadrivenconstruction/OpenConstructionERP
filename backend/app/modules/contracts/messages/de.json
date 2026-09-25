@@ -38,7 +38,8 @@
     },
     "errors": {
       "submission_blocked": "Diese Abschlagsrechnung kann erst eingereicht werden, wenn Folgendes behoben ist: {findings}",
-      "rules_unavailable": "Die Prüfregeln für Abschlagsrechnungen sind in dieser Installation nicht geladen, daher kann diese Abschlagsrechnung vor dem Einreichen nicht geprüft werden."
+      "rules_unavailable": "Die Prüfregeln für Abschlagsrechnungen sind in dieser Installation nicht geladen, daher kann diese Abschlagsrechnung vor dem Einreichen nicht geprüft werden.",
+      "later_claim_already_issued": "Abschlagsrechnung {claims} folgt auf diese und ist bereits eingereicht. Sie wurde erstellt, als diese noch ein Entwurf war, und rechnet diese Leistung daher bereits ab. Löschen Sie diesen Entwurf oder legen Sie seinen Zeitraum hinter die letzte eingereichte Abschlagsrechnung"
     },
     "totals_match_lines": {
       "fail": "Zahlungsantrag {claim} fordert {gross}, die zugehörigen Positionen ergeben aber {lines_total}: der Antrag wurde nach der Änderung seiner Positionen nicht neu berechnet",

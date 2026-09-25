@@ -65,6 +65,7 @@ from app.modules.contracts.models import (
 )
 from app.modules.contracts.periods import claim_dates_for_write, claim_order_key, claims_before
 from app.modules.contracts.repository import (
+    PRIOR_CLAIM_IDS_KEY,
     ContractDocumentRepository,
     ContractLineRepository,
     ContractMilestoneRepository,
@@ -2434,6 +2435,12 @@ class ContractsService:
                         "locked_fields": frozen,
                     },
                 )
+        if "metadata_" in fields and PRIOR_CLAIM_IDS_KEY in (claim.metadata_ or {}):
+            # The claims this one counted as previous when it went out. A
+            # metadata write must not change them, or the issued claim would
+            # reprint with a different line 7.
+            frozen_prior = claim.metadata_[PRIOR_CLAIM_IDS_KEY]
+            fields["metadata_"] = {**(fields["metadata_"] or {}), PRIOR_CLAIM_IDS_KEY: frozen_prior}
         fields = {**fields, **claim_dates_for_write(fields)}
         if fields:
             await self.claim_repo.update_fields(claim.id, **fields)
@@ -2461,6 +2468,11 @@ class ContractsService:
         double payment. Reading line 7 as certified claims only needs
         certification to refuse or re-work an overlapping claim first
         (test_overlapping_claims_never_pay_the_same_work_twice).
+
+        A draft is not an application: it has not left the contractor, so a
+        certificate built now leaves it out. A claim issued before that rule
+        keeps counting the drafts it counted; see
+        :meth:`ProgressClaimRepository.prior_claims`.
 
         Returns the amount and the basis it was worked out on. ``"snapshot"``
         when the previous claim stores its certificate: line 7 is then its
@@ -3120,6 +3132,44 @@ class ContractsService:
             "warnings": [_serialise(r) for r in report.warnings],
         }
 
+    async def _refuse_going_out_behind_a_later_claim(self, claim: ProgressClaim) -> None:
+        """Refuse to submit a draft that a claim after it went out without counting.
+
+        A draft is not a previous certificate, so a later claim that went out
+        while this one was a draft applied for its work as well. Submitting
+        this one now would ask for that work a second time. A later claim that
+        did count it (it was past draft then, and has come back since) is no
+        obstacle, and neither is a rejected one, which billed nothing. A claim
+        issued before the counted set was frozen onto claims counted drafts.
+
+        Raises:
+            HTTPException: 409 ``later_claim_already_issued``.
+        """
+        ordered = await self.claim_repo.ordered_for_contract(claim.contract_id)
+        position = next((i for i, c in enumerate(ordered) if c.id == claim.id), len(ordered))
+        later = [
+            c.claim_number
+            for c in ordered[position + 1 :]
+            if c.status not in ("draft", "rejected")
+            and isinstance((c.metadata_ or {}).get(PRIOR_CLAIM_IDS_KEY), list)
+            and str(claim.id) not in {str(i) for i in c.metadata_[PRIOR_CLAIM_IDS_KEY]}
+        ]
+        if later:
+            from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "later_claim_already_issued",
+                    "message": contracts_translate(
+                        "pay_application.errors.later_claim_already_issued",
+                        locale=get_locale(),
+                        claims=", ".join(later),
+                    ),
+                    "later_claims": later,
+                },
+            )
+
     async def transition_claim(
         self,
         claim_id: uuid.UUID,
@@ -3156,9 +3206,15 @@ class ContractsService:
             # The moment the claim leaves the contractor. Checked here rather
             # than at approval because a payment application with a broken
             # period or an overbilled line should never reach the owner.
+            await self._refuse_going_out_behind_a_later_claim(claim)
             await self.enforce_claim_rules(claim)
 
         fields: dict[str, Any] = {"status": target_status}
+        if claim.status == "draft":
+            # Freeze the claims its "previous" was worked out from, drafts left
+            # out, so every later print of it reads the same line 7.
+            counted = await self.claim_repo.prior_claims(claim.contract_id, before_claim_id=claim.id)
+            fields["metadata_"] = {**(claim.metadata_ or {}), PRIOR_CLAIM_IDS_KEY: [str(c.id) for c in counted]}
         now = datetime.now(UTC).isoformat()
         if target_status == "submitted":
             fields["submitted_at"] = now
