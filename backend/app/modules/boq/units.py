@@ -390,6 +390,34 @@ def is_approved_unit(unit: str | None) -> bool:
     return normalise_unit(unit) is not None
 
 
+_SUPERSCRIPT_DIGITS: Final[dict[int, str]] = {ord("²"): "2", ord("³"): "3"}
+
+
+def unit_identity_key(unit: str) -> str:
+    """Return the key two unit spellings are compared by for identity.
+
+    Trimmed, case-folded, with the superscript squared / cubed glyphs folded
+    to digits, so ``M3``, ``m3`` and ``m³`` are one unit. Aliases are NOT
+    applied here: ``tonne`` and ``t`` stay distinct keys, because this key
+    answers "did the user type the same thing", not "do they measure the same
+    thing".
+    """
+    return unit.strip().translate(_SUPERSCRIPT_DIGITS).casefold()
+
+
+def is_registry_unit(unit: str | None) -> bool:
+    """Return True when ``unit`` is one the platform already knows.
+
+    That is a member of :data:`APPROVED_UNITS` or a synonym in the alias
+    table, compared through :func:`unit_identity_key`. A user's personal
+    custom-unit list never needs such a unit, since every picker offers it.
+    """
+    if not unit:
+        return False
+    key = unit_identity_key(unit)
+    return key in APPROVED_UNITS or key in _UNIT_ALIASES
+
+
 # ── Internal unit token → GAEB ``<QU>`` code ──────────────────────────────
 #
 # GAEB carries the unit as a short code from the market lexicon (GAEB 3.3

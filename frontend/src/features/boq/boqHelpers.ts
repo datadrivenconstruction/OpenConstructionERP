@@ -182,17 +182,43 @@ const LOCALE_UNITS: Record<string, readonly string[]> = {
  *
  * The dropdown reads from localStorage for instant render. On app boot we
  * call `syncCustomUnitsFromServer()` to merge the server-side list (per-user,
- * stored on `User.metadata_["custom_units"]`) into the local cache. New unit
- * commits go through `saveCustomUnit()` which writes locally first then
- * fire-and-forgets a PATCH to the server. Anonymous / offline sessions keep
- * working as before — the server sync is best-effort and silently degrades.
+ * stored on `User.metadata_["custom_units"]`) into the local cache; loading
+ * only reads, it never writes to the server. A committed unit goes through
+ * `saveCustomUnit()`, which records it only when it is genuinely new: not a
+ * unit the registry already offers (in any language) and not already in the
+ * list under another case or superscript spelling. A new unit is written
+ * locally and then sent ALONE to the server, whose PATCH adds it to the
+ * stored list rather than replacing the list. Two sessions under one login
+ * therefore can no longer overwrite each other's units. Anonymous / offline
+ * sessions keep working: the server sync is best-effort.
  */
 const CUSTOM_UNITS_KEY = 'oe_custom_units';
+const CUSTOM_UNITS_ENDPOINT = '/v1/users/me/custom-units/';
+
+/** The key two unit spellings are compared by: trimmed, case-folded, with
+ *  the superscript squared / cubed glyphs folded to digits, so `M3`, `m3`
+ *  and `m³` are one unit. Mirrors `unit_identity_key` in
+ *  `backend/app/modules/boq/units.py`. */
+export function unitIdentityKey(unit: string): string {
+  return unit.trim().replace(/²/g, '2').replace(/³/g, '3').toLowerCase();
+}
+
+/** Every unit the picker offers without a custom list, in any language. */
+let registryKeys: Set<string> | null = null;
+function isRegistryUnit(unit: string): boolean {
+  if (!registryKeys) {
+    registryKeys = new Set(
+      [...BASE_UNITS, ...Object.values(LOCALE_UNITS).flat()].map(unitIdentityKey),
+    );
+  }
+  return registryKeys.has(unitIdentityKey(unit));
+}
 
 function loadCustomUnits(): string[] {
   try {
     const raw = localStorage.getItem(CUSTOM_UNITS_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === 'string') : [];
   } catch {
     return [];
   }
@@ -202,6 +228,19 @@ function writeCustomUnits(units: string[]): void {
   try {
     localStorage.setItem(CUSTOM_UNITS_KEY, JSON.stringify(units));
   } catch { /* localStorage full / disabled — accept the loss */ }
+}
+
+/** Append the units of `extra` whose identity key is not in `base` yet. */
+function unionUnits(base: string[], extra: string[]): string[] {
+  const out = [...base];
+  const seen = new Set(base.map(unitIdentityKey));
+  for (const unit of extra) {
+    const key = unitIdentityKey(unit);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(unit);
+  }
+  return out;
 }
 
 interface CustomUnitsResponse { units: string[] }
@@ -214,19 +253,17 @@ interface CustomUnitsResponse { units: string[] }
 let inFlightSync: Promise<string[]> | null = null;
 
 /** Pull the server-side catalogue into local cache. Called once on app boot
- *  after auth resolves. Returns the merged list for callers that want it. */
+ *  after auth resolves. Returns the merged list for callers that want it.
+ *  Read-only towards the server: it used to PATCH the merged local list back
+ *  whenever the lengths differed, which replaced another session's list. */
 export async function syncCustomUnitsFromServer(): Promise<string[]> {
   if (inFlightSync) return inFlightSync;
   inFlightSync = (async () => {
     try {
-      const resp = await apiGet<CustomUnitsResponse>('/v1/users/me/custom-units/');
+      const resp = await apiGet<CustomUnitsResponse>(CUSTOM_UNITS_ENDPOINT);
       const server = Array.isArray(resp?.units) ? resp.units : [];
-      const merged = [...new Set([...loadCustomUnits(), ...server])];
+      const merged = unionUnits(loadCustomUnits(), server);
       writeCustomUnits(merged);
-      // If the merge produced new entries that weren't on the server, push them.
-      if (merged.length !== server.length) {
-        apiPatch('/v1/users/me/custom-units/', { units: merged }).catch(() => undefined);
-      }
       return merged;
     } catch {
       // 401 (anonymous) or network failure — local-only path stays valid.
@@ -236,15 +273,17 @@ export async function syncCustomUnitsFromServer(): Promise<string[]> {
   return inFlightSync;
 }
 
+/** Remember a unit the user committed, when it is one the picker lacks. */
 export function saveCustomUnit(unit: string): void {
+  const trimmed = unit.trim();
+  if (!trimmed || isRegistryUnit(trimmed)) return;
   const custom = loadCustomUnits();
-  if (custom.includes(unit)) return;
-  custom.push(unit);
-  writeCustomUnits(custom);
-  // Best-effort server sync. Don't block the UI on the network round-trip;
-  // don't surface the error if it fails — the next syncCustomUnitsFromServer()
-  // call will reconcile the merged list.
-  apiPatch('/v1/users/me/custom-units/', { units: custom }).catch(() => undefined);
+  const key = unitIdentityKey(trimmed);
+  if (custom.some((u) => unitIdentityKey(u) === key)) return;
+  writeCustomUnits([...custom, trimmed]);
+  // Best-effort server sync with the new unit alone: the server adds it to
+  // the stored list. Don't block the UI on the round-trip.
+  apiPatch(CUSTOM_UNITS_ENDPOINT, { units: [trimmed] }).catch(() => undefined);
 }
 
 /**

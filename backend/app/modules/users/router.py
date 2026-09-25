@@ -1162,35 +1162,89 @@ async def get_custom_units(
     return CustomUnitsPayload(units=units)
 
 
+_CUSTOM_UNIT_MAX_LEN = 32
+_CUSTOM_UNITS_MAX = 200
+
+
+def _custom_unit_key(unit: str) -> str:
+    """Identity key for a custom unit, shared with the BOQ unit registry."""
+    try:
+        from app.modules.boq.units import unit_identity_key
+    except ImportError:  # BOQ module not installed: plain case-insensitive compare
+        return unit.strip().casefold()
+    return unit_identity_key(unit)
+
+
+def _is_registry_unit(unit: str) -> bool:
+    """True when the BOQ unit registry already offers ``unit`` to every user."""
+    try:
+        from app.modules.boq.units import is_registry_unit
+    except ImportError:
+        return False
+    return is_registry_unit(unit)
+
+
+def _merge_custom_units(existing: object, incoming: list[str]) -> list[str]:
+    """Add the genuinely new units of ``incoming`` to ``existing``.
+
+    Nothing already stored is removed or rewritten. An incoming unit is added
+    only when it is not in the unit registry and no stored unit has the same
+    identity key (so ``M3`` does not sit next to ``m3``). The first spelling
+    seen is the one kept. Stored entries come first under the list cap, so a
+    long request can never push out units the user already has.
+    """
+    merged: list[str] = []
+    seen: set[str] = set()
+    if isinstance(existing, list):
+        for raw in existing:
+            if not isinstance(raw, str) or not raw.strip():
+                continue
+            unit = raw.strip()[:_CUSTOM_UNIT_MAX_LEN]
+            key = _custom_unit_key(unit)
+            if key not in seen:
+                seen.add(key)
+                merged.append(unit)
+    for raw in incoming:
+        if len(merged) >= _CUSTOM_UNITS_MAX:
+            break
+        if not isinstance(raw, str):
+            continue
+        unit = raw.strip()[:_CUSTOM_UNIT_MAX_LEN]
+        if not unit or _is_registry_unit(unit):
+            continue
+        key = _custom_unit_key(unit)
+        if key not in seen:
+            seen.add(key)
+            merged.append(unit)
+    return merged
+
+
 @router.patch("/me/custom-units/", response_model=CustomUnitsPayload)
 async def save_custom_units(
     data: CustomUnitsPayload,
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
 ) -> CustomUnitsPayload:
-    """Replace the user's saved custom-unit catalogue.
+    """Add units to the user's saved custom-unit catalogue.
 
-    Sanitises the payload: trims whitespace, drops empties / duplicates,
-    caps each unit at 32 chars and the list at 200 entries so a runaway
-    client can't bloat the JSON column.
+    The PATCH is additive and idempotent: it never removes a stored unit.
+    It used to replace the whole list with the body, and the client sent its
+    own local copy, so two sessions under one login overwrote each other and
+    a unit added in one was lost to the other's stale list. A body carrying
+    the full old list is therefore still safe: units already stored are kept,
+    and only units that are new (not in the unit registry, not already in the
+    list by identity key) are appended. The response is the resulting list.
+
+    Each unit is trimmed and capped at 32 chars, the list at 200 entries.
+    No UI removes a custom unit today; a removal would need its own explicit
+    operation rather than a smaller list sent here.
     """
-    seen: set[str] = set()
-    cleaned: list[str] = []
-    for raw in data.units:
-        if not isinstance(raw, str):
-            continue
-        u = raw.strip()[:32]
-        if u and u not in seen:
-            seen.add(u)
-            cleaned.append(u)
-        if len(cleaned) >= 200:
-            break
-
     user = await service.get_user(uuid.UUID(user_id))
     metadata: dict[str, Any] = dict(user.metadata_ or {})
-    metadata["custom_units"] = cleaned
+    merged = _merge_custom_units(metadata.get("custom_units", []), data.units)
+    metadata["custom_units"] = merged
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
-    return CustomUnitsPayload(units=cleaned)
+    return CustomUnitsPayload(units=merged)
 
 
 # ── Module Info Blocks ────────────────────────────────────────────────────
