@@ -238,7 +238,9 @@ export function GanttChart({
       const startD = new Date(a.start);
       const endD = new Date(a.end);
       const x = dateToPx(startD, viewMode, timelineStart);
-      const xEnd = dateToPx(endD, viewMode, timelineStart);
+      // End dates are inclusive: an activity ending on the 5th works that day,
+      // so its bar runs to the start of the 6th. A milestone stays a point.
+      const xEnd = a.isMilestone ? x : dateToPx(addDays(endD, 1), viewMode, timelineStart);
       const width = Math.max(xEnd - x, MIN_BAR_WIDTH);
 
       let baselineX: number | undefined;
@@ -247,7 +249,7 @@ export function GanttChart({
         const bsD = new Date(a.baselineStart);
         const beD = new Date(a.baselineEnd);
         baselineX = dateToPx(bsD, viewMode, timelineStart);
-        const bxEnd = dateToPx(beD, viewMode, timelineStart);
+        const bxEnd = dateToPx(addDays(beD, 1), viewMode, timelineStart);
         baselineWidth = Math.max(bxEnd - baselineX, MIN_BAR_WIDTH);
       }
 
@@ -391,12 +393,13 @@ export function GanttChart({
       );
       let deltaDays = daysBetween(anchor, newDate);
 
-      // Clamp so the bar stays at least 1 day wide.
+      // Clamp so the bar stays at least 1 day wide. With inclusive ends that
+      // is start == end, so a one-day bar has no room to shrink at all.
       if (resizeState.edge === 'left') {
-        const maxDelta = daysBetween(resizeState.origStart, resizeState.origEnd) - 1;
+        const maxDelta = daysBetween(resizeState.origStart, resizeState.origEnd);
         if (deltaDays > maxDelta) deltaDays = maxDelta;
       } else {
-        const minDelta = -(daysBetween(resizeState.origStart, resizeState.origEnd) - 1);
+        const minDelta = -daysBetween(resizeState.origStart, resizeState.origEnd);
         if (deltaDays < minDelta) deltaDays = minDelta;
       }
 

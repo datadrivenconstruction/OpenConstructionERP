@@ -14,6 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { GanttChart } from './GanttChart';
 import type { GanttActivity } from './ganttUtils';
+import { COLUMN_WIDTH } from './ganttUtils';
 
 // Opens mid-January, which is what gives the leading month a cell narrower than
 // its own label. A range starting on the 1st does not reproduce the bug.
@@ -196,5 +197,33 @@ describe('GanttChart date columns', () => {
     const fitOut = labels.find((l) => l.startsWith('Fit-out'));
     expect(fitOut, 'no bar label for the second activity').toBeDefined();
     expect(fitOut!).toMatch(/28/);
+  });
+});
+
+describe('GanttChart bar length', () => {
+  // End dates are inclusive, as the schedule API stores them: an activity from
+  // the 4th to the 4th works one day and one from the 4th to the 8th works five.
+  function barWidth(container: HTMLElement, name: string): number {
+    const group = [...container.querySelectorAll('g[role="img"]')].find((g) =>
+      (g.getAttribute('aria-label') ?? '').startsWith(`${name}:`),
+    );
+    expect(group, `no bar for ${name}`).toBeTruthy();
+    return Number(group!.querySelector('rect')!.getAttribute('width'));
+  }
+
+  it('draws a one-day activity one day wide and a five-day one five days wide', () => {
+    const { container } = render(
+      <GanttChart
+        viewMode="day"
+        activities={[
+          { id: 'one', name: 'One day', start: '2026-05-04', end: '2026-05-04', progress: 0 },
+          { id: 'five', name: 'Five days', start: '2026-05-04', end: '2026-05-08', progress: 0 },
+        ]}
+        startDate="2026-05-01"
+        endDate="2026-05-20"
+      />,
+    );
+    expect(barWidth(container, 'One day')).toBe(COLUMN_WIDTH.day);
+    expect(barWidth(container, 'Five days')).toBe(5 * COLUMN_WIDTH.day);
   });
 });
