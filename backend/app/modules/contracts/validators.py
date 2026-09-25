@@ -1104,6 +1104,54 @@ class ClaimPriorMatchesEarlierClaimsRule(_ClaimRule):
         return results
 
 
+class ClaimScheduleReconcilesContractSumRule(_ClaimRule):
+    """The schedule of values adds up to the contract sum to date.
+
+    Column C of the continuation sheet is the schedule of values, and line 3
+    of the certificate is the contract sum to date. An approved change moves
+    the sum, and before change orders reached the schedule it moved nothing
+    else, so the part of the contract the change added had no line to be
+    billed against. A warning, not a block: the claim is still right about the
+    lines it has, and the gap is the contract's to close, by the reconcile when
+    approved changes are missing and by hand otherwise.
+    """
+
+    rule_id = "pay_application.sov_reconciles_contract_sum"
+    name = "Schedule of values adds up to the contract sum"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "The schedule of values lines must add up to the contract sum to date"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        claim = _section(context, "claim")
+        schedule = _section(context, "schedule")
+        if not claim or not schedule or not schedule.get("has_lines"):
+            return []
+        currency = str(_data(context).get("currency") or "")
+        scheduled = _money(schedule.get("scheduled_total"))
+        contract_sum = _money(schedule.get("contract_sum"))
+        if abs(contract_sum - scheduled) <= _MONEY_EPSILON:
+            return [self._result(context, passed=True, element_ref=str(claim.get("id", "")))]
+        count = int(schedule.get("unreconciled_changes") or 0)
+        result = self._result(
+            context,
+            passed=False,
+            element_ref=str(claim.get("id", "")),
+            fail_key="pay_application.sov_reconciles_contract_sum.fail",
+            suggestion_key="pay_application.sov_reconciles_contract_sum.suggestion",
+            scheduled=sentence_amount(scheduled, currency),
+            contract_sum=sentence_amount(contract_sum, currency),
+            difference=sentence_amount(contract_sum - scheduled, currency),
+        )
+        if count:
+            result.suggestion = translate(
+                "pay_application.sov_reconciles_contract_sum.suggestion_reconcile",
+                locale=_locale(context),
+                count=count,
+            )
+        return [result]
+
+
 class ClaimWithinNTECapRule(_ClaimRule):
     """A T&M claim bills within the not-to-exceed cap, counting the others.
 
@@ -1160,6 +1208,7 @@ PAY_APPLICATION_RULES: tuple[type[ValidationRule], ...] = (
     ClaimPercentRegressedRule,
     ClaimTotalsMatchLinesRule,
     ClaimPriorMatchesEarlierClaimsRule,
+    ClaimScheduleReconcilesContractSumRule,
     ClaimWithinNTECapRule,
     ClaimRetentionMatchesPolicyRule,
     ClaimRetentionAboveCapRule,

@@ -199,6 +199,9 @@ async def test_with_no_other_module_registered_the_claim_is_checked_and_submits(
         # not-to-exceed cap above it: one bounds what the job may bill, the
         # other bounds what may be withheld from what it bills.
         "retention_cap",
+        # The schedule of values beside the contract sum it should add up to,
+        # read by a rule that warns when approved changes are missing from it.
+        "schedule",
     }
     submitted = await svc.transition_claim(claim.id, "submitted")
     assert submitted.status == "submitted"

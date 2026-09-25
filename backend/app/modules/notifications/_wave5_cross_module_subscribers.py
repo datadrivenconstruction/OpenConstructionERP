@@ -698,6 +698,35 @@ def _record_mirror_skip(
     return True
 
 
+async def _post_to_sov(session, contract, source_key: str, kind: str, source_id: object, data: dict, delta) -> None:
+    """Put the change on the schedule of values in the transaction that moved the sum.
+
+    See ``app.modules.contracts.sov_posting``: one pooled line and one
+    adjustment under the same source key, nothing on a replay.
+    """
+    from datetime import UTC, datetime
+
+    from app.modules.contracts.sov_posting import post_source_to_sov
+
+    try:
+        parsed_id = uuid.UUID(str(source_id))
+    except (ValueError, TypeError):
+        parsed_id = None
+    code = str(data.get("code") or "")
+    await post_source_to_sov(
+        session,
+        contract,
+        key=source_key,
+        kind=kind,
+        source_id=parsed_id,
+        code=code,
+        title=code,
+        amount=delta,
+        currency=str(data.get("currency") or contract.currency or ""),
+        approved_on=datetime.now(UTC).date(),
+    )
+
+
 # ── Variations: VO completed → contract sum bump ─────────────────────────
 
 
@@ -837,6 +866,7 @@ async def _on_variation_completed(event: Event) -> None:
         await session.execute(
             sa_update(Contract).where(Contract.id == contract_id).values(total_value=Contract.total_value + delta)
         )
+        await _post_to_sov(session, contract, source_key, "variation_order", vo_id_raw, data, delta)
         await session.commit()
         logger.info(
             "Contract %s total_value bumped by %s (VO=%s)",
@@ -1013,6 +1043,7 @@ async def _on_changeorder_approved_contract(event: Event) -> None:
         await session.execute(
             sa_update(Contract).where(Contract.id == contract_id).values(total_value=Contract.total_value + delta)
         )
+        await _post_to_sov(session, contract, source_key, "change_order", co_id_raw, data, delta)
         await session.commit()
         logger.info(
             "Contract %s total_value bumped by %s (CO=%s)",

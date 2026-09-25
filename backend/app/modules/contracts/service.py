@@ -2877,6 +2877,27 @@ class ContractsService:
 
     # ── Payment application rules (pay_application) ─────────────────────
 
+    async def _claim_schedule_context(self, contract: Contract, contract_lines: dict[uuid.UUID, Any]) -> dict[str, Any]:
+        """The schedule of values beside the contract sum it should add up to.
+
+        Roll-up rows are left out, as on the continuation sheet. The count of
+        approved changes still missing from the schedule lets the finding
+        point at the reconcile rather than at the lines.
+        """
+        from app.modules.contracts.sov_posting import plan_reconcile  # noqa: PLC0415
+
+        parents = {ln.parent_line_id for ln in contract_lines.values() if ln.parent_line_id is not None}
+        scheduled = sum(
+            (Decimal(str(ln.total_value or 0)) for ln in contract_lines.values() if ln.id not in parents),
+            DEC_ZERO,
+        )
+        return {
+            "has_lines": bool(contract_lines),
+            "contract_sum": str(contract.total_value or 0),
+            "scheduled_total": str(scheduled),
+            "unreconciled_changes": len(await plan_reconcile(self.session, contract)) if contract_lines else 0,
+        }
+
     async def claim_rule_context(self, claim: ProgressClaim) -> dict[str, Any]:
         """Build the plain dict the ``pay_application`` rules read.
 
@@ -2977,6 +2998,7 @@ class ContractsService:
             },
             "cap": _tm_cap_context(contract, claim, ordered),
             "retention_cap": await self._claim_retention_cap_context(claim, contract),
+            "schedule": await self._claim_schedule_context(contract, contract_lines),
         }
 
         # What other modules add (the subcontractor pay apps rolled into this
@@ -4178,6 +4200,70 @@ class ContractsService:
         await self.final_account_repo.delete(account.id)
 
     # ── SOV status (Schedule of Values per-line tracker) ────────────────
+
+    async def sov_reconcile_preview(self, contract_id: uuid.UUID) -> dict[str, Any]:
+        """The approved changes the contract sum carries and no SoV line does."""
+        from app.modules.contracts.sov_posting import reconcile_preview  # noqa: PLC0415
+
+        contract = await self.get_contract(contract_id)
+        return await reconcile_preview(self.session, contract)
+
+    async def sov_reconcile_apply(
+        self, contract_id: uuid.UUID, confirmed_keys: list[str], actor_id: str | None = None
+    ) -> dict[str, Any]:
+        """Post the changes a person confirmed from the preview, and audit it.
+
+        Raises:
+            HTTPException: 409 ``contract_not_reconcilable`` for a contract
+                that is not active, 409 ``reconcile_preview_stale`` when the
+                confirmed list is not what the reconcile would post now.
+        """
+        from app.core.audit import audit_log  # noqa: PLC0415
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+        from app.modules.contracts.sov_posting import (  # noqa: PLC0415
+            POSTABLE_CONTRACT_STATUSES,
+            ReconcileMismatchError,
+            apply_reconcile,
+            reconcile_preview,
+        )
+
+        contract = await self.get_contract(contract_id)
+        locale = get_locale()
+        if contract.status not in POSTABLE_CONTRACT_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "contract_not_reconcilable",
+                    "message": contracts_translate(
+                        "sov_reconcile.errors.not_active", locale=locale, status=contract.status
+                    ),
+                    "contract_status": contract.status,
+                },
+            )
+        try:
+            posted = await apply_reconcile(self.session, contract, confirmed_keys)
+        except ReconcileMismatchError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "reconcile_preview_stale",
+                    "message": contracts_translate("sov_reconcile.errors.preview_stale", locale=locale),
+                },
+            ) from exc
+        await audit_log(
+            self.session,
+            action="reconcile_sov",
+            entity_type="contract",
+            entity_id=str(contract.id),
+            user_id=actor_id,
+            details={
+                "source_keys": [row.source_key for row in posted],
+                "amounts": {row.source_key: str(row.delta_value) for row in posted},
+                "contract_line_ids": [str(row.contract_line_id) for row in posted],
+            },
+        )
+        preview = await reconcile_preview(self.session, contract)
+        return {**preview, "posted": len(posted)}
 
     async def sov_status(self, contract_id: uuid.UUID) -> dict[str, Any]:
         """Build the Schedule-of-Values status: scheduled vs earned vs paid per line."""

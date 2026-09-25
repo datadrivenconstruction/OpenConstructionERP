@@ -69,6 +69,7 @@ import {
   retentionEventLabel,
 } from './RetentionReleasePanel';
 import { ContractAnalyticsPanels } from './ContractAnalyticsPanels';
+import { SovReconcilePanel } from './SovReconcilePanel';
 import { contractsGuide } from './contractsGuide';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -2418,6 +2419,7 @@ export function ContractDetailDrawer({
                 {sovBilledLockedText(t)}
               </p>
             )}
+            <SovReconcilePanel contractId={contractId} />
           </Card>
 
           {/* Retention ledger - real per-currency/direction rollup pulled from

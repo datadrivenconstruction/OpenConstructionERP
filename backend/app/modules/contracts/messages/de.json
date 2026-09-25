@@ -71,6 +71,11 @@
     "retention_release_within_held": {
       "fail": "Die bis einschließlich Abschlagsrechnung {claim} abgerechneten Freigaben zahlen {released} aus, mehr als die bis dahin einbehaltenen {accrued}",
       "suggestion": "Stornieren Sie die zu hohe Freigabe oder rechnen Sie sie in einer späteren Abschlagsrechnung ab, wenn mehr einbehalten ist"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Der Zahlungsplan ergibt {scheduled}, die Auftragssumme bis heute beträgt jedoch {contract_sum}: {difference} des Auftrags stehen auf keiner Position, gegen die abgerechnet wird",
+      "suggestion": "Ergänzen oder korrigieren Sie Positionen im Zahlungsplan, bis sie die Auftragssumme ergeben",
+      "suggestion_reconcile": "{count} genehmigte Nachträge oder Änderungen haben die Auftragssumme verändert, bevor sie in den Zahlungsplan gelangten. Nutzen Sie am Vertrag „Nachträge abgleichen“, um für jeden eine Position anzulegen"
     }
   },
   "retention_release": {
@@ -99,6 +104,12 @@
   "aia": {
     "g703": {
       "billed_not_on_a_schedule_line": "Abgerechnete Leistung ohne Position im Zahlungsplan"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Nachträge werden nur in den Zahlungsplan eines aktiven Vertrags übernommen; dieser Vertrag hat den Status {status}",
+      "preview_stale": "Die Liste der abzugleichenden Nachträge hat sich geändert, seit Sie sie geöffnet haben. Öffnen Sie die Vorschau erneut und bestätigen Sie den aktuellen Stand"
     }
   }
 }
