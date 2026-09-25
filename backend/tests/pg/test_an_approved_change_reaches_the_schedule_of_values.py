@@ -33,6 +33,7 @@ import app.modules.notifications._wave5_cross_module_subscribers as w5
 from app.core.events import Event
 from app.modules.changeorders.models import ChangeOrder
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, SovAdjustment
+from app.modules.contracts.schemas import AutoGenerateClaimRequest
 from app.modules.contracts.service import ContractsService
 from app.modules.contracts.validators import register_contracts_validation_rules
 from app.modules.projects.models import Project
@@ -283,6 +284,49 @@ async def test_a_claim_on_a_schedule_short_of_the_contract_sum_warns_and_points_
         keys = [item["source_key"] for item in (await svc.sov_reconcile_preview(world.contract.id))["items"]]
         await svc.sov_reconcile_apply(world.contract.id, keys)
         report = await svc.validate_claim(claim.id)
+        assert not [w for w in report["warnings"] if w["rule_id"] == "pay_application.sov_reconciles_contract_sum"]
+        await session.rollback()
+
+
+async def test_a_claim_bills_on_a_schedule_that_carries_a_deductive_change(world) -> None:
+    """A deductive variation becomes a negative line; the claim still adds up."""
+    register_contracts_validation_rules()
+    await _legacy_change(world)
+    async with world.factory() as session:
+        svc = ContractsService(session)
+        keys = [item["source_key"] for item in (await svc.sov_reconcile_preview(world.contract.id))["items"]]
+        await svc.sov_reconcile_apply(world.contract.id, keys)
+        lines = {
+            ln.code: ln
+            for ln in (await session.execute(select(ContractLine).where(ContractLine.contract_id == world.contract.id)))
+            .scalars()
+            .all()
+        }
+        assert lines["VO-003"].total_value == Decimal("-2500")
+        claim = ProgressClaim(
+            contract_id=world.contract.id,
+            claim_number="PC-1",
+            currency="USD",
+            status="draft",
+            period_start="2026-05-01",
+            period_end="2026-05-31",
+            period_from=date(2026, 5, 1),
+            period_to=date(2026, 5, 31),
+        )
+        session.add(claim)
+        await session.flush()
+        claim = await svc.auto_generate_claim_lines(
+            claim.id,
+            AutoGenerateClaimRequest(
+                completion={str(lines["A"].id): Decimal("50"), str(lines["VO-003"].id): Decimal("100")}
+            ),
+        )
+        # Half of the structure, less the deduction taken in full.
+        assert claim.gross_amount == Decimal("47500")
+        application = await svc.build_aia_application(claim.id)
+        assert application["summary"]["current_payment_due"] == Decimal(str(claim.net_due)).quantize(Decimal("0.01"))
+        report = await svc.validate_claim(claim.id)
+        assert report["errors"] == []
         assert not [w for w in report["warnings"] if w["rule_id"] == "pay_application.sov_reconciles_contract_sum"]
         await session.rollback()
 
