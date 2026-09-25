@@ -33,6 +33,7 @@ import { PresenceAvatars } from '@/modules/collaboration/components/PresenceAvat
 import { usePresenceStore } from '@/modules/collaboration/hooks/usePresence';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CreateBOQModal } from './CreateBOQPage';
+import { projectFilterOptions } from './projectFilterOptions';
 
 interface Project {
   id: string;
@@ -863,9 +864,7 @@ export function BOQListPage() {
   }
 
   const isLoading = projLoading || boqLoading;
-  const uniqueProjects = Array.from(
-    new Map((projects ?? []).map((p) => [p.name, p])).values(),
-  );
+  const uniqueProjects = projectFilterOptions(projects ?? []);
   const uniqueStatuses = [...new Set((allBoqs ?? []).map((b) => b.status))];
 
   function valueBorderColor(value: number): string {
@@ -1083,7 +1082,7 @@ export function BOQListPage() {
                 >
                   <option value="">{t('boq.all_projects', { defaultValue: 'All projects' })}</option>
                   {uniqueProjects.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                    <option key={p.id} value={p.id}>{p.label}</option>
                   ))}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
