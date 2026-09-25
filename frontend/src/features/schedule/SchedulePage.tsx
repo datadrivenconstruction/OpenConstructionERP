@@ -1685,6 +1685,7 @@ function ScheduleDetail({
                   const ok = await confirm({
                     title: t('schedule.confirm_reset_title', { defaultValue: 'Reset schedule?' }),
                     message: t('schedule.confirm_reset', { defaultValue: 'Delete all activities in this schedule? This cannot be undone. You can regenerate them afterwards from a BOQ.' }),
+                    confirmLabel: t('schedule.reset', { defaultValue: 'Reset' }),
                   });
                   if (ok) resetSchedule.mutate();
                 }}

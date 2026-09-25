@@ -845,6 +845,7 @@ function DraftReviewSection({
       message: t('carbon.sixd.wl_confirm_reject_msg', {
         defaultValue: 'The line will be permanently removed. You can recompute it again later.',
       }),
+      confirmLabel: t('carbon.sixd.wl_reject', { defaultValue: 'Reject' }),
     });
     if (!ok) return;
     setLoading(true);

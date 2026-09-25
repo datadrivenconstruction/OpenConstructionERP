@@ -1218,6 +1218,7 @@ export function IntegrationsPage() {
                               const ok = await confirm({
                                 title: t('integrations.confirm_disconnect_title', { defaultValue: 'Disconnect integration?' }),
                                 message: t('integrations.confirm_disconnect', 'Disconnect this integration?'),
+                                confirmLabel: t('integrations.disconnect', 'Disconnect'),
                               });
                               if (ok) deleteMut.mutate(cfg.id);
                             }}
