@@ -4,5 +4,4 @@
 // Videos feature - public surface.
 
 export { VideosPage } from './VideosPage';
-export { TUTORIAL_VIDEOS, VIDEO_CATEGORIES } from './videoCatalog';
-export type { TutorialVideo, VideoCategory, VideoCategoryId } from './videoCatalog';
+export type { AcademyVideo, AcademySeries, ResultFamily } from './academyTypes';

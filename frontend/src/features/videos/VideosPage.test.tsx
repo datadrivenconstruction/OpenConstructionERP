@@ -1,22 +1,24 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The Videos page and the list behind it. The page promises that nothing is
-// requested from the video host before the reader presses play, so the first
-// thing checked is that no iframe exists until then, and that the one created
-// afterwards points at the no-cookie host the backend CSP allows.
+// The Videos page. It promises that nothing is requested from the video host
+// before the reader presses play, so most checks count iframes: none on
+// arrival, none for a shared link until play, none ever for a video that is
+// not out yet, and the one that does appear points at the no-cookie host at
+// the second the reader asked for.
 
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { ReactNode } from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: { defaultValue?: unknown }) =>
-      typeof opts?.defaultValue === 'string' ? opts.defaultValue : key,
+    t: (key: string, opts?: Record<string, unknown>) => {
+      const template = typeof opts?.defaultValue === 'string' ? opts.defaultValue : key;
+      return template.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(opts?.[name] ?? ''));
+    },
     i18n: { language: 'en', changeLanguage: vi.fn() },
   }),
   Trans: ({ children }: { children: ReactNode }) => children,
@@ -24,91 +26,157 @@ vi.mock('react-i18next', () => ({
 }));
 
 import { VideosPage } from './VideosPage';
-import { TUTORIAL_VIDEOS, VIDEO_CATEGORIES, embedUrl, videosInCategory } from './videoCatalog';
+import { VIDEOS, startHereVideo } from './academy';
+import { useVideosStore } from './useVideosStore';
+
+let lastSearch = '';
+function LocationProbe() {
+  lastSearch = useLocation().search;
+  return null;
+}
 
 function renderAt(entry = '/videos') {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter initialEntries={[entry]}>
-      <VideosPage />
-    </MemoryRouter>,
+    <QueryClientProvider client={client}>
+      <MemoryRouter initialEntries={[entry]}>
+        <VideosPage />
+        <LocationProbe />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
+const iframes = () => Array.from(document.querySelectorAll('iframe'));
+const setup = startHereVideo()!;
+const soon = VIDEOS.find((v) => v.status === 'coming_soon' && v.chapters.length > 0)!;
+
+beforeEach(() => {
+  localStorage.clear();
+  useVideosStore.setState({ role: null, market: 'auto', started: {}, watched: {} });
+});
 afterEach(() => cleanup());
 
-describe('the video list', () => {
-  it('names each video once, by a well-formed id, in a known topic', () => {
-    const ids = TUTORIAL_VIDEOS.map((v) => v.id);
-    const hosted = TUTORIAL_VIDEOS.map((v) => v.youtubeId);
-    expect(new Set(ids).size).toBe(ids.length);
-    expect(new Set(hosted).size).toBe(hosted.length);
-    const topics = new Set(VIDEO_CATEGORIES.map((c) => c.id));
-    for (const video of TUTORIAL_VIDEOS) {
-      expect(video.youtubeId).toMatch(/^[A-Za-z0-9_-]{11}$/);
-      expect(topics.has(video.category)).toBe(true);
-    }
-  });
-
-  it('ships a local poster for every video', () => {
-    // Resolved from the working directory, as navCatalog.test.ts does:
-    // `import.meta.url` is rewritten to a bare drive root on Windows.
-    const publicDir = [resolve(process.cwd(), 'public'), resolve(process.cwd(), 'frontend/public')].find((dir) =>
-      existsSync(dir),
+describe('the Videos page', () => {
+  it('loads nothing from the video host until play, then only the no-cookie player', () => {
+    renderAt();
+    expect(iframes()).toHaveLength(0);
+    fireEvent.click(screen.getByTestId('videos-start-here'));
+    const [frame] = iframes();
+    expect(frame?.getAttribute('src')).toMatch(
+      new RegExp(`^https://www\\.youtube-nocookie\\.com/embed/${setup.youtubeId}\\?`),
     );
-    expect(publicDir).toBeDefined();
-    for (const video of TUTORIAL_VIDEOS) {
-      expect(video.thumbnail.startsWith('/assets/videos/')).toBe(true);
-      expect(existsSync(resolve(publicDir!, `.${video.thumbnail}`))).toBe(true);
+    expect(frame?.getAttribute('referrerpolicy')).toBe('strict-origin-when-cross-origin');
+    expect(lastSearch).toContain(`v=${setup.id}`);
+  });
+
+  it('opens a shared link on the poster, and plays from its second only on press', () => {
+    renderAt(`/videos?v=${setup.id}&t=61`);
+    const dialog = screen.getByTestId('video-player');
+    expect(iframes()).toHaveLength(0);
+    fireEvent.click(within(dialog).getAllByRole('button', { name: /^Play:/ })[0]!);
+    expect(iframes()[0]?.getAttribute('src')).toContain('start=61');
+  });
+
+  it('seeks to a chapter by reloading the player at that second', () => {
+    renderAt();
+    fireEvent.click(screen.getByTestId('videos-start-here'));
+    const chapter = setup.chapters[2]!;
+    const dialog = screen.getByTestId('video-player');
+    fireEvent.click(within(dialog).getByRole('button', { name: new RegExp(chapter.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }));
+    expect(iframes()[0]?.getAttribute('src')).toContain(`start=${chapter.t}`);
+    expect(lastSearch).toContain(`t=${chapter.t}`);
+  });
+
+  it('shows a video that is not out yet as an outline, never a player', () => {
+    renderAt(`/videos?v=${soon.id}`);
+    const dialog = screen.getByTestId('video-player');
+    expect(within(dialog).getAllByText('Coming soon').length).toBeGreaterThan(0);
+    expect(within(dialog).getByText(soon.chapters[0]!.title)).toBeTruthy();
+    expect(iframes()).toHaveLength(0);
+    expect(within(dialog).queryByRole('button', { name: soon.chapters[0]!.title })).toBeNull();
+  });
+
+  it('closes on Escape and drops the video from the URL', () => {
+    renderAt(`/videos?v=${setup.id}`);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByTestId('video-player')).toBeNull();
+    expect(lastSearch).not.toContain('v=');
+  });
+
+  it('finds a chapter by search and opens the video at it', () => {
+    const video = VIDEOS.find((v) => v.status === 'published' && v.chapters.length > 3)!;
+    const chapter = video.chapters[3]!;
+    renderAt();
+    fireEvent.change(screen.getByTestId('videos-search'), { target: { value: chapter.title } });
+    const library = screen.getByTestId('videos-library');
+    const card = within(library)
+      .getAllByTestId('video-card')
+      .find((c) => c.getAttribute('data-video-id') === video.id)!;
+    fireEvent.click(within(card).getByRole('button', { name: new RegExp(chapter.title.slice(0, 20).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }));
+    expect(iframes()[0]?.getAttribute('src')).toContain(`start=${chapter.t}`);
+  });
+
+  it('reads library filters from the URL and says when nothing matches', () => {
+    renderAt('/videos?market=DE');
+    const library = screen.getByTestId('videos-library');
+    const cards = within(library).getAllByTestId('video-card');
+    const de = VIDEOS.filter((v) => v.market === 'DE');
+    expect(cards.map((c) => c.getAttribute('data-video-id'))).toEqual(de.map((v) => v.id));
+    fireEvent.change(screen.getByTestId('videos-search'), { target: { value: 'zzzz-no-such-thing' } });
+    expect(screen.getByTestId('videos-empty')).toBeTruthy();
+    fireEvent.click(within(screen.getByTestId('videos-empty')).getByText('Clear filters'));
+    expect(within(screen.getByTestId('videos-library')).getAllByTestId('video-card')).toHaveLength(VIDEOS.length);
+  });
+
+  it('asks for a role when it knows none, and remembers the pick', () => {
+    renderAt();
+    const picker = screen.getByTestId('video-role-picker');
+    expect(within(picker).getAllByRole('button')).toHaveLength(15);
+    fireEvent.click(within(picker).getByRole('button', { name: /Estimator/ }));
+    expect(localStorage.getItem('oe_videos_role')).toBe('estimator');
+    expect(screen.queryByTestId('video-role-picker')).toBeNull();
+    expect(screen.getByTestId('videos-role-button').textContent).toContain('Estimator');
+  });
+
+  it('keeps the market choice and narrows the recommendations to it', () => {
+    useVideosStore.setState({ role: 'estimator' });
+    renderAt();
+    fireEvent.change(screen.getByTestId('videos-market-select'), { target: { value: 'CA' } });
+    expect(localStorage.getItem('oe_videos_market')).toBe('CA');
+    const rec = screen.getByTestId('videos-recommended');
+    const ids = within(rec).getAllByTestId('video-card').map((c) => c.getAttribute('data-video-id'));
+    expect(ids.length).toBeGreaterThan(0);
+    for (const id of ids) {
+      const v = VIDEOS.find((x) => x.id === id)!;
+      expect(!v.market || v.market === 'CA', id!).toBe(true);
     }
   });
 
-  it('plays from the no-cookie host only', () => {
-    expect(new URL(embedUrl('X06cIaroAeI')).host).toBe('www.youtube-nocookie.com');
-  });
-});
-
-describe('VideosPage', () => {
-  it('draws a poster per video and loads no player until play is pressed', () => {
-    renderAt();
-    for (const video of TUTORIAL_VIDEOS) {
-      expect(screen.getByTestId(`video-card-${video.id}`)).toBeTruthy();
-    }
-    expect(document.querySelector('iframe')).toBeNull();
-  });
-
-  it('starts one player on play, and a second play replaces it', () => {
-    renderAt();
-    const [first, second] = TUTORIAL_VIDEOS;
-
-    fireEvent.click(within(screen.getByTestId(`video-card-${first!.id}`)).getAllByRole('button')[0]!);
-    let frames = document.querySelectorAll('iframe');
-    expect(frames).toHaveLength(1);
-    expect(frames[0]!.getAttribute('src')).toBe(embedUrl(first!.youtubeId));
-    // The app's own Referrer-Policy would strip the referrer the player needs.
-    expect(frames[0]!.getAttribute('referrerpolicy')).toBe('strict-origin-when-cross-origin');
-
-    fireEvent.click(within(screen.getByTestId(`video-card-${second!.id}`)).getAllByRole('button')[0]!);
-    frames = document.querySelectorAll('iframe');
-    expect(frames).toHaveLength(1);
-    expect(frames[0]!.getAttribute('src')).toBe(embedUrl(second!.youtubeId));
+  it('counts a series as watched from the reader’s own marks', () => {
+    const first = VIDEOS.filter((v) => v.series === 'landshut-de').sort((a, b) => a.seriesOrder - b.seriesOrder)[0]!;
+    renderAt(`/videos?v=${first.id}`);
+    const dialog = screen.getByTestId('video-player');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Watched' }));
+    expect(JSON.parse(localStorage.getItem('oe_videos_progress')!).watched).toEqual({ [first.id]: true });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    const shelf = screen
+      .getAllByTestId('videos-series')
+      .find((s) => s.getAttribute('data-series-id') === 'landshut-de')!;
+    expect(shelf.textContent).toContain('1 of 12 watched');
+    expect(within(shelf).getByRole('button', { name: /Continue/ })).toBeTruthy();
   });
 
-  it('shows topics without a video yet as coming soon, not as empty sections', () => {
-    renderAt();
-    for (const category of VIDEO_CATEGORIES) {
-      const upcoming = screen.queryByTestId(`videos-upcoming-${category.id}`);
-      if (videosInCategory(category.id).length === 0) expect(upcoming).toBeTruthy();
-      else expect(upcoming).toBeNull();
-    }
-  });
-
-  it('narrows to one topic from the URL', () => {
-    renderAt('/videos?topic=talks');
-    const talks = videosInCategory('talks');
-    for (const video of TUTORIAL_VIDEOS) {
-      const card = screen.queryByTestId(`video-card-${video.id}`);
-      if (talks.includes(video)) expect(card).toBeTruthy();
-      else expect(card).toBeNull();
+  it('still works when storage throws', () => {
+    const get = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    try {
+      renderAt();
+      fireEvent.click(within(screen.getByTestId('video-role-picker')).getByRole('button', { name: /Estimator/ }));
+      expect(screen.getByTestId('videos-role-button').textContent).toContain('Estimator');
+    } finally {
+      get.mockRestore();
     }
   });
 });
