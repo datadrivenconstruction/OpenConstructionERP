@@ -7866,100 +7866,101 @@ class BOQService:
         # behaviour) rather than failing the breakdown.
         base_currency, fx_map = await self._resolve_project_fx(boq_id)
 
-        # Accumulators
-        category_amounts: dict[str, float] = {}
+        # Every position contributes its canonical total, the figure the grid,
+        # the structured endpoint, the markup panel and the exports sum:
+        # ``quantity x unit_rate`` as stored, converted into the base currency
+        # (``_leaf_total_base_with_resources``). The resource rows only decide
+        # how that total is split between categories.
+        #
+        # This used to sum ``res.quantity x res.unit_rate`` scaled by the
+        # position quantity instead. That is the same number only while the
+        # resource rows add up to the position's rate to the cent, and they do
+        # not always: a catalogue component carries a separately rounded cost,
+        # a variant default lands at a different figure, and some writers
+        # store whole-position quantities on the rows. The Grand Total card,
+        # which reads this endpoint, then disagreed with the grid under the
+        # same label. Accumulated in Decimal so the direct cost here is the
+        # cent-exact sum the structured endpoint computes.
+        category_amounts: dict[str, Decimal] = {}
         category_counts: dict[str, int] = {}
-        resource_totals: dict[str, float] = {}  # name -> total cost
+        resource_totals: dict[str, Decimal] = {}  # name -> total cost
         resource_types: dict[str, str] = {}  # name -> type
         resource_positions: dict[str, set[uuid.UUID]] = {}  # name -> position ids
+        direct_cost_val = Decimal("0")
+
+        def _add(cat: str, name: str, amount: Decimal, pos_id: uuid.UUID) -> None:
+            category_amounts[cat] = category_amounts.get(cat, Decimal("0")) + amount
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+            resource_totals[name] = resource_totals.get(name, Decimal("0")) + amount
+            resource_types[name] = cat
+            resource_positions.setdefault(name, set()).add(pos_id)
+
         for pos in all_positions:
             if _is_section(pos):
                 continue
 
-            pos_qty = _str_to_float(pos.quantity)
-            pos_total = _str_to_float(pos.total)
+            pos_total_base = _leaf_total_base_with_resources(pos, fx_map, base_currency)
+            direct_cost_val += pos_total_base
             meta = pos.metadata_ or {}
             resources = meta.get("resources")
 
-            if isinstance(resources, list) and len(resources) > 0:
+            # Per-unit subtotal of each resource row in the base currency, used
+            # as the row's WEIGHT within the position, never as money.
+            shares: list[tuple[str, str, float]] = []
+            if isinstance(resources, list):
                 for res in resources:
                     if not isinstance(res, dict):
                         continue
-                    res_type = str(res.get("type", "other")).lower()
-                    res_name = str(res.get("name", "Unknown"))
-                    # Derive the per-unit subtotal from quantity * unit_rate when
-                    # both are present, so the breakdown self-heals after an
-                    # inline resource edit that updated qty/rate but left a stale
-                    # ``total`` behind. Fall back to the stored ``total`` only
-                    # when the factors are missing.
                     res_qty = res.get("quantity")
                     res_rate = res.get("unit_rate")
                     if res_qty is not None and res_rate is not None:
-                        res_total = (_str_to_float(res_qty)) * (_str_to_float(res_rate))
+                        weight = _str_to_float(res_qty) * _str_to_float(res_rate)
                     else:
-                        res_total = float(res.get("total", 0) or 0)
-                    if not math.isfinite(res_total):
-                        res_total = 0.0
-
-                    # Convert this resource's per-unit subtotal into the base
-                    # currency (mirrors _resource_total_in_base): a resource may
-                    # carry its own currency; a missing rate degrades to no
-                    # conversion rather than zeroing the row. Scaling by the
-                    # position quantity afterwards is currency-neutral.
+                        weight = _str_to_float(res.get("total"))
+                    if not math.isfinite(weight):
+                        weight = 0.0
                     res_currency = str(res.get("currency") or "").strip().upper()
                     if res_currency and res_currency != base_currency and fx_map:
                         fx = fx_map.get(res_currency)
                         if fx:
                             fx_f = _str_to_float(fx)
                             if math.isfinite(fx_f) and fx_f > 0:
-                                res_total = res_total * fx_f
+                                weight = weight * fx_f
+                    shares.append(
+                        (
+                            self._normalize_resource_category(str(res.get("type", "other")).lower()),
+                            str(res.get("name", "Unknown")),
+                            weight,
+                        )
+                    )
 
-                    cat = self._normalize_resource_category(res_type)
-
-                    # Scale the per-unit resource subtotal by the real
-                    # position quantity. ``res.total`` is the PER-UNIT
-                    # subtotal (r.quantity * r.unit_rate) and the position's
-                    # authoritative total is pos.quantity * Σ(res.total), so
-                    # scaling by ``pos_qty`` makes this branch sum to the same
-                    # canonical direct cost as the stored ``pos.total`` summed
-                    # everywhere else. Never substitute 1.0 for a legitimate
-                    # fractional or zero quantity (that over-stated 0.5 m3 as
-                    # 1.0 and reported a full subtotal for a 0-qty position).
-                    scaled_cost = res_total * pos_qty
-
-                    category_amounts[cat] = category_amounts.get(cat, 0.0) + scaled_cost
-                    category_counts[cat] = category_counts.get(cat, 0) + 1
-
-                    resource_totals[res_name] = resource_totals.get(res_name, 0.0) + scaled_cost
-                    resource_types[res_name] = cat
-                    resource_positions.setdefault(res_name, set()).add(pos.id)
+            weight_sum = sum(w for _, _, w in shares)
+            if shares and weight_sum != 0 and math.isfinite(weight_sum):
+                # Split the canonical total by each row's share. The last row
+                # takes the remainder so the parts add up to the total exactly.
+                allotted = Decimal("0")
+                for idx, (cat, name, weight) in enumerate(shares):
+                    if idx == len(shares) - 1:
+                        amount = pos_total_base - allotted
+                    else:
+                        amount = pos_total_base * Decimal(str(weight / weight_sum))
+                        allotted += amount
+                    _add(cat, name, amount, pos.id)
             else:
-                # Heuristic fallback - classify by description keywords (fast).
-                # Convert the position total into base currency first so a
-                # foreign-priced position is not aggregated at its face value
-                # (mirrors _position_total_in_base on the export rollup path).
+                # No usable resource split: classify the whole position by its
+                # description keywords (fast heuristic).
                 cat = self._classify_position_category(pos.description)
-                pos_total_base = float(
-                    _position_total_in_base(pos.total, _position_currency(pos), fx_map, base_currency)
-                )
-                category_amounts[cat] = category_amounts.get(cat, 0.0) + pos_total_base
-                category_counts[cat] = category_counts.get(cat, 0) + 1
-
                 short_name = pos.description[:60] if pos.description else "Position"
-                resource_totals[short_name] = resource_totals.get(short_name, 0.0) + pos_total_base
-                resource_types[short_name] = cat
-                resource_positions.setdefault(short_name, set()).add(pos.id)
-
-        direct_cost_val = sum(category_amounts.values())
+                _add(cat, short_name, pos_total_base, pos.id)
 
         # Build categories sorted by amount descending
         categories: list[CostBreakdownCategory] = []
         for cat, amount in sorted(category_amounts.items(), key=lambda x: x[1], reverse=True):
-            pct = (amount / direct_cost_val * 100.0) if direct_cost_val > 0 else 0.0
+            pct = float(amount / direct_cost_val * 100) if direct_cost_val > 0 else 0.0
             categories.append(
                 CostBreakdownCategory(
                     type=cat,
-                    amount=round(amount, 2),
+                    amount=_round_currency(amount),
                     percentage=round(pct, 1),
                     item_count=category_counts.get(cat, 0),
                 )
@@ -7980,13 +7981,11 @@ class BOQService:
         markup_total = Decimal("0")
 
         if markups_orm:
-            # ``direct_cost_val`` is a float sum built by the category loop
-            # above, and the scoped partition walks the same positions through
-            # the canonical resource-aware conversion. Where the two disagree
-            # by a rounding tail the difference lands in the bill-wide bucket,
-            # so this screen's total is the one it computed for itself.
+            # ``direct_cost_val`` is the same canonical per-position sum the
+            # scoped partition and ``get_boq_structured`` walk, so the markup
+            # amounts here are the ones the editor and the exports show.
             markup_results = _calculate_markup_amounts_scoped(
-                Decimal(str(direct_cost_val)),
+                direct_cost_val,
                 markups_orm,
                 all_positions,
                 lambda pos: _leaf_total_base_with_resources(pos, fx_map, base_currency),
@@ -8005,7 +8004,7 @@ class BOQService:
 
         # OC-47: keep as str-serialised Decimal so openpyxl writes a clean
         # number without binary-float tails like 30695.000000000004.
-        grand_total = float(str(Decimal(str(direct_cost_val)) + markup_total))
+        grand_total = direct_cost_val + markup_total
 
         # Top 10 resources by cost
         top_resources: list[CostBreakdownResource] = []
@@ -8014,7 +8013,7 @@ class BOQService:
                 CostBreakdownResource(
                     name=name,
                     type=resource_types.get(name, "other"),
-                    total_cost=round(total_cost, 2),
+                    total_cost=_round_currency(total_cost),
                     positions_count=len(resource_positions.get(name, set())),
                 )
             )
