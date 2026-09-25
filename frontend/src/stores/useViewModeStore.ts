@@ -77,6 +77,10 @@ interface ViewModeState {
   toggle: () => void;
   /** Show a derived default. Ignored once a choice exists; writes nothing. */
   applyDefault: (mode: ViewMode) => void;
+  /** Show Advanced for this session only, e.g. when the guided tour points at
+   *  a group Simple hides. Writes nothing and leaves `chosen` alone, so the
+   *  user's saved choice is back on the next load. */
+  revealAdvanced: () => void;
 }
 
 const initial = readStored();
@@ -106,6 +110,11 @@ export const useViewModeStore = create<ViewModeState>((set, get) => ({
   applyDefault: (mode: ViewMode) => {
     if (get().chosen || get().mode === mode) return;
     set({ mode, isAdvanced: mode === 'advanced' });
+  },
+
+  revealAdvanced: () => {
+    if (get().mode === 'advanced') return;
+    set({ mode: 'advanced', isAdvanced: true });
   },
 }));
 

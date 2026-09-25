@@ -91,4 +91,19 @@ describe('useViewModeStore', () => {
     expect(useViewModeStore.getState().mode).toBe('simple');
     expect(apiPut).not.toHaveBeenCalled();
   });
+
+  it('the guided tour shows Advanced for the session without overriding a saved Simple', async () => {
+    apiGet.mockResolvedValue({ mode: 'simple' });
+    const { useViewModeStore, hydrateViewModeFromServer } = await freshStore();
+    await hydrateViewModeFromServer('u1');
+    expect(useViewModeStore.getState().mode).toBe('simple');
+    const storedBefore = localStorage.getItem('oe_view_mode');
+
+    useViewModeStore.getState().revealAdvanced();
+
+    expect(useViewModeStore.getState().mode).toBe('advanced');
+    expect(useViewModeStore.getState().chosen).toBe(true);
+    expect(apiPut).not.toHaveBeenCalled();
+    expect(localStorage.getItem('oe_view_mode')).toBe(storedBefore);
+  });
 });
