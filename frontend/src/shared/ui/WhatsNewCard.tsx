@@ -19,12 +19,13 @@
  *
  *   - First visit on a new major.minor → card auto-shown.
  *   - Click X / Dismiss → card hidden, a small "What's new" pill renders
- *     in its place. `localStorage.oe.last_seen_version` persists the
- *     dismissal for the version (next major.minor bump resets it).
- *   - Click the pill → card re-appears for this session only. Dismissing
- *     again hides it back to the pill. Reloading keeps it as the pill.
- *   - A separate session-only flag (`oe.whatsnew_reopened`) is used to
- *     track the in-tab "I clicked the pill" state; it is NOT persisted.
+ *     in its place for as long as the dashboard stays open, so a close by
+ *     mistake can be undone. `localStorage.oe.last_seen_version` persists
+ *     the dismissal for the version (next major.minor bump resets it).
+ *   - Next visit after a dismissal → nothing at all. The pill used to stay
+ *     on the dashboard for good, which meant the card could never really be
+ *     closed; the header's What's new button is the lasting way back to the
+ *     release news.
  *
  * Tour wiring is preserved: the "Take a quick tour" affordance dispatches
  * `window.CustomEvent('oe:start-tour')` exactly as before.
@@ -46,29 +47,10 @@ import {
   GraduationCap,
   type LucideIcon,
 } from 'lucide-react';
-import { APP_VERSION } from '@/shared/lib/version';
+import { APP_VERSION, isNewerFeatureRelease } from '@/shared/lib/version';
 
 /** localStorage key that records which release the user has acknowledged. */
 const LAST_SEEN_KEY = 'oe.last_seen_version';
-
-/**
- * Compare versions on the major.minor axis only. Patch bumps (4.5.0 → 4.5.1)
- * do not re-show the card — those are hotfixes and the user has already seen
- * the headline content for the minor. Only feature releases re-trigger.
- */
-function shouldShow(current: string, lastSeen: string | null): boolean {
-  if (!current) return false;
-  if (!lastSeen) return true;
-  const cur = current.split('.').map((x) => parseInt(x, 10) || 0);
-  const prev = lastSeen.split('.').map((x) => parseInt(x, 10) || 0);
-  const a = cur[0] ?? 0;
-  const b = cur[1] ?? 0;
-  const pa = prev[0] ?? 0;
-  const pb = prev[1] ?? 0;
-  if (a > pa) return true;
-  if (a < pa) return false;
-  return b > pb;
-}
 
 interface Section {
   /** Stable identifier used for React keys + i18n key suffix. */
@@ -236,12 +218,9 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
   // renders the dashboard rather than crashing the whole tree.
   useEffect(() => {
     let show = forceShow;
-    let alreadyAcked = false;
     if (!show) {
       try {
-        const lastSeen = window.localStorage.getItem(LAST_SEEN_KEY);
-        show = shouldShow(version, lastSeen);
-        alreadyAcked = !show && lastSeen != null;
+        show = isNewerFeatureRelease(version, window.localStorage.getItem(LAST_SEEN_KEY));
       } catch {
         show = false;
       }
@@ -253,14 +232,10 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
       const id = window.requestAnimationFrame(() => setMounted(true));
       return () => window.cancelAnimationFrame(id);
     }
-    // Already acknowledged this version → show the reopen pill in place of
-    // the full card. We do NOT show the pill if there's no version match
-    // to begin with (e.g. localStorage unavailable) — quiet by default.
-    if (alreadyAcked) {
-      setMode('pill');
-    } else {
-      setMode(null);
-    }
+    // Already acknowledged (or storage unavailable): nothing. The reopen pill
+    // belongs to the visit in which the card was closed, not to every visit
+    // after it.
+    setMode(null);
     return undefined;
   }, [forceShow, version]);
 

@@ -26,9 +26,10 @@
  *   answering with its own page, a slow endpoint, an error — renders nothing
  *   at all. The notice can never be the reason a screen fails.
  *
- * - **Dismiss.** Per-version dismiss state is stored in sessionStorage; once
- *   the user closes the card for v0.8.0 they will not see it again until
- *   v0.8.1 (or higher) appears.
+ * - **Dismiss.** The dismissed version is kept in localStorage; once the
+ *   user closes the card for v0.8.0 no update notice shows again, in the
+ *   sidebar or as the one-line notice on Settings and About, until a version
+ *   newer than v0.8.0 is offered. See {@link isUpdateDismissed}.
  */
 
 import { useState, useEffect, useCallback, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
@@ -43,6 +44,7 @@ import { apiGet, apiPost, ApiError, getAuthToken } from '@/shared/lib/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { isTauri, openExternalUrl, openInNewTab } from '@/shared/lib/desktop';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { compareVersions, parseVersion } from '@/shared/lib/version';
 
 /* ── One-click upgrade — starts `pip install --upgrade` server-side ───
  *
@@ -108,6 +110,77 @@ const VERSION_CHECK_TTL_MS = 4 * 60 * 60 * 1000;
 // banner does not reappear on every page load. The guard is version-scoped:
 // dismissing v17.4.1 does not suppress a later v17.5.0 notification.
 const DISMISS_KEY = 'oe_update_dismissed_version';
+/** Fired on this window when a notice is dismissed, so every mounted notice
+ *  (the sidebar card and the line on Settings or About) hides together. The
+ *  `storage` event covers other tabs but never fires in the tab that wrote. */
+const DISMISS_EVENT = 'oe:update-dismissed';
+
+/**
+ * Whether a dismissal covers the version on offer.
+ *
+ * It does when the dismissed version is the offered one or newer, compared as
+ * numbers rather than as text: the text is whatever the key holds, and the
+ * card itself prints "v18.0.0", so a person who copies it writes the "v". A
+ * string equality let exactly that dismissal through. A key naming an older
+ * release (17.8.3 against 18.0.0) does not cover the newer one, which is the
+ * point of keying the dismissal by version. A key that names no version at
+ * all covers nothing.
+ *
+ * This is not a second answer to "is there an update": the server decides
+ * `update_available`. It answers a question the server cannot see, namely
+ * what this browser was told to stop showing.
+ */
+export function isUpdateDismissed(dismissed: string | null | undefined, offered: string): boolean {
+  const d = parseVersion(dismissed);
+  const o = parseVersion(offered);
+  if (!d || !o) return false;
+  return compareVersions(d, o) >= 0;
+}
+
+function readDismissedVersion(): string | null {
+  try {
+    return localStorage.getItem(DISMISS_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The dismissed version and a way to dismiss one, shared by every notice.
+ *
+ * Read at mount, so a notice mounting on another route with the answer
+ * already cached stays down, and kept in step afterwards through the dismiss
+ * event (this tab) and the `storage` event (other tabs).
+ */
+function useUpdateDismissal(): [string | null, (version: string) => void] {
+  const [dismissed, setDismissed] = useState<string | null>(readDismissedVersion);
+
+  useEffect(() => {
+    const reread = () => setDismissed(readDismissedVersion());
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === DISMISS_KEY) reread();
+    };
+    window.addEventListener(DISMISS_EVENT, reread);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(DISMISS_EVENT, reread);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  const dismiss = useCallback((version: string) => {
+    setDismissed(version);
+    try {
+      localStorage.setItem(DISMISS_KEY, version);
+    } catch {
+      /* storage unavailable: the notice simply reappears on the next mount */
+    }
+    window.dispatchEvent(new Event(DISMISS_EVENT));
+  }, []);
+
+  return [dismissed, dismiss];
+}
+
 /** The endpoint truncates the release body at this many characters, so notes
  *  arriving at exactly this length are a cut, not a short release. */
 const NOTES_CAP = 500;
@@ -474,48 +547,78 @@ export function useUpdateCheck(): VersionCheck | null {
   return data && data.update_available ? data : null;
 }
 
-interface UpdateNotificationProps {
-  /** When true, the dismiss state is ignored — used on the About / Settings pages
-   *  where the user explicitly navigated to "see what's new". */
-  forceShow?: boolean;
-  /** Hide the dismiss button — pairs naturally with `forceShow`. */
-  hideDismiss?: boolean;
+/**
+ * The update the reader has not dismissed, or null.
+ *
+ * What every notice renders from: the server's answer when it offers an
+ * update, minus a dismissal that covers the offered version.
+ */
+export function useUndismissedUpdate(): {
+  release: VersionCheck | null;
+  dismiss: () => void;
+} {
+  const release = useUpdateCheck();
+  const [dismissedVersion, dismissVersion] = useUpdateDismissal();
+  const dismiss = useCallback(() => {
+    if (release) dismissVersion(release.latest_version);
+  }, [release, dismissVersion]);
+  const shown = release && !isUpdateDismissed(dismissedVersion, release.latest_version) ? release : null;
+  return { release: shown, dismiss };
 }
 
-export function UpdateNotification({ forceShow = false, hideDismiss = false }: UpdateNotificationProps = {}) {
+/**
+ * The one-line update notice for Settings and About.
+ *
+ * Those pages used to render the full sidebar card with its dismiss button
+ * removed and the dismissal ignored, so a reader who had closed the notice
+ * met it again, undismissable, on the two pages they open most to check a
+ * setting. The line says the same thing in one row, links to the release, and
+ * follows the same dismissal as the sidebar card.
+ */
+export function UpdateInlineNotice({ className = '' }: { className?: string }) {
   const { t } = useTranslation();
-  const release = useUpdateCheck();
-  // The version a dismissal was about, not the fact that one happened. Read
-  // from storage at mount rather than when the answer arrives, so a card
-  // dismissed in this session stays down when the widget mounts again on
-  // another route with the answer already cached.
-  const [dismissedVersion, setDismissedVersion] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(DISMISS_KEY);
-    } catch {
-      return null;
-    }
-  });
-  const [showFullModal, setShowFullModal] = useState(false);
+  const { release } = useUndismissedUpdate();
+  if (!release) return null;
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm dark:border-sky-800 dark:bg-sky-950 ${className}`}
+    >
+      <Sparkles size={14} className="shrink-0 text-sky-500" />
+      <span className="text-content-secondary">
+        {release.current_version
+          ? t('settings.update_available_inline', {
+              defaultValue: 'Update available: v{{current}} → v{{latest}}',
+              current: release.current_version,
+              latest: release.latest_version,
+            })
+          : `v${release.latest_version}`}
+      </span>
+      {release.release_url && (
+        <a
+          href={release.release_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto text-xs font-medium text-oe-blue hover:underline"
+        >
+          {t('common.details', { defaultValue: 'Details' })}
+        </a>
+      )}
+    </div>
+  );
+}
 
-  const handleDismiss = useCallback(() => {
-    if (!release) return;
-    setDismissedVersion(release.latest_version);
-    try {
-      localStorage.setItem(DISMISS_KEY, release.latest_version);
-    } catch {
-      /* storage unavailable — the card simply reappears next mount */
-    }
-  }, [release]);
+export function UpdateNotification() {
+  const { t } = useTranslation();
+  const { release, dismiss: handleDismiss } = useUndismissedUpdate();
+  const [showFullModal, setShowFullModal] = useState(false);
 
   const grouped = useMemo<GroupedHighlights | null>(
     () => (release ? groupHighlights(release.release_notes) : null),
     [release],
   );
 
+  // Scoped to the version dismissed: a newer release speaks up on its own.
   if (!release) return null;
-  // Scoped to the version dismissed: the next release speaks up on its own.
-  if (dismissedVersion === release.latest_version && !forceShow) return null;
 
   const relativeDate = release.published_at
     ? new Date(release.published_at).toLocaleDateString(getIntlLocale())
@@ -590,15 +693,13 @@ export function UpdateNotification({ forceShow = false, hideDismiss = false }: U
             </div>
           </div>
         </button>
-        {!hideDismiss && (
-          <button
-            onClick={handleDismiss}
-            aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
-            className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded text-sky-500/70 hover:text-blue-700 hover:bg-sky-500/20 dark:hover:bg-sky-400/20 transition-colors"
-          >
-            <X size={11} />
-          </button>
-        )}
+        <button
+          onClick={handleDismiss}
+          aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
+          className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded text-sky-500/70 hover:text-blue-700 hover:bg-sky-500/20 dark:hover:bg-sky-400/20 transition-colors"
+        >
+          <X size={11} />
+        </button>
       </div>
 
       {showFullModal && (

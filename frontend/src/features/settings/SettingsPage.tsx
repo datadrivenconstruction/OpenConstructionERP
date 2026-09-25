@@ -55,7 +55,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { settingsGuide } from './settingsGuide';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { DashboardLayoutManager } from '@/features/dashboard/DashboardLayoutManager';
-import { useUpdateCheck } from '@/shared/ui/UpdateChecker';
+import { UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { apiGet, apiPatch, apiPost, apiPut, apiDelete } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -1304,7 +1304,6 @@ export function SettingsPage() {
   const setTokens = useAuthStore((s) => s.setTokens);
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const updateData = useUpdateCheck();
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ full_name: '' });
@@ -1475,30 +1474,9 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Update notification — compact inline banner. The sidebar already
-          shows the full update card; this is just a one-liner reminder so
-          users who navigate to Settings are aware an update exists without
-          the banner competing with the sidebar for attention. */}
-      {updateData && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm dark:border-sky-800 dark:bg-sky-950">
-          <Sparkles size={14} className="text-sky-500" />
-          <span className="text-content-secondary">
-            {t('settings.update_available_inline', {
-              defaultValue: 'Update available: v{{current}} → v{{latest}}',
-              current: updateData.current_version,
-              latest: updateData.latest_version,
-            })}
-          </span>
-          <a
-            href={updateData.release_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto text-xs font-medium text-oe-blue hover:underline"
-          >
-            {t('common.details', 'Details')}
-          </a>
-        </div>
-      )}
+      {/* Update notification, one line. The sidebar carries the full card;
+          both follow the same per-version dismissal. */}
+      <UpdateInlineNotice className="mb-4" />
 
       <Breadcrumb items={[{ label: t('nav.settings', 'Settings') }]} />
 

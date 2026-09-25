@@ -19,7 +19,7 @@ import { Card, Button, Badge, Breadcrumb, DismissibleInfo, IntroRichText } from 
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { APP_VERSION } from '@/shared/lib/version';
-import { UpdateNotification } from '@/shared/ui/UpdateChecker';
+import { UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { Changelog, getRecentReleases } from './Changelog';
 import { ThirdPartyLicenses } from './ThirdPartyLicenses';
 import { CONTRIBUTORS, SPONSORS, acknowledgedUrl, type Acknowledged } from './acknowledgments';
@@ -232,11 +232,12 @@ export function AboutPage() {
         </div>
 
         {/* ── Right column — update notification + recent releases ──
-            UpdateNotification renders its own card; the recent-releases
+            UpdateInlineNotice renders one line when an update is on offer
+            and not dismissed; the recent-releases
             mini-list lives below it so the right column visually matches
             the left identity block's height on wide screens. */}
         <div className="flex flex-col gap-3">
-          <UpdateNotification forceShow hideDismiss />
+          <UpdateInlineNotice />
 
           {/* Recent releases — last 3 published versions with date so
               users can see the cadence at a glance without scrolling
