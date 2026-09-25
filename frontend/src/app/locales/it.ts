@@ -18579,6 +18579,7 @@ const resource = {
     "costmodel.bl_description": "Descrizione",
     "costmodel.bl_earned": "Maturato",
     "costmodel.bl_earned_hint": "Il valore maturato viene calcolato automaticamente dall'avanzamento registrato in cantiere",
+    "costmodel.bl_committed_from_documents": "Da ordini di acquisto e contratti",
     "costmodel.bl_edit_hint": "Fai doppio clic su una riga o usa il pulsante di modifica per cambiare i valori.",
     "costmodel.budget_failed": "Generazione del budget non riuscita",
     "costmodel.budget_line_update_failed": "Aggiornamento della riga di budget non riuscito",

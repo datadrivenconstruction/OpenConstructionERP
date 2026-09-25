@@ -18828,6 +18828,7 @@ const resource = {
     "costmodel.bl_description": "Описание",
     "costmodel.bl_earned": "Освоено",
     "costmodel.bl_earned_hint": "Освоенный объём рассчитывается автоматически по зафиксированному ходу работ на площадке",
+    "costmodel.bl_committed_from_documents": "Из заказов на закупку и договоров",
     "costmodel.bl_edit_hint": "Дважды кликните по строке или используйте кнопку редактирования, чтобы изменить значения.",
     "costmodel.budget_failed": "Не удалось сформировать бюджет",
     "costmodel.budget_line_update_failed": "Не удалось обновить строку бюджета",

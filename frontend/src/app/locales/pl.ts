@@ -18949,6 +18949,7 @@ const resource = {
     "costmodel.bl_description": "Opis",
     "costmodel.bl_earned": "Wypracowane",
     "costmodel.bl_earned_hint": "Wartość wypracowana jest obliczana automatycznie na podstawie zarejestrowanego postępu robót",
+    "costmodel.bl_committed_from_documents": "Z zamówień zakupu i umów",
     "costmodel.bl_edit_hint": "Kliknij dwukrotnie wiersz lub użyj przycisku edycji, aby zmienić wartości.",
     "costmodel.budget_failed": "Nie udało się wygenerować budżetu",
     "costmodel.budget_line_update_failed": "Nie udało się zaktualizować pozycji budżetu",

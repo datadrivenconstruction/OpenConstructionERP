@@ -18088,6 +18088,7 @@ const resource = {
     "costmodel.bl_description": "Paglalarawan",
     "costmodel.bl_earned": "Naitrabaho",
     "costmodel.bl_earned_hint": "Awtomatikong kinakalkula ang earned value mula sa naitalang progreso sa field",
+    "costmodel.bl_committed_from_documents": "Mula sa mga purchase order at kontrata",
     "costmodel.bl_edit_hint": "I-double-click ang isang row o gamitin ang edit button para baguhin ang mga halaga.",
     "costmodel.budget_failed": "Nabigong gumawa ng badyet",
     "costmodel.budget_line_update_failed": "Nabigong i-update ang linya ng badyet",

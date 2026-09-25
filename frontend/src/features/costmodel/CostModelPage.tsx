@@ -973,6 +973,8 @@ interface EditingBudgetLine {
   category: string;
   description: string;
   planned_amount: number;
+  committed_amount: number;
+  committed_from_documents: boolean;
   actual_amount: number;
   forecast_amount: number;
 }
@@ -1074,6 +1076,8 @@ function BudgetLinesEditor({
       category: string;
       description: string;
       planned_amount: number;
+      committed_amount: number;
+      committed_from_documents?: boolean;
       actual_amount: number;
       forecast_amount: number;
     }) => {
@@ -1083,6 +1087,8 @@ function BudgetLinesEditor({
         category: line.category,
         description: line.description,
         planned_amount: line.planned_amount,
+        committed_amount: Number(line.committed_amount) || 0,
+        committed_from_documents: Boolean(line.committed_from_documents),
         actual_amount: line.actual_amount,
         forecast_amount: line.forecast_amount,
       });
@@ -1103,6 +1109,9 @@ function BudgetLinesEditor({
         category: editForm.category,
         description: editForm.description,
         planned_amount: editForm.planned_amount,
+        // Committed that comes from purchase orders and contracts is not
+        // the user's to type; the API refuses a different value.
+        ...(editForm.committed_from_documents ? {} : { committed_amount: editForm.committed_amount }),
         actual_amount: editForm.actual_amount,
         forecast_amount: editForm.forecast_amount,
       },
@@ -1130,13 +1139,14 @@ function BudgetLinesEditor({
         // Number() guards against the backend's Decimal-as-string money
         // encoding (string + string would concatenate, not add).
         planned: acc.planned + (Number(l.planned_amount) || 0),
+        committed: acc.committed + (Number(l.committed_amount) || 0),
         actual: acc.actual + (Number(l.actual_amount) || 0),
         forecast: acc.forecast + (Number(l.forecast_amount) || 0),
         earned: acc.earned + (earned ?? 0),
         hasEarned: acc.hasEarned || earned != null,
       };
     },
-    { planned: 0, actual: 0, forecast: 0, earned: 0, hasEarned: false },
+    { planned: 0, committed: 0, actual: 0, forecast: 0, earned: 0, hasEarned: false },
   );
 
   return (
@@ -1163,6 +1173,9 @@ function BudgetLinesEditor({
                 {t('costmodel.bl_earned', 'Earned')}
                 <Activity size={11} className="shrink-0 text-content-tertiary" />
               </span>
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.committed', 'Committed')}
             </th>
             <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
               {t('costmodel.actual', 'Actual')}
@@ -1229,6 +1242,26 @@ function BudgetLinesEditor({
                   >
                     {earned == null ? '-' : formatCurrency(earned, currency)}
                   </td>
+                  {editForm.committed_from_documents ? (
+                    <td className="py-2 px-4 text-right tabular-nums text-content-tertiary">
+                      {formatCurrency(editForm.committed_amount, currency)}
+                      <span className="block text-2xs">{t('costmodel.bl_committed_from_documents', { defaultValue: 'From purchase orders and contracts' })}</span>
+                    </td>
+                  ) : (
+                    <td className="py-2 px-4">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editForm.committed_amount}
+                        onChange={(e) =>
+                          setEditForm((f) =>
+                            f && { ...f, committed_amount: parseFloat(e.target.value) || 0 },
+                          )
+                        }
+                        className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                      />
+                    </td>
+                  )}
                   <td className="py-2 px-4">
                     <input
                       type="number"
@@ -1284,7 +1317,7 @@ function BudgetLinesEditor({
                   </td>
                 </tr>
                 <tr className="bg-oe-blue-subtle/10">
-                  <td colSpan={8} className="px-4 pb-3">
+                  <td colSpan={9} className="px-4 pb-3">
                     <BudgetLineThresholdEditor
                       lineId={line.id}
                       initialThresholdPct={line.overrun_alert_threshold_pct}
@@ -1367,6 +1400,12 @@ function BudgetLinesEditor({
                   )}
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                  {formatCurrency(line.committed_amount, currency)}
+                  {line.committed_from_documents && (
+                    <span className="block text-2xs text-content-tertiary">{t('costmodel.bl_committed_from_documents', { defaultValue: 'From purchase orders and contracts' })}</span>
+                  )}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
                   {formatCurrency(line.actual_amount, currency)}
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
@@ -1415,6 +1454,9 @@ function BudgetLinesEditor({
             </td>
             <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
               {lineTotal.hasEarned ? formatCurrency(lineTotal.earned, currency) : '-'}
+            </td>
+            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+              {formatCurrency(lineTotal.committed, currency)}
             </td>
             <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
               {formatCurrency(lineTotal.actual, currency)}

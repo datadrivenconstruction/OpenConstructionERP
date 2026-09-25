@@ -18577,6 +18577,7 @@ const resource = {
     "costmodel.bl_description": "Тайлбар",
     "costmodel.bl_earned": "Олсон",
     "costmodel.bl_earned_hint": "Олсон үнэ цэнэ нь бүртгэгдсэн талбайн явцаас автоматаар тооцогдоно",
+    "costmodel.bl_committed_from_documents": "Худалдан авалтын захиалга ба гэрээнээс",
     "costmodel.bl_edit_hint": "Утгыг өөрчлөхийн тулд мөр дээр давхар товшино уу эсвэл засах товчийг ашиглана уу.",
     "costmodel.budget_failed": "Төсөв үүсгэж чадсангүй",
     "costmodel.budget_line_update_failed": "Төсвийн мөрийг шинэчилж чадсангүй",

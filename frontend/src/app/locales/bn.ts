@@ -18082,6 +18082,7 @@ const resource = {
     "costmodel.bl_description": "বিবরণ",
     "costmodel.bl_earned": "অর্জিত",
     "costmodel.bl_earned_hint": "নথিভুক্ত ফিল্ড অগ্রগতি থেকে অর্জিত মূল্য স্বয়ংক্রিয়ভাবে গণনা করা হয়",
+    "costmodel.bl_committed_from_documents": "ক্রয় আদেশ ও চুক্তি থেকে",
     "costmodel.bl_edit_hint": "মান পরিবর্তন করতে একটি সারিতে ডাবল-ক্লিক করুন বা সম্পাদনা বোতাম ব্যবহার করুন।",
     "costmodel.budget_failed": "বাজেট তৈরি করতে ব্যর্থ হয়েছে",
     "costmodel.budget_line_update_failed": "বাজেট লাইন আপডেট করতে ব্যর্থ হয়েছে",

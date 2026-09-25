@@ -19013,6 +19013,7 @@ const resource = {
     "costmodel.bl_description": "الوصف",
     "costmodel.bl_earned": "المكتسب",
     "costmodel.bl_earned_hint": "تُحسب القيمة المكتسبة تلقائيًا من التقدم الميداني المسجّل",
+    "costmodel.bl_committed_from_documents": "من أوامر الشراء والعقود",
     "costmodel.bl_edit_hint": "انقر نقراً مزدوجاً على صف أو استخدم زر التحرير لتعديل القيم.",
     "costmodel.budget_failed": "تعذّر توليد الموازنة",
     "costmodel.budget_line_update_failed": "تعذّر تحديث بند الموازنة",

@@ -18662,6 +18662,7 @@ const resource = {
     "costmodel.bl_description": "Mô tả",
     "costmodel.bl_earned": "Giá trị thực hiện",
     "costmodel.bl_earned_hint": "Giá trị thực hiện được tính tự động từ tiến độ hiện trường đã ghi nhận",
+    "costmodel.bl_committed_from_documents": "Từ đơn đặt hàng và hợp đồng",
     "costmodel.bl_edit_hint": "Nhấp đúp vào một hàng hoặc dùng nút chỉnh sửa để thay đổi giá trị.",
     "costmodel.budget_failed": "Không thể tạo ngân sách",
     "costmodel.budget_line_update_failed": "Không thể cập nhật dòng ngân sách",

@@ -18160,6 +18160,7 @@ const resource = {
     "costmodel.bl_description": "תיאור",
     "costmodel.bl_earned": "נצבר",
     "costmodel.bl_earned_hint": "הערך הצבור מחושב אוטומטית מהתקדמות שטח רשומה",
+    "costmodel.bl_committed_from_documents": "מהזמנות רכש וחוזים",
     "costmodel.bl_edit_hint": "לחצו פעמיים על שורה או השתמשו בכפתור העריכה כדי לשנות ערכים.",
     "costmodel.budget_failed": "יצירת התקציב נכשלה",
     "costmodel.budget_line_update_failed": "עדכון שורת התקציב נכשל",

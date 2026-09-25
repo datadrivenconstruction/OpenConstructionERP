@@ -18708,6 +18708,7 @@ const resource = {
     "costmodel.bl_description": "Beskrivelse",
     "costmodel.bl_earned": "Opptjent",
     "costmodel.bl_earned_hint": "Opptjent verdi beregnes automatisk fra registrert fremdrift i felt",
+    "costmodel.bl_committed_from_documents": "Fra innkjøpsordrer og kontrakter",
     "costmodel.bl_edit_hint": "Dobbeltklikk en rad eller bruk redigeringsknappen for å endre verdier.",
     "costmodel.budget_failed": "Kunne ikke generere budsjett",
     "costmodel.budget_line_update_failed": "Kunne ikke oppdatere budsjettlinje",

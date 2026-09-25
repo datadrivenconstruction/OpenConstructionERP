@@ -18678,6 +18678,7 @@ const resource = {
     "costmodel.bl_description": "설명",
     "costmodel.bl_earned": "기성고",
     "costmodel.bl_earned_hint": "기성고는 기록된 현장 진척도에서 자동으로 계산됩니다",
+    "costmodel.bl_committed_from_documents": "구매 주문 및 계약 기준",
     "costmodel.bl_edit_hint": "행을 더블클릭하거나 편집 버튼을 사용하여 값을 수정하세요.",
     "costmodel.budget_failed": "예산 생성에 실패했습니다",
     "costmodel.budget_line_update_failed": "예산 항목 업데이트에 실패했습니다",

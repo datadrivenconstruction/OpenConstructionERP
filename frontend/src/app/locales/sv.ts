@@ -18781,6 +18781,7 @@ const resource = {
     "costmodel.bl_description": "Beskrivning",
     "costmodel.bl_earned": "Upparbetat",
     "costmodel.bl_earned_hint": "Upparbetat värde beräknas automatiskt från registrerade framsteg i fält",
+    "costmodel.bl_committed_from_documents": "Från inköpsorder och avtal",
     "costmodel.bl_edit_hint": "Dubbelklicka på en rad eller använd redigeringsknappen för att ändra värden.",
     "costmodel.budget_failed": "Det gick inte att generera budget",
     "costmodel.budget_line_update_failed": "Det gick inte att uppdatera budgetraden",

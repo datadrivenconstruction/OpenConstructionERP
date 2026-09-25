@@ -18696,6 +18696,7 @@ const resource = {
     "costmodel.bl_description": "Popis",
     "costmodel.bl_earned": "Dosažené",
     "costmodel.bl_earned_hint": "Dosažená hodnota se počítá automaticky ze zaznamenaného postupu v terénu",
+    "costmodel.bl_committed_from_documents": "Z objednávek a smluv",
     "costmodel.bl_edit_hint": "Pro úpravu hodnot dvakrát klikněte na řádek nebo použijte tlačítko úprav.",
     "costmodel.budget_failed": "Rozpočet se nepodařilo vygenerovat",
     "costmodel.budget_line_update_failed": "Položku rozpočtu se nepodařilo aktualizovat",

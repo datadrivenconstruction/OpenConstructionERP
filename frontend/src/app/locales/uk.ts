@@ -18829,6 +18829,7 @@ const resource = {
     "costmodel.bl_description": "Опис",
     "costmodel.bl_earned": "Освоєно",
     "costmodel.bl_earned_hint": "Освоєний обсяг обчислюється автоматично із зареєстрованого прогресу з об'єкта",
+    "costmodel.bl_committed_from_documents": "Із замовлень на закупівлю та договорів",
     "costmodel.bl_edit_hint": "Двічі клацніть рядок чи скористайтеся кнопкою редагування, щоб змінити значення.",
     "costmodel.budget_failed": "Не вдалося згенерувати бюджет",
     "costmodel.budget_line_update_failed": "Не вдалося оновити рядок бюджету",

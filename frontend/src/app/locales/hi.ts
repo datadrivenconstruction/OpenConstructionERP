@@ -18774,6 +18774,7 @@ const resource = {
     "costmodel.bl_description": "विवरण",
     "costmodel.bl_earned": "अर्जित",
     "costmodel.bl_earned_hint": "अर्जित मूल्य दर्ज की गई साइट प्रगति से स्वचालित रूप से परिकलित होता है",
+    "costmodel.bl_committed_from_documents": "क्रय आदेशों और अनुबंधों से",
     "costmodel.bl_edit_hint": "मूल्य बदलने के लिए किसी पंक्ति पर डबल-क्लिक करें या संपादन बटन का उपयोग करें।",
     "costmodel.budget_failed": "बजट बनाने में विफल",
     "costmodel.budget_line_update_failed": "बजट लाइन अपडेट करने में विफल",
