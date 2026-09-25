@@ -4,8 +4,8 @@
  * usePresenceWebSocket — live roster + lock-event stream for one entity.
  *
  * Connects to /api/v1/collaboration_locks/presence/?entity_type=...&entity_id=...
- * with the JWT on the `token` query param (the browser WebSocket
- * API cannot set Authorization headers).
+ * and sends the JWT as the first frame (`shared/lib/socketAuth`), never in
+ * the URL, where every access log would write it down.
  *
  * The hook is purely *observational* — it does not acquire or
  * release locks.  Pair it with useEntityLock for the holder; use
@@ -15,6 +15,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
+import { authFrame, socketUrl } from '@/shared/lib/socketAuth';
 
 export interface PresenceUser {
   user_id: string;
@@ -84,13 +85,11 @@ export function usePresenceWebSocket(
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url =
-      `${protocol}//${window.location.host}` +
+    const url = socketUrl(
       `/api/v1/collaboration_locks/presence/` +
-      `?entity_type=${encodeURIComponent(entityType)}` +
-      `&entity_id=${encodeURIComponent(entityId)}` +
-      `&token=${encodeURIComponent(token)}`;
+        `?entity_type=${encodeURIComponent(entityType)}` +
+        `&entity_id=${encodeURIComponent(entityId)}`,
+    );
 
     let closed = false;
     setStatus('connecting');
@@ -105,6 +104,7 @@ export function usePresenceWebSocket(
 
     ws.onopen = () => {
       if (closed) return;
+      ws.send(authFrame(token));
       setStatus('open');
     };
 

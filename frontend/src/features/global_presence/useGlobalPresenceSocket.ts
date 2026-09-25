@@ -3,10 +3,17 @@
 /**
  * useGlobalPresenceSocket -- app-wide presence WebSocket.
  *
- * Connects to /api/v1/global_presence/ws/?token=<jwt> and keeps the
- * global presence store in sync with the server roster. Sends
- * `route_update` on pathname changes and `status_update` when the tab
- * becomes hidden or the user goes idle for 3 minutes.
+ * Connects to /api/v1/global_presence/ws/, sends the JWT as the first frame
+ * (`shared/lib/socketAuth`, never in the URL), and keeps the presence store
+ * in sync with the roster of the project this tab is working in. Sends
+ * `route_update` with the active project on pathname and project changes,
+ * and `status_update` when the tab becomes hidden or the user goes idle for
+ * 3 minutes.
+ *
+ * The server only shows a tab the people in the same project, and only when
+ * the user may open that project. Without an active project the roster is
+ * empty, which is the point: the header used to show every signed-in account
+ * on the server to every other one.
  *
  * Unlike the per-entity usePresenceWebSocket (collab_locks), this hook:
  *   - auto-reconnects with jittered exponential backoff,
@@ -20,6 +27,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { authFrame, socketUrl } from '@/shared/lib/socketAuth';
 import {
   useGlobalPresenceStore,
   type GlobalPresenceUser,
@@ -120,6 +129,9 @@ export function useGlobalPresenceSocket(): void {
   const location = useLocation();
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const projectRef = useRef(activeProjectId);
+  projectRef.current = activeProjectId;
 
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
@@ -166,11 +178,7 @@ export function useGlobalPresenceSocket(): void {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url =
-      `${protocol}//${window.location.host}` +
-      `/api/v1/global_presence/ws/` +
-      `?token=${encodeURIComponent(token)}`;
+    const url = socketUrl('/api/v1/global_presence/ws/');
 
     setWsStatus('connecting');
     let ws: WebSocket;
@@ -185,11 +193,13 @@ export function useGlobalPresenceSocket(): void {
 
     ws.onopen = () => {
       if (!mountedRef.current) { ws.close(); return; }
+      // Authenticate first: the server reads nothing else until it has.
+      ws.send(authFrame(token));
       setWsStatus('open');
       retryRef.current = 0;
 
-      // Report current route immediately after handshake.
-      send({ type: 'route_update', route: pathnameRef.current });
+      // Report current route and project immediately after handshake.
+      send({ type: 'route_update', route: pathnameRef.current, project_id: projectRef.current });
 
       // Keep-alive pings.
       pingTimerRef.current = setInterval(() => {
@@ -313,8 +323,8 @@ export function useGlobalPresenceSocket(): void {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ── Send route_update on pathname change ────────────────────── */
+  /* ── Send route_update on pathname or project change ─────────── */
   useEffect(() => {
-    send({ type: 'route_update', route: location.pathname });
-  }, [location.pathname, send]);
+    send({ type: 'route_update', route: location.pathname, project_id: activeProjectId });
+  }, [location.pathname, activeProjectId, send]);
 }
