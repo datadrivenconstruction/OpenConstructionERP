@@ -2931,5 +2931,45 @@
     "en_value": "PropDev",
     "n": 25,
     "reason": "Seeded when the leak guard was first split into three lists (ci(i18n): rebuild the leak guard as two separate lists plus a general scan). This entry's n is >=24/28, the shape the threshold scan actually flags; filed as ambiguous at guard rollout rather than triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
+  },
+  "contracts.sov_link_boq": {
+    "added_by": "i18n sweep (2026-09-25)",
+    "differs_in": [
+      "de",
+      "et",
+      "fa",
+      "fi",
+      "fr",
+      "he",
+      "hu",
+      "it",
+      "ja",
+      "ko",
+      "uk",
+      "zh"
+    ],
+    "en_value": "BOQ",
+    "n": 30,
+    "reason": "New key for the SOV-to-BOQ link picker. BOQ is kept literal (CLAUDE.md: not translated) in most locales, but de/fr/it/ja/ko/uk/et/fi/hu/zh/fa/he already use their own established term for the bill of quantities elsewhere in the app (e.g. tendering.export_gaeb_title), so this key follows that per-locale precedent instead of the acronym."
+  },
+  "contracts.sov_link_linked": {
+    "added_by": "i18n sweep (2026-09-25)",
+    "differs_in": [
+      "de",
+      "et",
+      "fa",
+      "fi",
+      "fr",
+      "he",
+      "hu",
+      "it",
+      "ja",
+      "ko",
+      "uk",
+      "zh"
+    ],
+    "en_value": "BOQ {{position}}",
+    "n": 30,
+    "reason": "Sibling of contracts.sov_link_boq (same key family, same picker): the BOQ label is substituted with each locale established term where one exists, kept literal elsewhere."
   }
 }

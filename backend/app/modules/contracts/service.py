@@ -394,6 +394,14 @@ def compute_progress_claim_total(
 #: for this position; lines without it are skipped (additive, no DDL needed).
 BOQ_POSITION_META_KEY = "boq_position_id"
 
+#: The metadata a SoV line may be given on any contract that is not closed:
+#: its link to the bill and its classification codes. Reference data, not
+#: money; see ContractsService._assert_line_may_be_linked.
+LINE_LINK_META_KEYS = frozenset({BOQ_POSITION_META_KEY, "classification"})
+
+#: Contracts whose lines may still be linked to the bill.
+LINE_LINKABLE_CONTRACT_STATUSES = frozenset({"draft", "active", "suspended"})
+
 #: Key under which a claim's ``metadata_`` keeps the lines whose percent to
 #: date came in below what earlier claims billed. Written by the generators,
 #: replaced on every run, read by ``pay_application.percent_regressed``.
@@ -2350,8 +2358,13 @@ class ContractsService:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
             raise HTTPException(status_code=404, detail="Contract line not found")
-        await self._assert_line_may_change(line)
         fields = data.model_dump(exclude_unset=True)
+        link_only = set(fields) == {"metadata"} and isinstance(fields["metadata"], dict)
+        link_only = link_only and set(fields["metadata"]) <= LINE_LINK_META_KEYS
+        if link_only:
+            await self._assert_line_may_be_linked(line, fields["metadata"])
+        else:
+            await self._assert_line_may_change(line)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (
@@ -2366,6 +2379,68 @@ class ContractsService:
         await self.line_repo.update_fields(line_id, **fields)
         await self.session.refresh(line)
         return line
+
+    async def _assert_line_may_be_linked(self, line: ContractLine, metadata: dict[str, Any]) -> None:
+        """Raise unless this line may take the link and classification it is sent.
+
+        The link to a BOQ position and the line's classification code are
+        reference data: they move no quantity, rate or total and restate
+        nothing a certificate carries. They decide which progress reading
+        "Populate from progress" bills the line at, and what the classification
+        rules read. So they are taken on a signed contract and on a line a
+        claim has billed, where :meth:`_assert_line_may_change` refuses every
+        other write, and refused only once the contract is closed.
+
+        The position has to belong to the contract's own project. The progress
+        bridge reads readings by project, so a foreign position would never
+        bill, and accepting it would say a link was made that can do nothing.
+        """
+        contract = await self.get_contract(line.contract_id)
+        if contract.status not in LINE_LINKABLE_CONTRACT_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "contract_closed",
+                    "message": (
+                        f"This contract is {contract.status!r}; its schedule of values lines "
+                        "can no longer be linked to the bill."
+                    ),
+                    "contract_status": contract.status,
+                },
+            )
+        classification = metadata.get("classification")
+        if classification is not None and not (
+            isinstance(classification, dict)
+            and all(isinstance(k, str) and isinstance(v, str) for k, v in classification.items())
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="A classification is a map of standard to code, both text.",
+            )
+        raw = metadata.get(BOQ_POSITION_META_KEY)
+        if raw in (None, ""):
+            return
+        try:
+            position_id = uuid.UUID(str(raw))
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The BOQ position id is not a valid id.",
+            ) from None
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.boq.models import BOQ, Position  # noqa: PLC0415
+
+        project_id = (
+            await self.session.execute(
+                select(BOQ.project_id).join(Position, Position.boq_id == BOQ.id).where(Position.id == position_id)
+            )
+        ).scalar_one_or_none()
+        if project_id != contract.project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The BOQ position is not in this contract's project.",
+            )
 
     async def delete_line(self, line_id: uuid.UUID) -> None:
         line = await self.line_repo.get_by_id(line_id)

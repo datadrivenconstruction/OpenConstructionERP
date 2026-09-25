@@ -60,6 +60,7 @@ import {
   TEMPLATE_CATALOGUE_KEY,
 } from './ContractTemplatesPanel';
 import { ContractStatusPipeline } from './ContractStatusPipeline';
+import { SovLineLinkEditor, SovLineLinkSummary } from './SovLineLink';
 import { ContractExpiryBadge } from './ContractExpiryBadge';
 import { ComplianceGate } from './ComplianceGate';
 import { ContractPartiesPanel } from './ContractPartiesPanel';
@@ -1578,22 +1579,31 @@ function lineDraftOf(line: ContractLine) {
  * cell empty: the server refuses to change or delete it, and a row without
  * its cell would slide its figures under the wrong headings.
  */
+/** A contract whose schedule lines may still be linked to the bill: not yet closed. */
+const SOV_LINKABLE_STATUSES: ContractStatus[] = ['draft', 'active', 'suspended'];
+
 function SoVLineRow({
   line,
   contractId,
+  projectId,
   currency,
   editable,
+  linkable,
 }: {
   line: ContractLine;
   contractId: string;
+  projectId: string;
   currency: string | null;
   editable: boolean;
+  /** The line's link to the bill may be set: any contract that is not closed. */
+  linkable: boolean;
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [linking, setLinking] = useState(false);
   const [draft, setDraft] = useState(() => lineDraftOf(line));
   const billed = line.billed === true;
 
@@ -1725,57 +1735,74 @@ function SoVLineRow({
   }
 
   return (
-    <tr className="border-t border-border-light" data-testid={`sov-row-${line.id}`}>
-      <td className="py-1 font-mono text-xs text-content-secondary">
-        {line.code || '—'}
-      </td>
-      <td className="py-1 truncate max-w-[260px]">{line.description || '—'}</td>
-      <td className="py-1 text-right text-content-secondary">
-        {toNum(line.quantity).toLocaleString(getNumberLocale())} {line.unit || ''}
-      </td>
-      <td className="py-1 text-right text-content-secondary">
-        <MoneyDisplay amount={toNum(line.unit_rate)} currency={currency || undefined} />
-      </td>
-      <td className="py-1 text-right font-medium">
-        <MoneyDisplay amount={toNum(line.total_value)} currency={currency || undefined} />
-      </td>
-      {editable && billed && <td className="py-1" />}
-      {editable && !billed && (
-        <td className="py-1 text-right">
-          <div className="flex gap-1 justify-end">
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<PenLine size={12} />}
-              onClick={startEdit}
-            >
-              {t('common.edit', { defaultValue: 'Edit' })}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Trash2 size={12} />}
-              onClick={() => setConfirming(true)}
-            >
-              {t('common.delete', { defaultValue: 'Delete' })}
-            </Button>
-          </div>
-          <ConfirmDialog
-            open={confirming}
-            onConfirm={() => deleteMut.mutate()}
-            onCancel={() => setConfirming(false)}
-            title={t('contracts.delete_line_title', { defaultValue: 'Remove this line' })}
-            message={t('contracts.delete_line_message', {
-              defaultValue:
-                'The line leaves the schedule of values and the contract total drops by its amount.',
-            })}
-            confirmLabel={t('common.delete', { defaultValue: 'Delete' })}
-            variant="danger"
-            loading={deleteMut.isPending}
-          />
+    <>
+      <tr className="border-t border-border-light" data-testid={`sov-row-${line.id}`}>
+        <td className="py-1 font-mono text-xs text-content-secondary">
+          {line.code || '—'}
         </td>
+        <td className="py-1 max-w-[260px]">
+          <span className="block truncate">{line.description || '—'}</span>
+          <SovLineLinkSummary line={line} canLink={linkable} onOpen={() => setLinking((v) => !v)} />
+        </td>
+        <td className="py-1 text-right text-content-secondary">
+          {toNum(line.quantity).toLocaleString(getNumberLocale())} {line.unit || ''}
+        </td>
+        <td className="py-1 text-right text-content-secondary">
+          <MoneyDisplay amount={toNum(line.unit_rate)} currency={currency || undefined} />
+        </td>
+        <td className="py-1 text-right font-medium">
+          <MoneyDisplay amount={toNum(line.total_value)} currency={currency || undefined} />
+        </td>
+        {editable && billed && <td className="py-1" />}
+        {editable && !billed && (
+          <td className="py-1 text-right">
+            <div className="flex gap-1 justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<PenLine size={12} />}
+                onClick={startEdit}
+              >
+                {t('common.edit', { defaultValue: 'Edit' })}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Trash2 size={12} />}
+                onClick={() => setConfirming(true)}
+              >
+                {t('common.delete', { defaultValue: 'Delete' })}
+              </Button>
+            </div>
+            <ConfirmDialog
+              open={confirming}
+              onConfirm={() => deleteMut.mutate()}
+              onCancel={() => setConfirming(false)}
+              title={t('contracts.delete_line_title', { defaultValue: 'Remove this line' })}
+              message={t('contracts.delete_line_message', {
+                defaultValue:
+                  'The line leaves the schedule of values and the contract total drops by its amount.',
+              })}
+              confirmLabel={t('common.delete', { defaultValue: 'Delete' })}
+              variant="danger"
+              loading={deleteMut.isPending}
+            />
+          </td>
+        )}
+      </tr>
+      {linking && (
+        <tr data-testid={`sov-link-row-${line.id}`}>
+          <td colSpan={editable ? 6 : 5} className="pb-2">
+            <SovLineLinkEditor
+              line={line}
+              contractId={contractId}
+              projectId={projectId}
+              onDone={() => setLinking(false)}
+            />
+          </td>
+        </tr>
       )}
-    </tr>
+    </>
   );
 }
 
@@ -2347,8 +2374,10 @@ export function ContractDetailDrawer({
                         key={l.id}
                         line={l}
                         contractId={contractId}
+                        projectId={contract.project_id}
                         currency={contract.currency}
                         editable={linesEditable}
+                        linkable={SOV_LINKABLE_STATUSES.includes(contract.status)}
                       />
                     ))}
                   </tbody>
