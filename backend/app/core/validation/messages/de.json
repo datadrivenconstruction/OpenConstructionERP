@@ -586,6 +586,10 @@
     "insurance_valid_at_start": {
       "fail": "Die Versicherung des Nachunternehmers lief am {expiry} ab, also vor Arbeitsbeginn am {reference}",
       "suggestion": "Holen Sie einen aktuellen Nachweis ein, bevor der Nachunternehmer die Baustelle betritt"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Der Nachunternehmervertrag {agreement} und der Vertrag {contract} scheinen derselbe Nachunternehmerauftrag zu sein, daher könnten die Finanzen ihn doppelt zählen",
+      "suggestion": "Verknüpfen Sie beide, wenn es derselbe Auftrag ist, oder markieren Sie sie als verschieden"
     }
   },
   "submittal": {

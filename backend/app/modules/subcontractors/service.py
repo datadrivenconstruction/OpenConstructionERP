@@ -1302,6 +1302,8 @@ class SubcontractorService:
             "end_date": _iso(agreement.end_date),
             "insurance_expiry_date": _iso(insurance_expiry),
             "as_of": datetime.now(UTC).date().isoformat(),
+            "contract_id": str(agreement.contract_id) if agreement.contract_id else None,
+            "twin_candidates": await self._twin_candidates_for(agreement),
             "work_packages": [
                 {
                     "name": package.name,
@@ -1312,6 +1314,145 @@ class SubcontractorService:
                 for package in packages
             ],
         }
+
+    # ── One subcontract written twice ───────────────────────────────────
+
+    #: ``SubcontractAgreement.metadata_`` key listing the contract ids a person
+    #: said are a different subcontract, so the pair is not raised again.
+    TWIN_DISMISSED_KEY = "unlinked_twin_dismissed"
+
+    async def _twin_records(self, project_id: uuid.UUID) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """The project's agreements and subcontracts, flattened for :func:`match_unlinked_twins`.
+
+        A counterparty goes by the ids it can be written under (subcontractor
+        and contact) and by its company names, read from whichever record the
+        id resolves to.
+        """
+        from app.modules.contacts.models import Contact  # noqa: PLC0415
+        from app.modules.contracts.models import Contract  # noqa: PLC0415
+
+        agreements = (
+            (
+                await self.session.execute(
+                    select(SubcontractAgreement).where(SubcontractAgreement.project_id == project_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        contracts = (
+            (
+                await self.session.execute(
+                    select(Contract).where(
+                        Contract.project_id == project_id,
+                        Contract.counterparty_type == "subcontractor",
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        async def party(raw_id: Any) -> tuple[set[str], set[str]]:
+            """Ids and names for one counterparty id, whatever table it lives in."""
+            try:
+                wanted = raw_id if isinstance(raw_id, uuid.UUID) else uuid.UUID(str(raw_id))
+            except (TypeError, ValueError):
+                return set(), set()
+            ids, names = {str(wanted)}, set()
+            sub = await self.session.get(Subcontractor, wanted)
+            if sub is not None:
+                names |= {n for n in (sub.legal_name, sub.trade_name) if n}
+                if sub.contact_id:
+                    ids.add(str(sub.contact_id))
+                    wanted = sub.contact_id
+            contact = await self.session.get(Contact, wanted)
+            if contact is not None:
+                names |= {n for n in (contact.company_name, contact.legal_name) if n}
+            return ids, names
+
+        agreement_rows: list[dict[str, Any]] = []
+        for agreement in agreements:
+            ids, names = await party(agreement.subcontractor_id)
+            agreement_rows.append(
+                {
+                    "id": str(agreement.id),
+                    "title": agreement.title,
+                    "status": agreement.status,
+                    "currency": agreement.currency,
+                    "total_value": str(agreement.total_value),
+                    "contract_id": str(agreement.contract_id) if agreement.contract_id else None,
+                    "dismissed_contract_ids": list((agreement.metadata_ or {}).get(self.TWIN_DISMISSED_KEY) or []),
+                    "party_ids": sorted(ids),
+                    "party_names": sorted(names),
+                }
+            )
+        contract_rows: list[dict[str, Any]] = []
+        for contract in contracts:
+            ids, names = set(), set()
+            meta = contract.metadata_ or {}
+            for raw in (contract.counterparty_id, meta.get("counterparty_contact_id")):
+                if raw:
+                    more_ids, more_names = await party(raw)
+                    ids |= more_ids
+                    names |= more_names
+            if meta.get("counterparty_name"):
+                names.add(str(meta["counterparty_name"]))
+            contract_rows.append(
+                {
+                    "id": str(contract.id),
+                    "code": contract.code,
+                    "title": contract.title,
+                    "status": contract.status,
+                    "currency": contract.currency,
+                    "total_value": str(contract.total_value),
+                    "party_ids": sorted(ids),
+                    "party_names": sorted(names),
+                }
+            )
+        return agreement_rows, contract_rows
+
+    async def find_unlinked_twins(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Agreement and contract pairs on the project that look like one subcontract.
+
+        Read-only. Linking is ``PATCH /agreements/{id}`` with ``contract_id``;
+        :meth:`dismiss_unlinked_twin` records that a pair is two subcontracts.
+        """
+        from app.modules.subcontractors.validators import match_unlinked_twins  # noqa: PLC0415
+
+        agreements, contracts = await self._twin_records(project_id)
+        return match_unlinked_twins(agreements, contracts)
+
+    async def _twin_candidates_for(self, agreement: SubcontractAgreement) -> list[dict[str, Any]]:
+        """The likely twins of one agreement, for its validation payload.
+
+        Advisory, so a failure to read them (a stub session in a unit test, a
+        deployment without the contracts module) reports nothing rather than
+        breaking validation.
+        """
+        try:
+            pairs = await self.find_unlinked_twins(agreement.project_id)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("Unlinked twin check skipped for %s: %s", agreement.id, exc)
+            return []
+        return [pair for pair in pairs if pair["agreement_id"] == str(agreement.id)]
+
+    async def dismiss_unlinked_twin(self, agreement_id: uuid.UUID, contract_id: uuid.UUID) -> SubcontractAgreement:
+        """Record that an agreement and a contract are different subcontracts.
+
+        Kept on the agreement, so neither the warning nor the banner raises the
+        pair again. Idempotent.
+        """
+        entity = await self.agreements.get_by_id(agreement_id)
+        if entity is None:
+            raise HTTPException(status_code=404, detail=translate("errors.agreement_not_found", locale=get_locale()))
+        meta = dict(entity.metadata_ or {})
+        dismissed = [str(v) for v in meta.get(self.TWIN_DISMISSED_KEY) or []]
+        if str(contract_id) not in dismissed:
+            meta[self.TWIN_DISMISSED_KEY] = [*dismissed, str(contract_id)]
+            await self.agreements.update_fields(agreement_id, metadata_=meta)
+            await self.session.refresh(entity)
+        return entity
 
     async def _validate_agreement(
         self,

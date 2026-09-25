@@ -586,6 +586,10 @@
     "insurance_valid_at_start": {
       "fail": "The subcontractor's insurance expired on {expiry}, before work starts on {reference}",
       "suggestion": "Collect a current certificate before letting the subcontractor on site"
+    },
+    "unlinked_contract_twin": {
+      "fail": "The subcontract {agreement} and the contract {contract} look like the same subcontract, so the finances may count it twice",
+      "suggestion": "Link them if they are the same subcontract, or mark them as different"
     }
   },
   "submittal": {

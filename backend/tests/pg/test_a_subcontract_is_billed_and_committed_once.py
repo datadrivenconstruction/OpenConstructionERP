@@ -460,7 +460,7 @@ async def test_an_unresolved_counterparty_is_left_blank_not_invented(world: _Wor
     assert invoice.contact_id is None
 
 
-async def _linked_agreement(world: _World, contract_id: uuid.UUID, *, sign: bool) -> uuid.UUID:
+async def _linked_agreement(world: _World, contract_id: uuid.UUID | None, *, sign: bool) -> uuid.UUID:
     async with world.factory() as session:
         svc = SubcontractorService(session)
         agreement = await svc.create_agreement(
@@ -583,3 +583,88 @@ async def test_the_duplicate_report_finds_the_old_second_invoice_and_changes_not
     assert by_number["PC-PC-0001"]["linked_invoice_number"] == "INV-P-001"
     assert by_number["PC-PC-0009"]["kind"] == "only_invoice"
     assert len(await world.invoices()) == 3
+
+
+# ── The same subcontract written twice, unlinked ────────────────────────────
+
+
+async def _unlinked_pair(world: _World, bus: EventBus) -> tuple[uuid.UUID, uuid.UUID]:
+    """A signed subcontract in contracts and a signed agreement for it, nobody linked them."""
+    contract_id = await _signed_subcontract(world, bus)
+    agreement_id = await _linked_agreement(world, None, sign=True)
+    return agreement_id, contract_id
+
+
+async def _twins_and_warning(world: _World, agreement_id: uuid.UUID) -> tuple[list[dict[str, Any]], list[str]]:
+    async with world.factory() as session:
+        svc = SubcontractorService(session)
+        twins = await svc.find_unlinked_twins(world.project_id)
+        report = await svc.validate_agreement(agreement_id)
+    warned = [
+        r["message"]
+        for r in report["results"]
+        if r["rule_id"] == "subcontract.unlinked_contract_twin" and not r["passed"]
+    ]
+    return twins, warned
+
+
+@pytest.mark.asyncio
+async def test_an_unlinked_pair_is_reported_and_counted_twice_until_linked(
+    world: _World, production_bus: EventBus
+) -> None:
+    agreement_id, contract_id = await _unlinked_pair(world, production_bus)
+    # The double count the report exists for.
+    assert await world.budget() == (2 * AGREEMENT_VALUE, Decimal("0.00"))
+
+    twins, warned = await _twins_and_warning(world, agreement_id)
+    assert [(t["agreement_id"], t["contract_id"], t["matched_on"]) for t in twins] == [
+        (str(agreement_id), str(contract_id), "counterparty")
+    ]
+    assert twins[0]["value_close"] is True
+    assert len(warned) == 1 and "twice" in warned[0]
+
+    async with world.factory() as session:
+        await SubcontractorService(session).update_agreement(agreement_id, AgreementUpdate(contract_id=contract_id))
+        await session.commit()
+
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+    assert await _twins_and_warning(world, agreement_id) == ([], [])
+
+
+@pytest.mark.asyncio
+async def test_a_pair_said_to_be_different_is_not_raised_again_and_not_merged(
+    world: _World, production_bus: EventBus
+) -> None:
+    agreement_id, contract_id = await _unlinked_pair(world, production_bus)
+
+    async with world.factory() as session:
+        svc = SubcontractorService(session)
+        await svc.dismiss_unlinked_twin(agreement_id, contract_id)
+        await svc.dismiss_unlinked_twin(agreement_id, contract_id)
+        await session.commit()
+
+    assert await _twins_and_warning(world, agreement_id) == ([], [])
+    # Two subcontracts, two commitments: nothing was merged behind the user's back.
+    assert await world.budget() == (2 * AGREEMENT_VALUE, Decimal("0.00"))
+
+
+@pytest.mark.asyncio
+async def test_a_contract_in_another_currency_is_not_a_twin(world: _World, production_bus: EventBus) -> None:
+    async with world.factory() as session:
+        session.add(
+            Contract(
+                code="SC-USD",
+                title="Drywall subcontract",
+                project_id=world.project_id,
+                counterparty_type="subcontractor",
+                counterparty_id=world.subcontractor_id,
+                status="active",
+                currency="USD",
+                total_value=AGREEMENT_VALUE,
+                retention_percent=RETENTION_PCT,
+            )
+        )
+        await session.commit()
+    agreement_id = await _linked_agreement(world, None, sign=False)
+
+    assert await _twins_and_warning(world, agreement_id) == ([], [])

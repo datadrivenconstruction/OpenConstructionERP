@@ -498,6 +498,30 @@ class AgreementCreate(BaseModel):
         return _validate_currency(value) or ""
 
 
+class UnlinkedTwinResponse(BaseModel):
+    """An agreement and a contract on one project that look like one subcontract."""
+
+    agreement_id: UUID
+    agreement_title: str
+    contract_id: UUID
+    contract_code: str
+    contract_title: str
+    currency: str
+    agreement_value: Decimal
+    contract_value: Decimal
+    #: ``counterparty`` when the same subcontractor or contact is named,
+    #: ``name`` when only the normalised company names agree.
+    matched_on: str
+    #: Values within 1% of each other; a supporting signal, not the reason.
+    value_close: bool
+
+
+class DismissTwinRequest(BaseModel):
+    """Say an agreement and a contract are different subcontracts."""
+
+    contract_id: UUID
+
+
 class AgreementUpdate(BaseModel):
     """Partial update for SubcontractAgreement."""
 

@@ -53,6 +53,7 @@ from app.modules.subcontractors.schemas import (
     CertificateResponse,
     CertificateUpdate,
     ClaimSubRollupResponse,
+    DismissTwinRequest,
     ExpiryAlert,
     IncludePaymentApplicationsRequest,
     InsuranceExpiryEntry,
@@ -88,6 +89,7 @@ from app.modules.subcontractors.schemas import (
     SuggestedClaimLinesResponse,
     TaxIdValidationRequest,
     TaxIdValidationResponse,
+    UnlinkedTwinResponse,
     VendorEligibility,
     WorkPackageCreate,
     WorkPackageResponse,
@@ -657,6 +659,38 @@ async def update_agreement(
     svc = SubcontractorService(session)
     await _verify_agreement_project(agreement_id, user_id, session, svc)
     entity = await svc.update_agreement(agreement_id, data)
+    return AgreementResponse.model_validate(entity)
+
+
+@router.get("/unlinked-twins/", response_model=list[UnlinkedTwinResponse])
+async def list_unlinked_twins(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> list[UnlinkedTwinResponse]:
+    """Agreements and contracts on the project that look like the same subcontract.
+
+    Unlinked, finance counts such a pair twice. Nothing here merges them: link
+    one through ``PATCH /agreements/{id}`` with ``contract_id``, or dismiss it.
+    """
+    await verify_project_access(project_id, user_id, session)
+    pairs = await SubcontractorService(session).find_unlinked_twins(project_id)
+    return [UnlinkedTwinResponse.model_validate(pair) for pair in pairs]
+
+
+@router.post("/agreements/{agreement_id}/dismiss-twin/", response_model=AgreementResponse)
+async def dismiss_unlinked_twin(
+    agreement_id: uuid.UUID,
+    data: DismissTwinRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> AgreementResponse:
+    """Record that this agreement and the contract are different subcontracts."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    entity = await svc.dismiss_unlinked_twin(agreement_id, data.contract_id)
     return AgreementResponse.model_validate(entity)
 
 

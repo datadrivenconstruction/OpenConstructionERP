@@ -682,3 +682,133 @@ def check_sub_certificate_payment_date(rollup: dict[str, Any]) -> list[Finding]:
                 )
             )
     return findings
+
+
+# ── One subcontract written twice ────────────────────────────────────────────
+#
+# A subcontract can be written as an agreement here and as a contract with a
+# subcontractor in the contracts module. Linked through
+# ``SubcontractAgreement.contract_id`` the pair counts once; unlinked, finance
+# sees two commitments for one spend. Nothing in the data proves two unlinked
+# records are the same subcontract, so they are never merged: a likely pair is
+# reported and a person links it or says the two are different.
+
+#: Statuses on either side that no longer commit anything.
+_ENDED_STATUSES = frozenset({"terminated", "cancelled", "canceled", "void"})
+
+#: Legal-form words dropped before names are compared, so "Suhi Zid d.o.o."
+#: and "SUHI ZID" read as one company. Only whole tokens are dropped.
+_LEGAL_FORMS = frozenset(
+    {
+        "ab", "ag", "as", "bv", "co", "company", "corp", "corporation", "doo", "dd", "eood", "gmbh", "inc",
+        "kft", "kg", "llc", "llp", "ltd", "limited", "nv", "oy", "oo", "ooo", "plc", "pty", "sa", "sarl",
+        "sas", "spa", "sp", "srl", "sro", "zoo",
+    }
+)  # fmt: skip
+
+
+def normalise_company_name(raw: Any) -> str:
+    """A company name reduced to what identifies it: letters and digits, no legal form.
+
+    Case-folded, punctuation dropped, legal-form tokens removed. Returns ``""``
+    when nothing identifying is left, and an empty name never matches.
+    """
+    text = str(raw or "").casefold()
+    cleaned = "".join(ch if ch.isalnum() else " " for ch in text.replace(".", ""))
+    tokens = [token for token in cleaned.split() if token not in _LEGAL_FORMS]
+    return " ".join(tokens)
+
+
+def _identity(record: dict[str, Any]) -> tuple[set[str], set[str]]:
+    ids = {str(v) for v in record.get("party_ids") or [] if v}
+    names = {n for n in (normalise_company_name(v) for v in record.get("party_names") or []) if n}
+    return ids, names
+
+
+def _value_close(a: Any, b: Any) -> bool:
+    """Within 1% of the larger value: a bonus signal, never required."""
+    left, right = parse_money(a), parse_money(b)
+    if left is None or right is None or left <= 0 or right <= 0:
+        return False
+    return abs(left - right) <= max(left, right) / Decimal("100")
+
+
+def match_unlinked_twins(agreements: list[dict[str, Any]], contracts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Pairs of an unlinked agreement and an unclaimed subcontract that look like one subcontract.
+
+    ``agreements`` and ``contracts`` are flat dicts for one project:
+    ``id``, ``status``, ``currency``, ``total_value``, ``party_ids`` (the ids
+    the counterparty goes by: subcontractor and contact) and ``party_names``.
+    An agreement also carries ``contract_id`` and ``dismissed_contract_ids``.
+
+    A pair is reported when the agreement is not linked, no agreement links the
+    contract, both are live, the currencies are the same and the counterparty
+    is the same by id or by normalised company name. A close value is recorded
+    as ``value_close`` and does not decide anything.
+    """
+    claimed = {str(a["contract_id"]) for a in agreements if a.get("contract_id")}
+    open_contracts = [
+        c for c in contracts if str(c.get("id")) not in claimed and str(c.get("status") or "") not in _ENDED_STATUSES
+    ]
+    pairs: list[dict[str, Any]] = []
+    for agreement in agreements:
+        if agreement.get("contract_id") or str(agreement.get("status") or "") in _ENDED_STATUSES:
+            continue
+        currency = str(agreement.get("currency") or "").strip().upper()
+        if not currency:
+            continue
+        a_ids, a_names = _identity(agreement)
+        dismissed = {str(v) for v in agreement.get("dismissed_contract_ids") or []}
+        for contract in open_contracts:
+            if str(contract.get("id")) in dismissed:
+                continue
+            if str(contract.get("currency") or "").strip().upper() != currency:
+                continue
+            c_ids, c_names = _identity(contract)
+            by_id = bool(a_ids & c_ids)
+            by_name = bool(a_names & c_names)
+            if not (by_id or by_name):
+                continue
+            pairs.append(
+                {
+                    "agreement_id": str(agreement.get("id")),
+                    "agreement_title": str(agreement.get("title") or ""),
+                    "contract_id": str(contract.get("id")),
+                    "contract_code": str(contract.get("code") or ""),
+                    "contract_title": str(contract.get("title") or ""),
+                    "currency": currency,
+                    "agreement_value": str(agreement.get("total_value") or "0"),
+                    "contract_value": str(contract.get("total_value") or "0"),
+                    "matched_on": "counterparty" if by_id else "name",
+                    "value_close": _value_close(agreement.get("total_value"), contract.get("total_value")),
+                }
+            )
+    return pairs
+
+
+def check_unlinked_contract_twin(agreement: dict[str, Any]) -> list[Finding]:
+    """This agreement looks like a subcontract also written, unlinked, in contracts.
+
+    Reads ``twin_candidates``, the pairs :func:`match_unlinked_twins` found for
+    this agreement, which the service fills. One finding per contract.
+    """
+    candidates = agreement.get("twin_candidates")
+    if not isinstance(candidates, list):
+        return []
+    findings: list[Finding] = []
+    for pair in candidates:
+        if not isinstance(pair, dict):
+            continue
+        contract = " ".join(p for p in (pair.get("contract_code"), pair.get("contract_title")) if p) or "?"
+        findings.append(
+            Finding(
+                element_ref=_agreement_ref(agreement),
+                params={"agreement": _agreement_ref(agreement), "contract": contract},
+                details={
+                    "contract_id": pair.get("contract_id"),
+                    "matched_on": pair.get("matched_on"),
+                    "value_close": bool(pair.get("value_close")),
+                },
+            )
+        )
+    return findings

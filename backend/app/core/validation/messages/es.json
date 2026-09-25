@@ -586,6 +586,10 @@
     "insurance_valid_at_start": {
       "fail": "El seguro del subcontratista vencio el {expiry}, antes del inicio de los trabajos el {reference}",
       "suggestion": "Recabe un certificado vigente antes de dar acceso a obra al subcontratista"
+    },
+    "unlinked_contract_twin": {
+      "fail": "El subcontrato {agreement} y el contrato {contract} parecen ser el mismo subcontrato, por lo que las finanzas podrían contarlo dos veces",
+      "suggestion": "Vincúlelos si son el mismo subcontrato, o márquelos como distintos"
     }
   },
   "submittal": {
