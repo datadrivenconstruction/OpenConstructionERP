@@ -659,7 +659,12 @@ class TestDashboardSingleRetentionAndPaymentsQuery:
         )
 
         svc = _make_service()
-        with patch("app.modules.subcontractors.service.event_bus.publish_detached"):
+        # Activating an agreement asks finance to sync the budget; this test
+        # counts the dashboard's own queries on an in-memory session.
+        with (
+            patch("app.modules.subcontractors.service.event_bus.publish_detached"),
+            patch("app.modules.finance.service.FinanceService.sync_project_budget", AsyncMock(), create=True),
+        ):
             sub_id = uuid.uuid4()
             sub_row = Subcontractor(
                 legal_name="Acme",
