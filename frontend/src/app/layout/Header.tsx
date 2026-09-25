@@ -535,9 +535,12 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             platform was missing one, so it lives here rather than in the
             sidebar. Renders nothing for anyone who may not install one.
             Hidden below xl to reduce crowding on narrower screens. */}
-        <div className="hidden xl:block"><ModuleBuilderButton /></div>
-        <div className="hidden xl:block"><SupportUsButton /></div>
-        <SubscribeButton />
+        {/* Shown from 2xl only: at 125% and 150% text size a 1280-1440px bar
+            had no room for these three next to the project picker, and the
+            right cluster ran off screen. */}
+        <div className="hidden 2xl:block"><ModuleBuilderButton /></div>
+        <div className="hidden 2xl:block"><SupportUsButton /></div>
+        <div className="hidden 2xl:block"><SubscribeButton /></div>
         <BugReportMenu />
         <HelpMenu />
 

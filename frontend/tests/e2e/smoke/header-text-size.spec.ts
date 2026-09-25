@@ -74,7 +74,13 @@ for (const width of WIDTHS) {
       const paintedRight = col!.clips ? Math.min(c!.right, col!.right) : c!.right;
       // The readout must stay visible, at least as its icon...
       expect(paintedRight - paintedLeft, 'the pack chip was clipped away entirely').toBeGreaterThanOrEqual(12);
-      // ...and must not be painted over the project picker.
+      // The bar keeps its right cluster on screen instead of running off it.
+      const overflow = await authedPage.evaluate(() => {
+        const h = document.querySelector('header');
+        return h ? h.scrollWidth - h.clientWidth : 0;
+      });
+      expect(overflow, 'the top bar is wider than the screen').toBeLessThanOrEqual(1);
+      // ...and the chip must not be painted over the project picker.
       expect(
         paintedLeft,
         `chip starts at ${Math.round(paintedLeft)}px, inside the project picker that ends at ${Math.round(p!.right)}px`,
