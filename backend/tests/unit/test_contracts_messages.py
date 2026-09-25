@@ -44,7 +44,7 @@ TRANSLATED_LOCALES = [locale for locale in SHIPPED_LOCALES if locale != "en"]
 #: carries and this list cannot see is reported as unused, which is a red test
 #: about a key that is fine. The certificate label arrived under "aia." and was
 #: read as the second of those. Add the prefix with the first key that uses it.
-KEY_PREFIXES = ("aia.", "pay_application.", "retention_release.")
+KEY_PREFIXES = ("aia.", "compliance_gate.", "pay_application.", "retention_release.")
 
 
 def message_keys() -> set[str]:

@@ -9417,6 +9417,20 @@ class SubcontractInsuranceValidAtStart(_SubcontractRule):
     check_name = "check_insurance_valid_at_start"
 
 
+class SubcontractUnlinkedContractTwin(_SubcontractRule):
+    """The agreement looks like a subcontract also written, unlinked, in contracts."""
+
+    rule_id = "subcontract.unlinked_contract_twin"
+    name = "Subcontract Written Twice"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags an agreement and a contract with the same subcontractor and currency that are not linked, "
+        "which finance would count as two commitments."
+    )
+    check_name = "check_unlinked_contract_twin"
+
+
 # ── Submittals (submission gate) ────────────────────────────────────────────
 #
 # Submission is where a submittal stops being a draft and starts consuming
@@ -9892,6 +9906,7 @@ def register_builtin_rules() -> None:
         (SubcontractAgreementCurrencySet(), ["subcontract"]),
         (SubcontractRetentionWithinBounds(), ["subcontract"]),
         (SubcontractInsuranceValidAtStart(), ["subcontract"]),
+        (SubcontractUnlinkedContractTwin(), ["subcontract"]),
         # Submittals (submission gate)
         # Registered into the "submittal" set, which
         # SubmittalService._validate_submittal passes on submit and on the
