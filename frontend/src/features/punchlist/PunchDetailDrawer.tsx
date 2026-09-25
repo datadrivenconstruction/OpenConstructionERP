@@ -38,6 +38,7 @@ import {
   reworkCostForInput,
 } from './reworkCost';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { RaiseBackCharge } from '@/features/cost-recovery/RaiseBackCharge';
 
 const STATUS_VARIANT: Record<PunchStatus, 'error' | 'warning' | 'blue' | 'success' | 'neutral'> = {
   open: 'error',
@@ -375,6 +376,9 @@ export function PunchDetailDrawer({
           projectCurrency={projectCurrency}
           onSaved={refresh}
         />
+        {item.rework_cost != null && item.rework_cost !== '' && (
+          <RaiseBackCharge key={`bc-${item.id}`} projectId={item.project_id} source={{ kind: 'punch_item', id: item.id }} />
+        )}
 
         {/* ── Description ──────────────────────────────────────────────── */}
         {item.description?.trim() && (
