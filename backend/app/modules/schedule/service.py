@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
 from app.core.calendar import _holidays_cn
-from app.core.cpm import readable_exception_dates, readable_work_days
+from app.core.cpm import normalise_exception_date, readable_exception_dates, readable_work_days
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 
@@ -201,6 +201,54 @@ def _meta_number(meta: dict, key: str) -> float:
         return float(meta.get(key, 0) or 0)
     except (TypeError, ValueError):
         return 0.0
+
+
+def plan_span_work_days(sections: list[list[int]]) -> int:
+    """Working days a generated plan spans, in the layout BOQ generation uses.
+
+    The children of a section run back to back, and each next section starts
+    ``max(3, section_total // 2)`` working days after the previous one did.
+
+    Args:
+        sections: Per section, the working days of each of its activities.
+
+    Returns:
+        The number of working days from the first start to the last finish.
+    """
+    offset = 0
+    finish = 0
+    for rows in sections:
+        total = sum(rows)
+        finish = max(finish, offset + total)
+        offset += max(3, total // 2)
+    return finish
+
+
+def fit_plan_to_budget(sections: list[list[int]], budget: int) -> list[list[int]]:
+    """Scale a generated plan's working days down until it spans ``budget``.
+
+    Every activity keeps at least one working day, so a plan with more
+    activities than the budget allows comes back as short as it can be and
+    still over; the caller decides what to say about that.
+
+    Args:
+        sections: Per section, the working days of each of its activities.
+        budget: The working days the whole plan may span.
+
+    Returns:
+        The same shape with every duration scaled by one common factor.
+    """
+    span = plan_span_work_days(sections)
+    if span <= budget:
+        return sections
+    factor = budget / span
+    fitted = sections
+    for _ in range(200):
+        fitted = [[max(1, int(w * factor)) for w in rows] for rows in sections]
+        if plan_span_work_days(fitted) <= budget or all(w == 1 for rows in fitted for w in rows):
+            break
+        factor *= 0.95
+    return fitted
 
 
 def _calc_duration_from_resources(
@@ -757,6 +805,39 @@ def resolve_calendar(schedule: Schedule) -> dict:
         exceptions = readable_exception_dates(cal.get("exceptions"), source="schedule metadata calendar exceptions")
         return {"work_days": work_days or list(default_work_days), "exceptions": exceptions}
     return {"work_days": list(default_work_days), "exceptions": []}
+
+
+def inclusive_end_from_cpm(early_start: int, early_finish: int, calendar: dict, project_start: date) -> str:
+    """Turn a CPM finish offset into the inclusive end date an activity shows.
+
+    The engine's ``early_finish`` is the first day an FS successor may start,
+    that is the day after the work. An activity of N working days ends on its
+    Nth working day, so the end date is the last working day before that
+    offset on the activity's own calendar. Writing ``early_finish`` itself made
+    every linked activity end one working day late and put its successor's
+    start on the predecessor's end day. A zero-duration activity ends where it
+    starts.
+
+    Args:
+        early_start: CPM early start, a day offset from ``project_start``.
+        early_finish: CPM early finish, a day offset from ``project_start``.
+        calendar: ``{"work_days": [...], "exceptions": [...]}``, the calendar
+            the engine measured this activity on.
+        project_start: The CPM origin date.
+
+    Returns:
+        The inclusive end date as an ISO string.
+    """
+    start = project_start + timedelta(days=int(early_start))
+    finish = project_start + timedelta(days=int(early_finish))
+    if finish <= start:
+        return start.isoformat()
+    work_days = set(calendar.get("work_days") or [0, 1, 2, 3, 4])
+    exceptions = {d for d in (normalise_exception_date(e) for e in calendar.get("exceptions") or []) if d}
+    current = finish - timedelta(days=1)
+    while current > start and (current.weekday() not in work_days or current in exceptions):
+        current -= timedelta(days=1)
+    return current.isoformat()
 
 
 def _effective_activity_status(
@@ -2358,7 +2439,12 @@ class ScheduleService:
                 continue
             if str(act.id) in has_predecessor:
                 new_start = offset_to_iso(cpm["early_start"], project_start)
-                new_end = offset_to_iso(cpm["early_finish"], project_start)
+                new_end = inclusive_end_from_cpm(
+                    cpm["early_start"],
+                    cpm["early_finish"],
+                    activity_calendars.get(str(act.id), calendar),
+                    project_start,
+                )
             else:
                 new_start = act.start_date
                 new_end = act.end_date
@@ -2480,7 +2566,10 @@ class ScheduleService:
                 }
             )
 
-        # Determine project duration
+        # Determine project duration. Only a window the caller supplied (the
+        # project's own dates) is a promise the plan has to keep; the default
+        # below is a guess and merely caps a single activity.
+        window_is_explicit = total_project_days is not None
         if total_project_days is None:
             boq_meta = boq.metadata_ or {}
             building_type = boq_meta.get("building_type", "residential")
@@ -2579,6 +2668,51 @@ class ScheduleService:
         else:
             schedule_start = date.today()
 
+        # ── Durations, fitted to the project window ──────────────────────
+        # Each position's duration is computed first, per section, as
+        # (calendar days, source, working days). The layout below runs the
+        # children of a section back to back and starts each next section half
+        # way into the previous one, so a section of a few long positions can
+        # run far past the project even though every single position is capped
+        # at the window. When the caller gave the project's window, the working
+        # days are scaled down together until the whole plan fits inside it,
+        # keeping the positions' proportions. One working day is held back for
+        # the completion milestone, which CPM puts on the day after the work.
+        plan: list[list[tuple[int, str, int]]] = []
+        for section in sections:
+            rows: list[tuple[int, str, int]] = []
+            for pos in section["children"]:
+                duration_cal, duration_source = _calc_duration_from_resources(
+                    pos.get("metadata_", {}) or {},
+                    _str_to_float(pos["quantity"]),
+                    pos["unit"] or "",
+                    _str_to_float(pos["total"]),
+                    grand_total,
+                    total_project_days,
+                    hours_per_day=hours_per_day,
+                    work_days_per_week=work_days_per_week,
+                )
+                # Calendar days to working days on the project's own week, so
+                # six-day regions get counts consistent with their calendar.
+                work_days = max(1, math.ceil(duration_cal * work_days_per_week / 7))
+                rows.append((duration_cal, duration_source, work_days))
+            plan.append(rows)
+
+        if window_is_explicit and total_project_days > 0:
+            window_end = schedule_start + timedelta(days=total_project_days - 1)
+            budget = max(1, _working_days_between(schedule_start - timedelta(days=1), window_end) - 1)
+            raw = [[w for _, _, w in rows] for rows in plan]
+            if plan_span_work_days(raw) > budget:
+                fitted = fit_plan_to_budget(raw, budget)
+                if plan_span_work_days(fitted) > budget:
+                    logger.warning(
+                        "BOQ %s has too many positions to fit %d days even at one day each", boq_id, total_project_days
+                    )
+                plan = [
+                    [(cal, source, w) for (cal, source, _), w in zip(rows, new_rows, strict=True)]
+                    for rows, new_rows in zip(plan, fitted, strict=True)
+                ]
+
         # ── Create hierarchical activities ───────────────────────────────
         created_activities: list[Activity] = []
         sort_counter = 0
@@ -2590,8 +2724,11 @@ class ScheduleService:
         # Track per-section data for summary rollup
         summary_activity_map: dict[uuid.UUID, list[Activity]] = {}
 
-        # Current date cursor for section starts
+        # Current date cursor for section starts, on a working day so an
+        # activity's first day is one it is worked.
         section_start = schedule_start
+        while section_start.weekday() not in work_days_set:
+            section_start += timedelta(days=1)
 
         for section_idx, section in enumerate(sections):
             # ── Leaf position: create a standalone TASK, no Summary wrapper ──
@@ -2602,18 +2739,9 @@ class ScheduleService:
                 pos_total = _str_to_float(pos["total"])
                 pos_meta = pos.get("metadata_", {}) or {}
 
-                duration_cal, duration_source = _calc_duration_from_resources(
-                    pos_meta,
-                    pos_quantity,
-                    pos_unit,
-                    pos_total,
-                    grand_total,
-                    total_project_days,
-                    hours_per_day=hours_per_day,
-                    work_days_per_week=work_days_per_week,
-                )
-                work_days = max(1, math.ceil(duration_cal * work_days_per_week / 7))
-                leaf_end = _add_working_days(section_start, work_days)
+                duration_cal, duration_source, work_days = plan[section_idx][0]
+                # The end date is inclusive: the activity's last working day.
+                leaf_end = _add_working_days(section_start, work_days - 1)
 
                 leaf_deps: list[dict] = []
                 if prev_section_summary_id is not None:
@@ -2630,7 +2758,7 @@ class ScheduleService:
                     wbs_code=pos["ordinal"],
                     start_date=section_start.isoformat(),
                     end_date=leaf_end.isoformat(),
-                    duration_days=duration_cal,
+                    duration_days=work_days,
                     progress_pct="0",
                     status="not_started",
                     activity_type="task",
@@ -2719,24 +2847,11 @@ class ScheduleService:
                 child_total = _str_to_float(child_pos["total"])
                 child_meta = child_pos.get("metadata_", {}) or {}
 
-                duration_cal, duration_source = _calc_duration_from_resources(
-                    child_meta,
-                    child_quantity,
-                    child_unit,
-                    child_total,
-                    grand_total,
-                    total_project_days,
-                    hours_per_day=hours_per_day,
-                    work_days_per_week=work_days_per_week,
-                )
-                # Convert calendar days to working days for date arithmetic.
-                # Use the project's regional work-week (not a hardcoded 5/7)
-                # so 6-day-week regions (GULF, BRAZIL, CHINA, INDIA) get
-                # working-day counts consistent with the stored duration.
-                work_days = max(1, math.ceil(duration_cal * work_days_per_week / 7))
+                duration_cal, duration_source, work_days = plan[section_idx][child_idx]
                 section_work_days_total += work_days
 
-                child_end = _add_working_days(child_start, work_days)
+                # The end date is inclusive: the activity's last working day.
+                child_end = _add_working_days(child_start, work_days - 1)
 
                 # Within-section dependency: sequential FS
                 child_deps: list[dict] = []
@@ -2763,7 +2878,7 @@ class ScheduleService:
                     wbs_code=child_pos["ordinal"] or f"{section['ordinal']}.{child_idx + 1:03d}",
                     start_date=child_start.isoformat(),
                     end_date=child_end.isoformat(),
-                    duration_days=duration_cal,
+                    duration_days=work_days,
                     progress_pct="0",
                     status="not_started",
                     activity_type="task",
@@ -2808,14 +2923,14 @@ class ScheduleService:
                 )
 
                 prev_child_id = child_activity_id
-                child_start = child_end  # next child starts after this one ends
+                child_start = _add_working_days(child_end, 1)  # the next working day
 
             # ── Update SUMMARY dates from children (rollup) ─────────────
             children_data = summary_activity_map[summary_id]
             if children_data:
                 earliest_start = min(date.fromisoformat(a["start_date"]) for a in children_data)
                 latest_end = max(date.fromisoformat(a["end_date"]) for a in children_data)
-                summary_duration = (latest_end - earliest_start).days
+                summary_duration = _working_days_between(earliest_start - timedelta(days=1), latest_end)
                 await self.activity_repo.update_fields(
                     summary_id,
                     start_date=earliest_start.isoformat(),

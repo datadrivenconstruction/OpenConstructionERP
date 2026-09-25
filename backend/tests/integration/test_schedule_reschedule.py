@@ -100,7 +100,7 @@ async def test_patch_relationship_and_reschedule_moves_successor() -> None:
             assert a_pred.start_date == "2024-01-01"  # root: unchanged
             assert a_pred.is_critical is True
             assert a_succ.start_date == "2024-01-08"  # FS + 0 lag lands on Monday
-            assert a_succ.end_date == "2024-01-11"
+            assert a_succ.end_date == "2024-01-10"  # 3 working days, end inclusive
             assert a_succ.is_critical is True
 
             # PATCH updates the lag; the type stays FS.
@@ -126,7 +126,7 @@ async def test_patch_relationship_and_reschedule_moves_successor() -> None:
             )
             a_succ = _by_id(activities, succ_id)
             assert a_succ.start_date == "2024-01-10"
-            assert a_succ.end_date == "2024-01-15"
+            assert a_succ.end_date == "2024-01-12"  # Wed, Thu, Fri
 
             # PATCH also updates the type; the lag is untouched (still 2).
             retyped = await schedule_router.update_relationship(
@@ -438,3 +438,119 @@ async def test_setting_a_new_default_calendar_clears_the_previous_one() -> None:
         defaults = [c for c in cals if c.is_default]
         assert len(defaults) == 1
         assert defaults[0].id == first.id
+
+
+def _working_days_inclusive(start: str, end: str, work_days: set[int], holidays: set[str]) -> int:
+    """Count the working days from ``start`` to ``end``, both ends included."""
+    from datetime import date, timedelta
+
+    current, last = date.fromisoformat(start), date.fromisoformat(end)
+    count = 0
+    while current <= last:
+        if current.weekday() in work_days and current.isoformat() not in holidays:
+            count += 1
+        current += timedelta(days=1)
+    return count
+
+
+def _next_working_day(day: str, work_days: set[int], holidays: set[str]) -> str:
+    from datetime import date, timedelta
+
+    current = date.fromisoformat(day) + timedelta(days=1)
+    while current.weekday() not in work_days or current.isoformat() in holidays:
+        current += timedelta(days=1)
+    return current.isoformat()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("work_days", "holidays"),
+    [
+        ([0, 1, 2, 3, 4], []),
+        ([0, 1, 2, 3, 4], ["2024-01-10"]),
+        ([0, 1, 2, 3, 4, 5], ["2024-01-10"]),
+    ],
+    ids=["mon-fri", "mon-fri-holiday", "six-day-holiday"],
+)
+async def test_fs_link_keeps_the_duration_and_starts_the_next_working_day(
+    work_days: list[int], holidays: list[str]
+) -> None:
+    """A finish-to-start link must not stretch either activity by a day.
+
+    The end date is inclusive: an activity of N working days runs from its start
+    through its Nth working day. Before the fix the CPM finish offset (the first
+    free day after the work) was written as the end date, so every linked
+    activity ended one working day late and its successor started on that day.
+    The durations are counted on the same calendar the schedule runs on.
+    """
+    from app.modules.schedule_advanced.schemas import CalendarCreate
+    from app.modules.schedule_advanced.service import ScheduleAdvancedService
+
+    async with transactional_session(disable_fks=True) as session:
+        service = ScheduleService(session)
+        project_id = uuid.uuid4()
+        schedule = await service.create_schedule(
+            ScheduleCreate(project_id=project_id, name="Inclusive end QA", start_date="2024-01-01")
+        )
+        schedule_id = schedule.id
+        await ScheduleAdvancedService(session).create_calendar(
+            CalendarCreate(
+                project_id=project_id,
+                name="Project week",
+                work_days=work_days,
+                holidays=holidays,
+                is_default=True,
+            )
+        )
+        chain = []
+        for name, duration in (("Site prep", 4), ("Foundations", 5), ("Concrete", 3)):
+            act = await service.create_activity(
+                ActivityCreate(
+                    schedule_id=schedule_id,
+                    name=name,
+                    start_date="2024-01-01",
+                    end_date="2024-01-01",
+                    duration_days=duration,
+                )
+            )
+            chain.append((act.id, duration))
+
+        async def _noop_verify(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+            return None
+
+        original = schedule_router._verify_schedule_owner
+        schedule_router._verify_schedule_owner = _noop_verify  # type: ignore[assignment]
+        try:
+            for (pred_id, _), (succ_id, _) in zip(chain, chain[1:], strict=False):
+                await schedule_router.create_relationship(
+                    schedule_id=schedule_id,
+                    data=RelationshipCreate(
+                        predecessor_id=pred_id, successor_id=succ_id, relationship_type="FS", lag_days=0
+                    ),
+                    session=session,
+                    _user_id=uuid.uuid4(),
+                    payload={"role": "admin"},
+                    service=service,
+                )
+            session.expire_all()
+            activities = await schedule_router.reschedule_schedule(
+                schedule_id=schedule_id,
+                _user_id=uuid.uuid4(),
+                payload={"role": "admin"},
+                session=session,
+                service=service,
+            )
+        finally:
+            schedule_router._verify_schedule_owner = original  # type: ignore[assignment]
+
+        week, off = set(work_days), set(holidays)
+        rows = [_by_id(activities, act_id) for act_id, _ in chain]
+        # Site prep is the root and keeps its manual dates; the two linked
+        # activities are the ones CPM writes.
+        for row, (_, duration) in zip(rows[1:], chain[1:], strict=True):
+            assert _working_days_inclusive(row.start_date, row.end_date, week, off) == duration, (
+                row.name,
+                row.start_date,
+                row.end_date,
+            )
+        assert rows[2].start_date == _next_working_day(rows[1].end_date, week, off)
