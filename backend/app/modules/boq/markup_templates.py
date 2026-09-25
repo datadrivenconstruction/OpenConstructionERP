@@ -1396,9 +1396,9 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # Worldwide Tax Summaries for Greece, both read 2026-09-02. Construction
     # services are standard-rated. The VAT suspension that keeps coming up in
     # Greek sources is on sales of newly built property, not on construction
-    # services, and does not reach a bill of quantities. If GR is added to
-    # ``app/core/tax.py`` or to the seed table later, that becomes the single
-    # source and this figure should defer to it.
+    # services, and does not reach a bill of quantities. GR is in the dated
+    # tax seed since 2026-09-25 (``FPA`` 24.0), which is the single source a
+    # bill reads first; this figure is the same number and defers to it.
     #
     # Two standard lines of a Greek budget are deliberately absent. Αναθεώρηση,
     # price revision, is a formula over published index coefficients budgeted as
@@ -2165,6 +2165,63 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
             "sort_order": 3,
         },
     ],
+    # ── Ukraine ─────────────────────────────────────────────────────────
+    # Настанова з визначення вартості будівництва, approved by наказ
+    # Мінрегіону №281 of 01.11.2021 and amended by Зміни №2, №5 and №6. The
+    # summary estimate adds profit, administrative costs and the risk
+    # allowance after its twelve chapters, then ПДВ.
+    #
+    # What is sourced and what is not. Постанова КМУ №1512 of 19.11.2025 caps
+    # general production costs at 10, administrative costs at 3 and profit at
+    # 15 percent of direct costs under martial law. Those are ceilings, not
+    # rates, so 9, 2.5 and 7 here are editable starting points inside them, the
+    # same values the pack's demos carry. The risk allowance is Додаток 28 at
+    # the design stage for housing, 1.8; public buildings take 3.0, which is a
+    # per-project edit. ПДВ at 20 is statutory (Податковий кодекс ст. 193).
+    #
+    # The order is deliberate. General production costs sit inside the
+    # chapters, and risk is a percentage of chapters 1 to 12, so the risk line
+    # follows general production costs cumulatively and comes BEFORE profit and
+    # administrative costs, which are therefore outside its base. Listed in the
+    # summary estimate's own order (profit, administrative, risk) with risk
+    # cumulative, it would charge risk on profit, which the Настанова does not.
+    "UA": [
+        {
+            "name": "Загальновиробничі витрати",
+            "category": "overhead",
+            "percentage": "9.0",
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+        {
+            "name": "Кошти на покриття ризиків",
+            "category": "contingency",
+            "percentage": "1.8",
+            "apply_to": "cumulative",
+            "sort_order": 1,
+        },
+        {
+            "name": "Адміністративні витрати",
+            "category": "overhead",
+            "percentage": "2.5",
+            "apply_to": "direct_cost",
+            "sort_order": 2,
+        },
+        {
+            "name": "Кошторисний прибуток",
+            "category": "profit",
+            "percentage": "7.0",
+            "apply_to": "direct_cost",
+            "sort_order": 3,
+        },
+        {
+            "name": "ПДВ",
+            "category": "tax",
+            "percentage": "20.0",
+            "apply_to": "cumulative",
+            "sort_order": 4,
+        },
+    ],
     # ── Singapore ───────────────────────────────────────────────────────
     # SISV Singapore Standard Method of Measurement, PSSCOC and SIA form
     # bills of quantities.
@@ -2593,6 +2650,9 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "CZ": "CZ",
     "RO": "RO",
     "GR": "GR",
+    # Ukraine joined with its country pack; the UA block above says which of
+    # its numbers are statutory and which are starting points under a ceiling.
+    "UA": "UA",
     # Ireland reads the UK stack rather than getting one of its own. The
     # measurement convention, the bill structure and the preliminaries practice
     # are the same tradition, and the one number that differs, VAT at 13.5 on

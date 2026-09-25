@@ -194,6 +194,15 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     # the shared regional stack for the life of the install.
     ("KW", "NONE"): "2026-09-02",
     ("QA", "NONE"): "2026-09-02",
+    # Greece, with the Greek country pack. Until then a Greek bill was charged
+    # the 24 on the GR region line, which is the right number read from the
+    # wrong table: an install seeded before these rows has no dated Greek rate
+    # at all, so a bill dated before a rate change could not be priced at the
+    # rate in force on its date. Standard 24 since 1 June 2016, reduced 13 and
+    # super-reduced 6 (Ν. 5144/2024 art. 26).
+    ("GR", "FPA"): "2026-09-25",
+    ("GR", "FPA_RED"): "2026-09-25",
+    ("GR", "FPA_SRED"): "2026-09-25",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see
