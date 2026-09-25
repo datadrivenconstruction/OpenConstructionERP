@@ -77,6 +77,9 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
       subcontractor: t('costmodel.cat_subcontractor', { defaultValue: 'Subcontractor' }),
       overhead: t('costmodel.cat_overhead', { defaultValue: 'Overhead' }),
       contingency: t('costmodel.cat_contingency', { defaultValue: 'Contingency' }),
+      // Committed documents on cost lines without a budget line arrive under
+      // the empty key, next to budget lines that carry no category.
+      '': t('boq.uncategorized', { defaultValue: '(Not specified)' }),
     }),
     [t],
   );
@@ -313,7 +316,7 @@ export function ContractExposurePanel({ projectId, currency }: ContractExposureP
                     <tr key={g.group} className="transition-colors hover:bg-surface-secondary/50">
                       <td className="py-3.5 pr-4 font-medium text-content-primary">
                         <span>{labelFor(g.group)}</span>
-                        {categoryLabels[g.group] && g.group !== categoryLabels[g.group] && (
+                        {g.group && categoryLabels[g.group] && g.group !== categoryLabels[g.group] && (
                           <span className="block text-2xs font-normal text-content-tertiary">{g.group}</span>
                         )}
                       </td>
