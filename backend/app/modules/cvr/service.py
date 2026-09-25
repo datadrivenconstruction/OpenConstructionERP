@@ -47,6 +47,7 @@ from app.modules.cvr.schemas import (
     CvrSummaryResponse,
     PaymentApplicationCreate,
     PaymentApplicationUpdate,
+    ProgressClaimOption,
 )
 from app.modules.cvr.validators import CvrValidationError, assert_single_currency
 
@@ -56,6 +57,23 @@ logger = logging.getLogger(__name__)
 def _money(value: Any) -> Decimal:
     """Parse an incoming money value to a 2dp-quantized Decimal."""
     return q2(to_decimal(value))
+
+
+def _claim_period(claim: Any) -> str | None:
+    """The ``YYYY-MM`` a progress claim bills, read from its period end.
+
+    The parsed date wins; the legacy string columns are the fallback for a
+    claim written before the dates existed. None when nothing is readable.
+    """
+    period_to = getattr(claim, "period_to", None)
+    if period_to is not None:
+        return f"{period_to.year:04d}-{period_to.month:02d}"
+    for raw in (getattr(claim, "period_end", None), getattr(claim, "claim_date", None)):
+        text = str(raw or "").strip()
+        if len(text) >= 7 and text[4] == "-" and text[:4].isdigit() and text[5:7].isdigit():
+            if 1 <= int(text[5:7]) <= 12:
+                return text[:7]
+    return None
 
 
 class CvrService:
@@ -342,24 +360,110 @@ class CvrService:
 
     # ── Payment applications ──────────────────────────────────────────────
 
+    async def _claim_in_project(self, project_id: uuid.UUID, claim_id: uuid.UUID) -> Any:
+        """Return the progress claim if it sits under a contract of *project_id*.
+
+        A progress claim carries no project of its own, so the check goes
+        through its contract. A missing claim and a claim of another project
+        both answer 400: the application is refused rather than linked to a
+        claim the caller cannot see.
+        """
+        from sqlalchemy import select  # noqa: PLC0415
+
+        # Lazy import: cvr stays loadable without the contracts module.
+        from app.modules.contracts.models import Contract, ProgressClaim  # noqa: PLC0415
+
+        stmt = (
+            select(ProgressClaim)
+            .join(Contract, Contract.id == ProgressClaim.contract_id)
+            .where(ProgressClaim.id == claim_id, Contract.project_id == project_id)
+        )
+        claim = (await self.session.execute(stmt)).scalar_one_or_none()
+        if claim is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Progress claim not found in this project",
+            )
+        return claim
+
+    async def list_progress_claims_for_project(self, project_id: uuid.UUID) -> list[ProgressClaimOption]:
+        """Every progress claim on the project's contracts, for the picker."""
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.contracts.models import Contract, ProgressClaim  # noqa: PLC0415
+
+        stmt = (
+            select(ProgressClaim, Contract.code)
+            .join(Contract, Contract.id == ProgressClaim.contract_id)
+            .where(Contract.project_id == project_id)
+            .order_by(Contract.code, ProgressClaim.created_at)
+        )
+        rows = (await self.session.execute(stmt)).all()
+        return [
+            ProgressClaimOption(
+                id=claim.id,
+                contract_id=claim.contract_id,
+                contract_code=code or "",
+                claim_number=claim.claim_number or "",
+                status=claim.status or "",
+                period=_claim_period(claim),
+                gross_amount=_money(claim.gross_amount),
+                retention_amount=_money(claim.retention_amount),
+                net_due=_money(claim.net_due),
+                currency=claim.currency or "",
+            )
+            for claim, code in rows
+        ]
+
     async def create_payment_application(
         self,
         data: PaymentApplicationCreate,
         user_id: str | None = None,
     ) -> PaymentApplication:
-        """Create an IPA. ``net_value`` is derived as gross - retention."""
-        gross = _money(data.gross_value)
-        retention = _money(data.retention)
+        """Create an IPA. ``net_value`` is derived as gross - retention.
+
+        With ``progress_claim_id`` the claim fills every figure the caller did
+        not send: its period end as the period, its number, its period gross
+        and retention, and its currency. The net is still gross less retention,
+        which is the claim's own net due unless the claim also pays back
+        released retention.
+        """
+        sent = data.model_fields_set
+        period = data.period
+        application_number = data.application_number
+        gross_in: Any = data.gross_value
+        retention_in: Any = data.retention
+        currency = (data.currency or "").strip().upper()
+        if data.progress_claim_id is not None:
+            claim = await self._claim_in_project(data.project_id, data.progress_claim_id)
+            if not period:
+                period = _claim_period(claim)
+            if "application_number" not in sent:
+                application_number = claim.claim_number or None
+            if "gross_value" not in sent:
+                gross_in = claim.gross_amount
+            if "retention" not in sent:
+                retention_in = claim.retention_amount
+            if not currency:
+                currency = (claim.currency or "").strip().upper()
+            if not period:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="The progress claim has no period; send one with the application",
+                )
+        gross = _money(gross_in)
+        retention = _money(retention_in)
         application = PaymentApplication(
             project_id=data.project_id,
-            period=data.period,
-            application_number=data.application_number,
+            period=period,
+            application_number=application_number,
             gross_value=gross,
             retention=retention,
             net_value=net_of_retention(gross, retention),
-            currency=(data.currency or "").strip().upper(),
+            currency=currency,
             status=data.status,
             notes=data.notes,
+            progress_claim_id=data.progress_claim_id,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -396,6 +500,8 @@ class CvrService:
         """Update an IPA, always recomputing net_value = gross - retention."""
         application = await self.get_payment_application(app_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        if fields.get("progress_claim_id") is not None:
+            await self._claim_in_project(application.project_id, fields["progress_claim_id"])
         if "currency" in fields and fields["currency"] is not None:
             fields["currency"] = str(fields["currency"]).strip().upper()
         for money_field in ("gross_value", "retention"):
