@@ -589,3 +589,24 @@ async def test_a_broken_seed_row_falls_back_loudly(pg_session, caplog) -> None:
     assert "rate_not_numeric" in warnings[0].getMessage(), (
         f"the warning must name which rule the row breaks, got {warnings[0].getMessage()!r}"
     )
+
+
+async def test_a_croatian_bill_gets_exactly_one_pdv_line_at_25(pg_session) -> None:
+    """Croatia has no regional stack, and its bill still charges PDV.
+
+    The neutral stack a Croatian bill is seeded with carries no tax line, so the
+    resolved 25 had nowhere to go and the bill showed no VAT at all. It now gets
+    one line named after the seeded tax, and applying the defaults again
+    replaces the stack rather than adding a second line.
+    """
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "HR")
+    service = BOQService(pg_session)
+
+    await service.apply_default_markups(boq.id)
+    await service.apply_default_markups(boq.id)
+    lines = await _tax_lines(pg_session, boq.id)
+
+    assert [(line.name, Decimal(line.percentage)) for line in lines] == [("PDV", Decimal("25"))]
+    assert lines[0].apply_to == "cumulative"
+    assert lines[0].metadata_["vat_rate_source"] == "country_seed"
