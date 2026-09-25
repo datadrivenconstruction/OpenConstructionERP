@@ -234,7 +234,9 @@ class NCRService:
             )
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
-        if fields.get("change_order_id"):
+        # Checked only when it changes: a row written before the check may hold
+        # a free string, and echoing it back on an unrelated edit must not fail.
+        if fields.get("change_order_id") and fields["change_order_id"] != ncr.change_order_id:
             fields["change_order_id"] = await self._check_change_order(ncr.project_id, fields["change_order_id"])
         # Merge a partial metadata patch into the existing column instead of
         # replacing it wholesale - a PATCH touching one key must not wipe the

@@ -95,3 +95,18 @@ async def test_a_foreign_change_order_is_refused_on_update(session: AsyncSession
     own = await _order(session, pid)
     updated = await svc.update_ncr(ncr.id, NCRUpdate(change_order_id=own))
     assert updated.change_order_id == own
+
+
+async def test_an_old_free_string_echoed_back_does_not_block_an_edit(session: AsyncSession) -> None:
+    # A row written before the check may hold anything; a client that sends the
+    # stored value back with an unrelated edit must still be able to save.
+    pid = await _project(session)
+    svc = NCRService(session)
+    ncr = await svc.create_ncr(_create(pid, None))
+    ncr.change_order_id = "CO-7"
+    await session.flush()
+
+    updated = await svc.update_ncr(ncr.id, NCRUpdate(title="Honeycombing, slab S2 east", change_order_id="CO-7"))
+
+    assert updated.title == "Honeycombing, slab S2 east"
+    assert updated.change_order_id == "CO-7"
