@@ -21,6 +21,7 @@ audit of the 5D cost model module:
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any
 
@@ -130,7 +131,7 @@ class _StubBudgetRepo:
             if r.project_id == project_id and (getattr(r, "currency", "") or "").strip()
         }
 
-    async def aggregate_by_category(self, project_id: uuid.UUID) -> list[dict[str, str]]:
+    async def aggregate_by_category(self, project_id: uuid.UUID, **_kwargs: Any) -> list[dict[str, str]]:
         return list(self._by_category)
 
 
@@ -305,6 +306,11 @@ async def test_aggregate_by_project_converts_foreign_currency_lines(
     from app.modules.projects import repository as proj_repo_mod
 
     monkeypatch.setattr(proj_repo_mod.ProjectRepository, "get_by_id", _fake_get_project)
+
+    async def _no_spine(_self: Any, _pid: uuid.UUID) -> dict[str, Decimal]:
+        return {}
+
+    monkeypatch.setattr(BudgetLineRepository, "_spine_committed_by_cost_line", _no_spine)
 
     aggregates = await repo.aggregate_by_project(project_id)
 

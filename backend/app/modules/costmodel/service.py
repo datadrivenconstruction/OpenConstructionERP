@@ -627,7 +627,7 @@ class CostModelService:
         Returns:
             BudgetSummary with per-category breakdown.
         """
-        rows = await self.budget_repo.aggregate_by_category(project_id)
+        rows = await self.budget_repo.aggregate_by_category(project_id, include_unbudgeted_commitments=True)
 
         categories: list[BudgetCategoryRow] = []
         for row in rows:
@@ -660,8 +660,9 @@ class CostModelService:
         the whole thing up to the project. All money is Decimal-exact; the
         commitment ratio is undefined (null) when a budget is zero or absent.
 
-        ``committed`` is the ``committed_amount`` column - the value already
-        committed to contracts (subcontracts, purchase orders, awarded values).
+        ``committed`` is the value already committed to contracts: issued
+        purchase orders and non-draft contracts linked to the group's cost
+        lines, or the manual ``committed_amount`` on lines without such links.
 
         Args:
             project_id: Target project.
@@ -669,7 +670,7 @@ class CostModelService:
         Returns:
             A ContractExposureResponse with per-group rows and the project rollup.
         """
-        rows = await self.budget_repo.aggregate_by_category(project_id)
+        rows = await self.budget_repo.aggregate_by_category(project_id, include_unbudgeted_commitments=True)
         exposure = compute_contract_exposure((row["category"], row["planned"], row["committed"]) for row in rows)
 
         # Mirror the sibling money surfaces (dashboard / EVM): carry the project
