@@ -43478,6 +43478,15 @@ const resource = {
     "videos.player_note": "Ойнатқыш тек ойнату түймесін басқанда, YouTube-тың құпиялылығы күшейтілген серверінен жүктеледі.",
     "videos.see_all_for_step": "Бейнелер бетіндегі барлық {{total}}",
     "videos.example": "Мысалы: {{place}}",
+    "videos.view_label": "Көрсету түрі",
+    "videos.view_videos": "Бейнелер",
+    "videos.view_moments": "Сәттер",
+    "videos.view_matrix": "Қамту картасы",
+    "videos.moments_note": "Әр бейнедегі барлық тараулар. Сол жерден ойнатуды бастау үшін сәтті таңдаңыз.",
+    "videos.matrix_note": "Жобаның әр кезеңінде әр рөлді немесе елді қанша бейне қамтитынын көрсетеді. Тізімін көру үшін ұяшықты таңдаңыз.",
+    "videos.matrix_rows": "Жолдар",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Тағы {{more}} сәт",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -44113,6 +44113,15 @@ const resource = {
     "videos.player_note": "Spelaren laddas först när du trycker play, från YouTubes integritetsvänliga värd.",
     "videos.see_all_for_step": "Alla {{total}} på sidan Videor",
     "videos.example": "Exempel: {{place}}",
+    "videos.view_label": "Visa som",
+    "videos.view_videos": "Videor",
+    "videos.view_moments": "Ögonblick",
+    "videos.view_matrix": "Täckningskarta",
+    "videos.moments_note": "Varje kapitel längs videon. Välj ett ögonblick att spela upp från.",
+    "videos.matrix_note": "Hur många videor som täcker varje roll eller land i varje projektfas. Välj en cell för att lista dem.",
+    "videos.matrix_rows": "Rader",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} ögonblick till",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

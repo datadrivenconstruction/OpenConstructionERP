@@ -43502,6 +43502,15 @@ const resource = {
     "videos.player_note": "Soitin latautuu vasta, kun painat play-painiketta, YouTuben yksityisyyttä suojaavalta palvelimelta.",
     "videos.see_all_for_step": "Kaikki {{total}} Videot-sivulla",
     "videos.example": "Esimerkki: {{place}}",
+    "videos.view_label": "Näyttötapa",
+    "videos.view_videos": "Videot",
+    "videos.view_moments": "Hetket",
+    "videos.view_matrix": "Kattavuuskartta",
+    "videos.moments_note": "Jokainen luku omassa videossaan. Valitse hetki, josta toisto alkaa.",
+    "videos.matrix_note": "Kuinka moni video kattaa kunkin roolin tai maan jokaisessa projektin vaiheessa. Valitse solu nähdäksesi luettelon.",
+    "videos.matrix_rows": "Rivit",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Vielä {{more}} hetkeä",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

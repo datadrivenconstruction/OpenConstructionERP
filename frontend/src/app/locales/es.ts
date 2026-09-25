@@ -46228,6 +46228,15 @@ const resource = {
     "videos.player_note": "El reproductor se carga solo cuando presiona reproducir, desde el servidor de YouTube con privacidad mejorada.",
     "videos.see_all_for_step": "Los {{total}} en la página Videos",
     "videos.example": "Ejemplo: {{place}}",
+    "videos.view_label": "Mostrar como",
+    "videos.view_videos": "Videos",
+    "videos.view_moments": "Momentos",
+    "videos.view_matrix": "Mapa de cobertura",
+    "videos.moments_note": "Cada capítulo dentro de su video. Elija un momento para reproducir desde ahí.",
+    "videos.matrix_note": "Cuántos videos cubren cada rol o país en cada etapa del proyecto. Elija una celda para ver la lista.",
+    "videos.matrix_rows": "Filas",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} momentos más",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -45855,6 +45855,15 @@ const resource = {
     "videos.player_note": "播放器只有在您按下播放后才会加载,来自保护隐私的 YouTube 服务器。",
     "videos.see_all_for_step": "视频页面上的全部{{total}}个",
     "videos.example": "示例：{{place}}",
+    "videos.view_label": "显示为",
+    "videos.view_videos": "视频",
+    "videos.view_moments": "时刻",
+    "videos.view_matrix": "覆盖图",
+    "videos.moments_note": "沿视频排列的每个章节。选择一个时刻从那里播放。",
+    "videos.matrix_note": "每个项目阶段中,每个角色或国家有多少视频覆盖。选择一个单元格以查看列表。",
+    "videos.matrix_rows": "行",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "还有{{more}}个时刻",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

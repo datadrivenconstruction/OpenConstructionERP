@@ -43477,6 +43477,15 @@ const resource = {
     "videos.player_note": "Ο player φορτώνει μόνο όταν πατήσετε αναπαραγωγή, από τον διακομιστή του YouTube με ενισχυμένη προστασία απορρήτου.",
     "videos.see_all_for_step": "Όλα τα {{total}} στη σελίδα Βίντεο",
     "videos.example": "Παράδειγμα: {{place}}",
+    "videos.view_label": "Εμφάνιση ως",
+    "videos.view_videos": "Βίντεο",
+    "videos.view_moments": "Στιγμές",
+    "videos.view_matrix": "Χάρτης κάλυψης",
+    "videos.moments_note": "Κάθε κεφάλαιο μέσα στο βίντεό του. Επιλέξτε μια στιγμή για αναπαραγωγή από εκεί.",
+    "videos.matrix_note": "Πόσα βίντεο καλύπτουν κάθε ρόλο ή χώρα σε κάθε στάδιο του έργου. Επιλέξτε ένα κελί για να τα δείτε σε λίστα.",
+    "videos.matrix_rows": "Γραμμές",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} ακόμη στιγμές",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

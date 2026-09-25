@@ -38208,6 +38208,15 @@ const resource = {
     "videos.player_note": "The player loads only when you press play, from the privacy-enhanced YouTube host.",
     "videos.see_all_for_step": "All {{total}} on the Videos page",
     "videos.example": "Example: {{place}}",
+    "videos.view_label": "Show as",
+    "videos.view_videos": "Videos",
+    "videos.view_moments": "Moments",
+    "videos.view_matrix": "Coverage map",
+    "videos.moments_note": "Every chapter along its video. Choose a moment to play from there.",
+    "videos.matrix_note": "How many videos cover each role or country at each project stage. Choose a cell to list them.",
+    "videos.matrix_rows": "Rows",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} more moments",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

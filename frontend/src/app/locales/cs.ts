@@ -44420,6 +44420,15 @@ const resource = {
     "videos.player_note": "Přehrávač se načte teprve po stisknutí tlačítka přehrát, z hostitele YouTube s vylepšenou ochranou soukromí.",
     "videos.see_all_for_step": "Všech {{total}} na stránce Videa",
     "videos.example": "Příklad: {{place}}",
+    "videos.view_label": "Zobrazit jako",
+    "videos.view_videos": "Videa",
+    "videos.view_moments": "Momenty",
+    "videos.view_matrix": "Mapa pokrytí",
+    "videos.moments_note": "Každá kapitola v rámci videa. Vyberte moment a přehrajte od něj.",
+    "videos.matrix_note": "Kolik videí pokrývá danou roli nebo zemi v každé fázi projektu. Vyberte buňku pro jejich seznam.",
+    "videos.matrix_rows": "Řádky",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Zobrazit {{more}} dalších",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

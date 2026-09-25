@@ -45249,6 +45249,15 @@ const resource = {
     "videos.player_note": "Плеєр завантажується лише після натискання кнопки відтворення, з хостингу YouTube, що захищає конфіденційність.",
     "videos.see_all_for_step": "Усі {{total}} на сторінці «Відео»",
     "videos.example": "Приклад: {{place}}",
+    "videos.view_label": "Показати як",
+    "videos.view_videos": "Відео",
+    "videos.view_moments": "Моменти",
+    "videos.view_matrix": "Карта охоплення",
+    "videos.moments_note": "Кожен розділ у межах відео. Виберіть момент, щоб почати відтворення з нього.",
+    "videos.matrix_note": "Скільки відео охоплюють кожну роль або країну на кожній стадії проєкту. Виберіть комірку, щоб побачити список.",
+    "videos.matrix_rows": "Рядки",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Ще {{more}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -44004,6 +44004,15 @@ const resource = {
     "videos.player_note": "재생 버튼을 누를 때만 플레이어가 로드되며, YouTube의 개인정보 보호 강화 호스트에서 제공됩니다.",
     "videos.see_all_for_step": "동영상 페이지에서 전체 {{total}}개 보기",
     "videos.example": "예시: {{place}}",
+    "videos.view_label": "보기 형식",
+    "videos.view_videos": "영상",
+    "videos.view_moments": "순간",
+    "videos.view_matrix": "커버리지 맵",
+    "videos.moments_note": "영상별로 모든 챕터를 나열합니다. 순간을 선택하면 그 지점부터 재생됩니다.",
+    "videos.matrix_note": "프로젝트 단계별로 각 역할 또는 국가를 다루는 영상 수를 보여줍니다. 셀을 선택하면 목록이 표시됩니다.",
+    "videos.matrix_rows": "행",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "순간 {{more}}개 더 보기",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

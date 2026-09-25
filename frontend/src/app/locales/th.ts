@@ -43386,6 +43386,15 @@ const resource = {
     "videos.player_note": "ตัวเล่นวิดีโอจะโหลดก็ต่อเมื่อคุณกดเล่นเท่านั้น จากโฮสต์ YouTube แบบที่ปกป้องความเป็นส่วนตัว",
     "videos.see_all_for_step": "ทั้งหมด {{total}} รายการในหน้าวิดีโอ",
     "videos.example": "ตัวอย่าง: {{place}}",
+    "videos.view_label": "แสดงเป็น",
+    "videos.view_videos": "วิดีโอ",
+    "videos.view_moments": "ช่วงเวลา",
+    "videos.view_matrix": "แผนที่ความครอบคลุม",
+    "videos.moments_note": "ทุกบทตลอดทั้งวิดีโอ เลือกช่วงเวลาที่ต้องการเล่นจากจุดนั้น",
+    "videos.matrix_note": "จำนวนวิดีโอที่ครอบคลุมแต่ละบทบาทหรือประเทศในแต่ละขั้นตอนของโครงการ เลือกช่องเพื่อดูรายการ",
+    "videos.matrix_rows": "แถว",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "อีก {{more}} ช่วงเวลา",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43477,6 +43477,15 @@ const resource = {
     "videos.player_note": "پخش‌کننده فقط وقتی روی پخش بزنید بارگذاری می‌شود، از میزبان YouTube با حریم خصوصی تقویت‌شده.",
     "videos.see_all_for_step": "همه {{total}} در صفحه ویدیوها",
     "videos.example": "مثال: {{place}}",
+    "videos.view_label": "نمایش به‌صورت",
+    "videos.view_videos": "ویدیوها",
+    "videos.view_moments": "لحظات",
+    "videos.view_matrix": "نقشه پوشش",
+    "videos.moments_note": "هر فصل در طول ویدیوی خودش. یک لحظه را برای پخش از آنجا انتخاب کنید.",
+    "videos.matrix_note": "چند ویدیو هر نقش یا کشور را در هر مرحله از پروژه پوشش می‌دهند. یک خانه را برای دیدن فهرست آن انتخاب کنید.",
+    "videos.matrix_rows": "ردیف‌ها",
+    "videos.matrix_cell": "{{row}}، {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} لحظه دیگر",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

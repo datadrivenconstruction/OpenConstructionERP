@@ -46344,6 +46344,15 @@ const resource = {
     "videos.player_note": "Плеер загружается только при нажатии кнопки воспроизведения, с хостинга YouTube, защищающего конфиденциальность.",
     "videos.see_all_for_step": "Все {{total}} на странице «Видео»",
     "videos.example": "Пример: {{place}}",
+    "videos.view_label": "Показать как",
+    "videos.view_videos": "Видео",
+    "videos.view_moments": "Моменты",
+    "videos.view_matrix": "Карта охвата",
+    "videos.moments_note": "Каждая глава внутри видео. Выберите момент, чтобы начать воспроизведение с него.",
+    "videos.matrix_note": "Сколько видео есть для каждой роли или страны на каждой стадии проекта. Выберите ячейку, чтобы увидеть список.",
+    "videos.matrix_rows": "Строки",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Ещё {{more}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

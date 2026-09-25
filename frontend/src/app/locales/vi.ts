@@ -43394,6 +43394,15 @@ const resource = {
     "videos.player_note": "Trình phát chỉ tải khi bạn nhấn phát, từ máy chủ YouTube tăng cường quyền riêng tư.",
     "videos.see_all_for_step": "Cả {{total}} video trên trang Video",
     "videos.example": "Ví dụ: {{place}}",
+    "videos.view_label": "Hiển thị dạng",
+    "videos.view_videos": "Video",
+    "videos.view_moments": "Khoảnh khắc",
+    "videos.view_matrix": "Bản đồ phạm vi",
+    "videos.moments_note": "Mỗi chương trong video. Chọn một khoảnh khắc để phát từ đó.",
+    "videos.matrix_note": "Số video bao quát mỗi vai trò hoặc quốc gia ở mỗi giai đoạn dự án. Chọn một ô để xem danh sách.",
+    "videos.matrix_rows": "Hàng",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} khoảnh khắc nữa",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

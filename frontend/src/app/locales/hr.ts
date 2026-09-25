@@ -43665,6 +43665,15 @@ const resource = {
     "videos.player_note": "Player se učitava tek kad pritisnete play, s YouTubeova poslužitelja s pojačanom zaštitom privatnosti.",
     "videos.see_all_for_step": "Svih {{total}} na stranici Videozapisi",
     "videos.example": "Primjer: {{place}}",
+    "videos.view_label": "Prikaži kao",
+    "videos.view_videos": "Videozapisi",
+    "videos.view_moments": "Trenuci",
+    "videos.view_matrix": "Karta pokrivenosti",
+    "videos.moments_note": "Svako poglavlje uz njegov videozapis. Odaberite trenutak za reprodukciju odande.",
+    "videos.matrix_note": "Koliko videozapisa pokriva svaku ulogu ili državu u svakoj fazi projekta. Odaberite ćeliju za popis.",
+    "videos.matrix_rows": "Redovi",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Još {{more}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43477,6 +43477,15 @@ const resource = {
     "videos.player_note": "پلیئر تب ہی لوڈ ہوتا ہے جب آپ پلے دبائیں، YouTube کے پرائیویسی دوست میزبان سے۔",
     "videos.see_all_for_step": "ویڈیوز کے صفحے پر تمام {{total}}",
     "videos.example": "مثال: {{place}}",
+    "videos.view_label": "بطور دکھائیں",
+    "videos.view_videos": "ویڈیوز",
+    "videos.view_moments": "لمحات",
+    "videos.view_matrix": "احاطے کا نقشہ",
+    "videos.moments_note": "ویڈیو کے ساتھ ہر باب۔ وہاں سے چلانے کے لیے ایک لمحہ منتخب کریں۔",
+    "videos.matrix_note": "ہر پروجیکٹ مرحلے میں ہر کردار یا ملک کا احاطہ کتنی ویڈیوز کرتی ہیں۔ فہرست دیکھنے کے لیے ایک خانہ منتخب کریں۔",
+    "videos.matrix_rows": "قطاریں",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} مزید لمحات",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

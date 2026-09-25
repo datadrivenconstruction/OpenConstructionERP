@@ -43654,6 +43654,15 @@ const resource = {
     "videos.player_note": "Playerul se încarcă doar când apeși play, de pe gazda YouTube care protejează confidențialitatea.",
     "videos.see_all_for_step": "Toate cele {{total}} din pagina Videouri",
     "videos.example": "Exemplu: {{place}}",
+    "videos.view_label": "Afișează ca",
+    "videos.view_videos": "Videoclipuri",
+    "videos.view_moments": "Momente",
+    "videos.view_matrix": "Hartă de acoperire",
+    "videos.moments_note": "Fiecare capitol de-a lungul videoclipului. Alege un moment de la care să redai.",
+    "videos.matrix_note": "Câte videoclipuri acoperă fiecare rol sau țară în fiecare etapă a proiectului. Alege o celulă pentru a le lista.",
+    "videos.matrix_rows": "Rânduri",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Încă {{more}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

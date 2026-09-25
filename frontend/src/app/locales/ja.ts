@@ -44918,6 +44918,15 @@ const resource = {
     "videos.player_note": "プレーヤーは再生を押したときだけ、YouTubeのプライバシー強化ホストから読み込まれます。",
     "videos.see_all_for_step": "動画ページですべての{{total}}件を見る",
     "videos.example": "例: {{place}}",
+    "videos.view_label": "表示形式",
+    "videos.view_videos": "動画",
+    "videos.view_moments": "モーメント",
+    "videos.view_matrix": "カバレッジマップ",
+    "videos.moments_note": "各動画のすべてのチャプターを一覧表示します。再生したいモーメントを選んでください。",
+    "videos.matrix_note": "プロジェクトの各段階で、各役割または国をカバーする動画の数を示します。セルを選ぶと一覧表示されます。",
+    "videos.matrix_rows": "行",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "さらに{{more}}件のモーメント",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

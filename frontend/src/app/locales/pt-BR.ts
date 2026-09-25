@@ -40387,6 +40387,15 @@ const resource = {
     "videos.player_note": "O player só carrega quando você aperta play, a partir do serviço do YouTube que protege a privacidade.",
     "videos.see_all_for_step": "Todos os {{total}} na página Vídeos",
     "videos.example": "Exemplo: {{place}}",
+    "videos.view_label": "Mostrar como",
+    "videos.view_videos": "Vídeos",
+    "videos.view_moments": "Momentos",
+    "videos.view_matrix": "Mapa de cobertura",
+    "videos.moments_note": "Cada capítulo ao longo do vídeo. Escolha um momento para reproduzir a partir dali.",
+    "videos.matrix_note": "Quantos vídeos cobrem cada função ou país em cada etapa do projeto. Escolha uma célula para listá-los.",
+    "videos.matrix_rows": "Linhas",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Mais {{more}} momentos",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

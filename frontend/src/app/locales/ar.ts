@@ -45690,6 +45690,15 @@ const resource = {
     "videos.player_note": "يُحمَّل المشغّل فقط عند الضغط على تشغيل، من مضيف YouTube المعزز للخصوصية.",
     "videos.see_all_for_step": "كل {{total}} في صفحة الفيديوهات",
     "videos.example": "مثال: {{place}}",
+    "videos.view_label": "العرض كـ",
+    "videos.view_videos": "فيديوهات",
+    "videos.view_moments": "لحظات",
+    "videos.view_matrix": "خريطة التغطية",
+    "videos.moments_note": "كل فصل ضمن الفيديو الخاص به. اختر لحظة لتبدأ التشغيل منها.",
+    "videos.matrix_note": "عدد الفيديوهات التي تغطي كل دور أو دولة في كل مرحلة من مراحل المشروع. اختر خلية لعرض قائمتها.",
+    "videos.matrix_rows": "الصفوف",
+    "videos.matrix_cell": "{{row}}، {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} إضافية",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

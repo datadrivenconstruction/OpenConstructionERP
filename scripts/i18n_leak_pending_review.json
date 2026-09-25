@@ -2901,6 +2901,16 @@
     "n": 25,
     "reason": "Added in the commit that split Chile, Colombia and Brazil into their own locales (feat(i18n): give Chile, Colombia and Brazil a locale of their own). This entry's n is >=25/28, the shape the threshold scan actually flags. Checked: only one of the thirteen keys from this commit names es-CL or es-CO in its differs_in set (this one may or may not be that key), so a link to those new locales is not established for most of them. Not individually triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
   },
+  "videos.matrix_cell": {
+    "added_by": "wip/learn-menu (2026-09-25)",
+    "differs_in": [
+      "ar",
+      "fa"
+    ],
+    "en_value": "{{row}}, {{stage}}: {{n}}",
+    "n": 40,
+    "reason": "Screen-reader label of one cell in the Videos coverage map: a role or country, a stage and a count, joined by punctuation only. There is no word to translate; the Arabic-script locales write their own comma, so it is not identical everywhere and does not qualify for the allowlist."
+  },
   "whatsnew.v450.geo.chip": {
     "added_by": "a959ccb4f (2026-08-02)",
     "differs_in": [

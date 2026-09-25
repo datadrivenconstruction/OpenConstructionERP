@@ -43498,6 +43498,15 @@ const resource = {
     "videos.player_note": "Afspilleren indlæses kun, når du trykker på afspil, fra YouTubes privatlivsforbedrede vært.",
     "videos.see_all_for_step": "Alle {{total}} på siden Videoer",
     "videos.example": "Eksempel: {{place}}",
+    "videos.view_label": "Vis som",
+    "videos.view_videos": "Videoer",
+    "videos.view_moments": "Øjeblikke",
+    "videos.view_matrix": "Dækningskort",
+    "videos.moments_note": "Hvert kapitel i sin video. Vælg et øjeblik at afspille fra.",
+    "videos.matrix_note": "Hvor mange videoer dækker hver rolle eller hvert land på hvert projektstadie. Vælg en celle for at se dem.",
+    "videos.matrix_rows": "Rækker",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} øjeblikke mere",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

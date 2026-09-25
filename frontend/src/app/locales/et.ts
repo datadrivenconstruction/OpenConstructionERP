@@ -43440,6 +43440,15 @@ const resource = {
     "videos.player_note": "Pleier laadib alles siis, kui vajutate esitusnuppu, privaatsust arvestavast YouTube'i hostist.",
     "videos.see_all_for_step": "Kõik {{total}} lehel Videod",
     "videos.example": "Näide: {{place}}",
+    "videos.view_label": "Kuva kujul",
+    "videos.view_videos": "Videod",
+    "videos.view_moments": "Hetked",
+    "videos.view_matrix": "Kattekaart",
+    "videos.moments_note": "Iga peatükk oma video sees. Valige hetk, millest mängimist alustada.",
+    "videos.matrix_note": "Mitu videot katab iga rolli või riigi igas projekti etapis. Valige lahter, et need loendina näha.",
+    "videos.matrix_rows": "Read",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Veel {{more}} hetke",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

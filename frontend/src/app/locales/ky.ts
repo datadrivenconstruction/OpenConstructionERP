@@ -43612,6 +43612,15 @@ const resource = {
     "videos.player_note": "Ойноткуч ойнотуу баскычы басылганда гана, YouTube'дун купуялуулугу күчөтүлгөн серверинен жүктөлөт.",
     "videos.see_all_for_step": "Видеолор бетиндеги бардык {{total}}",
     "videos.example": "Мисалы: {{place}}",
+    "videos.view_label": "Көрсөтүү түрү",
+    "videos.view_videos": "Видеолор",
+    "videos.view_moments": "Учурлар",
+    "videos.view_matrix": "Камтуу картасы",
+    "videos.moments_note": "Ар бир видеонун бардык бөлүмдөрү. Ошол жерден ойнотууну баштоо үчүн учурду тандаңыз.",
+    "videos.matrix_note": "Долбоордун ар бир этабында ар бир ролду же өлкөнү канча видео камтыйрын көрсөтөт. Тизмени көрүү үчүн уячаны тандаңыз.",
+    "videos.matrix_rows": "Саптар",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Дагы {{more}} учур",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -44410,6 +44410,15 @@ const resource = {
     "videos.player_note": "Pleyer faqat play tugmasini bosganingizda, YouTubening maxfiylikni himoya qiluvchi serveridan yuklanadi.",
     "videos.see_all_for_step": "Videolar sahifasidagi barcha {{total}} ta",
     "videos.example": "Misol: {{place}}",
+    "videos.view_label": "Qanday koʻrsatish",
+    "videos.view_videos": "Videolar",
+    "videos.view_moments": "Lahzalar",
+    "videos.view_matrix": "Qamrov xaritasi",
+    "videos.moments_note": "Video boʻylab har bir boʻlim. Oʻsha yerdan ijro etish uchun lahzani tanlang.",
+    "videos.matrix_note": "Har bir loyiha bosqichida har bir rol yoki davlat qancha videoda qamrab olinganligi. Roʻyxatini koʻrish uchun katakni tanlang.",
+    "videos.matrix_rows": "Qatorlar",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Yana {{more}} ta lahza",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

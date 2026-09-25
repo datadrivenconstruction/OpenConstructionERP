@@ -46229,6 +46229,15 @@ const resource = {
     "videos.player_note": "Le lecteur ne se charge qu'après avoir appuyé sur lecture, depuis l'hébergement YouTube à confidentialité renforcée.",
     "videos.see_all_for_step": "Les {{total}} sur la page Vidéos",
     "videos.example": "Exemple : {{place}}",
+    "videos.view_label": "Afficher comme",
+    "videos.view_videos": "Vidéos",
+    "videos.view_moments": "Moments",
+    "videos.view_matrix": "Carte de couverture",
+    "videos.moments_note": "Chaque chapitre le long de sa vidéo. Choisissez un moment pour lancer la lecture à partir de là.",
+    "videos.matrix_note": "Combien de vidéos couvrent chaque rôle ou pays à chaque étape du projet. Choisissez une cellule pour les lister.",
+    "videos.matrix_rows": "Lignes",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} moments de plus",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

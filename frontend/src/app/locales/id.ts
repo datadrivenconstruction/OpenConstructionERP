@@ -43385,6 +43385,15 @@ const resource = {
     "videos.player_note": "Pemutar hanya dimuat saat Anda menekan putar, dari host YouTube dengan privasi yang ditingkatkan.",
     "videos.see_all_for_step": "Semua {{total}} di halaman Video",
     "videos.example": "Contoh: {{place}}",
+    "videos.view_label": "Tampilkan sebagai",
+    "videos.view_videos": "Video",
+    "videos.view_moments": "Momen",
+    "videos.view_matrix": "Peta cakupan",
+    "videos.moments_note": "Setiap bab di sepanjang videonya. Pilih momen untuk mulai diputar dari sana.",
+    "videos.matrix_note": "Berapa banyak video yang mencakup setiap peran atau negara di setiap tahap proyek. Pilih sel untuk melihat daftarnya.",
+    "videos.matrix_rows": "Baris",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} momen lagi",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

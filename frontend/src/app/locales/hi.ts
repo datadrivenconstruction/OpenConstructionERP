@@ -43501,6 +43501,15 @@ const resource = {
     "videos.player_note": "प्लेयर तभी लोड होता है जब आप प्ले दबाते हैं, YouTube के प्राइवेसी-एन्हांस्ड होस्ट से।",
     "videos.see_all_for_step": "वीडियो पेज पर सभी {{total}}",
     "videos.example": "उदाहरण: {{place}}",
+    "videos.view_label": "इस रूप में दिखाएं",
+    "videos.view_videos": "वीडियो",
+    "videos.view_moments": "पल",
+    "videos.view_matrix": "कवरेज मैप",
+    "videos.moments_note": "हर वीडियो के सभी अध्याय एक साथ। वहां से चलाने के लिए कोई पल चुनें।",
+    "videos.matrix_note": "हर प्रोजेक्ट चरण में हर भूमिका या देश को कितने वीडियो कवर करते हैं। सूची देखने के लिए कोई सेल चुनें।",
+    "videos.matrix_rows": "पंक्तियां",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} और पल",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43789,6 +43789,15 @@ const resource = {
     "videos.player_note": "প্লে চাপলেই কেবল প্লেয়ার লোড হয়, প্রাইভেসি-বর্ধিত YouTube হোস্ট থেকে।",
     "videos.see_all_for_step": "ভিডিও পাতায় সবগুলো {{total}}টি",
     "videos.example": "উদাহরণ: {{place}}",
+    "videos.view_label": "এভাবে দেখান",
+    "videos.view_videos": "ভিডিও",
+    "videos.view_moments": "মুহূর্ত",
+    "videos.view_matrix": "কভারেজ মানচিত্র",
+    "videos.moments_note": "প্রতিটি ভিডিওর প্রতিটি অধ্যায়। সেখান থেকে চালাতে একটি মুহূর্ত বেছে নিন।",
+    "videos.matrix_note": "প্রতিটি প্রকল্প পর্যায়ে প্রতিটি ভূমিকা বা দেশ কতগুলো ভিডিওতে আছে। তালিকা দেখতে একটি সেল বেছে নিন।",
+    "videos.matrix_rows": "সারি",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "আরও {{more}}টি মুহূর্ত",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

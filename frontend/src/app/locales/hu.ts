@@ -46087,6 +46087,15 @@ const resource = {
     "videos.player_note": "A lejátszó csak akkor töltődik be, amikor lejátszásra kattint, a YouTube fokozott adatvédelmű szerveréről.",
     "videos.see_all_for_step": "Mind a(z) {{total}} a Videók oldalon",
     "videos.example": "Példa: {{place}}",
+    "videos.view_label": "Megjelenítés",
+    "videos.view_videos": "Videók",
+    "videos.view_moments": "Pillanatok",
+    "videos.view_matrix": "Lefedettségi térkép",
+    "videos.moments_note": "Minden fejezet a videója mentén. Válasszon egy pillanatot, hogy onnan induljon a lejátszás.",
+    "videos.matrix_note": "Hány videó fedi le az egyes szerepköröket vagy országokat a projekt egyes szakaszaiban. Válasszon egy cellát a listázáshoz.",
+    "videos.matrix_rows": "Sorok",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Még {{more}} pillanat",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

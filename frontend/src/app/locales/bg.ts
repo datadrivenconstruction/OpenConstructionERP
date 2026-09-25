@@ -43502,6 +43502,15 @@ const resource = {
     "videos.player_note": "Плейърът се зарежда само когато натиснете play, от версията на YouTube с подобрена поверителност.",
     "videos.see_all_for_step": "Всички {{total}} на страницата Видеа",
     "videos.example": "Пример: {{place}}",
+    "videos.view_label": "Покажи като",
+    "videos.view_videos": "Видеа",
+    "videos.view_moments": "Моменти",
+    "videos.view_matrix": "Карта на покритие",
+    "videos.moments_note": "Всяка глава от видеото. Изберете момент, за да пуснете оттам.",
+    "videos.matrix_note": "Колко видеа обхващат всяка роля или държава на всеки етап от проекта. Изберете клетка, за да ги видите.",
+    "videos.matrix_rows": "Редове",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Още {{more}} момента",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -44649,6 +44649,15 @@ const resource = {
     "videos.player_note": "Odtwarzacz ładuje się dopiero po naciśnięciu play, z chroniącego prywatność serwera YouTube.",
     "videos.see_all_for_step": "Wszystkie {{total}} na stronie Filmy",
     "videos.example": "Przykład: {{place}}",
+    "videos.view_label": "Pokaż jako",
+    "videos.view_videos": "Filmy",
+    "videos.view_moments": "Momenty",
+    "videos.view_matrix": "Mapa pokrycia",
+    "videos.moments_note": "Każdy rozdział wzdłuż filmu. Wybierz moment, aby odtworzyć od niego.",
+    "videos.matrix_note": "Ile filmów obejmuje każdą rolę lub kraj na każdym etapie projektu. Wybierz komórkę, aby je wyświetlić.",
+    "videos.matrix_rows": "Wiersze",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Jeszcze {{more}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

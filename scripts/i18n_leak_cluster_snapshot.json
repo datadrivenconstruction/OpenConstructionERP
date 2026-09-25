@@ -1576,5 +1576,16 @@
     ],
     "key_count_at_seed": 6,
     "note": "The singular of a counted error label, '{{count}} error': Spanish spells the noun the same as English and Filipino uses the English loanword, as its own error strings already do. Their plural forms (errores, and the unchanged Filipino) are translated."
+  },
+  {
+    "locale_set": [
+      "de",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Videos is the German and the Spanish word as well (nav.videos, videos.stat_videos, videos.view_videos). Checked in de and es; ru, fr and pt translate it."
   }
 ]

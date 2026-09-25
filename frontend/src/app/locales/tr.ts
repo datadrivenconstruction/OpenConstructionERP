@@ -44342,6 +44342,15 @@ const resource = {
     "videos.player_note": "Oynatıcı yalnızca oynat tuşuna bastığınızda, YouTube'un gizliliği koruyan sunucusundan yüklenir.",
     "videos.see_all_for_step": "Videolar sayfasında {{total}} videonun tümü",
     "videos.example": "Örnek: {{place}}",
+    "videos.view_label": "Şu şekilde göster",
+    "videos.view_videos": "Videolar",
+    "videos.view_moments": "Anlar",
+    "videos.view_matrix": "Kapsam haritası",
+    "videos.moments_note": "Video boyunca her bölüm. Oradan oynatmak için bir an seçin.",
+    "videos.matrix_note": "Her proje aşamasında her rolü veya ülkeyi kaç videonun kapsadığı. Listelemek için bir hücre seçin.",
+    "videos.matrix_rows": "Satırlar",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} an daha",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

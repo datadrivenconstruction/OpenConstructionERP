@@ -43498,6 +43498,15 @@ const resource = {
     "videos.player_note": "Spilleren lastes først når du trykker play, fra YouTubes personvernvennlige vert.",
     "videos.see_all_for_step": "Alle {{total}} på Videoer-siden",
     "videos.example": "Eksempel: {{place}}",
+    "videos.view_label": "Vis som",
+    "videos.view_videos": "Videoer",
+    "videos.view_moments": "Øyeblikk",
+    "videos.view_matrix": "Dekningskart",
+    "videos.moments_note": "Hvert kapittel langs videoen. Velg et øyeblikk å spille av fra.",
+    "videos.matrix_note": "Hvor mange videoer som dekker hver rolle eller hvert land i hver prosjektfase. Velg en celle for å liste dem.",
+    "videos.matrix_rows": "Rader",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} øyeblikk til",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

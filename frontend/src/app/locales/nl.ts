@@ -44379,6 +44379,15 @@ const resource = {
     "videos.player_note": "De speler laadt pas nadat u op afspelen drukt, vanaf de privacyvriendelijke YouTube-host.",
     "videos.see_all_for_step": "Alle {{total}} op de pagina Video's",
     "videos.example": "Voorbeeld: {{place}}",
+    "videos.view_label": "Weergeven als",
+    "videos.view_videos": "Video's",
+    "videos.view_moments": "Momenten",
+    "videos.view_matrix": "Dekkingskaart",
+    "videos.moments_note": "Elk hoofdstuk langs zijn video. Kies een moment om vandaar af te spelen.",
+    "videos.matrix_note": "Hoeveel video's elke rol of elk land in elke projectfase dekken. Kies een cel om ze te tonen.",
+    "videos.matrix_rows": "Rijen",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "Nog {{more}} momenten",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

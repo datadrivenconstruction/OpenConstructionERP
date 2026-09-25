@@ -43477,6 +43477,15 @@ const resource = {
     "videos.player_note": "Mago-load lang ang player kapag pinindot mo ang play, mula sa privacy-enhanced na YouTube host.",
     "videos.see_all_for_step": "Lahat ng {{total}} sa page ng Mga Video",
     "videos.example": "Halimbawa: {{place}}",
+    "videos.view_label": "Ipakita bilang",
+    "videos.view_videos": "Mga Video",
+    "videos.view_moments": "Mga Sandali",
+    "videos.view_matrix": "Mapa ng Saklaw",
+    "videos.moments_note": "Bawat chapter sa video nito. Pumili ng sandali para magsimula roon ang pag-play.",
+    "videos.matrix_note": "Ilang video ang sumasakop sa bawat role o bansa sa bawat stage ng proyekto. Pumili ng cell para makita ang listahan.",
+    "videos.matrix_rows": "Mga Row",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "{{more}} pang sandali",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

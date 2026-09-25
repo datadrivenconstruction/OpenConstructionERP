@@ -29,6 +29,8 @@ import {
   ExternalLink,
   EyeOff,
   GraduationCap,
+  Grid3x3,
+  LayoutGrid,
   ListVideo,
   MonitorPlay,
   Play,
@@ -65,6 +67,8 @@ import {
   type VideoFilters,
 } from './academy';
 import { VideoCard } from './VideoCard';
+import { MatrixView, type MatrixRows } from './MatrixView';
+import { MomentsView } from './MomentsView';
 import { VideoCover } from './VideoCover';
 import { VideoPlayerDialog } from './VideoPlayerDialog';
 import { RolePicker } from './RolePicker';
@@ -170,6 +174,9 @@ export function VideosPage() {
         setFilter={setFilter}
         clearFilters={clearFilters}
         onOpen={openPlayer}
+        patchParams={patchParams}
+        view={LIBRARY_VIEWS.find((v) => v === params.get('view')) ?? 'videos'}
+        rows={params.get('rows') === 'markets' ? 'markets' : 'roles'}
       />
       <HintsRestore />
       <CasesCta />
@@ -631,16 +638,49 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
 
 // ── Library ──────────────────────────────────────────────────────────────────
 
+type LibraryView = 'videos' | 'moments' | 'matrix';
+const LIBRARY_VIEWS: LibraryView[] = ['videos', 'moments', 'matrix'];
+
 interface LibraryProps {
   labels: VideoLabels;
   filters: VideoFilters;
   setFilter: <K extends keyof VideoFilters>(key: K, value: VideoFilters[K]) => void;
   clearFilters: () => void;
   onOpen: (v: AcademyVideo, s?: number) => void;
+  patchParams: (patch: Record<string, string | null>) => void;
+  view: LibraryView;
+  rows: MatrixRows;
 }
 
-function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryProps) {
+function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams, view, rows }: LibraryProps) {
   const { t } = useTranslation();
+  const viewLabel: Record<LibraryView, string> = {
+    videos: t('videos.view_videos', { defaultValue: 'Videos' }),
+    moments: t('videos.view_moments', { defaultValue: 'Moments' }),
+    matrix: t('videos.view_matrix', { defaultValue: 'Coverage map' }),
+  };
+  const viewIcon: Record<LibraryView, ReactNode> = {
+    videos: <LayoutGrid size={13} aria-hidden />,
+    moments: <ListVideo size={13} aria-hidden />,
+    matrix: <Grid3x3 size={13} aria-hidden />,
+  };
+  const viewNote: Record<LibraryView, string> = {
+    videos: '',
+    moments: t('videos.moments_note', {
+      defaultValue: 'Every chapter along its video. Choose a moment to play from there.',
+    }),
+    matrix: t('videos.matrix_note', {
+      defaultValue: 'How many videos cover each role or country at each project stage. Choose a cell to list them.',
+    }),
+  };
+  const pickCell = (row: string, stage: string) => {
+    patchParams(
+      rows === 'roles'
+        ? { role: row, stage, view: null }
+        : { market: row, stage, view: null },
+    );
+    sectionRef.current?.scrollIntoView?.({ block: 'start' });
+  };
   const hits = useMemo(() => searchVideos(filters), [filters]);
   const count = activeFilterCount(filters);
   const any = t('common.all', { defaultValue: 'All' });
@@ -776,6 +816,35 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryPr
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <div
+          role="group"
+          aria-label={t('videos.view_label', { defaultValue: 'Show as' })}
+          className="inline-flex max-w-full flex-wrap rounded-xl border border-border-light bg-surface-secondary/50 p-0.5"
+        >
+          {LIBRARY_VIEWS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={view === v}
+              data-testid={`videos-view-${v}`}
+              onClick={() => patchParams({ view: v === 'videos' ? null : v })}
+              className={clsx(
+                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
+                view === v
+                  ? 'bg-surface-primary text-content-primary shadow-sm'
+                  : 'text-content-secondary hover:text-content-primary',
+              )}
+            >
+              {viewIcon[v]}
+              {viewLabel[v]}
+            </button>
+          ))}
+        </div>
+        {viewNote[view] && <p className="min-w-0 flex-1 text-2xs text-content-tertiary">{viewNote[view]}</p>}
+      </div>
+
       {hits.length === 0 ? (
         <div data-testid="videos-empty" className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border-light px-4 py-10 text-center">
           <Search size={22} className="text-content-tertiary" aria-hidden />
@@ -794,6 +863,16 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryPr
             </Link>
           </div>
         </div>
+      ) : view === 'moments' ? (
+        <MomentsView hits={hits} searching={filters.query.trim() !== ''} labels={labels} onOpen={onOpen} />
+      ) : view === 'matrix' ? (
+        <MatrixView
+          videos={hits.map((h) => h.video)}
+          rows={rows}
+          onRowsChange={(r) => patchParams({ rows: r === 'roles' ? null : r })}
+          labels={labels}
+          onPick={pickCell}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {hits.map((hit) => (

@@ -43627,6 +43627,15 @@ const resource = {
     "videos.player_note": "הנגן נטען רק כשלוחצים על הפעלה, מהאירוח הפרטי המוגן של YouTube.",
     "videos.see_all_for_step": "כל {{total}} בעמוד הסרטונים",
     "videos.example": "דוגמה: {{place}}",
+    "videos.view_label": "הצג כ",
+    "videos.view_videos": "סרטונים",
+    "videos.view_moments": "רגעים",
+    "videos.view_matrix": "מפת כיסוי",
+    "videos.moments_note": "כל פרק לאורך הסרטון שלו. בחרו רגע כדי להתחיל לנגן משם.",
+    "videos.matrix_note": "כמה סרטונים מכסים כל תפקיד או מדינה בכל שלב בפרויקט. בחרו תא כדי להציג את הרשימה.",
+    "videos.matrix_rows": "שורות",
+    "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
+    "videos.more_moments": "עוד {{more}} רגעים",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };
