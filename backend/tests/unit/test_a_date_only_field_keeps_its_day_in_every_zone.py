@@ -71,6 +71,16 @@ def test_a_row_stored_at_the_server_zone_midnight_reads_back_as_the_day_meant(
     assert calendar_day_of(stored, legacy_zone=server_zone) == expected
 
 
+@pytest.mark.parametrize("month", range(1, 13))
+def test_a_row_written_the_old_way_on_this_machine_reads_back_as_its_day_in_every_season(month: int) -> None:
+    # Exactly what asyncpg did with a naive value: read it in the process's
+    # local zone, at the offset in force on THAT day. A winter row read back in
+    # summer (or the reverse) must not lose a day to the daylight-saving hour.
+    # Trivially green on a UTC machine, discriminating on any machine with DST.
+    stored = datetime(2026, month, 15).astimezone(UTC)
+    assert calendar_day_of(stored) == date(2026, month, 15)
+
+
 def test_a_genuine_timestamp_keeps_its_utc_day() -> None:
     # A seeded "now + 7 days" is midnight in neither UTC nor the server zone.
     assert calendar_day_of(datetime(2026, 10, 16, 15, 42, tzinfo=UTC), legacy_zone=BERLIN) == date(2026, 10, 16)

@@ -31,7 +31,8 @@ signature: converted to the server zone it reads 00:00. Such a row reads back
 as the local day. A stored instant that is midnight in neither UTC nor the
 server zone is a genuine timestamp (a seeded ``now() + 7 days``), and its UTC
 day is taken. This is a reading rule, not a data repair: nothing is rewritten.
-It assumes the server zone has not changed since the row was written.
+It assumes the server zone has not changed since the row was written; the
+daylight-saving offset of the row's own date is applied.
 """
 
 from __future__ import annotations
@@ -43,11 +44,6 @@ from typing import Annotated, Any
 from pydantic import BeforeValidator, PlainSerializer
 
 _DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-
-
-def _server_zone() -> tzinfo | None:
-    """The zone naive values were read in before the fix: the process's local zone."""
-    return datetime.now().astimezone().tzinfo
 
 
 def _parse(value: object) -> date | datetime:
@@ -97,11 +93,13 @@ def calendar_day_of(value: object, *, legacy_zone: tzinfo | None = None) -> date
     utc_value = parsed.astimezone(UTC)
     if utc_value.time() == time(0):
         return utc_value.date()
-    zone = legacy_zone if legacy_zone is not None else _server_zone()
-    if zone is not None:
-        local = utc_value.astimezone(zone)
-        if local.time() == time(0):
-            return local.date()
+    # asyncpg read a naive value at the local offset in force on THAT day, so
+    # the default converts per instant (``astimezone()`` with no argument). A
+    # fixed offset taken from "now" would lose a day to daylight saving: a
+    # winter row read back in summer misses midnight by the DST hour.
+    local = utc_value.astimezone(legacy_zone) if legacy_zone is not None else utc_value.astimezone()
+    if local.time() == time(0):
+        return local.date()
     return utc_value.date()
 
 
