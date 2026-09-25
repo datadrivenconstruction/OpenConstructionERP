@@ -1587,5 +1587,15 @@
     ],
     "key_count_at_seed": 3,
     "note": "Videos is the German and the Spanish word as well (nav.videos, videos.stat_videos, videos.view_videos). Checked in de and es; ru, fr and pt translate it."
+  },
+  {
+    "locale_set": [
+      "fil",
+      "fr",
+      "ro",
+      "tr"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Net is the ordinary accounting word for the net amount in French, Romanian, Turkish and Filipino (finance.line_net, finance.total_net, certified_payroll.col.net). Checked in each; German reads Netto, so it is translated where the language differs."
   }
 ]
