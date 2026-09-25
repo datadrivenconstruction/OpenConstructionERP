@@ -229,7 +229,7 @@ export function AssemblyPickerModal({
     new Intl.NumberFormat(getNumberLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose} aria-hidden="true">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose} role="presentation">
       <div
         role="dialog"
         aria-modal="true"
@@ -1645,7 +1645,7 @@ export function CostDatabaseSearchModal({
   }, [selected, items, rowQuantity]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} aria-hidden="true">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} role="presentation">
       <div
         role="dialog"
         aria-modal="true"

@@ -286,6 +286,20 @@ describe('CostDatabaseSearchModal - paginated catalog', () => {
     expect(screen.queryByTestId('filter-chip-category')).toBeNull();
   });
 
+  it('exposes the dialog and its buttons to role queries', async () => {
+    // The backdrop used to carry aria-hidden="true", which removes the whole
+    // dialog (it is a child of the backdrop) from the accessibility tree:
+    // assistive tech saw nothing, and role-based queries found no buttons.
+    const { onClose } = renderModal();
+    expect(await screen.findByText('Concrete C30/37 wall')).toBeInTheDocument();
+
+    const dialog = screen.getByRole('dialog', { name: 'Add from Cost Database' });
+    const cancel = within(dialog).getByRole('button', { name: /cancel/i });
+    expect(within(dialog).getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    fireEvent.click(cancel);
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('shows the inline retry CTA when the category tree fails', async () => {
     // mockRejectedValue (not Once) because the tree query is region-scoped and
     // fires twice on mount: once for region='' and again after the auto-default
