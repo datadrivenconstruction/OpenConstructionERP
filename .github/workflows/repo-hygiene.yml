@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 83. They run on every push and pull request, grouped into three
+# Guards: 84. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -305,11 +305,9 @@ jobs:
       # and compares against a string built in memory, so both platforms reach
       # the same verdict. backend/tests/unit/test_architecture_manifest_guard.py
       # pins that, along with a negative control per direction of drift. It sits
-      # in the unit lane rather than next to the script it tests because nothing
-      # runs scripts/test_*.py: not a workflow, not the Makefile, not
-      # .pre-commit-config.yaml. A test in that directory is read by people and
-      # by nothing else, which is the same shape of failure as the stale
-      # manifest this step exists to catch.
+      # in the unit lane rather than next to the script it tests because, when
+      # it was written, nothing ran scripts/test_*.py. The step that runs them
+      # now exists further down this job; the test stays where it is.
       - name: Check the architecture manifest against the tree it describes
         if: ${{ !cancelled() }}
         run: python scripts/check_architecture_manifest.py
@@ -773,6 +771,18 @@ jobs:
       - name: Check the instrument runs and no country has fallen to zero
         if: ${{ !cancelled() }}
         run: python backend/scripts/country_coverage.py --strict --ignore-unprobed US CA DE BG RU CN IN BR NG
+
+      # Until 2026-09-25 nothing ran scripts/test_*.py: not a workflow, not the
+      # Makefile, not .pre-commit-config.yaml, so a test written next to the
+      # script it covers was read by people and by nothing else. It sits below
+      # the backend install because that is what puts pytest on this runner.
+      # The glob picks up a new file without an edit here. test_cost_import.py
+      # matches it and contributes nothing: it is a smoke script against a
+      # running server, driven by its own main(), with no test functions.
+      # pytest exits 5 when it collects nothing, so an emptied glob fails.
+      - name: Run the tests that live next to the scripts they cover
+        if: ${{ !cancelled() }}
+        run: python -m pytest -p no:cacheprovider scripts/test_*.py
 
       # Both kinds of file are already parsed on the way through CI, and stating
       # that precisely matters, because the first version of this finding said
