@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,6 +30,7 @@ from app.modules.cost_recovery.back_charge import (
     BackChargeItem,
     RecoveryLedger,
     build_ledger,
+    quantize_money,
 )
 from app.modules.cost_recovery.models import BackCharge, BackChargeApportionment
 from app.modules.cost_recovery.recovery_analytics import (
@@ -130,6 +132,134 @@ async def _stamp_traceability_band(
     await session.flush()
 
 
+class InvalidBackChargeLink(Exception):
+    """A back-charge named a party or source record that does not resolve.
+
+    Raised for an unknown subcontractor or contact, and for an NCR or punch
+    item that is missing or belongs to another project. The router answers 400
+    and the request rolls back, so no back-charge is stored with a dangling id.
+    """
+
+    def __init__(self, detail: str) -> None:
+        self.detail = detail
+        super().__init__(detail)
+
+
+@dataclass(frozen=True)
+class _PartyLink:
+    subcontractor_id: uuid.UUID | None
+    contact_id: uuid.UUID | None
+    label: str
+
+
+async def _resolve_party_link(
+    session: AsyncSession,
+    subcontractor_id: uuid.UUID | None,
+    contact_id: uuid.UUID | None,
+) -> _PartyLink:
+    """Check the party ids and complete the pair where the records say so.
+
+    A subcontractor carries its own contact, and a contact may be the one a
+    subcontractor points at. Whichever of the two the caller sent, the other is
+    filled in when it is known, so a pending-deduction query by subcontractor
+    finds a charge that was raised against the subcontractor's contact.
+    """
+    # Lazy imports: cost_recovery reads these tables, it does not own them.
+    from app.modules.contacts.models import Contact  # noqa: PLC0415
+    from app.modules.subcontractors.models import Subcontractor  # noqa: PLC0415
+
+    label = ""
+    sub = None
+    if subcontractor_id is not None:
+        sub = await session.get(Subcontractor, subcontractor_id)
+        if sub is None:
+            raise InvalidBackChargeLink("Subcontractor not found")
+        if contact_id is None and sub.contact_id is not None:
+            contact_id = sub.contact_id
+    if contact_id is not None:
+        contact = await session.get(Contact, contact_id)
+        if contact is None:
+            raise InvalidBackChargeLink("Contact not found")
+        if sub is None:
+            stmt = select(Subcontractor).where(Subcontractor.contact_id == contact_id).limit(1)
+            sub = (await session.execute(stmt)).scalar_one_or_none()
+        label = (
+            contact.company_name
+            or contact.legal_name
+            or f"{contact.first_name or ''} {contact.last_name or ''}".strip()
+        )
+    if sub is not None:
+        label = sub.legal_name or sub.trade_name or label
+    return _PartyLink(
+        subcontractor_id=sub.id if sub is not None else None,
+        contact_id=contact_id,
+        label=label or "",
+    )
+
+
+def _parse_money(raw: object) -> Decimal | None:
+    """A money figure from a free-text source field, or None when not numeric.
+
+    An NCR's cost impact is free text, often written as ``EUR 8400``: a leading
+    or trailing three-letter code is dropped. Anything else that is not a plain
+    decimal with a point (a decimal comma, a range, prose) is not guessed at.
+    """
+    text = str(raw or "").strip().replace(" ", "")
+    if len(text) > 3 and text[:3].isalpha():
+        text = text[3:]
+    elif len(text) > 3 and text[-3:].isalpha():
+        text = text[:-3]
+    if not text:
+        return None
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        return None
+    if not value.is_finite() or value < 0:
+        return None
+    return value
+
+
+@dataclass
+class _SourceFill:
+    source_ref: str = ""
+    description: str = ""
+    gross_amount: Decimal | None = None
+    currency: str = ""
+
+
+async def _resolve_source(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    *,
+    ncr_id: uuid.UUID | None,
+    punch_item_id: uuid.UUID | None,
+) -> _SourceFill:
+    """Check the source records sit in *project_id* and read what they prefill."""
+    fill = _SourceFill()
+    if punch_item_id is not None:
+        from app.modules.punchlist.models import PunchItem  # noqa: PLC0415
+
+        punch = await session.get(PunchItem, punch_item_id)
+        if punch is None or punch.project_id != project_id:
+            raise InvalidBackChargeLink("Punch item not found in this project")
+        fill.description = punch.title or ""
+        fill.gross_amount = _parse_money(punch.rework_cost)
+        if fill.gross_amount is not None:
+            fill.currency = (punch.rework_cost_currency or "").strip().upper()
+    if ncr_id is not None:
+        from app.modules.ncr.models import NCR  # noqa: PLC0415
+
+        ncr = await session.get(NCR, ncr_id)
+        if ncr is None or ncr.project_id != project_id:
+            raise InvalidBackChargeLink("NCR not found in this project")
+        fill.source_ref = ncr.ncr_number or ""
+        fill.description = fill.description or ncr.title or ""
+        if fill.gross_amount is None:
+            fill.gross_amount = _parse_money(ncr.cost_impact)
+    return fill
+
+
 async def create_back_charge(
     session: AsyncSession,
     project_id: uuid.UUID,
@@ -137,15 +267,39 @@ async def create_back_charge(
     *,
     created_by: str | None = None,
 ) -> BackCharge:
-    """Record a new back-charge for a project and announce it on the timeline."""
-    currency = await _resolve_currency(session, project_id, payload.currency)
+    """Record a new back-charge for a project and announce it on the timeline.
+
+    Linked records are checked first (a bad id raises
+    :class:`InvalidBackChargeLink`) and fill only what the caller left unset:
+    the party label from the subcontractor or contact, and the gross,
+    currency, description and reference from the NCR or punch item.
+    """
+    sent = payload.model_fields_set
+    party = await _resolve_party_link(session, payload.subcontractor_id, payload.contact_id)
+    source = await _resolve_source(
+        session,
+        project_id,
+        ncr_id=payload.ncr_id,
+        punch_item_id=payload.punch_item_id,
+    )
+    gross = payload.gross_amount if payload.gross_amount is not None else Decimal("0")
+    requested_currency = payload.currency
+    if "gross_amount" not in sent and source.gross_amount is not None:
+        gross = source.gross_amount
+        if not (requested_currency or "").strip():
+            requested_currency = source.currency
+    currency = await _resolve_currency(session, project_id, requested_currency)
     back_charge = BackCharge(
         project_id=project_id,
-        source_ref=payload.source_ref or "",
-        responsible_party=payload.responsible_party or "",
-        description=payload.description or "",
+        source_ref=payload.source_ref or source.source_ref,
+        responsible_party=payload.responsible_party or party.label,
+        subcontractor_id=party.subcontractor_id,
+        contact_id=party.contact_id,
+        ncr_id=payload.ncr_id,
+        punch_item_id=payload.punch_item_id,
+        description=payload.description or source.description,
         basis=payload.basis or "",
-        gross_amount=payload.gross_amount if payload.gross_amount is not None else Decimal("0"),
+        gross_amount=gross,
         chargeable_pct=payload.chargeable_pct if payload.chargeable_pct is not None else Decimal("1"),
         currency=currency,
         status=payload.status or "proposed",
@@ -214,6 +368,19 @@ async def update_back_charge(
         return None
 
     fields = payload.model_dump(exclude_unset=True)
+    if "subcontractor_id" in fields or "contact_id" in fields:
+        # Re-link: a new subcontractor without a contact takes the
+        # subcontractor's own contact, not the one the old party had.
+        keep_contact = "subcontractor_id" not in fields
+        party = await _resolve_party_link(
+            session,
+            fields.pop("subcontractor_id", back_charge.subcontractor_id),
+            fields.pop("contact_id", back_charge.contact_id if keep_contact else None),
+        )
+        back_charge.subcontractor_id = party.subcontractor_id
+        back_charge.contact_id = party.contact_id
+        if not (back_charge.responsible_party or "").strip() and "responsible_party" not in fields:
+            back_charge.responsible_party = party.label
     for key, value in fields.items():
         setattr(back_charge, key, value)
 
@@ -408,3 +575,111 @@ async def build_portfolio_recovery_performance(
     stmt = select(BackCharge).where(BackCharge.project_id.in_(ids)).order_by(BackCharge.created_at)
     rows = list((await session.execute(stmt)).scalars().all())
     return compute_recovery_performance(to_recovery_item(row) for row in rows)
+
+
+# --- Pending deductions: agreed back-charges a subcontractor still owes -------
+
+
+@dataclass(frozen=True)
+class PendingBackCharge:
+    """One agreed back-charge still to be deducted from a subcontractor.
+
+    ``amount`` is what is left to recover, in the back-charge's currency. When
+    the charge was apportioned across parties it is only this subcontractor's
+    share of what is left, and ``apportioned`` says so.
+    """
+
+    back_charge_id: uuid.UUID
+    project_id: uuid.UUID
+    source_ref: str
+    description: str
+    currency: str
+    amount: Decimal
+    apportioned: bool
+
+
+@dataclass(frozen=True)
+class PendingBackCharges:
+    """A subcontractor's pending deductions and their totals per currency."""
+
+    subcontractor_id: uuid.UUID
+    items: tuple[PendingBackCharge, ...] = ()
+    totals: dict[str, Decimal] = field(default_factory=dict)
+
+
+async def pending_backcharges(
+    session: AsyncSession,
+    subcontractor_id: uuid.UUID,
+    *,
+    project_id: uuid.UUID | None = None,
+) -> PendingBackCharges:
+    """Agreed back-charges the subcontractor still owes, as pending deductions.
+
+    Only ``agreed`` charges count: a proposed or disputed one is not yet owed,
+    and a recovered or waived one is settled. The amount is the outstanding
+    figure (chargeable less recovered), so whoever deducts it must move
+    ``recovered_amount``, or the same money is deducted again next time.
+
+    An apportioned charge contributes only the shares whose party names this
+    subcontractor (its id, legal name or trade name), scaled to what is still
+    outstanding; a charge apportioned wholly to others contributes nothing.
+    Totals are per currency and never summed across them.
+    """
+    from app.modules.subcontractors.models import Subcontractor  # noqa: PLC0415
+
+    stmt = select(BackCharge).where(
+        BackCharge.subcontractor_id == subcontractor_id,
+        BackCharge.status == STATUS_AGREED,
+    )
+    if project_id is not None:
+        stmt = stmt.where(BackCharge.project_id == project_id)
+    rows = list((await session.execute(stmt.order_by(BackCharge.created_at))).scalars().all())
+
+    shares_by_charge: dict[uuid.UUID, list[BackChargeApportionment]] = {}
+    if rows:
+        share_stmt = select(BackChargeApportionment).where(
+            BackChargeApportionment.back_charge_id.in_([r.id for r in rows])
+        )
+        for share in (await session.execute(share_stmt)).scalars():
+            shares_by_charge.setdefault(share.back_charge_id, []).append(share)
+
+    sub = await session.get(Subcontractor, subcontractor_id)
+    names = {str(subcontractor_id).lower()}
+    if sub is not None:
+        names |= {n.strip().lower() for n in (sub.legal_name, sub.trade_name) if n and n.strip()}
+
+    items: list[PendingBackCharge] = []
+    totals: dict[str, Decimal] = {}
+    for row in rows:
+        item = to_back_charge_item(row)
+        outstanding = item.outstanding
+        shares = shares_by_charge.get(row.id)
+        if shares:
+            mine = sum(
+                (s.share_amount or Decimal("0") for s in shares if (s.party or "").strip().lower() in names),
+                Decimal("0"),
+            )
+            chargeable = item.chargeable_amount
+            amount = quantize_money(mine * outstanding / chargeable) if chargeable > 0 else quantize_money(Decimal("0"))
+        else:
+            amount = outstanding
+        if amount <= 0:
+            continue
+        currency = row.currency or ""
+        items.append(
+            PendingBackCharge(
+                back_charge_id=row.id,
+                project_id=row.project_id,
+                source_ref=row.source_ref or "",
+                description=row.description or "",
+                currency=currency,
+                amount=amount,
+                apportioned=bool(shares),
+            )
+        )
+        totals[currency] = totals.get(currency, Decimal("0")) + amount
+    return PendingBackCharges(
+        subcontractor_id=subcontractor_id,
+        items=tuple(items),
+        totals={cur: quantize_money(total) for cur, total in totals.items()},
+    )
