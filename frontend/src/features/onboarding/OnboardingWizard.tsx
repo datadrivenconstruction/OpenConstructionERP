@@ -120,6 +120,13 @@ import {
   fetchOnboardingStatus,
   type OnboardingJobState,
 } from './onboardingApi';
+import {
+  combineOutcomes,
+  countryProvisionToast,
+  failedItemCount,
+  jobOutcome,
+  type OnboardingProvisionResult,
+} from './provisionOutcome';
 import { SemanticModelCard } from './SemanticModelCard';
 import { aiEstimatorApi } from '@/features/ai-estimator/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -696,37 +703,46 @@ const ONBOARDING_POLL_MS = 1500;
 const ONBOARDING_GRACE_MS = 30_000;
 const ONBOARDING_TERMINAL_STATES = new Set(['success', 'failed', 'cancelled']);
 
-/** Map a background job state onto a banner row status. */
-function onboardingJobToBgStatus(state: string): BgInstallStepStatus {
-  switch (state) {
-    case 'started':
-      return 'running';
-    case 'success':
-      return 'ok';
-    case 'failed':
-      return 'error';
-    case 'cancelled':
-      return 'skipped';
-    default:
-      return 'pending';
+/** Map a finished job onto a banner row status: by its outcome, not its state. */
+function onboardingJobToBgStatus(job: OnboardingJobState): BgInstallStepStatus {
+  const outcome = jobOutcome(job);
+  if (outcome === 'failed') return job.state === 'cancelled' ? 'skipped' : 'error';
+  if (outcome === 'completed' || outcome === 'partial') return 'ok';
+  return job.state === 'started' ? 'running' : 'pending';
+}
+
+/** The detail a finished cost base row shows: items loaded, and items left out. */
+function costDbDetail(job: OnboardingJobState): string | undefined {
+  const outcome = jobOutcome(job);
+  if (outcome === 'partial') {
+    return i18n.t('onboarding.bg_cost_db_left_out', {
+      defaultValue: 'Left out: {{items}}',
+      items: (job.failed_items ?? 0).toLocaleString(getNumberLocale()),
+    });
   }
+  if (outcome === 'completed' && job.total != null && job.total > 0) {
+    return job.total.toLocaleString(getNumberLocale());
+  }
+  return undefined;
 }
 
 /**
  * Provision a region cost base and/or sample projects in the background.
  *
- * Resolves ``'done'`` when every job finished within the grace window, or
- * ``'backgrounded'`` once the grace window elapses with work still running (the
- * caller routes the user on; the root banner keeps tracking to completion). A
- * submit failure rejects so the caller can fall back to a retry. Never leaves
- * the banner spinning forever: it always reaches a terminal state.
+ * Resolves with phase ``'done'`` when every job finished within the grace
+ * window, or ``'backgrounded'`` once the grace window elapses with work still
+ * running (the caller routes the user on; the root banner keeps tracking to
+ * completion). ``outcome`` says how the finished jobs ended - completed,
+ * partial or failed - so the caller never reads "finished" as "ready". A submit
+ * failure rejects so the caller can fall back to a retry. Never leaves the
+ * banner spinning forever: it always reaches a terminal state.
  */
-async function startBackgroundOnboardingProvision(opts: {
+export async function startBackgroundOnboardingProvision(opts: {
   region?: string | null;
   demoIds?: string[];
   country: string;
   graceMs?: number;
-}): Promise<'done' | 'backgrounded'> {
+}): Promise<OnboardingProvisionResult> {
   const region = opts.region || null;
   const demoIds = (opts.demoIds ?? []).filter((d) => Boolean(d));
   const graceMs = opts.graceMs ?? ONBOARDING_GRACE_MS;
@@ -748,7 +764,7 @@ async function startBackgroundOnboardingProvision(opts: {
       status: 'pending',
     });
   }
-  if (seed.length === 0) return 'done';
+  if (seed.length === 0) return { phase: 'done', outcome: 'completed', failedItems: 0 };
   store.begin(`onboarding:${region ?? 'demo'}`, opts.country, seed);
 
   let jobs: OnboardingJobState[];
@@ -763,17 +779,21 @@ async function startBackgroundOnboardingProvision(opts: {
   const ids = jobs.map((j) => j.id);
   if (ids.length === 0) {
     store.finish(false);
-    return 'done';
+    return { phase: 'done', outcome: 'completed', failedItems: 0 };
   }
 
-  return new Promise<'done' | 'backgrounded'>((resolve) => {
+  return new Promise<OnboardingProvisionResult>((resolve) => {
     let settled = false;
     const startedAt = Date.now();
 
-    const settle = (outcome: 'done' | 'backgrounded') => {
+    const settle = (phase: 'done' | 'backgrounded', states: OnboardingJobState[] = []) => {
       if (settled) return;
       settled = true;
-      resolve(outcome);
+      resolve({
+        phase,
+        outcome: phase === 'done' ? combineOutcomes(states) : null,
+        failedItems: failedItemCount(states),
+      });
     };
 
     const applyStates = (states: OnboardingJobState[]): void => {
@@ -784,7 +804,7 @@ async function startBackgroundOnboardingProvision(opts: {
         if (cwicr) {
           if (cwicr.state === 'started') s.markRunning('cost_db');
           else if (ONBOARDING_TERMINAL_STATES.has(cwicr.state)) {
-            s.markDone('cost_db', onboardingJobToBgStatus(cwicr.state));
+            s.markDone('cost_db', onboardingJobToBgStatus(cwicr), costDbDetail(cwicr));
           }
         }
       }
@@ -793,8 +813,8 @@ async function startBackgroundOnboardingProvision(opts: {
         if (demoJobs.length > 0) {
           const allTerminal = demoJobs.every((j) => ONBOARDING_TERMINAL_STATES.has(j.state));
           if (allTerminal) {
-            const hadError = demoJobs.some((j) => j.state === 'failed');
-            const okCount = demoJobs.filter((j) => j.state === 'success').length;
+            const hadError = demoJobs.some((j) => onboardingJobToBgStatus(j) === 'error');
+            const okCount = demoJobs.filter((j) => onboardingJobToBgStatus(j) === 'ok').length;
             s.markDone(
               'demos',
               hadError ? 'error' : okCount > 0 ? 'ok' : 'skipped',
@@ -826,9 +846,9 @@ async function startBackgroundOnboardingProvision(opts: {
       const allTerminal =
         states.length > 0 && states.every((j) => ONBOARDING_TERMINAL_STATES.has(j.state));
       if (allTerminal) {
-        const hadError = states.some((j) => j.state === 'failed');
-        useBackgroundInstallStore.getState().finish(hadError);
-        settle('done');
+        // Anything short of complete keeps the banner up, so the user sees it.
+        useBackgroundInstallStore.getState().finish(combineOutcomes(states) !== 'completed');
+        settle('done', states);
         return;
       }
 
@@ -1508,7 +1528,7 @@ export function ReadyPackPicker({
         // grace window if it runs long, so the user is never stuck on a
         // spinner: the root background banner keeps showing live progress after
         // they route into the app.
-        const outcome = await startBackgroundOnboardingProvision({
+        const result = await startBackgroundOnboardingProvision({
           region: pack.region,
           // Every preset carries a demo now, so this is never the empty list
           // that used to make the provision step a no-op for sixteen markets.
@@ -1516,21 +1536,12 @@ export function ReadyPackPicker({
           country,
         });
 
-        addToast({
-          type: 'success',
-          title:
-            outcome === 'done'
-              ? t('onboarding.country_ready', {
-                  defaultValue: '{{country}} is ready',
-                  country,
-                })
-              : t('onboarding.pp_language_ready', {
-                  defaultValue: '{{country}} is ready, finishing setup in the background',
-                  country,
-                }),
-        });
+        // Say how it really ended: a load that failed used to read "is ready".
+        addToast(countryProvisionToast(result, country));
         // Record a synthetic slug so the wizard treats this as a completed pack
-        // install and advances to Finish. The rest keeps loading in the banner.
+        // install and advances to Finish, whatever the outcome: the language
+        // is set and the user can load a cost base later. The rest keeps
+        // loading in the banner.
         onInstalled(`country:${pack.id}`);
       } catch (err) {
         addToast({
