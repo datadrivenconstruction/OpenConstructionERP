@@ -242,19 +242,24 @@ function renderCoverPage(
   ];
 
   doc.setFontSize(9);
-  for (let i = 0; i < metaItems.length; i++) {
-    const item = metaItems[i]!;
-    const y = metaY + i * 10;
+  // A value wraps inside the column instead of running off the page: a bill
+  // with several named markups printed "..., General Li" and lost the rest.
+  const valueWidth = pageW - 20 - valueX;
+  const wrapLineHeight = 4;
+  let y = metaY;
+  for (const item of metaItems) {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...BRAND_MID);
     doc.text(item[0], labelX, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...BRAND_DARK);
-    doc.text(item[1], valueX, y);
+    const valueLines = doc.splitTextToSize(item[1], valueWidth) as string[];
+    doc.text(valueLines, valueX, y);
+    y += 10 + Math.max(0, valueLines.length - 1) * wrapLineHeight;
   }
 
   // Gross total — highlighted
-  const grossY = metaY + metaItems.length * 10 + 4;
+  const grossY = y + 4;
   doc.setDrawColor(...BRAND_LIGHT);
   doc.line(labelX, grossY - 4, pageW - 20, grossY - 4);
   doc.setFont('helvetica', 'bold');

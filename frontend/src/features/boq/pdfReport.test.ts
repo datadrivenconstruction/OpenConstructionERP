@@ -202,6 +202,33 @@ describe('generateBOQPdf', () => {
     expect(mockSave).toHaveBeenCalledOnce();
   });
 
+  it('wraps a long markups line on the cover inside the page instead of clipping it', async () => {
+    const { generateBOQPdf } = await import('./pdfReport');
+    const markupTotals = [
+      { name: 'Site Overhead', percentage: 8, amount: 320 },
+      { name: 'Head Office Overhead', percentage: 4, amount: 160 },
+      { name: 'Profit', percentage: 5, amount: 200 },
+      { name: 'General Liability Insurance', percentage: 1.5, amount: 60 },
+    ];
+    const joined = 'Site Overhead 8%, Head Office Overhead 4%, Profit 5%, General Liability Insurance 1.5%';
+    mockSplitTextToSize.mockImplementation((text: string) =>
+      text === joined ? ['Site Overhead 8%, Head Office Overhead 4%,', 'Profit 5%, General Liability Insurance 1.5%'] : [text],
+    );
+    generateBOQPdf(baseOptions({ markupTotals }));
+    mockSplitTextToSize.mockImplementation((text: string) => [text]);
+
+    const split = mockSplitTextToSize.mock.calls.find((c) => c[0] === joined);
+    expect(split).toBeDefined();
+    // The value column starts at 72 mm on a 210 mm page with a 20 mm margin.
+    expect(split![1]).toBeLessThanOrEqual(210 - 20 - 72);
+    const drawn = mockText.mock.calls.find((c) => Array.isArray(c[0]) && c[0].join(' ').includes('General Liability Insurance'));
+    expect(drawn).toBeDefined();
+    // The row after the wrapped value moves down to make room for its second line.
+    const markupsY = mockText.mock.calls.find((c) => c[0] === 'Markups')![2];
+    const netY = mockText.mock.calls.find((c) => c[0] === 'Net Total')![2];
+    expect(netY - markupsY).toBeGreaterThan(10);
+  });
+
   it('adds a page for TOC when there are multiple sections', async () => {
     const { generateBOQPdf } = await import('./pdfReport');
     const secA = makeSection({ id: 'sec-a', ordinal: '01', description: 'Section A' });
