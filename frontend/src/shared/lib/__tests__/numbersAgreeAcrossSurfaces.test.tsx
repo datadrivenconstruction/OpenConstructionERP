@@ -377,6 +377,11 @@ const read = (rel: string) => {
   fileText.set(rel, text);
   return text;
 };
+// Filled now, while the file is collected, not lazily. A lazy cache still made
+// the FIRST census pay for all two thousand cold reads inside its own test
+// body, and under a loaded suite that one test timed out on its own; collection
+// has no per-test timeout.
+for (const rel of PRODUCT_FILES) read(rel);
 
 /**
  * The locale argument of a formatter call: from `from` to the first comma or
