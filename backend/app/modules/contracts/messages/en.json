@@ -111,5 +111,10 @@
       "not_active": "Change orders are reconciled onto the schedule of values of an active contract only; this contract is {status}",
       "preview_stale": "The list of change orders to reconcile has changed since you opened it. Open the preview again and confirm what it shows now"
     }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "This contract cannot be signed until these are resolved: {findings}"
+    }
   }
 }

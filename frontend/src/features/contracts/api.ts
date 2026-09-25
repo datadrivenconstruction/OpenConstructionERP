@@ -1205,6 +1205,8 @@ export interface ComplianceViolation {
   severity: 'error' | 'warning' | 'info';
   message: string;
   element_ref: string | null;
+  /** What a person calls the line or contract ``element_ref`` points at. */
+  element_label?: string | null;
   suggestion: string | null;
 }
 

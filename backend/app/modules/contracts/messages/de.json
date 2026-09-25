@@ -111,5 +111,10 @@
       "not_active": "Nachträge werden nur in den Zahlungsplan eines aktiven Vertrags übernommen; dieser Vertrag hat den Status {status}",
       "preview_stale": "Die Liste der abzugleichenden Nachträge hat sich geändert, seit Sie sie geöffnet haben. Öffnen Sie die Vorschau erneut und bestätigen Sie den aktuellen Stand"
     }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Dieser Vertrag kann erst unterschrieben werden, wenn Folgendes behoben ist: {findings}"
+    }
   }
 }

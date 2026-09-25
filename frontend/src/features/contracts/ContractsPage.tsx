@@ -2893,6 +2893,10 @@ export function CreateContractModal({
             onChange={(e) =>
               setForm({ ...form, retention_percent: e.target.value })
             }
+            // Select the prefilled 5 on focus so typing replaces it; typing
+            // 5 used to append and read 55.
+            onFocus={(e) => e.currentTarget.select()}
+            data-testid="contract-retention"
             className={inputCls}
           />
         </WideModalField>

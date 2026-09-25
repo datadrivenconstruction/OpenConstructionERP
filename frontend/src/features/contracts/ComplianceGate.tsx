@@ -425,8 +425,12 @@ function ViolationGroup({
                 <p className="text-content-primary">{v.message}</p>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary">
                   <span className="font-mono">{v.rule_id}</span>
-                  {v.element_ref && (
-                    <span className="font-mono">· {v.element_ref}</span>
+                  {v.element_label ? (
+                    <span>· {v.element_label}</span>
+                  ) : (
+                    v.element_ref && (
+                      <span className="font-mono">· {v.element_ref}</span>
+                    )
                   )}
                 </div>
                 {v.suggestion && (
