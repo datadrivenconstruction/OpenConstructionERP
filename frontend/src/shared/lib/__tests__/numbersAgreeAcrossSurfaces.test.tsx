@@ -312,7 +312,7 @@ describe('the number-format preference', () => {
 
   it('reads the pre-auto default out of an existing browser', () => {
     localStorage.setItem('oe_preferences', JSON.stringify({ currency: 'USD', numberLocale: 'de-DE' }));
-    usePreferencesStore.getState().setPreference('vatRate', 19);
+    usePreferencesStore.getState().setPreference('measurementSystem', 'metric');
     expect(persisted().numberLocale).toBe('auto');
   });
 
@@ -321,13 +321,13 @@ describe('the number-format preference', () => {
       'oe_preferences',
       JSON.stringify({ currency: 'USD', numberLocale: 'de-DE', _v: 2 }),
     );
-    usePreferencesStore.getState().setPreference('vatRate', 19);
+    usePreferencesStore.getState().setPreference('measurementSystem', 'metric');
     expect(persisted().numberLocale).toBe('de-DE');
   });
 
   it('leaves a locale nobody could have got by default alone', () => {
     localStorage.setItem('oe_preferences', JSON.stringify({ numberLocale: 'ja-JP' }));
-    usePreferencesStore.getState().setPreference('vatRate', 19);
+    usePreferencesStore.getState().setPreference('measurementSystem', 'metric');
     expect(persisted().numberLocale).toBe('ja-JP');
   });
 });
