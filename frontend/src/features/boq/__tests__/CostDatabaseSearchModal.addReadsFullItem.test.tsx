@@ -91,6 +91,12 @@ import { fetchCostSearch, fetchCategoryTree } from '../api';
 import type { CostSearchPage } from '../api';
 import { CostDatabaseSearchModal } from '../BOQModals';
 
+// Testing Library waits 1 s by default. The first test of the file also pays
+// for the modal's first render and query, and under a parallel run that alone
+// took longer (the flake failed at 1.3 s). A wider window costs nothing when
+// the modal is quick.
+const SETTLE = { timeout: 10_000 };
+
 // ── Rows ────────────────────────────────────────────────────────────────
 
 const STATS = { min: 100, max: 140, mean: 120, median: 120, unit: 'm3', group: 'concrete', count: 3 };
@@ -177,10 +183,10 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     };
     const { onAdded } = renderModal();
 
-    fireEvent.click(await screen.findByText('Concrete wall'));
+    fireEvent.click(await screen.findByText('Concrete wall', {}, SETTLE));
     fireEvent.click(screen.getByText(/^Add 1 to BOQ/));
 
-    await waitFor(() => expect(onAdded).toHaveBeenCalled());
+    await waitFor(() => expect(onAdded).toHaveBeenCalled(), SETTLE);
     expect(detailReads()).toEqual(['/v1/costs/item-1']);
     const posts = positionPosts();
     expect(posts).toHaveLength(1);
@@ -209,13 +215,13 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     };
     const { onAdded } = renderModal();
 
-    fireEvent.click(await screen.findByText('Concrete slab'));
+    fireEvent.click(await screen.findByText('Concrete slab', {}, SETTLE));
     fireEvent.click(screen.getByText(/^Add 1 to BOQ/));
 
-    expect(await screen.findByTestId('variant-picker')).toBeInTheDocument();
+    expect(await screen.findByTestId('variant-picker', {}, SETTLE)).toBeInTheDocument();
     fireEvent.click(screen.getByText('pick C30/37'));
 
-    await waitFor(() => expect(onAdded).toHaveBeenCalled());
+    await waitFor(() => expect(onAdded).toHaveBeenCalled(), SETTLE);
     const body = positionPosts()[0]?.[1] as {
       unit_rate: number;
       metadata: {
@@ -242,11 +248,11 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     };
     const { onAdded } = renderModal();
 
-    fireEvent.click(await screen.findByText('Concrete wall'));
+    fireEvent.click(await screen.findByText('Concrete wall', {}, SETTLE));
     fireEvent.click(screen.getByText('Strip footing'));
     fireEvent.click(screen.getByText(/^Add 2 to BOQ/));
 
-    await waitFor(() => expect(onAdded).toHaveBeenCalled());
+    await waitFor(() => expect(onAdded).toHaveBeenCalled(), SETTLE);
     expect(detailReads().sort()).toEqual(['/v1/costs/item-1', '/v1/costs/item-3']);
     const bodies = positionPosts().map(
       (c) => c[1] as { description: string; unit_rate: number; metadata: { resources?: Array<{ name: string }> } },
@@ -265,12 +271,13 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     details['item-3'] = new Error('Cost item not found');
     const { onAdded } = renderModal();
 
-    fireEvent.click(await screen.findByText('Concrete wall'));
+    fireEvent.click(await screen.findByText('Concrete wall', {}, SETTLE));
     fireEvent.click(screen.getByText('Strip footing'));
     fireEvent.click(screen.getByText(/^Add 2 to BOQ/));
 
-    await waitFor(() =>
-      expect(useToastStore.getState().toasts.some((toast) => toast.type === 'error')).toBe(true),
+    await waitFor(
+      () => expect(useToastStore.getState().toasts.some((toast) => toast.type === 'error')).toBe(true),
+      SETTLE,
     );
     const toast = useToastStore.getState().toasts.find((x) => x.type === 'error');
     expect(toast?.message).toContain('Cost item not found');
@@ -287,10 +294,10 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     const onSelectForResources = vi.fn();
     renderModal(onSelectForResources);
 
-    fireEvent.click(await screen.findByText('Concrete wall'));
+    fireEvent.click(await screen.findByText('Concrete wall', {}, SETTLE));
     fireEvent.click(screen.getByText(/^Add 1 as resources/));
 
-    await waitFor(() => expect(onSelectForResources).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onSelectForResources).toHaveBeenCalledTimes(1), SETTLE);
     const handed = onSelectForResources.mock.calls[0]?.[0] as { components: Array<{ name: string }> };
     expect(handed.components.map((c) => c.name)).toEqual(['Formwork', 'Labour']);
     expect(positionPosts()).toHaveLength(0);
