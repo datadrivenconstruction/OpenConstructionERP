@@ -43,6 +43,7 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
+import { invalidateFinanceFigures } from '@/features/finance/financeQueryKeys';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getPOMatchStatus, type POLineMatchTag } from './api';
 import { PORemovalDialog, removalVerbFor } from './PORemovalDialog';
@@ -940,6 +941,7 @@ function PurchaseOrdersTab({
       apiPost(`/v1/procurement/${poId}/issue/`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
+      void invalidateFinanceFigures(queryClient);
       addToast({
         type: 'success',
         title: t('procurement.po_issued_toast', {
@@ -1845,8 +1847,8 @@ function GoodsReceiptsTab({
       apiPost(`/v1/procurement/goods-receipts/${grId}/confirm/`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['procurement-gr', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['finance', 'dashboard', projectId] });
+      // A confirmed receipt moves committed and actual: every finance figure.
+      void invalidateFinanceFigures(queryClient);
       addToast({
         type: 'success',
         title: t('procurement.gr_confirmed_toast', {

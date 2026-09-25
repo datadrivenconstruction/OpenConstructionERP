@@ -15,6 +15,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateFinanceFigures } from '@/features/finance/financeQueryKeys';
 import { Loader2, AlertTriangle, Percent, PiggyBank, Lock } from 'lucide-react';
 import { WideModal, Badge, Button, EmptyState } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
@@ -87,6 +88,7 @@ export function RetainagePanel({
         queryKey: ['procurement-retainage-releases', poId],
       });
       void queryClient.invalidateQueries({ queryKey: ['procurement-po'] });
+      void invalidateFinanceFigures(queryClient);
     },
     onError: (e) =>
       addToast({

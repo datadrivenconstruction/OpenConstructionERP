@@ -24,6 +24,7 @@ import { WideModal, Button } from '@/shared/ui';
 import { apiGet, apiPost, getErrorMessage, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
+import { invalidateFinanceFigures } from '@/features/finance/financeQueryKeys';
 
 /* ── Wire types (subset of the backend POResponse / GR contract) ───────── */
 
@@ -248,6 +249,7 @@ export function RecordDeliveryModal({
       // the PO status up, so keep both in sync).
       void queryClient.invalidateQueries({ queryKey: ['procurement-gr', projectId] });
       void queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
+      void invalidateFinanceFigures(queryClient);
       onClose();
     },
     onError: (e) => {
