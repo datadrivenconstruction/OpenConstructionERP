@@ -1175,6 +1175,22 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         tax_label="AFA",
         decimals=0,
     ),
+    # Ukraine, with the Ukrainian country pack. The flat arguments here are
+    # replaced by the UA stack in the regional markup table, which states the
+    # structure of the Настанова (наказ Мінрегіону №281 of 01.11.2021): general
+    # production costs, risk, administrative costs, profit and ПДВ. Overhead
+    # 11.5 is general production 9 plus administrative 2.5, the starting points
+    # that stack carries inside the wartime ceilings of КМУ постанова №1512.
+    _flat_country_template(
+        slug="ukraine",
+        name="Ukraine",
+        country_code="UA",
+        currency="UAH",
+        vat="20",
+        overhead="11.5",
+        profit="7",
+        tax_label="PDV",
+    ),
     # Russia. The rates written here are the fallback and are not what ships:
     # the regional table states the national stack (НР, СП, unforeseen costs,
     # НДС) and :func:`_reconcile_with_region_table` replaces these three steps

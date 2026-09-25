@@ -4,8 +4,8 @@
 
 The defect
 ----------
-``DEFAULT_MARKUP_TEMPLATES`` is keyed by region and fifty countries map onto
-forty-two regions, so a region that serves several markets carries one VAT
+``DEFAULT_MARKUP_TEMPLATES`` is keyed by region and fifty-one countries map onto
+forty-three regions, so a region that serves several markets carries one VAT
 number and it is one member's. A bill on a project that set no rate of its own
 took that number: Austria was invoiced at Germany's 19 against its own 20,
 Switzerland at 19 against its own 8.1, Saudi Arabia at the Gulf's 5 against its
@@ -22,15 +22,15 @@ by a rule that grows on its own.
 
 Three populations, counted apart
 -------------------------------
-"No disagreements" over the whole set would read as forty-five countries
-verified when it is thirty-four verified, ten unmeasured and one asserted
+"No disagreements" over the whole set would read as forty-six countries
+verified when it is thirty-six verified, nine unmeasured and one asserted
 against a different number. A country with no row in the seed cannot be
 checked against the seed, so it is reported as unmeasured rather than as
 agreement, and every denominator is printed beside the verdict.
 
 The third population is one country and it is the interesting one. China's
 seed row carries the headline 13 and its bill is priced at the 9 tier
-construction is charged at, so the rule the other thirty-four obey would move
+construction is charged at, so the rule the other thirty-six obey would move
 a Chinese bill to a number that is right about the wrong question. It is named
 in ``CONSTRUCTION_TIER_COUNTRIES`` and asserted against the tier instead.
 
@@ -85,7 +85,6 @@ pytestmark = pytest.mark.asyncio
 _NO_SEED_ROW: dict[str, str] = {
     "AR": "sole country of region AR, whose line carries Argentina's own 21",
     "CL": "sole country of region CL, whose line carries Chile's own 19",
-    "GR": "sole country of region GR, whose line carries Greece's own 24",
     "ID": "sole country of region ID, whose line carries Indonesia's own 11",
     "KE": "sole country of region KE, whose line carries Kenya's own 16",
     "MA": "sole country of region MA, whose line carries Morocco's own 20",

@@ -50,6 +50,7 @@ _EXTRA_COUNTRY_SLUGS = {
     "czechia",
     "romania",
     "hungary",
+    "ukraine",
     "qatar",
     "kuwait",
     "egypt",

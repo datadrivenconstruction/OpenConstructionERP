@@ -946,6 +946,54 @@
     "is_default": false
   },
   {
+    "country_code": "GR",
+    "tax_name": "VAT Standard (FPA)",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "el": "ΦΠΑ κανονικός συντελεστής"
+    },
+    "tax_code": "FPA",
+    "rate_pct": "24.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2016-06-01",
+    "effective_to": null,
+    "is_default": true
+  },
+  {
+    "country_code": "GR",
+    "tax_name": "VAT Reduced (FPA)",
+    "tax_name_translations": {
+      "en": "VAT Reduced",
+      "el": "ΦΠΑ μειωμένος συντελεστής"
+    },
+    "tax_code": "FPA_RED",
+    "rate_pct": "13.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2011-01-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "GR",
+    "tax_name": "VAT Super-reduced (FPA)",
+    "tax_name_translations": {
+      "en": "VAT Super-reduced",
+      "el": "ΦΠΑ υπερμειωμένος συντελεστής"
+    },
+    "tax_code": "FPA_SRED",
+    "rate_pct": "6.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2015-07-20",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
     "country_code": "BR",
     "tax_name": "ICMS (São Paulo)",
     "tax_name_translations": {

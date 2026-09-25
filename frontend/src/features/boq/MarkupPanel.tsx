@@ -32,6 +32,7 @@ const REGIONS: { code: string; flag: string; label: string; standard: string }[]
   { code: 'RO', flag: '\ud83c\uddf7\ud83c\uddf4', label: 'Romania', standard: 'DevGen' },
   { code: 'GR', flag: '\ud83c\uddec\ud83c\uddf7', label: 'Greece', standard: 'ATOE' },
   { code: 'HU', flag: '\ud83c\udded\ud83c\uddfa', label: 'Hungary', standard: 'TERC' },
+  { code: 'UA', flag: '\ud83c\uddfa\ud83c\udde6', label: 'Ukraine', standard: '\u041a\u041d\u0423' },
   { code: 'PT', flag: '\ud83c\uddf5\ud83c\uddf9', label: 'Portugal', standard: 'ProNIC' },
   { code: 'NORDIC', flag: '\ud83c\uddf8\ud83c\uddea', label: 'Scandinavia', standard: 'AB 04' },
   // Americas
