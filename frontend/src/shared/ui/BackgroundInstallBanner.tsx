@@ -88,16 +88,24 @@ export function BackgroundInstallBanner() {
   const pct = total > 0 ? Math.round((finished / total) * 100) : 0;
   const runningStep = install.steps.find((s) => s.status === 'running');
 
+  // A step that failed is not "ready, with some items skipped": that line read
+  // next to a red cross on a cost database that never loaded.
+  const anyStepFailed = install.steps.some((s) => s.status === 'error');
   const headline = install.done
-    ? install.hadError
-      ? t('onboarding.bg_install_done_issues', {
-          defaultValue: '{{country}} workspace ready, with some items skipped',
+    ? anyStepFailed
+      ? t('onboarding.bg_install_done_failed', {
+          defaultValue: '{{country}} setup finished with errors',
           country: install.country,
         })
-      : t('onboarding.bg_install_done', {
-          defaultValue: '{{country}} workspace is ready',
-          country: install.country,
-        })
+      : install.hadError
+        ? t('onboarding.bg_install_done_issues', {
+            defaultValue: '{{country}} workspace ready, with some items skipped',
+            country: install.country,
+          })
+        : t('onboarding.bg_install_done', {
+            defaultValue: '{{country}} workspace is ready',
+            country: install.country,
+          })
     : t('onboarding.bg_install_running', {
         defaultValue: 'Setting up {{country}} in the background',
         country: install.country,
