@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.1.0',
+    date: '2026-09-26',
+    tag: 'NEW',
+    summary:
+      'Croatia, Romania, Greece and Ukraine join with their own VAT, validation, contract rules and defaults, and a Croatian troškovnik imports in its own language with its total, tax and recap lines left out. The money follows one path: a purchase order, contract, subcontract, invoice and payment each count once in committed, invoiced and paid, Mark Paid records the payment, and every dashboard and the budget table read the same number. Subcontracts are drawn up, signed and billed from their own page and flagged when they look like an unlinked contract, tenders can go out by section and award to the real firm, and a punch item or NCR can be charged back. A new Learn section at the top of the menu holds Videos and Cases: 34 OpenConstruction Academy lessons from YouTube, filtered by role, country and stage, with chapters, moments and a coverage map. The bill total matches the grid, a large cost database load ends with what really happened, dates stay on the day they were entered, the session token leaves WebSocket URLs, and in-app updates are off unless switched on.',
+  },
+  {
     version: '18.0.0',
     date: '2026-09-24',
     tag: 'MILESTONE',

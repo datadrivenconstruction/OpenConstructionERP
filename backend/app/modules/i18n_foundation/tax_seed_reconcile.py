@@ -170,6 +170,11 @@ RateLine = tuple[str, str]
 #: commit time: an install seeded earlier that same day is then read as too
 #: young and skipped, which costs a fix rather than risking a resurrection.
 #:
+#: A line added between two releases takes the date of the release that ships
+#: it, not of its commit: an install of the previous release seeded after the
+#: commit came from a file without the line, and a commit date would read it as
+#: one that already had the line and deleted it.
+#:
 #: Adding a line to ``tax_configurations.json`` means adding it here too.
 #: ``tests/unit/test_tax_seed_reconcile_covers_the_seed_file.py`` refuses a
 #: seed file whose lines are not all accounted for, so this is a gate rather
@@ -201,17 +206,17 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     # at all, so a bill dated before a rate change could not be priced at the
     # rate in force on its date. Standard 24 since 1 June 2016, reduced 13 and
     # super-reduced 6 (Ν. 5144/2024 art. 26).
-    ("GR", "FPA"): "2026-09-25",
-    ("GR", "FPA_RED"): "2026-09-25",
-    ("GR", "FPA_SRED"): "2026-09-25",
+    ("GR", "FPA"): "2026-09-26",
+    ("GR", "FPA_RED"): "2026-09-26",
+    ("GR", "FPA_SRED"): "2026-09-26",
     # Croatia's two reduced rates and its zero rate. The seed carried only the
     # 25 % standard rate, so a Croatian contractor typed the others by hand.
     # Each rate is its own line, the way India's GST bands are, because the
     # reconciler and the supersede repair key on the code: two open rows under
     # one code would read as two windows of one rate.
-    ("HR", "PDV_13"): "2026-09-25",
-    ("HR", "PDV_5"): "2026-09-25",
-    ("HR", "PDV_0"): "2026-09-25",
+    ("HR", "PDV_13"): "2026-09-26",
+    ("HR", "PDV_5"): "2026-09-26",
+    ("HR", "PDV_0"): "2026-09-26",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see
