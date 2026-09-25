@@ -1004,6 +1004,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const commitPositionCurrency = useCallback(() => {
     const dlg = positionCurrencyDialog;
     if (!dlg) return;
+    if (readOnly) {
+      setPositionCurrencyDialog(null);
+      return;
+    }
     const pos = positions.find((p) => p.id === dlg.positionId);
     if (!pos) {
       setPositionCurrencyDialog(null);
@@ -1027,7 +1031,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     );
     setPositionCurrencyDialog(null);
     scheduleGridRefresh(['unit_rate', 'total']);
-  }, [positionCurrencyDialog, positions, onUpdatePosition, currencyCode, scheduleGridRefresh]);
+  }, [positionCurrencyDialog, positions, onUpdatePosition, currencyCode, scheduleGridRefresh, readOnly]);
 
   const openPositionVariantPicker = useCallback(
     (positionId: string, anchorEl: HTMLElement | null) => {
@@ -1380,7 +1384,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       anomalyMap,
       onApplyAnomalySuggestion,
       bimModelId,
-      onUpdatePosition,
+      // Renderers that write outside a cell editor (variant pick, model and
+      // takeoff quantities, section rename) reach the bill through this; a
+      // locked bill hands them nothing to call.
+      onUpdatePosition: readOnly ? undefined : onUpdatePosition,
       onHighlightBIMElements,
       onDeleteSection: onDeleteSection ?? (() => {}),
       onReorderSections: onReorderSections ?? (() => {}),
@@ -3781,7 +3788,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
        *   override. The unit-rate cell then shows the currency badge and
        *   the position total rebases to base via the project FX rate so
        *   currencies are never blended in the grand total. */}
-      {positionCurrencyDialog && createPortal(
+      {positionCurrencyDialog && !readOnly && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={() => setPositionCurrencyDialog(null)}
