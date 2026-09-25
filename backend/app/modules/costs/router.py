@@ -5021,6 +5021,21 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             "duration_seconds": duration,
         }
 
+    # End the read transaction the count above opened BEFORE the long part.
+    #
+    # Everything from here to the price sheet seed is not work on this session:
+    # a download that can take minutes, then an import that runs in a thread on
+    # its own sync connection and commits there (a large base takes well over a
+    # quarter of an hour). Held open across that, this session sits "idle in
+    # transaction" and PostgreSQL terminates it once the engine's
+    # ``idle_in_transaction_session_timeout`` runs out. The seed below then fails
+    # on the dead connection and the caller's next ``commit`` raises "Can't
+    # reconnect until invalid transaction is rolled back", although every item
+    # is already in the table. Commit, not rollback: every caller hands in a
+    # session with nothing pending, and if one ever did not, committing keeps
+    # its work where a rollback would silently discard it.
+    await session.commit()
+
     # A fresh (re)load repopulates the region from its home English parquet, so
     # forget any language the market-switch swap had recorded for it.
     _REGION_ACTIVE_LANG.pop(db_id, None)
@@ -5100,6 +5115,16 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             result_data["resource_prices"] = seed.as_dict()
         except Exception:
             logger.exception("Resource price seeding failed for %s (non-fatal)", db_id)
+            # Leave the session usable for the caller: a failed statement (or a
+            # dropped connection) puts it in a state where its next commit
+            # raises instead of committing. And say so in the result rather
+            # than only in the log, so a caller can report a base without its
+            # price sheet instead of reporting it ready.
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001 - the rollback is best effort
+                logger.debug("rollback after the failed price seed also failed", exc_info=True)
+            result_data["resource_prices_error"] = "seed_failed"
 
     _invalidate_cost_cache()
     # A new CWICR parquet may have been written alongside the SQL import
@@ -5144,6 +5169,44 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
 # (code, region), so every flush is a complete, self-contained transaction and
 # an interrupted import resumes instead of restarting.
 _INSERT_FLUSH_ROWS = 5000
+
+
+# How many rejected codes an import result lists. The count is always exact;
+# the list is only there so an operator can find the rows.
+_FAILED_CODES_REPORTED = 50
+
+
+def _insert_cost_rows_isolating_rejects(sync_url: str, rows: list[tuple], failed_codes: list[str]) -> int:
+    """Insert one flush of cost rows, skipping any row PostgreSQL refuses.
+
+    ``_pg_bulk_insert_cost_rows`` loads a flush as one transaction, so one row
+    the database cannot store (a NUL character in a description, a value that
+    breaks a column type) used to fail its whole flush and with it the whole
+    import. On a data error the flush is split in halves and each half retried,
+    down to single rows; a single row that still fails is left out and its code
+    appended to ``failed_codes``. The rows around it load as before.
+
+    Only data errors are isolated. A connection or server error is not a row's
+    fault, so it propagates unchanged and fails the import, rather than being
+    retried row by row and reported as every row rejected.
+
+    Returns:
+        Number of rows actually inserted.
+    """
+    import psycopg2
+
+    try:
+        return _pg_bulk_insert_cost_rows(sync_url, rows)
+    except (psycopg2.DataError, psycopg2.IntegrityError) as exc:
+        if len(rows) == 1:
+            code = str(rows[0][1])
+            logger.warning("CWICR row %s rejected by the database and skipped: %s", code, str(exc).strip())
+            failed_codes.append(code)
+            return 0
+        mid = len(rows) // 2
+        return _insert_cost_rows_isolating_rejects(
+            sync_url, rows[:mid], failed_codes
+        ) + _insert_cost_rows_isolating_rejects(sync_url, rows[mid:], failed_codes)
 
 
 def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
@@ -5881,6 +5944,10 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     skipped_count = 0
     imported = 0
     batch: list[tuple] = []
+    # Codes of rows PostgreSQL refused. Kept apart from ``skipped_count``, which
+    # counts rows this transform drops on purpose (no description, no code):
+    # those are expected on every base, these are a partial load.
+    failed_codes: list[str] = []
 
     for rate_code, row in grouped.iterrows():
         desc = _safe_str(row.get("_desc", ""))
@@ -6003,17 +6070,24 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         # region first. Each flush is its own committed transaction, so peak
         # memory stays flat and a killed import resumes rather than restarts.
         if len(batch) >= _INSERT_FLUSH_ROWS:
-            imported += _pg_bulk_insert_cost_rows(db_file, batch)
+            imported += _insert_cost_rows_isolating_rejects(db_file, batch, failed_codes)
             batch.clear()
 
     # PostgreSQL: idempotent bulk insert via ON CONFLICT (code, region)
     # DO NOTHING. Whatever the loop did not fill a flush with lands here.
     if batch:
-        imported += _pg_bulk_insert_cost_rows(db_file, batch)
+        imported += _insert_cost_rows_isolating_rejects(db_file, batch, failed_codes)
         batch.clear()
 
     elapsed = round(time.monotonic() - start, 1)
-    _log.info("CWICR %s: %d imported, %d skipped in %.1fs", db_id, imported, skipped_count, elapsed)
+    _log.info(
+        "CWICR %s: %d imported, %d skipped, %d rejected by the database in %.1fs",
+        db_id,
+        imported,
+        skipped_count,
+        len(failed_codes),
+        elapsed,
+    )
 
     # Total resource components carried by the imported work items. Each CWICR
     # work item (rate_code) bundles a labour/material/equipment breakdown in its
@@ -6026,6 +6100,8 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     return {
         "imported": imported,
         "skipped": skipped_count,
+        "failed": len(failed_codes),
+        "failed_codes": failed_codes[:_FAILED_CODES_REPORTED],
         "total_rows": total_rows,
         "unique_items": len(grouped),
         "resource_components": resource_components,
