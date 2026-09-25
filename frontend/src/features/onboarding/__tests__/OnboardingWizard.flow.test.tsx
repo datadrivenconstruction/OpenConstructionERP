@@ -63,6 +63,7 @@ import { ALL_MODULES, CORE_MODULE_KEYS } from '../modules';
 import { meOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useViewModeStore } from '@/stores/useViewModeStore';
+import { useToastStore } from '@/stores/useToastStore';
 
 interface Preset {
   key: string;
@@ -503,5 +504,62 @@ describe('the browser tab on the wizard', () => {
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
     expect(document.title).toBe('Getting started | OpenConstructionERP');
+  });
+});
+
+// The Data Setup "Load Database" button used to send the import as a direct
+// request and abort it after five minutes, so a large region read "Connection
+// error" while the load carried on and finished on the server. It now starts
+// the onboarding job and follows it, and says how the job ended.
+describe('loading a cost base by hand on the data step', () => {
+  it('runs the load as a job and reports how it ended', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('aborted'));
+    const cwicr = {
+      id: 'job-cwicr',
+      kind: 'onboarding.load_cwicr',
+      arg: 'ENG_TORONTO',
+      pct: 0,
+      message: null,
+      error: null,
+      failed_items: 0,
+    };
+    const fallbackPost = api.apiPost.getMockImplementation()!;
+    api.apiPost.mockImplementation((path: string, body: unknown) =>
+      path === '/v1/onboarding/provision'
+        ? Promise.resolve({ jobs: [{ ...cwicr, state: 'pending', outcome: null }] })
+        : fallbackPost(path, body),
+    );
+    const fallbackGet = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/onboarding/jobs/'
+        ? Promise.resolve({
+            jobs: [{ ...cwicr, state: 'success', outcome: 'completed', pct: 100, imported: 55719, total: 55719 }],
+          })
+        : fallbackGet(path),
+    );
+    useToastStore.setState({ toasts: [] });
+
+    try {
+      renderWizard();
+      await heading('Welcome to OpenConstructionERP');
+      click(/Get Started/);
+      await heading('How would you like to start?');
+      click(/Quick Start/);
+      await heading('Data Setup');
+      click('Load Database');
+
+      await waitFor(
+        () => expect(useToastStore.getState().toasts.some((t) => / loaded$/.test(t.title))).toBe(true),
+        { timeout: 5_000 },
+      );
+      expect(posts('/v1/onboarding/provision')).toHaveLength(1);
+      expect(fetchSpy.mock.calls.some(([url]) => String(url).includes('load-cwicr'))).toBe(false);
+      const toast = useToastStore.getState().toasts.find((t) => / loaded$/.test(t.title))!;
+      expect(toast.type).toBe('success');
+      expect(toast.message).toBe('Cost items available: 55,719');
+      expect(useToastStore.getState().toasts.some((t) => /connection error/i.test(t.title))).toBe(false);
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 });
