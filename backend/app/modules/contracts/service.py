@@ -4218,6 +4218,8 @@ class ContractsService:
                 that is not active, 409 ``reconcile_preview_stale`` when the
                 confirmed list is not what the reconcile would post now.
         """
+        from sqlalchemy import select  # noqa: PLC0415
+
         from app.core.audit import audit_log  # noqa: PLC0415
         from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
         from app.modules.contracts.sov_posting import (  # noqa: PLC0415
@@ -4227,6 +4229,12 @@ class ContractsService:
             reconcile_preview,
         )
 
+        # The row lock is the guard against a change posted twice, not the
+        # unique constraint: each post makes a new line, so (line, source key)
+        # never collides. Two confirms in parallel queue here, and the second
+        # plans after the first has committed and finds the preview stale.
+        # The wave-5 subscribers take the same lock before they post.
+        await self.session.execute(select(Contract).where(Contract.id == contract_id).with_for_update())
         contract = await self.get_contract(contract_id)
         locale = get_locale()
         if contract.status not in POSTABLE_CONTRACT_STATUSES:
