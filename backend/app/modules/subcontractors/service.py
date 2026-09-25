@@ -1245,19 +1245,13 @@ class SubcontractorService:
             # re-patching an agreement that is already active does not re-run
             # the checks and re-log the same findings on every edit.
             await self._report_agreement_validation(entity)
-        if activating or (linking and entity.status in ("active", "completed")):
-            # Signing is the moment the spend is agreed, so it commits the
-            # budget, keyed on the agreement so a second activation cannot
-            # commit it twice. A linked contract that already committed the
-            # same subcontract hands its commitment over rather than keeping
-            # a second one.
-            await finance_bridge.commit_subcontract(
-                self.session,
-                project_id=entity.project_id,
-                source=finance_bridge.agreement_source(entity.id),
-                amount=entity.total_value,
-                supersedes=finance_bridge.contract_source(entity.contract_id) if entity.contract_id else None,
-            )
+        if activating or linking:
+            # Signing is the moment the spend is agreed, and linking a contract
+            # makes the pair one subcontract, so both move the budget. Finance
+            # works the commitment out from the records, once per subcontract.
+            from app.modules.finance.service import FinanceService  # noqa: PLC0415
+
+            await FinanceService(self.session).sync_project_budget(entity.project_id)
         return entity
 
     # ── Agreement validation ────────────────────────────────────────────

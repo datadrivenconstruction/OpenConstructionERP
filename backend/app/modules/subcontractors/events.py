@@ -123,8 +123,13 @@ def _uuid(value: object) -> uuid.UUID | None:
 
 
 async def _on_contract_signed(event: Event) -> None:
-    """``contracts.contract.signed`` → commit a subcontract's value to the budget."""
+    """``contracts.contract.signed`` → bring the budget up to a signed subcontract.
+
+    Finance works out the commitment, including when an agreement here carries
+    the same subcontract through ``contract_id``, so the pair counts once.
+    """
     from app.modules.contracts.models import Contract  # noqa: PLC0415
+    from app.modules.finance.service import FinanceService  # noqa: PLC0415
 
     contract_id = _uuid((event.data or {}).get("contract_id"))
     if contract_id is None:
@@ -133,16 +138,7 @@ async def _on_contract_signed(event: Event) -> None:
         contract = await session.get(Contract, contract_id)
         if contract is None or contract.counterparty_type != "subcontractor":
             return
-        if await finance_bridge.agreement_linked_to(session, contract.id) is not None:
-            # The linked agreement carries this subcontract's commitment, or
-            # will when it is signed; committing here as well counts it twice.
-            return
-        await finance_bridge.commit_subcontract(
-            session,
-            project_id=contract.project_id,
-            source=finance_bridge.contract_source(contract.id),
-            amount=contract.total_value,
-        )
+        await FinanceService(session).sync_project_budget(contract.project_id)
         await session.commit()
 
 
@@ -174,26 +170,6 @@ async def _on_claim_paid(event: Event) -> None:
         await session.commit()
 
 
-async def _on_invoice_paid(event: Event) -> None:
-    """``invoice.paid`` → draw a subcontract's commitment down by the paid gross.
-
-    Covers a subcontractor's payable paid from the finance screens. A payment
-    made through this module or a paid claim has drawn it down already, and the
-    per-invoice marker makes this a no-op then.
-    """
-    from app.modules.finance.models import Invoice  # noqa: PLC0415
-
-    invoice_id = _uuid((event.data or {}).get("invoice_id"))
-    if invoice_id is None:
-        return
-    async with async_session_factory() as session:
-        invoice = await session.get(Invoice, invoice_id)
-        if invoice is None:
-            return
-        await finance_bridge.draw_down_for_invoice(session, invoice)
-        await session.commit()
-
-
 _SUBSCRIPTIONS: list[tuple[str, object]] = [
     ("ncr.created", _on_ncr_created),
     ("safety.incident.created", _on_safety_incident_created),
@@ -201,7 +177,6 @@ _SUBSCRIPTIONS: list[tuple[str, object]] = [
     ("subcontractors.defect.recorded", _on_defect_recorded),
     ("contracts.contract.signed", _on_contract_signed),
     ("contracts.claim.paid", _on_claim_paid),
-    ("invoice.paid", _on_invoice_paid),
 ]
 
 
