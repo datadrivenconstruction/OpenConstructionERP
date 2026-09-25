@@ -13837,6 +13837,8 @@ const resource = {
     "tendering.award_bid": "این پیشنهاد را واگذار کنید",
     "tendering.award_confirm": "این قرارداد به {{company}} واگذار شود؟ این اقدام قابل بازگشت نیست.",
     "tendering.award_confirm_title": "قرارداد واگذار شود؟",
+    "tendering.disclose_award_sum": "نمایش مبلغ واگذارشده در اطلاعیه‌های رد پیشنهاد",
+    "tendering.disclose_award_sum_hint": "به‌طور پیش‌فرض غیرفعال: پیشنهاددهنده ناموفق فقط از انتخاب‌نشدنش مطلع می‌شود. در جایی که قوانین تدارکات دولتی الزام می‌کنند مقدار واگذارشده در اطلاعیه ذکر شود، این گزینه را فعال کنید.",
     "tendering.bid_comparison": "مقایسه پیشنهادها",
     "tendering.bid_comparison_chart_label": "نمودار میله‌ای مقایسه جمع پیشنهادها",
     "tendering.bid_count": "{{count}} پیشنهاد",

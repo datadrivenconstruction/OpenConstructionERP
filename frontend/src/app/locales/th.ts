@@ -14260,6 +14260,8 @@ const resource = {
     "takeoff.markup.comment_send": "ส่ง",
     "tendering.award_confirm": "มอบสัญญานี้ให้ {{company}} หรือไม่? การดำเนินการนี้ไม่สามารถยกเลิกได้",
     "tendering.award_confirm_title": "ยืนยันการมอบสัญญา?",
+    "tendering.disclose_award_sum": "แสดงมูลค่าที่มอบให้ในหนังสือแจ้งปฏิเสธ",
+    "tendering.disclose_award_sum_hint": "ปิดอยู่โดยค่าเริ่มต้น: ผู้เสนอราคาที่ไม่ได้รับการคัดเลือกจะทราบเพียงว่าไม่ได้รับเลือก เปิดตัวเลือกนี้เมื่อกฎการจัดซื้อจัดจ้างภาครัฐกำหนดให้ต้องระบุมูลค่าที่มอบให้ในหนังสือแจ้ง",
     "tendering.bid_count": "{{count}} ใบเสนอราคา",
     "tendering.close_package": "ปิด",
     "tendering.compare.collapseLowVariance": "ซ่อนรายการที่ความแปรปรวนต่ำ",

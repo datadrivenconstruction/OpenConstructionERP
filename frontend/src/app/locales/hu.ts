@@ -13940,6 +13940,8 @@ const resource = {
     "takeoff.markup.comment_send": "Küldés",
     "tendering.award_confirm": "Odaítéli ezt a szerződést a(z) {{company}} részére? A művelet nem vonható vissza.",
     "tendering.award_confirm_title": "Odaítéli a szerződést?",
+    "tendering.disclose_award_sum": "Az odaítélt összeg megjelenítése az elutasító értesítésekben",
+    "tendering.disclose_award_sum_hint": "Alapértelmezés szerint ki van kapcsolva: a nem nyertes ajánlattevő csak azt tudja meg, hogy nem őt választották. Kapcsolja be, ha a közbeszerzési szabályok megkövetelik az odaítélt érték feltüntetését az értesítésben.",
     "tendering.bid_count": "{{count}} ajánlat",
     "tendering.close_package": "Lezárás",
     "tendering.compare.collapseLowVariance": "Alacsony eltérésű tételek elrejtése",

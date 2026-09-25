@@ -13873,6 +13873,8 @@ const resource = {
     "tendering.award_bid": "یہ بولی ایوارڈ کریں",
     "tendering.award_confirm": "یہ کنٹریکٹ {{company}} کو ایوارڈ کریں؟ اس عمل کو واپس نہیں کیا جا سکتا۔",
     "tendering.award_confirm_title": "کنٹریکٹ ایوارڈ کریں؟",
+    "tendering.disclose_award_sum": "مسترد کرنے کے نوٹسز میں دی گئی رقم دکھائیں",
+    "tendering.disclose_award_sum_hint": "پہلے سے بند: ناکام بولی دہندہ کو صرف یہ معلوم ہوتا ہے کہ اسے منتخب نہیں کیا گیا۔ اسے فعال کریں جہاں سرکاری خریداری کے قواعد نوٹس میں دی گئی رقم بتانا لازمی قرار دیں۔",
     "tendering.bid_comparison": "بولی موازنہ",
     "tendering.bid_comparison_chart_label": "بولی کل رقوم کا موازنہ کرنے والا بار چارٹ",
     "tendering.bid_count": "{{count}} بولیاں",

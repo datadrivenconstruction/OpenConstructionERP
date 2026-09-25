@@ -55,6 +55,11 @@ _BID_MONEY_FIELDS: tuple[str, ...] = ("total_amount", "currency", "line_items")
 _CENTS = Decimal("0.01")
 
 
+#: Package metadata flag that puts the winning sum into rejection notices.
+#: Off by default; a package under a regime that requires disclosure sets it.
+DISCLOSE_AWARD_SUM_KEY = "disclose_award_sum"
+
+
 def _to_decimal(value: object, default: str = "0") -> Decimal:
     """Parse an arbitrary value into Decimal, never raising.
 
@@ -1432,9 +1437,14 @@ class TenderingService:
     async def build_rejection_letter_pdf(self, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[bytes, str]:
         """Generate a PDF rejection notice for an unsuccessful bid.
 
-        Returns ``(pdf_bytes, filename)``. Where the package has a recorded
-        winner, the awarded sum is included for transparency (same currency
-        only - never blend currencies).
+        Returns ``(pdf_bytes, filename)``. The notice does not disclose the
+        winning price by default: the other bidders' prices are commercial
+        information, and in most private tenders the unsuccessful bidder learns
+        only that it was not selected. Some public procurement regimes require
+        the awarded value in the notice, so a package can opt in through
+        ``metadata.disclose_award_sum`` (off unless set to ``true``). Even then
+        the sum is printed only in the rejected bid's own currency, never
+        blended.
         """
         from app.modules.tendering.pdf_documents import generate_rejection_letter_pdf
 
@@ -1449,11 +1459,11 @@ class TenderingService:
         project_name, _currency = await self._project_name_and_currency(package)
         meta = package.metadata_ or {}
 
-        # Awarded sum for transparency - only when we can resolve the winning
-        # bid and it shares the rejected bid's currency (no cross-currency mix).
+        # The awarded sum only where the package opted in, the winning bid
+        # resolves, and it shares the rejected bid's currency.
         winning_amount: str | None = None
         awarded_bid_id = meta.get("awarded_bid_id")
-        if awarded_bid_id:
+        if awarded_bid_id and meta.get(DISCLOSE_AWARD_SUM_KEY) is True:
             try:
                 winner = await self.repo.get_bid_by_id(uuid.UUID(str(awarded_bid_id)))
             except (ValueError, AttributeError):

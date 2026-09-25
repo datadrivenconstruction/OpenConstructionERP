@@ -14516,6 +14516,8 @@ const resource = {
     "takeoff.markup.comment_send": "Gönder",
     "tendering.award_confirm": "Bu sözleşmeyi {{company}} firmasına vermek istiyor musunuz? Bu işlem geri alınamaz.",
     "tendering.award_confirm_title": "Sözleşme verilsin mi?",
+    "tendering.disclose_award_sum": "Ret bildirimlerinde verilen tutarı göster",
+    "tendering.disclose_award_sum_hint": "Varsayılan olarak kapalı: seçilmeyen bir teklif sahibi yalnızca seçilmediğini öğrenir. Kamu ihale kuralları bildirimde verilen değeri zorunlu kılıyorsa bunu açın.",
     "tendering.bid_count": "{{count}} teklif",
     "tendering.close_package": "Kapat",
     "tendering.compare.collapseLowVariance": "Düşük sapmalı kalemleri gizle",

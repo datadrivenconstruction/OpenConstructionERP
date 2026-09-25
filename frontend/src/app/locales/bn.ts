@@ -13865,6 +13865,8 @@ const resource = {
     "tendering.award_bid": "এই বিড প্রদান করুন",
     "tendering.award_confirm": "{{company}}-কে এই চুক্তি প্রদান করবেন? এই পদক্ষেপ ফিরিয়ে আনা যাবে না।",
     "tendering.award_confirm_title": "চুক্তি প্রদান করবেন?",
+    "tendering.disclose_award_sum": "প্রত্যাখ্যান নোটিশে প্রদত্ত পরিমাণ দেখান",
+    "tendering.disclose_award_sum_hint": "ডিফল্টরূপে বন্ধ: অসফল বিডকারী কেবল জানতে পারে যে তাকে নির্বাচিত করা হয়নি। সরকারি ক্রয় নিয়মে নোটিশে প্রদত্ত মূল্য উল্লেখ করা আবশ্যক হলে এটি চালু করুন।",
     "tendering.bid_comparison": "বিড তুলনা",
     "tendering.bid_comparison_chart_label": "বিড মোট তুলনাকারী বার চার্ট",
     "tendering.bid_count": "{{count}}টি বিড",

@@ -14278,6 +14278,8 @@ const resource = {
     "takeoff.markup.comment_send": "전송",
     "tendering.award_confirm": "이 계약을 {{company}}에 낙찰하시겠습니까? 이 작업은 취소할 수 없습니다.",
     "tendering.award_confirm_title": "계약 낙찰?",
+    "tendering.disclose_award_sum": "탈락 통지서에 낙찰 금액 표시",
+    "tendering.disclose_award_sum_hint": "기본값은 꺼짐입니다: 낙찰받지 못한 입찰자는 선정되지 않았다는 사실만 알게 됩니다. 공공 조달 규정에서 통지서에 낙찰가를 명시하도록 요구하는 경우 이 옵션을 켜세요.",
     "tendering.bid_count": "{{count}}개 입찰",
     "tendering.close_package": "닫기",
     "tendering.compare.collapseLowVariance": "편차가 적은 항목 숨기기",

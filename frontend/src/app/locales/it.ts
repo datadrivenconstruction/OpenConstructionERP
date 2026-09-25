@@ -13844,6 +13844,8 @@ const resource = {
     "takeoff.markup.comment_send": "Invia",
     "tendering.award_confirm": "Aggiudicare il contratto a {{company}}? Questa azione non può essere annullata.",
     "tendering.award_confirm_title": "Aggiudicare il contratto?",
+    "tendering.disclose_award_sum": "Mostra l'importo aggiudicato negli avvisi di rigetto",
+    "tendering.disclose_award_sum_hint": "Disattivato per impostazione predefinita: un offerente non selezionato viene a sapere solo di non essere stato scelto. Attivalo quando le norme sugli appalti pubblici richiedono di indicare il valore aggiudicato nell'avviso.",
     "tendering.bid_count": "{{count}} offerte",
     "tendering.close_package": "Chiudi",
     "tendering.compare.collapseLowVariance": "Nascondi posizioni a bassa varianza",

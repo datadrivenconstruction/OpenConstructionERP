@@ -14119,6 +14119,8 @@ const resource = {
     "tendering.award_bid": "Award энэ санал",
     "tendering.award_confirm": "Award энэ гэрээ хүртэл {{company}}? Энэ action чадахгүй байх undone.",
     "tendering.award_confirm_title": "Гэрээг олгох уу?",
+    "tendering.disclose_award_sum": "Татгалзсан мэдэгдэлд олгосон дүнг харуулах",
+    "tendering.disclose_award_sum_hint": "Анхдагчаар унтраалттай: ялаагүй оролцогч зөвхөн сонгогдоогүйгээ мэднэ. Төрийн худалдан авалтын дүрэм мэдэгдэлд олгосон үнийг заахыг шаарддаг тохиолдолд үүнийг асаана уу.",
     "tendering.bid_comparison": "Үнийн санал харьцуулалт",
     "tendering.bid_comparison_chart_label": "Bar chart харьцуулж байна санал нийт",
     "tendering.bid_count": "{{count}} саналууд",

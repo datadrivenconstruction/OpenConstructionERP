@@ -14565,6 +14565,8 @@ const resource = {
     "tendering.award_bid": "Sõlmi leping selle pakkumusega",
     "tendering.award_confirm": "Sõlmida leping ettevõttega {{company}}? Seda toimingut ei saa tagasi võtta.",
     "tendering.award_confirm_title": "Sõlmida leping?",
+    "tendering.disclose_award_sum": "Kuva määratud summa tagasilükkamisteadetes",
+    "tendering.disclose_award_sum_hint": "Vaikimisi väljas: pakkuja, kes ei võitnud, saab teada ainult, et teda ei valitud. Lülitage sisse, kui riigihanke reeglid nõuavad määratud väärtuse esitamist teates.",
     "tendering.bid_comparison": "Pakkumuste võrdlus",
     "tendering.bid_comparison_chart_label": "Tulpdiagramm pakkumuste kogusummade võrdluseks",
     "tendering.bid_count": "{{count}} pakkumust",

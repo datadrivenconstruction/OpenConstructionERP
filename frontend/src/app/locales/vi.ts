@@ -14219,6 +14219,8 @@ const resource = {
     "takeoff.markup.comment_send": "Gửi",
     "tendering.award_confirm": "Trao hợp đồng cho {{company}}? Hành động này không thể hoàn tác.",
     "tendering.award_confirm_title": "Xác nhận trao thầu?",
+    "tendering.disclose_award_sum": "Hiển thị số tiền trúng thầu trong thông báo từ chối",
+    "tendering.disclose_award_sum_hint": "Mặc định tắt: nhà thầu không trúng chỉ được biết rằng mình không được chọn. Bật tùy chọn này khi quy định đấu thầu công yêu cầu nêu giá trị trúng thầu trong thông báo.",
     "tendering.bid_count": "{{count}} hồ sơ dự thầu",
     "tendering.close_package": "Đóng",
     "tendering.compare.collapseLowVariance": "Ẩn các hạng mục ít biến động",

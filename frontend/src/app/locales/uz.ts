@@ -14694,6 +14694,8 @@ const resource = {
     "takeoff.markup.comment_send": "Yuborish",
     "tendering.award_confirm": "Bu shartnoma {{company}} ga berilsinmi? Bu amalni qaytarib boʻlmaydi.",
     "tendering.award_confirm_title": "Shartnoma berilsinmi?",
+    "tendering.disclose_award_sum": "Rad etish xabarnomalarida berilgan summani koʻrsatish",
+    "tendering.disclose_award_sum_hint": "Sukut boʻyicha oʻchirilgan: gʻolib boʻlmagan ishtirokchi faqat tanlanmaganini biladi. Davlat xaridlari qoidalari xabarnomada berilgan qiymatni koʻrsatishni talab qilganda buni yoqing.",
     "tendering.bid_count": "{{count}} ta taklif",
     "tendering.close_package": "Yopish",
     "tendering.compare.collapseLowVariance": "Past farqli bandlarni yashirish",

@@ -14895,6 +14895,8 @@ const resource = {
     "takeoff.markup.comment_send": "Отправить",
     "tendering.award_confirm": "Присвоить контракт компании {{company}}? Это действие нельзя отменить.",
     "tendering.award_confirm_title": "Присвоить контракт?",
+    "tendering.disclose_award_sum": "Показывать присуждённую сумму в уведомлениях об отказе",
+    "tendering.disclose_award_sum_hint": "По умолчанию выключено: неуспешный участник узнаёт лишь то, что не был выбран. Включите, если правила госзакупок требуют указывать присуждённую сумму в уведомлении.",
     "tendering.bid_count": "{{count}} предл.",
     "tendering.close_package": "Закрыть",
     "tendering.compare.collapseLowVariance": "Скрыть позиции с низким отклонением",

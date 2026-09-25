@@ -14218,6 +14218,8 @@ const resource = {
     "takeoff.markup.comment_send": "Kirim",
     "tendering.award_confirm": "Tetapkan kontrak ini kepada {{company}}? Tindakan ini tidak dapat dibatalkan.",
     "tendering.award_confirm_title": "Tetapkan kontrak?",
+    "tendering.disclose_award_sum": "Tampilkan jumlah yang dimenangkan pada pemberitahuan penolakan",
+    "tendering.disclose_award_sum_hint": "Nonaktif secara default: peserta yang tidak menang hanya mengetahui bahwa dirinya tidak terpilih. Aktifkan bila aturan pengadaan publik mewajibkan nilai pemenang dicantumkan dalam pemberitahuan.",
     "tendering.bid_count": "{{count}} penawaran",
     "tendering.close_package": "Tutup",
     "tendering.compare.collapseLowVariance": "Sembunyikan posisi varians rendah",

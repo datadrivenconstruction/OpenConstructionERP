@@ -14167,6 +14167,8 @@ const resource = {
     "takeoff.markup.comment_send": "Pošalji",
     "tendering.award_confirm": "Dodijeliti ovaj ugovor tvrtki {{company}}? Ova se radnja ne može poništiti.",
     "tendering.award_confirm_title": "Award ugovor?",
+    "tendering.disclose_award_sum": "Prikaži dodijeljeni iznos u obavijestima o odbijanju",
+    "tendering.disclose_award_sum_hint": "Prema zadanim postavkama isključeno: neuspješni ponuđač saznaje samo da nije odabran. Uključite ovo kada pravila javne nabave zahtijevaju navođenje dodijeljene vrijednosti u obavijesti.",
     "tendering.bid_count": "{{count}} ponude",
     "tendering.close_package": "Zatvori",
     "tendering.compare.collapseLowVariance": "Sakrij low-variance stavke",

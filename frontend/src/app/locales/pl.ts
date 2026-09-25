@@ -14666,6 +14666,8 @@ const resource = {
     "takeoff.markup.comment_send": "Wyślij",
     "tendering.award_confirm": "Udzielić tego zamówienia firmie {{company}}? Tej operacji nie można cofnąć.",
     "tendering.award_confirm_title": "Award umowa?",
+    "tendering.disclose_award_sum": "Pokazuj przyznaną kwotę w powiadomieniach o odrzuceniu",
+    "tendering.disclose_award_sum_hint": "Domyślnie wyłączone: niewybrany oferent dowiaduje się tylko, że nie został wybrany. Włącz tę opcję, gdy przepisy o zamówieniach publicznych wymagają podania przyznanej wartości w powiadomieniu.",
     "tendering.bid_count": "{{count}} oferty",
     "tendering.close_package": "Zamknij",
     "tendering.compare.collapseLowVariance": "Ukryj low-variance pozycje",

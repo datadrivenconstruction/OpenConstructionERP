@@ -1398,6 +1398,21 @@ function PackageDetail({
     },
   });
 
+  // Whether rejection notices name the winning price. Off unless the
+  // package opts in, since a bidder's price is commercial information.
+  const discloseMutation = useMutation({
+    mutationFn: (disclose: boolean) =>
+      apiPatch<TenderPackage>(`/v1/tendering/packages/${packageId}`, {
+        metadata: { disclose_award_sum: disclose },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
   // Update package status
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: string) =>
@@ -1739,9 +1754,28 @@ function PackageDetail({
       {/* Bids list */}
       {activeTab === 'bids' && pkg.bids.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-content-primary">
-            {t('tendering.bids_received', 'Bids Received')}
-          </h4>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold text-content-primary">
+              {t('tendering.bids_received', 'Bids Received')}
+            </h4>
+            <label
+              className="inline-flex items-center gap-2 text-xs text-content-secondary"
+              title={t('tendering.disclose_award_sum_hint', {
+                defaultValue:
+                  'Off by default: an unsuccessful bidder learns only that it was not selected. Turn it on where public procurement rules require the awarded value in the notice.',
+              })}
+            >
+              <input
+                type="checkbox"
+                checked={pkg.metadata?.disclose_award_sum === true}
+                disabled={discloseMutation.isPending}
+                onChange={(e) => discloseMutation.mutate(e.target.checked)}
+              />
+              {t('tendering.disclose_award_sum', {
+                defaultValue: 'Show the awarded sum in rejection notices',
+              })}
+            </label>
+          </div>
           {pkg.bids.map((bid) => (
             <Card key={bid.id} padding="none">
               <div className="flex items-center gap-3 px-4 py-3">

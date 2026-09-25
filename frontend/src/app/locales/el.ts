@@ -13922,6 +13922,8 @@ const resource = {
     "tendering.award_bid": "Ανάθεση αυτής της προσφοράς",
     "tendering.award_confirm": "Ανάθεση αυτής της σύμβασης στην {{company}}; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
     "tendering.award_confirm_title": "Ανάθεση σύμβασης;",
+    "tendering.disclose_award_sum": "Εμφάνιση του ποσού ανάθεσης στις ειδοποιήσεις απόρριψης",
+    "tendering.disclose_award_sum_hint": "Απενεργοποιημένο από προεπιλογή: ο μη επιτυχών προσφέρων μαθαίνει μόνο ότι δεν επιλέχθηκε. Ενεργοποιήστε το όπου οι κανόνες δημοσίων συμβάσεων απαιτούν την αναγραφή της αξίας ανάθεσης στην ειδοποίηση.",
     "tendering.bid_comparison": "Σύγκριση Προσφορών",
     "tendering.bid_comparison_chart_label": "Ραβδόγραμμα σύγκρισης συνόλων προσφορών",
     "tendering.bid_count": "{{count}} προσφορές",
