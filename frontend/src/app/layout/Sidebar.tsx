@@ -487,7 +487,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const setGroupHidden = useModuleStore((s) => s.setGroupHidden);
   const addToast = useToastStore((s) => s.addToast);
   const isAdvanced = useViewModeStore((s) => s.isAdvanced);
-  const setViewMode = useViewModeStore((s) => s.setMode);
   // A company profile with a workspace (`workspaces.ts`) redefines Simple mode
   // for its users: the workspace rows in their order, then every other screen
   // under "More modules". Advanced mode is unchanged, and so is Simple mode
@@ -793,12 +792,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       }
       const group = navGroups.find((g) => g.id === groupId);
       if (group?.hideInSimple && useViewModeStore.getState().mode !== 'advanced') {
-        setViewMode('advanced');
+        // Shown for this session only: the tour pointing at a group is not the
+        // user choosing Advanced, so nothing is saved.
+        useViewModeStore.getState().revealAdvanced();
       }
     };
     window.addEventListener('oe:tour-reveal', onReveal);
     return () => window.removeEventListener('oe:tour-reveal', onReveal);
-  }, [setViewMode, workspaceActive]);
+  }, [workspaceActive]);
 
   const togglePin = useCallback((route: string) => {
     setPinned((prev) => {
