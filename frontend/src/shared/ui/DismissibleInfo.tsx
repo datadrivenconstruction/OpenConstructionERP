@@ -14,7 +14,8 @@ import { useInfoBlockPrefsStore, readLegacyCollapsed } from '@/stores/useInfoBlo
  * a light, notion-style help card (NOT a loud alert) with TWO states only:
  *
  *  - Expanded: a soft, translucent card with an info chip, a title and the
- *    body. Clicking anywhere on the card - or on the X - collapses it.
+ *    body. Only the X (a button named "Collapse") collapses it; the title and
+ *    the body are plain content, so clicking or selecting them does nothing.
  *  - Collapsed: NOTHING renders in the page (founder decision 2026-06-06).
  *    The card registers itself in `useModuleInfoStore`, and the top app bar
  *    shows a small info icon right after the module name (project pill >
@@ -164,18 +165,16 @@ export function DismissibleInfo({
   // (bg-oe-blue/10 ~ #e5f1fc over white; /[0.14] over the dark surfaces),
   // founder feedback 2026-06-06: the previous bg-oe-blue-subtle/25 emitted
   // no CSS at all (alpha on an opaque var) so cards looked transparent.
-  // The X and the link pills are interactive, so they cannot live inside a
-  // role=button (nesting interactive content is invalid ARIA). Instead the
-  // outer row is a plain div with a click/keyboard handler (whole-card
-  // toggle), and a dedicated header BUTTON carries aria-expanded for AT.
+  // The row is a plain div with no handler: the X is the collapse control and
+  // carries aria-expanded for AT, and the link pills act on their own.
   // No default margin (audit fix S2): pages provide rhythm via the root
   // space-y-5; a built-in mb-5 doubled the gap below every info card.
   // Tint at 80% of the first visible pass (founder 2026-06-06: light blue,
   // a little more transparency, background at 80%): /10 -> /[0.08].
   // Lightened again (founder 2026-07-26: the card still reads too blue, make
-  // it lighter): /[0.08] -> /[0.045] on light, /[0.11] -> /[0.07] on dark,
-  // hover /[0.06] -> /[0.035]. The card must still read as its own surface
-  // rather than as bare page, so the tint is halved rather than dropped: the
+  // it lighter): /[0.08] -> /[0.045] on light, /[0.11] -> /[0.07] on dark
+  // (the row hover went with the click-anywhere collapse). The card must
+  // still read as its own surface rather than as bare page, so the tint is halved rather than dropped: the
   // left accent bar and the border carry the identity at this weight, which
   // is why they are left alone.
   // NO backdrop-blur here (founder 2026-06-06: cards "look opaque"): the
@@ -189,35 +188,22 @@ export function DismissibleInfo({
 
   return (
     <div className={wrapper}>
-      {/* Collapse on click anywhere in the header strip. Keyboard access is
-          covered by the dedicated buttons inside (Show more toggle, close),
-          so the wrapper itself stays a plain div. */}
-      <div
-        onClick={collapse}
-        className="flex cursor-pointer items-start gap-3 rounded-xl px-4 py-4 transition-colors hover:bg-oe-blue/[0.035]"
-      >
+      {/* The card collapses through the X only. It used to collapse on a
+          click anywhere in this row, the title included, so a reader who
+          clicked the title (or selected a sentence to copy) lost the card
+          without having asked for that. The title is plain text now, and the
+          one collapse control is a real button with an accessible name. The
+          way back is the info icon the Header shows beside the module name. */}
+      <div className="flex items-start gap-3 rounded-xl px-4 py-4">
         {/* Chip and title share the same 28px midline (uniformity sweep: the
             mt-0.5 chip on an items-start row read ~5px low on every page). */}
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue/15">
           <Info size={16} className="text-oe-blue-text" />
         </span>
         <div className="min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={(e) => {
-              // The header button is the keyboard/AT toggle (Enter/Space fire
-              // a native click). The outer div also handles pointer clicks, so
-              // swallow this one to avoid a double-toggle when the pointer
-              // lands on the title.
-              e.stopPropagation();
-              collapse();
-            }}
-            aria-expanded
-            title={t('common.collapse', { defaultValue: 'Collapse' })}
-            className="flex min-h-7 items-center rounded-sm text-left text-base font-medium leading-snug text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
-          >
+          <p className="flex min-h-7 items-center text-base font-medium leading-snug text-content-primary">
             {title}
-          </button>
+          </p>
           {children != null && (
             <div className="mt-1.5 text-sm leading-relaxed text-content-secondary">{children}</div>
           )}
@@ -230,11 +216,7 @@ export function DismissibleInfo({
               )}
               <button
                 type="button"
-                onClick={(e) => {
-                  // The toggle lives inside the clickable card - never collapse.
-                  e.stopPropagation();
-                  setShowMore((v) => !v);
-                }}
+                onClick={() => setShowMore((v) => !v)}
                 aria-expanded={showMore}
                 className="mt-2 inline-flex items-center gap-1 rounded-sm text-xs font-medium text-oe-blue-text transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
               >
@@ -251,11 +233,7 @@ export function DismissibleInfo({
                 <button
                   key={l.label}
                   type="button"
-                  onClick={(e) => {
-                    // Inner pills must never toggle the card.
-                    e.stopPropagation();
-                    l.onClick();
-                  }}
+                  onClick={l.onClick}
                   className="inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-surface-primary px-2.5 py-1 text-xs font-medium text-oe-blue-text transition-colors hover:bg-oe-blue hover:text-content-inverse"
                 >
                   {l.label}
@@ -266,12 +244,9 @@ export function DismissibleInfo({
         </div>
         <button
           type="button"
-          onClick={(e) => {
-            // The X now simply collapses - it must not bubble into the card
-            // toggle (which would double-fire), and it no longer hides forever.
-            e.stopPropagation();
-            collapse();
-          }}
+          // The only collapse control. It collapses, it never hides forever.
+          onClick={collapse}
+          aria-expanded
           aria-label={t('common.collapse', { defaultValue: 'Collapse' })}
           title={t('common.collapse', { defaultValue: 'Collapse' })}
           className="-mr-1 -mt-1 shrink-0 rounded-md p-1.5 text-content-tertiary opacity-60 transition-all hover:bg-surface-secondary hover:text-content-primary hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"

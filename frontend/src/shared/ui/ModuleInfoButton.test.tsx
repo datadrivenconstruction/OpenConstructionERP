@@ -78,7 +78,7 @@ describe('module info card collapse / re-open', () => {
     render(<Harness storageKey="ib-b" />);
 
     // Collapse via the card title (a dedicated toggle button).
-    fireEvent.click(screen.getByText('Test card'));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
 
     // Card is gone from the flow; the re-open icon appears.
     expect(screen.queryByText('Test card')).toBeNull();
@@ -95,7 +95,7 @@ describe('module info card collapse / re-open', () => {
 
   it('persists the collapse to the per-user store and pushes it to the server', async () => {
     render(<Harness storageKey="ib-sync" />);
-    fireEvent.click(screen.getByText('Test card'));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
 
     // localStorage bucket (instant offline) holds the flag.
     const bucket = JSON.parse(localStorage.getItem('oce.info-blocks') || '{}');
@@ -121,7 +121,7 @@ describe('module info card collapse / re-open', () => {
 
   it('carries a name without spending a word of the top bar on it', () => {
     render(<Harness storageKey="ib-name" />);
-    fireEvent.click(screen.getByText('Test card'));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
 
     const icon = screen.getByTestId('module-info-button');
     // The control sits beside the module name in a bar already holding the
@@ -145,7 +145,7 @@ describe('module info card collapse / re-open', () => {
       </>,
     );
 
-    fireEvent.click(screen.getByText('Test card'));
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
     fireEvent.click(screen.getByText('Test explainer'));
     expect(screen.queryByText('Test card')).toBeNull();
     expect(screen.queryByText('Test explainer')).toBeNull();
