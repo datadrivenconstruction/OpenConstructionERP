@@ -49,6 +49,7 @@ _LITE_ROW_FIELDS = frozenset(
         "mass_per_unit",
         "mass_basis",
         "catalog_id",
+        "hazards",
         "is_active",
         "metadata_",
         "created_at",

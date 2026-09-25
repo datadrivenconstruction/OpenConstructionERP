@@ -300,6 +300,31 @@ describe('CostDatabaseSearchModal - paginated catalog', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('badges an item made of a hazardous material', async () => {
+    (fetchCostSearch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      makePage({
+        items: [
+          {
+            id: 'item-h',
+            code: 'H-001',
+            description: 'Wall cladding with chrysotile cement sheets',
+            unit: 'm2',
+            rate: 120,
+            currency: 'CAD',
+            region: 'DE_BERLIN',
+            classification: {},
+            components: [],
+            hazards: ['asbestos'],
+          },
+        ],
+      }),
+    );
+    renderModal();
+    const badge = await screen.findByTestId('cost-row-hazard-item-h');
+    expect(badge.textContent).toBe('Asbestos');
+    expect(badge.getAttribute('title')).toMatch(/hazardous material/);
+  });
+
   it('shows the inline retry CTA when the category tree fails', async () => {
     // mockRejectedValue (not Once) because the tree query is region-scoped and
     // fires twice on mount: once for region='' and again after the auto-default

@@ -1,0 +1,39 @@
+{
+  "_about": "Words that mark a cost item as containing a hazardous material. Keyed by hazard id; the id is what the API returns and what the frontend translates (costs.hazard_<id>). Terms are matched case-insensitively as substrings of the item description, so a stem covers its compounds (asbest -> Asbestzement). Cover every language a cost database ships in. Adding a language or a hazard is a data change here, never a code change.",
+  "hazards": {
+    "asbestos": [
+      "asbestos",
+      "chrysotile",
+      "amosite",
+      "crocidolite",
+      "asbest",
+      "chrysotil",
+      "amiante",
+      "amianto",
+      "asbesto",
+      "crisotilo",
+      "crisotila",
+      "crisotil",
+      "azbest",
+      "chryzotyl",
+      "krizotil",
+      "krysotil",
+      "chrysotiel",
+      "asbes",
+      "krisotil",
+      "amiăng",
+      "асбест",
+      "азбест",
+      "хризотил",
+      "石棉",
+      "石綿",
+      "アスベスト",
+      "석면",
+      "แร่ใยหิน",
+      "أسبستوس",
+      "اسبستوس",
+      "एस्बेस्टस",
+      "ऐस्बेस्टस"
+    ]
+  }
+}
