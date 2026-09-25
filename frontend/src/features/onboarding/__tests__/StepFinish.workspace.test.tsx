@@ -3,8 +3,11 @@
 //
 // Where the wizard leaves a user, checked against the menu they land on.
 //
-// The last step used to switch the user to Simple mode and, in the same
-// handler, tell the server `interface_mode: 'advanced'`. And it wrote the
+// The last step used to switch the user to Simple mode, over any mode they
+// had picked, and in the same handler tell the server
+// `interface_mode: 'advanced'`. Now it sets no mode: a picked mode stays, and
+// a user who never picked one gets the default the profile implies
+// (`useViewModeDefault`, mounted here the way App mounts it). And it wrote the
 // chosen profile to the server without telling the sidebar, whose copy of the
 // onboarding record is the one the dashboard fetched before sending the user
 // here: no profile, not completed. So these tests mount the sidebar next to
@@ -20,6 +23,7 @@ const api = vi.hoisted(() => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
   apiPatch: vi.fn(),
+  apiPut: vi.fn(),
   apiDelete: vi.fn(),
 }));
 
@@ -71,7 +75,8 @@ import { Sidebar } from '@/app/layout/Sidebar';
 import { meOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { useViewModeStore } from '@/stores/useViewModeStore';
+import { _resetViewModeHydration, useViewModeStore } from '@/stores/useViewModeStore';
+import { useViewModeDefault } from '@/app/layout/useViewModeDefault';
 
 type Presets = Parameters<typeof StepFinish>[0]['presets'];
 
@@ -98,6 +103,11 @@ const PRESETS: Presets = [
 
 const USER_ID = 'user-1';
 
+function ViewModeDefault() {
+  useViewModeDefault();
+  return null;
+}
+
 function Location() {
   return <span data-testid="location">{useLocation().pathname}</span>;
 }
@@ -110,6 +120,7 @@ function renderFinish(companyType: string) {
   render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={['/onboarding']}>
+        <ViewModeDefault />
         <Sidebar />
         <StepFinish
           onBack={() => undefined}
@@ -143,6 +154,8 @@ beforeEach(() => {
   localStorage.clear();
   api.apiGet.mockReset();
   api.apiPost.mockReset();
+  api.apiPut.mockReset();
+  api.apiPut.mockResolvedValue({});
   // A small server: the onboarding record the POST writes is what a GET reads.
   let record: Record<string, unknown> = { completed: false, company_type: null };
   api.apiGet.mockImplementation((path: string) => {
@@ -157,8 +170,9 @@ beforeEach(() => {
   });
   useAuthStore.setState({ isAuthenticated: true, userRole: 'editor', userId: USER_ID });
   useModuleStore.setState({ enabledModules: {}, hiddenGroups: [] });
-  // Somebody who had tried Advanced before re-running the wizard.
-  useViewModeStore.getState().setMode('advanced');
+  // A user who has never picked a mode.
+  _resetViewModeHydration();
+  useViewModeStore.setState({ mode: 'simple', isAdvanced: false, chosen: false });
 });
 
 afterEach(() => cleanup());
@@ -174,7 +188,7 @@ describe('finishing the wizard as a general contractor', () => {
 
   it('lands in Simple mode on the workspace, with the profile saved and no mode claimed', async () => {
     const client = renderFinish('general_contractor');
-    // Advanced before Finish, so the stale record shows no workspace yet.
+    // No profile before Finish, so the stale record shows no workspace yet.
     expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
     await waitFor(() => expect(onboardingReads()).toBe(1));
 
@@ -182,6 +196,10 @@ describe('finishing the wizard as a general contractor', () => {
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
     expect(useViewModeStore.getState().mode).toBe('simple');
+    // A default, not a choice: nothing stored here or on the server.
+    expect(useViewModeStore.getState().chosen).toBe(false);
+    expect(localStorage.getItem('oe_view_mode')).toBeNull();
+    expect(api.apiPut).not.toHaveBeenCalled();
 
     const body = onboardingPost();
     expect(body.company_type).toBe('general_contractor');
@@ -210,16 +228,36 @@ describe('finishing the wizard as a general contractor', () => {
 });
 
 describe('finishing the wizard with a profile that has no workspace', () => {
-  it('lands in Simple mode as before, with no workspace line and no mode claimed', async () => {
+  it('lands in Advanced mode, so the modules the profile enabled are all in the menu', async () => {
     renderFinish('estimator');
     expect(screen.queryByTestId('onboarding-finish-workspace')).toBeNull();
+    // Let the menu's own read of the old record land first, as in the case
+    // above; a late answer would otherwise overwrite the saved profile.
+    await waitFor(() => expect(onboardingReads()).toBe(1));
 
     fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
 
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
-    expect(useViewModeStore.getState().mode).toBe('simple');
+    await waitFor(() => expect(useViewModeStore.getState().mode).toBe('advanced'));
+    expect(useViewModeStore.getState().chosen).toBe(false);
     expect('interface_mode' in onboardingPost()).toBe(false);
     expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
     expect(screen.queryByTestId('sidebar-more-modules')).toBeNull();
+  });
+});
+
+describe('finishing the wizard after picking a mode', () => {
+  it('keeps the picked Advanced mode instead of forcing Simple', async () => {
+    useViewModeStore.getState().setMode('advanced');
+    renderFinish('general_contractor');
+    await waitFor(() => expect(onboardingReads()).toBe(1));
+
+    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
+    expect(useViewModeStore.getState().mode).toBe('advanced');
+    expect(localStorage.getItem('oe_view_mode')).toBe('advanced');
+    // Advanced mode shows the full menu, not the workspace.
+    expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
   });
 });

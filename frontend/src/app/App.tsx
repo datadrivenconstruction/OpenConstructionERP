@@ -32,6 +32,7 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { hydrateInfoBlocksFromServer } from '@/stores/useInfoBlockPrefsStore';
+import { useViewModeDefault } from './layout/useViewModeDefault';
 import { ddcVerifyIntegrity, ddcInjectMeta, DDC_ORIGIN } from '@/shared/lib/ddc-integrity';
 import { NavigationProgress } from '@/shared/lib/navigationProgress';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
@@ -999,6 +1000,9 @@ function useDocumentDirection() {
 export default function App() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   useDocumentDirection();
+  // The Simple / Advanced menu mode: the user's stored choice, or while there
+  // is none a default derived from the company profile.
+  useViewModeDefault();
 
   // DDC-CWICR-OE integrity verification
   if (typeof window !== 'undefined') {

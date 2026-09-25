@@ -277,7 +277,9 @@ describe('the onboarding wizard, first screen to the app', () => {
     expect(localStorage.getItem('oe_company_type')).toBe('general_contractor');
     expect(localStorage.getItem('oe_onboarding_completed')).toBe('true');
     expect(posts('/v1/users/me/onboarding/complete/')).toHaveLength(1);
-    expect(useViewModeStore.getState().mode).toBe('simple');
+    // The user picked Advanced before running the wizard, and Start Working
+    // no longer forces Simple over that choice.
+    expect(useViewModeStore.getState().mode).toBe('advanced');
   });
 
   it('goes back one step at a time from the summary to the welcome screen, keeping the pick', async () => {

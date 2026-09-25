@@ -7,8 +7,9 @@
  * (`passesRowGates` in `Sidebar.tsx`) is what this page controls. The
  * interface-mode gate (`advancedOnly` and `hideInSimple`, applied in
  * `visibleGroupItems` there) is not: it lives behind the Simple / Advanced switch in
- * Settings, it defaults to Simple, and in Simple mode it hides most of the
- * catalogue outright. A user who enables a module here and then cannot find it
+ * Settings, its default follows the company profile (Simple when there is none,
+ * `useViewModeDefault.ts`), and in Simple mode it hides most of the catalogue
+ * outright. A user who enables a module here and then cannot find it
  * has met the second gate without ever being told it exists.
  *
  * The notice appears only in Simple mode, names the number of entries being
