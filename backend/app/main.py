@@ -98,11 +98,13 @@ from app.core.self_upgrade import (
     DISABLED_REFUSAL,
     FROZEN_REFUSAL,
     UPGRADE_DEMO_ACCOUNT,
+    UPGRADE_DISABLED,
     claim_upgrade,
     current_upgrade,
     is_frozen_build,
     repair_hint,
     run_upgrade,
+    runtime_upgrade_enabled,
     runtime_upgrade_refusal,
 )
 from app.dependencies import OptionalUserPayload, RequireRole, get_current_user_id, rls_request_context
@@ -3542,11 +3544,18 @@ def create_app() -> FastAPI:
         from app.modules.users.models import User
 
         try:
-            async with async_session_factory() as session:
-                user = await session.get(User, uuid.UUID(str(user_id)))
+            uid = uuid.UUID(str(user_id))
         except (ValueError, TypeError):
             return None
+        async with async_session_factory() as session:
+            user = await session.get(User, uid)
         return user.email if user is not None else None
+
+    async def _upgrade_refusal(user_id: str) -> str | None:
+        """``runtime_upgrade_refusal`` for this caller, reading the database only when the switch is on."""
+        if not runtime_upgrade_enabled():
+            return UPGRADE_DISABLED
+        return runtime_upgrade_refusal(await _caller_email(user_id))
 
     async def _runtime_upgrade_state(user_id: str) -> dict[str, Any]:
         """Whether THIS caller may press "Apply update", kept out of the shared cache.
@@ -3557,7 +3566,7 @@ def create_app() -> FastAPI:
         will be refused. Separate from ``self_upgrade_supported``, which is a
         fact about the build (can pip run here) and picks the instructions.
         """
-        reason = None if is_frozen_build() else runtime_upgrade_refusal(await _caller_email(user_id))
+        reason = None if is_frozen_build() else await _upgrade_refusal(user_id)
         return {"runtime_upgrade_allowed": reason is None and not is_frozen_build(), "runtime_upgrade_blocked": reason}
 
     @app.post(
@@ -3621,7 +3630,7 @@ def create_app() -> FastAPI:
         if is_frozen_build():
             raise HTTPException(status_code=409, detail=FROZEN_REFUSAL)
 
-        refusal = runtime_upgrade_refusal(await _caller_email(user_id))
+        refusal = await _upgrade_refusal(user_id)
         if refusal is not None:
             raise HTTPException(
                 status_code=403,
