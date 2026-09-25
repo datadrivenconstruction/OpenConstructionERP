@@ -275,6 +275,9 @@ async def test_an_earlier_claim_regenerated_leaves_the_later_one_blocked_until_i
     # rewritten under the person reading it; it is blocked instead.
     await svc.claim_repo.update_fields(march.id, status="draft")
     march = await _generate(svc, world, march, a="50", b="50")
+    # Back past draft, reworked: a draft is not a previous certificate, so
+    # while March sat in draft April would simply leave it out.
+    await svc.claim_repo.update_fields(march.id, status="approved")
     report = await _validate(svc, april.id)
     findings = _failures(report, "pay_application.prior_matches_earlier_claims")
     assert len(findings) == 3

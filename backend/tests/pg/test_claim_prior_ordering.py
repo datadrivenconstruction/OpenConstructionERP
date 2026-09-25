@@ -35,6 +35,14 @@ from app.modules.users.models import User
 
 pytestmark = pytest.mark.asyncio
 
+
+@pytest.fixture(autouse=True)
+def _pay_application_rules() -> None:
+    # Submitting a claim runs the pay_application gate, which refuses when the
+    # rule set is not loaded; registering here keeps the file order-independent.
+    register_contracts_validation_rules()
+
+
 LINE_VALUE = Decimal("100000")
 
 
@@ -113,6 +121,9 @@ async def test_forty_then_sixty_bills_forty_then_twenty_and_the_certificate_agre
     april = await _claim(svc, contract, "PC-2", "2026-04-01", "2026-04-30")
 
     march = await _generate(svc, march, line, "40")
+    # March goes out before April is drawn: a draft is not a previous
+    # certificate, so April would otherwise bill all sixty per cent.
+    await svc.transition_claim(march.id, "submitted")
     april = await _generate(svc, april, line, "60")
 
     first, second = await _only_line(svc, march), await _only_line(svc, april)
@@ -148,9 +159,16 @@ async def test_an_earlier_claim_regenerated_later_counts_only_what_came_before_i
     april = await _claim(svc, contract, "PC-2", "2026-04-01", "2026-04-30")
     march = await _claim(svc, contract, "PC-1", "2026-03-01", "2026-03-31")
     march = await _generate(svc, march, line, "40")
+    await svc.transition_claim(march.id, "submitted")
     april = await _generate(svc, april, line, "60")
+    # April has gone out, so it is not left out as a draft: only billing
+    # order can keep it from being previous to March.
+    await svc.transition_claim(april.id, "submitted")
 
-    # March regenerated after April exists: April is not previous to it.
+    # March sent back and regenerated after April exists: April is not
+    # previous to it.
+    await svc.transition_claim(march.id, "rejected")
+    await svc.transition_claim(march.id, "draft")
     march = await _generate(svc, march, line, "40")
     row = await _only_line(svc, march)
     assert row.prior_completed_value == Decimal("0")
@@ -162,7 +180,8 @@ async def test_an_earlier_claim_regenerated_later_counts_only_what_came_before_i
     assert application["summary"]["previous_certificates_total"] == Decimal("0.00")
     assert application["summary"]["current_payment_due"] == march.net_due == Decimal("36000")
 
-    # And April still reads March, and only March, as previous.
+    # And April, which went out counting March, still reads March, and only
+    # March, as previous.
     application = await svc.build_aia_application(april.id)
     assert application["lines"][0]["previous_value"] == Decimal("40000.00")
     assert application["summary"]["previous_certificates_total"] == Decimal("36000.00")
@@ -189,6 +208,7 @@ async def test_a_percent_that_goes_backwards_bills_nothing_and_the_report_says_s
     contract, line = await _contract(pg_session)
     march = await _claim(svc, contract, "PC-1", "2026-03-01", "2026-03-31")
     await _generate(svc, march, line, "40")
+    await svc.transition_claim(march.id, "submitted")
     april = await _claim(svc, contract, "PC-2", "2026-04-01", "2026-04-30")
     april = await _generate(svc, april, line, "30")
 
@@ -214,6 +234,7 @@ async def test_committing_a_progress_preview_bills_on_the_same_basis(pg_session)
     contract, line = await _contract(pg_session)
     march = await _claim(svc, contract, "PC-1", "2026-03-01", "2026-03-31")
     await _generate(svc, march, line, "40")
+    await svc.transition_claim(march.id, "submitted")
     april = await _claim(svc, contract, "PC-2", "2026-04-01", "2026-04-30")
 
     april = await svc.commit_preview_to_claim(

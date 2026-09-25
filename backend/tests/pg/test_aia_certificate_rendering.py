@@ -36,10 +36,19 @@ from app.modules.contracts.models import Contract, ContractLine, ProgressClaimLi
 from app.modules.contracts.router import create_claim_line
 from app.modules.contracts.schemas import AutoGenerateClaimRequest, ProgressClaimLineCreate
 from app.modules.contracts.service import ContractsService
+from app.modules.contracts.validators import register_contracts_validation_rules
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 
 pytestmark = pytest.mark.asyncio
+
+
+@pytest.fixture(autouse=True)
+def _pay_application_rules() -> None:
+    # Submitting a claim runs the pay_application gate, which refuses when the
+    # rule set is not loaded; registering here keeps the file order-independent.
+    register_contracts_validation_rules()
+
 
 PERIODS = [("2026-03-01", "2026-03-31"), ("2026-04-01", "2026-04-30"), ("2026-05-01", "2026-05-31")]
 
@@ -207,7 +216,8 @@ async def test_a_line_billed_at_zero_percent_still_shows_what_it_billed(pg_sessi
     """
     svc = ContractsService(pg_session)
     job = await _job(pg_session, [("A", "60000"), ("B", "40000")])
-    await _bill(svc, job, 1, {"A": "40", "B": "40"})
+    first = await _bill(svc, job, 1, {"A": "40", "B": "40"})
+    await svc.transition_claim(first.id, "submitted")
     second = await _bill(svc, job, 2, {"A": "60"})
     billed = [ln.contract_line_id for ln in await svc.claim_line_repo.list_for_claim(second.id)]
     assert billed.count(job.lines["B"].id) == 1
@@ -246,6 +256,7 @@ async def test_a_claim_with_no_sov_lines_bills_its_own_totals_rv_s13(pg_session,
     assert app["summary"]["total_completed_stored"] == Decimal("50000.00")
     assert app["summary"]["retainage"] == Decimal("5000.00")
     assert app["summary"]["current_payment_due"] == Decimal(str(first.net_due)).quantize(Decimal("0.01"))
+    await svc.transition_claim(first.id, "submitted")
 
     second = await svc.auto_generate_claim_lines((await _claim(svc, job, 2)).id, _request("30000"))
     app2 = await svc.build_aia_application(second.id)

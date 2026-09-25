@@ -38,7 +38,8 @@
     },
     "errors": {
       "submission_blocked": "This payment application cannot be submitted until these are resolved: {findings}",
-      "rules_unavailable": "The payment application rules are not loaded on this deployment, so this claim cannot be checked before it is submitted."
+      "rules_unavailable": "The payment application rules are not loaded on this deployment, so this claim cannot be checked before it is submitted.",
+      "later_claim_already_issued": "Claim {claims} comes after this one and has already gone out. It was built while this claim was a draft, so it already applies for this work. Delete this draft, or move its period after the last claim that went out"
     },
     "totals_match_lines": {
       "fail": "Claim {claim} asks for {gross}, but the lines behind it add up to {lines_total}: the claim was not worked out again after its lines changed",

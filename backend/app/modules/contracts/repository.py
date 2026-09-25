@@ -38,6 +38,10 @@ from app.modules.contracts.models import (
 )
 from app.modules.contracts.periods import claim_order_key, claims_before
 
+#: Claim metadata key frozen when a claim leaves draft: the ids of the claims
+#: it counted as previous. See :meth:`ProgressClaimRepository.prior_claims`.
+PRIOR_CLAIM_IDS_KEY = "prior_claim_ids"
+
 
 class _CRUDBase:
     """Common CRUD operations shared by all contracts repositories."""
@@ -310,10 +314,28 @@ class ProgressClaimRepository(_CRUDBase):
         contract" is the reading this replaces, and it counted a later claim as
         previous whenever an earlier one was re-rendered or regenerated.
         ``None`` (a claim not stored yet) sees every claim on the contract.
+
+        Draft claims are left out too, for a certificate still being built: a
+        draft has not left the contractor, so it certified nothing either, and
+        counting it put work nobody had applied for into "previous
+        certificates". A claim already issued is not restated, though. Its
+        application is drawn again from this method every time it is printed,
+        so when it leaves draft the claims it counted are frozen onto it under
+        :data:`PRIOR_CLAIM_IDS_KEY`, and from then on only those count, less
+        any rejected since. A claim that left draft before the freeze existed
+        keeps the rule it was issued under, drafts counted.
         """
         ordered = await self.ordered_for_contract(contract_id)
         earlier = claims_before(ordered, before_claim_id) if before_claim_id is not None else ordered
-        return [claim for claim in earlier if claim.status != "rejected"]
+        earlier = [claim for claim in earlier if claim.status != "rejected"]
+        target = next((claim for claim in ordered if claim.id == before_claim_id), None)
+        if target is None or target.status == "draft":
+            return [claim for claim in earlier if claim.status != "draft"]
+        frozen = (target.metadata_ or {}).get(PRIOR_CLAIM_IDS_KEY)
+        if isinstance(frozen, list):
+            counted = {str(claim_id) for claim_id in frozen}
+            return [claim for claim in earlier if str(claim.id) in counted]
+        return earlier
 
     async def claim_numbers_past_draft(self, contract_id: uuid.UUID) -> list[str]:
         """The numbers of the claims on a contract that have left draft, sorted.
@@ -514,11 +536,11 @@ class ProgressClaimLineRepository(_CRUDBase):
         This is G703 column D, work completed from previous applications, and
         the base every running ``cumulative_completed_value`` is built on.
         "Prior" is :meth:`ProgressClaimRepository.prior_claims`: the claims
-        strictly before ``before_claim_id`` in billing order, rejected ones
-        left out. It used to be every claim except the one being written,
-        which counted a later claim as previous whenever an earlier one was
-        regenerated or re-rendered. ``None`` (a claim not stored yet) counts
-        every non-rejected claim. Returns ``{contract_line_id: Decimal}``.
+        strictly before ``before_claim_id`` in billing order, rejected and
+        draft ones left out. It used to be every claim except the one being
+        written, which counted a later claim as previous whenever an earlier
+        one was regenerated or re-rendered. ``None`` (a claim not stored yet)
+        counts every claim past draft. Returns ``{contract_line_id: Decimal}``.
         """
         prior = await ProgressClaimRepository(self.session).prior_claims(contract_id, before_claim_id=before_claim_id)
         if not prior:
