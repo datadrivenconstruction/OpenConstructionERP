@@ -72,6 +72,7 @@ import {
   type WorkOrder,
   type TicketPriority,
   type TicketStatus,
+  type AssetStatus,
   type ContractStatus,
   type WorkOrderStatus,
 } from './api';
@@ -115,6 +116,46 @@ function priorityLabel(
   return t(`service.priority_${priority}`, {
     defaultValue: priority.charAt(0).toUpperCase() + priority.slice(1),
   });
+}
+
+// Work order, service contract and asset badges printed the raw enum the same
+// way the ticket badge once did. Same fix: a key per status, English here only
+// as the fallback for a status the locale files do not know yet.
+const WO_STATUS_LABELS: Record<WorkOrderStatus, string> = {
+  scheduled: 'Scheduled',
+  dispatched: 'Dispatched',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  billed: 'Billed',
+  cancelled: 'Cancelled',
+};
+
+const CONTRACT_STATUS_LABELS: Record<ContractStatus, string> = {
+  draft: 'Draft',
+  active: 'Active',
+  expired: 'Expired',
+  terminated: 'Terminated',
+};
+
+const ASSET_STATUS_LABELS: Record<AssetStatus, string> = {
+  active: 'Active',
+  decommissioned: 'Decommissioned',
+  maintenance: 'In maintenance',
+};
+
+function woStatusLabel(status: WorkOrderStatus, t: (k: string, o?: Record<string, unknown>) => string): string {
+  return t(`service.wo_status_${status}`, { defaultValue: WO_STATUS_LABELS[status] ?? status });
+}
+
+function contractStatusLabel(
+  status: ContractStatus,
+  t: (k: string, o?: Record<string, unknown>) => string,
+): string {
+  return t(`service.contract_status_${status}`, { defaultValue: CONTRACT_STATUS_LABELS[status] ?? status });
+}
+
+function assetStatusLabel(status: AssetStatus, t: (k: string, o?: Record<string, unknown>) => string): string {
+  return t(`service.asset_status_${status}`, { defaultValue: ASSET_STATUS_LABELS[status] ?? status });
 }
 
 const CONTRACT_STATUS_VARIANT: Record<ContractStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
@@ -870,7 +911,7 @@ function WorkOrderTable({
               </td>
               <td className="px-4 py-2 text-content-secondary text-xs">{resolveUserName(r.technician_id) || '—'}</td>
               <td className="px-4 py-2">
-                <Badge variant={WO_STATUS_VARIANT[r.status]} dot>{r.status}</Badge>
+                <Badge variant={WO_STATUS_VARIANT[r.status]} dot>{woStatusLabel(r.status, t)}</Badge>
               </td>
               <td className="px-4 py-2 text-right">
                 <MoneyDisplay amount={Number(r.billed_amount) || 0} currency={r.currency || undefined} />
@@ -935,7 +976,7 @@ function ContractTable({
               </td>
               <td className="px-4 py-2 text-xs text-content-secondary">{r.sla_tier}</td>
               <td className="px-4 py-2">
-                <Badge variant={CONTRACT_STATUS_VARIANT[r.status]} dot>{r.status}</Badge>
+                <Badge variant={CONTRACT_STATUS_VARIANT[r.status]} dot>{contractStatusLabel(r.status, t)}</Badge>
               </td>
               <td className="px-4 py-2 text-right">
                 <MoneyDisplay amount={Number(r.value) || 0} currency={r.currency || undefined} />
@@ -1346,7 +1387,7 @@ function DetailDrawer({
           {wo && (
             <>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Field label={t('service.status')} value={<Badge variant={WO_STATUS_VARIANT[wo.status]} dot>{wo.status}</Badge>} />
+                <Field label={t('service.status')} value={<Badge variant={WO_STATUS_VARIANT[wo.status]} dot>{woStatusLabel(wo.status, t)}</Badge>} />
                 <Field label={t('service.scheduled_for')} value={wo.scheduled_for ? <DateDisplay value={wo.scheduled_for} /> : '—'} />
                 <Field label={t('service.technician')} value={resolveUserName(wo.technician_id) || '—'} />
                 <Field label={t('service.billed')} value={<MoneyDisplay amount={Number(wo.billed_amount) || 0} currency={wo.currency || undefined} />} />
@@ -1466,7 +1507,7 @@ function DetailDrawer({
                 )}
               </div>
               <Field label={t('service.title_col')} value={contract.title || '—'} />
-              <Field label={t('service.status')} value={<Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>{contract.status}</Badge>} />
+              <Field label={t('service.status')} value={<Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>{contractStatusLabel(contract.status, t)}</Badge>} />
               <Field label={t('service.period_start', { defaultValue: 'Start' })} value={contract.period_start} />
               <Field label={t('service.period_end', { defaultValue: 'End' })} value={contract.period_end} />
               <Field label={t('service.sla_tier')} value={contract.sla_tier} />
@@ -1485,7 +1526,7 @@ function DetailDrawer({
               <Field label={t('service.location')} value={asset.location || '—'} />
               <Field label={t('service.install_date', { defaultValue: 'Installed' })} value={asset.install_date || '—'} />
               <Field label={t('service.warranty_until', { defaultValue: 'Warranty until' })} value={asset.warranty_until || '—'} />
-              <Field label={t('service.status')} value={<Badge variant={asset.status === 'active' ? 'success' : 'warning'} dot>{asset.status}</Badge>} />
+              <Field label={t('service.status')} value={<Badge variant={asset.status === 'active' ? 'success' : 'warning'} dot>{assetStatusLabel(asset.status, t)}</Badge>} />
             </div>
           )}
 

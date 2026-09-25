@@ -239,6 +239,23 @@ const SPA_STATUS_LABELS: Record<string, string> = {
   signed: 'Signed', countersigned: 'Countersigned', registered: 'Registered', cancelled: 'Cancelled'
 };
 
+// English fallbacks for the computed `propdev.plot.status.*`, `propdev.instalment.status.*`
+// and `propdev.selection.status.*` keys, for the same reason as the maps above. The
+// status badges on these tabs printed the raw enum (`handed_over`) until they
+// resolved the same keys as the status pickers.
+const PLOT_STATUS_LABELS: Record<string, string> = {
+  planned: 'Planned', reserved: 'Reserved', under_construction: 'Under construction', ready: 'Ready',
+  sold: 'Sold', handed_over: 'Handed over', held: 'Held', blocked: 'Blocked'
+};
+
+const INSTALMENT_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending', due: 'Due', overdue: 'Overdue', paid: 'Paid', waived: 'Waived', cancelled: 'Cancelled'
+};
+
+const SELECTION_STATUS_LABELS: Record<string, string> = {
+  draft: 'Draft', submitted: 'Submitted', locked: 'Locked', cancelled: 'Cancelled'
+};
+
 
 // Order matters - arrow-key navigation walks the list in this order.
 const PROPDEV_TAB_IDS = [
@@ -2609,7 +2626,7 @@ function ReservationsTab({
                       </td>
                       <td className="px-3 py-2">{r.expires_at ? <DateDisplay value={r.expires_at} /> : '—'}</td>
                       <td className="px-3 py-2">
-                        <Badge variant={RESERVATION_VARIANT[r.status]} dot>{r.status}</Badge>
+                        <Badge variant={RESERVATION_VARIANT[r.status]} dot>{t(`propdev.reservation.status.${r.status}`, { defaultValue: RESERVATION_STATUS_LABELS[r.status] ?? r.status })}</Badge>
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center justify-end gap-1">
@@ -3221,7 +3238,7 @@ function SpaTab({
                         <MoneyDisplay amount={toNumber(s.total_value)} currency={s.currency || undefined} />
                       </td>
                       <td className="px-3 py-2">
-                        <Badge variant={SPA_VARIANT[s.status]} dot>{s.status}</Badge>
+                        <Badge variant={SPA_VARIANT[s.status]} dot>{t(`propdev.spa.status.${s.status}`, { defaultValue: SPA_STATUS_LABELS[s.status] ?? s.status })}</Badge>
                       </td>
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
@@ -3412,7 +3429,7 @@ function SpaDetailDrawer({
             />
             <Field
               label={t('common.status', { defaultValue: 'Status' })}
-              value={<Badge variant={SPA_VARIANT[spa.status]} dot>{spa.status}</Badge>}
+              value={<Badge variant={SPA_VARIANT[spa.status]} dot>{t(`propdev.spa.status.${spa.status}`, { defaultValue: SPA_STATUS_LABELS[spa.status] ?? spa.status })}</Badge>}
             />
           </div>
 
@@ -3472,7 +3489,7 @@ function SpaDetailDrawer({
             </div>
             {schedule ? (
               <div className="mb-2 text-xs text-content-secondary">
-                <Badge variant={SCHEDULE_VARIANT[schedule.status]}>{schedule.status}</Badge>
+                <Badge variant={SCHEDULE_VARIANT[schedule.status]}>{t(`propdev.payment_schedule.status.${schedule.status}`, { defaultValue: SCHEDULE_STATUS_LABELS[schedule.status] ?? schedule.status })}</Badge>
                 <span className="ml-2">
                   <MoneyDisplay amount={toNumber(schedule.total_amount)} currency={schedule.currency || undefined} />
                   {' · '}
@@ -3577,7 +3594,7 @@ function InstalmentsTable({
                     <MoneyDisplay amount={toNumber(ins.amount_paid)} currency={currency || undefined} />
                   </td>
                   <td className="px-2 py-1.5">
-                    <Badge variant={INSTALMENT_VARIANT[ins.status]}>{ins.status}</Badge>
+                    <Badge variant={INSTALMENT_VARIANT[ins.status]}>{t(`propdev.instalment.status.${ins.status}`, { defaultValue: INSTALMENT_STATUS_LABELS[ins.status] ?? ins.status })}</Badge>
                   </td>
                   <td className="px-2 py-1.5">
                     <div className="flex items-center justify-end gap-0.5">
@@ -4156,7 +4173,7 @@ function PaymentScheduleTab({
                       </td>
                       <td className="px-3 py-2 text-right text-xs">{String(sch.late_fee_pct)}%</td>
                       <td className="px-3 py-2">
-                        <Badge variant={SCHEDULE_VARIANT[sch.status]} dot>{sch.status}</Badge>
+                        <Badge variant={SCHEDULE_VARIANT[sch.status]} dot>{t(`propdev.payment_schedule.status.${sch.status}`, { defaultValue: SCHEDULE_STATUS_LABELS[sch.status] ?? sch.status })}</Badge>
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center justify-end gap-1">
@@ -4367,7 +4384,7 @@ function HandoverPlotRow({ plot, buyer }: { plot: Plot; buyer: Buyer | undefined
             {buyer ? buyer.full_name : t('propdev.no_buyer', { defaultValue: 'No buyer assigned' })}
           </p>
         </div>
-        <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{plot.status}</Badge>
+        <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{t(`propdev.plot.status.${plot.status}`, { defaultValue: PLOT_STATUS_LABELS[plot.status] ?? plot.status })}</Badge>
       </div>
       {handoversQ.isLoading ? (
         <p className="mt-2 text-xs text-content-tertiary">
@@ -5456,7 +5473,7 @@ function PlotDetailDrawer({
                     aria-expanded={statusMenuOpen}
                     data-testid="plot-status-pill"
                   >
-                    <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{plot.status}</Badge>
+                    <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{t(`propdev.plot.status.${plot.status}`, { defaultValue: PLOT_STATUS_LABELS[plot.status] ?? plot.status })}</Badge>
                     <ChevronDown size={12} className="text-content-tertiary" />
                   </button>
                   {statusMenuOpen && (
@@ -5483,7 +5500,7 @@ function PlotDetailDrawer({
                   )}
                 </div>
               ) : (
-                <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{plot.status}</Badge>
+                <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{t(`propdev.plot.status.${plot.status}`, { defaultValue: PLOT_STATUS_LABELS[plot.status] ?? plot.status })}</Badge>
               )}
               <span className="text-xs text-content-tertiary">
                 {Math.round(toNumber(plot.construction_status_percent))}% {t('propdev.built', { defaultValue: 'built' })}
@@ -6126,7 +6143,7 @@ export function BuyerDetailDrawer({
                 {items.map((s) => (
                   <li key={s.id} className="flex items-center justify-between rounded border border-border-light px-3 py-2 text-sm">
                     <span>
-                      <Badge variant={s.status === 'locked' ? 'success' : 'neutral'}>{s.status}</Badge>
+                      <Badge variant={s.status === 'locked' ? 'success' : 'neutral'}>{t(`propdev.selection.status.${s.status}`, { defaultValue: SELECTION_STATUS_LABELS[s.status] ?? s.status })}</Badge>
                       <span className="ml-2 text-content-secondary text-xs">
                         <DateDisplay value={s.created_at} />
                       </span>

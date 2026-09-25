@@ -31,6 +31,20 @@ export type InspectionResult = 'pass' | 'fail' | 'conditional';
 export type DamageSeverity = 'minor' | 'major' | 'critical';
 export type DamageStatus = 'reported' | 'under_repair' | 'repaired';
 
+/** English fallbacks for `equipment.damage.severity_*` and `equipment.damage.status_*`.
+ *  The damage badges and pickers printed the raw enum (`under_repair`) to every reader. */
+export const DAMAGE_SEVERITY_LABELS: Record<DamageSeverity, string> = {
+  minor: 'Minor',
+  major: 'Major',
+  critical: 'Critical',
+};
+
+export const DAMAGE_STATUS_LABELS: Record<DamageStatus, string> = {
+  reported: 'Reported',
+  under_repair: 'Under repair',
+  repaired: 'Repaired',
+};
+
 export interface Equipment {
   id: string;
   code: string;

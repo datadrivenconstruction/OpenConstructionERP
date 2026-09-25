@@ -65,6 +65,8 @@ import {
   deleteInspection,
   listDamageReports,
   deleteDamageReport,
+  DAMAGE_SEVERITY_LABELS,
+  DAMAGE_STATUS_LABELS,
   listTypes,
   deleteType,
   type Equipment,
@@ -2172,9 +2174,15 @@ function DamageTab({
               </div>
               <div className="flex flex-col items-end gap-1">
                 <Badge variant={DAMAGE_VARIANT[r.severity]} dot>
-                  {r.severity}
+                  {t(`equipment.damage.severity_${r.severity}`, {
+                    defaultValue: DAMAGE_SEVERITY_LABELS[r.severity] ?? r.severity,
+                  })}
                 </Badge>
-                <Badge variant="neutral">{r.status}</Badge>
+                <Badge variant="neutral">
+                  {t(`equipment.damage.status_${r.status}`, {
+                    defaultValue: DAMAGE_STATUS_LABELS[r.status] ?? r.status,
+                  })}
+                </Badge>
               </div>
             </div>
             <div className="mt-2 flex items-center justify-between gap-2">

@@ -89,6 +89,14 @@ const STATUS_COLORS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' |
   running: 'blue',
 };
 
+// The sync-run badges printed the raw run status (`partial`) to every reader.
+const STATUS_LABELS: Record<string, string> = {
+  success: 'Succeeded',
+  partial: 'Partial',
+  failed: 'Failed',
+  running: 'Running',
+};
+
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
@@ -416,7 +424,9 @@ function SyncResultPanel({ log }: { log: SyncLog }) {
             ? t('finance.connectors.dry_run_result', { defaultValue: 'Dry run preview' })
             : t('finance.connectors.sync_result', { defaultValue: 'Sync result' })}
         </span>
-        <Badge variant={STATUS_COLORS[log.status] ?? 'neutral'}>{log.status}</Badge>
+        <Badge variant={STATUS_COLORS[log.status] ?? 'neutral'}>
+          {t(`finance.connectors.log_status_${log.status}`, { defaultValue: STATUS_LABELS[log.status] ?? log.status })}
+        </Badge>
       </div>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-content-secondary">
         <span>
@@ -506,7 +516,11 @@ function SyncHistory({ configId }: { configId: string }) {
                 {log.is_dry_run ? t('finance.connectors.dry', { defaultValue: 'dry run' }) : log.trigger}
               </td>
               <td className="px-4 py-2">
-                <Badge variant={STATUS_COLORS[log.status] ?? 'neutral'}>{log.status}</Badge>
+                <Badge variant={STATUS_COLORS[log.status] ?? 'neutral'}>
+                  {t(`finance.connectors.log_status_${log.status}`, {
+                    defaultValue: STATUS_LABELS[log.status] ?? log.status,
+                  })}
+                </Badge>
               </td>
               <td className="px-4 py-2 text-right tabular-nums">{log.records_out}</td>
               <td className="px-4 py-2 text-right tabular-nums">{log.records_in}</td>

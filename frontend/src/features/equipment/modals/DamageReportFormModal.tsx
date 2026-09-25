@@ -11,6 +11,8 @@ import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import {
   createDamageReport,
   updateDamageReport,
+  DAMAGE_SEVERITY_LABELS,
+  DAMAGE_STATUS_LABELS,
   type DamageReport,
   type DamageSeverity,
   type DamageStatus,
@@ -254,7 +256,7 @@ export function DamageReportFormModal({
                   {(['minor', 'major', 'critical'] as DamageSeverity[]).map(
                     (s) => (
                       <option key={s} value={s}>
-                        {s}
+                        {t(`equipment.damage.severity_${s}`, { defaultValue: DAMAGE_SEVERITY_LABELS[s] })}
                       </option>
                     ),
                   )}
@@ -275,7 +277,7 @@ export function DamageReportFormModal({
                     {(['reported', 'under_repair', 'repaired'] as DamageStatus[]).map(
                       (s) => (
                         <option key={s} value={s}>
-                          {s}
+                          {t(`equipment.damage.status_${s}`, { defaultValue: DAMAGE_STATUS_LABELS[s] })}
                         </option>
                       ),
                     )}
