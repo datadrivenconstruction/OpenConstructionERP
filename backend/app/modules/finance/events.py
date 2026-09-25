@@ -12,7 +12,7 @@ silently divorced from real procurement activity.
 The handlers in this module subscribe to those events and adjust the
 project's budget rows accordingly:
 
-* ``procurement.po.approved`` → committed += po.amount_total (TOP-30 #10:
+* ``procurement.po.approved`` → committed += po.amount_subtotal, net (TOP-30 #10:
   budget is committed when a PO is approved, the moment the spend is
   authorised, since a PO must be approved before it can be issued)
 * ``procurement.po.cancelled`` / ``procurement.po.reverted`` →
@@ -194,7 +194,7 @@ async def _select_budget_row(
 
 
 async def _on_po_approved(event: Event) -> None:
-    """``procurement.po.approved`` → ProjectBudget.committed += amount_total.
+    """``procurement.po.approved`` → ProjectBudget.committed += amount_subtotal (net).
 
     Approval is the commitment moment (TOP-30 #10): a PO must be approved
     before it can be issued, so committing budget here gives a live committed
@@ -208,7 +208,12 @@ async def _on_po_approved(event: Event) -> None:
     """
     data = event.data or {}
     project_id = _coerce_uuid(data.get("project_id"))
-    amount = _to_decimal(data.get("amount_total"))
+    # Net of VAT, like the budget it is measured against and like the goods
+    # receipts that later release it: committing the gross left the order's
+    # VAT stuck in committed after full delivery. ``amount_total`` is only the
+    # fallback for an event published before the net was carried.
+    raw_net = data.get("amount_subtotal")
+    amount = _to_decimal(raw_net if raw_net not in (None, "") else data.get("amount_total"))
     marker_key = _committed_marker_key(data.get("po_id"))
     if project_id is None or amount == 0:
         return

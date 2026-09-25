@@ -827,6 +827,8 @@ class ProcurementService:
                 "status": po.status,
                 "vendor_contact_id": str(po.vendor_contact_id) if po.vendor_contact_id else None,
                 "amount_total": po.amount_total,
+                # Net of VAT, the basis finance commits on (the budget is net).
+                "amount_subtotal": po.amount_subtotal,
                 "currency_code": po.currency_code,
                 "item_count": len(data.items),
             },
@@ -1202,6 +1204,8 @@ class ProcurementService:
                     "project_id": str(updated.project_id),
                     "po_number": updated.po_number,
                     "amount_total": updated.amount_total,
+                    # Net of VAT, the basis finance commits on (the budget is net).
+                    "amount_subtotal": updated.amount_subtotal,
                     "currency_code": updated.currency_code or "",
                     "approver_id": "",
                 },
@@ -1237,6 +1241,8 @@ class ProcurementService:
                         "project_id": str(updated.project_id),
                         "po_number": updated.po_number,
                         "amount_total": updated.amount_total,
+                        # Net of VAT, the basis finance commits on (the budget is net).
+                        "amount_subtotal": updated.amount_subtotal,
                         "currency_code": updated.currency_code or "",
                         "prior_status": prior_status,
                         "status": updated.status,
@@ -1825,6 +1831,8 @@ class ProcurementService:
                 "project_id": str(updated.project_id),
                 "po_number": updated.po_number,
                 "amount_total": updated.amount_total,
+                # Net of VAT, the basis finance commits on (the budget is net).
+                "amount_subtotal": updated.amount_subtotal,
                 "currency_code": updated.currency_code or "",
                 "approver_id": approver_id or "",
             },
@@ -1893,6 +1901,8 @@ class ProcurementService:
                 "project_id": str(updated.project_id),
                 "po_number": updated.po_number,
                 "amount_total": updated.amount_total,
+                # Net of VAT, the basis finance commits on (the budget is net).
+                "amount_subtotal": updated.amount_subtotal,
                 "currency_code": updated.currency_code or "",
             },
         )

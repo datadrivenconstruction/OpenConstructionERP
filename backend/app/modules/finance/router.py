@@ -1210,10 +1210,13 @@ async def list_budgets(
     # VIEWER does not receive every tenant's budgets (admins -> None -> all).
     scope = None if project_id is not None else await accessible_project_ids(session, user_id)
     items, total = await service.list_budgets(project_id=project_id, project_ids=scope, category=category)
-    return BudgetListResponse(
-        items=[BudgetResponse.model_validate(b) for b in items],
-        total=total,
-    )
+    labels = await service.budget_wbs_labels([b.wbs_id for b in items])
+    out = []
+    for b in items:
+        row = BudgetResponse.model_validate(b)
+        row.wbs_label = labels.get(b.wbs_id or "")
+        out.append(row)
+    return BudgetListResponse(items=out, total=total)
 
 
 @router.post(

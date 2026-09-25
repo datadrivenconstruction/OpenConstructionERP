@@ -395,10 +395,13 @@ async def test_patch_into_approved_commits_the_budget_like_approve(
         "project_id",
         "po_number",
         "amount_total",
+        "amount_subtotal",
         "currency_code",
         "approver_id",
     }
     assert approved[0]["amount_total"] == po.amount_total
+    # Finance commits the net, so the net travels with the event.
+    assert approved[0]["amount_subtotal"] == po.amount_subtotal
 
     # And reverting decommits exactly what was committed, not a phantom amount.
     published.clear()

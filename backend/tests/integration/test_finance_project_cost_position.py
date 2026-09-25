@@ -135,7 +135,7 @@ async def _login(client: AsyncClient) -> tuple[str, dict[str, str]]:
     return reg.json()["id"], {"Authorization": f"Bearer {login.json()['access_token']}"}
 
 
-async def _seed_project_and_bill(owner_id: str) -> tuple[uuid.UUID, uuid.UUID]:
+async def _seed_project_and_bill(owner_id: str, country: str = "HR") -> tuple[uuid.UUID, uuid.UUID]:
     """A Croatian project in EUR with one priced, unlocked bill (see module docstring)."""
     from app.database import async_session_factory
     from app.modules.boq.models import BOQ, Position
@@ -148,6 +148,7 @@ async def _seed_project_and_bill(owner_id: str) -> tuple[uuid.UUID, uuid.UUID]:
             owner_id=uuid.UUID(owner_id),
             currency="EUR",
             region="EU",
+            country_code=country,
             metadata_={},
             fx_rates=[],
         )
@@ -671,3 +672,127 @@ async def test_a_link_the_order_cannot_back_is_refused(client: AsyncClient) -> N
     # Unlinking is a plain update.
     unlinked = await _ok(await client.patch(f"{API}/finance/{ok['id']}", json={"purchase_order_id": None}, headers=h))
     assert unlinked["purchase_order_id"] is None
+
+
+async def _budget_rows(client: AsyncClient, h: dict[str, str], project_id: uuid.UUID) -> dict[str, dict]:
+    body = await _ok(await client.get(f"{API}/finance/budgets/?project_id={project_id}", headers=h))
+    items = body["items"] if isinstance(body, dict) else body
+    return {row["wbs_id"]: row for row in items}
+
+
+@pytest.mark.asyncio
+async def test_budget_lines_keep_their_own_actual_and_commitment(client: AsyncClient) -> None:
+    """Each paid amount lands on one budget line, net; an order commits net and is spent once.
+
+    Before: the order committed its gross, so after full delivery its VAT
+    stayed in committed; and every payment wrote the project's whole paid
+    gross into ``actual`` on every line, so two lines showed twice the spend.
+    """
+    owner, h = await _login(client)
+    project_id, boq_id = await _seed_project_and_bill(owner)
+    await _ok(await client.post(f"{API}/boq/boqs/{boq_id}/lock/", headers=h))
+    vendor = await _supplier(client, h)
+    po = await _order(client, h, project_id, vendor)
+    rows = await _budget_rows(client, h, project_id)
+    assert set(rows) == {"01", "02"}
+    # The order commits its net on the line of its WBS, not the 62 500 gross.
+    assert _money(rows["02"]["committed"]) == Decimal("50000")
+
+    await _issue_and_receive(client, h, po)
+    await _supplier_invoices(client, h, project_id, vendor, po)
+    split = await _ok(
+        await client.post(
+            f"{API}/finance/",
+            json={
+                "project_id": str(project_id),
+                "contact_id": vendor,
+                "invoice_direction": "payable",
+                "invoice_number": "R-2026-140",
+                "invoice_date": "2026-09-24",
+                "currency_code": "EUR",
+                "amount_subtotal": "4000.00",
+                "tax_amount": "1000.00",
+                "amount_total": "5000.00",
+                "line_items": [
+                    {"description": "Survey pegs", "amount": "1000.00", "wbs_id": "01", "vat_rate": "25"},
+                    {"description": "Formwork ties", "amount": "3000.00", "wbs_id": "02", "vat_rate": "25"},
+                ],
+            },
+            headers=h,
+        )
+    )
+    await _ok(await client.post(f"{API}/finance/{split['id']}/approve/", headers=h))
+    await _ok(await client.post(f"{API}/finance/{split['id']}/pay/", headers=h))
+
+    rows = await _budget_rows(client, h, project_id)
+    actual = {wbs: _money(row["actual"]) for wbs, row in rows.items()}
+    committed = {wbs: _money(row["committed"]) for wbs, row in rows.items()}
+    # 02: 40 000 received on the order (its paid invoice is the same money)
+    # plus 3 000 of the split invoice; 01: its 1 000 line. Net throughout.
+    assert actual == {"01": Decimal("1000"), "02": Decimal("43000")}
+    # The order's 50 000 less the 40 000 received and paid: 10 000 still open.
+    assert committed == {"01": Decimal("0"), "02": Decimal("10000")}
+
+
+@pytest.mark.asyncio
+async def test_a_budget_line_keyed_by_a_bill_section_shows_its_name(client: AsyncClient) -> None:
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.boq.models import Position
+
+    owner, h = await _login(client)
+    project_id, boq_id = await _seed_project_and_bill(owner)
+    async with async_session_factory() as s:
+        section_id = (
+            await s.execute(select(Position.id).where(Position.boq_id == boq_id, Position.ordinal == "02"))
+        ).scalar_one()
+    await _ok(
+        await client.post(
+            f"{API}/finance/budgets/",
+            json={
+                "project_id": str(project_id),
+                "wbs_id": str(section_id),
+                "category": "material",
+                "original_budget": "1000",
+                "currency_code": "EUR",
+            },
+            headers=h,
+        )
+    )
+    body = await _ok(await client.get(f"{API}/finance/budgets/?project_id={project_id}", headers=h))
+    row = next(r for r in body["items"] if r["wbs_id"] == str(section_id))
+    assert row["wbs_label"] == "02 Concrete works"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("country", "expected"), [("HR", "25"), ("DE", "19")])
+async def test_an_invoice_line_without_a_vat_rate_gets_the_project_country_rate(
+    client: AsyncClient, country: str, expected: str
+) -> None:
+    owner, h = await _login(client)
+    project_id, _ = await _seed_project_and_bill(owner, country=country)
+    vendor = await _supplier(client, h)
+    created = await _ok(
+        await client.post(
+            f"{API}/finance/",
+            json={
+                "project_id": str(project_id),
+                "contact_id": vendor,
+                "invoice_direction": "payable",
+                "invoice_date": "2026-09-24",
+                "currency_code": "EUR",
+                "amount_subtotal": "300.00",
+                "line_items": [
+                    {"description": "No rate given", "amount": "100.00"},
+                    {"description": "Reduced rate", "amount": "100.00", "vat_rate": "13"},
+                    {"description": "Exempt", "amount": "100.00", "vat_rate": "0"},
+                ],
+            },
+            headers=h,
+        )
+    )
+    rates = {line["description"]: line["vat_rate"] for line in created["line_items"]}
+    assert Decimal(str(rates["No rate given"])) == Decimal(expected)
+    assert Decimal(str(rates["Reduced rate"])) == Decimal("13")
+    assert Decimal(str(rates["Exempt"])) == Decimal("0")

@@ -898,7 +898,13 @@ def _make_paid_invoice(*, project_id: uuid.UUID, amount_total: str, items: list[
         id=uuid.uuid4(),
         project_id=project_id,
         status="paid",
+        invoice_direction="payable",
+        currency_code="",
+        # These stubs carry no tax, so the net is the total.
+        amount_subtotal=amount_total,
         amount_total=amount_total,
+        purchase_order_id=None,
+        metadata_={},
         invoice_number="INV-TEST",
         line_items=list(items or []),
     )
@@ -956,9 +962,9 @@ async def test_pay_invoice_distributes_actuals_by_category() -> None:
 
 @pytest.mark.asyncio
 async def test_pay_invoice_unmatched_category_lands_in_catch_all() -> None:
-    """Line items with a cost_category that has NO matching budget row
-    fall through to the ``(None, None)`` bucket if one exists — otherwise
-    they are dropped (logged elsewhere)."""
+    """Line items with a cost_category that has NO matching budget row land
+    on the project-level ``(None, None)`` line. They used to be dropped, so
+    paid money vanished from every budget line."""
     pid = uuid.uuid4()
 
     paid_invoice = _make_paid_invoice(
@@ -983,10 +989,8 @@ async def test_pay_invoice_unmatched_category_lands_in_catch_all() -> None:
 
     await service.pay_invoice(approved_invoice.id)
 
-    # 500 went to the 'material' bucket that has no matching budget; the
-    # catch-all budget (category=None) stays at 0. Production resets every
-    # budget row to ``Decimal("0")`` before assignment, so compare numerically.
-    assert Decimal(uncategorized_budget.actual) == Decimal("0")
+    # No 'material' line exists, so the 500 lands on the one project-level line.
+    assert Decimal(uncategorized_budget.actual) == Decimal("500")
 
 
 @pytest.mark.asyncio
