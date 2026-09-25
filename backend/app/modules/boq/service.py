@@ -6441,7 +6441,7 @@ class BOQService:
         # out here, because the methodology catalogue reads the same table and a
         # rule written twice is a rule that will be true in one place.
         new_markups: list[BOQMarkup] = []
-        for entry in resolve_region_lines(region_key, vat_rate=vat_rate):
+        for entry in resolve_region_lines(region_key, vat_rate=vat_rate, country_code=country_code):
             # ``vat_override`` keeps its existing meaning: this line's rate was
             # replaced. ``vat_rate_source`` is added on tax lines only, and is
             # read off the line rather than off the decision above, because a
