@@ -35723,6 +35723,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Partidas de costo omitidas: {{items}}",
     "onboarding.db_load_failed": "No se pudo cargar {{name}}",
     "onboarding.db_load_unconfirmed": "Se perdió la conexión al cargar {{name}}. La carga puede terminar igualmente en el servidor.",
+    "onboarding.pack_still_loading": "Aún se está cargando, revísalo más tarde",
     "onboarding.base_loading_catalog": "Cargando bases de costos...",
     "pointcloud.boq_added_title": "Agregado a LV",
     "pointcloud.boq_failed_title": "No se pudo agregar a LV",

@@ -46,6 +46,7 @@ import {
   Handshake,
   Truck,
   CalendarClock,
+  Clock,
   Hammer,
   BadgeCheck,
   ShieldCheck,
@@ -120,7 +121,12 @@ import {
   fetchOnboardingStatus,
   type OnboardingJobState,
 } from './onboardingApi';
-import { costDbItemCount, costDbLoadReport, followCostDbLoad } from './costDbLoad';
+import {
+  costDbItemCount,
+  costDbLoadReport,
+  followCostDbLoad,
+  type CostDbLoadOutcome,
+} from './costDbLoad';
 import {
   combineOutcomes,
   countryProvisionToast,
@@ -2661,8 +2667,18 @@ function StepModuleConfig({
 
 // ── Country Pack picker (Step 5 lead experience) ────────────────────────────
 
-/** Per-component install status used by the Country Pack card. */
-type PackComponentState = 'idle' | 'running' | 'done' | 'error' | 'skipped';
+/**
+ * Per-component install status used by the Country Pack card. ``pending`` is a
+ * cost base load the wizard lost track of: it may still finish on the server.
+ */
+type PackComponentState = 'idle' | 'running' | 'pending' | 'done' | 'error' | 'skipped';
+
+/** The card state for a finished cost base load. Losing the server is not a failure. */
+export function packDbStateFor(outcome: CostDbLoadOutcome): PackComponentState {
+  if (outcome === 'failed') return 'error';
+  if (outcome === 'unconfirmed') return 'pending';
+  return 'done';
+}
 
 /** Small status glyph for a Country Pack component (locale / DB / demo). */
 function PackStatusGlyph({ state }: { state: PackComponentState }) {
@@ -2674,6 +2690,9 @@ function PackStatusGlyph({ state }: { state: PackComponentState }) {
   }
   if (state === 'skipped') {
     return <span className="text-2xs text-content-quaternary shrink-0">—</span>;
+  }
+  if (state === 'pending') {
+    return <Clock size={15} className="text-semantic-warning shrink-0" aria-hidden />;
   }
   if (state === 'error') {
     return <span className="text-2xs font-semibold text-semantic-error shrink-0">!</span>;
@@ -3159,6 +3178,7 @@ function PackComponentRow({
   onAction: () => void;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-secondary/60 px-3 py-2.5">
       <div className="flex min-w-0 items-center gap-2.5">
@@ -3178,6 +3198,11 @@ function PackComponentRow({
           </span>
         ) : state === 'skipped' ? (
           <span className="text-2xs text-content-quaternary">{skippedLabel}</span>
+        ) : state === 'pending' ? (
+          <span className="flex items-center gap-1 text-2xs font-medium text-semantic-warning">
+            <Clock size={13} />
+            {t('onboarding.pack_still_loading', { defaultValue: 'Still loading, check later' })}
+          </span>
         ) : (
           <Button
             variant="ghost"
@@ -3561,12 +3586,14 @@ export function StepDataSetup({
   const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
 
   // Generalized cost-DB loader. Loads an explicit ``region`` (defaults to the
-  // currently selected one) and returns ``true`` on success so callers that
+  // currently selected one) and returns how the load ended so callers that
   // chain components (the Country Pack "install all" flow) can react. Shared
   // by the region grid (manual path) and the Country Pack picker.
   const loadCostDb = useCallback(
-    async (region: string): Promise<boolean> => {
-      if (loadingDb || (loadedDb && loadedDb.id === region)) return !!loadedDb;
+    async (region: string): Promise<CostDbLoadOutcome> => {
+      if (loadedDb && loadedDb.id === region) return 'completed';
+      // Another load is running; its own toast reports how it ends.
+      if (loadingDb) return 'unconfirmed';
       setLoadingDb(true);
 
       const dbName = CWICR_DATABASES.find((d) => d.id === region)?.name ?? region;
@@ -3617,7 +3644,7 @@ export function StepDataSetup({
           updateQueueTask(taskId, { status: 'error', progress: 0, error: report.queueLine });
         }
         addToast(report.toast);
-        return loaded;
+        return result.outcome;
       } finally {
         setLoadingDb(false);
       }
@@ -3701,8 +3728,7 @@ export function StepDataSetup({
     async (pack: CountryPack) => {
       setSelectedRegion(pack.region);
       setPackDbState('running');
-      const ok = await loadCostDb(pack.region);
-      setPackDbState(ok ? 'done' : 'error');
+      setPackDbState(packDbStateFor(await loadCostDb(pack.region)));
     },
     [loadCostDb],
   );
@@ -3721,7 +3747,7 @@ export function StepDataSetup({
 
   // One-click (generic preset): language + classification, the relational cost
   // DB, and the preset's worked example project. Endpoints called:
-  //   - POST /api/v1/costs/load-cwicr/{region}
+  //   - POST /api/v1/onboarding/provision {region}, then its job is polled
   //   - POST /api/demo/install/{demoId}
   // Locale + classification are applied client-side.
   //
@@ -3747,10 +3773,11 @@ export function StepDataSetup({
       recordClassification(pack.classification);
       setPackLocaleState('done');
 
-      // 2) Cost database.
+      // 2) Cost database, started and not awaited here. A large region takes
+      // many minutes, and the example project used to wait for all of them;
+      // the load reports its own ending in a toast.
       setPackDbState('running');
-      const dbOk = await loadCostDb(pack.region);
-      setPackDbState(dbOk ? 'done' : 'error');
+      const dbDone = loadCostDb(pack.region).then((outcome) => setPackDbState(packDbStateFor(outcome)));
 
       // 3) Example project. Independent of the cost database on purpose: a
       // demo carries its own priced bill, so a slow or failed catalogue import
@@ -3759,6 +3786,9 @@ export function StepDataSetup({
       const demoOk = await installDemoProject(pack.demoId);
       setPackDemoState(demoOk ? 'done' : 'error');
 
+      // The card stays locked until the load ends too, so switching the
+      // country cannot land this load's state on another pack.
+      await dbDone;
       setPackInstalling(false);
     },
     [packInstalling, applyLocale, recordClassification, loadCostDb, installDemoProject],

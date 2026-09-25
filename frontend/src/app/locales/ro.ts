@@ -37916,6 +37916,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Articole de cost omise: {{items}}",
     "onboarding.db_load_failed": "{{name}} nu a putut fi încărcată",
     "onboarding.db_load_unconfirmed": "Conexiunea s-a pierdut în timpul încărcării {{name}}. Încărcarea se poate încheia totuși pe server.",
+    "onboarding.pack_still_loading": "Încă se încarcă, verificați mai târziu",
     "onboarding.base_loading_catalog": "Se încarcă bazele de costuri...",
     "pipeline.toolbar.open": "Deschidere",
     "pipeline.toolbar.open_hint": "Deschide un flux de lucru salvat sau pornește de la un șablon",

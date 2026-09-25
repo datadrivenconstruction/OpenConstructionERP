@@ -37841,6 +37841,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Udeladte omkostningsposter: {{items}}",
     "onboarding.db_load_failed": "{{name}} kunne ikke indlæses",
     "onboarding.db_load_unconfirmed": "Forbindelsen blev afbrudt under indlæsning af {{name}}. Indlæsningen kan stadig blive færdig på serveren.",
+    "onboarding.pack_still_loading": "Indlæses stadig, tjek senere",
     "onboarding.base_loading_catalog": "Indlæser omkostningsbaser...",
     "pipeline.toolbar.open": "Åbn",
     "pipeline.toolbar.open_hint": "Åbn en gemt arbejdsgang eller start fra en skabelon",

@@ -37951,6 +37951,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Пропуснати ценови позиции: {{items}}",
     "onboarding.db_load_failed": "{{name}} не можа да се зареди",
     "onboarding.db_load_unconfirmed": "Връзката беше загубена при зареждането на {{name}}. Зареждането може все още да завърши на сървъра.",
+    "onboarding.pack_still_loading": "Все още се зарежда, проверете по-късно",
     "onboarding.base_loading_catalog": "Зареждане на бази данни за разходи...",
     "pipeline.toolbar.open": "Отваряне",
     "pipeline.toolbar.open_hint": "Отвори запазен работен процес или започни от шаблон",

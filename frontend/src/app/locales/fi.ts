@@ -37726,6 +37726,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Pois jääneet kustannusnimikkeet: {{items}}",
     "onboarding.db_load_failed": "Kohdetta {{name}} ei voitu ladata",
     "onboarding.db_load_unconfirmed": "Yhteys katkesi ladattaessa kohdetta {{name}}. Lataus voi silti valmistua palvelimella.",
+    "onboarding.pack_still_loading": "Latautuu yhä, tarkista myöhemmin",
     "onboarding.base_loading_catalog": "Ladataan kustannuspohjia...",
     "phonelog.rec.direction": "Suunta",
     "pipeline.toolbar.open": "Avaa",

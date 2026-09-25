@@ -37577,6 +37577,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Kihagyott költségtételek: {{items}}",
     "onboarding.db_load_failed": "A(z) {{name}} nem tölthető be",
     "onboarding.db_load_unconfirmed": "Megszakadt a kapcsolat a(z) {{name}} betöltése közben. A betöltés a szerveren még befejeződhet.",
+    "onboarding.pack_still_loading": "Még töltődik, nézze meg később",
     "onboarding.base_loading_catalog": "Költségadatbázisok betöltése...",
     "pipeline.toolbar.open": "Megnyitás",
     "pipeline.toolbar.open_hint": "Nyisson meg egy mentett munkafolyamatot, vagy induljon egy sablonból",

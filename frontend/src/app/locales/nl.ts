@@ -37826,6 +37826,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Weggelaten kostenposten: {{items}}",
     "onboarding.db_load_failed": "{{name}} kon niet worden geladen",
     "onboarding.db_load_unconfirmed": "Verbinding verloren tijdens het laden van {{name}}. Het laden kan op de server nog worden voltooid.",
+    "onboarding.pack_still_loading": "Wordt nog geladen, controleer later",
     "onboarding.base_loading_catalog": "Kostenbases laden...",
     "phonelog.rec.direction": "Richting",
     "pipeline.toolbar.open": "Openen",

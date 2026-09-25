@@ -37993,6 +37993,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Vynechané nákladové položky: {{items}}",
     "onboarding.db_load_failed": "{{name}} se nepodařilo načíst",
     "onboarding.db_load_unconfirmed": "Během načítání {{name}} došlo ke ztrátě spojení. Načítání se na serveru může ještě dokončit.",
+    "onboarding.pack_still_loading": "Stále se načítá, zkontrolujte později",
     "onboarding.base_loading_catalog": "Načítání nákladových bází...",
     "pipeline.toolbar.open": "Otevřít",
     "pipeline.toolbar.open_hint": "Otevřete uložený pracovní postup nebo začněte z šablony",

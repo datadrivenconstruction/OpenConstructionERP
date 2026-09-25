@@ -37792,6 +37792,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Postes de coût non chargés: {{items}}",
     "onboarding.db_load_failed": "Impossible de charger {{name}}",
     "onboarding.db_load_unconfirmed": "Connexion perdue pendant le chargement de {{name}}. Le chargement peut encore se terminer sur le serveur.",
+    "onboarding.pack_still_loading": "Chargement en cours, vérifiez plus tard",
     "onboarding.base_loading_catalog": "Chargement des bases de coûts...",
     "phonelog.rec.card_title": "Créer un protocole à partir d'un enregistrement",
     "pipeline.toolbar.open": "Ouvrir",

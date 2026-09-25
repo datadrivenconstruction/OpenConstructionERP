@@ -37191,6 +37191,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "פריטי עלות שלא נטענו: {{items}}",
     "onboarding.db_load_failed": "לא ניתן היה לטעון את {{name}}",
     "onboarding.db_load_unconfirmed": "החיבור אבד בזמן טעינת {{name}}. ייתכן שהטעינה עדיין תסתיים בשרת.",
+    "onboarding.pack_still_loading": "עדיין נטען, בדקו מאוחר יותר",
     "onboarding.base_loading_catalog": "טוען מאגרי עלות...",
     "phonelog.rec.card_title": "צור פרוטוקול מהקלטה",
     "pipeline.toolbar.open": "פתח",

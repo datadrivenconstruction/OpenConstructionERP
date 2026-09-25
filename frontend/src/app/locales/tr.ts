@@ -38064,6 +38064,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Dışarıda kalan maliyet kalemleri: {{items}}",
     "onboarding.db_load_failed": "{{name}} yüklenemedi",
     "onboarding.db_load_unconfirmed": "{{name}} yüklenirken bağlantı koptu. Yükleme sunucuda yine de tamamlanabilir.",
+    "onboarding.pack_still_loading": "Hâlâ yükleniyor, daha sonra kontrol edin",
     "onboarding.base_loading_catalog": "Maliyet tabanları yükleniyor...",
     "pipeline.toolbar.open": "Aç",
     "pipeline.toolbar.open_hint": "Kaydedilmiş bir iş akışını açın veya bir şablondan başlayın",

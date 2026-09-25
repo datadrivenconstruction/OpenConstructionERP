@@ -37871,6 +37871,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Utelämnade kostnadsposter: {{items}}",
     "onboarding.db_load_failed": "{{name}} kunde inte läsas in",
     "onboarding.db_load_unconfirmed": "Anslutningen bröts när {{name}} lästes in. Inläsningen kan fortfarande slutföras på servern.",
+    "onboarding.pack_still_loading": "Läses fortfarande in, kontrollera senare",
     "onboarding.base_loading_catalog": "Läser in kostnadsbaser...",
     "pipeline.toolbar.open": "Öppna",
     "pipeline.toolbar.open_hint": "Öppna ett sparat arbetsflöde eller starta från en mall",

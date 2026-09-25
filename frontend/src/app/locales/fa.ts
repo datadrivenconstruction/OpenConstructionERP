@@ -37052,6 +37052,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "اقلام هزینه‌ای که بارگذاری نشدند: {{items}}",
     "onboarding.db_load_failed": "{{name}} بارگذاری نشد",
     "onboarding.db_load_unconfirmed": "ارتباط هنگام بارگذاری {{name}} قطع شد. ممکن است بارگذاری همچنان روی سرور کامل شود.",
+    "onboarding.pack_still_loading": "هنوز در حال بارگذاری است، بعداً بررسی کنید",
     "onboarding.base_loading_catalog": "در حال بارگذاری پایگاه‌های هزینه...",
     "phonelog.rec.card_title": "ایجاد یک پروتکل از یک ضبط",
     "pipeline.toolbar.open": "باز",

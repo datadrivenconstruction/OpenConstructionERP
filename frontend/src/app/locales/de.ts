@@ -38449,6 +38449,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Ausgelassene Kostenpositionen: {{items}}",
     "onboarding.db_load_failed": "{{name}} konnte nicht geladen werden",
     "onboarding.db_load_unconfirmed": "Verbindung beim Laden von {{name}} verloren. Der Ladevorgang kann auf dem Server noch abgeschlossen werden.",
+    "onboarding.pack_still_loading": "Lädt noch, später prüfen",
     "onboarding.base_loading_catalog": "Kostenbasen werden geladen...",
     "pipeline.toolbar.open": "Öffnen",
     "pipeline.toolbar.open_hint": "Gespeicherten Workflow öffnen oder von einer Vorlage starten",

@@ -37724,6 +37724,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "読み込まれなかったコスト項目: {{items}}",
     "onboarding.db_load_failed": "{{name}} を読み込めませんでした",
     "onboarding.db_load_unconfirmed": "{{name}} の読み込み中に接続が切れました。読み込みはサーバー上で完了する可能性があります。",
+    "onboarding.pack_still_loading": "読み込み中です。後で確認してください",
     "onboarding.base_loading_catalog": "コストベースを読み込んでいます...",
     "pipeline.toolbar.open": "開く",
     "pipeline.toolbar.open_hint": "保存したワークフローを開くか、テンプレートから開始します",

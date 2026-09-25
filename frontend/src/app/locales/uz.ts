@@ -38349,6 +38349,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Tashlab ketilgan xarajat pozitsiyalari: {{items}}",
     "onboarding.db_load_failed": "{{name}} yuklanmadi",
     "onboarding.db_load_unconfirmed": "{{name}} yuklanayotganda aloqa uzildi. Yuklash serverda baribir yakunlanishi mumkin.",
+    "onboarding.pack_still_loading": "Hali yuklanmoqda, keyinroq tekshiring",
     "onboarding.base_loading_catalog": "Xarajat bazalari yuklanmoqda...",
     "pipeline.toolbar.open": "Ochiq",
     "pipeline.toolbar.open_hint": "Saqlangan ish jarayonini oching yoki shablondan boshlang",

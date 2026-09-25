@@ -38320,6 +38320,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Пропущено позицій вартості: {{items}}",
     "onboarding.db_load_failed": "Не вдалося завантажити {{name}}",
     "onboarding.db_load_unconfirmed": "Зв'язок втрачено під час завантаження {{name}}. Завантаження ще може завершитися на сервері.",
+    "onboarding.pack_still_loading": "Ще завантажується, перевірте пізніше",
     "onboarding.base_loading_catalog": "Завантаження цінових баз...",
     "pipeline.toolbar.open": "Відкрити",
     "pipeline.toolbar.open_hint": "Відкрийте збережений робочий процес або почніть із шаблону",

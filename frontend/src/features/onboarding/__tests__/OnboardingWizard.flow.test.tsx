@@ -58,7 +58,7 @@ vi.mock('@/features/costs/baseCatalog', async (importOriginal) => {
   return { ...actual, useBaseCatalog: () => ({ data: undefined }) };
 });
 
-import { OnboardingWizard } from '../OnboardingWizard';
+import { OnboardingWizard, packDbStateFor } from '../OnboardingWizard';
 import { ALL_MODULES, CORE_MODULE_KEYS } from '../modules';
 import { meOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -561,5 +561,69 @@ describe('loading a cost base by hand on the data step', () => {
     } finally {
       fetchSpy.mockRestore();
     }
+  });
+});
+
+// The country pack's one-click install used to load the cost base first and
+// only then install the example project, so on a large region the demo waited
+// for the whole import. The load now runs beside it and reports its own end.
+describe('installing a country pack on the data step', () => {
+  it('installs the example project while the cost base is still loading', async () => {
+    const cwicr = {
+      id: 'job-cwicr',
+      kind: 'onboarding.load_cwicr',
+      arg: 'X',
+      pct: 15,
+      message: null,
+      error: null,
+      failed_items: 0,
+    };
+    let loadFinished = false;
+    const fallbackPost = api.apiPost.getMockImplementation()!;
+    api.apiPost.mockImplementation((path: string, body: unknown) =>
+      path === '/v1/onboarding/provision'
+        ? Promise.resolve({ jobs: [{ ...cwicr, state: 'pending', outcome: null }] })
+        : fallbackPost(path, body),
+    );
+    const fallbackGet = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/onboarding/jobs/'
+        ? Promise.resolve({
+            jobs: [
+              loadFinished
+                ? { ...cwicr, state: 'success', outcome: 'completed', pct: 100, imported: 100, total: 100 }
+                : { ...cwicr, state: 'started', outcome: null },
+            ],
+          })
+        : fallbackGet(path),
+    );
+    useToastStore.setState({ toasts: [] });
+
+    renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    click(/Get Started/);
+    await heading('How would you like to start?');
+    click(/Quick Start/);
+    await heading('Data Setup');
+    click(/^Install .* pack$/);
+
+    const demoPosts = () => api.apiPost.mock.calls.filter(([p]) => String(p).startsWith('/demo/install/'));
+    await waitFor(() => expect(demoPosts()).toHaveLength(1), { timeout: 5_000 });
+    // The load is still running when the demo goes in.
+    expect(loadFinished).toBe(false);
+    expect(useToastStore.getState().toasts.some((t) => / loaded$/.test(t.title))).toBe(false);
+
+    loadFinished = true;
+    await waitFor(
+      () => expect(useToastStore.getState().toasts.some((t) => / loaded$/.test(t.title))).toBe(true),
+      { timeout: 5_000 },
+    );
+  });
+
+  it('shows a load it lost track of as still loading, not as failed', () => {
+    expect(packDbStateFor('unconfirmed')).toBe('pending');
+    expect(packDbStateFor('failed')).toBe('error');
+    expect(packDbStateFor('partial')).toBe('done');
+    expect(packDbStateFor('completed')).toBe('done');
   });
 });
