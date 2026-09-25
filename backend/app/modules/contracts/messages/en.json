@@ -71,6 +71,11 @@
     "retention_release_within_held": {
       "fail": "The releases billed up to claim {claim} pay back {released}, more than the {accrued} of retention held up to it",
       "suggestion": "Void the release that is too large, or bill it on a later claim once more retention is held"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "The schedule of values adds up to {scheduled}, but the contract sum to date is {contract_sum}: the lines this claim is billed against leave {difference} of the contract without a line",
+      "suggestion": "Add or correct schedule of values lines until they add up to the contract sum",
+      "suggestion_reconcile": "{count} approved change orders or variations moved the contract sum before they reached the schedule of values. Use Reconcile change orders on the contract to add a line for each"
     }
   },
   "retention_release": {
@@ -99,6 +104,12 @@
   "aia": {
     "g703": {
       "billed_not_on_a_schedule_line": "Billed work not carried by any schedule of values line"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Change orders are reconciled onto the schedule of values of an active contract only; this contract is {status}",
+      "preview_stale": "The list of change orders to reconcile has changed since you opened it. Open the preview again and confirm what it shows now"
     }
   }
 }

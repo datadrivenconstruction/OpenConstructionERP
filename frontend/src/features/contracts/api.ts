@@ -1433,6 +1433,49 @@ export function getSovStatus(contractId: string): Promise<SovStatusResponse> {
   );
 }
 
+/** One approved change that moved the contract sum and has no SoV line yet. */
+export interface SovReconcileItem {
+  source_key: string;
+  source_kind: 'change_order' | 'variation_order';
+  source_id: string;
+  source_code: string;
+  title: string;
+  amount: string;
+  currency: string;
+  approved_on: string | null;
+}
+
+export interface SovReconcilePreview {
+  contract_id: string;
+  contract_status: string;
+  can_apply: boolean;
+  currency: string;
+  contract_sum: string;
+  scheduled_total: string;
+  scheduled_total_after: string;
+  items: SovReconcileItem[];
+  /** Set on the apply response only. */
+  posted?: number;
+}
+
+/** Changes approved before they reached the schedule of values. */
+export function getSovReconcilePreview(contractId: string): Promise<SovReconcilePreview> {
+  return apiGet<SovReconcilePreview>(
+    `/v1/contracts/contracts/${contractId}/sov/reconcile-change-orders`,
+  );
+}
+
+/** Post exactly the previewed changes; 409 when the preview is out of date. */
+export function applySovReconcile(
+  contractId: string,
+  sourceKeys: string[],
+): Promise<SovReconcilePreview> {
+  return apiPost<SovReconcilePreview>(
+    `/v1/contracts/contracts/${contractId}/sov/reconcile-change-orders`,
+    { source_keys: sourceKeys },
+  );
+}
+
 /** One finding from the contracts completeness rule set (parties/security/EOT). */
 export interface CompletenessFinding {
   rule_id: string;

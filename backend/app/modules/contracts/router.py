@@ -141,6 +141,7 @@ from app.modules.contracts.schemas import (
     RetentionScheduleResponse,
     RetentionScheduleUpdate,
     RetentionSummaryResponse,
+    SovReconcileConfirm,
     TemplateCatalogueEntry,
     TemplateClauseSetRequest,
 )
@@ -1690,6 +1691,35 @@ async def sov_status(
         },
         "totals": {k: str(v) if hasattr(v, "as_tuple") else v for k, v in result["totals"].items()},
     }
+
+
+@router.get("/contracts/{contract_id}/sov/reconcile-change-orders")
+async def sov_reconcile_preview(
+    contract_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> dict:
+    """Changes approved before they reached the schedule of values, and what posting them adds."""
+    await _verify_contract_access(session, contract_id, user_id)
+    return await ContractsService(session).sov_reconcile_preview(contract_id)
+
+
+@router.post("/contracts/{contract_id}/sov/reconcile-change-orders")
+async def sov_reconcile_apply(
+    contract_id: uuid.UUID,
+    body: SovReconcileConfirm,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> dict:
+    """Post the previewed changes as schedule of values lines, once a person confirms them.
+
+    Nothing is posted unless ``source_keys`` is exactly the list the preview
+    gives now (409 ``reconcile_preview_stale`` otherwise).
+    """
+    await _verify_contract_access(session, contract_id, user_id)
+    return await ContractsService(session).sov_reconcile_apply(contract_id, body.source_keys, actor_id=user_id)
 
 
 # ── Retention release ────────────────────────────────────────────────────

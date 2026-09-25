@@ -1581,3 +1581,13 @@ class ContractSigningSessionResponse(BaseModel):
     content_hash_current: bool
     stale_signatories: list[str] = Field(default_factory=list)
     signed_roles: list[str] = Field(default_factory=list)
+
+
+class SovReconcileConfirm(BaseModel):
+    """Body for ``POST /contracts/{id}/sov/reconcile-change-orders``.
+
+    The source keys the person read in the preview and agreed to post. The
+    server posts only when they are exactly what it would post now.
+    """
+
+    source_keys: list[str] = Field(default_factory=list, max_length=500)
