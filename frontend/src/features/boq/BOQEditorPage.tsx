@@ -103,6 +103,7 @@ import {
   getCurrencyCode,
   createFormatter,
   fmtWithCurrency,
+  catalogComponentAmounts,
   convertToBase,
   computeQualityScore,
   isResourceDrivenRate,
@@ -4472,8 +4473,7 @@ export function BOQEditorPage() {
       const components = item.components || [];
       const resources = components.map((c) => ({
         name: c.name, code: c.code || '', type: c.type || 'other',
-        unit: c.unit, quantity: c.quantity, unit_rate: c.unit_rate,
-        total: c.cost || c.quantity * c.unit_rate,
+        unit: c.unit, ...catalogComponentAmounts(c),
       }));
       const newMeta: Record<string, unknown> = { ...pos.metadata, cost_item_code: item.code, source: 'cost_database' };
       if (resources.length > 0) newMeta.resources = resources;

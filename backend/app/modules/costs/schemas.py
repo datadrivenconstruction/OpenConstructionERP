@@ -11,8 +11,17 @@ from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
+from app.modules.costs.buildup import buildup_rate as _buildup_rate
 from app.modules.costs.region_currency import REGION_CURRENCY
 
 # Round-7 audit (2026-05-24): money / rate / factor fields are exchanged as
@@ -287,6 +296,21 @@ class CostItemResponse(BaseModel):
     metadata: dict[str, Any] = Field(alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def buildup_rate(self) -> str | None:
+        """The unit rate a bill line receives when this item is added.
+
+        The catalogue ``rate`` and the sum of the item's components are two
+        figures in the source data. The add flow prices the line from its
+        components, so a picker that shows only ``rate`` promises one price and
+        delivers another. ``None`` when the item has no components (it is added
+        at ``rate``) or has a variant slot (the rate follows the variant
+        picked). Decimal-string, like ``rate``.
+        """
+        value = _buildup_rate(self.components, self.metadata)
+        return None if value is None else str(value)
 
     @model_validator(mode="after")
     def _resolve_currency_from_region(self) -> CostItemResponse:

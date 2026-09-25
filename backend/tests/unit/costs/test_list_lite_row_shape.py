@@ -38,6 +38,7 @@ _LITE_ROW_FIELDS = frozenset(
         "descriptions",
         "unit",
         "rate",
+        "buildup_rate",
         "currency",
         "source",
         "classification",

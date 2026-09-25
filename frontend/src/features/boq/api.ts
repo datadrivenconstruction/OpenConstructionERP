@@ -1667,6 +1667,10 @@ export interface CostSearchItem {
   description: string;
   unit: string;
   rate: number;
+  /** The unit rate a bill line receives when this item is added: the sum of
+   *  its components. ``null`` when the item has no components (it lands at
+   *  ``rate``) or a variant still to pick. */
+  buildup_rate?: number | null;
   currency?: string;
   region: string | null;
   classification: Record<string, string>;
@@ -1757,6 +1761,8 @@ export async function fetchCostSearch(
   const items = (raw.items ?? []).map((item) => ({
     ...item,
     rate: toNum(item.rate as number | string | null | undefined),
+    buildup_rate:
+      item.buildup_rate == null ? null : toNum(item.buildup_rate as number | string),
   }));
   const limit = raw.limit ?? params.limit ?? 50;
   const next_cursor = raw.next_cursor ?? null;

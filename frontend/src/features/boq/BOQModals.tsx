@@ -32,6 +32,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { highlightMatch } from './highlightMatch';
+import { catalogComponentAmounts } from './boqHelpers';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import {
   MultiVariantPicker,
@@ -150,6 +151,15 @@ async function loadCostItemsForAdd(listItems: CostSearchItem[]): Promise<CostSea
       };
     }),
   );
+}
+
+/** The unit rate the bill line receives when this row is added. An item
+ *  with a component breakdown is priced from its components, which is a
+ *  different figure from its catalogue rate in most imported databases; the
+ *  server states it as ``buildup_rate``. Without one (no components, or a
+ *  variant still to pick) the catalogue rate is what lands. */
+function landingRate(item: CostSearchItem): number {
+  return typeof item.buildup_rate === 'number' ? item.buildup_rate : item.rate;
 }
 
 /* ── AssemblyPickerModal ─────────────────────────────────────────────── */
@@ -1059,14 +1069,15 @@ export function CostDatabaseSearchModal({
             compStats != null;
 
           if (!hasCompVariants) {
+            // Quantity, rate and total made to agree (see
+            // ``catalogComponentAmounts``): the line is priced from the
+            // totals, and a later edit re-prices it from quantity x rate.
             return {
               name: c.name,
               code: c.code || '',
               type: c.type || 'other',
               unit: c.unit || 'pcs',
-              quantity: c.quantity ?? 1,
-              unit_rate: c.unit_rate ?? 0,
-              total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
+              ...catalogComponentAmounts(c),
             };
           }
 
@@ -1623,8 +1634,9 @@ export function CostDatabaseSearchModal({
   /** Live projected sum for the current selection — Σ(rate × qty) across
    *  the items the user has selected (qty falls back to 1). Surfaces the
    *  cumulative cost impact in the modal footer so a 5-item batch isn't
-   *  committed blind. Variant rates aren't projected here yet — the picker
-   *  will negotiate them at apply-time; this is the catalog-rate baseline. */
+   *  committed blind. Each row counts at the rate its line will receive
+   *  (``landingRate``). Variant rates aren't projected here yet: the picker
+   *  negotiates them at apply-time. */
   const selectionPreview = useMemo(() => {
     if (selected.size === 0) return null;
     let sum = 0;
@@ -1632,8 +1644,7 @@ export function CostDatabaseSearchModal({
     for (const item of items) {
       if (!selected.has(item.id)) continue;
       const qty = parseDecimalInput(rowQuantity[item.id] ?? '') ?? 1;
-      const rate = typeof item.rate === 'number' ? item.rate : 0;
-      sum += rate * qty;
+      sum += landingRate(item) * qty;
       if (!currency) {
         currency =
           (item.currency && item.currency.trim()) ||
@@ -2095,7 +2106,34 @@ export function CostDatabaseSearchModal({
                           </td>
                           <td className="px-3 py-2.5 text-end font-semibold tabular-nums text-content-primary">
                             <div className="inline-flex items-center gap-1.5">
-                              <span>{fmtRate(item.rate)}</span>
+                              {(() => {
+                                // The rate the line lands at comes first. When
+                                // the catalogue quotes a different figure it is
+                                // shown underneath, named, so the two are never
+                                // mistaken for each other.
+                                const landing = landingRate(item);
+                                const differs = Math.abs(landing - item.rate) >= 0.005;
+                                if (!differs) return <span>{fmtRate(landing)}</span>;
+                                return (
+                                  <span
+                                    className="inline-flex flex-col items-end leading-tight"
+                                    title={t('boq.cost_db_buildup_hint', {
+                                      defaultValue:
+                                        "The bill line is priced from this item's resources. The catalogue quotes {{rate}} for the item as a whole.",
+                                      rate: fmtRate(item.rate),
+                                    })}
+                                    data-testid={`cost-row-rate-${item.id}`}
+                                  >
+                                    <span>{fmtRate(landing)}</span>
+                                    <span className="text-2xs font-normal text-content-tertiary">
+                                      {t('boq.cost_db_catalogue_rate', {
+                                        defaultValue: 'Catalogue {{rate}}',
+                                        rate: fmtRate(item.rate),
+                                      })}
+                                    </span>
+                                  </span>
+                                );
+                              })()}
                               {(() => {
                                 const vc = item.metadata_?.variant_stats?.count ?? 0;
                                 const vs = item.metadata_?.variant_stats;
@@ -2115,7 +2153,7 @@ export function CostDatabaseSearchModal({
                                 // entry whose price never landed (CWICR rows with
                                 // empty rate column); ``lump_sum`` is high-risk
                                 // because qty × rate becomes ambiguous.
-                                const lowRate = !(typeof item.rate === 'number' && item.rate > 0);
+                                const lowRate = !(landingRate(item) > 0);
                                 const lumpSum = (item.unit || '').toLowerCase() === 'lump_sum';
                                 if (!lowRate && !lumpSum) return null;
                                 return (
@@ -2206,7 +2244,7 @@ export function CostDatabaseSearchModal({
                   data-testid="cost-modal-selection-preview"
                   title={t('boq.preview_total_hint', {
                     defaultValue:
-                      'Catalog-rate × quantity for the selection. Variant picks may adjust this.',
+                      'Rate × quantity for the selection, at the rate each line will receive. Variant picks may adjust this.',
                   })}
                 >
                   {/* Through the shared formatter rather than a bare `Intl`

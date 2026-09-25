@@ -547,6 +547,41 @@ export function resourceAwareTotalInBase(
   return convertToBase(num(position.total), src, base, fxRates);
 }
 
+/* ── Catalogue component to resource row ─────────────────────────────────
+ * A catalogue component carries three figures: quantity, unit rate and cost.
+ * In imported cost databases the cost is the source's own figure, computed
+ * from an exact quantity, while the quantity column is rounded (a component
+ * listed at 0.00 kg can cost 12.84). A resource row whose quantity x rate is
+ * not its total is unstable in a bill: the line's rate is priced from the
+ * totals when it is added, the server re-derives it from quantity x rate on
+ * the next edit, and the cost breakdown weighs the rows by quantity x rate,
+ * so the same line reads three ways.
+ *
+ * The row keeps the cost as its total and takes the quantity the cost
+ * implies, so quantity x rate is the total. A component without a cost is
+ * priced at quantity x rate, a missing quantity read as 1, as before.
+ */
+export function catalogComponentAmounts(component: {
+  quantity?: number | string | null;
+  unit_rate?: number | string | null;
+  cost?: number | string | null;
+}): { quantity: number; unit_rate: number; total: number } {
+  const num = (x: unknown): number => {
+    const n = typeof x === 'number' ? x : Number(x);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const rate = num(component.unit_rate);
+  const quantity = component.quantity == null ? 1 : num(component.quantity);
+  const cost = num(component.cost);
+  if (cost === 0) {
+    return { quantity, unit_rate: rate, total: quantity * rate };
+  }
+  if (rate !== 0 && Math.abs(quantity * rate - cost) > 0.005) {
+    return { quantity: cost / rate, unit_rate: rate, total: cost };
+  }
+  return { quantity, unit_rate: rate, total: cost };
+}
+
 /* ── Resource-driven pricing predicate ───────────────────────────────────
  * A position's Unit Rate is derived (Σ per-unit resource subtotals) and its
  * cell is locked ONLY when the position carries a resource that actually
