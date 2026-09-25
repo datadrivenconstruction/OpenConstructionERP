@@ -14860,6 +14860,7 @@ const resource = {
     "finance.summary_committed": "Majburiyatlar",
     "finance.summary_invoiced": "Hisob-fakturalangan",
     "finance.summary_paid": "Toʻlangan",
+    "finance.summary_over_commitment": "Majburiyatlardan ortiq",
     "finance.summary_unpaid_payables": "Toʻlanmagan yetkazib beruvchi hisob-fakturalari",
     "finance.po_link_label": "Xarid buyurtmasi",
     "finance.po_link_hint": "Ixtiyoriy. Bogʻlangan hisob-faktura oʻz buyurtmasi hisobiga yoziladi, shuning uchun buyurtma va hisob-faktura majburiyatlarda bir marta hisoblanadi.",

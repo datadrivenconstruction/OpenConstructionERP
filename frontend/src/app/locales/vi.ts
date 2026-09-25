@@ -14387,6 +14387,7 @@ const resource = {
     "finance.summary_committed": "Đã cam kết",
     "finance.summary_invoiced": "Đã lập hóa đơn",
     "finance.summary_paid": "Đã thanh toán",
+    "finance.summary_over_commitment": "Vượt cam kết",
     "finance.summary_unpaid_payables": "Hóa đơn nhà cung cấp chưa thanh toán",
     "finance.po_link_label": "Đơn đặt hàng",
     "finance.po_link_hint": "Tùy chọn. Hóa đơn được liên kết sẽ được tính vào đơn đặt hàng của nó, do đó đơn đặt hàng và hóa đơn chỉ cam kết ngân sách một lần.",

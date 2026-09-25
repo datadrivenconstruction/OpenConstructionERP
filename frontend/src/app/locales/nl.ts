@@ -13759,6 +13759,7 @@ const resource = {
     "finance.summary_committed": "Vastgelegd",
     "finance.summary_invoiced": "Gefactureerd",
     "finance.summary_paid": "Betaald",
+    "finance.summary_over_commitment": "Boven vastgelegd",
     "finance.summary_unpaid_payables": "Onbetaalde leveranciersfacturen",
     "finance.po_link_label": "Inkooporder",
     "finance.po_link_hint": "Optioneel. Een gekoppelde factuur telt mee op haar order, zodat de order en de factuur maar één keer worden vastgelegd.",

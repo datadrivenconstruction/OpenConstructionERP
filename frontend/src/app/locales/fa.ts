@@ -11188,6 +11188,7 @@ const resource = {
     "finance.summary_committed": "متعهدشده",
     "finance.summary_invoiced": "فاکتورشده",
     "finance.summary_paid": "پرداخت‌شده",
+    "finance.summary_over_commitment": "فراتر از تعهد",
     "finance.summary_unpaid_payables": "فاکتورهای پرداخت‌نشده تأمین‌کننده",
     "finance.po_link_label": "سفارش خرید",
     "finance.po_link_hint": "اختیاری. فاکتور پیوندشده در برابر سفارش خودش محاسبه می‌شود، بنابراین سفارش و فاکتور فقط یک‌بار بودجه را متعهد می‌کنند.",

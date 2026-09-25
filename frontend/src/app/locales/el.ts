@@ -11273,6 +11273,7 @@ const resource = {
     "finance.summary_committed": "Δεσμευμένο",
     "finance.summary_invoiced": "Τιμολογημένο",
     "finance.summary_paid": "Πληρωμένο",
+    "finance.summary_over_commitment": "Πέραν της δέσμευσης",
     "finance.summary_unpaid_payables": "Απλήρωτα τιμολόγια προμηθευτών",
     "finance.po_link_label": "Παραγγελία αγοράς",
     "finance.po_link_hint": "Προαιρετικό. Ένα συνδεδεμένο τιμολόγιο μετράει έναντι της παραγγελίας του, οπότε η παραγγελία και το τιμολόγιο δεσμεύουν τον προϋπολογισμό μία μόνο φορά.",

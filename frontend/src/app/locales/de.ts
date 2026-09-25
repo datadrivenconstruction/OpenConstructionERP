@@ -14762,6 +14762,7 @@ const resource = {
     "finance.summary_committed": "Gebunden",
     "finance.summary_invoiced": "Fakturiert",
     "finance.summary_paid": "Bezahlt",
+    "finance.summary_over_commitment": "Über Bindung",
     "finance.summary_unpaid_payables": "Offene Lieferantenrechnungen",
     "finance.po_link_label": "Bestellung",
     "finance.po_link_hint": "Optional. Eine verknüpfte Rechnung wird auf ihre Bestellung angerechnet, sodass Bestellung und Rechnung nur einmal gebunden werden.",

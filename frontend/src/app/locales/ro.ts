@@ -14420,6 +14420,7 @@ const resource = {
     "finance.summary_committed": "Angajat",
     "finance.summary_invoiced": "Facturat",
     "finance.summary_paid": "Plătit",
+    "finance.summary_over_commitment": "Peste angajat",
     "finance.summary_unpaid_payables": "Facturi de furnizor neplătite",
     "finance.po_link_label": "Comandă de achiziție",
     "finance.po_link_hint": "Opțional. O factură asociată se scade din comanda ei, astfel încât comanda și factura sunt angajate o singură dată.",

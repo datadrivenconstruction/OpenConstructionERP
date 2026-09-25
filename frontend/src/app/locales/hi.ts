@@ -14501,6 +14501,7 @@ const resource = {
     "finance.summary_committed": "प्रतिबद्ध",
     "finance.summary_invoiced": "चालानित",
     "finance.summary_paid": "भुगतान",
+    "finance.summary_over_commitment": "प्रतिबद्धता से अधिक",
     "finance.summary_unpaid_payables": "अवैतनिक आपूर्तिकर्ता चालान",
     "finance.po_link_label": "क्रय आदेश",
     "finance.po_link_hint": "वैकल्पिक। जुड़ा हुआ चालान अपने आदेश पर गिना जाता है, इसलिए आदेश और चालान बजट को केवल एक बार प्रतिबद्ध करते हैं।",

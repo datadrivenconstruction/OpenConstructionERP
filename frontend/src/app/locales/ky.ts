@@ -9489,6 +9489,7 @@ const resource = {
     "finance.summary_committed": "Милдеттенилди",
     "finance.summary_invoiced": "Эсептелди",
     "finance.summary_paid": "Төлөндү",
+    "finance.summary_over_commitment": "Милдеттенмеден ашык",
     "finance.summary_unpaid_payables": "Төлөнбөгөн жеткирүүчү эсеп-фактуралары",
     "finance.po_link_label": "Сатып алуу буйрутмасы",
     "finance.po_link_hint": "Милдеттүү эмес. Байланышкан эсеп-фактура өз буйрутмасына каршы эсептелет, ошондуктан буйрутма менен эсеп-фактура бюджетти бир жолу гана милдеттендирет.",

@@ -14334,6 +14334,7 @@ const resource = {
     "finance.summary_committed": "Ugovoreno",
     "finance.summary_invoiced": "Fakturirano",
     "finance.summary_paid": "Plaćeno",
+    "finance.summary_over_commitment": "Iznad ugovorenog",
     "finance.summary_unpaid_payables": "Neplaćeni računi dobavljača",
     "finance.po_link_label": "Narudžbenica",
     "finance.po_link_hint": "Neobavezno. Povezan račun se uračunava u svoju narudžbenicu, pa narudžbenica i račun obvezuju proračun samo jednom.",

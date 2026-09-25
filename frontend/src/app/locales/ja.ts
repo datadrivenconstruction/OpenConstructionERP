@@ -14446,6 +14446,7 @@ const resource = {
     "finance.summary_committed": "コミット済",
     "finance.summary_invoiced": "請求済",
     "finance.summary_paid": "支払済",
+    "finance.summary_over_commitment": "コミット超過",
     "finance.summary_unpaid_payables": "未払いの仕入先請求書",
     "finance.po_link_label": "発注書",
     "finance.po_link_hint": "任意。関連付けられた請求書はその発注書に対して計上されるため、発注書と請求書は予算を一度だけコミットします。",

@@ -11227,6 +11227,7 @@ const resource = {
     "finance.summary_committed": "প্রতিশ্রুত",
     "finance.summary_invoiced": "ইনভয়েসকৃত",
     "finance.summary_paid": "পরিশোধিত",
+    "finance.summary_over_commitment": "প্রতিশ্রুতির অতিরিক্ত",
     "finance.summary_unpaid_payables": "অপরিশোধিত সরবরাহকারী চালান",
     "finance.po_link_label": "ক্রয় আদেশ",
     "finance.po_link_hint": "ঐচ্ছিক। সংযুক্ত ইনভয়েস তার আদেশের বিপরীতে গণনা হয়, তাই আদেশ ও ইনভয়েস বাজেটকে একবারই প্রতিশ্রুত করে।",

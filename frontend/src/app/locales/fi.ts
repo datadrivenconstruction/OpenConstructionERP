@@ -14405,6 +14405,7 @@ const resource = {
     "finance.summary_committed": "Sidottu",
     "finance.summary_invoiced": "Laskutettu",
     "finance.summary_paid": "Maksettu",
+    "finance.summary_over_commitment": "Yli sitoumuksen",
     "finance.summary_unpaid_payables": "Maksamattomat toimittajalaskut",
     "finance.po_link_label": "Ostotilaus",
     "finance.po_link_hint": "Valinnainen. Liitetty lasku lasketaan sen tilausta vastaan, joten tilaus ja lasku sitovat budjettia vain kerran.",

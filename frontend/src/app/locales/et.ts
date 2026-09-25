@@ -11916,6 +11916,7 @@ const resource = {
     "finance.summary_committed": "Kohustatud",
     "finance.summary_invoiced": "Arveldatud",
     "finance.summary_paid": "Makstud",
+    "finance.summary_over_commitment": "Üle kohustuse",
     "finance.summary_unpaid_payables": "Maksmata tarnijaarved",
     "finance.po_link_label": "Ostutellimus",
     "finance.po_link_hint": "Valikuline. Seotud arve arvestatakse tema tellimuse vastu, mistõttu tellimus ja arve kohustavad eelarvet ainult üks kord.",

@@ -14514,6 +14514,7 @@ const resource = {
     "finance.summary_committed": "Zazávazkováno",
     "finance.summary_invoiced": "Fakturováno",
     "finance.summary_paid": "Zaplaceno",
+    "finance.summary_over_commitment": "Nad rámec závazku",
     "finance.summary_unpaid_payables": "Nezaplacené faktury dodavatelů",
     "finance.po_link_label": "Objednávka",
     "finance.po_link_hint": "Volitelné. Propojená faktura se počítá proti své objednávce, takže objednávka a faktura zavazují rozpočet jen jednou.",

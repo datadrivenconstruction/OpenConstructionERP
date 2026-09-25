@@ -13791,6 +13791,7 @@ const resource = {
     "finance.summary_committed": "Comprometido",
     "finance.summary_invoiced": "Facturado",
     "finance.summary_paid": "Pagado",
+    "finance.summary_over_commitment": "Sobre comprometido",
     "finance.summary_unpaid_payables": "Facturas de proveedor sin pagar",
     "finance.po_link_label": "Orden de compra",
     "finance.po_link_hint": "Opcional. Una factura vinculada se descuenta de su orden, de modo que la orden y la factura se comprometen una sola vez.",

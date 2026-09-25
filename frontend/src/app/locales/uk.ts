@@ -14682,6 +14682,7 @@ const resource = {
     "finance.summary_committed": "Законтрактовано",
     "finance.summary_invoiced": "Виставлено",
     "finance.summary_paid": "Сплачено",
+    "finance.summary_over_commitment": "Понад законтрактоване",
     "finance.summary_unpaid_payables": "Несплачені рахунки постачальників",
     "finance.po_link_label": "Замовлення на закупівлю",
     "finance.po_link_hint": "Необов'язково. Пов'язаний рахунок зараховується до свого замовлення, тому замовлення і рахунок зобов'язують бюджет лише один раз.",

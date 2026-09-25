@@ -13738,6 +13738,7 @@ const resource = {
     "finance.summary_committed": "Forpligtet",
     "finance.summary_invoiced": "Faktureret",
     "finance.summary_paid": "Betalt",
+    "finance.summary_over_commitment": "Over forpligtelse",
     "finance.summary_unpaid_payables": "Ubetalte leverandørfakturaer",
     "finance.po_link_label": "Indkøbsordre",
     "finance.po_link_hint": "Valgfrit. En tilknyttet faktura tælles mod sin ordre, så ordren og fakturaen kun binder budgettet én gang.",

@@ -13741,6 +13741,7 @@ const resource = {
     "finance.summary_committed": "Engagé",
     "finance.summary_invoiced": "Facturé",
     "finance.summary_paid": "Payé",
+    "finance.summary_over_commitment": "Au-delà de l'engagement",
     "finance.summary_unpaid_payables": "Factures fournisseurs impayées",
     "finance.po_link_label": "Bon de commande",
     "finance.po_link_hint": "Facultatif. Une facture liée s'impute sur son bon de commande, de sorte que le bon et la facture ne sont engagés qu'une seule fois.",

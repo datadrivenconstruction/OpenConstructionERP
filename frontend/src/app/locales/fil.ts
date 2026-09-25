@@ -11185,6 +11185,7 @@ const resource = {
     "finance.summary_committed": "Nakatakda na",
     "finance.summary_invoiced": "Ni-invoice",
     "finance.summary_paid": "Bayad na",
+    "finance.summary_over_commitment": "Lampas sa nakatakda",
     "finance.summary_unpaid_payables": "Hindi pa bayad na invoice ng supplier",
     "finance.po_link_label": "Purchase order",
     "finance.po_link_hint": "Opsyonal. Ang naka-link na invoice ay ibinibilang laban sa order nito, kaya ang order at ang invoice ay nagta-tally sa badyet nang isang beses lang.",
