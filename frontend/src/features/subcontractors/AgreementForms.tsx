@@ -20,6 +20,7 @@ import { Button, WideModal, WideModalField, WideModalSection } from '@/shared/ui
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
+import { listContracts } from '@/features/contracts/api';
 import {
   createAgreement,
   submitPaymentApplication,
@@ -59,6 +60,7 @@ interface AgreementFormState {
   retention_percent: string;
   start_date: string;
   end_date: string;
+  contract_id: string;
 }
 
 export function AgreementFormModal({
@@ -81,12 +83,36 @@ export function AgreementFormModal({
     retention_percent: '5',
     start_date: '',
     end_date: '',
+    contract_id: '',
   });
   const set = <K extends keyof AgreementFormState>(key: K, value: AgreementFormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const projectId = form.project_id || projects[0]?.id || '';
   const currency = form.currency || projects.find((p) => p.id === projectId)?.currency || '';
+
+  // The project's subcontracts in the contracts module. Linking one says the
+  // agreement and that contract are the same subcontract, so the budget
+  // commitment is counted once.
+  const contractsQ = useQuery({
+    queryKey: ['contracts', 'list', projectId, 'subcontractor'],
+    queryFn: () => listContracts({ project_id: projectId, counterparty_type: 'subcontractor', limit: 200 }),
+    enabled: Boolean(projectId),
+  });
+  const subcontracts = contractsQ.data?.items ?? [];
+
+  const linkContract = (id: string) => {
+    const picked = subcontracts.find((c) => c.id === id);
+    // Take the figures from the contract where nothing was typed yet.
+    setForm((prev) => ({
+      ...prev,
+      contract_id: id,
+      title: prev.title || picked?.title || '',
+      total_value: prev.total_value || (picked ? String(picked.total_value ?? '') : ''),
+      currency: prev.currency || picked?.currency || '',
+      retention_percent: picked ? String(toNum(picked.retention_percent)) : prev.retention_percent,
+    }));
+  };
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -99,6 +125,7 @@ export function AgreementFormModal({
         retention_percent: String(toNum(form.retention_percent)),
         start_date: form.start_date || undefined,
         end_date: form.end_date || undefined,
+        contract_id: form.contract_id || undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['subcontractors'] });
@@ -154,6 +181,25 @@ export function AgreementFormModal({
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
+              </option>
+            ))}
+          </select>
+        </WideModalField>
+        <WideModalField
+          label={t('subcontractors.agreement_contract')}
+          hint={t('subcontractors.agreement_contract_hint')}
+          span={2}
+        >
+          <select
+            value={form.contract_id}
+            onChange={(e) => linkContract(e.target.value)}
+            className={inputCls}
+            data-testid="agreement-contract"
+          >
+            <option value="">{t('subcontractors.agreement_contract_none')}</option>
+            {subcontracts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.code} {c.title}
               </option>
             ))}
           </select>
