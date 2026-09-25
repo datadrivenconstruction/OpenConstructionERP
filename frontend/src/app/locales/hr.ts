@@ -14685,6 +14685,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definicija resursa propagirana",
     "boq.link_locked_skipped_msg": "Povezane stavke u zaključanim troškovnicima ({{count}}) zadržale su staru definiciju: {{bills}}. Otključajte te troškovnike ili izradite reviziju kako biste preuzeli promjenu.",
     "boq.link_locked_skipped_title": "Zaključani troškovnici ostali su nepromijenjeni",
+    "boq.locked_banner_title": "Ovaj troškovnik je zaključan",
+    "boq.locked_banner_body": "Stavke se ne mogu dodavati, uređivati ni brisati. Izradite reviziju da biste ga promijenili ili zamolite voditelja da ga otključa.",
     "boq.link_role_instance": "Povezana instanca",
     "boq.link_role_master": "Glavni (definition od record)",
     "boq.link_unlinked_msg": "Vaša je izmjena promijenila ovu povezanu kopiju pa ona više ne prati zajednički kod. Ako je niste namjeravali odvojiti, vratite joj izvorni kod.",

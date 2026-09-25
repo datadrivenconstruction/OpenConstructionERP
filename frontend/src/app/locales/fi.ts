@@ -14707,6 +14707,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Resurssimääritys levitetty",
     "boq.link_locked_skipped_msg": "Lukituissa arvioissa {{count}} linkitettyä riviä säilytti vanhan määrityksen: {{bills}}. Avaa näiden arvioiden lukitus tai luo revisio, jotta muutos tulee voimaan.",
     "boq.link_locked_skipped_title": "Lukitut arviot jätettiin ennalleen",
+    "boq.locked_banner_title": "Tämä arvio on lukittu",
+    "boq.locked_banner_body": "Nimikkeitä ei voi lisätä, muokata tai poistaa. Luo revisio muuttaaksesi sitä tai pyydä esihenkilöä avaamaan lukitus.",
     "boq.link_role_instance": "Linkitetty instanssi",
     "boq.link_role_master": "Master (virallinen määritelmä)",
     "boq.link_unlinked_msg": "Muokkauksesi muutti tätä linkitettyä kopiota, joten se ei enää seuraa jaettua koodia. Jos et tarkoittanut eriyttää sitä, vaihda sen koodi takaisin.",

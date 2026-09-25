@@ -14771,6 +14771,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definiție resursă propagată",
     "boq.link_locked_skipped_msg": "Pozițiile legate din devizele blocate au păstrat definiția veche ({{count}}): {{bills}}. Deblocați acele devize sau creați o revizie pentru a prelua modificarea.",
     "boq.link_locked_skipped_title": "Devizele blocate au rămas neschimbate",
+    "boq.locked_banner_title": "Acest deviz este blocat",
+    "boq.locked_banner_body": "Pozițiile nu pot fi adăugate, editate sau șterse. Creați o revizie pentru a-l modifica sau cereți unui manager să-l deblocheze.",
     "boq.link_role_instance": "Instanță legată",
     "boq.link_role_master": "Principal (definition al record)",
     "boq.link_unlinked_msg": "Modificarea dumneavoastră a schimbat această copie legată, așa că nu mai urmează codul partajat. Dacă nu ați intenționat să o separați, readuceți codul la valoarea inițială.",

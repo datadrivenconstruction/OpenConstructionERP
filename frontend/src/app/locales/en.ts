@@ -4184,6 +4184,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Resource definition propagated",
     "boq.link_locked_skipped_msg": "{{count}} linked position(s) in locked estimates kept the old definition: {{bills}}. Unlock those estimates or create a revision to take the change.",
     "boq.link_locked_skipped_title": "Locked estimates left unchanged",
+    "boq.locked_banner_title": "This estimate is locked",
+    "boq.locked_banner_body": "Positions cannot be added, edited or deleted. Create a revision to change it, or ask a manager to unlock it.",
     "boq.link_role_instance": "Linked instance",
     "boq.link_role_master": "Master (definition of record)",
     "boq.link_unlinked_msg": "Your edit changed this linked copy, so it no longer follows the shared code. If you did not mean to diverge it, change its code back instead.",

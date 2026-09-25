@@ -9515,6 +9515,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Ressourcedefinition spredt",
     "boq.link_locked_skipped_msg": "{{count}} tilknyttede post(er) i låste estimater beholdt den gamle definition: {{bills}}. Lås estimaterne op eller opret en revision for at overtage ændringen.",
     "boq.link_locked_skipped_title": "Låste estimater er uændrede",
+    "boq.locked_banner_title": "Dette estimat er låst",
+    "boq.locked_banner_body": "Poster kan ikke tilføjes, redigeres eller slettes. Opret en revision for at ændre det, eller bed en leder om at låse det op.",
     "boq.link_role_instance": "Tilknyttet instans",
     "boq.link_role_master": "Master (registreringsdefinition)",
     "boq.link_unlinked_msg": "Din redigering ændrede denne tilknyttede kopi, så den ikke længere følger den delte kode. Hvis du ikke ønskede at afvige den, skal du ændre dens kode tilbage i stedet.",

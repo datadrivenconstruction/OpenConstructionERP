@@ -85,6 +85,8 @@ export interface BOQToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onShowVersionHistory: () => void;
+  /** The bill is locked: the add and import actions, all writes, are not offered. */
+  readOnly?: boolean;
   // Add actions
   onAddPosition: () => void;
   onAddSection: () => void;
@@ -207,6 +209,7 @@ export function BOQToolbar({
   onUndo,
   onRedo,
   onShowVersionHistory,
+  readOnly = false,
   onAddPosition,
   onAddSection,
   onOpenCostDb,
@@ -324,6 +327,7 @@ export function BOQToolbar({
           {/* Quality ring + Add group */}
           <div className="flex items-center gap-1.5" data-testid="boq-quality-ring">
             {hasPositions && qualityScoreRing}
+            {!readOnly && <>
             <Button
               variant="primary"
               size="sm"
@@ -354,6 +358,7 @@ export function BOQToolbar({
             >
               <span className="hidden xl:inline">{t('boq.from_assembly', { defaultValue: 'From Assembly' })}</span>
             </Button>
+            </>}
           </div>
 
           <div className="w-px h-6 bg-border-light hidden sm:block" />
@@ -472,12 +477,14 @@ export function BOQToolbar({
           <span className="mx-0.5 h-5 w-px shrink-0 bg-border-light" />
 
           {/* File: import / export / paste / density / carbon */}
-          <IconBtn
-            icon={isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
-            title={t('common.import')}
-            onClick={onImportClick}
-            disabled={isImporting}
-          />
+          {!readOnly && (
+            <IconBtn
+              icon={isImporting ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
+              title={t('common.import')}
+              onClick={onImportClick}
+              disabled={isImporting}
+            />
+          )}
           <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn,.x81,.x83,.x84,.x85,.x86,.xml,.bc3,.ods,.json,.yaml,.yml" className="hidden" onChange={onImportInputChange} aria-label={t('common.import')} />
           <div className="relative">
             <button

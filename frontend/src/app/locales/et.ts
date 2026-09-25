@@ -14970,6 +14970,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Ressursi definitsioon levitatud",
     "boq.link_locked_skipped_msg": "Lukustatud kalkulatsioonides säilitasid {{count}} seotud positsiooni vana definitsiooni: {{bills}}. Muudatuse rakendamiseks avage nende kalkulatsioonide lukustus või looge redaktsioon.",
     "boq.link_locked_skipped_title": "Lukustatud kalkulatsioonid jäid muutmata",
+    "boq.locked_banner_title": "See kalkulatsioon on lukustatud",
+    "boq.locked_banner_body": "Positsioone ei saa lisada, muuta ega kustutada. Muutmiseks looge revisjon või paluge juhil see avada.",
     "boq.link_role_instance": "Seotud eksemplar",
     "boq.link_role_master": "Algallikas (ametlik definitsioon)",
     "boq.link_unlinked_msg": "Teie muudatus muutis seda seotud koopiat, mistõttu see enam ei järgi jagatud koodi. Kui te ei kavatsenud seda lahutada, muutke selle kood tagasi.",

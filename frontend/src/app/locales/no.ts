@@ -9447,6 +9447,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Ressursdefinisjon spredt",
     "boq.link_locked_skipped_msg": "{{count}} koblede posisjon(er) i låste kalkyler beholdt den gamle definisjonen: {{bills}}. Lås opp kalkylene eller opprett en revisjon for å ta i bruk endringen.",
     "boq.link_locked_skipped_title": "Låste kalkyler er uendret",
+    "boq.locked_banner_title": "Denne kalkylen er låst",
+    "boq.locked_banner_body": "Poster kan ikke legges til, redigeres eller slettes. Opprett en revisjon for å endre den, eller be en leder om å låse den opp.",
     "boq.link_role_instance": "Tilknyttet instans",
     "boq.link_role_master": "Master (definisjonens kilde)",
     "boq.link_unlinked_msg": "Redigeringen din endret denne koblede kopien, slik at den ikke lenger følger den delte koden. Hvis du ikke mente å avvike, endre koden tilbake.",

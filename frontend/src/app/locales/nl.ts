@@ -14045,6 +14045,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Resourcedefinitie gepropageerd",
     "boq.link_locked_skipped_msg": "{{count}} gekoppelde post(en) in vergrendelde begrotingen behouden de oude definitie: {{bills}}. Ontgrendel die begrotingen of maak een revisie aan om de wijziging over te nemen.",
     "boq.link_locked_skipped_title": "Vergrendelde begrotingen ongewijzigd",
+    "boq.locked_banner_title": "Deze begroting is vergrendeld",
+    "boq.locked_banner_body": "Posten kunnen niet worden toegevoegd, bewerkt of verwijderd. Maak een revisie om hem te wijzigen, of vraag een manager hem te ontgrendelen.",
     "boq.link_role_instance": "Gekoppelde instantie",
     "boq.link_role_master": "Master (referentiedefinitie)",
     "boq.link_unlinked_msg": "Uw wijziging heeft deze gekoppelde kopie aangepast, daarom volgt zij de gedeelde code niet meer. Als u geen afwijking wilde, herstel dan haar code.",

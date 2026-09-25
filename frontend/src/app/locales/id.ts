@@ -14696,6 +14696,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definisi sumber daya disebarkan",
     "boq.link_locked_skipped_msg": "{{count}} item tertaut di estimasi terkunci tetap memakai definisi lama: {{bills}}. Buka kunci estimasi tersebut atau buat revisi untuk menerapkan perubahan.",
     "boq.link_locked_skipped_title": "Estimasi terkunci tidak diubah",
+    "boq.locked_banner_title": "Estimasi ini terkunci",
+    "boq.locked_banner_body": "Posisi tidak dapat ditambahkan, diedit, atau dihapus. Buat revisi untuk mengubahnya, atau minta manajer untuk membukanya.",
     "boq.link_role_instance": "Instansi tertaut",
     "boq.link_role_master": "Master (definisi resmi)",
     "boq.link_unlinked_msg": "Pengeditan Anda mengubah salinan tertaut ini sehingga tidak lagi mengikuti kode bersama. Jika Anda tidak bermaksud memisahkannya, kembalikan kodenya.",
