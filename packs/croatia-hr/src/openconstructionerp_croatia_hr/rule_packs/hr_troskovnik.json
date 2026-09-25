@@ -1,0 +1,25 @@
+{
+  "rule_pack_id": "hr_troskovnik",
+  "name": "Troškovnik - the Croatian priced bill of quantities",
+  "standard": "Troškovnik (common Croatian practice)",
+  "jurisdiction": "HR",
+  "regulator": "No single regulator; the form is set by practice and by the procurement documents of the contracting authority",
+  "applies_to": [
+    "boq",
+    "estimate",
+    "tender",
+    "validation"
+  ],
+  "description": "Reference document for the troškovnik, the priced bill of quantities every Croatian tender and building contract is quoted on. Items are grouped into chapters in a fixed order, construction works first (pripremni, zemljani, betonski i armiranobetonski, zidarski, izolaterski radovi), then the finishing trades (obrtnički radovi: limarski, stolarski, bravarski, keramičarski, podopolagački, soboslikarski i ličilački, fasaderski radovi), then installations and external works. Every item carries a description that states what is included, a unit, a quantity and an all-in unit rate that already contains labour, material, plant, site and head-office overheads and profit, so no separate overhead or profit lines follow the chapters. Each chapter closes with its total, and the recapitulation (rekapitulacija) sums the chapters and adds PDV once, on the total. Labour and material norms are commonly taken from the GN norm series (Prosječne norme u građevinarstvu). Road works are described against the Opći tehnički uvjeti za radove na cestama. What the pack checks is the priced bill: that every item has a description, a quantity and a non-zero unit rate, that ordinals are unique, that totals reconcile and that one currency is used.",
+  "review_status": "Chapter order and pricing convention reflect common Croatian practice drawn from public tender documents and are pending review by a Croatian cost engineer before they are relied on for a public submission.",
+  "severity_overrides": {},
+  "enables_rule_ids": [
+    "boq_quality.position_has_description",
+    "boq_quality.position_has_quantity",
+    "boq_quality.position_has_unit_rate",
+    "boq_quality.no_zero_unit_rate",
+    "boq_quality.no_duplicate_ordinals",
+    "boq_quality.total_mismatch",
+    "boq_quality.currency_consistency"
+  ]
+}

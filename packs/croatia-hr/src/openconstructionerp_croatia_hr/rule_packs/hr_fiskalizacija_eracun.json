@@ -1,0 +1,16 @@
+{
+  "rule_pack_id": "hr_fiskalizacija_eracun",
+  "name": "Fiskalizacija and eRačun - Croatian e-invoicing",
+  "standard": "Zakon o fiskalizaciji (NN 89/25), EN 16931",
+  "jurisdiction": "HR",
+  "regulator": "Porezna uprava (Tax Administration)",
+  "applies_to": [
+    "invoice"
+  ],
+  "description": "Reference document for the Zakon o fiskalizaciji published in NN 89/25. From 2026-01-01 every taxable person in the VAT system issues invoices to other taxable persons as eRačun, a structured XML document compliant with EN 16931 and the Tax Administration's technical specification, exchanged through an information intermediary (informacijski posrednik) and fiscalised with the Tax Administration. Persons outside the VAT system must be able to receive eRačun from the same date. The platform's e-invoice writer produces an EN 16931 document; the Croatian national specification on top of it and the exchange through an intermediary are not implemented, so this pack records the obligation rather than claiming to meet it.",
+  "review_status": "The obligation and its dates are taken from the law as published in Narodne novine and from the Tax Administration's guidance. The Croatian national restrictions on EN 16931 are not implemented by the platform.",
+  "severity_overrides": {},
+  "enables_rule_ids": [
+    "boq_quality.currency_consistency"
+  ]
+}

@@ -620,6 +620,7 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 "../packs/brazil-sinapi/src" = "packs/brazil-sinapi/src"
 "../packs/canada-ca/src" = "packs/canada-ca/src"
 "../packs/china-gbt50500/src" = "packs/china-gbt50500/src"
+"../packs/croatia-hr/src" = "packs/croatia-hr/src"
 "../packs/czechia-cz/src" = "packs/czechia-cz/src"
 "../packs/denmark-dk/src" = "packs/denmark-dk/src"
 "../packs/france-fr/src" = "packs/france-fr/src"

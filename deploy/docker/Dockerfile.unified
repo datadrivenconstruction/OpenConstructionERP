@@ -129,6 +129,7 @@ COPY packs/belgium-be/src/ packs/belgium-be/src/
 COPY packs/brazil-sinapi/src/ packs/brazil-sinapi/src/
 COPY packs/canada-ca/src/ packs/canada-ca/src/
 COPY packs/china-gbt50500/src/ packs/china-gbt50500/src/
+COPY packs/croatia-hr/src/ packs/croatia-hr/src/
 COPY packs/czechia-cz/src/ packs/czechia-cz/src/
 COPY packs/denmark-dk/src/ packs/denmark-dk/src/
 COPY packs/france-fr/src/ packs/france-fr/src/

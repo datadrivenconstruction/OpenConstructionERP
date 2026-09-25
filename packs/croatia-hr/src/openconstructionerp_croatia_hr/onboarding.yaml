@@ -1,0 +1,43 @@
+# Croatia Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+
+version: 2
+locale: hr
+title: "Welcome to OpenConstructionERP - Croatia Edition"
+title_hr: "Dobrodošli u OpenConstructionERP - hrvatsko izdanje"
+subtitle: "Three steps to align your workspace with Croatian construction practice. Tri koraka do radnog prostora prilagođenog hrvatskoj građevinskoj praksi."
+
+steps:
+  - id: company_profile
+    title: "Company profile / Podaci o tvrtki"
+    body: "Enter your firm details so reports, bills and tender documents carry the correct attribution. Unesite podatke o tvrtki kako bi izvještaji, troškovnici i ponude bili ispravno potpisani."
+    fields:
+      - { key: company_name, label: "Company name / Naziv tvrtke", type: text, required: true }
+      - { key: oib, label: "OIB (Osobni identifikacijski broj)", type: text, required: false, placeholder: "12345678901", help: "Eleven-digit personal identification number, also used as the VAT number with the HR prefix." }
+      - { key: legal_form, label: "Legal form / Pravni oblik", type: select, options: ["d.o.o. (društvo s ograničenom odgovornošću)", "j.d.o.o. (jednostavno društvo s ograničenom odgovornošću)", "d.d. (dioničko društvo)", "obrt (sole trader)", "Other / Ostalo"], default: "d.o.o. (društvo s ograničenom odgovornošću)", required: true }
+      - { key: in_vat_system, label: "Registered for PDV / U sustavu PDV-a", type: checkbox, default: true, help: "From 2026-01-01 taxable persons in the VAT system issue invoices to other businesses as eRačun under the Zakon o fiskalizaciji." }
+      - { key: primary_sector, label: "Primary sector / Glavna djelatnost", type: select, options: ["Visokogradnja (building construction)", "Niskogradnja (civil and road works)", "Stambena gradnja (residential)", "Obrtnički i završni radovi (finishing trades)", "Instalacije (MEP installations)"], required: true, default: "Visokogradnja (building construction)" }
+
+  - id: standards
+    title: "Estimating and tax / Troškovnik i porez"
+    body: "A Croatian troškovnik prices every item at an all-in unit rate and adds PDV once, on the recapitulation. Confirm how your bills are built. Hrvatski troškovnik iskazuje jedinične cijene sa svim troškovima, a PDV se dodaje jednom, na rekapitulaciji."
+    fields:
+      - { key: estimate_type, label: "Default bill type / Zadana vrsta troškovnika", type: radio, options: ["Troškovnik za nadmetanje (tender bill)", "Procjena troškova (cost estimate)", "Okončani obračun (final account)"], required: true, default: "Troškovnik za nadmetanje (tender bill)" }
+      - { key: default_pdv, label: "Default PDV rate / Zadana stopa PDV-a", type: radio, options: ["25% (opća stopa)", "13% (snižena stopa)", "5% (snižena stopa)", "0% (nulta stopa)"], required: true, default: "25% (opća stopa)" }
+      - { key: public_procurement, label: "Public procurement under ZJN / Javna nabava prema ZJN", type: checkbox, default: false, help: "Tender bills published through the Elektronički oglasnik javne nabave (EOJN RH) are returned priced without changing descriptions, units or quantities." }
+
+  - id: review
+    title: "Review and finish / Pregled i završetak"
+    body: "We will create your workspace with EUR currency, PDV at 25% and the troškovnik checks. You can change everything later in Settings. Radni prostor bit će postavljen s valutom EUR, PDV-om od 25% i provjerama troškovnika."
+    action:
+      label: "Create my Croatia workspace / Stvori moj radni prostor"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: hr_pdv_25
+        - enable_rule_packs:
+            - hr_troskovnik
+            - hr_zakon_o_gradnji
+            - hr_javna_nabava
+            - hr_pdv
+            - hr_fiskalizacija_eracun

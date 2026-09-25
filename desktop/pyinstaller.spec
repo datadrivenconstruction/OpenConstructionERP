@@ -299,6 +299,7 @@ _COMMUNITY_PACKS = (
     "brazil-sinapi",
     "canada-ca",
     "china-gbt50500",
+    "croatia-hr",
     "czechia-cz",
     "denmark-dk",
     "france-fr",
