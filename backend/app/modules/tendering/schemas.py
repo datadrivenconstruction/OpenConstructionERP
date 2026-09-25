@@ -287,10 +287,11 @@ class BidAnalysisResponse(BaseModel):
 class CreatePackageFromBOQData(BaseModel):
     """Request body for creating a tender package seeded from BOQ sections.
 
-    When ``section_ids`` is empty every top-level section in the BOQ is
-    included. A top-level section is a position whose ``parent_id`` is
-    ``None`` and whose ``unit`` is either empty or the literal ``"section"``.
-    All descendant positions under the chosen sections are gathered
+    When ``section_ids`` is empty every top-level row of the BOQ is included.
+    A top-level row is a position whose ``parent_id`` is ``None``: a section,
+    or a priced line that sits loose at the top of the bill. Ids that name no
+    top-level row are refused rather than packaged as an empty scope.
+    All descendant positions under the chosen rows are gathered
     recursively and stored as a compact line-item template in the package
     metadata so that incoming bids can be pre-seeded without an additional
     BOQ read.

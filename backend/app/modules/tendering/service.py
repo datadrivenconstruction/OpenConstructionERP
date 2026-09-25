@@ -291,12 +291,12 @@ class TenderingService:
         """Create a tender package pre-seeded from selected BOQ sections.
 
         Loads the BOQ the same way ``compare_bids`` and ``_build_leveling`` do,
-        identifies top-level sections (positions whose ``parent_id`` is ``None``
-        and whose ``unit`` is empty or ``"section"``), filters to the requested
-        ``section_ids`` (or takes all sections when the list is empty), then
-        recursively gathers every descendant. The resulting positions are stored
-        as a compact line-item template in ``metadata_`` so bids can be
-        pre-seeded without an additional BOQ read.
+        identifies the top-level rows (positions whose ``parent_id`` is
+        ``None``: sections, and priced lines that sit loose at the top of the
+        bill), filters to the requested ``section_ids`` (or takes every top-level
+        row when the list is empty), then recursively gathers every descendant.
+        The resulting positions are stored as a compact line-item template in
+        ``metadata_`` so bids can be pre-seeded without an additional BOQ read.
 
         Currency is inferred from the linked project via the same project
         repository path used in ``apply_winner`` and ``_build_leveling``. When
@@ -334,18 +334,24 @@ class TenderingService:
         # Index positions by id for fast descendant lookup.
         pos_by_id: dict[uuid.UUID, object] = {p.id: p for p in all_positions}
 
-        # Identify top-level sections: parent_id is None and unit is empty or "section".
-        def _is_section(pos: object) -> bool:
-            parent = getattr(pos, "parent_id", None)
-            unit = (getattr(pos, "unit", "") or "").strip().lower()
-            return parent is None and (unit == "" or unit == "section")
-
-        section_positions = [p for p in all_positions if _is_section(p)]
+        # Every top-level row is a unit of scope the caller can pick: a section
+        # with its lines, or a priced line sitting loose at the top of the bill.
+        # Only sections used to count, so a flat bill (no sections at all)
+        # became an empty package, and a loose line beside the sections was
+        # left out of a package that claimed to cover the whole bill.
+        section_positions = [p for p in all_positions if getattr(p, "parent_id", None) is None]
 
         # Filter to the requested section_ids when the caller specified any.
         if data.section_ids:
             requested = set(data.section_ids)
             section_positions = [p for p in section_positions if p.id in requested]
+            if not section_positions:
+                # A pick that matches no top-level row of this bill would make
+                # an empty package that reads as a real one.
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="None of the chosen sections is a top-level row of this BOQ",
+                )
 
         # Build set of chosen section IDs for the metadata record.
         chosen_section_ids = [str(p.id) for p in section_positions]
