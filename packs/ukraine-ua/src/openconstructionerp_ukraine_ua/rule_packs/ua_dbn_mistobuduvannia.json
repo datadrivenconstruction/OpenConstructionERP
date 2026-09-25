@@ -1,0 +1,22 @@
+{
+  "rule_pack_id": "ua_dbn_mistobuduvannia",
+  "name": "State building norms",
+  "name_uk": "Державні будівельні норми",
+  "standard": "ДБН",
+  "jurisdiction": "UA",
+  "applies_to": [
+    "projects",
+    "documents"
+  ],
+  "review_status": "Reference document only. Norms and their status read in the state register of construction norms. Pending review by a Ukrainian design engineer.",
+  "references": [
+    "ДБН В.1.2-14:2018 «Загальні принципи забезпечення надійності та конструктивної безпеки будівель і споруд», in force from 01.01.2019 (https://e-construction.gov.ua/laws_detail/3199634775304307868?doc_type=2)",
+    "ДБН В.2.2-15:2019 «Житлові будинки. Основні положення», in force from 01.12.2019 (https://e-construction.gov.ua/laws_detail/3199650971919583106)"
+  ],
+  "description": "Buildings in Ukraine are designed to the державні будівельні норми (ДБН). ДБН В.1.2-14:2018 sets the consequence classes CC1 to CC3 that drive the level of design review and, in the Настанова, the indicators for profit and administrative costs. ДБН В.2.2-15:2019 sets the basic requirements for residential buildings up to 73.5 metres. ДБН А.2.2-3:2014 on the content of design documentation is marked archived in the state register and is not cited as current.",
+  "practice_notes": [
+    "Consequence class CC2 covers most multi-storey housing and schools",
+    "A civil protection shelter built into the building is budgeted in chapter 2 with the object it serves, together with its hermetic doors and filter ventilation"
+  ],
+  "enables_rule_ids": []
+}
