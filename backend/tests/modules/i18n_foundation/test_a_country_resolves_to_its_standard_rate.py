@@ -88,6 +88,7 @@ _STANDARD_RATE = (
     ("IT", "22", Decimal("22000.00"), Decimal("122000.00")),
     ("PL", "23", Decimal("23000.00"), Decimal("123000.00")),
     ("RO", "21", Decimal("21000.00"), Decimal("121000.00")),
+    ("HR", "25", Decimal("25000.00"), Decimal("125000.00")),
 )
 
 
