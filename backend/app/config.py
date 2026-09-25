@@ -457,6 +457,15 @@ class Settings(BaseSettings):
     # registration can set ``OE_REGISTRATION_MODE=open`` in their .env.
     registration_mode: Literal["open", "email-verify", "admin-approve", "closed"] = "admin-approve"
 
+    # Who may verify a punch item. ``different_user`` (default) is the
+    # four-eyes rule: the verifier must hold ``punchlist.verify`` and must not
+    # be the person who resolved the item, so an item has to be resolved
+    # before it can be verified. ``verify_permission`` lets anyone holding
+    # ``punchlist.verify`` verify their own work, for a small site team with
+    # one supervisor. Closing always needs a verified item, under either
+    # policy. Env: ``OE_PUNCHLIST_VERIFY_POLICY``.
+    punchlist_verify_policy: Literal["different_user", "verify_permission"] = "different_user"
+
     # ── Multi-tenant row-level security ──────────────────────────────────
     # When True, each request sets a transaction-local ``app.current_tenant``
     # GUC from the caller's tenant, and - once the non-superuser runtime role

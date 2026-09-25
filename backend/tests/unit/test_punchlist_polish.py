@@ -201,7 +201,7 @@ async def test_reopen_history_unchanged_for_normal_forward_transitions() -> None
 
 @pytest.mark.asyncio
 async def test_bulk_close_summary_split() -> None:
-    """5 items, 1 already-closed -> 4 closed + 1 skipped, 0 errors."""
+    """5 items: 1 already closed, 3 verified, 1 still open -> 3 closed, 1 skipped, 1 not verified."""
     svc = _make_service()
 
     items = []
@@ -221,6 +221,11 @@ async def test_bulk_close_summary_split() -> None:
 
     assert target.status == "closed"
 
+    for it in items[1:4]:
+        await svc.transition_status(it.id, PunchStatusTransition(new_status="in_progress"), user_id="w")
+        await svc.transition_status(it.id, PunchStatusTransition(new_status="resolved"), user_id="w")
+        await svc.transition_status(it.id, PunchStatusTransition(new_status="verified"), user_id="i")
+
     result = await svc.bulk_close(
         PROJECT_ID,
         [it.id for it in items],
@@ -228,13 +233,14 @@ async def test_bulk_close_summary_split() -> None:
         comment="end-of-project sweep",
     )
 
-    assert result["closed"] == 4
+    assert result["closed"] == 3
     assert result["skipped"] == 1
-    assert result["errors"] == []
+    assert result["errors"] == [{"id": str(items[4].id), "error": "not_verified"}]
 
-    # All items should now be closed
-    for it in items:
+    # The verified ones are closed; the open one keeps its status.
+    for it in items[:4]:
         assert it.status == "closed"
+    assert items[4].status == "open"
 
 
 @pytest.mark.asyncio
@@ -244,6 +250,9 @@ async def test_bulk_close_project_mismatch_returns_error() -> None:
     other_project = uuid.uuid4()
 
     a = await svc.create_item(_create_data(title="A"), user_id="u1")
+    await svc.transition_status(a.id, PunchStatusTransition(new_status="in_progress"), user_id="w")
+    await svc.transition_status(a.id, PunchStatusTransition(new_status="resolved"), user_id="w")
+    await svc.transition_status(a.id, PunchStatusTransition(new_status="verified"), user_id="i")
     b = await svc.create_item(
         _create_data(project_id=other_project, title="B"),
         user_id="u1",

@@ -34,7 +34,11 @@ export const PUNCH_STAGES: readonly PunchStatus[] = [
 export const PUNCH_FSM_NEXT: Record<PunchStatus, readonly PunchStatus[]> = {
   open: ['assigned', 'in_progress'],
   assigned: ['in_progress', 'open'],
-  in_progress: ['resolved', 'verified', 'assigned', 'open'],
+  // The backend also accepts in_progress -> verified, but only when the
+  // deployment lets a verifier sign off their own work
+  // (`punchlist_verify_policy`). Under the default four-eyes rule the item has
+  // to be resolved first, so the shortcut is never offered here.
+  in_progress: ['resolved', 'assigned', 'open'],
   resolved: ['verified', 'open'],
   verified: ['closed', 'open'],
   closed: ['open'],

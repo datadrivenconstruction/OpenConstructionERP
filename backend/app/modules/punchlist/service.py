@@ -22,6 +22,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.core.party_names import resolve_party_names
@@ -127,8 +128,33 @@ VALID_TRANSITIONS: dict[str, list[str]] = {
 # Terminal statuses trigger a reopen_history entry when transitioning back
 # to an active status.
 # Statuses that require special role checks:
-# resolved -> verified: must be a different user than the resolver
+# resolved -> verified: must be a different user than the resolver, unless the
+#   deployment allows self-verification (``punchlist_verify_policy``)
+# in_progress -> verified: only under the self-verification policy; the
+#   four-eyes rule needs a recorded resolver to compare against
 # verified -> closed: admin/manager only (handled via permissions in router)
+# Closing, one by one or in bulk, always starts from ``verified``.
+
+
+def verification_refusal(item: PunchItem, user_id: str, *, policy: str) -> str | None:
+    """Why ``user_id`` may not verify ``item`` under ``policy``, or None when they may.
+
+    Pure so both the single transition and anything that verifies in bulk read
+    the same rule. The caller has already checked ``punchlist.verify``.
+
+    Returns:
+        ``"resolve_first"`` when the four-eyes rule needs a resolver and the item
+        was never resolved, ``"same_user"`` when the verifier resolved it
+        themselves, None when verification may go ahead.
+    """
+    if policy == "verify_permission":
+        return None
+    if item.status != "resolved":
+        return "resolve_first"
+    resolved_by = (getattr(item, "metadata_", None) or {}).get("resolved_by")
+    if resolved_by and resolved_by == user_id:
+        return "same_user"
+    return None
 
 
 class PunchListService:
@@ -437,11 +463,19 @@ class PunchListService:
         # resolved the item. A null assignee must not disable the guard, so we compare
         # against the recorded resolver (metadata_.resolved_by) instead of assigned_to.
         if target == "verified":
-            resolved_by = (getattr(item, "metadata_", None) or {}).get("resolved_by")
-            if resolved_by and resolved_by == user_id:
+            refusal = verification_refusal(item, user_id, policy=get_settings().punchlist_verify_policy)
+            if refusal == "same_user":
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Verification must be done by a different user than the resolver",
+                )
+            if refusal == "resolve_first":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        "Mark the item resolved first: verification is done by a different user "
+                        "than the one who resolved it"
+                    ),
                 )
             update_fields["verified_at"] = now
             update_fields["verified_by"] = user_id
@@ -556,6 +590,10 @@ class PunchListService:
         """Close many punch items at once.
 
         - Items already ``closed`` are counted as ``skipped``.
+        - Only ``verified`` items are closed. Anything earlier in the lifecycle
+          is returned in ``errors`` as ``not_verified`` and keeps its status:
+          a bulk close is the last step for many items, not a way round the
+          verification the single close requires.
         - Items not found, owned by another project, or violating close rules
           (e.g. critical items with open peers) are returned in ``errors``.
         - Successful closes emit ``punchlist.item.status_changed`` events.
@@ -575,6 +613,9 @@ class PunchListService:
                     continue
                 if item.status == "closed":
                     skipped += 1
+                    continue
+                if item.status != "verified":
+                    errors.append({"id": str(item_id), "error": "not_verified"})
                     continue
 
                 # Critical-with-open-peers guard mirrors transition_status().
