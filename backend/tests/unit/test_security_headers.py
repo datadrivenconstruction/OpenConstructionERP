@@ -85,6 +85,21 @@ def test_csp_header_present_and_has_key_directives(client: TestClient) -> None:
     assert "style-src 'self' 'unsafe-inline';" in csp
 
 
+def test_csp_frames_the_privacy_enhanced_video_host_only(client: TestClient) -> None:
+    """The Videos page plays tutorials in an iframe from the no-cookie host.
+
+    Without the host on frame-src the player renders blank. Only the no-cookie
+    host is allowed: the regular host sets tracking cookies on embed, which is
+    the reason the page uses the other one.
+    """
+    r = client.get("/ping")
+    csp = r.headers["Content-Security-Policy"]
+    frame_src = next(d for d in csp.split(";") if d.strip().startswith("frame-src"))
+
+    assert "https://www.youtube-nocookie.com" in frame_src.split()
+    assert "https://www.youtube.com" not in frame_src.split()
+
+
 def test_csp_skipped_for_swagger_docs(client: TestClient) -> None:
     """Swagger UI needs inline scripts from a CDN, so we skip CSP on docs paths."""
     r = client.get("/api/docs")

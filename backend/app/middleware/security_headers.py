@@ -82,7 +82,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "style-src-elem 'self' 'unsafe-inline'; "
             "img-src 'self' data: blob: https:; "
             "font-src 'self' data:; "
-            "frame-src 'self' blob: data:; "
+            # The Videos page plays tutorials from the privacy-enhanced
+            # no-cookie host, loaded only after the user presses play. The
+            # regular video host is left off on purpose: it sets cookies on
+            # embed, which is why the page does not use it.
+            "frame-src 'self' blob: data: https://www.youtube-nocookie.com; "
             "connect-src 'self' https://www.google-analytics.com "
             "https://*.google-analytics.com https://*.analytics.google.com "
             "https://api.github.com "
