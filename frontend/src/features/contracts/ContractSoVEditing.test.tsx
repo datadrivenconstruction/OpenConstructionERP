@@ -395,3 +395,42 @@ describe('the money a new record starts in', () => {
     expect(field.value).toBe('GBP');
   });
 });
+
+describe('a claim just created', () => {
+  it('is in the list the dialog closes onto, for the contract it was raised against', async () => {
+    const created = { id: 'claim-9', claim_number: 'PC-001', contract_id: 'ctr-2', status: 'draft' };
+    seedReads([], [created as unknown as ProgressClaimItem]);
+    api.apiPost.mockResolvedValue(created);
+    const order: string[] = [];
+    api.apiGet.mockImplementation((path: string) => {
+      order.push(path);
+      return Promise.resolve({ items: [created], total: 1, offset: 0, limit: 200 });
+    });
+    const onClose = vi.fn(() => order.push('close'));
+    const onCreated = vi.fn();
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <NewClaimModal
+            contracts={[contract({ id: 'ctr-2', status: 'active' })]}
+            defaultContractId={CONTRACT_ID}
+            onClose={onClose}
+            onCreated={onCreated}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Create/i }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+
+    // The list for the claim's own contract was read before the dialog closed,
+    // so the register never shows its empty state for a claim that exists.
+    const listRead = order.findIndex((p) => p.includes('contract_id=ctr-2'));
+    expect(listRead).toBeGreaterThanOrEqual(0);
+    expect(listRead).toBeLessThan(order.indexOf('close'));
+    expect(onCreated).toHaveBeenCalledWith('ctr-2');
+    expect(client.getQueryData(['contracts', 'claims', 'ctr-2'])).toMatchObject({ total: 1 });
+  });
+});

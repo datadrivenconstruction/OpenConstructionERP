@@ -263,6 +263,14 @@ function toNum(v: number | string | null | undefined): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** The claims register of one contract: one key and one read for the list and for the new-claim dialog. */
+function claimsListQuery(contractId: string) {
+  return {
+    queryKey: ['contracts', 'claims', contractId],
+    queryFn: () => listProgressClaims({ contract_id: contractId, limit: 200 }),
+  };
+}
+
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -616,9 +624,7 @@ export function ContractsPage() {
   const effectiveClaimsContract = claimsContractId || contracts[0]?.id || '';
 
   const claimsQ = useQuery({
-    queryKey: ['contracts', 'claims', effectiveClaimsContract],
-    queryFn: () =>
-      listProgressClaims({ contract_id: effectiveClaimsContract, limit: 200 }),
+    ...claimsListQuery(effectiveClaimsContract),
     enabled: tab !== 'contracts' && !!effectiveClaimsContract,
   });
 
@@ -1006,6 +1012,7 @@ export function ContractsPage() {
           contracts={contracts.filter((c) => c.status === 'active')}
           defaultContractId={effectiveClaimsContract}
           onClose={() => setNewClaimOpen(false)}
+          onCreated={(contractId) => setClaimsContractId(contractId)}
         />
       )}
     </div>
@@ -2938,10 +2945,13 @@ export function NewClaimModal({
   contracts,
   defaultContractId,
   onClose,
+  onCreated,
 }: {
   contracts: ContractItem[];
   defaultContractId: string;
   onClose: () => void;
+  /** Called with the contract the claim was raised against, once its list is loaded. */
+  onCreated?: (contractId: string) => void;
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -2998,7 +3008,15 @@ export function NewClaimModal({
         type: 'success',
         title: t('contracts.claim_created', { defaultValue: 'Claim created' }),
       });
-      qc.invalidateQueries({ queryKey: ['contracts', 'claims'] });
+      // The list is read before the dialog closes, and for the contract the
+      // claim was raised against. Closing on an unawaited invalidation showed
+      // the list it already held, empty on a first claim, until the refetch
+      // landed; and the list could be showing another contract altogether,
+      // because the dialog offers active contracts only while the list
+      // defaults to the first contract of any status.
+      await qc.invalidateQueries({ queryKey: ['contracts', 'claims'] });
+      await qc.fetchQuery(claimsListQuery(form.contract_id));
+      onCreated?.(form.contract_id);
       onClose();
     } catch (err) {
       addToast({ type: 'error', title: getErrorMessage(err) });
