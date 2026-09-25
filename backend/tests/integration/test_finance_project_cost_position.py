@@ -53,6 +53,8 @@ Basis of every figure (the point of the test)
 * ``total_payable`` keeps its meaning: supplier invoices not yet marked paid,
   gross. 2 500.
 * ``total_payments`` keeps its meaning: every payment row, either direction.
+  The paid pay application is paid through its payable invoice, so its
+  28 500 is a payment row next to the supplier's 50 000: 78 500.
 
 The order-first variant approves the purchase order before any bill is
 locked, which is the order a busy site works in. A commitment counter that
@@ -452,7 +454,10 @@ def _assert_position(dash: dict) -> None:
         "total_actual": "70000",  # incurred, net of VAT: 40k received + 30k pay app gross
         "total_over_commitment": "0",  # nothing incurred beyond what was committed
         "total_payable": "2500",  # unpaid supplier invoices, gross
-        "total_payments": "50000",  # finance payment rows, any direction
+        # Finance payment rows, any direction: the supplier's 50 000 and the
+        # 28 500 the pay application's payable was paid with, its 1 500
+        # retention held back on the same row.
+        "total_payments": "78500",
     }
     wrong = {k: (dash.get(k), v) for k, v in expected.items() if dash.get(k) is None or _money(dash[k]) != Decimal(v)}
     assert not wrong, f"figures that do not roll up, as (got, expected): {wrong}"
@@ -468,11 +473,13 @@ def _assert_position(dash: dict) -> None:
     assert _money(dash["total_receivable"]) == Decimal("0")
     assert _money(dash["total_overdue"]) == Decimal("0")
     assert _money(dash["cash_flow_net"]) == Decimal("-2500")
+    # Paid: the supplier invoice on the order and the payable the paid pay
+    # application was raised as. Approved: the container hire.
     assert (dash["invoices_draft"], dash["invoices_pending"], dash["invoices_approved"], dash["invoices_paid"]) == (
         0,
         0,
         1,
-        1,
+        2,
     )
 
 
