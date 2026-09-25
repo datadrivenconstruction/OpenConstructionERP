@@ -550,6 +550,8 @@ def _unmarked_first_mention(text: str) -> str | None:
     so nothing about a following hyphen makes an occurrence exempt.
     """
     for name in _MARKED_NAMES:
+        if name not in text:
+            continue  # the common case, and far cheaper than a regex scan
         for match in re.finditer(re.escape(name), text):
             start, end = match.span()
             if text[:start].endswith(_SLUG_PREFIX):
@@ -573,12 +575,20 @@ def _code_before_comment(line: str) -> str:
         return line[:at]
 
 
-def _scan_trademark_form(path: Path) -> list[tuple[int, str, str]]:
+def _read_text(path: Path) -> str | None:
+    """The file as text, or None when it is binary or unreadable."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return None
+
+
+def _scan_trademark_form(path: Path, text: str | None = None) -> list[tuple[int, str, str]]:
     """Report a locale string whose first CAD tool mention is missing the mark."""
     hits: list[tuple[int, str, str]] = []
-    try:
-        text = path.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
+    if text is None:
+        text = _read_text(path)
+    if text is None:
         return hits
     for lineno, line in enumerate(text.splitlines(), start=1):
         entry = _LOCALE_ENTRY_RE.match(line)
@@ -591,7 +601,7 @@ def _scan_trademark_form(path: Path) -> list[tuple[int, str, str]]:
     return hits
 
 
-def _scan_component_defaults(path: Path) -> list[tuple[int, str]]:
+def _scan_component_defaults(path: Path, text: str | None = None) -> list[tuple[int, str]]:
     """Report an i18n default in a component whose CAD tool mention is bare.
 
     Same rule as the locale scan, applied to the other place English lives. The
@@ -600,10 +610,11 @@ def _scan_component_defaults(path: Path) -> list[tuple[int, str]]:
     that shouted at code would be turned off within a week.
     """
     hits: list[tuple[int, str]] = []
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except (UnicodeDecodeError, OSError):
+    if text is None:
+        text = _read_text(path)
+    if text is None:
         return hits
+    lines = text.splitlines()
     for lineno, line in enumerate(lines, start=1):
         if line.lstrip().startswith(_COMMENT_STARTS):
             continue
@@ -620,7 +631,7 @@ def _is_test_path(norm: str) -> bool:
     return any(marker in norm for marker in _TEST_MARKERS)
 
 
-def _scan_display_literals(path: Path, norm: str) -> list[tuple[int, str]]:
+def _scan_display_literals(path: Path, norm: str, text: str | None = None) -> list[tuple[int, str]]:
     """Report a quoted display string whose CAD tool mention is bare.
 
     Scope is narrow on purpose, because a rule over every quoted string in the
@@ -636,10 +647,11 @@ def _scan_display_literals(path: Path, norm: str) -> list[tuple[int, str]]:
     matches against is data, and marking it would edit the data.
     """
     hits: list[tuple[int, str]] = []
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except (UnicodeDecodeError, OSError):
+    if text is None:
+        text = _read_text(path)
+    if text is None:
         return hits
+    lines = text.splitlines()
     identity = _IDENTITY_FIELDS.get(norm, ())
     in_template = False
     for lineno, line in enumerate(lines, start=1):
@@ -726,20 +738,60 @@ def _mask(token: str) -> str:
     return f"{token[0]}{'*' * (len(token) - 2)}{token[-1]} (len {len(token)})"
 
 
-def _scan_file(path: Path) -> list[tuple[int, str, str]]:
+# Token -> its SHA-256. The same few words recur on almost every line of the
+# tree, and hashing each occurrence afresh was the largest share of the audit's
+# CPU time. Only the hash is remembered, never the verdict: membership is asked
+# of _DENY_HASHES on every call, so a list that changes (a test swaps it) is
+# never answered from a cache built against the old one.
+_DIGEST_CACHE: dict[str, str] = {}
+
+
+def _denied_digest(token: str) -> str | None:
+    """The denied digest of `token`, or None when the token is not denied."""
+    if not (_MIN_LEN <= len(token) <= _MAX_LEN):
+        return None
+    digest = _DIGEST_CACHE.get(token)
+    if digest is None:
+        digest = _DIGEST_CACHE[token] = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    return digest if digest in _DENY_HASHES else None
+
+
+def _file_may_hold_denied(text: str) -> bool:
+    """Could any line of `text` yield a denied token?
+
+    A pre-filter, so it must never answer no for a file the line scan would
+    report. It cuts the whole file with the path _tokens takes for a non-ASCII
+    line. On ASCII that path cuts exactly as the ASCII one does, marks never
+    join across a line break because every line break is a non-word character,
+    and lowercasing looks at no context wider than a word, so the runs found
+    here are the union of the runs every line produces.
+    """
+    lowered = text.lower()
+    if lowered.isascii():
+        runs = set(_ASCII_RUN_RE.findall(lowered))
+    else:
+        runs = set()
+        for run in set(_RUN_RE.findall(_MARK_RE.sub("", lowered))):
+            if not run.isascii():
+                run = _MARK_RE.sub("", unicodedata.normalize("NFKD", run))
+            runs.add(run)
+    return any(_denied_digest(run) is not None for run in runs)
+
+
+def _scan_file(path: Path, text: str | None = None) -> list[tuple[int, str, str]]:
     hits: list[tuple[int, str, str]] = []
-    try:
-        text = path.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
+    if text is None:
+        text = _read_text(path)
+    if text is None:
         return hits  # binary or unreadable - nothing to check
+    if not _file_may_hold_denied(text):
+        return hits
     words: list[str] | None = None  # built on the first denied token, not before
     stated: dict[int, set[str]] = {}  # phrase length -> replacements this file states
     for lineno, line in enumerate(text.splitlines(), start=1):
         for token in _tokens(line):
-            if not (_MIN_LEN <= len(token) <= _MAX_LEN):
-                continue
-            digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
-            if digest not in _DENY_HASHES:
+            digest = _denied_digest(token)
+            if digest is None:
                 continue
             replacement = _REPLACEMENT_OF.get(digest)
             if replacement is not None:
@@ -785,7 +837,13 @@ def main(argv: list[str]) -> int:
             shown = str(rp.relative_to(REPO_ROOT))
         except ValueError:
             shown = str(rp)
-        for lineno, masked, line in _scan_file(rp):
+        # Read once for all four scans. Opening a file is the dominant cost on a
+        # workstation whose scanner inspects every open, and the three form
+        # scans used to reopen what the token scan had just read.
+        text = _read_text(rp)
+        if text is None:
+            continue  # binary or unreadable - every scan below would pass it
+        for lineno, masked, line in _scan_file(rp, text):
             if _is_allowed(shown, line, allowlist):
                 allowed += 1
                 continue
@@ -793,17 +851,17 @@ def main(argv: list[str]) -> int:
 
         norm = shown.replace("\\", "/")
         if norm.startswith(_LOCALE_DIR):
-            for lineno, key, name in _scan_trademark_form(rp):
+            for lineno, key, name in _scan_trademark_form(rp, text):
                 unmarked.append(f"{shown}:{lineno}: {key} names {name} with no {_REGISTERED}")
         elif norm.startswith(_FRONTEND_SRC) and norm.endswith((".ts", ".tsx")) and not _is_test_path(norm):
             # A default is also a quoted literal, so report each line once and
             # let the more specific message win.
             seen: set[int] = set()
-            for lineno, name in _scan_component_defaults(rp):
+            for lineno, name in _scan_component_defaults(rp, text):
                 seen.add(lineno)
                 unmarked.append(f"{shown}:{lineno}: i18n default names {name} with no {_REGISTERED}")
             if norm not in _ARCHIVE_FILES:
-                for lineno, name in _scan_display_literals(rp, norm):
+                for lineno, name in _scan_display_literals(rp, norm, text):
                     if lineno in seen:
                         continue
                     unmarked.append(f"{shown}:{lineno}: display string names {name} with no {_REGISTERED}")
