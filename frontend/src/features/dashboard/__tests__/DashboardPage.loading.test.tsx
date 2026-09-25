@@ -18,6 +18,14 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 
+// Imported here, not inside the test body. The page's module graph is large,
+// and under parallel load its first import alone outran the 60 s test timeout.
+// The timed-out test's render then still landed, during the next test, and that
+// test failed on "Found multiple elements". Module-scope imports are paid while
+// the file is collected, which no per-test timeout covers; vi.mock is hoisted
+// above this line, so the page still sees every mock.
+import { DashboardPage } from '../DashboardPage';
+
 /* ── Scenario switch (hoisted so the vi.mock factory can read it) ─────── */
 
 const harness = vi.hoisted(() => ({
@@ -149,7 +157,6 @@ vi.mock('@/stores/useAuthStore', () => ({
 const WELCOME_TITLE = "Welcome - let's start with your first project";
 
 async function renderDashboard() {
-  const { DashboardPage } = await import('../DashboardPage');
   return render(
     <MemoryRouter>
       <DashboardPage />
