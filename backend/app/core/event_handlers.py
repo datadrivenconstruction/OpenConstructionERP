@@ -1831,7 +1831,9 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("rfi.response.design_change", _handle_rfi_response_design_change)
     event_bus.subscribe_once("ncr.cost_impact", _handle_ncr_cost_impact)
     event_bus.subscribe_once("document.revision.created", _handle_document_revision_created)
-    event_bus.subscribe_once("invoice.paid", _handle_invoice_paid)
+    # invoice.paid is NOT subscribed here any more: _handle_invoice_paid wrote the
+    # total of every paid invoice onto EACH budget line, inflating actual N times.
+    # FinanceService.pay_invoice buckets actual per (wbs, category, currency) itself.
     event_bus.subscribe_once("po.issued", _handle_po_issued)
     event_bus.subscribe_once("estimate.approved", _handle_estimate_approved)
     event_bus.subscribe_once("schedule.progress_updated", _handle_schedule_progress)
