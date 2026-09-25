@@ -92,6 +92,7 @@ import {
 import { WorkPackageSovPicker } from './WorkPackageSovPicker';
 import { certTypeLabel, describeComplianceReasons } from './complianceReasons';
 import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
+import { UnlinkedTwinBanner } from './UnlinkedTwinBanner';
 import { PayAppAmount, PaymentApprovalActions } from './PaymentApprovalActions';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
@@ -1359,6 +1360,9 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
             {agreement.status}
           </Badge>
         </div>
+      </div>
+      <div className="mt-2 empty:hidden">
+        <UnlinkedTwinBanner projectId={agreement.project_id} agreementId={agreement.id} />
       </div>
       <div className="mt-2 flex items-center justify-between text-xs text-content-secondary">
         <span>

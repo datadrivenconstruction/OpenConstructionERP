@@ -325,10 +325,46 @@ export function createAgreement(data: CreateAgreementPayload): Promise<Agreement
 export function updateAgreement(
   id: string,
   data: Partial<
-    Pick<Agreement, 'title' | 'status' | 'notes' | 'requires_lien_waiver' | 'prime_contract_id'>
+    Pick<
+      Agreement,
+      'title' | 'status' | 'notes' | 'requires_lien_waiver' | 'prime_contract_id' | 'contract_id'
+    >
   >,
 ): Promise<Agreement> {
   return apiPatch<Agreement>(`/v1/subcontractors/agreements/${id}`, data);
+}
+
+/**
+ * An agreement and a contract on one project that look like the same
+ * subcontract. Unlinked, finance counts such a pair twice; nothing merges
+ * them without a person saying so.
+ */
+export interface UnlinkedTwin {
+  agreement_id: string;
+  agreement_title: string;
+  contract_id: string;
+  contract_code: string;
+  contract_title: string;
+  currency: string;
+  agreement_value: string;
+  contract_value: string;
+  /** ``counterparty`` when the same subcontractor or contact is named, ``name`` on the company name alone. */
+  matched_on: 'counterparty' | 'name';
+  /** The two values are within 1% of each other. */
+  value_close: boolean;
+}
+
+export function listUnlinkedTwins(projectId: string): Promise<UnlinkedTwin[]> {
+  return apiGet<UnlinkedTwin[]>(
+    `/v1/subcontractors/unlinked-twins/?project_id=${encodeURIComponent(projectId)}`,
+  );
+}
+
+/** Record that the agreement and the contract are different subcontracts. */
+export function dismissUnlinkedTwin(agreementId: string, contractId: string): Promise<Agreement> {
+  return apiPost<Agreement>(`/v1/subcontractors/agreements/${agreementId}/dismiss-twin/`, {
+    contract_id: contractId,
+  });
 }
 
 export function listWorkPackages(agreementId: string): Promise<WorkPackage[]> {
