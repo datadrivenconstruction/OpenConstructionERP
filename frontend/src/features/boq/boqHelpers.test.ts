@@ -12,6 +12,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classificationCode,
   convertToBase,
+  getUnitsForLocale,
   hasContributingResources,
   resourceAwareTotalInBase,
 } from './boqHelpers';
@@ -282,5 +283,25 @@ describe('classificationCode - every standard, not the legacy three', () => {
 
   it('skips an empty entry and keeps looking', () => {
     expect(classificationCode({ din276: '', tetelrend: 'MA-06-21-03' })).toBe('MA-06-21-03');
+  });
+});
+
+// P-56: the Croatian site units existed but sat behind the hundred-odd base
+// tokens, so a Croatian estimator scrolling the dropdown never reached them.
+describe('getUnitsForLocale - locale trade units lead the list', () => {
+  it('offers the Croatian troskovnik units first under hr', () => {
+    const units = getUnitsForLocale('hr');
+    expect(units.slice(0, 4)).toEqual(['kom', 'kpl', 'pauš.', "m'"]);
+  });
+
+  it('keeps the base catalogue, without duplicates', () => {
+    const units = getUnitsForLocale('hr-HR');
+    expect(units).toContain('m2');
+    expect(units).toContain('lsum');
+    expect(new Set(units).size).toBe(units.length);
+  });
+
+  it('starts with the base catalogue for a locale without trade units', () => {
+    expect(getUnitsForLocale('en')[0]).toBe('mm');
   });
 });

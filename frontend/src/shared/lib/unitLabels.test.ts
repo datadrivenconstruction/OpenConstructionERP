@@ -41,6 +41,16 @@ describe('localizedUnitCode', () => {
     expect(localizedUnitCode('pcs', 'en')).toBe('pcs');
   });
 
+  // P-56: Croatian trade spellings. The server stores the running metre m'
+  // as the canonical "lm"; it has to read back as m', not "l.m".
+  it('shows the Croatian trade codes under hr', () => {
+    expect(localizedUnitCode('lm', 'hr')).toBe("m'");
+    expect(localizedUnitCode('lsum', 'hr')).toBe('pauš.');
+    expect(localizedUnitCode('pcs', 'hr')).toBe('kom');
+    expect(localizedUnitCode('m2', 'hr')).toBe('m²');
+    expect(localizedUnitCode('lm', 'en')).toBe('l.m');
+  });
+
   it('localizes the unit part of compound trade units (DACH cost bases)', () => {
     expect(localizedUnitCode('100 m2', 'de')).toBe('100 m²');
     expect(localizedUnitCode('100 m3', 'de')).toBe('100 m³');

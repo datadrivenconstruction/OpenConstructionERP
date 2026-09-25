@@ -67,6 +67,11 @@ const LOCALE_UNIT_CODES: Record<string, Record<string, string>> = {
   // ("Standard-m, m², m³, kg, Stk"); a raw "pcs" next to German labels
   // reads as untranslated UI (audit case-2 K-14).
   de: { lsum: 'psch', ls: 'psch', lump_sum: 'psch', pcs: 'Stk', ea: 'Stk' },
+  // A Croatian troskovnik writes a running metre as "m'", a lump sum as
+  // "paus." with the caron and a piece as "kom". The server folds the
+  // apostrophe forms of the running metre into the canonical "lm", so without
+  // this entry a Croatian user who typed m' would read back "l.m".
+  hr: { lm: "m'", lsum: 'pauš.', ls: 'pauš.', lump_sum: 'pauš.', pcs: 'kom', ea: 'kom' },
 };
 
 /**

@@ -141,9 +141,24 @@ const LOCALE_UNITS: Record<string, readonly string[]> = {
        'лм', 'мл', 'м.л',
        'час', 'ден', 'месец', 'година', 'смяна'],
   // Croatian
-  hr: ['kom', 'kpl', 'par', 'set',
+  hr: ['kom', 'kpl', 'pauš.', "m'", 'par', 'set',
        'm', 'm2', 'm3',
        'h', 'sat', 'dan', 'mj', 'god'],
+  // Hungarian
+  hu: ['db', 'klt', 'fm', 'átalány',
+       'óra', 'nap', 'hét', 'hó', 'év'],
+  // Greek
+  el: ['τεμ.', 'τεμ', 'σετ', 'μμ', 'τ.μ.', 'κ.μ.', 'κ.α.',
+       'ώρα', 'ημέρα', 'μήνας'],
+  // Ukrainian
+  uk: ['шт', 'компл', 'компл.', 'п.м', 'м.п.', 'м', 'м2', 'м3', 'кг', 'т',
+       'люд.-год', 'маш.-год', 'год', 'дн', 'міс'],
+  // Finnish
+  fi: ['kpl', 'jm', 'erä', 'h', 'pv', 'vk', 'kk'],
+  // Danish
+  da: ['stk', 'sæt', 'lbm', 'time', 'dag', 'uge', 'md', 'år'],
+  // Norwegian
+  no: ['stk', 'sett', 'lm', 'RS', 'time', 'dag', 'uke', 'mnd', 'år'],
   // Swedish
   sv: ['st', 'styck', 'sats', 'par',
        'lm', 'löpmeter',
@@ -233,14 +248,18 @@ export function saveCustomUnit(unit: string): void {
 }
 
 /**
- * Get units for the current locale. Includes base metric + locale-specific + user custom.
- * Always deduplicates and keeps base units first.
+ * Get units for the current locale: the locale's own trade tokens, then the
+ * base catalogue, then the user's custom units. Deduplicated.
+ *
+ * The locale's tokens lead because they are what a native estimator looks
+ * for. Behind the hundred-odd base tokens a Croatian "kom" or "kpl" sat at the
+ * bottom of the dropdown, far enough down to read as missing.
  */
 export function getUnitsForLocale(lang?: string): string[] {
   const code = (lang || 'en').split('-')[0] ?? 'en';
   const locale = LOCALE_UNITS[code] ?? [];
   const custom = loadCustomUnits();
-  const all = [...BASE_UNITS, ...locale, ...custom];
+  const all = [...locale, ...BASE_UNITS, ...custom];
   // Deduplicate preserving order
   return [...new Set(all)];
 }
