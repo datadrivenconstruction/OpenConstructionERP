@@ -692,7 +692,9 @@
     "escrow_not_found": "Treuhand-Transaktion nicht gefunden",
     "commission_accrual_not_found": "Provisions-Abgrenzung nicht gefunden",
     "baseline_not_found": "Baseline nicht gefunden",
-    "fx_rate_set_locked": "Die EZB-Kurse vom {date} sind gesperrt, deshalb hat diese Aktualisierung sie nicht überschrieben. Entsperren Sie den Kurssatz zuerst, wenn er die neue Veröffentlichung übernehmen soll."
+    "fx_rate_set_locked": "Die EZB-Kurse vom {date} sind gesperrt, deshalb hat diese Aktualisierung sie nicht überschrieben. Entsperren Sie den Kurssatz zuerst, wenn er die neue Veröffentlichung übernehmen soll.",
+    "boq_locked": "Das Leistungsverzeichnis ist gesperrt und kann nicht geändert werden. Legen Sie eine Revision an, um Änderungen vorzunehmen.",
+    "boq_link_owner_locked": "Der Code '{code}' ist durch eine Position im gesperrten Leistungsverzeichnis '{bill}' definiert, und eine Verknüpfung würde dieses Leistungsverzeichnis ändern. Entsperren Sie es zuerst oder erfassen Sie die Position unter einem neuen Code."
   },
   "variations": {
     "boq_lines_are_traced": {
