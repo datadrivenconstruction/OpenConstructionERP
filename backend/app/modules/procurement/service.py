@@ -14,6 +14,7 @@ Event publishing (slice E):
 
 import logging
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -58,11 +59,22 @@ from app.modules.procurement.schemas import (
     ProjectDeliveryPerformanceResponse,
     SupplierDeliveryPerformance,
 )
+from app.modules.procurement.validators import line_label
 
 #: Rule set run against a purchase order. Registered in
 #: ``app.core.validation.rules.register_builtin_rules`` and passed explicitly by
 #: :meth:`ProcurementService._validate_po` -- a rule set nobody passes never runs.
 PROCUREMENT_RULE_SET = "procurement"
+
+#: Rule set run against a supplier invoice linked to a purchase order (amount
+#: still open on the order, quantity received). Warnings only, see
+#: ``procurement.validators.check_invoice_within_order``.
+INVOICE_PO_MATCH_RULE_SET = "invoice_po_match"
+
+
+def _line_key(description: object) -> str:
+    """How an invoice line is matched to an order line: its text, case and spacing ignored."""
+    return " ".join(str(description or "").split()).casefold()
 
 
 # ── Material Requisition FSM (R7) ─────────────────────────────────────────────
@@ -1611,6 +1623,129 @@ class ProcurementService:
             ],
         }
 
+    async def invoice_match_payload(
+        self,
+        po_id: uuid.UUID,
+        *,
+        invoice_net: object,
+        lines: Sequence[dict[str, object]],
+        exclude_invoice_id: uuid.UUID | None = None,
+        invoice_ref: str | None = None,
+    ) -> dict[str, object]:
+        """Build what the ``invoice_po_match`` rules read for one invoice against its order.
+
+        "Invoiced before" is every other invoice linked to the order that the
+        dashboard counts as invoiced, in the order's currency, so re-checking
+        an invoice that is already saved does not count it twice.
+
+        An invoice line belongs to the order line with the same description.
+        When the order has a single line, every invoice line belongs to it,
+        which covers the common "one material, one order" case where the
+        supplier's wording differs from the buyer's. Lines that match nothing
+        are left to the amount check.
+        """
+        from app.modules.finance.cost_position import INVOICED_STATUSES
+
+        po = await self.get_po(po_id)
+        currency = (po.currency_code or "").strip().upper()
+        items = list(po.items or [])
+        by_key = {_line_key(item.description): item for item in items}
+
+        def _item_for(description: object) -> PurchaseOrderItem | None:
+            if len(items) == 1:
+                return items[0]
+            return by_key.get(_line_key(description))
+
+        invoiced_before_net = Decimal("0")
+        invoiced_before: dict[uuid.UUID, Decimal] = {}
+        for inv in await self.po_repo.linked_payable_invoices(po_id, po.project_id):
+            if inv.id == exclude_invoice_id or inv.status not in INVOICED_STATUSES:
+                continue
+            if (inv.currency_code or "").strip().upper() != currency:
+                continue
+            invoiced_before_net += _to_decimal(inv.amount_subtotal)
+            for line in inv.line_items or []:
+                item = _item_for(line.description)
+                if item is not None:
+                    invoiced_before[item.id] = invoiced_before.get(item.id, Decimal("0")) + _to_decimal(line.quantity)
+
+        invoiced_now: dict[uuid.UUID, Decimal] = {}
+        for line in lines:
+            item = _item_for(line.get("description"))
+            if item is not None:
+                invoiced_now[item.id] = invoiced_now.get(item.id, Decimal("0")) + _to_decimal(line.get("quantity"))
+
+        received: dict[uuid.UUID, Decimal] = {}
+        has_receipts = False
+        for gr in po.goods_receipts or []:
+            if gr.status != "confirmed":
+                continue
+            has_receipts = True
+            for gr_item in gr.items or []:
+                if gr_item.po_item_id is not None:
+                    received[gr_item.po_item_id] = received.get(gr_item.po_item_id, Decimal("0")) + _to_decimal(
+                        gr_item.quantity_received
+                    )
+
+        return {
+            "po_number": po.po_number,
+            "currency_code": po.currency_code or "",
+            "po_net": po.amount_subtotal,
+            "invoiced_before_net": str(invoiced_before_net),
+            "invoice_net": str(invoice_net or "0"),
+            "invoice_ref": invoice_ref or "",
+            "has_receipts": has_receipts,
+            "received_net": str(
+                sum(
+                    (received.get(item.id, Decimal("0")) * _to_decimal(item.unit_rate) for item in items),
+                    Decimal("0"),
+                )
+            ),
+            "lines": [
+                {
+                    "label": line_label(idx, {"description": item.description}),
+                    "unit": item.unit or "",
+                    "ordered": item.quantity,
+                    "received": str(received.get(item.id, Decimal("0"))),
+                    "invoiced_before": str(invoiced_before.get(item.id, Decimal("0"))),
+                    "invoiced": str(invoiced_now.get(item.id, Decimal("0"))),
+                }
+                for idx, item in enumerate(items)
+            ],
+        }
+
+    async def check_invoice_against_po(
+        self,
+        po_id: uuid.UUID,
+        *,
+        invoice_net: object,
+        lines: Sequence[dict[str, object]],
+        exclude_invoice_id: uuid.UUID | None = None,
+        invoice_ref: str | None = None,
+    ) -> dict[str, object]:
+        """Run the ``invoice_po_match`` rules for an invoice about to be saved (read-only).
+
+        Warnings, never a refusal: the person entering the invoice sees what
+        does not match and decides.
+        """
+        payload = await self.invoice_match_payload(
+            po_id,
+            invoice_net=invoice_net,
+            lines=lines,
+            exclude_invoice_id=exclude_invoice_id,
+            invoice_ref=invoice_ref,
+        )
+        po = await self.get_po(po_id)
+        report = await validation_engine.validate(
+            data=payload,
+            rule_sets=[INVOICE_PO_MATCH_RULE_SET],
+            target_type="invoice",
+            target_id=str(exclude_invoice_id or po_id),
+            project_id=str(po.project_id),
+            metadata={"locale": get_locale(), "operation": "invoice_check"},
+        )
+        return self._po_report_to_dict(report)
+
     async def validate_po(self, po_id: uuid.UUID) -> dict[str, object]:
         """Run the procurement rule set and return the report (read-only).
 
@@ -2312,19 +2447,11 @@ class ProcurementService:
         # ── Invoiced quantities - best-effort, optional finance module ──
         invoiced_by_sort: dict[int, Decimal] = {}
         try:
-            from app.modules.finance.models import Invoice, InvoiceLineItem
+            from app.modules.finance.models import InvoiceLineItem
 
-            # Find invoices whose JSON metadata.po_id == this PO id. Fetch the
-            # id AND metadata_ together so the link filter needs no second pass
-            # over the same id set (previously a separate ``meta_stmt`` re-read
-            # the metadata for every id this query already returned).
-            inv_stmt = _select(Invoice.id, Invoice.metadata_).where(
-                Invoice.project_id == po.project_id,
-                Invoice.invoice_direction == "payable",
-            )
-            inv_rows = (await self.session.execute(inv_stmt)).all()
+            # The column or the legacy metadata stamp, whichever the invoice has.
             linked_invoice_ids: set[uuid.UUID] = {
-                inv_id for inv_id, meta in inv_rows if isinstance(meta, dict) and str(meta.get("po_id")) == str(po_id)
+                inv.id for inv in await self.po_repo.linked_payable_invoices(po_id, po.project_id)
             }
             if linked_invoice_ids:
                 # Pull line items only for the invoices actually linked to this

@@ -509,6 +509,18 @@
     "po_line_cost_coded": {
       "fail": "Line {line} has no WBS, cost category or cost line, so it will not appear in the cost breakdown",
       "suggestion": "Assign a cost code so the commitment reports against a budget"
+    },
+    "invoice_within_order": {
+      "fail": "Invoice {invoice} is more than the {remaining} still open on order {po}, by {excess}",
+      "suggestion": "Check the invoice against the order; if the extra was agreed, record it as a change to the order before approving"
+    },
+    "invoice_quantity_received": {
+      "fail": "Line {line} would be invoiced for {invoiced} in total, but only {received} has been received",
+      "suggestion": "Wait for the delivery note or confirm the goods receipt before approving this quantity"
+    },
+    "invoice_value_received": {
+      "fail": "On order {po} the invoices would total {invoiced}, but the goods received are worth only {received} at the order rates",
+      "suggestion": "Wait for the delivery note or confirm the goods receipt before approving this amount"
     }
   },
   "subcontract": {

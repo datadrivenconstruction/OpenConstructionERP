@@ -8,6 +8,9 @@ No business logic - pure data access.
 
 import logging
 import uuid
+from collections.abc import Sequence
+from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -164,7 +167,7 @@ class PurchaseOrderRepository:
             .where(PurchaseOrder.status != "cancelled")
         )
         committed_rows = (await self.session.execute(committed_stmt)).all()
-        from decimal import Decimal, InvalidOperation
+        from decimal import InvalidOperation
 
         total_committed = Decimal("0")
         for row in committed_rows:
@@ -263,32 +266,74 @@ class PurchaseOrderRepository:
         stmt = select(func.count()).select_from(MaterialRequisition).where(MaterialRequisition.po_id == po_id)
         return int((await self.session.execute(stmt)).scalar_one() or 0)
 
-    async def count_payable_invoices(self, po_id: uuid.UUID, project_id: uuid.UUID) -> int:
-        """Number of payable invoices raised from this PO.
+    async def linked_payable_invoices(self, po_id: uuid.UUID, project_id: uuid.UUID) -> Sequence[Any]:
+        """The payable invoices that bill against this PO, any status.
 
         Finance is an optional module and its ``Invoice`` carries no foreign
-        key to a PO - ``create_invoice_from_po`` stamps the link into
-        ``Invoice.metadata_["po_id"]``. This reads that same stamp, which is
-        the link ``get_match_status`` already relies on; a check reading
-        anything else would report zero for every invoice ever created.
+        key to a PO. The link is ``Invoice.purchase_order_id``, or, on invoices
+        ``create_invoice_from_po`` raised before that column existed, the
+        ``metadata_["po_id"]`` stamp (``finance.po_link`` says why both). A
+        reader of only one of the two would report zero for half the invoices.
 
-        The metadata filter is applied in Python for the same reason
-        ``get_match_status`` does it: the JSON key lookup is not portable
-        across the backends the test suite runs on, and the candidate set is
-        one project's payables.
+        The stamp is matched in Python because the JSON key lookup is not
+        portable across the backends the test suite runs on, and the candidate
+        set is one project's payables. Empty when finance is not installed.
         """
         try:
             from app.modules.finance.models import Invoice
+            from app.modules.finance.po_link import invoice_po_link
         except Exception:  # noqa: BLE001 - finance is an optional module
-            logger.debug("Finance module unavailable; PO %s invoice holders not counted", po_id)
-            return 0
+            logger.debug("Finance module unavailable; PO %s invoices not read", po_id)
+            return []
 
-        stmt = select(Invoice.metadata_).where(
+        stmt = select(Invoice).where(
             Invoice.project_id == project_id,
             Invoice.invoice_direction == "payable",
         )
-        rows = (await self.session.execute(stmt)).all()
-        return sum(1 for (meta,) in rows if isinstance(meta, dict) and str(meta.get("po_id")) == str(po_id))
+        rows = (await self.session.execute(stmt)).scalars().all()
+        return [inv for inv in rows if invoice_po_link(inv.purchase_order_id, inv.metadata_) == po_id]
+
+    async def invoiced_net_by_po(
+        self, project_id: uuid.UUID, pos: Sequence[PurchaseOrder]
+    ) -> dict[uuid.UUID, tuple[Decimal, int]]:
+        """Net invoiced to date and invoice count per order, for one project's orders.
+
+        Counts the invoices the finance dashboard counts as invoiced
+        (``finance.cost_position.INVOICED_STATUSES``) and only those in the
+        order's own currency, so the figure reads against the order's net.
+        One query for the whole page of orders.
+        """
+        wanted = {po.id: (po.currency_code or "").strip().upper() for po in pos}
+        if not wanted:
+            return {}
+        try:
+            from app.modules.finance.cost_position import INVOICED_STATUSES
+            from app.modules.finance.models import Invoice
+            from app.modules.finance.po_link import invoice_po_link
+        except Exception:  # noqa: BLE001 - finance is an optional module
+            return {}
+        stmt = select(
+            Invoice.purchase_order_id,
+            Invoice.metadata_,
+            Invoice.currency_code,
+            Invoice.amount_subtotal,
+        ).where(
+            Invoice.project_id == project_id,
+            Invoice.invoice_direction == "payable",
+            Invoice.status.in_(INVOICED_STATUSES),
+        )
+        out: dict[uuid.UUID, tuple[Decimal, int]] = {}
+        for column, meta, currency, subtotal in (await self.session.execute(stmt)).all():
+            po_id = invoice_po_link(column, meta)
+            if po_id not in wanted or (currency or "").strip().upper() != wanted[po_id]:
+                continue
+            net, count = out.get(po_id, (Decimal("0"), 0))
+            out[po_id] = (net + Decimal(str(subtotal or 0)), count + 1)
+        return out
+
+    async def count_payable_invoices(self, po_id: uuid.UUID, project_id: uuid.UUID) -> int:
+        """Number of payable invoices raised against this PO (see ``linked_payable_invoices``)."""
+        return len(await self.linked_payable_invoices(po_id, project_id))
 
     async def has_left_draft(self, po_id: uuid.UUID) -> bool:
         """True when this PO has ever been approved, issued or received against.

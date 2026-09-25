@@ -352,3 +352,126 @@ def check_line_cost_coded(po: dict[str, Any]) -> list[Finding]:
                 )
             )
     return findings
+
+
+# ── Invoice against its purchase order (simple three-way match) ─────────────
+#
+# A supplier invoice linked to an order is checked against what is left on the
+# order and, once goods have been received, against what arrived. Both are
+# WARNINGS: an invoice above the order can be a legitimate extra the site
+# agreed by phone, and a delivery note can reach the office after the invoice.
+# The person approving the invoice reads the warning and decides; nothing here
+# blocks the save. This is deliberately not an accounts-payable matching
+# engine: price variance per unit, tolerances per supplier and partial-line
+# splits are out of scope.
+#
+# The payload is built by ``ProcurementService.invoice_match_payload``:
+#
+#     {"po_number", "currency_code", "po_net", "invoiced_before_net",
+#      "invoice_net", "invoice_ref", "has_receipts", "received_net",
+#      "lines": [{"label", "unit", "ordered", "received", "invoiced_before",
+#                 "invoiced"}]}
+#
+# Money is net of VAT on both sides; quantities are per order line.
+
+#: Quantities closer than this are equal (a rounded metre of cable, a kilo).
+QUANTITY_TOLERANCE = Decimal("0.001")
+
+
+def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
+    """The invoice should not exceed what is still open on its order, net of VAT."""
+    po_net = _money(payload.get("po_net"))
+    before = _money(payload.get("invoiced_before_net"))
+    invoice = _money(payload.get("invoice_net"))
+    remaining = po_net - before
+    if invoice <= remaining + MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=str(payload.get("invoice_ref") or _po_ref(payload)),
+            params={
+                "po": _po_ref(payload),
+                "invoice": _amount(invoice, payload),
+                "remaining": _amount(max(remaining, Decimal("0")), payload),
+                "excess": _amount(invoice - max(remaining, Decimal("0")), payload),
+            },
+            details={
+                "po_net": str(po_net),
+                "invoiced_before_net": str(before),
+                "invoice_net": str(invoice),
+                "remaining_net": str(remaining),
+            },
+        )
+    ]
+
+
+def check_invoice_quantity_received(payload: dict[str, Any]) -> list[Finding]:
+    """Invoiced quantity per order line should not run ahead of goods received.
+
+    Only once the order has a confirmed goods receipt: an order for services,
+    or one whose deliveries are not booked in the system, has nothing to match
+    and gets no warning. Lines the invoice does not bill are skipped.
+    """
+    if not payload.get("has_receipts"):
+        return []
+    findings: list[Finding] = []
+    for line in payload.get("lines") or []:
+        if not isinstance(line, dict):
+            continue
+        invoiced_now = _money(line.get("invoiced"))
+        if invoiced_now <= 0:
+            continue
+        total = _money(line.get("invoiced_before")) + invoiced_now
+        received = _money(line.get("received"))
+        if total <= received + QUANTITY_TOLERANCE:
+            continue
+        label = str(line.get("label") or "?")
+        unit = str(line.get("unit") or "").strip()
+        findings.append(
+            Finding(
+                element_ref=label,
+                params={
+                    "line": label,
+                    "invoiced": f"{total.normalize():f} {unit}".strip(),
+                    "received": f"{received.normalize():f} {unit}".strip(),
+                },
+                details={
+                    "invoiced_total": str(total),
+                    "received": str(received),
+                    "ordered": str(_money(line.get("ordered"))),
+                },
+            )
+        )
+    return findings
+
+
+def check_invoice_value_received(payload: dict[str, Any]) -> list[Finding]:
+    """An invoice billed as one sum should not run ahead of the value received.
+
+    The quantity check needs invoice lines that name an order line. An invoice
+    entered as a single amount has none, so it is weighed by value instead:
+    everything invoiced on the order so far, this invoice included, against
+    the confirmed receipts priced at the order's unit rates. Silent when the
+    invoice carries matched quantities (the quantity check speaks then) or
+    when nothing has been received yet.
+    """
+    if not payload.get("has_receipts"):
+        return []
+    lines = [line for line in payload.get("lines") or [] if isinstance(line, dict)]
+    if any(_money(line.get("invoiced")) > 0 for line in lines):
+        return []
+    total = _money(payload.get("invoiced_before_net")) + _money(payload.get("invoice_net"))
+    received = _money(payload.get("received_net"))
+    if total <= received + MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=str(payload.get("invoice_ref") or _po_ref(payload)),
+            params={
+                "po": _po_ref(payload),
+                "invoiced": _amount(total, payload),
+                "received": _amount(received, payload),
+            },
+            details={"invoiced_total_net": str(total), "received_net": str(received)},
+        )
+    ]

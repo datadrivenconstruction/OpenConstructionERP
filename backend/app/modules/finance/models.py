@@ -29,6 +29,9 @@ class Invoice(Base):
         Index("ix_invoice_project_status", "project_id", "status"),
         # Gap E: fast idempotent "did this claim already spawn an invoice?" lookup.
         Index("ix_invoice_source_claim", "source_claim_id"),
+        # "What has been invoiced against this order?" - the PO view and the
+        # invoice-to-order match both ask it per order.
+        Index("ix_invoice_purchase_order", "purchase_order_id"),
     )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
@@ -46,6 +49,16 @@ class Invoice(Base):
     # the claim lives in another module and may be deleted while the AR invoice
     # and its payment history survive. NULL on every non-claim invoice.
     source_claim_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The procurement purchase order a supplier invoice bills against. Optional:
+    # plenty of payables have no order behind them. Plain GUID with no
+    # cross-module FK, the same as ``source_claim_id``: procurement is an
+    # optional module, and an order may be removed while the invoice and its
+    # payments survive. Invoices raised by ``POST /procurement/{id}/create-invoice/``
+    # before this column existed carry the link only as ``metadata_["po_id"]``;
+    # every reader matches on this column OR that stamp (see
+    # ``invoice_po_link``), because a running install gains the column on boot
+    # without a backfill.
+    purchase_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     invoice_number: Mapped[str] = mapped_column(String(50), nullable=False)
     invoice_date: Mapped[str] = mapped_column(String(40), nullable=False)
     due_date: Mapped[str | None] = mapped_column(String(40), nullable=True)

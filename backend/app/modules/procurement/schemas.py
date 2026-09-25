@@ -95,6 +95,26 @@ class POCreate(BaseModel):
         return _validate_non_negative_decimal(v)
 
 
+class InvoiceCheckLine(BaseModel):
+    """One line of an invoice being checked against its order."""
+
+    description: str = Field(default="", max_length=500)
+    quantity: str = Field(default="0", max_length=50)
+
+
+class InvoiceCheckRequest(BaseModel):
+    """A supplier invoice, saved or not yet, to check against the order it bills.
+
+    ``invoice_id`` names the saved invoice being edited, so its own earlier
+    figures are not counted as "invoiced before".
+    """
+
+    amount_subtotal: str = Field(default="0", max_length=50)
+    line_items: list[InvoiceCheckLine] = Field(default_factory=list)
+    invoice_id: UUID | None = None
+    invoice_number: str | None = Field(default=None, max_length=50)
+
+
 class POUpdate(BaseModel):
     """Partial update for a purchase order."""
 
@@ -232,6 +252,12 @@ class POResponse(BaseModel):
     # ad-hoc vendors. Stamped by the router from the service gate; not a
     # persisted column.
     vendor_warnings: list[str] = Field(default_factory=list)
+    # ── Invoiced against this order ──────────────────────────────────────
+    # Supplier invoices linked to this order (``pending`` onwards, not
+    # cancelled or credited), net of VAT, in the order's currency, so it reads
+    # against ``amount_subtotal``. Computed on read, not a column.
+    invoiced_net: str = "0"
+    invoice_count: int = 0
     created_at: datetime
     updated_at: datetime
 
