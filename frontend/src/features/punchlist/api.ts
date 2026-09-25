@@ -424,7 +424,6 @@ export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]>
       name: u.full_name?.trim() || u.email,
       email: u.email,
       avatar_url: null,
-      detail: u.email,
       assignable: true,
       on_roster: false,
     }));
@@ -433,7 +432,7 @@ export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]>
   // project whose roster is all subcontractor gangs without accounts has plenty
   // of rows and nobody assignable, and keying on row count instead of on
   // assignability would leave the list empty on exactly that project.
-  if (!roster.some((m) => m.user_id && !m.user_is_inactive)) return workspace;
+  if (!roster.some((m) => m.user_id && !m.user_is_inactive)) return withDisambiguation(workspace);
 
   const rostered = new Set(roster.map((m) => m.user_id).filter((id): id is string => !!id));
   const rosterRows: TeamMember[] = roster.map((m) => ({
@@ -450,5 +449,27 @@ export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]>
   // before anybody filled the roster in points at one of them, and an option
   // that is missing makes the editor read "Unassigned" for an item that is
   // assigned to somebody.
-  return [...rosterRows, ...workspace.filter((u) => !rostered.has(u.id))];
+  return withDisambiguation([...rosterRows, ...workspace.filter((u) => !rostered.has(u.id))]);
+}
+
+const nameKey = (name: string) => name.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+
+/**
+ * Show an email beside a name only where the name alone is ambiguous.
+ *
+ * Every account in the picker used to read "Name - email", which put the whole
+ * workspace's addresses on screen for anyone opening a snag, and in any screen
+ * recording or screen share of it. The name is what a site manager picks by;
+ * the address only earns its place when two people in the list share a name
+ * and there is nothing else to tell them apart. A roster row keeps its firm and
+ * site role, which already does that job without an address.
+ */
+export function withDisambiguation(members: TeamMember[]): TeamMember[] {
+  const counts = new Map<string, number>();
+  for (const m of members) counts.set(nameKey(m.name), (counts.get(nameKey(m.name)) ?? 0) + 1);
+  return members.map((m) => {
+    const shared = (counts.get(nameKey(m.name)) ?? 0) > 1;
+    const detail = m.detail || (shared && m.email && nameKey(m.email) !== nameKey(m.name) ? m.email : undefined);
+    return { ...m, detail };
+  });
 }
