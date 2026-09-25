@@ -7,10 +7,12 @@ Tables:
 """
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text, column, event, select, table
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.db_types import CalendarDayDateTime
 from app.database import GUID, Base
 
 
@@ -34,7 +36,8 @@ class PunchItem(Base):
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", index=True)
     assigned_to: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    due_date: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # A calendar day, kept as midnight UTC in a timestamp column (see app.core.calendar_day).
+    due_date: Mapped[datetime | None] = mapped_column(CalendarDayDateTime(), nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     trade: Mapped[str | None] = mapped_column(String(100), nullable=True)
     photos: Mapped[list] = mapped_column(  # type: ignore[assignment]
