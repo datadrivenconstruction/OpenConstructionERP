@@ -181,7 +181,7 @@ async def test_fsm_assigned_state_in_transitions() -> None:
 
 @pytest.mark.asyncio
 async def test_fsm_full_lifecycle_with_assigned() -> None:
-    """Full FSM walk: open → assigned → in_progress → verified → closed."""
+    """Full FSM walk: open → assigned → in_progress → resolved → verified → closed."""
     svc = _make_service()
     repo: _StubRepo = svc.repo  # type: ignore[assignment]
 
@@ -198,7 +198,11 @@ async def test_fsm_full_lifecycle_with_assigned() -> None:
     await svc.transition_status(item.id, PunchStatusTransition(new_status="in_progress"), user_a)
     assert item.status == "in_progress"
 
-    # in_progress → verified (different user)
+    # in_progress → resolved (the one who did the work)
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="resolved"), user_a)
+    assert item.status == "resolved"
+
+    # resolved → verified (different user)
     await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), user_b)
     assert item.status == "verified"
     assert item.verified_by == user_b
@@ -383,8 +387,8 @@ async def test_bulk_close_project_mismatch_becomes_error() -> None:
     svc = _make_service()
     repo: _StubRepo = svc.repo  # type: ignore[assignment]
 
-    good = repo._make_item(project_id=PROJECT_ID)
-    foreign = repo._make_item(project_id=OTHER_PROJECT_ID)
+    good = repo._make_item(project_id=PROJECT_ID, status="verified")
+    foreign = repo._make_item(project_id=OTHER_PROJECT_ID, status="verified")
 
     result = await svc.bulk_close(
         PROJECT_ID,
@@ -409,13 +413,76 @@ async def test_bulk_close_skips_already_closed() -> None:
     repo: _StubRepo = svc.repo  # type: ignore[assignment]
 
     already = repo._make_item(status="closed")
-    new_item = repo._make_item(status="open")
+    new_item = repo._make_item(status="verified")
 
     result = await svc.bulk_close(PROJECT_ID, [already.id, new_item.id], user_id="mgr")
 
     assert result["closed"] == 1
     assert result["skipped"] == 1
     assert result["errors"] == []
+
+
+# ── 7b. The verify step cannot be skipped (four-eyes by default) ─────────────
+
+
+@pytest.mark.asyncio
+async def test_in_progress_straight_to_verified_is_refused_by_default() -> None:
+    """Nobody resolved the item, so there is no resolver the verifier differs from."""
+    from fastapi import HTTPException
+
+    svc = _make_service()
+    repo: _StubRepo = svc.repo  # type: ignore[assignment]
+    item = repo._make_item(status="in_progress")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), "same-person")
+    assert exc_info.value.status_code == 400
+    assert item.status == "in_progress"
+
+
+@pytest.mark.asyncio
+async def test_the_self_verify_policy_lets_the_verifier_close_their_own_work(monkeypatch) -> None:
+    """``punchlist_verify_policy=verify_permission``: holding the permission is enough."""
+    from types import SimpleNamespace
+
+    from app.modules.punchlist import service as punch_service
+
+    monkeypatch.setattr(
+        punch_service,
+        "get_settings",
+        lambda: SimpleNamespace(punchlist_verify_policy="verify_permission"),
+    )
+    svc = _make_service()
+    repo: _StubRepo = svc.repo  # type: ignore[assignment]
+    item = repo._make_item(status="in_progress")
+
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="resolved"), "supervisor")
+    await svc.transition_status(item.id, PunchStatusTransition(new_status="verified"), "supervisor")
+    assert item.status == "verified"
+    assert item.verified_by == "supervisor"
+
+
+@pytest.mark.asyncio
+async def test_bulk_close_leaves_unverified_items_alone() -> None:
+    """Close selected closes verified items only; the rest keep their status."""
+    svc = _make_service()
+    repo: _StubRepo = svc.repo  # type: ignore[assignment]
+
+    verified = repo._make_item(status="verified")
+    in_progress = repo._make_item(status="in_progress")
+    resolved = repo._make_item(status="resolved")
+
+    result = await svc.bulk_close(PROJECT_ID, [verified.id, in_progress.id, resolved.id], user_id="mgr")
+
+    assert result["closed"] == 1
+    assert result["skipped"] == 0
+    assert {e["id"]: e["error"] for e in result["errors"]} == {
+        str(in_progress.id): "not_verified",
+        str(resolved.id): "not_verified",
+    }
+    assert verified.status == "closed"
+    assert in_progress.status == "in_progress"
+    assert resolved.status == "resolved"
 
 
 # ── 8. FSM: assigned → open (unassign / reopen from assigned) ─────────────────

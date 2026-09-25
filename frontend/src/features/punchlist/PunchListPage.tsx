@@ -1295,20 +1295,32 @@ export function PunchListPage() {
     onSuccess: (data) => {
       invalidateAll();
       setSelectedIds(new Set());
+      // Only verified items are closed; the rest come back as `not_verified`
+      // and keep their status, which is a lifecycle answer, not a failure.
+      const notVerified = data.errors.filter((e) => e.error === 'not_verified').length;
+      const failed = data.errors.length - notVerified;
+      const details = [
+        data.skipped || failed
+          ? t('punch.bulk_close_detail', {
+              defaultValue: '{{skipped}} skipped, {{errors}} error(s)',
+              skipped: data.skipped,
+              errors: failed,
+            })
+          : '',
+        notVerified
+          ? t('punch.bulk_close_not_verified', {
+              defaultValue: 'Not verified yet, left as they were: {{n}}',
+              n: notVerified,
+            })
+          : '',
+      ].filter(Boolean);
       addToast({
         type: data.errors.length > 0 ? 'warning' : 'success',
         title: t('punch.bulk_close_done', {
           defaultValue: 'Closed {{closed}} item(s)',
           closed: data.closed,
         }),
-        message:
-          data.skipped || data.errors.length
-            ? t('punch.bulk_close_detail', {
-                defaultValue: '{{skipped}} skipped, {{errors}} error(s)',
-                skipped: data.skipped,
-                errors: data.errors.length,
-              })
-            : undefined,
+        message: details.length ? details.join(' · ') : undefined,
       });
     },
     onError: (e: Error) =>
@@ -1351,7 +1363,7 @@ export function PunchListPage() {
       }),
       message: t('punch.confirm_bulk_close_message', {
         defaultValue:
-          'Mark {{count}} punch item(s) as closed? Items already closed will be skipped.',
+          'Close {{count}} punch item(s)? Only verified items are closed. Items already closed are skipped and the rest keep their status.',
         count: selectedIds.size,
       }),
       confirmLabel: t('punch.action_close', { defaultValue: 'Close' }),
