@@ -310,25 +310,18 @@ export function ComplianceGate({
             <span className="hidden h-4 w-px bg-border-light sm:block" />
             <div className="flex items-center gap-3 text-sm">
               <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 size={14} /> {t('contracts.compliance.passed_count', {
-                  count: passedCount,
-                  defaultValue_one: '{{count}} passed',
-                  defaultValue: '{{count}} passed',
-                })}
+                <CheckCircle2 size={14} /> {passedCount}{' '}
+                {t('contracts.compliance.passed_label', { defaultValue: 'passed' })}
               </span>
               <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                <ShieldAlert size={14} /> {t('contracts.compliance.warnings_count', {
-                  count: warnings.length,
-                  defaultValue_one: '{{count}} warning',
-                  defaultValue: '{{count}} warnings',
+                <ShieldAlert size={14} /> {warnings.length}{' '}
+                {t('contracts.compliance.warnings_label', {
+                  defaultValue: 'warnings',
                 })}
               </span>
               <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-                <ShieldX size={14} /> {t('contracts.compliance.errors_count', {
-                  count: errors.length,
-                  defaultValue_one: '{{count}} error',
-                  defaultValue: '{{count}} errors',
-                })}
+                <ShieldX size={14} /> {errors.length}{' '}
+                {t('contracts.compliance.errors_label', { defaultValue: 'errors' })}
               </span>
             </div>
           </div>

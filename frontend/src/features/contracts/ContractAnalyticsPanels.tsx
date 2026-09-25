@@ -502,25 +502,16 @@ function CompletenessPanel({ contractId }: { contractId: string }) {
             <p className={clsx('text-sm font-semibold', banner.titleCls)}>{banner.title}</p>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-2xs">
               <span className={clsx('inline-flex items-center gap-1', SUCCESS)}>
-                <CheckCircle2 size={12} /> {t('contracts.completeness_passed_count', {
-                  count: passedCount,
-                  defaultValue_one: '{{count}} passed',
-                  defaultValue: '{{count}} passed',
-                })}
+                <CheckCircle2 size={12} /> {passedCount}{' '}
+                {t('contracts.completeness_passed_label', { defaultValue: 'passed' })}
               </span>
               <span className={clsx('inline-flex items-center gap-1', WARNING)}>
-                <ShieldAlert size={12} /> {t('contracts.completeness_warnings_count', {
-                  count: warnings.length,
-                  defaultValue_one: '{{count}} warning',
-                  defaultValue: '{{count}} warnings',
-                })}
+                <ShieldAlert size={12} /> {warnings.length}{' '}
+                {t('contracts.completeness_warnings_label', { defaultValue: 'warnings' })}
               </span>
               <span className={clsx('inline-flex items-center gap-1', DANGER)}>
-                <ShieldX size={12} /> {t('contracts.completeness_errors_count', {
-                  count: errors.length,
-                  defaultValue_one: '{{count}} error',
-                  defaultValue: '{{count}} errors',
-                })}
+                <ShieldX size={12} /> {errors.length}{' '}
+                {t('contracts.completeness_errors_label', { defaultValue: 'errors' })}
               </span>
             </div>
           </div>
