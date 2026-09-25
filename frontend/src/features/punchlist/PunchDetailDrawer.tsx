@@ -277,17 +277,26 @@ export function PunchDetailDrawer({
     enabled: Boolean(itemId),
   });
 
-  const refresh = useCallback(() => {
-    qc.invalidateQueries({ queryKey: ['punchlist'] });
-    qc.invalidateQueries({ queryKey: ['punchlist', 'item', itemId] });
-    qc.invalidateQueries({ queryKey: ['punchlist-summary'] });
-  }, [qc, itemId]);
+  const refresh = useCallback(
+    () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['punchlist'] }),
+        qc.invalidateQueries({ queryKey: ['punchlist', 'item', itemId] }),
+        qc.invalidateQueries({ queryKey: ['punchlist-summary'] }),
+      ]),
+    [qc, itemId],
+  );
 
   const transitionMut = useMutation({
     mutationFn: ({ next, notes }: { next: PunchStatus; notes?: string }) =>
       transitionPunchStatus(itemId, next, notes),
-    onSuccess: (_data, vars) => {
-      refresh();
+    onSuccess: async (updated, vars) => {
+      // The response is the item as it now stands, so the stepper shows the
+      // next status's actions at once instead of the old ones until the refetch
+      // lands. The mutation stays pending until the lists are fresh, which keeps
+      // the buttons disabled and holds the toast until the screen agrees with it.
+      qc.setQueryData(['punchlist', 'item', itemId], updated);
+      await refresh();
       addToast({
         type: 'success',
         title: t('punch.status_updated', {
