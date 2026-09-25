@@ -30,6 +30,7 @@ from app.core.events import event_bus
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
 from app.core.validation.messages import translate
+from app.modules.subcontractors import finance_bridge
 from app.modules.subcontractors.models import (
     Certificate,
     LienWaiver,
@@ -1237,6 +1238,15 @@ class SubcontractorService:
             # re-patching an agreement that is already active does not re-run
             # the checks and re-log the same findings on every edit.
             await self._report_agreement_validation(entity)
+            # Signing is the moment the spend is agreed, so it commits the
+            # budget, keyed on the agreement so a second activation cannot
+            # commit it twice.
+            await finance_bridge.commit_subcontract(
+                self.session,
+                project_id=entity.project_id,
+                source=finance_bridge.agreement_source(entity.id),
+                amount=entity.total_value,
+            )
         return entity
 
     # ── Agreement validation ────────────────────────────────────────────
@@ -1756,6 +1766,10 @@ class SubcontractorService:
                 "approved_net_amount": net,
             },
         )
+        # What finance approved is a bill we owe: raise it as a payable with
+        # the approved retention held from it, so the payables ledger and this
+        # module's retention ledger carry the same figure.
+        await finance_bridge.raise_payable_for_pay_app(self.session, approved, agreement, actor_id=user_id)
 
         from app.core.audit_log import log_activity as _log_activity
 
@@ -1849,13 +1863,27 @@ class SubcontractorService:
             result[line_id] = (claimed, before, after)
         return result
 
-    async def mark_paid(self, payment_id: uuid.UUID) -> PaymentApplication:
+    async def mark_paid(self, payment_id: uuid.UUID, user_id: str | None = None) -> PaymentApplication:
+        """Record that a finance-approved pay application has been paid.
+
+        The payment goes through finance: the pay application's payable is paid
+        with its retention held back, which moves the gross from committed to
+        actual. A pay application approved before payables were raised gets
+        its payable here.
+        """
         await self._assert_lien_waiver_ok(payment_id)
-        return await self._transition_payment(
+        paid = await self._transition_payment(
             payment_id,
             "paid",
             extra={"paid_at": datetime.now(UTC)},
         )
+        agreement = await self.agreements.get_by_id(paid.agreement_id)
+        if agreement is None:
+            raise HTTPException(status_code=404, detail=translate("errors.agreement_not_found", locale=get_locale()))
+        invoice = await finance_bridge.raise_payable_for_pay_app(self.session, paid, agreement, actor_id=user_id)
+        await finance_bridge.settle_payable(self.session, invoice.id, actor_id=user_id)
+        await self.session.refresh(paid)
+        return paid
 
     async def lien_waiver_status(self, payment_id: uuid.UUID) -> tuple[bool, PaymentBlockResult]:
         """Return ``(required, block_result)`` for a payment application.
