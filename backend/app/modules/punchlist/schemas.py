@@ -14,6 +14,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.calendar_day import CalendarDay
+
 # Upper bound for money fields - far above any realistic rework cost yet within
 # Decimal's precision so quantize() below can never raise InvalidOperation on a
 # finite-but-absurd input. Mirrors changeorders/schemas.py:_MONEY_MAX.
@@ -57,7 +59,7 @@ class PunchItemCreate(BaseModel):
         pattern=r"^(low|medium|high|critical)$",
     )
     assigned_to: str | None = Field(default=None, max_length=36)
-    due_date: datetime | None = None
+    due_date: CalendarDay | None = None
     category: str | None = Field(
         default=None,
         pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
@@ -117,7 +119,7 @@ class PunchItemUpdate(BaseModel):
         pattern=r"^(low|medium|high|critical)$",
     )
     assigned_to: str | None = Field(default=None, max_length=36)
-    due_date: datetime | None = None
+    due_date: CalendarDay | None = None
     category: str | None = Field(
         default=None,
         pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
@@ -173,7 +175,7 @@ class PunchItemResponse(BaseModel):
     #: name someone typed. Null when the raw value is already a name, when it
     #: points at no contact, and when the contacts module is not installed.
     assigned_to_name: str | None = None
-    due_date: datetime | None = None
+    due_date: CalendarDay | None = None
     category: str | None = None
     trade: str | None = None
     photos: list[str] = Field(default_factory=list)

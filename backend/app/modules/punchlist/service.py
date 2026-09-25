@@ -23,6 +23,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.core.calendar_day import calendar_day_iso
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.core.party_names import resolve_party_names
@@ -885,7 +886,7 @@ class PunchListService:
                 ws.cell(row=row_idx, column=5, value=item.category or "")
                 ws.cell(row=row_idx, column=6, value=item.trade or "")
                 ws.cell(row=row_idx, column=7, value=_party_label(item, names))
-                ws.cell(row=row_idx, column=8, value=str(item.due_date) if item.due_date else "")
+                ws.cell(row=row_idx, column=8, value=calendar_day_iso(item.due_date) or "")
                 ws.cell(row=row_idx, column=9, value=(item.description or "")[:500])
                 ws.cell(row=row_idx, column=10, value=(item.resolution_notes or "")[:500])
                 ws.cell(row=row_idx, column=11, value=str(item.created_at) if item.created_at else "")
@@ -935,7 +936,7 @@ class PunchListService:
                     item.category or "",
                     item.trade or "",
                     _party_label(item, names),
-                    str(item.due_date) if item.due_date else "",
+                    calendar_day_iso(item.due_date) or "",
                     (item.description or "")[:500],
                     (item.resolution_notes or "")[:500],
                     str(item.created_at) if item.created_at else "",
@@ -1047,7 +1048,7 @@ def _render_punchlist_text(
         if item.assigned_to:
             lines.append(f"   Assigned to: {_party_label(item, names)}")
         if item.due_date:
-            lines.append(f"   Due: {item.due_date}")
+            lines.append(f"   Due: {calendar_day_iso(item.due_date)}")
         if item.description:
             lines.append(f"   Description: {item.description[:200]}")
         if item.resolution_notes:
@@ -1212,7 +1213,7 @@ def _build_reportlab_pdf(
                 "Assignee",
                 _party_label(item, names) or "-",
                 "Due Date",
-                item.due_date.strftime("%Y-%m-%d") if item.due_date else "-",
+                calendar_day_iso(item.due_date) or "-",
             ],
             [
                 "Category",

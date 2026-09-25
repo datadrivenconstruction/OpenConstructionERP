@@ -40,6 +40,8 @@ from typing import Any
 
 from sqlalchemy import Date, DateTime, Numeric, String, TypeDecorator
 
+from app.core.calendar_day import calendar_day_utc
+
 
 class MoneyType(TypeDecorator):
     """Money / signed-decimal column.
@@ -179,3 +181,31 @@ class AwareDateTime(TypeDecorator):
             return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
         # SQLite may hand back a stored ISO string for legacy rows.
         return self._to_aware(value)
+
+
+class CalendarDayDateTime(TypeDecorator):
+    """A calendar day kept in a ``TIMESTAMP WITH TIME ZONE`` column.
+
+    For date-only fields whose column is a timestamp. The column type is
+    unchanged; only what is bound and read back is normalised, through
+    :mod:`app.core.calendar_day`:
+
+    * **bind**: any date, ``YYYY-MM-DD`` string or datetime becomes midnight
+      UTC of its calendar day, so asyncpg never reads a naive value in the
+      server's local zone (which stored a day typed at UTC+2 as 22:00 UTC of
+      the day before);
+    * **read**: a row written before that, at local midnight of the server
+      zone, comes back as midnight UTC of the day that was meant.
+
+    Also used on the comparison side of a query: binding ``now`` through this
+    type yields midnight UTC of today, which is what a due-date comparison wants.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value: Any, dialect: Any) -> datetime | None:
+        return calendar_day_utc(value)
+
+    def process_result_value(self, value: Any, dialect: Any) -> datetime | None:
+        return calendar_day_utc(value)

@@ -7,7 +7,6 @@ No business logic - pure data access.
 """
 
 import uuid
-from datetime import UTC, datetime
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +14,7 @@ from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
+from app.core.calendar_day import start_of_today_utc
 from app.modules.punchlist.models import PunchItem
 
 #: Statuses that count as still-to-action work in the summary aggregates.
@@ -173,14 +173,18 @@ class PunchListRepository:
         }
 
     async def count_overdue(self, project_id: uuid.UUID) -> int:
-        """Count punch items that are past due and not closed/verified."""
-        now = datetime.now(UTC)
+        """Count punch items that are past due and not closed/verified.
+
+        A due date is a calendar day, so an item is overdue from the day after
+        it, the same rule the punch list screen applies.
+        """
+        today = start_of_today_utc()
         stmt = select(func.count()).select_from(
             select(PunchItem)
             .where(
                 PunchItem.project_id == project_id,
                 PunchItem.due_date.isnot(None),
-                PunchItem.due_date < now,
+                PunchItem.due_date < today,
                 PunchItem.status.notin_(["verified", "closed"]),
             )
             .subquery()
