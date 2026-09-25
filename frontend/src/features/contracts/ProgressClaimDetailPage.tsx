@@ -362,8 +362,26 @@ export function ProgressClaimDetailPage() {
       >
         {t('contracts_claim.intro_body', {
           defaultValue:
-            'Enter the percent or value complete against each schedule-of-values line, or pull it straight from progress observations, and the claim totals gross, retention and net due for you. Walk it through Submit, Approve, Certify and Mark paid, and the certified amount flows back to the contract and into Finance as a payable.',
+            'Enter the percent or value complete against each schedule-of-values line, or pull it straight from progress observations, and the claim totals gross, retention and net due for you. Walk it through Submit, Approve, Certify and Mark paid, and the certified amount flows back to the contract and into Finance.',
         })}
+        {/* Which side of the books the certified amount lands on follows the
+            contract, the same field the invoice card below is raised by: a
+            client contract bills a receivable, a subcontract a payable. Said
+            only once the contract is known, never guessed. */}
+        {contractQ.data && (
+          <span data-testid="claim-intro-direction">
+            {' '}
+            {invoiceDirection === 'payable'
+              ? t('contracts_claim.intro_direction_payable', {
+                  defaultValue:
+                    'This is a subcontract, so the certified amount is a payable: money you owe the subcontractor.',
+                })
+              : t('contracts_claim.intro_direction_receivable', {
+                  defaultValue:
+                    'This contract bills your client, so the certified amount is a receivable: money owed to you.',
+                })}
+          </span>
+        )}
       </DismissibleInfo>
 
       {/* Totals */}

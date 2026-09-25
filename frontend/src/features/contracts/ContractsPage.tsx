@@ -759,7 +759,7 @@ export function ContractsPage() {
       >
         {t('contracts.intro_body', {
           defaultValue:
-            'Set up each commercial agreement with its type-aware schedule of values, retention and lifecycle, then bill the work through progress claims and settle in the final account. Variations adjust the contract sum mid-flight and approved claims push their net due into Finance, so what you signed and what you owe never drift apart.',
+            'Set up each commercial agreement with its type-aware schedule of values, retention and lifecycle, then bill the work through progress claims and settle in the final account. Variations adjust the contract sum mid-flight and approved claims push their net due into Finance, so what you signed and what is billed never drift apart.',
         })}
       </DismissibleInfo>
 

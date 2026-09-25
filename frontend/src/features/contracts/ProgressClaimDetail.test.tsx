@@ -19,6 +19,7 @@ import {
   waitFor,
   fireEvent,
   within,
+  cleanup as cleanupDetail,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -242,6 +243,21 @@ describe('ProgressClaimDetailPage', () => {
     // assert on at least one match rather than a unique element.
     await waitFor(() => expect(screen.getAllByText(/PC-0001/).length).toBeGreaterThan(0));
     expect(screen.getByTestId('progress-claim-detail')).toBeTruthy();
+  });
+
+  it('says a certified client claim is a receivable and a subcontract claim a payable', async () => {
+    api.getProgressClaim.mockResolvedValue(claim());
+    api.listClaimLines.mockResolvedValue([]);
+    renderDetail();
+    const client = await screen.findByTestId('claim-intro-direction');
+    expect(client.textContent).toMatch(/receivable/);
+    expect(client.textContent).not.toMatch(/payable/);
+    cleanupDetail();
+
+    api.getContract.mockResolvedValueOnce({ counterparty_type: 'subcontractor' });
+    renderDetail();
+    const sub = await screen.findByTestId('claim-intro-direction');
+    expect(sub.textContent).toMatch(/a payable/);
   });
 
   it('shows the Populate button on a draft claim', async () => {
