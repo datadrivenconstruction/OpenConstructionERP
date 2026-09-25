@@ -26,6 +26,7 @@ import { usePreferencesStore, useNumberLocale } from '@/stores/usePreferencesSto
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import {
   boqApi,
+  billDirectCost,
   exportablePositions,
   groupPositionsIntoSections,
   isEmptyPosition,
@@ -102,7 +103,6 @@ import {
   getCurrencyCode,
   createFormatter,
   fmtWithCurrency,
-  resourceAwareTotalInBase,
   convertToBase,
   computeQualityScore,
   isResourceDrivenRate,
@@ -2325,27 +2325,10 @@ export function BOQEditorPage() {
 
   const directCost = useMemo(() => {
     if (!boq) return 0;
-    // Issue #111 (skolodi follow-up) — rebase per-position currencies into
-    // the project base before summing. ``resourceAwareTotalInBase`` covers
-    // BOTH a position-level ``metadata.currency`` (verified #131 path) AND
-    // the previously-missed case: a position with NO metadata.currency but
-    // foreign-currency ``metadata.resources`` (its stored total was built
-    // from Σ(r.qty×r.rate) with no FX, so summing it raw added a USD
-    // resource into an ARS project as if "1 USD = 1 ARS").
-    return boq.positions.reduce((sum, p) => {
-      return (
-        sum +
-        resourceAwareTotalInBase(
-          p as unknown as {
-            total?: number | string | null;
-            quantity?: number | string | null;
-            metadata?: Record<string, unknown> | null;
-          },
-          currencyCode,
-          fxRates,
-        )
-      );
-    }, 0);
+    // Issue #111 (skolodi follow-up): each line is rebased into the project
+    // base currency before it is summed, and section headers are left out
+    // (a change-order section stores its lines' sum on the header).
+    return billDirectCost(boq.positions, currencyCode, fxRates);
   }, [boq, currencyCode, fxRates]);
 
   const markupTotals = useMemo(() => {
