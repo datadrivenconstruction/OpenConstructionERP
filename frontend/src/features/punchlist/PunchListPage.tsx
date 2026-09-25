@@ -1218,10 +1218,14 @@ export function PunchListPage() {
   }, [highlightId, punchItems, setSearchParams]);
 
   // Invalidation
-  const invalidateAll = useCallback(() => {
-    qc.invalidateQueries({ queryKey: ['punchlist'] });
-    qc.invalidateQueries({ queryKey: ['punchlist-summary'] });
-  }, [qc]);
+  const invalidateAll = useCallback(
+    () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['punchlist'] }),
+        qc.invalidateQueries({ queryKey: ['punchlist-summary'] }),
+      ]),
+    [qc],
+  );
 
   // The pin board renders over the project-wide (unfiltered) `punchlist-pins`
   // list, whose key is NOT matched by the ['punchlist'] invalidation above.
@@ -1253,8 +1257,10 @@ export function PunchListPage() {
   const transitionMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: PunchStatus }) =>
       transitionPunchStatus(id, status),
-    onSuccess: (_data, vars) => {
-      invalidateAll();
+    onSuccess: async (_data, vars) => {
+      // Hold the toast (and the pending state) until the list has refetched,
+      // so the row never announces a status its buttons do not show yet.
+      await invalidateAll();
       addToast({
         type: 'success',
         title: t('punch.status_updated', {
