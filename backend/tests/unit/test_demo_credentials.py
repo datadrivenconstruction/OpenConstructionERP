@@ -180,3 +180,44 @@ def test_main_module_has_no_hardcoded_demo_password():
         "Hardcoded demo password reintroduced in main.py — see BUG-D01. "
         "Use _resolve_demo_password() + _persist_demo_credentials() instead."
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# _announce_generated_demo_credentials: the password never reaches the log
+# ─────────────────────────────────────────────────────────────────────────
+
+_SECRET = "gen-Secret_value-123"
+_EMAIL = "demo@openconstructionerp.com"
+
+
+def test_a_generated_password_is_saved_but_never_logged(tmp_path: Path, caplog, capsys):
+    """The log names the file and the variable, the file holds the password."""
+    import logging
+
+    from app.main import _announce_generated_demo_credentials
+
+    with patch.dict(os.environ, {"OE_CLI_DATA_DIR": str(tmp_path)}, clear=False):
+        with caplog.at_level(logging.DEBUG):
+            _announce_generated_demo_credentials({_EMAIL: _SECRET}, {_EMAIL: "DEMO_USER_PASSWORD"})
+
+    logged = "\n".join(r.getMessage() for r in caplog.records)
+    assert _SECRET not in logged
+    assert _EMAIL in logged
+    assert str(tmp_path / ".demo_credentials.json") in logged
+    assert "DEMO_USER_PASSWORD" in logged
+    assert _SECRET not in capsys.readouterr().err
+    assert json.loads((tmp_path / ".demo_credentials.json").read_text(encoding="utf-8")) == {_EMAIL: _SECRET}
+
+
+def test_without_a_file_the_password_goes_to_the_console_once_not_the_log(monkeypatch, caplog, capsys):
+    """No file means no other way to learn it: console, once, and still not the log."""
+    import logging
+
+    import app.main as _main
+
+    monkeypatch.setattr(_main, "_persist_demo_credentials", lambda _creds: None)
+    with caplog.at_level(logging.DEBUG):
+        _main._announce_generated_demo_credentials({_EMAIL: _SECRET}, {_EMAIL: "DEMO_USER_PASSWORD"})
+
+    assert _SECRET not in "\n".join(r.getMessage() for r in caplog.records)
+    assert capsys.readouterr().err.count(_SECRET) == 1
