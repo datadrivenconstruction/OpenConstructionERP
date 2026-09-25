@@ -32,6 +32,13 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Imported at module scope, not inside a test. Loading the binding runs the
+// mock factory below, and its `importOriginal` pulls the real legacy PDF.js
+// build: about 1.5 s idle, and 16 s once on a loaded Windows runner, all billed
+// to whichever test imported first. Paid here, it falls in file collection,
+// which no per-test timeout covers. vi.mock is hoisted above this import.
+import { PDFJS_ASSET_ROOT, closePdf, openPdf } from './pdfjs';
+
 const FRONTEND_ROOT = resolve(__dirname, '../../..');
 /** Resolved exactly as `vite.config.ts` resolves it. */
 const PDFJS_ROOT = join(FRONTEND_ROOT, 'node_modules', 'pdfjs-dist');
@@ -74,7 +81,6 @@ type OpenParams = { data: ArrayBuffer; wasmUrl: string; iccUrl: string };
 
 /** Open a document and hand back what the binding asked PDF.js for. */
 async function paramsOfOneOpen(): Promise<OpenParams> {
-  const { openPdf } = await import('./pdfjs');
   openPdf(new ArrayBuffer(8));
   expect(getDocument).toHaveBeenCalledTimes(1);
   const [params] = getDocument.mock.calls[0] as unknown as [OpenParams];
@@ -95,7 +101,6 @@ describe('pdfjs binding', () => {
   });
 
   it('publishes the runtime assets under the version the build stamps into the path', async () => {
-    const { PDFJS_ASSET_ROOT } = await import('./pdfjs');
     expect(PDFJS_ASSET_ROOT).toBe(ASSET_ROOT);
   });
 
@@ -106,7 +111,6 @@ describe('pdfjs binding', () => {
 
   it('points the worker at the bundled legacy worker, never a CDN', async () => {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-    await import('./pdfjs');
     expect(pdfjs.GlobalWorkerOptions.workerSrc).toMatch(/pdf\.worker\.min\.mjs$/);
     expect(pdfjs.GlobalWorkerOptions.workerSrc).not.toMatch(/^https?:\/\/(cdn|unpkg|cdnjs)/);
   });
@@ -119,7 +123,6 @@ describe('pdfjs binding', () => {
   });
 
   it('passes the caller its own buffer, which the worker then detaches', async () => {
-    const { openPdf } = await import('./pdfjs');
     const bytes = new ArrayBuffer(8);
     openPdf(bytes);
     const [params] = getDocument.mock.calls[0] as unknown as [OpenParams];
@@ -170,7 +173,6 @@ describe('pdfjs binding', () => {
   });
 
   it('closes a document through its loading task and tolerates nothing loaded', async () => {
-    const { closePdf } = await import('./pdfjs');
     const destroy = vi.fn(() => Promise.resolve());
     closePdf({ loadingTask: { destroy } } as unknown as Parameters<typeof closePdf>[0]);
     expect(destroy).toHaveBeenCalledTimes(1);
