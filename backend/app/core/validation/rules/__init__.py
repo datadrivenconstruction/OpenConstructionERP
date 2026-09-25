@@ -9263,6 +9263,47 @@ class ProcurementPOLineCostCoded(_ProcurementRule):
     check_name = "check_line_cost_coded"
 
 
+# ── Supplier invoice against its purchase order (simple three-way match) ────
+#
+# Run by ``ProcurementService.check_invoice_against_po`` while an invoice linked
+# to an order is being entered. Both rules are WARNINGS: the person approving
+# the invoice sees the mismatch and decides; nothing is blocked. The payload
+# shape is documented beside the checks in ``procurement.validators``.
+
+
+class ProcurementInvoiceWithinOrder(_ProcurementRule):
+    """An invoice should not bill more than is still open on its order."""
+
+    rule_id = "procurement.invoice_within_order"
+    name = "Invoice Within Order"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a supplier invoice whose net exceeds the order's net not yet invoiced."
+    check_name = "check_invoice_within_order"
+
+
+class ProcurementInvoiceQuantityReceived(_ProcurementRule):
+    """Invoiced quantity should not run ahead of the goods received."""
+
+    rule_id = "procurement.invoice_quantity_received"
+    name = "Invoice Quantity Received"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags an order line invoiced for more than its confirmed goods receipts."
+    check_name = "check_invoice_quantity_received"
+
+
+class ProcurementInvoiceValueReceived(_ProcurementRule):
+    """An invoice entered as one sum should not run ahead of the value received."""
+
+    rule_id = "procurement.invoice_value_received"
+    name = "Invoice Value Received"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags an invoice without line quantities whose net exceeds the received goods at order rates."
+    check_name = "check_invoice_value_received"
+
+
 # ── Subcontract agreements (activation gate) ────────────────────────────────
 #
 # An agreement leaving ``draft`` for ``active`` is the moment a subcontractor
@@ -9880,6 +9921,11 @@ def register_builtin_rules() -> None:
         (ProcurementPORetentionWithinBounds(), ["procurement"]),
         (ProcurementPODeliveryAfterIssue(), ["procurement"]),
         (ProcurementPOLineCostCoded(), ["procurement"]),
+        # Supplier invoice against its order. Registered into "invoice_po_match",
+        # which ProcurementService.check_invoice_against_po passes explicitly.
+        (ProcurementInvoiceWithinOrder(), ["invoice_po_match"]),
+        (ProcurementInvoiceQuantityReceived(), ["invoice_po_match"]),
+        (ProcurementInvoiceValueReceived(), ["invoice_po_match"]),
         # Subcontract agreements (activation gate)
         # Registered into the "subcontract" set, which
         # SubcontractorService._validate_agreement passes on activation and on

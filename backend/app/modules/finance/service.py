@@ -30,6 +30,7 @@ from app.modules.finance.models import (
     Payment,
     ProjectBudget,
 )
+from app.modules.finance.po_link import invoice_po_link
 from app.modules.finance.repository import (
     BudgetRepository,
     EVMSnapshotRepository,
@@ -578,10 +579,19 @@ class FinanceService:
             else _compute_invoice_total(data.amount_subtotal, data.tax_amount)
         )
 
+        if data.purchase_order_id is not None:
+            await self._check_po_link(
+                data.purchase_order_id,
+                project_id=data.project_id,
+                direction=data.invoice_direction,
+                contact_id=data.contact_id,
+            )
+
         invoice = Invoice(
             project_id=data.project_id,
             contact_id=data.contact_id,
             invoice_direction=data.invoice_direction,
+            purchase_order_id=data.purchase_order_id,
             invoice_number=invoice_number,
             invoice_date=data.invoice_date,
             due_date=data.due_date,
@@ -613,6 +623,59 @@ class FinanceService:
             )
         logger.info("Invoice created: %s (%s)", refreshed.invoice_number, refreshed.invoice_direction)
         return refreshed
+
+    async def _check_po_link(
+        self,
+        po_id: uuid.UUID,
+        *,
+        project_id: uuid.UUID,
+        direction: str,
+        contact_id: str | None,
+    ) -> None:
+        """Refuse a purchase-order link the order cannot back.
+
+        The invoice form only offers matching orders, and this is the same rule
+        for every other caller: a supplier invoice, an order on the same
+        project, not a draft or cancelled one, and the same supplier when both
+        name one. The order row is locked for the rest of the transaction, the
+        lock ``create-invoice`` and the order removal path take, so an invoice
+        cannot be linked to an order that another request is deleting.
+        """
+        if direction != "payable":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Only a supplier (payable) invoice can be linked to a purchase order.",
+            )
+        try:
+            from app.modules.procurement.models import PurchaseOrder
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Purchase orders are not available: the procurement module is not installed.",
+            ) from exc
+        row = (
+            await self.session.execute(
+                select(PurchaseOrder.project_id, PurchaseOrder.vendor_contact_id, PurchaseOrder.status)
+                .where(PurchaseOrder.id == po_id)
+                .with_for_update()
+            )
+        ).first()
+        if row is None or row[0] != project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The purchase order does not exist on this project.",
+            )
+        po_vendor, po_status = row[1], row[2]
+        if po_status in ("draft", "cancelled"):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"A {po_status} purchase order cannot be invoiced; approve it first.",
+            )
+        if contact_id and po_vendor and str(contact_id) != str(po_vendor):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The purchase order was placed with a different supplier than this invoice.",
+            )
 
     async def get_invoice(self, invoice_id: uuid.UUID) -> Invoice:
         """Get invoice by ID. Raises 404 if not found."""
@@ -723,6 +786,31 @@ class FinanceService:
         # comes without a total still has to leave the invoice adding up.
         if asserted_total is None and ("amount_subtotal" in fields or "tax_amount" in fields):
             fields["amount_total"] = _compute_invoice_total(new_subtotal, new_tax)
+
+        # Linking (or relinking) to an order is allowed at any status: it moves
+        # no money, it only says which commitment the money belongs to.
+        if "purchase_order_id" in fields and fields["purchase_order_id"] is None:
+            # Unlinking has to clear the legacy stamp too, or the link reads
+            # straight back from it (``finance.po_link``).
+            meta = dict(fields.get("metadata_", invoice.metadata_) or {})
+            if meta.pop("po_id", None) is not None:
+                fields["metadata_"] = meta
+        # Re-checked when the link moves, and when the vendor or the direction
+        # moves under a link that stays, since either can make it one the
+        # order cannot back.
+        parties_moved = ("contact_id" in fields and fields["contact_id"] != invoice.contact_id) or (
+            "invoice_direction" in fields and fields["invoice_direction"] != invoice.invoice_direction
+        )
+        if "purchase_order_id" in fields or parties_moved:
+            current_link = invoice_po_link(invoice.purchase_order_id, invoice.metadata_)
+            target_link = fields.get("purchase_order_id", current_link)
+            if target_link is not None and (target_link != current_link or parties_moved):
+                await self._check_po_link(
+                    target_link,
+                    project_id=invoice.project_id,
+                    direction=fields.get("invoice_direction") or invoice.invoice_direction,
+                    contact_id=fields.get("contact_id", invoice.contact_id),
+                )
 
         if fields:
             await self.invoices.update(invoice_id, **fields)
@@ -1839,6 +1927,95 @@ class FinanceService:
         logger.info("Budget created: project=%s cat=%s", data.project_id, data.category)
         return budget
 
+    async def seed_budget_from_boq(self, project_id: uuid.UUID, boq_id: uuid.UUID) -> list[ProjectBudget]:
+        """Write a locked bill's net total into the project budget, one row per WBS.
+
+        Locking a bill is what makes it the budget. The lock itself fills the
+        cost model's budget lines; this is the finance side of the same step,
+        so the finance dashboard and the Budgets tab stop reading zero after a
+        lock (they read ``ProjectBudget``, which nothing used to fill).
+
+        * Only priced leaves count. A section row carries the subtotal of its
+          children, and summing it as well would count the bill twice.
+        * Rows are keyed ``(wbs_id, category="estimate")``, the category that
+          marks them as generated. Each row records what every bill put into
+          it under ``from_boq:<boq_id>``, so locking the same bill again
+          replaces that bill's share instead of adding it twice, and a second
+          bill on the same WBS adds to the first rather than overwriting it.
+        * A change in the original budget moves the revised budget by the same
+          amount, so revisions already booked against the row survive.
+
+        Amounts are net of VAT, as a bill is, in the project currency.
+
+        Args:
+            project_id: Project the bill belongs to.
+            boq_id: The bill that was locked.
+
+        Returns:
+            The budget rows created or updated.
+        """
+        from app.modules.boq.models import Position
+
+        rows = (
+            await self.session.execute(
+                select(Position.id, Position.parent_id, Position.wbs_id, Position.total).where(
+                    Position.boq_id == boq_id
+                )
+            )
+        ).all()
+        parents = {parent_id for _, parent_id, _, _ in rows if parent_id is not None}
+        by_wbs: dict[str | None, Decimal] = {}
+        for pos_id, _, wbs_id, total in rows:
+            if pos_id in parents:
+                continue
+            key = (wbs_id or "").strip() or None
+            by_wbs[key] = by_wbs.get(key, Decimal("0")) + _safe_decimal(total)
+        if not by_wbs:
+            return []
+
+        currency_code = await self._project_currency(project_id)
+        marker = f"from_boq:{boq_id}"
+        touched: list[ProjectBudget] = []
+        for wbs_id, amount in by_wbs.items():
+            stmt = select(ProjectBudget).where(
+                ProjectBudget.project_id == project_id,
+                ProjectBudget.category == "estimate",
+                ProjectBudget.wbs_id.is_(None) if wbs_id is None else ProjectBudget.wbs_id == wbs_id,
+            )
+            budget = (await self.session.execute(stmt)).scalars().first()
+            if budget is None:
+                budget = ProjectBudget(
+                    project_id=project_id,
+                    wbs_id=wbs_id,
+                    category="estimate",
+                    currency_code=currency_code,
+                    original_budget=amount,
+                    revised_budget=amount,
+                    metadata_={marker: str(amount)},
+                )
+                self.session.add(budget)
+            else:
+                md = dict(budget.metadata_ or {})
+                previous = _safe_decimal(md.get(marker))
+                md[marker] = str(amount)
+                delta = amount - previous
+                budget.original_budget = _safe_decimal(budget.original_budget) + delta
+                budget.revised_budget = _safe_decimal(budget.revised_budget) + delta
+                budget.metadata_ = md
+            touched.append(budget)
+        await self.session.flush()
+        logger.info("Budget seeded from BOQ %s: project=%s rows=%d", boq_id, project_id, len(touched))
+        return touched
+
+    async def _project_currency(self, project_id: uuid.UUID) -> str:
+        """The project's currency, or "" when it has none (never a guessed default)."""
+        from app.modules.projects.models import Project
+
+        currency = (
+            await self.session.execute(select(Project.currency).where(Project.id == project_id))
+        ).scalar_one_or_none()
+        return (currency or "").strip().upper()
+
     async def get_budget(self, budget_id: uuid.UUID) -> ProjectBudget:
         """Get budget by ID. Raises 404 if not found."""
         budget = await self.budgets.get(budget_id)
@@ -2134,6 +2311,12 @@ class FinanceService:
         payments_by_currency = await self.payments_repo.aggregate_by_currency(
             project_id=project_id, project_ids=project_ids
         )
+        # Committed, invoiced and paid come from the records themselves, not
+        # from the ``committed`` / ``actual`` columns the budget rows carry;
+        # ``cost_position`` explains why and names the basis of each figure.
+        from app.modules.finance.cost_position import load_cost_position
+
+        position = await load_cost_position(self.session, project_id=project_id, project_ids=project_ids)
         overdue_count = inv_agg["overdue_count"]
         status_counts = inv_agg["status_counts"]
 
@@ -2174,7 +2357,7 @@ class FinanceService:
             )
             for c in grp
             if c
-        }
+        } | position.currencies()
         mixed_currencies = len(currencies_in_play) > 1
         missing: set[str] = set()
 
@@ -2191,13 +2374,19 @@ class FinanceService:
         # ── Budgets ────────────────────────────────────────────────────
         total_budget_original = _to_base(budget_agg["original_by_currency"])
         total_budget_revised = _to_base(budget_agg["revised_by_currency"])
-        total_committed = _to_base(budget_agg["committed_by_currency"])
-        total_actual = _to_base(budget_agg["actual_by_currency"])
+        # ── Cost position (net of VAT, except total_paid) ──────────────
+        total_committed = _to_base(position.committed)
+        total_invoiced = _to_base(position.invoiced)
+        total_actual = _to_base(position.paid_net)
+        total_paid = _to_base(position.paid)
         # Summed per row by the repository, following the rule in `variance.py`,
         # so this header agrees with the column of variances under it. It used
         # to subtract spend alone and report money that was already on order as
-        # headroom still available.
-        total_outturn = _to_base(budget_agg["outturn_by_currency"])
+        # headroom still available. The rows' own committed column misses what
+        # it was never told about (subcontracts, orders placed before a budget
+        # row existed), so the outturn never drops below what the records show
+        # is already committed.
+        total_outturn = max(_to_base(budget_agg["outturn_by_currency"]), total_committed)
 
         total_variance = total_budget_revised - total_outturn
         # The bar stays on spend and the flag moves to outturn, the same split
@@ -2232,7 +2421,9 @@ class FinanceService:
             total_budget_original=round(total_budget_original, 2),
             total_budget_revised=round(total_budget_revised, 2),
             total_committed=round(total_committed, 2),
+            total_invoiced=round(total_invoiced, 2),
             total_actual=round(total_actual, 2),
+            total_paid=round(total_paid, 2),
             total_variance=round(total_variance, 2),
             budget_consumed_pct=round(budget_consumed_pct, 1),
             budget_warning_level=warning_level,

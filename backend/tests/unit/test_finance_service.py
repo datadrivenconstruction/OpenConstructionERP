@@ -760,11 +760,26 @@ async def test_create_evm_snapshot_zero_pv_spi_is_zero() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_dashboard_returns_invoices_and_budgets() -> None:
+async def test_get_dashboard_returns_invoices_and_budgets(monkeypatch: pytest.MonkeyPatch) -> None:
     """Dashboard aggregates call into repo-level SQL helpers; we wire
     them up directly on the stub repo instances so the calculation
     logic is exercised without a real DB."""
+    from app.modules.finance import cost_position
+
     service = _make_service()
+
+    # Committed, invoiced and paid come from the cost position, which reads
+    # orders, agreements and payments across modules. Stubbed here; the real
+    # read is covered by tests/integration/test_finance_project_cost_position.py.
+    async def _position(*_args: Any, **_kwargs: Any) -> cost_position.CostPosition:
+        return cost_position.CostPosition(
+            committed={"EUR": Decimal("40000")},
+            invoiced={"EUR": Decimal("12000")},
+            paid={"EUR": Decimal("15000")},
+            paid_net={"EUR": Decimal("12000")},
+        )
+
+    monkeypatch.setattr(cost_position, "load_cost_position", _position)
 
     async def _inv_agg(
         *, project_id: uuid.UUID | None = None, project_ids: set[uuid.UUID] | None = None
@@ -819,6 +834,10 @@ async def test_get_dashboard_returns_invoices_and_budgets() -> None:
     assert dashboard["total_budget_revised"] == 110_000.0
     assert dashboard["invoices_paid"] == 3
     assert dashboard["budget_warning_level"] == "normal"  # 30/110 ~ 27%
+    assert Decimal(str(dashboard["total_committed"])) == Decimal("40000")
+    assert Decimal(str(dashboard["total_invoiced"])) == Decimal("12000")
+    assert Decimal(str(dashboard["total_paid"])) == Decimal("15000")
+    assert Decimal(str(dashboard["total_actual"])) == Decimal("12000")
 
 
 # ── BUG-346: pay_invoice distributes actuals by (wbs_id, cost_category) ──

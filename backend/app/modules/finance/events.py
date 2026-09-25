@@ -20,6 +20,13 @@ project's budget rows accordingly:
   commitment ledger must be reversible so a cancelled or reverted PO
   does not leave a phantom commitment on the budget)
 * ``procurement.gr.confirmed`` → committed -= gr.amount, actual += gr.amount
+* ``costmodel.budget.generated`` (a BOQ was locked) → the project's
+  ``ProjectBudget`` rows are seeded from the bill, net, per WBS, once per
+  BOQ (``FinanceService.seed_budget_from_boq``)
+
+The dashboard's project totals for committed, invoiced and paid do not come
+from these row counters; ``finance.cost_position`` reads them from the
+source records so an order and its invoice count once.
 
 The commitment a PO contributes is idempotent and reversible: each
 approved PO stamps a per-PO marker (``committed_from_po:<po_id>``) in the
@@ -428,6 +435,29 @@ async def _on_claim_certified(event: Event) -> None:
         logger.exception("finance: _on_claim_certified failed for claim %s", claim_id)
 
 
+async def _on_budget_generated(event: Event) -> None:
+    """``costmodel.budget.generated`` -> seed the finance budget from the locked bill.
+
+    Locking a bill generates the cost model's budget lines and publishes this
+    event; the finance budget is the other half of the same step (see
+    ``FinanceService.seed_budget_from_boq``). Idempotent per bill, so a replay
+    or a later lock of the same bill replaces its share rather than adding it.
+    """
+    data = event.data or {}
+    project_id = _coerce_uuid(data.get("project_id"))
+    boq_id = _coerce_uuid(data.get("boq_id"))
+    if project_id is None or boq_id is None:
+        return
+    try:
+        from app.modules.finance.service import FinanceService
+
+        async with async_session_factory() as session:
+            await FinanceService(session).seed_budget_from_boq(project_id, boq_id)
+            await session.commit()
+    except Exception:
+        logger.exception("finance: budget seeding failed for boq %s (project %s)", boq_id, project_id)
+
+
 _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("procurement.po.approved", _on_po_approved),
     # Max-Audit #10: a cancelled or reverted PO must shed its commitment so
@@ -438,6 +468,8 @@ _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("procurement.gr.confirmed", _on_gr_confirmed),
     # Gap E (Wave 6): certified progress claim → auto receivable invoice.
     ("contracts.claim.certified", _on_claim_certified),
+    # A locked bill becomes the finance budget, not only the cost model's.
+    ("costmodel.budget.generated", _on_budget_generated),
 ]
 
 

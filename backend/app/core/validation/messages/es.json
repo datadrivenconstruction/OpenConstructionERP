@@ -509,6 +509,18 @@
     "po_line_cost_coded": {
       "fail": "La línea {line} no tiene WBS, categoría de coste ni línea de coste, por lo que no aparecerá en el desglose",
       "suggestion": "Asigne un código de coste para que el compromiso impute a un presupuesto"
+    },
+    "invoice_within_order": {
+      "fail": "La factura de {invoice} supera en {excess} los {remaining} pendientes del pedido {po}",
+      "suggestion": "Compare la factura con el pedido; si el exceso se acordó, regístrelo como cambio del pedido antes de aprobar"
+    },
+    "invoice_quantity_received": {
+      "fail": "La línea {line} quedaría facturada por {invoiced} en total, pero solo se han recibido {received}",
+      "suggestion": "Espere el albarán o confirme la recepción de mercancía antes de aprobar esta cantidad"
+    },
+    "invoice_value_received": {
+      "fail": "En el pedido {po} las facturas sumarían {invoiced}, pero la mercancía recibida solo vale {received} a los precios del pedido",
+      "suggestion": "Espere el albarán o confirme la recepción de mercancía antes de aprobar este importe"
     }
   },
   "subcontract": {

@@ -509,6 +509,18 @@
     "po_line_cost_coded": {
       "fail": "Position {line} hat weder WBS noch Kostenart noch Kostenzeile und erscheint damit nicht in der Kostenaufstellung",
       "suggestion": "Vergeben Sie einen Kostencode, damit die Verpflichtung einem Budget zugeordnet wird"
+    },
+    "invoice_within_order": {
+      "fail": "Rechnung {invoice} übersteigt den offenen Betrag von {remaining} auf Bestellung {po} um {excess}",
+      "suggestion": "Rechnung mit der Bestellung abgleichen; wurde die Mehrleistung vereinbart, zuerst die Bestellung ändern und dann freigeben"
+    },
+    "invoice_quantity_received": {
+      "fail": "Position {line} würde insgesamt mit {invoiced} berechnet, eingegangen sind aber nur {received}",
+      "suggestion": "Lieferschein abwarten oder den Wareneingang bestätigen, bevor diese Menge freigegeben wird"
+    },
+    "invoice_value_received": {
+      "fail": "Auf Bestellung {po} ergäben die Rechnungen insgesamt {invoiced}, der Wareneingang ist zu Bestellpreisen aber nur {received} wert",
+      "suggestion": "Lieferschein abwarten oder den Wareneingang bestätigen, bevor dieser Betrag freigegeben wird"
     }
   },
   "subcontract": {
