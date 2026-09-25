@@ -777,12 +777,15 @@ jobs:
       # script it covers was read by people and by nothing else. It sits below
       # the backend install because that is what puts pytest on this runner.
       # The glob picks up a new file without an edit here. test_cost_import.py
-      # matches it and contributes nothing: it is a smoke script against a
-      # running server, driven by its own main(), with no test functions.
-      # pytest exits 5 when it collects nothing, so an emptied glob fails.
+      # is filtered out of it: it is a smoke script against a running server,
+      # driven by its own main(), with no test functions, and it imports
+      # requests at module level, which nothing here promises to install.
+      # pytest --ignore does not drop a path named on the command line, hence
+      # the filter. pytest exits 5 when it collects nothing, so an emptied
+      # glob fails.
       - name: Run the tests that live next to the scripts they cover
         if: ${{ !cancelled() }}
-        run: python -m pytest -p no:cacheprovider scripts/test_*.py
+        run: python -m pytest -p no:cacheprovider $(ls scripts/test_*.py | grep -v '/test_cost_import\.py$')
 
       # Both kinds of file are already parsed on the way through CI, and stating
       # that precisely matters, because the first version of this finding said
