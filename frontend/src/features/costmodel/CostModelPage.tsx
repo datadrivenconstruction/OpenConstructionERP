@@ -483,6 +483,9 @@ const BudgetTable = memo(function BudgetTable({
       subcontractor: t('costmodel.cat_subcontractor', 'Subcontractor'),
       overhead: t('costmodel.cat_overhead', 'Overhead'),
       contingency: t('costmodel.cat_contingency', 'Contingency'),
+      // Lines without a category, and committed documents on cost lines that
+      // have no budget line yet, arrive under the empty key.
+      '': t('boq.uncategorized', '(Not specified)'),
     }),
     [t],
   );
@@ -523,7 +526,7 @@ const BudgetTable = memo(function BudgetTable({
               <tr key={cat.category} className="transition-colors hover:bg-surface-secondary/50">
                 <td className="py-3.5 pr-4 font-medium text-content-primary">
                   <span>{categoryLabels[cat.category] || cat.category}</span>
-                  {categoryLabels[cat.category] && cat.category !== categoryLabels[cat.category] && (
+                  {cat.category && categoryLabels[cat.category] && cat.category !== categoryLabels[cat.category] && (
                     <span className="block text-2xs text-content-tertiary font-normal">{cat.category}</span>
                   )}
                 </td>
