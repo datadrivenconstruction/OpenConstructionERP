@@ -67,7 +67,7 @@ describe.each(ZONES)('a date-only value in $zone', ({ zone, januaryOffsetMinutes
 
   it('is not overdue on its own day', () => {
     moveTo(zone, januaryOffsetMinutes);
-    // Late evening of the 26th in this zone.
+    // Midday UTC on the 26th: still the 26th in every zone tested here.
     const lateOnTheDay = new Date('2026-01-26T12:00:00Z');
     expect(isDateOnlyPast('2026-01-26', lateOnTheDay)).toBe(false);
     expect(isDateOnlyPast('2026-01-25', lateOnTheDay)).toBe(true);
