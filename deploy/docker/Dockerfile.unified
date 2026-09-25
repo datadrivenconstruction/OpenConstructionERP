@@ -133,6 +133,7 @@ COPY packs/czechia-cz/src/ packs/czechia-cz/src/
 COPY packs/denmark-dk/src/ packs/denmark-dk/src/
 COPY packs/france-fr/src/ packs/france-fr/src/
 COPY packs/germany-de/src/ packs/germany-de/src/
+COPY packs/greece-gr/src/ packs/greece-gr/src/
 COPY packs/hungary-hu/src/ packs/hungary-hu/src/
 COPY packs/india-cpwd/src/ packs/india-cpwd/src/
 COPY packs/indonesia-id/src/ packs/indonesia-id/src/
@@ -150,6 +151,7 @@ COPY packs/poland-pl/src/ packs/poland-pl/src/
 COPY packs/portugal-pt/src/ packs/portugal-pt/src/
 COPY packs/renewables-epc/src/ packs/renewables-epc/src/
 COPY packs/retail-grocery-dach/src/ packs/retail-grocery-dach/src/
+COPY packs/romania-ro/src/ packs/romania-ro/src/
 COPY packs/russia-gesn/src/ packs/russia-gesn/src/
 COPY packs/saudi-vision2030/src/ packs/saudi-vision2030/src/
 COPY packs/singapore-sg/src/ packs/singapore-sg/src/
@@ -160,6 +162,7 @@ COPY packs/switzerland-ch/src/ packs/switzerland-ch/src/
 COPY packs/turkey-tr/src/ packs/turkey-tr/src/
 COPY packs/uae-ae/src/ packs/uae-ae/src/
 COPY packs/uk-jct/src/ packs/uk-jct/src/
+COPY packs/ukraine-ua/src/ packs/ukraine-ua/src/
 COPY packs/us-california/src/ packs/us-california/src/
 COPY packs/us-costdata/src/ packs/us-costdata/src/
 COPY packs/us-texas/src/ packs/us-texas/src/
