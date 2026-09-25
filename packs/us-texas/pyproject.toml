@@ -58,6 +58,5 @@ where = ["src"]
 openconstructionerp_us_texas = [
     "logo.svg",
     "onboarding.yaml",
-    "locales/*.json",
     "rule_packs/*.json",
 ]

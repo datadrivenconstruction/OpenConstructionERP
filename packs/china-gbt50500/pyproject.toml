@@ -42,8 +42,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 openconstructionerp_china_gbt50500 = [
-    "logo.svg",
     "onboarding.yaml",
-    "locales/*.json",
     "rule_packs/*.json",
 ]

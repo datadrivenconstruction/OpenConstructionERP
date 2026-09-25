@@ -56,5 +56,4 @@ where = ["src"]
 [tool.setuptools.package-data]
 openconstructionerp_retail_grocery_dach = [
     "rule_packs/*.json",
-    "locales/*.json",
 ]

@@ -46,9 +46,3 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.package-data]
-openconstructionerp_portugal_pt = [
-    "onboarding.yaml",
-    "rule_packs/*.json",
-]
