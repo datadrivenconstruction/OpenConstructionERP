@@ -2960,6 +2960,21 @@ export function BOQEditorPage() {
     [boq?.positions, selectedPositionIds],
   );
 
+  // The rows the send-to-tender dialog offers as scope: every top-level row,
+  // in bill order, so one section can be tendered on its own.
+  const tenderScopeRows = useMemo(
+    () =>
+      (boq?.positions ?? [])
+        .filter((p) => !p.parent_id)
+        .sort((a, b) =>
+          a.sort_order !== b.sort_order
+            ? a.sort_order - b.sort_order
+            : (a.ordinal ?? '').localeCompare(b.ordinal ?? '', undefined, { numeric: true }),
+        )
+        .map((p) => ({ id: p.id, ordinal: p.ordinal ?? '', description: p.description ?? '' })),
+    [boq?.positions],
+  );
+
   const handleJumpToMarkups = useCallback(() => {
     setMarkupOpenSignal((n) => n + 1);
     // Defer so the panel re-expands before we scroll it into view.
@@ -5651,6 +5666,7 @@ export function BOQEditorPage() {
           projectId={boq.project_id}
           baseName={boq?.name ?? ''}
           sectionIds={selectedSectionIds}
+          scopeRows={tenderScopeRows}
           isOpen={tenderOpen}
           onClose={() => setTenderOpen(false)}
           onCreated={handleTenderCreated}
