@@ -524,6 +524,10 @@ class BudgetResponse(BaseModel):
     id: UUID
     project_id: UUID
     wbs_id: str | None = None
+    #: A readable name for ``wbs_id`` when it is an id: the WBS node's code and
+    #: name, or the bill section's number and description. ``None`` when the
+    #: id is already readable (a code such as "02") or names nothing.
+    wbs_label: str | None = None
     category: str | None = None
     currency_code: str = ""
     # Phase 2d: the ORM now hands us ``Decimal`` values (see MoneyType

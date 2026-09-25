@@ -156,3 +156,54 @@ def test_the_po_link_reads_the_column_first_and_the_legacy_stamp_second() -> Non
     assert invoice_po_link(None, {"po_id": "not-a-uuid"}) is None
     assert invoice_po_link(None, None) is None
     assert invoice_po_link("", {"po_id": ""}) is None
+
+
+def test_an_invoice_marked_paid_without_a_payment_row_still_counts_as_paid() -> None:
+    inv = _invoice("40000", "50000", status="paid")
+    pos = build_cost_position([], [inv], [], [], [])
+    assert pos.paid == {"EUR": D("50000")}
+    assert pos.paid_net == {"EUR": D("40000")}
+
+
+def test_an_invoice_with_its_payments_is_not_counted_again() -> None:
+    inv = _invoice("40000", "50000", status="paid")
+    pay = PaymentRow(invoice_id=inv.id, currency="EUR", amount=D("50000"), is_refund=False)
+    assert build_cost_position([], [inv], [pay], [], []).paid == {"EUR": D("50000")}
+
+
+def _sub_invoice(ag: AgreementRow, net: str, gross: str, *, pay_app: uuid.UUID | None = None) -> InvoiceRow:
+    return InvoiceRow(
+        id=uuid.uuid4(),
+        status="approved",
+        currency=ag.currency,
+        net=D(net),
+        gross=D(gross),
+        po_id=None,
+        commitment_id=ag.id,
+        pay_app_id=pay_app,
+    )
+
+
+def test_a_subcontract_invoice_draws_down_its_agreement_instead_of_adding_to_it() -> None:
+    ag = _agreement("120000")
+    pos = build_cost_position([], [_sub_invoice(ag, "30000", "37500")], [], [ag], [])
+    assert pos.committed == {"EUR": D("120000")}
+    assert pos.invoiced == {"EUR": D("30000")}
+    assert pos.subcontract_open == {"EUR": D("90000")}
+
+
+def test_a_payment_application_with_its_own_invoice_is_counted_once() -> None:
+    ag = _agreement("120000")
+    app_id = uuid.uuid4()
+    app = PayAppRow(
+        agreement_id=ag.id, status="finance_approved", currency="EUR", gross=D("30000"), cash=D("28500"), id=app_id
+    )
+    pos = build_cost_position([], [_sub_invoice(ag, "30000", "37500", pay_app=app_id)], [], [ag], [app])
+    assert pos.invoiced == {"EUR": D("30000")}
+    assert pos.subcontract_open == {"EUR": D("90000")}
+
+
+def test_open_subcontract_commitment_never_goes_below_zero() -> None:
+    ag = _agreement("100")
+    pos = build_cost_position([], [_sub_invoice(ag, "150", "150")], [], [ag], [])
+    assert pos.subcontract_open == {"EUR": D("0")}

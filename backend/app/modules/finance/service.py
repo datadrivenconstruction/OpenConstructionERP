@@ -391,7 +391,12 @@ def compute_payment_withholding(
     return _q2(amount_to_pay), _q2(withheld)
 
 
-def _line_item_from(invoice_id: uuid.UUID, item_data: InvoiceLineItemCreate, idx: int) -> InvoiceLineItem:
+def _line_item_from(
+    invoice_id: uuid.UUID,
+    item_data: InvoiceLineItemCreate,
+    idx: int,
+    default_vat_rate: Decimal | None = None,
+) -> InvoiceLineItem:
     """Build a line item row from its Create schema.
 
     Creating an invoice and replacing its lines persist the same shape, so the
@@ -403,6 +408,8 @@ def _line_item_from(invoice_id: uuid.UUID, item_data: InvoiceLineItemCreate, idx
         invoice_id: the invoice the line belongs to.
         item_data: the validated Create schema for one line.
         idx: position in the submitted list, used when no sort order is given.
+        default_vat_rate: the project country's VAT rate, used only when the
+            line carries none. An explicit rate, zero included, always wins.
 
     Returns:
         An unpersisted :class:`InvoiceLineItem`.
@@ -418,7 +425,7 @@ def _line_item_from(invoice_id: uuid.UUID, item_data: InvoiceLineItemCreate, idx
         cost_category=item_data.cost_category,
         cost_line_id=getattr(item_data, "cost_line_id", None),
         sort_order=item_data.sort_order if item_data.sort_order else idx,
-        vat_rate=item_data.vat_rate,
+        vat_rate=item_data.vat_rate if item_data.vat_rate is not None else default_vat_rate,
         vat_category=item_data.vat_category,
     )
 
@@ -611,8 +618,9 @@ class FinanceService:
 
         # Create line items
         await resolve_position_cost_lines(self.session, data.line_items)
+        default_vat = await self._default_vat_rate(invoice.project_id, invoice.invoice_date, data.line_items)
         for idx, item_data in enumerate(data.line_items):
-            await self.line_items.create(_line_item_from(invoice.id, item_data, idx))
+            await self.line_items.create(_line_item_from(invoice.id, item_data, idx, default_vat))
 
         # Re-fetch invoice with relationships (line_items, payments) eager-loaded
         refreshed = await self.invoices.get(invoice.id)
@@ -841,8 +849,13 @@ class FinanceService:
 
             await resolve_position_cost_lines(self.session, data.line_items)
             await self.line_items.delete_by_invoice(invoice_id)
+            default_vat = await self._default_vat_rate(
+                invoice.project_id,
+                fields.get("invoice_date") or getattr(invoice, "invoice_date", None),
+                data.line_items,
+            )
             for idx, item_data in enumerate(data.line_items):
-                await self.line_items.create(_line_item_from(invoice_id, item_data, idx))
+                await self.line_items.create(_line_item_from(invoice_id, item_data, idx, default_vat))
 
             # Single audit row for the bulk replacement. Best-effort:
             # failures are warned (not rolled back) for the same reason as
@@ -1022,107 +1035,14 @@ class FinanceService:
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
 
-        # BUG-346: distribute actuals across budget rows by
-        # ``(wbs_id, cost_category)`` instead of writing the whole project
-        # total onto every row. The old behaviour made every budget line
-        # look like it had consumed the full project spend, so the variance
-        # dashboard flagged every category as 500% over-run after a single
-        # paid invoice.
-        #
-        # Strategy:
-        #   1. Walk all paid invoices of the project.
-        #   2. For invoices with line items, bucket each line's ``amount``
-        #      by ``(wbs_id, cost_category)``.
-        #   3. For invoices without line items, attribute the full
-        #      ``amount_total`` to the ``(None, None)`` bucket.
-        #   4. For each ``ProjectBudget`` row, look up its matching bucket
-        #      and set ``actual`` to the summed Decimal; unmatched rows are
-        #      zeroed so a later cost-category removal doesn't leave stale
-        #      actuals hanging.
+        # Budget actuals, recomputed from the project's paid supplier invoices.
+        # Each paid amount lands on ONE budget line, net of VAT, and an order's
+        # payments add only what its goods receipts did not already move into
+        # actual (``finance.budget_actuals`` states the rules). BUG-346 fixed the
+        # every-line write here once; the core ``invoice.paid`` handler that
+        # kept reintroducing it after this ran has been removed.
         try:
-            from collections import defaultdict
-
-            from sqlalchemy import select
-            from sqlalchemy.orm import selectinload
-
-            paid_result = await self.session.execute(
-                select(Invoice)
-                .options(selectinload(Invoice.line_items))
-                .where(
-                    Invoice.project_id == invoice.project_id,
-                    Invoice.status == "paid",
-                )
-            )
-            paid_invoices = paid_result.scalars().all()
-
-            # key = (wbs_id, cost_category, currency); wbs_id/cost_category both
-            # None means "uncategorized". The currency is part of the key so we
-            # never blend two currencies into one ProjectBudget.actual (FX
-            # never-blend rule): each budget row carries its own currency_code
-            # and only receives the bucket priced in that same currency. A blank
-            # invoice currency is normalised to "" to match a blank budget-row
-            # currency (both treated as base). Mixed-currency invoices on the
-            # same (wbs_id, cost_category) therefore land in separate buckets
-            # and the per-currency dashboard rollup FX-converts them correctly,
-            # instead of summing them as if 1 USD == 1 EUR.
-            bucketed: dict[tuple[str | None, str | None, str], Decimal] = defaultdict(lambda: Decimal("0"))
-            total_actual = Decimal("0")
-
-            for inv in paid_invoices:
-                # getattr keeps this resilient when an invoice row predates the
-                # currency_code column (or a caller passes a lightweight stub):
-                # a missing/blank code means "base currency" and buckets under "".
-                inv_currency = (getattr(inv, "currency_code", "") or "").strip().upper()
-                items = list(inv.line_items or [])
-                if items:
-                    for item in items:
-                        try:
-                            amt = Decimal(str(item.amount))
-                        except (InvalidOperation, ValueError):
-                            continue
-                        bucketed[(item.wbs_id, item.cost_category, inv_currency)] += amt
-                        total_actual += amt
-                else:
-                    # No breakdown - attribute the full invoice total to the
-                    # catch-all bucket for this invoice's currency.
-                    try:
-                        amt = Decimal(str(inv.amount_total))
-                    except (InvalidOperation, ValueError):
-                        continue
-                    bucketed[(None, None, inv_currency)] += amt
-                    total_actual += amt
-
-            budget_result = await self.session.execute(
-                select(ProjectBudget).where(ProjectBudget.project_id == invoice.project_id)
-            )
-            budgets = list(budget_result.scalars().all())
-
-            # Reset every budget row before assignment so removing a
-            # cost_category from future invoices drains the actual back to 0.
-            # Assign Decimal (not str) - MoneyType column expects Decimal on
-            # the ORM side; str assignment works on SQLite but triggers a
-            # type-coercion warning on PostgreSQL (BUG-FINANCE-ACT01).
-            for budget in budgets:
-                # Match the bucket priced in the budget row's own currency only,
-                # so a row stamped EUR never absorbs a USD invoice's amount. A
-                # row without a currency_code (legacy/stub) buckets under "" and
-                # so still matches base-currency invoice amounts as before.
-                budget_currency = (getattr(budget, "currency_code", "") or "").strip().upper()
-                key = (budget.wbs_id, budget.category, budget_currency)
-                # Preserve the goods-receipt-sourced portion of actual (recorded
-                # in metadata by the procurement gr.confirmed handler). Without
-                # this, paying any invoice overwrites actual with only the
-                # invoice-sourced total and silently wipes procurement actuals.
-                gr_actual = _safe_decimal((getattr(budget, "metadata_", None) or {}).get("actual_from_receipts", "0"))
-                budget.actual = bucketed.get(key, Decimal("0")) + gr_actual
-
-            logger.info(
-                "Updated budget actuals for project %s: total_actual=%s across %d budget row(s), %d bucket(s)",
-                invoice.project_id,
-                total_actual,
-                len(budgets),
-                len(bucketed),
-            )
+            await self._recompute_budget_actuals(invoice.project_id)
         except Exception:
             logger.exception(
                 "Failed to update budget actuals after paying invoice %s",
@@ -1169,6 +1089,201 @@ class FinanceService:
         )
 
         return updated
+
+    async def budget_wbs_labels(self, wbs_ids: Sequence[str | None]) -> dict[str, str]:
+        """Readable names for budget ``wbs_id`` values that are ids.
+
+        A budget line's ``wbs_id`` is free text: a WBS code such as "02", the
+        id of a project WBS node, or the id of a bill section (what the bill's
+        "Create budget" action groups by). The Budgets table showed the raw
+        UUID for the last two. Codes are left alone; ids resolve to the node's
+        code and name, else to the section's number and description.
+        """
+        ids: dict[str, uuid.UUID] = {}
+        for raw in wbs_ids:
+            text = (raw or "").strip()
+            if not text:
+                continue
+            try:
+                ids[text] = uuid.UUID(text)
+            except ValueError:
+                continue
+        if not ids:
+            return {}
+        from sqlalchemy import select
+
+        labels: dict[str, str] = {}
+        try:
+            from app.modules.projects.models import ProjectWBS
+
+            for node_id, code, name in (
+                await self.session.execute(
+                    select(ProjectWBS.id, ProjectWBS.code, ProjectWBS.name).where(ProjectWBS.id.in_(ids.values()))
+                )
+            ).all():
+                labels[str(node_id)] = " ".join(part for part in ((code or "").strip(), (name or "").strip()) if part)
+        except ImportError:
+            pass
+        rest = [value for key, value in ids.items() if str(value) not in labels]
+        if rest:
+            try:
+                from app.modules.boq.models import Position
+
+                for pos_id, ordinal, description in (
+                    await self.session.execute(
+                        select(Position.id, Position.ordinal, Position.description).where(Position.id.in_(rest))
+                    )
+                ).all():
+                    text = " ".join(part for part in ((ordinal or "").strip(), (description or "").strip()) if part)
+                    labels[str(pos_id)] = text[:120]
+            except ImportError:
+                pass
+        # Keyed by the stored text, which may differ from str(UUID) in case.
+        return {key: labels[str(value)] for key, value in ids.items() if str(value) in labels}
+
+    async def _default_vat_rate(
+        self,
+        project_id: uuid.UUID,
+        invoice_date: object,
+        items: Sequence[InvoiceLineItemCreate],
+    ) -> Decimal | None:
+        """The VAT rate a line without one gets: the project country's, on the invoice date.
+
+        Read from the jurisdiction registry (``I18nFoundationService.resolve_tax_rate``)
+        only when some line actually lacks a rate. ``None`` when the project
+        has no country, the country taxes by subdivision and none is known, or
+        the registry cannot answer; the line then stays without a rate, as it
+        did before, rather than getting a guessed one.
+        """
+        if all(item.vat_rate is not None for item in items):
+            return None
+        try:
+            from app.modules.i18n_foundation.service import I18nFoundationService
+            from app.modules.projects.repository import ProjectRepository
+
+            project = await ProjectRepository(self.session).get_by_id(project_id)
+            country = (getattr(project, "country_code", None) or "").strip().upper() if project else ""
+            if not country:
+                return None
+            on_date = str(invoice_date or "")[:10] or None
+            resolution = await I18nFoundationService(self.session).resolve_tax_rate(country, on_date=on_date)
+        except Exception:
+            logger.warning("VAT default for project %s could not be resolved", project_id, exc_info=True)
+            return None
+        if not resolution.resolved or resolution.combined_rate_pct is None:
+            return None
+        return _safe_decimal(resolution.combined_rate_pct)
+
+    async def _recompute_budget_actuals(self, project_id: uuid.UUID) -> None:
+        """Set each budget line's actual from paid supplier invoices and receipts.
+
+        ``actual`` = the receipt-sourced part the goods receipt handler recorded
+        on the line (``actual_from_receipts``) + the paid invoices that
+        ``finance.budget_actuals.plan_actuals`` lands on it. The commitment an
+        order's payments release is applied as a difference against the
+        ``released_by_payment:<po_id>`` marker, so a recompute never releases
+        twice.
+        """
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
+
+        from app.modules.finance.budget_actuals import (
+            COMMITTED_FROM_PO_PREFIX,
+            RELEASED_BY_PAYMENT_PREFIX,
+            BudgetLineRow,
+            PaidInvoice,
+            PaidLine,
+            plan_actuals,
+        )
+        from app.modules.finance.cost_position import received_net_by_po
+
+        budgets = list(
+            (
+                await self.session.execute(
+                    select(ProjectBudget)
+                    .where(ProjectBudget.project_id == project_id)
+                    .order_by(ProjectBudget.created_at.asc())
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not budgets:
+            return
+        rows = [
+            BudgetLineRow(
+                id=b.id,
+                wbs_id=b.wbs_id,
+                category=b.category,
+                currency=(getattr(b, "currency_code", "") or "").strip().upper(),
+            )
+            for b in budgets
+        ]
+        committed_by_po: dict[uuid.UUID, tuple[uuid.UUID, Decimal]] = {}
+        for b in budgets:
+            for key, value in (getattr(b, "metadata_", None) or {}).items():
+                if key.startswith(COMMITTED_FROM_PO_PREFIX):
+                    try:
+                        committed_by_po[uuid.UUID(key[len(COMMITTED_FROM_PO_PREFIX) :])] = (b.id, _safe_decimal(value))
+                    except ValueError:
+                        continue
+
+        paid = (
+            (
+                await self.session.execute(
+                    select(Invoice)
+                    .options(selectinload(Invoice.line_items))
+                    .where(
+                        Invoice.project_id == project_id,
+                        Invoice.status == "paid",
+                        Invoice.invoice_direction == "payable",
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        invoices = []
+        for inv in paid:
+            items = list(inv.line_items or [])
+            lines = (
+                [PaidLine(item.wbs_id, item.cost_category, _safe_decimal(item.amount)) for item in items]
+                if items
+                else [PaidLine(None, None, _safe_decimal(inv.amount_subtotal))]
+            )
+            invoices.append(
+                PaidInvoice(
+                    currency=(getattr(inv, "currency_code", "") or "").strip().upper(),
+                    po_id=invoice_po_link(getattr(inv, "purchase_order_id", None), inv.metadata_),
+                    lines=lines,
+                )
+            )
+
+        received = await received_net_by_po(self.session, project_id) if any(i.po_id for i in invoices) else {}
+        plan = plan_actuals(
+            rows,
+            invoices,
+            received_by_po=received,
+            committed_by_po=committed_by_po,
+        )
+        for b in budgets:
+            md = dict(getattr(b, "metadata_", None) or {})
+            receipts = _safe_decimal(md.get("actual_from_receipts", "0"))
+            b.actual = plan.actual.get(b.id, Decimal("0")) + receipts
+            release_delta = Decimal("0")
+            for po_id, release in plan.released.get(b.id, {}).items():
+                key = f"{RELEASED_BY_PAYMENT_PREFIX}{po_id}"
+                release_delta += release - _safe_decimal(md.get(key, "0"))
+                md[key] = str(release)
+            if release_delta:
+                b.committed = max(_safe_decimal(b.committed) - release_delta, Decimal("0"))
+                b.metadata_ = md
+        if plan.unplaced:
+            logger.warning(
+                "Paid supplier invoices of project %s found no budget line in their currency: %s",
+                project_id,
+                plan.unplaced,
+            )
 
     async def _post_paid_invoices_to_spine(self, project_id: uuid.UUID) -> None:
         """Mirror every paid invoice of a project into the costmodel cost spine.
@@ -1218,10 +1333,16 @@ class FinanceService:
             )
             return str(Decimal(str(converted)))
 
+        # Supplier invoices only: a client invoice being paid is income, not a
+        # cost actual on the spine.
         result = await self.session.execute(
             select(Invoice)
             .options(selectinload(Invoice.line_items))
-            .where(Invoice.project_id == project_id, Invoice.status == "paid")
+            .where(
+                Invoice.project_id == project_id,
+                Invoice.status == "paid",
+                Invoice.invoice_direction == "payable",
+            )
         )
         paid_invoices = result.scalars().all()
 
@@ -1273,7 +1394,8 @@ class FinanceService:
                     posting_ref=f"{inv.id}:full",
                     cost_line_id=None,
                     cost_category=None,
-                    amount_base=_to_base(inv.amount_total, inv_currency),
+                    # Net, like the line amounts above: the spine's budget is net.
+                    amount_base=_to_base(inv.amount_subtotal, inv_currency),
                     currency=inv_currency,
                 )
 
