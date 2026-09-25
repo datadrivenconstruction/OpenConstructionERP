@@ -15031,6 +15031,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Ressourcendefinition übertragen",
     "boq.link_locked_skipped_msg": "{{count}} verknüpfte Position(en) in gesperrten Kalkulationen behalten die alte Definition: {{bills}}. Entsperren Sie diese Kalkulationen oder erstellen Sie eine Revision, um die Änderung zu übernehmen.",
     "boq.link_locked_skipped_title": "Gesperrte Kalkulationen unverändert",
+    "boq.locked_banner_title": "Diese Kalkulation ist gesperrt",
+    "boq.locked_banner_body": "Positionen können nicht hinzugefügt, bearbeitet oder gelöscht werden. Erstellen Sie eine Revision, um sie zu ändern, oder bitten Sie einen Manager, sie zu entsperren.",
     "boq.link_role_instance": "Verknüpfte Instanz",
     "boq.link_role_master": "Master (maßgebliche Definition)",
     "boq.link_unlinked_msg": "Ihre Änderung hat diese verknüpfte Kopie verändert, daher folgt sie dem gemeinsamen Code nicht mehr. Falls keine Divergenz beabsichtigt war, setzen Sie den Code zurück.",

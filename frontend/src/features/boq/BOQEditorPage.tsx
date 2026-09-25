@@ -1053,6 +1053,8 @@ export function BOQEditorPage() {
    */
   const trackedDelete = useCallback(
     (posId: string) => {
+      // The Delete key reaches here as well; a locked bill keeps its lines.
+      if (boq?.is_locked) return;
       const posToDelete = boq?.positions.find((p) => p.id === posId);
       if (!posToDelete) {
         deleteMutation.mutate(posId);
@@ -1146,7 +1148,7 @@ export function BOQEditorPage() {
 
       pendingDeleteRef.current = { timeoutId, positionSnapshot: snapshot, toastId };
     },
-    [deleteMutation, boq?.positions, queryClient, boqId, addToast, removeToast, t],
+    [deleteMutation, boq?.positions, boq?.is_locked, queryClient, boqId, addToast, removeToast, t],
   );
 
   // Bind ref so the keyboard handler can call trackedDelete without a
@@ -2673,7 +2675,8 @@ export function BOQEditorPage() {
 
   const handleAddPosition = useCallback(
     (parentId?: string) => {
-      if (!boqId) return;
+      // A locked bill takes no new line; the keyboard shortcut reaches here too.
+      if (!boqId || boq?.is_locked) return;
       const allPositions = boq?.positions ?? [];
 
       /* Generate the next ordinal using the standard "gap-of-10" scheme
@@ -5051,7 +5054,39 @@ export function BOQEditorPage() {
           </div>
         </div>
 
+        {boq.is_locked && (
+          <div
+            role="status"
+            data-testid="boq-locked-banner"
+            className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3
+                       text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-100"
+          >
+            <Lock size={16} className="shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">
+                {t('boq.locked_banner_title', { defaultValue: 'This estimate is locked' })}
+              </p>
+              <p className="text-xs">
+                {t('boq.locked_banner_body', {
+                  defaultValue:
+                    'Positions cannot be added, edited or deleted. Create a revision to change it, or ask a manager to unlock it.',
+                })}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleCreateRevision}
+              disabled={createRevisionMutation.isPending}
+            >
+              <Copy size={14} className="mr-1" />
+              {t('boq.create_revision', { defaultValue: 'Create Revision' })}
+            </Button>
+          </div>
+        )}
+
         <BOQToolbar
+          readOnly={Boolean(boq.is_locked)}
           t={t}
           projectId={boq.project_id}
           boqId={boq.id}
@@ -5170,6 +5205,7 @@ export function BOQEditorPage() {
           onUpdatePosition={trackedUpdate}
           onDeletePosition={trackedDelete}
           onAddPosition={handleAddPosition}
+          readOnly={Boolean(boq.is_locked)}
           onSelectSuggestion={handleGridSelectSuggestion}
           onSaveToDatabase={handleGridSaveToDatabase}
           onAddComment={handleAddComment}
@@ -5238,7 +5274,7 @@ export function BOQEditorPage() {
           bimModelId={bimModelId}
           onHighlightBIMElements={handleHighlightBIMElements}
         /></div>
-      ) : (
+      ) : boq.is_locked ? null : (
         <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden p-8">
           <EmptyBOQOnboarding
             onAddSection={handleAddSection}
@@ -5445,25 +5481,29 @@ export function BOQEditorPage() {
       />
 
       {/* ── Quick Add FAB ─────────────────────────────────────────────── */}
-      <QuickAddFAB
-        onAddPosition={() => handleAddPosition()}
-        onAddSection={handleAddSection}
-        onImportFromCosts={() => setCostDbModalOpen(true)}
-        sidePanelOpen={aiChatOpen || costFinderOpen || smartPanelOpen}
-        t={t}
-      />
+      {!boq.is_locked && (
+        <QuickAddFAB
+          onAddPosition={() => handleAddPosition()}
+          onAddSection={handleAddSection}
+          onImportFromCosts={() => setCostDbModalOpen(true)}
+          sidePanelOpen={aiChatOpen || costFinderOpen || smartPanelOpen}
+          t={t}
+        />
+      )}
 
       {/* ── Batch Action Bar ──────────────────────────────────────── */}
-      <BatchActionBar
-        selectedIds={selectedPositionIds}
-        onBatchDelete={handleBatchDelete}
-        onBatchChangeUnit={handleBatchChangeUnit}
-        onClearSelection={handleClearSelection}
-        onBatchFactor={handleBatchFactor}
-        onBatchSetClassification={handleBatchSetClassification}
-        onBatchFindReplace={handleBatchFindReplace}
-        onBatchSetValue={handleBatchSetValue}
-      />
+      {!boq.is_locked && (
+        <BatchActionBar
+          selectedIds={selectedPositionIds}
+          onBatchDelete={handleBatchDelete}
+          onBatchChangeUnit={handleBatchChangeUnit}
+          onClearSelection={handleClearSelection}
+          onBatchFactor={handleBatchFactor}
+          onBatchSetClassification={handleBatchSetClassification}
+          onBatchFindReplace={handleBatchFindReplace}
+          onBatchSetValue={handleBatchSetValue}
+        />
+      )}
 
       {/* ── Export Quality Warning Dialog ──────────────────────────── */}
       {exportWarning && (

@@ -14063,6 +14063,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definição de recurso propagada",
     "boq.link_locked_skipped_msg": "{{count}} item(ns) vinculado(s) em estimativas bloqueadas mantiveram a definição anterior: {{bills}}. Desbloqueie essas estimativas ou crie uma revisão para aplicar a alteração.",
     "boq.link_locked_skipped_title": "Estimativas bloqueadas não alteradas",
+    "boq.locked_banner_title": "Esta estimativa está bloqueada",
+    "boq.locked_banner_body": "Não é possível adicionar, editar ou eliminar posições. Crie uma revisão para a alterar, ou peça a um gestor que a desbloqueie.",
     "boq.link_role_instance": "Instância vinculada",
     "boq.link_role_master": "Mestre (definição de referência)",
     "boq.link_unlinked_msg": "Sua edição alterou esta cópia vinculada, por isso ela não segue mais o código partilhado. Se não pretendia diferenciá-la, restaure seu código original.",

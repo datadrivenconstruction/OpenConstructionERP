@@ -15064,6 +15064,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definicja zasobu rozpropagowana",
     "boq.link_locked_skipped_msg": "Powiązane pozycje w zablokowanych kosztorysach ({{count}}) zachowały poprzednią definicję: {{bills}}. Aby przyjąć zmianę, odblokuj te kosztorysy lub utwórz rewizję.",
     "boq.link_locked_skipped_title": "Zablokowane kosztorysy bez zmian",
+    "boq.locked_banner_title": "Ten kosztorys jest zablokowany",
+    "boq.locked_banner_body": "Nie można dodawać, edytować ani usuwać pozycji. Utwórz rewizję, aby go zmienić, lub poproś menedżera o odblokowanie.",
     "boq.link_role_instance": "Powiązana instancja",
     "boq.link_role_master": "Wzorzec (definicja referencyjna)",
     "boq.link_unlinked_msg": "Twoja edycja zmieniła tę powiązaną kopię, więc nie podąża już za współdzielonym kodem. Jeśli nie chciałeś jej oddzielać, przywróć poprzedni kod.",

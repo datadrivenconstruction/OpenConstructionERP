@@ -202,6 +202,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
   }, [nameDraft, description, ctx, data]);
 
   if (!data?._isSection || !ctx) return null;
+  const readOnly = Boolean(ctx.readOnly);
 
   const isCollapsed = ctx.collapsedSections?.has(data.id) ?? false;
   const childCount: number = data._childCount ?? 0;
@@ -233,8 +234,9 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         dragOver ? 'bg-oe-blue-subtle border-t-2 border-oe-blue' : ''
       }`}
       style={depth > 0 ? { paddingLeft: 8 + depth * 22 } : undefined}
-      draggable
+      draggable={!readOnly}
       onDragStart={(e) => {
+        if (readOnly) return;
         e.dataTransfer.setData('text/x-section-id', data.id);
         e.dataTransfer.effectAllowed = 'move';
       }}
@@ -250,7 +252,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         e.preventDefault();
         setDragOver(false);
         const fromId = e.dataTransfer.getData('text/x-section-id');
-        if (fromId && fromId !== data.id) {
+        if (fromId && fromId !== data.id && !readOnly) {
           ctx.onReorderSections?.(fromId, data.id);
         }
       }}
@@ -260,12 +262,14 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           contrast the token was chosen for, so the class would have read as
           fixed while the grip stayed invisible. The step on hover is colour
           now, not opacity. */}
-      <span
-        data-testid="section-drag-grip"
-        className="cursor-grab shrink-0 text-content-secondary group-hover/section:text-content-primary transition-colors"
-      >
-        <GripVertical size={14} />
-      </span>
+      {!readOnly && (
+        <span
+          data-testid="section-drag-grip"
+          className="cursor-grab shrink-0 text-content-secondary group-hover/section:text-content-primary transition-colors"
+        >
+          <GripVertical size={14} />
+        </span>
+      )}
 
       <button
         onClick={(e) => {
@@ -325,9 +329,9 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           onClick={(e) => e.stopPropagation()}
           onDoubleClick={(e) => {
             e.stopPropagation();
-            startRename();
+            if (!readOnly) startRename();
           }}
-          title={t('boq.rename_section_hint', {
+          title={readOnly ? undefined : t('boq.rename_section_hint', {
             defaultValue: 'Double-click to rename',
           })}
           className="text-xs font-bold text-content-primary uppercase tracking-wide
@@ -350,7 +354,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
 
       <div className="flex-1" />
 
-      {!renaming && (
+      {!renaming && !readOnly && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -369,7 +373,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         </button>
       )}
 
-      {ctx.onAddSubSection && (
+      {ctx.onAddSubSection && !readOnly && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -394,6 +398,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           section id, so the new partida lands in this section — never in the
           last one. Rendered as the primary section action; "Sub" sits beside
           it for the rarer nested-section case. */}
+      {!readOnly && (
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -410,8 +415,9 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         <Plus size={11} />
         {t('boq.add_position', { defaultValue: 'Add Position' })}
       </button>
+      )}
 
-      {(ctx as FullGridContext | undefined)?.onDeleteSection && (
+      {(ctx as FullGridContext | undefined)?.onDeleteSection && !readOnly && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -609,6 +615,8 @@ export interface VariationLineTraceBadge {
 }
 
 export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
+  /** The bill is locked: renderers show values and offer no write. */
+  readOnly?: boolean;
   /**
    * Issue #435 - present only when the bill belongs to a variation request.
    * Keyed by position id; a line missing from the map is untraced and paints
@@ -4957,6 +4965,9 @@ function VariantHeaderResourceRow({
 
 /* ── Resource Full-Width Renderer ──────────────────────────────────── */
 
+/** ``inert`` as React 18 passes it through: a string, not a boolean. */
+const INERT = { inert: '' } as Record<string, string>;
+
 export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   const { data, context, api } = params;
   const ctx = context as FullGridContext | undefined;
@@ -4988,14 +4999,16 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
 
   // Resource sub-row
   if (data?._isResource) {
-    return <EditableResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
+    const row = <EditableResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
+    return ctx.readOnly ? <div className="h-full w-full" {...INERT}>{row}</div> : row;
   }
 
   // Synthetic "abstract variant" header — surfaces the position-level
   // CWICR variant catalog as a visible row inside the resource panel.
   // V badge prominent + click anywhere reopens the position-level picker.
   if (data?._isVariantHeader) {
-    return <VariantHeaderResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
+    const row = <VariantHeaderResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
+    return ctx.readOnly ? <div className="h-full w-full" {...INERT}>{row}</div> : row;
   }
 
   // "Add resource" row — column-driven layout so the action buttons sit
@@ -5003,6 +5016,8 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   // total slot, and any custom regional-preset columns get empty
   // width-matched placeholders that preserve grid alignment.
   if (data?._isAddResource) {
+    // Adding a resource is a write, and a locked bill takes none.
+    if (ctx.readOnly) return <div className="h-full w-full" aria-hidden="true" />;
     const renderTotalSlot = (width: number) => {
       if (typeof data._positionResourceTotal !== 'number' || data._positionResourceTotal <= 0) {
         return (

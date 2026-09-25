@@ -14614,6 +14614,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Erőforrás-definíció szétterjesztve",
     "boq.link_locked_skipped_msg": "Zárolt kalkulációkban {{count}} kapcsolt tétel megtartotta a korábbi definíciót: {{bills}}. A módosítás átvételéhez oldja fel ezeknek a kalkulációknak a zárolását, vagy hozzon létre új verziót.",
     "boq.link_locked_skipped_title": "A zárolt kalkulációk változatlanok maradtak",
+    "boq.locked_banner_title": "Ez a kalkuláció zárolva van",
+    "boq.locked_banner_body": "Tételek nem adhatók hozzá, nem szerkeszthetők és nem törölhetők. A módosításhoz hozzon létre egy revíziót, vagy kérje meg egy vezetőt a zárolás feloldására.",
     "boq.link_role_instance": "Kapcsolt példány",
     "boq.link_role_master": "Mester (hivatalos definíció)",
     "boq.link_unlinked_msg": "A szerkesztése megváltoztatta ezt a kapcsolt másolatot, így az már nem követi a megosztott kódot. Ha nem szándékosan tért el tőle, inkább állítsa vissza a kódját.",

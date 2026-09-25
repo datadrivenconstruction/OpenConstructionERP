@@ -14763,6 +14763,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definice zdroje rozšířena",
     "boq.link_locked_skipped_msg": "Propojené položky v uzamčených rozpočtech ({{count}}) si ponechaly původní definici: {{bills}}. Chcete-li změnu převzít, odemkněte tyto rozpočty nebo vytvořte revizi.",
     "boq.link_locked_skipped_title": "Uzamčené rozpočty zůstaly beze změny",
+    "boq.locked_banner_title": "Tento rozpočet je uzamčen",
+    "boq.locked_banner_body": "Položky nelze přidávat, upravovat ani mazat. Pro změnu vytvořte revizi, nebo požádejte manažera o odemčení.",
     "boq.link_role_instance": "Propojená instance",
     "boq.link_role_master": "Hlavní (definition z record)",
     "boq.link_unlinked_msg": "Vaše úprava změnila tuto propojenou kopii, takže už nesleduje sdílený kód. Pokud jste ji rozejít nechtěli, vraťte jí původní kód.",

@@ -592,6 +592,13 @@ export interface BOQGridProps {
   /** Custom column definitions from BOQ metadata */
   customColumns?: import('./grid/columnDefs').CustomColumnDef[];
   /**
+   * The bill is locked. The server refuses every write to it, so the grid
+   * offers none: no cell editor opens, rows do not drag, and the write actions
+   * leave the section header, the resource rows and the row menu. What only
+   * reads (collapse, price analysis, links, actuals) stays.
+   */
+  readOnly?: boolean;
+  /**
    * Show the Material/Labor/Equipment % cost-driver split columns (tri-state
    * `columns` position). Toggled from the BOQ toolbar; off by default.
    */
@@ -658,6 +665,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onUpdatePosition,
   onDeletePosition,
   onAddPosition,
+  readOnly = false,
   onSelectSuggestion: _onSelectSuggestion,
   onSaveToDatabase,
   onAddComment,
@@ -1398,6 +1406,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // Issue #435: per-line provenance chips, defined only on a variation bill.
       variationTraces,
       variationUntracedBadge,
+      readOnly,
     }) as FullGridContext,
     [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
@@ -1407,7 +1416,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied,
      positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, renderInlineCopilot, displayQuantity,
-     sectionTotalBasis, variationTraces, variationUntracedBadge],
+     sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -1468,8 +1477,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         defs.push(...customDefs);
       }
     }
+    // A locked bill: no column opens an editor and no row drags.
+    if (readOnly) return defs.map((c) => ({ ...c, editable: false, rowDrag: false }));
     return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, displayQuantity, maxOrdinalChars]);
+  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, displayQuantity, maxOrdinalChars, readOnly]);
 
   /* ── Calculated-column refresh on positions change ──────────────────
    * AG Grid re-runs `valueGetter` on every refresh; for cross-position
@@ -3107,7 +3118,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           // Stable identity is load-bearing, see BOQ_ROW_SELECTION.
           rowSelection={BOQ_ROW_SELECTION}
           onSelectionChanged={handleSelectionChanged}
-          rowDragManaged
+          rowDragManaged={!readOnly}
           animateRows
           singleClickEdit
           enterNavigatesVertically
@@ -3177,6 +3188,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { toggleResources(d.id as string); closeContextMenu(); }}
                   />
                 )}
+                {!readOnly && <>
                 <CtxItem icon={<Plus size={14}/>}
                   label={t('boq.add_resource_manual', { defaultValue: 'Add Resource' })}
                   onClick={() => {
@@ -3192,7 +3204,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={t('boq.add_from_catalog', { defaultValue: 'Pick from Catalog' })}
                   onClick={() => { onOpenCatalogForPosition?.(d.id as string); closeContextMenu(); }}
                 />
-                {onOpenAICopilot && (
+                </>}
+                {onOpenAICopilot && !readOnly && (
                   <CtxItem icon={<Sparkles size={14} className="text-violet-500"/>}
                     label={t('boq.ai_copilot', { defaultValue: 'AI Copilot' })}
                     onClick={() => { onOpenAICopilot(d.id as string); closeContextMenu(); }}
@@ -3222,7 +3235,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     frontend calling them, so this was reachable only by a
                     hand-written request. Label carries no defaultValue for the
                     reason given above; the key is in en.ts. */}
-                {onShowMeasurement && (
+                {onShowMeasurement && !readOnly && (
                   <CtxItem icon={<Ruler size={14}/>}
                     label={t('boq.measurement.title')}
                     onClick={() => { onShowMeasurement(d.id as string); closeContextMenu(); }}
@@ -3243,12 +3256,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   );
                 })()}
                 <CtxSeparator />
+                {!readOnly && (
                 <CtxItem icon={<Copy size={14}/>}
                   label={t('boq.duplicate_position', { defaultValue: 'Duplicate Position' })}
                   onClick={() => { onDuplicatePosition?.(d.id as string); closeContextMenu(); }}
                 />
+                )}
                 {/* ── Issue #136: nest a child Partida under this one ── */}
-                {onAddChildPosition && (() => {
+                {onAddChildPosition && !readOnly && (() => {
                   const capped = childWouldExceedCap(d.id as string);
                   return (
                     <CtxItem icon={<Plus size={14}/>}
@@ -3260,14 +3275,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   );
                 })()}
                 {/* ── Feature 1: live model→quantity binding ───────── */}
-                {onModelLink && (
+                {onModelLink && !readOnly && (
                   <CtxItem icon={<Cuboid size={14} className="text-oe-blue"/>}
                     label={t('boq.model_link_action', { defaultValue: 'Model link…' })}
                     onClick={() => { onModelLink(d.id as string); closeContextMenu(); }}
                   />
                 )}
                 {/* ── Issue #127: reuse / linked-positions ──────────── */}
-                {onReuseCode && (
+                {onReuseCode && !readOnly && (
                   <CtxItem icon={<Link2 size={14}/>}
                     label={t('boq.reuse_code_action', { defaultValue: 'Reuse Existing Code…' })}
                     onClick={() => { onReuseCode(d.parent_id as string | undefined); closeContextMenu(); }}
@@ -3281,7 +3296,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                         onClick={() => { onShowLinks(d.id as string); closeContextMenu(); }}
                       />
                     )}
-                    {onUnlinkPosition && (
+                    {onUnlinkPosition && !readOnly && (
                       <CtxItem icon={<Link2Off size={14}/>}
                         label={t('boq.unlink_this', { defaultValue: 'Unlink this position' })}
                         onClick={() => { onUnlinkPosition(d.id as string); closeContextMenu(); }}
@@ -3289,6 +3304,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     )}
                   </>
                 )}
+                {(!readOnly || cmtCount > 0) && (
                 <CtxItem icon={<MessageSquare size={14}/>}
                   label={cmtCount > 0
                     ? t('boq.view_comments', { defaultValue: 'Comments ({{count}})', count: cmtCount })
@@ -3296,6 +3312,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   }
                   onClick={() => { gridContext.onAddComment(d.id as string); closeContextMenu(); }}
                 />
+                )}
                 <CtxItem icon={<BookmarkPlus size={14}/>}
                   label={t('boq.save_to_database', { defaultValue: 'Save to Catalog' })}
                   onClick={() => { onSaveToDatabase(d.id as string); closeContextMenu(); }}
@@ -3341,6 +3358,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     />
                   );
                 })()}
+                {/* Everything below writes the line: currency, the AI
+                    suggestions and delete. None of it on a locked bill. */}
+                {!readOnly && <>
                 {/* ── Currency (multi-currency BOQ) ──────────────────
                      Sets ``metadata.currency`` on the position so it can
                      be priced in a currency other than the project base.
@@ -3393,6 +3413,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   danger
                   onClick={() => { onDeletePosition(d.id as string); closeContextMenu(); }}
                 />
+                </>}
               </>;
             })()}
 
@@ -3406,12 +3427,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={t('boq.save_to_catalog', { defaultValue: 'Save to Catalog' })}
                   onClick={() => { gridContext.onSaveResourceToCatalog(posId, resIdx); closeContextMenu(); }}
                 />
+                {!readOnly && <>
                 <CtxSeparator />
                 <CtxItem icon={<X size={14}/>}
                   label={t('boq.remove_resource', { defaultValue: 'Remove Resource' })}
                   danger
                   onClick={() => { gridContext.onRemoveResource(posId, resIdx); closeContextMenu(); }}
                 />
+                </>}
               </>;
             })()}
 
@@ -3421,6 +3444,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               const isCollapsed = collapsedSections.has(d.id as string);
               const sectionCapped = childWouldExceedCap(d.id as string);
               return <>
+                {!readOnly && <>
                 <CtxItem icon={<Plus size={14}/>}
                   label={t('boq.add_position', { defaultValue: 'Add Position' })}
                   disabled={sectionCapped}
@@ -3441,6 +3465,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { onReuseCode(d.id as string); closeContextMenu(); }}
                   />
                 )}
+                </>}
                 <CtxItem icon={isCollapsed ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
                   label={isCollapsed ? t('boq.expand_section', { defaultValue: 'Expand Section' }) : t('boq.collapse_section', { defaultValue: 'Collapse Section' })}
                   onClick={() => { onToggleSection(d.id as string); closeContextMenu(); }}
@@ -3449,7 +3474,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             })()}
 
             {/* — Add Resource row context menu — */}
-            {contextMenu.type === 'addResource' && (() => {
+            {contextMenu.type === 'addResource' && !readOnly && (() => {
               const posId = contextMenu.data._parentPositionId as string;
               return <>
                 <CtxItem icon={<Plus size={14}/>}

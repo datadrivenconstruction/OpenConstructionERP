@@ -15126,6 +15126,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Resurs taʼrifi tarqatildi",
     "boq.link_locked_skipped_msg": "Qulflangan smetalardagi {{count}} ta bogʻlangan band eski taʼrifni saqlab qoldi: {{bills}}. Oʻzgarishni qabul qilish uchun ushbu smetalarni qulfdan chiqaring yoki reviziya yarating.",
     "boq.link_locked_skipped_title": "Qulflangan smetalar oʻzgartirilmadi",
+    "boq.locked_banner_title": "Bu smeta qulflangan",
+    "boq.locked_banner_body": "Pozitsiyalarni qoʻshish, tahrirlash yoki oʻchirish mumkin emas. Oʻzgartirish uchun tahrir yarating yoki menejerdan qulfni ochishni soʻrang.",
     "boq.link_role_instance": "Bogʻlangan nusxa",
     "boq.link_role_master": "Asosiy (rasmiy taʼrif)",
     "boq.link_unlinked_msg": "Tahriringiz bu bogʻlangan nusxani oʻzgartirdi, shuning uchun u endi umumiy kodga ergashmaydi. Agar uni ajratishni maqsad qilmagan boʻlsangiz, kodini orqaga qaytaring.",

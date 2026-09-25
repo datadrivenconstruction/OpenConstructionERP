@@ -13999,6 +13999,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Définition de ressource propagée",
     "boq.link_locked_skipped_msg": "{{count}} position(s) liée(s) dans des estimations verrouillées conservent l'ancienne définition : {{bills}}. Déverrouillez ces estimations ou créez une révision pour appliquer la modification.",
     "boq.link_locked_skipped_title": "Estimations verrouillées inchangées",
+    "boq.locked_banner_title": "Cette estimation est verrouillée",
+    "boq.locked_banner_body": "Les postes ne peuvent être ni ajoutés, ni modifiés, ni supprimés. Créez une révision pour la modifier, ou demandez à un responsable de la déverrouiller.",
     "boq.link_role_instance": "Instance liée",
     "boq.link_role_master": "Maître (définition de référence)",
     "boq.link_unlinked_msg": "Votre modification a changé cette copie liée, elle ne suit donc plus le code partagé. Si vous ne souhaitiez pas la faire diverger, rétablissez son code d'origine.",

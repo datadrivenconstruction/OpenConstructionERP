@@ -14714,6 +14714,8 @@ const resource = {
     "boq.resource_link_propagated_title": "リソース定義を伝播しました",
     "boq.link_locked_skipped_msg": "ロックされた見積内の {{count}} 件のリンク済み明細は旧定義のままです: {{bills}}。変更を反映するには、これらの見積のロックを解除するか、リビジョンを作成してください。",
     "boq.link_locked_skipped_title": "ロックされた見積は変更されていません",
+    "boq.locked_banner_title": "この見積はロックされています",
+    "boq.locked_banner_body": "項目の追加、編集、削除はできません。変更するには改訂版を作成するか、管理者にロック解除を依頼してください。",
     "boq.link_role_instance": "リンクインスタンス",
     "boq.link_role_master": "マスター(正本)",
     "boq.link_unlinked_msg": "編集によりこのリンクコピーが変更されたため、共有コードに従わなくなりました。分岐させたくない場合は、コードを元に戻してください。",

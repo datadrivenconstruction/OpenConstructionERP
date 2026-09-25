@@ -14268,6 +14268,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Definizione di risorsa propagata",
     "boq.link_locked_skipped_msg": "{{count}} voci collegate in stime bloccate mantengono la definizione precedente: {{bills}}. Sblocca queste stime o crea una revisione per applicare la modifica.",
     "boq.link_locked_skipped_title": "Stime bloccate non modificate",
+    "boq.locked_banner_title": "Questa stima è bloccata",
+    "boq.locked_banner_body": "Non è possibile aggiungere, modificare o eliminare voci. Crea una revisione per modificarla, oppure chiedi a un responsabile di sbloccarla.",
     "boq.link_role_instance": "Istanza collegata",
     "boq.link_role_master": "Master (definizione di riferimento)",
     "boq.link_unlinked_msg": "La tua modifica ha cambiato questa copia collegata, quindi non segue più il codice condiviso. Se non volevi farla divergere, ripristina il codice.",

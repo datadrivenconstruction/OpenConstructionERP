@@ -14203,6 +14203,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Naipalaganap ang resource definition",
     "boq.link_locked_skipped_msg": "Pinanatili ng {{count}} naka-link na position sa mga naka-lock na estimate ang lumang definition: {{bills}}. I-unlock ang mga estimate na iyon o gumawa ng rebisyon para matanggap ang pagbabago.",
     "boq.link_locked_skipped_title": "Hindi binago ang mga naka-lock na estimate",
+    "boq.locked_banner_title": "Naka-lock ang estimate na ito",
+    "boq.locked_banner_body": "Hindi maaaring magdagdag, mag-edit o magbura ng mga posisyon. Gumawa ng rebisyon para baguhin ito, o hilingin sa isang manager na i-unlock ito.",
     "boq.link_role_instance": "Naka-link na instance",
     "boq.link_role_master": "Master (opisyal na definition)",
     "boq.link_unlinked_msg": "Binago ng iyong edit ang naka-link na kopyang ito, kaya hindi na ito sumusunod sa shared code. Kung hindi mo intensyong ihiwalay ito, ibalik na lang ang code nito.",

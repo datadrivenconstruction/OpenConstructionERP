@@ -15007,6 +15007,8 @@ const resource = {
     "boq.resource_link_propagated_title": "Kaynak tanımı yayıldı",
     "boq.link_locked_skipped_msg": "Kilitli keşiflerdeki {{count}} bağlı kalem eski tanımı korudu: {{bills}}. Değişikliği almak için bu keşiflerin kilidini açın veya revizyon oluşturun.",
     "boq.link_locked_skipped_title": "Kilitli keşifler değiştirilmedi",
+    "boq.locked_banner_title": "Bu keşif kilitli",
+    "boq.locked_banner_body": "Pozlar eklenemez, düzenlenemez veya silinemez. Değiştirmek için bir revizyon oluşturun ya da bir yöneticiden kilidi açmasını isteyin.",
     "boq.link_role_instance": "Bağlı kopya",
     "boq.link_role_master": "Ana (resmi tanım)",
     "boq.link_unlinked_msg": "Düzenlemeniz bu bağlı kopyayı değiştirdi, artık paylaşılan kodu izlemiyor. Ayrıştırma kasıtlı değilse kodu eski haline getirin.",

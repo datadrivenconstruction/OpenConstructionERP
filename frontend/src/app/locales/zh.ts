@@ -14714,6 +14714,8 @@ const resource = {
     "boq.resource_link_propagated_title": "资源定义已传播",
     "boq.link_locked_skipped_msg": "已锁定估算中的 {{count}} 个关联清单项保留了原定义：{{bills}}。如需应用此更改，请解锁这些估算或创建修订版本。",
     "boq.link_locked_skipped_title": "已锁定的估算未更改",
+    "boq.locked_banner_title": "此估算已锁定",
+    "boq.locked_banner_body": "无法添加、编辑或删除条目。如需修改，请创建修订版，或请管理员解锁。",
     "boq.link_role_instance": "关联实例",
     "boq.link_role_master": "主项(基准定义)",
     "boq.link_unlinked_msg": "您的编辑改变了该关联副本,因此它不再遵循共享代码。如不打算让其分歧,请将代码改回原值。",
