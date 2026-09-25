@@ -35,6 +35,7 @@ import {
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
+import { OrderInvoicedSummary } from './OrderInvoicedSummary';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { apiGet, apiPost, apiPatch, type Page } from '@/shared/lib/api';
@@ -82,10 +83,16 @@ interface PurchaseOrder {
   // undefined, so MoneyDisplay rendered an em-dash for every PO. Match the
   // real wire contract here.
   amount_total: string | number;
+  // Net of VAT. The invoiced figure below is net too, so the two compare.
+  amount_subtotal?: string | number;
   currency_code: string;
   status: string;
   description: string;
   line_items_count: number;
+  // Payable invoices linked to this order (drafts and cancelled left out),
+  // net of VAT, and how many there are. Decimal-as-string.
+  invoiced_net?: string;
+  invoice_count?: number;
   // ── Retainage (Gap F) ──────────────────────────────────────────────────
   // retention_percent / retain_on_receipt are persisted; retainage_amount /
   // retainage_held are computed by the backend. All Decimal-as-string.
@@ -1526,6 +1533,14 @@ function PurchaseOrdersTab({
                       accepts string amounts and parses them internally, so no
                       Number() wrapping is needed here. */}
                   <MoneyDisplay amount={po.amount_total} currency={po.currency_code} />
+                  {(po.invoice_count ?? 0) > 0 && (
+                    <OrderInvoicedSummary
+                      className="mt-1"
+                      invoiced={po.invoiced_net}
+                      ordered={po.amount_subtotal}
+                      currency={po.currency_code}
+                    />
+                  )}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="flex flex-col items-center gap-1">

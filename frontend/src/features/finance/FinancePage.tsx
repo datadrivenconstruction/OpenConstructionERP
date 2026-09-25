@@ -65,6 +65,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiPost, apiPatch, downloadWithAuth, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
+import { InvoicePurchaseOrderField } from './InvoicePurchaseOrderField';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -157,6 +158,8 @@ interface Invoice {
   tax_amount?: string | null;
   amount_total?: string | null;
   contact_id?: string | null;
+  // The purchase order a payable invoice bills, when one was picked.
+  purchase_order_id?: string | null;
   invoice_date?: string | null;
   currency_code?: string | null;
   notes?: string | null;
@@ -480,6 +483,12 @@ interface FinanceDashboardData {
   budget_warning_level: string;
   total_payments: number;
   cash_flow_net: number;
+  /** Net of VAT: supplier invoices and approved subcontract payment
+   *  applications. `total_committed` and `total_actual` are net as well. */
+  total_invoiced?: number | string;
+  /** Cash out of the door, VAT included: payments on supplier invoices less
+   *  refunds, plus subcontract payment applications marked paid. */
+  total_paid?: number | string;
   /** Base currency the totals are expressed in. For a project-scoped
    *  dashboard the server FX-converts every foreign record into this
    *  currency via Project.fx_rates; empty when no record carries one. */
@@ -519,7 +528,10 @@ export function FinanceSummaryCards({
   const totalBudget = Number(dashboard?.total_budget_original ?? 0);
   const totalRevised = Number(dashboard?.total_budget_revised ?? 0);
   const totalActual = Number(dashboard?.total_actual ?? 0);
-  const totalInvoiced = Number(dashboard?.total_payable ?? 0);
+  const totalCommitted = Number(dashboard?.total_committed ?? 0);
+  const totalInvoiced = Number(dashboard?.total_invoiced ?? 0);
+  const totalPaid = Number(dashboard?.total_paid ?? 0);
+  const totalUnpaid = Number(dashboard?.total_payable ?? 0);
   const totalReceivable = Number(dashboard?.total_receivable ?? 0);
   const totalOverdue = Number(dashboard?.total_overdue ?? 0);
   const remaining = (totalRevised || totalBudget) - totalActual;
@@ -551,7 +563,9 @@ export function FinanceSummaryCards({
   if (
     totalBudget === 0 &&
     totalRevised === 0 &&
+    totalCommitted === 0 &&
     totalInvoiced === 0 &&
+    totalUnpaid === 0 &&
     totalReceivable === 0
   ) {
     return (
@@ -590,23 +604,75 @@ export function FinanceSummaryCards({
     );
   }
 
-  const cards = [
+  // Every figure states its basis. Budget, committed, invoiced and remaining
+  // are compared net of VAT, because the budget comes from the bill, which is
+  // net; paid and the two open balances are cash and carry the VAT. A card
+  // with no basis is a count or a status, not an amount against the budget.
+  const basisNet = t('finance.basis_net', { defaultValue: 'Net of VAT' });
+  const basisGross = t('finance.basis_gross', { defaultValue: 'Incl. VAT' });
+
+  const cards: Array<{
+    key: string;
+    label: string;
+    basis?: string;
+    value: number;
+    icon: React.ReactNode;
+    color: string;
+    accent: string;
+  }> = [
     {
+      key: 'budget',
       label: t('finance.summary_total_budget', { defaultValue: 'Total Budget' }),
+      basis: basisNet,
       value: totalBudget,
       icon: <Wallet size={18} />,
       color: 'bg-oe-blue/10 text-oe-blue',
       accent: 'bg-oe-blue',
     },
     {
-      label: t('finance.summary_total_invoiced', { defaultValue: 'Total Invoiced (Payable)' }),
+      // Orders and subcontract agreements the project is bound to. An order
+      // and the invoices against it count once, at the larger of the two.
+      key: 'committed',
+      label: t('finance.summary_committed', { defaultValue: 'Committed' }),
+      basis: basisNet,
+      value: totalCommitted,
+      icon: <FileText size={18} />,
+      color: 'bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400',
+      accent: 'bg-violet-500',
+    },
+    {
+      key: 'invoiced',
+      label: t('finance.summary_invoiced', { defaultValue: 'Invoiced' }),
+      basis: basisNet,
       value: totalInvoiced,
       icon: <Receipt size={18} />,
       color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
       accent: 'bg-amber-500',
     },
     {
+      key: 'paid',
+      label: t('finance.summary_paid', { defaultValue: 'Paid' }),
+      basis: basisGross,
+      value: totalPaid,
+      icon: <CreditCard size={18} />,
+      color: 'bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400',
+      accent: 'bg-sky-500',
+    },
+    {
+      // What the old "Total Invoiced (Payable)" card showed: supplier
+      // invoices still to be paid, not everything invoiced.
+      key: 'unpaid',
+      label: t('finance.summary_unpaid_payables', { defaultValue: 'Unpaid supplier invoices' }),
+      basis: basisGross,
+      value: totalUnpaid,
+      icon: <Inbox size={18} />,
+      color: 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400',
+      accent: 'bg-orange-500',
+    },
+    {
+      key: 'receivable',
       label: t('finance.summary_receivable', { defaultValue: 'Receivable' }),
+      basis: basisGross,
       value: totalReceivable,
       icon: <PiggyBank size={18} />,
       color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
@@ -618,7 +684,9 @@ export function FinanceSummaryCards({
       // all along; this screen declared the field and never read it, so the
       // one figure a finance lead opens the page for was the one it did not
       // show. Same key as the reporting tile: one number, one wording.
+      key: 'overdue',
       label: t('reporting.overdue_total', { defaultValue: 'Total Overdue' }),
+      basis: basisGross,
       value: totalOverdue,
       icon: <AlertTriangle size={18} />,
       color:
@@ -628,7 +696,9 @@ export function FinanceSummaryCards({
       accent: totalOverdue > 0 ? 'bg-red-500' : 'bg-green-500',
     },
     {
+      key: 'remaining',
       label: t('finance.summary_remaining', { defaultValue: 'Remaining Budget' }),
+      basis: basisNet,
       value: remaining,
       icon: <DollarSign size={18} />,
       color: remaining >= 0
@@ -650,7 +720,8 @@ export function FinanceSummaryCards({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <div
-            key={card.label}
+            key={card.key}
+            data-testid={`finance-card-${card.key}`}
             className="relative overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
           >
             <div className={`absolute top-0 start-0 end-0 h-1 ${card.accent}`} />
@@ -666,6 +737,9 @@ export function FinanceSummaryCards({
               <div className="text-xl font-bold tabular-nums text-content-primary">
                 <MoneyDisplay amount={card.value} currency={currency} />
               </div>
+              {card.basis && (
+                <div className="mt-0.5 text-2xs text-content-tertiary">{card.basis}</div>
+              )}
             </div>
           </div>
         ))}
@@ -1992,6 +2066,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
     // an invoice lets a user advance its status, which is otherwise only
     // reachable via the row Approve / Mark Paid actions (#284).
     status: 'draft',
+    // Optional order this payable invoice bills. Empty means not linked.
+    purchase_order_id: '',
   });
   const [invoiceErrors, setInvoiceErrors] = useState<Record<string, string>>({});
   // Tracks whether the user has hand-entered the Total (overriding the
@@ -2047,6 +2123,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
       buyer_reference: readBuyerReference(inv.metadata),
       // Shown exactly as stored. A person sees the state the machine wrote.
       status: inv.status || 'draft',
+      purchase_order_id: inv.purchase_order_id ?? '',
     });
     // If the stored total differs from subtotal+tax, the invoice was saved
     // with a deliberate manual total - preserve that intent so editing the
@@ -2158,13 +2235,15 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
         // subtotal it is being asked to store.
         line_items: singleFormLine(data, sub),
         metadata: invoiceMetadataWithBuyerReference(null, data.buyer_reference),
+        purchase_order_id:
+          data.direction === 'payable' && data.purchase_order_id ? data.purchase_order_id : undefined,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-invoices', projectId] });
       queryClient.invalidateQueries({ queryKey: ['finance', 'dashboard', projectId] });
       setShowCreate(false);
-      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft' });
+      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
       setAmountEditedManually(false);
       addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created successfully' }) });
     },
@@ -2208,6 +2287,9 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
         // and only the buyer reference is edited here.
         metadata: invoiceMetadataWithBuyerReference(editingInvoice?.metadata, data.form.buyer_reference),
         ...lineItemsPatch,
+        // Null unlinks. A receivable invoice never bills a purchase order.
+        purchase_order_id:
+          data.form.direction === 'payable' && data.form.purchase_order_id ? data.form.purchase_order_id : null,
         ...(statusChanged ? { status: data.form.status } : {}),
       });
     },
@@ -2402,7 +2484,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
             size="sm"
             icon={<Plus size={14} />}
             onClick={() => {
-              setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft' });
+              setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
               setInvoiceErrors({});
               setAmountEditedManually(false);
               setShowCreate(true);
@@ -2480,7 +2562,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   ? {
                       label: t('finance.new_invoice', { defaultValue: 'New Invoice' }),
                       onClick: () => {
-                        setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft' });
+                        setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: projectCurrency, description: '', buyer_reference: '', status: 'draft', purchase_order_id: '' });
                         setInvoiceErrors({});
                         setAmountEditedManually(false);
                         setShowCreate(true);
@@ -2989,7 +3071,15 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
             >
               <ContactSearchInput
                 value={invoiceForm.counterparty}
-                onChange={(id, name) => setInvoiceForm((f) => ({ ...f, counterparty: name, contact_id: id }))}
+                onChange={(id, name) =>
+                  setInvoiceForm((f) => ({
+                    ...f,
+                    counterparty: name,
+                    contact_id: id,
+                    // An order belongs to one supplier; a new supplier drops the link.
+                    purchase_order_id: id === f.contact_id ? f.purchase_order_id : '',
+                  }))
+                }
                 placeholder={
                   invoiceForm.direction === 'payable'
                     ? t('finance.search_vendor', { defaultValue: 'Search vendor...' })
@@ -3042,6 +3132,29 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                   aria-label={t('finance.einvoice.buyerReferenceLabel', {
                     defaultValue: 'Buyer reference / Leitweg-ID',
                   })}
+                />
+              </WideModalField>
+            )}
+
+            {/* The order this supplier invoice bills. Optional; linking it is
+                what keeps an order and its invoice from being committed
+                twice on the Finance dashboard. */}
+            {invoiceForm.direction === 'payable' && (
+              <WideModalField
+                label={t('finance.po_link_label', { defaultValue: 'Purchase order' })}
+                span={2}
+                hint={t('finance.po_link_hint', {
+                  defaultValue:
+                    'Optional. A linked invoice counts against its order, so the order and the invoice are committed once.',
+                })}
+              >
+                <InvoicePurchaseOrderField
+                  projectId={projectId}
+                  contactId={invoiceForm.contact_id}
+                  value={invoiceForm.purchase_order_id}
+                  onChange={(poId) => setInvoiceForm((f) => ({ ...f, purchase_order_id: poId }))}
+                  amountSubtotal={readInvoiceAmounts(invoiceForm).subtotal}
+                  invoiceId={editingInvoice?.id}
                 />
               </WideModalField>
             )}
