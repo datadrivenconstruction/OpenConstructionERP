@@ -1,0 +1,27 @@
+{
+  "rule_pack_id": "ua_publichni_zakupivli",
+  "name": "Public procurement of works",
+  "name_uk": "Публічні закупівлі робіт",
+  "standard": "Закон №922-VIII",
+  "jurisdiction": "UA",
+  "applies_to": [
+    "tendering",
+    "estimate",
+    "projects"
+  ],
+  "review_status": "Thresholds read in the law as published on the parliament's legal portal and in the procurement system's own summary. Whether the wartime procurement rules amended in 2026 changed the works threshold has not been confirmed. Pending review by a Ukrainian procurement specialist.",
+  "references": [
+    "Закон України №922-VIII від 25.12.2015 «Про публічні закупівлі», ст. 3 (https://zakon.rada.gov.ua/laws/show/922-19)",
+    "Summary of the thresholds by the procurement system (https://infobox.prozorro.org/news-mert/zakon-ukrajini-pro-publichni-zakupivli-1)",
+    "Постанова КМУ №1178 від 12.10.2022, public procurement under martial law (https://zakon.rada.gov.ua/go/1178-2022-%D0%BF)"
+  ],
+  "description": "Public works in Ukraine are procured under Закон №922-VIII through the electronic procurement system. The law applies to works with an expected value of 1.5 million hryvnias or more, and 5 million for utility-sector customers. Under martial law the procedure is set by постанова КМУ №1178. The expected value rests on the estimate drawn up under the Настанова, and bidders return a contract price (договірна ціна) built on the same structure.",
+  "practice_notes": [
+    "The expected value of the procurement is the summary estimate total, and ПДВ is shown separately",
+    "The risk allowance a bidder may carry in its contract price is limited by the Настанова; check the current limit before pricing"
+  ],
+  "enables_rule_ids": [
+    "ukraine.zkr_chapter_required",
+    "ukraine.zkr_chapter_recognised"
+  ]
+}

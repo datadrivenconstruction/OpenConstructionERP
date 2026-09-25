@@ -1,0 +1,45 @@
+# Ukraine Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by the
+# OnboardingWizard React component in place of the default steps.
+#
+# Labels are bilingual: the English sentence and the Ukrainian term an
+# estimator decides on, rather than a translation of the whole sentence.
+
+version: 2
+locale: uk
+title: "Welcome to OpenConstructionERP - Ukraine"
+title_uk: "Ласкаво просимо до OpenConstructionERP - Україна"
+subtitle: "Three steps to line the workspace up with Ukrainian practice: the chapters of the summary estimate, the cost cascade and ПДВ. Три кроки, щоб налаштувати робочий простір під українську практику."
+
+steps:
+  - id: company_profile
+    title: "Company details / Дані підприємства"
+    body: "Used on estimates, tender documents and reports. Використовуються в кошторисах, тендерній документації та звітах."
+    fields:
+      - { key: company_name, label: "Company name / Найменування підприємства", type: text, required: true }
+      - { key: edrpou, label: "Company registration code / Код ЄДРПОУ", type: text, required: false, placeholder: "12345678" }
+      - { key: ipn, label: "VAT payer number / ІПН платника ПДВ", type: text, required: false, placeholder: "123456789012" }
+      - { key: role, label: "Your role on projects / Роль у проєктах", type: radio, required: true, default: "Contractor (генпідрядник)", options: ["Contractor (генпідрядник)", "Subcontractor (субпідрядник)", "Designer or cost engineer (проєктувальник, кошторисник)", "Client or public customer (замовник)"] }
+
+  - id: estimate_structure
+    title: "Estimate structure / Структура кошторису"
+    body: "Every line is filed under its chapter of the зведений кошторисний розрахунок (1 to 12) and classified against DIN 276 for the cost-group view. Кожна позиція належить до глави зведеного кошторисного розрахунку."
+    fields:
+      - { key: public_procurement, label: "We tender for public contracts under Закон №922-VIII / Беремо участь у публічних закупівлях", type: checkbox, default: true }
+      - { key: general_production, label: "General production costs / Загальновиробничі витрати", type: select, required: true, default: "9%", options: ["7%", "9%", "10%", "Set per project"] }
+      - { key: administrative, label: "Administrative costs / Адміністративні витрати", type: select, required: true, default: "2.5%", options: ["2%", "2.5%", "3%", "Set per project"] }
+      - { key: profit, label: "Profit / Кошторисний прибуток", type: select, required: true, default: "7%", options: ["5%", "7%", "10%", "Set per project"] }
+
+  - id: review
+    title: "Review and finish / Перевірка та завершення"
+    body: "We will set the workspace to UAH, switch on the Ukrainian validation rules and apply the Ukrainian estimating method with 20% ПДВ. Everything can be changed later in Settings. Усе можна змінити пізніше в Налаштуваннях."
+    action:
+      label: "Create my Ukrainian workspace / Створити робочий простір"
+      apply:
+        - set_default_currency: UAH
+        - set_tax_template: ua_pdv_20
+        - enable_rule_packs:
+            - ua_nastanova_281
+            - ua_publichni_zakupivli
+            - ua_dbn_mistobuduvannia
+            - ua_pdv_budivnytstvo

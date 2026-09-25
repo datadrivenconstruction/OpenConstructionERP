@@ -1,0 +1,45 @@
+{
+  "rule_pack_id": "ua_nastanova_281",
+  "name": "Cost estimating rules and the summary estimate",
+  "name_uk": "Кошторисні норми та зведений кошторисний розрахунок",
+  "standard": "Наказ Мінрегіону №281",
+  "jurisdiction": "UA",
+  "applies_to": [
+    "estimate",
+    "boq",
+    "validation"
+  ],
+  "review_status": "Order and chapter list read in the official text of наказ №281 and in the published text of Зміна №2 and Додатки 25, 27 and 28. The wartime ceilings of постанова КМУ №1512 read through a summary of the official text. Pending review by a Ukrainian cost engineer.",
+  "references": [
+    "Наказ Мінрегіону №281 від 01.11.2021 «Про затвердження кошторисних норм України у будівництві» (https://zakon.rada.gov.ua/laws/show/v0281914-21)",
+    "Зміна №2 до Настанови, наказ №244 від 01.12.2022, chapters of the зведений кошторисний розрахунок (https://radnuk.com.ua/wp-content/uploads/2023/05/knu-zmina-2.pdf)",
+    "Зміна №5, наказ №456 від 09.03.2026 (https://mindev.gov.ua/npas/pro-zatverdzhennia-zminy-5-do-koshtorysnykh-norm-ukrainy-u-budivnytstvi)",
+    "Зміна №6, наказ №1069 від 08.06.2026 (https://mininfra.gov.ua/news/minrozvytku-zakripylo-nakazom-onovleni-pravyla-vyznachennia-vartosti-budivnytstva-za-publichni-koshti)",
+    "Додаток 28, risk allowance by type of building (https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-28.pdf)",
+    "Постанова КМУ №1512 від 19.11.2025 (https://zakon.rada.gov.ua/laws/show/1512-2025-%D0%BF)"
+  ],
+  "description": "The cost of construction in Ukraine is set under the Настанова з визначення вартості будівництва, approved by наказ Мінрегіону №281 of 01.11.2021 and in force since 08.11.2021, which cancelled ДСТУ Б Д.1.1-1:2013. Local estimates roll up into object estimates and then into the зведений кошторисний розрахунок, whose twelve chapters run from site preparation (1) and the main objects (2) through external networks (6), landscaping (7) and temporary buildings (8) to design, survey and supervision (12). Profit, administrative costs, the risk allowance and inflation are added after chapter 12, then ПДВ. Under martial law постанова КМУ №1512 caps general production costs at 10, administrative costs at 3 and profit at 15 percent of direct costs.",
+  "chapters": {
+    "1": "Підготовка території будівництва",
+    "2": "Об'єкти основного призначення",
+    "3": "Об'єкти підсобного та обслуговуючого призначення",
+    "4": "Об'єкти енергетичного господарства",
+    "5": "Об'єкти транспортного господарства і зв'язку",
+    "6": "Зовнішні мережі та споруди",
+    "7": "Благоустрій та озеленення території",
+    "8": "Тимчасові будівлі і споруди",
+    "9": "Кошти на інші роботи та витрати",
+    "10": "Утримання служби замовника та інжинірингові послуги",
+    "11": "Підготовка експлуатаційних кадрів",
+    "12": "Проектні, вишукувальні роботи, експертиза та авторський нагляд"
+  },
+  "practice_notes": [
+    "Resource consumption comes from the ресурсні елементні кошторисні норми (РЕКН) for building, repair, equipment installation and commissioning work",
+    "The risk allowance of Додаток 28 at the design stage is 1.8 percent for housing and 3.0 percent for public buildings, on chapters 1 to 12",
+    "Зміна №5 renamed the unit rate indicators to одиничні показники вартості робіт (ОПВ); Зміна №6 added wage coefficients and the certificate of wages actually paid"
+  ],
+  "enables_rule_ids": [
+    "ukraine.zkr_chapter_required",
+    "ukraine.zkr_chapter_recognised"
+  ]
+}
