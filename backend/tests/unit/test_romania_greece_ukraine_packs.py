@@ -38,6 +38,7 @@ from typing import Any
 
 import pytest
 
+from app.core.classification_registry import resolve_standard
 from app.core.demo_packs import PACK_TEMPLATES
 from app.core.demo_projects import (
     _COUNTRY_ISO2,
@@ -266,6 +267,20 @@ def test_the_demo_project_lands_in_the_country_in_its_currency_at_its_rate(slug:
 @pytest.mark.parametrize("slug", SLUGS)
 def test_the_pack_installs_its_flagship_demo(slug: str) -> None:
     assert PACK_DEMO_PROJECT.get(slug) == EXPECTED[slug]["demos"][0]
+
+
+@pytest.mark.parametrize("slug", SLUGS)
+def test_a_project_in_the_country_is_classified_against_din276(slug: str) -> None:
+    """The region alone, with no standard named, lands on the hierarchy the pack maps onto.
+
+    Ukraine read ``gesn`` here, the Russian norm lineage its 2021 cost rules
+    replaced, and Greece had no entry and fell through to the default with a
+    warning, so both are asserted as a match from the region and not as a
+    fallback that happens to spell the same word.
+    """
+    resolution = resolve_standard(explicit=None, region=EXPECTED[slug]["country"])
+    assert resolution.source == "region", f"{slug}: {resolution}"
+    assert resolution.standard == "din276"
 
 
 # ── Validation ───────────────────────────────────────────────────────────

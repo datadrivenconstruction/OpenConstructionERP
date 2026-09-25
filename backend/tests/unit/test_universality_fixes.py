@@ -302,9 +302,10 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("RU", "gesn"),
         ("RU_STPETERSBURG", "gesn"),
         ("RU_MOSCOW", "gesn"),
-        ("UA", "gesn"),
         ("BY", "gesn"),
         ("KZ", "gesn"),
+        # ── Ukraine — its own 2021 cost rules, mapped onto DIN 276 ──
+        ("UA", "din276"),
         # ── Asia-Pacific single countries — native standards ────────
         ("JP", "sekisan"),
         ("CN", "gb50500"),
@@ -337,6 +338,7 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("CZ", "din276"),
         ("BG", "din276"),
         ("RO", "din276"),
+        ("GR", "din276"),
         ("HR", "din276"),
         # ── Nordic ──────────────────────────────────────────────────
         ("SE", "din276"),

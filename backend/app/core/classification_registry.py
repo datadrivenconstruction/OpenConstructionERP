@@ -133,6 +133,10 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "CZ": "din276",
         "SK": "din276",
         "RO": "din276",
+        # Greece, with the Greek country pack: every line carries its ΝΕΤ
+        # article under its own key and is classified against DIN 276. It
+        # had no entry and fell through to the default with a warning.
+        "GR": "din276",
         "BG": "din276",
         "HR": "din276",
         "SI": "din276",
@@ -215,11 +219,16 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         # This read din276 until 2026-08, which was the Central European
         # default rather than a statement about Hungary.
         "HU": "tetelrend",
+        # Ukraine. Its national cost rules replaced the shared Soviet-era
+        # norm lineage with the Настанова of наказ Мінрегіону №281 in 2021,
+        # and the Ukrainian country pack files every line under DIN 276 with
+        # the chapter of the summary estimate beside it, the way the Czech
+        # and Polish packs map onto DIN 276. It read gesn until 2026-09.
+        "UA": "din276",
         # GESN family. Mongolia is here because its construction norms
         # descend from the same lineage as the CIS states around it,
         # not because a catalogue declares it.
         "RU": "gesn",
-        "UA": "gesn",
         "BY": "gesn",
         "KZ": "gesn",
         "MN": "gesn",
