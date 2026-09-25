@@ -259,6 +259,12 @@ class SubcontractAgreement(Base):
     # client contract on the project, and reports the agreement as ambiguous
     # when there is more than one rather than guessing between them.
     prime_contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The same subcontract written in the contracts module (a contract with
+    # ``counterparty_type="subcontractor"``), when there is one. Both records
+    # describe one spend, so only one of them may commit the budget: when this
+    # is set the agreement carries the commitment and the contract does not.
+    # Plain GUID with no ORM foreign key, like ``prime_contract_id``.
+    contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     status: Mapped[str] = mapped_column(
         String(32),
         nullable=False,

@@ -99,8 +99,13 @@ async def commit_subcontract(
     project_id: uuid.UUID,
     source: str,
     amount: object,
+    supersedes: str | None = None,
 ) -> bool:
     """Commit a signed subcontract's value to the budget, once.
+
+    ``supersedes`` names another record of the same subcontract (the contract
+    an agreement is linked to). Whatever that one still has committed is taken
+    off first, so the pair commits the value once however they were signed.
 
     Returns True when the commitment was written, False when there is no budget
     row, no value, or the subcontract is already committed.
@@ -113,14 +118,30 @@ async def commit_subcontract(
         logger.info("subcontract %s signed on project %s with no budget row, nothing committed", source, project_id)
         return False
     md = dict(budget.metadata_ or {})
+    if supersedes:
+        old_key = f"{COMMITTED_PREFIX}{supersedes}"
+        handed_over = _dec(md.get(old_key))
+        if handed_over > 0:
+            budget.committed = max(_dec(budget.committed) - handed_over, _ZERO)
+            md[old_key] = "0"
+            budget.metadata_ = md
     key = f"{COMMITTED_PREFIX}{source}"
     if key in md:
+        await session.flush()
         return False
     budget.committed = _dec(budget.committed) + value
     md[key] = str(value)
     budget.metadata_ = md
     await session.flush()
     return True
+
+
+async def agreement_linked_to(session: AsyncSession, contract_id: uuid.UUID) -> uuid.UUID | None:
+    """The agreement that carries a contracts-module subcontract, or None."""
+    from app.modules.subcontractors.models import SubcontractAgreement  # noqa: PLC0415
+
+    stmt = select(SubcontractAgreement.id).where(SubcontractAgreement.contract_id == contract_id).limit(1)
+    return (await session.execute(stmt)).scalar_one_or_none()
 
 
 async def draw_down(
@@ -171,7 +192,10 @@ async def subcontract_source_of(session: AsyncSession, invoice: Invoice) -> str 
         except (ValueError, TypeError):
             return None
         if contract is not None and contract.counterparty_type == "subcontractor":
-            return contract_source(contract.id)
+            # A contract linked to an agreement bills against the agreement's
+            # commitment, which is the one of the pair that holds it.
+            linked = await agreement_linked_to(session, contract.id)
+            return agreement_source(linked) if linked is not None else contract_source(contract.id)
     return None
 
 
@@ -290,6 +314,10 @@ async def raise_payable_for_pay_app(
             unit="psch",
             unit_rate=gross,
             amount=gross,
+            # No cost_category: finance matches paid lines to the budget row by
+            # category, and the project's row has none, so a categorised line
+            # would miss it. Paying still posts the line to the 5D cost model
+            # as actual, the same way a supplier invoice reaches it.
             sort_order=0,
         )
     )

@@ -77,14 +77,22 @@ class _World:
         self.subcontractor_id: uuid.UUID | None = None
         self.client_contact_id: uuid.UUID | None = None
 
-    async def contract(self, *, counterparty: str) -> uuid.UUID:
+    async def contract(
+        self,
+        *,
+        counterparty: str,
+        counterparty_id: uuid.UUID | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> uuid.UUID:
         async with self.factory() as session:
             contract = Contract(
                 code=f"SC-{uuid.uuid4().hex[:8]}",
                 title="Drywall subcontract" if counterparty == "subcontractor" else "Main contract",
                 project_id=self.project_id,
                 counterparty_type=counterparty,
-                counterparty_id=self.subcontractor_id if counterparty == "subcontractor" else self.client_contact_id,
+                counterparty_id=counterparty_id
+                or (self.subcontractor_id if counterparty == "subcontractor" else self.client_contact_id),
+                metadata_=metadata or {},
                 status="active",
                 currency="EUR",
                 total_value=AGREEMENT_VALUE,
@@ -394,3 +402,184 @@ async def test_a_pay_application_is_committed_billed_and_paid_once(world: _World
     (paid,) = await world.payments(invoice.id)
     assert (_money(paid.amount), _money(paid.withholding_amount)) == (NET, RETENTION)
     assert await world.payable_retention() == (RETENTION, RETENTION)
+
+
+@pytest.mark.asyncio
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "finance posts the cash leg (34,200) from record_payment_with_withholding AND the invoice line (36,000) "
+        "from pay_invoice onto the same 5D budget line, 70,200 in all; owned by finance, reported to fin-po-rollup"
+    ),
+)
+async def test_a_paid_pay_application_reaches_the_5d_actual_once(world: _World, production_bus: EventBus) -> None:
+    """The paid payable reaches the 5D cost model the way a supplier invoice does, and only once."""
+    from app.modules.costmodel.models import BudgetLine
+
+    await test_a_pay_application_is_committed_billed_and_paid_once(world, production_bus)
+
+    async with world.factory() as session:
+        lines = (
+            (await session.execute(select(BudgetLine).where(BudgetLine.project_id == world.project_id))).scalars().all()
+        )
+    assert sum((Decimal(str(line.actual_amount)) for line in lines), Decimal("0")) == GROSS
+
+
+@pytest.mark.asyncio
+async def test_an_awarded_subcontract_bills_the_contact_the_award_resolved(
+    world: _World, production_bus: EventBus
+) -> None:
+    """An award names the bidder in counterparty_id and the contact in metadata."""
+    bidder_id = uuid.uuid4()
+    contract_id = await world.contract(
+        counterparty="subcontractor",
+        counterparty_id=bidder_id,
+        metadata={"counterparty_contact_id": str(world.sub_contact_id)},
+    )
+    claim_id = await world.approved_claim(contract_id)
+
+    await _certify(world, production_bus, claim_id)
+
+    (invoice,) = await world.invoices()
+    assert invoice.invoice_direction == "payable"
+    assert invoice.contact_id == str(world.sub_contact_id)
+
+
+@pytest.mark.asyncio
+async def test_an_unresolved_counterparty_is_left_blank_not_invented(world: _World, production_bus: EventBus) -> None:
+    contract_id = await world.contract(
+        counterparty="subcontractor",
+        counterparty_id=uuid.uuid4(),
+        metadata={"counterparty_contact_id": str(uuid.uuid4())},
+    )
+    claim_id = await world.approved_claim(contract_id)
+
+    await _certify(world, production_bus, claim_id)
+
+    (invoice,) = await world.invoices()
+    assert invoice.contact_id is None
+
+
+async def _linked_agreement(world: _World, contract_id: uuid.UUID, *, sign: bool) -> uuid.UUID:
+    async with world.factory() as session:
+        svc = SubcontractorService(session)
+        agreement = await svc.create_agreement(
+            AgreementCreate(
+                subcontractor_id=world.subcontractor_id,
+                project_id=world.project_id,
+                title="Drywall, block B",
+                total_value=AGREEMENT_VALUE,
+                currency="EUR",
+                retention_percent=RETENTION_PCT,
+                contract_id=contract_id,
+            )
+        )
+        if sign:
+            await svc.update_agreement(agreement.id, AgreementUpdate(status="active"))
+        await session.commit()
+        return agreement.id
+
+
+@pytest.mark.asyncio
+async def test_a_contract_signed_before_its_agreement_commits_once(world: _World, production_bus: EventBus) -> None:
+    contract_id = await _signed_subcontract(world, production_bus)
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+    await _linked_agreement(world, contract_id, sign=True)
+
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+
+@pytest.mark.asyncio
+async def test_an_agreement_signed_before_its_contract_commits_once(world: _World, production_bus: EventBus) -> None:
+    contract_id = await world.contract(counterparty="subcontractor")
+    await _linked_agreement(world, contract_id, sign=True)
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+    await production_bus.publish(SIGNED, {"contract_id": str(contract_id)})
+    await _drain(production_bus)
+
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+
+@pytest.mark.asyncio
+async def test_a_linked_pair_draws_its_one_commitment_down(world: _World, production_bus: EventBus) -> None:
+    """A claim paid on the linked contract takes its gross off the agreement's commitment."""
+    contract_id = await _signed_subcontract(world, production_bus)
+    await _linked_agreement(world, contract_id, sign=True)
+    claim_id = await world.approved_claim(contract_id)
+    await _certify(world, production_bus, claim_id)
+
+    async with world.factory() as session:
+        await ContractsService(session).transition_claim(claim_id, "paid", actor_id=None)
+        await session.commit()
+    await _drain(production_bus)
+
+    assert await world.budget() == (REMAINING, GROSS)
+
+
+@pytest.mark.asyncio
+async def test_a_contract_links_to_one_agreement_only(world: _World, production_bus: EventBus) -> None:
+    from fastapi import HTTPException
+
+    contract_id = await world.contract(counterparty="subcontractor")
+    await _linked_agreement(world, contract_id, sign=False)
+
+    with pytest.raises(HTTPException) as exc:
+        await _linked_agreement(world, contract_id, sign=False)
+    assert exc.value.status_code == 409
+    assert exc.value.detail["code"] == "subcontract_already_linked"
+
+
+@pytest.mark.asyncio
+async def test_an_agreement_cannot_link_the_client_contract(world: _World, production_bus: EventBus) -> None:
+    from fastapi import HTTPException
+
+    contract_id = await world.contract(counterparty="client")
+    with pytest.raises(HTTPException) as exc:
+        await _linked_agreement(world, contract_id, sign=False)
+    assert exc.value.status_code == 422
+    assert exc.value.detail["code"] == "linked_contract_not_subcontract"
+
+
+def _legacy_claim_invoice(project_id: uuid.UUID, claim_id: uuid.UUID, number: str) -> Invoice:
+    """The shape the removed notifications subscriber wrote: unlinked, net_due as total."""
+    return Invoice(
+        project_id=project_id,
+        invoice_direction="receivable",
+        invoice_number=number,
+        invoice_date="2026-09-30",
+        currency_code="EUR",
+        amount_subtotal=NET,
+        tax_amount=Decimal("0"),
+        retention_amount=RETENTION,
+        amount_total=NET,
+        status="draft",
+        metadata_={"source": "contracts.claim.certified", "claim_id": str(claim_id), "claim_number": number[3:]},
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_duplicate_report_finds_the_old_second_invoice_and_changes_nothing(
+    world: _World, production_bus: EventBus
+) -> None:
+    from scripts.report_duplicate_claim_invoices import find_duplicate_claim_invoices
+
+    contract_id = await world.contract(counterparty="subcontractor")
+    claim_id = await world.approved_claim(contract_id)
+    await _certify(world, production_bus, claim_id)
+    orphan_claim = uuid.uuid4()
+    async with world.factory() as session:
+        session.add(_legacy_claim_invoice(world.project_id, claim_id, "PC-PC-0001"))
+        session.add(_legacy_claim_invoice(world.project_id, orphan_claim, "PC-PC-0009"))
+        await session.commit()
+
+    async with world.factory() as session:
+        rows = await find_duplicate_claim_invoices(session)
+
+    by_number = {row["invoice_number"]: row for row in rows}
+    assert set(by_number) == {"PC-PC-0001", "PC-PC-0009"}
+    assert by_number["PC-PC-0001"]["kind"] == "duplicate"
+    assert by_number["PC-PC-0001"]["linked_invoice_number"] == "INV-P-001"
+    assert by_number["PC-PC-0009"]["kind"] == "only_invoice"
+    assert len(await world.invoices()) == 3
