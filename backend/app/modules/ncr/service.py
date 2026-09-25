@@ -37,12 +37,47 @@ class NCRService:
         self.session = session
         self.repo = NCRRepository(session)
 
+    async def _check_change_order(self, project_id: uuid.UUID, change_order_id: str) -> str:
+        """Return *change_order_id* normalised, or 400 unless it is a change order of the project.
+
+        ``change_order_id`` is a plain ``VARCHAR(36)`` with no foreign key. A
+        database foreign key is deliberately not added: running installs
+        already hold free strings in the column, the boot heal would add the
+        key ``NOT VALID`` over them (such a row can never be repointed), and
+        the change orders table belongs to another module. So the link is
+        checked here, on every write that names one.
+        """
+        try:
+            order_uuid = uuid.UUID(str(change_order_id).strip())
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="change_order_id is not a change order id",
+            ) from exc
+        # Lazy import: ncr stays loadable without the changeorders module.
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.changeorders.models import ChangeOrder  # noqa: PLC0415
+
+        found = await self.session.scalar(
+            select(ChangeOrder.id).where(ChangeOrder.id == order_uuid, ChangeOrder.project_id == project_id)
+        )
+        if found is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Change order not found in this project",
+            )
+        return str(order_uuid)
+
     async def create_ncr(
         self,
         data: NCRCreate,
         user_id: str | None = None,
     ) -> NCR:
         """Create a new NCR with auto-generated number."""
+        change_order_id = data.change_order_id or None
+        if change_order_id:
+            change_order_id = await self._check_change_order(data.project_id, change_order_id)
         ncr = NCR(
             project_id=data.project_id,
             title=data.title,
@@ -61,7 +96,7 @@ class NCRService:
             location_lon=data.location_lon,
             location_accuracy_m=data.location_accuracy_m,
             linked_inspection_id=data.linked_inspection_id,
-            change_order_id=data.change_order_id,
+            change_order_id=change_order_id,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -199,6 +234,8 @@ class NCRService:
             )
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        if fields.get("change_order_id"):
+            fields["change_order_id"] = await self._check_change_order(ncr.project_id, fields["change_order_id"])
         # Merge a partial metadata patch into the existing column instead of
         # replacing it wholesale - a PATCH touching one key must not wipe the
         # rest. NCRs are auto-created with source/report tracking keys in
