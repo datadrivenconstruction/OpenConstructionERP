@@ -14362,10 +14362,13 @@
       "files": [
         "__init__.py",
         "analytics.py",
+        "award_contract.py",
         "award_selection.py",
+        "events.py",
         "manifest.py",
         "models.py",
         "permissions.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -14586,6 +14589,12 @@
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
               "nullable": false
+            },
+            {
+              "name": "boq_position_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -14724,6 +14733,18 @@
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
+            },
+            {
+              "name": "subcontractor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             },
             {
               "name": "status",
@@ -15370,6 +15391,13 @@
           "request_schema": "BidPackageLineItemBulkCreate"
         },
         {
+          "method": "POST",
+          "path": "/bid-packages/{package_id}/lines/from-boq",
+          "handler": "add_lines_from_boq",
+          "response_model": "list[BidPackageLineItemResponse]",
+          "request_schema": "BidPackageLinesFromBOQ"
+        },
+        {
           "method": "PATCH",
           "path": "/bid-package-line-items/{line_id}",
           "handler": "update_line_item",
@@ -15931,6 +15959,11 @@
               "name": "is_mandatory",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -15981,6 +16014,11 @@
             {
               "name": "is_mandatory",
               "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
               "default": "None"
             }
           ]
@@ -16045,6 +16083,11 @@
               "default": "True"
             },
             {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -16064,6 +16107,19 @@
             {
               "name": "items",
               "type": "list[BidPackageLineItemCreate]"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPackageLinesFromBOQ",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Add scope lines copied from bill positions of the package's project.",
+          "fields": [
+            {
+              "name": "position_ids",
+              "type": "list[UUID]"
             }
           ]
         },
@@ -16232,6 +16288,16 @@
               "name": "notes",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -16274,6 +16340,16 @@
             {
               "name": "disqualification_reason",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
               "default": "None"
             }
           ]
@@ -16331,6 +16407,16 @@
               "name": "notes",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "created_at",
@@ -18182,7 +18268,12 @@
         }
       ],
       "import_dependencies": [
-        "procurement"
+        "boq",
+        "contacts",
+        "contracts",
+        "procurement",
+        "subcontractors",
+        "tendering"
       ]
     },
     {
@@ -61799,6 +61890,30 @@
               "nullable": false
             },
             {
+              "name": "subcontractor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "ncr_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "punch_item_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "description",
               "annotation": "Mapped[str]",
               "sql_type": "Text",
@@ -61957,6 +62072,12 @@
         },
         {
           "method": "GET",
+          "path": "/projects/{project_id}/pending-backcharges",
+          "handler": "get_pending_backcharges",
+          "response_model": "PendingBackChargesOut"
+        },
+        {
+          "method": "GET",
           "path": "/projects/{project_id}/recovery-ledger",
           "handler": "get_recovery_ledger",
           "response_model": "RecoveryLedgerOut"
@@ -62042,6 +62163,26 @@
               "name": "subject_id",
               "type": "uuid.UUID | None",
               "default": "None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "ncr_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "punch_item_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -62052,6 +62193,16 @@
           ],
           "docstring": "Partial update of a back-charge; only the supplied fields are changed.",
           "fields": [
+            {
+              "name": "subcontractor_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
             {
               "name": "responsible_party",
               "type": "str | None",
@@ -62164,6 +62315,26 @@
               "name": "traceability_band",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "ncr_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "punch_item_id",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -62271,6 +62442,64 @@
             {
               "name": "by_currency",
               "type": "list[CurrencyRecoveryOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "PendingBackChargeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One agreed back-charge still to be deducted from a subcontractor.",
+          "fields": [
+            {
+              "name": "back_charge_id",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "str"
+            },
+            {
+              "name": "source_ref",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "str"
+            },
+            {
+              "name": "apportioned",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "PendingBackChargesOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a subcontractor owes back, per currency, never summed across them.",
+          "fields": [
+            {
+              "name": "subcontractor_id",
+              "type": "str"
+            },
+            {
+              "name": "items",
+              "type": "list[PendingBackChargeOut]"
+            },
+            {
+              "name": "totals",
+              "type": "dict[str, str]"
             }
           ]
         },
@@ -62506,7 +62735,11 @@
       ],
       "import_dependencies": [
         "claims_evidence",
-        "projects"
+        "contacts",
+        "ncr",
+        "projects",
+        "punchlist",
+        "subcontractors"
       ]
     },
     {
@@ -63572,6 +63805,11 @@
             {
               "name": "committed_amount",
               "type": "Decimal"
+            },
+            {
+              "name": "committed_from_documents",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "actual_amount",
@@ -70843,6 +71081,12 @@
               "nullable": true
             },
             {
+              "name": "progress_claim_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "created_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -70987,6 +71231,13 @@
           "path": "/payment-applications",
           "handler": "list_payment_applications",
           "response_model": "PaymentApplicationListResponse",
+          "request_schema": "CvrService"
+        },
+        {
+          "method": "GET",
+          "path": "/progress-claims/",
+          "handler": "list_progress_claim_options",
+          "response_model": "list[ProgressClaimOption]",
           "request_schema": "CvrService"
         },
         {
@@ -71629,7 +71880,7 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Create an interim payment application (IPA).\n\n``net_value`` is not accepted - it is always derived as\n``gross_value - retention`` by the service so the figures cannot drift.",
+          "docstring": "Create an interim payment application (IPA).\n\n``net_value`` is not accepted - it is always derived as\n``gross_value - retention`` by the service so the figures cannot drift.\n\n``progress_claim_id`` raises the application from a contract progress\nclaim of the same project. The claim then fills every figure the caller\nleft unset: period (from the claim's period end), number, gross,\nretention and currency. ``period`` is required only without a claim.",
           "fields": [
             {
               "name": "project_id",
@@ -71637,7 +71888,12 @@
             },
             {
               "name": "period",
-              "type": "str"
+              "type": "str | None"
+            },
+            {
+              "name": "progress_claim_id",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "application_number",
@@ -71701,6 +71957,11 @@
               "type": "str | None"
             },
             {
+              "name": "progress_claim_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
@@ -71759,6 +72020,11 @@
               "default": "None"
             },
             {
+              "name": "progress_claim_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "created_by",
               "type": "str | None",
               "default": "None"
@@ -71793,9 +72059,64 @@
               "type": "int"
             }
           ]
+        },
+        {
+          "class_name": "ProgressClaimOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One contract progress claim offered by the payment application picker.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "contract_id",
+              "type": "UUID"
+            },
+            {
+              "name": "contract_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "claim_number",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "period",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "gross_amount",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "retention_amount",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "net_due",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            }
+          ]
         }
       ],
       "import_dependencies": [
+        "contracts",
         "projects"
       ]
     },
@@ -103141,6 +103462,7 @@
         "connectors/base.py",
         "connectors/file_connector.py",
         "connectors/registry.py",
+        "cost_position.py",
         "einvoice_parties.py",
         "einvoice_settings_models.py",
         "einvoice_settings_schemas.py",
@@ -103156,6 +103478,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "po_link.py",
         "repository.py",
         "retention_ledger.py",
         "router.py",
@@ -103204,6 +103527,12 @@
             },
             {
               "name": "source_claim_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "purchase_order_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
@@ -104273,6 +104602,11 @@
               "type": "str | None"
             },
             {
+              "name": "purchase_order_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "line_items",
               "type": "list[InvoiceLineItemCreate]"
             },
@@ -104340,6 +104674,11 @@
             {
               "name": "notes",
               "type": "str | None"
+            },
+            {
+              "name": "purchase_order_id",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "line_items",
@@ -104459,6 +104798,11 @@
             },
             {
               "name": "source_claim_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "purchase_order_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -105207,7 +105551,15 @@
               "type": "Decimal"
             },
             {
+              "name": "total_invoiced",
+              "type": "Decimal"
+            },
+            {
               "name": "total_actual",
+              "type": "Decimal"
+            },
+            {
+              "name": "total_paid",
               "type": "Decimal"
             },
             {
@@ -106075,6 +106427,7 @@
         "file_search",
         "procurement",
         "projects",
+        "subcontractors",
         "teams",
         "users"
       ]
@@ -135396,7 +135749,6 @@
         "collaboration",
         "contracts",
         "crm",
-        "finance",
         "projects",
         "qms",
         "resources",
@@ -145838,6 +146190,12 @@
           "request_schema": "ProcurementService"
         },
         {
+          "method": "POST",
+          "path": "/{po_id}/invoice-check/",
+          "handler": "check_invoice_against_order",
+          "request_schema": "InvoiceCheckRequest"
+        },
+        {
           "method": "GET",
           "path": "/{po_id}/validate/",
           "handler": "validate_purchase_order",
@@ -146010,6 +146368,49 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoiceCheckLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One line of an invoice being checked against its order.",
+          "fields": [
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoiceCheckRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A supplier invoice, saved or not yet, to check against the order it bills.\n\n``invoice_id`` names the saved invoice being edited, so its own earlier\nfigures are not counted as \"invoiced before\".",
+          "fields": [
+            {
+              "name": "amount_subtotal",
+              "type": "str"
+            },
+            {
+              "name": "line_items",
+              "type": "list[InvoiceCheckLine]"
+            },
+            {
+              "name": "invoice_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_number",
+              "type": "str | None"
             }
           ]
         },
@@ -146278,6 +146679,16 @@
             {
               "name": "vendor_warnings",
               "type": "list[str]"
+            },
+            {
+              "name": "invoiced_net",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "invoice_count",
+              "type": "int",
+              "default": "0"
             },
             {
               "name": "created_at",
@@ -186730,6 +187141,13 @@
           "request_schema": "LinkPositionRequest"
         },
         {
+          "method": "DELETE",
+          "path": "/activities/{activity_id}/link-position/{boq_position_id}/",
+          "handler": "unlink_boq_position",
+          "response_model": "ActivityResponse",
+          "request_schema": "ScheduleService"
+        },
+        {
           "method": "PATCH",
           "path": "/activities/{activity_id}/progress/",
           "handler": "update_activity_progress",
@@ -203463,6 +203881,7 @@
         "__init__.py",
         "claim_rules.py",
         "events.py",
+        "finance_bridge.py",
         "intl.py",
         "manifest.py",
         "messages/__init__.py",
@@ -203873,6 +204292,12 @@
             },
             {
               "name": "prime_contract_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "contract_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
@@ -205613,6 +206038,11 @@
               "default": "None"
             },
             {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "notes",
               "type": "str | None",
               "default": "None"
@@ -205663,6 +206093,11 @@
             },
             {
               "name": "prime_contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -205735,6 +206170,11 @@
             },
             {
               "name": "prime_contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -207657,6 +208097,7 @@
       ],
       "import_dependencies": [
         "contracts",
+        "finance",
         "projects",
         "tax_withholding"
       ]
@@ -230294,10 +230735,10 @@
     },
     {
       "name": "bid-management",
-      "ts_files": 6,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 6
+      "test_files": 2,
+      "total_files": 10
     },
     {
       "name": "bim",
@@ -230315,10 +230756,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 130,
+      "ts_files": 134,
       "css_files": 0,
-      "test_files": 59,
-      "total_files": 130
+      "test_files": 63,
+      "total_files": 134
     },
     {
       "name": "buyer-portal",
@@ -230455,10 +230896,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 47,
+      "ts_files": 48,
       "css_files": 0,
-      "test_files": 21,
-      "total_files": 47
+      "test_files": 22,
+      "total_files": 48
     },
     {
       "name": "coordination",
@@ -230487,6 +230928,13 @@
       "css_files": 0,
       "test_files": 1,
       "total_files": 6
+    },
+    {
+      "name": "cost-recovery",
+      "ts_files": 3,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 3
     },
     {
       "name": "costmodel",
@@ -230518,10 +230966,10 @@
     },
     {
       "name": "cvr",
-      "ts_files": 4,
+      "ts_files": 6,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 4
+      "test_files": 1,
+      "total_files": 6
     },
     {
       "name": "daily-diary",
@@ -230749,10 +231197,10 @@
     },
     {
       "name": "finance",
-      "ts_files": 18,
+      "ts_files": 22,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 18
+      "test_files": 8,
+      "total_files": 22
     },
     {
       "name": "forms",
@@ -231071,10 +231519,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 23,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 23
+      "test_files": 10,
+      "total_files": 25
     },
     {
       "name": "progress",
@@ -231120,10 +231568,10 @@
     },
     {
       "name": "punchlist",
-      "ts_files": 16,
+      "ts_files": 17,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 16
+      "test_files": 5,
+      "total_files": 17
     },
     {
       "name": "qms",
@@ -231253,10 +231701,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 35,
+      "ts_files": 39,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 35
+      "test_files": 15,
+      "total_files": 39
     },
     {
       "name": "schedule-advanced",
@@ -231351,10 +231799,10 @@
     },
     {
       "name": "subcontractors",
-      "ts_files": 22,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 22
+      "test_files": 8,
+      "total_files": 25
     },
     {
       "name": "submittals",
@@ -231596,8 +232044,13 @@
       "variations"
     ],
     "bid_management": [
+      "boq",
+      "contacts",
+      "contracts",
       "procurement",
       "projects",
+      "subcontractors",
+      "tendering",
       "users"
     ],
     "bim_hub": [
@@ -231847,7 +232300,11 @@
     ],
     "cost_recovery": [
       "claims_evidence",
+      "contacts",
+      "ncr",
       "projects",
+      "punchlist",
+      "subcontractors",
       "users"
     ],
     "costmodel": [
@@ -231880,6 +232337,7 @@
       "users"
     ],
     "cvr": [
+      "contracts",
       "projects",
       "users"
     ],
@@ -232111,6 +232569,7 @@
       "file_search",
       "procurement",
       "projects",
+      "subcontractors",
       "teams",
       "users"
     ],
@@ -232267,7 +232726,6 @@
       "collaboration",
       "contracts",
       "crm",
-      "finance",
       "projects",
       "qms",
       "resources",
@@ -232646,6 +233104,7 @@
     "subcontractors": [
       "contacts",
       "contracts",
+      "finance",
       "projects",
       "tax_withholding",
       "users"
@@ -232755,14 +233214,14 @@
     "backend_modules": 195,
     "modules_with_manifests": 193,
     "total_models": 617,
-    "total_columns": 7091,
+    "total_columns": 7101,
     "total_relationships": 234,
-    "total_routes": 3691,
-    "total_schemas": 3475,
-    "total_python_files": 2198,
-    "frontend_features": 188,
-    "frontend_ts_files": 2659,
-    "frontend_backend_mapped": 168
+    "total_routes": 3696,
+    "total_schemas": 3481,
+    "total_python_files": 2204,
+    "frontend_features": 189,
+    "frontend_ts_files": 2687,
+    "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -232810,6 +233269,7 @@
     "correspondence": "correspondence",
     "cost-explorer": "cost_explorer",
     "cost-match": "cost_match",
+    "cost-recovery": "cost_recovery",
     "costmodel": "costmodel",
     "costs": "costs",
     "credentials": "credentials",
