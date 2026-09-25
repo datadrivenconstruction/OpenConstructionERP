@@ -18296,6 +18296,7 @@ const resource = {
     "costmodel.bl_description": "Description",
     "costmodel.bl_earned": "Valeur acquise",
     "costmodel.bl_earned_hint": "La valeur acquise est calculée automatiquement à partir de l'avancement terrain enregistré",
+    "costmodel.bl_committed_from_documents": "Issu des bons de commande et des contrats",
     "costmodel.bl_edit_hint": "Double-cliquez sur une ligne ou utilisez le bouton modifier pour changer les valeurs.",
     "costmodel.budget_failed": "Échec de la génération du budget",
     "costmodel.budget_line_update_failed": "Échec de la mise à jour de la ligne budgétaire",

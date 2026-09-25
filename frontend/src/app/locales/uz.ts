@@ -19025,6 +19025,7 @@ const resource = {
     "costmodel.bl_description": "Tavsif",
     "costmodel.bl_earned": "Ishlab topilgan",
     "costmodel.bl_earned_hint": "Ishlab topilgan qiymat qayd etilgan maydon jarayonidan avtomatik hisoblanadi",
+    "costmodel.bl_committed_from_documents": "Xarid buyurtmalari va shartnomalardan",
     "costmodel.bl_edit_hint": "Qiymatlarni oʻzgartirish uchun qatorni ikki marta bosing yoki tahrirlash tugmasidan foydalaning.",
     "costmodel.budget_failed": "Byudjetni yaratib boʻlmadi",
     "costmodel.budget_line_update_failed": "Byudjet qatorini yangilab boʻlmadi",

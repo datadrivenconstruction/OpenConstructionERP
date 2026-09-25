@@ -18433,6 +18433,7 @@ const resource = {
     "costmodel.bl_description": "Megnevezés",
     "costmodel.bl_earned": "Elért érték",
     "costmodel.bl_earned_hint": "Az elért érték automatikusan számítódik a rögzített helyszíni előrehaladásból",
+    "costmodel.bl_committed_from_documents": "Megrendelésekből és szerződésekből",
     "costmodel.bl_edit_hint": "Kattintson duplán egy sorra, vagy használja a szerkesztés gombot az értékek módosításához.",
     "costmodel.budget_failed": "Nem sikerült generálni a költségkeretet",
     "costmodel.budget_line_update_failed": "Nem sikerült frissíteni a költségkeret-sort",

@@ -18985,6 +18985,7 @@ const resource = {
     "costmodel.bl_description": "Açıklama",
     "costmodel.bl_earned": "Kazanılan",
     "costmodel.bl_earned_hint": "Kazanılan değer, kaydedilen saha ilerlemesinden otomatik olarak hesaplanır",
+    "costmodel.bl_committed_from_documents": "Satın alma siparişleri ve sözleşmelerden",
     "costmodel.bl_edit_hint": "Değerleri değiştirmek için bir satıra çift tıklayın veya düzenle düğmesini kullanın.",
     "costmodel.budget_failed": "Bütçe oluşturulamadı",
     "costmodel.budget_line_update_failed": "Bütçe satırı güncellenemedi",

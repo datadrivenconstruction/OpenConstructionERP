@@ -18633,6 +18633,7 @@ const resource = {
     "costmodel.bl_description": "Kuvaus",
     "costmodel.bl_earned": "Ansaittu",
     "costmodel.bl_earned_hint": "Ansaittu arvo lasketaan automaattisesti kirjatusta työmaan edistymisestä",
+    "costmodel.bl_committed_from_documents": "Ostotilauksista ja sopimuksista",
     "costmodel.bl_edit_hint": "Muokkaa arvoja kaksoisnapsauttamalla riviä tai muokkauspainikkeella.",
     "costmodel.budget_failed": "Budjetin muodostaminen epäonnistui",
     "costmodel.budget_line_update_failed": "Budjettirivin päivitys epäonnistui",

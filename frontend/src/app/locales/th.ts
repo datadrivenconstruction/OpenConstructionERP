@@ -18724,6 +18724,7 @@ const resource = {
     "costmodel.bl_description": "รายละเอียด",
     "costmodel.bl_earned": "มูลค่าที่ได้รับ",
     "costmodel.bl_earned_hint": "มูลค่าที่ได้รับคำนวณโดยอัตโนมัติจากความคืบหน้าหน้างานที่บันทึกไว้",
+    "costmodel.bl_committed_from_documents": "จากใบสั่งซื้อและสัญญา",
     "costmodel.bl_edit_hint": "ดับเบิลคลิกที่แถวหรือใช้ปุ่มแก้ไขเพื่อปรับค่า",
     "costmodel.budget_failed": "สร้างงบประมาณไม่สำเร็จ",
     "costmodel.budget_line_update_failed": "อัปเดตรายการงบประมาณไม่สำเร็จ",

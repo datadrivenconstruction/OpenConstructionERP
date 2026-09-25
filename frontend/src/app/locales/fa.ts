@@ -18053,6 +18053,7 @@ const resource = {
     "costmodel.bl_description": "شرح",
     "costmodel.bl_earned": "کسب‌شده",
     "costmodel.bl_earned_hint": "ارزش کسب‌شده به‌طور خودکار از پیشرفت میدانی ثبت‌شده محاسبه می‌شود",
+    "costmodel.bl_committed_from_documents": "از سفارش‌های خرید و قراردادها",
     "costmodel.bl_edit_hint": "روی یک ردیف دوبار کلیک کنید یا از دکمه ویرایش برای تغییر مقادیر استفاده کنید.",
     "costmodel.budget_failed": "تولید بودجه ناموفق بود",
     "costmodel.budget_line_update_failed": "به‌روزرسانی قلم بودجه ناموفق بود",

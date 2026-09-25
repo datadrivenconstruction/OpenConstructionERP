@@ -18130,6 +18130,7 @@ const resource = {
     "costmodel.bl_description": "Περιγραφή",
     "costmodel.bl_earned": "Δεδουλευμένα",
     "costmodel.bl_earned_hint": "Η δεδουλευμένη αξία υπολογίζεται αυτόματα από την καταγεγραμμένη πρόοδο πεδίου",
+    "costmodel.bl_committed_from_documents": "Από εντολές αγοράς και συμβάσεις",
     "costmodel.bl_edit_hint": "Κάντε διπλό κλικ σε μια γραμμή ή χρησιμοποιήστε το κουμπί επεξεργασίας για να τροποποιήσετε τιμές.",
     "costmodel.budget_failed": "Αποτυχία δημιουργίας προϋπολογισμού",
     "costmodel.budget_line_update_failed": "Αποτυχία ενημέρωσης γραμμής προϋπολογισμού",

@@ -18606,6 +18606,7 @@ const resource = {
     "costmodel.bl_description": "Deskripsi",
     "costmodel.bl_earned": "Nilai perolehan",
     "costmodel.bl_earned_hint": "Nilai perolehan dihitung otomatis dari kemajuan lapangan yang tercatat",
+    "costmodel.bl_committed_from_documents": "Dari pesanan pembelian dan kontrak",
     "costmodel.bl_edit_hint": "Klik ganda baris atau gunakan tombol edit untuk mengubah nilai.",
     "costmodel.budget_failed": "Gagal membuat anggaran",
     "costmodel.budget_line_update_failed": "Gagal memperbarui baris anggaran",

@@ -19004,6 +19004,7 @@ const resource = {
     "costmodel.bl_description": "Beschreibung",
     "costmodel.bl_earned": "Fertigstellungswert",
     "costmodel.bl_earned_hint": "Der Fertigstellungswert wird automatisch aus dem erfassten Baufortschritt berechnet",
+    "costmodel.bl_committed_from_documents": "Aus Bestellungen und Verträgen",
     "costmodel.bl_edit_hint": "Doppelklicken Sie auf eine Zeile oder nutzen Sie die Schaltfläche Bearbeiten, um Werte zu ändern.",
     "costmodel.budget_failed": "Budget konnte nicht erstellt werden",
     "costmodel.budget_line_update_failed": "Budgetposition konnte nicht aktualisiert werden",

@@ -18769,6 +18769,7 @@ const resource = {
     "costmodel.bl_description": "Beskrivelse",
     "costmodel.bl_earned": "Optjent",
     "costmodel.bl_earned_hint": "Optjent værdi beregnes automatisk ud fra registreret fremdrift på pladsen",
+    "costmodel.bl_committed_from_documents": "Fra indkøbsordrer og kontrakter",
     "costmodel.bl_edit_hint": "Dobbeltklik på en række, eller brug redigeringsknappen for at ændre værdier.",
     "costmodel.budget_failed": "Kunne ikke generere budget",
     "costmodel.budget_line_update_failed": "Kunne ikke opdatere budgetlinje",

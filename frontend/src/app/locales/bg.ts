@@ -18847,6 +18847,7 @@ const resource = {
     "costmodel.bl_description": "Описание",
     "costmodel.bl_earned": "Усвоено",
     "costmodel.bl_earned_hint": "Усвоената стойност се изчислява автоматично от записания напредък на обекта",
+    "costmodel.bl_committed_from_documents": "От поръчки за покупка и договори",
     "costmodel.bl_edit_hint": "Кликнете два пъти върху ред или използвайте бутона за редактиране, за да промените стойностите.",
     "costmodel.budget_failed": "Неуспешно генериране на бюджет",
     "costmodel.budget_line_update_failed": "Неуспешна актуализация на бюджетния ред",

@@ -18773,6 +18773,7 @@ const resource = {
     "costmodel.bl_description": "Kirjeldus",
     "costmodel.bl_earned": "Teenitud",
     "costmodel.bl_earned_hint": "Teenitud väärtus arvutatakse automaatselt registreeritud objekti edenemise põhjal",
+    "costmodel.bl_committed_from_documents": "Ostutellimustest ja lepingutest",
     "costmodel.bl_edit_hint": "Väärtuste muutmiseks tehke topeltklõps real või kasutage muutmisnuppu.",
     "costmodel.budget_failed": "Eelarve genereerimine ebaõnnestus",
     "costmodel.budget_line_update_failed": "Eelarverea uuendamine ebaõnnestus",

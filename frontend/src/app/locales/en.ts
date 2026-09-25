@@ -15431,6 +15431,7 @@ const resource = {
     "costmodel.bl_description": "Description",
     "costmodel.bl_earned": "Earned",
     "costmodel.bl_earned_hint": "Earned value is calculated automatically from recorded field progress",
+    "costmodel.bl_committed_from_documents": "From purchase orders and contracts",
     "costmodel.bl_edit_hint": "Double-click a row or use the edit button to modify values.",
     "costmodel.budget_failed": "Failed to generate budget",
     "costmodel.budget_line_update_failed": "Failed to update budget line",

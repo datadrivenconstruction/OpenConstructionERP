@@ -18137,6 +18137,7 @@ const resource = {
     "costmodel.bl_description": "تفصیل",
     "costmodel.bl_earned": "کمائی گئی",
     "costmodel.bl_earned_hint": "Earned value ریکارڈ شدہ فیلڈ پیش رفت سے خودکار طور پر شمار کی جاتی ہے",
+    "costmodel.bl_committed_from_documents": "خریداری آرڈرز اور معاہدوں سے",
     "costmodel.bl_edit_hint": "قدریں تبدیل کرنے کے لیے کسی قطار پر ڈبل کلک کریں یا edit بٹن استعمال کریں۔",
     "costmodel.budget_failed": "بجٹ بنانے میں ناکامی",
     "costmodel.budget_line_update_failed": "بجٹ لائن اپ ڈیٹ کرنے میں ناکامی",

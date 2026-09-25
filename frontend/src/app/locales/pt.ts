@@ -18529,6 +18529,7 @@ const resource = {
     "costmodel.bl_description": "Descrição",
     "costmodel.bl_earned": "Agregado",
     "costmodel.bl_earned_hint": "O valor agregado é calculado automaticamente a partir do progresso registado em campo",
+    "costmodel.bl_committed_from_documents": "De ordens de compra e contratos",
     "costmodel.bl_edit_hint": "Faça duplo clique numa linha ou use o botão de editar para alterar os valores.",
     "costmodel.budget_failed": "Falha ao gerar o orçamento",
     "costmodel.budget_line_update_failed": "Falha ao atualizar a linha de orçamento",

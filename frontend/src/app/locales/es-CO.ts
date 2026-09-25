@@ -18228,6 +18228,7 @@ const resource = {
     "costmodel.bl_description": "Descripción",
     "costmodel.bl_earned": "Valor ganado",
     "costmodel.bl_earned_hint": "El valor ganado se calcula automáticamente a partir del avance de obra registrado",
+    "costmodel.bl_committed_from_documents": "De órdenes de compra y contratos",
     "costmodel.bl_edit_hint": "Haz doble clic en una fila o usa el botón de editar para modificar los valores.",
     "costmodel.budget_failed": "No se pudo generar el presupuesto",
     "costmodel.budget_line_update_failed": "No se pudo actualizar la línea de presupuesto",

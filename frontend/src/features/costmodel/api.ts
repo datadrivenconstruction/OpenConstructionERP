@@ -41,6 +41,11 @@ export interface BudgetLine {
   description: string;
   planned_amount: number;
   committed_amount: number;
+  /**
+   * True when committed_amount is this line's share of the purchase orders
+   * and contracts on its cost line; the API refuses a typed value then.
+   */
+  committed_from_documents?: boolean;
   actual_amount: number;
   forecast_amount: number;
   /**

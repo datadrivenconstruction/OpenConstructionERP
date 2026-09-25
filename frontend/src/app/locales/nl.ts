@@ -18416,6 +18416,7 @@ const resource = {
     "costmodel.bl_description": "Omschrijving",
     "costmodel.bl_earned": "Verdiend",
     "costmodel.bl_earned_hint": "Verdiende waarde wordt automatisch berekend uit de geregistreerde voortgang op de bouwplaats",
+    "costmodel.bl_committed_from_documents": "Uit inkooporders en contracten",
     "costmodel.bl_edit_hint": "Dubbelklik op een rij of gebruik de bewerkknop om waarden te wijzigen.",
     "costmodel.budget_failed": "Genereren van budget mislukt",
     "costmodel.budget_line_update_failed": "Bijwerken van budgetregel mislukt",

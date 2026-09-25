@@ -18678,6 +18678,7 @@ const resource = {
     "costmodel.bl_description": "説明",
     "costmodel.bl_earned": "出来高",
     "costmodel.bl_earned_hint": "出来高は記録された現場の進捗から自動的に計算されます",
+    "costmodel.bl_committed_from_documents": "発注書と契約から",
     "costmodel.bl_edit_hint": "行をダブルクリックするか、編集ボタンを使って値を変更します。",
     "costmodel.budget_failed": "予算の生成に失敗しました",
     "costmodel.budget_line_update_failed": "予算明細の更新に失敗しました",

@@ -18633,6 +18633,7 @@ const resource = {
     "costmodel.bl_description": "Opis",
     "costmodel.bl_earned": "Ostvareno",
     "costmodel.bl_earned_hint": "Ostvarena vrijednost izračunava se automatski iz zabilježenog napretka na terenu",
+    "costmodel.bl_committed_from_documents": "Iz narudžbenica i ugovora",
     "costmodel.bl_edit_hint": "Dvostruko kliknite na redak ili koristite gumb za uređivanje vrijednosti.",
     "costmodel.budget_failed": "Generiranje proračuna nije uspjelo",
     "costmodel.budget_line_update_failed": "Ažuriranje stavke proračuna nije uspjelo",

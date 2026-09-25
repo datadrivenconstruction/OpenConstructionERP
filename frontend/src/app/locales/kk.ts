@@ -18081,6 +18081,7 @@ const resource = {
     "costmodel.bl_description": "Сипаттама",
     "costmodel.bl_earned": "Игерілді",
     "costmodel.bl_earned_hint": "Игерілген құн тіркелген алаң барысынан автоматты есептеледі",
+    "costmodel.bl_committed_from_documents": "Сатып алу тапсырыстары мен шарттардан",
     "costmodel.bl_edit_hint": "Мәндерді өзгерту үшін жолды екі рет басыңыз немесе өңдеу түймесін пайдаланыңыз.",
     "costmodel.budget_failed": "Бюджетті жасау сәтсіз аяқталды",
     "costmodel.budget_line_update_failed": "Бюджет жолын жаңарту сәтсіз аяқталды",

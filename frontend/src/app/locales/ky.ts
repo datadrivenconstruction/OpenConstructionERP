@@ -14657,6 +14657,7 @@ const resource = {
     "costmodel.bl_description": "Сүрөттөмө",
     "costmodel.bl_earned": "Эмгектелди",
     "costmodel.bl_earned_hint": "Эмгектелген баасы катталган талаа прогрессинен автоматтык эсептелет",
+    "costmodel.bl_committed_from_documents": "Сатып алуу буйрутмаларынан жана келишимдерден",
     "costmodel.bl_edit_hint": "Маанилерди өзгөртүү үчүн сапты эки жолу басыңыз же оңдоо баскычын колдонуңуз.",
     "costmodel.budget_failed": "Бюджет жаратуу ишке ашкан жок",
     "costmodel.budget_line_update_failed": "Бюджет сабын жаңылоо ишке ашкан жок",

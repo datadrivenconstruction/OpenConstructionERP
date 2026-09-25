@@ -18731,6 +18731,7 @@ const resource = {
     "costmodel.bl_description": "Descriere",
     "costmodel.bl_earned": "Realizat",
     "costmodel.bl_earned_hint": "Valoarea realizată se calculează automat din progresul înregistrat pe teren",
+    "costmodel.bl_committed_from_documents": "Din comenzi de achiziție și contracte",
     "costmodel.bl_edit_hint": "Dublu-clic pe un rând sau folosiți butonul de editare pentru a modifica valorile.",
     "costmodel.budget_failed": "Generarea bugetului a eșuat",
     "costmodel.budget_line_update_failed": "Actualizarea liniei de buget a eșuat",

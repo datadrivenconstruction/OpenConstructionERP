@@ -18726,6 +18726,7 @@ const resource = {
     "costmodel.bl_description": "描述",
     "costmodel.bl_earned": "挣值",
     "costmodel.bl_earned_hint": "挣值根据记录的现场进度自动计算",
+    "costmodel.bl_committed_from_documents": "来自采购订单和合同",
     "costmodel.bl_edit_hint": "双击某行或使用编辑按钮以修改数值。",
     "costmodel.budget_failed": "预算生成失败",
     "costmodel.budget_line_update_failed": "预算明细行更新失败",
