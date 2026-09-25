@@ -96,3 +96,25 @@ export function resolveCountryOffer(
 
   return null;
 }
+
+/**
+ * The installed pack a pack picker may preselect for ``country``, or ``null``.
+ *
+ * Only the reader's own country's pack, and only when it is the one pack for
+ * that country. The pickers used to fall back to the first pack in the list,
+ * which is ordered by slug, so a Canadian first run (no Canadian pack ships)
+ * opened with Australia selected and its install button under the thumb. A
+ * country served by several packs (the United States has a national one and
+ * two for single states) is the reader's choice to make, not the slug
+ * order's: preselecting the first made every American a Californian.
+ * ``null`` leaves the grid unselected and the curated offer, if any, leads.
+ */
+export function packToPreselect(
+  country: string | null | undefined,
+  packs: InstalledPartnerPack[],
+): string | null {
+  const code = country?.toLowerCase();
+  if (!code || code === 'xx') return null;
+  const own = packs.filter((p) => packCountryCode(p) === code);
+  return own.length === 1 ? (own[0]?.slug ?? null) : null;
+}
