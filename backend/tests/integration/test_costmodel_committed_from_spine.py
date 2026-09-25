@@ -77,10 +77,8 @@ async def _admin_headers(client: AsyncClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
 
 
-@pytest_asyncio.fixture(scope="module")
-async def scenario(http_client):
-    headers = await _admin_headers(http_client)
-    resp = await http_client.post(
+async def _create_project(client: AsyncClient, headers: dict[str, str]) -> uuid.UUID:
+    resp = await client.post(
         f"{API}/projects/",
         json={
             "name": f"Committed {uuid.uuid4().hex[:6]}",
@@ -92,7 +90,18 @@ async def scenario(http_client):
         headers=headers,
     )
     assert resp.status_code in (200, 201), resp.text
-    project_id = uuid.UUID(resp.json()["id"])
+    return uuid.UUID(resp.json()["id"])
+
+
+@pytest_asyncio.fixture(scope="module")
+async def admin_headers(http_client):
+    return await _admin_headers(http_client)
+
+
+@pytest_asyncio.fixture(scope="module")
+async def scenario(http_client, admin_headers):
+    headers = admin_headers
+    project_id = await _create_project(http_client, headers)
 
     from app.database import async_session_factory
     from app.modules.contracts.models import Contract, ContractLine
@@ -231,3 +240,206 @@ async def test_bi_cost_split_reads_the_same_committed(http_client, scenario):
     assert basis == "committed"
     assert count == 2
     assert by_category == {"subcontractor": Decimal("1300"), "material": Decimal("200")}
+
+
+async def _dashboard_committed(client: AsyncClient, headers: dict[str, str], project_id: uuid.UUID) -> Decimal:
+    resp = await client.get(f"{API}/costmodel/projects/{project_id}/5d/dashboard/", headers=headers)
+    assert resp.status_code == 200, resp.text
+    return Decimal(str(resp.json()["total_committed"]))
+
+
+@pytest.mark.asyncio
+async def test_budget_line_table_and_bi_drilldown_add_up_to_the_dashboard(http_client, scenario):
+    headers = scenario["headers"]
+    project_id = scenario["project_id"]
+    dashboard = await _dashboard_committed(http_client, headers, uuid.UUID(project_id))
+
+    resp = await http_client.get(f"{API}/costmodel/projects/{project_id}/5d/budget-lines/", headers=headers)
+    assert resp.status_code == 200, resp.text
+    table = {row["category"]: Decimal(str(row["committed_amount"])) for row in resp.json()}
+    # The subcontractor row shows its share of the documents, not the typed 400.
+    assert table == {"subcontractor": Decimal("1300"), "material": Decimal("200")}
+    assert sum(table.values()) == dashboard
+
+    from app.database import async_session_factory
+    from app.modules.bi_dashboards.kpis import _cost_split_records
+
+    async with async_session_factory() as s:
+        records = await _cost_split_records(s, uuid.UUID(project_id), 100)
+    assert sum(Decimal(r["committed_amount"]) for r in records) == dashboard
+
+
+async def _seed_line(
+    s, project_id: uuid.UUID, code: str, *, planned: str = "1000", committed: str = "0", forecast: str | None = None
+):
+    from app.modules.costmodel.models import BudgetLine, CostLine
+
+    cost_line = CostLine(project_id=project_id, code=code, description=code, currency="EUR")
+    s.add(cost_line)
+    await s.flush()
+    s.add(
+        BudgetLine(
+            project_id=project_id,
+            cost_line_id=cost_line.id,
+            category="subcontractor",
+            description=code,
+            planned_amount=planned,
+            committed_amount=committed,
+            actual_amount="0",
+            forecast_amount=planned if forecast is None else forecast,
+            currency="EUR",
+        )
+    )
+    return cost_line
+
+
+async def _seed_contract(s, project_id, cost_line_id, *, value: str, status_: str, metadata: dict | None = None):
+    from app.modules.contracts.models import Contract, ContractLine
+
+    contract = Contract(
+        code=f"C-{uuid.uuid4().hex[:6]}",
+        title="Subcontract",
+        contract_type="lump_sum",
+        project_id=project_id,
+        total_value=Decimal(value),
+        currency="EUR",
+        status=status_,
+    )
+    contract.metadata_ = metadata or {}
+    s.add(contract)
+    await s.flush()
+    line = ContractLine(
+        contract_id=contract.id,
+        code="SOV-1",
+        description="Works",
+        unit="lsum",
+        quantity=Decimal("1"),
+        unit_rate=Decimal(value),
+        total_value=Decimal(value),
+        cost_line_id=cost_line_id,
+    )
+    s.add(line)
+    await s.flush()
+    return contract, line
+
+
+async def _seed_po(s, project_id, cost_line_id, *, amount: str, metadata: dict | None = None):
+    from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+
+    po = PurchaseOrder(
+        project_id=project_id,
+        po_number=f"PO-{uuid.uuid4().hex[:6]}",
+        currency_code="EUR",
+        status="issued",
+        amount_total=amount,
+    )
+    po.metadata_ = metadata or {}
+    s.add(po)
+    await s.flush()
+    s.add(
+        PurchaseOrderItem(
+            po_id=po.id, description="Supply", quantity="1", unit_rate=amount, amount=amount, cost_line_id=cost_line_id
+        )
+    )
+
+
+@pytest.mark.asyncio
+async def test_terminated_contract_commits_only_what_was_certified(http_client, admin_headers):
+    """A terminated 900 contract with 300 certified (and 500 merely submitted) commits 300."""
+    project_id = await _create_project(http_client, admin_headers)
+
+    from app.database import async_session_factory
+    from app.modules.contracts.models import ProgressClaim, ProgressClaimLine
+
+    async with async_session_factory() as s:
+        cost_line = await _seed_line(s, project_id, "CL-T")
+        contract, line = await _seed_contract(s, project_id, cost_line.id, value="900", status_="terminated")
+        for number, status_, cumulative in (("PC-1", "certified", "300"), ("PC-2", "submitted", "500")):
+            claim = ProgressClaim(contract_id=contract.id, claim_number=number, status=status_, currency="EUR")
+            s.add(claim)
+            await s.flush()
+            s.add(
+                ProgressClaimLine(
+                    progress_claim_id=claim.id,
+                    contract_line_id=line.id,
+                    cumulative_completed_value=Decimal(cumulative),
+                )
+            )
+        await s.commit()
+
+    assert await _dashboard_committed(http_client, admin_headers, project_id) == Decimal("300")
+
+
+@pytest.mark.asyncio
+async def test_po_and_contract_from_one_award_count_once(http_client, admin_headers):
+    """Contract 800 and PO 1000 from the same award commit 1000, not 1800.
+
+    An unrelated PO of 50 on the same cost line still adds, and a PO of 70 on
+    a cost line with no budget line reaches the dashboard and the drill-down.
+    """
+    project_id = await _create_project(http_client, admin_headers)
+    award = {"tender_package_id": str(uuid.uuid4())}
+
+    from app.database import async_session_factory
+    from app.modules.costmodel.models import CostLine
+
+    async with async_session_factory() as s:
+        cost_line = await _seed_line(s, project_id, "CL-A")
+        await _seed_contract(s, project_id, cost_line.id, value="800", status_="active", metadata=award)
+        await _seed_po(s, project_id, cost_line.id, amount="1000", metadata=award)
+        await _seed_po(s, project_id, cost_line.id, amount="50")
+        orphan = CostLine(project_id=project_id, code="CL-U", description="No budget yet", currency="EUR")
+        s.add(orphan)
+        await s.flush()
+        await _seed_po(s, project_id, orphan.id, amount="70")
+        await s.commit()
+
+    dashboard = await _dashboard_committed(http_client, admin_headers, project_id)
+    assert dashboard == Decimal("1120")
+
+    from app.modules.bi_dashboards.kpis import _cost_split_records
+
+    async with async_session_factory() as s:
+        records = await _cost_split_records(s, project_id, 100)
+    assert sum(Decimal(r["committed_amount"]) for r in records) == dashboard
+    assert [r["committed_amount"] for r in records if r["kind"] == "unbudgeted_commitment"] == ["70"]
+
+
+@pytest.mark.asyncio
+async def test_bi_includes_a_project_without_budget_lines(http_client, admin_headers):
+    project_id = await _create_project(http_client, admin_headers)
+
+    from app.database import async_session_factory
+    from app.modules.bi_dashboards.kpis import _cost_breakdown_by_category
+    from app.modules.costmodel.models import CostLine
+
+    async with async_session_factory() as s:
+        cost_line = CostLine(project_id=project_id, code="CL-1", description="Shell", currency="EUR")
+        s.add(cost_line)
+        await s.flush()
+        await _seed_po(s, project_id, cost_line.id, amount="250")
+        await s.commit()
+
+    async with async_session_factory() as s:
+        by_category, basis, _count, _mixed = await _cost_breakdown_by_category(s, project_id, None)
+    assert basis == "committed"
+    assert by_category == {"uncategorized": Decimal("250")}
+
+
+@pytest.mark.asyncio
+async def test_portfolio_outturn_reads_the_documents(http_client, admin_headers):
+    """No forecast and no typed commitment: the outturn is the issued PO, 1200."""
+    project_id = await _create_project(http_client, admin_headers)
+
+    from app.database import async_session_factory
+
+    async with async_session_factory() as s:
+        cost_line = await _seed_line(s, project_id, "CL-O", forecast="0")
+        await _seed_po(s, project_id, cost_line.id, amount="1200")
+        await s.commit()
+
+    resp = await http_client.get(f"{API}/projects/analytics/overview/", headers=admin_headers)
+    assert resp.status_code == 200, resp.text
+    row = next(p for p in resp.json()["projects"] if p["id"] == str(project_id))
+    assert Decimal(str(row["outturn"])) == Decimal("1200")
+    assert row["status"] == "over_budget"

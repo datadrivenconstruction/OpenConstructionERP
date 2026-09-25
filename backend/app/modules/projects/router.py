@@ -2088,8 +2088,8 @@ async def analytics_overview(
         # whichever of the two is smaller in its entirety.
         budget_stmt = select(
             BudgetLine.project_id,
+            BudgetLine.id,
             numeric_value(BudgetLine.planned_amount),
-            numeric_value(BudgetLine.committed_amount),
             numeric_value(BudgetLine.actual_amount),
             numeric_value(BudgetLine.forecast_amount),
         ).where(BudgetLine.project_id.in_(project_ids))
@@ -2097,8 +2097,29 @@ async def analytics_overview(
     else:
         budget_rows = []
 
+    # Committed as the 5D dashboard counts it: issued purchase orders and
+    # signed contracts on the line's cost line, the hand-typed figure only
+    # where there are none, plus documents on cost lines with no budget line.
+    from app.modules.costmodel.repository import BudgetLineRepository
+
+    committed_repo = BudgetLineRepository(session)
+    committed_by_line: dict[uuid.UUID, Decimal] = {}
+    unbudgeted_by_project: dict[str, Decimal] = {}
+    for committed_project_id in {row[0] for row in budget_rows}:
+        by_line, unbudgeted = await committed_repo.effective_committed(committed_project_id)
+        committed_by_line.update(by_line)
+        unbudgeted_by_project[str(committed_project_id)] = unbudgeted
+
     budget_map: dict[str, tuple[float, float, float]] = {}
-    for row_project_id, planned_amt, committed_amt, actual_amt, forecast_amt in budget_rows:
+    for key, unbudgeted in unbudgeted_by_project.items():
+        if unbudgeted:
+            budget_map[key] = (
+                0.0,
+                0.0,
+                float(expected_outturn(forecast_final=Decimal("0"), committed=unbudgeted, actual=Decimal("0"))),
+            )
+    for row_project_id, line_id, planned_amt, actual_amt, forecast_amt in budget_rows:
+        committed_amt = committed_by_line.get(line_id, Decimal("0"))
         key = str(row_project_id)
         planned_so_far, actual_so_far, outturn_so_far = budget_map.get(key, (0.0, 0.0, 0.0))
         budget_map[key] = (

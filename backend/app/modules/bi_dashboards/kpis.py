@@ -2837,13 +2837,26 @@ async def _cost_breakdown_by_category(
         # issued purchase orders and signed contracts linked to the cost spine
         # and falls back to the hand-typed ``committed_amount`` only on lines
         # without such documents, so this tile agrees with the 5D dashboard.
+        # A project with a cost spine but no budget lines yet still has
+        # commitments; they land in the uncategorized group.
+        from app.modules.costmodel.models import CostLine  # type: ignore
         from app.modules.costmodel.repository import BudgetLineRepository  # type: ignore
 
+        budget_pids = {getattr(row, "project_id", None) for row in rows} - {None}
+        spine_stmt = select(CostLine.project_id).distinct()
+        if project_id is not None:
+            spine_stmt = spine_stmt.where(CostLine.project_id == project_id)
+        spine_stmt = _scope_portfolio(spine_stmt, CostLine.project_id, project_id, allowed_project_ids)
+        spine_only_pids = set((await session.execute(spine_stmt)).scalars().all()) - budget_pids
+
         budget_repo = BudgetLineRepository(session)
-        for pid in {getattr(row, "project_id", None) for row in rows} - {None}:
+        for pid in budget_pids | spine_only_pids:
             for agg in await budget_repo.aggregate_by_category(pid, include_unbudgeted_commitments=True):
                 category = (agg["category"] or "uncategorized").strip().lower() or "uncategorized"
                 amt_c = _to_decimal(agg["committed"])
+                if amt_c and pid in spine_only_pids:
+                    pid_base, _pid_fx = await _project_currency_and_fx(session, pid)
+                    bases_seen.add(pid_base or "UNKNOWN")
                 committed[category] = committed.get(category, Decimal("0")) + amt_c
                 total_committed += amt_c
     except ImportError:
@@ -3322,7 +3335,24 @@ async def _cost_split_records(
             stmt = stmt.where(BudgetLine.project_id == project_id)
         stmt = _scope_portfolio(stmt, BudgetLine.project_id, project_id, allowed_project_ids).limit(limit)
         rows = (await session.execute(stmt)).scalars().all()
+
+        # Committed per line as the 5D dashboard counts it (purchase orders
+        # and contracts on the cost line, the typed figure where there are
+        # none), plus one row per project for documents on cost lines that
+        # have no budget line, so the rows add up to the tile.
+        from app.modules.costmodel.repository import BudgetLineRepository  # type: ignore
+
+        budget_repo = BudgetLineRepository(session)
+        effective: dict[uuid.UUID, Decimal] = {}
+        unbudgeted: dict[uuid.UUID, Decimal] = {}
+        for pid in {getattr(row, "project_id", None) for row in rows} - {None}:
+            by_line, unbudgeted[pid] = await budget_repo.effective_committed(pid)
+            effective.update(by_line)
+
         for row in rows:
+            row_committed = effective.get(row.id)
+            if row_committed is None:
+                row_committed = _to_decimal(getattr(row, "committed_amount", 0))
             records.append(
                 {
                     "kind": "budget_line",
@@ -3330,12 +3360,28 @@ async def _cost_split_records(
                     "category": getattr(row, "category", "") or "",
                     "description": (getattr(row, "description", "") or "")[:200],
                     "planned_amount": str(_to_decimal(getattr(row, "planned_amount", 0))),
-                    "committed_amount": str(_to_decimal(getattr(row, "committed_amount", 0))),
+                    "committed_amount": str(row_committed),
                     "actual_amount": str(_to_decimal(getattr(row, "actual_amount", 0))),
                     "currency": getattr(row, "currency", "") or "",
                     "project_id": str(getattr(row, "project_id", "") or ""),
                 },
             )
+        for pid, amount in unbudgeted.items():
+            if amount:
+                base, _fx = await _project_currency_and_fx(session, pid)
+                records.append(
+                    {
+                        "kind": "unbudgeted_commitment",
+                        "id": f"unbudgeted:{pid}",
+                        "category": "",
+                        "description": "",
+                        "planned_amount": "0",
+                        "committed_amount": str(amount),
+                        "actual_amount": "0",
+                        "currency": base,
+                        "project_id": str(pid),
+                    },
+                )
     except ImportError:
         pass
     except Exception:

@@ -23,6 +23,7 @@ Endpoints:
 """
 
 import uuid
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -127,8 +128,12 @@ def _snapshot_to_response(snap: object) -> SnapshotResponse:
     )
 
 
-def _budget_line_to_response(line: object) -> BudgetLineResponse:
-    """Convert a BudgetLine ORM model to a BudgetLineResponse."""
+def _budget_line_to_response(line: object, *, committed: Decimal | None = None) -> BudgetLineResponse:
+    """Convert a BudgetLine ORM model to a BudgetLineResponse.
+
+    ``committed`` overrides the stored ``committed_amount`` with the value the
+    5D dashboard counts for the line (see ``BudgetLineRepository.effective_committed``).
+    """
     return BudgetLineResponse(
         id=line.id,  # type: ignore[attr-defined]
         project_id=line.project_id,  # type: ignore[attr-defined]
@@ -137,7 +142,7 @@ def _budget_line_to_response(line: object) -> BudgetLineResponse:
         category=line.category,  # type: ignore[attr-defined]
         description=line.description,  # type: ignore[attr-defined]
         planned_amount=float(line.planned_amount),  # type: ignore[attr-defined]
-        committed_amount=float(line.committed_amount),  # type: ignore[attr-defined]
+        committed_amount=float(committed if committed is not None else line.committed_amount),  # type: ignore[attr-defined]
         actual_amount=float(line.actual_amount),  # type: ignore[attr-defined]
         forecast_amount=float(line.forecast_amount),  # type: ignore[attr-defined]
         earned_amount=getattr(line, "earned_amount", None),
@@ -274,7 +279,11 @@ async def list_budget_lines(
     """List detailed budget lines for a project."""
     await verify_project_access(project_id, user_id, session)
     lines, _ = await service.list_budget_lines(project_id, category=category, offset=offset, limit=limit)
-    return [_budget_line_to_response(line) for line in lines]
+    # Show the committed the dashboard counts, so the rows add up to it: a
+    # line whose cost line has purchase orders or contracts shows its share
+    # of them instead of the hand-typed figure.
+    effective, _unbudgeted = await service.budget_repo.effective_committed(project_id)
+    return [_budget_line_to_response(line, committed=effective.get(line.id)) for line in lines]
 
 
 @router.post(
