@@ -9,8 +9,10 @@
  * Where the mode comes from, strongest first:
  *   1. The user's own choice, stored on the server (`/v1/users/me/view-mode/`)
  *      so it follows the login to every browser. Only `setMode` writes it, and
- *      `setMode` is what the Settings card, the Modules page notice and the
- *      sidebar call when the user picks a mode.
+ *      `setMode` is what the Settings card and the Modules page notice call
+ *      when the user picks a mode. The guided tour also calls it to switch to
+ *      Advanced when a step needs a group Simple hides, so that switch is
+ *      stored as a choice too.
  *   2. A choice this browser already remembers (`oe_view_mode`). Builds before
  *      the server copy existed kept the mode only here. That value is honoured
  *      but never promoted to the server: old onboarding wrote `simple` into it
