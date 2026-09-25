@@ -36834,6 +36834,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "چھوٹ جانے والے لاگت آئٹمز: {{items}}",
     "onboarding.db_load_failed": "{{name}} لوڈ نہیں ہو سکا",
     "onboarding.db_load_unconfirmed": "{{name}} لوڈ کرتے وقت رابطہ ٹوٹ گیا۔ لوڈنگ سرور پر اب بھی مکمل ہو سکتی ہے۔",
+    "onboarding.pack_still_loading": "ابھی لوڈ ہو رہا ہے، بعد میں چیک کریں",
     "onboarding.base_loading_catalog": "لاگت بیسز لوڈ ہو رہے ہیں...",
     "phonelog.rec.card_title": "ایک ریکارڈنگ سے ایک protocol بنائیں",
     "pipeline.toolbar.open": "کھولیں",

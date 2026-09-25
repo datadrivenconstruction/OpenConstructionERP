@@ -37949,6 +37949,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Pominięte pozycje kosztowe: {{items}}",
     "onboarding.db_load_failed": "Nie udało się załadować {{name}}",
     "onboarding.db_load_unconfirmed": "Utracono połączenie podczas ładowania {{name}}. Ładowanie może jeszcze zakończyć się na serwerze.",
+    "onboarding.pack_still_loading": "Nadal się ładuje, sprawdź później",
     "onboarding.base_loading_catalog": "Ładowanie baz kosztów...",
     "pointcloud.boq_added_title": "Dodano do KNR",
     "pointcloud.boq_failed_title": "Nie można dodać do KNR",

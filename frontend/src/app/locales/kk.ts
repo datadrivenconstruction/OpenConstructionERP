@@ -36690,6 +36690,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Өткізіп алынған құн позициялары: {{items}}",
     "onboarding.db_load_failed": "{{name}} жүктелмеді",
     "onboarding.db_load_unconfirmed": "{{name}} жүктеу кезінде байланыс үзілді. Жүктеу серверде әлі аяқталуы мүмкін.",
+    "onboarding.pack_still_loading": "Әлі жүктелуде, кейінірек тексеріңіз",
     "onboarding.base_loading_catalog": "Шығын базалары жүктелуде...",
     "phonelog.rec.card_title": "Жазбадан хаттама жасау",
     "pipeline.toolbar.open": "Ашу",

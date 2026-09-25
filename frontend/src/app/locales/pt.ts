@@ -37701,6 +37701,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Itens de custo omitidos: {{items}}",
     "onboarding.db_load_failed": "Não foi possível carregar {{name}}",
     "onboarding.db_load_unconfirmed": "Perdeu-se a ligação ao carregar {{name}}. O carregamento ainda pode terminar no servidor.",
+    "onboarding.pack_still_loading": "Ainda a carregar, verifique mais tarde",
     "onboarding.base_loading_catalog": "A carregar bases de custo...",
     "pipeline.toolbar.open": "Abrir",
     "pipeline.toolbar.open_hint": "Abrir um fluxo de trabalho guardado ou começar a partir de um modelo",

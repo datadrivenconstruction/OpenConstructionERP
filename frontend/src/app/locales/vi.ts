@@ -37538,6 +37538,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Hạng mục chi phí bị bỏ qua: {{items}}",
     "onboarding.db_load_failed": "Không thể tải {{name}}",
     "onboarding.db_load_unconfirmed": "Mất kết nối khi đang tải {{name}}. Việc tải vẫn có thể hoàn tất trên máy chủ.",
+    "onboarding.pack_still_loading": "Vẫn đang tải, hãy kiểm tra sau",
     "onboarding.base_loading_catalog": "Đang tải cơ sở chi phí...",
     "phonelog.rec.card_title": "Tạo một biên bản từ bản ghi",
     "pipeline.toolbar.open": "Mở",

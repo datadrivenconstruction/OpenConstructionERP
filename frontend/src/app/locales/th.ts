@@ -37442,6 +37442,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "รายการต้นทุนที่ถูกข้าม: {{items}}",
     "onboarding.db_load_failed": "ไม่สามารถโหลด {{name}} ได้",
     "onboarding.db_load_unconfirmed": "การเชื่อมต่อขาดหายระหว่างโหลด {{name}} การโหลดอาจยังเสร็จสมบูรณ์บนเซิร์ฟเวอร์",
+    "onboarding.pack_still_loading": "ยังโหลดอยู่ โปรดตรวจสอบภายหลัง",
     "onboarding.base_loading_catalog": "กำลังโหลดฐานข้อมูลต้นทุน...",
     "pipeline.toolbar.open": "เปิด",
     "pipeline.toolbar.open_hint": "เปิดเวิร์กโฟลว์ที่บันทึกไว้ หรือเริ่มต้นจากเทมเพลต",

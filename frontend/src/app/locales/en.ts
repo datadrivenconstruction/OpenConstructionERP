@@ -27975,6 +27975,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Cost items left out: {{items}}",
     "onboarding.db_load_failed": "{{name}} could not be loaded",
     "onboarding.db_load_unconfirmed": "Lost contact while loading {{name}}. The load may still finish on the server.",
+    "onboarding.pack_still_loading": "Still loading, check later",
     "onboarding.pp_continue_to_app": "Continue to {{country}}",
     "onboarding.pp_preparing": "Preparing {{country}}…",
     "onboarding.ready_pack_install_hint_bg": "The language is applied first so you can start right away. Cost databases and sample projects keep loading in the background.",

@@ -37808,6 +37808,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "بنود التكلفة التي لم تُحمَّل: {{items}}",
     "onboarding.db_load_failed": "تعذر تحميل {{name}}",
     "onboarding.db_load_unconfirmed": "انقطع الاتصال أثناء تحميل {{name}}. قد يكتمل التحميل على الخادم رغم ذلك.",
+    "onboarding.pack_still_loading": "لا يزال التحميل جاريًا، تحقق لاحقًا",
     "onboarding.base_loading_catalog": "جاري تحميل قواعد التكاليف...",
     "phonelog.rec.card_title": "إنشاء بروتوكول من تسجيل",
     "pipeline.toolbar.open": "فتح",

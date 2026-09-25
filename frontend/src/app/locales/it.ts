@@ -37704,6 +37704,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Voci di costo escluse: {{items}}",
     "onboarding.db_load_failed": "Impossibile caricare {{name}}",
     "onboarding.db_load_unconfirmed": "Connessione persa durante il caricamento di {{name}}. Il caricamento potrebbe comunque completarsi sul server.",
+    "onboarding.pack_still_loading": "Caricamento in corso, controlla più tardi",
     "onboarding.base_loading_catalog": "Caricamento delle basi di costo...",
     "pipeline.toolbar.open": "Apri",
     "pipeline.toolbar.open_hint": "Apri un flusso di lavoro salvato o inizia da un modello",

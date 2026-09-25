@@ -37389,6 +37389,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Item biaya yang tidak dimuat: {{items}}",
     "onboarding.db_load_failed": "{{name}} tidak dapat dimuat",
     "onboarding.db_load_unconfirmed": "Koneksi terputus saat memuat {{name}}. Pemuatan mungkin tetap selesai di server.",
+    "onboarding.pack_still_loading": "Masih memuat, periksa nanti",
     "onboarding.base_loading_catalog": "Memuat basis biaya...",
     "pipeline.toolbar.open": "Buka",
     "pipeline.toolbar.open_hint": "Buka alur kerja tersimpan atau mulai dari templat",

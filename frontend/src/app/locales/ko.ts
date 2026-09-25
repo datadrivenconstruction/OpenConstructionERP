@@ -37490,6 +37490,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "누락된 비용 항목: {{items}}",
     "onboarding.db_load_failed": "{{name}}을(를) 로드할 수 없습니다",
     "onboarding.db_load_unconfirmed": "{{name}} 로드 중 연결이 끊겼습니다. 서버에서 로드가 계속 완료될 수 있습니다.",
+    "onboarding.pack_still_loading": "아직 로드 중입니다. 나중에 확인하세요",
     "onboarding.base_loading_catalog": "비용 기준 로딩 중...",
     "pipeline.toolbar.open": "열기",
     "pipeline.toolbar.open_hint": "저장된 워크플로우를 열거나 템플릿에서 시작하세요",

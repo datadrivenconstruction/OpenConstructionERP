@@ -36721,6 +36721,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Στοιχεία κόστους που παραλείφθηκαν: {{items}}",
     "onboarding.db_load_failed": "Δεν ήταν δυνατή η φόρτωση του {{name}}",
     "onboarding.db_load_unconfirmed": "Η σύνδεση χάθηκε κατά τη φόρτωση του {{name}}. Η φόρτωση μπορεί ακόμη να ολοκληρωθεί στον διακομιστή.",
+    "onboarding.pack_still_loading": "Φορτώνεται ακόμη, ελέγξτε αργότερα",
     "onboarding.base_loading_catalog": "Φόρτωση βάσεων κόστους...",
     "phonelog.rec.card_title": "Δημιουργία πρακτικού από ηχογράφηση",
     "pipeline.toolbar.open": "Άνοιγμα",

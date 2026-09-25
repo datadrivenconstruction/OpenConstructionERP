@@ -37412,6 +37412,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Välja jäänud kuluartiklid: {{items}}",
     "onboarding.db_load_failed": "{{name}} laadimine ebaõnnestus",
     "onboarding.db_load_unconfirmed": "Ühendus katkes {{name}} laadimise ajal. Laadimine võib serveris siiski lõpule jõuda.",
+    "onboarding.pack_still_loading": "Laadimine käib veel, kontrolli hiljem",
     "onboarding.base_loading_catalog": "Kuluandmebaaside laadimine...",
     "phonelog.rec.card_title": "Loo protokoll salvestisest",
     "pipeline.toolbar.open": "Ava",

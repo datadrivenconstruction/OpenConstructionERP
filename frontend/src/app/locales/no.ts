@@ -37640,6 +37640,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Utelatte kostnadsposter: {{items}}",
     "onboarding.db_load_failed": "{{name}} kunne ikke lastes inn",
     "onboarding.db_load_unconfirmed": "Forbindelsen ble brutt under innlasting av {{name}}. Innlastingen kan fortsatt fullføres på serveren.",
+    "onboarding.pack_still_loading": "Lastes fortsatt inn, sjekk senere",
     "onboarding.base_loading_catalog": "Laster kostnadsgrunnlag...",
     "phonelog.rec.direction": "Retning",
     "pipeline.toolbar.open": "Åpne",

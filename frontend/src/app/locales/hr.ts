@@ -37560,6 +37560,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Izostavljene troškovne stavke: {{items}}",
     "onboarding.db_load_failed": "{{name}} nije moguće učitati",
     "onboarding.db_load_unconfirmed": "Veza je izgubljena tijekom učitavanja {{name}}. Učitavanje se na poslužitelju još može dovršiti.",
+    "onboarding.pack_still_loading": "Još se učitava, provjerite kasnije",
     "onboarding.base_loading_catalog": "Učitavanje temeljnih troškova...",
     "pipeline.toolbar.open": "Otvori",
     "pipeline.toolbar.open_hint": "Otvorite spremljeni tijek rada ili započnite iz predloška",

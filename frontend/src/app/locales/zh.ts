@@ -37482,6 +37482,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "未加载的成本项: {{items}}",
     "onboarding.db_load_failed": "无法加载 {{name}}",
     "onboarding.db_load_unconfirmed": "加载 {{name}} 时连接中断。加载仍可能在服务器上完成。",
+    "onboarding.pack_still_loading": "仍在加载，请稍后查看",
     "onboarding.base_loading_catalog": "正在加载成本库...",
     "pipeline.toolbar.open": "打开",
     "pipeline.toolbar.open_hint": "打开已保存的工作流或从模板开始",

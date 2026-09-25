@@ -37406,6 +37406,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Пропущено позиций стоимости: {{items}}",
     "onboarding.db_load_failed": "Не удалось загрузить {{name}}",
     "onboarding.db_load_unconfirmed": "Связь потеряна во время загрузки {{name}}. Загрузка может ещё завершиться на сервере.",
+    "onboarding.pack_still_loading": "Ещё загружается, проверьте позже",
     "onboarding.base_loading_catalog": "Загрузка баз затрат...",
     "pipeline.toolbar.open": "Открыть",
     "pipeline.toolbar.open_hint": "Открыть сохранённый рабочий процесс или начать с шаблона",

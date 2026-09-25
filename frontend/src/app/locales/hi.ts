@@ -37588,6 +37588,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "छूटे हुए लागत आइटम: {{items}}",
     "onboarding.db_load_failed": "{{name}} लोड नहीं हो सका",
     "onboarding.db_load_unconfirmed": "{{name}} लोड करते समय संपर्क टूट गया। लोड सर्वर पर अब भी पूरा हो सकता है।",
+    "onboarding.pack_still_loading": "अभी लोड हो रहा है, बाद में जाँचें",
     "onboarding.base_loading_catalog": "लागत आधार लोड हो रहे हैं...",
     "phonelog.rec.card_title": "रिकॉर्डिंग से एक प्रोटोकॉल बनाएँ",
     "pipeline.toolbar.open": "खोलें",

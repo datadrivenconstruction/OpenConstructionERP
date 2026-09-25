@@ -36754,6 +36754,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Mga cost item na hindi naisama: {{items}}",
     "onboarding.db_load_failed": "Hindi ma-load ang {{name}}",
     "onboarding.db_load_unconfirmed": "Nawala ang koneksyon habang nilo-load ang {{name}}. Maaaring matapos pa rin ang pag-load sa server.",
+    "onboarding.pack_still_loading": "Naglo-load pa, tingnan mamaya",
     "onboarding.base_loading_catalog": "Lino-load ang mga cost base...",
     "phonelog.rec.card_title": "Gumawa ng protocol mula sa recording",
     "pipeline.toolbar.open": "Bukas",

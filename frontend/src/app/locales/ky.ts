@@ -27111,6 +27111,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Калтырылган нарк позициялары: {{items}}",
     "onboarding.db_load_failed": "{{name}} жүктөлгөн жок",
     "onboarding.db_load_unconfirmed": "{{name}} жүктөлүп жатканда байланыш үзүлдү. Жүктөө серверде дагы эле аяктап калышы мүмкүн.",
+    "onboarding.pack_still_loading": "Дагы эле жүктөлүүдө, кийинчерээк текшериңиз",
     "onboarding.pp_continue_to_app": "{{country}} менен улантуу",
     "onboarding.pp_preparing": "{{country}} даярдалууда…",
     "onboarding.ready_pack_install_hint_bg": "Тил биринчи болуп колдонулат, андыктан сиз дароо баштасаңыз болот. Баалар базалары жана үлгү долбоорлор фондо жүктөлө берет.",

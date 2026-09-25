@@ -36754,6 +36754,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "বাদ পড়া খরচের আইটেম: {{items}}",
     "onboarding.db_load_failed": "{{name}} লোড করা যায়নি",
     "onboarding.db_load_unconfirmed": "{{name}} লোড করার সময় সংযোগ বিচ্ছিন্ন হয়েছে। লোড সার্ভারে এখনও শেষ হতে পারে।",
+    "onboarding.pack_still_loading": "এখনও লোড হচ্ছে, পরে দেখুন",
     "onboarding.base_loading_catalog": "কস্ট বেস লোড হচ্ছে...",
     "phonelog.rec.card_title": "একটি রেকর্ডিং থেকে প্রোটোকল তৈরি করুন",
     "pipeline.toolbar.open": "খুলুন",

@@ -37048,6 +37048,7 @@ const resource = {
     "onboarding.db_loaded_left_out": "Орхигдсон өртгийн зүйлс: {{items}}",
     "onboarding.db_load_failed": "{{name}}-г ачаалж чадсангүй",
     "onboarding.db_load_unconfirmed": "{{name}}-г ачаалах үед холболт тасарлаа. Ачаалал сервер дээр дуусч магадгүй.",
+    "onboarding.pack_still_loading": "Ачаалсаар байна, дараа шалгана уу",
     "onboarding.base_loading_catalog": "Өртгийн суурьуудыг ачаалж байна...",
     "phonelog.rec.direction": "Чиглэл",
     "construction_control.gate.waived_title": "Хаалга цуцлагдлаа",
