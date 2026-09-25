@@ -403,6 +403,13 @@ BUNDLE_MAP: dict[str, str] = {
     "residential-bergen": "residential_ifc",
     "office-copenhagen": "commercial_rvt",
     "residential-aarhus": "residential_ifc",
+    # Romania, Greece, Ukraine.
+    "residential-cluj": "residential_ifc",
+    "office-bucharest": "commercial_rvt",
+    "residential-athens": "residential_ifc",
+    "school-thessaloniki": "commercial_rvt",
+    "residential-lviv": "residential_ifc",
+    "school-kyiv": "commercial_rvt",
 }
 
 # demo_ids that own a dedicated seed path and must never be attached here.

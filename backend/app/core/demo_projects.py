@@ -2325,6 +2325,10 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "nigeria-ng": "residential-abuja",
     "portugal-pt": "office-lisbon",
     "singapore-sg": "office-singapore",
+    # Romania, Greece and Ukraine, added 2026-09-25.
+    "romania-ro": "residential-cluj",
+    "greece-gr": "residential-athens",
+    "ukraine-ua": "residential-lviv",
 }
 
 # Country-name → ISO 3166-1 alpha-2, for catalog rows auto-derived from a
@@ -2373,6 +2377,9 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Nigeria": "NG",
     "Portugal": "PT",
     "Singapore": "SG",
+    "Romania": "RO",
+    "Greece": "GR",
+    "Ukraine": "UA",
 }
 
 # Who really receives a notice of commencement, per country. Named because a
@@ -2413,6 +2420,11 @@ _AUTHORITY_BY_COUNTRY: dict[str, str] = {
     "SE": "byggnadsnamnden",
     "NO": "kommunen som bygningsmyndighet",
     "DK": "kommunalbestyrelsen",
+    # The start of works is notified to the state construction inspectorate
+    # alongside the authority that issued the permit.
+    "RO": "Inspectoratul de Stat în Construcții",
+    "GR": "η Υπηρεσία Δόμησης (ΥΔΟΜ)",
+    "UA": "Державна інспекція архітектури та містобудування",
 }
 
 # The provision a formal notice is raised under, per country, so the register's
@@ -2531,6 +2543,12 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "residential-bergen": "Residential",
     "office-copenhagen": "Commercial",
     "residential-aarhus": "Residential",
+    "residential-cluj": "Residential",
+    "office-bucharest": "Commercial",
+    "residential-athens": "Residential",
+    "school-thessaloniki": "Education",
+    "residential-lviv": "Residential",
+    "school-kyiv": "Education",
 }
 
 
@@ -2555,6 +2573,8 @@ _CURRENCY_SYMBOL: dict[str, str] = {
     "SEK": "kr",
     "NOK": "kr",
     "DKK": "kr",
+    "RON": "lei",
+    "UAH": "₴",
 }
 
 
@@ -2636,6 +2656,15 @@ _DEMO_COST_LEVEL: dict[str, tuple[float, float]] = {
     # small market are in, and construction wages among the highest in
     # Europe, which puts labour above material the way the Nordic rows do.
     "CHF": (1.25, 1.60),
+    # Romania and Ukraine, for the Cluj, Bucharest, Lviv and Kyiv demos.
+    # Materials are traded and track the conversion (about 5.28 lei and 51
+    # hryvnias to the euro in September 2026) a little under the German
+    # level. Labour is where both fall away: the Romanian construction minimum
+    # is 4,582 lei a month and the Ukrainian estimate wage runs from about
+    # 20,000 hryvnias in Lviv to 38,000 in Kyiv, a third and roughly a seventh
+    # of a German wage.
+    "RON": (5.00, 1.90),
+    "UAH": (44.00, 7.00),
 }
 
 # The words the assemblies and resources vocabularies use for people. Both
