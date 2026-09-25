@@ -414,7 +414,9 @@ class BudgetLineRepository:
         from_documents = {i for indexes in groups.values() for i in indexes}
         return per_line, unbudgeted, from_documents
 
-    async def effective_committed(self, project_id: uuid.UUID) -> tuple[dict[uuid.UUID, Decimal], Decimal]:
+    async def effective_committed(
+        self, project_id: uuid.UUID
+    ) -> tuple[dict[uuid.UUID, Decimal], Decimal, set[uuid.UUID]]:
         """Committed per budget line as the 5D dashboard counts it.
 
         For readers that work line by line (the budget-line table, the
@@ -424,19 +426,24 @@ class BudgetLineRepository:
         converted back from the base currency through the same fx rate.
 
         Returns:
-            ``(by_line_id, unbudgeted)``; ``unbudgeted`` is the document value
-            on cost lines without a budget line, in the project base currency.
+            ``(by_line_id, unbudgeted, from_documents)``; ``unbudgeted`` is the
+            document value on cost lines without a budget line, in the project
+            base currency, and ``from_documents`` holds the ids of the lines
+            whose committed comes from purchase orders and contracts (the
+            lines where a hand-typed committed has no effect).
         """
         lines = await self._list_lines_for_rollup(project_id)
         base, fx = await self._project_fx_context(project_id)
         per_line, unbudgeted, from_documents = await self._committed_in_base(project_id, lines, base, fx)
         out: dict[uuid.UUID, Decimal] = {}
+        document_line_ids: set[uuid.UUID] = set()
         for idx, (line, value) in enumerate(zip(lines, per_line, strict=True)):
             if idx in from_documents:
                 out[line.id] = _base_to_line_currency(value, (line.currency or "").strip().upper(), base, fx)
+                document_line_ids.add(line.id)
             else:
                 out[line.id] = _to_money(line.committed_amount)
-        return out, unbudgeted
+        return out, unbudgeted, document_line_ids
 
     async def aggregate_by_project(self, project_id: uuid.UUID) -> dict[str, str]:
         """Aggregate budget line totals for a project, currency-aware.
