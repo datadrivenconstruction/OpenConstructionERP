@@ -203,6 +203,14 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     ("GR", "FPA"): "2026-09-25",
     ("GR", "FPA_RED"): "2026-09-25",
     ("GR", "FPA_SRED"): "2026-09-25",
+    # Croatia's two reduced rates and its zero rate. The seed carried only the
+    # 25 % standard rate, so a Croatian contractor typed the others by hand.
+    # Each rate is its own line, the way India's GST bands are, because the
+    # reconciler and the supersede repair key on the code: two open rows under
+    # one code would read as two windows of one rate.
+    ("HR", "PDV_13"): "2026-09-25",
+    ("HR", "PDV_5"): "2026-09-25",
+    ("HR", "PDV_0"): "2026-09-25",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

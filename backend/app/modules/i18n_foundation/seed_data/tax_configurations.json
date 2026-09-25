@@ -1323,9 +1323,57 @@
     "tax_type": "vat",
     "combination": "national",
     "subdivision_code": null,
-    "effective_from": "2013-03-01",
+    "effective_from": "2012-03-01",
     "effective_to": null,
     "is_default": true
+  },
+  {
+    "country_code": "HR",
+    "tax_name": "VAT Reduced 13% (PDV)",
+    "tax_name_translations": {
+      "en": "VAT Reduced 13%",
+      "hr": "PDV snižena stopa 13%"
+    },
+    "tax_code": "PDV_13",
+    "rate_pct": "13.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2014-01-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "HR",
+    "tax_name": "VAT Reduced 5% (PDV)",
+    "tax_name_translations": {
+      "en": "VAT Reduced 5%",
+      "hr": "PDV snižena stopa 5%"
+    },
+    "tax_code": "PDV_5",
+    "rate_pct": "5.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2013-01-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "HR",
+    "tax_name": "VAT Zero Rate (PDV)",
+    "tax_name_translations": {
+      "en": "VAT Zero Rate",
+      "hr": "PDV nulta stopa"
+    },
+    "tax_code": "PDV_0",
+    "rate_pct": "0.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2022-10-01",
+    "effective_to": null,
+    "is_default": false
   },
   {
     "country_code": "IL",
