@@ -226,6 +226,11 @@ class QMSService:
         if plan is None:
             raise ValueError(f"ITP plan {plan_id} not found")
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        # The same plan-status rule add_itp_item and link_itp_item_to_spec
+        # apply: a plan past active is the record of how the work was
+        # controlled. Only its status may still move (superseded -> closed).
+        if plan.status not in ("draft", "active") and set(fields) - {"status"}:
+            raise ValueError(f"Cannot edit an ITP plan in status '{plan.status}'")
         new_status = fields.get("status")
         if new_status is not None and new_status != plan.status:
             _guard_transition(
@@ -1639,6 +1644,10 @@ class QMSService:
         if audit is None:
             raise ValueError(f"Audit {audit_id} not found")
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        # add_finding refuses a closed audit for the same reason; a status
+        # move out of closed is refused by the transition table below.
+        if audit.status == "closed" and set(fields) - {"status"}:
+            raise ValueError("Cannot edit a closed audit")
         new_status = fields.get("status")
         if new_status is not None and new_status != audit.status:
             _guard_transition(
@@ -1647,6 +1656,10 @@ class QMSService:
                 new=new_status,
                 entity="audit",
             )
+            # Completion stamps performed_at and publishes qms.audit.completed;
+            # a plain PATCH must not be able to skip it.
+            if new_status == "completed":
+                raise ValueError("Use the audit 'complete' action to complete an audit")
         for key in ("planned_date", "performed_at"):
             value = fields.get(key)
             if isinstance(value, datetime):
