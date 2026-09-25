@@ -42,6 +42,7 @@ from fastapi import (
 from sqlalchemy import select
 
 from app.config import get_settings
+from app.core.ws_auth import refuse_socket, resolve_socket_token
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -274,7 +275,7 @@ class _AuthenticationUnavailableError(Exception):
 
 
 async def _authenticate_ws(token: str | None) -> dict[str, Any] | None:
-    """Decode a JWT passed as ``?token=`` on a WebSocket upgrade.
+    """Judge the access token a WebSocket presented.
 
     Matches the collab-locks pattern: returns the payload on success, or
     ``None`` when the caller was judged and rejected, which the caller
@@ -336,26 +337,30 @@ async def notifications_ws(
     # 1008 says "we judged you and the answer is no", 1011 says "we could not
     # judge you". Collapsing the two told a user their credentials were bad
     # when the truth was that the database was unreachable.
+    # The token arrives in the first frame (see app.core.ws_auth); ``?token=``
+    # is the previous frontend's spelling, still read for one release.
+    token, accepted = await resolve_socket_token(websocket, token)
     try:
         payload = await _authenticate_ws(token)
     except _AuthenticationUnavailableError:
-        await websocket.close(code=1011, reason="authentication unavailable")
+        await refuse_socket(websocket, code=1011, reason="authentication unavailable")
         return
     if payload is None:
-        await websocket.close(code=1008, reason="unauthenticated")
+        await refuse_socket(websocket, code=1008, reason="unauthenticated")
         return
 
     user_id_str = payload.get("sub")
     if not isinstance(user_id_str, str):
-        await websocket.close(code=1008, reason="invalid token subject")
+        await refuse_socket(websocket, code=1008, reason="invalid token subject")
         return
     try:
         user_id = uuid.UUID(user_id_str)
     except (ValueError, TypeError):
-        await websocket.close(code=1008, reason="invalid user id")
+        await refuse_socket(websocket, code=1008, reason="invalid user id")
         return
 
-    await websocket.accept()
+    if not accepted:
+        await websocket.accept()
     await notifications_ws_hub.join(user_id, websocket)
 
     try:

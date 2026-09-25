@@ -126,13 +126,18 @@ def test_ws_rejects_missing_token(ws_client: TestClient) -> None:
     ``pytest.raises(Exception)`` used to pass here whether the socket closed
     with 1008 or blew up with a 500, which is how the RLS/HTTPBearer handshake
     regression stayed invisible for four releases. Assert the close code.
+
+    The token now arrives in the first frame (``app.core.ws_auth``), so the
+    upgrade is accepted in order to read it; a first frame without a token is
+    refused before any presence frame is sent.
     """
     entity_id = str(uuid.uuid4())
-    with pytest.raises(WebSocketDisconnect) as excinfo:
-        with ws_client.websocket_connect(
-            f"/api/v1/collaboration_locks/presence/?entity_type=boq_position&entity_id={entity_id}"
-        ):
-            pass
+    with ws_client.websocket_connect(
+        f"/api/v1/collaboration_locks/presence/?entity_type=boq_position&entity_id={entity_id}"
+    ) as ws:
+        ws.send_json({"type": "auth"})
+        with pytest.raises(WebSocketDisconnect) as excinfo:
+            ws.receive_json()
     assert excinfo.value.code == 1008
 
 

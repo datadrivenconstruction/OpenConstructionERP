@@ -4,8 +4,8 @@
  * useNotificationsWebSocket — real-time push channel for the bell.
  *
  * Epic B / B10. Opens a WebSocket against /api/v1/notifications/ws/
- * with the JWT on the `token` query param (the browser WebSocket API
- * cannot set Authorization headers).
+ * and sends the JWT as the first frame (`shared/lib/socketAuth`), never
+ * in the URL, where every access log would write it down.
  *
  * On any incoming notification the hook invokes `onNotification` so
  * the caller (NotificationBell) can invalidate its React Query cache
@@ -19,6 +19,7 @@
 import { useEffect, useRef } from 'react';
 
 import { useAuthStore } from '@/stores/useAuthStore';
+import { authFrame, socketUrl } from '@/shared/lib/socketAuth';
 
 export type NotificationsWsStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
 
@@ -60,9 +61,7 @@ export function useNotificationsWebSocket(
     const token = useAuthStore.getState().accessToken;
     if (!token) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url =
-      `${protocol}//${window.location.host}/api/v1/notifications/ws/?token=${encodeURIComponent(token)}`;
+    const url = socketUrl('/api/v1/notifications/ws/');
 
     let closed = false;
     let ws: WebSocket;
@@ -73,6 +72,11 @@ export function useNotificationsWebSocket(
       return;
     }
     wsRef.current = ws;
+
+    ws.onopen = () => {
+      if (closed) return;
+      ws.send(authFrame(token));
+    };
 
     ws.onmessage = (msg: MessageEvent<string>) => {
       if (closed) return;

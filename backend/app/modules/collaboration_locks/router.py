@@ -60,6 +60,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.core.ws_auth import refuse_socket, resolve_socket_token
 from app.database import async_session_factory
 from app.dependencies import (
     CurrentUserId,
@@ -454,7 +455,7 @@ class _AuthenticationUnavailableError(Exception):
 
 
 async def _authenticate_ws(token: str | None) -> dict[str, Any] | None:
-    """Decode a JWT passed as ``?token=`` on a WebSocket upgrade.
+    """Judge the access token a WebSocket presented.
 
     Returns the payload on success; returns ``None`` when the caller was
     judged and rejected, which the caller answers with a 1008 policy close.
@@ -517,26 +518,31 @@ async def presence_ws(
         await websocket.close(code=1008, reason="invalid entity_id")
         return
 
+    # The token arrives in the first frame (see app.core.ws_auth); ``?token=``
+    # is the previous frontend's spelling, still read for one release. Nothing
+    # below joins the hub or sends a frame until the tenant gate has passed.
+    token, accepted = await resolve_socket_token(websocket, token)
+
     # 1008 says "we judged you and the answer is no", 1011 says "we could not
     # judge you". The authorization step further down already draws exactly
     # this line; this is the same distinction applied one step earlier.
     try:
         payload = await _authenticate_ws(token)
     except _AuthenticationUnavailableError:
-        await websocket.close(code=1011, reason="authentication unavailable")
+        await refuse_socket(websocket, code=1011, reason="authentication unavailable")
         return
     if payload is None:
-        await websocket.close(code=1008, reason="unauthenticated")
+        await refuse_socket(websocket, code=1008, reason="unauthenticated")
         return
 
     user_id_str = payload.get("sub")
     if not isinstance(user_id_str, str):
-        await websocket.close(code=1008, reason="invalid token subject")
+        await refuse_socket(websocket, code=1008, reason="invalid token subject")
         return
     try:
         user_id = uuid.UUID(user_id_str)
     except (ValueError, TypeError):
-        await websocket.close(code=1008, reason="invalid user id")
+        await refuse_socket(websocket, code=1008, reason="invalid user id")
         return
 
     # Tenant gate before anything is sent: the presence_snapshot frame leaks
@@ -549,11 +555,11 @@ async def presence_ws(
         async with async_session_factory() as auth_sess:
             await _verify_lock_entity_access(entity_type, parsed_id, user_id, auth_sess)
     except HTTPException:
-        await websocket.close(code=1008, reason="forbidden")
+        await refuse_socket(websocket, code=1008, reason="forbidden")
         return
     except Exception:  # noqa: BLE001 - never leak presence on an unexpected error
         logger.exception("presence websocket authorization failed")
-        await websocket.close(code=1011, reason="authorization error")
+        await refuse_socket(websocket, code=1011, reason="authorization error")
         return
 
     # Resolve the display name in its own session so the connection
@@ -561,7 +567,8 @@ async def presence_ws(
     async with async_session_factory() as sess:
         user_name = await _resolve_user_name(sess, user_id)
 
-    await websocket.accept()
+    if not accepted:
+        await websocket.accept()
     # Tag the socket so PresenceHub.leave() can attribute remaining
     # subscribers back to their user ids without a separate map.
     websocket._collab_lock_user_id = user_id  # type: ignore[attr-defined]

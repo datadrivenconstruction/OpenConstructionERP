@@ -764,6 +764,12 @@ def configure_logging(settings: Settings) -> None:
     root_logger.addHandler(console)
     if not any(isinstance(f, RequestIDLogFilter) for f in root_logger.filters):
         root_logger.addFilter(RequestIDLogFilter())
+    # uvicorn prints request paths with their query strings, and a few of ours
+    # carry a credential there (calendar feed, portal link, the previous
+    # frontend's socket token). Mask them on the way in.
+    from app.core.log_redaction import install_url_redaction
+
+    install_url_redaction()
 
 
 def _init_vector_db() -> None:

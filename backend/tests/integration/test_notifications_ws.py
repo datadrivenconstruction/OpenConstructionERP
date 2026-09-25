@@ -56,10 +56,15 @@ def test_ws_rejects_missing_token(ws_client: TestClient) -> None:
     The close code is asserted, not merely that something went wrong: a 500
     during the handshake and a deliberate policy refusal both raise here, and
     only one of them is correct.
+
+    The token now arrives in the first frame (``app.core.ws_auth``), so the
+    upgrade is accepted in order to read it; a first frame that carries no
+    token is what refuses the caller, before the hello frame.
     """
-    with pytest.raises(WebSocketDisconnect) as excinfo:
-        with ws_client.websocket_connect("/api/v1/notifications/ws/"):
-            pass
+    with ws_client.websocket_connect("/api/v1/notifications/ws/") as ws:
+        ws.send_json({"type": "auth"})
+        with pytest.raises(WebSocketDisconnect) as excinfo:
+            ws.receive_json()
     assert excinfo.value.code == 1008
 
 
