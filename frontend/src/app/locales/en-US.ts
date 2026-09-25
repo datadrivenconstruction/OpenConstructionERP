@@ -107,7 +107,7 @@ const resource = {
     "howto.bim-rules.how.4": "Send the gaps back to the model author to fix, or use a quantity rule to bulk-link matching elements straight to bid schedule positions.",
     "howto.bim-rules.what": "BIM Rules is where you set the standards a model has to meet and check it against them. Import information requirements - for example as IDS, COBie or a spreadsheet - and the page reports which elements carry the required classification, properties and level of information, and which fall short. The same page also lets you bulk-link matching elements to bid schedule positions with pattern-based rules.",
     "howto.boq.title": "Bid Schedule",
-    "howto.boq.what": "A Bid Schedule (bid schedule) is a structured, priced list of every item of work in a project. You build it top-down: sections that group the work, then positions inside them, then the quantities and rates that drive the cost. It is the central document the rest of the platform feeds and reads.",
+    "howto.boq.what": "A Bid Schedule is a structured, priced list of every item of work in a project. You build it top-down: sections that group the work, then positions inside them, then the quantities and rates that drive the cost. It is the central document the rest of the platform feeds and reads.",
     "howto.capacity.summary": "See whether you have the people and equipment to deliver across projects.",
     "howto.carbon.how.2": "Add embodied entries from the bid schedule and record Scope 1, 2 and 3 activity to roll up lifecycle stages A1 to D.",
     "howto.carbon.tip.1": "EPD factors are drawn from recognized sources, with a manual override when you have a product-specific figure.",
