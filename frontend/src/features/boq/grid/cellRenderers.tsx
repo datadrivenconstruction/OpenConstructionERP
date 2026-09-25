@@ -5524,7 +5524,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
   // Bug 9: render the raw unit code (e.g. "m2") with NO casing transform — must match
   // the agSelectCellEditor dropdown which lists lowercase values.
   if (!data || data._isSection || data._isFooter) {
-    return <span className="text-center text-2xs font-mono">{value ?? ''}</span>;
+    return <span className="text-center text-xs font-mono">{value ?? ''}</span>;
   }
 
   const ctx = context as FullGridContext | undefined;
@@ -5546,7 +5546,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 
   // No source indicator needed
   if (!bimSource && !pdfSource && !dwgSource) {
-    return <span className="text-center text-2xs font-mono w-full block">{displayUnit}</span>;
+    return <span className="text-center text-xs font-mono w-full block">{displayUnit}</span>;
   }
 
   if (pdfSource) {
@@ -5555,7 +5555,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
     const shortLabel = (parts[parts.length - 1] ?? pdfSource).trim();
     return (
       <div className="flex flex-col items-center justify-center h-full w-full gap-0">
-        <span className="text-2xs font-mono leading-tight">{displayUnit}</span>
+        <span className="text-xs font-mono leading-tight">{displayUnit}</span>
         <span
           className="text-[7px] leading-none font-medium text-rose-600 dark:text-rose-400 truncate max-w-full"
           title={pdfSource}
@@ -5572,7 +5572,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
     const shortLabel = (parts[parts.length - 1] ?? dwgSource).trim();
     return (
       <div className="flex flex-col items-center justify-center h-full w-full gap-0">
-        <span className="text-2xs font-mono leading-tight">{displayUnit}</span>
+        <span className="text-xs font-mono leading-tight">{displayUnit}</span>
         <span
           className="text-[7px] leading-none font-medium text-amber-600 dark:text-amber-400 truncate max-w-full"
           title={dwgSource}
@@ -5590,7 +5590,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-0">
-      <span className="text-2xs font-mono leading-tight">{displayUnit}</span>
+      <span className="text-xs font-mono leading-tight">{displayUnit}</span>
       <span
         className="text-[7px] leading-none font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-full"
         title={bimSource}
