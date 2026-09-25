@@ -1113,6 +1113,11 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   // earlier ``open=false`` workaround is replaced by the portal fix.
   const [open, setOpen] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
+  // Whether the estimator moved the highlight with the arrow keys since they
+  // last typed. The first suggestion is highlighted on its own, and Enter on
+  // that is not a choice: the list filters by prefix, so typing "m" puts "mm"
+  // first, and committing the highlight saved "mm" for a typed "m".
+  const navigatedRef = useRef(false);
   // Anchor rect for portal positioning. Recomputed when the dropdown
   // opens so resizing the column / scrolling doesn't leave a stale popover.
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -1310,6 +1315,7 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
           setValue(e.target.value);
           setOpen(true);
           setActiveIdx(0);
+          navigatedRef.current = false;
         }}
         onFocus={() => setOpen(true)}
         onClick={() => setOpen(true)}
@@ -1317,7 +1323,7 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
           if (e.key === 'Enter') {
             e.preventDefault();
             const sel = filtered[activeIdx];
-            if (open && sel != null) pick(sel);
+            if (open && navigatedRef.current && sel != null) pick(sel);
             else commit();
           } else if (e.key === 'Escape') {
             e.preventDefault();
@@ -1330,9 +1336,11 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
           } else if (e.key === 'ArrowDown') {
             e.preventDefault();
             setOpen(true);
+            navigatedRef.current = true;
             setActiveIdx((i) => Math.min(filtered.length - 1, i + 1));
           } else if (e.key === 'ArrowUp') {
             e.preventDefault();
+            navigatedRef.current = true;
             setActiveIdx((i) => Math.max(0, i - 1));
           } else if (e.key === 'Tab') {
             // Plain Tab commits the current text - same behaviour as Enter on
