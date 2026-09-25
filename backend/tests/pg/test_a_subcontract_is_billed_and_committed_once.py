@@ -46,6 +46,7 @@ from app.core.events import EventBus
 from app.modules.contacts.models import Contact
 from app.modules.contracts.models import Contract, ProgressClaim
 from app.modules.contracts.service import ContractsService
+from app.modules.finance.cost_position import subcontract_open_commitment
 from app.modules.finance.models import Invoice, Payment, ProjectBudget
 from app.modules.finance.service import FinanceService
 from app.modules.projects.models import Project
@@ -399,19 +400,15 @@ async def test_a_pay_application_is_committed_billed_and_paid_once(world: _World
     (invoice,) = await world.invoices()
     assert invoice.status == "paid"
     assert await world.budget() == (REMAINING, GROSS)
+    # The budget row carries what finance itself reports as still open.
+    async with world.factory() as session:
+        assert await subcontract_open_commitment(session, world.project_id) == {"EUR": REMAINING}
     (paid,) = await world.payments(invoice.id)
     assert (_money(paid.amount), _money(paid.withholding_amount)) == (NET, RETENTION)
     assert await world.payable_retention() == (RETENTION, RETENTION)
 
 
 @pytest.mark.asyncio
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "finance posts the cash leg (34,200) from record_payment_with_withholding AND the invoice line (36,000) "
-        "from pay_invoice onto the same 5D budget line, 70,200 in all; owned by finance, reported to fin-po-rollup"
-    ),
-)
 async def test_a_paid_pay_application_reaches_the_5d_actual_once(world: _World, production_bus: EventBus) -> None:
     """The paid payable reaches the 5D cost model the way a supplier invoice does, and only once."""
     from app.modules.costmodel.models import BudgetLine
