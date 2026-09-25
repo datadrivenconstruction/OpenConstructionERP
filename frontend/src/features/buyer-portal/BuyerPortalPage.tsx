@@ -84,7 +84,7 @@ import {
   type PortalKycCode,
   type PortalOverviewResponse,
 } from './api';
-import { fmtFixed, getIntlLocale } from '@/shared/lib/formatters';
+import { fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 
 // English fallbacks for the computed `buyer_portal.documents.cat.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -2020,13 +2020,8 @@ function formatMoney(amount: string, currency: string, locale: string): string {
 function formatDate(iso: string): string {
   if (!iso) return '';
   try {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return new Intl.DateTimeFormat(getIntlLocale(), {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(d);
+    // Due dates and the signing date are plain calendar dates: keep their day.
+    return formatDateValue(iso, { year: 'numeric', month: 'short', day: 'numeric' });
   } catch {
     return iso;
   }

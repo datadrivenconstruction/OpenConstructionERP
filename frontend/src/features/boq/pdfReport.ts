@@ -10,7 +10,7 @@ import {
 } from './api';
 import { resourceAwareTotalInBase } from './boqHelpers';
 import { toDisplayQuantity, toDisplayRate } from '@/shared/lib/unitConversion';
-import { fmtPercent } from '@/shared/lib/formatters';
+import { fmtPercent, formatDateValue } from '@/shared/lib/formatters';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -157,7 +157,9 @@ function formatDate(dateInput: string | undefined, locale: string): string {
   const d = dateInput ? new Date(dateInput) : new Date();
   if (isNaN(d.getTime())) return dateInput ?? '';
   try {
-    return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    // A typed report date is YYYY-MM-DD: keep its day in every zone.
+    return dateInput ? formatDateValue(dateInput, options, locale) : d.toLocaleDateString(locale, options);
   } catch {
     return d.toISOString().split('T')[0] ?? '';
   }

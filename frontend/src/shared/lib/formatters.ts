@@ -29,6 +29,7 @@
  */
 import { getNumberLocale, usePreferencesStore, type DateFormat } from '@/stores/usePreferencesStore';
 import { getIntlLocale } from './intlLocale';
+import { dateOnlyFormatOptions } from './dates';
 
 // The language-to-locale map moved to `./intlLocale`, a leaf module the
 // preferences store can import without closing a cycle back through this file.
@@ -385,13 +386,33 @@ export function fmtDate(dateStr: string, options?: Intl.DateTimeFormatOptions): 
   // back at negative UTC offsets (a diary date of 2026-07-01 shows as
   // 2026-06-30 in UTC-6). Pin date-only values to UTC so the calendar day
   // is preserved; full timestamps keep their local-zone rendering.
-  const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
-  const finalOpts = isDateOnly && !opts.timeZone ? { ...opts, timeZone: 'UTC' } : opts;
+  const finalOpts = dateOnlyFormatOptions(dateStr, opts);
   const pref = getDateFormatPreference();
   if (pref === 'auto') {
     return new Date(dateStr).toLocaleDateString(getIntlLocale(), finalOpts);
   }
   return formatDateWithPreference(new Date(dateStr), getIntlLocale(), finalOpts, pref);
+}
+
+/**
+ * Format an API date value with exactly the options given, keeping a date-only
+ * value on its calendar day in every zone.
+ *
+ * For the feature-local formatters that pass their own options or locale and do
+ * not apply the date-format preference (that is `fmtDate`'s job). It differs from
+ * `new Intl.DateTimeFormat(locale, options).format(new Date(value))` only for a
+ * `YYYY-MM-DD` value, which is pinned to UTC so a package deadline of 26 January
+ * is not printed as the 25th in Toronto. Returns `value` unchanged when it does
+ * not parse.
+ */
+export function formatDateValue(
+  value: string,
+  options: Intl.DateTimeFormatOptions = {},
+  locale: string | undefined = getIntlLocale(),
+): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, dateOnlyFormatOptions(value, options)).format(date);
 }
 
 // ---------------------------------------------------------------------------
