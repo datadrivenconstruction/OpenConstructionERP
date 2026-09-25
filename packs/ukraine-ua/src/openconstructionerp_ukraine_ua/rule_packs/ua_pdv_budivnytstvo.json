@@ -8,13 +8,13 @@
     "estimate",
     "invoicing"
   ],
-  "review_status": "Rates taken from reporting on the 2026 rates and the tax service's regional notes on first supply of housing; the text of ст. 193 has not been read directly. Confirm against the Tax Code before relying on it.",
+  "review_status": "Rates read in the official text of the Податковий кодекс (пп. 193.1, 194.1, 197.1.14) on zakon.rada.gov.ua in September 2026. Pending review by a Ukrainian tax adviser.",
   "references": [
-    "Податковий кодекс України, ст. 193, ставки ПДВ (https://zakon.rada.gov.ua/laws/show/2755-17)",
-    "ПДВ rates in 2026 (https://fakty.com.ua/ua/ukraine/ekonomika/20260107-yakyj-pdv-v-ukrayini-u-2026-roczi-shho-vidomo-pro-rozmir-ta-zminy/)",
+    "Податковий кодекс України, п. 193.1 пп. «а», «в», «г» (ставки ПДВ) and п. 194.1 (https://zakon.rada.gov.ua/laws/show/2755-17)",
+    "Податковий кодекс України, п. 197.1.14, supply of housing and its first supply (https://zakon.rada.gov.ua/laws/show/2755-17)",
     "Перше постачання житла, п. 14.1.202 and п. 197.1.14 (https://kyiv.tax.gov.ua/media-ark/news-ark/631771.html)"
   ],
-  "description": "ПДВ is 20 percent at the standard rate, with 14 percent for certain agricultural goods and 7 percent for medicines, medical devices and some cultural services; none of the reduced rates reaches construction work. The first supply of newly built housing is taxable and later supplies are exempt, with exemptions for affordable housing and housing built with state budget funds. No domestic reverse charge for construction services was found, and a contractor invoices ПДВ to its customer in the normal way.",
+  "description": "ПДВ is 20 percent at the basic rate (п. 193.1 пп. «а»), with 7 percent for medicines, medical devices, clinical trials and certain cultural services (пп. «в») and 14 percent for listed agricultural goods (пп. «г»); none of the reduced rates names construction work, which is taxed at the basic rate (п. 194.1). Under п. 197.1.14 the supply of housing is exempt except its first supply, which includes building such housing for a customer. No domestic reverse charge for construction services was found, and a contractor invoices ПДВ to its customer in the normal way.",
   "practice_notes": [
     "Estimate prices are net of ПДВ, which is added once after chapter 12, profit, administrative costs, risk and inflation",
     "Returnable amounts (зворотні суми) are shown after the ПДВ line and do not reduce the ПДВ base"

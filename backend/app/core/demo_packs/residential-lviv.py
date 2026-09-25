@@ -15,10 +15,11 @@ from app.core.demo_projects import DemoTemplate
 # in under the ``zkr`` key (Настанова з визначення вартості будівництва,
 # наказ Мінрегіону №281 of 01.11.2021, as amended), next to its DIN 276 cost
 # group. Unit rates are all-in direct costs at Lviv 2026 levels in UAH
-# excluding ПДВ. The cascade stays inside the wartime ceilings of постанова
-# КМУ №1512 (general production costs up to 10, administrative up to 3,
-# profit up to 15 percent of direct costs) and adds the risk allowance of
-# Додаток 28 for housing.
+# excluding ПДВ. General production costs 9, administrative costs 2.5 and
+# profit 7 percent are a contractor's starting points with no clause behind
+# them; they sit under the caps that постанова КМУ №1512, п. 1 пп. 4 sets for
+# publicly funded work (10, 3 and 15 percent). The risk allowance is
+# Додаток 28, table 2, row 3, housing, 1.8 percent.
 # ---------------------------------------------------------------------------
 
 TEMPLATE = DemoTemplate(

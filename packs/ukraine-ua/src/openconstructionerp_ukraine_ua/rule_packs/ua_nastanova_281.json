@@ -9,16 +9,16 @@
     "boq",
     "validation"
   ],
-  "review_status": "Order and chapter list read in the official text of наказ №281 and in the published text of Зміна №2 and Додатки 25, 27 and 28. The wartime ceilings of постанова КМУ №1512 read through a summary of the official text. Pending review by a Ukrainian cost engineer.",
+  "review_status": "Order and chapter list read in the official text of наказ №281 and in the published text of Зміна №2 and Додатки 25, 27 and 28. Постанова КМУ №1512 п. 1 пп. 4 read in the official text as amended on 26.08.2026. Pending review by a Ukrainian cost engineer.",
   "references": [
     "Наказ Мінрегіону №281 від 01.11.2021 «Про затвердження кошторисних норм України у будівництві» (https://zakon.rada.gov.ua/laws/show/v0281914-21)",
     "Зміна №2 до Настанови, наказ №244 від 01.12.2022, chapters of the зведений кошторисний розрахунок (https://radnuk.com.ua/wp-content/uploads/2023/05/knu-zmina-2.pdf)",
     "Зміна №5, наказ №456 від 09.03.2026 (https://mindev.gov.ua/npas/pro-zatverdzhennia-zminy-5-do-koshtorysnykh-norm-ukrainy-u-budivnytstvi)",
     "Зміна №6, наказ №1069 від 08.06.2026 (https://mininfra.gov.ua/news/minrozvytku-zakripylo-nakazom-onovleni-pravyla-vyznachennia-vartosti-budivnytstva-za-publichni-koshti)",
-    "Додаток 28, risk allowance by type of building (https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-28.pdf)",
-    "Постанова КМУ №1512 від 19.11.2025 (https://zakon.rada.gov.ua/laws/show/1512-2025-%D0%BF)"
+    "Додаток 28 до Настанови (пункт 4.40), table 2, risk allowance by type of building (https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-28.pdf)",
+    "Постанова КМУ №1512 від 19.11.2025, п. 1 пп. 4 (https://zakon.rada.gov.ua/laws/show/1512-2025-%D0%BF)"
   ],
-  "description": "The cost of construction in Ukraine is set under the Настанова з визначення вартості будівництва, approved by наказ Мінрегіону №281 of 01.11.2021 and in force since 08.11.2021, which cancelled ДСТУ Б Д.1.1-1:2013. Local estimates roll up into object estimates and then into the зведений кошторисний розрахунок, whose twelve chapters run from site preparation (1) and the main objects (2) through external networks (6), landscaping (7) and temporary buildings (8) to design, survey and supervision (12). Profit, administrative costs, the risk allowance and inflation are added after chapter 12, then ПДВ. Under martial law постанова КМУ №1512 caps general production costs at 10, administrative costs at 3 and profit at 15 percent of direct costs.",
+  "description": "The cost of construction in Ukraine is set under the Настанова з визначення вартості будівництва, approved by наказ Мінрегіону №281 of 01.11.2021 and in force since 08.11.2021, which cancelled ДСТУ Б Д.1.1-1:2013. Local estimates roll up into object estimates and then into the зведений кошторисний розрахунок, whose twelve chapters run from site preparation (1) and the main objects (2) through external networks (6), landscaping (7) and temporary buildings (8) to design, survey and supervision (12). Profit, administrative costs, the risk allowance and inflation are added after chapter 12, then ПДВ. Under martial law постанова КМУ №1512 (п. 1 пп. 4) sets general production costs at 10, administrative costs at 3 and profit at 15 percent of direct costs in the investor's estimate, and caps them at those values in the contract price, for construction paid for with budget or state funds.",
   "chapters": {
     "1": "Підготовка території будівництва",
     "2": "Об'єкти основного призначення",
@@ -35,7 +35,7 @@
   },
   "practice_notes": [
     "Resource consumption comes from the ресурсні елементні кошторисні норми (РЕКН) for building, repair, equipment installation and commissioning work",
-    "The risk allowance of Додаток 28 at the design stage is 1.8 percent for housing and 3.0 percent for public buildings, on chapters 1 to 12",
+    "The risk allowance of Додаток 28 (table 2, design stage П) is 1.8 percent for housing (row 3) and 3.0 percent for public buildings (row 2), on chapters 1 to 12",
     "Зміна №5 renamed the unit rate indicators to одиничні показники вартості робіт (ОПВ); Зміна №6 added wage coefficients and the certificate of wages actually paid"
   ],
   "enables_rule_ids": [

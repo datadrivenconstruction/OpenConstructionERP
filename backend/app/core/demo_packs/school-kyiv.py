@@ -15,9 +15,12 @@ from app.core.demo_projects import DemoTemplate
 #
 # Every line names its chapter of the зведений кошторисний розрахунок under
 # ``zkr`` next to its DIN 276 cost group. Unit rates are all-in direct costs
-# at Kyiv 2026 levels in UAH excluding ПДВ. The cascade stays inside the
-# wartime ceilings of постанова КМУ №1512 and adds the Додаток 28 risk
-# allowance for public buildings, 3.0 percent.
+# at Kyiv 2026 levels in UAH excluding ПДВ. The markups are a contract price
+# under the caps of постанова КМУ №1512, п. 1 пп. 4 (not more than 10, 3 and
+# 15 percent of direct costs); the 9, 2.5 and 7 percent are a contractor's
+# choice, not figures from a clause, and an investor's estimate for the same
+# school would carry exactly 10, 3 and 15. The risk allowance is Додаток 28,
+# table 2, row 2, public buildings, 3.0 percent.
 # ---------------------------------------------------------------------------
 
 TEMPLATE = DemoTemplate(
@@ -242,7 +245,7 @@ TEMPLATE = DemoTemplate(
         "construction_standards": [
             "Настанова з визначення вартості будівництва, наказ Мінрегіону №281 від 01.11.2021",
             "ДБН В.1.2-14:2018 - Загальні принципи забезпечення надійності та конструктивної безпеки",
-            "Постанова КМУ №1512 від 19.11.2025 - граничні розміри витрат і прибутку",
+            "Постанова КМУ №1512 від 19.11.2025, п. 1 пп. 4 - розміри витрат і прибутку",
         ],
         "vat_note": "Усі ціни без ПДВ. ПДВ 20% нараховується на підсумок.",
     },

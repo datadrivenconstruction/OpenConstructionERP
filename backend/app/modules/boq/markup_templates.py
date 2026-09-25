@@ -2171,13 +2171,16 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # summary estimate adds profit, administrative costs and the risk
     # allowance after its twelve chapters, then ПДВ.
     #
-    # What is sourced and what is not. Постанова КМУ №1512 of 19.11.2025 caps
-    # general production costs at 10, administrative costs at 3 and profit at
-    # 15 percent of direct costs under martial law. Those are ceilings, not
-    # rates, so 9, 2.5 and 7 here are editable starting points inside them, the
-    # same values the pack's demos carry. The risk allowance is Додаток 28 at
-    # the design stage for housing, 1.8; public buildings take 3.0, which is a
-    # per-project edit. ПДВ at 20 is statutory (Податковий кодекс ст. 193).
+    # What is sourced and what is not. Постанова КМУ №1512 of 19.11.2025,
+    # п. 1 пп. 4, covers construction paid for with budget or state funds under
+    # martial law: general production costs 10, administrative costs 3 and
+    # profit 15 percent of direct costs in the investor's estimate, and not
+    # more than that in the contract price. No clause gives 9, 2.5 or 7; they
+    # are a contractor's editable starting points under those caps, the same
+    # values the pack's demos carry. The risk allowance is Додаток 28 to the
+    # Настанова, table 2 (stage П), row 3, housing, 1.8; public buildings take
+    # 3.0 (row 2), which is a per-project edit. ПДВ at 20 is statutory
+    # (Податковий кодекс п. 193.1 пп. «а»).
     #
     # The order is deliberate. General production costs sit inside the
     # chapters, and risk is a percentage of chapters 1 to 12, so the risk line

@@ -24,18 +24,44 @@ added after chapter 12, then ПДВ. The pack asks every line for its chapter.
 **The cascade under martial law.** The Настанова prices profit and
 administrative costs from indicators per labour hour that depend on the
 consequence class, and Зміни №5 (наказ №456 of 09.03.2026) and №6 (наказ №1069
-of 08.06.2026) brought it in line with постанова КМУ №1512 of 19.11.2025. That
-resolution caps general production costs (загальновиробничі витрати) at 10,
-administrative costs at 3 and profit at 15 percent of direct costs for the
-duration of martial law. The pack's demos carry 9, 2.5 and 7 percent, inside
-those ceilings, and the Додаток 28 risk allowance at the design stage: 1.8
-percent for housing and 3.0 percent for public buildings. These are editable
-starting points, not rates the law fixes.
+of 08.06.2026) brought it in line with постанова КМУ №1512 of 19.11.2025.
+Пункт 1 of that resolution covers construction paid for with budget funds,
+funds of state and communal enterprises or state-guaranteed loans, for the
+duration of martial law. Its підпункт 4 sets general production costs
+(загальновиробничі витрати) at 10, administrative costs at 3 and profit at 15
+percent of direct costs in the investor's estimate (інвесторська кошторисна
+документація), and caps them at not more than 10, 3 and 15 percent at the
+stage of the contract price and settlements. Construction paid for privately
+is outside пункт 1.
 
-**ПДВ is 20 percent.** The reduced rates of 14 and 7 percent do not reach
-construction work. The first supply of newly built housing is taxable and later
-supplies are exempt. No domestic reverse charge for construction services was
-found; a contractor invoices ПДВ to its customer.
+The risk allowance is set by Додаток 28 to the Настанова (пункт 4.40), as a
+percentage of chapters 1 to 12. Its table 2, for the design stage П and
+individual projects, gives 1.8 percent for housing (row 3) and 3.0 percent for
+public buildings other than housing (row 2).
+
+Which of the pack's figures come from a clause and which do not:
+
+| Line | Pack value | Source |
+|---|---|---|
+| ПДВ | 20 % | Податковий кодекс, п. 193.1 пп. «а» |
+| Risk allowance, housing / public | 1.8 % / 3.0 % | Настанова, Додаток 28, table 2, rows 3 and 2 |
+| General production costs | 9 % | No clause. КМУ №1512 п. 1 пп. 4 caps it at 10 % in a contract price |
+| Administrative costs | 2.5 % | No clause. КМУ №1512 п. 1 пп. 4 caps it at 3 % in a contract price |
+| Profit | 7 % | No clause. КМУ №1512 п. 1 пп. 4 caps it at 15 % in a contract price |
+
+The 9, 2.5 and 7 percent are a contractor's editable starting points, chosen
+below the caps; they are not official figures. A publicly funded investor's
+estimate uses exactly 10, 3 and 15 percent, and a privately funded estimate
+derives these lines from the Настанова's own indicators.
+
+**ПДВ is 20 percent.** Податковий кодекс п. 193.1 sets the basic rate at 20
+percent (пп. «а»), 7 percent for medicines, medical devices, clinical trials and
+certain cultural services (пп. «в») and 14 percent for listed agricultural goods
+(пп. «г»); none of the reduced rates names construction work, so it is taxed at
+the basic rate (п. 194.1). Under п. 197.1.14 the supply of housing is exempt
+except its first supply, and the first supply includes the construction of such
+housing for a customer. No domestic reverse charge for construction services
+was found; a contractor invoices ПДВ to its customer.
 
 **Public works go through Закон №922-VIII.** Works with an expected value of 1.5
 million hryvnias or more are procured under the public procurement law through
@@ -78,7 +104,9 @@ about 51.3 UAH to the euro (NBU, September 2026). For comparison, the
 ministry's national indicator for the cost of housing as of 1 April 2026 is
 26,623 UAH/m2 including ПДВ (наказ №786 of 16.04.2026), a benchmark for state
 housing programmes rather than a market price. These are market indications for
-a demo, not an official price index.
+a demo, not an official price index. Both demos carry a contractor's markups,
+so the Kyiv school is a contract price under the caps of КМУ №1512 п. 1 пп. 4,
+not the investor's estimate.
 
 ## Sources
 
@@ -93,12 +121,14 @@ a demo, not an official price index.
   https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-28.pdf
 - Зміна №5: https://mindev.gov.ua/npas/pro-zatverdzhennia-zminy-5-do-koshtorysnykh-norm-ukrainy-u-budivnytstvi
 - Зміна №6: https://mininfra.gov.ua/news/minrozvytku-zakripylo-nakazom-onovleni-pravyla-vyznachennia-vartosti-budivnytstva-za-publichni-koshti
-- Постанова КМУ №1512 of 19.11.2025: https://zakon.rada.gov.ua/laws/show/1512-2025-%D0%BF
+- Постанова КМУ №1512 of 19.11.2025, as amended by №526 of 24.04.2026 and
+  №1073 of 26.08.2026, п. 1 пп. 4 read in the official text:
+  https://zakon.rada.gov.ua/laws/show/1512-2025-%D0%BF
 - Закон №922-VIII, public procurement: https://zakon.rada.gov.ua/laws/show/922-19
 - Постанова КМУ №1178 of 12.10.2022: https://zakon.rada.gov.ua/go/1178-2022-%D0%BF
-- Податковий кодекс України: https://zakon.rada.gov.ua/laws/show/2755-17; the
-  2026 rates: https://fakty.com.ua/ua/ukraine/ekonomika/20260107-yakyj-pdv-v-ukrayini-u-2026-roczi-shho-vidomo-pro-rozmir-ta-zminy/;
-  first supply of housing: https://kyiv.tax.gov.ua/media-ark/news-ark/631771.html
+- Податковий кодекс України, пп. 193.1, 194.1 and 197.1.14, read in the
+  official text: https://zakon.rada.gov.ua/laws/show/2755-17; the tax service
+  on first supply of housing: https://kyiv.tax.gov.ua/media-ark/news-ark/631771.html
 - ДБН В.1.2-14:2018: https://e-construction.gov.ua/laws_detail/3199634775304307868?doc_type=2
 - ДБН В.2.2-15:2019: https://e-construction.gov.ua/laws_detail/3199650971919583106
 - ДБН А.2.2-3:2014, archived status: https://e-construction.gov.ua/laws_detail/3192355188719486804
@@ -115,11 +145,12 @@ this pack is legal, tax or regulatory advice.
 
 ## Review status
 
-The chapter structure, rates and statutes are drawn from the public sources
-above. The ПДВ rates were taken from reporting rather than the text of ст. 193,
-and the indicators of Додатки 25 and 27 may have been revised by Зміни №5 and
-№6. Pending review by a Ukrainian cost engineer (кошторисник) before they are
-relied on for a public tender.
+The ПДВ rates (Податковий кодекс пп. 193.1, 194.1, 197.1.14) and the
+wartime rates of постанова КМУ №1512 (п. 1 пп. 4) were read in the official
+texts on zakon.rada.gov.ua in September 2026. Додаток 28 was read in its 2021
+published text and may have been revised by Зміни №5 and №6, as may the
+indicators of Додатки 25 and 27. Pending review by a Ukrainian cost engineer
+(кошторисник) before any of it is relied on for a public tender.
 
 ## Install
 
