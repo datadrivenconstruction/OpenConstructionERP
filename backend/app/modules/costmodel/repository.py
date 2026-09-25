@@ -366,8 +366,8 @@ class BudgetLineRepository:
 
         When several budget lines share one cost line, the documents' value
         is split in proportion to their planned amounts (equally when none
-        is planned), the last line taking the remainder so the shares add
-        up exactly. Document value on a cost line with no budget line in the
+        is planned) in whole cents, the last line taking the remainder so the
+        shares add up exactly. Document value on a cost line with no budget line in the
         project is returned separately as the unbudgeted commitment.
 
         Returns:
@@ -388,8 +388,11 @@ class BudgetLineRepository:
             else:
                 per_line.append(_amount_in_base(line.committed_amount, line_ccy, base, fx))
 
+        cent = Decimal("0.01")
         for key, indexes in groups.items():
-            total = spine[key]
+            # Shares are whole cents with the remainder on the last line, so
+            # the per-line table adds up to the dashboard to the cent.
+            total = spine[key].quantize(cent)
             weights = [
                 max(
                     _amount_in_base(lines[i].planned_amount, (lines[i].currency or "").strip().upper(), base, fx),
@@ -406,7 +409,7 @@ class BudgetLineRepository:
                 if pos == len(indexes) - 1:
                     share = total - allocated
                 else:
-                    share = total * weights[pos] / weight_sum
+                    share = (total * weights[pos] / weight_sum).quantize(cent)
                     allocated += share
                 per_line[i] = share
 
