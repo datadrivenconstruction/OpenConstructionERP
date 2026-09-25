@@ -38,10 +38,13 @@ from app.modules.cost_recovery.schemas import (
     CurrencyRecoveryOut,
     CurrencyRecoveryPerfOut,
     PartyRecoveryOut,
+    PendingBackChargeOut,
+    PendingBackChargesOut,
     RecoveryLedgerOut,
     RecoveryPerformanceOut,
 )
 from app.modules.cost_recovery.service import (
+    InvalidBackChargeLink,
     InvalidSubjectLink,
     apportion_back_charge,
     build_portfolio_recovery_performance,
@@ -51,6 +54,7 @@ from app.modules.cost_recovery.service import (
     get_back_charge,
     list_apportionment,
     list_back_charges,
+    pending_backcharges,
     to_back_charge_item,
     update_back_charge,
 )
@@ -80,6 +84,10 @@ def _serialize(back_charge: BackCharge) -> BackChargeOut:
         agreed_at=back_charge.agreed_at,
         recovered_at=back_charge.recovered_at,
         traceability_band=str(meta.get("traceability_band", "") or ""),
+        subcontractor_id=str(back_charge.subcontractor_id) if back_charge.subcontractor_id else None,
+        contact_id=str(back_charge.contact_id) if back_charge.contact_id else None,
+        ncr_id=str(back_charge.ncr_id) if back_charge.ncr_id else None,
+        punch_item_id=str(back_charge.punch_item_id) if back_charge.punch_item_id else None,
     )
 
 
@@ -116,6 +124,8 @@ async def create_project_back_charge(
         back_charge = await create_back_charge(session, project_id, payload, created_by=user_id)
     except InvalidSubjectLink as exc:
         raise HTTPException(status_code=404 if exc.not_found else 400, detail=exc.detail) from exc
+    except InvalidBackChargeLink as exc:
+        raise HTTPException(status_code=400, detail=exc.detail) from exc
     return _serialize(back_charge)
 
 
@@ -133,10 +143,45 @@ async def update_project_back_charge(
 ) -> BackChargeOut:
     """Update a back-charge (amounts, responsible party, or commercial status)."""
     await verify_project_access(project_id, user_id or "", session)
-    back_charge = await update_back_charge(session, project_id, back_charge_id, payload)
+    try:
+        back_charge = await update_back_charge(session, project_id, back_charge_id, payload)
+    except InvalidBackChargeLink as exc:
+        raise HTTPException(status_code=400, detail=exc.detail) from exc
     if back_charge is None:
         raise HTTPException(status_code=404, detail="Back-charge not found")
     return _serialize(back_charge)
+
+
+@router.get(
+    "/projects/{project_id}/pending-backcharges",
+    response_model=PendingBackChargesOut,
+    dependencies=[Depends(RequirePermission("cost_recovery.read"))],
+)
+async def get_pending_backcharges(
+    project_id: uuid.UUID,
+    subcontractor_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> PendingBackChargesOut:
+    """Agreed back-charges this subcontractor still owes on the project."""
+    await verify_project_access(project_id, user_id or "", session)
+    pending = await pending_backcharges(session, subcontractor_id, project_id=project_id)
+    return PendingBackChargesOut(
+        subcontractor_id=str(pending.subcontractor_id),
+        items=[
+            PendingBackChargeOut(
+                back_charge_id=str(p.back_charge_id),
+                project_id=str(p.project_id),
+                source_ref=p.source_ref,
+                description=p.description,
+                currency=p.currency,
+                amount=str(p.amount),
+                apportioned=p.apportioned,
+            )
+            for p in pending.items
+        ],
+        totals={cur: str(total) for cur, total in pending.totals.items()},
+    )
 
 
 @router.get(

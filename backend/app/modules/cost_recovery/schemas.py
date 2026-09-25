@@ -36,11 +36,23 @@ class BackChargeCreate(BaseModel):
     # variation_request, variation_order, moc_entry.
     subject_kind: str | None = None
     subject_id: uuid.UUID | None = None
+    # The responsible party as a record. Either may be sent; a contact that
+    # belongs to a subcontractor links both. ``responsible_party`` stays the
+    # free-text fallback and is filled from the record's name when blank.
+    subcontractor_id: uuid.UUID | None = None
+    contact_id: uuid.UUID | None = None
+    # The record the cost arose from, in the same project. A punch item fills
+    # an unsent gross and currency from its rework cost, an NCR fills an unsent
+    # gross from a numeric cost impact; both fill a blank description.
+    ncr_id: uuid.UUID | None = None
+    punch_item_id: uuid.UUID | None = None
 
 
 class BackChargeUpdate(BaseModel):
     """Partial update of a back-charge; only the supplied fields are changed."""
 
+    subcontractor_id: uuid.UUID | None = None
+    contact_id: uuid.UUID | None = None
     responsible_party: str | None = None
     description: str | None = None
     basis: str | None = None
@@ -73,6 +85,10 @@ class BackChargeOut(BaseModel):
     # (weak / moderate / strong); blank when the back-charge was not linked to a
     # scored subject, which the recovery engine treats as the low cohort.
     traceability_band: str = ""
+    subcontractor_id: str | None = None
+    contact_id: str | None = None
+    ncr_id: str | None = None
+    punch_item_id: str | None = None
 
 
 class PartyRecoveryOut(BaseModel):
@@ -108,6 +124,26 @@ class RecoveryLedgerOut(BaseModel):
     primary_outstanding: str
     by_party: list[PartyRecoveryOut]
     by_currency: list[CurrencyRecoveryOut]
+
+
+class PendingBackChargeOut(BaseModel):
+    """One agreed back-charge still to be deducted from a subcontractor."""
+
+    back_charge_id: str
+    project_id: str
+    source_ref: str
+    description: str
+    currency: str
+    amount: str
+    apportioned: bool
+
+
+class PendingBackChargesOut(BaseModel):
+    """What a subcontractor owes back, per currency, never summed across them."""
+
+    subcontractor_id: str
+    items: list[PendingBackChargeOut]
+    totals: dict[str, str]
 
 
 # --- Apportionment (splitting one back-charge across parties) ----------------

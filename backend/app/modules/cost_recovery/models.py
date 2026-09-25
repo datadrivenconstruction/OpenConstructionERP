@@ -35,8 +35,20 @@ class BackCharge(Base):
     # The originating record (a change order, NCR, defect, delay event). A free
     # reference string so the module stays decoupled from any one source table.
     source_ref: Mapped[str] = mapped_column(String(64), nullable=False, default="")
-    # Who the cost is charged to: a contact / subcontractor id or a plain label.
+    # Who the cost is charged to, as a label. Kept as the fallback when no
+    # subcontractor or contact is linked, and filled from the linked record's
+    # name when left blank.
     responsible_party: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    # The party as a record. Plain GUIDs with no foreign key, like every
+    # cross-module link (the tables belong to the subcontractors and contacts
+    # modules); the service checks that each id resolves before it is stored.
+    # A contact that belongs to a subcontractor stamps both, so a query by
+    # subcontractor finds the charge either way.
+    subcontractor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The record the cost arose from, checked to sit in the same project.
+    ncr_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    punch_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # How the liability is grounded (a contract clause, an NCR, an instruction).
     basis: Mapped[str] = mapped_column(String(120), nullable=False, default="")
