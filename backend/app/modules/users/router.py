@@ -35,7 +35,7 @@ Endpoints:
 """
 
 import uuid
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
@@ -124,6 +124,20 @@ class InfoBlocksPayload(BaseModel):
     """
 
     blocks: dict[str, bool]
+
+
+class ViewModePayload(BaseModel):
+    """Request/response body for the user's Simple / Advanced menu choice.
+
+    ``mode`` is ``null`` until the user picks a mode themselves, and the
+    client then derives a default from the company profile. It is stored under
+    its own ``metadata_`` key, ``view_mode``, and never read from the
+    onboarding record's ``interface_mode``: old clients wrote ``advanced``
+    there on every profile save, whatever the user had chosen, so that copy
+    is not a choice anybody made.
+    """
+
+    mode: Literal["simple", "advanced"] | None = None
 
 
 class DashboardLayoutPayload(BaseModel):
@@ -1310,6 +1324,42 @@ async def save_info_blocks(
     metadata["info_blocks"] = cleaned
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
     return InfoBlocksPayload(blocks=cleaned)
+
+
+# ── Simple / Advanced view mode ───────────────────────────────────────────
+
+
+@router.get("/me/view-mode/", response_model=ViewModePayload)
+async def get_view_mode(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> ViewModePayload:
+    """Get the Simple / Advanced menu mode the user chose, or ``null``."""
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = user.metadata_ or {}
+    stored = metadata.get("view_mode")
+    return ViewModePayload(mode=stored if stored in ("simple", "advanced") else None)
+
+
+@router.put("/me/view-mode/", response_model=ViewModePayload)
+async def save_view_mode(
+    data: ViewModePayload,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> ViewModePayload:
+    """Record the user's Simple / Advanced choice so it follows the login.
+
+    ``null`` clears the choice, which hands the menu back to the default the
+    client derives from the company profile. Keyed by ``CurrentUserId`` only.
+    """
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = dict(user.metadata_ or {})
+    if data.mode is None:
+        metadata.pop("view_mode", None)
+    else:
+        metadata["view_mode"] = data.mode
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    return ViewModePayload(mode=data.mode)
 
 
 # ── Onboarding ────────────────────────────────────────────────────────────────

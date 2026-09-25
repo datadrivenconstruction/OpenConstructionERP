@@ -68,7 +68,6 @@ import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { normalizeRole } from '@/shared/lib/roles';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { workspaceFor } from '@/app/layout/workspaces';
@@ -4261,7 +4260,6 @@ export function StepFinish({
   const queryClient = useQueryClient();
   const onboardingQueryKey = useMeOnboardingQueryKey();
   const syncFromServer = useModuleStore((s) => s.syncFromServer);
-  const setViewMode = useViewModeStore((s) => s.setMode);
   const text = usePresetText();
   const [saving, setSaving] = useState(false);
   // The profile Finish saves, which is not always the one picked: Full
@@ -4283,19 +4281,15 @@ export function StepFinish({
   const handleFinish = useCallback(async () => {
     setSaving(true);
 
-    // Start new users in simple mode. For a profile with a workspace
-    // (`app/layout/workspaces.ts`) Simple mode is that workspace; for every
-    // other profile it is the essential groups, as before. They can switch to
-    // advanced any time from Settings > Interface Mode.
-    //
-    // The mode is a per-browser setting (`oe_view_mode`) and is not sent to
-    // the server. The POST below used to carry `interface_mode: 'advanced'`
-    // while this line set Simple, and nothing ever read the server copy back.
-    // Reading it back now would move every existing user into Advanced on
-    // their next fresh browser, since every stored copy says 'advanced'. What
-    // has to follow the user between browsers is the profile, and that does:
-    // the sidebar reads `company_type` from the server.
-    setViewMode('simple');
+    // The Simple / Advanced mode is not set here. It used to be forced to
+    // Simple on every finish, which overrode a mode the user had picked.
+    // A user who has picked one keeps it (it is stored per user on the
+    // server); anybody else gets the default the saved profile implies
+    // (`app/layout/useViewModeDefault.ts`): Simple for a profile with a
+    // workspace, which is that workspace, Advanced for any other profile.
+    // They can switch any time from Settings > Interface Mode. The POST below
+    // carries no `interface_mode` either: that onboarding field was written as
+    // 'advanced' whatever the user had, and the mode is not read from it.
 
     if (packInstalled) {
       // The ready-made pack already configured modules, locale, classification
@@ -4355,7 +4349,6 @@ export function StepFinish({
     queryClient,
     onboardingQueryKey,
     syncFromServer,
-    setViewMode,
   ]);
 
   return (

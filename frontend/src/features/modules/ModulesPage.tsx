@@ -605,9 +605,11 @@ function CompanyProfilesTab() {
         ? Object.values(getModulesByCategory()).flatMap((mods) => mods.map((m) => m.id))
         : switchingTo.enabled_modules;
 
-      // No `interface_mode`: the Simple / Advanced choice is a per-browser
-      // setting that nothing reads from the server, and this used to write
-      // 'advanced' on every switch whatever mode the user was in.
+      // No `interface_mode`: the Simple / Advanced choice has its own per-user
+      // record (`/v1/users/me/view-mode/`), and this field used to be written
+      // as 'advanced' on every switch whatever mode the user was in. A user
+      // who never picked a mode gets the default the new profile implies
+      // (`app/layout/useViewModeDefault.ts`).
       const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
         company_type: switchingTo.key,
         enabled_modules: enabledModules,
