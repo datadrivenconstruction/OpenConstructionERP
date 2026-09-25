@@ -65,6 +65,25 @@ describe('ClaimInvoicePreview', () => {
     expect(screen.queryByText('finance.claimInvoice.netCollectible')).not.toBeInTheDocument();
   });
 
+  it('shows a client claim as collectible after retention, never the gross subtotal', async () => {
+    // P-39: the card used to print the stored subtotal, which is the gross,
+    // as the net collectible (184,300 on a certified client claim).
+    getMock.mockResolvedValue({
+      ...payable,
+      invoice_number: 'INV-R-007',
+      amount_subtotal: '184300.00',
+      retention_amount: '9215.00',
+      amount_total: '184300.00',
+      invoice_direction: 'receivable',
+    });
+    renderPreview({ direction: 'receivable' });
+
+    expect(await screen.findByText('INV-R-007')).toBeInTheDocument();
+    const net = screen.getByText('finance.claimInvoice.netCollectible').parentElement as HTMLElement;
+    expect(net).toHaveTextContent(/175\D?085/);
+    expect(net).not.toHaveTextContent(/184\D?300/);
+  });
+
   it('offers to raise a payable before the invoice exists', async () => {
     getMock.mockRejectedValue(new Error('404'));
     renderPreview({ direction: 'payable', certified: false });
