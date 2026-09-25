@@ -2186,7 +2186,7 @@ class BOQService:
         if boq.is_locked:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="BOQ is locked and cannot be modified. Create a revision to make changes.",
+                detail=translate("errors.boq_locked", locale=get_locale()),
             )
         return boq
 
@@ -2212,7 +2212,7 @@ class BOQService:
         if row[0]:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="BOQ is locked and cannot be modified. Create a revision to make changes.",
+                detail=translate("errors.boq_locked", locale=get_locale()),
             )
 
     async def _locked_bills_among(self, boq_ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, str]:
@@ -3557,10 +3557,11 @@ class BOQService:
             if master_boq_id in locked:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        f"Code '{reference_code}' is defined by a line in the locked bill "
-                        f"'{locked[master_boq_id]}', and linking to it would change that bill. "
-                        "Unlock that bill first, or enter the line under a new code."
+                    detail=translate(
+                        "errors.boq_link_owner_locked",
+                        locale=get_locale(),
+                        code=reference_code,
+                        bill=locked[master_boq_id],
                     ),
                 )
 

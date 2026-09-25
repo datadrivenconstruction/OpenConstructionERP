@@ -648,7 +648,9 @@
     "estimate_job_not_found": "Estimate job not found",
     "escrow_not_found": "EscrowTransaction not found",
     "commission_accrual_not_found": "CommissionAccrual not found",
-    "baseline_not_found": "Baseline not found"
+    "baseline_not_found": "Baseline not found",
+    "boq_locked": "BOQ is locked and cannot be modified. Create a revision to make changes.",
+    "boq_link_owner_locked": "Code '{code}' is defined by a line in the locked bill '{bill}', and linking to it would change that bill. Unlock that bill first, or enter the line under a new code."
   },
   "variations": {
     "boq_lines_are_traced": {

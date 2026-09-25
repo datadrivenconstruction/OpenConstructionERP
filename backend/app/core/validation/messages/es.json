@@ -648,7 +648,9 @@
     "estimate_job_not_found": "Tarea de estimación no encontrada",
     "escrow_not_found": "Transacción de depósito en garantía no encontrada",
     "commission_accrual_not_found": "Devengo de comisión no encontrado",
-    "baseline_not_found": "Línea base no encontrada"
+    "baseline_not_found": "Línea base no encontrada",
+    "boq_locked": "El BOQ está bloqueado y no se puede modificar. Cree una revisión para hacer cambios.",
+    "boq_link_owner_locked": "El código '{code}' está definido por una partida del BOQ bloqueado '{bill}', y vincularlo modificaría ese BOQ. Desbloquee primero ese BOQ o introduzca la partida con un código nuevo."
   },
   "variations": {
     "boq_lines_are_traced": {

@@ -648,7 +648,9 @@
     "estimate_job_not_found": "Kalkulationsauftrag nicht gefunden",
     "escrow_not_found": "Treuhand-Transaktion nicht gefunden",
     "commission_accrual_not_found": "Provisions-Abgrenzung nicht gefunden",
-    "baseline_not_found": "Baseline nicht gefunden"
+    "baseline_not_found": "Baseline nicht gefunden",
+    "boq_locked": "Das Leistungsverzeichnis ist gesperrt und kann nicht geändert werden. Legen Sie eine Revision an, um Änderungen vorzunehmen.",
+    "boq_link_owner_locked": "Der Code '{code}' ist durch eine Position im gesperrten Leistungsverzeichnis '{bill}' definiert, und eine Verknüpfung würde dieses Leistungsverzeichnis ändern. Entsperren Sie es zuerst oder erfassen Sie die Position unter einem neuen Code."
   },
   "variations": {
     "boq_lines_are_traced": {
