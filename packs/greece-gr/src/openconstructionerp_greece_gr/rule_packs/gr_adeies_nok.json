@@ -1,0 +1,24 @@
+{
+  "rule_pack_id": "gr_adeies_nok",
+  "name": "Building code, permits and energy performance",
+  "name_el": "Οικοδομικός κανονισμός, άδειες και ενεργειακή απόδοση",
+  "standard": "Ν. 4067/2012",
+  "jurisdiction": "GR",
+  "applies_to": [
+    "projects",
+    "documents"
+  ],
+  "review_status": "Reference document only. Statutes read on consolidated-law sites because the official government portals refused automated access. Confirm against the Government Gazette before relying on it.",
+  "references": [
+    "Ν. 4067/2012 (ΦΕΚ Α 79/09.04.2012), Νέος Οικοδομικός Κανονισμός (https://www.kodiko.gr/nomothesia/document/117459/nomos-4067-2012)",
+    "Ν. 4495/2017, Έλεγχος και προστασία του Δομημένου Περιβάλλοντος, electronic building permits (https://support.e-nomothesia.gr/nomos-4495-2017.html)",
+    "Υ.Α. ΔΙΠΑΔ/οικ.372/2014 (ΦΕΚ Β 1457/05.06.2014), Eurocodes with the Greek national annexes (https://www.elinyae.gr/ethniki-nomothesia/ya-dipadoik3722014-fek-1457b-562014)",
+    "Κ.Υ.Α. ΔΕΠΕΑ/οικ.178581/2017 (ΦΕΚ Β 2367/12.07.2017), ΚΕΝΑΚ (https://www.elinyae.gr/ethniki-nomothesia/ya-depeaoik1785812017-fek-2367b-1272017)"
+  ],
+  "description": "A building in Greece is designed to the building regulation (ΝΟΚ, Ν. 4067/2012) and permitted electronically under Ν. 4495/2017 through the e-Άδειες platform. Structural design may follow the Eurocodes with the Greek national annexes, approved in 2014, or the older national codes ΕΑΚ 2000 and ΕΚΩΣ 2000, at the owner's written choice. Energy performance follows ΚΕΝΑΚ.",
+  "practice_notes": [
+    "Permit and supervision fees are budgeted by the owner and do not belong to the works",
+    "A ΚΕΝΑΚ energy class target, such as nearly zero energy for a new public building, drives the insulation, glazing and heat pump lines of the budget"
+  ],
+  "enables_rule_ids": []
+}

@@ -1,0 +1,44 @@
+# Greece Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by the
+# OnboardingWizard React component in place of the default steps.
+#
+# Labels are bilingual: the English sentence and the Greek term an estimator
+# decides on, rather than a translation of the whole sentence.
+
+version: 2
+locale: el
+title: "Welcome to OpenConstructionERP - Greece"
+title_el: "Καλώς ήρθατε στο OpenConstructionERP - Ελλάδα"
+subtitle: "Three steps to line the workspace up with Greek practice: ΝΕΤ articles, the public works cascade and ΦΠΑ. Τρία βήματα για να προσαρμοστεί ο χώρος εργασίας στην ελληνική πρακτική."
+
+steps:
+  - id: company_profile
+    title: "Company details / Στοιχεία επιχείρησης"
+    body: "Used on budgets, tender documents and reports. Εμφανίζονται στους προϋπολογισμούς, τα τεύχη δημοπράτησης και τις αναφορές."
+    fields:
+      - { key: company_name, label: "Company name / Επωνυμία", type: text, required: true }
+      - { key: afm, label: "Tax number / ΑΦΜ", type: text, required: false, placeholder: "EL123456789" }
+      - { key: mhte, label: "Contractor register class / Τάξη πτυχίου ΜΗ.Τ.Ε.", type: text, required: false, placeholder: "3η τάξη" }
+      - { key: role, label: "Your role on projects / Ρόλος στα έργα", type: radio, required: true, default: "Contractor (ανάδοχος)", options: ["Contractor (ανάδοχος)", "Subcontractor (υπεργολάβος)", "Designer or engineer (μελετητής)", "Contracting authority or owner (αναθέτουσα αρχή, κύριος του έργου)"] }
+
+  - id: estimate_structure
+    title: "Budget structure / Δομή προϋπολογισμού"
+    body: "Every line carries its ΝΕΤ article (ΟΙΚ, ΟΔΟ, ΥΔΡ, ΗΛΜ, or a new article ΝΑ) and a DIN 276 cost group for the cost-group view. Κάθε γραμμή φέρει το άρθρο των Νέων Ενιαίων Τιμολογίων."
+    fields:
+      - { key: public_works, label: "We price public works under Ν. 4412/2016 / Δημόσια έργα", type: checkbox, default: true }
+      - { key: overhead_profit, label: "General expenses and profit / ΓΕ & ΟΕ", type: select, required: true, default: "18%", options: ["18%", "Set per project"] }
+      - { key: contingency, label: "Contingency / Απρόβλεπτα", type: select, required: true, default: "15%", options: ["9%", "15%", "Set per project"] }
+
+  - id: review
+    title: "Review and finish / Έλεγχος και ολοκλήρωση"
+    body: "We will set the workspace to EUR, switch on the Greek validation rules and apply the Greek estimating method with 24% ΦΠΑ. Everything can be changed later in Settings. Όλα αλλάζουν αργότερα από τις Ρυθμίσεις."
+    action:
+      label: "Create my Greek workspace / Δημιουργία χώρου εργασίας"
+      apply:
+        - set_default_currency: EUR
+        - set_tax_template: gr_fpa_24
+        - enable_rule_packs:
+            - gr_net_timologia
+            - gr_dimosia_erga_4412
+            - gr_adeies_nok
+            - gr_fpa_kataskeves

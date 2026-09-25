@@ -1,0 +1,41 @@
+{
+  "rule_pack_id": "gr_net_timologia",
+  "name": "National unified price lists (ΝΕΤ)",
+  "name_el": "Νέα Ενιαία Τιμολόγια (ΝΕΤ)",
+  "standard": "ΦΕΚ Β 1746/2017",
+  "jurisdiction": "GR",
+  "applies_to": [
+    "estimate",
+    "boq",
+    "validation"
+  ],
+  "review_status": "Chapter list read in the descriptive ΟΙΚ price list distributed by the Technical Chamber of Greece; article codes and 2025 prices read in published municipal and regional budgets. Pending review by a Greek engineer who prices public works.",
+  "references": [
+    "Υ.Α. ΔΝΣγ/οικ.35577/ΦΝ 466/2017 (ΦΕΚ Β 1746/19.05.2017), έγκριση Νέων Ενιαίων Τιμολογίων (https://www.e-nomothesia.gr/demosia-erga/upourgike-apophase-dnsg-oik-35577-phn-466-2017.html)",
+    "Περιγραφικό Τιμολόγιο Οικοδομικών Εργασιών (ΝΕΤ ΟΙΚ), TEE seminar copy v4.0 (https://tkm.tee.gr/wp-content/uploads/2024/02/04.%CE%91.-%CE%95%CE%A1%CE%93%CE%91-OIK-%CE%A0%CE%B5%CF%81%CE%B9%CE%B3%CF%81%CE%B1%CF%86%CE%B9%CE%BA%CF%8C-%CE%A4%CE%B9%CE%BC%CE%BF%CE%BB%CF%8C%CE%B3%CE%B9%CE%BF.pdf)"
+  ],
+  "description": "The value of a Greek public works contract is estimated from the Νέα Ενιαία Τιμολόγια, six price lists for building (ΟΙΚ), road (ΟΔΟ), hydraulic (ΥΔΡ), port (ΛΙΜ), electromechanical (ΗΛΜ) and landscape (ΠΡΣ) works. Every line of the budget names the article it is priced from, and an article code opens with its chapter (ΟΙΚ 32.01.06 is concrete, chapter 32). Work the lists do not cover is priced as a new article, written ΝΑΟΙΚ, ΝΑΗΛΜ and so on, in the chapter it belongs to. The pack keeps that article next to a DIN 276 cost group on every line.",
+  "chapters": {
+    "10": "Φορτοεκφορτώσεις και μεταφορές",
+    "20": "Εκσκαφές για κτιριακά έργα",
+    "22": "Καθαιρέσεις",
+    "23": "Ικριώματα και αντιστηρίξεις",
+    "32": "Σκυροδέματα κατασκευών",
+    "38": "Ξυλότυποι και οπλισμοί",
+    "46": "Πλινθοδομές",
+    "65": "Αλουμίνια",
+    "71": "Αρμολογήματα και επιχρίσματα",
+    "73": "Επενδύσεις και επιστρώσεις",
+    "77": "Χρωματισμοί",
+    "79": "Μονώσεις"
+  },
+  "practice_notes": [
+    "ΝΕΤ unit prices exclude ΓΕ&ΟΕ, απρόβλεπτα, price revision and ΦΠΑ, which the budget adds below the works",
+    "Each article also carries a separate price-revision code (for example ΟΙΚ 3215), which drives αναθεώρηση and is not the article number",
+    "Plumbing and electrical items in building budgets are often still priced from the older ΑΤΗΕ articles, such as ΑΤΗΕ 8151.1"
+  ],
+  "enables_rule_ids": [
+    "greece.net_article_required",
+    "greece.net_article_valid"
+  ]
+}
