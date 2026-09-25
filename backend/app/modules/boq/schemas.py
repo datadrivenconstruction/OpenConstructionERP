@@ -1213,6 +1213,25 @@ class MarkupListResponse(BaseModel):
     """
 
     markups: list[MarkupResponse] = Field(default_factory=list)
+    items: list[MarkupResponse] = Field(
+        default_factory=list,
+        description="The same rows as ``markups``, under the ``items`` key most list routes use.",
+    )
+    total: int = Field(default=0, description="Number of rows in ``items``.")
+
+    @model_validator(mode="after")
+    def _mirror_markups_as_items(self) -> "MarkupListResponse":
+        """Carry the rows under ``items`` too, so a generic list reader finds them.
+
+        ``markups`` stays for the clients that read it; ``items`` and ``total``
+        follow the envelope most list routes answer with.
+        """
+        if not self.items and self.markups:
+            self.items = list(self.markups)
+        elif self.items and not self.markups:
+            self.markups = list(self.items)
+        self.total = len(self.items)
+        return self
 
 
 # ── Composite schemas ─────────────────────────────────────────────────────────
