@@ -103,6 +103,10 @@ _ADDED_AFTER_V15_4_0 = {
     # rate that changed belongs to the supersede repair, exactly as Nova
     # Scotia's 14 % row does.
     ("RU", "NDS", "2026-01-01"),
+    # Greece's three rate lines, first shipped with the Greek country pack.
+    ("GR", "FPA", "2016-06-01"),
+    ("GR", "FPA_RED", "2011-01-01"),
+    ("GR", "FPA_SRED", "2015-07-20"),
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -130,6 +134,9 @@ _ADDED_AFTER_V15_9_1 = {
     ("KW", "NONE", None),
     ("QA", "NONE", None),
     ("RU", "NDS", "2026-01-01"),
+    ("GR", "FPA", "2016-06-01"),
+    ("GR", "FPA_RED", "2011-01-01"),
+    ("GR", "FPA_SRED", "2015-07-20"),
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -151,7 +158,18 @@ _DIGEST_V15_9_1 = "ec4106ee3f0cadcd6fce5ca0ec95fe69d55b4e51d1b4b3283daa462542038
 
 _FIELDS = ("country_code", "tax_code", "rate_pct", "tax_type", "effective_from", "effective_to", "is_default")
 
-#: The ten rate lines a pre-v15.5.0 install is missing and must be given.
+#: What Greece is delivered today: the standard rate only. No install before
+#: the Greek pack holds a Greek row, so FPA lands in an empty country-wide slot,
+#: and once it has, the slot rule refuses the 13 and 6 percent tiers beside it
+#: in the same pass. A bill charges the standard rate, so the price is right;
+#: the tiers are the gap. The change that lets a tier join a filled slot
+#: without changing the country's answer (the Croatian tiers need the same)
+#: should add ``GR/FPA_RED`` and ``GR/FPA_SRED`` here when it lands.
+_GREECE_LINES = {"GR/FPA"}
+
+#: The rate lines a pre-v15.5.0 install is missing and must be given. The
+#: counts below are taken from this set rather than written as numbers, so a
+#: country that joins it moves every assertion at once.
 #: Nova Scotia is deliberately not among them - it already holds the 15 % row,
 #: so the 14 % one is a rate that changed rather than a rate never delivered.
 _EXPECTED_DELIVERY = {
@@ -168,7 +186,11 @@ _EXPECTED_DELIVERY = {
     # regional stack at 5 percent.
     "KW/NONE",
     "QA/NONE",
+    *_GREECE_LINES,
 }
+
+#: What a v15.9.1 install is owed: the lines that shipped after it.
+_EXPECTED_AFTER_V15_9_1 = {"KW/NONE", "QA/NONE", *_GREECE_LINES}
 
 
 def _key(row: dict) -> tuple:
@@ -385,7 +407,9 @@ async def test_a_pre_v15_5_install_is_given_the_provinces_it_never_received(repa
 
     reconcile = _outcome(report, REPAIR_ID)
     assert reconcile.status == "applied"
-    assert reconcile.rows_changed == 10, f"expected ten missing rates delivered, got {reconcile.rows_changed}"
+    assert reconcile.rows_changed == len(_EXPECTED_DELIVERY), (
+        f"expected {len(_EXPECTED_DELIVERY)} missing rates delivered, got {reconcile.rows_changed}"
+    )
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
 
     lines = await _lines(repair_factory)
@@ -431,8 +455,8 @@ async def test_nova_scotia_is_not_this_repairs_to_deliver(repair_factory) -> Non
     deliveries = await _deliveries(repair_factory)
     assert "CA/HST_NS" not in deliveries, "the reconciler delivered a rate line that was already on file"
     assert deliveries == _EXPECTED_DELIVERY
-    assert _outcome(report, REPAIR_ID).rows_changed == 10, (
-        "the reconciler's own count moved, so it is doing something other than the ten rate lines it owns"
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY), (
+        "the reconciler's own count moved, so it is doing something other than the rate lines it owns"
     )
 
     async with repair_factory() as session:
@@ -454,7 +478,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
 
     first = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
-    assert first.rows_changed == 10
+    assert first.rows_changed == len(_EXPECTED_DELIVERY)
     settled = await _count(repair_factory)
 
     second = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
@@ -467,8 +491,8 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
             await session.execute(select(DataRepairLedger).where(DataRepairLedger.repair_id == REPAIR_ID))
         ).scalar_one()
     assert ledger.runs == 2, "the second boot has to be recorded, not skipped"
-    assert ledger.rows_changed_total == 10, "the second pass applied something after all"
-    assert len(await _deliveries(repair_factory)) == 10, "a delivery was recorded twice"
+    assert ledger.rows_changed_total == len(_EXPECTED_DELIVERY), "the second pass applied something after all"
+    assert len(await _deliveries(repair_factory)) == len(_EXPECTED_DELIVERY), "a delivery was recorded twice"
 
 
 async def test_a_delivered_rate_the_customer_deletes_stays_deleted(repair_factory) -> None:
@@ -480,7 +504,7 @@ async def test_a_delivered_rate_the_customer_deletes_stays_deleted(repair_factor
     install.
     """
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
-    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == 10
+    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY)
 
     async with repair_factory() as session:
         await session.execute(
@@ -522,11 +546,11 @@ async def test_a_v15_9_1_install_that_deleted_a_rate_does_not_get_it_back(repair
     delivered = await _deliveries(repair_factory)
     assert "NG/VAT" not in delivered, "a rate deleted on a modern install was restored"
     assert ("NG", "VAT") not in await _lines(repair_factory)
-    # This cohort predates the two Gulf rate lines, so it is owed those and
-    # nothing else. Pinned rather than counted, so a future seed row cannot
-    # slip in here disguised as one of them.
-    assert delivered == {"KW/NONE", "QA/NONE"}
-    assert _outcome(report, REPAIR_ID).rows_changed == 2
+    # This cohort predates the two Gulf rate lines and Greece's three, so it
+    # is owed those and nothing else. Pinned rather than counted, so a future
+    # seed row cannot slip in here disguised as one of them.
+    assert delivered == _EXPECTED_AFTER_V15_9_1
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_AFTER_V15_9_1)
 
 
 async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory) -> None:
@@ -560,8 +584,8 @@ async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory)
     report = await run_data_repairs(repair_factory)
 
     assert _outcome(report, REPAIR_ID).status == "applied"
-    assert _outcome(report, REPAIR_ID).rows_changed == 2
-    assert await _deliveries(repair_factory) == {"KW/NONE", "QA/NONE"}
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_AFTER_V15_9_1)
+    assert await _deliveries(repair_factory) == _EXPECTED_AFTER_V15_9_1
 
     async with repair_factory() as session:
         still = (
@@ -656,7 +680,7 @@ async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_
 
     Reading the newest would take that one row for the seed, date this install
     to today, and conclude that every rate added since is absent because
-    somebody removed it. The install would be refused all ten of the rates it
+    somebody removed it. The install would be refused every one of the rates it
     is owed, for good, on the evidence of a row that has nothing to do with any
     of them. The oldest surviving shipped row is the seeder's own and it still
     says June.
@@ -701,7 +725,7 @@ async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == 10, (
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY), (
         "one shipped rate re-entered by hand withheld every rate this install was owed"
     )
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
@@ -752,8 +776,8 @@ async def test_a_country_that_typed_in_its_own_rate_is_not_given_a_second_one(re
     )
     assert ("NG", "VAT") not in await _lines(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == 9, (
-        "one country holding its own rate must not withhold the other seven rate lines"
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY) - 1, (
+        "one country holding its own rate must not withhold the other rate lines"
     )
 
 
@@ -791,7 +815,7 @@ async def test_a_province_that_has_a_hand_entered_rate_is_not_charged_twice(repa
 
     quebec = await _resolve_in(repair_factory, "CA", "CA-QC")
     assert quebec.combined_rate_pct == "14.975", "one province holding its own rate withheld the others"
-    assert _outcome(report, REPAIR_ID).rows_changed == 9
+    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY) - 1
 
 
 async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
@@ -807,7 +831,9 @@ async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
     async with repair_factory() as session:
         after = await snapshot_table(session, _TAX_TABLE)
 
-    assert len(after) == len(before) + 10, "the pass under test did not deliver, so the check below is vacuous"
+    assert len(after) == len(before) + len(_EXPECTED_DELIVERY), (
+        "the pass under test did not deliver, so the check below is vacuous"
+    )
     assert verify_additive_shape(repair, before, after) == ()
 
 
