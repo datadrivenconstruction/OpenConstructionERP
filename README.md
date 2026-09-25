@@ -437,17 +437,17 @@ Open **http://localhost:5173** - for hacking on the codebase. Requires Python 3.
 
 Three demo accounts are created automatically on first start. Each
 password is **generated per installation** (via `secrets.token_urlsafe`)
-and printed to the backend startup log so you see it immediately, e.g.:
+and saved to `~/.openestimator/.demo_credentials.json` (chmod 600). The
+startup log tells you where the file is, and never prints the password
+itself, because a log is the thing that gets copied, shipped and shared:
 
 ```
-[seed] Demo user created: demo@openconstructionerp.com / xK7p_Q2nR8sT4uV6wX9yZ
-[seed] Pre-set DEMO_USER_PASSWORD env to skip random generation
+[seed] Demo user created: demo@openconstructionerp.com. Password saved to /home/you/.openestimator/.demo_credentials.json (set DEMO_USER_PASSWORD before the first start to choose it)
 ```
 
-The same passwords are also persisted to
-`~/.openestimator/.demo_credentials.json` (chmod 600) so you can recover
-them later. To pin known passwords (e.g. for a team demo or CI), set the
-env vars **before the first boot**:
+Only if that file cannot be written is the password printed, once, to the
+console and not to the log. To pin known passwords (e.g. for a team demo
+or CI), set the env vars **before the first boot**:
 
 - `DEMO_USER_PASSWORD` - admin (`demo@openconstructionerp.com`)
 - `DEMO_ESTIMATOR_PASSWORD` - estimator (`estimator@openconstructionerp.com`)
@@ -455,9 +455,9 @@ env vars **before the first boot**:
 
 | Account | Email | Password | Role |
 |---------|-------|----------|------|
-| Admin | `demo@openconstructionerp.com` | _see startup log or `.demo_credentials.json`_ | Full access |
-| Estimator | `estimator@openconstructionerp.com` | _see startup log or `.demo_credentials.json`_ | Estimator |
-| Manager | `manager@openconstructionerp.com` | _see startup log or `.demo_credentials.json`_ | Manager |
+| Admin | `demo@openconstructionerp.com` | _see `.demo_credentials.json`_ | Full access |
+| Estimator | `estimator@openconstructionerp.com` | _see `.demo_credentials.json`_ | Estimator |
+| Manager | `manager@openconstructionerp.com` | _see `.demo_credentials.json`_ | Manager |
 
 > On a local default install you can simply type `DemoPass1234!` on the sign-in form for any demo account. The built-in demo login accepts it, so the documented credential always works. The per-install random password above is the stored hash, kept for reference and for API tokens. This shortcut turns off whenever `SEED_DEMO=false`, which you should set for any internet-exposed deployment.
 

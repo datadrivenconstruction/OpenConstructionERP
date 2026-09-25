@@ -1171,6 +1171,45 @@ def _persist_demo_credentials(creds: dict[str, str]) -> Path | None:
         return None
 
 
+def _announce_generated_demo_credentials(generated: dict[str, str], env_var_for_email: dict[str, str]) -> None:
+    """Save freshly generated demo passwords and tell the operator where they are.
+
+    The passwords used to be logged at WARNING, one ``email / password`` line
+    per account. A log is the one thing an operator ships somewhere else: to a
+    file, a collector, a support ticket, a screen recording of the console. The
+    admin demo account's password went with it. The file this writes (chmod
+    600, next to the rest of the install's state) already holds them, and the
+    password-free "Try demo" sign-in needs none, so the log now names the file
+    and the variable that pins a password, and never the password.
+
+    Only when the file cannot be written is there no other way for a first-run
+    user to learn the password. Then it is printed once to the console, which
+    the operator is looking at, and not to the log.
+    """
+    creds_path = _persist_demo_credentials(generated)
+    for email in generated:
+        env_var = env_var_for_email.get(email, "DEMO_USER_PASSWORD")
+        if creds_path is not None:
+            logger.warning(
+                "[seed] Demo user created: %s. Password saved to %s (set %s before the first start to choose it)",
+                email,
+                creds_path,
+                env_var,
+            )
+        else:
+            logger.warning(
+                "[seed] Demo user created: %s. Password could not be saved to a file and was printed "
+                "once to the console (set %s before the first start to choose it)",
+                email,
+                env_var,
+            )
+    if creds_path is None:
+        import sys
+
+        for email, password in generated.items():
+            print(f"[seed] Demo user {email} password: {password}", file=sys.stderr, flush=True)
+
+
 #: The identity of a data directory, published by ``/api/health``.
 #:
 #: Read by the desktop launcher (``desktop/src-tauri/src/main.rs``) before it
@@ -1356,8 +1395,9 @@ async def _seed_demo_account() -> None:
     (``DEMO_USER_PASSWORD``, ``DEMO_ESTIMATOR_PASSWORD``,
     ``DEMO_MANAGER_PASSWORD``), otherwise generated per-installation via
     ``secrets.token_urlsafe(16)``. Generated values are written to
-    ``~/.openestimator/.demo_credentials.json`` (chmod 600) and printed
-    once to the startup log. Operators who want a stable password for
+    ``~/.openestimator/.demo_credentials.json`` (chmod 600) and the startup
+    log names that file, never the password itself (see
+    :func:`_announce_generated_demo_credentials`). Operators who want a stable password for
     their team can set the env vars; everyone else gets a unique secret
     they can recover from the credentials file.
 
@@ -1457,30 +1497,12 @@ async def _seed_demo_account() -> None:
                     "env" if not was_generated else "generated",
                 )
 
-            # Persist generated passwords + print once. Operators who set
-            # env vars never see this banner; new installs get a one-time
-            # log line with the location.
-            #
-            # IMPORTANT: log each generated credential as a self-contained
-            # ``[seed]`` line so a new developer sees the password
-            # immediately at first-boot time without having to know about
-            # ``~/.openestimator/.demo_credentials.json``. This was the #1
-            # cause of "why won't login work" debug sessions on fresh
-            # installs (see docs/qa/FRESH_INSTALL_RESULTS.md Issue 3).
+            # Persist generated passwords and say where they are. Operators
+            # who set env vars never see this banner.
             if generated_creds:
-                creds_path = _persist_demo_credentials(generated_creds)
-                # Email -> env-var-name lookup so each per-account banner
-                # can name the exact variable that suppresses random
-                # generation for that account.
-                env_var_for_email = {spec["email"]: spec["env_var"] for spec in demo_account_specs}
-                for email, pw in generated_creds.items():
-                    env_var = env_var_for_email.get(email, "DEMO_USER_PASSWORD")
-                    logger.warning("[seed] Demo user created: %s / %s", email, pw)
-                    logger.warning("[seed] Pre-set %s env to skip random generation", env_var)
-                logger.warning(
-                    "[seed] %d demo credential(s) also saved to %s",
-                    len(generated_creds),
-                    creds_path or "(persistence failed - check logs)",
+                _announce_generated_demo_credentials(
+                    generated_creds,
+                    {spec["email"]: spec["env_var"] for spec in demo_account_specs},
                 )
 
             # 2. Capture the demo user ids while the session is open.
