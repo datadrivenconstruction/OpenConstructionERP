@@ -1,8 +1,10 @@
 /**
  * Tests for the shared DismissibleInfo help card.
  *
- * Behaviour under test (the 2026-06-06 contract):
- *   - clicking the card collapses it - NOTHING is left in the page; the card
+ * Behaviour under test (the 2026-06-06 contract, collapse control narrowed):
+ *   - clicking the title or the body does nothing; only the named Collapse
+ *     button collapses the card
+ *   - collapsing leaves NOTHING in the page; the card
  *     registers itself in useModuleInfoStore so the TOP APP BAR can show the
  *     re-opener icon (project pill > module name > info icon)
  *   - the X ALSO just collapses (it never hides the card forever)
@@ -30,6 +32,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
 import { DismissibleInfo } from './DismissibleInfo';
+import { ModuleInfoButton } from './ModuleInfoButton';
 import { useModuleInfoStore } from '@/stores/useModuleInfoStore';
 import { useInfoBlockPrefsStore } from '@/stores/useInfoBlockPrefsStore';
 
@@ -59,11 +62,11 @@ function storeEntries() {
   return useModuleInfoStore.getState().entries;
 }
 
-/** The clickable surface for "whole-card click" in the expanded state. */
+/** The row that used to carry a whole-card collapse handler. */
 function cardClickSurface(): HTMLElement {
   const wrapper = document.querySelector('div.border-l-oe-blue\\/70') as HTMLElement | null;
   if (!wrapper) throw new Error('no expanded card wrapper rendered');
-  // First element child is the flex row that carries the collapse click handler.
+  // First element child is the flex row under the wrapper.
   return wrapper.firstElementChild as HTMLElement;
 }
 
@@ -87,17 +90,31 @@ describe('DismissibleInfo', () => {
     expect(storeEntries()).toHaveLength(0);
   });
 
-  it('clicking anywhere on the card collapses it to NOTHING and persists "1"', () => {
-    const { container } = renderCard();
-    // Click the whole-card surface (not just the title) to prove the entire
-    // card is the toggle.
+  it('clicking the title or the body leaves the card expanded', () => {
+    renderCard();
+    // The title used to be a button that collapsed the card, and the whole
+    // row carried the same handler, so any click on the card lost it.
+    fireEvent.click(screen.getByText('Demo title'));
+    fireEvent.click(screen.getByText('Body copy explaining the page.'));
     fireEvent.click(cardClickSurface());
+
+    expect(screen.getByText('Demo title')).toBeInTheDocument();
+    expect(screen.getByText('Body copy explaining the page.')).toBeInTheDocument();
+    expect(storedCollapsed()).toBeUndefined();
+    expect(storeEntries()).toHaveLength(0);
+    // The title is text, not a control: the X is the only button.
+    expect(screen.queryByRole('button', { name: 'Demo title' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+  });
+
+  it('the named Collapse button collapses it to NOTHING in the page', () => {
+    const { container } = renderCard();
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
 
     // The card leaves the page entirely - no leftover line (founder decision
     // 2026-06-06: the re-opener lives in the top app bar instead).
     expect(screen.queryByText('Body copy explaining the page.')).not.toBeInTheDocument();
     expect(screen.queryByText('Demo title')).not.toBeInTheDocument();
-    expect(screen.queryByText('Module information')).not.toBeInTheDocument();
     expect(container.firstChild).toBeNull();
     // Collapsed state recorded per user, not under the legacy per-card flag.
     expect(storedCollapsed()).toBe(true);
@@ -106,9 +123,30 @@ describe('DismissibleInfo', () => {
     expect(storeEntries()[0]!.key).toBe(KEY);
   });
 
+  it('a collapsed card comes back with a click on the module info button', () => {
+    render(
+      <>
+        <ModuleInfoButton />
+        <DismissibleInfo storageKey={KEY} title="Demo title">
+          <span>Body copy explaining the page.</span>
+        </DismissibleInfo>
+      </>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+    expect(screen.queryByText('Demo title')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Module information' }));
+
+    expect(screen.getByText('Demo title')).toBeInTheDocument();
+    expect(screen.getByText('Body copy explaining the page.')).toBeInTheDocument();
+    expect(storedCollapsed()).toBe(false);
+    // Nothing collapsed any more, so the re-open control leaves the bar.
+    expect(screen.queryByRole('button', { name: 'Module information' })).not.toBeInTheDocument();
+  });
+
   it('the store expand entry (top-bar icon) re-expands and persists "0"', () => {
     renderCard();
-    fireEvent.click(cardClickSurface());
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
     expect(storeEntries()).toHaveLength(1);
 
     // The Header icon calls expandAll(), which fires the registered expand.
