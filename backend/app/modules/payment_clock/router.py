@@ -19,6 +19,11 @@ Mounted at ``/api/v1/payment-clock/``.
     DELETE /notices/{notice_id}               - delete a notice recorded in error
 
     GET    /events/                           - the breach register
+    POST   /events/refresh                    - bring the register up to today
+
+Reads never write. The register is brought level by the routes that change a
+clock and by ``/events/refresh``; a GET that filed or deleted breaches would
+let a reader rewrite the record by picking an ``as_of`` date.
 
 ``/regimes/`` and ``/events/`` are declared before ``/applications/{id}`` only
 in the sense that they sit on different path roots, so no ordering trap
@@ -78,8 +83,9 @@ from app.modules.payment_clock.service import (
     list_regimes,
     notified_sum,
     recompute_schedule,
-    record_clock_events,
     regime_summary,
+    sync_clock_register,
+    sync_project_register,
     update_application,
 )
 from app.modules.payment_clock.validators import evaluate_clock
@@ -227,6 +233,7 @@ async def open_clock(
             detail=f"Unknown statutory regime {payload.regime_code!r}.",
         )
     application = await create_application(session, body=payload, regime=regime, created_by=str(user_id))
+    await sync_clock_register(session, application=application, regime=regime)
     return _application_response(application, regime)
 
 
@@ -243,17 +250,17 @@ async def get_clock(
 ) -> ApplicationClock:
     """One clock in full: dates, notices, findings, register and notified sum.
 
-    Reading is also what refreshes the breach register. The findings are a
-    function of the stored facts and of today's date, so a deadline passes
-    unattended between one read and the next and the register has to learn
-    about it without anybody pressing anything.
+    A pure read. The findings are computed for ``as_of`` (today by default)
+    and returned as they stand; the register is returned as it was filed and
+    is not touched. Filing happens on the routes that change the clock and on
+    ``POST /events/refresh``, so reading a clock as of some other date cannot
+    delete a breach from the record.
     """
     application, regime = await _load_application(session, application_id, user_id)
     notices = await list_notices(session, application_id=application.id)
     reading_date = as_of or date.today()
     snapshot = clock_snapshot(application, regime, notices, as_of=reading_date)
     findings = await evaluate_clock(snapshot, application_id=str(application.id))
-    await record_clock_events(session, application=application, findings=findings)
     events = await list_events(session, application_id=application.id)
     summary = notified_sum(application, regime, notices, as_of=reading_date)
     schedule = build_schedule(
@@ -289,6 +296,7 @@ async def amend_clock(
     """Change what was recorded. Statutory dates move only on a recompute."""
     application, regime = await _load_application(session, application_id, user_id)
     updated = await update_application(session, application=application, body=payload)
+    await sync_clock_register(session, application=updated, regime=regime)
     return _application_response(updated, regime)
 
 
@@ -340,6 +348,7 @@ async def recompute_clock(
                 "the regime computes."
             ),
         )
+    await sync_clock_register(session, application=application, regime=regime)
     return await get_clock(application_id, session, user_id, as_of=None)
 
 
@@ -380,8 +389,9 @@ async def serve_notice(
     single most important fact about the application it belongs to, and
     refusing to store it would delete the evidence the rules exist to report.
     """
-    application, _ = await _load_application(session, application_id, user_id)
+    application, regime = await _load_application(session, application_id, user_id)
     notice = await create_notice(session, application=application, body=payload, created_by=str(user_id))
+    await sync_clock_register(session, application=application, regime=regime)
     return NoticeResponse.model_validate(notice)
 
 
@@ -404,8 +414,9 @@ async def remove_notice(
     notice = await get_notice(session, notice_id=notice_id)
     if notice is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
-    await _load_application(session, notice.application_id, user_id)
+    application, regime = await _load_application(session, notice.application_id, user_id)
     await delete_notice(session, notice=notice)
+    await sync_clock_register(session, application=application, regime=regime)
 
 
 # ── Register ─────────────────────────────────────────────────────────────────
@@ -426,10 +437,10 @@ async def get_events(
 ) -> list[EventResponse]:
     """The breach register for one project.
 
-    Read-only and computed: every row here was written by a validation rule.
-    Rows appear when a clock is read and the rule sees the deadline has passed,
-    so a register that looks quiet on a project nobody opens is telling you
-    about the reading, not about the payments.
+    Read-only: every row here was written by a validation rule when a clock
+    changed or when the register was refreshed. A deadline that passed since
+    then is not on it until ``POST /events/refresh`` runs, so a quiet register
+    is telling you about the last refresh, not about the payments.
     """
     await verify_project_access(project_id, user_id, session)
     rows = await list_events(
@@ -439,6 +450,28 @@ async def get_events(
         limit=limit,
         offset=offset,
     )
+    return [EventResponse.model_validate(row) for row in rows]
+
+
+@router.post(
+    "/events/refresh",
+    response_model=list[EventResponse],
+    dependencies=[Depends(RequirePermission("payment_clock.write"))],
+)
+async def refresh_events(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+) -> list[EventResponse]:
+    """Bring the breach register of one project up to today.
+
+    The explicit write the reads no longer do: every clock on the project is
+    evaluated as of today and its breaches are filed, and the register is
+    returned as it now stands.
+    """
+    await verify_project_access(project_id, user_id, session)
+    await sync_project_register(session, project_id=project_id)
+    rows = await list_events(session, project_id=project_id, limit=1000)
     return [EventResponse.model_validate(row) for row in rows]
 
 

@@ -69,7 +69,7 @@ from app.modules.payment_clock.repository import regime_codes as _repo_regime_co
 from app.modules.payment_clock.repository import remove_application as _repo_remove_application
 from app.modules.payment_clock.repository import remove_notice as _repo_remove_notice
 from app.modules.payment_clock.schemas import ApplicationCreate, ApplicationUpdate, NoticeCreate
-from app.modules.payment_clock.validators import RULE_EVENT_TYPES
+from app.modules.payment_clock.validators import RULE_EVENT_TYPES, evaluate_clock
 
 logger = logging.getLogger(__name__)
 
@@ -617,6 +617,51 @@ async def record_clock_events(
     return written
 
 
+async def sync_clock_register(
+    session: AsyncSession,
+    *,
+    application: StatutoryPaymentApplication,
+    regime: PaymentRegime,
+) -> list[PaymentClockEvent]:
+    """File the breaches one clock shows today into the register.
+
+    The register is written here and only here, never by a read. It is always
+    evaluated as of today: a reader asking what the clock looked like on some
+    other date is asking a question, and the answer must not replace what was
+    filed, least of all by deleting a breach that had not happened yet on the
+    date they picked.
+    """
+    notices = await list_notices(session, application_id=application.id)
+    snapshot = clock_snapshot(application, regime, notices, as_of=date.today())
+    findings = await evaluate_clock(snapshot, application_id=str(application.id))
+    return await record_clock_events(session, application=application, findings=findings)
+
+
+async def sync_project_register(session: AsyncSession, *, project_id: Any) -> int:
+    """Bring the register of every clock on one project up to today.
+
+    The explicit counterpart of the reads: deadlines pass with nobody touching
+    a clock, so somebody (a person pressing the button, or a scheduled job)
+    has to ask for the register to be brought level. Returns how many clocks
+    were evaluated.
+    """
+    regimes = {regime.id: regime for regime in await list_regimes(session)}
+    count = 0
+    offset = 0
+    page = 500
+    while True:
+        rows = await list_applications(session, project_id=project_id, limit=page, offset=offset)
+        for application in rows:
+            regime = regimes.get(application.regime_id)
+            if regime is None:
+                continue
+            await sync_clock_register(session, application=application, regime=regime)
+            count += 1
+        if len(rows) < page:
+            return count
+        offset += page
+
+
 def regime_summary(regime: PaymentRegime) -> str:
     """The interest clause of a regime as one sentence, for a response body."""
     return interest_description(regime_spec(regime))
@@ -647,5 +692,7 @@ __all__ = [
     "recompute_schedule",
     "regime_spec",
     "regime_summary",
+    "sync_clock_register",
+    "sync_project_register",
     "update_application",
 ]

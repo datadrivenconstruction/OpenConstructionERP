@@ -1798,6 +1798,90 @@ class TestBreachRegister:
 
 
 @pytest.mark.asyncio
+class TestReadingFilesNothing:
+    """A GET on a clock is a read: the register moves only on writes and refresh.
+
+    The deadlines in ``_application`` (31 March 2026) passed long before any
+    date this suite runs on, so a read that files what it sees would leave rows
+    behind, and a read ``as_of`` the day before the deadline would delete them.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _no_project_check(self, monkeypatch):
+        from app.modules.payment_clock import router as clock_router
+
+        async def _allow(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(clock_router, "verify_project_access", _allow)
+
+    async def _count(self, session: AsyncSession, application_id: uuid.UUID) -> int:
+        return int(
+            await session.scalar(
+                select(func.count())
+                .select_from(PaymentClockEvent)
+                .where(PaymentClockEvent.application_id == application_id)
+            )
+            or 0
+        )
+
+    async def test_reading_a_clock_writes_no_register_rows(self, session):
+        from app.modules.payment_clock.router import get_clock
+
+        application, _ = await _application(session)
+        clock_payload = await get_clock(application.id, session, str(uuid.uuid4()), as_of=None)
+
+        # The breach is reported on the screen ...
+        assert any(f.rule_id == "payment_clock.notified_sum" for f in clock_payload.findings)
+        # ... and nothing was filed by looking at it.
+        assert clock_payload.events == []
+        assert await self._count(session, application.id) == 0
+
+    async def test_reading_as_of_an_earlier_date_keeps_the_filed_breach(self, session):
+        from app.modules.payment_clock.router import get_clock
+
+        application, regime = await _application(session)
+        await service.sync_clock_register(session, application=application, regime=regime)
+        filed = await self._count(session, application.id)
+        assert filed > 0
+
+        # The day before the payment notice deadline nothing had been breached;
+        # asking that question must not erase what has been filed since.
+        await get_clock(application.id, session, str(uuid.uuid4()), as_of=date(2026, 4, 1))
+        assert await self._count(session, application.id) == filed
+
+    async def test_refresh_files_the_breaches_of_every_clock_on_the_project(self, session):
+        from app.modules.payment_clock.router import refresh_events
+
+        application, _ = await _application(session)
+        assert await self._count(session, application.id) == 0
+
+        events = await refresh_events(session, str(uuid.uuid4()), project_id=application.project_id)
+
+        assert any(event.event_type == "payment_notice_missed" for event in events)
+        assert await self._count(session, application.id) == len(events)
+
+    async def test_serving_a_notice_brings_the_register_level(self, session):
+        from app.modules.payment_clock.router import serve_notice
+
+        application, _ = await _application(session)
+        await serve_notice(
+            application.id,
+            schemas.NoticeCreate(
+                notice_type="payment_notice",
+                issued_at=date(2026, 4, 15),
+                notified_amount=Decimal("118500.00"),
+                currency="GBP",
+                basis_of_calculation="Measured work to 31 March.",
+            ),
+            session,
+            str(uuid.uuid4()),
+        )
+        filed = {e.event_type for e in await service.list_events(session, application_id=application.id)}
+        assert "notice_out_of_time" in filed
+
+
+@pytest.mark.asyncio
 class TestBlockingFindings:
     async def test_errors_are_separated_from_the_notes(self, session):
         application, regime = await _application(session)
