@@ -178,6 +178,11 @@ class PaymentApplication(Base):
     # Lifecycle: draft | submitted | certified | paid.
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The contract progress claim this application was raised from, if any.
+    # Plain GUID with no foreign key, like every cross-module link: the claims
+    # table belongs to the contracts module. The service checks that the claim
+    # exists and sits under a contract of the same project.
+    progress_claim_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
