@@ -1171,13 +1171,8 @@ function ContractTable({
             <td colSpan={5} className="px-4 py-2 text-xs uppercase tracking-wide text-content-tertiary">
               {t('contracts.register_total', { defaultValue: 'Register total' })}
               <span className="ml-2 normal-case text-content-secondary">
-                (
-                {t('contracts.register_count', {
-                  count: rows.length,
-                  defaultValue_one: '{{count}} contract',
-                  defaultValue: '{{count}} contracts',
-                })}
-                )
+                ({rows.length}{' '}
+                {t('contracts.contracts_label', { defaultValue: 'contracts' })})
               </span>
             </td>
             <td className="px-4 py-2 text-right text-sm font-medium">
