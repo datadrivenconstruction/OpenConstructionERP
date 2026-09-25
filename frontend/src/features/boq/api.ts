@@ -634,6 +634,25 @@ export function isSection(pos: Pick<Position, 'unit'>): boolean {
   return !pos.unit || pos.unit.trim() === '' || pos.unit.trim().toLowerCase() === 'section';
 }
 
+/** Direct cost of a bill: the sum of its line items in the base currency.
+ *
+ * Section rows are headers and are skipped. Most carry a zero total, but a
+ * section written by an approved change order stores the sum of its lines on
+ * the header itself, so a sum over every row counted that change twice in the
+ * editor footer and everything read from it. The server's rollups skip
+ * sections the same way.
+ */
+export function billDirectCost(
+  positions: ReadonlyArray<Pick<Position, 'unit' | 'total' | 'quantity' | 'metadata'>>,
+  baseCurrency: string | undefined | null,
+  fxRates: Array<{ currency: string; rate: number }> | undefined | null,
+): number {
+  return positions.reduce(
+    (sum, p) => (isSection(p) ? sum : sum + resourceAwareTotalInBase(p, baseCurrency, fxRates)),
+    0,
+  );
+}
+
 /** A position nobody has typed into yet: no description and no quantity.
  *
  * "Add Position" creates the row on the server straight away and opens its

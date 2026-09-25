@@ -4,6 +4,7 @@ import {
   normalizePosition,
   normalizePositions,
   groupPositionsIntoSections,
+  billDirectCost,
   type Position,
 } from './api';
 
@@ -289,5 +290,39 @@ describe('groupPositionsIntoSections', () => {
       fxRates: [{ currency: 'USD', rate: 0.9 }],
     });
     expect(result.sections[0].subtotal).toBeCloseTo(200);
+  });
+});
+
+describe('billDirectCost', () => {
+  it('counts an approved change order once, not on its header and its lines', () => {
+    // The change-order writeback stores the sum of its lines on the section
+    // header (total 300 here) as well as on the lines themselves.
+    const positions = [
+      makePosition({ id: 'a', total: 1000 }),
+      makePosition({
+        id: 'co',
+        ordinal: 'CO-001',
+        unit: 'section',
+        quantity: 0,
+        unit_rate: 0,
+        total: 300,
+      }),
+      makePosition({ id: 'co1', parent_id: 'co', ordinal: 'CO-001.001', total: 200 }),
+      makePosition({ id: 'co2', parent_id: 'co', ordinal: 'CO-001.002', total: 100 }),
+    ];
+    expect(billDirectCost(positions, 'EUR', [])).toBe(1300);
+  });
+
+  it('agrees with the section subtotals the grid shows', () => {
+    const positions = [
+      makePosition({ id: 's', unit: '', quantity: 0, unit_rate: 0, total: 0 }),
+      makePosition({ id: 'l1', parent_id: 's', total: 40 }),
+      makePosition({ id: 'l2', total: 60 }),
+    ];
+    const grouped = groupPositionsIntoSections(positions);
+    const shown =
+      grouped.sections.reduce((s, g) => s + g.subtotal, 0) +
+      grouped.ungrouped.reduce((s, p) => s + Number(p.total), 0);
+    expect(billDirectCost(positions, 'EUR', [])).toBe(shown);
   });
 });
