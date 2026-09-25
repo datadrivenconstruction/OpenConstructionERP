@@ -21,6 +21,7 @@ import {
   CUSTOM_CURRENCY_SENTINEL,
   lookupCountryDefault,
 } from './currencyGroups';
+import { COUNTRIES } from '@/shared/lib/countries';
 
 describe('normalizeCurrencyCode', () => {
   it('upper-cases lower/mixed-case input', () => {
@@ -81,5 +82,15 @@ describe('Croatia', () => {
   it('defaults a Croatian project to the Croatia region and the euro', () => {
     expect(lookupCountryDefault('HR')).toEqual({ region: 'Croatia', currency: 'EUR' });
     expect(lookupCountryDefault('hr')).toEqual({ region: 'Croatia', currency: 'EUR' });
+  });
+});
+
+describe('Bulgaria', () => {
+  it('does not offer the lev for a new project, the euro replaced it on 2026-01-01', () => {
+    expect(CURRENCY_CODES.has('BGN')).toBe(false);
+  });
+
+  it('lists the euro as Bulgaria\'s currency', () => {
+    expect(COUNTRIES.find((country) => country.code === 'BG')?.currency).toBe('EUR');
   });
 });
