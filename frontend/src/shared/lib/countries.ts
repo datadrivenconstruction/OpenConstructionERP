@@ -51,7 +51,7 @@ export const COUNTRIES: ReadonlyArray<Country> = [
   { code: 'BD', name: 'Bangladesh', nameLocal: 'বাংলাদেশ', currency: 'BDT' },
   { code: 'BE', name: 'Belgium', nameLocal: 'België', currency: 'EUR' },
   { code: 'BF', name: 'Burkina Faso', currency: 'XOF' },
-  { code: 'BG', name: 'Bulgaria', nameLocal: 'България', currency: 'BGN' },
+  { code: 'BG', name: 'Bulgaria', nameLocal: 'България', currency: 'EUR' },
   { code: 'BH', name: 'Bahrain', nameLocal: 'البحرين', currency: 'BHD' },
   { code: 'BI', name: 'Burundi', currency: 'BIF' },
   { code: 'BJ', name: 'Benin', nameLocal: 'Bénin', currency: 'XOF' },

@@ -239,7 +239,6 @@ export const CURRENCY_GROUPS: OptionGroup[] = [
       { value: 'RUB', label: 'RUB (₽) - Russian Ruble' },
       { value: 'HUF', label: 'HUF (Ft) - Hungarian Forint' },
       { value: 'RON', label: 'RON (lei) - Romanian Leu' },
-      { value: 'BGN', label: 'BGN (лв) - Bulgarian Lev' },
       { value: 'ISK', label: 'ISK (kr) - Icelandic Krona' },
     ],
   },
