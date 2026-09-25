@@ -295,3 +295,32 @@ def test_a_cost_impact_is_read_only_when_it_is_a_plain_figure(raw: str, expected
     from app.modules.cost_recovery.service import _parse_money
 
     assert _parse_money(raw) == expected
+
+
+@pytest.mark.asyncio
+async def test_a_cost_impact_in_another_currency_keeps_its_currency(session: AsyncSession) -> None:
+    pid = await _project(session, currency="USD")
+    ncr = await _ncr(session, pid)
+    ncr.cost_impact = "EUR 8400"
+    await session.flush()
+
+    bc = await create_back_charge(session, pid, BackChargeCreate(ncr_id=ncr.id))
+
+    assert bc.gross_amount == Decimal("8400")
+    assert bc.currency == "EUR"
+
+
+@pytest.mark.asyncio
+async def test_a_charge_apportioned_under_its_own_label_is_still_pending(session: AsyncSession) -> None:
+    pid = await _project(session)
+    bc = await create_back_charge(
+        session, pid, BackChargeCreate(responsible_party="Drywall Co", gross_amount=Decimal("500"))
+    )
+    sub = await _sub(session)
+    await update_back_charge(session, pid, bc.id, BackChargeUpdate(subcontractor_id=sub.id))
+    await _agree(session, pid, bc.id)
+    await apportion_back_charge(session, pid, bc.id, [ApportionmentShareIn(party="Drywall Co", share_pct=Decimal("1"))])
+
+    pending = await pending_backcharges(session, sub.id)
+
+    assert [p.amount for p in pending.items] == [Decimal("500.00")]

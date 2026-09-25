@@ -500,7 +500,9 @@ class CvrService:
         """Update an IPA, always recomputing net_value = gross - retention."""
         application = await self.get_payment_application(app_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
-        if fields.get("progress_claim_id") is not None:
+        # Checked only when it changes, so an echoed link to a claim deleted
+        # since does not block an unrelated edit.
+        if fields.get("progress_claim_id") is not None and fields["progress_claim_id"] != application.progress_claim_id:
             await self._claim_in_project(application.project_id, fields["progress_claim_id"])
         if "currency" in fields and fields["currency"] is not None:
             fields["currency"] = str(fields["currency"]).strip().upper()

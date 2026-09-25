@@ -165,3 +165,19 @@ async def test_the_picker_lists_only_this_projects_claims(session: AsyncSession)
     claims = await svc.list_progress_claims_for_project(pid)
 
     assert [c.id for c in claims] == [own.id]
+
+
+@pytest.mark.asyncio
+async def test_an_echoed_link_to_a_vanished_claim_does_not_block_an_edit(session: AsyncSession) -> None:
+    pid = await _project(session)
+    svc = CvrService(session)
+    app = await svc.create_payment_application(PaymentApplicationCreate(project_id=pid, period="2026-07"))
+    gone = uuid.uuid4()
+    app.progress_claim_id = gone
+    await session.flush()
+
+    updated = await svc.update_payment_application(
+        app.id, PaymentApplicationUpdate(notes="Resubmitted", progress_claim_id=gone)
+    )
+
+    assert updated.notes == "Resubmitted"

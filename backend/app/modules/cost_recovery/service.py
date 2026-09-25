@@ -197,27 +197,34 @@ async def _resolve_party_link(
     )
 
 
-def _parse_money(raw: object) -> Decimal | None:
-    """A money figure from a free-text source field, or None when not numeric.
+def _parse_money_and_code(raw: object) -> tuple[Decimal | None, str]:
+    """A money figure and the currency code written with it, from free text.
 
     An NCR's cost impact is free text, often written as ``EUR 8400``: a leading
-    or trailing three-letter code is dropped. Anything else that is not a plain
+    or trailing three-letter code is split off and returned, so the amount is
+    never relabelled into another currency. Anything else that is not a plain
     decimal with a point (a decimal comma, a range, prose) is not guessed at.
     """
     text = str(raw or "").strip().replace(" ", "")
+    code = ""
     if len(text) > 3 and text[:3].isalpha():
-        text = text[3:]
+        code, text = text[:3].upper(), text[3:]
     elif len(text) > 3 and text[-3:].isalpha():
-        text = text[:-3]
+        code, text = text[-3:].upper(), text[:-3]
     if not text:
-        return None
+        return None, ""
     try:
         value = Decimal(text)
     except InvalidOperation:
-        return None
+        return None, ""
     if not value.is_finite() or value < 0:
-        return None
-    return value
+        return None, ""
+    return value, code
+
+
+def _parse_money(raw: object) -> Decimal | None:
+    """The amount half of :func:`_parse_money_and_code`."""
+    return _parse_money_and_code(raw)[0]
 
 
 @dataclass
@@ -256,7 +263,7 @@ async def _resolve_source(
         fill.source_ref = ncr.ncr_number or ""
         fill.description = fill.description or ncr.title or ""
         if fill.gross_amount is None:
-            fill.gross_amount = _parse_money(ncr.cost_impact)
+            fill.gross_amount, fill.currency = _parse_money_and_code(ncr.cost_impact)
     return fill
 
 
@@ -655,8 +662,11 @@ async def pending_backcharges(
         outstanding = item.outstanding
         shares = shares_by_charge.get(row.id)
         if shares:
+            # The charge's own label names this subcontractor too: the
+            # apportionment form seeds its first row from it.
+            row_names = names | {(row.responsible_party or "").strip().lower()} - {""}
             mine = sum(
-                (s.share_amount or Decimal("0") for s in shares if (s.party or "").strip().lower() in names),
+                (s.share_amount or Decimal("0") for s in shares if (s.party or "").strip().lower() in row_names),
                 Decimal("0"),
             )
             chargeable = item.chargeable_amount
