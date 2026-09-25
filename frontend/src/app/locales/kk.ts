@@ -42959,6 +42959,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, бөлімдер: {{count}}",
     "boq.import_toast.summary_skipped": "Өткізілген жиынтық, салық немесе қорытынды жолдары: {{count}}",
     "boq.import_toast.errors": "Қателер: {{count}}",
+    "boq.markup_region.gulf": "Парсы шығанағы елдері",
+    "boq.markup_region.generic": "Жалпы халықаралық",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позициялар",

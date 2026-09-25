@@ -42967,6 +42967,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML، حصے: {{count}}",
     "boq.import_toast.summary_skipped": "چھوڑی گئی کل، ٹیکس یا خلاصہ کی سطریں: {{count}}",
     "boq.import_toast.errors": "خرابیاں: {{count}}",
+    "boq.markup_region.gulf": "خلیجی ممالک",
+    "boq.markup_region.generic": "عمومی بین الاقوامی",
     "boq.import_preview.stats_currency": "کرنسی",
     "boq.import_preview.stats_format": "فارمیٹ",
     "boq.import_preview.stats_positions": "آئٹم",

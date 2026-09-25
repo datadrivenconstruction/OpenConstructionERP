@@ -42851,6 +42851,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, bagian: {{count}}",
     "boq.import_toast.summary_skipped": "Baris jumlah, pajak, atau rekapitulasi yang dilewati: {{count}}",
     "boq.import_toast.errors": "Kesalahan: {{count}}",
+    "boq.markup_region.gulf": "Negara-negara Teluk",
+    "boq.markup_region.generic": "Internasional umum",
     "boq.import_preview.stats_currency": "Mata uang",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Item",

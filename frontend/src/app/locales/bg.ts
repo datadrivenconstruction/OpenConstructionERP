@@ -42983,6 +42983,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, раздели: {{count}}",
     "boq.import_toast.summary_skipped": "Пропуснати редове за общо, данък или рекапитулация: {{count}}",
     "boq.import_toast.errors": "Грешки: {{count}}",
+    "boq.markup_region.gulf": "Държави от Персийския залив",
+    "boq.markup_region.generic": "Общ международен",
     "boq.import_preview.stats_currency": "Валута",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позиции",

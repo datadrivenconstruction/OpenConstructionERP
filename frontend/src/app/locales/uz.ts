@@ -43891,6 +43891,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, bo‘limlar: {{count}}",
     "boq.import_toast.summary_skipped": "O‘tkazib yuborilgan jami, soliq yoki yig‘ma qatorlari: {{count}}",
     "boq.import_toast.errors": "Xatolar: {{count}}",
+    "boq.markup_region.gulf": "Fors ko‘rfazi davlatlari",
+    "boq.markup_region.generic": "Umumiy xalqaro",
     "boq.import_preview.stats_currency": "Valyuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Pozitsiyalar",

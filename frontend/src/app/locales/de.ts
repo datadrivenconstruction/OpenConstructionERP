@@ -45630,6 +45630,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, Abschnitte: {{count}}",
     "boq.import_toast.summary_skipped": "Ausgelassene Summen-, Steuer- oder Zusammenstellungszeilen: {{count}}",
     "boq.import_toast.errors": "Fehler: {{count}}",
+    "boq.markup_region.gulf": "Golfstaaten",
+    "boq.markup_region.generic": "Allgemein international",
     "boq.import_preview.stats_currency": "Währung",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Positionen",

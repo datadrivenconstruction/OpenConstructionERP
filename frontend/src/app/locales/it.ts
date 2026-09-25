@@ -44012,6 +44012,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, sezioni: {{count}}",
     "boq.import_toast.summary_skipped": "Righe di totale, imposta o riepilogo escluse: {{count}}",
     "boq.import_toast.errors": "Errori: {{count}}",
+    "boq.markup_region.gulf": "Stati del Golfo",
+    "boq.markup_region.generic": "Internazionale generico",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Formato",
     "boq.import_preview.stats_positions": "Voci",

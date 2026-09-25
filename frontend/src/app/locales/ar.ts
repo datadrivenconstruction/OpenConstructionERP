@@ -45148,6 +45148,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML، الأقسام: {{count}}",
     "boq.import_toast.summary_skipped": "أسطر الإجمالي أو الضريبة أو الملخص المستبعدة: {{count}}",
     "boq.import_toast.errors": "الأخطاء: {{count}}",
+    "boq.markup_region.gulf": "دول الخليج",
+    "boq.markup_region.generic": "دولي عام",
     "boq.import_preview.stats_currency": "العملة",
     "boq.import_preview.stats_format": "التنسيق",
     "boq.import_preview.stats_positions": "البنود",

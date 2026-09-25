@@ -44393,6 +44393,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML、セクション: {{count}}",
     "boq.import_toast.summary_skipped": "除外した合計・税・集計の行: {{count}}",
     "boq.import_toast.errors": "エラー: {{count}}",
+    "boq.markup_region.gulf": "湾岸諸国",
+    "boq.markup_region.generic": "汎用（国際）",
     "boq.import_preview.stats_currency": "通貨",
     "boq.import_preview.stats_format": "フォーマット",
     "boq.import_preview.stats_positions": "項目数",

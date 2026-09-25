@@ -43894,6 +43894,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, oddíly: {{count}}",
     "boq.import_toast.summary_skipped": "Vynechané řádky součtu, daně nebo rekapitulace: {{count}}",
     "boq.import_toast.errors": "Chyby: {{count}}",
+    "boq.markup_region.gulf": "Státy Perského zálivu",
+    "boq.markup_region.generic": "Obecný mezinárodní",
     "boq.import_preview.stats_currency": "Měna",
     "boq.import_preview.stats_format": "Formát",
     "boq.import_preview.stats_positions": "Položky",

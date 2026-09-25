@@ -43136,6 +43136,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, secțiuni: {{count}}",
     "boq.import_toast.summary_skipped": "Rânduri de total, taxă sau centralizator omise: {{count}}",
     "boq.import_toast.errors": "Erori: {{count}}",
+    "boq.markup_region.gulf": "Statele din Golf",
+    "boq.markup_region.generic": "Internațional generic",
     "boq.import_preview.stats_currency": "Monedă",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Articole",

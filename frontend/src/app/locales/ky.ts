@@ -43093,6 +43093,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, бөлүмдөр: {{count}}",
     "boq.import_toast.summary_skipped": "Өткөрүлгөн жыйынтык, салык же топтоо саптары: {{count}}",
     "boq.import_toast.errors": "Каталар: {{count}}",
+    "boq.markup_region.gulf": "Перс булуңунун өлкөлөрү",
+    "boq.markup_region.generic": "Жалпы эл аралык",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позициялар",

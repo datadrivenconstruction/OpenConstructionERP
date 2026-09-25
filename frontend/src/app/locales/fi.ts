@@ -42983,6 +42983,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, osiot: {{count}}",
     "boq.import_toast.summary_skipped": "Pois jätetyt summa-, vero- tai yhteenvetorivit: {{count}}",
     "boq.import_toast.errors": "Virheet: {{count}}",
+    "boq.markup_region.gulf": "Persianlahden valtiot",
+    "boq.markup_region.generic": "Yleinen kansainvälinen",
     "boq.import_preview.stats_currency": "Valuutta",
     "boq.import_preview.stats_format": "Muoto",
     "boq.import_preview.stats_positions": "Nimikkeet",

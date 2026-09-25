@@ -42988,6 +42988,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, seksjoner: {{count}}",
     "boq.import_toast.summary_skipped": "Utelatte sum-, skatte- eller sammendragslinjer: {{count}}",
     "boq.import_toast.errors": "Feil: {{count}}",
+    "boq.markup_region.gulf": "Gulfstatene",
+    "boq.markup_region.generic": "Generell internasjonal",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Poster",

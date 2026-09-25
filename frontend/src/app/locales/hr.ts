@@ -43138,6 +43138,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, poglavlja: {{count}}",
     "boq.import_toast.summary_skipped": "Izostavljeni retci ukupnog iznosa, poreza ili rekapitulacije: {{count}}",
     "boq.import_toast.errors": "Pogreške: {{count}}",
+    "boq.markup_region.gulf": "Zaljevske države",
+    "boq.markup_region.generic": "Opće međunarodno",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Stavke",
