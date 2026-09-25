@@ -15,6 +15,9 @@ Subscribers wired:
     ``ncr.created``                  → ``bump_rating_from_event(kind="ncr")``
     ``safety.incident.created``      → ``bump_rating_from_event(kind="hse")``
     ``schedule.activity.slipped``    → ``bump_rating_from_event(kind="schedule")``
+    ``contracts.contract.signed``    → commit a subcontract's value to the budget
+    ``contracts.claim.paid``         → pay a subcontractor claim's payable
+    ``invoice.paid``                 → draw the subcontract commitment down
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ from sqlalchemy import select
 
 from app.core.events import Event, event_bus
 from app.database import async_session_factory
+from app.modules.subcontractors import finance_bridge
 from app.modules.subcontractors.models import Subcontractor
 from app.modules.subcontractors.service import SubcontractorService
 
@@ -103,11 +107,97 @@ async def _on_defect_recorded(event: Event) -> None:
     await _bump("ncr", event)
 
 
+def _uuid(value: object) -> uuid.UUID | None:
+    try:
+        return uuid.UUID(str(value)) if value else None
+    except (ValueError, TypeError):
+        return None
+
+
+# ── Subcontract money ──────────────────────────────────────────────────
+#
+# A subcontract written in the contracts module (a contract whose counterparty
+# is a subcontractor) reaches the budget through these. Unlike the rating bumps
+# above, a failure here is money that did not move, so it is left to the bus,
+# which logs it at exception level and records it on the publish result.
+
+
+async def _on_contract_signed(event: Event) -> None:
+    """``contracts.contract.signed`` → commit a subcontract's value to the budget."""
+    from app.modules.contracts.models import Contract  # noqa: PLC0415
+
+    contract_id = _uuid((event.data or {}).get("contract_id"))
+    if contract_id is None:
+        return
+    async with async_session_factory() as session:
+        contract = await session.get(Contract, contract_id)
+        if contract is None or contract.counterparty_type != "subcontractor":
+            return
+        await finance_bridge.commit_subcontract(
+            session,
+            project_id=contract.project_id,
+            source=finance_bridge.contract_source(contract.id),
+            amount=contract.total_value,
+        )
+        await session.commit()
+
+
+async def _on_claim_paid(event: Event) -> None:
+    """``contracts.claim.paid`` → pay a subcontractor claim's payable through finance.
+
+    Marking a subcontractor's claim paid used to stop at the claim: its invoice
+    stayed a draft, so the money never reached actual and never came off the
+    commitment. A client claim is not touched; what the client paid us is
+    booked on the receivable by whoever records the receipt.
+    """
+    from app.modules.contracts.models import Contract, ProgressClaim  # noqa: PLC0415
+    from app.modules.finance.service import FinanceService  # noqa: PLC0415
+
+    data = event.data or {}
+    claim_id = _uuid(data.get("claim_id"))
+    if claim_id is None:
+        return
+    async with async_session_factory() as session:
+        claim = await session.get(ProgressClaim, claim_id)
+        if claim is None:
+            return
+        contract = await session.get(Contract, claim.contract_id)
+        if contract is None or contract.counterparty_type != "subcontractor":
+            return
+        actor = data.get("actor") or None
+        invoice = await FinanceService(session).create_receivable_from_claim(claim_id, actor_id=actor)
+        await finance_bridge.settle_payable(session, invoice.id, actor_id=actor)
+        await session.commit()
+
+
+async def _on_invoice_paid(event: Event) -> None:
+    """``invoice.paid`` → draw a subcontract's commitment down by the paid gross.
+
+    Covers a subcontractor's payable paid from the finance screens. A payment
+    made through this module or a paid claim has drawn it down already, and the
+    per-invoice marker makes this a no-op then.
+    """
+    from app.modules.finance.models import Invoice  # noqa: PLC0415
+
+    invoice_id = _uuid((event.data or {}).get("invoice_id"))
+    if invoice_id is None:
+        return
+    async with async_session_factory() as session:
+        invoice = await session.get(Invoice, invoice_id)
+        if invoice is None:
+            return
+        await finance_bridge.draw_down_for_invoice(session, invoice)
+        await session.commit()
+
+
 _SUBSCRIPTIONS: list[tuple[str, object]] = [
     ("ncr.created", _on_ncr_created),
     ("safety.incident.created", _on_safety_incident_created),
     ("schedule.activity.slipped", _on_schedule_slipped),
     ("subcontractors.defect.recorded", _on_defect_recorded),
+    ("contracts.contract.signed", _on_contract_signed),
+    ("contracts.claim.paid", _on_claim_paid),
+    ("invoice.paid", _on_invoice_paid),
 ]
 
 

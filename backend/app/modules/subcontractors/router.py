@@ -862,7 +862,7 @@ async def mark_payment_paid(
     """Mark a finance-approved payment application as paid."""
     svc = SubcontractorService(session)
     await _verify_payment_application_project(payment_id, user_id, session, svc)
-    entity = await svc.mark_paid(payment_id)
+    entity = await svc.mark_paid(payment_id, user_id=str(user_id) if user_id else None)
     return PaymentApplicationResponse.model_validate(entity)
 
 
