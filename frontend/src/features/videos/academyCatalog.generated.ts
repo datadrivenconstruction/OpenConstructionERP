@@ -1542,7 +1542,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "EP02_L1",
-      "status": "coming_soon",
+      "youtubeId": "kEN-F92hNZc",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "series": "playbook-getting-started",
@@ -1567,10 +1568,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/schedule-advanced"
       ],
       "result": "rate",
-      "title": "🇺🇸 EN • USA • 01/03 | Construction Cost Database: Check a Unit Rate",
+      "title": "Construction Cost Database: Check a Unit Rate",
       "description": "Every number in an estimate comes from somewhere. Find a unit rate in a construction cost database, see what it is made of, and adjust it to your market before it goes into a bid.",
       "duration": 242,
-      "cover": "/assets/videos/academy/ep02-l1.webp",
+      "cover": "https://i.ytimg.com/vi/kEN-F92hNZc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1592,7 +1593,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "EP02_L2",
-      "status": "coming_soon",
+      "youtubeId": "zGgfX19b3gc",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "US",
@@ -1620,10 +1622,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "bill",
-      "title": "🇺🇸 EN • DENVER • 02/03 | Build a Construction Estimate Step by Step",
+      "title": "Build a Construction Estimate Step by Step",
       "description": "Build a priced construction estimate from an empty page. A Denver duplex, ten positions in five sections, and every rate traced back to where it came from.",
       "duration": 288,
-      "cover": "/assets/videos/academy/ep02-l2.webp",
+      "cover": "https://i.ytimg.com/vi/zGgfX19b3gc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1645,7 +1647,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "EP02_L3",
-      "status": "coming_soon",
+      "youtubeId": "FRI5_7CsZT0",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "series": "playbook-getting-started",
@@ -1669,10 +1672,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ],
       "result": "bill",
-      "title": "🇺🇸 EN • USA • 03/03 | Construction Pricing: Overhead, Profit & Contingency",
+      "title": "Construction Pricing: Overhead, Profit & Contingency",
       "description": "The estimate says what the job costs. The price says what you charge. Turn a direct cost into a bid price with overhead, profit and contingency, then check it, save a version and export it.",
       "duration": 234,
-      "cover": "/assets/videos/academy/ep02-l3.webp",
+      "cover": "https://i.ytimg.com/vi/FRI5_7CsZT0/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1694,7 +1697,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA02",
-      "status": "coming_soon",
+      "youtubeId": "LejLQ4skfvM",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1723,10 +1727,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ],
       "result": "bill",
-      "title": "🇨🇦 EN • TORONTO • 01/06 | Price a Construction Job",
+      "title": "Price a Construction Job",
       "description": "Every bid on a Toronto job comes down to one number: your contract price, in Canadian dollars, with markups and bond, before HST. Price six stacked townhomes and turn their cost into that number.",
       "duration": 289,
-      "cover": "/assets/videos/academy/ca02.webp",
+      "cover": "https://i.ytimg.com/vi/LejLQ4skfvM/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1748,7 +1752,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA03",
-      "status": "coming_soon",
+      "youtubeId": "7u7Ur3ZFe94",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1773,10 +1778,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/bid-management"
       ],
       "result": "award",
-      "title": "🇨🇦 EN • TORONTO • 02/06 | Tender Work to Subcontractors",
+      "title": "Tender Work to Subcontractors",
       "description": "Three drywall subtrades priced your townhomes, and one came in more than a fifth lower. In Canada, carry the wrong sub's price in your bid and you may be held to it.",
       "duration": 263,
-      "cover": "/assets/videos/academy/ca03.webp",
+      "cover": "https://i.ytimg.com/vi/7u7Ur3ZFe94/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1798,7 +1803,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA04",
-      "status": "coming_soon",
+      "youtubeId": "b-qv_emcDwc",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1826,10 +1832,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ],
       "result": "invoice",
-      "title": "🇨🇦 EN • ONTARIO • 03/06 | CCDC 2 Monthly Progress Draw",
+      "title": "CCDC 2 Monthly Progress Draw",
       "description": "Once a month on a CCDC 2 job you bill the owner for the work in place, and Ontario law makes the owner hold back 10%. Set up the contract, bill a $184,300 draw, and see what stays on your own calendar.",
       "duration": 298,
-      "cover": "/assets/videos/academy/ca04.webp",
+      "cover": "https://i.ytimg.com/vi/b-qv_emcDwc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1851,7 +1857,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA05",
-      "status": "coming_soon",
+      "youtubeId": "aQlkuS7ShCM",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1876,10 +1883,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "invoice",
-      "title": "🇨🇦 EN • ONTARIO • 04/06 | The Construction Payment Clock",
+      "title": "The Construction Payment Clock",
       "description": "In Ontario, an owner has 28 days to pay a proper invoice, and a contract cannot push that back. Start the payment clock on this month's invoice and see every date that matters.",
       "duration": 275,
-      "cover": "/assets/videos/academy/ca05.webp",
+      "cover": "https://i.ytimg.com/vi/aQlkuS7ShCM/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1901,7 +1908,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA06",
-      "status": "coming_soon",
+      "youtubeId": "tj7McUl37X0",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1929,10 +1937,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/value"
       ],
       "result": "change",
-      "title": "🇨🇦 EN • CANADA • 05/06 | Manage Construction Change Orders",
+      "title": "Manage Construction Change Orders",
       "description": "Your crew hits rock the soils report never showed, and the work, the price and the finish date all change. See how CCDC 2 handles it, then record the change order, price it against your estimate and get it approved.",
       "duration": 285,
-      "cover": "/assets/videos/academy/ca06.webp",
+      "cover": "https://i.ytimg.com/vi/tj7McUl37X0/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1954,7 +1962,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "CA07",
-      "status": "coming_soon",
+      "youtubeId": "fKGh2e6pJqc",
+      "status": "published",
       "channel": "academy",
       "language": "en",
       "market": "CA",
@@ -1986,10 +1995,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/field-time"
       ],
       "result": "handover",
-      "title": "🇨🇦 EN • CANADA • 06/06 | Schedule to Substantial Performance",
+      "title": "Schedule to Substantial Performance",
       "description": "On an Ontario job, the day that matters most for your money is the day the work is substantially performed. Take a townhome project from the schedule to that finish line, and see how it starts the holdback clock.",
       "duration": 289,
-      "cover": "/assets/videos/academy/ca07.webp",
+      "cover": "https://i.ytimg.com/vi/fKGh2e6pJqc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2011,7 +2020,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "QC01",
-      "status": "coming_soon",
+      "youtubeId": "CMuMMej0zwM",
+      "status": "published",
       "channel": "academy",
       "language": "fr",
       "market": "CA",
@@ -2035,10 +2045,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/estimate-basis",
         "/reports"
       ],
-      "title": "⚜️ FR • QUÉBEC • 01/05 | Démarrer avec OpenConstructionERP en français",
+      "title": "Démarrer avec OpenConstructionERP en français",
       "description": "L'application s'affiche en français, mais c'est le français de France. Passez votre logiciel de construction en français et faites le lien entre ses mots et ceux d'un chantier québécois.",
       "duration": 226,
-      "cover": "/assets/videos/academy/qc01.webp",
+      "cover": "https://i.ytimg.com/vi/CMuMMej0zwM/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2064,7 +2074,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "QC02",
-      "status": "coming_soon",
+      "youtubeId": "7eT4lg1ggQY",
+      "status": "published",
       "channel": "academy",
       "language": "fr",
       "market": "CA",
@@ -2091,10 +2102,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/price-index"
       ],
       "result": "bill",
-      "title": "⚜️ FR • MONTRÉAL • 02/05 | Estimer un projet de construction",
+      "title": "Estimer un projet de construction",
       "description": "Toute soumission se résume à un montant : le prix du contrat, avant taxes. Estimez un immeuble locatif à Montréal, ajoutez vos majorations et établissez ce prix.",
       "duration": 258,
-      "cover": "/assets/videos/academy/qc02.webp",
+      "cover": "https://i.ytimg.com/vi/7eT4lg1ggQY/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2120,7 +2131,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "QC03",
-      "status": "coming_soon",
+      "youtubeId": "gmg2h1JcuGI",
+      "status": "published",
       "channel": "academy",
       "language": "fr",
       "market": "CA",
@@ -2144,10 +2156,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/bid-management"
       ],
       "result": "award",
-      "title": "⚜️ FR • QUÉBEC • 03/05 | Soumissions et BSDQ",
+      "title": "Soumissions et BSDQ",
       "description": "Trois sous-traitants ont soumissionné par le BSDQ, et la plus basse soumission est arrivée sans la garantie exigée. Voyez pourquoi vous ne pouvez pas l'accepter, même si l'application la recommande.",
       "duration": 271,
-      "cover": "/assets/videos/academy/qc03.webp",
+      "cover": "https://i.ytimg.com/vi/gmg2h1JcuGI/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2177,7 +2189,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "QC04",
-      "status": "coming_soon",
+      "youtubeId": "4LTXS0QEkzY",
+      "status": "published",
       "channel": "academy",
       "language": "fr",
       "market": "CA",
@@ -2204,10 +2217,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ],
       "result": "invoice",
-      "title": "⚜️ FR • QUÉBEC • 04/05 | Facturation, retenue et hypothèque légale",
+      "title": "Facturation, retenue et hypothèque légale",
       "description": "Votre première demande de paiement s'élève à 184 300 $, avec une retenue de 10 % prévue au contrat. Préparez-la, puis voyez comment conserver votre hypothèque légale au Québec.",
       "duration": 277,
-      "cover": "/assets/videos/academy/qc04.webp",
+      "cover": "https://i.ytimg.com/vi/4LTXS0QEkzY/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2237,7 +2250,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
     },
     {
       "id": "QC05",
-      "status": "coming_soon",
+      "youtubeId": "IWjtAujWPAA",
+      "status": "published",
       "channel": "academy",
       "language": "fr",
       "market": "CA",
@@ -2265,10 +2279,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "handover",
-      "title": "⚜️ FR • QUÉBEC • 05/05 | Réception des travaux et déficiences",
+      "title": "Réception des travaux et déficiences",
       "description": "À la fin d'un chantier au Québec, le jour qui compte le plus pour votre argent, c'est la réception des travaux. Suivez vos déficiences jusqu'à leur vérification et voyez ce que la réception déclenche.",
       "duration": 224,
-      "cover": "/assets/videos/academy/qc05.webp",
+      "cover": "https://i.ytimg.com/vi/IWjtAujWPAA/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2321,7 +2335,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/estimate-basis"
       ],
       "result": "cost",
-      "title": "01/04 · Budget de chantier : justifier chaque coût | OpenConstructionERP",
+      "title": "Budget de chantier : justifier chaque coût",
       "description": "240 000 USD de budget : pouvez-vous expliquer chaque poste ? Ce tutoriel montre comment relier les quantités, les prix et leurs sources dans OpenConstructionERP.",
       "duration": 306,
       "cover": "https://i.ytimg.com/vi/L1DUikMF04Y/maxresdefault.jpg",
@@ -2371,7 +2385,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/site-inventory"
       ],
       "result": "order",
-      "title": "02/04 · Achats et stock : suivre les quantités | OpenConstructionERP",
+      "title": "Achats et stock : suivre les quantités",
       "description": "1 000 sacs de ciment commandés, 600 encore en stock : comment expliquer l’écart ? Suivez une commande, une réception et une consommation dans OpenConstructionERP.",
       "duration": 277,
       "cover": "https://i.ytimg.com/vi/ZXbWsG_Syuo/maxresdefault.jpg",
@@ -2423,7 +2437,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/contracts"
       ],
       "result": "site",
-      "title": "03/04 · Chantier : suivre les heures et le matériel | OpenConstructionERP",
+      "title": "Chantier : suivre les heures et le matériel",
       "description": "64 heures-personnes : quel travail a été réalisé ? Ce tutoriel relie le pointage de l’équipe, un volume mesuré séparément et l’utilisation du matériel dans OpenConstructionERP.",
       "duration": 323,
       "cover": "https://i.ytimg.com/vi/5utorRM1fhY/maxresdefault.jpg",
@@ -2478,7 +2492,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "invoice",
-      "title": "04/04 · Facture et paiement : comprendre le solde | OpenConstructionERP",
+      "title": "Facture et paiement : comprendre le solde",
       "description": "30 000 USD facturés, 18 000 USD reçus : pourquoi reste-t-il 12 000 USD à recevoir ? Suivez les étapes du contrat au règlement dans OpenConstructionERP.",
       "duration": 339,
       "cover": "https://i.ytimg.com/vi/ViuB-ONl5Lk/maxresdefault.jpg",

@@ -28,6 +28,9 @@ vi.mock('react-i18next', () => ({
 import { VideosPage } from './VideosPage';
 import { VIDEOS, startHereVideo } from './academy';
 import { useVideosStore } from './useVideosStore';
+import { VideoPlayerDialog } from './VideoPlayerDialog';
+import type { AcademyVideo } from './academyTypes';
+import type { VideoLabels } from './videoLabels';
 import { useVideoHintsStore } from './videoRoutes';
 
 let lastSearch = '';
@@ -50,7 +53,15 @@ function renderAt(entry = '/videos') {
 
 const iframes = () => Array.from(document.querySelectorAll('iframe'));
 const setup = startHereVideo()!;
-const soon = VIDEOS.find((v) => v.status === 'coming_soon' && v.chapters.length > 0)!;
+// Every catalogue video may be out, so the not-yet-published case is the setup
+// lesson with its id taken away: the one field a publication adds.
+const soon: AcademyVideo = {
+  ...setup,
+  id: 'unreleased',
+  youtubeId: undefined,
+  status: 'coming_soon',
+  cover: '/assets/videos/academy/unreleased.webp',
+};
 
 beforeEach(() => {
   localStorage.clear();
@@ -91,7 +102,19 @@ describe('the Videos page', () => {
   });
 
   it('shows a video that is not out yet as an outline, never a player', () => {
-    renderAt(`/videos?v=${soon.id}`);
+    const labels = { series: () => '', role: String, stage: String, stageShort: String, result: String, country: String, language: String };
+    render(
+      <MemoryRouter>
+        <VideoPlayerDialog
+          video={soon}
+          start={0}
+          autoplay
+          labels={labels as unknown as VideoLabels}
+          onClose={() => {}}
+          onOpenVideo={() => {}}
+        />
+      </MemoryRouter>,
+    );
     const dialog = screen.getByTestId('video-player');
     expect(within(dialog).getAllByText('Coming soon').length).toBeGreaterThan(0);
     expect(within(dialog).getByText(soon.chapters[0]!.title)).toBeTruthy();

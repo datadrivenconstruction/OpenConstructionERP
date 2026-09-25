@@ -110,7 +110,8 @@ describe('the video catalogue', () => {
     // A published video's old local cover is deleted by the generator, so the
     // folder holds exactly the covers the catalogue still points at.
     const local = new Set(videos.filter((v) => !v.youtubeId).map((v) => v.cover.split('/').pop()));
-    expect(new Set(readdirSync(coversDir))).toEqual(local);
+    // Git keeps no empty folder, so once every video is out the folder is gone.
+    expect(new Set(existsSync(coversDir) ? readdirSync(coversDir) : [])).toEqual(local);
     const text = JSON.stringify(ACADEMY_CATALOG);
     expect(text).not.toMatch(/\.mp4|\.srt|\.vtt|file:\/\/|[A-Z]:\\/i);
   });

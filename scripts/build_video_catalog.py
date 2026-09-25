@@ -256,6 +256,23 @@ def chapters_from_description(description: str) -> list[dict]:
     ]
 
 
+# The channel titles carry a prefix for the YouTube shelf: a flag, the
+# language, the place and the episode ("🇨🇦 EN • TORONTO • 01/06 | Price a
+# Construction Job"), or an episode and a channel suffix ("01/04 · Budget de
+# chantier | OpenConstructionERP"). The page shows language, market and order
+# as badges of its own, so only the topic is kept.
+CHANNEL_PREFIX = re.compile(r"^(?:[^|]*•[^|]*\|\s*|\d{2}/\d{2}\s*·\s*)")
+CHANNEL_SUFFIX = re.compile(r"\s*\|\s*OpenConstructionERP\s*$")
+
+
+def clean_title(title: str) -> str:
+    """The topic of a channel title, without the shelf prefix and suffix."""
+    cleaned = CHANNEL_SUFFIX.sub("", CHANNEL_PREFIX.sub("", title)).strip()
+    if not cleaned:
+        fail(f"title {title!r} is empty once the channel prefix is removed")
+    return cleaned
+
+
 def first_paragraph(text: str) -> str:
     """The first paragraph of a description, joined onto one line."""
     return " ".join(text.strip().split("\n\n")[0].split())
@@ -399,7 +416,7 @@ def build(args: argparse.Namespace) -> None:
                 "id": v["id"],
                 "youtubeId": doc_yt,
                 "language": v["language"],
-                "title": v["title"],
+                "title": clean_title(v["title"]),
                 "description": v["short_description"],
                 "chapters": [
                     {"t": int(c["seconds"]), "title": c["title"]} for c in v["chapters"]
