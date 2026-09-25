@@ -101,7 +101,7 @@ import {
   getCountryPack,
   type CountryPack,
 } from './countryPacks';
-import { resolveCountryOffer } from './countryOffer';
+import { packToPreselect, resolveCountryOffer } from './countryOffer';
 import { activeModuleCount, companyTypeToSave, groupProfilePresets } from './profileGroups';
 import { profileShapes } from '@/features/modules/profileDifference';
 import { packNameSlug } from '@/shared/lib/regionalPack';
@@ -1320,7 +1320,9 @@ function StepStartChoice({
 // still fires. On failure we fall back to the normal multi-step flow with a
 // clear message (``onFallback``).
 
-function ReadyPackPicker({
+// Exported for its test, which renders the pack grid against the packs the
+// community wheel ships.
+export function ReadyPackPicker({
   onActivateLocale,
   onInstalled,
   onFallback,
@@ -1392,16 +1394,16 @@ function ReadyPackPicker({
     return COUNTRY_PACKS.filter((preset) => !covered.has(preset.flagId.toLowerCase()));
   }, [packs]);
 
-  // Default-select the pack for the reader's own country, falling back to the
-  // first in the list only when there is nothing better. packs[0] alone meant
-  // a Brazilian first run opened with Australia selected, because the list is
-  // ordered by slug and nothing about the reader entered into it.
+  // Default-select the pack for the reader's own country and nothing else.
+  // Falling back to packs[0] meant a Brazilian, and later every Canadian, first
+  // run opened with Australia selected, because the list is ordered by slug
+  // and nothing about the reader entered into it. See `packToPreselect`.
   useEffect(() => {
     if (!selectedSlug && packs.length > 0) {
-      const own = countryOffer?.kind === 'pack' ? countryOffer.pack.slug : null;
-      setSelectedSlug(own ?? packs[0]?.slug ?? null);
+      const own = packToPreselect(detectedCountry, packs);
+      if (own) setSelectedSlug(own);
     }
-  }, [packs, selectedSlug, countryOffer]);
+  }, [packs, selectedSlug, detectedCountry]);
 
   const selectedPack = packs.find((p) => p.slug === selectedSlug) ?? null;
 
@@ -2805,10 +2807,12 @@ function PartnerPackInstaller({
   const [installedSlug, setInstalledSlug] = useState<string | null>(null);
   const [installFailed, setInstallFailed] = useState(false);
 
-  // Default-select the first pack once they load.
+  // Default-select the reader's own country's pack once they load, never
+  // simply the first one (`packToPreselect`).
   useEffect(() => {
     if (!selectedSlug && packs.length > 0) {
-      setSelectedSlug(packs[0]?.slug ?? null);
+      const own = packToPreselect(detectCountry(), packs);
+      if (own) setSelectedSlug(own);
     }
   }, [packs, selectedSlug]);
 
