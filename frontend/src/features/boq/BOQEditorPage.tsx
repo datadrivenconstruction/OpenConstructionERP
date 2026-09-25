@@ -170,6 +170,20 @@ function selectNormalizedBoq(data: BOQWithPositions): BOQWithPositions {
   return { ...data, positions: normalizePositions(data.positions) };
 }
 
+/**
+ * The bill as the server sent it, minus the lines this page has deleted.
+ *
+ * A delete leaves the grid at once but reaches the server only after the undo
+ * window, and any refetch in between (every added line causes one) still
+ * carries the line. Filtering the fetched bill, rather than the rendered one,
+ * keeps the cache itself honest, so the line does not come back after the
+ * DELETE has gone out either.
+ */
+function withoutDeletedRows(data: BOQWithPositions, deletedIds: ReadonlySet<string>): BOQWithPositions {
+  if (deletedIds.size === 0 || !Array.isArray(data?.positions)) return data;
+  return { ...data, positions: data.positions.filter((p) => !deletedIds.has(p.id)) };
+}
+
 /* ══════════════════════════════════════════════════════════════════════ */
 /*  BOQEditorPage                                                        */
 /* ══════════════════════════════════════════════════════════════════════ */
@@ -185,9 +199,12 @@ export function BOQEditorPage() {
 
   /* ── Data fetching ─────────────────────────────────────────────────── */
 
+  /** Lines deleted on this page, pending or sent, which no refetch may bring back. */
+  const deletedIdsRef = useRef<Set<string>>(new Set());
+
   const { data: boq, isLoading, isError } = useQuery({
     queryKey: ['boq', boqId],
-    queryFn: () => boqApi.get(boqId!),
+    queryFn: async () => withoutDeletedRows(await boqApi.get(boqId!), deletedIdsRef.current),
     enabled: !!boqId,
     // Keep data fresh for 5 minutes — prevents refetch while user is
     // editing cells in AG Grid (refetch destroys the cell editor and
@@ -857,16 +874,20 @@ export function BOQEditorPage() {
     // delete, rapid sequential deletes) and bring back rows that were
     // optimistically removed but whose API call is still in flight.
     // Sidecar queries (rollups / activity feed) are safe to refresh.
+    onMutate: (id: string) => {
+      deletedIdsRef.current.add(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boq-cost-breakdown', boqId] });
       queryClient.invalidateQueries({ queryKey: ['boq-resource-summary', boqId] });
       queryClient.invalidateQueries({ queryKey: ['boq-markups', boqId] });
       queryClient.invalidateQueries({ queryKey: ['boq-activity', boqId] });
     },
-    onError: (err: Error) => {
+    onError: (err: Error, id: string) => {
       // The server rejected the delete — re-sync the BOQ so the row
       // reappears (otherwise the user sees a phantom-deleted position
       // that's still on the server).
+      deletedIdsRef.current.delete(id);
       queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
       addToast({ type: 'error', title: t('boq.delete_failed', { defaultValue: 'Failed to delete position' }), message: err.message });
     },
@@ -1063,7 +1084,9 @@ export function BOQEditorPage() {
       redoStackRef.current = [];
       setUndoRedoVersion((v) => v + 1);
 
-      // Optimistically remove the position from the query cache
+      // Optimistically remove the position from the query cache, and keep it
+      // out of every refetch until the delete lands or is undone.
+      deletedIdsRef.current.add(posId);
       queryClient.setQueryData(['boq', boqId], (old: unknown) => {
         if (!old || typeof old !== 'object') return old;
         const data = old as { positions: Position[]; [key: string]: unknown };
@@ -1085,11 +1108,13 @@ export function BOQEditorPage() {
               if (pending && pending.toastId === toastId) {
                 clearTimeout(pending.timeoutId);
                 pendingDeleteRef.current = null;
+                deletedIdsRef.current.delete(posId);
 
                 // Restore the position in the query cache
                 queryClient.setQueryData(['boq', boqId], (old: unknown) => {
                   if (!old || typeof old !== 'object') return old;
                   const data = old as { positions: Position[]; [key: string]: unknown };
+                  if (data.positions.some((p) => p.id === posId)) return data;
                   return {
                     ...data,
                     positions: [...data.positions, snapshot],
