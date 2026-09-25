@@ -23,6 +23,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -1183,6 +1184,8 @@ class SubcontractorService:
         await self.get_subcontractor(data.subcontractor_id)
         if data.prime_contract_id is not None:
             await self._assert_prime_contract(data.prime_contract_id, data.project_id)
+        if data.contract_id is not None:
+            await self._assert_subcontract_contract(data.contract_id, data.project_id)
         entity = SubcontractAgreement(
             subcontractor_id=data.subcontractor_id,
             project_id=data.project_id,
@@ -1195,6 +1198,7 @@ class SubcontractorService:
             retention_release_event=data.retention_release_event,
             requires_lien_waiver=data.requires_lien_waiver,
             prime_contract_id=data.prime_contract_id,
+            contract_id=data.contract_id,
             notes=data.notes,
             # Born unsigned. Set explicitly rather than leaning on the column
             # default so the state machine has a deterministic origin
@@ -1230,6 +1234,9 @@ class SubcontractorService:
                 activating = True
         if fields.get("prime_contract_id") is not None:
             await self._assert_prime_contract(fields["prime_contract_id"], entity.project_id)
+        linking = fields.get("contract_id") is not None and fields["contract_id"] != entity.contract_id
+        if linking:
+            await self._assert_subcontract_contract(fields["contract_id"], entity.project_id)
         if fields:
             await self.agreements.update_fields(agreement_id, **fields)
             await self.session.refresh(entity)
@@ -1238,14 +1245,18 @@ class SubcontractorService:
             # re-patching an agreement that is already active does not re-run
             # the checks and re-log the same findings on every edit.
             await self._report_agreement_validation(entity)
+        if activating or (linking and entity.status in ("active", "completed")):
             # Signing is the moment the spend is agreed, so it commits the
             # budget, keyed on the agreement so a second activation cannot
-            # commit it twice.
+            # commit it twice. A linked contract that already committed the
+            # same subcontract hands its commitment over rather than keeping
+            # a second one.
             await finance_bridge.commit_subcontract(
                 self.session,
                 project_id=entity.project_id,
                 source=finance_bridge.agreement_source(entity.id),
                 amount=entity.total_value,
+                supersedes=finance_bridge.contract_source(entity.contract_id) if entity.contract_id else None,
             )
         return entity
 
@@ -1745,6 +1756,7 @@ class SubcontractorService:
             raise HTTPException(status_code=404, detail=translate("errors.agreement_not_found", locale=get_locale()))
         changes = await self._approved_line_amounts(payment_id, lines or [])
         gross, retention, net = _approved_payable(entity, agreement, changes.values())
+        await self._assert_billed_claim_unchanged(entity, changes, retention)
         for line_id, (_claimed, before, after) in changes.items():
             if after != before:
                 await self.payment_lines.update_fields(line_id, approved_amount=after)
@@ -1803,6 +1815,39 @@ class SubcontractorService:
             },
         )
         return approved
+
+    async def _assert_billed_claim_unchanged(
+        self,
+        entity: PaymentApplication,
+        changes: dict[uuid.UUID, tuple[Decimal, Decimal, Decimal]],
+        retention: Decimal,
+    ) -> None:
+        """409 when approval would move figures a locked GC claim already billed.
+
+        The GC claim rollup bills each line's approved amount, and the claim's
+        retention follows the accrual. Once that claim is past editing, an
+        approval that confirms the figures still goes through; one that lowers
+        a line or moves the retention would change what an issued claim says
+        it contained, so it is refused before anything is written.
+        """
+        if entity.progress_claim_id is None:
+            return
+        claim = await PrimeContractReader(self.session).get_claim(entity.progress_claim_id)
+        if claim is None or claim.status in self._CLAIM_EDITABLE_STATUSES:
+            return
+        lines_move = any(after != before for _claimed, before, after in changes.values())
+        retention_moves = any(
+            ledger.released_amount == 0 and ledger.accrued_amount != retention
+            for ledger in await self.retention.list_for_payment_application(entity.id)
+        )
+        if lines_move or retention_moves:
+            raise self._refuse(
+                status.HTTP_409_CONFLICT,
+                "claim_not_editable",
+                f"The pay application is billed on a claim that is {claim.status!r}, so its amounts can no "
+                "longer change. Approve it as billed, or correct the claim first.",
+                claim_status=claim.status,
+            )
 
     async def _approved_line_amounts(
         self,
@@ -2050,6 +2095,38 @@ class SubcontractorService:
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "prime_contract_not_client",
                 "The prime contract must be the contract with the client, not another subcontract.",
+            )
+
+    async def _assert_subcontract_contract(self, contract_id: uuid.UUID, project_id: uuid.UUID) -> None:
+        """422 unless ``contract_id`` is a subcontract on the agreement's project.
+
+        The link says "this agreement and that contract are one subcontract",
+        so it only makes sense for a contract with a subcontractor on the same
+        project, and only one agreement may claim it.
+        """
+        contract = await PrimeContractReader(self.session).get_contract(contract_id)
+        if contract is None or contract.project_id != project_id:
+            raise self._refuse(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "subcontract_not_on_project",
+                "The linked contract must be a contract on the same project as the agreement.",
+            )
+        if getattr(contract, "counterparty_type", "client") != "subcontractor":
+            raise self._refuse(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "linked_contract_not_subcontract",
+                "The linked contract must be a subcontract, not the contract with the client.",
+            )
+        taken = (
+            await self.session.execute(
+                select(SubcontractAgreement.id).where(SubcontractAgreement.contract_id == contract_id).limit(1)
+            )
+        ).scalar_one_or_none()
+        if taken is not None:
+            raise self._refuse(
+                status.HTTP_409_CONFLICT,
+                "subcontract_already_linked",
+                "That contract is already linked to another subcontract agreement.",
             )
 
     async def _assert_contract_line_on_project(self, line_id: uuid.UUID, project_id: uuid.UUID) -> None:

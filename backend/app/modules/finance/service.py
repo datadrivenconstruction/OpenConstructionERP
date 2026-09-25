@@ -1674,22 +1674,37 @@ class FinanceService:
         which every finance view prints as an unspecified counterparty. On a
         subcontract an id that resolves to neither is dropped rather than
         stored as if it did; a client contract keeps its id as before.
+
+        A subcontract awarded from a tender names the bidder in
+        ``counterparty_id``, which is neither, and records the contact the
+        award resolved in ``metadata.counterparty_contact_id``. That is the
+        last place looked, and only a contact that exists is taken from it.
         """
         from sqlalchemy import select as _select
 
         from app.modules.contacts.models import Contact
         from app.modules.subcontractors.models import Subcontractor
 
+        async def _existing_contact(raw: Any) -> str | None:
+            try:
+                wanted = raw if isinstance(raw, uuid.UUID) else uuid.UUID(str(raw))
+            except (ValueError, TypeError):
+                return None
+            found = (await self.session.execute(_select(Contact.id).where(Contact.id == wanted))).scalar_one_or_none()
+            return str(found) if found is not None else None
+
         cid = getattr(contract, "counterparty_id", None)
-        if cid is None:
-            return None
-        if getattr(contract, "counterparty_type", "client") != "subcontractor":
+        if cid is not None and getattr(contract, "counterparty_type", "client") != "subcontractor":
             return str(cid)
-        sub = await self.session.get(Subcontractor, cid)
-        if sub is not None:
-            return str(sub.contact_id) if sub.contact_id else None
-        found = (await self.session.execute(_select(Contact.id).where(Contact.id == cid))).scalar_one_or_none()
-        return str(found) if found is not None else None
+        if cid is not None:
+            sub = await self.session.get(Subcontractor, cid)
+            if sub is not None:
+                return str(sub.contact_id) if sub.contact_id else None
+            direct = await _existing_contact(cid)
+            if direct is not None:
+                return direct
+        recorded = (getattr(contract, "metadata_", None) or {}).get("counterparty_contact_id")
+        return await _existing_contact(recorded) if recorded else None
 
     async def get_receivable_for_claim(self, claim_id: uuid.UUID) -> Invoice | None:
         """Return the receivable invoice raised from *claim_id*, or None.

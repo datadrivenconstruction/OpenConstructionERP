@@ -489,6 +489,7 @@ class AgreementCreate(BaseModel):
     retention_release_event: str | None = Field(default=None, max_length=120)
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None
+    contract_id: UUID | None = None
     notes: str | None = None
 
     @field_validator("currency")
@@ -511,6 +512,7 @@ class AgreementUpdate(BaseModel):
     retention_release_event: str | None = Field(default=None, max_length=120)
     requires_lien_waiver: bool | None = None
     prime_contract_id: UUID | None = None
+    contract_id: UUID | None = None
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|active|completed|terminated)$",
@@ -540,6 +542,7 @@ class AgreementResponse(BaseModel):
     retention_release_event: str | None = None
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None
+    contract_id: UUID | None = None
     status: str = "draft"
     notes: str | None = None
     created_by: str | None = None

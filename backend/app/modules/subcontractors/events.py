@@ -133,6 +133,10 @@ async def _on_contract_signed(event: Event) -> None:
         contract = await session.get(Contract, contract_id)
         if contract is None or contract.counterparty_type != "subcontractor":
             return
+        if await finance_bridge.agreement_linked_to(session, contract.id) is not None:
+            # The linked agreement carries this subcontract's commitment, or
+            # will when it is signed; committing here as well counts it twice.
+            return
         await finance_bridge.commit_subcontract(
             session,
             project_id=contract.project_id,
