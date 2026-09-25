@@ -103,6 +103,12 @@ _ADDED_AFTER_V15_4_0 = {
     # rate that changed belongs to the supersede repair, exactly as Nova
     # Scotia's 14 % row does.
     ("RU", "NDS", "2026-01-01"),
+    # Croatia's reduced and zero rates. Both cohorts hold the 25 % PDV row, so
+    # these land in a country-wide slot that is already taken and are not in
+    # _EXPECTED_DELIVERY.
+    ("HR", "PDV_13", "2014-01-01"),
+    ("HR", "PDV_5", "2013-01-01"),
+    ("HR", "PDV_0", "2022-10-01"),
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -122,6 +128,8 @@ _RESTORED_TO_V15_4_0 = {
     ("CA", "HST_NS", "2010-07-01"): {"effective_to": None},
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
     ("RU", "NDS", "2019-01-01"): {"effective_to": None},
+    # The old file dated Croatia's 25 % a year late.
+    ("HR", "PDV", "2012-03-01"): {"effective_from": "2013-03-01"},
 }
 
 _ADDED_AFTER_V15_9_1 = {
@@ -130,6 +138,9 @@ _ADDED_AFTER_V15_9_1 = {
     ("KW", "NONE", None),
     ("QA", "NONE", None),
     ("RU", "NDS", "2026-01-01"),
+    ("HR", "PDV_13", "2014-01-01"),
+    ("HR", "PDV_5", "2013-01-01"),
+    ("HR", "PDV_0", "2022-10-01"),
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -142,6 +153,7 @@ _ADDED_AFTER_V15_9_1 = {
 _RESTORED_TO_V15_9_1 = {
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
     ("RU", "NDS", "2019-01-01"): {"effective_to": None},
+    ("HR", "PDV", "2012-03-01"): {"effective_from": "2013-03-01"},
 }
 
 #: SHA-256 of the real shipped file at each tag, over the fields the fixture
