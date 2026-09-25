@@ -1,0 +1,19 @@
+{
+  "rule_pack_id": "hr_pdv",
+  "name": "PDV - Croatian value added tax on construction",
+  "standard": "Zakon o porezu na dodanu vrijednost (NN 73/13 and amendments)",
+  "jurisdiction": "HR",
+  "regulator": "Porezna uprava (Tax Administration)",
+  "applies_to": [
+    "boq",
+    "invoice",
+    "estimate"
+  ],
+  "description": "Reference document for PDV. The standard rate is 25 % since 2012-03-01 and it is the rate construction works are charged at. The reduced rates are 13 % since 2014-01-01 and 5 % since 2013-01-01, and a 0 % rate applies since 2022-10-01 to the supply and installation of solar panels on residential and public-interest buildings (article 38(6) as amended by NN 113/22). All four rates are on file in the platform's dated tax table, with 25 % as the default. Between two taxable persons, construction services are subject to the domestic reverse charge (prijenos porezne obveze, article 75(3)(a)): the contractor invoices without PDV and the recipient accounts for it. The pack prices every bill excluding PDV and adds PDV once, on the recapitulation.",
+  "review_status": "Rates and effective dates are taken from the Tax Administration and from Croatian professional publications and were read on 2026-09-25. The reverse charge rules for a specific contract are a matter for the parties' tax advisers.",
+  "severity_overrides": {},
+  "enables_rule_ids": [
+    "boq_quality.currency_consistency",
+    "boq_quality.total_mismatch"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "rule_pack_id": "hr_javna_nabava",
+  "name": "Zakon o javnoj nabavi - Croatian Public Procurement Act",
+  "standard": "Zakon o javnoj nabavi (NN 120/16, 114/22)",
+  "jurisdiction": "HR",
+  "regulator": "Ministarstvo gospodarstva (Ministry of Economy), Državna komisija za kontrolu postupaka javne nabave",
+  "applies_to": [
+    "tender",
+    "boq",
+    "procurement"
+  ],
+  "description": "Reference document for the Zakon o javnoj nabavi, which transposes the EU procurement directives. For works the contracting authority publishes the troškovnik as part of the tender documentation through the Elektronički oglasnik javne nabave (EOJN RH), and bidders return it priced without changing descriptions, units or quantities. Offers are compared on the price excluding PDV, which is why every demo in this pack is priced excluding PDV. What the pack checks is that the returned bill is complete: every item priced, quantities present, totals reconciled and one currency used.",
+  "review_status": "Regulatory references are drawn from public sources and are pending review by a Croatian procurement specialist before they are relied on for a public submission.",
+  "severity_overrides": {},
+  "enables_rule_ids": [
+    "boq_quality.position_has_quantity",
+    "boq_quality.position_has_unit_rate",
+    "boq_quality.no_missing_quantity",
+    "boq_quality.total_mismatch",
+    "boq_quality.currency_consistency"
+  ]
+}

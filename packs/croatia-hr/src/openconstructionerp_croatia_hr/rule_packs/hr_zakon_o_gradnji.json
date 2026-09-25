@@ -1,0 +1,19 @@
+{
+  "rule_pack_id": "hr_zakon_o_gradnji",
+  "name": "Zakon o gradnji - Croatian Building Act",
+  "standard": "Zakon o gradnji (NN 153/13, 20/17, 39/19, 125/19)",
+  "jurisdiction": "HR",
+  "regulator": "Ministarstvo prostornoga uređenja, graditeljstva i državne imovine (Ministry of Physical Planning, Construction and State Assets)",
+  "applies_to": [
+    "project",
+    "boq",
+    "documents"
+  ],
+  "description": "Reference document for the Zakon o gradnji, which sets the participants in construction (investitor, projektant, izvođač, nadzorni inženjer), the design documentation a building permit (građevinska dozvola) rests on, the obligation to keep a construction log (građevni dnevnik) on site and the use permit (uporabna dozvola) that closes a project. Structural design follows the HRN EN Eurocodes. The act is procedural and does not set prices; what the pack checks is that the priced bill that accompanies the design is complete and reconciles.",
+  "review_status": "Regulatory references are drawn from public sources and are pending review by a Croatian chartered engineer before they are relied on. The consolidated text in force must be confirmed against Narodne novine.",
+  "severity_overrides": {},
+  "enables_rule_ids": [
+    "boq_quality.position_has_unit_rate",
+    "boq_quality.total_mismatch"
+  ]
+}
