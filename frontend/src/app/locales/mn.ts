@@ -42688,6 +42688,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, бүлэг: {{count}}",
     "boq.import_toast.summary_skipped": "Орхигдсон нийт дүн, татвар эсвэл нэгтгэлийн мөр: {{count}}",
     "boq.import_toast.errors": "Алдаа: {{count}}",
+    "boq.markup_region.gulf": "Персийн булангийн орнууд",
+    "boq.markup_region.generic": "Ерөнхий олон улсын",
     "boq.import_preview.stats_currency": "Валют",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Ажлын нэрс",

@@ -44171,6 +44171,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, sekcje: {{count}}",
     "boq.import_toast.summary_skipped": "Pominięte wiersze sumy, podatku lub zestawienia: {{count}}",
     "boq.import_toast.errors": "Błędy: {{count}}",
+    "boq.markup_region.gulf": "Państwa Zatoki Perskiej",
+    "boq.markup_region.generic": "Ogólny międzynarodowy",
     "boq.import_preview.stats_currency": "Waluta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Pozycje",

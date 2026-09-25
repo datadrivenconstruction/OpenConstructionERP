@@ -43305,6 +43305,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, বিভাগ: {{count}}",
     "boq.import_toast.summary_skipped": "বাদ দেওয়া মোট, কর বা সারসংক্ষেপ সারি: {{count}}",
     "boq.import_toast.errors": "ত্রুটি: {{count}}",
+    "boq.markup_region.gulf": "উপসাগরীয় দেশসমূহ",
+    "boq.markup_region.generic": "সাধারণ আন্তর্জাতিক",
     "boq.import_preview.stats_currency": "মুদ্রা",
     "boq.import_preview.stats_format": "ফরম্যাট",
     "boq.import_preview.stats_positions": "আইটেম",

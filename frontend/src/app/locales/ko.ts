@@ -43527,6 +43527,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, 섹션: {{count}}",
     "boq.import_toast.summary_skipped": "제외된 합계, 세금 또는 집계 행: {{count}}",
     "boq.import_toast.errors": "오류: {{count}}",
+    "boq.markup_region.gulf": "걸프 국가",
+    "boq.markup_region.generic": "일반 국제",
     "boq.import_preview.stats_currency": "통화",
     "boq.import_preview.stats_format": "형식",
     "boq.import_preview.stats_positions": "항목 수",

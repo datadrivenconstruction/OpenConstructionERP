@@ -42993,6 +42993,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, mga seksyon: {{count}}",
     "boq.import_toast.summary_skipped": "Mga linya ng kabuuan, buwis o buod na nilaktawan: {{count}}",
     "boq.import_toast.errors": "Mga error: {{count}}",
+    "boq.markup_region.gulf": "Mga bansa sa Gulpo",
+    "boq.markup_region.generic": "Pangkalahatang internasyonal",
     "boq.import_preview.stats_currency": "Pera",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Mga aytem",

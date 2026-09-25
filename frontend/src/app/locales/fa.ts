@@ -43015,6 +43015,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML، بخش‌ها: {{count}}",
     "boq.import_toast.summary_skipped": "سطرهای جمع، مالیات یا خلاصهٔ کنارگذاشته: {{count}}",
     "boq.import_toast.errors": "خطاها: {{count}}",
+    "boq.markup_region.gulf": "کشورهای حوزهٔ خلیج فارس",
+    "boq.markup_region.generic": "بین‌المللی عمومی",
     "boq.import_preview.stats_currency": "ارز",
     "boq.import_preview.stats_format": "فرمت",
     "boq.import_preview.stats_positions": "ردیف‌ها",

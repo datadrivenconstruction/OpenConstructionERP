@@ -43039,6 +43039,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, खंड: {{count}}",
     "boq.import_toast.summary_skipped": "छोड़ी गई योग, कर या सारांश पंक्तियाँ: {{count}}",
     "boq.import_toast.errors": "त्रुटियाँ: {{count}}",
+    "boq.markup_region.gulf": "खाड़ी देश",
+    "boq.markup_region.generic": "सामान्य अंतरराष्ट्रीय",
     "boq.import_preview.stats_currency": "मुद्रा",
     "boq.import_preview.stats_format": "प्रारूप",
     "boq.import_preview.stats_positions": "आइटम",

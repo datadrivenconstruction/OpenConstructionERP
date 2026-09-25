@@ -45625,6 +45625,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, szakaszok: {{count}}",
     "boq.import_toast.summary_skipped": "Kihagyott összeg-, adó- vagy összesítő sorok: {{count}}",
     "boq.import_toast.errors": "Hibák: {{count}}",
+    "boq.markup_region.gulf": "Öböl menti államok",
+    "boq.markup_region.generic": "Általános nemzetközi",
     "boq.import_preview.stats_currency": "Pénznem",
     "boq.import_preview.stats_format": "Formátum",
     "boq.import_preview.stats_positions": "Tételek",

@@ -42917,6 +42917,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, phần: {{count}}",
     "boq.import_toast.summary_skipped": "Dòng tổng, thuế hoặc tổng hợp đã bỏ qua: {{count}}",
     "boq.import_toast.errors": "Lỗi: {{count}}",
+    "boq.markup_region.gulf": "Các nước vùng Vịnh",
+    "boq.markup_region.generic": "Quốc tế chung",
     "boq.import_preview.stats_currency": "Tiền tệ",
     "boq.import_preview.stats_format": "Định dạng",
     "boq.import_preview.stats_positions": "Hạng mục",

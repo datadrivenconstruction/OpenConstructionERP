@@ -45378,6 +45378,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML，章节：{{count}}",
     "boq.import_toast.summary_skipped": "已略过的合计、税金或汇总行：{{count}}",
     "boq.import_toast.errors": "错误：{{count}}",
+    "boq.markup_region.gulf": "海湾国家",
+    "boq.markup_region.generic": "通用国际",
     "boq.import_preview.stats_currency": "货币",
     "boq.import_preview.stats_format": "格式",
     "boq.import_preview.stats_positions": "清单项数",

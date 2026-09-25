@@ -43157,6 +43157,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, פרקים: {{count}}",
     "boq.import_toast.summary_skipped": "שורות סיכום, מס או ריכוז שהושמטו: {{count}}",
     "boq.import_toast.errors": "שגיאות: {{count}}",
+    "boq.markup_region.gulf": "מדינות המפרץ",
+    "boq.markup_region.generic": "בין-לאומי כללי",
     "boq.import_preview.stats_currency": "מטבע",
     "boq.import_preview.stats_format": "פורמט",
     "boq.import_preview.stats_positions": "סעיפים",

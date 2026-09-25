@@ -42909,6 +42909,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, หมวด: {{count}}",
     "boq.import_toast.summary_skipped": "บรรทัดยอดรวม ภาษี หรือสรุปที่ข้าม: {{count}}",
     "boq.import_toast.errors": "ข้อผิดพลาด: {{count}}",
+    "boq.markup_region.gulf": "ประเทศอ่าวเปอร์เซีย",
+    "boq.markup_region.generic": "สากลทั่วไป",
     "boq.import_preview.stats_currency": "สกุลเงิน",
     "boq.import_preview.stats_format": "รูปแบบ",
     "boq.import_preview.stats_positions": "รายการ",

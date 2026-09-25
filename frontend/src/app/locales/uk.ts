@@ -44762,6 +44762,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, розділів: {{count}}",
     "boq.import_toast.summary_skipped": "Пропущено рядків підсумку, податку або зведення: {{count}}",
     "boq.import_toast.errors": "Помилок: {{count}}",
+    "boq.markup_region.gulf": "Країни Перської затоки",
+    "boq.markup_region.generic": "Загальний міжнародний",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позиції",

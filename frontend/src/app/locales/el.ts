@@ -43006,6 +43006,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, ενότητες: {{count}}",
     "boq.import_toast.summary_skipped": "Γραμμές συνόλου, φόρου ή ανακεφαλαίωσης που παραλείφθηκαν: {{count}}",
     "boq.import_toast.errors": "Σφάλματα: {{count}}",
+    "boq.markup_region.gulf": "Χώρες του Κόλπου",
+    "boq.markup_region.generic": "Γενικό διεθνές",
     "boq.import_preview.stats_currency": "Νόμισμα",
     "boq.import_preview.stats_format": "Μορφή",
     "boq.import_preview.stats_positions": "Θέσεις",

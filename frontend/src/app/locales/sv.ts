@@ -43651,6 +43651,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, avsnitt: {{count}}",
     "boq.import_toast.summary_skipped": "Utelämnade summa-, skatte- eller sammanställningsrader: {{count}}",
     "boq.import_toast.errors": "Fel: {{count}}",
+    "boq.markup_region.gulf": "Gulfstaterna",
+    "boq.markup_region.generic": "Allmän internationell",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Poster",

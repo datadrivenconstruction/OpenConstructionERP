@@ -43871,6 +43871,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, bölümler: {{count}}",
     "boq.import_toast.summary_skipped": "Dışarıda bırakılan toplam, vergi veya icmal satırları: {{count}}",
     "boq.import_toast.errors": "Hatalar: {{count}}",
+    "boq.markup_region.gulf": "Körfez ülkeleri",
+    "boq.markup_region.generic": "Genel uluslararası",
     "boq.import_preview.stats_currency": "Para birimi",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Pozlar",

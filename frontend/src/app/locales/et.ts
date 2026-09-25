@@ -42969,6 +42969,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, jaotised: {{count}}",
     "boq.import_toast.summary_skipped": "Välja jäetud summa-, maksu- või koondread: {{count}}",
     "boq.import_toast.errors": "Vead: {{count}}",
+    "boq.markup_region.gulf": "Pärsia lahe riigid",
+    "boq.markup_region.generic": "Üldine rahvusvaheline",
     "boq.import_preview.stats_currency": "Valuuta",
     "boq.import_preview.stats_format": "Vorming",
     "boq.import_preview.stats_positions": "Read",

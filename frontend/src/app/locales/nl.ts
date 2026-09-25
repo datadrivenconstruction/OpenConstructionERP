@@ -43917,6 +43917,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, secties: {{count}}",
     "boq.import_toast.summary_skipped": "Weggelaten totaal-, belasting- of samenvattingsregels: {{count}}",
     "boq.import_toast.errors": "Fouten: {{count}}",
+    "boq.markup_region.gulf": "Golfstaten",
+    "boq.markup_region.generic": "Algemeen internationaal",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Formaat",
     "boq.import_preview.stats_positions": "Posten",

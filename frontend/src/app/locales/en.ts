@@ -3725,6 +3725,8 @@ const resource = {
     "boq.import_toast.method_gaeb": "GAEB XML, sections: {{count}}",
     "boq.import_toast.summary_skipped": "Total, tax or recap lines left out: {{count}}",
     "boq.import_toast.errors": "Errors: {{count}}",
+    "boq.markup_region.gulf": "Gulf states",
+    "boq.markup_region.generic": "Generic international",
     "boq.import_preview.stats_currency": "Currency",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Positions",

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } from './api';
 import { fmtWithCurrency } from './boqHelpers';
+import { markupRegionLabel, type MarkupRegion } from './markupRegionLabel';
 import { toNum } from '@/shared/lib/money';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
@@ -17,58 +18,61 @@ import {
   GripVertical,
 } from 'lucide-react';
 
-/** Regional templates — code must match backend DEFAULT_MARKUP_TEMPLATES keys. */
-const REGIONS: { code: string; flag: string; label: string; standard: string }[] = [
+/**
+ * Regional templates. `code` must match backend DEFAULT_MARKUP_TEMPLATES keys;
+ * the name shown is worked out in the reader's language by markupRegionLabel.
+ */
+const REGIONS: MarkupRegion[] = [
   // Europe
-  { code: 'DACH', flag: '\ud83c\udde9\ud83c\uddea', label: 'DACH', standard: 'VOB/HOAI' },
-  { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7', label: 'United Kingdom', standard: 'NRM/RICS' },
-  { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', label: 'France', standard: 'BATIPRIX' },
-  { code: 'ES', flag: '\ud83c\uddea\ud83c\uddf8', label: 'Spain', standard: 'CTE' },
-  { code: 'IT', flag: '\ud83c\uddee\ud83c\uddf9', label: 'Italy', standard: 'Prezzario' },
-  { code: 'NL', flag: '\ud83c\uddf3\ud83c\uddf1', label: 'Netherlands', standard: 'STABU' },
-  { code: 'PL', flag: '\ud83c\uddf5\ud83c\uddf1', label: 'Poland', standard: 'KNR' },
-  { code: 'BE', flag: '\ud83c\udde7\ud83c\uddea', label: 'Belgium', standard: 'BSAB' },
-  { code: 'CZ', flag: '\ud83c\udde8\ud83c\uddff', label: 'Czech Republic', standard: 'TSP' },
-  { code: 'HR', flag: '\ud83c\udded\ud83c\uddf7', label: 'Croatia', standard: 'Tro\u0161kovnik' },
-  { code: 'RO', flag: '\ud83c\uddf7\ud83c\uddf4', label: 'Romania', standard: 'DevGen' },
-  { code: 'GR', flag: '\ud83c\uddec\ud83c\uddf7', label: 'Greece', standard: 'ATOE' },
-  { code: 'HU', flag: '\ud83c\udded\ud83c\uddfa', label: 'Hungary', standard: 'TERC' },
-  { code: 'UA', flag: '\ud83c\uddfa\ud83c\udde6', label: 'Ukraine', standard: '\u041a\u041d\u0423' },
-  { code: 'PT', flag: '\ud83c\uddf5\ud83c\uddf9', label: 'Portugal', standard: 'ProNIC' },
-  { code: 'NORDIC', flag: '\ud83c\uddf8\ud83c\uddea', label: 'Scandinavia', standard: 'AB 04' },
+  { code: 'DACH', flag: '\ud83c\udde9\ud83c\uddea', countries: ['DE', 'AT', 'CH'], standard: 'VOB/HOAI' },
+  { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7', countries: ['GB'], standard: 'NRM/RICS' },
+  { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', standard: 'BATIPRIX' },
+  { code: 'ES', flag: '\ud83c\uddea\ud83c\uddf8', standard: 'CTE' },
+  { code: 'IT', flag: '\ud83c\uddee\ud83c\uddf9', standard: 'Prezzario' },
+  { code: 'NL', flag: '\ud83c\uddf3\ud83c\uddf1', standard: 'STABU' },
+  { code: 'PL', flag: '\ud83c\uddf5\ud83c\uddf1', standard: 'KNR' },
+  { code: 'BE', flag: '\ud83c\udde7\ud83c\uddea', standard: 'BSAB' },
+  { code: 'CZ', flag: '\ud83c\udde8\ud83c\uddff', standard: 'TSP' },
+  { code: 'HR', flag: '\ud83c\udded\ud83c\uddf7', standard: 'Tro\u0161kovnik' },
+  { code: 'RO', flag: '\ud83c\uddf7\ud83c\uddf4', standard: 'DevGen' },
+  { code: 'GR', flag: '\ud83c\uddec\ud83c\uddf7', standard: 'ATOE' },
+  { code: 'HU', flag: '\ud83c\udded\ud83c\uddfa', standard: 'TERC' },
+  { code: 'UA', flag: '\ud83c\uddfa\ud83c\udde6', standard: '\u041a\u041d\u0423' },
+  { code: 'PT', flag: '\ud83c\uddf5\ud83c\uddf9', standard: 'ProNIC' },
+  { code: 'NORDIC', flag: '\ud83c\uddf8\ud83c\uddea', countries: ['DK', 'FI', 'NO', 'SE'], standard: 'AB 04' },
   // Americas
-  { code: 'US', flag: '\ud83c\uddfa\ud83c\uddf8', label: 'United States', standard: 'MasterFormat/AIA' },
-  { code: 'CA', flag: '\ud83c\udde8\ud83c\udde6', label: 'Canada', standard: 'CCDC' },
-  { code: 'BR', flag: '\ud83c\udde7\ud83c\uddf7', label: 'Brazil', standard: 'TCU/SINAPI' },
-  { code: 'AR', flag: '\ud83c\udde6\ud83c\uddf7', label: 'Argentina', standard: 'CAC' },
-  { code: 'CL', flag: '\ud83c\udde8\ud83c\uddf1', label: 'Chile', standard: 'CDT' },
-  { code: 'CO', flag: '\ud83c\udde8\ud83c\uddf4', label: 'Colombia', standard: 'NTC' },
-  { code: 'PE', flag: '\ud83c\uddf5\ud83c\uddea', label: 'Peru', standard: 'CAPECO' },
+  { code: 'US', flag: '\ud83c\uddfa\ud83c\uddf8', standard: 'MasterFormat/AIA' },
+  { code: 'CA', flag: '\ud83c\udde8\ud83c\udde6', standard: 'CCDC' },
+  { code: 'BR', flag: '\ud83c\udde7\ud83c\uddf7', standard: 'TCU/SINAPI' },
+  { code: 'AR', flag: '\ud83c\udde6\ud83c\uddf7', standard: 'CAC' },
+  { code: 'CL', flag: '\ud83c\udde8\ud83c\uddf1', standard: 'CDT' },
+  { code: 'CO', flag: '\ud83c\udde8\ud83c\uddf4', standard: 'NTC' },
+  { code: 'PE', flag: '\ud83c\uddf5\ud83c\uddea', standard: 'CAPECO' },
   // Asia-Pacific
-  { code: 'CN', flag: '\ud83c\udde8\ud83c\uddf3', label: 'China', standard: 'GB50500' },
-  { code: 'IN', flag: '\ud83c\uddee\ud83c\uddf3', label: 'India', standard: 'CPWD' },
-  { code: 'JP', flag: '\ud83c\uddef\ud83c\uddf5', label: 'Japan', standard: 'MLIT' },
-  { code: 'KR', flag: '\ud83c\uddf0\ud83c\uddf7', label: 'South Korea', standard: 'KICT' },
-  { code: 'AU', flag: '\ud83c\udde6\ud83c\uddfa', label: 'Australia', standard: 'AIQS' },
-  { code: 'NZ', flag: '\ud83c\uddf3\ud83c\uddff', label: 'New Zealand', standard: 'NZIQS' },
-  { code: 'SG', flag: '\ud83c\uddf8\ud83c\uddec', label: 'Singapore', standard: 'BCA' },
-  { code: 'MY', flag: '\ud83c\uddf2\ud83c\uddfe', label: 'Malaysia', standard: 'JKR' },
-  { code: 'TH', flag: '\ud83c\uddf9\ud83c\udded', label: 'Thailand', standard: 'EIT' },
-  { code: 'ID', flag: '\ud83c\uddee\ud83c\udde9', label: 'Indonesia', standard: 'SNI' },
-  { code: 'PH', flag: '\ud83c\uddf5\ud83c\udded', label: 'Philippines', standard: 'DPWH' },
-  { code: 'VN', flag: '\ud83c\uddfb\ud83c\uddf3', label: 'Vietnam', standard: 'BXD' },
+  { code: 'CN', flag: '\ud83c\udde8\ud83c\uddf3', standard: 'GB50500' },
+  { code: 'IN', flag: '\ud83c\uddee\ud83c\uddf3', standard: 'CPWD' },
+  { code: 'JP', flag: '\ud83c\uddef\ud83c\uddf5', standard: 'MLIT' },
+  { code: 'KR', flag: '\ud83c\uddf0\ud83c\uddf7', standard: 'KICT' },
+  { code: 'AU', flag: '\ud83c\udde6\ud83c\uddfa', standard: 'AIQS' },
+  { code: 'NZ', flag: '\ud83c\uddf3\ud83c\uddff', standard: 'NZIQS' },
+  { code: 'SG', flag: '\ud83c\uddf8\ud83c\uddec', standard: 'BCA' },
+  { code: 'MY', flag: '\ud83c\uddf2\ud83c\uddfe', standard: 'JKR' },
+  { code: 'TH', flag: '\ud83c\uddf9\ud83c\udded', standard: 'EIT' },
+  { code: 'ID', flag: '\ud83c\uddee\ud83c\udde9', standard: 'SNI' },
+  { code: 'PH', flag: '\ud83c\uddf5\ud83c\udded', standard: 'DPWH' },
+  { code: 'VN', flag: '\ud83c\uddfb\ud83c\uddf3', standard: 'BXD' },
   // Middle East / Africa
-  { code: 'GULF', flag: '\ud83c\udde6\ud83c\uddea', label: 'Gulf / UAE', standard: 'FIDIC' },
-  { code: 'IL', flag: '\ud83c\uddee\ud83c\uddf1', label: 'Israel', standard: 'SI' },
-  { code: 'TR', flag: '\ud83c\uddf9\ud83c\uddf7', label: 'Turkey', standard: 'BIB' },
-  { code: 'NG', flag: '\ud83c\uddf3\ud83c\uddec', label: 'Nigeria', standard: 'BQSM' },
-  { code: 'ZA', flag: '\ud83c\uddff\ud83c\udde6', label: 'South Africa', standard: 'ASAQS' },
-  { code: 'KE', flag: '\ud83c\uddf0\ud83c\uddea', label: 'Kenya', standard: 'IQSK' },
-  { code: 'MA', flag: '\ud83c\uddf2\ud83c\udde6', label: 'Morocco', standard: 'BPU' },
+  { code: 'GULF', flag: '\ud83c\udde6\ud83c\uddea', labelKey: 'boq.markup_region.gulf', labelDefault: 'Gulf states', standard: 'FIDIC' },
+  { code: 'IL', flag: '\ud83c\uddee\ud83c\uddf1', standard: 'SI' },
+  { code: 'TR', flag: '\ud83c\uddf9\ud83c\uddf7', standard: 'BIB' },
+  { code: 'NG', flag: '\ud83c\uddf3\ud83c\uddec', standard: 'BQSM' },
+  { code: 'ZA', flag: '\ud83c\uddff\ud83c\udde6', standard: 'ASAQS' },
+  { code: 'KE', flag: '\ud83c\uddf0\ud83c\uddea', standard: 'IQSK' },
+  { code: 'MA', flag: '\ud83c\uddf2\ud83c\udde6', standard: 'BPU' },
   // CIS
-  { code: 'RU', flag: '\ud83c\uddf7\ud83c\uddfa', label: 'Russia / CIS', standard: '\u0413\u042d\u0421\u041d' },
+  { code: 'RU', flag: '\ud83c\uddf7\ud83c\uddfa', standard: '\u0413\u042d\u0421\u041d' },
   // Generic
-  { code: 'DEFAULT', flag: '\ud83c\udf10', label: 'Generic International', standard: '' },
+  { code: 'DEFAULT', flag: '\ud83c\udf10', labelKey: 'boq.markup_region.generic', labelDefault: 'Generic international', standard: '' },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -174,7 +178,7 @@ interface EditState {
 }
 
 export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt, openSignal, sections }: MarkupPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -506,7 +510,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                     >
                       <span className="text-base leading-none">{region.flag}</span>
                       <div className="min-w-0">
-                        <div className="text-content-primary font-medium truncate">{region.label}</div>
+                        <div className="text-content-primary font-medium truncate">
+                          {markupRegionLabel(region, i18n.language, t)}
+                        </div>
                         {region.standard && (
                           <div className="text-2xs text-content-tertiary">{region.standard}</div>
                         )}
