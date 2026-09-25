@@ -66,6 +66,7 @@ from app.modules.bid_management.schemas import (
     BidPackageLineItemCreate,
     BidPackageLineItemResponse,
     BidPackageLineItemUpdate,
+    BidPackageLinesFromBOQ,
     BidPackageResponse,
     BidPackageUpdate,
     BidParityAnalyticsResponse,
@@ -483,6 +484,29 @@ async def bulk_create_lines(
     await _verify_package_access(session, package_id, user_id)
     svc = BidManagementService(session)
     rows = await svc.bulk_create_lines(package_id, data.items)
+    return [BidPackageLineItemResponse.model_validate(r) for r in rows]
+
+
+@router.post(
+    "/bid-packages/{package_id}/lines/from-boq",
+    response_model=list[BidPackageLineItemResponse],
+    status_code=201,
+)
+async def add_lines_from_boq(
+    package_id: uuid.UUID,
+    data: BidPackageLinesFromBOQ,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bid_management.create")),
+) -> list[BidPackageLineItemResponse]:
+    """Add scope lines copied from bill positions, keeping the link to each.
+
+    Returns only the lines this call created: positions already in the
+    package and section headers are skipped.
+    """
+    await _verify_package_access(session, package_id, user_id)
+    svc = BidManagementService(session)
+    rows = await svc.add_lines_from_boq(package_id, data)
     return [BidPackageLineItemResponse.model_validate(r) for r in rows]
 
 

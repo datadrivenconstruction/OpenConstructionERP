@@ -64,6 +64,7 @@ from app.modules.bid_management.schemas import (
     BidPackageCreate,
     BidPackageLineItemCreate,
     BidPackageLineItemUpdate,
+    BidPackageLinesFromBOQ,
     BidPackageUpdate,
     BidQAAnswer,
     BidQACreate,
@@ -1306,8 +1307,81 @@ class BidManagementService:
 
     # ── Lines ─────────────────────────────────────────────────────────
 
+    async def _load_project_positions(
+        self, project_id: uuid.UUID, position_ids: list[uuid.UUID]
+    ) -> dict[uuid.UUID, Any]:
+        """Load bill positions by id, refusing any outside ``project_id``.
+
+        A scope line carries its position to the contract on award, where the
+        progress bridge bills against it, so a position from another project
+        would put that project's progress on this contract.
+        """
+        if not position_ids:
+            return {}
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.boq.models import BOQ, Position  # noqa: PLC0415
+
+        rows = (
+            await self.session.execute(
+                select(Position, BOQ.project_id)
+                .join(BOQ, BOQ.id == Position.boq_id)
+                .where(Position.id.in_(set(position_ids))),
+            )
+        ).all()
+        found = {pos.id: pos for pos, pos_project in rows if pos_project == project_id}
+        missing = [str(pid) for pid in dict.fromkeys(position_ids) if pid not in found]
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "code": "boq_position_not_in_project",
+                    "message": "Bill position not found in the project of this package",
+                    "position_ids": missing,
+                },
+            )
+        return found
+
+    async def add_lines_from_boq(self, package_id: uuid.UUID, data: BidPackageLinesFromBOQ) -> list[BidPackageLineItem]:
+        """Copy bill positions into the package as scope lines.
+
+        Each line takes the position's ordinal, description, unit and quantity
+        and keeps ``boq_position_id``, which the award carries onto the
+        contract line. A position already in the package is skipped, so adding
+        the same selection twice adds nothing. Section headers carry no
+        quantity to price and are skipped too.
+        """
+        from app.modules.boq.service import _is_section  # noqa: PLC0415
+
+        package = await self.get_package(package_id)
+        positions = await self._load_project_positions(package.project_id, data.position_ids)
+        existing = await self.line_repo.list_for_package(package_id)
+        already = {line.boq_position_id for line in existing if line.boq_position_id is not None}
+        next_index = max((line.order_index for line in existing), default=-1) + 1
+        rows: list[BidPackageLineItem] = []
+        for pid in dict.fromkeys(data.position_ids):
+            pos = positions[pid]
+            if pid in already or _is_section(pos):
+                continue
+            rows.append(
+                BidPackageLineItem(
+                    package_id=package_id,
+                    code=(pos.ordinal or "")[:64],
+                    description=pos.description or "",
+                    unit=(pos.unit or "")[:20],
+                    quantity=str(_to_decimal(pos.quantity)),
+                    order_index=next_index + len(rows),
+                    boq_position_id=pid,
+                ),
+            )
+        if not rows:
+            return []
+        return await self.line_repo.bulk_create(rows)
+
     async def create_line(self, data: BidPackageLineItemCreate) -> BidPackageLineItem:
-        await self.get_package(data.package_id)  # 404 if missing
+        package = await self.get_package(data.package_id)  # 404 if missing
+        if data.boq_position_id is not None:
+            await self._load_project_positions(package.project_id, [data.boq_position_id])
         line = BidPackageLineItem(
             package_id=data.package_id,
             code=data.code,
@@ -1319,13 +1393,17 @@ class BidManagementService:
             parent_line_id=data.parent_line_id,
             spec_attachment_url=data.spec_attachment_url,
             is_mandatory=data.is_mandatory,
+            boq_position_id=data.boq_position_id,
         )
         return await self.line_repo.create(line)
 
     async def bulk_create_lines(
         self, package_id: uuid.UUID, items: list[BidPackageLineItemCreate]
     ) -> list[BidPackageLineItem]:
-        await self.get_package(package_id)
+        package = await self.get_package(package_id)
+        await self._load_project_positions(
+            package.project_id, [item.boq_position_id for item in items if item.boq_position_id is not None]
+        )
         rows = [
             BidPackageLineItem(
                 package_id=package_id,
@@ -1338,6 +1416,7 @@ class BidManagementService:
                 parent_line_id=item.parent_line_id,
                 spec_attachment_url=item.spec_attachment_url,
                 is_mandatory=item.is_mandatory,
+                boq_position_id=item.boq_position_id,
             )
             for item in items
         ]
@@ -1350,6 +1429,9 @@ class BidManagementService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "quantity" in fields and fields["quantity"] is not None:
             fields["quantity"] = str(fields["quantity"])
+        if fields.get("boq_position_id") is not None:
+            package = await self.get_package(line.package_id)
+            await self._load_project_positions(package.project_id, [fields["boq_position_id"]])
         if not fields:
             return line
         await self.line_repo.update_fields(line_id, **fields)
@@ -1365,8 +1447,35 @@ class BidManagementService:
 
     # ── Bidders ───────────────────────────────────────────────────────
 
+    async def _resolve_bidder_links(
+        self,
+        subcontractor_id: uuid.UUID | None,
+        contact_id: uuid.UUID | None,
+    ) -> tuple[uuid.UUID | None, uuid.UUID | None]:
+        """Check a bidder's directory links and fill the contact from the subcontractor.
+
+        A link is what an award turns into the contract counterparty, so one
+        that points at nothing is refused here rather than discovered there.
+        When only the subcontractor is given, its own contact stands for it.
+        """
+        if subcontractor_id is not None:
+            from app.modules.subcontractors.models import Subcontractor  # noqa: PLC0415
+
+            sub = await self.session.get(Subcontractor, subcontractor_id)
+            if sub is None:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Subcontractor not found")
+            if contact_id is None:
+                contact_id = sub.contact_id
+        if contact_id is not None:
+            from app.modules.contacts.models import Contact  # noqa: PLC0415
+
+            if await self.session.get(Contact, contact_id) is None:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Contact not found")
+        return subcontractor_id, contact_id
+
     async def create_bidder(self, data: BidderCreate) -> Bidder:
         await self.get_package(data.package_id)
+        subcontractor_id, contact_id = await self._resolve_bidder_links(data.subcontractor_id, data.contact_id)
         bidder = Bidder(
             package_id=data.package_id,
             company_name=data.company_name,
@@ -1376,6 +1485,8 @@ class BidManagementService:
             country=data.country,
             status=data.status,
             notes=data.notes,
+            subcontractor_id=subcontractor_id,
+            contact_id=contact_id,
         )
         return await self.bidder_repo.create(bidder)
 
@@ -1384,6 +1495,17 @@ class BidManagementService:
         if bidder is None:
             raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
         fields = data.model_dump(exclude_unset=True)
+        if "subcontractor_id" in fields or "contact_id" in fields:
+            # A new subcontractor brings its own contact unless one is given;
+            # keeping the old contact would pair the new firm with the old one.
+            sub_id = fields.get("subcontractor_id", bidder.subcontractor_id)
+            if "contact_id" in fields:
+                contact_id = fields["contact_id"]
+            elif "subcontractor_id" in fields:
+                contact_id = None
+            else:
+                contact_id = bidder.contact_id
+            fields["subcontractor_id"], fields["contact_id"] = await self._resolve_bidder_links(sub_id, contact_id)
         if not fields:
             return bidder
         await self.bidder_repo.update_fields(bidder_id, **fields)

@@ -103,6 +103,7 @@ class BidPackageLineItemCreate(BaseModel):
     parent_line_id: UUID | None = None
     spec_attachment_url: str | None = Field(default=None, max_length=1024)
     is_mandatory: bool = True
+    boq_position_id: UUID | None = None
 
 
 class BidPackageLineItemUpdate(BaseModel):
@@ -119,6 +120,7 @@ class BidPackageLineItemUpdate(BaseModel):
     parent_line_id: UUID | None = None
     spec_attachment_url: str | None = Field(default=None, max_length=1024)
     is_mandatory: bool | None = None
+    boq_position_id: UUID | None = None
 
 
 class BidPackageLineItemResponse(BaseModel):
@@ -137,6 +139,7 @@ class BidPackageLineItemResponse(BaseModel):
     parent_line_id: UUID | None = None
     spec_attachment_url: str | None = None
     is_mandatory: bool = True
+    boq_position_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -145,6 +148,12 @@ class BidPackageLineItemBulkCreate(BaseModel):
     """Bulk-create lines."""
 
     items: list[BidPackageLineItemCreate] = Field(default_factory=list)
+
+
+class BidPackageLinesFromBOQ(BaseModel):
+    """Add scope lines copied from bill positions of the package's project."""
+
+    position_ids: list[UUID] = Field(..., min_length=1, max_length=500)
 
 
 # ── BidInvitation ────────────────────────────────────────────────────────
@@ -212,6 +221,8 @@ class BidderCreate(BaseModel):
     country: str = Field(default="", max_length=64)
     status: str = Field(default="active", pattern=_BIDDER_STATUS)
     notes: str = ""
+    subcontractor_id: UUID | None = None
+    contact_id: UUID | None = None
 
 
 class BidderUpdate(BaseModel):
@@ -227,6 +238,8 @@ class BidderUpdate(BaseModel):
     status: str | None = Field(default=None, pattern=_BIDDER_STATUS)
     notes: str | None = None
     disqualification_reason: str | None = None
+    subcontractor_id: UUID | None = None
+    contact_id: UUID | None = None
 
 
 class BidderResponse(BaseModel):
@@ -244,6 +257,8 @@ class BidderResponse(BaseModel):
     status: str = "active"
     disqualification_reason: str | None = None
     notes: str = ""
+    subcontractor_id: UUID | None = None
+    contact_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 
