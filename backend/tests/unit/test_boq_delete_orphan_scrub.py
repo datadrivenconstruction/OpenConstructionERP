@@ -69,11 +69,16 @@ async def test_delete_boq_scrubs_orphaned_position_refs(monkeypatch: pytest.Monk
     service._ensure_boq_writable = writable  # type: ignore[method-assign]
     scrub = AsyncMock()
     service._scrub_activity_position_refs = scrub  # type: ignore[method-assign]
+    # The generated budgets are released on a real database
+    # (tests/modules/boq/test_deleting_a_bill_takes_its_budgets_with_it.py).
+    release = AsyncMock()
+    service._release_generated_budgets = release  # type: ignore[method-assign]
     monkeypatch.setattr("app.modules.boq.service._safe_publish", AsyncMock())
 
     await service.delete_boq(boq_id)
 
     writable.assert_awaited_once_with(boq_id)
+    release.assert_awaited_once_with(boq_id, project_id, [str(pos_a), str(pos_b)])
     scrub.assert_awaited_once()
     args, kwargs = scrub.call_args
     # boq_id positional, the captured ids as strings, project id forwarded
@@ -99,6 +104,7 @@ async def test_delete_boq_skips_scrub_when_no_positions(monkeypatch: pytest.Monk
     service._ensure_boq_writable = writable  # type: ignore[method-assign]
     scrub = AsyncMock()
     service._scrub_activity_position_refs = scrub  # type: ignore[method-assign]
+    service._release_generated_budgets = AsyncMock()  # type: ignore[method-assign]
     monkeypatch.setattr("app.modules.boq.service._safe_publish", AsyncMock())
 
     await service.delete_boq(boq_id)

@@ -3231,6 +3231,7 @@ class BOQService:
                 deleted_position_ids,
                 project_id=project_uuid,
             )
+        await self._release_generated_budgets(boq_id, project_uuid, deleted_position_ids)
 
         await self.boq_repo.delete(boq_id)
 
@@ -3242,6 +3243,76 @@ class BOQService:
         )
 
         logger.info("BOQ deleted: %s", boq_id)
+
+    async def _release_generated_budgets(
+        self,
+        boq_id: uuid.UUID,
+        project_id: uuid.UUID,
+        position_ids: Sequence[str],
+    ) -> None:
+        """Remove or detach the budgets "Create budget" generated from this bill.
+
+        That endpoint writes finance budgets stamped with ``boq_id`` in their
+        metadata and one cost model budget line per position. Neither has a
+        foreign key to the bill, so deleting the bill left both behind as budget
+        that no bill stands behind. A generated row nobody has worked on goes
+        with the bill. A row with money recorded against it since (committed,
+        actual, earned, or a revised finance budget) is a record in its own
+        right and is kept, detached from the bill: the finance row notes which
+        bill it came from, the budget line drops its position link.
+        """
+        from app.modules.costmodel.models import BudgetLine
+        from app.modules.finance.models import ProjectBudget
+
+        def _is_zero(value: object) -> bool:
+            try:
+                return Decimal(str(value if value not in (None, "") else "0")) == 0
+            except (InvalidOperation, ValueError):
+                return False
+
+        budgets = (
+            (await self.session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id)))
+            .scalars()
+            .all()
+        )
+        for budget in budgets:
+            meta = budget.metadata_ if isinstance(budget.metadata_, dict) else {}
+            if meta.get("boq_id") != str(boq_id):
+                continue
+            untouched = (
+                _is_zero(budget.committed)
+                and _is_zero(budget.actual)
+                and Decimal(str(budget.revised_budget or 0)) == Decimal(str(budget.original_budget or 0))
+            )
+            if untouched:
+                await self.session.delete(budget)
+            else:
+                detached = {k: v for k, v in meta.items() if k != "boq_id"}
+                detached["deleted_boq_id"] = str(boq_id)
+                budget.metadata_ = detached
+
+        if position_ids:
+            lines = (
+                (
+                    await self.session.execute(
+                        select(BudgetLine).where(
+                            BudgetLine.project_id == project_id,
+                            BudgetLine.boq_position_id.in_([uuid.UUID(pid) for pid in position_ids]),
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            for line in lines:
+                untouched = (
+                    _is_zero(line.committed_amount) and _is_zero(line.actual_amount) and line.earned_amount is None
+                )
+                if untouched:
+                    await self.session.delete(line)
+                else:
+                    line.boq_position_id = None
+        await self.session.flush()
 
     # ── Position operations ───────────────────────────────────────────────
 
