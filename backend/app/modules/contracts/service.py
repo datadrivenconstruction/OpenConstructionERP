@@ -1577,13 +1577,19 @@ class ContractsService:
         pack_ids: list[str],
         *,
         message: str | None = None,
+        labels: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         """Structured 422 body the ComplianceGate UI renders verbatim.
 
         ``message`` is the one line a caller that only gets a toast will see,
         so a gate whose findings are not rendered anywhere near the button it
         guards passes one that names them.
+
+        ``labels`` maps an ``element_ref`` to what a person calls it (a line's
+        code and description, the contract's code and title), sent as
+        ``element_label`` so a finding names the line instead of its id.
         """
+        names = labels or {}
 
         def _serialise(r: Any) -> dict[str, Any]:
             return {
@@ -1592,6 +1598,7 @@ class ContractsService:
                 "severity": r.severity.value,
                 "message": r.message,
                 "element_ref": r.element_ref,
+                "element_label": names.get(str(r.element_ref)) if r.element_ref else None,
                 "suggestion": r.suggestion,
             }
 
@@ -1684,10 +1691,35 @@ class ContractsService:
             len(report.errors),
             pack_ids,
         )
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=self._compliance_http_detail(report, pack_ids),
+            detail=self._compliance_http_detail(
+                report,
+                pack_ids,
+                message=contracts_translate(
+                    "compliance_gate.errors.signature_blocked",
+                    locale=get_locale(),
+                    findings="; ".join(r.message for r in report.errors[:3]),
+                ),
+                labels=await self._compliance_labels(contract),
+            ),
         )
+
+    async def _compliance_labels(self, contract: Contract) -> dict[str, str]:
+        """What a person calls each thing the signature gate can point at.
+
+        The gate validates the schedule of values, so a finding points at a
+        line by id, or at the contract itself. The id is all the dialog used to
+        show; this gives it the line's code and description instead.
+        """
+        labels = {str(contract.id): " ".join(p for p in (contract.code, getattr(contract, "title", None)) if p)}
+        for line in await self.line_repo.list_for_contract(contract.id):
+            label = " ".join(p for p in (line.code, line.description) if p)
+            if label:
+                labels[str(line.id)] = label
+        return labels
 
     # ── The contract's own rule set (parties, securities, EOT, templates) ─
 
@@ -2847,6 +2879,29 @@ class ContractsService:
             "prior_completed_value": prior,
             "cumulative_completed_value": (prior + Decimal(str(period_value or 0))).quantize(Decimal("0.0001")),
         }
+
+    async def claim_line_value_from_percent(
+        self,
+        claim: ProgressClaim,
+        contract_line_id: uuid.UUID,
+        pct: Decimal | float | int | str | None,
+    ) -> Decimal | None:
+        """This period's value for a hand-edited line entered as a percent.
+
+        The percent is to date, as on the generated lines, so the period bills
+        what that percent of the SoV line comes to less what earlier claims
+        already billed on it. None when the SoV line is not on this claim's
+        contract, so the caller keeps the value it was given.
+        """
+        line = await self.line_repo.get_by_id(contract_line_id)
+        if line is None or line.contract_id != claim.contract_id:
+            return None
+        prior_by_line = await self.claim_line_repo.prior_period_value_by_line(
+            claim.contract_id,
+            before_claim_id=claim.id,
+        )
+        derived = compute_progress_claim_line(line, pct or 0, prior_value=prior_by_line.get(line.id, DEC_ZERO))
+        return derived["period_completed_value"]
 
     async def record_percent_regressed(self, claim: ProgressClaim, entries: list[dict[str, str]]) -> None:
         """Keep the lines whose percent to date went backwards on the claim.

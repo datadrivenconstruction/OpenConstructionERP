@@ -99,5 +99,10 @@
     "g703": {
       "billed_not_on_a_schedule_line": "Billed work not carried by any schedule of values line"
     }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "This contract cannot be signed until these are resolved: {findings}"
+    }
   }
 }

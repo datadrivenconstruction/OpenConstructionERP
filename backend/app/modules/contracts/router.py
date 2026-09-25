@@ -471,6 +471,7 @@ async def preview_compliance_gate(
     contract = await _verify_contract_access(session, contract_id, user_id)
     service = ContractsService(session)
     report, pack_ids = await service.run_compliance_gate(contract)
+    labels = await service._compliance_labels(contract)
 
     def _serialise(r: object) -> dict:
         return {
@@ -479,6 +480,7 @@ async def preview_compliance_gate(
             "severity": r.severity.value,
             "message": r.message,
             "element_ref": r.element_ref,
+            "element_label": labels.get(str(r.element_ref)) if r.element_ref else None,
             "suggestion": r.suggestion,
         }
 
@@ -1358,9 +1360,17 @@ async def create_claim_line(
     service._assert_claim_editable(claim)
     repo = ProgressClaimLineRepository(session)
     fields = data.model_dump()
+    # A line entered as a percent alone arrives with a zero value, which billed
+    # nothing. The percent is to date, so the period value is worked out from it.
+    if data.period_completed_pct > 0 and not data.period_completed_value:
+        derived = await service.claim_line_value_from_percent(claim, data.contract_line_id, data.period_completed_pct)
+        if derived is not None:
+            fields["period_completed_value"] = derived
     # Column D and the running total are derived, never client-authored: the
     # same "claims before this one" the generators use, plus this period.
-    fields.update(await service.claim_line_running_totals(claim, data.contract_line_id, data.period_completed_value))
+    fields.update(
+        await service.claim_line_running_totals(claim, data.contract_line_id, fields["period_completed_value"])
+    )
     obj = ProgressClaimLine(**fields)
     obj = await repo.create(obj)
     # Totals and retention follow the lines, so a hand-added line bills.
@@ -1398,6 +1408,18 @@ async def update_claim_line(
         # the same semantics as commit_preview_to_claim: what the claims before
         # this one in billing order billed on this SoV line + this period's value.
         fields.pop("cumulative_completed_value", None)
+        # A changed percent with the value left as it was (or zero) means the
+        # percent is what was edited, so the period value follows it.
+        new_pct = fields.get("period_completed_pct")
+        sent_value = fields.get("period_completed_value", obj.period_completed_value)
+        if (
+            new_pct is not None
+            and new_pct > 0
+            and (not sent_value or (new_pct != obj.period_completed_pct and sent_value == obj.period_completed_value))
+        ):
+            derived = await service.claim_line_value_from_percent(claim, obj.contract_line_id, new_pct)
+            if derived is not None:
+                fields["period_completed_value"] = derived
         period_value = fields.get("period_completed_value", obj.period_completed_value)
         fields.update(await service.claim_line_running_totals(claim, obj.contract_line_id, period_value))
         await repo.update_fields(line_id, **fields)

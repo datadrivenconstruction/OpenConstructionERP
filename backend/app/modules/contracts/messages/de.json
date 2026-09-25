@@ -99,5 +99,10 @@
     "g703": {
       "billed_not_on_a_schedule_line": "Abgerechnete Leistung ohne Position im Zahlungsplan"
     }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Dieser Vertrag kann erst unterschrieben werden, wenn Folgendes behoben ist: {findings}"
+    }
   }
 }
