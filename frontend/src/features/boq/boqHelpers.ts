@@ -576,7 +576,10 @@ export function catalogComponentAmounts(component: {
   if (cost === 0) {
     return { quantity, unit_rate: rate, total: quantity * rate };
   }
-  if (rate !== 0 && Math.abs(quantity * rate - cost) > 0.005) {
+  // Any disagreement beyond float noise counts: a sub-cent gap per row still
+  // adds up to cents on a line with many components once the server
+  // re-prices it from quantity x rate.
+  if (rate !== 0 && Math.abs(quantity * rate - cost) > 1e-9 * Math.max(1, Math.abs(cost))) {
     return { quantity: cost / rate, unit_rate: rate, total: cost };
   }
   return { quantity, unit_rate: rate, total: cost };

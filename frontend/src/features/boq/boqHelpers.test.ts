@@ -315,6 +315,13 @@ describe('catalogComponentAmounts', () => {
     expect(r.quantity * r.unit_rate).toBeCloseTo(12.84, 9);
   });
 
+  it('takes the implied quantity even when the gap is under a cent', () => {
+    // 24.38 h x 19.67 = 479.5546, the source costs 479.55.
+    const r = catalogComponentAmounts({ quantity: 24.38, unit_rate: 19.67, cost: 479.55 });
+    expect(r.total).toBe(479.55);
+    expect(r.quantity * r.unit_rate).toBeCloseTo(479.55, 9);
+  });
+
   it('leaves a component that already adds up alone', () => {
     expect(catalogComponentAmounts({ quantity: 2, unit_rate: 15, cost: 30 })).toEqual({
       quantity: 2,
