@@ -43757,6 +43757,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Siz ishlaydigan mamlakat uchun yozilgan keyslar, boshqa har bir bozor bir bosish masofasida",
     "dashboard.market_cases.source_pack": "Bozor paketingizga qarab tanlandi",
     "dashboard.market_cases.source_language": "Siz foydalanadigan tilga qarab tanlandi",
+    "dashboard.market_cases.source_region": "Brauzeringiz mintaqasiga qarab tanlandi",
     "dashboard.market_cases.source_nearest": "Tilingizga eng yaqin bozor",
     "dashboard.market_cases.all_for_market": "{{market}} bozorining barcha keyslari ({{count}})",
     "dashboard.market_cases.empty": "Hozircha birorta keys bozorni koʻrsatmaydi. Butun kutubxona bir bosish masofasida.",

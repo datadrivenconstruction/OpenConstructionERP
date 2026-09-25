@@ -43471,6 +43471,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Případy napsané pro zemi, ve které pracujete, a každý další trh na jedno kliknutí",
     "dashboard.market_cases.source_pack": "Vybráno podle vašeho tržního balíčku",
     "dashboard.market_cases.source_language": "Vybráno podle jazyka, který používáte",
+    "dashboard.market_cases.source_region": "Vybráno podle oblasti nastavené v prohlížeči",
     "dashboard.market_cases.source_nearest": "Trh nejbližší vašemu jazyku",
     "dashboard.market_cases.all_for_market": "Všechny případy pro trh {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Zatím žádný případ neuvádí trh. Celá knihovna je na jedno kliknutí.",

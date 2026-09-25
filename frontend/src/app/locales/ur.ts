@@ -42544,6 +42544,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "جس ملک میں آپ کام کرتے ہیں اس کے لیے لکھے گئے کیسز، اور ہر دوسری مارکیٹ ایک کلک کی دوری پر",
     "dashboard.market_cases.source_pack": "آپ کے مارکیٹ پیکج کے مطابق منتخب",
     "dashboard.market_cases.source_language": "آپ جو زبان استعمال کرتے ہیں اس کے مطابق منتخب",
+    "dashboard.market_cases.source_region": "آپ کے براؤزر کے علاقے کے مطابق منتخب",
     "dashboard.market_cases.source_nearest": "آپ کی زبان سے قریب ترین مارکیٹ",
     "dashboard.market_cases.all_for_market": "{{market}} کے تمام کیسز ({{count}})",
     "dashboard.market_cases.empty": "ابھی کوئی کیس کسی مارکیٹ کا نام نہیں دیتا۔ پوری لائبریری ایک کلک کی دوری پر ہے۔",

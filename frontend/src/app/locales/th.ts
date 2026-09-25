@@ -42440,6 +42440,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "เคสที่เขียนขึ้นสำหรับประเทศที่คุณทำงานอยู่ และทุกตลาดอื่นอยู่ห่างเพียงคลิกเดียว",
     "dashboard.market_cases.source_pack": "เลือกตามแพ็กตลาดของคุณ",
     "dashboard.market_cases.source_language": "เลือกตามภาษาที่คุณใช้",
+    "dashboard.market_cases.source_region": "เลือกตามภูมิภาคของเบราว์เซอร์ของคุณ",
     "dashboard.market_cases.source_nearest": "ตลาดที่ใกล้เคียงกับภาษาของคุณที่สุด",
     "dashboard.market_cases.all_for_market": "เคสทั้งหมดของ {{market}} ({{count}})",
     "dashboard.market_cases.empty": "ยังไม่มีเคสใดระบุตลาด คลังทั้งหมดอยู่ห่างเพียงคลิกเดียว",

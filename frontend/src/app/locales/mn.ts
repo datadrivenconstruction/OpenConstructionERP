@@ -42192,6 +42192,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Таны ажилладаг улсад зориулсан тохиолдлууд, бусад бүх зах зээл нэг товшилтын зайд",
     "dashboard.market_cases.source_pack": "Таны зах зээлийн багцаар сонгосон",
     "dashboard.market_cases.source_language": "Таны хэрэглэж буй хэлээр сонгосон",
+    "dashboard.market_cases.source_region": "Таны хөтчийн бүсээр сонгосон",
     "dashboard.market_cases.source_nearest": "Таны хэлэнд хамгийн ойр зах зээл",
     "dashboard.market_cases.all_for_market": "{{market}} зах зээлийн бүх тохиолдол ({{count}})",
     "dashboard.market_cases.empty": "Одоогоор ямар ч тохиолдол зах зээл заагаагүй байна. Бүх сан нэг товшилтын зайд.",

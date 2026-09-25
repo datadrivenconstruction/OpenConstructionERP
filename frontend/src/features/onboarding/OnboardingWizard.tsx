@@ -56,7 +56,13 @@ import {
 } from 'lucide-react';
 import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
 import { APP_VERSION } from '@/shared/lib/version';
-import { detectCountry, matchSupportedLanguage, changeLanguage, SUPPORTED_LANGUAGES } from '@/app/i18n';
+import {
+  detectCountry,
+  detectCountryForLanguage,
+  matchSupportedLanguage,
+  changeLanguage,
+  SUPPORTED_LANGUAGES,
+} from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   useBackgroundInstallStore,
@@ -841,6 +847,45 @@ function getSuggestedRegion(lang?: string): string {
   const code = lang || i18n.language || 'en';
   const base = code.split('-')[0] ?? 'en';
   return LANG_TO_REGION[base] ?? 'ENG_TORONTO';
+}
+
+/**
+ * The cost database and the country preset the data step leads with.
+ *
+ * The country the browser names comes first, then the UI language. Keying on
+ * the language alone offered every English reader the United States base and
+ * the first English preset, so an en-CA browser was never offered Canada
+ * although its region said Canada. The country is looked up in the data we
+ * ship rather than in a table here: the curated preset for that country
+ * (through `resolveCountryOffer`, which knows GB is filed as `uk`) names both
+ * its preset and its base, and a country without a preset still gets its own
+ * base when `CWICR_DATABASES` carries one for its flag. A country with neither
+ * (Austria, Iceland) falls back to the language's suggestion, which is where
+ * every reader was before; the preset and base are an offer the reader
+ * changes with one click, never an install.
+ *
+ * @param country lower-case ISO 3166-1 alpha-2 from `detectCountry`, or null.
+ * @param lang the UI language the reader picked on the first step.
+ */
+export function suggestDataSetup(
+  country: string | null | undefined,
+  lang: string,
+): { region: string; packId: string } {
+  const offer = resolveCountryOffer(country, []);
+  const preset = offer?.kind === 'preset' ? offer.preset : null;
+  const code = country?.toLowerCase() ?? '';
+  const ownBase =
+    preset && CWICR_DATABASES.some((db) => db.id === preset.region)
+      ? preset.region
+      : code && code !== 'xx'
+        ? CWICR_DATABASES.find((db) => db.flagId === code)?.id
+        : undefined;
+  const region = ownBase ?? getSuggestedRegion(lang);
+  if (preset) return { region, packId: preset.id };
+  const base = lang.split('-')[0] ?? 'en';
+  const byLocale = COUNTRY_PACKS.find((p) => p.locale === base);
+  const byRegion = COUNTRY_PACKS.find((p) => p.region === region);
+  return { region, packId: (byLocale ?? byRegion ?? DEFAULT_COUNTRY_PACK).id };
 }
 
 /** Get the suggested demo project IDs for the current language */
@@ -3411,7 +3456,13 @@ export function StepDataSetup({
   const addToast = useToastStore((s) => s.addToast);
   const canInstallPartnerPacks = useCanInstallPartnerPacks();
 
-  const suggestedRegion = getSuggestedRegion(selectedLang);
+  // The browser's country while the reader keeps the browser's language, else
+  // the chosen language's own country (`detectCountryForLanguage`).
+  const suggestion = useMemo(
+    () => suggestDataSetup(detectCountryForLanguage(selectedLang), selectedLang),
+    [selectedLang],
+  );
+  const suggestedRegion = suggestion.region;
   const suggestedDemoId = getSuggestedDemo(selectedLang);
 
   // ── Cost Database state ──
@@ -3446,15 +3497,10 @@ export function StepDataSetup({
   const installSemanticModel = semanticChoice ?? semanticStatus?.enabled ?? true;
 
   // ── Country Pack state ──
-  // Default-select the pack whose region matches the language-suggested
-  // region (e.g. picking French in step 1 pre-selects the France pack); fall
-  // back to the first showcase pack (US) if nothing matches.
-  const [selectedPackId, setSelectedPackId] = useState<string>(() => {
-    const base = selectedLang.split('-')[0] ?? 'en';
-    const byLocale = COUNTRY_PACKS.find((p) => p.locale === base);
-    const byRegion = COUNTRY_PACKS.find((p) => p.region === suggestedRegion);
-    return (byLocale ?? byRegion ?? DEFAULT_COUNTRY_PACK).id;
-  });
+  // Default-select the preset for the browser's country, else the one for the
+  // language (picking French in step 1 pre-selects France), else the first
+  // showcase preset. See `suggestDataSetup`.
+  const [selectedPackId, setSelectedPackId] = useState<string>(suggestion.packId);
   // Per-component status for the active generic preset (locale + cost DB only;
   // demos are handled exclusively by the partner-pack installer).
   const [packLocaleState, setPackLocaleState] = useState<PackComponentState>('idle');

@@ -43403,6 +43403,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Çalıştığınız ülke için yazılmış vakalar, diğer her pazar tek tıklama uzağınızda",
     "dashboard.market_cases.source_pack": "Pazar paketinize göre seçildi",
     "dashboard.market_cases.source_language": "Kullandığınız dile göre seçildi",
+    "dashboard.market_cases.source_region": "Tarayıcınızın bölgesine göre seçildi",
     "dashboard.market_cases.source_nearest": "Dilinize en yakın pazar",
     "dashboard.market_cases.all_for_market": "{{market}} için tüm vakalar ({{count}})",
     "dashboard.market_cases.empty": "Henüz hiçbir vaka bir pazar belirtmiyor. Tüm kitaplık tek tıklama uzağınızda.",

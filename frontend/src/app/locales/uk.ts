@@ -44294,6 +44294,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Кейси для країни, у якій ви працюєте, і будь-який інший ринок в один клік",
     "dashboard.market_cases.source_pack": "Підібрано за вашим ринковим пакетом",
     "dashboard.market_cases.source_language": "Підібрано за мовою, якою ви користуєтесь",
+    "dashboard.market_cases.source_region": "Підібрано за регіоном вашого браузера",
     "dashboard.market_cases.source_nearest": "Ринок, найближчий до вашої мови",
     "dashboard.market_cases.all_for_market": "Усі кейси для ринку {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Поки жоден кейс не вказує ринок. Уся бібліотека в один клік.",

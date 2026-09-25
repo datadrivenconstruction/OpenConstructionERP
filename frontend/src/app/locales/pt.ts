@@ -45277,6 +45277,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Casos escritos para o país onde trabalha, com todos os outros mercados a um clique",
     "dashboard.market_cases.source_pack": "Escolhidos segundo o seu pacote de mercado",
     "dashboard.market_cases.source_language": "Escolhidos segundo o idioma que utiliza",
+    "dashboard.market_cases.source_region": "Escolhidos segundo a região do seu navegador",
     "dashboard.market_cases.source_nearest": "O mercado mais próximo do seu idioma",
     "dashboard.market_cases.all_for_market": "Todos os casos de {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Ainda nenhum caso indica um mercado. Toda a biblioteca está a um clique.",

@@ -37606,6 +37606,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Worked cases for the country you work in, with every other market one click away",
     "dashboard.market_cases.source_pack": "Matched to your regional pack",
     "dashboard.market_cases.source_language": "Matched to the language you use",
+    "dashboard.market_cases.source_region": "Matched to your browser's region",
     "dashboard.market_cases.source_nearest": "The closest market to your language",
     "dashboard.market_cases.all_for_market": "All cases for {{market}} ({{count}})",
     "dashboard.market_cases.empty": "No case names a market yet. The whole library is one click away.",

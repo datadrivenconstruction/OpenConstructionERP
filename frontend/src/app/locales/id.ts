@@ -42345,6 +42345,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Kasus yang ditulis untuk negara tempat Anda bekerja, dengan setiap pasar lain sejauh satu klik",
     "dashboard.market_cases.source_pack": "Dipilih menurut paket pasar Anda",
     "dashboard.market_cases.source_language": "Dipilih menurut bahasa yang Anda gunakan",
+    "dashboard.market_cases.source_region": "Dipilih menurut wilayah browser Anda",
     "dashboard.market_cases.source_nearest": "Pasar yang paling dekat dengan bahasa Anda",
     "dashboard.market_cases.all_for_market": "Semua kasus untuk {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Belum ada kasus yang menyebut pasar. Seluruh pustaka hanya sejauh satu klik.",

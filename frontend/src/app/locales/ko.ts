@@ -42970,6 +42970,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "일하는 국가에 맞춰 작성된 케이스, 다른 모든 시장은 클릭 한 번 거리",
     "dashboard.market_cases.source_pack": "시장 팩에 맞춰 선택됨",
     "dashboard.market_cases.source_language": "사용 중인 언어에 맞춰 선택됨",
+    "dashboard.market_cases.source_region": "브라우저의 지역에 맞춰 선택됨",
     "dashboard.market_cases.source_nearest": "사용 언어와 가장 가까운 시장",
     "dashboard.market_cases.all_for_market": "{{market}} 케이스 전체 ({{count}})",
     "dashboard.market_cases.empty": "아직 시장을 지정한 케이스가 없습니다. 전체 라이브러리는 클릭 한 번 거리입니다.",

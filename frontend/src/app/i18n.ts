@@ -148,6 +148,45 @@ export function matchSupportedLanguage(raw: string | null | undefined): string |
   return SUPPORTED_LANGUAGES.some((l) => l.code === base) ? base : null;
 }
 
+/** The region subtag of one language tag, lower case, or null. Scans past the
+ *  language subtag rather than reading parts[1], so a script subtag does not
+ *  hide the region: zh-Hans-CN has to answer 'cn'. A UN M49 region such as
+ *  es-419 is deliberately not matched. */
+function regionOfTag(tag: string): string | null {
+  for (const part of tag.trim().split('-').slice(1)) {
+    if (/^[A-Za-z]{2}$/.test(part)) return part.toLowerCase();
+  }
+  return null;
+}
+
+/**
+ * The country the browser's own language settings name, lower-case ISO
+ * 3166-1 alpha-2, or null when they name none.
+ *
+ * Only the region subtag counts here, never a country read off a language:
+ * en-CA and fr-CA both say Canada, de-AT says Austria, a bare `de` says
+ * nothing. `navigator.language` is read first. When it carries no region, the
+ * rest of `navigator.languages` is consulted, but only entries in the SAME
+ * language: a browser set to `de` with `de-AT` further down its list is in
+ * Austria, while one set to `de` with `en-US` as a second language has said
+ * nothing about the United States.
+ */
+export function detectBrowserRegion(): string | null {
+  if (typeof navigator === 'undefined') return null;
+  const primary = (navigator.language || '').trim();
+  const own = regionOfTag(primary);
+  if (own) return own;
+  const base = primary.split('-')[0]?.toLowerCase();
+  if (!base) return null;
+  const others = Array.isArray(navigator.languages) ? navigator.languages : [];
+  for (const tag of others) {
+    if (typeof tag !== 'string' || tag.split('-')[0]?.toLowerCase() !== base) continue;
+    const region = regionOfTag(tag);
+    if (region) return region;
+  }
+  return null;
+}
+
 /**
  * The country this browser is most likely sitting in, lower-case ISO 3166-1
  * alpha-2, or ``null`` when nothing says.
@@ -181,14 +220,40 @@ export function matchSupportedLanguage(raw: string | null | undefined): string |
  *   fallback half to be deterministic.
  */
 export function detectCountry(uiLanguage?: string): string | null {
-  const raw = typeof navigator !== 'undefined' ? navigator.language || '' : '';
-  // Scan past the language subtag rather than reading parts[1], so a script
-  // subtag does not hide the region: zh-Hans-CN has to answer 'cn'. A UN M49
-  // region such as es-419 is deliberately not matched here and falls through
-  // to the language's own country.
-  for (const part of raw.trim().split('-').slice(1)) {
-    if (/^[A-Za-z]{2}$/.test(part)) return part.toLowerCase();
-  }
+  const region = detectBrowserRegion();
+  if (region) return region;
+  return countryOfLanguage(uiLanguage);
+}
+
+/**
+ * The country for a reader who chose `uiLanguage` in the app.
+ *
+ * The browser's region counts only while the reader keeps the browser's
+ * language. An en-CA browser left on English is in Canada; the same browser
+ * switched to German in the language step has told us the browser's settings
+ * are not theirs to go by (en-US in particular is the factory default of a
+ * great many machines far from the United States), so the chosen language's
+ * own country answers instead. fr-CA left on French stays Canada.
+ */
+export function detectCountryForLanguage(uiLanguage: string): string | null {
+  return browserRegionForLanguage(uiLanguage) ?? countryOfLanguage(uiLanguage);
+}
+
+/**
+ * The browser's region, but only while the reader keeps the browser's
+ * language (see `detectCountryForLanguage`), else null. The region half on its
+ * own, for a caller that asks the language separately.
+ */
+export function browserRegionForLanguage(uiLanguage: string | null | undefined): string | null {
+  if (!uiLanguage || typeof navigator === 'undefined') return null;
+  const browserBase = (navigator.language || '').split('-')[0]?.toLowerCase();
+  const chosenBase = uiLanguage.split('-')[0]?.toLowerCase();
+  if (!browserBase || browserBase !== chosenBase) return null;
+  return detectBrowserRegion();
+}
+
+/** The country a language entry declares (`xx` for plain English), or null. */
+function countryOfLanguage(uiLanguage?: string): string | null {
   const code = uiLanguage || i18n.language || 'en';
   const entry =
     SUPPORTED_LANGUAGES.find((l) => l.code === code) ??

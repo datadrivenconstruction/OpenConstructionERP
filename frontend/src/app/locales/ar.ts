@@ -44725,6 +44725,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "حالات عملية للبلد الذي تعمل فيه، وكل سوق آخر على بُعد نقرة واحدة",
     "dashboard.market_cases.source_pack": "مختارة حسب حزمة السوق لديك",
     "dashboard.market_cases.source_language": "مختارة حسب اللغة التي تستخدمها",
+    "dashboard.market_cases.source_region": "مختارة حسب منطقة متصفحك",
     "dashboard.market_cases.source_nearest": "أقرب سوق إلى لغتك",
     "dashboard.market_cases.all_for_market": "كل الحالات العملية في {{market}} ({{count}})",
     "dashboard.market_cases.empty": "لا توجد حتى الآن حالة تحدد سوقًا. المكتبة كاملة على بُعد نقرة واحدة.",

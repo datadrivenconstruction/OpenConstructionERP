@@ -42641,6 +42641,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Scenariji napisani za zemlju u kojoj radite, uz svako drugo tržište na jedan klik",
     "dashboard.market_cases.source_pack": "Odabrano prema vašem tržišnom paketu",
     "dashboard.market_cases.source_language": "Odabrano prema jeziku koji koristite",
+    "dashboard.market_cases.source_region": "Odabrano prema regiji vašeg preglednika",
     "dashboard.market_cases.source_nearest": "Tržište najbliže vašem jeziku",
     "dashboard.market_cases.all_for_market": "Svi scenariji za tržište {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Nijedan scenarij još ne navodi tržište. Cijela je knjižnica na jedan klik.",

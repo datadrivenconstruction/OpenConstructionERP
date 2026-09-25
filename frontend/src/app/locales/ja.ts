@@ -43863,6 +43863,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "働いている国のケースと、ワンクリックで切り替えられる他のすべての市場",
     "dashboard.market_cases.source_pack": "市場パックに合わせて選択",
     "dashboard.market_cases.source_language": "使用中の言語に合わせて選択",
+    "dashboard.market_cases.source_region": "ブラウザーの地域に合わせて選択",
     "dashboard.market_cases.source_nearest": "使用中の言語に最も近い市場",
     "dashboard.market_cases.all_for_market": "{{market}}のケースをすべて表示（{{count}}）",
     "dashboard.market_cases.empty": "市場を指定したケースはまだありません。ライブラリ全体はワンクリックで開けます。",

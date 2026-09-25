@@ -42491,6 +42491,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "जिस देश में आप काम करते हैं उसके लिए लिखे गए केस, और हर दूसरा बाज़ार एक क्लिक दूर",
     "dashboard.market_cases.source_pack": "आपके मार्केट पैक के अनुसार चुना गया",
     "dashboard.market_cases.source_language": "आप जिस भाषा का उपयोग करते हैं उसके अनुसार चुना गया",
+    "dashboard.market_cases.source_region": "आपके ब्राउज़र के क्षेत्र के अनुसार चुना गया",
     "dashboard.market_cases.source_nearest": "आपकी भाषा के सबसे नज़दीक का बाज़ार",
     "dashboard.market_cases.all_for_market": "{{market}} के सभी केस ({{count}})",
     "dashboard.market_cases.empty": "अभी किसी केस में बाज़ार नहीं बताया गया है। पूरी लाइब्रेरी एक क्लिक दूर है।",

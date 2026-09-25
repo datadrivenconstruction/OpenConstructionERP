@@ -42390,6 +42390,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Tapaukset siitä maasta, jossa työskentelet, ja kaikki muut markkinat yhden klikkauksen päässä",
     "dashboard.market_cases.source_pack": "Valittu markkinapakettisi mukaan",
     "dashboard.market_cases.source_language": "Valittu käyttämäsi kielen mukaan",
+    "dashboard.market_cases.source_region": "Valittu selaimesi alueen mukaan",
     "dashboard.market_cases.source_nearest": "Kieltäsi lähinnä olevat markkinat",
     "dashboard.market_cases.all_for_market": "Kaikki markkinan {{market}} tapaukset ({{count}})",
     "dashboard.market_cases.empty": "Yksikään tapaus ei vielä nimeä markkinaa. Koko kirjasto on yhden klikkauksen päässä.",

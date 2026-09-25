@@ -42395,6 +42395,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Mga kasong isinulat para sa bansang pinagtatrabahuhan ninyo, at isang pindot lang ang bawat ibang merkado",
     "dashboard.market_cases.source_pack": "Pinili ayon sa inyong market pack",
     "dashboard.market_cases.source_language": "Pinili ayon sa wikang ginagamit ninyo",
+    "dashboard.market_cases.source_region": "Pinili ayon sa rehiyon ng inyong browser",
     "dashboard.market_cases.source_nearest": "Ang merkadong pinakamalapit sa inyong wika",
     "dashboard.market_cases.all_for_market": "Lahat ng kaso para sa {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Wala pang kasong nagtutukoy ng merkado. Isang pindot lang ang buong aklatan.",

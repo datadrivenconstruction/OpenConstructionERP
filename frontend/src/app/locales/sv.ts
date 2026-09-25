@@ -43180,6 +43180,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Fall skrivna för landet du arbetar i, med alla andra marknader ett klick bort",
     "dashboard.market_cases.source_pack": "Valt utifrån ditt marknadspaket",
     "dashboard.market_cases.source_language": "Valt utifrån språket du använder",
+    "dashboard.market_cases.source_region": "Valt utifrån webbläsarens region",
     "dashboard.market_cases.source_nearest": "Marknaden som ligger närmast ditt språk",
     "dashboard.market_cases.all_for_market": "Alla fall för {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Inget fall nämner någon marknad ännu. Hela biblioteket är ett klick bort.",

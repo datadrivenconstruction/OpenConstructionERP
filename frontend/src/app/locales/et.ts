@@ -42501,6 +42501,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Juhtumid riigi kohta, kus te töötate, ja iga teine turg ühe klikiga",
     "dashboard.market_cases.source_pack": "Valitud teie turupaketi järgi",
     "dashboard.market_cases.source_language": "Valitud teie kasutatava keele järgi",
+    "dashboard.market_cases.source_region": "Valitud teie brauseri piirkonna järgi",
     "dashboard.market_cases.source_nearest": "Teie keelele lähim turg",
     "dashboard.market_cases.all_for_market": "Kõik turu {{market}} juhtumid ({{count}})",
     "dashboard.market_cases.empty": "Ükski juhtum ei nimeta veel turgu. Kõik juhtumid on ühe kliki kaugusel.",

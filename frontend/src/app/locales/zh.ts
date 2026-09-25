@@ -44909,6 +44909,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "为您所在国家编写的案例，其他市场一键切换",
     "dashboard.market_cases.source_pack": "根据您的市场数据包匹配",
     "dashboard.market_cases.source_language": "根据您使用的语言匹配",
+    "dashboard.market_cases.source_region": "根据您浏览器的地区匹配",
     "dashboard.market_cases.source_nearest": "与您的语言最接近的市场",
     "dashboard.market_cases.all_for_market": "{{market}}的全部案例（{{count}}）",
     "dashboard.market_cases.empty": "暂时还没有案例指明市场。整个案例库一键可达。",

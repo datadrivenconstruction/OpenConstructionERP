@@ -42713,6 +42713,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Cazuri scrise pentru țara în care lucrați, cu orice altă piață la un clic distanță",
     "dashboard.market_cases.source_pack": "Alese după pachetul dvs. de piață",
     "dashboard.market_cases.source_language": "Alese după limba pe care o folosiți",
+    "dashboard.market_cases.source_region": "Alese după regiunea browserului dvs.",
     "dashboard.market_cases.source_nearest": "Piața cea mai apropiată de limba dvs.",
     "dashboard.market_cases.all_for_market": "Toate cazurile pentru {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Niciun caz nu indică încă o piață. Întreaga bibliotecă este la un clic distanță.",

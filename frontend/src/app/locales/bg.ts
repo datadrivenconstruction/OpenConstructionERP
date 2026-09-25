@@ -42563,6 +42563,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Казуси, написани за държавата, в която работите, а всеки друг пазар е на един клик",
     "dashboard.market_cases.source_pack": "Избрано според вашия пазарен пакет",
     "dashboard.market_cases.source_language": "Избрано според езика, който използвате",
+    "dashboard.market_cases.source_region": "Избрано според региона на браузъра ви",
     "dashboard.market_cases.source_nearest": "Най-близкият пазар до вашия език",
     "dashboard.market_cases.all_for_market": "Всички казуси за {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Все още нито един казус не посочва пазар. Цялата библиотека е на един клик.",
