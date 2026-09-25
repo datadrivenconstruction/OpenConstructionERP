@@ -375,6 +375,23 @@ class _Repo:
         return None
 
 
+@pytest.fixture(autouse=True)
+def _no_finance_ledger():
+    """Keep the payables ledger out of these in-memory workflow tests.
+
+    Approving and paying a payment application raises and settles a payable
+    through the finance module, which needs a real session. The money it
+    books is covered on PostgreSQL by
+    ``tests/pg/test_a_subcontract_is_billed_and_committed_once.py``; here only
+    the pay application's own workflow is under test.
+    """
+    with (
+        patch("app.modules.subcontractors.finance_bridge.raise_payable_for_pay_app", AsyncMock()),
+        patch("app.modules.subcontractors.finance_bridge.settle_payable", AsyncMock()),
+    ):
+        yield
+
+
 def _make_service() -> Any:
     from app.modules.subcontractors.service import SubcontractorService
 
