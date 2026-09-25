@@ -201,6 +201,41 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     expect(body.metadata.scope_of_work).toEqual(['Set formwork', 'Pour']);
   });
 
+  it('shows the rate the line lands at, and lands it there with rows that add up', async () => {
+    // Shaped like an imported catalogue: the source cost of each component is
+    // exact while its quantity column is rounded (0.00 kg of nails costs
+    // 12.84), and the catalogue rate of the item (500) is a third figure.
+    (fetchCostSearch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      page([slimRow('item-9', 'F-009', 'Frame wall', { rate: 500, buildup_rate: 511.11 })]),
+    );
+    details['item-9'] = {
+      ...slimRow('item-9', 'F-009', 'Frame wall', { rate: 500 }),
+      components: [
+        { name: 'Worker', code: 'L-1', unit: 'h', quantity: 24.38, unit_rate: 19.67, cost: 479.59, type: 'labor' },
+        { name: 'Nails', code: 'M-1', unit: 'kg', quantity: 0, unit_rate: 15107.19, cost: 12.84, type: 'material' },
+        { name: 'Profile', code: 'M-2', unit: 'm', quantity: 2, unit_rate: 9.34, type: 'material' },
+      ],
+    };
+    const { onAdded } = renderModal();
+
+    const rateCell = await screen.findByTestId('cost-row-rate-item-9', {}, SETTLE);
+    expect(rateCell.textContent).toContain('511.11');
+    expect(rateCell.textContent).toContain('Catalogue 500.00');
+
+    fireEvent.click(screen.getByText('Frame wall'));
+    fireEvent.click(screen.getByText(/^Add 1 to BOQ/));
+    await waitFor(() => expect(onAdded).toHaveBeenCalled(), SETTLE);
+
+    const body = positionPosts()[0]?.[1] as {
+      unit_rate: number;
+      metadata: { resources: Array<{ quantity: number; unit_rate: number; total: number }> };
+    };
+    expect(body.unit_rate).toBeCloseTo(511.11, 6);
+    for (const r of body.metadata.resources) {
+      expect(r.quantity * r.unit_rate).toBeCloseTo(r.total, 6);
+    }
+  });
+
   it('opens the variant picker from the full row and posts the chosen variant rate', async () => {
     // The slim row knows there are three variants (the list shows the count)
     // but carries no catalogue to pick from.
