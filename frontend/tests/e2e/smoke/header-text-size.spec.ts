@@ -26,7 +26,8 @@ for (const width of WIDTHS) {
 
       const picker = authedPage.getByTestId('header-project-picker');
       const chip = authedPage.getByTestId('active-pack-chip');
-      await expect(picker).toBeVisible();
+      // The picker may shrink to nothing on a crowded bar; it only has to be there.
+      await expect(picker).toBeAttached();
       await expect(chip).toBeAttached();
 
       const boxes = await authedPage.evaluate(() => {
@@ -36,11 +37,13 @@ for (const width of WIDTHS) {
           const r = el.getBoundingClientRect();
           return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
         };
-        // The picker's button can be wider than its shrinking wrapper, so its
-        // painted right edge is the furthest right of the wrapper and all it holds.
+        // The picker's painted extent is its wrapper and the pill inside it.
+        // The pill clips its own content (overflow-hidden), so nothing deeper
+        // can paint outside it; a closed dropdown is not painted at all.
         const pickerEl = document.querySelector('[data-testid="header-project-picker"]');
         const picker = pickerEl
-          ? [pickerEl, ...Array.from(pickerEl.querySelectorAll('*'))]
+          ? [pickerEl, pickerEl.firstElementChild]
+              .filter((el): el is Element => !!el)
               .map((el) => el.getBoundingClientRect())
               .filter((r) => r.width > 0)
               .reduce(
@@ -51,20 +54,31 @@ for (const width of WIDTHS) {
         return {
           picker,
           chip: rect('[data-testid="active-pack-chip"]'),
-          column: rect('[data-testid="header-pack-column"]'),
+          // The chip's own column, found through the chip so the check does
+          // not depend on a hook only the fixed header carries.
+          column: (() => {
+            const parent = document.querySelector('[data-testid="active-pack-chip"]')?.parentElement;
+            if (!parent) return null;
+            const r = parent.getBoundingClientRect();
+            // Only a column that clips bounds what the chip can paint.
+            const clips = getComputedStyle(parent).overflowX !== 'visible';
+            return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, clips };
+          })(),
         };
       });
       const { picker: p, chip: c, column: col } = boxes;
       expect(p && c && col).toBeTruthy();
-      // The painted part of the chip is its box clipped to its column.
-      const paintedLeft = Math.max(c!.left, col!.left);
-      const paintedRight = Math.min(c!.right, col!.right);
-      if (paintedRight > paintedLeft) {
-        expect(
-          paintedLeft,
-          `chip starts at ${Math.round(paintedLeft)}px, inside the project picker that ends at ${Math.round(p!.right)}px`,
-        ).toBeGreaterThanOrEqual(p!.right - 1);
-      }
+      // The painted part of the chip is its box, clipped to its column when
+      // the column clips.
+      const paintedLeft = col!.clips ? Math.max(c!.left, col!.left) : c!.left;
+      const paintedRight = col!.clips ? Math.min(c!.right, col!.right) : c!.right;
+      // The readout must stay visible, at least as its icon...
+      expect(paintedRight - paintedLeft, 'the pack chip was clipped away entirely').toBeGreaterThanOrEqual(12);
+      // ...and must not be painted over the project picker.
+      expect(
+        paintedLeft,
+        `chip starts at ${Math.round(paintedLeft)}px, inside the project picker that ends at ${Math.round(p!.right)}px`,
+      ).toBeGreaterThanOrEqual(p!.right - 1);
     });
   }
 }
