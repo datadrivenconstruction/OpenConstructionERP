@@ -256,6 +256,38 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "birimfiyat"],
     },
+    # The three country packs of 2026-09. Each classifies against DIN 276, the
+    # nearest hierarchy the product renders, and files every line under its own
+    # national structure as well; the engine set is the country name, which is
+    # a different namespace from the classification key the rules read.
+    "ro_compliance": {
+        "id": "ro_compliance",
+        "name": "Romania Compliance",
+        "description": "Every priced line filed under a chapter and subchapter of the "
+        "deviz general (HG 907/2016), DIN 276 cost groups, and the universal quality baseline.",
+        "jurisdiction": "RO",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "din276", "romania"],
+    },
+    "gr_compliance": {
+        "id": "gr_compliance",
+        "name": "Greece Compliance",
+        "description": "Every priced line carrying a well-formed article of the national "
+        "unified price lists (ΝΕΤ), DIN 276 cost groups, and the universal quality baseline.",
+        "jurisdiction": "GR",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "din276", "greece"],
+    },
+    "ua_compliance": {
+        "id": "ua_compliance",
+        "name": "Ukraine Compliance",
+        "description": "Every priced line filed under one of the twelve chapters of the "
+        "summary estimate (наказ Мінрегіону №281), DIN 276 cost groups, and the universal "
+        "quality baseline.",
+        "jurisdiction": "UA",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "din276", "ukraine"],
+    },
 }
 
 #: Default pack every project falls back to when nothing else matches.
@@ -399,6 +431,12 @@ PACK_BY_LABEL: dict[str, str] = {
     "japan": "jp_compliance",
     "turkey": "tr_compliance",
     "türkiye": "tr_compliance",
+    "romania": "ro_compliance",
+    "românia": "ro_compliance",
+    "greece": "gr_compliance",
+    "ελλάδα": "gr_compliance",
+    "ukraine": "ua_compliance",
+    "україна": "ua_compliance",
 }
 
 

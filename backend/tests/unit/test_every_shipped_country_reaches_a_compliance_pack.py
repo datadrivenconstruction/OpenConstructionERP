@@ -349,12 +349,15 @@ NATIONAL_RULE_SET_BY_COUNTRY: dict[str, str] = {
     "ES": "bc3",
     "FR": "dpgf",
     "GB": "nrm",
+    "GR": "greece",
     "HU": "hungary",
     "IN": "cpwd",
     "JP": "sekisan",
     "MX": "mexico",
+    "RO": "romania",
     "RU": "gesn",
     "TR": "birimfiyat",
+    "UA": "ukraine",
     "US": "masterformat",
 }
 
@@ -541,12 +544,13 @@ def test_no_national_rule_set_is_inert_on_the_payload_the_gate_builds() -> None:
     )
 
 
-#: The three packs whose lines this file writes out in full, with a compliant
-#: and a malformed code apiece. Three and not fifteen on purpose: a compliant
-#: line has to be written against the standard itself, and inventing eleven
-#: more from the rule sources would be asserting what the regex says rather
-#: than what the standard says. The test above covers all fifteen for the
-#: weaker property, that none of them is inert.
+#: The packs whose lines this file writes out in full, with a compliant and a
+#: malformed code apiece. Six and not eighteen on purpose: a compliant line has
+#: to be written against the standard itself, and inventing the rest from the
+#: rule sources would be asserting what the regex says rather than what the
+#: standard says. Romania, Greece and Ukraine are here because their lines were
+#: written from the sources their packs cite. The test above covers every
+#: national set for the weaker property, that none of them is inert.
 _DISCRIMINATION_CASES: dict[str, dict[str, list[ContractLine]]] = {
     "AT": {
         "bare": [_sov_line("1", "Excavation", "m3")],
@@ -562,6 +566,24 @@ _DISCRIMINATION_CASES: dict[str, dict[str, list[ContractLine]]] = {
         "bare": [_sov_line("1", "Excavation", "m3")],
         "compliant": [_sov_line("1.1", "Excavation", "m3", {"birimfiyat": "15.140"})],
         "malformed": [_sov_line("1.1", "Excavation", "m3", {"birimfiyat": "NOT-A-POZ"})],
+    },
+    # The deviz general chapter a Romanian line is budgeted under (HG 907/2016).
+    "RO": {
+        "bare": [_sov_line("1", "Excavation", "m3")],
+        "compliant": [_sov_line("1.1", "Excavation", "m3", {"deviz": "4.1"})],
+        "malformed": [_sov_line("1.1", "Excavation", "m3", {"deviz": "7.2"})],
+    },
+    # The unified price list article a Greek line is priced from.
+    "GR": {
+        "bare": [_sov_line("1", "Excavation", "m3")],
+        "compliant": [_sov_line("1.1", "Excavation", "m3", {"net": "ΟΙΚ 20.05.01"})],
+        "malformed": [_sov_line("1.1", "Excavation", "m3", {"net": "ΟΙΚ 99.05.01"})],
+    },
+    # The chapter of the Ukrainian summary estimate, one to twelve.
+    "UA": {
+        "bare": [_sov_line("1", "Excavation", "m3")],
+        "compliant": [_sov_line("1.1", "Excavation", "m3", {"zkr": "2"})],
+        "malformed": [_sov_line("1.1", "Excavation", "m3", {"zkr": "13"})],
     },
 }
 
