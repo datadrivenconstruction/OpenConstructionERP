@@ -478,6 +478,13 @@ def _get_lancedb():
         _lancedb_instance = lancedb.connect(db_path)
         logger.info("LanceDB connected at %s", db_path)
         return _lancedb_instance
+    except ImportError as exc:
+        # lancedb ships in the optional [vector] extra; app.main already warns
+        # once at boot, so a plain install must not log an ERROR on every start.
+        if not _lancedb_tried:
+            logger.info("LanceDB not installed (optional [vector] extra): %s", exc)
+            _lancedb_tried = True
+        return None
     except Exception as exc:
         if not _lancedb_tried:
             logger.error("Failed to connect LanceDB: %s", exc)
