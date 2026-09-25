@@ -415,6 +415,13 @@ async def _on_bid_package_awarded(event: Event) -> None:
     schedule-of-values lines mirroring the winning bid submission lines.
     The contract.metadata back-references the bid package + award so the
     audit trail is unbroken.
+
+    Idempotency is keyed on ``metadata.bid_package_id`` and, when the package
+    is linked to a tender package, ``metadata.tender_package_id``, which the
+    tender award path writes too, so one logical award drafts one contract
+    whichever path fires first. The contract code is only a label: a
+    hand-made contract that already uses ``CONTRACT-{code}`` gets a warning
+    and the draft a free code, where it used to swallow the award silently.
     """
     if not await _can_open_isolated_session():
         return
@@ -431,6 +438,12 @@ async def _on_bid_package_awarded(event: Event) -> None:
     async with async_session_factory() as session:
         from sqlalchemy import select
 
+        from app.modules.bid_management.award_contract import (
+            add_award_party,
+            find_award_contract,
+            free_contract_code,
+            resolve_award_counterparty,
+        )
         from app.modules.bid_management.award_selection import select_awarded_submission
         from app.modules.bid_management.models import (
             Bidder,
@@ -447,13 +460,33 @@ async def _on_bid_package_awarded(event: Event) -> None:
         if bidder is None:
             return
 
-        # Don't double-create: deterministic code keyed on package id.
-        code = f"CONTRACT-{package.code}"
-        existing = await session.execute(
-            select(Contract).where(Contract.code == code),
+        # Don't double-create. The key is the award, not the code: a person
+        # may have typed CONTRACT-{code} on a contract of their own.
+        tender_package_id = str(package.tender_id) if package.tender_id else None
+        existing = await find_award_contract(
+            session,
+            package.project_id,
+            keys={"bid_package_id": str(package.id), "tender_package_id": tender_package_id},
         )
-        if existing.scalar_one_or_none() is not None:
+        if existing is not None:
+            logger.info(
+                "bid_management.awarded: contract %s already drafted for package %s (idempotent skip)",
+                existing.code,
+                package.code,
+            )
             return
+        code = await free_contract_code(session, f"CONTRACT-{package.code}")
+
+        # The bidder row is a snapshot nobody else can resolve, so it is
+        # never the counterparty. The directory entry it was invited from
+        # is, and a bidder typed in by hand has none: the contract then
+        # names no counterparty and its party carries the company name.
+        counterparty = await resolve_award_counterparty(
+            session,
+            subcontractor_id=bidder.subcontractor_id,
+            contact_id=bidder.contact_id,
+            company_name=bidder.company_name,
+        )
 
         # Locate the awarded submission so we can mirror lines.
         #
@@ -474,7 +507,7 @@ async def _on_bid_package_awarded(event: Event) -> None:
             title=package.title or f"Contract - {package.code}",
             contract_type="lump_sum",
             counterparty_type="subcontractor",
-            counterparty_id=awarded_bidder_id,
+            counterparty_id=counterparty.counterparty_id,
             project_id=package.project_id,
             total_value=Decimal(str(data.get("awarded_amount", "0"))),
             currency=str(data.get("currency", "")) or package.currency,
@@ -489,8 +522,13 @@ async def _on_bid_package_awarded(event: Event) -> None:
             "awarded_bidder_id": str(awarded_bidder_id),
             "awarded_bidder_name": bidder.company_name,
         }
+        if tender_package_id:
+            contract.metadata_["tender_package_id"] = tender_package_id
+        if counterparty.contact_id is not None:
+            contract.metadata_["counterparty_contact_id"] = str(counterparty.contact_id)
         session.add(contract)
         await session.flush()
+        add_award_party(session, contract.id, counterparty)
 
         # Mirror the package's line items → contract lines, copying
         # the awarded bidder's priced totals when present.
@@ -534,6 +572,10 @@ async def _on_bid_package_awarded(event: Event) -> None:
                 order_index=pkg_line.order_index,
             )
             cl.metadata_ = {"bid_package_line_id": str(pkg_line.id)}
+            if pkg_line.boq_position_id is not None:
+                # The key the contracts progress bridge reads, see
+                # contracts.service.BOQ_POSITION_META_KEY.
+                cl.metadata_["boq_position_id"] = str(pkg_line.boq_position_id)
             session.add(cl)
 
         await session.commit()

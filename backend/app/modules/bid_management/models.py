@@ -132,6 +132,10 @@ class BidPackageLineItem(Base):
     )
     spec_attachment_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     is_mandatory: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    # Plain UUID - the oe_boq_position this scope line was added from, no FK.
+    # Carried onto the contract line on award, so the contract bills against
+    # the same bill position the estimate priced.
+    boq_position_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     package: Mapped[BidPackage] = relationship(back_populates="line_items")
 
@@ -191,6 +195,12 @@ class Bidder(Base):
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     contact_phone: Mapped[str] = mapped_column(String(64), nullable=False, default="")
     country: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    # Plain UUIDs - oe_subcontractors_subcontractor.id and oe_contacts_contact.id,
+    # no FK. Both are optional: a bidder typed in by hand is only its free-text
+    # company. An award makes the linked row the contract counterparty, so the
+    # contract and finance name a real firm instead of this snapshot row.
+    subcontractor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     status: Mapped[str] = mapped_column(
         String(32),
         nullable=False,
