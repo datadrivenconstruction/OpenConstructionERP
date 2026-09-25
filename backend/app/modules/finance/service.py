@@ -1392,10 +1392,18 @@ class FinanceService:
         *,
         actor_id: str | None = None,
     ) -> Invoice:
-        """Auto-create a receivable invoice from a certified progress claim.
+        """Auto-create the invoice a certified progress claim is billed on.
 
-        Idempotent: if a receivable invoice already carries this ``claim_id`` in
-        its ``source_claim_id`` column it is returned unchanged (event replay /
+        The direction follows the contract's counterparty. A claim on a client
+        contract is money the client owes us, so it is raised as a receivable.
+        A claim on a subcontract is the subcontractor billing us, so it is a
+        payable: booking it as a receivable put a subcontractor's bill into
+        accounts receivable and its retainage into the retention we hold from
+        the client. The name keeps its original wording because the route and
+        its callers use it.
+
+        Idempotent: if an invoice already carries this ``claim_id`` in its
+        ``source_claim_id`` column it is returned unchanged (event replay /
         double certification / concurrent calls all converge on one row).
 
         The claim's contract supplies the project and counterparty; the claim
@@ -1437,7 +1445,10 @@ class FinanceService:
         if existing is not None:
             return existing
 
-        if claim.status != "certified":
+        # A claim marked paid was certified first, so it is invoiceable too;
+        # without that a claim paid before its invoice existed could never
+        # get one.
+        if claim.status not in ("certified", "paid"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(f"Claim must be certified before it can be invoiced (current status: '{claim.status}')."),
@@ -1452,8 +1463,8 @@ class FinanceService:
             )
 
         project_id = contract.project_id
-        # Counterparty (client) on the contract becomes the invoice contact.
-        contact_id = str(contract.counterparty_id) if contract.counterparty_id else None
+        direction = "payable" if getattr(contract, "counterparty_type", "client") == "subcontractor" else "receivable"
+        contact_id = await self._claim_counterparty_contact_id(contract)
         claim_currency = (claim.currency or contract.currency or "").strip().upper()
 
         # ── FX: convert claim figures into the project base currency ─────────
@@ -1523,11 +1534,11 @@ class FinanceService:
             else Decimal("0")
         )
 
-        invoice_number = await self.invoices.next_invoice_number(project_id, "receivable")
+        invoice_number = await self.invoices.next_invoice_number(project_id, direction)
         invoice = Invoice(
             project_id=project_id,
             contact_id=contact_id,
-            invoice_direction="receivable",
+            invoice_direction=direction,
             invoice_number=invoice_number,
             invoice_date=(claim.claim_date or "")[:10],
             due_date=None,
@@ -1608,8 +1619,9 @@ class FinanceService:
                 entity_type="invoice",
                 entity_id=str(refreshed.id),
                 action="created_from_claim",
-                reason=f"Receivable auto-created from certified claim {claim.claim_number}",
+                reason=f"{direction.capitalize()} auto-created from certified claim {claim.claim_number}",
                 metadata={
+                    "direction": direction,
                     "claim_id": str(claim_id),
                     "claim_number": claim.claim_number,
                     "gross_base": str(gross_base),
@@ -1632,6 +1644,7 @@ class FinanceService:
             {
                 "project_id": str(project_id),
                 "invoice_id": str(refreshed.id),
+                "invoice_direction": direction,
                 "claim_id": str(claim_id),
                 "amount_total": str(gross_base),
                 "net_due": str(net_base),
@@ -1650,6 +1663,33 @@ class FinanceService:
             invoice_currency,
         )
         return refreshed
+
+    async def _claim_counterparty_contact_id(self, contract: Any) -> str | None:
+        """The contact a claim invoice is addressed to, or None.
+
+        ``Contract.counterparty_id`` is a plain UUID that names a contact on a
+        client contract and usually a subcontractor on a subcontract, whose
+        contact is then ``Subcontractor.contact_id``. Writing the raw id onto
+        the invoice left a subcontract's invoice with an id no contact carries,
+        which every finance view prints as an unspecified counterparty. On a
+        subcontract an id that resolves to neither is dropped rather than
+        stored as if it did; a client contract keeps its id as before.
+        """
+        from sqlalchemy import select as _select
+
+        from app.modules.contacts.models import Contact
+        from app.modules.subcontractors.models import Subcontractor
+
+        cid = getattr(contract, "counterparty_id", None)
+        if cid is None:
+            return None
+        if getattr(contract, "counterparty_type", "client") != "subcontractor":
+            return str(cid)
+        sub = await self.session.get(Subcontractor, cid)
+        if sub is not None:
+            return str(sub.contact_id) if sub.contact_id else None
+        found = (await self.session.execute(_select(Contact.id).where(Contact.id == cid))).scalar_one_or_none()
+        return str(found) if found is not None else None
 
     async def get_receivable_for_claim(self, claim_id: uuid.UUID) -> Invoice | None:
         """Return the receivable invoice raised from *claim_id*, or None.
