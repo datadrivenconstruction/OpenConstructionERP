@@ -79,7 +79,7 @@ import {
 import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 import { companyThumbFor } from '@/features/cases/caseFaces';
-import { apiGet, apiPost, extractErrorMessageFromBody } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import { useBaseCatalog } from '@/features/costs/baseCatalog';
 import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
 import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
@@ -115,6 +115,7 @@ import {
   fetchOnboardingStatus,
   type OnboardingJobState,
 } from './onboardingApi';
+import { costDbItemCount, costDbLoadReport, followCostDbLoad } from './costDbLoad';
 import {
   combineOutcomes,
   countryProvisionToast,
@@ -3526,41 +3527,30 @@ export function StepDataSetup({
       addQueueTask({
         id: taskId,
         type: 'import',
-        filename: `${dbName} Cost Database`,
+        filename: t('onboarding.db_queue_name', { defaultValue: '{{name}} cost database', name: dbName }),
         status: 'processing',
         progress: 10,
         message: t('onboarding.db_loading_status', { defaultValue: 'Loading cost database...' }),
       });
 
       try {
-        const token = useAuthStore.getState().accessToken;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
-
-        updateQueueTask(taskId, { progress: 30, message: t('onboarding.db_downloading', { defaultValue: 'Downloading from server...' }) });
-
-        const res = await fetch(`/api/v1/costs/load-cwicr/${region}`, {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          signal: controller.signal,
+        // Run as a provisioning job and follow it to its end. A direct request
+        // aborted after five minutes, so a large region read "Connection error"
+        // while the import carried on and finished on the server.
+        const result = await followCostDbLoad(region, {
+          onProgress: (job) =>
+            updateQueueTask(taskId, {
+              progress: Math.max(10, Math.min(95, job.pct)),
+              message: t('onboarding.db_importing', { defaultValue: 'Importing items...' }),
+            }),
         });
-        clearTimeout(timeoutId);
+        const report = costDbLoadReport(result, dbName);
+        const loaded = result.outcome === 'completed' || result.outcome === 'partial';
 
-        if (res.ok) {
-          updateQueueTask(taskId, { progress: 80, message: t('onboarding.db_importing', { defaultValue: 'Importing items...' }) });
-
-          const data = await res.json();
-          const imported = data.imported ?? 0;
+        if (loaded) {
           setDbProgress(100);
-          setLoadedDb({ id: region, count: imported });
-
-          // Update queue task to completed
-          updateQueueTask(taskId, {
-            status: 'completed',
-            progress: 100,
-            message: `${imported.toLocaleString(getNumberLocale())} items imported`,
-          });
-
+          setLoadedDb({ id: region, count: costDbItemCount(result.job) });
+          updateQueueTask(taskId, { status: 'completed', progress: 100, message: report.queueLine });
           try {
             const existing = JSON.parse(
               localStorage.getItem('oe_loaded_databases') || '[]',
@@ -3574,29 +3564,11 @@ export function StepDataSetup({
           } catch {
             // ignore
           }
-
-          addToast({
-            type: 'success',
-            title: `${dbName} loaded`,
-            message: `${imported.toLocaleString(getNumberLocale())} cost items imported`,
-          });
-          return true;
+        } else {
+          updateQueueTask(taskId, { status: 'error', progress: 0, error: report.queueLine });
         }
-        const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
-        updateQueueTask(taskId, { status: 'error', progress: 0, error: extractErrorMessageFromBody(err) ?? 'Failed' });
-        addToast({
-          type: 'error',
-          title: 'Failed to load database',
-          message: extractErrorMessageFromBody(err) ?? 'Unknown error',
-        });
-        return false;
-      } catch {
-        updateQueueTask(taskId, { status: 'error', progress: 0, error: 'Connection error' });
-        addToast({
-          type: 'error',
-          title: t('common.connection_error', { defaultValue: 'Connection error' }),
-        });
-        return false;
+        addToast(report.toast);
+        return loaded;
       } finally {
         setLoadingDb(false);
       }
