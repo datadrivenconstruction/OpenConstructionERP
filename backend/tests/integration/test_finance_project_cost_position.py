@@ -436,6 +436,18 @@ def _assert_position(dash: dict) -> None:
     # Committed 172k of 400k is 43 %, well under the caution line.
     assert dash["budget_warning_level"] == "normal"
     assert _money(dash["total_variance"]) == Decimal("228000")  # 400k budget less 172k committed
+    # The open balances. Nothing is receivable here, so the "net cash flow"
+    # the dashboard reports is receivable less unpaid payables, an open
+    # balance rather than money that moved.
+    assert _money(dash["total_receivable"]) == Decimal("0")
+    assert _money(dash["total_overdue"]) == Decimal("0")
+    assert _money(dash["cash_flow_net"]) == Decimal("-2500")
+    assert (dash["invoices_draft"], dash["invoices_pending"], dash["invoices_approved"], dash["invoices_paid"]) == (
+        0,
+        0,
+        1,
+        1,
+    )
 
 
 @pytest.mark.asyncio
@@ -454,6 +466,15 @@ async def test_the_dashboard_rolls_up_budget_committed_invoiced_and_paid(client:
     await _subcontract(client, h, project_id)
 
     _assert_position(await _dashboard(client, h, project_id))
+
+    cf = await client.get(f"{API}/finance/gaap/statements/cash-flow", params={"project_id": str(project_id)}, headers=h)
+    # Known gap, pinned so that closing it shows up here: the GAAP cash flow is
+    # derived from journal movements on cash accounts, and neither a supplier
+    # payment nor a paid subcontract application posts one. The 78 500 paid in
+    # this scenario therefore does not appear; the dashboard's total_paid is
+    # the figure that carries it. Update this assertion when payments post.
+    cash_flow = await _ok(cf)
+    assert (cash_flow["operating"], cash_flow["closing_cash"]) == ("0.00", "0.00")
 
 
 @pytest.mark.asyncio
@@ -573,6 +594,25 @@ async def test_an_invoice_links_to_its_order_and_the_order_shows_what_is_invoice
         if i["invoice_number"].startswith("LEGACY-")
     ]
     assert legacy[0]["purchase_order_id"] == po["id"]
+    # Saved the way the invoice form saves it, on an approved invoice: vendor
+    # and link sent back unchanged, a note edited. Not a change of terms, and
+    # the link is written to the column.
+    resaved = await _ok(
+        await client.patch(
+            f"{API}/finance/{legacy[0]['id']}",
+            json={
+                "contact_id": vendor,
+                "invoice_direction": "payable",
+                "purchase_order_id": po["id"],
+                "notes": "Delivery note 4471 attached",
+            },
+            headers=h,
+        )
+    )
+    assert resaved["purchase_order_id"] == po["id"]
+    async with async_session_factory() as s:
+        row = await s.get(Invoice, uuid.UUID(legacy[0]["id"]))
+        assert row is not None and str(row.purchase_order_id) == po["id"]
     # Unlinking a stamped invoice clears the stamp, or the link would read back.
     cleared = await _ok(
         await client.patch(f"{API}/finance/{legacy[0]['id']}", json={"purchase_order_id": None}, headers=h)
