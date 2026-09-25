@@ -42836,6 +42836,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "আপনি যে দেশে কাজ করেন তার জন্য লেখা কেস, আর প্রতিটি অন্য বাজার এক ক্লিক দূরে",
     "dashboard.market_cases.source_pack": "আপনার মার্কেট প্যাক অনুযায়ী বেছে নেওয়া",
     "dashboard.market_cases.source_language": "আপনি যে ভাষা ব্যবহার করেন সেই অনুযায়ী বেছে নেওয়া",
+    "dashboard.market_cases.source_region": "আপনার ব্রাউজারের অঞ্চল অনুযায়ী বেছে নেওয়া",
     "dashboard.market_cases.source_nearest": "আপনার ভাষার সবচেয়ে কাছের বাজার",
     "dashboard.market_cases.all_for_market": "{{market}}-এর সব কেস ({{count}})",
     "dashboard.market_cases.empty": "এখনও কোনো কেস কোনো বাজারের নাম বলে না। পুরো লাইব্রেরি এক ক্লিক দূরে।",

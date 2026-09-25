@@ -42565,6 +42565,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Cases skrevet til det land, du arbejder i, med alle andre markeder ét klik væk",
     "dashboard.market_cases.source_pack": "Valgt ud fra din markedspakke",
     "dashboard.market_cases.source_language": "Valgt ud fra det sprog, du bruger",
+    "dashboard.market_cases.source_region": "Valgt ud fra din browsers region",
     "dashboard.market_cases.source_nearest": "Det marked, der ligger tættest på dit sprog",
     "dashboard.market_cases.all_for_market": "Alle cases for {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Ingen case nævner endnu et marked. Hele biblioteket er ét klik væk.",

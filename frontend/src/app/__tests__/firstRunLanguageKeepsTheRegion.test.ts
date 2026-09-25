@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { detectCountry, resolveInitialLanguage, SUPPORTED_LANGUAGES } from '../i18n';
 
 const realLanguage = navigator.language;
+const realLanguages = navigator.languages;
 
 /**
  * Point navigator.language and localStorage at a clean first run.
@@ -22,6 +23,12 @@ function firstRunWith(browserLanguage: string): void {
     value: browserLanguage,
     configurable: true,
   });
+  // A real browser lists its language first in `languages`; jsdom's default
+  // list is en-US whatever `language` says, and detectCountry reads the list.
+  Object.defineProperty(window.navigator, 'languages', {
+    value: [browserLanguage],
+    configurable: true,
+  });
   window.localStorage.clear();
   window.history.replaceState(null, '', '/');
 }
@@ -29,6 +36,10 @@ function firstRunWith(browserLanguage: string): void {
 afterEach(() => {
   Object.defineProperty(window.navigator, 'language', {
     value: realLanguage,
+    configurable: true,
+  });
+  Object.defineProperty(window.navigator, 'languages', {
+    value: realLanguages,
     configurable: true,
   });
   window.localStorage.clear();

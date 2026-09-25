@@ -13,8 +13,8 @@
  * cases for the market the reader works in, named as such, first.
  *
  * WHICH MARKET. Resolved by `resolveHomeMarket` (features/cases/marketCases):
- * the applied regional pack's country when it has cases, else the country the
- * UI language declares, else the nearest market for that language, each read
+ * the applied regional pack's country when it has cases, else the browser's
+ * region (en-CA is Canada), else the country the UI language declares, else the nearest market for that language, each read
  * through the same helpers the catalogue orders itself by. The subtitle says
  * which of the three answered, because "your market" is only an honest title
  * for the first two; for the third the card says "closest to your language"
@@ -74,6 +74,7 @@ import { iconFor } from '@/features/cases/icons';
 import { CaseArt } from '@/features/cases/CaseArt';
 import { CountryFlag, CountryFlagBackdrop } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
+import { browserRegionForLanguage } from '@/app/i18n';
 import { packCountryCode } from '@/shared/lib/regionalPack';
 import { useDashboardLayoutStore } from '@/stores/useDashboardLayoutStore';
 import { DASHBOARD_WIDGET_BY_ID } from './widgetRegistry';
@@ -136,7 +137,13 @@ export function DashboardMarketCasesCard() {
   const packCountry =
     packData?.active && packData.manifest ? packCountryCode(packData.manifest) : null;
   const resolution = useMemo(
-    () => resolveHomeMarket({ language: i18n.language, packCountry, markets }),
+    () =>
+      resolveHomeMarket({
+        language: i18n.language,
+        packCountry,
+        browserRegion: browserRegionForLanguage(i18n.language),
+        markets,
+      }),
     [i18n.language, packCountry, markets],
   );
   const shelf = useMemo(() => orderMarkets(counts, resolution.market), [counts, resolution.market]);
@@ -209,23 +216,25 @@ export function DashboardMarketCasesCard() {
   // it; the subtitle says which. A nearest-market answer and a no-answer both
   // get the neutral title, and the nearest one says what it is.
   const title =
-    resolution.source === 'pack' || resolution.source === 'language'
+    resolution.source === 'pack' || resolution.source === 'region' || resolution.source === 'language'
       ? t('dashboard.market_cases.title', { defaultValue: 'Cases for your market' })
       : t('dashboard.market_cases.title_generic', { defaultValue: 'Cases by market' });
   const sourceLine =
     resolution.source === 'pack'
       ? t('dashboard.market_cases.source_pack', { defaultValue: 'Matched to your regional pack' })
-      : resolution.source === 'language'
-        ? t('dashboard.market_cases.source_language', {
-            defaultValue: 'Matched to the language you use',
-          })
-        : resolution.source === 'nearest'
-          ? t('dashboard.market_cases.source_nearest', {
-              defaultValue: 'The closest market to your language',
+      : resolution.source === 'region'
+        ? t('dashboard.market_cases.source_region', { defaultValue: "Matched to your browser's region" })
+        : resolution.source === 'language'
+          ? t('dashboard.market_cases.source_language', {
+              defaultValue: 'Matched to the language you use',
             })
-          : t('cases.region_selector.subtitle', {
-              defaultValue: "Cases written for one country's standards, forms and payment law.",
-            });
+          : resolution.source === 'nearest'
+            ? t('dashboard.market_cases.source_nearest', {
+                defaultValue: 'The closest market to your language',
+              })
+            : t('cases.region_selector.subtitle', {
+                defaultValue: "Cases written for one country's standards, forms and payment law.",
+              });
   // Whether the subtitle still describes the market on screen: once the
   // reader presses another chip, "matched to your language" would be a
   // sentence about a market they are no longer looking at.

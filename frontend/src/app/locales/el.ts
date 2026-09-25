@@ -42538,6 +42538,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Περιπτώσεις γραμμένες για τη χώρα στην οποία εργάζεστε, με κάθε άλλη αγορά ένα κλικ μακριά",
     "dashboard.market_cases.source_pack": "Επιλέχθηκε με βάση το πακέτο αγοράς σας",
     "dashboard.market_cases.source_language": "Επιλέχθηκε με βάση τη γλώσσα που χρησιμοποιείτε",
+    "dashboard.market_cases.source_region": "Επιλέχθηκε με βάση την περιοχή του προγράμματος περιήγησής σας",
     "dashboard.market_cases.source_nearest": "Η αγορά που είναι πιο κοντά στη γλώσσα σας",
     "dashboard.market_cases.all_for_market": "Όλες οι περιπτώσεις για {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Καμία περίπτωση δεν ονομάζει ακόμη αγορά. Ολόκληρη η βιβλιοθήκη είναι ένα κλικ μακριά.",

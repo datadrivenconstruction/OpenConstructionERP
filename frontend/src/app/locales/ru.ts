@@ -44993,6 +44993,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Кейсы для страны, в которой вы работаете, и любой другой рынок в один клик",
     "dashboard.market_cases.source_pack": "Подобрано по вашему рыночному пакету",
     "dashboard.market_cases.source_language": "Подобрано по языку, которым вы пользуетесь",
+    "dashboard.market_cases.source_region": "Подобрано по региону вашего браузера",
     "dashboard.market_cases.source_nearest": "Рынок, ближайший к вашему языку",
     "dashboard.market_cases.all_for_market": "Все кейсы для рынка {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Пока ни один кейс не указывает рынок. Вся библиотека в один клик.",

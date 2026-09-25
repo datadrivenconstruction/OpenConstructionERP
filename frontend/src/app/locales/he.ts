@@ -42647,6 +42647,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "תרחישים שנכתבו למדינה שבה אתם עובדים, וכל שוק אחר במרחק לחיצה",
     "dashboard.market_cases.source_pack": "נבחר לפי חבילת השוק שלך",
     "dashboard.market_cases.source_language": "נבחר לפי השפה שבה אתם משתמשים",
+    "dashboard.market_cases.source_region": "נבחר לפי האזור שמוגדר בדפדפן שלכם",
     "dashboard.market_cases.source_nearest": "השוק הקרוב ביותר לשפה שלך",
     "dashboard.market_cases.all_for_market": "כל התרחישים עבור {{market}} ({{count}})",
     "dashboard.market_cases.empty": "אף תרחיש עדיין לא מציין שוק. כל הספרייה במרחק לחיצה.",

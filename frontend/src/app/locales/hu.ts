@@ -45458,6 +45458,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Kidolgozott esetek arra az országra, ahol dolgozik, minden más piac egy kattintásra",
     "dashboard.market_cases.source_pack": "A regionális csomagjához illesztve",
     "dashboard.market_cases.source_language": "Az Ön által használt nyelvhez illesztve",
+    "dashboard.market_cases.source_region": "A böngészője régiójához illesztve",
     "dashboard.market_cases.source_nearest": "A nyelvéhez legközelebbi piac",
     "dashboard.market_cases.all_for_market": "Minden eset erre: {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Még egyetlen eset sem nevez meg piacot. A teljes tár egy kattintásra van.",

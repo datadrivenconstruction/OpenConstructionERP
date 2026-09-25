@@ -45207,6 +45207,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Fallbeispiele für das Land, in dem Sie arbeiten, jeder andere Markt einen Klick entfernt",
     "dashboard.market_cases.source_pack": "Nach Ihrem Marktpaket ausgewählt",
     "dashboard.market_cases.source_language": "Nach der Sprache ausgewählt, die Sie verwenden",
+    "dashboard.market_cases.source_region": "Nach der Region Ihres Browsers ausgewählt",
     "dashboard.market_cases.source_nearest": "Der Markt, der Ihrer Sprache am nächsten liegt",
     "dashboard.market_cases.all_for_market": "Alle Fallbeispiele für {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Noch nennt kein Fallbeispiel einen Markt. Die ganze Bibliothek ist einen Klick entfernt.",

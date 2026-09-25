@@ -42585,6 +42585,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Сиз иштеген өлкө үчүн жазылган мисалдар, ар бир башка рынок бир басууда",
     "dashboard.market_cases.source_pack": "Рынок пакетиңиз боюнча тандалды",
     "dashboard.market_cases.source_language": "Сиз колдонгон тил боюнча тандалды",
+    "dashboard.market_cases.source_region": "Браузериңиздин аймагы боюнча тандалды",
     "dashboard.market_cases.source_nearest": "Тилиңизге эң жакын рынок",
     "dashboard.market_cases.all_for_market": "{{market}} рыногу үчүн бардык мисалдар ({{count}})",
     "dashboard.market_cases.empty": "Азырынча бир да мисал рынокту көрсөтпөйт. Бүткүл китепкана бир басууда.",

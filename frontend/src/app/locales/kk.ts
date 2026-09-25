@@ -42451,6 +42451,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Сіз жұмыс істейтін елге арналған кейстер, кез келген басқа нарық бір басу қашықтықта",
     "dashboard.market_cases.source_pack": "Нарық пакетіңіз бойынша таңдалды",
     "dashboard.market_cases.source_language": "Сіз қолданатын тіл бойынша таңдалды",
+    "dashboard.market_cases.source_region": "Браузеріңіздің аймағы бойынша таңдалды",
     "dashboard.market_cases.source_nearest": "Тіліңізге ең жақын нарық",
     "dashboard.market_cases.all_for_market": "{{market}} нарығының барлық кейстері ({{count}})",
     "dashboard.market_cases.empty": "Әзірге бірде-бір кейс нарықты көрсетпейді. Бүкіл кітапхана бір басу қашықтықта.",

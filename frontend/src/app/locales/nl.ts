@@ -43358,6 +43358,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Cases geschreven voor het land waar u werkt, met elke andere markt op één klik",
     "dashboard.market_cases.source_pack": "Gekozen op basis van uw marktpakket",
     "dashboard.market_cases.source_language": "Gekozen op basis van de taal die u gebruikt",
+    "dashboard.market_cases.source_region": "Gekozen op basis van de regio van uw browser",
     "dashboard.market_cases.source_nearest": "De markt die het dichtst bij uw taal ligt",
     "dashboard.market_cases.all_for_market": "Alle cases voor {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Nog geen enkele case noemt een markt. De hele bibliotheek is één klik verwijderd.",

@@ -42448,6 +42448,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Tình huống viết cho quốc gia bạn đang làm việc, mọi thị trường khác chỉ cách một cú nhấp",
     "dashboard.market_cases.source_pack": "Chọn theo gói thị trường của bạn",
     "dashboard.market_cases.source_language": "Chọn theo ngôn ngữ bạn dùng",
+    "dashboard.market_cases.source_region": "Chọn theo khu vực của trình duyệt",
     "dashboard.market_cases.source_nearest": "Thị trường gần nhất với ngôn ngữ của bạn",
     "dashboard.market_cases.all_for_market": "Tất cả tình huống cho {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Chưa có tình huống nào nêu thị trường. Toàn bộ thư viện chỉ cách một cú nhấp.",

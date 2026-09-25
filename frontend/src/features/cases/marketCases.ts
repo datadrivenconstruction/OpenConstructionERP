@@ -13,13 +13,17 @@
 // the language step here IS `homeMarketForLanguage`, imported, not copied,
 // and the ordering inside a market IS `homeMarketFirst`.
 //
-// Three sources, in order of how much they say about the reader:
+// Four sources, in order of how much they say about the reader:
 //
 //   pack      - the applied regional pack names a country and the catalogue
 //               has cases for it. Someone who switched on the Texas pack has
 //               said where they work more plainly than a UI language ever
 //               could, and a German-speaking estimator on a US pack is not a
 //               rare shape.
+//   region    - the browser's own region (en-CA, fr-CA, de-AT), while the
+//               reader keeps the browser's language. Plain `en` names no
+//               country, so without this step an en-CA reader got no market
+//               at all and the card opened on the largest one, Germany.
 //   language  - `homeMarketForLanguage`: the country the language registry
 //               declares, only when the catalogue carries cases for it.
 //   nearest   - `NEAREST_MARKETS_BY_LANGUAGE`: for a language whose declared
@@ -40,7 +44,7 @@ import { marketCode } from '@/shared/lib/regionalPack';
 import { homeMarketFirst, homeMarketForLanguage, normalizeLanguageTag } from './homeMarket';
 
 /** Where a home market came from. */
-export type HomeMarketSource = 'pack' | 'language' | 'nearest';
+export type HomeMarketSource = 'pack' | 'region' | 'language' | 'nearest';
 
 export interface HomeMarketResolution {
   /** ISO 3166-1 alpha-2, upper case as the cases spell it, or null. */
@@ -115,6 +119,9 @@ export interface ResolveHomeMarketInput {
   /** Country of the applied regional pack as `packCountryCode` spells it (lower
    *  case); `xx`, `all`, empty and null all mean "no single market". */
   packCountry?: string | null;
+  /** The browser's region as `browserRegionForLanguage` reads it (lower case),
+   *  or null when the browser names none the reader still goes by. */
+  browserRegion?: string | null;
   /** The markets the catalogue actually has cases for, upper case. */
   markets: readonly string[];
 }
@@ -122,18 +129,22 @@ export interface ResolveHomeMarketInput {
 /**
  * The reader's home market and where that answer came from.
  *
- * Pack first, then language, then the nearest-market table, each step only
- * answering with a market in `markets`. A pack for a country with no cases is
+ * Pack first, then the browser's region, then language, then the
+ * nearest-market table, each step only answering with a market in `markets`. A pack for a country with no cases is
  * skipped rather than shown empty: the card exists to show cases, and a pack
  * that names a market the catalogue has nothing for says nothing useful here.
  */
 export function resolveHomeMarket({
   language,
   packCountry,
+  browserRegion,
   markets,
 }: ResolveHomeMarketInput): HomeMarketResolution {
   const pack = marketCode(packCountry)?.toUpperCase();
   if (pack && markets.includes(pack)) return { market: pack, source: 'pack' };
+
+  const region = marketCode(browserRegion)?.toUpperCase();
+  if (region && markets.includes(region)) return { market: region, source: 'region' };
 
   const spoken = homeMarketForLanguage(language, markets);
   if (spoken) return { market: spoken, source: 'language' };

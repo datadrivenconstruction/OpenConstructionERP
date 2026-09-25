@@ -42415,6 +42415,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "سناریوهایی برای کشوری که در آن کار می‌کنید، و هر بازار دیگر با یک کلیک",
     "dashboard.market_cases.source_pack": "بر اساس بستهٔ بازار شما انتخاب شده است",
     "dashboard.market_cases.source_language": "بر اساس زبانی که استفاده می‌کنید انتخاب شده است",
+    "dashboard.market_cases.source_region": "بر اساس منطقه مرورگر شما انتخاب شده است",
     "dashboard.market_cases.source_nearest": "نزدیک‌ترین بازار به زبان شما",
     "dashboard.market_cases.all_for_market": "همهٔ سناریوهای {{market}} ({{count}})",
     "dashboard.market_cases.empty": "هنوز هیچ سناریویی بازاری را مشخص نکرده است. کل کتابخانه با یک کلیک در دسترس است.",

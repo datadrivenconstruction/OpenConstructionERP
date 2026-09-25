@@ -43700,6 +43700,7 @@ const resource = {
     "dashboard.layout.w_cases_market_desc": "Scenariusze napisane dla kraju, w którym pracujesz, a każdy inny rynek o jedno kliknięcie",
     "dashboard.market_cases.source_pack": "Dopasowane do Twojego pakietu rynkowego",
     "dashboard.market_cases.source_language": "Dopasowane do języka, którego używasz",
+    "dashboard.market_cases.source_region": "Dopasowane do regionu ustawionego w przeglądarce",
     "dashboard.market_cases.source_nearest": "Rynek najbliższy Twojemu językowi",
     "dashboard.market_cases.all_for_market": "Wszystkie scenariusze dla rynku {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Żaden scenariusz nie wskazuje jeszcze rynku. Cała biblioteka jest o jedno kliknięcie.",
