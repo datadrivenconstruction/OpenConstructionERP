@@ -236,6 +236,20 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     }
   });
 
+  it('names the rate of an item whose variant is still to pick as the catalogue rate', async () => {
+    (fetchCostSearch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      page([
+        slimRow('item-7', 'F-007', 'Frame wall with a pick', { rate: 500, buildup_rate: null, components_count: 4 }),
+        slimRow('item-8', 'F-008', 'Plain item', { rate: 42, buildup_rate: null, components_count: 0 }),
+      ]),
+    );
+    renderModal();
+
+    const rateCell = await screen.findByTestId('cost-row-rate-item-7', {}, SETTLE);
+    expect(rateCell.textContent).toBe('Catalogue 500.00');
+    expect(screen.queryByTestId('cost-row-rate-item-8')).toBeNull();
+  });
+
   it('opens the variant picker from the full row and posts the chosen variant rate', async () => {
     // The slim row knows there are three variants (the list shows the count)
     // but carries no catalogue to pick from.

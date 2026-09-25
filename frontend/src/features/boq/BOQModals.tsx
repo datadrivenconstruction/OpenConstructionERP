@@ -2130,6 +2130,23 @@ export function CostDatabaseSearchModal({
                                 // mistaken for each other.
                                 const landing = landingRate(item);
                                 const differs = Math.abs(landing - item.rate) >= 0.005;
+                                // A breakdown with a variant still to pick has no
+                                // landing rate yet: the figure is the catalogue's,
+                                // and is named as such.
+                                const variantPending =
+                                  item.buildup_rate == null &&
+                                  ((item.components_count ?? item.components?.length ?? 0) > 0 ||
+                                    (item.metadata_?.variant_stats?.count ?? 0) >= 2);
+                                if (!differs && variantPending) {
+                                  return (
+                                    <span data-testid={`cost-row-rate-${item.id}`}>
+                                      {t('boq.cost_db_catalogue_rate', {
+                                        defaultValue: 'Catalogue {{rate}}',
+                                        rate: fmtRate(item.rate),
+                                      })}
+                                    </span>
+                                  );
+                                }
                                 if (!differs) return <span>{fmtRate(landing)}</span>;
                                 return (
                                   <span

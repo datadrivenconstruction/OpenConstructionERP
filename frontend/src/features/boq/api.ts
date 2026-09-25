@@ -1682,6 +1682,9 @@ export interface CostSearchItem {
   region: string | null;
   classification: Record<string, string>;
   components: CostItemComponent[];
+  /** How many components the item has. A ``lite`` list row empties
+   *  ``components`` and keeps only this count. */
+  components_count?: number;
   /** Opaque CWICR metadata (variants, variant_stats, etc.) — type-erased. */
   metadata_?: Record<string, unknown>;
 }
