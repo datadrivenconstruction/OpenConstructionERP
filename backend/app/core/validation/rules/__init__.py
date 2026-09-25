@@ -4881,6 +4881,339 @@ class HungarianItemNumberUnique(ValidationRule):
         return results
 
 
+# ── Romania, Greece, Ukraine: the national structure a line is filed under ──
+#
+# The three packs classify their bills against DIN 276, the nearest hierarchy
+# the product renders, the way the Czech and Polish packs do. What makes each
+# bill national is a second code every line carries next to it, under its own
+# classification key, and that is what these rules read:
+#
+#   romania  ``deviz``  the chapter and subchapter of the deviz general,
+#                       HG 907/2016 Annex 7 (4.1 Construcții și instalații)
+#   greece   ``net``    the article of the national unified price lists
+#                       (ΝΕΤ ΟΙΚ, ΟΔΟ, ΥΔΡ, ΛΙΜ, ΗΛΜ, ΠΡΣ; ΑΤΗΕ for services)
+#   ukraine  ``zkr``    the chapter, 1 to 12, of the зведений кошторисний
+#                       розрахунок in the Настанова approved by наказ
+#                       Мінрегіону №281 of 01.11.2021
+#
+# The engine rule-set names are the country names and the classification keys
+# are different words on purpose, which is the lesson of ``hungary`` and
+# ``tetelrend``. Each set has a presence rule that fails on a line with no
+# code, so the set is never silent on a bill written without the local
+# structure, and a recognition rule that names the code it could not place.
+# The chapter titles are the standards' own and are data, not prose.
+
+RO_DEVIZ_GENERAL_CHAPTERS: dict[str, str] = {
+    "1": "Cheltuieli pentru obținerea și amenajarea terenului",
+    "1.1": "Obținerea terenului",
+    "1.2": "Amenajarea terenului",
+    "1.3": "Amenajări pentru protecția mediului și aducerea terenului la starea inițială",
+    "1.4": "Cheltuieli pentru relocarea/protecția utilităților",
+    "2": "Cheltuieli pentru asigurarea utilităților necesare obiectivului de investiții",
+    "3": "Cheltuieli pentru proiectare și asistență tehnică",
+    "3.1": "Studii",
+    "3.2": "Documentații-suport și cheltuieli pentru obținerea de avize, acorduri și autorizații",
+    "3.3": "Expertizare tehnică",
+    "3.4": "Certificarea performanței energetice și auditul energetic al clădirilor",
+    "3.5": "Proiectare",
+    "3.6": "Organizarea procedurilor de achiziție",
+    "3.7": "Consultanță",
+    "3.8": "Asistență tehnică",
+    "4": "Cheltuieli pentru investiția de bază",
+    "4.1": "Construcții și instalații",
+    "4.2": "Montaj utilaje, echipamente tehnologice și funcționale",
+    "4.3": "Utilaje, echipamente tehnologice și funcționale care necesită montaj",
+    "4.4": "Utilaje, echipamente tehnologice și funcționale care nu necesită montaj și echipamente de transport",
+    "4.5": "Dotări",
+    "4.6": "Active necorporale",
+    "5": "Alte cheltuieli",
+    "5.1": "Organizare de șantier",
+    "5.2": "Comisioane, cote, taxe, costul creditului",
+    "5.3": "Cheltuieli diverse și neprevăzute",
+    "5.4": "Cheltuieli pentru informare și publicitate",
+    "6": "Cheltuieli pentru probe tehnologice și teste",
+    "6.1": "Pregătirea personalului de exploatare",
+    "6.2": "Probe tehnologice și teste",
+}
+
+# A chapter, a subchapter, and one level below it for the per-object lines of
+# a deviz general (4.1.1, 4.1.2 ...) and the split of 3.8 into 3.8.1 and 3.8.2.
+_RO_DEVIZ_CODE_RE = re.compile(r"^\d(?:\.\d{1,2}){0,2}$")
+
+# The ΝΕΤ ΟΙΚ chapters, by the two digits that open an article code. From the
+# descriptive price list for building works; an English gloss is enough here
+# because the rule reports the number, not the title.
+GR_NET_OIK_CHAPTERS: frozenset[str] = frozenset(
+    {
+        "10",  # loading, unloading and transport
+        "20",  # excavation for buildings
+        "21",  # pumping and dewatering
+        "22",  # demolition and stripping out
+        "23",  # scaffolding and shoring
+        "31",  # gravel concrete
+        "32",  # concrete structures
+        "33",  # lime and earth concrete
+        "34",  # stone concrete
+        "35",  # lightweight concrete
+        "38",  # formwork and reinforcement
+        "41",  # stone fill and paving
+        "42",  # rubble masonry
+        "43",  # stone masonry
+        "45",  # stone facing
+        "46",  # brick masonry
+        "47",  # other masonry units
+        "48",  # special masonry
+        "49",  # tie beams
+        "50",  # glass walls and partitions
+        "51",  # timber works
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "61",  # miscellaneous ironwork
+        "62",  # steel frames and doors
+        "63",  # steel stairs
+        "64",  # steel railings
+        "65",  # aluminium
+        "71",  # pointing and plaster
+        "72",  # roofing
+        "73",  # floor and wall finishes
+        "74",  # marble floors
+        "75",  # other marble work
+        "76",  # glazing
+        "77",  # painting
+        "78",  # decorative finishes
+        "79",  # damp, sound and thermal insulation
+    }
+)
+
+# Latin capitals that look like Greek ones. A code keyed on an English layout
+# reads ``OIK`` for ``ΟΙΚ``; mapping the lookalikes lets the shape judge the
+# code rather than the keyboard it was typed on.
+_GR_LOOKALIKES = str.maketrans("ABEHIKMNOPTXYZ", "ΑΒΕΗΙΚΜΝΟΡΤΧΥΖ")
+
+_GR_OIK_RE = re.compile(r"^(?:ΝΑ)?ΟΙΚ ?(\d{2})(?:\.\d{2}){1,3}$")
+_GR_OTHER_NET_RE = re.compile(r"^(?:ΝΑ)?(?:ΟΔΟ|ΥΔΡ|ΛΙΜ|ΗΛΜ|ΠΡΣ) ?[Α-Ω0-9][Α-Ω0-9.\-]*$")
+_GR_ATHE_RE = re.compile(r"^(?:ΝΑ)?ΑΤΗΕ ?\d{3,5}(?:\.\d+)*$")
+
+UA_ZKR_CHAPTERS: dict[int, str] = {
+    1: "Підготовка території будівництва",
+    2: "Об'єкти основного призначення",
+    3: "Об'єкти підсобного та обслуговуючого призначення",
+    4: "Об'єкти енергетичного господарства",
+    5: "Об'єкти транспортного господарства і зв'язку",
+    6: "Зовнішні мережі та споруди",
+    7: "Благоустрій та озеленення території",
+    8: "Тимчасові будівлі і споруди",
+    9: "Кошти на інші роботи та витрати",
+    10: "Утримання служби замовника та інжинірингові послуги",
+    11: "Підготовка експлуатаційних кадрів",
+    12: "Проектні, вишукувальні роботи, експертиза та авторський нагляд",
+}
+
+
+def _national_code(pos: dict[str, Any], key: str) -> str:
+    """The code a position carries under one classification key, trimmed."""
+    return str((pos.get("classification") or {}).get(key, "") or "").strip()
+
+
+def _gr_net_code(pos: dict[str, Any]) -> str:
+    """The ΝΕΤ article on a position, upper-cased, lookalikes mapped, spaces collapsed."""
+    code = re.sub(r"\s+", " ", _national_code(pos, "net")).upper()
+    return code.translate(_GR_LOOKALIKES)
+
+
+class _NationalCodeRequired(ValidationRule):
+    """Every priced line carries a code under ``key``; the message prefix is the rule id."""
+
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    key = ""
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_leaf_positions(context):
+            passed = bool(_national_code(pos, self.key))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=(
+                        _ok(locale)
+                        if passed
+                        else translate(f"{self.rule_id}.fail", locale=locale, ordinal=pos.get("ordinal", "?"))
+                    ),
+                    element_ref=pos.get("id"),
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+class RomanianDevizChapterRequired(_NationalCodeRequired):
+    rule_id = "romania.deviz_chapter_required"
+    name = "Romanian Deviz General Chapter Required"
+    standard = "romania"
+    description = "Priced lines must name the deviz general chapter they are budgeted under (HG 907/2016)"
+    key = "deviz"
+
+
+class RomanianDevizChapterRecognised(ValidationRule):
+    rule_id = "romania.deviz_chapter_recognised"
+    name = "Romanian Deviz General Chapter Is Recognised"
+    standard = "romania"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "The deviz code must be a chapter or subchapter of the HG 907/2016 deviz general"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = _national_code(pos, "deviz")
+            if not code:
+                continue
+            # The two top levels are the standard's; a third level is the
+            # per-object split of a recognised subchapter.
+            head = ".".join(code.split(".")[:2])
+            passed = bool(_RO_DEVIZ_CODE_RE.match(code)) and head in RO_DEVIZ_GENERAL_CHAPTERS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=(
+                        _ok(locale)
+                        if passed
+                        else translate(
+                            "romania.deviz_chapter_recognised.fail",
+                            locale=locale,
+                            code=code,
+                            ordinal=pos.get("ordinal", "?"),
+                        )
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"given_code": code, "chapter_name": RO_DEVIZ_GENERAL_CHAPTERS.get(head, "")},
+                    suggestion=(
+                        None if passed else translate("romania.deviz_chapter_recognised.suggestion", locale=locale)
+                    ),
+                )
+            )
+        return results
+
+
+class GreekNetArticleRequired(_NationalCodeRequired):
+    rule_id = "greece.net_article_required"
+    name = "Greek Unified Price List Article Required"
+    standard = "greece"
+    description = "Priced lines must carry the article of the national unified price lists (ΝΕΤ) they are priced from"
+    key = "net"
+
+
+class GreekNetArticleValid(ValidationRule):
+    rule_id = "greece.net_article_valid"
+    name = "Greek Unified Price List Article Is Well Formed"
+    standard = "greece"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "ΝΕΤ article codes follow the price list's own shape, and a building-works article opens a real chapter"
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = _gr_net_code(pos)
+            if not code:
+                continue
+            oik = _GR_OIK_RE.match(code)
+            if oik:
+                chapter = oik.group(1)
+                passed = chapter in GR_NET_OIK_CHAPTERS
+                key = "greece.net_article_valid.chapter"
+            else:
+                chapter = ""
+                passed = bool(_GR_OTHER_NET_RE.match(code) or _GR_ATHE_RE.match(code))
+                key = "greece.net_article_valid.invalid"
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=(
+                        _ok(locale)
+                        if passed
+                        else translate(key, locale=locale, code=code, chapter=chapter, ordinal=pos.get("ordinal", "?"))
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"given_code": code, "chapter": chapter},
+                    suggestion=None if passed else translate("greece.net_article_valid.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+class UkrainianZkrChapterRequired(_NationalCodeRequired):
+    rule_id = "ukraine.zkr_chapter_required"
+    name = "Ukrainian Summary Estimate Chapter Required"
+    standard = "ukraine"
+    description = "Priced lines must name the chapter of the зведений кошторисний розрахунок they belong to"
+    key = "zkr"
+
+
+class UkrainianZkrChapterRecognised(ValidationRule):
+    rule_id = "ukraine.zkr_chapter_recognised"
+    name = "Ukrainian Summary Estimate Chapter Is One of the Twelve"
+    standard = "ukraine"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "The chapter must be one of the twelve of the зведений кошторисний розрахунок"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = _national_code(pos, "zkr")
+            if not code:
+                continue
+            passed = code.isdigit() and int(code) in UA_ZKR_CHAPTERS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=(
+                        _ok(locale)
+                        if passed
+                        else translate(
+                            "ukraine.zkr_chapter_recognised.fail",
+                            locale=locale,
+                            chapter=code,
+                            ordinal=pos.get("ordinal", "?"),
+                        )
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"chapter": code, "chapter_name": UA_ZKR_CHAPTERS.get(int(code), "") if passed else ""},
+                    suggestion=(
+                        None if passed else translate("ukraine.zkr_chapter_recognised.suggestion", locale=locale)
+                    ),
+                )
+            )
+        return results
+
+
 # ── Birim Fiyat Rules (Turkey) ──────────────────────────────────────────
 
 
@@ -9847,6 +10180,15 @@ def register_builtin_rules() -> None:
         (HungarianChapterRecognised(), None),
         (HungarianMaterialFeeSplit(), None),
         (HungarianItemNumberUnique(), None),
+        # Romania (deviz general, HG 907/2016)
+        (RomanianDevizChapterRequired(), None),
+        (RomanianDevizChapterRecognised(), None),
+        # Greece (national unified price lists)
+        (GreekNetArticleRequired(), None),
+        (GreekNetArticleValid(), None),
+        # Ukraine (summary estimate chapters, наказ Мінрегіону №281)
+        (UkrainianZkrChapterRequired(), None),
+        (UkrainianZkrChapterRecognised(), None),
         # Birim Fiyat (Turkey)
         (BirimFiyatCodeRequired(), None),
         (BirimFiyatValidPoz(), None),
