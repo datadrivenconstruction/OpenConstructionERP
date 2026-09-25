@@ -329,6 +329,37 @@
       "suggestion": "Jeder Position eine eigene Projekt-Positionsnummer geben, bevor das LV herausgeht"
     }
   },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Position {ordinal} nennt kein Kapitel des deviz general",
+      "suggestion": "Die Position ihrem Kapitel und Unterkapitel nach HG 907/2016 zuordnen, etwa 4.1 für Bau- und Installationsarbeiten oder 5.1 für die Baustelleneinrichtung"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Der Deviz-Code '{code}' in Position {ordinal} ist kein Kapitel oder Unterkapitel des deviz general",
+      "suggestion": "Einen Code aus den Kapiteln 1 bis 6 des deviz general nach HG 907/2016 verwenden, etwa 1.2, 2, 3.5, 4.1, 5.1 oder 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Position {ordinal} trägt keinen Artikel der einheitlichen Preislisten (ΝΕΤ)",
+      "suggestion": "Den ΝΕΤ-Artikel angeben, nach dem die Position bepreist ist, etwa ΟΙΚ 32.01.06, oder ΝΑΟΙΚ für einen neuen Artikel"
+    },
+    "net_article_valid": {
+      "invalid": "Der Artikel '{code}' in Position {ordinal} hat nicht die Form eines ΝΕΤ-Artikels",
+      "chapter": "Der Artikel '{code}' in Position {ordinal} beginnt mit Kapitel {chapter}, das die Preisliste für Hochbauarbeiten nicht kennt",
+      "suggestion": "Präfix der Preisliste und Artikelnummer angeben, etwa ΟΙΚ 38.20.02, ΟΔΟ Α-2 oder ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Position {ordinal} nennt kein Kapitel der zusammenfassenden Kostenberechnung",
+      "suggestion": "Die Position ihrem Kapitel des зведений кошторисний розрахунок zuordnen, 1 bis 12; Bauarbeiten am Hauptobjekt gehören in Kapitel 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Kapitel {chapter} in Position {ordinal} ist keines der zwölf Kapitel der zusammenfassenden Kostenberechnung",
+      "suggestion": "Eine Kapitelnummer von 1 bis 12 verwenden"
+    }
+  },
   "birimfiyat": {
     "code_required": {
       "fail": "Position {ordinal} hat keine birim-fiyat-Positionsnummer",

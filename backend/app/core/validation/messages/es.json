@@ -329,6 +329,37 @@
       "suggestion": "Asigne a cada posición su propio número de partida antes de enviar el presupuesto"
     }
   },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "La posición {ordinal} no indica ningún capítulo del deviz general",
+      "suggestion": "Asigne la partida a su capítulo y subcapítulo según la HG 907/2016, por ejemplo 4.1 para obras de construcción e instalaciones o 5.1 para la organización de obra"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "El código de deviz '{code}' de la posición {ordinal} no es un capítulo ni un subcapítulo del deviz general",
+      "suggestion": "Use un código de los capítulos 1 a 6 del deviz general de la HG 907/2016, como 1.2, 2, 3.5, 4.1, 5.1 o 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "La posición {ordinal} no lleva ningún artículo de las listas de precios unificadas (ΝΕΤ)",
+      "suggestion": "Indique el artículo ΝΕΤ con el que se valora la partida, por ejemplo ΟΙΚ 32.01.06, o ΝΑΟΙΚ para un artículo nuevo"
+    },
+    "net_article_valid": {
+      "invalid": "El artículo '{code}' de la posición {ordinal} no tiene la forma de un artículo ΝΕΤ",
+      "chapter": "El artículo '{code}' de la posición {ordinal} abre el capítulo {chapter}, que la lista de precios de edificación no tiene",
+      "suggestion": "Escriba el prefijo de la lista y el número de artículo, por ejemplo ΟΙΚ 38.20.02, ΟΔΟ Α-2 o ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "La posición {ordinal} no indica ningún capítulo del presupuesto resumen",
+      "suggestion": "Asigne la partida a su capítulo del зведений кошторисний розрахунок, del 1 al 12; las obras del objeto principal van en el capítulo 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "El capítulo {chapter} de la posición {ordinal} no es uno de los doce capítulos del presupuesto resumen",
+      "suggestion": "Use un número de capítulo del 1 al 12"
+    }
+  },
   "birimfiyat": {
     "code_required": {
       "fail": "A la posición {ordinal} le falta el número de poz de birim fiyat",

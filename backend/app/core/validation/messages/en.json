@@ -329,6 +329,37 @@
       "suggestion": "Give each position its own project item number before the bill leaves for the client"
     }
   },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Position {ordinal} names no deviz general chapter",
+      "suggestion": "File the line under its HG 907/2016 chapter and subchapter, for example 4.1 for construction and installation works or 5.1 for site organisation"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Deviz code '{code}' on position {ordinal} is not a chapter or subchapter of the deviz general",
+      "suggestion": "Use a code from chapters 1 to 6 of the HG 907/2016 deviz general, such as 1.2, 2, 3.5, 4.1, 5.1 or 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Position {ordinal} carries no unified price list (ΝΕΤ) article",
+      "suggestion": "Name the ΝΕΤ article the line is priced from, for example ΟΙΚ 32.01.06, or ΝΑΟΙΚ for a new article"
+    },
+    "net_article_valid": {
+      "invalid": "Article '{code}' on position {ordinal} does not have the shape of a ΝΕΤ article",
+      "chapter": "Article '{code}' on position {ordinal} opens chapter {chapter}, which the building-works price list does not have",
+      "suggestion": "Write the list prefix and the article number, for example ΟΙΚ 38.20.02, ΟΔΟ Α-2 or ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Position {ordinal} names no chapter of the summary estimate",
+      "suggestion": "File the line under its chapter of the зведений кошторисний розрахунок, 1 to 12; building works of the main object sit in chapter 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Chapter {chapter} on position {ordinal} is not one of the twelve chapters of the summary estimate",
+      "suggestion": "Use a chapter number from 1 to 12"
+    }
+  },
   "birimfiyat": {
     "code_required": {
       "fail": "Position {ordinal} missing birim fiyat poz number",
