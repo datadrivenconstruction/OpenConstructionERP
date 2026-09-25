@@ -52341,6 +52341,7 @@
         "seed.py",
         "service.py",
         "signing_bridge.py",
+        "sov_posting.py",
         "validators.py"
       ],
       "manifest": {
@@ -54417,6 +54418,18 @@
           "path": "/contracts/{contract_id}/sov-status",
           "handler": "sov_status",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/contracts/{contract_id}/sov/reconcile-change-orders",
+          "handler": "sov_reconcile_preview",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/contracts/{contract_id}/sov/reconcile-change-orders",
+          "handler": "sov_reconcile_apply",
+          "request_schema": "SovReconcileConfirm"
         },
         {
           "method": "POST",
@@ -58631,9 +58644,23 @@
               "type": "list[str]"
             }
           ]
+        },
+        {
+          "class_name": "SovReconcileConfirm",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Body for ``POST /contracts/{id}/sov/reconcile-change-orders``.\n\nThe source keys the person read in the preview and agreed to post. The\nserver posts only when they are exactly what it would post now.",
+          "fields": [
+            {
+              "name": "source_keys",
+              "type": "list[str]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
+        "changeorders",
         "contacts",
         "progress",
         "projects",
@@ -230428,10 +230455,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 45,
+      "ts_files": 47,
       "css_files": 0,
-      "test_files": 20,
-      "total_files": 45
+      "test_files": 21,
+      "total_files": 47
     },
     {
       "name": "coordination",
@@ -231783,6 +231810,7 @@
       "users"
     ],
     "contracts": [
+      "changeorders",
       "contacts",
       "progress",
       "projects",
@@ -232729,11 +232757,11 @@
     "total_models": 617,
     "total_columns": 7091,
     "total_relationships": 234,
-    "total_routes": 3689,
-    "total_schemas": 3474,
-    "total_python_files": 2197,
+    "total_routes": 3691,
+    "total_schemas": 3475,
+    "total_python_files": 2198,
     "frontend_features": 188,
-    "frontend_ts_files": 2657,
+    "frontend_ts_files": 2659,
     "frontend_backend_mapped": 168
   },
   "frontend_backend_mapping": {

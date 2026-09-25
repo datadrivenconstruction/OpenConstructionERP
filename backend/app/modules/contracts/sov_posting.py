@@ -52,6 +52,17 @@ def source_key(kind: str, source_id: object) -> str:
     return f"{kind}:{source_id}"
 
 
+async def has_schedule(session: AsyncSession, contract_id: uuid.UUID) -> bool:
+    """Whether the contract bills against a schedule of values at all.
+
+    A contract with no lines (cost-plus, T&M, or a lump sum billed without a
+    schedule) gets no line from a change either: a lone change order line
+    would be the whole schedule, and every claim would be measured against it.
+    """
+    found = await session.execute(select(ContractLine.id).where(ContractLine.contract_id == contract_id).limit(1))
+    return found.first() is not None
+
+
 async def posted_source_keys(session: AsyncSession, contract_id: uuid.UUID) -> set[str]:
     """Every source key that already has an adjustment on this contract."""
     rows = await session.execute(select(SovAdjustment.source_key).where(SovAdjustment.contract_id == contract_id))
@@ -75,11 +86,14 @@ async def post_source_to_sov(
 
     ``kind`` names the record that carried the money, which is what the line's
     origin says; ``key`` may name the variation a change order mirrors. Does
-    nothing, and returns ``None``, for a contract that is not active, for a
-    zero amount, and for a key already posted on this contract. Flushes and
+    nothing, and returns ``None``, for a contract that is not active, for one
+    with no schedule of values, for a zero amount, and for a key already
+    posted on this contract. Flushes and
     leaves the commit to the caller, so the line moves with the contract sum.
     """
     if contract.status not in POSTABLE_CONTRACT_STATUSES or amount == 0:
+        return None
+    if not await has_schedule(session, contract.id):
         return None
     if key in await posted_source_keys(session, contract.id):
         return None
@@ -200,6 +214,8 @@ async def plan_reconcile(session: AsyncSession, contract: Contract) -> list[Reco
     from app.modules.changeorders.models import ChangeOrder  # noqa: PLC0415
     from app.modules.variations.models import VariationOrder  # noqa: PLC0415
 
+    if not await has_schedule(session, contract.id):
+        return []
     md = dict(contract.metadata_ or {})
     unpaid_changes, unpaid_variations = _unpaid_ids(md)
     change_ids = [

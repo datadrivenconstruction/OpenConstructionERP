@@ -100,7 +100,7 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
               <tr key={item.source_key} className="border-t border-border-light">
                 <td className="py-1 font-mono">{item.source_code}</td>
                 <td className="py-1">{item.title}</td>
-                <td className="py-1">{item.approved_on ? fmtDate(item.approved_on) : '—'}</td>
+                <td className="py-1">{item.approved_on ? fmtDate(item.approved_on) : '-'}</td>
                 <td className="py-1 text-end">
                   <MoneyDisplay amount={item.amount} currency={item.currency || currency} />
                 </td>

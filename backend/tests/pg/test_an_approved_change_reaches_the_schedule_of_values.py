@@ -167,6 +167,27 @@ async def test_a_change_in_another_currency_moves_neither_the_sum_nor_the_schedu
     assert adjustments == []
 
 
+async def test_a_contract_without_a_schedule_gets_no_line_from_a_change(world) -> None:
+    # Cost-plus and T&M bill without schedule lines. A lone change order line
+    # would become the whole schedule and every claim would be read against it.
+    async with world.factory() as session:
+        for line in (
+            (await session.execute(select(ContractLine).where(ContractLine.contract_id == world.contract.id)))
+            .scalars()
+            .all()
+        ):
+            await session.delete(line)
+        await session.commit()
+    await _approve_co(world, uuid.uuid4(), "4000")
+
+    total, lines, adjustments = await _state(world)
+    assert total == BASE + Decimal("4000")
+    assert lines == []
+    assert adjustments == []
+    async with world.factory() as session:
+        assert (await ContractsService(session).sov_reconcile_preview(world.contract.id))["items"] == []
+
+
 async def _legacy_change(world) -> ChangeOrder:
     """A change order approved before the poster: the sum moved, no line did."""
     async with world.factory() as session:
