@@ -112,10 +112,16 @@ from app.modules.boq.copilot_schemas import (
     CopilotMessageOut,
 )
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
+from app.modules.boq.importers.excel import (
+    _match_column,
+    _parse_rows_from_excel,
+    _rows_to_positions,
+    partition_summary_rows,
+    summary_row_warning,
+)
 from app.modules.boq.markup_templates import DEFAULT_MARKUP_TEMPLATES
 from app.modules.boq.resource_review_router import resource_review_router
 from app.modules.boq.roundtrip import (
-    ID_COLUMN_ALIASES,
     ID_COLUMN_HEADER,
     RoundTripRow,
     diff_import_rows,
@@ -217,7 +223,7 @@ from app.modules.boq.service import (
     exportable_positions,
     resource_fx_factor,
 )
-from app.modules.boq.units import to_gaeb_unit_code
+from app.modules.boq.units import is_lump_sum_unit, to_gaeb_unit_code
 from app.modules.costs.repository import CostItemRepository
 from app.modules.measurement.presets import PRESETS as MEASUREMENT_PRESETS
 from app.modules.price_breakdown.presets import PRESETS as PRICE_BREAKDOWN_PRESETS
@@ -5660,71 +5666,11 @@ def build_gaeb_xml(
 
 logger = logging.getLogger(__name__)
 
-# Column name aliases for flexible matching (all lowercased for comparison)
-_COLUMN_ALIASES: dict[str, list[str]] = {
-    # Round-trip identity (GitHub #360) - matched first so an exported
-    # "Position ID" header maps here, never to ``ordinal``.
-    "position_id": sorted(ID_COLUMN_ALIASES),
-    "ordinal": ["pos", "pos.", "position", "ordinal", "nr.", "nr", "no.", "no", "#"],
-    "description": [
-        "description",
-        "beschreibung",
-        "desc",
-        "text",
-        "bezeichnung",
-        "item",
-        "item description",
-    ],
-    "unit": ["unit", "einheit", "me", "uom", "unit of measure"],
-    "quantity": ["quantity", "qty", "menge", "amount", "qty.", "quantity (qty)"],
-    "unit_rate": [
-        "unit rate",
-        "rate",
-        "ep",
-        "einheitspreis",
-        "unit price",
-        "unit cost",
-        "price",
-        "rate (ep)",
-    ],
-    "total": ["total", "amount", "gesamtpreis", "gp", "sum", "total price"],
-    "classification": [
-        "classification",
-        "din 276",
-        "din276",
-        "kg",
-        "nrm",
-        "code",
-        "masterformat",
-        "cost code",
-        "cost group",
-        "class",
-        # Brazilian estimators commonly label the classification column as
-        # one of these in Excel exports from Orçafascio / Sienge / planilhas
-        # padrão SINAPI - recognising them avoids force-mapping to "ordinal".
-        "sinapi",
-        "código sinapi",
-        "codigo sinapi",
-        "nbr",
-        "nbr 12721",
-    ],
-}
-
-
-def _match_column(header: str) -> str | None:
-    """Match a header string to a canonical column name using the alias map.
-
-    Args:
-        header: Raw column header text from the uploaded file.
-
-    Returns:
-        Canonical column key (e.g. "ordinal", "description") or None if unrecognised.
-    """
-    normalised = header.strip().lower()
-    for canonical, aliases in _COLUMN_ALIASES.items():
-        if normalised in aliases:
-            return canonical
-    return None
+# Column headers are read through the Excel importer's language-tagged table
+# (``importers/excel.py``), so the legacy ``/import/excel/`` and the smart
+# import's direct path read the same headers ``/import/auto/`` does. This file
+# used to keep its own English and German list, so a bill headed in any other
+# language imported through ``/import/auto/`` and was refused here.
 
 
 def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet", "unknown"]:
@@ -5873,66 +5819,6 @@ def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
             rows.append(row)
 
     return rows
-
-
-def _parse_rows_from_excel(
-    content_bytes: bytes,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Parse rows from an Excel (.xlsx) file using openpyxl.
-
-    Reads the first (active) worksheet. The first row is treated as headers,
-    unless it names fewer than two known columns and a row just under it
-    names more: that is the table under a company letterhead (see
-    ``app.core.sheet_header``).
-
-    Returns:
-        Tuple of (rows, import_metadata).
-        rows: List of dicts mapping canonical column names to cell values.
-        import_metadata: Original file structure info for round-trip export.
-    """
-    from openpyxl import load_workbook
-
-    from app.core.sheet_header import locate_header_row
-
-    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
-    ws = wb.active
-    if ws is None:
-        raise ValueError("Excel file has no worksheets")
-
-    sheet_names = wb.sheetnames
-
-    raw_headers, rows_iter = locate_header_row(ws.iter_rows(values_only=True), _match_column)
-    if not raw_headers:
-        raise ValueError("Excel file is empty or has no header row")
-
-    original_columns = [str(h) if h is not None else "" for h in raw_headers]
-    column_map: dict[int, str] = {}
-    for idx, hdr in enumerate(raw_headers):
-        if hdr is not None:
-            canonical = _match_column(str(hdr))
-            if canonical:
-                column_map[idx] = canonical
-
-    rows: list[dict[str, Any]] = []
-    for raw_row in rows_iter:
-        row: dict[str, Any] = {}
-        for idx, val in enumerate(raw_row):
-            canonical = column_map.get(idx)
-            if canonical and val is not None:
-                row[canonical] = val
-        if row:
-            rows.append(row)
-
-    wb.close()
-
-    import_metadata = {
-        "original_columns": original_columns,
-        "column_mapping": {str(k): v for k, v in column_map.items()},
-        "sheet_names": sheet_names,
-        "total_rows": len(rows),
-    }
-
-    return rows, import_metadata
 
 
 # ── Round-trip apply (GitHub #360) ────────────────────────────────────────────
@@ -6349,7 +6235,13 @@ async def import_boq_excel(
     _rate_samples.sort()
     _median_rate = _rate_samples[len(_rate_samples) // 2] if _rate_samples else 0.0
 
-    for row_idx, row in enumerate(rows, start=2):  # start=2 because row 1 is header
+    # Section totals, tax lines and the recap page are not work: leave them
+    # out and say so, instead of importing each one as an empty section.
+    kept_rows, summary_rows = partition_summary_rows(rows, row_numbers=import_meta.get("row_numbers"))
+    skipped += len(summary_rows)
+    warnings_list.extend(summary_row_warning(report) for report in summary_rows)
+
+    for row_idx, row in kept_rows:  # the sheet's own row numbers when it is an xlsx
         try:
             description = str(row.get("description", "")).strip()
 
@@ -6486,7 +6378,7 @@ async def import_boq_excel(
             # Soft checks - imported, but surfaced in the UI so the user
             # can spot tampered-export attacks (ENH-090 / BUG-154) and
             # data-quality issues.
-            if _median_rate > 0 and unit_rate > _median_rate * 10:
+            if _median_rate > 0 and unit_rate > _median_rate * 10 and not is_lump_sum_unit(unit):
                 warnings_list.append(
                     {
                         "row": row_idx,
@@ -7403,12 +7295,12 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
         Dict with ``text``, ``structured`` flag, and optionally ``rows``.
     """
     try:
-        rows, _meta = _parse_rows_from_excel(content)
+        rows, meta = _parse_rows_from_excel(content)
         if rows:
             # Check if we have enough structure for a direct import
             has_description = any(r.get("description") for r in rows)
             if has_description:
-                return {"text": "", "structured": True, "rows": rows}
+                return {"text": "", "structured": True, "rows": rows, "row_numbers": meta.get("row_numbers")}
     except Exception:
         logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
 
@@ -7667,80 +7559,39 @@ async def smart_import(
 
     # ── 2. Direct import for structured Excel/CSV ──────────────────────
     if extracted.get("structured") and extracted.get("rows"):
+        # The same row reader ``/import/auto/`` uses: sections stay sections,
+        # section totals, tax lines and the recap page are left out and
+        # reported, and a row carrying an exported Position ID updates that
+        # position instead of duplicating it. This branch used to create every
+        # row, headings and totals included, as a priced "pcs" line.
         rows = extracted["rows"]
-        imported = 0
-        skipped = 0
-        errors: list[dict[str, Any]] = []
-        auto_ordinal = 1
-
-        for row_idx, row in enumerate(rows, start=2):
-            try:
-                description = str(row.get("description", "")).strip()
-                if not description:
-                    skipped += 1
-                    continue
-
-                desc_lower = description.lower()
-                if desc_lower in (
-                    "grand total",
-                    "total",
-                    "summe",
-                    "gesamt",
-                    "gesamtsumme",
-                    "subtotal",
-                    "zwischensumme",
-                ):
-                    skipped += 1
-                    continue
-
-                ordinal = str(row.get("ordinal", "")).strip()
-                if not ordinal:
-                    ordinal = str(auto_ordinal)
-                auto_ordinal += 1
-
-                unit = str(row.get("unit", "pcs")).strip() or "pcs"
-                quantity = _safe_float(row.get("quantity"), default=0.0)
-                unit_rate = _safe_float(row.get("unit_rate"), default=0.0)
-
-                classification: dict[str, Any] = {}
-                class_value = str(row.get("classification", "")).strip()
-                if class_value:
-                    classification["code"] = class_value
-
-                position_data = PositionCreate(
-                    boq_id=boq_id,
-                    ordinal=ordinal,
-                    description=description,
-                    unit=unit,
-                    quantity=quantity,
-                    unit_rate=unit_rate,
-                    classification=classification,
-                    source="smart_import",
-                )
-                await service.add_position(position_data)
-                imported += 1
-
-            except Exception as exc:
-                errors.append(
-                    {
-                        "row": row_idx,
-                        "error": str(exc),
-                        "data": {k: str(v)[:100] for k, v in row.items()},
-                    }
-                )
+        imported_boq = _rows_to_positions(rows, source="smart_import", row_numbers=extracted.get("row_numbers"))
+        apply_summary = await _persist_imported_boq(
+            boq_id,
+            imported_boq,
+            file_name=file.filename or "upload",
+            service=service,
+            actor_id=user_id,
+        )
+        created = int(apply_summary["created"])
+        updated = int(apply_summary["updated"])
+        errors = imported_boq.errors + apply_summary["apply_errors"]
 
         logger.info(
-            "Smart import (direct) for BOQ %s: imported=%d, skipped=%d, errors=%d",
+            "Smart import (direct) for BOQ %s: created=%d, updated=%d, skipped=%d, errors=%d",
             boq_id,
-            imported,
-            skipped,
+            created,
+            updated,
+            imported_boq.skipped,
             len(errors),
         )
 
         return {
-            "imported": imported,
-            "skipped": skipped,
+            "imported": created,
+            "updated": updated,
+            "skipped": imported_boq.skipped,
             "errors": errors,
+            "warnings": imported_boq.warnings,
             "total_items": len(rows),
             "method": "direct",
             "model_used": None,

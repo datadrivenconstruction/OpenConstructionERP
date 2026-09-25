@@ -25,10 +25,11 @@ import csv
 import io
 import logging
 import re
+import unicodedata
 from typing import Any, ClassVar, Literal
 
 from app.core.file_signature import detect as detect_signature
-from app.core.sheet_header import locate_header_row
+from app.core.sheet_header import find_header_row
 from app.modules.boq.importers._base import (
     ImportedBOQ,
     ImportedPosition,
@@ -41,6 +42,7 @@ from app.modules.boq.importers._encoding import (
 )
 from app.modules.boq.importers.hungary_workbook import parse_hungarian_workbook
 from app.modules.boq.roundtrip import ID_COLUMN_ALIASES, normalise_id
+from app.modules.boq.units import is_lump_sum_unit
 
 logger = logging.getLogger(__name__)
 
@@ -81,12 +83,24 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "item",
             "item no",
             "ref",
+            "#",
+            # South Asian and Commonwealth bills: "Sl. No.", "S. No.", "Sr. No.".
+            "sl. no.",
+            "s. no.",
+            "sr. no.",
         ),
-        "description": ("description", "desc", "text"),
-        "unit": ("unit",),
-        "quantity": ("quantity", "qty"),
-        "unit_rate": ("unit rate", "rate", "unitrate"),
-        "total": ("total", "amount", "subtotal"),
+        "description": (
+            "description",
+            "desc",
+            "text",
+            "item description",
+            "description of item",
+            "description of work",
+        ),
+        "unit": ("unit", "uom", "unit of measure"),
+        "quantity": ("quantity", "qty", "qty."),
+        "unit_rate": ("unit rate", "rate", "unitrate", "unit price", "unit cost", "price"),
+        "total": ("total", "amount", "subtotal", "sum", "total price"),
         # Note: ``"code"`` lives here in the ``classification`` group, not in
         # ``ordinal``. Spreadsheets that name their classification column
         # "Code" (NRM / MasterFormat exports) need that header to map to
@@ -102,14 +116,18 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "division",
             "category",
             "trade",
+            "cost code",
+            "cost group",
+            "class",
         ),
     },
     "de": {
-        "description": ("beschreibung", "leistung"),
+        "ordinal": ("oz", "pos.-nr.", "lv-pos."),
+        "description": ("beschreibung", "leistung", "bezeichnung", "kurztext"),
         "unit": ("einheit", "me"),
         "quantity": ("menge",),
         "unit_rate": ("einheitspreis", "ep", "preis"),
-        "total": ("gesamt", "gesamtpreis"),
+        "total": ("gesamt", "gesamtpreis", "gp"),
         "classification": ("din 276", "din276", "kg"),
     },
     "es": {
@@ -124,12 +142,14 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "unit": ("unité",),
         "quantity": ("quantité",),
         "unit_rate": ("prix",),
+        "total": ("montant", "prix total", "montant ht", "total ht"),
     },
     "it": {
         "description": ("descrizione",),
         "unit": ("unità", "u"),
         "quantity": ("quantità", "quantita"),
         "unit_rate": ("prezzo",),
+        "total": ("importo", "totale", "importo totale"),
     },
     "pl": {
         "description": ("opis",),
@@ -171,6 +191,9 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "custo unitario",
         ),
         "total": ("valor total", "preço total", "preco total"),
+        # Brazilian estimators label the classification column after the
+        # reference they priced from, so these must not fall to ``ordinal``.
+        "classification": ("sinapi", "código sinapi", "codigo sinapi", "nbr", "nbr 12721"),
     },
     "nl": {
         "ordinal": ("post", "postnr", "postnr.", "volgnr", "volgnr."),
@@ -354,6 +377,127 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "unit_rate": ("đơn giá", "don gia"),
         "total": ("thành tiền", "thanh tien", "tổng cộng", "tong cong"),
     },
+    # Croatian troškovnik. "Jed. mj." is the unit (jedinica mjere), and the
+    # money columns usually carry the currency in brackets, "Jed. cijena
+    # (EUR)", which the matcher strips before it looks the header up.
+    "hr": {
+        "ordinal": ("r.br.", "r. br.", "rbr", "rb", "red. br.", "redni broj", "br.", "br. stavke"),
+        "description": ("opis", "opis stavke", "opis radova", "opis rada", "naziv", "naziv stavke"),
+        "unit": ("jed. mj.", "jed.mj.", "j. mj.", "jm", "jedinica mjere", "mjerna jedinica"),
+        "quantity": ("količina", "kolicina", "kol."),
+        "unit_rate": ("jed. cijena", "jedinična cijena", "jedinicna cijena", "cijena"),
+        "total": ("ukupno", "iznos", "ukupna cijena", "ukupni iznos"),
+    },
+    # Serbian writes both scripts, so each Latin spelling has its Cyrillic twin.
+    "sr": {
+        "ordinal": ("r.br.", "rb", "redni broj", "р.бр.", "рб", "редни број"),
+        "description": ("opis", "opis pozicije", "naziv", "опис", "опис позиције", "назив"),
+        "unit": ("jed. mere", "jedinica mere", "j.m.", "јед. мере", "јединица мере", "ј.м."),
+        "quantity": ("količina", "kolicina", "количина"),
+        "unit_rate": ("jed. cena", "jedinična cena", "jedinicna cena", "cena", "јед. цена", "јединична цена"),
+        "total": ("ukupno", "iznos", "укупно", "износ"),
+    },
+    "sl": {
+        "ordinal": ("zap. št.", "zap. st.", "zap.št.", "poz."),
+        "description": ("opis", "opis postavke", "naziv"),
+        "unit": ("enota", "enota mere", "em", "e.m."),
+        "quantity": ("količina", "kolicina"),
+        "unit_rate": ("cena na enoto", "cena/enoto", "enotna cena", "cena enote", "cena"),
+        "total": ("skupaj", "vrednost", "znesek"),
+    },
+    "et": {
+        "ordinal": ("jrk", "jrk nr", "jrk. nr"),
+        "description": ("kirjeldus", "nimetus", "töö kirjeldus"),
+        "unit": ("ühik", "uhik", "mõõtühik", "mootuhik"),
+        "quantity": ("kogus", "maht"),
+        "unit_rate": ("ühikuhind", "uhikuhind", "ühiku hind", "hind"),
+        "total": ("kokku", "maksumus"),
+    },
+    "th": {
+        "ordinal": ("ลำดับ", "ลำดับที่"),
+        "description": ("รายการ", "รายละเอียด"),
+        "unit": ("หน่วย",),
+        "quantity": ("จำนวน", "ปริมาณ"),
+        "unit_rate": ("ราคาต่อหน่วย", "ราคา/หน่วย"),
+        "total": ("รวมเงิน", "จำนวนเงิน"),
+    },
+    "hi": {
+        "ordinal": ("क्रम सं.", "क्रमांक", "क्र.सं."),
+        "description": ("विवरण", "कार्य का विवरण"),
+        "unit": ("इकाई",),
+        "quantity": ("मात्रा",),
+        "unit_rate": ("दर",),
+        "total": ("राशि", "कुल राशि"),
+    },
+    "bn": {
+        "ordinal": ("ক্রমিক নং", "ক্রম"),
+        "description": ("বিবরণ", "কাজের বিবরণ"),
+        "unit": ("একক",),
+        "quantity": ("পরিমাণ",),
+        "unit_rate": ("দর", "একক দর"),
+        "total": ("মোট", "মোট টাকা"),
+    },
+    # Urdu "شرح" means rate but Persian "شرح" means description, so Urdu
+    # carries only the loanword for rate and the shared spelling is Persian's.
+    "ur": {
+        "ordinal": ("نمبر شمار",),
+        "description": ("تفصیل",),
+        "unit": ("اکائی", "یونٹ"),
+        "quantity": ("مقدار",),
+        "unit_rate": ("ریٹ", "فی یونٹ ریٹ"),
+        # Bare "رقم" is Arabic for the item number, so Urdu keeps only the
+        # spelling that says "total amount".
+        "total": ("کل رقم",),
+    },
+    "fa": {
+        "ordinal": ("ردیف",),
+        "description": ("شرح", "شرح عملیات", "شرح کار"),
+        "unit": ("واحد",),
+        # Persian and Urdu share the spelling and the meaning here.
+        "quantity": ("مقدار",),
+        "unit_rate": ("بهای واحد", "فی"),
+        "total": ("بهای کل", "مبلغ"),
+    },
+    "fil": {
+        "ordinal": ("blg.",),
+        "description": ("paglalarawan",),
+        "unit": ("yunit",),
+        "quantity": ("dami",),
+        "unit_rate": ("presyo bawat yunit", "halaga bawat yunit"),
+        "total": ("kabuuan", "kabuuang halaga"),
+    },
+    "kk": {
+        "ordinal": ("р/с", "№ р/с"),
+        "description": ("атауы", "жұмыстардың атауы"),
+        "unit": ("өлшем бірлігі", "өлш. бір."),
+        "quantity": ("саны", "көлемі"),
+        "unit_rate": ("бірлік бағасы", "бағасы"),
+        "total": ("сомасы", "құны"),
+    },
+    "ky": {
+        "description": ("аталышы", "иштердин аталышы"),
+        "unit": ("өлчөө бирдиги",),
+        # Kazakh and Kyrgyz share the spelling and the meaning here.
+        "quantity": ("саны",),
+        "unit_rate": ("баасы", "бирдик баасы"),
+        "total": ("суммасы",),
+    },
+    "uz": {
+        "ordinal": ("t/r",),
+        "description": ("nomi", "ishlar nomi"),
+        "unit": ("o'lchov birligi", "o‘lchov birligi", "olchov birligi"),
+        "quantity": ("miqdori", "soni"),
+        "unit_rate": ("narxi", "birlik narxi"),
+        "total": ("qiymati", "jami"),
+    },
+    "mn": {
+        "ordinal": ("д/д",),
+        "description": ("ажлын нэр", "нэр"),
+        "unit": ("хэмжих нэгж", "нэгж"),
+        "quantity": ("тоо хэмжээ",),
+        "unit_rate": ("нэгж үнэ",),
+        "total": ("нийт үнэ", "дүн"),
+    },
 }
 
 
@@ -442,13 +586,110 @@ regardless of what this set says.
 """
 
 
+# ── Label normalisation ─────────────────────────────────────────────────────
+#
+# A header is written a dozen ways for the same column: "Jed. mj.", "JED MJ",
+# "Jed.mj.", "Jed. cijena (EUR)", "KOLIČINA", "Kolicina". The table above
+# holds one or two spellings per column, so the matcher reduces both sides to
+# a key that ignores case, diacritics, punctuation, spacing and a bracketed or
+# trailing currency before it compares them.
+
+# Letters NFKD leaves alone because Unicode does not treat them as a base
+# letter plus an accent. Without these, "Količina" and "Kolicina" meet but
+# "Đ" (Croatian), "Ł" (Polish), "Ø"/"Æ" (Danish, Norwegian) and "ı"
+# (Turkish) never reach their unaccented twins.
+_TRANSLITERATE: dict[int, str] = str.maketrans(
+    {"đ": "d", "ł": "l", "ø": "o", "æ": "ae", "œ": "oe", "ß": "ss", "ı": "i", "þ": "th", "ð": "d"}
+)
+
+# Combining marks are dropped only above this code point's scripts (Latin,
+# Greek, Cyrillic, Armenian). Thai tone marks, Devanagari and Bengali vowel
+# signs and Arabic hamza are combining marks too, but there they change the
+# word, so dropping them would make two different headers one.
+_STRIP_MARKS_BELOW = 0x0590
+
+_BRACKETED = re.compile(r"\([^)]*\)|\[[^\]]*\]|\{[^}]*\}")
+
+
+def _currency_codes() -> frozenset[str]:
+    """Lowercased ISO 4217 codes the platform knows, for stripping from headers."""
+    from app.core.currency_registry import CURRENCIES
+
+    return frozenset(code.lower() for code in CURRENCIES)
+
+
+_CURRENCY_CODES: frozenset[str] = _currency_codes()
+
+
+def normalise_label(text: str) -> str:
+    """Reduce a header or row label to its comparison form.
+
+    Lowercases, drops bracketed parts ("Jed. cijena (EUR)"), strips accents
+    from Latin, Greek and Cyrillic letters, turns every run of punctuation
+    and spacing into one space and drops a trailing currency code or sign
+    ("Iznos EUR", "Ukupno €"). The words stay separated by single spaces.
+
+    Args:
+        text: The raw cell text.
+
+    Returns:
+        The normalised label, possibly empty.
+    """
+    lowered = _BRACKETED.sub(" ", str(text).lower()).translate(_TRANSLITERATE)
+    kept: list[str] = []
+    base = 0
+    for char in unicodedata.normalize("NFKD", lowered):
+        if unicodedata.combining(char):
+            if base < _STRIP_MARKS_BELOW:
+                continue
+            kept.append(char)
+            continue
+        base = ord(char)
+        kept.append(char if char.isalnum() else " ")
+    words = unicodedata.normalize("NFC", "".join(kept)).split()
+    if len(words) > 1 and words[-1] in _CURRENCY_CODES:
+        words.pop()
+    return " ".join(words)
+
+
+def _label_key(text: str) -> str:
+    """The normalised label with the spaces removed too ("r br" == "rbr")."""
+    return normalise_label(text).replace(" ", "")
+
+
+def _build_normalised_index(aliases: dict[str, frozenset[str]]) -> dict[str, str]:
+    """Key every alias by :func:`_label_key`, the first canonical column winning.
+
+    The collision test in ``tests/unit/test_boq_spreadsheet_header_languages``
+    holds that no two canonical columns share a key, so "first wins" never
+    decides anything in practice; it only keeps ``position_id`` ahead of
+    ``ordinal`` if that test is ever broken.
+    """
+    index: dict[str, str] = {}
+    for canonical, words in aliases.items():
+        for word in words:
+            key = _label_key(word)
+            if key:
+                index.setdefault(key, canonical)
+    return index
+
+
+_NORMALISED_COLUMN_INDEX: dict[str, str] = _build_normalised_index(_COLUMN_ALIASES)
+
+
 def _match_column(header: str) -> str | None:
-    """Match a header string to a canonical column name using the alias map."""
-    normalised = header.strip().lower()
+    """Match a header string to a canonical column name using the alias map.
+
+    The exact lowercased spelling is tried first, so a symbol-only header such
+    as ``#`` (which normalises to nothing) still matches, then the normalised
+    key, which is what reads "Jed. mj." and "KOLICINA (m3)".
+    """
+    lowered = header.strip().lower()
     for canonical, aliases in _COLUMN_ALIASES.items():
-        if normalised in aliases:
+        if lowered in aliases:
             return canonical
-    return None
+    key = _label_key(header)
+    return _NORMALISED_COLUMN_INDEX.get(key) if key else None
 
 
 def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet", "unknown"]:
@@ -592,7 +833,9 @@ def _parse_rows_from_excel(
 
     Returns ``(rows, import_metadata)``; metadata preserves the raw
     column ordering so a later export can round-trip back to the
-    user's original spreadsheet layout.
+    user's original spreadsheet layout, and ``row_numbers`` holds the
+    sheet row each returned row came from, so a message about it names the
+    row the user sees under a letterhead and past blank lines.
     """
     from openpyxl import load_workbook
 
@@ -603,7 +846,7 @@ def _parse_rows_from_excel(
 
     sheet_names = wb.sheetnames
 
-    raw_headers, rows_iter = locate_header_row(ws.iter_rows(values_only=True), _match_column)
+    raw_headers, header_number, rows_iter = find_header_row(ws.iter_rows(values_only=True), _match_column)
     if not raw_headers:
         raise ImporterParseError("Excel file is empty or has no header row")
 
@@ -616,7 +859,8 @@ def _parse_rows_from_excel(
                 column_map[idx] = canonical
 
     rows: list[dict[str, Any]] = []
-    for raw_row in rows_iter:
+    row_numbers: list[int] = []
+    for sheet_row, raw_row in enumerate(rows_iter, start=header_number + 1):
         row: dict[str, Any] = {}
         for idx, val in enumerate(raw_row):
             canonical = column_map.get(idx)
@@ -624,6 +868,7 @@ def _parse_rows_from_excel(
                 row[canonical] = val
         if row:
             rows.append(row)
+            row_numbers.append(sheet_row)
     wb.close()
 
     import_metadata = {
@@ -631,6 +876,7 @@ def _parse_rows_from_excel(
         "column_mapping": {str(k): v for k, v in column_map.items()},
         "sheet_names": sheet_names,
         "total_rows": len(rows),
+        "row_numbers": row_numbers,
     }
     return rows, import_metadata
 
@@ -652,6 +898,363 @@ _TOTAL_ROW_DESCRIPTIONS = {
 }
 
 
+# ── Total, tax and recap rows, tagged by language ──────────────────────────
+#
+# A national bill closes every section with a total line ("UKUPNO I. ...",
+# "Summe Titel 01"), ends with a tax line and a grand total ("PDV 25 %",
+# "SVEUKUPNO") and often repeats the section totals on a recap page
+# ("REKAPITULACIJA"). None of them is work, and a total line has no unit,
+# quantity or rate, so without this table each one imported as an empty
+# section, and the recap page repeated the section ordinals.
+#
+# The phrases are matched on :func:`normalise_label`, so they are written
+# plainly here and accents, punctuation and a trailing currency do not matter.
+# ``recap`` phrases must be the whole label; the others may also start a
+# longer one ("ukupno" reads "UKUPNO II. ZEMLJANI RADOVI") and then only count
+# on a line that carries an amount, so a section heading that happens to start
+# with "Total" stays a section.
+_SUMMARY_KINDS: tuple[str, ...] = ("subtotal", "tax", "grand_total", "recap")
+
+_SUMMARY_WORDS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
+    "en": {
+        "subtotal": (
+            "total",
+            "subtotal",
+            "sub total",
+            "page total",
+            "carried forward",
+            "brought forward",
+            "carried to collection",
+            "total carried to collection",
+            "total carried to summary",
+            "net total",
+            "total excluding vat",
+            "total excl vat",
+        ),
+        "tax": ("vat", "tax", "sales tax", "gst", "hst", "pst", "qst"),
+        "grand_total": ("grand total", "total including vat", "total incl vat", "gross total", "contract sum"),
+        "recap": ("summary", "collection", "recapitulation", "general summary", "cost summary"),
+    },
+    "de": {
+        "subtotal": ("summe", "zwischensumme", "gesamt", "übertrag", "nettosumme", "summe netto"),
+        "tax": ("mwst", "ust", "umsatzsteuer", "mehrwertsteuer"),
+        "grand_total": ("gesamtsumme", "gesamtbetrag", "bruttosumme", "summe brutto", "angebotssumme", "endsumme"),
+        "recap": ("zusammenstellung", "zusammenfassung"),
+    },
+    "hr": {
+        "subtotal": ("ukupno", "svega", "ukupno bez pdv"),
+        "tax": ("pdv",),
+        "grand_total": ("sveukupno", "sveukupno s pdv", "ukupno s pdv"),
+        "recap": ("rekapitulacija", "rekapitulacija radova", "zbirna rekapitulacija"),
+    },
+    "sr": {
+        "subtotal": ("ukupno", "svega", "укупно", "свега"),
+        "tax": ("pdv", "пдв"),
+        "grand_total": ("sveukupno", "свеукупно"),
+        "recap": ("rekapitulacija", "рекапитулација"),
+    },
+    "sl": {
+        "subtotal": ("skupaj", "vmesni seštevek"),
+        "tax": ("ddv",),
+        "grand_total": ("skupaj z ddv", "skupna vrednost"),
+        "recap": ("rekapitulacija",),
+    },
+    "pl": {
+        "subtotal": ("razem", "suma", "razem netto", "wartość netto"),
+        "grand_total": ("ogółem", "razem brutto", "wartość brutto"),
+        "recap": ("zestawienie", "podsumowanie"),
+    },
+    "cs": {
+        "subtotal": ("celkem", "mezisoučet", "součet"),
+        "tax": ("dph",),
+        "grand_total": ("celkem s dph", "celková cena"),
+        "recap": ("rekapitulace", "rekapitulace stavby"),
+    },
+    "sk": {
+        "subtotal": ("spolu", "celkom", "medzisúčet"),
+        "grand_total": ("spolu s dph", "celkom s dph"),
+        "recap": ("rekapitulácia",),
+    },
+    "hu": {
+        "subtotal": ("összesen", "részösszeg"),
+        "tax": ("áfa",),
+        "grand_total": ("mindösszesen", "végösszeg"),
+        "recap": ("összesítő", "összesítés"),
+    },
+    "ro": {
+        "subtotal": ("total capitol", "subtotal"),
+        "tax": ("tva",),
+        "grand_total": ("total general",),
+        "recap": ("centralizator", "recapitulatie"),
+    },
+    "bg": {
+        "subtotal": ("общо", "междинна сума"),
+        "tax": ("ддс",),
+        "grand_total": ("общо с ддс", "всичко"),
+        "recap": ("рекапитулация", "обобщение"),
+    },
+    "el": {
+        "subtotal": ("σύνολο", "μερικό σύνολο", "άθροισμα"),
+        "tax": ("φπα",),
+        "grand_total": ("γενικό σύνολο",),
+        "recap": ("ανακεφαλαίωση",),
+    },
+    "ru": {
+        "subtotal": ("итого", "итого по разделу", "всего по разделу"),
+        "tax": ("ндс",),
+        "grand_total": ("всего", "всего по смете", "итого по смете", "всего с ндс"),
+    },
+    "uk": {
+        "subtotal": ("разом", "всього по розділу", "підсумок"),
+        "tax": ("пдв",),
+        "grand_total": ("всього", "разом з пдв"),
+    },
+    "it": {
+        "subtotal": ("totale", "subtotale", "totale parziale"),
+        "tax": ("iva",),
+        "grand_total": ("totale generale", "importo complessivo"),
+        "recap": ("riepilogo", "riassunto"),
+    },
+    "es": {
+        "subtotal": ("suma y sigue",),
+        "tax": ("igic",),
+        "grand_total": ("total general", "total presupuesto"),
+        "recap": ("resumen", "resumen de presupuesto"),
+    },
+    "pt": {
+        "subtotal": ("total parcial",),
+        "grand_total": ("total geral",),
+        "recap": ("resumo",),
+    },
+    "fr": {
+        "subtotal": ("sous total", "total ht"),
+        "tax": ("tva",),
+        "grand_total": ("total ttc", "montant ttc", "total général"),
+        "recap": ("récapitulatif", "récapitulation"),
+    },
+    "nl": {
+        "subtotal": ("totaal", "subtotaal", "totaal excl btw"),
+        "tax": ("btw",),
+        "grand_total": ("totaal incl btw", "eindtotaal"),
+        "recap": ("samenvatting", "recapitulatie"),
+    },
+    "sv": {
+        "subtotal": ("summa", "delsumma", "totalt"),
+        "tax": ("moms",),
+        "grand_total": ("summa inkl moms", "totalsumma"),
+        "recap": ("sammanställning",),
+    },
+    "no": {
+        "subtotal": ("sum", "delsum"),
+        "tax": ("mva",),
+        "grand_total": ("sum inkl mva", "totalsum"),
+        "recap": ("sammendrag", "sammenstilling"),
+    },
+    "da": {
+        "subtotal": ("i alt",),
+        "grand_total": ("i alt inkl moms",),
+        "recap": ("sammenfatning",),
+    },
+    "fi": {
+        "subtotal": ("yhteensä", "välisumma"),
+        "tax": ("alv",),
+        "grand_total": ("kokonaissumma", "yhteensä sis alv"),
+        "recap": ("yhteenveto",),
+    },
+    "et": {
+        "subtotal": ("kokku", "vahesumma"),
+        "tax": ("käibemaks",),
+        "grand_total": ("kokku koos käibemaksuga",),
+        "recap": ("koond", "kokkuvõte"),
+    },
+    "tr": {
+        "subtotal": ("toplam", "ara toplam"),
+        "tax": ("kdv",),
+        "grand_total": ("genel toplam",),
+        "recap": ("icmal", "özet"),
+    },
+    "ja": {"subtotal": ("小計", "合計"), "tax": ("消費税",), "grand_total": ("総合計", "総計"), "recap": ("集計",)},
+    "zh": {"subtotal": ("小计", "合计"), "tax": ("税金", "增值税"), "grand_total": ("总计",), "recap": ("汇总",)},
+    "ko": {"subtotal": ("소계", "합계"), "tax": ("부가세", "부가가치세"), "grand_total": ("총계",), "recap": ("집계",)},
+    "ar": {
+        "subtotal": ("المجموع", "المجموع الفرعي"),
+        "tax": ("ضريبة القيمة المضافة",),
+        "grand_total": ("الإجمالي", "المجموع الكلي"),
+        "recap": ("ملخص",),
+    },
+    "he": {
+        "subtotal": ('סה"כ', "סיכום ביניים"),
+        "tax": ('מע"מ',),
+        "grand_total": ('סה"כ כולל מע"מ',),
+        "recap": ("ריכוז",),
+    },
+    "id": {
+        "subtotal": ("jumlah", "sub total"),
+        "tax": ("ppn",),
+        "grand_total": ("jumlah total", "total keseluruhan"),
+        "recap": ("rekapitulasi",),
+    },
+    "vi": {"subtotal": ("cộng",), "tax": ("thuế gtgt",), "grand_total": ("tổng cộng",), "recap": ("tổng hợp",)},
+    "th": {"subtotal": ("รวม",), "tax": ("ภาษีมูลค่าเพิ่ม",), "grand_total": ("รวมทั้งสิ้น",)},
+    "hi": {"subtotal": ("कुल", "योग"), "tax": ("जीएसटी",), "grand_total": ("कुल योग",)},
+    "fa": {"subtotal": ("جمع",), "tax": ("مالیات بر ارزش افزوده",), "grand_total": ("جمع کل",)},
+}
+
+
+def _build_summary_index(table: dict[str, dict[str, tuple[str, ...]]]) -> dict[str, str]:
+    """Normalised phrase -> summary kind, across every language."""
+    index: dict[str, str] = {}
+    for words_by_kind in table.values():
+        for kind, phrases in words_by_kind.items():
+            for phrase in phrases:
+                key = normalise_label(phrase)
+                if key:
+                    index.setdefault(key, kind)
+    return index
+
+
+_SUMMARY_INDEX: dict[str, str] = _build_summary_index(_SUMMARY_WORDS_BY_LANGUAGE)
+
+
+def summary_label_kind(label: str) -> tuple[str, bool] | None:
+    """Say whether a row label reads as a total, tax, grand-total or recap line.
+
+    Args:
+        label: The row's description cell.
+
+    Returns:
+        ``(kind, whole)`` where ``whole`` is True when the phrase is the entire
+        label and False when it only starts it; ``None`` when no phrase fits.
+        A ``recap`` phrase counts only as the whole label.
+    """
+    normalised = normalise_label(label)
+    if not normalised:
+        return None
+    kind = _SUMMARY_INDEX.get(normalised)
+    if kind is not None:
+        return kind, True
+    words = normalised.split()
+    for length in range(len(words) - 1, 0, -1):
+        kind = _SUMMARY_INDEX.get(" ".join(words[:length]))
+        if kind is not None and kind != "recap":
+            return kind, False
+    return None
+
+
+def _is_blank_cell(value: Any) -> bool:
+    """A cell that carries nothing: empty, whitespace or a zero."""
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return not value.strip() or safe_float(value, default=1.0) == 0.0
+    return value in (0, 0.0)
+
+
+def partition_summary_rows(
+    rows: list[dict[str, Any]],
+    *,
+    first_row_number: int = 2,
+    row_numbers: list[int] | None = None,
+) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
+    """Separate a bill's total, tax and recap lines from its sections and work.
+
+    Only a row with no unit, no quantity and no rate can be one of these; a
+    priced row is work whatever its label says. Such a row is a summary line
+    when its label is a summary phrase in any language of
+    :data:`_SUMMARY_WORDS_BY_LANGUAGE` (a phrase that only starts the label
+    also needs an amount in the total column), when it carries an amount
+    under a recap heading, or when it carries an amount and repeats the
+    ordinal of a section already read, which is what a recap page without a
+    heading looks like. Every other unpriced row stays a section heading.
+
+    Args:
+        rows: Canonical row dicts as the sheet parsers return them.
+        first_row_number: The sheet row number of ``rows[0]``, when
+            ``row_numbers`` is not given.
+        row_numbers: The sheet row of each row, as the Excel reader returns
+            them in its metadata.
+
+    Returns:
+        ``(kept, summary)``: the rows to import, each with its row number, and
+        one report per summary line with its row, ordinal, label, kind and
+        amount.
+    """
+    kept: list[tuple[int, dict[str, Any]]] = []
+    summary: list[dict[str, Any]] = []
+    section_ordinals: set[str] = set()
+    in_recap = False
+    numbers = row_numbers if row_numbers is not None and len(row_numbers) == len(rows) else None
+    for index, row in enumerate(rows):
+        number = numbers[index] if numbers is not None else first_row_number + index
+        description = str(row.get("description", "") or "").strip()
+        unpriced = (
+            not str(row.get("unit", "") or "").strip()
+            and _is_blank_cell(row.get("quantity"))
+            and _is_blank_cell(row.get("unit_rate"))
+        )
+        if not description or not unpriced:
+            if not unpriced:
+                in_recap = False
+            kept.append((number, row))
+            continue
+
+        amount = safe_float(row.get("total"), default=0.0)
+        ordinal = str(row.get("ordinal", "") or "").strip()
+        ordinal_key = _label_key(ordinal)
+        kind: str | None = None
+        matched = summary_label_kind(description)
+        if matched is not None and (matched[1] or amount):
+            kind = matched[0]
+        elif amount and (in_recap or (ordinal_key and ordinal_key in section_ordinals)):
+            kind = "recap"
+
+        if kind is None:
+            in_recap = False
+            if ordinal_key:
+                section_ordinals.add(ordinal_key)
+            kept.append((number, row))
+            continue
+        if kind == "recap":
+            in_recap = True
+        summary.append(
+            {
+                "row": number,
+                "ordinal": ordinal,
+                "description": description[:200],
+                "kind": kind,
+                "amount": amount,
+            }
+        )
+    return kept, summary
+
+
+_SUMMARY_KIND_WORDS: dict[str, str] = {
+    "subtotal": "subtotal",
+    "tax": "tax",
+    "grand_total": "grand total",
+    "recap": "recap",
+}
+
+
+def summary_row_warning(report: dict[str, Any]) -> dict[str, Any]:
+    """The import warning that tells the user a summary line was left out."""
+    return {
+        "row": report["row"],
+        "ordinal": report["ordinal"],
+        "severity": "info",
+        "code": "summary_row_skipped",
+        "kind": report["kind"],
+        "amount": report["amount"],
+        # The row number travels in ``row``; the import dialog prints it in
+        # front of the message, so the message does not repeat it.
+        "label": report["description"][:80],
+        "message": (
+            f"'{report['description'][:80]}' reads as a "
+            f"{_SUMMARY_KIND_WORDS[report['kind']]} line and was not imported as a position."
+        ),
+    }
+
+
 _IMPORT_MAX_QUANTITY = 1e9
 _IMPORT_MAX_UNIT_RATE = 1e8
 
@@ -660,6 +1263,7 @@ def _rows_to_positions(
     rows: list[dict[str, Any]],
     *,
     source: str = "excel_import",
+    row_numbers: list[int] | None = None,
 ) -> ImportedBOQ:
     """Convert canonical rows into :class:`ImportedPosition` objects.
 
@@ -676,7 +1280,13 @@ def _rows_to_positions(
     rate_samples = sorted(v for v in (safe_float(r.get("unit_rate"), default=0.0) for r in rows) if v > 0)
     median_rate = rate_samples[len(rate_samples) // 2] if rate_samples else 0.0
 
-    for row_idx, row in enumerate(rows, start=2):
+    kept_rows, summary_rows = partition_summary_rows(rows, row_numbers=row_numbers)
+    result.skipped += len(summary_rows)
+    result.warnings.extend(summary_row_warning(report) for report in summary_rows)
+    if summary_rows:
+        result.metadata["summary_rows"] = summary_rows
+
+    for row_idx, row in kept_rows:
         try:
             description = str(row.get("description", "")).strip()
             if not description:
@@ -775,8 +1385,9 @@ def _rows_to_positions(
                 )
                 continue
 
-            # Soft warnings.
-            if median_rate > 0 and unit_rate > median_rate * 10:
+            # Soft warnings. A lump sum prices a whole piece of work, so its
+            # rate says nothing next to the per-metre rates around it.
+            if median_rate > 0 and unit_rate > median_rate * 10 and not is_lump_sum_unit(unit):
                 result.warnings.append(
                     {
                         "row": row_idx,
@@ -893,9 +1504,10 @@ class ExcelImporter:
         if not rows:
             raise ImporterParseError("No data rows found. Check that the header row names the columns.")
 
-        result = _rows_to_positions(rows)
+        result = _rows_to_positions(rows, row_numbers=import_meta.get("row_numbers"))
         result.source_format = source_format
         result.metadata = {
+            **result.metadata,
             "original_columns": import_meta.get("original_columns", []),
             "column_mapping": import_meta.get("column_mapping", {}),
             "sheet_names": import_meta.get("sheet_names", []),
