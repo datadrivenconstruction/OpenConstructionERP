@@ -1213,27 +1213,20 @@ async def project_dashboard(
         revised = original
         forecast = revised if revised > 0 else original
 
-        # A-DASH-04: committed = real purchase-order commitments (sum of
-        # non-draft/cancelled PO totals), not a fabricated 0.8×actual. Same
-        # source as procurement_section.total_committed; degrades to 0 if
-        # the procurement module/table is absent.
+        # A-DASH-04: committed is what the project is bound to pay, read from
+        # the same aggregator as the 5D cost model dashboard so the two never
+        # disagree: issued purchase orders and signed contracts linked to the
+        # cost spine, the hand-typed budget-line figure only where there are
+        # none. Degrades to 0 if the cost model is absent.
         committed_total = 0.0
         try:
-            from app.modules.procurement.models import PurchaseOrder
+            from app.modules.costmodel.repository import BudgetLineRepository
 
             committed_total = float(
-                (
-                    await session.execute(
-                        select(func.sum(numeric_value(PurchaseOrder.amount_total))).where(
-                            PurchaseOrder.project_id == project_id,
-                            PurchaseOrder.status.notin_(["draft", "cancelled"]),
-                        )
-                    )
-                ).scalar_one()
-                or 0.0
+                (await BudgetLineRepository(session).aggregate_by_project(project_id))["total_committed"]
             )
         except Exception:
-            logger.debug("Dashboard: committed PO sum unavailable", exc_info=True)
+            logger.debug("Dashboard: committed total unavailable", exc_info=True)
 
         outturn_total = float(
             expected_outturn(
@@ -2106,7 +2099,7 @@ async def analytics_overview(
     committed_by_line: dict[uuid.UUID, Decimal] = {}
     unbudgeted_by_project: dict[str, Decimal] = {}
     for committed_project_id in {row[0] for row in budget_rows}:
-        by_line, unbudgeted = await committed_repo.effective_committed(committed_project_id)
+        by_line, unbudgeted, _from_documents = await committed_repo.effective_committed(committed_project_id)
         committed_by_line.update(by_line)
         unbudgeted_by_project[str(committed_project_id)] = unbudgeted
 

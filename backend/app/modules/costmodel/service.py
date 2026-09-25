@@ -781,6 +781,25 @@ class CostModelService:
 
         fields = data.model_dump(exclude_unset=True)
 
+        # A line whose cost line carries issued purchase orders or signed
+        # contracts takes its committed from them, so a typed value would be
+        # stored and then silently ignored by every total. Refuse it instead;
+        # echoing back the value the API reported for the line is allowed so a
+        # client that round-trips the whole row keeps working.
+        if fields.get("committed_amount") is not None:
+            effective, _unbudgeted, from_documents = await self.budget_repo.effective_committed(line.project_id)
+            if line_id in from_documents:
+                cent = Decimal("0.01")
+                if Decimal(str(fields["committed_amount"])).quantize(cent) != effective[line_id].quantize(cent):
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail=(
+                            "Committed on this budget line comes from the purchase orders and contracts "
+                            "linked to its cost line and cannot be edited by hand. Change those documents instead."
+                        ),
+                    )
+                fields.pop("committed_amount")
+
         # Convert float values to strings for storage
         for key in ("planned_amount", "committed_amount", "actual_amount", "forecast_amount"):
             if key in fields:

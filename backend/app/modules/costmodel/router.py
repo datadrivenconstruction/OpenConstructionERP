@@ -128,7 +128,9 @@ def _snapshot_to_response(snap: object) -> SnapshotResponse:
     )
 
 
-def _budget_line_to_response(line: object, *, committed: Decimal | None = None) -> BudgetLineResponse:
+def _budget_line_to_response(
+    line: object, *, committed: Decimal | None = None, committed_from_documents: bool = False
+) -> BudgetLineResponse:
     """Convert a BudgetLine ORM model to a BudgetLineResponse.
 
     ``committed`` overrides the stored ``committed_amount`` with the value the
@@ -142,7 +144,8 @@ def _budget_line_to_response(line: object, *, committed: Decimal | None = None) 
         category=line.category,  # type: ignore[attr-defined]
         description=line.description,  # type: ignore[attr-defined]
         planned_amount=float(line.planned_amount),  # type: ignore[attr-defined]
-        committed_amount=float(committed if committed is not None else line.committed_amount),  # type: ignore[attr-defined]
+        committed_amount=committed if committed is not None else float(line.committed_amount),  # type: ignore[attr-defined]
+        committed_from_documents=committed_from_documents,
         actual_amount=float(line.actual_amount),  # type: ignore[attr-defined]
         forecast_amount=float(line.forecast_amount),  # type: ignore[attr-defined]
         earned_amount=getattr(line, "earned_amount", None),
@@ -282,8 +285,15 @@ async def list_budget_lines(
     # Show the committed the dashboard counts, so the rows add up to it: a
     # line whose cost line has purchase orders or contracts shows its share
     # of them instead of the hand-typed figure.
-    effective, _unbudgeted = await service.budget_repo.effective_committed(project_id)
-    return [_budget_line_to_response(line, committed=effective.get(line.id)) for line in lines]
+    effective, _unbudgeted, from_documents = await service.budget_repo.effective_committed(project_id)
+    return [
+        _budget_line_to_response(
+            line,
+            committed=effective[line.id].quantize(Decimal("0.01")) if line.id in from_documents else None,
+            committed_from_documents=line.id in from_documents,
+        )
+        for line in lines
+    ]
 
 
 @router.post(

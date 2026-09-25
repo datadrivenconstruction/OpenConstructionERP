@@ -443,3 +443,49 @@ async def test_portfolio_outturn_reads_the_documents(http_client, admin_headers)
     row = next(p for p in resp.json()["projects"] if p["id"] == str(project_id))
     assert Decimal(str(row["outturn"])) == Decimal("1200")
     assert row["status"] == "over_budget"
+
+
+@pytest.mark.asyncio
+async def test_project_dashboard_shows_the_same_committed_as_the_cost_model(http_client, scenario):
+    headers = scenario["headers"]
+    project_id = scenario["project_id"]
+    five_d = await _dashboard_committed(http_client, headers, uuid.UUID(project_id))
+
+    resp = await http_client.get(f"{API}/projects/{project_id}/dashboard/", headers=headers)
+    assert resp.status_code == 200, resp.text
+    assert Decimal(str(resp.json()["budget"]["committed"])) == five_d == Decimal("1500")
+
+
+@pytest.mark.asyncio
+async def test_manual_committed_is_refused_on_a_line_fed_by_documents(http_client, scenario):
+    headers = scenario["headers"]
+    project_id = scenario["project_id"]
+    resp = await http_client.get(f"{API}/costmodel/projects/{project_id}/5d/budget-lines/", headers=headers)
+    assert resp.status_code == 200, resp.text
+    lines = {row["category"]: row for row in resp.json()}
+    fed, manual = lines["subcontractor"], lines["material"]
+    assert fed["committed_from_documents"] is True
+    assert manual["committed_from_documents"] is False
+
+    refused = await http_client.patch(
+        f"{API}/costmodel/5d/budget-lines/{fed['id']}", json={"committed_amount": 999}, headers=headers
+    )
+    assert refused.status_code == 409, refused.text
+    assert "purchase orders and contracts" in refused.json()["detail"]
+
+    # Echoing back the reported value (a client saving the whole row) is fine,
+    # and so is editing another field of the same line.
+    echoed = await http_client.patch(
+        f"{API}/costmodel/5d/budget-lines/{fed['id']}",
+        json={"committed_amount": fed["committed_amount"], "description": "Shell works (rev)"},
+        headers=headers,
+    )
+    assert echoed.status_code == 200, echoed.text
+
+    # A line without documents keeps accepting a typed committed.
+    typed = await http_client.patch(
+        f"{API}/costmodel/5d/budget-lines/{manual['id']}", json={"committed_amount": 200}, headers=headers
+    )
+    assert typed.status_code == 200, typed.text
+
+    assert await _dashboard_committed(http_client, headers, uuid.UUID(project_id)) == Decimal("1500")

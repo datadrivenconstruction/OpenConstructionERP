@@ -199,6 +199,10 @@ class BudgetLineResponse(BaseModel):
     description: str
     planned_amount: Decimal = Decimal("0")
     committed_amount: Decimal = Decimal("0")
+    # True when ``committed_amount`` is this line's share of the purchase
+    # orders and contracts on its cost line rather than a hand-typed figure;
+    # such a line refuses a manual committed on update.
+    committed_from_documents: bool = False
     actual_amount: Decimal = Decimal("0")
     forecast_amount: Decimal = Decimal("0")
     # EVM earned value (BCWP) - position total x latest progress percent,

@@ -3346,7 +3346,7 @@ async def _cost_split_records(
         effective: dict[uuid.UUID, Decimal] = {}
         unbudgeted: dict[uuid.UUID, Decimal] = {}
         for pid in {getattr(row, "project_id", None) for row in rows} - {None}:
-            by_line, unbudgeted[pid] = await budget_repo.effective_committed(pid)
+            by_line, unbudgeted[pid], _from_documents = await budget_repo.effective_committed(pid)
             effective.update(by_line)
 
         for row in rows:
