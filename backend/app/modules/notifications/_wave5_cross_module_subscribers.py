@@ -5,13 +5,19 @@
 Wires real cross-module side-effects emitted by the wave-5 deep-dive:
 
 * ``resources.cert_expiring`` → notification per expiring certification.
-* ``contracts.claim.certified`` → finance Invoice (AR direction, project-scoped).
 * ``contracts.retention.released`` → notification for project owner.
 * ``crm.opportunity.won`` → bid_management BidPackage (draft, pre-populated).
 * ``crm.opportunity.scored`` → notification for opportunity owner.
 * ``carbon.boq_position.assigned`` → notification for project sustainability lead.
 * ``changeorder.approved`` → revise the linked contract's total_value (when
   the CO carries ``metadata.contract_id``).
+
+``contracts.claim.certified`` used to raise an invoice here as well. The
+finance module already raises exactly one per claim, linked through
+``source_claim_id`` and in the direction the contract calls for, so this
+second, unlinked receivable (numbered ``PC-<claim>``) doubled every certified
+claim and booked a subcontractor's bill as money owed to us. It was removed
+rather than deduplicated: two writers for one invoice is the defect.
 
 All handlers are best-effort, and the bus is what makes them so:
 ``EventBus.publish`` runs each handler in its own ``try``, logs a failure
@@ -92,100 +98,6 @@ async def _on_cert_expiring(event: Event) -> None:
             action_url=f"/resources/{resource_id}",
         )
         await session.commit()
-
-
-# ── Contracts: claim certified → finance invoice ─────────────────────────
-
-
-async def _on_claim_certified(event: Event) -> None:
-    """``contracts.claim.certified`` → create a draft Invoice (AR direction).
-
-    Reads the claim's net_due + contract's currency + counterparty, and
-    spawns an Invoice referencing back to the claim through metadata.
-    """
-    if not await _can_open_isolated_session():
-        return
-    data = event.data or {}
-    claim_id = data.get("claim_id")
-    contract_id = data.get("contract_id")
-    if not (claim_id and contract_id):
-        return
-    async with async_session_factory() as session:
-        from app.modules.contracts.repository import (
-            ContractRepository,
-            ProgressClaimRepository,
-        )
-        from app.modules.finance.models import Invoice
-
-        claim_repo = ProgressClaimRepository(session)
-        contract_repo = ContractRepository(session)
-        try:
-            claim = await claim_repo.get_by_id(uuid.UUID(str(claim_id)))
-            contract = await contract_repo.get_by_id(uuid.UUID(str(contract_id)))
-        except (ValueError, TypeError):
-            return
-        if claim is None or contract is None:
-            return
-        # Dedupe: skip if metadata already records an auto-invoice.
-        meta = dict(claim.metadata_ or {})
-        if meta.get("auto_invoice_id"):
-            logger.debug(
-                "claim %s already auto-invoiced (%s)",
-                claim_id,
-                meta["auto_invoice_id"],
-            )
-            return
-        net_due = Decimal(str(claim.net_due or 0))
-        if net_due <= 0:
-            return
-        from datetime import UTC, datetime, timedelta
-
-        invoice = Invoice(
-            project_id=contract.project_id,
-            contact_id=str(contract.counterparty_id) if contract.counterparty_id else None,
-            invoice_direction="receivable",
-            invoice_number=f"PC-{claim.claim_number or claim.id}",
-            invoice_date=datetime.now(UTC).date().isoformat(),
-            due_date=(datetime.now(UTC).date() + timedelta(days=30)).isoformat(),
-            currency_code=contract.currency or "",
-            amount_subtotal=Decimal(str(claim.gross_amount or 0)) - Decimal(str(claim.retention_amount or 0)),
-            tax_amount=Decimal("0"),
-            retention_amount=Decimal(str(claim.retention_amount or 0)),
-            amount_total=net_due,
-            status="draft",
-            payment_terms_days="30",
-            notes=(f"Auto-generated from certified progress claim {claim.claim_number} on contract {contract.code}"),
-        )
-        invoice.metadata_ = {
-            "source": "contracts.claim.certified",
-            "contract_id": str(contract.id),
-            "claim_id": str(claim.id),
-            "claim_number": claim.claim_number,
-        }
-        session.add(invoice)
-        await session.flush()
-        # Stash the invoice id back into the claim metadata so we don't
-        # double-issue on subsequent events.
-        meta["auto_invoice_id"] = str(invoice.id)
-        await claim_repo.update_fields(claim.id, metadata_=meta)
-        await session.commit()
-        event_bus.publish_detached(
-            "finance.invoice.created",
-            {
-                "invoice_id": str(invoice.id),
-                "source": "contracts.claim.certified",
-                "claim_id": str(claim.id),
-                "amount_total": str(net_due),
-                "currency": contract.currency or "",
-            },
-            source_module="finance",
-        )
-        logger.info(
-            "Auto-created invoice %s from claim %s (net_due=%s)",
-            invoice.id,
-            claim.id,
-            net_due,
-        )
 
 
 # ── Contracts: retention released → notification ─────────────────────────
@@ -1126,7 +1038,6 @@ async def _on_changeorder_approved_schedule(event: Event) -> None:
 
 _SUBSCRIPTIONS: tuple[tuple[str, Callable[[Event], object]], ...] = (
     ("resources.cert_expiring", _on_cert_expiring),
-    ("contracts.claim.certified", _on_claim_certified),
     ("contracts.retention.released", _on_retention_released),
     ("crm.opportunity.won", _on_opportunity_won),
     ("crm.opportunity.scored", _on_opportunity_scored),
