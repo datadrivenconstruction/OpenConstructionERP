@@ -2770,9 +2770,12 @@ function DashboardPageInner() {
             size="md"
             icon={<FileSpreadsheet size={15} />}
             onClick={() => {
-              const firstProject = projects?.[0];
-              if (firstProject) {
-                navigate(`/projects/${firstProject.id}/boq/new`);
+              // The project in the top-bar switcher is the one the reader is
+              // working in; the first project in the list is only a fallback.
+              const target =
+                (activeProjectId && projects?.find((p) => p.id === activeProjectId)) || projects?.[0];
+              if (target) {
+                navigate(`/projects/${target.id}/boq/new`);
               } else {
                 navigate('/projects/new');
               }

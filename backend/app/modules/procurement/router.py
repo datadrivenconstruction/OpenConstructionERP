@@ -117,6 +117,13 @@ def _po_to_response(
     resp.invoice_count = count
     if po.vendor_contact_id:
         resp.vendor_name = vendor_names.get(po.vendor_contact_id)
+    if not resp.vendor_name:
+        # An order drafted from an award to a bidder that is not in the
+        # directory has no vendor contact, only the company it was awarded to.
+        # Name that company rather than show an order with no vendor at all.
+        supplier = (po.metadata_ or {}).get("supplier_name") if isinstance(po.metadata_, dict) else None
+        if isinstance(supplier, str) and supplier.strip():
+            resp.vendor_name = supplier.strip()
     # Computed retainage values cannot come through ``model_validate`` (they
     # are ORM methods, not attributes), so stamp them here. Strings, in the
     # PO's own currency - never blended.
