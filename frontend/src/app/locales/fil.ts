@@ -13823,6 +13823,8 @@ const resource = {
     "tendering.award_bid": "I-award ang bid na ito",
     "tendering.award_confirm": "I-award ang kontratang ito kay {{company}}? Hindi na ito maibabalik.",
     "tendering.award_confirm_title": "I-award ang kontrata?",
+    "tendering.disclose_award_sum": "Ipakita ang na-award na halaga sa mga abiso ng pagtanggi",
+    "tendering.disclose_award_sum_hint": "Naka-off bilang default: malalaman lang ng hindi napiling bidder na hindi siya napili. I-on ito kung kinakailangan ng mga patakaran sa pampublikong pagkuha na banggitin ang na-award na halaga sa abiso.",
     "tendering.bid_comparison": "Paghahambing ng Bid",
     "tendering.bid_comparison_chart_label": "Bar chart na naghahambing ng kabuuang bid",
     "tendering.bid_count": "{{count}} bid",

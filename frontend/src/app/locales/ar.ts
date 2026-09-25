@@ -14813,6 +14813,8 @@ const resource = {
     "tendering.award_bid": "ترسية هذا العطاء",
     "tendering.award_confirm": "هل تريد ترسية هذا العقد على {{company}}؟ لا يمكن التراجع عن هذا الإجراء.",
     "tendering.award_confirm_title": "ترسية العقد؟",
+    "tendering.disclose_award_sum": "إظهار المبلغ المرسّى في إشعارات الرفض",
+    "tendering.disclose_award_sum_hint": "معطّل افتراضيًا: يعرف مقدّم العرض غير الفائز فقط أنه لم يُختر. فعّل هذا الخيار عندما تتطلب قواعد المشتريات العامة ذكر القيمة المرسّاة في الإشعار.",
     "tendering.bid_comparison": "مقارنة العطاءات",
     "tendering.bid_comparison_chart_label": "مخطط شريطي لمقارنة إجماليات العطاءات",
     "tendering.bid_count": "{{count}} عرض",

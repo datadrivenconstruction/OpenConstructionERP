@@ -14278,6 +14278,8 @@ const resource = {
     "takeoff.markup.comment_send": "发送",
     "tendering.award_confirm": "将本合同授予 {{company}}？此操作无法撤销。",
     "tendering.award_confirm_title": "定标合同？",
+    "tendering.disclose_award_sum": "在拒标通知中显示中标金额",
+    "tendering.disclose_award_sum_hint": "默认关闭:未中标方仅会得知未被选中。若公共采购规则要求在通知中说明中标金额,请开启此项。",
     "tendering.bid_count": "{{count}} 报价",
     "tendering.close_package": "关闭",
     "tendering.compare.collapseLowVariance": "隐藏低-偏差清单项",

@@ -14596,6 +14596,8 @@ const resource = {
     "takeoff.markup.comment_send": "Senden",
     "tendering.award_confirm": "Diesen Auftrag an {{company}} vergeben? Diese Aktion kann nicht rückgängig gemacht werden.",
     "tendering.award_confirm_title": "Auftrag vergeben?",
+    "tendering.disclose_award_sum": "Vergebene Summe in Ablehnungsbescheiden anzeigen",
+    "tendering.disclose_award_sum_hint": "Standardmäßig aus: Ein nicht erfolgreicher Bieter erfährt nur, dass er nicht ausgewählt wurde. Aktivieren Sie dies, wenn die Vergaberegeln verlangen, dass der Vergabewert in der Mitteilung genannt wird.",
     "tendering.bid_count": "{{count}} Angebote",
     "tendering.close_package": "Schließen",
     "tendering.compare.collapseLowVariance": "Positionen mit geringer Abweichung ausblenden",

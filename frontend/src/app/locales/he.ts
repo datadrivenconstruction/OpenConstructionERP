@@ -13905,6 +13905,8 @@ const resource = {
     "tendering.award_bid": "הענקת הצעה זו",
     "tendering.award_confirm": "להעניק את החוזה ל-{{company}}? לא ניתן לבטל פעולה זו.",
     "tendering.award_confirm_title": "להעניק את החוזה?",
+    "tendering.disclose_award_sum": "הצג את הסכום שהוענק בהודעות הדחייה",
+    "tendering.disclose_award_sum_hint": "כבוי כברירת מחדל: מציע שלא זכה יידע רק שלא נבחר. הפעל אפשרות זו כאשר כללי הרכש הציבורי דורשים לציין את הערך שהוענק בהודעה.",
     "tendering.bid_comparison": "השוואת הצעות",
     "tendering.bid_comparison_chart_label": "תרשים עמודות המשווה סך הצעות",
     "tendering.bid_count": "{{count}} הצעות",

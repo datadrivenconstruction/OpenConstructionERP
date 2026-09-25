@@ -14516,6 +14516,8 @@ const resource = {
     "takeoff.markup.comment_send": "Надіслати",
     "tendering.award_confirm": "Присудити цей договір компанії {{company}}? Цю дію не можна скасувати.",
     "tendering.award_confirm_title": "Присудити договір?",
+    "tendering.disclose_award_sum": "Показувати присуджену суму в повідомленнях про відмову",
+    "tendering.disclose_award_sum_hint": "За замовчуванням вимкнено: учасник, який не переміг, дізнається лише те, що його не обрано. Увімкніть це, якщо правила публічних закупівель вимагають зазначати присуджену суму в повідомленні.",
     "tendering.bid_count": "Пропозицій: {{count}}",
     "tendering.close_package": "Закрити",
     "tendering.compare.collapseLowVariance": "Приховати позиції з низьким відхиленням",

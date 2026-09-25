@@ -8594,6 +8594,8 @@ const resource = {
     "tendering.award_bid": "Award this bid",
     "tendering.award_confirm": "Award this contract to {{company}}? This action cannot be undone.",
     "tendering.award_confirm_title": "Award contract?",
+    "tendering.disclose_award_sum": "Show the awarded sum in rejection notices",
+    "tendering.disclose_award_sum_hint": "Off by default: an unsuccessful bidder learns only that it was not selected. Turn it on where public procurement rules require the awarded value in the notice.",
     "tendering.po_created_msg": "A draft purchase order is being prepared in Procurement from the winning bid.",
     "tendering.view_po": "View purchase orders",
     "tendering.bid_comparison": "Bid Comparison",

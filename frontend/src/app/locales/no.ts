@@ -12988,6 +12988,8 @@ const resource = {
     "tendering.award_bid": "Tildel dette tilbudet",
     "tendering.award_confirm": "Tildel denne kontrakten til {{company}}? Denne handlingen kan ikke angres.",
     "tendering.award_confirm_title": "Tildel kontrakt?",
+    "tendering.disclose_award_sum": "Vis det tildelte beløpet i avslagsmeldinger",
+    "tendering.disclose_award_sum_hint": "Av som standard: en tilbyder som ikke vant, får bare vite at de ikke ble valgt. Slå på dette der reglene for offentlige anskaffelser krever at den tildelte verdien oppgis i meldingen.",
     "tendering.bid_comparison": "Tilbudssammenligning",
     "tendering.bid_comparison_chart_label": "Stolpediagram som sammenligner tilbudssummer",
     "tendering.bid_count": "{{count}} bud",

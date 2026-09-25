@@ -13048,6 +13048,8 @@ const resource = {
     "tendering.award_bid": "Tilldela detta anbud",
     "tendering.award_confirm": "Tilldela detta kontrakt till {{company}}? Denna åtgärd kan inte ångras.",
     "tendering.award_confirm_title": "Tilldela kontrakt?",
+    "tendering.disclose_award_sum": "Visa den tilldelade summan i avslagsmeddelanden",
+    "tendering.disclose_award_sum_hint": "Avstängd som standard: en anbudsgivare som inte vann får bara veta att den inte valdes ut. Slå på detta där reglerna för offentlig upphandling kräver att det tilldelade värdet anges i meddelandet.",
     "tendering.bid_comparison": "Anbudsjämförelse",
     "tendering.bid_comparison_chart_label": "Stapeldiagram som jämför anbudssummor",
     "tendering.bid_count": "{{count}} anbud",

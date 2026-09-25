@@ -14381,6 +14381,8 @@ const resource = {
     "takeoff.markup.comment_send": "Изпрати",
     "tendering.award_confirm": "Да се присъди договорът на {{company}}? Действието не може да бъде отменено.",
     "tendering.award_confirm_title": "Присъждане на договор?",
+    "tendering.disclose_award_sum": "Показвай възложената сума в уведомленията за отказ",
+    "tendering.disclose_award_sum_hint": "По подразбиране изключено: неспечелилият участник узнава само, че не е избран. Включете го, когато правилата за обществени поръчки изискват посочване на възложената стойност в уведомлението.",
     "tendering.bid_count": "{{count}} оферти",
     "tendering.close_package": "Затвори",
     "tendering.compare.collapseLowVariance": "Скрий позиции с ниско отклонение",

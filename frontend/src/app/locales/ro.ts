@@ -14253,6 +14253,8 @@ const resource = {
     "takeoff.markup.comment_send": "Trimite",
     "tendering.award_confirm": "Atribuiți acest contract către {{company}}? Această acțiune nu poate fi anulată.",
     "tendering.award_confirm_title": "Atribuiți contractul?",
+    "tendering.disclose_award_sum": "Afișează suma atribuită în notificările de respingere",
+    "tendering.disclose_award_sum_hint": "Dezactivat implicit: un ofertant nereușit află doar că nu a fost selectat. Activați aici unde regulile de achiziții publice cer menționarea valorii atribuite în notificare.",
     "tendering.bid_count": "{{count}} oferte",
     "tendering.close_package": "Închide",
     "tendering.compare.collapseLowVariance": "Ascunde low-variance poziții",

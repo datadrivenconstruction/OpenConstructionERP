@@ -14237,6 +14237,8 @@ const resource = {
     "takeoff.markup.comment_send": "Lähetä",
     "tendering.award_confirm": "Myönnetäänkö sopimus yritykselle {{company}}? Tätä ei voi peruuttaa.",
     "tendering.award_confirm_title": "Myönnä sopimus?",
+    "tendering.disclose_award_sum": "Näytä myönnetty summa hylkäysilmoituksissa",
+    "tendering.disclose_award_sum_hint": "Oletuksena pois päältä: hylätty tarjoaja saa tietää vain, ettei häntä valittu. Ota käyttöön, jos julkisten hankintojen säännöt edellyttävät myönnetyn arvon ilmoittamista.",
     "tendering.bid_count": "{{count}} tarjousta",
     "tendering.close_package": "Sulje",
     "tendering.compare.collapseLowVariance": "Piilota vähän vaihtelevat nimikkeet",

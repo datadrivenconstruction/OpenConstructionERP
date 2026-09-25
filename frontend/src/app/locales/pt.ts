@@ -13639,6 +13639,8 @@ const resource = {
     "takeoff.markup.comment_send": "Enviar",
     "tendering.award_confirm": "Adjudicar este contrato a {{company}}? Esta ação não pode ser desfeita.",
     "tendering.award_confirm_title": "Adjudicar contrato?",
+    "tendering.disclose_award_sum": "Mostrar o valor adjudicado nos avisos de rejeição",
+    "tendering.disclose_award_sum_hint": "Desativado por predefinição: um concorrente não selecionado só sabe que não foi escolhido. Ative quando as regras de contratação pública exigirem o valor adjudicado no aviso.",
     "tendering.bid_count": "{{count}} propostas",
     "tendering.close_package": "Fechar",
     "tendering.compare.collapseLowVariance": "Ocultar posições de baixa variação",

@@ -14278,6 +14278,8 @@ const resource = {
     "takeoff.markup.comment_send": "送信",
     "tendering.award_confirm": "{{company}} にこの契約を発注しますか？この操作は元に戻せません。",
     "tendering.award_confirm_title": "契約を受注しますか？",
+    "tendering.disclose_award_sum": "却下通知に落札額を表示する",
+    "tendering.disclose_award_sum_hint": "既定でオフです。落札しなかった入札者は選定されなかったことのみを知らされます。公共調達の規則で通知に落札額の明示が求められる場合はオンにしてください。",
     "tendering.bid_count": "{{count}}件の応札",
     "tendering.close_package": "閉じる",
     "tendering.compare.collapseLowVariance": "低分散の明細を非表示",

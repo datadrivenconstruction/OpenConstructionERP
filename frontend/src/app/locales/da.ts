@@ -13084,6 +13084,8 @@ const resource = {
     "tendering.award_bid": "Tildel dette tilbud",
     "tendering.award_confirm": "Tildel denne kontrakt til {{company}}? Denne handling kan ikke fortrydes.",
     "tendering.award_confirm_title": "Tildel kontrakt?",
+    "tendering.disclose_award_sum": "Vis det tildelte beløb i afvisningsmeddelelser",
+    "tendering.disclose_award_sum_hint": "Slået fra som standard: en tabende byder får kun at vide, at vedkommende ikke blev valgt. Slå til, hvor reglerne for offentlige udbud kræver, at den tildelte værdi fremgår af meddelelsen.",
     "tendering.bid_comparison": "Tilbudssammenligning",
     "tendering.bid_comparison_chart_label": "Søjlediagram der sammenligner tilbudstotaler",
     "tendering.bid_count": "{{count}} bud",

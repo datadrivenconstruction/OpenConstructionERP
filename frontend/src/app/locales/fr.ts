@@ -13575,6 +13575,8 @@ const resource = {
     "takeoff.markup.comment_send": "Envoyer",
     "tendering.award_confirm": "Attribuer ce marché à {{company}} ? Cette action est irréversible.",
     "tendering.award_confirm_title": "Attribuer le marché ?",
+    "tendering.disclose_award_sum": "Afficher le montant attribué dans les avis de rejet",
+    "tendering.disclose_award_sum_hint": "Désactivé par défaut : un soumissionnaire non retenu apprend seulement qu'il n'a pas été choisi. Activez cette option lorsque les règles de la commande publique exigent que la valeur attribuée figure dans l'avis.",
     "tendering.bid_count": "{{count}} offres",
     "tendering.close_package": "Fermer",
     "tendering.compare.collapseLowVariance": "Masquer les positions à faible écart",

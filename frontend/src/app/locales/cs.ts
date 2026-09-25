@@ -14347,6 +14347,8 @@ const resource = {
     "takeoff.markup.comment_send": "Odeslat",
     "tendering.award_confirm": "Zadat tuto zakázku firmě {{company}}? Tuto akci nelze vzít zpět.",
     "tendering.award_confirm_title": "Award smlouva?",
+    "tendering.disclose_award_sum": "Zobrazit zadanou částku v oznámeních o odmítnutí",
+    "tendering.disclose_award_sum_hint": "Ve výchozím nastavení vypnuto: neúspěšný uchazeč se dozví pouze to, že nebyl vybrán. Zapněte, pokud pravidla veřejných zakázek vyžadují uvedení zadané hodnoty v oznámení.",
     "tendering.bid_count": "{{count}} nabídky",
     "tendering.close_package": "Zavřít",
     "tendering.compare.collapseLowVariance": "Skrýt low-variance položky",

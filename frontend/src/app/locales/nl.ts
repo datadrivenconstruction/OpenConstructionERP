@@ -13593,6 +13593,8 @@ const resource = {
     "takeoff.markup.comment_send": "Verzenden",
     "tendering.award_confirm": "Dit contract gunnen aan {{company}}? Deze actie kan niet ongedaan worden gemaakt.",
     "tendering.award_confirm_title": "Contract gunnen?",
+    "tendering.disclose_award_sum": "Het gegunde bedrag tonen in afwijzingsberichten",
+    "tendering.disclose_award_sum_hint": "Standaard uit: een niet-gekozen inschrijver verneemt alleen dat hij niet is geselecteerd. Zet dit aan wanneer de aanbestedingsregels vereisen dat de gegunde waarde in het bericht wordt vermeld.",
     "tendering.bid_count": "{{count}} inschrijvingen",
     "tendering.close_package": "Sluiten",
     "tendering.compare.collapseLowVariance": "Posities met lage variantie verbergen",

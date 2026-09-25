@@ -14333,6 +14333,8 @@ const resource = {
     "takeoff.markup.comment_send": "भेजें",
     "tendering.award_confirm": "यह अनुबंध {{company}} को दें? यह क्रिया पूर्ववत नहीं की जा सकती।",
     "tendering.award_confirm_title": "अनुबंध दें?",
+    "tendering.disclose_award_sum": "अस्वीकृति सूचनाओं में प्रदत्त राशि दिखाएं",
+    "tendering.disclose_award_sum_hint": "डिफ़ॉल्ट रूप से बंद: असफल बोलीदाता को केवल यह पता चलता है कि उसे चुना नहीं गया। इसे तब चालू करें जब सार्वजनिक खरीद नियमों के तहत सूचना में प्रदत्त मूल्य बताना आवश्यक हो।",
     "tendering.bid_count": "{{count}} बोलियाँ",
     "tendering.close_package": "बंद करें",
     "tendering.compare.collapseLowVariance": "कम-विचलन पोजीशन छिपाएँ",

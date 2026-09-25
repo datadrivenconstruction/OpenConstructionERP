@@ -13622,6 +13622,8 @@ const resource = {
     "takeoff.markup.comment_send": "Enviar",
     "tendering.award_confirm": "¿Adjudicar este contrato a {{company}}? Esta acción no se puede deshacer.",
     "tendering.award_confirm_title": "¿Adjudicar contrato?",
+    "tendering.disclose_award_sum": "Mostrar la suma adjudicada en los avisos de rechazo",
+    "tendering.disclose_award_sum_hint": "Desactivado de forma predeterminada: un licitante no seleccionado solo se entera de que no fue elegido. Actívelo cuando las normas de contratación pública exijan indicar el valor adjudicado en el aviso.",
     "tendering.bid_count": "{{count}} ofertas",
     "tendering.close_package": "Cerrar",
     "tendering.compare.collapseLowVariance": "Ocultar partidas de baja variación",
