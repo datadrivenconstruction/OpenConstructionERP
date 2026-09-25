@@ -352,10 +352,52 @@ async def _fire_tender(session, monkeypatch, package, bid) -> None:
     )
 
 
-async def test_the_tender_award_handler_is_subscribed() -> None:
-    """Calling the handler directly proves nothing if the bus never calls it."""
-    handlers = bm_events.event_bus._handlers.get("tendering.package.awarded", [])
-    assert bm_events._on_tender_awarded in handlers
+_LOADER_PROBE = """
+import asyncio
+from fastapi import FastAPI
+from app.core.events import event_bus
+from app.core.module_loader import ModuleLoader
+
+loader = ModuleLoader()
+loader.discover()
+asyncio.run(loader._load_module("oe_bid_management", FastAPI()))
+names = [f"{h.__module__}.{h.__name__}" for h in event_bus._handlers.get("tendering.package.awarded", [])]
+print("HANDLERS=" + ",".join(names))
+"""
+
+
+async def test_the_module_loader_subscribes_the_tender_award_handler() -> None:
+    """Calling the handler directly proves nothing if the bus never calls it.
+
+    This file imports ``bm_events`` itself, which registers the handler, so an
+    in-process check would pass whether or not the loader ever imports
+    ``events.py``. A clean interpreter that only runs the loader's own load of
+    the module is the honest question. The loader suppresses
+    ``ModuleNotFoundError`` from ``events.py``, so a broken import there would
+    otherwise drop the contract draft silently.
+    """
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    backend = Path(__file__).resolve().parents[2]
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(backend), env.get("PYTHONPATH", "")) if p)
+    env.setdefault("DATABASE_URL", "postgresql+asyncpg://probe:probe@127.0.0.1:59999/probe")
+    env.setdefault("DATABASE_SYNC_URL", "postgresql+psycopg://probe:probe@127.0.0.1:59999/probe")
+    done = subprocess.run(
+        [sys.executable, "-c", _LOADER_PROBE],
+        cwd=backend,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=600,
+        check=False,
+    )
+    line = next((ln for ln in done.stdout.splitlines() if ln.startswith("HANDLERS=")), None)
+    assert line is not None, f"the probe did not run: rc={done.returncode}\n{done.stderr[-3000:]}"
+    assert "app.modules.bid_management.events._on_tender_awarded" in line.split("=", 1)[1].split(","), line
 
 
 async def test_a_tender_award_drafts_a_contract_with_its_bill_links(pg_session, monkeypatch) -> None:
