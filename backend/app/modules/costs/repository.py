@@ -19,6 +19,7 @@ from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 from sqlalchemy.sql.expression import ColumnElement
 
+from app.modules.costs.hazards import hazard_sql_flag, query_names_a_hazard
 from app.modules.costs.models import CostItem
 from app.modules.costs.schemas import UNSPECIFIED_CATEGORY
 
@@ -493,15 +494,14 @@ class CostItemRepository:
             # insert/delete can shift a row across a page boundary - which is
             # acceptable for a relevance search where page 1 is what matters.
             score = self._fuzzy_score_expr(q)
-            page_stmt = (
-                base.order_by(
-                    score.desc(),
-                    CostItem.code.asc(),
-                    cast(CostItem.id, String).asc(),
-                )
-                .offset(offset)
-                .limit(limit + 1)
-            )
+            ordering: list[Any] = [score.desc(), CostItem.code.asc(), cast(CostItem.id, String).asc()]
+            # Items made of a hazardous material (asbestos-cement above all)
+            # rank after every other hit, unless the search asks for one by
+            # name. They stay in the results: removal and refurbishment work
+            # is priced from them.
+            if not query_names_a_hazard(q):
+                ordering.insert(0, hazard_sql_flag(CostItem.description).asc())
+            page_stmt = base.order_by(*ordering).offset(offset).limit(limit + 1)
             result = await self.session.execute(page_stmt)
             rows = list(result.scalars().all())
             has_more = len(rows) > limit
@@ -694,7 +694,11 @@ class CostItemRepository:
 
         priority = case((comp_len > 0, 1), else_=0).label("priority")
 
-        stmt = base.order_by(priority.desc(), CostItem.code.asc()).limit(limit)
+        ordering: list[Any] = [priority.desc(), CostItem.code.asc()]
+        # Hazardous-material items after the rest, as in :meth:`search`.
+        if not query_names_a_hazard(q):
+            ordering.insert(0, hazard_sql_flag(CostItem.description).asc())
+        stmt = base.order_by(*ordering).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

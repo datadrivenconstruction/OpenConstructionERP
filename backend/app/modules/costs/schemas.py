@@ -22,6 +22,7 @@ from pydantic import (
 )
 
 from app.modules.costs.buildup import buildup_rate as _buildup_rate
+from app.modules.costs.hazards import hazards_in as _hazards_in
 from app.modules.costs.region_currency import REGION_CURRENCY
 
 # Round-7 audit (2026-05-24): money / rate / factor fields are exchanged as
@@ -311,6 +312,17 @@ class CostItemResponse(BaseModel):
         """
         value = _buildup_rate(self.components, self.metadata)
         return None if value is None else str(value)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def hazards(self) -> list[str]:
+        """Hazardous materials the item is made of, as ids (``["asbestos"]``).
+
+        Read from the description in every language the row carries, against
+        the terms in ``hazard_terms.json``. The picker shows a warning badge
+        for each; an empty list means none was recognised, not a guarantee.
+        """
+        return _hazards_in([self.description, *self.descriptions.values()])
 
     @model_validator(mode="after")
     def _resolve_currency_from_region(self) -> CostItemResponse:

@@ -2052,6 +2052,23 @@ export function CostDatabaseSearchModal({
                                     </span>
                                   )}
                                   <span className="text-2xs text-content-quaternary font-mono">{item.code}</span>
+                                  {(item.hazards ?? []).map((hazard) => (
+                                    <span
+                                      key={hazard}
+                                      className="ms-1.5 inline-flex align-middle"
+                                      title={t('costs.hazard_hint', {
+                                        defaultValue:
+                                          'Contains a hazardous material. It stays listed for removal and refurbishment work; check the rules that apply where you build.',
+                                      })}
+                                      data-testid={`cost-row-hazard-${item.id}`}
+                                    >
+                                      <Badge variant="error" size="sm" className="text-2xs">
+                                        {hazard === 'asbestos'
+                                          ? t('costs.hazard_asbestos', { defaultValue: 'Asbestos' })
+                                          : t('costs.hazard_other', { defaultValue: 'Hazardous material' })}
+                                      </Badge>
+                                    </span>
+                                  ))}
                                 </>
                               );
                             })()}

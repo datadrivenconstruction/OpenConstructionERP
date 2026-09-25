@@ -1671,6 +1671,9 @@ export interface CostSearchItem {
    *  its components. ``null`` when the item has no components (it lands at
    *  ``rate``) or a variant still to pick. */
   buildup_rate?: number | null;
+  /** Hazardous materials the item is made of, as ids (``asbestos``). The
+   *  search ranks such items after ordinary hits; the picker badges them. */
+  hazards?: string[];
   currency?: string;
   region: string | null;
   classification: Record<string, string>;
