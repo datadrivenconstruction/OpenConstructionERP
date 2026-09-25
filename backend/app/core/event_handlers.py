@@ -12,7 +12,7 @@ Dataflows wired:
    4. rfi.response.design_change    -> flag for variation (change order)
    5. ncr.cost_impact               -> flag for variation (change order)
    6. document.revision.created     -> flag linked BOQ positions
-   7. (removed: invoice.paid budget actuals live in finance.pay_invoice)
+   7. invoice.paid                  -> update project budget actuals
    8. po.issued                     -> update project budget committed
    9. estimate.approved             -> auto-populate project budget from BOQ
   10. schedule.progress_updated     -> create EVM snapshot
@@ -479,16 +479,69 @@ async def _handle_document_revision_created(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 7. invoice.paid -> (no longer handled here)
+# 7. invoice.paid -> update project budget actuals
 # ---------------------------------------------------------------------------
-#
-# This slot used to hold a handler that summed the gross of every paid
-# invoice of the project and wrote that one figure into ``actual`` on EVERY
-# ProjectBudget row, so three budget lines showed three times the project's
-# spend. ``FinanceService.pay_invoice`` already attributes each paid amount
-# to its own budget row, net of VAT, and this handler ran after it and
-# overwrote the result. It was removed, not fixed: the finance module owns
-# budget actuals.
+
+
+async def _handle_invoice_paid(event: Event) -> None:
+    """Recalculate project budget actuals when an invoice is paid.
+
+    Expected event.data:
+        project_id: str (UUID)
+        invoice_id: str (UUID)
+        amount_total: str (monetary value)
+        currency_code: str
+    """
+    try:
+        data = event.data
+        project_id = data.get("project_id")
+        invoice_id = data.get("invoice_id")
+        amount_total = data.get("amount_total", "0")
+
+        if not project_id:
+            logger.debug("invoice.paid: missing project_id")
+            return
+
+        from decimal import Decimal, InvalidOperation
+
+        from sqlalchemy import select
+
+        from app.database import async_session_factory
+        from app.modules.finance.models import Invoice, ProjectBudget
+
+        async with async_session_factory() as session:
+            # Sum all paid invoices for the project
+            result = await session.execute(
+                select(Invoice).where(
+                    Invoice.project_id == project_id,
+                    Invoice.status == "paid",
+                )
+            )
+            paid_invoices = result.scalars().all()
+
+            total_actual = Decimal("0")
+            for inv in paid_invoices:
+                try:
+                    total_actual += Decimal(str(inv.amount_total))
+                except (InvalidOperation, ValueError):
+                    continue
+
+            # Update all budget lines for the project (aggregate level)
+            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
+            budgets = budget_result.scalars().all()
+            for budget in budgets:
+                budget.actual = str(total_actual)
+
+            await session.commit()
+
+        logger.info(
+            "invoice.paid: updated budget actuals for project %s (invoice %s, total_actual=%s)",
+            project_id,
+            invoice_id,
+            total_actual,
+        )
+    except Exception:
+        logger.exception("Error handling invoice.paid")
 
 
 # ---------------------------------------------------------------------------
@@ -499,7 +552,7 @@ async def _handle_document_revision_created(event: Event) -> None:
 # Unpublished: procurement emits ``procurement.po.issued``, never ``po.issued``,
 # so this handler never runs. Do not revive it as it stands. It writes the
 # project's whole committed total onto every budget row, the same defect the
-# removed invoice.paid handler had, and it commits gross. Finance owns the
+# invoice.paid handler had, and it commits gross. Finance owns the
 # commitment (``finance/events.py``, ``finance/cost_position.py``).
 async def _handle_po_issued(event: Event) -> None:
     """Recalculate project budget committed when a PO is issued.

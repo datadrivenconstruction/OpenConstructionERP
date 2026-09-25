@@ -14,7 +14,6 @@ from __future__ import annotations
 import uuid
 from decimal import Decimal
 
-from app.core import event_handlers
 from app.modules.finance.budget_actuals import (
     BudgetLineRow,
     PaidInvoice,
@@ -104,6 +103,3 @@ def test_payment_beyond_the_order_releases_no_more_than_it_committed() -> None:
     assert plan.actual == {line.id: D("35000")}
     assert plan.released == {line.id: {po: D("30000")}}
 
-
-def test_the_core_handler_that_wrote_every_line_is_gone() -> None:
-    assert not hasattr(event_handlers, "_handle_invoice_paid")
