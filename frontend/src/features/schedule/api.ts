@@ -23,6 +23,23 @@ export interface Schedule {
   updated_at: string;
 }
 
+/** A BOQ as the project's BOQ list returns it, reduced to what the link picker shows. */
+export interface BoqSummary {
+  id: string;
+  name: string;
+}
+
+/** A BOQ position reduced to what the link picker shows. */
+export interface BoqPositionLite {
+  id: string;
+  boq_id: string;
+  parent_id: string | null;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: string | number;
+}
+
 export interface Activity {
   id: string;
   schedule_id: string;
@@ -854,7 +871,22 @@ export const scheduleApi = {
       `/v1/schedule/schedules/${scheduleId}/activities/`,
     ),
   linkPosition: (activityId: string, positionId: string) =>
-    apiPost(`/v1/schedule/activities/${activityId}/link-position/`, { boq_position_id: positionId }),
+    apiPost<Activity>(`/v1/schedule/activities/${activityId}/link-position/`, { boq_position_id: positionId }),
+  unlinkPosition: (activityId: string, positionId: string) =>
+    apiDelete<Activity>(
+      `/v1/schedule/activities/${activityId}/link-position/${encodeURIComponent(positionId)}/`,
+    ),
+  /** The project's BOQs, for picking which bill to link positions from. */
+  listProjectBoqs: (projectId: string) =>
+    apiGet<BoqSummary[]>(`/v1/boq/boqs/?project_id=${encodeURIComponent(projectId)}`),
+  /** Every position of one BOQ; the whole bill comes back, so a filter over it is complete. */
+  getBoqPositions: (boqId: string) =>
+    apiGet<{ positions: BoqPositionLite[] }>(`/v1/boq/boqs/${encodeURIComponent(boqId)}`).then(
+      (b) => b.positions ?? [],
+    ),
+  /** One position by id, for a link that is not in the BOQ currently open in the picker. */
+  getBoqPosition: (positionId: string) =>
+    apiGet<BoqPositionLite>(`/v1/boq/positions/${encodeURIComponent(positionId)}`),
   updateProgress: (activityId: string, progressPct: number) =>
     apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
 

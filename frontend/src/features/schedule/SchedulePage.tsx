@@ -56,6 +56,8 @@ import { ScheduleCodesPanel } from './ScheduleCodesPanel';
 import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
+import { BoqLinkEditor } from './BoqLinkEditor';
+import { generateInWindow, projectWindowDays } from './generateWindow';
 import { ActivityGrid } from './ActivityGrid';
 import { WorkCalendarManager } from './WorkCalendarManager';
 import { scheduleGuide } from './scheduleGuide';
@@ -1137,6 +1139,8 @@ function ScheduleDetail({
   const [generateStartDate, setGenerateStartDate] = useState(
     () => schedule.start_date?.slice(0, 10) || new Date().toISOString().slice(0, 10),
   );
+  const [generateEndDate, setGenerateEndDate] = useState('');
+  const generateWindowDays = projectWindowDays(generateStartDate, generateEndDate);
   const [activityFilter, setActivityFilter] = useState('all');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const toggleCollapse = useCallback((id: string) => {
@@ -1157,9 +1161,31 @@ function ScheduleDetail({
   // Fetch project data for region / work calendar / currency
   const { data: projectData } = useQuery({
     queryKey: ['project', projectId],
-    queryFn: () => apiGet<{ id: string; region: string; currency?: string }>(`/v1/projects/${projectId}`),
+    queryFn: () =>
+      apiGet<{
+        id: string;
+        region: string;
+        currency?: string;
+        planned_start_date?: string | null;
+        planned_end_date?: string | null;
+      }>(`/v1/projects/${projectId}`),
     staleTime: 300_000,
   });
+  // The generate dialog fits the plan between the project's planned dates.
+  // They are filled in once, when the project first arrives, the start only
+  // when the schedule has none of its own, so a later refetch never overwrites
+  // a date the planner typed. The schedule's own end
+  // date is not used: generation writes it, so it would feed a previous run's
+  // result back in as the window.
+  const plannedDatesAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!projectData || plannedDatesAppliedRef.current) return;
+    plannedDatesAppliedRef.current = true;
+    const plannedStart = projectData.planned_start_date?.slice(0, 10);
+    const plannedEnd = projectData.planned_end_date?.slice(0, 10);
+    if (plannedStart && !schedule.start_date) setGenerateStartDate(plannedStart);
+    if (plannedEnd) setGenerateEndDate((cur) => cur || plannedEnd);
+  }, [projectData, schedule.start_date]);
   // Project ISO currency drives EVM money formatting; blank -> no symbol
   // (never mislabel a non-EUR amount). The activity cost columns are all
   // project-scoped so they share this single currency.
@@ -1256,13 +1282,7 @@ function ScheduleDetail({
   });
 
   const generateFromBOQ = useMutation({
-    mutationFn: async (boqId: string) => {
-      // Update the schedule start_date before generating so activities use the chosen date
-      if (generateStartDate) {
-        await scheduleApi.updateSchedule(schedule.id, { start_date: generateStartDate });
-      }
-      return scheduleApi.generateFromBOQ(schedule.id, boqId);
-    },
+    mutationFn: (boqId: string) => generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
@@ -2092,7 +2112,7 @@ function ScheduleDetail({
       <Modal
         open={!!selectedActivity}
         onClose={() => setSelectedActivityId(null)}
-        title={t('schedule.edit_dependencies', { defaultValue: 'Edit dependencies' })}
+        title={t('schedule.edit_activity_links', { defaultValue: 'Dependencies and BOQ links' })}
       >
         {selectedActivity && (
           <div className="space-y-4">
@@ -2107,6 +2127,9 @@ function ScheduleDetail({
               activity={selectedActivity}
               activities={ganttData?.activities ?? []}
             />
+            <div className="border-t border-border-light pt-4">
+              <BoqLinkEditor scheduleId={schedule.id} projectId={projectId} activity={selectedActivity} />
+            </div>
             <div className="flex items-center justify-end pt-1">
               <Button variant="ghost" type="button" onClick={() => setSelectedActivityId(null)}>
                 {t('common.done', { defaultValue: 'Done' })}
@@ -2143,6 +2166,30 @@ function ScheduleDetail({
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {t('schedule.start_date_hint', 'All activities will be scheduled relative to this date.')}
+            </p>
+          </div>
+
+          {/* End date: the generated plan is fitted between the two dates. */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('schedule.project_end_date', { defaultValue: 'Project End Date' })}
+            </label>
+            <input
+              type="date"
+              data-testid="generate-end-date"
+              value={generateEndDate}
+              min={generateStartDate || undefined}
+              onChange={(e) => setGenerateEndDate(e.target.value)}
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            />
+            <p className="mt-1 text-xs text-content-tertiary">
+              {!generateEndDate
+                ? t('schedule.end_date_missing', {
+                    defaultValue: 'This project has no planned end date yet. Enter one so the plan fits the project.',
+                  })
+                : generateWindowDays == null
+                  ? t('schedule.end_before_start', { defaultValue: 'The end date must be after the start date.' })
+                  : t('schedule.end_date_hint', { defaultValue: 'The generated plan is fitted between these two dates.' })}
             </p>
           </div>
 
@@ -2186,7 +2233,7 @@ function ScheduleDetail({
             </Button>
             <Button
               variant="primary"
-              disabled={!selectedBOQId || !generateStartDate}
+              disabled={!selectedBOQId || generateWindowDays == null}
               loading={generateFromBOQ.isPending}
               onClick={() => {
                 if (selectedBOQId) {
