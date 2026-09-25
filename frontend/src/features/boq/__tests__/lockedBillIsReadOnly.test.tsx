@@ -83,7 +83,7 @@ function position(n: number): Position {
 
 const noop = () => undefined;
 
-function renderGrid(readOnly: boolean) {
+function renderGrid(readOnly: boolean, extra: { positions?: Position[]; bimModelId?: string } = {}) {
   const handlers = {
     onUpdatePosition: vi.fn(),
     onDeletePosition: vi.fn(),
@@ -92,7 +92,8 @@ function renderGrid(readOnly: boolean) {
   };
   render(
     createElement(BOQGrid, {
-      positions: [SECTION, position(1), position(2)],
+      positions: extra.positions ?? [SECTION, position(1), position(2)],
+      bimModelId: extra.bimModelId,
       onSelectSuggestion: noop,
       onSaveToDatabase: noop,
       onFormulaApplied: noop,
@@ -200,5 +201,113 @@ describe('the grid of an open bill, for contrast', { timeout: 30_000 }, () => {
     });
     await flush(25);
     expect(menuLabels().some((l) => ['common.delete', 'Delete'].includes(l))).toBe(true);
+  });
+});
+
+/* ── Every surface that writes, not only the cell editors ─────────────── */
+
+const VARIANTS = [
+  { index: 0, label: 'C20/25', price: 100, price_per_unit: null },
+  { index: 1, label: 'C25/30', price: 120, price_per_unit: null },
+  { index: 2, label: 'C30/37', price: 140, price_per_unit: null },
+];
+
+/** A line priced from a variant catalogue: its rate cell carries the picker pill. */
+const PRICED_FROM_VARIANTS = {
+  ...position(3),
+  metadata: {
+    cost_item_variants: VARIANTS,
+    cost_item_variant_stats: { min: 100, max: 140, mean: 120, median: 120, unit: 'm3', group: 'concrete', count: 3 },
+  },
+} as unknown as Position;
+
+/** A line built from resources and linked to a model element. */
+const BUILT_FROM_RESOURCES = {
+  ...position(4),
+  cad_element_ids: ['el-1'],
+  cad_model_id: 'model-1',
+  metadata: {
+    resources: [
+      {
+        name: 'Ready-mix concrete',
+        code: 'R-1',
+        type: 'material',
+        unit: 'm3',
+        quantity: 1,
+        unit_rate: 100,
+        total: 100,
+        available_variants: VARIANTS,
+      },
+    ],
+  },
+} as unknown as Position;
+
+const RICH = [SECTION, PRICED_FROM_VARIANTS, BUILT_FROM_RESOURCES];
+
+/**
+ * Inputs a user could change the bill through: not disabled and not inside an
+ * inert subtree. AG Grid's row-selection checkboxes are left out on purpose:
+ * selecting rows writes nothing, and the batch bar that acts on a selection is
+ * not shown on a locked bill.
+ */
+function enabledEditors(): HTMLElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>('input, textarea, select, [contenteditable="true"]'),
+  ).filter(
+    (el) => !(el as HTMLInputElement).disabled && !el.closest('[inert]') && !el.classList.contains('ag-checkbox-input'),
+  );
+}
+
+function bimQuantityButton(): HTMLButtonElement | null {
+  return document.querySelector<HTMLButtonElement>(
+    'button[aria-label="Pick quantity from BIM"], button[aria-label="boq.pick_qty_from_bim"]',
+  );
+}
+
+function variantPill(): HTMLButtonElement | null {
+  return document.querySelector<HTMLButtonElement>('[data-testid="boq-variant-pill-pos-3"]');
+}
+
+async function openRich(readOnly: boolean) {
+  renderGrid(readOnly, { positions: RICH, bimModelId: 'model-1' });
+  await waitUntil(() => !!document.querySelector('.ag-row[row-id="pos-4"]'), 'grid rows to render');
+  // Expand the resource panel of the resource-built line, which is a read.
+  const v = document.querySelector<HTMLElement>('[data-testid="position-variant-v-pos-4"]');
+  if (!v) throw new Error('resource toggle not rendered');
+  await act(async () => {
+    v.dispatchEvent(new Event('pointerdown', { bubbles: true, cancelable: true }));
+  });
+  await waitUntil(
+    () => document.body.textContent?.includes('Ready-mix concrete') ?? false,
+    'the resource row to render',
+  );
+  // Ask every inline field to open. jsdom does not honour ``inert``, so on a
+  // locked bill the fields may still open here; what counts is that none of
+  // them opens outside an inert subtree, which a browser keeps unreachable.
+  const openers = Array.from(
+    document.querySelectorAll<HTMLElement>('[title="Double-click to edit"], [title="boq.double_click_to_edit"]'),
+  );
+  for (const el of openers) {
+    await act(async () => {
+      fireEvent.doubleClick(el);
+    });
+  }
+  await flush(25);
+}
+
+describe('a locked grid row leaves no editing surface', { timeout: 30_000 }, () => {
+  it('has no enabled input, no variant picker and no BIM quantity picker', async () => {
+    await openRich(true);
+    expect(enabledEditors()).toEqual([]);
+    const pill = variantPill();
+    expect(pill === null || pill.disabled).toBe(true);
+    expect(bimQuantityButton()).toBeNull();
+  });
+
+  it('an open bill offers all three, so the check above can fail', async () => {
+    await openRich(false);
+    expect(enabledEditors().length).toBeGreaterThan(0);
+    expect(variantPill()?.disabled).toBe(false);
+    expect(bimQuantityButton()).not.toBeNull();
   });
 });

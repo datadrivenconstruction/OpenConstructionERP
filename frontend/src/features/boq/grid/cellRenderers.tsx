@@ -1626,7 +1626,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
                 setShowPdfPopover(false);
                 navigate(pdfDeepLink);
               }}
-              onApplyQuantity={ctx?.onUpdatePosition}
+              onApplyQuantity={ctx?.readOnly ? undefined : ctx?.onUpdatePosition}
               displayQuantity={ctx?.displayQuantity}
             />
           </>,
@@ -1654,7 +1654,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
                 setShowDwgPopover(false);
                 navigate(dwgDeepLink);
               }}
-              onApplyQuantity={ctx?.onUpdatePosition}
+              onApplyQuantity={ctx?.readOnly ? undefined : ctx?.onUpdatePosition}
               displayQuantity={ctx?.displayQuantity}
             />
           </>,
@@ -1675,7 +1675,7 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
               style={popoverStyle!}
               onClose={() => setShowPreview(false)}
               positionData={data}
-              onUpdatePosition={ctx?.onUpdatePosition}
+              onUpdatePosition={ctx?.readOnly ? undefined : ctx?.onUpdatePosition}
             />
           </>,
           document.body,
@@ -5472,13 +5472,16 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
         <button
           ref={anchorRef}
           type="button"
+          // A locked bill keeps the pill as a label: picking a variant rewrites the rate.
+          disabled={Boolean(ctx?.readOnly)}
           onClick={(e) => {
             e.stopPropagation();
+            if (ctx?.readOnly) return;
             setPickerOpen((open) => !open);
           }}
           onMouseDown={(e) => e.stopPropagation()}
           className={`shrink-0 inline-flex items-center gap-0.5 h-5 px-1.5 rounded text-[10px] font-semibold
-                      transition-colors cursor-pointer ${
+                      transition-colors cursor-pointer disabled:cursor-default ${
                         variant
                           ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
                           : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
@@ -5513,7 +5516,7 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
         </span>
       )}
       <span className={isResourceDriven ? 'text-content-tertiary' : ''}>{formatted}</span>
-      {pickerOpen && hasVariants && (
+      {pickerOpen && hasVariants && !ctx?.readOnly && (
         <VariantPicker
           variants={variants!}
           stats={stats!}
@@ -5649,7 +5652,8 @@ export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
     setShowPicker(true);
   }, []);
 
-  if (!hasBimLink) return null;
+  // Picking a quantity from the model writes it; a locked bill offers no picker.
+  if (!hasBimLink || ctx?.readOnly) return null;
 
   return (
     <div className="flex items-center justify-center h-full w-full">
