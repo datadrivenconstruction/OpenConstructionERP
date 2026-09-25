@@ -78,6 +78,7 @@ import { RetentionLedgerTab } from './RetentionLedgerTab';
 import { EInvoiceModal } from './EInvoiceModal';
 import { financeGuide } from './financeGuide';
 import { DEFAULT_FINANCE_TAB, isFinanceTab, type FinanceTab } from './financeTabs';
+import { UnlinkedTwinBanner } from '@/features/subcontractors/UnlinkedTwinBanner';
 import { fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
 
 // English fallbacks for the computed `finance.payment_status_*` keys. The default used to be
@@ -976,6 +977,11 @@ export function FinancePage() {
           onGoToInvoices={() => setActiveTab('invoices')}
         />
       )}
+
+      {/* A subcontract written both as an agreement and as a contract, not
+          linked, is counted twice in the figures above; say so where the
+          double count shows. */}
+      {projectId && <UnlinkedTwinBanner projectId={projectId} />}
 
       {/* Tab Bar */}
       <TabBar<FinanceTab>
