@@ -94,6 +94,7 @@ def quiet():
         patch("app.modules.subcontractors.service.event_bus.publish_detached"),
         patch("app.modules.subcontractors.finance_bridge.raise_payable_for_pay_app", AsyncMock()),
         patch("app.modules.subcontractors.finance_bridge.settle_payable", AsyncMock()),
+        patch("app.modules.finance.service.FinanceService.sync_project_budget", AsyncMock(), create=True),
     ):
         yield
 

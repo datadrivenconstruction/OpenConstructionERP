@@ -383,11 +383,13 @@ def _no_finance_ledger():
     through the finance module, which needs a real session. The money it
     books is covered on PostgreSQL by
     ``tests/pg/test_a_subcontract_is_billed_and_committed_once.py``; here only
-    the pay application's own workflow is under test.
+    the pay application's own workflow is under test, and signing an
+    agreement does not ask finance to bring the budget along.
     """
     with (
         patch("app.modules.subcontractors.finance_bridge.raise_payable_for_pay_app", AsyncMock()),
         patch("app.modules.subcontractors.finance_bridge.settle_payable", AsyncMock()),
+        patch("app.modules.finance.service.FinanceService.sync_project_budget", AsyncMock(), create=True),
     ):
         yield
 
