@@ -1,0 +1,28 @@
+{
+  "rule_pack_id": "gr_dimosia_erga_4412",
+  "name": "Public works contracts",
+  "name_el": "Δημόσιες συμβάσεις έργων",
+  "standard": "Ν. 4412/2016",
+  "jurisdiction": "GR",
+  "applies_to": [
+    "tendering",
+    "estimate",
+    "projects"
+  ],
+  "review_status": "Article numbers read in a consolidated text of Ν. 4412/2016 that includes amendments up to Ν. 5149/2024; the order of the cascade checked against the arithmetic of a published municipal budget. Pending review by a Greek public works engineer.",
+  "references": [
+    "Ν. 4412/2016 (ΦΕΚ Α 147/08.08.2016), Δημόσιες Συμβάσεις Έργων, Προμηθειών και Υπηρεσιών (https://www.taxheaven.gr/law/4412/2016)",
+    "Ν. 4412/2016 art. 53 §7θ, ΓΕ&ΟΕ 18 percent, and art. 156 §3α, απρόβλεπτα 9 or 15 percent (consolidated text https://eadhsy.gr/n4412/n4412fulltextlinks.html)",
+    "Example of the cascade in a published municipal budget (https://messolonghi.gov.gr/wp-content/uploads/2020/03/%CE%9C%CE%B5%CE%BB%CE%AD%CF%84%CE%B7-48_2019.pdf)"
+  ],
+  "description": "Public works in Greece are procured under Ν. 4412/2016. The budget prices the works from the ΝΕΤ articles, adds general expenses and contractor profit (ΓΕ&ΟΕ) at 18 percent, then contingency (απρόβλεπτα) on the works plus ΓΕ&ΟΕ at 15 percent for a contract below the EU threshold or 9 percent at or above it, then any cost-plus items and the price revision allowance, and ΦΠΑ at 24 percent on the whole. Bidders usually tender a discount per group of works on the authority's budget.",
+  "practice_notes": [
+    "The pack's cascade carries 18 percent ΓΕ&ΟΕ and 15 percent απρόβλεπτα; set the contingency to 9 percent on a contract at or above the EU threshold",
+    "Αναθεώρηση, the price revision allowance, is a lump sum computed from published index coefficients and is not a percentage of the works",
+    "The tender discount (έκπτωση) belongs to tender evaluation, not to the authority's budget"
+  ],
+  "enables_rule_ids": [
+    "greece.net_article_required",
+    "greece.net_article_valid"
+  ]
+}

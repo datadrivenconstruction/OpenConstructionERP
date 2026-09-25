@@ -1,0 +1,24 @@
+{
+  "rule_pack_id": "gr_fpa_kataskeves",
+  "name": "VAT on construction",
+  "name_el": "ΦΠΑ στις κατασκευές",
+  "standard": "Ν. 5144/2024",
+  "jurisdiction": "GR",
+  "applies_to": [
+    "estimate",
+    "invoicing"
+  ],
+  "review_status": "Rates and the reverse charge read in the consolidated text of Ν. 5144/2024; the island rates from the tax authority's circular as reported by a tax publisher. Pending review by a Greek tax adviser.",
+  "references": [
+    "Ν. 5144/2024 (ΦΕΚ Α 162/11.10.2024), Κώδικας ΦΠΑ, art. 26, rates (https://www.e-nomothesia.gr/kat-oikonomia/n-5144-2024.html)",
+    "Ν. 5144/2024 art. 45 §4, reverse charge on public technical works (https://www.taxheaven.gr/law/5144/2024/arthro/45)",
+    "ΑΑΔΕ Ε.2113/2025, reduced island rates from 01.01.2026 (https://www.taxheaven.gr/news/72524/dieykriniseis-kai-paradeigmata-gia-toys-meiwmenoys-syntelestes-fpa-apo-01012026)",
+    "Ν. 5144/2024 art. 70 as amended by Ν. 5246/2025, suspension of VAT on new buildings to 31.12.2026 (https://www.e-nomothesia.gr/kat-oikonomia/n-5246-2025.html)"
+  ],
+  "description": "ΦΠΑ is 24 percent at the standard rate, with reduced rates of 13, 6 and 4 percent for the goods and services in Annex III of the VAT code; the 4 percent rate reaches work contracts that remove barriers for persons with disabilities. On the islands the code allows rates 30 percent lower (17, 9, 4 and 3 percent), extended from 1 January 2026 to more of the North Aegean and Dodecanese islands. Construction services are standard-rated. Between private businesses there is no reverse charge for construction; the reverse charge in art. 45 §4 applies only where the state or a public body owns the works and is itself taxable with a right to deduct. The optional suspension of VAT on sales of new buildings runs to 31 December 2026 and concerns the sale of the property, not the contractor's invoice.",
+  "practice_notes": [
+    "ΝΕΤ unit prices are net of ΦΠΑ, which is added once on the budget total",
+    "A job on an island with reduced rates needs its VAT line set to 17 percent by hand; the pack prices at the mainland rate"
+  ],
+  "enables_rule_ids": []
+}
