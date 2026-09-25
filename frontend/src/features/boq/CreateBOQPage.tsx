@@ -8,6 +8,7 @@ import { ChevronDown, X, FileSpreadsheet, FilePlus2, Upload, FileUp } from 'luci
 import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { boqApi } from './api';
 
@@ -47,7 +48,11 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
-  const [selectedProjectId, setSelectedProjectId] = useState(defaultProjectId ?? '');
+  // A caller that names no project gets the one in the top-bar switcher, the
+  // project the reader is working in, rather than an empty picker.
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const initialProjectId = defaultProjectId || activeProjectId || '';
+  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [startMode, setStartMode] = useState<StartMode>('empty');
@@ -66,7 +71,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   // Sync default project when modal opens or defaultProjectId changes
   useEffect(() => {
     if (open) {
-      setSelectedProjectId(defaultProjectId ?? '');
+      setSelectedProjectId(initialProjectId);
       setName('');
       setDescription('');
       setStartMode('empty');
@@ -75,7 +80,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
       setError(null);
       setTouched(false);
     }
-  }, [open, defaultProjectId]);
+  }, [open, initialProjectId]);
 
   const stripExt = (filename: string): string => filename.replace(/\.[^./\\]+$/, '');
 

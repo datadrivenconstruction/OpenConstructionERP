@@ -272,9 +272,27 @@ async def _create_po_from_award(event: Event) -> None:
             # with manually-created POs.
             po_number = await po_repo.next_po_number(package.project_id)
 
+            # The vendor is the awarded firm. A tender bid carries only a
+            # free-text company and an email, but a bidder invited from the
+            # subcontractor directory is on the package's distribution list
+            # under that email, and its directory entry names its contact. The
+            # contract drafted from the same award resolves the firm this way,
+            # so the order and the contract name the same firm. A bidder typed
+            # in by hand has no contact and the order keeps its company name in
+            # ``supplier_name``, which the order list shows in its place.
+            from app.modules.bid_management.award_contract import resolve_award_counterparty  # noqa: PLC0415
+            from app.modules.bid_management.events import _recipient_subcontractor  # noqa: PLC0415
+
+            counterparty = await resolve_award_counterparty(
+                session,
+                subcontractor_id=_recipient_subcontractor(package.metadata_, bid.contact_email),
+                contact_id=None,
+                company_name=bid.company_name,
+            )
+
             po = PurchaseOrder(
                 project_id=package.project_id,
-                vendor_contact_id=None,  # bid is a free-text supplier; no FK
+                vendor_contact_id=str(counterparty.contact_id) if counterparty.contact_id else None,
                 po_number=po_number,
                 po_type="standard",
                 issue_date=None,
