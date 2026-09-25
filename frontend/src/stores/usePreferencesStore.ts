@@ -62,21 +62,29 @@ interface Preferences {
   measurementSystem: MeasurementSystem;
   dateFormat: DateFormat;
   numberLocale: NumberLocale;
-  vatRate: number;
-  defaultRegion: string;
   defaultCurrency: string;
-  defaultStandard: string;
 }
+
+/**
+ * Keys this store used to carry and no longer does.
+ *
+ * `vatRate: 19`, `defaultRegion: 'DACH'` and `defaultStandard: 'din276'` were
+ * written for every account and read by nothing: VAT comes from the project's
+ * country through the tax table and the bill's own tax line, the region and
+ * standard from the project. What they did do was make every user's saved
+ * preferences say German VAT and a DACH region, so a Croatian contractor
+ * looking at their settings saw 19 % where their country charges 25 %. A value
+ * that looks like a default and is not one is dropped on the next read rather
+ * than left in the blob.
+ */
+const RETIRED_KEYS = ['vatRate', 'defaultRegion', 'defaultStandard'] as const;
 
 const DEFAULTS: Preferences = {
   currency: 'EUR',
   measurementSystem: 'metric',
   dateFormat: 'auto',
   numberLocale: 'auto',
-  vatRate: 19,
-  defaultRegion: 'DACH',
   defaultCurrency: 'EUR',
-  defaultStandard: 'din276',
 };
 
 /**
@@ -103,6 +111,7 @@ function readPreferences(): Preferences {
     if (!raw) return DEFAULTS;
     const { _v: version, ...stored } = JSON.parse(raw) as Partial<Preferences> & { _v?: number };
     const prefs: Preferences = { ...DEFAULTS, ...stored };
+    for (const key of RETIRED_KEYS) delete (prefs as unknown as Record<string, unknown>)[key];
     if ((version ?? 1) < SCHEMA_VERSION && prefs.numberLocale === LEGACY_NUMBER_LOCALE) {
       prefs.numberLocale = 'auto';
     }

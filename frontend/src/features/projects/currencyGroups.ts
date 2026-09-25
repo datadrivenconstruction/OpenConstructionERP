@@ -41,7 +41,6 @@ export const CURRENCY_GROUPS: OptionGroup[] = [
       { value: 'HUF', label: 'HUF (Ft) - Hungarian Forint' },
       { value: 'RON', label: 'RON (lei) - Romanian Leu' },
       { value: 'BGN', label: 'BGN (лв) - Bulgarian Lev' },
-      { value: 'HRK', label: 'HRK (kn) - Croatian Kuna' },
       { value: 'ISK', label: 'ISK (kr) - Icelandic Krona' },
     ],
   },
@@ -173,6 +172,10 @@ export const COUNTRY_DEFAULTS: Readonly<Record<string, CountryDefault>> = {
   nl: { region: 'Netherlands', currency: 'EUR' },
   pl: { region: 'Poland', currency: 'PLN' },
   cz: { region: 'Czech', currency: 'CZK' },
+  // Croatia replaced the kuna with the euro on 2023-01-01, so HRK is not
+  // offered for a new project at all. A project saved in HRK before then
+  // still shows its code; the picker renders an unlisted code as custom.
+  hr: { region: 'Croatia', currency: 'EUR' },
   tr: { region: 'Turkey', currency: 'TRY' },
   ru: { region: 'Russia', currency: 'RUB' },
   us: { region: 'US', currency: 'USD' },
