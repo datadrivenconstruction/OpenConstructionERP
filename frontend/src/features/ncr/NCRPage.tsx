@@ -61,6 +61,7 @@ import { ncrGuide } from './ncrGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildNCRInsights } from './ncrInsights';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
+import { RaiseBackCharge } from '@/features/cost-recovery/RaiseBackCharge';
 
 // English fallbacks for the computed `ncr.severity_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -978,6 +979,12 @@ const NCRRow = React.memo(function NCRRow({
                 defaultValue: 'Record a corrective action before this NCR can be closed.',
               })}
             </p>
+          )}
+
+          {ncr.cost_impact != null && ncr.cost_impact > 0 && (
+            <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+              <RaiseBackCharge projectId={ncr.project_id} source={{ kind: 'ncr', id: ncr.id }} />
+            </div>
           )}
 
           {/* Related cross-links */}
