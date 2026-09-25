@@ -120,7 +120,7 @@ class _StubBudgetRepo:
             if r.project_id == project_id and (getattr(r, "currency", "") or "").strip()
         }
 
-    async def aggregate_by_category(self, project_id: uuid.UUID) -> list[dict[str, str]]:
+    async def aggregate_by_category(self, project_id: uuid.UUID, **_kwargs: Any) -> list[dict[str, str]]:
         return list(self._by_category)
 
     def set_by_category(self, rows: list[dict[str, str]]) -> None:

@@ -2826,15 +2826,26 @@ async def _cost_breakdown_by_category(
                     row_base, row_fx = fx_cache[pid]
             bases_seen.add(row_base or code or "UNKNOWN")
             amt_a = _amount_in_base(_to_decimal(getattr(row, "actual_amount", 0)), code, row_fx, row_base)
-            amt_c = _amount_in_base(_to_decimal(getattr(row, "committed_amount", 0)), code, row_fx, row_base)
             amt_p = _amount_in_base(_to_decimal(getattr(row, "planned_amount", 0)), code, row_fx, row_base)
             actual[category] = actual.get(category, Decimal("0")) + amt_a
-            committed[category] = committed.get(category, Decimal("0")) + amt_c
             planned[category] = planned.get(category, Decimal("0")) + amt_p
             total_actual += amt_a
-            total_committed += amt_c
             total_planned += amt_p
             count += 1
+
+        # Committed comes from the cost model's own aggregator, which takes
+        # issued purchase orders and signed contracts linked to the cost spine
+        # and falls back to the hand-typed ``committed_amount`` only on lines
+        # without such documents, so this tile agrees with the 5D dashboard.
+        from app.modules.costmodel.repository import BudgetLineRepository  # type: ignore
+
+        budget_repo = BudgetLineRepository(session)
+        for pid in {getattr(row, "project_id", None) for row in rows} - {None}:
+            for agg in await budget_repo.aggregate_by_category(pid, include_unbudgeted_commitments=True):
+                category = (agg["category"] or "uncategorized").strip().lower() or "uncategorized"
+                amt_c = _to_decimal(agg["committed"])
+                committed[category] = committed.get(category, Decimal("0")) + amt_c
+                total_committed += amt_c
     except ImportError:
         return {}, "", 0, False
     except Exception:
