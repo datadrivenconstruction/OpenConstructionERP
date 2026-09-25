@@ -51,6 +51,7 @@ import { fetchBIMModels } from '@/features/bim/api';
 // AutocompleteInput used in sub-components, not directly here
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
+import { importToastText, type ImportToastResult } from './importToastText';
 import { AICostFinderPanel } from './AICostFinderPanel';
 import { AISmartPanel } from './AISmartPanel';
 import { AIPositionCopilot } from './AIPositionCopilot';
@@ -4395,42 +4396,12 @@ export function BOQEditorPage() {
           throw new Error(extractErrorMessageFromBody(body) ?? 'Import failed');
         }
 
-        const result: {
-          imported: number;
-          errors: { item?: string; error: string }[];
-          total_items?: number;
-          method?: string;
-          model_used?: string | null;
-          cad_format?: string;
-          cad_elements?: number;
-          // GAEB-specific
-          skipped?: number;
-          sections?: unknown[];
-          source_format?: string;
-          currency?: string;
-        } = await res.json();
-
-        let methodLabel: string;
-        if (isGaeb || result.source_format === 'gaeb') {
-          const sectionCount = Array.isArray(result.sections) ? result.sections.length : 0;
-          methodLabel = ` (GAEB XML, ${sectionCount} section${sectionCount === 1 ? '' : 's'}${result.currency ? `, ${result.currency}` : ''})`;
-        } else if (result.method === 'cad_ai') {
-          methodLabel = ` (CAD + ${result.model_used ?? 'AI'}, ${result.cad_elements ?? 0} elements)`;
-        } else if (result.method === 'ai') {
-          methodLabel = ` (AI: ${result.model_used ?? 'auto'})`;
-        } else {
-          methodLabel = ' (direct)';
-        }
-        // GAEB returns ``skipped`` instead of ``total_items`` — derive a
-        // reasonable denominator so the toast reads cleanly for both shapes.
-        const denominator = result.total_items ?? (result.imported + (result.skipped ?? 0));
+        const result: ImportToastResult = await res.json();
+        const toast = importToastText(result, isGaeb, t);
         addToast({
           type: result.imported > 0 ? 'success' : 'warning',
-          title: `Imported ${result.imported} of ${denominator} items${methodLabel}`,
-          message:
-            result.errors.length > 0
-              ? `${result.errors.length} error(s) occurred`
-              : undefined,
+          title: toast.title,
+          message: toast.message,
         });
 
         invalidateAll();
