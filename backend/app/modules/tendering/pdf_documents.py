@@ -360,6 +360,21 @@ def _info_table(styles: dict[str, ParagraphStyle], rows: list[tuple[str, str]]) 
     return table
 
 
+def _addressee_rows(label: str, company_name: str, contact_email: str) -> list[tuple[str, str]]:
+    """Who the letter is addressed to: the firm, and its contact when there is one.
+
+    The bidder's contact address used to be printed under "Yours faithfully"
+    and the signer's name, where it reads as the sender's address: a reader
+    replying to the letter was pointed at the bidder's own inbox. It belongs to
+    the addressee, and a letter to a bidder may legitimately carry it there, so
+    it moves rather than goes.
+    """
+    rows = [(label, company_name)]
+    if contact_email:
+        rows.append(("Contact:", contact_email))
+    return rows
+
+
 def generate_award_letter_pdf(
     *,
     package_name: str,
@@ -393,8 +408,8 @@ def generate_award_letter_pdf(
     flow.append(
         _info_table(
             styles,
-            [
-                ("Awarded to:", company_name),
+            _addressee_rows("Awarded to:", company_name, contact_email)
+            + [
                 ("Project:", project_name or "-"),
                 ("Tender package:", package_name),
                 ("Award date:", _fmt_date(awarded_at)),
@@ -458,8 +473,6 @@ def generate_award_letter_pdf(
     flow.append(Paragraph("Yours faithfully,", styles["signoff"]))
     signer = awarded_by_name or project_name or "The Project Team"
     flow.append(_safe_para(signer, styles["value"]))
-    if contact_email:
-        flow.append(_safe_para(contact_email, styles["label"]))
 
     doc.build(flow)
     pdf_bytes = buffer.getvalue()
@@ -499,7 +512,7 @@ def generate_rejection_letter_pdf(
     flow.append(Paragraph("Notification of Unsuccessful Bid", styles["doc_title"]))
 
     info_rows = [
-        ("Bidder:", company_name),
+        *_addressee_rows("Bidder:", company_name, contact_email),
         ("Project:", project_name or "-"),
         ("Tender package:", package_name),
         ("Date:", _fmt_date(rejected_at)),
@@ -545,8 +558,6 @@ def generate_rejection_letter_pdf(
     flow.append(Paragraph("Yours faithfully,", styles["signoff"]))
     signer = signed_by_name or project_name or "The Project Team"
     flow.append(_safe_para(signer, styles["value"]))
-    if contact_email:
-        flow.append(_safe_para(contact_email, styles["label"]))
 
     doc.build(flow)
     pdf_bytes = buffer.getvalue()
