@@ -40,21 +40,18 @@ def expected_outturn(
     showing, not one to smooth away.
 
     Absent a forecast - and absent is a real state, not a bug, since the
-    change-order and BOQ-generated writers insert zero - the commitment is the
-    next best evidence, because money under a signed order is spoken for
-    whether or not the invoice has landed. ``committed`` here is gross: nothing
-    in the product decrements it as invoices arrive, so it is compared against
-    spend rather than added to it. Adding them would double-count every
-    invoiced order.
-
-    Spend to date is the floor. It is the only evidence on a line that carries
-    neither a forecast nor a commitment, and on a job half built it reports
-    every line comfortably under budget, which is the reading this whole
-    function exists to stop being the only one.
+    change-order and BOQ-generated writers insert zero - the line finishes at
+    what it has incurred plus what is promised and not yet incurred. The
+    ``committed`` column is that open part: a goods receipt or a settled
+    invoice moves its amount from committed to actual
+    (``FinanceService.sync_project_budget``), so the two are added, never
+    compared. Comparing them was right while committed stayed at the full
+    order value; since it drains as the work is incurred, the larger of the
+    two understated every line with anything received against it.
     """
     if forecast_final > 0:
         return forecast_final
-    return committed if committed > actual else actual
+    return committed + actual
 
 
 def budget_variance(

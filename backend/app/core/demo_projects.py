@@ -10044,10 +10044,15 @@ async def _seed_module_data(
                     currency_code=bl.get("currency_code") or budget_currency,
                     original_budget=bl["original_budget"],
                     revised_budget=bl["revised_budget"],
-                    committed=bl["committed"],
+                    # The templates write committed as the full order value;
+                    # the column holds the part not yet incurred, so what has
+                    # been spent comes off it.
+                    committed=str(max(Decimal(bl["committed"]) - Decimal(bl["actual"]), Decimal("0"))),
                     actual=bl["actual"],
                     forecast_final=bl["forecast_final"],
-                    metadata_={"demo_id": demo_id},
+                    # Typed figures: the budget sync adds the records on top
+                    # and never resets them.
+                    metadata_={"demo_id": demo_id, "budget_sync": "1"},
                 )
             )
         # Report what was written, not what was offered. Reporting the input

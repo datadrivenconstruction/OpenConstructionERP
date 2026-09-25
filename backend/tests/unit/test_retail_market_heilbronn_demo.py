@@ -454,13 +454,15 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
 
         # Finance budget lines respect the single-currency EUR frame and the
         # Decimal-string money rule (no float drift): the 7 lines sum to the
-        # approved 9,430,000 budget and the committed total matches the story.
+        # approved 9,430,000 budget and the committed total matches the story:
+        # 6,571,400 on order, of which 2,817,800 is spent, so the committed
+        # column (the part not yet incurred) holds the other 3,753,600.
         budget_lines = (
             (await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project.id))).scalars().all()
         )
         assert len(budget_lines) == 7
         assert sum(Decimal(b.original_budget) for b in budget_lines) == Decimal("9430000.00")
-        assert sum(Decimal(b.committed) for b in budget_lines) == Decimal("6571400.00")
+        assert sum(Decimal(b.committed) for b in budget_lines) == Decimal("3753600.00")
         assert sum(Decimal(b.actual) for b in budget_lines) == Decimal("2817800.00")
 
         # Four tender packages with the awarded VP-07 and three pending ones.

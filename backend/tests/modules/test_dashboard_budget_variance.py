@@ -65,7 +65,8 @@ async def _budget(session: AsyncSession, project: Project, **money: str) -> None
 async def test_commitment_alone_puts_a_project_on_the_card(session: AsyncSession) -> None:
     """Nothing has been invoiced past the budget, and the project is still over it."""
     project = await _project(session, "Ordered past the budget")
-    await _budget(session, project, revised="40.00", committed="52.00", actual="9.00")
+    # 43 still open on order plus 9 spent: the line finishes at 52.
+    await _budget(session, project, revised="40.00", committed="43.00", actual="9.00")
 
     payload = await compute_budget_variance(session, [project])
 
@@ -73,7 +74,7 @@ async def test_commitment_alone_puts_a_project_on_the_card(session: AsyncSession
     row = payload["top_over"][0]
     assert D(row["planned"]) == D("40.00")
     assert D(row["actual"]) == D("9.00")
-    assert D(row["committed"]) == D("52.00")
+    assert D(row["committed"]) == D("43.00")
     assert D(row["outturn"]) == D("52.00")
     assert D(row["variance"]) == D("12.00")
     assert row["pct"] == 30
