@@ -515,15 +515,15 @@ class BudgetRepository:
         # This mirrors `expected_outturn` in `variance.py` and has to be read
         # against it. A `case` rather than GREATEST so the expression does not
         # depend on which database is underneath, and the casts sit inside the
-        # comparisons: `MoneyType` is NUMERIC on PostgreSQL but a string column
-        # elsewhere, and comparing money as text makes 9 larger than 33.40.
+        # comparison and the sum: `MoneyType` is NUMERIC on PostgreSQL but a
+        # string column elsewhere, and comparing money as text makes 9 larger
+        # than 33.40.
         forecast_col = cast(ProjectBudget.forecast_final, Numeric)
         committed_col = cast(ProjectBudget.committed, Numeric)
         actual_col = cast(ProjectBudget.actual, Numeric)
         outturn_col = case(
             (forecast_col > 0, forecast_col),
-            (committed_col > actual_col, committed_col),
-            else_=actual_col,
+            else_=committed_col + actual_col,
         )
 
         # Group by currency so the caller can FX-convert each currency's

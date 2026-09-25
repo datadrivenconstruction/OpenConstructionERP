@@ -26,7 +26,10 @@ project's budget rows accordingly:
 
 The dashboard's project totals for committed, invoiced and paid do not come
 from these row counters; ``finance.cost_position`` reads them from the
-source records so an order and its invoice count once.
+source records so an order and its invoice count once. After each of these
+handlers writes, ``FinanceService.sync_project_budget`` brings the rows to the
+same figures (an order paid beyond what was received, an order approved
+before its budget row existed), so the Budgets table adds up to the dashboard.
 
 The commitment a PO contributes is idempotent and reversible: each
 approved PO stamps a per-PO marker (``committed_from_po:<po_id>``) in the
@@ -193,6 +196,18 @@ async def _select_budget_row(
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
+async def _sync_budget(project_id: uuid.UUID) -> None:
+    """Bring the project's budget rows to the dashboard figures, in a session of its own."""
+    try:
+        from app.modules.finance.service import FinanceService
+
+        async with async_session_factory() as session:
+            await FinanceService(session).sync_project_budget(project_id)
+            await session.commit()
+    except Exception:
+        logger.exception("finance: budget rows not synced for project %s", project_id)
+
+
 async def _on_po_approved(event: Event) -> None:
     """``procurement.po.approved`` → ProjectBudget.committed += amount_subtotal (net).
 
@@ -245,6 +260,7 @@ async def _on_po_approved(event: Event) -> None:
                 md[marker_key] = str(amount)
                 budget.metadata_ = md
             await session.commit()
+            await _sync_budget(project_id)
             logger.info(
                 "finance: po.approved committed += %s on budget %s (project=%s, po=%s)",
                 amount,
@@ -305,6 +321,7 @@ async def _on_po_decommitted(event: Event) -> None:
             budget.committed = new_committed
             budget.metadata_ = md
             await session.commit()
+            await _sync_budget(project_id)
             logger.info(
                 "finance: po %s committed -= %s on budget %s (project=%s, po=%s)",
                 event.name,
@@ -391,6 +408,7 @@ async def _on_gr_confirmed(event: Event) -> None:
             budget.metadata_ = md
             budget.actual = current_actual + amount
             await session.commit()
+            await _sync_budget(project_id)
             logger.info(
                 "finance: gr.confirmed flipped %s from committed→actual on budget %s (project=%s, gr=%s)",
                 amount,
@@ -463,6 +481,32 @@ async def _on_budget_generated(event: Event) -> None:
         logger.exception("finance: budget seeding failed for boq %s (project %s)", boq_id, project_id)
 
 
+async def _on_pay_app_paid(event: Event) -> None:
+    """``subcontractors.payment_application.paid`` -> bring the budget rows to the records.
+
+    A payment application paid without a payable invoice of its own is still
+    incurred subcontract cost (``finance.cost_position``). The event names the
+    agreement, not the project, so the project is read from the agreement.
+    """
+    agreement_id = _coerce_uuid((event.data or {}).get("agreement_id"))
+    if agreement_id is None:
+        return
+    try:
+        from app.modules.subcontractors.models import SubcontractAgreement
+
+        async with async_session_factory() as session:
+            project_id = (
+                await session.execute(
+                    select(SubcontractAgreement.project_id).where(SubcontractAgreement.id == agreement_id)
+                )
+            ).scalar_one_or_none()
+    except Exception:
+        logger.exception("finance: project of agreement %s not resolved", agreement_id)
+        return
+    if project_id is not None:
+        await _sync_budget(project_id)
+
+
 _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("procurement.po.approved", _on_po_approved),
     # Max-Audit #10: a cancelled or reverted PO must shed its commitment so
@@ -475,6 +519,7 @@ _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("contracts.claim.certified", _on_claim_certified),
     # A locked bill becomes the finance budget, not only the cost model's.
     ("costmodel.budget.generated", _on_budget_generated),
+    ("subcontractors.payment_application.paid", _on_pay_app_paid),
 ]
 
 

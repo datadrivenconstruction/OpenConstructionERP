@@ -621,6 +621,8 @@ class FinanceService:
         default_vat = await self._default_vat_rate(invoice.project_id, invoice.invoice_date, data.line_items)
         for idx, item_data in enumerate(data.line_items):
             await self.line_items.create(_line_item_from(invoice.id, item_data, idx, default_vat))
+        if invoice.invoice_direction == "payable":
+            await self._sync_budget_quietly(invoice.project_id)
 
         # Re-fetch invoice with relationships (line_items, payments) eager-loaded
         refreshed = await self.invoices.get(invoice.id)
@@ -891,6 +893,7 @@ class FinanceService:
                     exc_info=True,
                 )
 
+        await self._sync_budget_quietly(invoice.project_id)
         updated = await self.invoices.get(invoice_id)
         if updated is None:
             raise HTTPException(
@@ -953,6 +956,7 @@ class FinanceService:
                 exc,
                 exc_info=True,
             )
+        await self._sync_budget_quietly(invoice.project_id)
         updated = await self.invoices.get(invoice_id)
         if updated is None:
             raise HTTPException(
@@ -1035,19 +1039,12 @@ class FinanceService:
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
 
-        # Budget actuals, recomputed from the project's paid supplier invoices.
-        # Each paid amount lands on ONE budget line, net of VAT, and an order's
-        # payments add only what its goods receipts did not already move into
-        # actual (``finance.budget_actuals`` states the rules). BUG-346 fixed the
-        # every-line write here once; the core ``invoice.paid`` handler that
-        # kept reintroducing it after this ran has been removed.
-        try:
-            await self._recompute_budget_actuals(invoice.project_id)
-        except Exception:
-            logger.exception(
-                "Failed to update budget actuals after paying invoice %s",
-                invoice.invoice_number,
-            )
+        # Budget rows follow the paid invoice: each source's committed and
+        # actual lands on ONE budget line, net of VAT (``finance.budget_actuals``
+        # states the rules). BUG-346 fixed the every-line write here once; the
+        # core ``invoice.paid`` handler that kept reintroducing it is no longer
+        # subscribed.
+        await self._sync_budget_quietly(invoice.project_id)
 
         # ── Post to the costmodel.BudgetLine cost spine (Gap B) ─────────────
         # In addition to the legacy ProjectBudget bucketing above, mirror every
@@ -1174,35 +1171,43 @@ class FinanceService:
             return None
         return _safe_decimal(resolution.combined_rate_pct)
 
-    async def _recompute_budget_actuals(self, project_id: uuid.UUID) -> None:
-        """Set each budget line's actual from paid supplier invoices and receipts.
+    async def sync_project_budget(self, project_id: uuid.UUID) -> None:
+        """Keep the project's budget rows to the committed and actual the dashboard shows.
 
-        ``actual`` = the receipt-sourced part the goods receipt handler recorded
-        on the line (``actual_from_receipts``) + the paid invoices that
-        ``finance.budget_actuals.plan_actuals`` lands on it. The commitment an
-        order's payments release is applied as a difference against the
-        ``released_by_payment:<po_id>`` marker, so a recompute never releases
-        twice.
+        The dashboard reads committed (the open part) and actual per source from
+        the records (``finance.cost_position``); this lands each source on one
+        budget row (``finance.budget_actuals``) and applies only the difference
+        from what it put there last time, recorded per source on the row as a
+        ``sync:<kind>:<id>`` marker. So a replay changes nothing, a figure typed
+        onto a row is left alone, and the rows add up to the dashboard.
+
+        Called after every write that moves one of those figures: an invoice or
+        payment in finance, an order approval or goods receipt (the order events),
+        and a subcontract signed or billed (the subcontractors module).
+
+        A row this has never run on in a project that already has a paid invoice
+        carries the actual the old paid-invoice recompute wrote over it; that part
+        is dropped once, keeping what goods receipts moved into it.
         """
-        from sqlalchemy import select
-        from sqlalchemy.orm import selectinload
-
         from app.modules.finance.budget_actuals import (
             COMMITTED_FROM_PO_PREFIX,
-            RELEASED_BY_PAYMENT_PREFIX,
+            RECEIVED_FROM_GR_PREFIX,
+            SYNC_PREFIX,
             BudgetLineRow,
-            PaidInvoice,
-            PaidLine,
-            plan_actuals,
+            parse_sync_marker,
+            plan_budget,
         )
-        from app.modules.finance.cost_position import received_net_by_po
+        from app.modules.finance.cost_position import load_cost_position
 
         budgets = list(
             (
                 await self.session.execute(
                     select(ProjectBudget)
                     .where(ProjectBudget.project_id == project_id)
-                    .order_by(ProjectBudget.created_at.asc())
+                    # Rows seeded in one flush share a timestamp; the WBS code
+                    # then decides which is "oldest", so the fallback line is
+                    # the same on every run.
+                    .order_by(ProjectBudget.created_at.asc(), ProjectBudget.wbs_id.asc(), ProjectBudget.id.asc())
                 )
             )
             .scalars()
@@ -1219,71 +1224,108 @@ class FinanceService:
             )
             for b in budgets
         ]
-        committed_by_po: dict[uuid.UUID, tuple[uuid.UUID, Decimal]] = {}
+
+        # What the order events already put on the rows, per order.
+        committed_marker: dict[uuid.UUID, Decimal] = {}
+        received_by_gr: dict[uuid.UUID, Decimal] = {}
+        order_rows: dict[uuid.UUID, uuid.UUID] = {}
+        gr_rows: dict[uuid.UUID, uuid.UUID] = {}
         for b in budgets:
             for key, value in (getattr(b, "metadata_", None) or {}).items():
-                if key.startswith(COMMITTED_FROM_PO_PREFIX):
-                    try:
-                        committed_by_po[uuid.UUID(key[len(COMMITTED_FROM_PO_PREFIX) :])] = (b.id, _safe_decimal(value))
-                    except ValueError:
-                        continue
+                prefix = next(
+                    (p for p in (COMMITTED_FROM_PO_PREFIX, RECEIVED_FROM_GR_PREFIX) if key.startswith(p)), None
+                )
+                if prefix is None:
+                    continue
+                try:
+                    ref = uuid.UUID(key[len(prefix) :])
+                except ValueError:
+                    continue
+                if prefix == COMMITTED_FROM_PO_PREFIX:
+                    committed_marker[ref] = _safe_decimal(value)
+                    order_rows[ref] = b.id
+                else:
+                    received_by_gr[ref] = _safe_decimal(value)
+                    gr_rows[ref] = b.id
+        received_marker: dict[uuid.UUID, Decimal] = {}
+        if received_by_gr:
+            from app.modules.procurement.models import GoodsReceipt
 
-        paid = (
-            (
+            for gr_id, po_id in (
                 await self.session.execute(
-                    select(Invoice)
-                    .options(selectinload(Invoice.line_items))
-                    .where(
-                        Invoice.project_id == project_id,
-                        Invoice.status == "paid",
-                        Invoice.invoice_direction == "payable",
-                    )
+                    select(GoodsReceipt.id, GoodsReceipt.po_id).where(GoodsReceipt.id.in_(list(received_by_gr)))
                 )
+            ).all():
+                received_marker[po_id] = received_marker.get(po_id, Decimal("0")) + received_by_gr[gr_id]
+                order_rows.setdefault(po_id, gr_rows[gr_id])
+        # A receipt takes its value off the row's committed whether or not the
+        # order's approval put anything there (an order approved before the
+        # budget existed is committed by this sync instead), so the order
+        # events' net effect on committed can be negative.
+        order_handled = {
+            po_id: (
+                committed_marker.get(po_id, Decimal("0")) - received_marker.get(po_id, Decimal("0")),
+                received_marker.get(po_id, Decimal("0")),
             )
-            .scalars()
-            .all()
-        )
-        invoices = []
-        for inv in paid:
-            items = list(inv.line_items or [])
-            lines = (
-                [PaidLine(item.wbs_id, item.cost_category, _safe_decimal(item.amount)) for item in items]
-                if items
-                else [PaidLine(None, None, _safe_decimal(inv.amount_subtotal))]
-            )
-            invoices.append(
-                PaidInvoice(
-                    currency=(getattr(inv, "currency_code", "") or "").strip().upper(),
-                    po_id=invoice_po_link(getattr(inv, "purchase_order_id", None), inv.metadata_),
-                    lines=lines,
-                )
-            )
+            for po_id in set(committed_marker) | set(received_marker)
+        }
 
-        received = await received_net_by_po(self.session, project_id) if any(i.po_id for i in invoices) else {}
-        plan = plan_actuals(
-            rows,
-            invoices,
-            received_by_po=received,
-            committed_by_po=committed_by_po,
-        )
+        position = await load_cost_position(self.session, project_id=project_id)
+        plan = plan_budget(rows, position.sources, order_rows=order_rows, order_handled=order_handled)
+
+        legacy_actual = None
         for b in budgets:
             md = dict(getattr(b, "metadata_", None) or {})
-            receipts = _safe_decimal(md.get("actual_from_receipts", "0"))
-            b.actual = plan.actual.get(b.id, Decimal("0")) + receipts
-            release_delta = Decimal("0")
-            for po_id, release in plan.released.get(b.id, {}).items():
-                key = f"{RELEASED_BY_PAYMENT_PREFIX}{po_id}"
-                release_delta += release - _safe_decimal(md.get(key, "0"))
-                md[key] = str(release)
-            if release_delta:
-                b.committed = max(_safe_decimal(b.committed) - release_delta, Decimal("0"))
+            if md.get("budget_sync") != "1":
+                if legacy_actual is None:
+                    legacy_actual = await self._project_has_paid_invoice(project_id)
+                if legacy_actual:
+                    b.actual = _safe_decimal(md.get("actual_from_receipts", "0"))
+                for key in [k for k in md if k.startswith("released_by_payment:")]:
+                    md.pop(key)
+                md["budget_sync"] = "1"
+            wanted = plan.per_row.get(b.id, {})
+            delta_c = delta_a = Decimal("0")
+            for key in {k[len(SYNC_PREFIX) :] for k in md if k.startswith(SYNC_PREFIX)} | set(wanted):
+                old_c, old_a = parse_sync_marker(md.get(f"{SYNC_PREFIX}{key}"))
+                new_c, new_a = wanted.get(key, (Decimal("0"), Decimal("0")))
+                delta_c += new_c - old_c
+                delta_a += new_a - old_a
+                if new_c == 0 and new_a == 0:
+                    md.pop(f"{SYNC_PREFIX}{key}", None)
+                else:
+                    md[f"{SYNC_PREFIX}{key}"] = f"{new_c}|{new_a}"
+            if delta_c:
+                b.committed = max(_safe_decimal(b.committed) + delta_c, Decimal("0"))
+            if delta_a:
+                b.actual = _safe_decimal(b.actual) + delta_a
+            if md != (getattr(b, "metadata_", None) or {}):
                 b.metadata_ = md
+        await self.session.flush()
         if plan.unplaced:
             logger.warning(
-                "Paid supplier invoices of project %s found no budget line in their currency: %s",
+                "Project %s has committed / actual in a currency no budget line carries: %s",
                 project_id,
                 plan.unplaced,
             )
+
+    async def _sync_budget_quietly(self, project_id: uuid.UUID | None) -> None:
+        """``sync_project_budget`` for a write that must not fail because of it."""
+        if project_id is None:
+            return
+        try:
+            async with self.session.begin_nested():
+                await self.sync_project_budget(project_id)
+        except Exception:
+            logger.exception("Budget rows not synced for project %s", project_id)
+
+    async def _project_has_paid_invoice(self, project_id: uuid.UUID) -> bool:
+        found = (
+            await self.session.execute(
+                select(Invoice.id).where(Invoice.project_id == project_id, Invoice.status == "paid").limit(1)
+            )
+        ).first()
+        return found is not None
 
     async def _post_paid_invoices_to_spine(self, project_id: uuid.UUID) -> None:
         """Mirror every paid invoice of a project into the costmodel cost spine.
@@ -1503,6 +1545,7 @@ class FinanceService:
                 exc_info=True,
             )
 
+        await self._sync_budget_quietly(invoice.project_id)
         logger.info("Payment recorded: %s for invoice %s", data.amount, data.invoice_id)
         return payment
 
@@ -1918,17 +1961,25 @@ class FinanceService:
         # ── Post the cash paid out onto the cost spine ───────────────────────
         # Only the cash leg is a realised actual; withheld retainage is a
         # liability still owed, not yet spent. Non-fatal.
-        try:
-            await self._post_claim_payment_to_spine(
-                project_id=invoice.project_id,
-                payment=payment,
-                currency=pay_currency,
-            )
-        except Exception:
-            logger.exception(
-                "Spine posting failed for claim payment %s - payment unaffected",
-                payment.id,
-            )
+        #
+        # Not for a supplier invoice: its cost reaches the spine once, at the
+        # invoice's net with retention included, when it is marked paid
+        # (``_post_paid_invoices_to_spine``). Posting this cash leg as well put
+        # the same pay application into the 5D actual twice.
+        if invoice.invoice_direction != "payable":
+            try:
+                await self._post_claim_payment_to_spine(
+                    project_id=invoice.project_id,
+                    payment=payment,
+                    currency=pay_currency,
+                )
+            except Exception:
+                logger.exception(
+                    "Spine posting failed for claim payment %s - payment unaffected",
+                    payment.id,
+                )
+        else:
+            await self._sync_budget_quietly(invoice.project_id)
 
         # Audit row - best-effort.
         try:
@@ -2076,7 +2127,9 @@ class FinanceService:
             committed=data.committed,
             actual=data.actual,
             forecast_final=data.forecast_final,
-            metadata_=data.metadata,
+            # A new row holds only what was typed onto it; it never carried the
+            # old paid-invoice recompute (see ``sync_project_budget``).
+            metadata_={**(data.metadata or {}), "budget_sync": "1"},
         )
         try:
             budget = await self.budgets.create(budget)
@@ -2102,6 +2155,7 @@ class FinanceService:
         # ``refresh`` rather than ``expire``: expiry defers the load to
         # attribute access during serialisation, and a lazy load at that point
         # is where MissingGreenlet comes from under async SQLAlchemy.
+        await self._sync_budget_quietly(data.project_id)
         await self.session.refresh(budget)
         logger.info("Budget created: project=%s cat=%s", data.project_id, data.category)
         return budget
@@ -2170,7 +2224,7 @@ class FinanceService:
                     currency_code=currency_code,
                     original_budget=amount,
                     revised_budget=amount,
-                    metadata_={marker: str(amount)},
+                    metadata_={marker: str(amount), "budget_sync": "1"},
                 )
                 self.session.add(budget)
             else:
@@ -2183,6 +2237,7 @@ class FinanceService:
                 budget.metadata_ = md
             touched.append(budget)
         await self.session.flush()
+        await self._sync_budget_quietly(project_id)
         logger.info("Budget seeded from BOQ %s: project=%s rows=%d", boq_id, project_id, len(touched))
         return touched
 
@@ -2554,18 +2609,20 @@ class FinanceService:
         total_budget_original = _to_base(budget_agg["original_by_currency"])
         total_budget_revised = _to_base(budget_agg["revised_by_currency"])
         # ── Cost position (net of VAT, except total_paid) ──────────────
+        # Committed is the open part and actual what has been incurred, so the
+        # two add up to the outturn (``cost_position`` states the basis).
         total_committed = _to_base(position.committed)
         total_invoiced = _to_base(position.invoiced)
-        total_actual = _to_base(position.paid_net)
+        total_actual = _to_base(position.actual)
         total_paid = _to_base(position.paid)
+        total_over_commitment = _to_base(position.over_commitment)
         # Summed per row by the repository, following the rule in `variance.py`,
         # so this header agrees with the column of variances under it. It used
         # to subtract spend alone and report money that was already on order as
-        # headroom still available. The rows' own committed column misses what
-        # it was never told about (subcontracts, orders placed before a budget
-        # row existed), so the outturn never drops below what the records show
-        # is already committed.
-        total_outturn = max(_to_base(budget_agg["outturn_by_currency"]), total_committed)
+        # headroom still available. A row can carry a forecast below what the
+        # records show, and money in a currency no row carries reaches no row,
+        # so the outturn never drops below committed plus actual.
+        total_outturn = max(_to_base(budget_agg["outturn_by_currency"]), total_committed + total_actual)
 
         total_variance = total_budget_revised - total_outturn
         # The bar stays on spend and the flag moves to outturn, the same split
@@ -2603,6 +2660,7 @@ class FinanceService:
             total_invoiced=round(total_invoiced, 2),
             total_actual=round(total_actual, 2),
             total_paid=round(total_paid, 2),
+            total_over_commitment=round(total_over_commitment, 2),
             total_variance=round(total_variance, 2),
             budget_consumed_pct=round(budget_consumed_pct, 1),
             budget_warning_level=warning_level,

@@ -651,8 +651,8 @@ export function FinanceSummaryCards({
       accent: 'bg-oe-blue',
     },
     {
-      // Orders and subcontract agreements the project is bound to. An order
-      // and the invoices against it count once, at the larger of the two.
+      // What orders, subcontracts and unordered invoices still promise and
+      // has not been incurred yet. With actual it adds up to the outturn.
       key: 'committed',
       label: t('finance.summary_committed', { defaultValue: 'Committed' }),
       basis: basisNet,

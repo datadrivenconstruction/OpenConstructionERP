@@ -36,19 +36,20 @@ The scenario (EUR, VAT 25 %)
 Basis of every figure (the point of the test)
 ---------------------------------------------
 * budget: net of VAT, from the locked bill.
-* committed: net. Each order at its net value, each live agreement at its
-  value, and a supplier invoice that no order stands behind at its own net
-  (money spent without an order is committed the day it is invoiced). An order
-  and its invoice are one commitment, never two; a payment application draws
-  down its agreement and is not a second commitment.
-  50 000 + 120 000 + 2 000 = 172 000.
+* actual (``total_actual``): net, what has been incurred. The order at the
+  larger of what was received and what was settled on its invoices (40 000
+  either way, the same money), the paid payment application at its gross
+  (retention is owed, only later). 40 000 + 30 000 = 70 000.
+* committed: net, the part of each commitment not yet incurred, so that
+  committed plus actual is the outturn. The order 50 000 - 40 000, the
+  agreement 120 000 - 30 000, and the supplier invoice no order stands behind
+  at its own 2 000 (money spent without an order is committed the day it is
+  invoiced). 10 000 + 90 000 + 2 000 = 102 000; outturn 172 000.
 * invoiced: net. Supplier invoices at their subtotal, payment applications at
   the gross finance approved (before retention, which is still owed).
   40 000 + 2 000 + 30 000 = 72 000.
 * paid (``total_paid``): cash out, VAT included, as the bank sees it.
   50 000 + 28 500 = 78 500.
-* actual (``total_actual``): what has been paid, net of VAT, so it compares
-  with a net budget. 40 000 + 28 500 = 68 500.
 * ``total_payable`` keeps its meaning: supplier invoices not yet marked paid,
   gross. 2 500.
 * ``total_payments`` keeps its meaning: every payment row, either direction.
@@ -56,6 +57,11 @@ Basis of every figure (the point of the test)
 The order-first variant approves the purchase order before any bill is
 locked, which is the order a busy site works in. A commitment counter that
 needs a budget row to exist loses the order in that case.
+
+The budget rows carry the same committed and actual line by line, so the
+Budgets table adds up to the dashboard; that is asserted after every step,
+not only at the end, because a step whose write does not reach the rows is
+exactly what the end state can hide.
 """
 
 from __future__ import annotations
@@ -350,7 +356,8 @@ async def _supplier_invoices(
     await _ok(await client.post(f"{API}/finance/{direct['id']}/approve/", headers=h))
 
 
-async def _subcontract(client: AsyncClient, h: dict[str, str], project_id: uuid.UUID) -> None:
+async def _active_agreement(client: AsyncClient, h: dict[str, str], project_id: uuid.UUID) -> dict:
+    """A signed 120 000 EUR subcontract agreement with 5 % retention."""
     sub = await _ok(
         await client.post(
             f"{API}/subcontractors/subcontractors/",
@@ -396,6 +403,11 @@ async def _subcontract(client: AsyncClient, h: dict[str, str], project_id: uuid.
     await _ok(
         await client.patch(f"{API}/subcontractors/agreements/{agreement['id']}", json={"status": "active"}, headers=h)
     )
+    return agreement
+
+
+async def _subcontract(client: AsyncClient, h: dict[str, str], project_id: uuid.UUID) -> None:
+    agreement = await _active_agreement(client, h, project_id)
     pa = await _ok(
         await client.post(
             f"{API}/subcontractors/payment-applications/",
@@ -417,15 +429,28 @@ def _money(value: object) -> Decimal:
     return Decimal(str(value))
 
 
+async def _assert_rows_match_dashboard(client: AsyncClient, h: dict[str, str], project_id: uuid.UUID) -> dict:
+    """The Budgets rows add up to the dashboard's committed and actual."""
+    dash = await _dashboard(client, h, project_id)
+    body = await _ok(await client.get(f"{API}/finance/budgets/?project_id={project_id}", headers=h))
+    items = body["items"] if isinstance(body, dict) else body
+    rows = (sum(_money(r["committed"]) for r in items), sum(_money(r["actual"]) for r in items))
+    assert rows == (_money(dash["total_committed"]), _money(dash["total_actual"])), (
+        f"rows (committed, actual) {rows} != dashboard {dash['total_committed'], dash['total_actual']}"
+    )
+    return dash
+
+
 def _assert_position(dash: dict) -> None:
     """Every figure of the scenario, with its basis named in the message."""
     expected = {
         "total_budget_original": "400000",  # net, locked bill leaves only
         "total_budget_revised": "400000",
-        "total_committed": "172000",  # net: order 50k + agreement 120k + unordered invoice 2k
+        "total_committed": "102000",  # net, still open: order 10k + agreement 90k + unordered invoice 2k
         "total_invoiced": "72000",  # net: 40k + 2k supplier, 30k approved pay app gross
         "total_paid": "78500",  # cash: 50k incl. VAT + 28.5k sub net of retention
-        "total_actual": "68500",  # paid, net of VAT: 40k + 28.5k
+        "total_actual": "70000",  # incurred, net of VAT: 40k received + 30k pay app gross
+        "total_over_commitment": "0",  # nothing incurred beyond what was committed
         "total_payable": "2500",  # unpaid supplier invoices, gross
         "total_payments": "50000",  # finance payment rows, any direction
     }
@@ -433,10 +458,10 @@ def _assert_position(dash: dict) -> None:
     assert not wrong, f"figures that do not roll up, as (got, expected): {wrong}"
     assert dash["currency"] == "EUR"
     assert dash["mixed_currencies"] is False
-    assert Decimal(str(dash["budget_consumed_pct"])) == Decimal("17.1")  # 68 500 / 400 000
-    # Committed 172k of 400k is 43 %, well under the caution line.
+    assert Decimal(str(dash["budget_consumed_pct"])) == Decimal("17.5")  # 70 000 / 400 000
+    # Outturn 172k of 400k is 43 %, well under the caution line.
     assert dash["budget_warning_level"] == "normal"
-    assert _money(dash["total_variance"]) == Decimal("228000")  # 400k budget less 172k committed
+    assert _money(dash["total_variance"]) == Decimal("228000")  # 400k budget less the 172k outturn
     # The open balances. Nothing is receivable here, so the "net cash flow"
     # the dashboard reports is receivable less unpaid payables, an open
     # balance rather than money that moved.
@@ -462,11 +487,14 @@ async def test_the_dashboard_rolls_up_budget_committed_invoiced_and_paid(client:
     await _ok(await client.post(f"{API}/boq/boqs/{boq_id}/lock/", headers=h))
     vendor = await _supplier(client, h)
     po = await _order(client, h, project_id, vendor)
+    await _assert_rows_match_dashboard(client, h, project_id)
     await _issue_and_receive(client, h, po)
+    await _assert_rows_match_dashboard(client, h, project_id)
     await _supplier_invoices(client, h, project_id, vendor, po)
+    await _assert_rows_match_dashboard(client, h, project_id)
     await _subcontract(client, h, project_id)
 
-    _assert_position(await _dashboard(client, h, project_id))
+    _assert_position(await _assert_rows_match_dashboard(client, h, project_id))
 
     cf = await client.get(f"{API}/finance/gaap/statements/cash-flow", params={"project_id": str(project_id)}, headers=h)
     # Known gap, pinned so that closing it shows up here: the GAAP cash flow is
@@ -486,11 +514,13 @@ async def test_an_order_approved_before_the_bill_is_locked_is_still_committed(cl
     vendor = await _supplier(client, h)
     po = await _order(client, h, project_id, vendor)
     await _ok(await client.post(f"{API}/boq/boqs/{boq_id}/lock/", headers=h))
+    # The order reaches the rows seeded after it.
+    await _assert_rows_match_dashboard(client, h, project_id)
     await _issue_and_receive(client, h, po)
     await _supplier_invoices(client, h, project_id, vendor, po)
     await _subcontract(client, h, project_id)
 
-    _assert_position(await _dashboard(client, h, project_id))
+    _assert_position(await _assert_rows_match_dashboard(client, h, project_id))
 
 
 @pytest.mark.asyncio
@@ -621,9 +651,10 @@ async def test_an_invoice_links_to_its_order_and_the_order_shows_what_is_invoice
     assert cleared["purchase_order_id"] is None
     await _ok(await client.patch(f"{API}/finance/{legacy[0]['id']}", json={"purchase_order_id": po["id"]}, headers=h))
 
-    # The dashboard counts the order once: 50 000 order vs 45 000 invoiced on it.
+    # The dashboard counts the order once: 50 000 order vs 45 000 invoiced on
+    # it, 40 000 of it received, so 40 000 incurred and 10 000 still open.
     dash = await _dashboard(client, h, project_id)
-    assert Decimal(dash["total_committed"]) == Decimal("50000")
+    assert (Decimal(dash["total_committed"]), Decimal(dash["total_actual"])) == (Decimal("10000"), Decimal("40000"))
     assert Decimal(dash["total_invoiced"]) == Decimal("45000")
 
 
@@ -730,8 +761,10 @@ async def test_budget_lines_keep_their_own_actual_and_commitment(client: AsyncCl
     # 02: 40 000 received on the order (its paid invoice is the same money)
     # plus 3 000 of the split invoice; 01: its 1 000 line. Net throughout.
     assert actual == {"01": Decimal("1000"), "02": Decimal("43000")}
-    # The order's 50 000 less the 40 000 received and paid: 10 000 still open.
-    assert committed == {"01": Decimal("0"), "02": Decimal("10000")}
+    # 02: the order's 50 000 less the 40 000 received and paid, 10 000 still
+    # open. 01: the unpaid container hire, 2 000, which names no WBS and so
+    # lands on the first line (there is no project-level line here).
+    assert committed == {"01": Decimal("2000"), "02": Decimal("10000")}
 
 
 @pytest.mark.asyncio
@@ -796,3 +829,71 @@ async def test_an_invoice_line_without_a_vat_rate_gets_the_project_country_rate(
     assert Decimal(str(rates["No rate given"])) == Decimal(expected)
     assert Decimal(str(rates["Reduced rate"])) == Decimal("13")
     assert Decimal(str(rates["Exempt"])) == Decimal("0")
+
+
+@pytest.mark.asyncio
+async def test_a_subcontract_billed_through_a_payable_invoice_is_committed_and_incurred_once(
+    client: AsyncClient,
+) -> None:
+    """120 000 signed, 5 % retention, a 30 % payment application billed as one payable invoice.
+
+    The invoice is the only money record for the pay application: 36 000 net,
+    1 800 retention. Paid with the retention withheld (34 200 cash), the
+    whole 36 000 is incurred, since the retention is owed and only paid later;
+    84 000 stays open. The rows add up to the dashboard at every step, and the
+    5D actual gets the 36 000 once: the cash leg of the payment used to be
+    posted as well, putting 70 200 there.
+    """
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.costmodel.models import BudgetLine
+
+    owner, h = await _login(client)
+    project_id, boq_id = await _seed_project_and_bill(owner)
+    await _ok(await client.post(f"{API}/boq/boqs/{boq_id}/lock/", headers=h))
+    agreement = await _active_agreement(client, h, project_id)
+    vendor = await _supplier(client, h)
+
+    invoice = await _ok(
+        await client.post(
+            f"{API}/finance/",
+            json={
+                "project_id": str(project_id),
+                "contact_id": vendor,
+                "invoice_direction": "payable",
+                "invoice_number": "PA-001",
+                "invoice_date": "2026-09-24",
+                "currency_code": "EUR",
+                "amount_subtotal": "36000.00",
+                "tax_amount": "0.00",
+                "retention_amount": "1800.00",
+                "amount_total": "36000.00",
+                "metadata": {"agreement_id": agreement["id"]},
+                "line_items": [{"description": "Payment application 1, 30 %", "amount": "36000.00", "vat_rate": "0"}],
+            },
+            headers=h,
+        )
+    )
+    dash = await _assert_rows_match_dashboard(client, h, project_id)
+    assert (_money(dash["total_committed"]), _money(dash["total_actual"])) == (Decimal("120000"), Decimal("0"))
+
+    await _ok(await client.post(f"{API}/finance/{invoice['id']}/approve/", headers=h))
+    await _ok(
+        await client.post(
+            f"{API}/finance/invoices/{invoice['id']}/record-payment/",
+            json={"payment_date": "2026-09-25", "currency_code": "EUR"},
+            headers=h,
+        )
+    )
+    dash = await _assert_rows_match_dashboard(client, h, project_id)
+    assert (_money(dash["total_committed"]), _money(dash["total_actual"])) == (Decimal("84000"), Decimal("36000"))
+    assert _money(dash["total_paid"]) == Decimal("34200")
+
+    await _ok(await client.post(f"{API}/finance/{invoice['id']}/pay/", headers=h))
+    dash = await _assert_rows_match_dashboard(client, h, project_id)
+    assert (_money(dash["total_committed"]), _money(dash["total_actual"])) == (Decimal("84000"), Decimal("36000"))
+
+    async with async_session_factory() as s:
+        spine = (await s.execute(select(BudgetLine.actual_amount).where(BudgetLine.project_id == project_id))).all()
+    assert sum((_money(row[0]) for row in spine), Decimal("0")) == Decimal("36000")

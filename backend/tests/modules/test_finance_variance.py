@@ -12,15 +12,14 @@ budgeted, 12.4 spent and 33.4 under signed order reported 36.3 of headroom in
 green. That number appeared on the very screen a cost manager reads before
 deciding whether there is room for something else.
 
-The free figure on that line is 15.3, not 2.9. `committed` is gross here: it
-includes what has already been invoiced, so it is compared against spend rather
-than added to it. That is not an assumption, it is what the writers do. The
-generated seeder sets committed at 0.7 of original and spend at 0.5 of the same
-original, and every hand-authored line carries a commitment at or above its
-spend - 420000 committed against 395000 spent, 650000 against 380000. Nothing
-anywhere decrements the field as invoices land. Adding the two would count
-every invoiced order twice and report a project as nearly exhausted while half
-its budget was still free, which is the same defect wearing the other face.
+`committed` is the open part of each commitment: a goods receipt or a settled
+invoice moves its amount from committed to actual
+(``FinanceService.sync_project_budget``). So the line finishes at what it has
+incurred plus what is still promised, 12.4 + 33.4 = 45.8, and 2.9 of it is
+free. While `committed` stayed at the full order value the rule compared the
+two instead of adding them, and reported 15.3; once the column drained as work
+was incurred, that comparison dropped the spend from every line with anything
+received against it.
 """
 
 from decimal import Decimal
@@ -37,9 +36,9 @@ D = Decimal
 class TestExpectedOutturn:
     def test_committed_money_is_not_headroom(self):
         """The case measured on a live screen, and the reason this exists."""
-        assert expected_outturn(forecast_final=D("0"), committed=D("33.4"), actual=D("12.4")) == D("33.4")
+        assert expected_outturn(forecast_final=D("0"), committed=D("33.4"), actual=D("12.4")) == D("45.8")
         free = budget_variance(revised_budget=D("48.7"), forecast_final=D("0"), committed=D("33.4"), actual=D("12.4"))
-        assert free == D("15.3")
+        assert free == D("2.9")
         # Named so the number this replaced is on the record: the header used
         # to subtract spend alone and offer 36.3 as room to spend.
         assert free != D("36.3")
@@ -56,20 +55,16 @@ class TestExpectedOutturn:
 
     def test_spend_is_the_floor_when_there_is_nothing_else(self):
         assert expected_outturn(forecast_final=D("0"), committed=D("0"), actual=D("12.4")) == D("12.4")
-        # And when spend has already passed the commitment, spend is the truth.
-        assert expected_outturn(forecast_final=D("0"), committed=D("10"), actual=D("12.4")) == D("12.4")
 
-    def test_commitment_and_spend_are_not_added(self):
-        """`committed` is gross, so adding spend to it double-counts.
+    def test_the_open_commitment_and_spend_add_up(self):
+        """`committed` is the open part, so it and the spend are two halves of one outturn.
 
-        Nothing in the product decrements `committed` as invoices arrive: it is
-        written once when the line is created and never adjusted. If that ever
-        changes to an open-commitment figure, this test is the one that has to
-        be revisited, and the sum below is what it would become.
+        Taking the larger of the two, as the rule did while `committed` held the
+        full order value, would report 33.4 here and drop the 12.4 already spent.
         """
         outturn = expected_outturn(forecast_final=D("0"), committed=D("33.4"), actual=D("12.4"))
-        assert outturn == D("33.4")
-        assert outturn != D("45.8")
+        assert outturn == D("45.8")
+        assert outturn != D("33.4")
 
     def test_an_overrun_is_reported_as_a_negative(self):
         assert budget_variance(revised_budget=D("48.7"), forecast_final=D("55"), committed=D("0"), actual=D("50")) == D(
@@ -98,7 +93,7 @@ class TestTheBudgetRow:
 
     def test_the_row_reports_what_is_free_not_what_is_left_unspent(self):
         row = self._row(revised_budget="48.70", committed="33.40", actual="12.40")
-        assert Decimal(row.variance) == D("15.30")
+        assert Decimal(row.variance) == D("2.90")
 
     def test_the_flag_lights_on_money_spoken_for_not_money_gone(self):
         """A line 68% committed and 25% spent is not `normal`.

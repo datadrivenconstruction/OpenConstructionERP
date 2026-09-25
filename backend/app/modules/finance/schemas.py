@@ -705,14 +705,19 @@ class FinanceDashboardResponse(BaseModel):
     total_budget_original: Decimal = Decimal("0")
     total_budget_revised: Decimal = Decimal("0")
     # The cost position, read from the records by ``finance.cost_position``
-    # (its docstring states the basis of each). ``total_committed`` and
-    # ``total_invoiced`` are net of VAT, like the budget above them;
-    # ``total_actual`` is what has been paid, net of VAT; ``total_paid`` is
-    # the same money as cash, VAT included.
+    # (its docstring states the basis of each). All net of VAT like the budget
+    # above them, except ``total_paid``: ``total_actual`` is what has been
+    # incurred, ``total_committed`` what is promised and not yet incurred (so
+    # the two add up to the outturn), ``total_invoiced`` what suppliers have
+    # billed; ``total_paid`` is cash paid, VAT included.
     total_committed: Decimal = Decimal("0")
     total_invoiced: Decimal = Decimal("0")
     total_actual: Decimal = Decimal("0")
     total_paid: Decimal = Decimal("0")
+    # Incurred beyond what was committed (received past an order nobody
+    # invoiced, settled past a subcontract's value). Committed never goes
+    # below zero, so this is where that excess is shown.
+    total_over_commitment: Decimal = Decimal("0")
     total_variance: Decimal = Decimal("0")
     budget_consumed_pct: float = 0.0
     budget_warning_level: str = "normal"  # "normal" | "caution" | "critical"
@@ -745,6 +750,7 @@ class FinanceDashboardResponse(BaseModel):
         "total_invoiced",
         "total_actual",
         "total_paid",
+        "total_over_commitment",
         "total_variance",
         "total_payments",
         when_used="json",

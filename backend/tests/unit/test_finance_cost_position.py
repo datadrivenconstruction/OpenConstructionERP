@@ -1,11 +1,12 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - the project cost position (committed, invoiced, paid) and the PO link.
+"""Unit tests - the project cost position (committed, actual, invoiced, paid) and the PO link.
 
 ``build_cost_position`` is pure, so every rule its docstring states is pinned
 here without a database: the order and its invoice count once, a payment
-application draws down its agreement, the VAT share leaves ``paid_net``,
-currencies never blend. The end-to-end run through the HTTP API lives in
+application draws down its agreement, committed is the open part and actual
+what has been incurred, the VAT share leaves ``paid_net``, currencies never
+blend. The end-to-end run through the HTTP API lives in
 ``tests/integration/test_finance_project_cost_position.py``.
 """
 
@@ -99,7 +100,9 @@ def test_a_payment_application_draws_down_its_agreement() -> None:
     ag = _agreement("120000")
     app = _pay_app(ag, "30000", "28500", status="paid")
     pos = build_cost_position([], [], [], [ag], [app])
-    assert pos.committed == {"EUR": D("120000")}
+    # Paid, so incurred: the rest of the agreement is what is still open.
+    assert pos.committed == {"EUR": D("90000")}
+    assert pos.actual == {"EUR": D("30000")}
     assert pos.invoiced == {"EUR": D("30000")}
     assert pos.paid == {"EUR": D("28500")}
     assert pos.paid_net == {"EUR": D("28500")}
@@ -171,10 +174,12 @@ def test_an_invoice_with_its_payments_is_not_counted_again() -> None:
     assert build_cost_position([], [inv], [pay], [], []).paid == {"EUR": D("50000")}
 
 
-def _sub_invoice(ag: AgreementRow, net: str, gross: str, *, pay_app: uuid.UUID | None = None) -> InvoiceRow:
+def _sub_invoice(
+    ag: AgreementRow, net: str, gross: str, *, pay_app: uuid.UUID | None = None, status: str = "approved"
+) -> InvoiceRow:
     return InvoiceRow(
         id=uuid.uuid4(),
-        status="approved",
+        status=status,
         currency=ag.currency,
         net=D(net),
         gross=D(gross),
@@ -187,9 +192,13 @@ def _sub_invoice(ag: AgreementRow, net: str, gross: str, *, pay_app: uuid.UUID |
 def test_a_subcontract_invoice_draws_down_its_agreement_instead_of_adding_to_it() -> None:
     ag = _agreement("120000")
     pos = build_cost_position([], [_sub_invoice(ag, "30000", "37500")], [], [ag], [])
+    # Billed but not settled: still all open, and not 150 000.
     assert pos.committed == {"EUR": D("120000")}
     assert pos.invoiced == {"EUR": D("30000")}
-    assert pos.subcontract_open == {"EUR": D("90000")}
+    assert pos.subcontract_open == {"EUR": D("120000")}
+    paid = build_cost_position([], [_sub_invoice(ag, "30000", "37500", status="paid")], [], [ag], [])
+    assert paid.committed == paid.subcontract_open == {"EUR": D("90000")}
+    assert paid.actual == {"EUR": D("30000")}
 
 
 def test_a_payment_application_with_its_own_invoice_is_counted_once() -> None:
@@ -200,10 +209,98 @@ def test_a_payment_application_with_its_own_invoice_is_counted_once() -> None:
     )
     pos = build_cost_position([], [_sub_invoice(ag, "30000", "37500", pay_app=app_id)], [], [ag], [app])
     assert pos.invoiced == {"EUR": D("30000")}
-    assert pos.subcontract_open == {"EUR": D("90000")}
+    assert pos.subcontract_open == {"EUR": D("120000")}
 
 
 def test_open_subcontract_commitment_never_goes_below_zero() -> None:
     ag = _agreement("100")
-    pos = build_cost_position([], [_sub_invoice(ag, "150", "150")], [], [ag], [])
-    assert pos.subcontract_open == {"EUR": D("0")}
+    pos = build_cost_position([], [_sub_invoice(ag, "150", "150", status="paid")], [], [ag], [])
+    assert pos.subcontract_open.get("EUR", D("0")) == 0
+    assert pos.actual == {"EUR": D("150")}
+
+
+def test_an_order_received_and_paid_is_incurred_once_and_the_rest_stays_open() -> None:
+    po = _order("50000")
+    inv = _invoice("40000", "50000", po=po, status="paid")
+    pos = build_cost_position([po], [inv], [], [], [], received_by_po={po.id: D("40000")})
+    assert pos.actual == {"EUR": D("40000")}
+    assert pos.committed == {"EUR": D("10000")}
+
+
+def test_an_order_received_but_not_invoiced_is_incurred_at_the_receipt() -> None:
+    po = _order("50000")
+    pos = build_cost_position([po], [], [], [], [], received_by_po={po.id: D("12000")})
+    assert pos.actual == {"EUR": D("12000")}
+    assert pos.committed == {"EUR": D("38000")}
+
+
+def test_retention_withheld_from_a_payment_counts_as_settled() -> None:
+    # A 36 000 pay application invoice, 5 % retention held back: incurred in full.
+    ag = _agreement("120000")
+    inv = _sub_invoice(ag, "36000", "36000")
+    pay = PaymentRow(invoice_id=inv.id, currency="EUR", amount=D("34200"), is_refund=False, withheld=D("1800"))
+    pos = build_cost_position([], [inv], [pay], [ag], [])
+    assert pos.actual == {"EUR": D("36000.00")}
+    assert pos.committed == {"EUR": D("84000.00")}
+    assert pos.paid == {"EUR": D("34200")}
+
+
+def test_a_contract_an_agreement_carries_is_not_a_second_commitment() -> None:
+    ag = _agreement("120000")
+    contract = _agreement("120000")
+    claim = InvoiceRow(
+        id=uuid.uuid4(),
+        status="paid",
+        currency="EUR",
+        net=D("30000"),
+        gross=D("30000"),
+        po_id=None,
+        commitment_id=contract.id,
+    )
+    pos = build_cost_position([], [claim], [], [ag, contract], [], contract_to_agreement={contract.id: ag.id})
+    assert pos.committed == {"EUR": D("90000")}
+    assert pos.actual == {"EUR": D("30000")}
+    assert [(s.kind, s.ref) for s in pos.sources] == [("subcontract", ag.id)]
+
+
+def test_committed_plus_actual_is_each_sources_outturn() -> None:
+    po = _order("50000")
+    ag = _agreement("120000")
+    pos = build_cost_position(
+        [po],
+        [
+            _invoice("30000", "37500", po=po, status="paid"),
+            _invoice("2000", "2500"),
+            _sub_invoice(ag, "36000", "36000", status="paid"),
+        ],
+        [],
+        [ag],
+        [],
+        received_by_po={po.id: D("20000")},
+    )
+    outturn = {(s.kind, s.ref): s.committed + s.actual for s in pos.sources}
+    assert outturn[("po", po.id)] == D("50000")
+    assert outturn[("subcontract", ag.id)] == D("120000")
+    assert sum(outturn.values()) == pos.committed["EUR"] + pos.actual["EUR"] == D("172000")
+
+
+def test_an_invoice_is_spread_over_its_lines_pro_rata() -> None:
+    inv = _invoice("4000", "5000", status="paid")
+    lines = {inv.id: [("01", None, D("1000")), ("02", None, D("3000"))]}
+    pos = build_cost_position([], [inv], [], [], [], invoice_lines=lines)
+    assert [(s.wbs_id, s.actual, s.committed) for s in pos.sources] == [
+        ("01", D("1000"), D("0")),
+        ("02", D("3000"), D("0")),
+    ]
+
+
+def test_what_is_incurred_beyond_the_commitment_is_shown_not_clamped_away() -> None:
+    # 12 000 kg received on a 10 000 kg order, nothing invoiced yet: the order
+    # is fully used, and the 5 000 beyond it is reported, not hidden in a zero.
+    po = _order("25000")
+    pos = build_cost_position([po], [], [], [], [], received_by_po={po.id: D("30000")})
+    assert pos.committed.get("EUR", D("0")) == 0
+    assert pos.actual == {"EUR": D("30000")}
+    assert pos.over_commitment == {"EUR": D("5000")}
+    within = build_cost_position([po], [], [], [], [], received_by_po={po.id: D("20000")})
+    assert within.over_commitment == {}
