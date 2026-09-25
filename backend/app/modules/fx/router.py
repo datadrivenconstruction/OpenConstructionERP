@@ -27,7 +27,9 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport
+from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.fx.repository import RateSetLockedError
 from app.modules.fx.schemas import (
@@ -201,7 +203,16 @@ async def fx_refresh(
     response records ``network_ok=false``; the endpoint never fails on a
     network error.
     """
-    return RefreshResponse(**await service.refresh())
+    try:
+        return RefreshResponse(**await service.refresh())
+    except RateSetLockedError as exc:
+        # A pinned set is kept as it was; the create and delete routes answer
+        # the same refusal with a 409, and so does the refresh.
+        day = exc.rate_date.isoformat() if exc.rate_date else ""
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=translate("errors.fx_rate_set_locked", locale=get_locale(), date=day),
+        ) from exc
 
 
 # ── Rate sets ────────────────────────────────────────────────────────────────
