@@ -643,12 +643,16 @@ export function isSection(pos: Pick<Position, 'unit'>): boolean {
  * sections the same way.
  */
 export function billDirectCost(
-  positions: ReadonlyArray<Pick<Position, 'unit' | 'total' | 'quantity' | 'metadata'>>,
+  positions: ReadonlyArray<Pick<Position, 'unit' | 'total' | 'quantity' | 'unit_rate' | 'metadata'>>,
   baseCurrency: string | undefined | null,
   fxRates: Array<{ currency: string; rate: number }> | undefined | null,
 ): number {
+  // Same rule as the server's ``_is_section``: a header unit AND no quantity
+  // AND no rate. A priced line imported without a unit is still a line.
+  const isHeader = (p: Pick<Position, 'unit' | 'quantity' | 'unit_rate'>) =>
+    isSection(p) && !Number(p.quantity) && !Number(p.unit_rate);
   return positions.reduce(
-    (sum, p) => (isSection(p) ? sum : sum + resourceAwareTotalInBase(p, baseCurrency, fxRates)),
+    (sum, p) => (isHeader(p) ? sum : sum + resourceAwareTotalInBase(p, baseCurrency, fxRates)),
     0,
   );
 }
