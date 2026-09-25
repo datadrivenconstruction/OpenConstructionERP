@@ -17,6 +17,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { importIssueText, type ImportIssue } from './importIssueText';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -31,15 +32,8 @@ interface PreviewPosition {
   is_section: boolean;
 }
 
-interface PreviewWarning {
-  row?: number;
-  message: string;
-}
-
-interface PreviewError {
-  row?: number;
-  message: string;
-}
+type PreviewWarning = ImportIssue;
+type PreviewError = ImportIssue;
 
 interface PreviewResponse {
   positions: PreviewPosition[];
@@ -512,7 +506,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                     <div className="px-3 pb-2 space-y-1">
                       {preview.warnings.map((w, i) => (
                         <p key={i} className="text-2xs text-amber-700 dark:text-amber-400">
-                          {w.row != null ? `Row ${w.row}: ` : ''}{w.message}
+                          {importIssueText(w, t)}
                         </p>
                       ))}
                     </div>
@@ -539,7 +533,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                     <div className="px-3 pb-2 space-y-1">
                       {preview.errors.map((e, i) => (
                         <p key={i} className="text-2xs text-red-700 dark:text-red-400">
-                          {e.row != null ? `Row ${e.row}: ` : ''}{e.message}
+                          {importIssueText(e, t)}
                         </p>
                       ))}
                     </div>

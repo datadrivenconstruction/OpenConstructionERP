@@ -42957,6 +42957,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "सर्वर ने 90 सेकंड में जवाब नहीं दिया। फ़ाइल बहुत बड़ी हो सकती है।",
     "boq.import_preview.parsing": "फ़ाइल प्रोसेस हो रही है...",
     "boq.import_preview.skipped_count": "{{count}} पंक्ति छोड़ी गई (खाली या अपठनीय)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: योग, कर या सारांश पंक्ति, मद के रूप में आयात नहीं की गई",
     "boq.import_preview.stats_currency": "मुद्रा",
     "boq.import_preview.stats_format": "प्रारूप",
     "boq.import_preview.stats_positions": "आइटम",

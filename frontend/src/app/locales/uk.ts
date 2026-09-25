@@ -44680,6 +44680,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сервер не відповів протягом 90 секунд. Можливо, файл занадто великий.",
     "boq.import_preview.parsing": "Розбір файлу...",
     "boq.import_preview.skipped_count": "{{count}} рядок(-ків) пропущено (порожні або нечитабельні)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: рядок підсумку, податку або зведення, не імпортовано як позицію",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позиції",

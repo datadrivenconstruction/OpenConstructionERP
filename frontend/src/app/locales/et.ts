@@ -42887,6 +42887,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Server ei vastanud 90 sekundi jooksul. Fail võib olla liiga suur.",
     "boq.import_preview.parsing": "Faili töötlemine...",
     "boq.import_preview.skipped_count": "{{count}} rida vahele jäetud (tühi või loetamatu)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: summa-, maksu- või koondrida, positsioonina ei imporditud",
     "boq.import_preview.stats_currency": "Valuuta",
     "boq.import_preview.stats_format": "Vorming",
     "boq.import_preview.stats_positions": "Read",

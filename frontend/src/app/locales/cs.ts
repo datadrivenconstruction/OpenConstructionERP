@@ -43860,6 +43860,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Server nereagoval do 90 sekund. Soubor může být příliš velký.",
     "boq.import_preview.parsing": "Zpracování souboru...",
     "boq.import_preview.skipped_count": "{{count}} řádek přeskočeno (prázdné nebo nečitelné)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: řádek součtu, daně nebo rekapitulace, neimportováno jako položka",
     "boq.import_preview.stats_currency": "Měna",
     "boq.import_preview.stats_format": "Formát",
     "boq.import_preview.stats_positions": "Položky",

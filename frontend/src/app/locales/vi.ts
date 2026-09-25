@@ -42835,6 +42835,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Máy chủ không phản hồi trong vòng 90 giây. Tệp có thể quá lớn.",
     "boq.import_preview.parsing": "Đang phân tích tệp...",
     "boq.import_preview.skipped_count": "{{count}} hàng bị bỏ qua (trống hoặc không đọc được)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: dòng tổng, thuế hoặc tổng hợp, không được nhập làm hạng mục",
     "boq.import_preview.stats_currency": "Tiền tệ",
     "boq.import_preview.stats_format": "Định dạng",
     "boq.import_preview.stats_positions": "Hạng mục",

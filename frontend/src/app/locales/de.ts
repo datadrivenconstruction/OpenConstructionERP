@@ -45596,6 +45596,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Der Server hat nicht innerhalb von 90 Sekunden geantwortet. Die Datei ist möglicherweise zu groß.",
     "boq.import_preview.parsing": "Datei wird eingelesen...",
     "boq.import_preview.skipped_count": "{{count}} Zeile(n) übersprungen (leer oder nicht lesbar)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: Summen-, Steuer- oder Zusammenstellungszeile, nicht als Position importiert",
     "boq.import_preview.stats_currency": "Währung",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Positionen",

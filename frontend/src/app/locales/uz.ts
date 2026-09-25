@@ -43857,6 +43857,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Server 90 soniya ichida javob bermadi. Fayl juda katta boʻlishi mumkin.",
     "boq.import_preview.parsing": "Fayl tahlil qilinmoqda...",
     "boq.import_preview.skipped_count": "{{count}} ta qator oʻtkazib yuborildi (boʻsh yoki oʻqib boʻlmaydi)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: jami, soliq yoki yig‘ma qatori, pozitsiya sifatida import qilinmadi",
     "boq.import_preview.stats_currency": "Valyuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Pozitsiyalar",

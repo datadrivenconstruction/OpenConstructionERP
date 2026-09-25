@@ -43789,6 +43789,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Sunucu 90 saniye içinde yanıt vermedi. Dosya çok büyük olabilir.",
     "boq.import_preview.parsing": "Dosya işleniyor...",
     "boq.import_preview.skipped_count": "{{count}} satır atlandı (boş veya okunamaz)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: toplam, vergi veya icmal satırı, kalem olarak içe aktarılmadı",
     "boq.import_preview.stats_currency": "Para birimi",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Pozlar",

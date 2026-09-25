@@ -43223,6 +43223,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "সার্ভার ৯০ সেকেন্ডের মধ্যে সাড়া দেয়নি। ফাইলটি অনেক বড় হতে পারে।",
     "boq.import_preview.parsing": "ফাইল পার্স করা হচ্ছে...",
     "boq.import_preview.skipped_count": "{{count}}টি সারি এড়িয়ে গেছে (ফাঁকা বা পড়া যাচ্ছে না)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: মোট, কর বা সারসংক্ষেপ সারি, আইটেম হিসেবে আমদানি করা হয়নি",
     "boq.import_preview.stats_currency": "মুদ্রা",
     "boq.import_preview.stats_format": "ফরম্যাট",
     "boq.import_preview.stats_positions": "আইটেম",

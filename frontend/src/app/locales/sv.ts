@@ -43569,6 +43569,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Servern svarade inte inom 90 sekunder. Filen kan vara för stor.",
     "boq.import_preview.parsing": "Bearbetar fil...",
     "boq.import_preview.skipped_count": "{{count}} rad(er) hoppades över (tomma eller oläsliga)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: summa-, skatte- eller sammanställningsrad, importerades inte som post",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Poster",

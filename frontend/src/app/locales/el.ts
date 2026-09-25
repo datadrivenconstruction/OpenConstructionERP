@@ -42924,6 +42924,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Ο διακομιστής δεν απάντησε εντός 90 δευτερολέπτων. Το αρχείο μπορεί να είναι πολύ μεγάλο.",
     "boq.import_preview.parsing": "Ανάλυση αρχείου...",
     "boq.import_preview.skipped_count": "{{count}} γραμμή(ές) παραλείφθηκε (κενές ή μη αναγνώσιμες)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: γραμμή συνόλου, φόρου ή ανακεφαλαίωσης, δεν εισήχθη ως άρθρο",
     "boq.import_preview.stats_currency": "Νόμισμα",
     "boq.import_preview.stats_format": "Μορφή",
     "boq.import_preview.stats_positions": "Θέσεις",

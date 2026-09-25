@@ -42817,6 +42817,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Server tidak merespons dalam 90 detik. File mungkin terlalu besar.",
     "boq.import_preview.parsing": "Memproses file...",
     "boq.import_preview.skipped_count": "{{count}} baris dilewati (kosong atau tidak terbaca)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: baris jumlah, pajak, atau rekapitulasi, tidak diimpor sebagai item",
     "boq.import_preview.stats_currency": "Mata uang",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Item",

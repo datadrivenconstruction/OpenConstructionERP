@@ -45677,6 +45677,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Le serveur n'a pas répondu dans les 90 secondes. Le fichier est peut-être trop volumineux.",
     "boq.import_preview.parsing": "Analyse du fichier en cours...",
     "boq.import_preview.skipped_count": "{{count}} ligne(s) ignorée(s) (vide(s) ou illisible(s))",
+    "boq.import_preview.summary_row_skipped": "{{label}} : ligne de total, de taxe ou de récapitulatif, non importée comme poste",
     "boq.import_preview.stats_currency": "Devise",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Postes",

@@ -43978,6 +43978,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Il server non ha risposto entro 90 secondi. Il file potrebbe essere troppo grande.",
     "boq.import_preview.parsing": "Elaborazione file in corso...",
     "boq.import_preview.skipped_count": "{{count}} riga/righe saltata/e (vuota/e o illeggibile/i)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: riga di totale, imposta o riepilogo, non importata come voce",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Formato",
     "boq.import_preview.stats_positions": "Voci",

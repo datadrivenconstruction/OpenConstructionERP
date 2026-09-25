@@ -45296,6 +45296,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "服务器未在 90 秒内响应，文件可能过大。",
     "boq.import_preview.parsing": "正在解析文件...",
     "boq.import_preview.skipped_count": "已跳过 {{count}} 行（空行或无法读取）",
+    "boq.import_preview.summary_row_skipped": "{{label}}：合计、税金或汇总行，未作为清单项导入",
     "boq.import_preview.stats_currency": "货币",
     "boq.import_preview.stats_format": "格式",
     "boq.import_preview.stats_positions": "清单项数",

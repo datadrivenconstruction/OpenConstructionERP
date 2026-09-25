@@ -43445,6 +43445,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "서버가 90초 내에 응답하지 않았습니다. 파일이 너무 클 수 있습니다.",
     "boq.import_preview.parsing": "파일 분석 중...",
     "boq.import_preview.skipped_count": "{{count}}개 행 건너뜀 (비어 있거나 읽을 수 없음)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: 합계, 세금 또는 집계 행이므로 항목으로 가져오지 않았습니다",
     "boq.import_preview.stats_currency": "통화",
     "boq.import_preview.stats_format": "형식",
     "boq.import_preview.stats_positions": "항목 수",

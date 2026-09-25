@@ -44359,6 +44359,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "サーバーが 90 秒以内に応答しませんでした。ファイルが大きすぎる可能性があります。",
     "boq.import_preview.parsing": "ファイルを解析中...",
     "boq.import_preview.skipped_count": "{{count}} 行をスキップしました（空白または読み取り不可）",
+    "boq.import_preview.summary_row_skipped": "{{label}}：合計・税・集計の行のため、明細として取り込みませんでした",
     "boq.import_preview.stats_currency": "通貨",
     "boq.import_preview.stats_format": "フォーマット",
     "boq.import_preview.stats_positions": "項目数",

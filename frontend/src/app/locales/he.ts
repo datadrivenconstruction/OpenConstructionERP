@@ -43075,6 +43075,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "השרת לא הגיב תוך 90 שניות. הקובץ עלול להיות גדול מדי.",
     "boq.import_preview.parsing": "מעבד קובץ...",
     "boq.import_preview.skipped_count": "{{count}} שורה/ות דולגה/ו (ריקה/ות או לא קריאה/ות)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: שורת סיכום, מס או ריכוז, לא יובאה כסעיף",
     "boq.import_preview.stats_currency": "מטבע",
     "boq.import_preview.stats_format": "פורמט",
     "boq.import_preview.stats_positions": "סעיפים",

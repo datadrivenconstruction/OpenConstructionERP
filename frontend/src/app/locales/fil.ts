@@ -42911,6 +42911,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Hindi sumagot ang server sa loob ng 90 segundo. Maaaring masyadong malaki ang file.",
     "boq.import_preview.parsing": "Inaayos ang file...",
     "boq.import_preview.skipped_count": "{{count}} hanay ang nilaktawan (walang laman o hindi mabasa)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: linya ng kabuuan, buwis o buod, hindi na-import bilang item",
     "boq.import_preview.stats_currency": "Pera",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Mga aytem",

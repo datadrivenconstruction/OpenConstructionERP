@@ -42933,6 +42933,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "سرور در ۹۰ ثانیه پاسخ نداد. فایل ممکن است خیلی بزرگ باشد.",
     "boq.import_preview.parsing": "در حال تجزیه فایل...",
     "boq.import_preview.skipped_count": "{{count}} ردیف رد شد (خالی یا غیرقابل خواندن)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: سطر جمع، مالیات یا خلاصه، به‌عنوان ردیف وارد نشد",
     "boq.import_preview.stats_currency": "ارز",
     "boq.import_preview.stats_format": "فرمت",
     "boq.import_preview.stats_positions": "ردیف‌ها",

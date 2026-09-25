@@ -43835,6 +43835,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "De server reageerde niet binnen 90 seconden. Het bestand is mogelijk te groot.",
     "boq.import_preview.parsing": "Bestand verwerken...",
     "boq.import_preview.skipped_count": "{{count}} rij(en) overgeslagen (leeg of onleesbaar)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: totaal-, belasting- of samenvattingsregel, niet als post geïmporteerd",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Formaat",
     "boq.import_preview.stats_positions": "Posten",

@@ -42949,6 +42949,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сървърът не отговори в рамките на 90 секунди. Файлът може да е твърде голям.",
     "boq.import_preview.parsing": "Анализ на файла...",
     "boq.import_preview.skipped_count": "{{count}} ред(а) пропуснати (празни или нечетими)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: ред за общо, данък или рекапитулация, не е импортиран като позиция",
     "boq.import_preview.stats_currency": "Валута",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позиции",

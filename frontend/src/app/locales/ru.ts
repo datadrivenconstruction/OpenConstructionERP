@@ -45775,6 +45775,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сервер не ответил за 90 секунд. Возможно, файл слишком большой.",
     "boq.import_preview.parsing": "Разбор файла...",
     "boq.import_preview.skipped_count": "{{count}} строк(-а) пропущено (пустые или нечитаемые)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: строка итога, налога или сводки, не импортирована как позиция",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позиции",

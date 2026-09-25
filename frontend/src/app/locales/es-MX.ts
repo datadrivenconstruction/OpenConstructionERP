@@ -40148,6 +40148,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "El servidor no respondió en 90 segundos. El archivo puede ser demasiado grande.",
     "boq.import_preview.parsing": "Procesando archivo...",
     "boq.import_preview.skipped_count": "{{count}} fila(s) omitida(s) (vacías o ilegibles)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: línea de total, impuesto o resumen, no importada como partida",
     "boq.import_preview.stats_currency": "Moneda",
     "boq.import_preview.stats_format": "Formato",
     "boq.import_preview.stats_positions": "Conceptos",

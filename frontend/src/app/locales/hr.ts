@@ -43104,6 +43104,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Poslužitelj nije odgovorio u roku od 90 sekundi. Datoteka je možda prevelika.",
     "boq.import_preview.parsing": "Obrada datoteke...",
     "boq.import_preview.skipped_count": "{{count}} redak/ka preskočeno (prazno ili nečitljivo)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: redak ukupnog iznosa, poreza ili rekapitulacije, nije uvezen kao stavka",
     "boq.import_preview.stats_currency": "Valuta",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Stavke",

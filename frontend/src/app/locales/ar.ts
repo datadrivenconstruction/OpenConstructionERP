@@ -45114,6 +45114,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "لم يستجب الخادم خلال 90 ثانية. قد يكون الملف كبيراً جداً.",
     "boq.import_preview.parsing": "جارٍ تحليل الملف...",
     "boq.import_preview.skipped_count": "تم تخطي {{count}} صف (فارغ أو غير قابل للقراءة)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: سطر إجمالي أو ضريبة أو ملخص، لم يُستورد كبند",
     "boq.import_preview.stats_currency": "العملة",
     "boq.import_preview.stats_format": "التنسيق",
     "boq.import_preview.stats_positions": "البنود",

@@ -43102,6 +43102,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Serverul nu a răspuns în 90 de secunde. Fișierul poate fi prea mare.",
     "boq.import_preview.parsing": "Se procesează fișierul...",
     "boq.import_preview.skipped_count": "{{count}} rând(uri) omis(e) (gol(e) sau ilizibil(e))",
+    "boq.import_preview.summary_row_skipped": "{{label}}: rând de total, taxă sau centralizator, nu a fost importat ca poziție",
     "boq.import_preview.stats_currency": "Monedă",
     "boq.import_preview.stats_format": "Format",
     "boq.import_preview.stats_positions": "Articole",

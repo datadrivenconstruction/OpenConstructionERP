@@ -42949,6 +42949,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Palvelin ei vastannut 90 sekunnin kuluessa. Tiedosto saattaa olla liian suuri.",
     "boq.import_preview.parsing": "Käsitellään tiedostoa...",
     "boq.import_preview.skipped_count": "{{count}} rivi ohitettu (tyhjä tai lukukelvoton)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: summa-, vero- tai yhteenvetorivi, ei tuotu nimikkeeksi",
     "boq.import_preview.stats_currency": "Valuutta",
     "boq.import_preview.stats_format": "Muoto",
     "boq.import_preview.stats_positions": "Nimikkeet",

@@ -42925,6 +42925,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сервер 90 секунд ішінде жауап бермеді. Файл тым үлкен болуы мүмкін.",
     "boq.import_preview.parsing": "Файл талданып жатыр...",
     "boq.import_preview.skipped_count": "{{count}} жол өткізілді (бос немесе оқылмайды)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: жиынтық, салық немесе қорытынды жолы, позиция ретінде импортталмады",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позициялар",

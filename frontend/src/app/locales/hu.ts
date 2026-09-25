@@ -45543,6 +45543,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "A szerver 90 másodpercen belül nem válaszolt. A fájl esetleg túl nagy.",
     "boq.import_preview.parsing": "Fájl feldolgozása...",
     "boq.import_preview.skipped_count": "{{count}} sor kihagyva (üres vagy olvashatatlan)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: összeg-, adó- vagy összesítő sor, tételként nem lett importálva",
     "boq.import_preview.stats_currency": "Pénznem",
     "boq.import_preview.stats_format": "Formátum",
     "boq.import_preview.stats_positions": "Tételek",

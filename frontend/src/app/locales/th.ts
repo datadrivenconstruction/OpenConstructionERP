@@ -42827,6 +42827,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "เซิร์ฟเวอร์ไม่ตอบสนองภายใน 90 วินาที ไฟล์อาจมีขนาดใหญ่เกินไป",
     "boq.import_preview.parsing": "กำลังประมวลผลไฟล์...",
     "boq.import_preview.skipped_count": "ข้ามไป {{count}} แถว (ว่างเปล่าหรืออ่านไม่ได้)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: บรรทัดยอดรวม ภาษี หรือสรุป ไม่ได้นำเข้าเป็นรายการ",
     "boq.import_preview.stats_currency": "สกุลเงิน",
     "boq.import_preview.stats_format": "รูปแบบ",
     "boq.import_preview.stats_positions": "รายการ",

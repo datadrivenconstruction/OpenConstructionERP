@@ -42933,6 +42933,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "سرور نے 90 سیکنڈ میں جواب نہیں دیا۔ فائل بہت بڑی ہو سکتی ہے۔",
     "boq.import_preview.parsing": "فائل پروسیس ہو رہی ہے...",
     "boq.import_preview.skipped_count": "{{count}} قطاریں چھوڑ دی گئیں (خالی یا ناقابل پڑھ)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: کل، ٹیکس یا خلاصہ کی سطر، آئٹم کے طور پر درآمد نہیں کی گئی",
     "boq.import_preview.stats_currency": "کرنسی",
     "boq.import_preview.stats_format": "فارمیٹ",
     "boq.import_preview.stats_positions": "آئٹم",

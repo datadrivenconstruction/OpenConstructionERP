@@ -42606,6 +42606,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сервер 90 секундын дотор хариу өгсөнгүй. Файл хэт том байж болзошгүй.",
     "boq.import_preview.parsing": "Файл боловсруулж байна...",
     "boq.import_preview.skipped_count": "{{count}} мөр алгасав (хоосон эсвэл унших боломжгүй)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: нийт дүн, татвар эсвэл нэгтгэлийн мөр, ажлын зүйл болгон импортлоогүй",
     "boq.import_preview.stats_currency": "Валют",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Ажлын нэрс",

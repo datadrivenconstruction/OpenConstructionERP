@@ -43059,6 +43059,7 @@ const resource = {
     "boq.import_preview.parse_timeout": "Сервер 90 секунда ичинде жооп бербеди. Файл өтө чоң болушу мүмкүн.",
     "boq.import_preview.parsing": "Файл иштетилүүдө...",
     "boq.import_preview.skipped_count": "{{count}} саптар өткөрүп жиберилди (бош же окулбайт)",
+    "boq.import_preview.summary_row_skipped": "{{label}}: жыйынтык, салык же топтоо сабы, позиция катары импорттолгон жок",
     "boq.import_preview.stats_currency": "Валюта",
     "boq.import_preview.stats_format": "Формат",
     "boq.import_preview.stats_positions": "Позициялар",
