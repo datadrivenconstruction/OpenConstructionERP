@@ -22,29 +22,57 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import case, or_
+from sqlalchemy import and_, case, not_, or_
 
 _TERMS_FILE = Path(__file__).with_name("hazard_terms.json")
 
 
 @lru_cache(maxsize=1)
-def hazard_terms() -> dict[str, tuple[str, ...]]:
-    """``{hazard_id: terms}``, casefolded, read once from the data file."""
-    raw = json.loads(_TERMS_FILE.read_text(encoding="utf-8"))
+def _raw() -> dict[str, Any]:
+    return json.loads(_TERMS_FILE.read_text(encoding="utf-8"))
+
+
+def _cleaned(section: str) -> dict[str, tuple[str, ...]]:
     out: dict[str, tuple[str, ...]] = {}
-    for hazard_id, terms in (raw.get("hazards") or {}).items():
-        cleaned = tuple(sorted({str(t).casefold().strip() for t in terms if str(t).strip()}))
+    for hazard_id, terms in (_raw().get(section) or {}).items():
+        # Longest first, so "asbestos-free" is stripped before "asbestos free".
+        cleaned = tuple(
+            sorted({str(t).casefold().strip() for t in terms if str(t).strip()}, key=lambda t: (-len(t), t))
+        )
         if cleaned:
             out[str(hazard_id)] = cleaned
     return out
 
 
+@lru_cache(maxsize=1)
+def hazard_terms() -> dict[str, tuple[str, ...]]:
+    """``{hazard_id: terms}``, casefolded, read once from the data file."""
+    return _cleaned("hazards")
+
+
+@lru_cache(maxsize=1)
+def hazard_exclusions() -> dict[str, tuple[str, ...]]:
+    """``{hazard_id: phrases}`` that deny the hazard ("asbestos-free")."""
+    return _cleaned("exclude")
+
+
+def _mentions(folded: str, hazard_id: str, terms: tuple[str, ...]) -> bool:
+    for phrase in hazard_exclusions().get(hazard_id, ()):
+        folded = folded.replace(phrase, " ")
+    return any(term in folded for term in terms)
+
+
 def hazards_in(texts: Iterable[str | None]) -> list[str]:
-    """The hazard ids any of ``texts`` mentions, in a stable order."""
+    """The hazard ids any of ``texts`` mentions, in a stable order.
+
+    A phrase that denies the hazard ("asbestos-free", "sans amiante") is
+    removed first, so a safe product carries no marker while a text that
+    also names the material elsewhere still does.
+    """
     folded = " ".join(t.casefold() for t in texts if isinstance(t, str) and t)
     if not folded:
         return []
-    return [hid for hid, terms in sorted(hazard_terms().items()) if any(term in folded for term in terms)]
+    return [hid for hid, terms in sorted(hazard_terms().items()) if _mentions(folded, hid, terms)]
 
 
 def _case_variants(term: str) -> set[str]:
@@ -56,10 +84,29 @@ def _case_variants(term: str) -> set[str]:
     return {term, term[:1].upper() + term[1:], term.upper()}
 
 
+def _any_like(column: Any, terms: Iterable[str]) -> Any:
+    patterns = sorted({v for t in terms for v in _case_variants(t)})
+    return or_(*[column.like(f"%{p}%") for p in patterns])
+
+
 def hazard_sql_flag(column: Any) -> Any:
-    """``1`` when ``column`` mentions a hazard, else ``0``, as SQL."""
-    patterns = sorted({v for terms in hazard_terms().values() for t in terms for v in _case_variants(t)})
-    return case((or_(*[column.like(f"%{p}%") for p in patterns]), 1), else_=0)
+    """``1`` when ``column`` mentions a hazard, else ``0``, as SQL.
+
+    A row that carries a denying phrase ("asbestos-free") is not flagged.
+    Unlike :func:`hazards_in` this does not look for a second, undenied
+    mention in the same text; such a row only loses its demotion, it still
+    shows the badge.
+    """
+    exclusions = hazard_exclusions()
+    conditions = []
+    for hazard_id, terms in hazard_terms().items():
+        cond = _any_like(column, terms)
+        if exclusions.get(hazard_id):
+            cond = and_(cond, not_(_any_like(column, exclusions[hazard_id])))
+        conditions.append(cond)
+    if not conditions:
+        return case((column.is_(None), 0), else_=0)
+    return case((or_(*conditions), 1), else_=0)
 
 
 def query_names_a_hazard(q: str | None) -> bool:
