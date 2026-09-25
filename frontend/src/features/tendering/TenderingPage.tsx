@@ -51,6 +51,7 @@ import { AddendumList } from './AddendumList';
 import { AwardRecordPanel } from './AwardRecordPanel';
 import { LevelingMatrix } from './LevelingMatrix';
 import { classifyCell, recommend } from './analysis';
+import { awardRatesMessage, type AwardResult } from './awardRates';
 import { tenderingGuide } from './tenderingGuide';
 import {
   listRecipients,
@@ -1366,25 +1367,25 @@ function PackageDetail({
   // losing bids in a stale state and never writing rates back to the BOQ.
   const awardMutation = useMutation({
     mutationFn: (bidId: string) =>
-      apiPost<{ positions_updated: number }>(
+      apiPost<AwardResult>(
         `/v1/tendering/packages/${packageId}/apply-winner/?bid_id=${bidId}`,
         {},
       ),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-comparison', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
-      // The award also writes rates back to the BOQ and the procurement
-      // module auto-creates a draft PO from the winning bid. Tell the user
-      // about the PO and offer a one-click jump to Procurement so the
-      // hand-off is visible instead of silent.
+      // The award writes the winning line rates into the BOQ where it can,
+      // and the procurement module auto-creates a draft PO from the winning
+      // bid. Say what happened to the bill, including when nothing was
+      // written and why, and offer a one-click jump to Procurement.
       addToast(
         {
           type: 'success',
           title: t('toasts.bid_awarded', { defaultValue: 'Bid awarded' }),
-          message: t('tendering.po_created_msg', {
+          message: [awardRatesMessage(result, t), t('tendering.po_created_msg', {
             defaultValue: 'A draft purchase order is being prepared in Procurement from the winning bid.',
-          }),
+          })].join(' '),
           action: {
             label: t('tendering.view_po', { defaultValue: 'View purchase orders' }),
             onClick: () => navigate('/procurement'),
@@ -1808,7 +1809,11 @@ function PackageDetail({
                     onClick={async () => {
                       const ok = await confirm({
                         title: t('tendering.award_confirm_title', { defaultValue: 'Award contract?' }),
-                        message: t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? Winning rates are written back to the BOQ and other bids are rejected. This action cannot be undone.', company: bid.company_name }),
+                        message: t('tendering.award_confirm_rates', {
+                          defaultValue:
+                            'Award this contract to {{company}}? The other bids are rejected. Where the winning bid is priced line by line and the BOQ is not locked, its rates are written into the BOQ. This action cannot be undone.',
+                          company: bid.company_name,
+                        }),
                         confirmLabel: t('tendering.award', 'Award'),
                         variant: 'warning',
                       });
