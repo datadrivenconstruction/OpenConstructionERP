@@ -35,7 +35,7 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -177,3 +177,34 @@ async def test_a_row_postgresql_refuses_is_skipped_and_counted_not_fatal(
     async with factory() as check:
         codes = (await check.execute(select(CostItem.code).where(CostItem.region == REGION))).scalars().all()
     assert sorted(codes) == ["R0000", "R0001", "R0002", "R0004", "R0005"]
+
+
+async def test_loading_a_base_again_seeds_a_price_sheet_the_first_load_lost(
+    factory: async_sessionmaker, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The estate the failure above left behind: items loaded, sheet empty.
+
+    Every later load of the region takes the already-loaded early return, so
+    without a seed there the sheet would stay empty for good while the job
+    reported the base complete.
+    """
+    parquet = tmp_path / "cwicr.parquet"
+    # More than the early return's threshold of ten items.
+    _write_parquet(parquet, [f"Work item {i}" for i in range(12)])
+    _point_at(parquet, monkeypatch)
+
+    async with factory() as session:
+        await router.load_cwicr_region(REGION, session)
+        await session.commit()
+    async with factory() as session:
+        await session.execute(delete(ResourcePrice).where(ResourcePrice.region == REGION))
+        await session.commit()
+
+    async with factory() as session:
+        result = await router.load_cwicr_region(REGION, session)
+        await session.commit()
+
+    assert result["status"] == "already_loaded"
+    async with factory() as check:
+        prices = (await check.execute(select(func.count()).where(ResourcePrice.region == REGION))).scalar_one()
+    assert prices == 1

@@ -5009,7 +5009,34 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
             existing_count,
             resource_components,
         )
+        already_loaded: dict[str, Any] = {}
+        # A base whose items loaded while its price sheet seed failed (the
+        # dead-session failure described below, before it was fixed) has
+        # resources and no sheet, and nothing else would ever seed it: this
+        # branch is what every later load of the region takes. Seed it here.
+        # Idempotent, and it never overwrites a price a user edited.
+        if resource_components > 0:
+            from app.modules.costs.models import ResourcePrice
+
+            sheet_rows = (
+                await session.execute(
+                    select(func.count()).select_from(ResourcePrice).where(ResourcePrice.region == db_id)
+                )
+            ).scalar_one()
+            if not sheet_rows:
+                try:
+                    seed = await ResourcePriceService(session).seed_region(db_id)
+                    already_loaded["resource_prices"] = seed.as_dict()
+                    logger.info("CWICR %s: seeded the missing resource price sheet", db_id)
+                except Exception:
+                    logger.exception("Resource price seeding failed for %s (non-fatal)", db_id)
+                    try:
+                        await session.rollback()
+                    except Exception:  # noqa: BLE001 - the rollback is best effort
+                        logger.debug("rollback after the failed price seed also failed", exc_info=True)
+                    already_loaded["resource_prices_error"] = "seed_failed"
         return {
+            **already_loaded,
             "imported": 0,
             "skipped": existing_count,
             "region": db_id,
