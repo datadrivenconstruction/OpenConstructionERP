@@ -1106,6 +1106,7 @@ class ScheduleService:
             dep["activity_id"] = str(dep["activity_id"])
         resources_data = [res.model_dump() for res in data.resources]
         boq_ids = [str(pid) for pid in data.boq_position_ids]
+        await self._assert_positions_in_project(data.schedule_id, boq_ids)
 
         activity = Activity(
             schedule_id=data.schedule_id,
@@ -1535,6 +1536,12 @@ class ScheduleService:
 
         if "boq_position_ids" in fields and fields["boq_position_ids"] is not None:
             fields["boq_position_ids"] = [str(pid) for pid in fields["boq_position_ids"]]
+            # Only ids this write adds are checked, so resending a list that
+            # already holds an older link does not fail on it.
+            already = {str(pid) for pid in (activity.boq_position_ids or [])}
+            await self._assert_positions_in_project(
+                schedule_id, [pid for pid in fields["boq_position_ids"] if pid not in already]
+            )
 
         # Map 'metadata' key to the model's 'metadata_' column. Merge the
         # incoming dict over the stored value so a partial PATCH never drops
@@ -1675,6 +1682,46 @@ class ScheduleService:
         logger.info("Cleared %d activity(ies) from schedule %s", deleted, schedule_id)
         return deleted
 
+    async def _assert_positions_in_project(self, schedule_id: uuid.UUID, position_ids: list[str]) -> None:
+        """Reject BOQ positions that are not in the schedule's own project.
+
+        The activity keeps position ids as a JSON list with no foreign key, so
+        without this a link could name a position of another project, and the
+        schedule would then read that project's quantities and money. Answers
+        404 for a foreign id exactly as for a missing one, so a caller cannot
+        probe which ids exist elsewhere.
+
+        Args:
+            schedule_id: The schedule the activity belongs to.
+            position_ids: Position ids about to be linked.
+
+        Raises:
+            HTTPException 404 if any id is not a position of that project.
+        """
+        if not position_ids:
+            return
+        from app.modules.boq.models import BOQ, Position
+
+        schedule = await self.get_schedule(schedule_id)
+        wanted: set[uuid.UUID] = set()
+        for pid in position_ids:
+            try:
+                wanted.add(uuid.UUID(str(pid)))
+            except ValueError as exc:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ position not found") from exc
+        rows = await self.session.execute(
+            select(Position.id)
+            .join(BOQ, BOQ.id == Position.boq_id)
+            .where(Position.id.in_(wanted))
+            .where(BOQ.project_id == schedule.project_id)
+        )
+        found = set(rows.scalars().all())
+        if wanted - found:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BOQ position not found in this project",
+            )
+
     async def link_boq_position(self, activity_id: uuid.UUID, boq_position_id: uuid.UUID) -> Activity:
         """Link a BOQ position to an activity.
 
@@ -1700,6 +1747,7 @@ class ScheduleService:
                 detail="BOQ position is already linked to this activity",
             )
 
+        await self._assert_positions_in_project(activity.schedule_id, [position_str])
         current_ids.append(position_str)
         await self.activity_repo.update_fields(activity_id, boq_position_ids=current_ids)
 
