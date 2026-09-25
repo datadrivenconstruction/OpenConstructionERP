@@ -1,5 +1,8 @@
 {
   "_note": "Editorial overlay for the Videos catalogue, read by scripts/build_video_catalog.py. Stage, roles, market, cases and result for every video that the source registries do not classify themselves, plus overrides for the ones they do. These links are editorial hypotheses, not a guarantee: 'provenance' says who proposed them. Stage and role ids are the ERP LifecycleStage and ProfessionalRole ids; market is ISO 3166-1 alpha-2 of the market whose rules the video teaches, or null when the topic applies anywhere. An empty roles list means the video is for every role. Case ids must exist in frontend/src/features/cases/data; the script reports any that do not.",
+  "youtube_ids": {
+    "_note": "YouTube ids for videos uploaded before the published-links document lists them, keyed by video id, for example \"CA02\": \"<11-char id>\". Adding one flips the video from coming soon to published on the next run. An id that contradicts the document or the registries stops the run."
+  },
   "series": {
     "getting-started": {
       "title": "Getting started",

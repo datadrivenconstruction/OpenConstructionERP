@@ -8,9 +8,11 @@ re-run and nothing else.
 
 Sources, in the order they are trusted:
 
-1. The published-links document (``ВСЕ_ВИДЕО_СО_ССЫЛКАМИ.html``). The only
+1. The published-links document (``ВСЕ_ВИДЕО_СО_ССЫЛКАМИ.html``), the
    authority for which videos have a YouTube id. Only the card id and the link
-   are read from it; its prose is not.
+   are read from it; its prose is not. ``youtube_ids`` in the editorial file
+   adds an id the document does not carry yet (a video uploaded before the
+   document was updated). An id that contradicts another source stops the run.
 2. ``gallery.json`` and ``setup_supplement.json`` from the YouTube publishing
    package: titles, short descriptions, language, series, chapters, duration
    and covers of the Builder's Playbook videos and the setup lesson.
@@ -26,10 +28,16 @@ does not exist is dropped from the output and reported; it stays in the source.
 No video file, subtitle file or local path reaches the output. MP4 files are
 never shipped: every video plays from the channel.
 
+Covers are always shipped as local WebP, so the page requests nothing from the
+video host before play. For a published video the script also fetches the
+channel's own thumbnail (``maxresdefault``, else ``hqdefault``) and encodes
+whichever of that and the production cover has more pixels; a tie keeps the
+production cover. Downloads are cached; ``--offline`` skips them.
+
 Usage:
     py -3.14 scripts/build_video_catalog.py [--out-root DIR] [--publish-dir DIR]
         [--links-doc FILE] [--lessons FILE] [--films FILE] [--landshut-covers DIR]
-        [--check]
+        [--cover-cache DIR] [--offline] [--check]
 """
 
 from __future__ import annotations
@@ -40,6 +48,9 @@ import io
 import json
 import re
 import sys
+import tempfile
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from PIL import Image
@@ -283,6 +294,43 @@ def write_cover(src: Path, dest: Path) -> int:
     return 0
 
 
+def channel_thumbnail(youtube_id: str, cache: Path) -> Path | None:
+    """The channel's own thumbnail for a published video, cached on disk.
+
+    ``maxresdefault`` exists only when the upload was at least 720p; YouTube
+    answers a missing one with a 404 or a 120x90 placeholder, so both are
+    treated as absent and ``hqdefault`` is tried next.
+    """
+    for name in ("maxresdefault", "hqdefault"):
+        path = cache / f"{youtube_id}-{name}.jpg"
+        if not path.is_file():
+            url = f"https://i.ytimg.com/vi/{youtube_id}/{name}.jpg"
+            try:
+                with urllib.request.urlopen(url, timeout=20) as response:
+                    data = response.read()
+            except (urllib.error.URLError, TimeoutError):
+                continue
+            cache.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        try:
+            with Image.open(path) as image:
+                if image.width > 120:
+                    return path
+        except OSError:
+            continue
+    return None
+
+
+def sharper_cover(local: Path, remote: Path | None) -> Path:
+    """The source with more pixels; the production cover on a tie."""
+    if remote is None:
+        return local
+    if not local.is_file():
+        return remote
+    with Image.open(local) as a, Image.open(remote) as b:
+        return remote if b.width * b.height > a.width * a.height else local
+
+
 def cover_slug(video_id: str) -> str:
     """File name for a video's cover."""
     return re.sub(r"[^a-z0-9]+", "-", video_id.lower()).strip("-")
@@ -430,6 +478,18 @@ def build(args: argparse.Namespace) -> None:
         )
         covers[x["id"]] = EDITORIAL.parent / x["cover"]
 
+    # Ids added in the editorial file ahead of the links document.
+    by_id = {v["id"]: v for v in videos}
+    for vid, yt in editorial.get("youtube_ids", {}).items():
+        if vid.startswith("_"):
+            continue
+        if vid not in by_id:
+            fail(f"youtube_ids: {vid!r} is not a video in the catalogue")
+        known = by_id[vid]["youtubeId"]
+        if known and known != yt:
+            fail(f"{vid}: youtube_ids says {yt}, the sources say {known}")
+        by_id[vid]["youtubeId"] = yt
+
     # Overlay, classification and validation.
     orphans: dict[str, list[str]] = {}
     extras_by_id = {x["id"]: x for x in editorial.get("extras", [])}
@@ -481,9 +541,13 @@ def build(args: argparse.Namespace) -> None:
     # Covers.
     cover_bytes = 0
     if not args.check:
+        cache = Path(args.cover_cache)
         for v in videos:
+            source = covers[v["id"]]
+            if v["youtubeId"] and not args.offline:
+                source = sharper_cover(source, channel_thumbnail(v["youtubeId"], cache))
             cover_bytes += write_cover(
-                covers[v["id"]], out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp"
+                source, out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp"
             )
         # A cover left behind by a video that was removed is dead weight in the wheel.
         wanted = {f"{cover_slug(v['id'])}.webp" for v in videos}
@@ -590,6 +654,16 @@ def main() -> None:
     parser.add_argument("--lessons", default=str(DEFAULTS["lessons"]))
     parser.add_argument("--films", default=str(DEFAULTS["films"]))
     parser.add_argument("--landshut-covers", default=str(DEFAULTS["landshut_covers"]))
+    parser.add_argument(
+        "--cover-cache",
+        default=str(Path(tempfile.gettempdir()) / "oe_video_covers"),
+        help="Where channel thumbnails are cached between runs.",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Use the production covers only; fetch nothing from the channel.",
+    )
     parser.add_argument(
         "--check",
         action="store_true",
