@@ -798,9 +798,11 @@ class FinanceService:
         # Re-checked when the link moves, and when the vendor or the direction
         # moves under a link that stays, since either can make it one the
         # order cannot back.
-        parties_moved = ("contact_id" in fields and fields["contact_id"] != invoice.contact_id) or (
-            "invoice_direction" in fields and fields["invoice_direction"] != invoice.invoice_direction
-        )
+        # Compared as text: the patch carries the vendor as a string, the row
+        # holds a UUID, and the form sends it back on every save.
+        parties_moved = (
+            "contact_id" in fields and str(fields["contact_id"] or "").lower() != str(invoice.contact_id or "").lower()
+        ) or ("invoice_direction" in fields and fields["invoice_direction"] != invoice.invoice_direction)
         if "purchase_order_id" in fields or parties_moved:
             current_link = invoice_po_link(invoice.purchase_order_id, invoice.metadata_)
             target_link = fields.get("purchase_order_id", current_link)

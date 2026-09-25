@@ -1222,3 +1222,45 @@ async def test_update_invoice_line_items_replace_logs_audit_row(
     assert md.get("new_count") == 1
     # 200 + 300 = 500 prior; 450 new; delta = -50
     assert Decimal(md.get("total_delta", "0")) == Decimal("-50")
+
+
+async def test_resaving_a_linked_invoice_with_its_own_vendor_does_not_recheck_the_order() -> None:
+    """The invoice form sends ``contact_id`` back as text on every save.
+
+    Compared to the stored UUID it must read as the same vendor, or every
+    edit of a linked invoice re-weighs the order link and an invoice whose
+    order has since been closed could not even have its notes corrected.
+    """
+    from app.modules.finance.schemas import InvoiceUpdate
+
+    service = _make_service()
+    vendor, order = uuid.uuid4(), uuid.uuid4()
+    invoice = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
+        invoice_number="INV-LINKED-1",
+        invoice_direction="payable",
+        contact_id=vendor,
+        purchase_order_id=order,
+        metadata_={"po_id": str(order)},
+        amount_subtotal="100",
+        tax_amount="25",
+        amount_total="125",
+        status="approved",
+        line_items=[],
+    )
+    service.invoices.rows[invoice.id] = invoice  # type: ignore[attr-defined]
+
+    async def _refuse(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("the order link was re-checked on a plain save")
+
+    service._check_po_link = _refuse  # type: ignore[method-assign]
+    await service.update_invoice(
+        invoice.id,
+        InvoiceUpdate(
+            contact_id=str(vendor),
+            invoice_direction="payable",
+            purchase_order_id=order,
+            notes="Delivery note 4471 attached",
+        ),
+    )
