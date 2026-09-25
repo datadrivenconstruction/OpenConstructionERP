@@ -35206,7 +35206,7 @@ const resource = {
     "schedule.boq_links_empty": "Hali birorta ham BOQ pozitsiyasi bogʻlanmagan. Bu ish quradigan pozitsiyalarni bogʻlang.",
     "schedule.boq_links_unknown": "Pozitsiya topilmadi",
     "schedule.boq_links_no_boqs": "Bu loyihada hali BOQ yoʻq.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Hajmlar jadvali",
     "schedule.boq_links_search": "Pozitsiyalarni qidirish",
     "schedule.boq_links_position": "Pozitsiya",
     "schedule.boq_links_select": "Pozitsiyani tanlang...",

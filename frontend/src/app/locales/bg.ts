@@ -34580,7 +34580,7 @@ const resource = {
     "schedule.boq_links_empty": "Все още няма свързани позиции от BOQ. Свържете позициите, които тази дейност изгражда.",
     "schedule.boq_links_unknown": "Позицията не е намерена",
     "schedule.boq_links_no_boqs": "Този проект все още няма BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Количествена сметка",
     "schedule.boq_links_search": "Търсене на позиции",
     "schedule.boq_links_position": "Позиция",
     "schedule.boq_links_select": "Изберете позиция...",

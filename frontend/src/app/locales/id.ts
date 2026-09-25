@@ -34418,7 +34418,7 @@ const resource = {
     "schedule.boq_links_empty": "Belum ada posisi BOQ yang ditautkan. Tautkan posisi yang dibangun oleh aktivitas ini.",
     "schedule.boq_links_unknown": "Posisi tidak ditemukan",
     "schedule.boq_links_no_boqs": "Proyek ini belum memiliki BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Daftar Kuantitas",
     "schedule.boq_links_search": "Cari posisi",
     "schedule.boq_links_position": "Posisi",
     "schedule.boq_links_select": "Pilih posisi...",

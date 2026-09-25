@@ -34497,7 +34497,7 @@ const resource = {
     "schedule.boq_links_empty": "Ingen BOQ-poster koblet ennå. Koble postene denne aktiviteten bygger.",
     "schedule.boq_links_unknown": "Post ikke funnet",
     "schedule.boq_links_no_boqs": "Dette prosjektet har ennå ingen BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Mengdebeskrivelse",
     "schedule.boq_links_search": "Søk i poster",
     "schedule.boq_links_position": "Post",
     "schedule.boq_links_select": "Velg post...",

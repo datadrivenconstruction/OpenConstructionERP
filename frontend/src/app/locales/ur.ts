@@ -33865,7 +33865,7 @@ const resource = {
     "schedule.boq_links_empty": "ابھی تک کوئی BOQ پوزیشن منسلک نہیں کی گئی۔ ان پوزیشنوں کو منسلک کریں جو یہ سرگرمی تعمیر کرتی ہے۔",
     "schedule.boq_links_unknown": "پوزیشن نہیں ملی",
     "schedule.boq_links_no_boqs": "اس پروجیکٹ کا ابھی تک کوئی BOQ نہیں ہے۔",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "مقدار کا بل",
     "schedule.boq_links_search": "پوزیشنیں تلاش کریں",
     "schedule.boq_links_position": "پوزیشن",
     "schedule.boq_links_select": "پوزیشن منتخب کریں...",

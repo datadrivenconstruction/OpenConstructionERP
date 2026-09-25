@@ -33752,7 +33752,7 @@ const resource = {
     "schedule.boq_links_empty": "Δεν έχουν συνδεθεί ακόμη θέσεις BOQ. Συνδέστε τις θέσεις που κατασκευάζει αυτή η δραστηριότητα.",
     "schedule.boq_links_unknown": "Η θέση δεν βρέθηκε",
     "schedule.boq_links_no_boqs": "Αυτό το έργο δεν διαθέτει ακόμη BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Πίνακας Ποσοτήτων",
     "schedule.boq_links_search": "Αναζήτηση θέσεων",
     "schedule.boq_links_position": "Θέση",
     "schedule.boq_links_select": "Επιλέξτε θέση...",

@@ -34690,7 +34690,7 @@ const resource = {
     "schedule.boq_links_empty": "Niciun articol din BOQ nu este încă legat. Legați articolele pe care le construiește această activitate.",
     "schedule.boq_links_unknown": "Articolul nu a fost găsit",
     "schedule.boq_links_no_boqs": "Acest proiect nu are încă un BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Listă de cantități",
     "schedule.boq_links_search": "Căutați articole",
     "schedule.boq_links_position": "Articol",
     "schedule.boq_links_select": "Selectați articolul...",

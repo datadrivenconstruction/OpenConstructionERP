@@ -34601,7 +34601,7 @@ const resource = {
     "schedule.boq_links_empty": "Nog geen BOQ-posten gekoppeld. Koppel de posten die deze activiteit bouwt.",
     "schedule.boq_links_unknown": "Post niet gevonden",
     "schedule.boq_links_no_boqs": "Dit project heeft nog geen BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Raming",
     "schedule.boq_links_search": "Posten zoeken",
     "schedule.boq_links_position": "Post",
     "schedule.boq_links_select": "Selecteer post...",

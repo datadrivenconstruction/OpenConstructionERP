@@ -33785,7 +33785,7 @@ const resource = {
     "schedule.boq_links_empty": "Wala pang naka-link na posisyon ng BOQ. I-link ang mga posisyong ginagawa ng aktibidad na ito.",
     "schedule.boq_links_unknown": "Hindi natagpuan ang posisyon",
     "schedule.boq_links_no_boqs": "Wala pang BOQ ang proyektong ito.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Listahan ng Dami",
     "schedule.boq_links_search": "Maghanap ng mga posisyon",
     "schedule.boq_links_position": "Posisyon",
     "schedule.boq_links_select": "Pumili ng posisyon...",

@@ -35007,7 +35007,7 @@ const resource = {
     "schedule.boq_links_empty": "Żadna pozycja BOQ nie jest jeszcze powiązana. Powiąż pozycje, które buduje ta czynność.",
     "schedule.boq_links_unknown": "Nie znaleziono pozycji",
     "schedule.boq_links_no_boqs": "Ten projekt nie ma jeszcze BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Kosztorys",
     "schedule.boq_links_search": "Szukaj pozycji",
     "schedule.boq_links_position": "Pozycja",
     "schedule.boq_links_select": "Wybierz pozycję...",

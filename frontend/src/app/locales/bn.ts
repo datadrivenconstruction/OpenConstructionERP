@@ -33785,7 +33785,7 @@ const resource = {
     "schedule.boq_links_empty": "এখনও কোনো BOQ পজিশন লিংক করা হয়নি। এই কার্যক্রম যে পজিশনগুলো তৈরি করে সেগুলো লিংক করুন।",
     "schedule.boq_links_unknown": "পজিশন পাওয়া যায়নি",
     "schedule.boq_links_no_boqs": "এই প্রজেক্টের এখনও কোনো BOQ নেই।",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "পরিমাণ বিবরণী",
     "schedule.boq_links_search": "পজিশন খুঁজুন",
     "schedule.boq_links_position": "পজিশন",
     "schedule.boq_links_select": "পজিশন নির্বাচন করুন...",

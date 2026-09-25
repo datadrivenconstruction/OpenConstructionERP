@@ -32753,7 +32753,7 @@ const resource = {
     "schedule.boq_links_empty": "Nenhum item do BOQ vinculado ainda. Vincule os itens que esta atividade constrói.",
     "schedule.boq_links_unknown": "Item não encontrado",
     "schedule.boq_links_no_boqs": "Este projeto ainda não tem um BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Mapa de quantidades",
     "schedule.boq_links_search": "Buscar itens",
     "schedule.boq_links_position": "Item",
     "schedule.boq_links_select": "Selecionar item...",

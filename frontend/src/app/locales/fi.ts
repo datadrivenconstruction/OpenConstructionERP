@@ -34470,7 +34470,7 @@ const resource = {
     "schedule.boq_links_empty": "BOQ-nimikkeitä ei ole vielä linkitetty. Linkitä nimikkeet, jotka tämä tehtävä toteuttaa.",
     "schedule.boq_links_unknown": "Nimikettä ei löytynyt",
     "schedule.boq_links_no_boqs": "Tällä projektilla ei ole vielä BOQ:ta.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Määräluettelo",
     "schedule.boq_links_search": "Hae nimikkeitä",
     "schedule.boq_links_position": "Nimike",
     "schedule.boq_links_select": "Valitse nimike...",

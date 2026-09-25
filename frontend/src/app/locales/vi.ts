@@ -34576,7 +34576,7 @@ const resource = {
     "schedule.boq_links_empty": "Chưa có hạng mục BOQ nào được liên kết. Hãy liên kết các hạng mục mà hoạt động này xây dựng.",
     "schedule.boq_links_unknown": "Không tìm thấy hạng mục",
     "schedule.boq_links_no_boqs": "Dự án này chưa có BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Bảng khối lượng",
     "schedule.boq_links_search": "Tìm hạng mục",
     "schedule.boq_links_position": "Hạng mục",
     "schedule.boq_links_select": "Chọn hạng mục...",

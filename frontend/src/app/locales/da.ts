@@ -34622,7 +34622,7 @@ const resource = {
     "schedule.boq_links_empty": "Ingen BOQ-positioner tilknyttet endnu. Tilknyt de positioner, denne aktivitet bygger.",
     "schedule.boq_links_unknown": "Position ikke fundet",
     "schedule.boq_links_no_boqs": "Dette projekt har endnu ingen BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Tilbudsliste",
     "schedule.boq_links_search": "Søg positioner",
     "schedule.boq_links_position": "Position",
     "schedule.boq_links_select": "Vælg position...",

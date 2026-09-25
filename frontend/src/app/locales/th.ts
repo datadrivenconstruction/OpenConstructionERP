@@ -34356,7 +34356,7 @@ const resource = {
     "schedule.boq_links_empty": "ยังไม่มีตำแหน่ง BOQ ที่เชื่อมโยง เชื่อมโยงตำแหน่งที่กิจกรรมนี้สร้างขึ้น",
     "schedule.boq_links_unknown": "ไม่พบตำแหน่ง",
     "schedule.boq_links_no_boqs": "โครงการนี้ยังไม่มี BOQ",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "บัญชีปริมาณงาน",
     "schedule.boq_links_search": "ค้นหาตำแหน่ง",
     "schedule.boq_links_position": "ตำแหน่ง",
     "schedule.boq_links_select": "เลือกตำแหน่ง...",

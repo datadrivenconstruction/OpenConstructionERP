@@ -34630,7 +34630,7 @@ const resource = {
     "schedule.boq_links_empty": "Inga BOQ-positioner länkade ännu. Länka positionerna som denna aktivitet bygger.",
     "schedule.boq_links_unknown": "Positionen hittades inte",
     "schedule.boq_links_no_boqs": "Det här projektet har ingen BOQ ännu.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Mängdförteckning",
     "schedule.boq_links_search": "Sök positioner",
     "schedule.boq_links_position": "Position",
     "schedule.boq_links_select": "Välj position...",

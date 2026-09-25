@@ -33721,7 +33721,7 @@ const resource = {
     "schedule.boq_links_empty": "Әлі бірде-бір BOQ позициясы байланыстырылмаған. Бұл әрекет құратын позицияларды байланыстырыңыз.",
     "schedule.boq_links_unknown": "Позиция табылмады",
     "schedule.boq_links_no_boqs": "Бұл жобада әлі BOQ жоқ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "ЖКТ",
     "schedule.boq_links_search": "Позицияларды іздеу",
     "schedule.boq_links_position": "Позиция",
     "schedule.boq_links_select": "Позицияны таңдаңыз...",

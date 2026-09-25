@@ -34808,7 +34808,7 @@ const resource = {
     "schedule.boq_links_empty": "Henüz bağlantılı BOQ pozisyonu yok. Bu faaliyetin inşa ettiği pozisyonları bağlayın.",
     "schedule.boq_links_unknown": "Pozisyon bulunamadı",
     "schedule.boq_links_no_boqs": "Bu projede henüz BOQ yok.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Keşif",
     "schedule.boq_links_search": "Pozisyon ara",
     "schedule.boq_links_position": "Pozisyon",
     "schedule.boq_links_select": "Pozisyon seçin...",

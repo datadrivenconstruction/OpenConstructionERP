@@ -34575,7 +34575,7 @@ const resource = {
     "schedule.boq_links_empty": "Još nema povezanih stavki BOQ-a. Povežite stavke koje ova aktivnost gradi.",
     "schedule.boq_links_unknown": "Stavka nije pronađena",
     "schedule.boq_links_no_boqs": "Ovaj projekt još nema BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Troškovnik",
     "schedule.boq_links_search": "Pretraži stavke",
     "schedule.boq_links_position": "Stavka",
     "schedule.boq_links_select": "Odaberi stavku...",

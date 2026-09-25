@@ -34729,7 +34729,7 @@ const resource = {
     "schedule.boq_links_empty": "Zatím nejsou propojeny žádné položky BOQ. Propojte položky, které tato činnost realizuje.",
     "schedule.boq_links_unknown": "Položka nebyla nalezena",
     "schedule.boq_links_no_boqs": "Tento projekt zatím nemá BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Rozpočet",
     "schedule.boq_links_search": "Hledat položky",
     "schedule.boq_links_position": "Položka",
     "schedule.boq_links_select": "Vybrat položku...",

@@ -32740,7 +32740,7 @@ const resource = {
     "schedule.boq_links_empty": "Todavía no hay partidas del BOQ vinculadas. Vincule las partidas que esta actividad construye.",
     "schedule.boq_links_unknown": "Partida no encontrada",
     "schedule.boq_links_no_boqs": "Este proyecto todavía no tiene BOQ.",
-    "schedule.boq_links_boq": "BOQ",
+    "schedule.boq_links_boq": "Presupuesto",
     "schedule.boq_links_search": "Buscar partidas",
     "schedule.boq_links_position": "Partida",
     "schedule.boq_links_select": "Seleccionar partida...",
