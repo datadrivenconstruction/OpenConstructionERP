@@ -78,6 +78,8 @@ class ContractUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
+    # Renamable while the contract is a draft; see ContractsService.update_contract.
+    code: str | None = Field(default=None, min_length=1, max_length=80)
     title: str | None = Field(default=None, max_length=500)
     contract_type: str | None = Field(default=None, pattern=rf"^({CONTRACT_TYPES})$")
     counterparty_type: str | None = Field(default=None, pattern=rf"^({COUNTERPARTY_TYPES})$")

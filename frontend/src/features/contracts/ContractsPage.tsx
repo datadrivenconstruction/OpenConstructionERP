@@ -61,6 +61,7 @@ import {
 } from './ContractTemplatesPanel';
 import { ContractStatusPipeline } from './ContractStatusPipeline';
 import { SovLineLinkEditor, SovLineLinkSummary } from './SovLineLink';
+import { ContractCodeRename } from './ContractCodeRename';
 import { ContractExpiryBadge } from './ContractExpiryBadge';
 import { ComplianceGate } from './ComplianceGate';
 import { ContractPartiesPanel } from './ContractPartiesPanel';
@@ -2031,9 +2032,13 @@ export function ContractDetailDrawer({
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-light bg-surface-elevated px-5 py-3">
           <div>
-            <h2 id="contract-drawer-title" className="text-base font-semibold">
-              {contract.code} — {contract.title || 'Untitled'}
-            </h2>
+            <div className="flex items-center gap-1">
+              <h2 id="contract-drawer-title" className="text-base font-semibold">
+                {contract.code} —{' '}
+                {contract.title || t('contracts.untitled', { defaultValue: 'Untitled' })}
+              </h2>
+              <ContractCodeRename key={contract.code} contract={contract} />
+            </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <ContractTypeChip type={contract.contract_type} />
               <Badge variant={CONTRACT_STATUS_VARIANT[contract.status]} dot>

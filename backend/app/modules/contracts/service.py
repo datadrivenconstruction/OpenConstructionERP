@@ -1175,9 +1175,22 @@ class ContractsService:
                         "details": errors,
                     },
                 )
+        if "code" in fields:
+            if fields["code"] is None or fields["code"] == contract.code:
+                fields.pop("code")
+            else:
+                await self._assert_code_may_change(contract, fields["code"])
         if not fields:
             return contract
-        await self.contract_repo.update_fields(contract_id, **fields)
+        try:
+            await self.contract_repo.update_fields(contract_id, **fields)
+        except IntegrityError as exc:
+            # Two renames racing to the same code: the loser gets the same 409
+            # the check above gives, not a 500.
+            if "uq_oe_contracts_contract_code" not in str(exc.orig):
+                raise
+            await self.session.rollback()
+            raise self._code_in_use(fields["code"]) from exc
         await self.session.refresh(contract)
         # The paper moved, so any signature already collected against the old
         # wording is stale. Pushing the new hash onto the outstanding sessions is
@@ -1186,6 +1199,46 @@ class ContractsService:
         # deployment without the signing module.
         await self.refresh_signing_content_hash(contract_id)
         return contract
+
+    @staticmethod
+    def _code_in_use(code: str) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "contract_code_in_use",
+                "message": f"Contract code {code!r} is already in use",
+            },
+        )
+
+    async def _assert_code_may_change(self, contract: Contract, new_code: str) -> None:
+        """Raise 409 unless a contract may take this code.
+
+        A draft may be renamed: until it is signed its code is a working name,
+        and the only other way to free a code typed by mistake was to delete the
+        draft and write it again. A signed contract keeps its code, because
+        that is what the certificates, the invoices raised from its claims and
+        the other party's records quote it by.
+
+        Codes stay unique across the database. Scoping them to a project needs
+        the unique constraint replaced, and a constraint change does not reach
+        an upgraded install, so it is left for a release that ships a repair
+        for it rather than a migration alone.
+        """
+        if contract.status != "draft":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "contract_code_locked",
+                    "message": (
+                        f"The code of a contract in status {contract.status!r} cannot change; "
+                        "only a draft can be renamed."
+                    ),
+                    "contract_status": contract.status,
+                },
+            )
+        existing = await self.contract_repo.get_by_code(new_code)
+        if existing is not None and existing.id != contract.id:
+            raise self._code_in_use(new_code)
 
     async def delete_contract(self, contract_id: uuid.UUID) -> None:
         """Delete a contract. Only a draft may be deleted.
