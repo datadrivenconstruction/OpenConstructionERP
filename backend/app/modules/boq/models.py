@@ -450,8 +450,8 @@ class BOQActivityLog(Base):
         nullable=True,
         index=True,
     )
-    # Nullable: system-generated activity (e.g. event-driven ``cost_breakdown.
-    # computed``) has no acting user. Previously a nil-UUID sentinel was written,
+    # Nullable: system-generated activity (an event published without an
+    # acting user) has no user. Previously a nil-UUID sentinel was written,
     # which SQLite accepted (FK enforcement off by default) but PostgreSQL
     # rejected with a ForeignKeyViolationError. NULL = "System" in the feed.
     user_id: Mapped[uuid.UUID | None] = mapped_column(

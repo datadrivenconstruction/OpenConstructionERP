@@ -282,6 +282,7 @@ async def _safe_audit(
 # Re-exported under its own name so ``from app.modules.boq.service import
 # DEFAULT_MARKUP_TEMPLATES`` keeps resolving for the readers that predate the
 # move. The table itself lives in a module the methodology catalogue can import.
+from app.modules.boq.activity_text import activity_description
 from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
@@ -8018,12 +8019,6 @@ class BOQService:
                 )
             )
 
-        await _safe_publish(
-            "boq.cost_breakdown.computed",
-            {"boq_id": str(boq_id), "direct_cost": round(direct_cost_val, 2)},
-            session=self.session,
-        )
-
         return CostBreakdownResponse(
             boq_id=str(boq_id),
             # BUG-B-012: HALF_UP cents quantisation, consistent with the
@@ -8552,7 +8547,7 @@ class BOQService:
                 action=e.action,
                 target_type=e.target_type,
                 target_id=e.target_id,
-                description=e.description,
+                description=activity_description(e.action, e.description),
                 changes=e.changes,
                 metadata_=e.metadata_,
                 created_at=e.created_at,
@@ -8588,7 +8583,7 @@ class BOQService:
                 action=e.action,
                 target_type=e.target_type,
                 target_id=e.target_id,
-                description=e.description,
+                description=activity_description(e.action, e.description),
                 changes=e.changes,
                 metadata_=e.metadata_,
                 created_at=e.created_at,

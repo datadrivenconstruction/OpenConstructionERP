@@ -19,6 +19,7 @@ from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 
 from app.core.sql_numeric import numeric_value
+from app.modules.boq.activity_text import READ_ONLY_ACTIVITY_ACTIONS
 from app.modules.boq.models import (
     BOQ,
     BOQActivityLog,
@@ -914,7 +915,10 @@ class ActivityLogRepository:
 
         Returns (entries, total_count).
         """
-        base = select(BOQActivityLog).where(BOQActivityLog.boq_id == boq_id)
+        base = select(BOQActivityLog).where(
+            BOQActivityLog.boq_id == boq_id,
+            BOQActivityLog.action.notin_(READ_ONLY_ACTIVITY_ACTIONS),
+        )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
@@ -936,7 +940,10 @@ class ActivityLogRepository:
 
         Returns (entries, total_count).
         """
-        base = select(BOQActivityLog).where(BOQActivityLog.project_id == project_id)
+        base = select(BOQActivityLog).where(
+            BOQActivityLog.project_id == project_id,
+            BOQActivityLog.action.notin_(READ_ONLY_ACTIVITY_ACTIONS),
+        )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
