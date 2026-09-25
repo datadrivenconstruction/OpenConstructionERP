@@ -513,6 +513,24 @@ function sourceFiles(dir: string, found: string[] = []): string[] {
   return found;
 }
 
+// The tree is walked, read and classified once, here, while the file is
+// collected. Doing it inside the tests put two thousand cold reads and two
+// full-tree censuses on the per-test clock, and under a loaded suite that alone
+// ran past the timeout: the census then reported nothing, which is worse than
+// red. Collection has no per-test timeout, and nothing below writes to the tree.
+const SOURCES = sourceFiles(SRC).map((file) => ({
+  rel: relative(SRC, file).replace(/\\/g, '/'),
+  text: readFileSync(file, 'utf8'),
+}));
+const TEXT_BY_REL = new Map(SOURCES.map((s) => [s.rel, s.text]));
+const readRel = (rel: string) => TEXT_BY_REL.get(rel) ?? readFileSync(join(SRC, rel), 'utf8');
+const BROWSER_LOCALE_OFFENDERS = SOURCES.flatMap(({ rel, text }) =>
+  browserLocaleSites(text, rel).map((h) => `${h.file}:${h.line}  ${h.text}`),
+);
+const FIXED_DECIMAL_OFFENDERS = SOURCES.flatMap(({ rel, text }) =>
+  fixedDecimalSites(text, rel).map((h) => `${h.file}:${h.line}  ${h.text}`),
+);
+
 describe('every number and date is written in the language the reader picked', () => {
   const original = i18next.language;
   afterAll(() => {
@@ -520,16 +538,13 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('finds no call site that asks the browser instead', () => {
-    const offenders = sourceFiles(SRC).flatMap((file) => {
-      const rel = relative(SRC, file).replace(/\\/g, '/');
-      return browserLocaleSites(readFileSync(file, 'utf8'), rel).map((h) => `${h.file}:${h.line}  ${h.text}`);
-    });
+    const offenders = BROWSER_LOCALE_OFFENDERS;
 
     // 308 of these existed across 140 files. Pass `getIntlLocale()` from
     // `shared/lib/formatters` as the first argument, or call one of the
     // fmt* helpers in that module.
     expect(offenders).toEqual([]);
-  }, 60_000);
+  });
 
   it('is looking at real files, so an empty result means something', () => {
     // A tree walk that visits nothing also finds no offenders, so the size of
@@ -538,8 +553,8 @@ describe('every number and date is written in the language the reader picked', (
     // in the run where it is already too late to matter. Failing here reports
     // the real number ("expected 0 to be greater than 500") in the one run
     // that needs it.
-    expect(sourceFiles(SRC).length).toBeGreaterThan(500);
-  }, 60_000);
+    expect(SOURCES.length).toBeGreaterThan(500);
+  });
 
   it('lists every deliberate exemption, so adding one shows up as a diff', () => {
     expect(ALLOWED.map((a) => `${a.file} :: ${a.snippet}`)).toEqual([
@@ -558,7 +573,7 @@ describe('every number and date is written in the language the reader picked', (
     // exemption nobody can see any more, and it would silently cover the next
     // bare call that happens to land on a line containing the same text.
     const stale = ALLOWED.filter(
-      (a) => !readFileSync(join(SRC, a.file), 'utf8').includes(a.snippet),
+      (a) => !readRel(a.file).includes(a.snippet),
     ).map((a) => a.file);
     expect(stale).toEqual([]);
   });
@@ -595,10 +610,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('finds no toFixed on a number a person reads', () => {
-    const offenders = sourceFiles(SRC).flatMap((file) => {
-      const rel = relative(SRC, file).replace(/\\/g, '/');
-      return fixedDecimalSites(readFileSync(file, 'utf8'), rel).map((h) => `${h.file}:${h.line}  ${h.text}`);
-    });
+    const offenders = FIXED_DECIMAL_OFFENDERS;
 
     // 508 of these existed across 178 files. Call `fmtFixed` from
     // `shared/lib/formatters` instead, or `fmtPercent` where the call is
@@ -606,7 +618,7 @@ describe('every number and date is written in the language the reader picked', (
     // it belongs to one of the MACHINE rules above or, failing those, to
     // FIXED_ALLOWED with the argument written down.
     expect(offenders).toEqual([]);
-  }, 60_000);
+  });
 
   it('recognises a fixed-decimal number wherever it is written', () => {
     expect(fixedDecimalSites('<span>{row.qty.toFixed(2)}</span>')).toHaveLength(1);
@@ -684,7 +696,7 @@ describe('every number and date is written in the language the reader picked', (
     ]);
     expect(FIXED_ALLOWED.filter((a) => a.why.length < 20)).toEqual([]);
     const stale = FIXED_ALLOWED.filter(
-      (a) => !readFileSync(join(SRC, a.file), 'utf8').includes(a.snippet),
+      (a) => !readRel(a.file).includes(a.snippet),
     ).map((a) => a.file);
     expect(stale).toEqual([]);
   });

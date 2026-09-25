@@ -108,22 +108,29 @@ describe('number helpers follow a language change while the preference is auto',
   });
 });
 
+// The tree is walked, read and scanned once, here, while the file is collected.
+// Doing it inside the test put two thousand cold reads on the per-test clock,
+// and under a loaded suite that alone ran past the timeout, so the census
+// reported nothing. Collection has no per-test timeout.
+const FILES = sourceFiles(SRC);
+const FROZEN = FILES.filter((file) => frozenSites(readFileSync(file, 'utf8')).length > 0).map((file) =>
+  relative(SRC, file).replace(/\\/g, '/'),
+);
+
 describe('no formatter outlives a language change', () => {
   it('finds none anywhere under src', () => {
-    const offenders = sourceFiles(SRC)
-      .filter((file) => frozenSites(readFileSync(file, 'utf8')).length > 0)
-      .map((file) => relative(SRC, file).replace(/\\/g, '/'));
+    const offenders = FROZEN;
 
     // Five of these existed, and one carried a comment describing the freeze
     // and leaving it in place. Build the formatter where it is used, or call
     // fmtNumber / fmtCurrency / fmtCompact, which read the locale per call.
     expect(offenders).toEqual([]);
-  }, 60_000);
+  });
 
   it('is looking at real files, so an empty result means something', () => {
     // A tree walk that visits nothing also finds no offenders.
-    expect(sourceFiles(SRC).length).toBeGreaterThan(500);
-  }, 60_000);
+    expect(FILES.length).toBeGreaterThan(500);
+  });
 
   it('still recognises a freeze in each of the shapes it can take', () => {
     const plain = 'const money = new Intl.NumberFormat(getIntlLocale(), { style: "currency" });';

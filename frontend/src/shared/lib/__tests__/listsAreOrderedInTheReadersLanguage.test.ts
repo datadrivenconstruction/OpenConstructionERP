@@ -230,10 +230,14 @@ function localeBlindCalls(src: string): string[] {
 describe('the rest of the product', () => {
   const root = sourceRoot();
   const files = productFiles(root);
+  // Read once, while the file is collected. Re-reading the tree inside a test
+  // put two thousand cold reads on the per-test clock, and under a loaded suite
+  // that ran past the timeout; collection has no per-test timeout.
+  const texts = new Map(files.map((file) => [file, readFileSync(file, 'utf8')]));
 
   const blind = new Map<string, string[]>();
   for (const file of files) {
-    const hits = localeBlindCalls(readFileSync(file, 'utf8'));
+    const hits = localeBlindCalls(texts.get(file)!);
     if (hits.length) blind.set(file.slice(root.length + 1).replace(/\\/g, '/'), hits);
   }
 
@@ -299,7 +303,7 @@ describe('the rest of the product', () => {
     // what a revert looks like - the bypass count stays flat because the
     // reverted site fails the name-shape test on some other key.
     const importers = files.filter((f) =>
-      /from '@\/shared\/lib\/collator'/.test(readFileSync(f, 'utf8')),
+      /from '@\/shared\/lib\/collator'/.test(texts.get(f)!),
     );
     expect(
       importers.length,

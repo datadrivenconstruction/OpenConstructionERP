@@ -41,28 +41,33 @@ function sourceFiles(dir: string, found: string[] = []): string[] {
   return found;
 }
 
+// The tree is walked, read and scanned once, here, while the file is collected.
+// Doing it inside the test put two thousand cold reads on the per-test clock,
+// and under a loaded suite that alone ran past the timeout, so the census
+// reported nothing. Collection has no per-test timeout.
+const FILES = sourceFiles(SRC);
+const OFFENDERS: string[] = [];
+for (const file of FILES) {
+  const text = readFileSync(file, 'utf8');
+  text.split('\n').forEach((line, i) => {
+    if (ABBREVIATED_YEAR.test(line)) {
+      OFFENDERS.push(`${relative(SRC, file).replace(/\\/g, '/')}:${i + 1}`);
+    }
+  });
+}
+
 describe('a year on screen', () => {
   it('is never written as two digits', () => {
-    const offenders: string[] = [];
-    for (const file of sourceFiles(SRC)) {
-      const text = readFileSync(file, 'utf8');
-      text.split('\n').forEach((line, i) => {
-        if (ABBREVIATED_YEAR.test(line)) {
-          offenders.push(`${relative(SRC, file).replace(/\\/g, '/')}:${i + 1}`);
-        }
-      });
-    }
-    expect(offenders).toEqual([]);
-  }, 60_000);
+    expect(OFFENDERS).toEqual([]);
+  });
 
   // Guards the guard. A census that walks the wrong directory, or one whose
   // pattern never matched anything in the first place, is green for a reason
   // that has nothing to do with the codebase being right.
   it('the census reads the source tree and its pattern matches the shape it names', () => {
-    const files = sourceFiles(SRC);
-    expect(files.length).toBeGreaterThan(500);
+    expect(FILES.length).toBeGreaterThan(500);
     expect(ABBREVIATED_YEAR.test("  { month: 'short', year: '2-digit' },")).toBe(true);
     expect(ABBREVIATED_YEAR.test('    ...(withYear ? { year: "2-digit" as const } : {}),')).toBe(true);
     expect(ABBREVIATED_YEAR.test("  { month: 'short', year: 'numeric' },")).toBe(false);
-  }, 60_000);
+  });
 });
