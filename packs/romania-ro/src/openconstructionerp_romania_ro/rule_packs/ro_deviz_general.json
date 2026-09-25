@@ -1,0 +1,34 @@
+{
+  "rule_pack_id": "ro_deviz_general",
+  "name": "Deviz general and its chapters",
+  "name_ro": "Devizul general și capitolele sale",
+  "standard": "HG 907/2016",
+  "jurisdiction": "RO",
+  "applies_to": [
+    "estimate",
+    "boq",
+    "validation"
+  ],
+  "review_status": "Chapter structure read from a completed HG 907/2016 deviz general published by a Romanian county council. Pending review by a Romanian cost engineer.",
+  "references": [
+    "HG 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice aferente obiectivelor/proiectelor de investiții finanțate din fonduri publice (https://legislatie.just.ro/public/detaliidocument/185166)"
+  ],
+  "description": "A publicly funded investment in Romania is budgeted in a deviz general of six chapters, each split into subchapters, and every object in it has its own deviz pe obiect. The chapter a cost sits in decides how it is financed, approved and audited, so a line whose chapter cannot be read is a line the client cannot place. The pack classifies each line against DIN 276 for the cost-group view and files it under its deviz general chapter as well.",
+  "chapters": {
+    "1": "Cheltuieli pentru obținerea și amenajarea terenului",
+    "2": "Cheltuieli pentru asigurarea utilităților necesare obiectivului de investiții",
+    "3": "Cheltuieli pentru proiectare și asistență tehnică",
+    "4": "Cheltuieli pentru investiția de bază",
+    "5": "Alte cheltuieli",
+    "6": "Cheltuieli pentru probe tehnologice și teste"
+  },
+  "practice_notes": [
+    "Construction and installation works of an object sit in subchapter 4.1, site organisation in 5.1, and the contingency (cheltuieli diverse și neprevăzute) in 5.3",
+    "The contractor's tender (deviz ofertă) is priced from norme de deviz: the Indicatoare de norme de deviz give the material, labour and plant consumption per unit of work",
+    "CAM, the 2.25 percent employer's labour insurance contribution (Codul fiscal art. 220^3), is levied on the labour component alone and sits inside the labour cost of each position rather than as a percentage of the bill"
+  ],
+  "enables_rule_ids": [
+    "romania.deviz_chapter_required",
+    "romania.deviz_chapter_recognised"
+  ]
+}

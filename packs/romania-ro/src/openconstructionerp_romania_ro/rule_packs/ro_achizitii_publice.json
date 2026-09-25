@@ -1,0 +1,26 @@
+{
+  "rule_pack_id": "ro_achizitii_publice",
+  "name": "Public procurement of works",
+  "name_ro": "Achiziții publice de lucrări",
+  "standard": "Legea 98/2016",
+  "jurisdiction": "RO",
+  "applies_to": [
+    "tendering",
+    "estimate",
+    "projects"
+  ],
+  "review_status": "Drawn from public statutory sources. Pending review by a Romanian procurement specialist before it is relied on for a tender.",
+  "references": [
+    "Legea 98/2016 privind achizițiile publice",
+    "HG 395/2016, norme metodologice de aplicare a Legii 98/2016 (https://legislatie.just.ro/Public/DetaliiDocument/179009)"
+  ],
+  "description": "Public works contracts are awarded under Legea 98/2016 and its implementing norms. The client's estimated value rests on the deviz general, and the bidder returns a priced deviz ofertă for each object against the same list of works, so the tender can be compared line by line.",
+  "practice_notes": [
+    "The bill goes out as a list of works per object and comes back priced on the same lines",
+    "The contingency in chapter 5.3 of the deviz general belongs to the client's budget, not to the bidder's price"
+  ],
+  "enables_rule_ids": [
+    "romania.deviz_chapter_required",
+    "romania.deviz_chapter_recognised"
+  ]
+}

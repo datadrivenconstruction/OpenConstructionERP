@@ -1,0 +1,45 @@
+# Romania Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by the
+# OnboardingWizard React component in place of the default steps.
+#
+# Labels are bilingual: the English sentence and the Romanian term an
+# estimator decides on, rather than a translation of the whole sentence.
+
+version: 2
+locale: ro
+title: "Welcome to OpenConstructionERP - Romania"
+title_ro: "Bun venit în OpenConstructionERP - România"
+subtitle: "Three steps to line the workspace up with Romanian practice: deviz general chapters, the cost cascade and TVA. Trei pași pentru a alinia spațiul de lucru la practica din România."
+
+steps:
+  - id: company_profile
+    title: "Company details / Datele firmei"
+    body: "Used on estimates, tender documents and reports. Apar pe devize, documentele de ofertă și rapoarte."
+    fields:
+      - { key: company_name, label: "Company name / Denumirea firmei", type: text, required: true }
+      - { key: cui, label: "Tax identification code / Cod unic de înregistrare (CUI)", type: text, required: false, placeholder: "RO12345678" }
+      - { key: trade_register, label: "Trade register number / Nr. de ordine în Registrul Comerțului", type: text, required: false, placeholder: "J40/1234/2020" }
+      - { key: role, label: "Your role on projects / Rolul în proiecte", type: radio, required: true, default: "Contractor (antreprenor)", options: ["Contractor (antreprenor)", "Subcontractor (subantreprenor)", "Designer or cost engineer (proiectant, devizier)", "Client or investor (beneficiar, investitor)"] }
+
+  - id: estimate_structure
+    title: "Estimate structure / Structura devizului"
+    body: "Every line is filed under its deviz general chapter (HG 907/2016) and classified against DIN 276 for the cost-group view. Fiecare poziție se încadrează într-un capitol al devizului general."
+    fields:
+      - { key: estimate_type, label: "Default estimate / Tipul implicit de deviz", type: radio, required: true, default: "Deviz ofertă (tender estimate)", options: ["Deviz general (investor budget)", "Deviz pe obiect (per-object estimate)", "Deviz ofertă (tender estimate)"] }
+      - { key: public_procurement, label: "We tender for public contracts under Legea 98/2016 / Participăm la achiziții publice", type: checkbox, default: true }
+      - { key: indirect_costs, label: "Indirect costs / Cheltuieli indirecte", type: select, required: true, default: "10%", options: ["8%", "10%", "12%", "Set per project"] }
+      - { key: profit, label: "Profit", type: select, required: true, default: "5%", options: ["3%", "5%", "8%", "Set per project"] }
+
+  - id: review
+    title: "Review and finish / Verificare și finalizare"
+    body: "We will set the workspace to RON, switch on the Romanian validation rules and apply the Romanian estimating method with 21% TVA. Everything can be changed later in Settings. Totul se poate modifica ulterior din Setări."
+    action:
+      label: "Create my Romanian workspace / Creează spațiul de lucru"
+      apply:
+        - set_default_currency: RON
+        - set_tax_template: ro_tva_21
+        - enable_rule_packs:
+            - ro_deviz_general
+            - ro_achizitii_publice
+            - ro_autorizare_constructii
+            - ro_tva_constructii
