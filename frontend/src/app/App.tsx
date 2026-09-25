@@ -701,6 +701,11 @@ const HowItWorksPage = lazy(() => import('@/features/help/HowItWorksPage'));
 const CasesPage = lazy(() =>
   import('@/features/cases').then((m) => ({ default: m.CasesPage }))
 );
+// Videos - tutorial and training videos. Lazy: the page is a list of posters,
+// and nothing on it is needed at boot.
+const VideosPage = lazy(() =>
+  import('@/features/videos').then((m) => ({ default: m.VideosPage }))
+);
 // The case editor, split from the hub: most readers never author one.
 const CaseEditorPage = lazy(() =>
   import('@/features/cases').then((m) => ({ default: m.CaseEditorPage }))
@@ -1437,6 +1442,7 @@ export default function App() {
             and the form has no business loading for the ones who do not.
             /cases/new is declared before the stepper for readability only -
             the router ranks a static segment above a dynamic one regardless. */}
+        <Route path="/videos" element={<P title="Videos"><VideosPage /></P>} />
         <Route path="/cases" element={<P title="Cases"><CasesPage /></P>} />
         <Route path="/cases/new" element={<P title="Cases"><CaseEditorPage /></P>} />
         <Route path="/cases/:playbookId/edit" element={<P title="Cases"><CaseEditorPage /></P>} />

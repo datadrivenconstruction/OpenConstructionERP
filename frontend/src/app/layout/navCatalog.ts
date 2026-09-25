@@ -99,6 +99,7 @@ import {
   FileWarning,
   Flag,
   Wrench,
+  MonitorPlay,
 } from 'lucide-react';
 
 
@@ -169,6 +170,10 @@ export interface NavGroup {
   dynamicGroupKey?: string;
 }
 
+/** The Learn group's id: the sidebar draws it apart from the loop and stores
+ *  its hidden state under this key in `hiddenGroups`. */
+export const LEARN_GROUP_ID = 'grp_learn';
+
 // Navigation groups — collapsible thematic sections (v6.10.0 redesign).
 //
 // The flat / oversized menu was regrouped into 19 thematic groups of
@@ -202,6 +207,29 @@ export interface NavGroup {
 // The locale keys are added by a later pass; until then the English
 // default renders. Item labelKeys reuse the existing locale strings.
 export const navGroups: NavGroup[] = [
+  // ── 0. LEARN (videos and cases) ────────────────────────────────────
+  // The two ways into the product for somebody new: watch it, or walk a
+  // guided case in the app. The sidebar does not render this group in the
+  // loop with the others: it draws it as its own card above everything else,
+  // Pinned included, in Simple, Advanced and workspace menus alike, and lets
+  // the user hide the whole card from its header and bring it back from the
+  // foot of the menu (see `LearnSection` in Sidebar.tsx). Hiding goes through
+  // the same `hiddenGroups` list as the Edit-menu section toggles, keyed by
+  // LEARN_GROUP_ID, so the "{N} hidden" chip counts it too.
+  //
+  // It stays in the catalogue rather than living in the sidebar alone, so the
+  // route-icon map and the case editor's screen picker keep seeing both rows.
+  // Cases (playbooks) moved here from Overview.
+  {
+    id: LEARN_GROUP_ID,
+    labelKey: 'sidebar.group.learn',
+    defaultLabel: 'Learn',
+    defaultOpen: true,
+    items: [
+      { labelKey: 'nav.videos', defaultLabel: 'Videos', to: '/videos', icon: MonitorPlay },
+      { labelKey: 'nav.cases', to: '/cases', icon: Route },
+    ],
+  },
   // ── 1. OVERVIEW (always visible) ───────────────────────────────────
   // The few entry points every user touches every session.
   {
@@ -212,10 +240,6 @@ export const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
-      // Cases (playbooks) - guided, cross-module worked examples. Sits in
-      // Overview so the "learn by example" entry is discoverable from the top,
-      // and above Project files so the "learn by example" entry is seen first.
-      { labelKey: 'nav.cases', to: '/cases', icon: Route },
       // Documents is back in Overview by founder request. It carries no
       // hideInSimple and no advancedOnly, which is what keeps it reachable in
       // Simple mode; the sheet register and the drawing surfaces stay behind

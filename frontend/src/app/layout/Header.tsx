@@ -287,6 +287,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Public Funding': 'funding.title',
   // Learning & admin
   'Cases': 'nav.cases',
+  'Videos': 'nav.videos',
   'How it works': 'howto.page_title',
   'Inside track': 'inside.page_title',
   'Module Builder': 'nav.module_builder',
