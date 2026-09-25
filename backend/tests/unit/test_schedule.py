@@ -535,9 +535,16 @@ async def test_update_progress_auto_status() -> None:
     assert updated.status == "not_started"
 
 
+async def _positions_always_in_project(_schedule_id: uuid.UUID, _position_ids: list[str]) -> None:
+    return None
+
+
 @pytest.mark.asyncio
 async def test_link_boq_position() -> None:
     svc = _make_service()
+    # The fake session runs no SQL; keeping a link inside the schedule's own
+    # project is covered against PostgreSQL in test_schedule_boq_links.py.
+    svc._assert_positions_in_project = _positions_always_in_project  # type: ignore[method-assign]
     schedule = await _create_schedule(svc)
     activity = await _create_activity(svc, schedule.id)
     boq_id = uuid.uuid4()
@@ -549,6 +556,9 @@ async def test_link_boq_position() -> None:
 @pytest.mark.asyncio
 async def test_link_boq_position_duplicate_rejected() -> None:
     svc = _make_service()
+    # The fake session runs no SQL; keeping a link inside the schedule's own
+    # project is covered against PostgreSQL in test_schedule_boq_links.py.
+    svc._assert_positions_in_project = _positions_always_in_project  # type: ignore[method-assign]
     schedule = await _create_schedule(svc)
     activity = await _create_activity(svc, schedule.id)
     boq_id = uuid.uuid4()

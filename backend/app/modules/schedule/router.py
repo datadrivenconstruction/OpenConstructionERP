@@ -702,6 +702,27 @@ async def link_boq_position(
     return _activity_to_response(activity)
 
 
+@router.delete(
+    "/activities/{activity_id}/link-position/{boq_position_id}/",
+    response_model=ActivityResponse,
+    summary="Unlink BOQ position from activity",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def unlink_boq_position(
+    activity_id: uuid.UUID,
+    boq_position_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Remove one BOQ position from an activity's links."""
+    existing = await service.get_activity(activity_id)
+    await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
+    activity = await service.unlink_boq_position(activity_id, boq_position_id)
+    return _activity_to_response(activity)
+
+
 @router.patch(
     "/activities/{activity_id}/progress/",
     response_model=ActivityResponse,
