@@ -29,6 +29,7 @@ const REGIONS: { code: string; flag: string; label: string; standard: string }[]
   { code: 'PL', flag: '\ud83c\uddf5\ud83c\uddf1', label: 'Poland', standard: 'KNR' },
   { code: 'BE', flag: '\ud83c\udde7\ud83c\uddea', label: 'Belgium', standard: 'BSAB' },
   { code: 'CZ', flag: '\ud83c\udde8\ud83c\uddff', label: 'Czech Republic', standard: 'TSP' },
+  { code: 'HR', flag: '\ud83c\udded\ud83c\uddf7', label: 'Croatia', standard: 'Tro\u0161kovnik' },
   { code: 'RO', flag: '\ud83c\uddf7\ud83c\uddf4', label: 'Romania', standard: 'DevGen' },
   { code: 'GR', flag: '\ud83c\uddec\ud83c\uddf7', label: 'Greece', standard: 'ATOE' },
   { code: 'HU', flag: '\ud83c\udded\ud83c\uddfa', label: 'Hungary', standard: 'TERC' },

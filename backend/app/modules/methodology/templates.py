@@ -1149,6 +1149,19 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         profit="8",
         tax_label="DPH",
     ),
+    # Croatia. A troškovnik is priced on all-in unit rates, so the regional
+    # table's HR stack is the PDV line alone and replaces the three steps built
+    # here; overhead and profit are zero because they already sit in the rates.
+    _flat_country_template(
+        slug="croatia",
+        name="Croatia",
+        country_code="HR",
+        currency="EUR",
+        vat="25",
+        overhead="0",
+        profit="0",
+        tax_label="PDV",
+    ),
     _flat_country_template(
         slug="romania",
         name="Romania",

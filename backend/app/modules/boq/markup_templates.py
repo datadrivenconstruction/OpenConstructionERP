@@ -2171,6 +2171,39 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
             "sort_order": 3,
         },
     ],
+    # ── Croatia ─────────────────────────────────────────────────────────
+    # Troškovnik, the bill a Croatian tender is priced on: every line carries
+    # a jedinična cijena that is all-in, the contractor's site overheads, head
+    # office and profit already inside the rate, and the bill closes with
+    # "UKUPNO (bez PDV-a)", "PDV 25 %" and "SVEUKUPNO". The only line a
+    # Croatian bill adds to the priced work is the tax, so that is the only
+    # line here.
+    #
+    # This region is a stack of one tax line on purpose. It used to be absent,
+    # which sent a Croatian bill to ``DEFAULT``: English Site Overhead 10, Head
+    # Office Overhead 5, Profit 5 and Contingency 5 on top of rates that
+    # already contain them, a double count of about a quarter of the bill.
+    #
+    # PDV 25 is the standard rate (Zakon o porezu na dodanu vrijednost, čl.
+    # 38 st. 1) and the dated tax seed's default for HR, which a bill reads
+    # first; this figure is the same number and defers to it. The reduced
+    # bands the seed also carries, 13 and 5, and the zero rate on solar
+    # installation, do not reach ordinary construction works; a project that
+    # is taxed at one of them states it through the per-project VAT rate,
+    # which replaces this line's percentage.
+    "HR": [
+        {
+            "name": "PDV",
+            "category": "tax",
+            "percentage": "25.0",
+            # On the direct cost, because nothing precedes it: a first line
+            # declared cumulative computes the same money under a label the
+            # markup validator rightly flags. A user who adds a line above it
+            # switches it to cumulative so the tax covers that line too.
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+    ],
     # ── Ukraine ─────────────────────────────────────────────────────────
     # Настанова з визначення вартості будівництва, approved by наказ
     # Мінрегіону №281 of 01.11.2021 and amended by Зміни №2, №5 and №6. The
@@ -2659,6 +2692,9 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "CZ": "CZ",
     "RO": "RO",
     "GR": "GR",
+    # Croatia prices on all-in rates, so its stack is the tax line alone; the
+    # HR block above says why.
+    "HR": "HR",
     # Ukraine joined with its country pack; the UA block above says which of
     # its numbers are statutory and which are starting points under a ceiling.
     "UA": "UA",

@@ -1,11 +1,15 @@
 """A country priced on the neutral stack still gets its own VAT line.
 
-Croatia, Bulgaria and Mexico have no regional markup stack, so their bills are
+Bulgaria and Mexico have no regional markup stack, so their bills are
 seeded with ``DEFAULT``, which carries no tax line. The tax seed knows each of
 their rates and the bill resolved them, but there was no tax line to put the
 rate on, so the bill showed no VAT at all. :func:`resolve_region_lines` now
 appends one line named after the country's seeded tax when it is told the
 country, and only then.
+
+Croatia was the third example here until it got a stack of its own, a single
+PDV line (a troškovnik prices on all-in rates); its seeded name is still
+checked below because the stack's line and the seed must agree.
 """
 
 from __future__ import annotations
@@ -32,7 +36,7 @@ def _tax_lines(lines: list[dict[str, object]]) -> list[dict[str, object]]:
 
 @pytest.mark.parametrize(
     ("country", "rate", "name"),
-    [("HR", "25", "PDV"), ("BG", "20", "DDS"), ("MX", "16", "IVA")],
+    [("BG", "20", "DDS"), ("MX", "16", "IVA")],
 )
 def test_a_country_on_the_neutral_stack_gets_one_line_of_its_own_tax(country: str, rate: str, name: str) -> None:
     assert country not in REGION_BY_COUNTRY
@@ -71,14 +75,14 @@ def test_a_zero_rate_country_gets_no_line() -> None:
 
 
 def test_no_rate_and_no_country_add_nothing() -> None:
-    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate=None, country_code="HR")) == []
-    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate="0", country_code="HR")) == []
-    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate="25")) == []
+    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate=None, country_code="BG")) == []
+    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate="0", country_code="BG")) == []
+    assert _tax_lines(resolve_region_lines("DEFAULT", vat_rate="20")) == []
 
 
 def test_a_stack_that_already_has_a_tax_line_is_not_given_a_second() -> None:
     """Idempotence: a stack with a tax line only has its rate swapped."""
-    lines = resolve_region_lines("CZ", vat_rate="25", country_code="HR")
+    lines = resolve_region_lines("CZ", vat_rate="20", country_code="BG")
 
     taxes = _tax_lines(lines)
     assert len(taxes) == 1
@@ -86,8 +90,8 @@ def test_a_stack_that_already_has_a_tax_line_is_not_given_a_second() -> None:
 
 
 def test_applying_twice_gives_the_same_single_line() -> None:
-    first = resolve_region_lines("DEFAULT", vat_rate="25", country_code="HR")
-    second = resolve_region_lines("DEFAULT", vat_rate="25", country_code="HR")
+    first = resolve_region_lines("DEFAULT", vat_rate="20", country_code="BG")
+    second = resolve_region_lines("DEFAULT", vat_rate="20", country_code="BG")
 
     assert first == second
     assert len(_tax_lines(second)) == 1
@@ -95,7 +99,7 @@ def test_applying_twice_gives_the_same_single_line() -> None:
 
 def test_the_methodology_side_never_sees_the_appended_line() -> None:
     """The catalogue derives templates only for mapped countries and passes no country."""
-    assert region_lines_for_country("HR", vat_rate="25") is None
+    assert region_lines_for_country("BG", vat_rate="20") is None
     for country, region in REGION_BY_COUNTRY.items():
         lines = region_lines_for_country(country, vat_rate="18")
         assert lines is not None

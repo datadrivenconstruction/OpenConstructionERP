@@ -592,12 +592,12 @@ async def test_a_broken_seed_row_falls_back_loudly(pg_session, caplog) -> None:
 
 
 async def test_a_croatian_bill_gets_exactly_one_pdv_line_at_25(pg_session) -> None:
-    """Croatia has no regional stack, and its bill still charges PDV.
+    """A Croatian bill charges PDV once, at 25.
 
-    The neutral stack a Croatian bill is seeded with carries no tax line, so the
-    resolved 25 had nowhere to go and the bill showed no VAT at all. It now gets
-    one line named after the seeded tax, and applying the defaults again
-    replaces the stack rather than adding a second line.
+    Croatia first had no stack, and the neutral one it was seeded with carried
+    no tax line, so the resolved 25 had nowhere to go and the bill showed no
+    VAT at all. Its stack is now that one PDV line, and applying the defaults
+    again replaces the stack rather than adding a second line.
     """
     await _install_tax_seed(pg_session)
     boq = await _bill_for(pg_session, "HR")
@@ -608,5 +608,45 @@ async def test_a_croatian_bill_gets_exactly_one_pdv_line_at_25(pg_session) -> No
     lines = await _tax_lines(pg_session, boq.id)
 
     assert [(line.name, Decimal(line.percentage)) for line in lines] == [("PDV", Decimal("25"))]
-    assert lines[0].apply_to == "cumulative"
+    # The HR stack's only line, so it sits on the direct cost; see the HR block.
+    assert lines[0].apply_to == "direct_cost"
     assert lines[0].metadata_["vat_rate_source"] == "country_seed"
+
+
+@pytest.mark.parametrize("region", [None, "HR"])
+async def test_a_troskovnik_gets_its_tax_and_no_overhead_on_rates_that_already_hold_it(pg_session, region) -> None:
+    """Croatia's regional template adds PDV and nothing else.
+
+    A troškovnik is priced on all-in unit rates, overhead and profit inside
+    every rate. Before Croatia had a stack of its own, "Apply regional
+    template" seeded the neutral one, English Site Overhead, Head Office
+    Overhead, Profit and Contingency on top of those rates, so the bill counted
+    its overhead and profit twice. Checked both ways a bill reaches the
+    template: from the project's country and by picking the region by name.
+    """
+    from app.modules.boq.schemas import PositionCreate
+
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "HR")
+    service = BOQService(pg_session)
+    for ordinal, quantity, rate in (("1.1", 1, "18500"), ("2.1", 1450, "9.8"), ("6.1", 180, "32")):
+        await service.add_position(
+            PositionCreate(
+                boq_id=boq.id,
+                ordinal=ordinal,
+                description=f"Stavka {ordinal}",
+                unit="m3",
+                quantity=quantity,
+                unit_rate=rate,
+            )
+        )
+
+    await service.apply_default_markups(boq.id, region)
+
+    markups = list((await pg_session.execute(select(BOQMarkup).where(BOQMarkup.boq_id == boq.id))).scalars().all())
+    assert [(m.category, m.name, Decimal(m.percentage)) for m in markups] == [("tax", "PDV", Decimal("25"))]
+
+    breakdown = await service.get_cost_breakdown(boq.id)
+    net = Decimal("18500") + Decimal("1450") * Decimal("9.8") + Decimal("180") * Decimal("32")
+    assert breakdown.direct_cost == net
+    assert breakdown.grand_total == net * Decimal("1.25")
