@@ -3993,47 +3993,14 @@ def _fmt_number(value: Any) -> str:
     return text if text else "0"
 
 
-# BUG-EXPORT-TRAILING-SLASH: every export route is registered under both
-# the trailing-slash and bare forms because the app sets
-# ``redirect_slashes=False`` (see ``app/main.py``) - without these aliases,
-# REST-style GETs without the slash return 404. ``include_in_schema=False``
-# keeps OpenAPI clean (one canonical path).
-@router.get(
-    "/boqs/{boq_id}/export/csv",
-    summary="Export BOQ as CSV (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
-    include_in_schema=False,
-)
-@router.get(
-    "/boqs/{boq_id}/export/csv/",
-    summary="Export BOQ as CSV",
-    dependencies=[Depends(RequirePermission("boq.read"))],
-)
-async def export_boq_csv(
-    boq_id: uuid.UUID,
-    _user_id: CurrentUserId,
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    service: BOQService = Depends(_get_service),
-) -> StreamingResponse:
-    """Export BOQ positions as a CSV file.
+def _render_boq_csv(structured: Any, base_ccy: str, fx_map: Mapping[str, Any]) -> str:
+    """Write the CSV export of a bill already read from the database.
 
-    Emits full-precision numeric values (BUG-150/151/152 - prior 2-decimal
-    truncation was a lossy roundtrip) and preserves secondary metadata
-    (source, confidence, classification blob, cad_element_ids, wbs_id)
-    so the CSV can be re-imported without silent data loss (BUG-163-175).
+    Pure: it touches no session and loads nothing, so the route can run it in a
+    worker thread. ``structured`` is the ``BOQWithSections`` payload and
+    ``fx_map`` the frozen rates, both read on the event loop beforehand.
     """
     import json as _json
-
-    # IDOR guard: every BOQ read endpoint scopes to project owner/member;
-    # exports must do the same before fetching any priced data.
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
-    # Use structured data to include markups in the grand total
-    structured = await service.get_boq_structured_for_export(boq_id)
-    # Issue #111 - freeze the project FX table into the exported artifact so
-    # the base-currency totals are auditable and a later rate edit cannot
-    # retroactively rewrite a delivered BOQ.
-    base_ccy, fx_map = await service.get_export_fx(boq_id)
 
     def _row_currency(pos: Any) -> str:
         meta = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
@@ -4225,6 +4192,53 @@ async def export_boq_csv(
 
     content = output.getvalue()
     output.close()
+    return content
+
+
+# BUG-EXPORT-TRAILING-SLASH: every export route is registered under both
+# the trailing-slash and bare forms because the app sets
+# ``redirect_slashes=False`` (see ``app/main.py``) - without these aliases,
+# REST-style GETs without the slash return 404. ``include_in_schema=False``
+# keeps OpenAPI clean (one canonical path).
+@router.get(
+    "/boqs/{boq_id}/export/csv",
+    summary="Export BOQ as CSV (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
+@router.get(
+    "/boqs/{boq_id}/export/csv/",
+    summary="Export BOQ as CSV",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def export_boq_csv(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export BOQ positions as a CSV file.
+
+    Emits full-precision numeric values (BUG-150/151/152 - prior 2-decimal
+    truncation was a lossy roundtrip) and preserves secondary metadata
+    (source, confidence, classification blob, cad_element_ids, wbs_id)
+    so the CSV can be re-imported without silent data loss (BUG-163-175).
+    """
+    # IDOR guard: every BOQ read endpoint scopes to project owner/member;
+    # exports must do the same before fetching any priced data.
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    # Use structured data to include markups in the grand total
+    structured = await service.get_boq_structured_for_export(boq_id)
+    # Issue #111 - freeze the project FX table into the exported artifact so
+    # the base-currency totals are auditable and a later rate edit cannot
+    # retroactively rewrite a delivered BOQ.
+    base_ccy, fx_map = await service.get_export_fx(boq_id)
+
+    # Writing the file walks every line of the bill and is pure CPU, so it runs in
+    # a worker thread: on the event loop a large bill would hold up every other
+    # request of the install until the last row is written.
+    content = await asyncio.to_thread(_render_boq_csv, structured, base_ccy, fx_map)
 
     filename = f"{structured.name}.csv"
 
@@ -4264,49 +4278,25 @@ def _project_line(project: Any) -> str | None:
     return "  |  ".join(parts) or None
 
 
-@router.get(
-    "/boqs/{boq_id}/export/excel",
-    summary="Export BOQ as Excel (no-slash alias)",
-    dependencies=[Depends(RequirePermission("boq.read"))],
-    include_in_schema=False,
-)
-@router.get(
-    "/boqs/{boq_id}/export/excel/",
-    summary="Export BOQ as Excel",
-    dependencies=[Depends(RequirePermission("boq.read"))],
-)
-async def export_boq_excel(
-    boq_id: uuid.UUID,
-    _user_id: CurrentUserId,
-    payload: CurrentUserPayload,
-    session: SessionDep,
-    service: BOQService = Depends(_get_service),
-) -> StreamingResponse:
-    """Export BOQ positions as an Excel (xlsx) file with formatting.
+def _render_boq_xlsx(
+    boq_data: Any,
+    structured_data: Any,
+    *,
+    custom_columns: list[dict],
+    project_line: str | None,
+    base_ccy: str,
+    fx_map: Mapping[str, Any],
+) -> bytes:
+    """Write the Excel export of a bill already read from the database.
 
-    The header layout includes:
-      1. Standard columns (Pos, Description, Unit, Quantity, Rate, Total, Classification)
-      2. Any custom columns the user has defined (from `boq.metadata_.custom_columns`)
-         - values come from `position.metadata_.custom_fields`
-
-    This guarantees that data added through the Custom Columns dialog
-    survives a round-trip through Excel.
+    Pure: it touches no session and loads nothing, so the route can run it in a
+    worker thread. ``boq_data`` is the ``BOQWithPositions`` payload,
+    ``structured_data`` the ``BOQWithSections`` one, and ``project_line`` the
+    line printed above the header, already built from the project row.
     """
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side, numbers
     from openpyxl.utils import get_column_letter
-
-    # IDOR guard: scope the export to the project owner/member, matching
-    # every other BOQ read endpoint.
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
-    boq_data = await service.get_boq_with_positions(boq_id)
-    boq_obj = await service.get_boq(boq_id)
-    structured_data = await service.get_boq_structured_for_export(boq_id)
-    # Issue #111 - structured_data totals are FX-converted into the project
-    # base currency; boq_data.grand_total is a raw position sum (wrong for
-    # mixed-currency BOQs). Source the aggregate cells from structured_data
-    # and freeze the FX table used to produce them.
-    base_ccy, fx_map = await service.get_export_fx(boq_id)
 
     def _xl_row_currency(p: Any) -> str:
         meta = getattr(p, "metadata", None) or getattr(p, "metadata_", None) or {}
@@ -4317,28 +4307,10 @@ async def export_boq_excel(
                     return val.strip().upper()
         return base_ccy or ""
 
-    # ── Custom column definitions from BOQ metadata ──────────────────────
-    boq_meta = boq_obj.metadata_ if isinstance(boq_obj.metadata_, dict) else {}
-    custom_columns: list[dict] = boq_meta.get("custom_columns", [])
-    # Sort by sort_order (defensive - backend assigns it on insert)
-    custom_columns = sorted(custom_columns, key=lambda c: c.get("sort_order", 0))
-
     wb = Workbook()
     ws = wb.active
     ws.title = "BOQ"
 
-    # ── Project line ─────────────────────────────────────────────────────
-    # Which job this bill belongs to, as the PDF export's cover page already
-    # names it. The sheet is read by whoever receives it, and the bill's name
-    # alone does not tell them. Written here, in the row above the header,
-    # rather than handed to the letterhead: the letterhead is drawn only when
-    # the company has a profile, and which job a bill is for has nothing to do
-    # with whether anyone uploaded a logo. The importers find the header row by
-    # its column names, so one more row above it does not stop a re-import.
-    from app.modules.projects.repository import ProjectRepository
-
-    project = await ProjectRepository(session).get_by_id(boq_data.project_id)
-    project_line = _project_line(project)
     header_row = 1
     if project_line:
         line_cell = ws.cell(row=1, column=1, value=neutralise_formula(project_line))
@@ -4698,12 +4670,85 @@ async def export_boq_excel(
     # ── Write to bytes buffer and return ──────────────────────────────────
     buffer = io.BytesIO()
     wb.save(buffer)
-    buffer.seek(0)
+    return buffer.getvalue()
+
+
+@router.get(
+    "/boqs/{boq_id}/export/excel",
+    summary="Export BOQ as Excel (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
+@router.get(
+    "/boqs/{boq_id}/export/excel/",
+    summary="Export BOQ as Excel",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def export_boq_excel(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export BOQ positions as an Excel (xlsx) file with formatting.
+
+    The header layout includes:
+      1. Standard columns (Pos, Description, Unit, Quantity, Rate, Total, Classification)
+      2. Any custom columns the user has defined (from `boq.metadata_.custom_columns`)
+         - values come from `position.metadata_.custom_fields`
+
+    This guarantees that data added through the Custom Columns dialog
+    survives a round-trip through Excel.
+    """
+    # IDOR guard: scope the export to the project owner/member, matching
+    # every other BOQ read endpoint.
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    boq_data = await service.get_boq_with_positions(boq_id)
+    boq_obj = await service.get_boq(boq_id)
+    structured_data = await service.get_boq_structured_for_export(boq_id)
+    # Issue #111 - structured_data totals are FX-converted into the project
+    # base currency; boq_data.grand_total is a raw position sum (wrong for
+    # mixed-currency BOQs). Source the aggregate cells from structured_data
+    # and freeze the FX table used to produce them.
+    base_ccy, fx_map = await service.get_export_fx(boq_id)
+
+    # ── Custom column definitions from BOQ metadata ──────────────────────
+    boq_meta = boq_obj.metadata_ if isinstance(boq_obj.metadata_, dict) else {}
+    custom_columns: list[dict] = boq_meta.get("custom_columns", [])
+    # Sort by sort_order (defensive - backend assigns it on insert)
+    custom_columns = sorted(custom_columns, key=lambda c: c.get("sort_order", 0))
+
+    # ── Project line ─────────────────────────────────────────────────────
+    # Which job this bill belongs to, as the PDF export's cover page already
+    # names it. The sheet is read by whoever receives it, and the bill's name
+    # alone does not tell them. Written here, in the row above the header,
+    # rather than handed to the letterhead: the letterhead is drawn only when
+    # the company has a profile, and which job a bill is for has nothing to do
+    # with whether anyone uploaded a logo. The importers find the header row by
+    # its column names, so one more row above it does not stop a re-import.
+    from app.modules.projects.repository import ProjectRepository
+
+    project = await ProjectRepository(session).get_by_id(boq_data.project_id)
+    project_line = _project_line(project)
+
+    # Styling the sheet cell by cell and deflating it is pure CPU that grows with
+    # the bill, so it runs in a worker thread; the reads above stay on the loop
+    # and hand it plain values, never a row that could lazy-load.
+    xlsx = await asyncio.to_thread(
+        _render_boq_xlsx,
+        boq_data,
+        structured_data,
+        custom_columns=custom_columns,
+        project_line=project_line,
+        base_ccy=base_ccy,
+        fx_map=fx_map,
+    )
 
     filename = f"{boq_data.name}.xlsx"
 
     return StreamingResponse(
-        buffer,
+        iter([xlsx]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": attachment_disposition(filename),
@@ -4964,7 +5009,10 @@ async def export_boq_gaeb(
     project_currency = (project.currency or "").strip()[:3].upper() if project else ""
 
     # Build the schema-valid document via the pure, unit-tested builder.
-    xml_content = build_gaeb_xml(
+    # The builder walks every item of the bill and is pure CPU, so it runs in a
+    # worker thread rather than holding up every other request on the loop.
+    xml_content = await asyncio.to_thread(
+        build_gaeb_xml,
         boq_data,
         project_name=project_name,
         project_currency=project_currency,
@@ -5031,7 +5079,10 @@ async def export_boq_bc3(
     project_name = project.name if project else "OpenConstructionERP Project"
     project_currency = (project.currency or "").strip()[:3].upper() if project else ""
 
-    data, http_charset = build_bc3(
+    # The builder walks every line of the bill and is pure CPU, so it runs in a
+    # worker thread rather than holding up every other request on the loop.
+    data, http_charset = await asyncio.to_thread(
+        build_bc3,
         boq_data,
         project_name=project_name,
         project_currency=project_currency,
