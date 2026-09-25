@@ -5,7 +5,8 @@
 A new user picks a region and a sample project in the wizard. Importing a
 regional cost base and installing a sample project each take tens of seconds,
 which is too long to make someone stare at a spinner. This module exposes a
-tiny API (`/api/v1/onboarding/provision` + `/status`) that turns those loads
+tiny API (`/api/v1/onboarding/provision`, plus `/jobs/` and `/status` to read
+the caller's jobs) that turns those loads
 into background jobs, so the wizard can hand them off and let the user carry on
 while a progress banner tracks the work to completion.
 
