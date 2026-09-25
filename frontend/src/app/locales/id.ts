@@ -36135,6 +36135,8 @@ const resource = {
     "transmittals.toggle_row": "Beralih detail untuk {{num}}",
     "transmittals.updated": "Transmittal diperbarui",
     "update.apply_now": "Terapkan pembaruan",
+    "update.runtime_blocked_disabled": "Pembaruan dari browser dinonaktifkan di server ini. Untuk mengaktifkannya, setel ALLOW_RUNTIME_UPGRADE=true di lingkungan server lalu mulai ulang server, atau jalankan perintah di bawah ini di server.",
+    "update.runtime_blocked_demo": "Akun demo tidak dapat memperbarui instalasi. Masuk dengan akun administrator Anda sendiri, atau jalankan perintah di bawah ini di server.",
     "update.apply_now_button": "Terapkan pembaruan",
     "update.changes_count": "{{count}} perubahan",
     "update.changes_count_short": "{{count}} perubahan",

@@ -36296,6 +36296,8 @@ const resource = {
     "transmittals.toggle_row": "Details voor {{num}} in-/uitschakelen",
     "transmittals.updated": "Transmittal bijgewerkt",
     "update.apply_now": "Update toepassen",
+    "update.runtime_blocked_disabled": "Bijwerken vanuit de browser is op deze server uitgeschakeld. Zet ALLOW_RUNTIME_UPGRADE=true in de serveromgeving en start de server opnieuw om het in te schakelen, of voer de onderstaande opdracht op de server uit.",
+    "update.runtime_blocked_demo": "Demo-accounts kunnen de installatie niet bijwerken. Meld u aan met uw eigen beheerdersaccount of voer de onderstaande opdracht op de server uit.",
     "update.apply_now_button": "Update toepassen",
     "update.changes_count": "{{count}} wijzigingen",
     "update.changes_count_short": "{{count}} wijzigingen",

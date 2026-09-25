@@ -33936,6 +33936,8 @@ const resource = {
     "update.group_fixed": "Fixed",
     "update.group_polished": "Polished",
     "update.apply_now": "Apply update",
+    "update.runtime_blocked_disabled": "Updating from the browser is switched off on this server. To switch it on, set ALLOW_RUNTIME_UPGRADE=true in the server environment and restart it, or run the command below on the server.",
+    "update.runtime_blocked_demo": "Demo accounts cannot update the installation. Sign in with your own administrator account, or run the command below on the server.",
     "update.one_click_title": "Install v{{version}} now",
     "update.one_click_sub": "Runs pip in the active venv. Restart the launcher once the install completes.",
     "update.apply_now_button": "Apply update",

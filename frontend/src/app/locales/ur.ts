@@ -35591,6 +35591,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} کی تفصیلات ٹوگل کریں",
     "transmittals.updated": "Transmittal اپ ڈیٹ ہو گیا",
     "update.apply_now": "اپ ڈیٹ لاگو کریں",
+    "update.runtime_blocked_disabled": "اس سرور پر براؤزر سے اپ ڈیٹ کرنا بند ہے۔ اسے آن کرنے کے لیے سرور کے ماحول میں ALLOW_RUNTIME_UPGRADE=true سیٹ کریں اور سرور دوبارہ شروع کریں، یا نیچے دی گئی کمانڈ سرور پر چلائیں۔",
+    "update.runtime_blocked_demo": "ڈیمو اکاؤنٹس انسٹالیشن کو اپ ڈیٹ نہیں کر سکتے۔ اپنے ایڈمنسٹریٹر اکاؤنٹ سے سائن ان کریں، یا نیچے دی گئی کمانڈ سرور پر چلائیں۔",
     "update.apply_now_button": "اپ ڈیٹ لاگو کریں",
     "update.changes_count": "{{count}} تبدیلیاں",
     "update.changes_count_short": "{{count}} تبدیلیاں",

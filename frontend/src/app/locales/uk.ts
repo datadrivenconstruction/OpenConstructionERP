@@ -36772,6 +36772,8 @@ const resource = {
     "transmittals.toggle_row": "Перемкнути деталі для {{num}}",
     "transmittals.updated": "Супровідний лист оновлено",
     "update.apply_now": "Застосувати оновлення",
+    "update.runtime_blocked_disabled": "Оновлення з браузера на цьому сервері вимкнено. Щоб увімкнути його, задайте ALLOW_RUNTIME_UPGRADE=true у середовищі сервера та перезапустіть його, або виконайте команду нижче на сервері.",
+    "update.runtime_blocked_demo": "Демо-облікові записи не можуть оновлювати інсталяцію. Увійдіть під власним обліковим записом адміністратора або виконайте команду нижче на сервері.",
     "update.apply_now_button": "Застосувати оновлення",
     "update.changes_count": "Змін: {{count}}",
     "update.changes_count_short": "Змін: {{count}}",

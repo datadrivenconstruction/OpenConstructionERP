@@ -36301,6 +36301,8 @@ const resource = {
     "transmittals.toggle_row": "Uključi/isključi detalje za {{num}}",
     "transmittals.updated": "Transmital je ažuriran",
     "update.apply_now": "Primijeni ažuriranje",
+    "update.runtime_blocked_disabled": "Ažuriranje iz preglednika isključeno je na ovom poslužitelju. Da biste ga uključili, postavite ALLOW_RUNTIME_UPGRADE=true u okruženju poslužitelja i ponovno ga pokrenite ili pokrenite naredbu ispod na poslužitelju.",
+    "update.runtime_blocked_demo": "Demo računi ne mogu ažurirati instalaciju. Prijavite se vlastitim administratorskim računom ili pokrenite naredbu ispod na poslužitelju.",
     "update.apply_now_button": "Primijeni ažuriranje",
     "update.changes_count": "{{count}} promjena",
     "update.changes_count_short": "{{count}} promjena",

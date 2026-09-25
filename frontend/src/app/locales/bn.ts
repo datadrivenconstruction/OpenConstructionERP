@@ -35511,6 +35511,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}}-এর বিবরণ টগল করুন",
     "transmittals.updated": "ট্রান্সমিটাল আপডেট হয়েছে",
     "update.apply_now": "আপডেট প্রয়োগ করুন",
+    "update.runtime_blocked_disabled": "এই সার্ভারে ব্রাউজার থেকে আপডেট করা বন্ধ আছে। এটি চালু করতে সার্ভারের পরিবেশে ALLOW_RUNTIME_UPGRADE=true সেট করুন এবং সার্ভারটি আবার চালু করুন, অথবা নিচের কমান্ডটি সার্ভারে চালান।",
+    "update.runtime_blocked_demo": "ডেমো অ্যাকাউন্ট ইনস্টলেশন আপডেট করতে পারে না। নিজের অ্যাডমিনিস্ট্রেটর অ্যাকাউন্ট দিয়ে সাইন ইন করুন, অথবা নিচের কমান্ডটি সার্ভারে চালান।",
     "update.apply_now_button": "আপডেট প্রয়োগ করুন",
     "update.changes_count": "{{count}}টি পরিবর্তন",
     "update.changes_count_short": "{{count}}টি পরিবর্তন",

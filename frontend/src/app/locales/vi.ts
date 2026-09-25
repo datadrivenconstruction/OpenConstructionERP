@@ -36294,6 +36294,8 @@ const resource = {
     "transmittals.toggle_row": "Chuyển đổi chi tiết cho {{num}}",
     "transmittals.updated": "Bảng ghi đã cập nhật",
     "update.apply_now": "Áp dụng cập nhật",
+    "update.runtime_blocked_disabled": "Cập nhật từ trình duyệt đang bị tắt trên máy chủ này. Để bật, hãy đặt ALLOW_RUNTIME_UPGRADE=true trong môi trường máy chủ rồi khởi động lại, hoặc chạy lệnh bên dưới trên máy chủ.",
+    "update.runtime_blocked_demo": "Tài khoản demo không thể cập nhật bản cài đặt. Hãy đăng nhập bằng tài khoản quản trị của riêng bạn, hoặc chạy lệnh bên dưới trên máy chủ.",
     "update.apply_now_button": "Áp dụng cập nhật",
     "update.changes_count": "{{count}} thay đổi",
     "update.changes_count_short": "{{count}} thay đổi",

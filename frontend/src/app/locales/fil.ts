@@ -35511,6 +35511,8 @@ const resource = {
     "transmittals.toggle_row": "I-toggle ang detalye para sa {{num}}",
     "transmittals.updated": "Na-update ang transmittal",
     "update.apply_now": "Ilapat ang update",
+    "update.runtime_blocked_disabled": "Naka-off sa server na ito ang pag-update mula sa browser. Para i-on ito, itakda ang ALLOW_RUNTIME_UPGRADE=true sa environment ng server at i-restart ito, o patakbuhin ang command sa ibaba sa server.",
+    "update.runtime_blocked_demo": "Hindi maaaring i-update ng mga demo account ang installation. Mag-sign in gamit ang sarili mong administrator account, o patakbuhin ang command sa ibaba sa server.",
     "update.apply_now_button": "Ilapat ang update",
     "update.changes_count": "{{count}} pagbabago",
     "update.changes_count_short": "{{count}} pagbabago",

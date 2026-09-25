@@ -36317,6 +36317,8 @@ const resource = {
     "transmittals.toggle_row": "Skift detaljer for {{num}}",
     "transmittals.updated": "Transmittal opdateret",
     "update.apply_now": "Anvend opdatering",
+    "update.runtime_blocked_disabled": "Opdatering fra browseren er slået fra på denne server. Slå den til ved at sætte ALLOW_RUNTIME_UPGRADE=true i servermiljøet og genstarte serveren, eller kør kommandoen nedenfor på serveren.",
+    "update.runtime_blocked_demo": "Demokonti kan ikke opdatere installationen. Log ind med din egen administratorkonto, eller kør kommandoen nedenfor på serveren.",
     "update.apply_now_button": "Anvend opdatering",
     "update.changes_count": "{{count}} ændringer",
     "update.changes_count_short": "{{count}} ændringer",

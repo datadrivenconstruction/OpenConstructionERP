@@ -93,3 +93,92 @@ async def test_upgrade_admin_clears_auth_gate(client):
     # so a 403 whose detail mentions the disabled flag proves auth succeeded.
     assert resp.status_code == 403, resp.text
     assert "disabled" in resp.text.lower()
+
+
+# ── P-17: off unless switched on, and never for a demo login ────────────────
+#
+# The switch used to default to on, so any admin session could run pip in the
+# environment the server runs from, and the seeded demo login is an admin that
+# needs no password wherever the demo login is offered. These tests replace pip
+# with a trap: a refusal that failed would start a job, and the trap fails the
+# test instead of touching the environment.
+
+
+@pytest.fixture
+def pip_trap(monkeypatch):
+    import app.main as main_module
+
+    def _no_pip(*_args, **_kwargs):
+        raise AssertionError("the upgrade route reached pip")
+
+    monkeypatch.setattr(main_module, "claim_upgrade", _no_pip)
+    monkeypatch.setattr(main_module, "run_upgrade", _no_pip)
+
+
+async def _demo_admin_headers() -> dict[str, str]:
+    """A token for the seeded demo admin, creating the account if this database has none."""
+    from sqlalchemy import select
+
+    from app.config import get_settings
+    from app.modules.users.service import create_access_token, hash_password
+
+    async with async_session_factory() as session:
+        user = (
+            await session.execute(select(User).where(User.email == "demo@openconstructionerp.com"))
+        ).scalar_one_or_none()
+        if user is None:
+            user = User(
+                id=uuid.uuid4(),
+                email="demo@openconstructionerp.com",
+                hashed_password=hash_password(uuid.uuid4().hex),
+                full_name="Demo Admin",
+                role="admin",
+                locale="en",
+                is_active=True,
+                metadata_={},
+            )
+            session.add(user)
+        else:
+            user.role = "admin"
+            user.is_active = True
+        await session.commit()
+        await session.refresh(user)
+        token = create_access_token(user, get_settings())
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.mark.asyncio
+async def test_upgrade_is_off_when_the_switch_is_not_set(client, monkeypatch, pip_trap):
+    monkeypatch.delenv("ALLOW_RUNTIME_UPGRADE", raising=False)
+    headers = await _register_with_role(client, "admin")
+    resp = await client.post("/api/system/upgrade", headers=headers)
+    assert resp.status_code == 403, resp.text
+    assert "ALLOW_RUNTIME_UPGRADE=true" in resp.json()["detail"]
+
+    check = await client.get("/api/system/version-check", headers=headers)
+    assert check.status_code == 200, check.text
+    assert check.json()["runtime_upgrade_allowed"] is False
+    assert check.json()["runtime_upgrade_blocked"] == "disabled"
+
+
+@pytest.mark.asyncio
+async def test_a_demo_admin_is_refused_even_with_the_switch_on(client, monkeypatch, pip_trap):
+    monkeypatch.setenv("ALLOW_RUNTIME_UPGRADE", "true")
+    headers = await _demo_admin_headers()
+    resp = await client.post("/api/system/upgrade", headers=headers)
+    assert resp.status_code == 403, resp.text
+    assert "Demo accounts" in resp.json()["detail"]
+
+    check = await client.get("/api/system/version-check", headers=headers)
+    assert check.json()["runtime_upgrade_allowed"] is False
+    assert check.json()["runtime_upgrade_blocked"] == "demo_account"
+
+
+@pytest.mark.asyncio
+async def test_a_real_admin_is_offered_the_button_when_the_switch_is_on(client, monkeypatch):
+    monkeypatch.setenv("ALLOW_RUNTIME_UPGRADE", "true")
+    headers = await _register_with_role(client, "admin")
+    check = await client.get("/api/system/version-check", headers=headers)
+    assert check.status_code == 200, check.text
+    assert check.json()["runtime_upgrade_allowed"] is True
+    assert check.json()["runtime_upgrade_blocked"] is None

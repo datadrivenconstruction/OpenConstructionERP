@@ -36565,6 +36565,8 @@ const resource = {
     "transmittals.toggle_row": "تبديل التفاصيل لـ {{num}}",
     "transmittals.updated": "تم تحديث الإرسال",
     "update.apply_now": "تطبيق التحديث",
+    "update.runtime_blocked_disabled": "التحديث من المتصفح متوقف على هذا الخادم. لتشغيله، اضبط ALLOW_RUNTIME_UPGRADE=true في بيئة الخادم ثم أعد تشغيله، أو نفّذ الأمر أدناه على الخادم.",
+    "update.runtime_blocked_demo": "لا يمكن للحسابات التجريبية تحديث التثبيت. سجّل الدخول بحساب المسؤول الخاص بك، أو نفّذ الأمر أدناه على الخادم.",
     "update.apply_now_button": "تطبيق التحديث",
     "update.changes_count": "{{count}} تغييرات",
     "update.changes_count_short": "{{count}} تغييرات",

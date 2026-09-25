@@ -36070,6 +36070,8 @@ const resource = {
     "transmittals.toggle_row": "สลับรายละเอียดสำหรับ {{num}}",
     "transmittals.updated": "เอกสารได้รับการอัปเดต",
     "update.apply_now": "ใช้อัปเดต",
+    "update.runtime_blocked_disabled": "การอัปเดตจากเบราว์เซอร์ถูกปิดอยู่บนเซิร์ฟเวอร์นี้ หากต้องการเปิด ให้ตั้งค่า ALLOW_RUNTIME_UPGRADE=true ในสภาพแวดล้อมของเซิร์ฟเวอร์แล้วรีสตาร์ต หรือรันคำสั่งด้านล่างบนเซิร์ฟเวอร์",
+    "update.runtime_blocked_demo": "บัญชีเดโมไม่สามารถอัปเดตการติดตั้งได้ ลงชื่อเข้าใช้ด้วยบัญชีผู้ดูแลระบบของคุณเอง หรือรันคำสั่งด้านล่างบนเซิร์ฟเวอร์",
     "update.apply_now_button": "ใช้อัปเดต",
     "update.changes_count": "{{count}} การเปลี่ยนแปลง",
     "update.changes_count_short": "{{count}} การเปลี่ยนแปลง",

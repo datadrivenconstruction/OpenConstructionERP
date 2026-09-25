@@ -36429,6 +36429,8 @@ const resource = {
     "transmittals.toggle_row": "Přepnout podrobnosti pro {{num}}",
     "transmittals.updated": "Odeslání aktualizováno",
     "update.apply_now": "Instalovat aktualizaci",
+    "update.runtime_blocked_disabled": "Aktualizace z prohlížeče je na tomto serveru vypnutá. Chcete-li ji zapnout, nastavte ALLOW_RUNTIME_UPGRADE=true v prostředí serveru a restartujte jej, nebo spusťte níže uvedený příkaz na serveru.",
+    "update.runtime_blocked_demo": "Demo účty nemohou aktualizovat instalaci. Přihlaste se vlastním účtem správce, nebo spusťte níže uvedený příkaz na serveru.",
     "update.apply_now_button": "Instalovat aktualizaci",
     "update.changes_count": "{{count}} změn",
     "update.changes_count_short": "{{count}} změn",

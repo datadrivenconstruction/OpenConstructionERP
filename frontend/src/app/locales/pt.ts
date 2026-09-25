@@ -36400,6 +36400,8 @@ const resource = {
     "transmittals.toggle_row": "Alternar detalhes para {{num}}",
     "transmittals.updated": "Transmital atualizado",
     "update.apply_now": "Aplicar atualização",
+    "update.runtime_blocked_disabled": "A atualização a partir do navegador está desativada neste servidor. Para a ativar, defina ALLOW_RUNTIME_UPGRADE=true no ambiente do servidor e reinicie-o, ou execute o comando abaixo no servidor.",
+    "update.runtime_blocked_demo": "As contas de demonstração não podem atualizar a instalação. Inicie sessão com a sua própria conta de administrador ou execute o comando abaixo no servidor.",
     "update.apply_now_button": "Aplicar atualização",
     "update.changes_count": "{{count}} alterações",
     "update.changes_count_short": "{{count}} alterações",

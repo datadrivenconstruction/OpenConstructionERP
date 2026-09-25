@@ -36930,6 +36930,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} tafsilotlarini ochish/yopish",
     "transmittals.updated": "Uzatma yangilandi",
     "update.apply_now": "Yangilanishni qoʻllash",
+    "update.runtime_blocked_disabled": "Bu serverda brauzerdan yangilash oʻchirilgan. Uni yoqish uchun server muhitida ALLOW_RUNTIME_UPGRADE=true ni oʻrnating va serverni qayta ishga tushiring yoki quyidagi buyruqni serverda bajaring.",
+    "update.runtime_blocked_demo": "Demo hisoblar oʻrnatmani yangilay olmaydi. Oʻzingizning administrator hisobingiz bilan kiring yoki quyidagi buyruqni serverda bajaring.",
     "update.apply_now_button": "Yangilanishni qoʻllash",
     "update.changes_count": "{{count}} oʻzgarish",
     "update.changes_count_short": "{{count}} oʻzgarish",

@@ -149,6 +149,11 @@ export interface VersionCheck {
    *  notes: only a GitHub release naming `latest_version` is quoted. */
   assets: ReleaseAsset[];
   self_upgrade_supported: boolean;
+  /** Whether this signed-in caller may press "Apply update". Off unless the
+   *  server sets ALLOW_RUNTIME_UPGRADE=true, and never for a demo account. */
+  runtime_upgrade_allowed: boolean;
+  /** Why not, when it is not allowed: 'disabled' or 'demo_account'. */
+  runtime_upgrade_blocked: 'disabled' | 'demo_account' | null;
   upgrade_command: string;
 }
 
@@ -292,6 +297,14 @@ async function fetchVersionCheck(): Promise<VersionCheck | null> {
       // instruction reaches a pip install too, while a pip command reaches a
       // frozen build as advice it cannot carry out.
       self_upgrade_supported: body.self_upgrade_supported === true,
+      // Not offered unless the server says so, for the same reason.
+      runtime_upgrade_allowed: body.runtime_upgrade_allowed === true,
+      runtime_upgrade_blocked:
+        body.runtime_upgrade_blocked === 'demo_account'
+          ? 'demo_account'
+          : body.runtime_upgrade_blocked === 'disabled'
+            ? 'disabled'
+            : null,
       upgrade_command: typeof body.upgrade_command === 'string' ? body.upgrade_command : '',
     };
   } catch {
@@ -673,10 +686,10 @@ function UpdateFullModal({
    *  spinner; ``done`` shows the post-pip result + restart hint; ``error``
    *  shows the captured stderr so the user can copy it into a bug report.
    *
-   *  Backed by ``POST /api/system/upgrade`` which gates on
-   *  ``ALLOW_RUNTIME_UPGRADE`` — managed installs (VPS, SaaS) keep the
-   *  copy-paste path while localhost / Windows installer users get the
-   *  one-click button working out of the box. */
+   *  Backed by ``POST /api/system/upgrade``, which is off unless the server
+   *  sets ``ALLOW_RUNTIME_UPGRADE=true`` and is always refused to a demo
+   *  account. The server says which through ``runtime_upgrade_allowed``, so
+   *  the button is only offered where pressing it can work. */
   const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'running' | 'done' | 'error'>('idle');
   const [upgradeResult, setUpgradeResult] = useState<UpgradeJob | null>(null);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
@@ -943,8 +956,9 @@ function UpdateFullModal({
           )}
 
           {/* One-click upgrade — server-side ``pip install --upgrade`` in the
-              same venv as the running uvicorn. The 403 fallback below shows
-              when ALLOW_RUNTIME_UPGRADE is off (managed installs).
+              same venv as the running uvicorn. Offered only when the server
+              reports runtime_upgrade_allowed; the section above explains a
+              refusal instead.
 
               Shown only where the server says this build can upgrade itself.
               It used to be shown everywhere, deliberately, because the 409 a
@@ -953,7 +967,29 @@ function UpdateFullModal({
               That reasoning held while the instruction lived in the refusal;
               it is now printed up front by the installer card below, so the
               reader gets it without pressing a button that cannot work. */}
-          {release.self_upgrade_supported && (
+          {/* Pip can run here, but this caller may not start it from the
+              browser: say why and how to switch it on, and leave the command
+              card below to do the rest. */}
+          {release.self_upgrade_supported && !release.runtime_upgrade_allowed && (
+            <section data-testid="update-runtime-blocked">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+                {t('update.apply_now', { defaultValue: 'Apply update' })}
+              </h3>
+              <p className="rounded-xl border border-border bg-surface-primary px-3 py-3 text-2xs leading-relaxed text-content-secondary">
+                {release.runtime_upgrade_blocked === 'demo_account'
+                  ? t('update.runtime_blocked_demo', {
+                      defaultValue:
+                        'Demo accounts cannot update the installation. Sign in with your own administrator account, or run the command below on the server.',
+                    })
+                  : t('update.runtime_blocked_disabled', {
+                      defaultValue:
+                        'Updating from the browser is switched off on this server. To switch it on, set ALLOW_RUNTIME_UPGRADE=true in the server environment and restart it, or run the command below on the server.',
+                    })}
+              </p>
+            </section>
+          )}
+
+          {release.self_upgrade_supported && release.runtime_upgrade_allowed && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
               {t('update.apply_now', { defaultValue: 'Apply update' })}
@@ -976,6 +1012,7 @@ function UpdateFullModal({
                     </div>
                   </div>
                   <button
+                    data-testid="update-apply-now"
                     onClick={handleApplyUpgrade}
                     className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-500/30 transition-all"
                   >

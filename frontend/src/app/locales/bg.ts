@@ -36305,6 +36305,8 @@ const resource = {
     "transmittals.toggle_row": "Преключи детайлите за {{num}}",
     "transmittals.updated": "Трансмисия актуализирана",
     "update.apply_now": "Приложи актуализация",
+    "update.runtime_blocked_disabled": "Обновяването от браузъра е изключено на този сървър. За да го включите, задайте ALLOW_RUNTIME_UPGRADE=true в средата на сървъра и го рестартирайте, или изпълнете командата по-долу на сървъра.",
+    "update.runtime_blocked_demo": "Демо акаунтите не могат да обновяват инсталацията. Влезте със собствения си администраторски акаунт или изпълнете командата по-долу на сървъра.",
     "update.apply_now_button": "Приложи актуализация",
     "update.changes_count": "{{count}} промени",
     "update.changes_count_short": "{{count}} промени",

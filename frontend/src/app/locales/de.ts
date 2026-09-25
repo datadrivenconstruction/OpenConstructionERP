@@ -36995,6 +36995,8 @@ const resource = {
     "transmittals.toggle_row": "Details für {{num}} umschalten",
     "transmittals.updated": "Übermittlung aktualisiert",
     "update.apply_now": "Update anwenden",
+    "update.runtime_blocked_disabled": "Das Aktualisieren über den Browser ist auf diesem Server ausgeschaltet. Zum Einschalten ALLOW_RUNTIME_UPGRADE=true in der Serverumgebung setzen und den Server neu starten, oder den Befehl unten auf dem Server ausführen.",
+    "update.runtime_blocked_demo": "Demo-Konten können die Installation nicht aktualisieren. Melden Sie sich mit Ihrem eigenen Administratorkonto an oder führen Sie den Befehl unten auf dem Server aus.",
     "update.apply_now_button": "Update anwenden",
     "update.changes_count": "{{count}} Änderungen",
     "update.changes_count_short": "{{count}} Änderungen",

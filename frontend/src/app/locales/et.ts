@@ -36169,6 +36169,8 @@ const resource = {
     "transmittals.toggle_row": "Lülita {{num}} üksikasjad",
     "transmittals.updated": "Edastusleht uuendatud",
     "update.apply_now": "Rakenda uuendus",
+    "update.runtime_blocked_disabled": "Brauserist uuendamine on selles serveris välja lülitatud. Sisselülitamiseks määrake serveri keskkonnas ALLOW_RUNTIME_UPGRADE=true ja taaskäivitage server või käivitage allolev käsk serveris.",
+    "update.runtime_blocked_demo": "Demokontod ei saa paigaldust uuendada. Logige sisse oma administraatorikontoga või käivitage allolev käsk serveris.",
     "update.apply_now_button": "Rakenda uuendus",
     "update.changes_count": "{{count}} muudatust",
     "update.changes_count_short": "{{count}} muudatust",

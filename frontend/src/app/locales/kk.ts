@@ -35447,6 +35447,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} үшін мәліметтерді ауыстыру",
     "transmittals.updated": "Тапсыру құжаты жаңартылды",
     "update.apply_now": "Жаңартуды қолдану",
+    "update.runtime_blocked_disabled": "Бұл серверде браузерден жаңарту өшірулі. Оны қосу үшін сервер ортасында ALLOW_RUNTIME_UPGRADE=true мәнін орнатып, серверді қайта іске қосыңыз немесе төмендегі команданы серверде орындаңыз.",
+    "update.runtime_blocked_demo": "Демо тіркелгілер орнатуды жаңарта алмайды. Өз әкімші тіркелгіңізбен кіріңіз немесе төмендегі команданы серверде орындаңыз.",
     "update.apply_now_button": "Жаңартуды қолдану",
     "update.changes_count": "{{count}} өзгеріс",
     "update.changes_count_short": "{{count}} өзгеріс",
