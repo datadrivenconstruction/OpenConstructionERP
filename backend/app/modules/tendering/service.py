@@ -886,6 +886,10 @@ class TenderingService:
 
         Iterates the bid's ``line_items`` and updates the matching BOQ
         position ``unit_rate`` (recomputing ``total`` via quantity * new rate).
+        A locked BOQ is never rewritten, and a bid priced as a lump sum has no
+        line rates to write; the award still stands in both cases and the
+        response names the reason in ``rates_skipped_reason`` (``boq_locked``
+        or ``no_line_rates``, ``None`` when rates were written).
         The package is transitioned to ``awarded``, the winning bid to
         ``accepted`` and every other bid to ``rejected``. An event is
         published for downstream budget / EVM modules.
@@ -982,18 +986,35 @@ class TenderingService:
                     },
                 )
 
-        from sqlalchemy import update
+        from sqlalchemy import select, update
 
-        from app.modules.boq.models import Position
+        from app.modules.boq.models import BOQ, Position
         from app.modules.boq.service import _quantize_money_str
 
+        # The rates go into the bill only where they can go honestly. A locked
+        # bill is an approved baseline: an award must not rewrite it behind the
+        # approval, so the award stands and the bill is left as approved. A bid
+        # priced as a lump sum carries no line rates, so there is nothing to
+        # write. Either way the caller is told why, instead of reading an award
+        # that "wrote the rates back" into a bill that never changed.
+        boq_locked = bool(
+            (await self.session.execute(select(BOQ.is_locked).where(BOQ.id == package.boq_id))).scalar_one_or_none()
+        )
+        rate_lines = [
+            item
+            for item in (bid.line_items or [])
+            if isinstance(item, dict) and item.get("position_id") and "unit_rate" in item
+        ]
+        rates_skipped_reason: str | None = None
+        if boq_locked:
+            rates_skipped_reason = "boq_locked"
+            rate_lines = []
+        elif not rate_lines:
+            rates_skipped_reason = "no_line_rates"
+
         updated = 0
-        for item in bid.line_items or []:
+        for item in rate_lines:
             pos_id = item.get("position_id")
-            if not pos_id:
-                continue
-            if "unit_rate" not in item:
-                continue
             rate = _to_decimal(item.get("unit_rate"))
             try:
                 pos_uuid = uuid.UUID(str(pos_id))
@@ -1052,6 +1073,7 @@ class TenderingService:
                 "bid_id": str(bid_id),
                 "company_name": bid.company_name,
                 "positions_updated": updated,
+                "rates_skipped_reason": rates_skipped_reason,
                 "boq_id": str(package.boq_id),
                 "awarded_by": str(awarded_by) if awarded_by else None,
             },
@@ -1069,6 +1091,7 @@ class TenderingService:
             "package_id": str(package_id),
             "bid_id": str(bid_id),
             "positions_updated": updated,
+            "rates_skipped_reason": rates_skipped_reason,
             "boq_id": str(package.boq_id),
         }
 
