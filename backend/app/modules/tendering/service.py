@@ -16,7 +16,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
@@ -1036,7 +1036,11 @@ class TenderingService:
             elif other.status not in ("rejected",):
                 await self.repo.update_bid_fields(other.id, status="rejected")
 
-        await _safe_publish(
+        # After commit, not now: the subscribers (the purchase order and the
+        # contract draft) open their own sessions, and an award that rolls
+        # back must not leave either behind.
+        publish_after_commit(
+            self.session,
             "tendering.package.awarded",
             {
                 "package_id": str(package_id),

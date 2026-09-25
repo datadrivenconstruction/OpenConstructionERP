@@ -308,7 +308,7 @@ async def test_a_position_from_another_project_is_refused(pg_session) -> None:
 # ── X5: a tender award drafts a contract ────────────────────────────────
 
 
-async def _tender_award(session, project, *, sub: Subcontractor | None = None):
+async def _tender_award(session, project, *, sub: Subcontractor | None = None, status: str = "awarded"):
     wall, slab = await _boq(session, project, [("02.001", "Wall", "m3", "10"), ("02.002", "Slab", "m2", "5")])
     [foreign] = await _boq(session, await _project(session), [("99", "Foreign", "m", "1")])
     recipients = []
@@ -318,7 +318,7 @@ async def _tender_award(session, project, *, sub: Subcontractor | None = None):
         project_id=project.id,
         boq_id=wall.boq_id,
         name="Shell works",
-        status="awarded",
+        status=status,
         metadata_={"recipients": recipients},
     )
     session.add(package)
@@ -432,16 +432,126 @@ async def test_a_tender_award_drafts_a_contract_with_its_bill_links(pg_session, 
     assert po_count.scalar_one() == 0
 
 
-async def test_a_tender_award_not_committed_drafts_nothing(pg_session, monkeypatch) -> None:
+async def test_an_event_for_a_package_that_is_not_awarded_drafts_nothing(pg_session, monkeypatch) -> None:
+    """The status guard: a replayed or stray event is not an award."""
     project = await _project(pg_session)
-    package, bid, _wall, _slab = await _tender_award(pg_session, project)
-    package.status = "evaluating"
-    await pg_session.flush()
-    monkeypatch.setattr(bm_events, "_VISIBILITY_WAITS", ())
+    package, bid, _wall, _slab = await _tender_award(pg_session, project, status="evaluating")
 
     await _fire_tender(pg_session, monkeypatch, package, bid)
 
     assert await _award_contracts(pg_session, project) == []
+
+
+def _capture_publishes(monkeypatch) -> list[str]:
+    from app.core.events import event_bus
+
+    names: list[str] = []
+    monkeypatch.setattr(event_bus, "publish_detached", lambda name, *_a, **_kw: names.append(name))
+    return names
+
+
+async def test_a_committed_tender_award_publishes(pg_session, monkeypatch) -> None:
+    """Control for the rollback test below: the same award, committed, does publish."""
+    from app.modules.tendering.service import TenderingService
+
+    project = await _project(pg_session)
+    package, bid, _wall, _slab = await _tender_award(pg_session, project, status="evaluating")
+    bid.status = "submitted"
+    await pg_session.flush()
+    names = _capture_publishes(monkeypatch)
+
+    await TenderingService(pg_session).apply_winner(package.id, bid.id)
+    assert "tendering.package.awarded" not in names, "published before the commit"
+    await pg_session.commit()
+
+    assert "tendering.package.awarded" in names
+
+
+async def test_a_rolled_back_tender_award_publishes_nothing(pg_engine, monkeypatch) -> None:
+    """No event, so neither the purchase order nor the contract subscriber ever runs."""
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+    from app.modules.tendering.service import TenderingService
+
+    async with async_sessionmaker(pg_engine, class_=AsyncSession, expire_on_commit=False)() as session:
+        project = await _project(session)
+        package, bid, _wall, _slab = await _tender_award(session, project, status="evaluating")
+        bid.status = "submitted"
+        await session.flush()
+        names = _capture_publishes(monkeypatch)
+
+        await TenderingService(session).apply_winner(package.id, bid.id)
+        await session.rollback()
+
+    assert "tendering.package.awarded" not in names, names
+
+
+# ── Boot repair: contracts drafted before the bidder links existed ──────
+
+
+async def _legacy_award_contract(session, project, bidder: Bidder) -> Contract:
+    """The shape the award subscriber wrote before 18.1: the bidder row as counterparty."""
+    contract = Contract(
+        code=f"CONTRACT-OLD-{uuid.uuid4().hex[:6]}",
+        title="Old award",
+        counterparty_type="subcontractor",
+        counterparty_id=bidder.id,
+        project_id=project.id,
+        status="draft",
+        terms={},
+    )
+    contract.metadata_ = {
+        "source": "bid_management.package.awarded",
+        "bid_package_id": str(bidder.package_id),
+        "awarded_bidder_id": str(bidder.id),
+        "awarded_bidder_name": bidder.company_name,
+    }
+    session.add(contract)
+    await session.flush()
+    return contract
+
+
+async def _parties(session, contract) -> list[tuple[str, uuid.UUID | None, str]]:
+    rows = await session.execute(select(ContractParty).where(ContractParty.contract_id == contract.id))
+    return [(p.party_type, p.party_id, p.display_name) for p in rows.scalars().all()]
+
+
+async def test_the_boot_repair_repoints_old_award_contracts_once(pg_session) -> None:
+    from app.modules.bid_management.award_contract import repair_bidder_counterparties
+
+    project = await _project(pg_session)
+    package = await _bid_package(pg_session, project)
+    sub, contact = await _directory_sub(pg_session)
+    linked = Bidder(package_id=package.id, company_name="Rheinbeton", subcontractor_id=sub.id, contact_id=contact.id)
+    typed = Bidder(package_id=package.id, company_name="ACME Bau GmbH")
+    pg_session.add_all([linked, typed])
+    await pg_session.flush()
+    linked_contract = await _legacy_award_contract(pg_session, project, linked)
+    typed_contract = await _legacy_award_contract(pg_session, project, typed)
+    # A counterparty someone set by hand since is not the defect and stays.
+    hand_set = await _legacy_award_contract(pg_session, project, typed)
+    hand_set.counterparty_id = sub.id
+    await pg_session.flush()
+
+    assert await repair_bidder_counterparties(pg_session) == 2
+
+    assert linked_contract.counterparty_id == sub.id
+    assert linked_contract.metadata_["counterparty_contact_id"] == str(contact.id)
+    assert await _parties(pg_session, linked_contract) == [("subcontractor", sub.id, "Rheinbeton")]
+    assert typed_contract.counterparty_id is None
+    assert await _parties(pg_session, typed_contract) == [("external", None, "ACME Bau GmbH")]
+    assert hand_set.counterparty_id == sub.id and await _parties(pg_session, hand_set) == []
+
+    # A second boot changes nothing.
+    assert await repair_bidder_counterparties(pg_session) == 0
+    assert len(await _parties(pg_session, linked_contract)) == 1
+    assert len(await _parties(pg_session, typed_contract)) == 1
+
+
+async def test_the_boot_repair_is_registered() -> None:
+    from app.core.data_repairs import discover_data_repairs
+
+    assert "bid_award_contract_counterparty" in {r.repair_id for r in discover_data_repairs()}
 
 
 @pytest.mark.parametrize("tender_first", [True, False])

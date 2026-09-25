@@ -193,3 +193,61 @@ def add_award_party(session: AsyncSession, contract_id: uuid.UUID, cp: AwardCoun
             is_primary=True,
         ),
     )
+
+
+async def repair_bidder_counterparties(session: AsyncSession) -> int:
+    """Re-point award contracts that name the bidder row as their counterparty.
+
+    Until 18.1 a ``bid_management.package.awarded`` contract carried the
+    awarded bidder's row id in ``counterparty_id``, which no contracts or
+    finance reader resolves. Each such contract is mapped the way a new award
+    is: to the bidder's subcontractor or contact when one resolves now,
+    otherwise to no counterparty, and it gets the firm as its primary
+    subcontractor party when it has none yet.
+
+    Only contracts whose counterparty still equals their own
+    ``metadata.awarded_bidder_id`` are touched, so a counterparty someone has
+    since set by hand is left alone, and a second pass finds nothing to do.
+
+    Returns:
+        The number of contracts changed.
+    """
+    from app.modules.bid_management.models import Bidder  # noqa: PLC0415
+    from app.modules.contracts.models import Contract, ContractParty  # noqa: PLC0415
+
+    rows = (
+        await session.execute(
+            select(Contract, Bidder).join(Bidder, Bidder.id == Contract.counterparty_id),
+        )
+    ).all()
+    changed = 0
+    for contract, bidder in rows:
+        md = dict(contract.metadata_) if isinstance(contract.metadata_, dict) else {}
+        if md.get("source") != "bid_management.package.awarded":
+            continue
+        if md.get("awarded_bidder_id") != str(bidder.id):
+            continue
+        cp = await resolve_award_counterparty(
+            session,
+            subcontractor_id=bidder.subcontractor_id,
+            contact_id=bidder.contact_id,
+            company_name=md.get("awarded_bidder_name") or bidder.company_name,
+        )
+        contract.counterparty_id = cp.counterparty_id
+        if cp.contact_id is not None:
+            md["counterparty_contact_id"] = str(cp.contact_id)
+            contract.metadata_ = md
+        has_party = (
+            await session.execute(
+                select(ContractParty.id)
+                .where(ContractParty.contract_id == contract.id, ContractParty.party_role == "subcontractor")
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        if has_party is None:
+            add_award_party(session, contract.id, cp)
+        changed += 1
+    if changed:
+        await session.flush()
+        logger.info("Re-pointed %d award contract(s) off the bidder row", changed)
+    return changed
