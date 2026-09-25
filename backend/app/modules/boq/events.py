@@ -23,6 +23,7 @@ from app.core.events import Event, event_bus
 from app.core.vector_index import delete_one as vector_delete_one
 from app.core.vector_index import index_one as vector_index_one
 from app.database import async_session_factory
+from app.modules.boq.activity_text import READ_ONLY_ACTIVITY_ACTIONS, humanize_action
 from app.modules.boq.models import BOQ, BOQActivityLog, Position
 from app.modules.boq.vector_adapter import boq_position_adapter
 
@@ -46,7 +47,10 @@ _EVENT_DESCRIPTIONS: dict[str, str] = {
     "boq.position.updated": "Updated position",
     "boq.position.deleted": "Deleted position",
     "boq.position.duplicated": "Duplicated position",
+    "boq.positions.bulk_created": "Added {count} position(s)",
     "boq.positions.resource_propagated": "Propagated a resource definition to {count} position(s)",
+    "boq.quantity_link.created": "Linked a position quantity to a model",
+    "boq.quantity_link.applied": "Updated {applied} position quantities from linked models",
     "boq.section.created": "Created section {ordinal}",
     "boq.markup.created": "Added markup: {name}",
     "boq.markup.updated": "Updated markup",
@@ -69,7 +73,9 @@ def _resolve_target(event_name: str) -> str:
 
 def _build_description(event_name: str, data: dict) -> str:
     """Build a human-readable description from the event name and payload."""
-    template = _EVENT_DESCRIPTIONS.get(event_name, event_name)
+    template = _EVENT_DESCRIPTIONS.get(event_name)
+    if template is None:
+        return humanize_action(event_name)
     try:
         return template.format(**data)
     except (KeyError, IndexError):
@@ -134,6 +140,8 @@ async def _log_boq_activity(event: Event) -> None:
     are silently ignored.
     """
     if not event.name.startswith("boq."):
+        return
+    if event.name.removeprefix("boq.") in READ_ONLY_ACTIVITY_ACTIONS:
         return
 
     data = event.data or {}

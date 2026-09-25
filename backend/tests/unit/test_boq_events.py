@@ -431,3 +431,31 @@ def _reset_after_module():
         importlib.reload(boq_events_mod)
     finally:
         _restore_bus(snapshot)
+
+
+class TestActivityText:
+    """No event name reaches the feed as text, mapped or not."""
+
+    def test_an_event_without_a_sentence_is_humanized(self):
+        from app.modules.boq.events import _build_description
+
+        assert _build_description("boq.some_new.thing_happened", {}) == "Some new thing happened"
+
+    def test_every_published_boq_event_has_a_sentence(self):
+        from app.modules.boq.events import _EVENT_DESCRIPTIONS
+
+        for name in (
+            "boq.positions.bulk_created",
+            "boq.quantity_link.created",
+            "boq.quantity_link.applied",
+        ):
+            assert name in _EVENT_DESCRIPTIONS, name
+
+    @pytest.mark.asyncio
+    async def test_a_read_only_event_writes_no_row(self):
+        events_mod = importlib.import_module("app.modules.boq.events")
+        with patch.object(events_mod, "async_session_factory") as factory:
+            await events_mod._log_boq_activity(
+                Event(name="boq.cost_breakdown.computed", data={"boq_id": str(uuid.uuid4())})
+            )
+        factory.assert_not_called()
