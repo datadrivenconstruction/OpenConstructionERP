@@ -12,7 +12,7 @@
 // with items left out, and failed.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const api = vi.hoisted(() => ({
@@ -108,6 +108,33 @@ describe('the country install reports how the load ended', () => {
     const toast = countryProvisionToast(result, 'Canada');
     expect(toast.type).toBe('warning');
     expect(toast.title).toContain('2');
+  });
+
+  it('a load that outlives the grace window still ends in the banner as failed', async () => {
+    // The reported case: a large base runs for many minutes, so the driver
+    // hands over to the banner long before the job ends. The truth has to
+    // reach the banner through the later polls.
+    const running = job({ state: 'started', pct: 15 });
+    const failed = job({ state: 'failed', outcome: 'failed', pct: 15, error: "Can't reconnect" });
+    api.apiPost.mockResolvedValue({ jobs: [job({})] });
+    api.apiGet.mockResolvedValueOnce({ jobs: [running] }).mockResolvedValue({ jobs: [failed] });
+
+    const result = await startBackgroundOnboardingProvision({
+      region: 'ENG_TORONTO',
+      country: 'Canada',
+      graceMs: 0,
+    });
+    expect(result.phase).toBe('backgrounded');
+    expect(result.outcome).toBeNull();
+    // Not an error and not ready: the toast for a hand-over says it goes on.
+    expect(countryProvisionToast(result, 'Canada').title).toContain('background');
+
+    await waitFor(() => expect(useBackgroundInstallStore.getState().install?.done).toBe(true), {
+      timeout: 5000,
+    });
+    const install = useBackgroundInstallStore.getState().install!;
+    expect(install.steps.find((s) => s.step === 'cost_db')?.status).toBe('error');
+    expect(install.hadError).toBe(true);
   });
 
   it('a complete load is ready', async () => {
