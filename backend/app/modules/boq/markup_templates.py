@@ -25,6 +25,11 @@ building, and every seeded line is editable in-app the moment it lands.
 
 from __future__ import annotations
 
+import json
+from decimal import Decimal, InvalidOperation
+from functools import cache
+from pathlib import Path
+
 __all__ = [
     "DEFAULT_MARKUP_TEMPLATES",
     "REGION_BY_COUNTRY",
@@ -33,6 +38,7 @@ __all__ = [
     "resolve_region_lines",
     "region_lines_for_country",
     "region_key_for_country",
+    "seeded_tax_line_names",
 ]
 
 
@@ -2752,11 +2758,80 @@ NON_SINGLE_TAX_REGIONS: dict[str, str] = {
         "PIS + COFINS is federal and ISS is municipal, two levies at two statutory rates, "
         "so one VAT number cannot stand in for both"
     ),
-    "DEFAULT": ("the neutral stack names no jurisdiction, so it names no consumption tax either"),
+    "DEFAULT": (
+        "the neutral stack names no jurisdiction, so it names no consumption tax either; a caller "
+        "that knows the country gets that country's own tax line appended instead, see "
+        "seeded_tax_line_names"
+    ),
 }
 
+# The dated tax seed the i18n foundation installs. Read here as a plain file
+# rather than through that module, which keeps this one standard-library only.
+_TAX_SEED_PATH = Path(__file__).resolve().parents[1] / "i18n_foundation" / "seed_data" / "tax_configurations.json"
 
-def resolve_region_lines(region_key: str, *, vat_rate: str | None = None) -> list[dict[str, object]]:
+# Kinds of row that are one consumption tax on the whole contract sum, which is
+# what a single bill-level line can state. A sales tax is levied on materials at
+# purchase and a service tax on some services only, so neither is one.
+_SINGLE_LINE_TAX_TYPES = frozenset({"vat", "gst"})
+
+
+@cache
+def seeded_tax_line_names() -> dict[str, str]:
+    """Return the tax line name for each country whose stack may be given one.
+
+    A country with no regional stack is seeded with ``DEFAULT``, which carries no
+    tax line, so its bill used to show no VAT at all even when the tax seed knew
+    the rate. :func:`resolve_region_lines` appends one line for such a country,
+    and this map says which countries qualify and what the line is called.
+
+    The map is computed from the seed rather than written out, so a country
+    added to the seed qualifies without a second edit here. A country qualifies
+    when its default row is country-wide (``national``), is a VAT or GST, and
+    charges more than zero. That leaves out the United States (no federal
+    consumption tax, sales tax is levied per state) and Canada (a federal GST
+    that every province tops up or replaces), and a country whose default row is
+    a zero rate, such as Hong Kong. The name is the row's ``tax_code``, the short
+    form a regional stack already uses for its own line (DPH, KDV, IVA). When a
+    country has more than one dated default row the latest one names the line.
+
+    Returns:
+        ISO 3166-1 alpha-2 country code to line name. Cached, so the file is
+        read once per process.
+    """
+    rows = json.loads(_TAX_SEED_PATH.read_text(encoding="utf-8"))
+    latest: dict[str, dict[str, object]] = {}
+    for row in rows:
+        if not row.get("is_default"):
+            continue
+        country = str(row["country_code"]).upper()
+        held = latest.get(country)
+        if held is None or str(row.get("effective_from") or "") > str(held.get("effective_from") or ""):
+            latest[country] = row
+    names: dict[str, str] = {}
+    for country, row in latest.items():
+        if row.get("combination") != "national" or row.get("tax_type") not in _SINGLE_LINE_TAX_TYPES:
+            continue
+        try:
+            rate = Decimal(str(row.get("rate_pct")))
+        except InvalidOperation:
+            continue
+        if rate > 0:
+            names[country] = str(row["tax_code"])
+    return names
+
+
+def _is_a_positive_rate(vat_rate: str | None) -> bool:
+    if vat_rate is None:
+        return False
+    try:
+        return Decimal(vat_rate) > 0
+    except InvalidOperation:
+        return False
+
+
+def resolve_region_lines(
+    region_key: str, *, vat_rate: str | None = None, country_code: str | None = None
+) -> list[dict[str, object]]:
     """Return a region's markup lines in seeding order, with VAT swapped in.
 
     The single reader of :data:`DEFAULT_MARKUP_TEMPLATES` for anything that
@@ -2791,6 +2866,13 @@ def resolve_region_lines(region_key: str, *, vat_rate: str | None = None) -> lis
             ``None`` leaves the region's own tax rates alone. ``"0"`` is a real
             rate and does override, because a zero-rated jurisdiction is a
             statement, not a missing value.
+        country_code: The project's country, ISO 3166-1 alpha-2. Read only when
+            the stack has no tax line: a country listed in
+            :func:`seeded_tax_line_names` then gets one tax line at
+            ``vat_rate``, after the stack's own lines, provided the rate is
+            above zero. A stack that already carries a tax line is never given
+            a second one. The methodology catalogue does not pass it, so the
+            templates it derives never see the appended line.
 
     Returns:
         Fresh dicts in ``sort_order``, so a caller may mutate them freely. Each
@@ -2806,6 +2888,13 @@ def resolve_region_lines(region_key: str, *, vat_rate: str | None = None) -> lis
     # that actually chose the template rather than the one that was passed in.
     if key not in DEFAULT_MARKUP_TEMPLATES:
         key = "DEFAULT"
+    # Decided before the multi-levy guard below clears the rate, because the
+    # stacks that need a line appended (DEFAULT, US) are on that list for having
+    # no tax line, not for having several.
+    appended_name: str | None = None
+    if country_code and _is_a_positive_rate(vat_rate) and not any(entry.get("category") == "tax" for entry in template):
+        appended_name = seeded_tax_line_names().get(country_code.upper())
+    appended_rate = vat_rate
     if key in NON_SINGLE_TAX_REGIONS:
         vat_rate = None
     lines: list[dict[str, object]] = []
@@ -2816,6 +2905,20 @@ def resolve_region_lines(region_key: str, *, vat_rate: str | None = None) -> lis
             line["percentage"] = vat_rate
         line["vat_override"] = swapped
         lines.append(line)
+    if appended_name is not None:
+        next_order = max((int(str(line.get("sort_order", 0))) for line in lines), default=-1) + 1
+        lines.append(
+            {
+                "name": appended_name,
+                "category": "tax",
+                "percentage": appended_rate,
+                "apply_to": "cumulative",
+                "sort_order": next_order,
+                # The percentage is the supplied rate, as on a swapped line, so
+                # the bill records where that rate came from.
+                "vat_override": True,
+            }
+        )
     return lines
 
 
