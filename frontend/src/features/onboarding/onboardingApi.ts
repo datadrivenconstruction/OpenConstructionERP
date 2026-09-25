@@ -7,7 +7,7 @@
 // sample project - to the server as background jobs and then poll their live
 // state, instead of awaiting the raw imports inline and blocking the user.
 
-import { apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 
 /** One background provisioning job's live state, as returned by the server. */
 export interface OnboardingJobState {
@@ -18,13 +18,28 @@ export interface OnboardingJobState {
   arg: string | null;
   /** pending | started | success | failed | cancelled. */
   state: string;
+  /**
+   * How the job ended, null while it runs. `partial` means it finished but left
+   * something out (see `failed_items`). Read this, not `state`: a job can reach
+   * `success` and still be partial.
+   */
+  outcome: OnboardingJobOutcome | null;
   /** 0..100 progress reported by the handler. */
   pct: number;
   /** Latest human progress message, when the handler set one. */
   message: string | null;
-  /** Error message when the job failed. */
+  /** Server-side reason when the job failed. For logs, not for the user. */
   error: string | null;
+  /** Items the job added, when it reports them. */
+  imported?: number | null;
+  /** Items now present for the job's subject. */
+  total?: number | null;
+  /** Items the job had to leave out. */
+  failed_items?: number;
 }
+
+/** The truthful ending of a finished onboarding job. */
+export type OnboardingJobOutcome = 'completed' | 'partial' | 'failed';
 
 /** What to provision in the background. Mirrors the backend `ProvisionRequest`. */
 export interface ProvisionOnboardingBody {
@@ -51,14 +66,18 @@ export async function provisionOnboarding(
   return res.jobs ?? [];
 }
 
+/** The caller's onboarding jobs, newest first (the server lists only their own). */
+export async function listOnboardingJobs(): Promise<OnboardingJobState[]> {
+  const res = await apiGet<JobsEnvelope>('/v1/onboarding/jobs/');
+  return res.jobs ?? [];
+}
+
 /**
- * Poll the live state of previously provisioned jobs by id. The server returns
- * only jobs owned by the caller, so ids from another user are silently dropped.
+ * Poll the live state of previously provisioned jobs by id. Reads the caller's
+ * job list, which the server scopes to the caller, and keeps the ids asked for.
  */
 export async function fetchOnboardingStatus(ids: string[]): Promise<OnboardingJobState[]> {
   if (ids.length === 0) return [];
-  const res = await apiPost<JobsEnvelope, { ids: string[] }>('/v1/onboarding/status', {
-    ids,
-  });
-  return res.jobs ?? [];
+  const wanted = new Set(ids);
+  return (await listOnboardingJobs()).filter((j) => wanted.has(j.id));
 }
