@@ -28,6 +28,7 @@ import {
   type ProfileSpec,
 } from './api';
 import { useTelemetry } from '@/shared/lib/telemetry';
+import { lookupCountryDefault } from './currencyGroups';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { fmtFixed } from '@/shared/lib/formatters';
 
@@ -72,6 +73,7 @@ const REGION_GROUPS: OptionGroup[] = [
       { value: 'Netherlands', label: 'Netherlands' },
       { value: 'Poland', label: 'Poland' },
       { value: 'Czech', label: 'Czech Republic' },
+      { value: 'Croatia', label: 'Croatia' },
       { value: 'Turkey', label: 'Turkey' },
       { value: 'Russia', label: 'Russia' },
     ],
@@ -238,7 +240,6 @@ export const CURRENCY_GROUPS: OptionGroup[] = [
       { value: 'HUF', label: 'HUF (Ft) - Hungarian Forint' },
       { value: 'RON', label: 'RON (lei) - Romanian Leu' },
       { value: 'BGN', label: 'BGN (лв) - Bulgarian Lev' },
-      { value: 'HRK', label: 'HRK (kn) - Croatian Kuna' },
       { value: 'ISK', label: 'ISK (kr) - Icelandic Krona' },
     ],
   },
@@ -325,6 +326,7 @@ const LANGUAGES = [
   { value: 'nl', label: 'Nederlands' },
   { value: 'pl', label: 'Polski' },
   { value: 'cs', label: 'Čeština' },
+  { value: 'hr', label: 'Hrvatski' },
   { value: 'hu', label: 'Magyar' },
   { value: 'ru', label: 'Русский' },
   { value: 'tr', label: 'Türkçe' },
@@ -573,6 +575,18 @@ export function CreateProjectModal({
     if (parts.postcode) setAddressPostal(parts.postcode);
     // Resolve ISO country code from geocoder — Nominatim returns lowercase.
     if (sel.country_code) setCountryCode(sel.country_code.toUpperCase());
+    // A new project in a known country takes that country's region and
+    // currency, unless the user already chose them. The currency counts as
+    // unchosen while it is still the preference the form opened with, which
+    // is how a Croatian project stopped opening on DACH defaults.
+    const countryDefault = isEdit ? null : lookupCountryDefault(sel.country_code);
+    if (countryDefault) {
+      setForm((prev) => ({
+        ...prev,
+        region: prev.region ? prev.region : countryDefault.region,
+        currency: prev.currency && prev.currency !== defaultCurrency ? prev.currency : countryDefault.currency,
+      }));
+    }
     // OC-11: derive location precision from Nominatim addresstype.
     if (sel.addresstype) {
       const at = sel.addresstype.toLowerCase();

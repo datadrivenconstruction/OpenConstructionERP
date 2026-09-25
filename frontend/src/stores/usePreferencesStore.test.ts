@@ -25,7 +25,28 @@ describe('usePreferencesStore', () => {
     // separators inside an English UI while every other number followed the
     // language. See `numbersAgreeAcrossSurfaces.test.tsx`.
     expect(state.numberLocale).toBe('auto');
-    expect(state.vatRate).toBe(19);
+  });
+
+  it('carries no country default nobody reads', () => {
+    // VAT and region come from the project's country. A store default of 19 %
+    // and DACH told a Croatian user their settings were German.
+    const state = usePreferencesStore.getState() as unknown as Record<string, unknown>;
+    expect(state.vatRate).toBeUndefined();
+    expect(state.defaultRegion).toBeUndefined();
+    expect(state.defaultStandard).toBeUndefined();
+  });
+
+  it('drops the retired country defaults from a blob saved before they were retired', async () => {
+    localStorage.setItem(
+      'oe_preferences',
+      JSON.stringify({ currency: 'EUR', vatRate: 19, defaultRegion: 'DACH', defaultStandard: 'din276', _v: 2 }),
+    );
+    vi.resetModules();
+    const fresh = await import('./usePreferencesStore');
+    const state = fresh.usePreferencesStore.getState() as unknown as Record<string, unknown>;
+    expect(state.vatRate).toBeUndefined();
+    expect(state.defaultRegion).toBeUndefined();
+    expect(state.currency).toBe('EUR');
   });
 
   it('should update currency via setPreference', () => {
@@ -48,16 +69,11 @@ describe('usePreferencesStore', () => {
     expect(usePreferencesStore.getState().numberLocale).toBe('en-US');
   });
 
-  it('should update VAT rate via setPreference', () => {
-    usePreferencesStore.getState().setPreference('vatRate', 20);
-    expect(usePreferencesStore.getState().vatRate).toBe(20);
-  });
-
   it('should update multiple preferences at once', () => {
-    usePreferencesStore.getState().setPreferences({ currency: 'USD', vatRate: 0 });
+    usePreferencesStore.getState().setPreferences({ currency: 'USD', measurementSystem: 'imperial' });
     const state = usePreferencesStore.getState();
     expect(state.currency).toBe('USD');
-    expect(state.vatRate).toBe(0);
+    expect(state.measurementSystem).toBe('imperial');
   });
 
   it('should reset to defaults', () => {
