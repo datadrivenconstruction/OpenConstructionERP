@@ -1,24 +1,21 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * #466 - the invoice total emptied itself once the figure reached a thousand.
+ * The invoice form bills the lines that were typed, with VAT per line.
  *
- * The blank field was the visible half. The cause is that the auto-filled
- * total was written through a display formatter: `fmtFixed` groups thousands
- * and writes the reader's decimal mark, a `<input type="number">` refuses any
- * value carrying either, and the same string is what the form reads back when
- * it builds the request. `parseFloat('9,000.00')` is 9 and
- * `parseFloat('900,50')` is 900, so the figure that left the screen was not
- * the figure the person typed.
+ * #466 was the first half: the auto-filled total went through a display
+ * formatter, `parseFloat('9,000.00')` is 9 and `parseFloat('900,50')` is 900,
+ * so the figure that left the screen was not the figure the person typed. The
+ * form now takes lines (quantity, unit rate, VAT %) and derives Net, VAT and
+ * Gross from them, so these tests type into the line editor and assert on the
+ * request that leaves, never on a formatter round trip.
  *
- * These tests drive the sequence a person performs - open the form, type into
- * a field, press Create - and assert on the request that leaves. Formatting a
- * number and reading it straight back would pass against the broken form,
- * because both halves of that round trip are the formatter.
+ * Both number conventions are covered on purpose: under a comma-decimal reader
+ * every invoice with cents lost them, at any size.
  *
- * Both conventions are covered on purpose. Under a point-decimal reader the
- * loss starts at a thousand, where grouping begins. Under a comma-decimal
- * reader every invoice with cents loses them, at any size.
+ * The same harness drives Mark Paid, which has to write a payment row for what
+ * is still open before it moves the status; `/pay/` alone left the payments
+ * list, the cash flow and the statements at zero.
  *
  * Run:  npx vitest run src/features/finance/__tests__/invoiceAmountsSurviveTheForm.test.tsx
  */
@@ -30,10 +27,15 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { InvoicesTab } from '../FinancePage';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const harness = vi.hoisted(() => ({
-  posted: [] as Record<string, unknown>[],
+  posted: [] as { url: string; body: Record<string, unknown> | undefined }[],
   patched: [] as { url: string; body: Record<string, unknown> }[],
+  invoices: [] as Record<string, unknown>[],
+  payments: [] as Record<string, unknown>[],
+  country: null as string | null,
+  taxRows: [] as Record<string, unknown>[],
 }));
 
 vi.mock('react-i18next', () => ({
@@ -56,12 +58,17 @@ vi.mock('react-i18next', () => ({
   Trans: ({ children }: { children?: unknown }) => children ?? null,
 }));
 
-// One canned payload answers every query this tab makes: the invoice register
-// reads `items`/`total`, the dashboard reads `currency`. `select` is applied
-// where a query declares one, because the register maps its rows through it.
+// Queries answer by the head of their key: the project (for its country), the
+// country's tax configurations, the invoice register, and a canned payload for
+// everything else. `select` is applied where a query declares one, because the
+// register maps its rows through it.
 vi.mock('@tanstack/react-query', () => ({
-  useQuery: (opts: { select?: (d: unknown) => unknown }) => {
-    const raw = { items: [], total: 0, currency: 'EUR' };
+  useQuery: (opts: { queryKey?: unknown[]; select?: (d: unknown) => unknown }) => {
+    const head = opts?.queryKey?.[0];
+    let raw: unknown = { items: [], total: 0, currency: 'EUR' };
+    if (head === 'project') raw = { id: 'proj-1', country_code: harness.country };
+    else if (head === 'i18n-tax-configs') raw = { items: harness.taxRows, total: harness.taxRows.length };
+    else if (head === 'finance-invoices') raw = { items: harness.invoices, total: harness.invoices.length };
     return {
       data: opts?.select ? opts.select(raw) : raw,
       isLoading: false,
@@ -89,9 +96,15 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 vi.mock('@/shared/lib/api', () => ({
-  apiGet: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  apiPost: vi.fn((_url: string, body: Record<string, unknown>) => {
-    harness.posted.push(body);
+  apiGet: vi.fn((url: string) =>
+    Promise.resolve(
+      url.startsWith('/v1/finance/payments/')
+        ? { items: harness.payments, total: harness.payments.length }
+        : { items: [], total: 0 },
+    ),
+  ),
+  apiPost: vi.fn((url: string, body?: Record<string, unknown>) => {
+    harness.posted.push({ url, body });
     return Promise.resolve({ id: 'inv-1' });
   }),
   apiPatch: vi.fn((url: string, body: Record<string, unknown>) => {
@@ -111,18 +124,38 @@ vi.mock('@/shared/lib/api', () => ({
   ApiError: class ApiError extends Error {},
 }));
 
-/** The number-format preference `fmtFixed` reads, per test. */
+// The confirm dialog answers yes, so Mark Paid runs the way a click through
+// the dialog runs it.
+vi.mock('@/shared/hooks/useConfirm', () => ({
+  useConfirm: () => ({
+    open: false,
+    title: '',
+    message: '',
+    variant: 'danger',
+    loading: false,
+    onConfirm: () => undefined,
+    onCancel: () => undefined,
+    confirm: () => Promise.resolve(true),
+    setLoading: () => undefined,
+  }),
+}));
+
+/** The number-format preference the form's figures follow, per test. */
 function readAs(locale: 'en-US' | 'de-DE') {
   usePreferencesStore.setState({ numberLocale: locale });
 }
 
-async function openTheInvoiceForm() {
-  const user = userEvent.setup();
+function renderTab() {
   render(
     <MemoryRouter>
       <InvoicesTab projectId="proj-1" />
     </MemoryRouter>,
   );
+}
+
+async function openTheInvoiceForm() {
+  const user = userEvent.setup();
+  renderTab();
   // The register offers the same action twice while it is empty (toolbar and
   // empty state); either opens the same form.
   const openers = await screen.findAllByRole('button', { name: /new invoice/i });
@@ -130,29 +163,36 @@ async function openTheInvoiceForm() {
   return user;
 }
 
-// The three money fields carry the same placeholder and no label association,
-// so they are taken in document order: subtotal, tax, then the total.
-const moneyFields = () => screen.getAllByPlaceholderText('0.00') as HTMLInputElement[];
-const subtotalField = () => moneyFields()[0] as HTMLInputElement;
-const totalField = () => screen.getByLabelText('Total') as HTMLInputElement;
+const lineRows = () => screen.getAllByTestId('invoice-line');
+const field = (label: string, row = 0) =>
+  (screen.getAllByLabelText(label) as HTMLInputElement[])[row] as HTMLInputElement;
 const createButton = () => screen.getByRole('button', { name: /^create$/i });
 
+/** The last create request (a POST without a sub-path). */
+function createdBody(): Record<string, unknown> {
+  const hit = harness.posted.filter((p) => p.url.startsWith('/v1/finance/') && !p.url.includes('/pay'));
+  return (hit[hit.length - 1]?.body ?? {}) as Record<string, unknown>;
+}
+
 /**
- * Put a figure in a money field the way a finished edit or a paste arrives.
+ * Put a figure in a field the way a finished edit or a paste arrives.
  *
  * Not keystroke by keystroke. A number field empties itself on an
  * intermediate "900." so a decimal never survives the trip, and under load
  * the controlled value lags far enough behind that characters are dropped -
- * both would make the test measure the harness rather than the form. What
- * this drives is the same handler a person's typing drives.
+ * both would make the test measure the harness rather than the form.
  */
-function enter(field: HTMLInputElement, value: string) {
-  fireEvent.change(field, { target: { value } });
+function enter(input: HTMLInputElement, value: string) {
+  fireEvent.change(input, { target: { value } });
 }
 
 beforeEach(() => {
   harness.posted.length = 0;
   harness.patched.length = 0;
+  harness.invoices = [];
+  harness.payments = [];
+  harness.country = null;
+  harness.taxRows = [];
 });
 
 afterEach(() => {
@@ -160,31 +200,17 @@ afterEach(() => {
 });
 
 describe('#466 - an invoice is billed for the figure that was typed', () => {
-  it('keeps the auto-filled total in a form the field itself accepts', async () => {
-    readAs('en-US');
-    await openTheInvoiceForm();
-
-    enter(subtotalField(), '9000');
-
-    // Whatever the form put in the total field has to be a number that field
-    // can hold. A grouped string is rejected by the control, which is how this
-    // reached us: the total looked empty from a thousand upwards.
-    await waitFor(() => expect(Number(totalField().value)).toBe(9000));
-  });
-
   it('posts nine thousand when nine thousand was typed', async () => {
     readAs('en-US');
     const user = await openTheInvoiceForm();
 
-    enter(subtotalField(), '9000');
+    enter(field('Unit rate'), '9000');
     await user.click(createButton());
 
     await waitFor(() => expect(harness.posted).toHaveLength(1));
-    const body = harness.posted[0] as Record<string, unknown>;
+    const body = createdBody();
     expect(Number(body.amount_total)).toBe(9000);
     expect(Number(body.amount_subtotal)).toBe(9000);
-    // The single lump-sum line the form writes is the same money. A line that
-    // disagrees with its own invoice is the shape the server check refuses.
     const lines = body.line_items as { amount: string }[];
     expect(lines).toHaveLength(1);
     expect(Number((lines[0] as { amount: string }).amount)).toBe(9000);
@@ -194,67 +220,191 @@ describe('#466 - an invoice is billed for the figure that was typed', () => {
     readAs('de-DE');
     const user = await openTheInvoiceForm();
 
-    enter(subtotalField(), '900.50');
+    enter(field('Unit rate'), '900.50');
     await user.click(createButton());
 
     await waitFor(() => expect(harness.posted).toHaveLength(1));
-    const body = harness.posted[0] as Record<string, unknown>;
-    // 900,50 read back through `parseFloat` is 900. The cents are the whole
-    // defect here, and it does not wait for a thousand to show up.
+    const body = createdBody();
     expect(Number(body.amount_total)).toBeCloseTo(900.5, 2);
     expect(Number(body.amount_subtotal)).toBeCloseTo(900.5, 2);
   });
+});
 
-  it('sends a subtotal when only a total was typed, rather than a zero', async () => {
-    readAs('en-US');
+describe('the invoice form takes lines with VAT per line', () => {
+  it('adds VAT per line into Net, VAT and Gross and posts them', async () => {
     const user = await openTheInvoiceForm();
 
-    enter(totalField(), '9000');
+    enter(field('Quantity'), '2');
+    enter(field('Unit rate'), '4500');
+    enter(field('VAT %'), '25');
+    await user.click(screen.getByRole('button', { name: /add line/i }));
+    expect(lineRows()).toHaveLength(2);
+    enter(field('Unit rate', 1), '1000');
+    enter(field('VAT %', 1), '5');
+
+    expect(screen.getByTestId('invoice-total-net').textContent).toMatch(/10,000/);
+    expect(screen.getByTestId('invoice-total-gross').textContent).toMatch(/12,300/);
+
+    await user.click(createButton());
+    await waitFor(() => expect(harness.posted).toHaveLength(1));
+    const body = createdBody();
+    expect(Number(body.amount_subtotal)).toBe(10000);
+    expect(Number(body.tax_amount)).toBe(2300);
+    expect(Number(body.amount_total)).toBe(12300);
+    const lines = body.line_items as { amount: string; vat_rate: string | null; quantity: string }[];
+    expect(lines.map((l) => [Number(l.amount), l.vat_rate])).toEqual([
+      [9000, '25'],
+      [1000, '5'],
+    ]);
+    expect(lines[0]?.quantity).toBe('2');
+  });
+
+  it('sends a typed 0 as 0 and an empty VAT field as null', async () => {
+    const user = await openTheInvoiceForm();
+
+    enter(field('Unit rate'), '100');
+    enter(field('VAT %'), '0');
+    await user.click(screen.getByRole('button', { name: /add line/i }));
+    enter(field('Unit rate', 1), '200');
+    enter(field('VAT %', 1), '');
     await user.click(createButton());
 
     await waitFor(() => expect(harness.posted).toHaveLength(1));
-    const body = harness.posted[0] as Record<string, unknown>;
-    // The server derives the stored total from subtotal + tax. Posting a
-    // subtotal of zero beside a total of nine thousand stored zero, with a
-    // nine-thousand line item sitting next to it.
-    expect(Number(body.amount_subtotal)).toBe(9000);
-    expect(Number(body.amount_total)).toBe(9000);
+    const lines = createdBody().line_items as { vat_rate: string | null }[];
+    // 0 is exempt or reverse-charged work; null asks the server for the
+    // country's rate. Collapsing either into the other bills the wrong tax.
+    expect(lines[0]?.vat_rate).toBe('0');
+    expect(lines[1]?.vat_rate).toBeNull();
   });
 
-  it('refuses a hand-typed total that does not agree with subtotal plus tax', async () => {
-    readAs('en-US');
+  it('starts a line at the project country standard rate', async () => {
+    harness.country = 'HR';
+    harness.taxRows = [
+      { rate_pct: '13.00', is_default: false, subdivision_code: null },
+      { rate_pct: '25.00', is_default: true, subdivision_code: null },
+      { rate_pct: '5.00', is_default: false, subdivision_code: null },
+    ];
     const user = await openTheInvoiceForm();
 
-    enter(subtotalField(), '9000');
-    enter(totalField(), '8000');
+    await waitFor(() => expect(field('VAT %').value).toBe('25'));
+    enter(field('Unit rate'), '9000');
     await user.click(createButton());
 
-    // Nothing is posted, and the disagreement is named on screen rather than
-    // quietly resolved in one direction or the other.
+    await waitFor(() => expect(harness.posted).toHaveLength(1));
+    const body = createdBody();
+    expect(Number(body.tax_amount)).toBe(2250);
+    expect(Number(body.amount_total)).toBe(11250);
+  });
+
+  it('posts the supplier invoice number that was typed', async () => {
+    const user = await openTheInvoiceForm();
+
+    enter(screen.getByLabelText('Supplier invoice number') as HTMLInputElement, 'RE-2026-0415');
+    enter(field('Unit rate'), '10');
+    await user.click(createButton());
+
+    await waitFor(() => expect(harness.posted).toHaveLength(1));
+    expect(createdBody().invoice_number).toBe('RE-2026-0415');
+  });
+
+  it('refuses an invoice whose lines carry no money', async () => {
+    const user = await openTheInvoiceForm();
+
+    expect(createButton()).toBeDisabled();
+    await user.click(createButton());
     expect(harness.posted).toHaveLength(0);
-    expect(await screen.findByText(/must equal the subtotal plus tax/i)).toBeInTheDocument();
+
+    enter(field('Unit rate'), '10');
+    expect(createButton()).toBeEnabled();
+  });
+});
+
+describe('editing a stored invoice', () => {
+  const stored = {
+    id: 'inv-7',
+    project_id: 'proj-1',
+    invoice_number: 'RE-7',
+    invoice_direction: 'payable',
+    invoice_date: '2026-09-01',
+    amount_subtotal: '1500.00',
+    tax_amount: '300.00',
+    amount_total: '1800.00',
+    currency_code: 'EUR',
+    status: 'approved',
+    line_items: [
+      { description: 'Rebar', quantity: '10', unit: 't', unit_rate: '100.00', amount: '1000.00', vat_rate: '20', cost_line_id: 'cl-1', wbs_id: 'w-1', cost_category: 'material', sort_order: 0 },
+      { description: 'Crane', quantity: '1', unit: 'd', unit_rate: '500.00', amount: '500.00', vat_rate: '20', cost_line_id: null, wbs_id: 'w-2', cost_category: 'equipment', sort_order: 1 },
+    ],
+  };
+
+  it('loads every stored line and sends no money when none of it changed', async () => {
+    harness.invoices = [stored];
+    harness.country = 'DE';
+    harness.taxRows = [{ rate_pct: '19.00', is_default: true, subdivision_code: null }];
+    const user = userEvent.setup();
+    renderTab();
+
+    await user.click(screen.getAllByRole('button', { name: /edit invoice/i })[0] as HTMLElement);
+    expect(lineRows()).toHaveLength(2);
+    // The stored rate stays, the country default does not overwrite it.
+    expect(field('VAT %', 0).value).toBe('20');
+    expect(screen.getByTestId('invoice-total-gross').textContent).toMatch(/1,800/);
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+    await waitFor(() => expect(harness.patched).toHaveLength(1));
+    const body = harness.patched[0]?.body as Record<string, unknown>;
+    expect(body).not.toHaveProperty('line_items');
+    expect(body).not.toHaveProperty('amount_total');
   });
 
-  it('sends a document that adds up when only the tax field was filled', async () => {
-    readAs('en-US');
-    const user = await openTheInvoiceForm();
+  it('keeps a line linked to its cost line when the lines are edited', async () => {
+    harness.invoices = [stored];
+    const user = userEvent.setup();
+    renderTab();
 
-    // Tax on its own is an odd thing to enter, and it is the one route through
-    // the form that no other test here drives. It used to reach the old
-    // `sub > 0 ? sub : total` fallback and post a line item for a figure the
-    // subtotal did not claim.
-    enter(moneyFields()[1] as HTMLInputElement, '9000');
-    await user.click(createButton());
+    await user.click(screen.getAllByRole('button', { name: /edit invoice/i })[0] as HTMLElement);
+    enter(field('Quantity', 1), '2');
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
 
-    await waitFor(() => expect(harness.posted).toHaveLength(1));
-    const body = harness.posted[0] as Record<string, unknown>;
-    // Degenerate but coherent, which is the property the server now enforces:
-    // subtotal plus tax is the total, and nothing claims to be a line of a
-    // subtotal of zero.
-    expect(Number(body.amount_subtotal) + Number(body.tax_amount)).toBeCloseTo(
-      Number(body.amount_total),
-      2,
-    );
-    expect(body.line_items).toHaveLength(0);
+    await waitFor(() => expect(harness.patched).toHaveLength(1));
+    const body = harness.patched[0]?.body as Record<string, unknown>;
+    const lines = body.line_items as Record<string, unknown>[];
+    expect(lines[0]).toMatchObject({ cost_line_id: 'cl-1', wbs_id: 'w-1', cost_category: 'material', amount: '1000.00' });
+    expect(lines[1]).toMatchObject({ wbs_id: 'w-2', amount: '1000.00' });
+    expect(Number(body.amount_subtotal)).toBe(2000);
+    expect(Number(body.amount_total)).toBe(2400);
+  });
+});
+
+describe('Mark Paid writes the payment before it closes the invoice', () => {
+  it('records the open balance under a stable key, then pays', async () => {
+    useAuthStore.setState({ userRole: 'admin' });
+    harness.invoices = [
+      {
+        id: 'inv-9',
+        invoice_number: 'RE-9',
+        invoice_direction: 'payable',
+        invoice_date: '2026-09-01',
+        amount_total: '1000.00',
+        currency_code: 'EUR',
+        status: 'approved',
+        line_items: [],
+      },
+    ];
+    harness.payments = [{ amount: '400.00', withholding_amount: '0', is_refund: false }];
+    const user = userEvent.setup();
+    renderTab();
+
+    await user.click(screen.getAllByRole('button', { name: /^mark paid$/i })[0] as HTMLElement);
+
+    await waitFor(() => expect(harness.posted.map((p) => p.url)).toEqual([
+      '/v1/finance/invoices/inv-9/record-payment/',
+      '/v1/finance/inv-9/pay/',
+    ]));
+    expect(harness.posted[0]?.body).toMatchObject({
+      amount: '600.00',
+      currency_code: 'EUR',
+      idempotency_key: 'markpaid:inv-9',
+    });
   });
 });

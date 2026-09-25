@@ -17,6 +17,7 @@ import { WideModal, WideModalSection, WideModalField } from '@/shared/ui/WideMod
 import { Button, Input } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { apiPost, getErrorMessage } from '@/shared/lib/api';
+import { invalidateFinanceFigures } from './financeQueryKeys';
 
 export interface PaymentModalProps {
   open: boolean;
@@ -75,8 +76,7 @@ export function PaymentModal({
     },
     onSuccess: () => {
       setError(null);
-      queryClient.invalidateQueries({ queryKey: ['finance', 'payments'] });
-      queryClient.invalidateQueries({ queryKey: ['finance', 'invoices'] });
+      void invalidateFinanceFigures(queryClient);
       onPaid?.();
       onClose();
     },
