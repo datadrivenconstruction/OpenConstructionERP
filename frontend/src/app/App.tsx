@@ -21,6 +21,7 @@ import { syncCustomUnitsFromServer } from '@/features/boq/boqHelpers';
 import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
+import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, PWAInstallPrompt } from '@/shared/ui';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
@@ -820,6 +821,11 @@ function AppShell() {
       <ErrorBoundary scope="app">
         <AppLayout title={title}>
           <Suspense fallback={<PageLoadingInline />}>
+            {/* "Videos for this step": renders nothing on a screen with no
+                videos, and a failure in it must never take the page down. */}
+            <ErrorBoundary key={`videos:${location.pathname}`} fallback={null}>
+              <ModuleVideosSlot />
+            </ErrorBoundary>
             <ErrorBoundary key={location.pathname}>
               <PageTitleContext.Provider value={setTitle}>
                 <Outlet />

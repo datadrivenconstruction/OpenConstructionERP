@@ -74,7 +74,8 @@ export interface AcademyVideo {
   recordedOn?: string;
   /** Running time in seconds, when known. */
   duration?: number;
-  /** Public path of the compressed cover. */
+  /** The channel thumbnail (i.ytimg.com) for a published video, or the
+   *  public path of the local WebP for one that is not out yet. */
   cover: string;
   chapters: VideoChapter[];
 }

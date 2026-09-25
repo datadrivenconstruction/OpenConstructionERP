@@ -1,8 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The Videos page. It promises that nothing is requested from the video host
-// before the reader presses play, so most checks count iframes: none on
+// The Videos page. It promises that the player is created only when the
+// reader presses play, so most checks count iframes: none on
 // arrival, none for a shared link until play, none ever for a video that is
 // not out yet, and the one that does appear points at the no-cookie host at
 // the second the reader asked for.
@@ -28,6 +28,7 @@ vi.mock('react-i18next', () => ({
 import { VideosPage } from './VideosPage';
 import { VIDEOS, startHereVideo } from './academy';
 import { useVideosStore } from './useVideosStore';
+import { useVideoHintsStore } from './videoRoutes';
 
 let lastSearch = '';
 function LocationProbe() {
@@ -54,11 +55,12 @@ const soon = VIDEOS.find((v) => v.status === 'coming_soon' && v.chapters.length 
 beforeEach(() => {
   localStorage.clear();
   useVideosStore.setState({ role: null, market: 'auto', started: {}, watched: {} });
+  useVideoHintsStore.setState({ off: false, hidden: [] });
 });
 afterEach(() => cleanup());
 
 describe('the Videos page', () => {
-  it('loads nothing from the video host until play, then only the no-cookie player', () => {
+  it('creates no player until play, then only the no-cookie one', () => {
     renderAt();
     expect(iframes()).toHaveLength(0);
     fireEvent.click(screen.getByTestId('videos-start-here'));
@@ -178,5 +180,34 @@ describe('the Videos page', () => {
     } finally {
       get.mockRestore();
     }
+  });
+
+  it('narrows the library to a screen from a module link, with a way out', () => {
+    renderAt('/videos?route=%2Fboq');
+    const library = screen.getByTestId('videos-library');
+    const n = VIDEOS.filter((v) => v.routes.includes('/boq')).length;
+    expect(within(library).getAllByTestId('video-card')).toHaveLength(n);
+    fireEvent.click(within(screen.getByTestId('videos-route-chip')).getByRole('button'));
+    expect(within(screen.getByTestId('videos-library')).getAllByTestId('video-card')).toHaveLength(VIDEOS.length);
+  });
+
+  it('lays out a learning path across all eight stages once the role is known', () => {
+    expect(() => renderAt()).not.toThrow();
+    expect(screen.queryByTestId('videos-path')).toBeNull();
+    cleanup();
+    useVideosStore.setState({ role: 'estimator' });
+    renderAt();
+    expect(screen.getAllByTestId('videos-path-stage')).toHaveLength(8);
+  });
+
+  it('offers to bring the module tips back once they were hidden', () => {
+    renderAt();
+    expect(screen.queryByTestId('videos-hints-restore')).toBeNull();
+    cleanup();
+    useVideoHintsStore.setState({ off: true, hidden: [] });
+    renderAt();
+    fireEvent.click(within(screen.getByTestId('videos-hints-restore')).getByRole('button'));
+    expect(useVideoHintsStore.getState().off).toBe(false);
+    expect(screen.queryByTestId('videos-hints-restore')).toBeNull();
   });
 });

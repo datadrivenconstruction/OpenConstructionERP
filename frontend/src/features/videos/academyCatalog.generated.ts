@@ -90,7 +90,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Install OpenConstructionERP on Windows and set up your first construction project. This beginner's guide covers the desktop app, installation with Python/pip, workspace settings and team access.",
       "recordedOn": "17.7",
       "duration": 281,
-      "cover": "/assets/videos/academy/setup-en.webp",
+      "cover": "https://i.ytimg.com/vi/WjDK-uk9b1w/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -187,7 +187,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Ein Projekt aufbauen, Beteiligte zuordnen und Budgetentscheidungen nachvollziehen.",
       "produces": "A project record with two comparable variants, budget scope, reserve and named owners",
       "duration": 438,
-      "cover": "/assets/videos/academy/v01.webp",
+      "cover": "https://i.ytimg.com/vi/IM9hK6kCZCs/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -330,7 +330,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Planstände, Rückfragen und Freigaben mit klaren Verantwortlichen verbinden.",
       "produces": "Drawing revisions, queries and approvals tied to the person responsible",
       "duration": 360,
-      "cover": "/assets/videos/academy/v02.webp",
+      "cover": "https://i.ytimg.com/vi/LP-CZOhu6OA/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -464,7 +464,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Fläche, Sockellänge und Fensterzahl mit Quelle und Gegenprüfung sichern.",
       "produces": "Floor area, skirting length and window count, each with its source and a cross-check",
       "duration": 355,
-      "cover": "/assets/videos/academy/v03.webp",
+      "cover": "https://i.ytimg.com/vi/YEk8F3W28po/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -584,7 +584,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "IFC und vorbereitetes RVT erkunden, Bauteile auswählen und die heruntergeladene CSV-Tabelle prüfen.",
       "produces": "Selected IFC and RVT elements grouped by storey, checked in the exported CSV",
       "duration": 341,
-      "cover": "/assets/videos/academy/bim01.webp",
+      "cover": "https://i.ytimg.com/vi/KI6e3s7XScY/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -687,7 +687,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Aus einer geprüften Mengenbasis acht eindeutig beschriebene Leistungen erstellen.",
       "produces": "Eight unambiguously described bill items built on a checked quantity base",
       "duration": 302,
-      "cover": "/assets/videos/academy/lv01.webp",
+      "cover": "https://i.ytimg.com/vi/tZEdPehNE6Q/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -786,7 +786,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Parkett und Gipskarton kalkulieren, Arbeitsrezepte aus dem Katalog verwenden und eine Kostenänderung über den Zeitbedarf begründen.",
       "produces": "Parquet and drywall rates from catalogue recipes, with a price change argued through labour time",
       "duration": 396,
-      "cover": "/assets/videos/academy/kalk01.webp",
+      "cover": "https://i.ytimg.com/vi/qFGKRIXHM8w/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -898,7 +898,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "X83 und X84 über geprüfte Wege ausgeben, Dateien prüfen und den Import kontrollieren.",
       "produces": "X83 and X84 exported by checked routes, then re-imported and verified",
       "duration": 334,
-      "cover": "/assets/videos/academy/gaeb01.webp",
+      "cover": "https://i.ytimg.com/vi/T3FBggAeFJ4/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1003,7 +1003,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Vollständige Leistungen vergleichen, einen automatischen Ansatz prüfen und eine vorläufige Begründung speichern.",
       "produces": "A like-for-like bid comparison with a saved, provisional award rationale",
       "duration": 184,
-      "cover": "/assets/videos/academy/vergabe01.webp",
+      "cover": "https://i.ytimg.com/vi/75sjLEjXiBc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1093,7 +1093,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Eine Lieferänderung durch den Ablauf verfolgen und die Zuordnung des Bodenteams nach erneutem Öffnen prüfen.",
       "produces": "A delivery change traced through the programme, with the crew assignment checked after reopening",
       "duration": 271,
-      "cover": "/assets/videos/academy/termin01.webp",
+      "cover": "https://i.ytimg.com/vi/bGUpude30wc/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1185,7 +1185,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Materialbedarf, Bestellung, geprüfte Teilmenge und offenen Lieferrest unterscheiden.",
       "produces": "Demand, order, checked part delivery and open remainder kept apart",
       "duration": 421,
-      "cover": "/assets/videos/academy/einkauf01.webp",
+      "cover": "https://i.ytimg.com/vi/G0a5pEiXaS4/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1305,7 +1305,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Parkettrezept als Katalogreferenz prüfen, Ressourcen ins LV übernehmen und eigene Preisansätze nachvollziehbar anpassen.",
       "produces": "Catalogue resources taken into the bill, with your own price assumptions traceable",
       "duration": 455,
-      "cover": "/assets/videos/academy/kostendb01.webp",
+      "cover": "https://i.ytimg.com/vi/uBhNqXw2dm0/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1428,7 +1428,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "50 Arbeiten, Mengen und Ressourcen prüfen, die Quellenfassung sichern und das vollständige Budget nachvollziehen.",
       "produces": "50 items with quantities and resources checked, the source version saved and the full budget traced",
       "duration": 615,
-      "cover": "/assets/videos/academy/v04.webp",
+      "cover": "https://i.ytimg.com/vi/OJ1FMzwY3FM/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -1567,7 +1567,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/schedule-advanced"
       ],
       "result": "rate",
-      "title": "Construction Cost Database: How to Check a Unit Rate",
+      "title": "🇺🇸 EN • USA • 01/03 | Construction Cost Database: Check a Unit Rate",
       "description": "Every number in an estimate comes from somewhere. Find a unit rate in a construction cost database, see what it is made of, and adjust it to your market before it goes into a bid.",
       "duration": 242,
       "cover": "/assets/videos/academy/ep02-l1.webp",
@@ -1620,7 +1620,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "bill",
-      "title": "Build a Construction Estimate Step by Step | Denver Duplex",
+      "title": "🇺🇸 EN • DENVER • 02/03 | Build a Construction Estimate Step by Step",
       "description": "Build a priced construction estimate from an empty page. A Denver duplex, ten positions in five sections, and every rate traced back to where it came from.",
       "duration": 288,
       "cover": "/assets/videos/academy/ep02-l2.webp",
@@ -1669,7 +1669,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ],
       "result": "bill",
-      "title": "Construction Pricing: Overhead, Profit & Contingency",
+      "title": "🇺🇸 EN • USA • 03/03 | Construction Pricing: Overhead, Profit & Contingency",
       "description": "The estimate says what the job costs. The price says what you charge. Turn a direct cost into a bid price with overhead, profit and contingency, then check it, save a version and export it.",
       "duration": 234,
       "cover": "/assets/videos/academy/ep02-l3.webp",
@@ -1723,7 +1723,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ],
       "result": "bill",
-      "title": "Price a Toronto Construction Job: Markups, Bond & HST",
+      "title": "🇨🇦 EN • TORONTO • 01/06 | Price a Construction Job",
       "description": "Every bid on a Toronto job comes down to one number: your contract price, in Canadian dollars, with markups and bond, before HST. Price six stacked townhomes and turn their cost into that number.",
       "duration": 289,
       "cover": "/assets/videos/academy/ca02.webp",
@@ -1773,7 +1773,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/bid-management"
       ],
       "result": "award",
-      "title": "Subtrade Tendering: Check the Low Bid Before You Award",
+      "title": "🇨🇦 EN • TORONTO • 02/06 | Tender Work to Subcontractors",
       "description": "Three drywall subtrades priced your townhomes, and one came in more than a fifth lower. In Canada, carry the wrong sub's price in your bid and you may be held to it.",
       "duration": 263,
       "cover": "/assets/videos/academy/ca03.webp",
@@ -1826,7 +1826,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ],
       "result": "invoice",
-      "title": "CCDC 2 Monthly Progress Draw & Ontario Holdback",
+      "title": "🇨🇦 EN • ONTARIO • 03/06 | CCDC 2 Monthly Progress Draw",
       "description": "Once a month on a CCDC 2 job you bill the owner for the work in place, and Ontario law makes the owner hold back 10%. Set up the contract, bill a $184,300 draw, and see what stays on your own calendar.",
       "duration": 298,
       "cover": "/assets/videos/academy/ca04.webp",
@@ -1876,7 +1876,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "invoice",
-      "title": "Ontario Prompt Payment: The 28-Day Invoice Clock",
+      "title": "🇨🇦 EN • ONTARIO • 04/06 | The Construction Payment Clock",
       "description": "In Ontario, an owner has 28 days to pay a proper invoice, and a contract cannot push that back. Start the payment clock on this month's invoice and see every date that matters.",
       "duration": 275,
       "cover": "/assets/videos/academy/ca05.webp",
@@ -1929,7 +1929,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/value"
       ],
       "result": "change",
-      "title": "CCDC 2 Change Orders: Notice, Pricing & Approval",
+      "title": "🇨🇦 EN • CANADA • 05/06 | Manage Construction Change Orders",
       "description": "Your crew hits rock the soils report never showed, and the work, the price and the finish date all change. See how CCDC 2 handles it, then record the change order, price it against your estimate and get it approved.",
       "duration": 285,
       "cover": "/assets/videos/academy/ca06.webp",
@@ -1986,7 +1986,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/field-time"
       ],
       "result": "handover",
-      "title": "Ontario Substantial Performance: Schedule, Deficiencies & Holdback",
+      "title": "🇨🇦 EN • CANADA • 06/06 | Schedule to Substantial Performance",
       "description": "On an Ontario job, the day that matters most for your money is the day the work is substantially performed. Take a townhome project from the schedule to that finish line, and see how it starts the holdback clock.",
       "duration": 289,
       "cover": "/assets/videos/academy/ca07.webp",
@@ -2035,7 +2035,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/estimate-basis",
         "/reports"
       ],
-      "title": "OpenConstructionERP au Québec : démarrer en français",
+      "title": "⚜️ FR • QUÉBEC • 01/05 | Démarrer avec OpenConstructionERP en français",
       "description": "L'application s'affiche en français, mais c'est le français de France. Passez votre logiciel de construction en français et faites le lien entre ses mots et ceux d'un chantier québécois.",
       "duration": 226,
       "cover": "/assets/videos/academy/qc01.webp",
@@ -2091,7 +2091,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/price-index"
       ],
       "result": "bill",
-      "title": "Estimation à Montréal : majorations, TPS, TVQ et RBQ",
+      "title": "⚜️ FR • MONTRÉAL • 02/05 | Estimer un projet de construction",
       "description": "Toute soumission se résume à un montant : le prix du contrat, avant taxes. Estimez un immeuble locatif à Montréal, ajoutez vos majorations et établissez ce prix.",
       "duration": 258,
       "cover": "/assets/videos/academy/qc02.webp",
@@ -2144,7 +2144,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/bid-management"
       ],
       "result": "award",
-      "title": "Soumissions BSDQ : choisir le plus bas conforme",
+      "title": "⚜️ FR • QUÉBEC • 03/05 | Soumissions et BSDQ",
       "description": "Trois sous-traitants ont soumissionné par le BSDQ, et la plus basse soumission est arrivée sans la garantie exigée. Voyez pourquoi vous ne pouvez pas l'accepter, même si l'application la recommande.",
       "duration": 271,
       "cover": "/assets/videos/academy/qc03.webp",
@@ -2204,7 +2204,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ],
       "result": "invoice",
-      "title": "Québec : demande de paiement, retenue et hypothèque légale",
+      "title": "⚜️ FR • QUÉBEC • 04/05 | Facturation, retenue et hypothèque légale",
       "description": "Votre première demande de paiement s'élève à 184 300 $, avec une retenue de 10 % prévue au contrat. Préparez-la, puis voyez comment conserver votre hypothèque légale au Québec.",
       "duration": 277,
       "cover": "/assets/videos/academy/qc04.webp",
@@ -2265,7 +2265,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "result": "handover",
-      "title": "Réception des travaux au Québec : vérifier les déficiences",
+      "title": "⚜️ FR • QUÉBEC • 05/05 | Réception des travaux et déficiences",
       "description": "À la fin d'un chantier au Québec, le jour qui compte le plus pour votre argent, c'est la réception des travaux. Suivez vos déficiences jusqu'à leur vérification et voyez ce que la réception déclenche.",
       "duration": 224,
       "cover": "/assets/videos/academy/qc05.webp",
@@ -2324,7 +2324,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "01/04 · Budget de chantier : justifier chaque coût | OpenConstructionERP",
       "description": "240 000 USD de budget : pouvez-vous expliquer chaque poste ? Ce tutoriel montre comment relier les quantités, les prix et leurs sources dans OpenConstructionERP.",
       "duration": 306,
-      "cover": "/assets/videos/academy/budget.webp",
+      "cover": "https://i.ytimg.com/vi/L1DUikMF04Y/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2374,7 +2374,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "02/04 · Achats et stock : suivre les quantités | OpenConstructionERP",
       "description": "1 000 sacs de ciment commandés, 600 encore en stock : comment expliquer l’écart ? Suivez une commande, une réception et une consommation dans OpenConstructionERP.",
       "duration": 277,
-      "cover": "/assets/videos/academy/achats-stock.webp",
+      "cover": "https://i.ytimg.com/vi/ZXbWsG_Syuo/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2426,7 +2426,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "03/04 · Chantier : suivre les heures et le matériel | OpenConstructionERP",
       "description": "64 heures-personnes : quel travail a été réalisé ? Ce tutoriel relie le pointage de l’équipe, un volume mesuré séparément et l’utilisation du matériel dans OpenConstructionERP.",
       "duration": 323,
-      "cover": "/assets/videos/academy/terrain.webp",
+      "cover": "https://i.ytimg.com/vi/5utorRM1fhY/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2481,7 +2481,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "04/04 · Facture et paiement : comprendre le solde | OpenConstructionERP",
       "description": "30 000 USD facturés, 18 000 USD reçus : pourquoi reste-t-il 12 000 USD à recevoir ? Suivez les étapes du contrat au règlement dans OpenConstructionERP.",
       "duration": 339,
-      "cover": "/assets/videos/academy/paiement.webp",
+      "cover": "https://i.ytimg.com/vi/ViuB-ONl5Lk/maxresdefault.jpg",
       "chapters": [
         {
           "t": 0,
@@ -2528,7 +2528,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "From a drawing to a priced tender",
       "description": "The whole chain in one take: a drawing becomes a takeoff, the takeoff becomes a bill, the bill carries its markups and the job is inspected on site. One data model underneath all of it.",
       "recordedOn": "15.0",
-      "cover": "/assets/videos/academy/ddc-walkthrough-v15.webp",
+      "cover": "https://i.ytimg.com/vi/vENnh7bBVVM/maxresdefault.jpg",
       "chapters": []
     },
     {
@@ -2559,7 +2559,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Onboarding, a new project, the bill of quantities, BIM linking, DWG and PDF takeoff, the AI estimate and the portfolio dashboard, in the order you would use them.",
       "recordedOn": "2.0",
       "duration": 720,
-      "cover": "/assets/videos/academy/ddc-walkthrough-full.webp",
+      "cover": "https://i.ytimg.com/vi/X06cIaroAeI/maxresdefault.jpg",
       "chapters": []
     },
     {
@@ -2577,7 +2577,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "The uberization of construction (ETH Zürich)",
       "description": "A talk at ETH Zürich on how drawings and models turn into quantities, why cost data stays locked up, and what open formats and AI agents change.",
       "duration": 862,
-      "cover": "/assets/videos/academy/ddc-eth-talk.webp",
+      "cover": "https://i.ytimg.com/vi/R_PQQHXY-rQ/maxresdefault.jpg",
       "chapters": []
     }
   ],

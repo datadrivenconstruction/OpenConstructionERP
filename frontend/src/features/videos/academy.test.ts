@@ -14,6 +14,7 @@ import {
   embedUrl,
   fold,
   formatClock,
+  pathForRole,
   playlist,
   recommend,
   searchVideos,
@@ -172,5 +173,30 @@ describe('links and URLs', () => {
 
   it('starts somebody new at the setup lesson', () => {
     expect(startHereVideo()?.id).toBe('Setup_EN');
+  });
+});
+
+describe('learning path', () => {
+  const STAGES = ['define', 'design', 'estimate', 'procure', 'plan', 'build', 'handover', 'operate'] as const;
+
+  it('lays a role out across every stage, named-for-the-role and playable first', () => {
+    const path = pathForRole('estimator', 'CA', STAGES, FIXTURE);
+    expect([...path.keys()]).toEqual([...STAGES]);
+    expect(ids(path.get('estimate')!)).toEqual(['ca-est', 'qc', 'qc1']);
+    expect(ids(path.get('define')!)).toEqual(['all']);
+    expect(path.get('build')).toEqual([]);
+  });
+
+  it('leaves out another market once the market is known', () => {
+    expect(ids(pathForRole('estimator', null, STAGES, FIXTURE).get('estimate')!)).toContain('de-lv');
+    expect(ids(pathForRole('estimator', 'CA', STAGES, FIXTURE).get('estimate')!)).not.toContain('de-lv');
+  });
+});
+
+describe('the screen filter', () => {
+  it('keeps the videos whose cases walk through a screen', () => {
+    const hits = searchVideos({ ...NO_FILTERS, route: '/boq' });
+    expect(hits.map((h) => h.video.id)).toEqual(ids(videosForRoute('/boq')));
+    expect(activeFilterCount({ ...NO_FILTERS, route: '/boq' })).toBe(1);
   });
 });

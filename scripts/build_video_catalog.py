@@ -28,16 +28,17 @@ does not exist is dropped from the output and reported; it stays in the source.
 No video file, subtitle file or local path reaches the output. MP4 files are
 never shipped: every video plays from the channel.
 
-Covers are always shipped as local WebP, so the page requests nothing from the
-video host before play. For a published video the script also fetches the
-channel's own thumbnail (``maxresdefault``, else ``hqdefault``) and encodes
-whichever of that and the production cover has more pixels; a tie keeps the
-production cover. Downloads are cached; ``--offline`` skips them.
+A published video's cover is the channel's own thumbnail, loaded by the page
+from the YouTube image host (``maxresdefault``; the page falls back to
+``hqdefault``). Only a video that is not out yet ships a local WebP cover, and
+that file is deleted by the next run once the video has an id. Unless
+``--offline`` is given, the run checks that each ``maxresdefault`` exists and
+lists the ones that will fall back.
 
 Usage:
     py -3.14 scripts/build_video_catalog.py [--out-root DIR] [--publish-dir DIR]
         [--links-doc FILE] [--lessons FILE] [--films FILE] [--landshut-covers DIR]
-        [--cover-cache DIR] [--offline] [--check]
+        [--offline] [--check]
 """
 
 from __future__ import annotations
@@ -48,7 +49,6 @@ import io
 import json
 import re
 import sys
-import tempfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -84,6 +84,7 @@ DEFAULTS = {
 }
 
 GENERATED_TS = Path("frontend/src/features/videos/academyCatalog.generated.ts")
+GENERATED_INDEX = Path("frontend/src/features/videos/academyIndex.generated.ts")
 COVERS_DIR = Path("frontend/public/assets/videos/academy")
 COVER_URL = "/assets/videos/academy"
 COVER_SIZE = (512, 288)
@@ -294,41 +295,29 @@ def write_cover(src: Path, dest: Path) -> int:
     return 0
 
 
-def channel_thumbnail(youtube_id: str, cache: Path) -> Path | None:
-    """The channel's own thumbnail for a published video, cached on disk.
+def thumbnail_url(youtube_id: str, size: str = "maxresdefault") -> str:
+    """The channel thumbnail the page shows for a published video."""
+    return f"https://i.ytimg.com/vi/{youtube_id}/{size}.jpg"
 
-    ``maxresdefault`` exists only when the upload was at least 720p; YouTube
-    answers a missing one with a 404 or a 120x90 placeholder, so both are
-    treated as absent and ``hqdefault`` is tried next.
+
+def has_maxres_thumbnail(youtube_id: str) -> bool | None:
+    """Whether ``maxresdefault`` exists; None when the host cannot be reached.
+
+    It exists only for uploads of at least 720p. A missing one comes back as a
+    404, or as a 120x90 placeholder, and the page then shows ``hqdefault``.
     """
-    for name in ("maxresdefault", "hqdefault"):
-        path = cache / f"{youtube_id}-{name}.jpg"
-        if not path.is_file():
-            url = f"https://i.ytimg.com/vi/{youtube_id}/{name}.jpg"
-            try:
-                with urllib.request.urlopen(url, timeout=20) as response:
-                    data = response.read()
-            except (urllib.error.URLError, TimeoutError):
-                continue
-            cache.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(data)
-        try:
-            with Image.open(path) as image:
-                if image.width > 120:
-                    return path
-        except OSError:
-            continue
-    return None
-
-
-def sharper_cover(local: Path, remote: Path | None) -> Path:
-    """The source with more pixels; the production cover on a tie."""
-    if remote is None:
-        return local
-    if not local.is_file():
-        return remote
-    with Image.open(local) as a, Image.open(remote) as b:
-        return remote if b.width * b.height > a.width * a.height else local
+    try:
+        with urllib.request.urlopen(thumbnail_url(youtube_id), timeout=20) as response:
+            data = response.read()
+    except urllib.error.HTTPError:
+        return False
+    except (urllib.error.URLError, TimeoutError):
+        return None
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            return image.width > 120
+    except OSError:
+        return False
 
 
 def cover_slug(video_id: str) -> str:
@@ -526,7 +515,11 @@ def build(args: argparse.Namespace) -> None:
                 if r not in routes:
                     routes.append(r)
         v["routes"] = routes
-        v["cover"] = f"{COVER_URL}/{cover_slug(v['id'])}.webp"
+        v["cover"] = (
+            thumbnail_url(v["youtubeId"])
+            if v["youtubeId"]
+            else f"{COVER_URL}/{cover_slug(v['id'])}.webp"
+        )
 
     ids = [v["id"] for v in videos]
     if len(set(ids)) != len(ids):
@@ -538,22 +531,25 @@ def build(args: argparse.Namespace) -> None:
     series_order = {sid: s["order"] for sid, s in series_meta.items()}
     videos.sort(key=lambda v: (series_order[v["series"]], v["seriesOrder"], v["id"]))
 
-    # Covers.
+    # Local covers, for the videos that are not out yet only.
     cover_bytes = 0
+    local = [v for v in videos if not v["youtubeId"]]
     if not args.check:
-        cache = Path(args.cover_cache)
-        for v in videos:
-            source = covers[v["id"]]
-            if v["youtubeId"] and not args.offline:
-                source = sharper_cover(source, channel_thumbnail(v["youtubeId"], cache))
+        for v in local:
             cover_bytes += write_cover(
-                source, out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp"
+                covers[v["id"]], out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp"
             )
-        # A cover left behind by a video that was removed is dead weight in the wheel.
-        wanted = {f"{cover_slug(v['id'])}.webp" for v in videos}
+        # A published video's cover now comes from the channel, and a removed
+        # video's is dead weight in the wheel: both go.
+        wanted = {f"{cover_slug(v['id'])}.webp" for v in local}
         for stale in (out_root / COVERS_DIR).glob("*.webp"):
             if stale.name not in wanted:
                 stale.unlink()
+    fallback: list[str] = []
+    if not args.offline:
+        for v in videos:
+            if v["youtubeId"] and has_maxres_thumbnail(v["youtubeId"]) is False:
+                fallback.append(v["id"])
 
     used_cases = sorted({c for v in videos for c in v["cases"]})
     field_order = (
@@ -611,16 +607,37 @@ def build(args: argparse.Namespace) -> None:
         "import type { AcademyCatalog } from './academyTypes';\n\n"
         f"export const ACADEMY_CATALOG: AcademyCatalog = {body};\n"
     )
-    target = out_root / GENERATED_TS
-    if args.check:
-        current = target.read_text(encoding="utf-8") if target.is_file() else ""
-        if current != ts:
-            fail(
-                f"{GENERATED_TS} is out of date; re-run scripts/build_video_catalog.py"
-            )
-    else:
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(ts, encoding="utf-8", newline="\n")
+    # A few hundred bytes the app shell and the case runner can import eagerly
+    # to decide whether to load the catalogue at all.
+    route_counts: dict[str, int] = {}
+    case_counts: dict[str, int] = {}
+    for v in videos:
+        for r in v["routes"]:
+            route_counts[r] = route_counts.get(r, 0) + 1
+        for c in v["cases"]:
+            case_counts[c] = case_counts.get(c, 0) + 1
+    routes_json = json.dumps(dict(sorted(route_counts.items())), indent=2)
+    cases_json = json.dumps(dict(sorted(case_counts.items())), indent=2)
+    index_ts = (
+        "// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP\n"
+        "// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction\n"
+        "//\n"
+        "// GENERATED by scripts/build_video_catalog.py. How many videos link to each\n"
+        "// module route and each case, so a screen can tell whether it has videos\n"
+        "// without loading the catalogue. Two exports, so the app shell pulls in\n"
+        "// the route counts only. Do not edit by hand.\n\n"
+        f"export const VIDEO_COUNT_BY_ROUTE: Record<string, number> = {routes_json};\n\n"
+        f"export const VIDEO_COUNT_BY_CASE: Record<string, number> = {cases_json};\n"
+    )
+    for rel, text in ((GENERATED_TS, ts), (GENERATED_INDEX, index_ts)):
+        target = out_root / rel
+        if args.check:
+            current = target.read_text(encoding="utf-8") if target.is_file() else ""
+            if current != text:
+                fail(f"{rel} is out of date; re-run scripts/build_video_catalog.py")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text, encoding="utf-8", newline="\n")
 
     published = sum(1 for v in videos if v["status"] == "published")
     chapters = sum(len(v["chapters"]) for v in videos)
@@ -631,7 +648,13 @@ def build(args: argparse.Namespace) -> None:
     print(f"cases linked: {len(used_cases)} distinct")
     if not args.check:
         print(
-            f"covers: {len(videos)} files, {cover_bytes} bytes ({cover_bytes / 1024:.1f} KiB)"
+            f"local covers (coming soon only): {len(local)} files, {cover_bytes} bytes"
+            f" ({cover_bytes / 1024:.1f} KiB)"
+        )
+    if not args.offline:
+        print(
+            "channel covers without maxresdefault (page shows hqdefault): "
+            + (", ".join(fallback) if fallback else "none")
         )
     if orphans:
         print("orphan case ids (kept in the source, left out of the catalogue):")
@@ -655,14 +678,9 @@ def main() -> None:
     parser.add_argument("--films", default=str(DEFAULTS["films"]))
     parser.add_argument("--landshut-covers", default=str(DEFAULTS["landshut_covers"]))
     parser.add_argument(
-        "--cover-cache",
-        default=str(Path(tempfile.gettempdir()) / "oe_video_covers"),
-        help="Where channel thumbnails are cached between runs.",
-    )
-    parser.add_argument(
         "--offline",
         action="store_true",
-        help="Use the production covers only; fetch nothing from the channel.",
+        help="Do not check the channel thumbnails.",
     )
     parser.add_argument(
         "--check",

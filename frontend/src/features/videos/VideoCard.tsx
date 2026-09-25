@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// One video as a card: local cover, running time, status, what it is for, and
+// One video as a card: cover, running time, status, what it is for, and
 // (from a search) the chapters that matched, each one a way straight into the
 // player at that second. A video that is not out yet opens the same dialog,
 // which then shows its outline instead of a player.
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { CheckCircle2, Clock, Hourglass, ListOrdered, Play } from 'lucide-react';
 import type { AcademyVideo, VideoChapter } from './academyTypes';
+import { VideoCover } from './VideoCover';
 import { formatClock } from './academy';
 import { useVideosStore } from './useVideosStore';
 import type { VideoLabels } from './videoLabels';
@@ -51,13 +52,8 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, classNa
         }
         className="relative block aspect-video w-full overflow-hidden bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue"
       >
-        <img
+        <VideoCover
           src={video.cover}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          width={512}
-          height={288}
           className={clsx(
             'h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]',
             soon && 'opacity-80 saturate-[0.85]',

@@ -121,6 +121,8 @@ export interface VideoFilters {
   language: string | null;
   series: string | null;
   result: ResultFamily | null;
+  /** A module route (`/boq`): videos whose cases walk through that screen. */
+  route: string | null;
   query: string;
 }
 
@@ -131,6 +133,7 @@ export const NO_FILTERS: VideoFilters = {
   language: null,
   series: null,
   result: null,
+  route: null,
   query: '',
 };
 
@@ -177,6 +180,7 @@ export function searchVideos(filters: VideoFilters, videos: AcademyVideo[] = VID
     if (filters.language && video.language !== filters.language) continue;
     if (filters.series && video.series !== filters.series) continue;
     if (filters.result && video.result !== filters.result) continue;
+    if (filters.route && !video.routes.includes(filters.route)) continue;
     const hit = matchesQuery(video, terms);
     if (hit) hits.push(hit);
   }
@@ -229,6 +233,32 @@ export function recommend(
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, limit)
     .map((s) => s.video);
+}
+
+// ── Learning path ────────────────────────────────────────────────────────────
+
+/** The videos for a role at one stage, named-for-the-role first, then the
+ *  ones that play now, then catalogue order. */
+export function pathForRole(
+  role: ProfessionalRole,
+  market: string | null,
+  stages: readonly LifecycleStage[],
+  videos: AcademyVideo[] = VIDEOS,
+): Map<LifecycleStage, AcademyVideo[]> {
+  const out = new Map<LifecycleStage, AcademyVideo[]>(stages.map((s) => [s, []]));
+  videos.forEach((video) => {
+    if (!isForRole(video, role)) return;
+    if (market && video.market && video.market !== market) return;
+    out.get(video.stage)?.push(video);
+  });
+  const rank = (v: AcademyVideo) => (v.roles.includes(role) ? 0 : 2) + (v.status === 'published' ? 0 : 1);
+  for (const [stage, list] of out) {
+    out.set(
+      stage,
+      list.map((v, i) => ({ v, i })).sort((a, b) => rank(a.v) - rank(b.v) || a.i - b.i).map((x) => x.v),
+    );
+  }
+  return out;
 }
 
 /** The entry point for somebody new: the setup lesson. */

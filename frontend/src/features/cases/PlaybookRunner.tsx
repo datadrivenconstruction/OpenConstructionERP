@@ -20,6 +20,8 @@
 // and the cards, the highlight and the primary action all read back from it.
 
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -78,6 +80,7 @@ import { CaseCompanyHive } from "./CompanyHive";
 import { MarketPackPanel } from "./MarketPackPanel";
 import { FlowGlyph, flowGlyphFor, type FlowGlyphKind } from "./flowGlyphs";
 import { normalizeCaseRoute } from "./playbookModules";
+import { VIDEO_COUNT_BY_CASE } from "@/features/videos/academyIndex.generated";
 import { compareNames } from '@/shared/lib/collator';
 
 /** Returns true for seeded sample projects (they carry `metadata.demo_id`). */
@@ -658,6 +661,10 @@ export interface PlaybookRunnerProps {
   onBack?: () => void;
 }
 
+// The videos for a case load with the catalogue behind them, so only for a
+// case the count index says has any.
+const CaseVideos = lazy(() => import("@/features/videos/CaseVideos"));
+
 export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -1194,6 +1201,12 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
           </div>
         </div>
       </header>
+
+      {VIDEO_COUNT_BY_CASE[playbook.id] ? (
+        <Suspense fallback={null}>
+          <CaseVideos caseId={playbook.id} />
+        </Suspense>
+      ) : null}
 
       {/* ── The process, and who the case is written for, side by side from
           `lg` up. The comb answers "is this case for a firm like mine", the

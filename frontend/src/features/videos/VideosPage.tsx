@@ -11,20 +11,23 @@
 //
 // All of it reads the generated catalogue through `academy.ts`. Titles,
 // descriptions and chapters are data in the video's own language and are
-// marked with `lang`; every label around them goes through i18n. Nothing is
-// requested from the video host until the reader presses play.
+// marked with `lang`; every label around them goes through i18n. Covers of
+// published videos come from the YouTube image host; the player itself is
+// created only when the reader presses play.
 //
 // State that is worth a link lives in the URL: the open video and second
 // (`?v=&t=`) and the library filters, so `/videos?role=estimator&q=gaeb` is a
 // shareable view and other screens can point into it.
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
   ArrowRight,
+  CheckCircle2,
   ExternalLink,
+  EyeOff,
   GraduationCap,
   ListVideo,
   MonitorPlay,
@@ -37,6 +40,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
+import { navGroups } from '@/app/layout/navCatalog';
 import { STAGE_META } from '@/features/cases/stages';
 import { ROLE_META } from '@/features/cases/roles';
 import { RoleAvatar } from '@/features/cases/RoleAvatar';
@@ -44,7 +48,6 @@ import type { LifecycleStage, ProfessionalRole } from '@/features/cases/types';
 import type { AcademyVideo, ResultFamily } from './academyTypes';
 import {
   CATALOG,
-  NO_FILTERS,
   RESULT_FAMILIES,
   SERIES,
   VIDEOS,
@@ -53,6 +56,7 @@ import {
   catalogMarkets,
   channelUrl,
   formatClock,
+  pathForRole,
   playlist,
   recommend,
   searchVideos,
@@ -61,11 +65,13 @@ import {
   type VideoFilters,
 } from './academy';
 import { VideoCard } from './VideoCard';
+import { VideoCover } from './VideoCover';
 import { VideoPlayerDialog } from './VideoPlayerDialog';
 import { RolePicker } from './RolePicker';
 import { useVideoContext } from './useVideoContext';
 import { useVideosStore } from './useVideosStore';
 import { useVideoLabels, type VideoLabels } from './videoLabels';
+import { useVideoHintsStore } from './videoRoutes';
 
 const ROLE_IDS = new Set<string>(ROLE_META.map((r) => r.id));
 const STAGE_IDS = new Set<string>(STAGE_META.map((s) => s.id));
@@ -77,6 +83,7 @@ function filtersFromParams(params: URLSearchParams): VideoFilters {
   const language = params.get('lang');
   const series = params.get('series');
   const result = params.get('result');
+  const route = params.get('route');
   return {
     role: role && ROLE_IDS.has(role) ? (role as ProfessionalRole) : null,
     stage: stage && STAGE_IDS.has(stage) ? (stage as LifecycleStage) : null,
@@ -84,6 +91,7 @@ function filtersFromParams(params: URLSearchParams): VideoFilters {
     language: language && catalogLanguages().includes(language) ? language : null,
     series: series && SERIES.some((s) => s.id === series) ? series : null,
     result: result && (RESULT_FAMILIES as string[]).includes(result) ? (result as ResultFamily) : null,
+    route: route && VIDEOS.some((v) => v.routes.includes(route)) ? route : null,
     query: params.get('q') ?? '',
   };
 }
@@ -95,6 +103,7 @@ const PARAM_OF: Record<keyof VideoFilters, string> = {
   language: 'lang',
   series: 'series',
   result: 'result',
+  route: 'route',
   query: 'q',
 };
 
@@ -153,6 +162,7 @@ export function VideosPage() {
     <div className="space-y-8 animate-fade-in">
       <Hero labels={labels} onPlay={openPlayer} />
       <Recommended labels={labels} onOpen={openPlayer} />
+      <LearningPath labels={labels} onOpen={openPlayer} />
       <SeriesShelves labels={labels} onOpen={openPlayer} />
       <Library
         labels={labels}
@@ -161,6 +171,7 @@ export function VideosPage() {
         clearFilters={clearFilters}
         onOpen={openPlayer}
       />
+      <HintsRestore />
       <CasesCta />
 
       {openVideo && (
@@ -255,7 +266,7 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
           </dl>
           <p className="mt-4 inline-flex items-center gap-1.5 text-2xs text-white/55">
             <ShieldCheck size={12} className="shrink-0 text-emerald-300" aria-hidden />
-            {t('videos.privacy_note', { defaultValue: 'Nothing loads from the video host until you press play.' })}
+            {t('videos.player_note', { defaultValue: 'The player loads only when you press play, from the privacy-enhanced YouTube host.' })}
           </p>
         </div>
 
@@ -266,7 +277,7 @@ function Hero({ labels, onPlay }: { labels: VideoLabels; onPlay: (v: AcademyVide
             aria-label={t('videos.play', { defaultValue: 'Play: {{title}}', title: start.title })}
             className="group relative block overflow-hidden rounded-xl shadow-2xl ring-1 ring-white/15 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
           >
-            <img src={start.cover} alt="" width={512} height={288} className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+            <VideoCover src={start.cover} eager className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
             <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
             <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-slate-900 shadow-xl transition-transform group-hover:scale-105">
               <Play size={26} className="translate-x-0.5" fill="currentColor" />
@@ -437,6 +448,105 @@ function Recommended({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Acad
   );
 }
 
+// ── Learning path ────────────────────────────────────────────────────────────
+
+const PATH_SHOWN = 3;
+
+function LearningPath({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: AcademyVideo, s?: number) => void }) {
+  const { t } = useTranslation();
+  const ctx = useVideoContext();
+  const watched = useVideosStore((s) => s.watched);
+  const path = useMemo(() => (ctx.role ? pathForRole(ctx.role, ctx.market, STAGE_META.map((s) => s.id)) : null), [ctx.role, ctx.market]);
+  if (!ctx.role || !path) return null;
+  const role = ctx.role;
+
+  return (
+    <section aria-labelledby="videos-path-title" data-testid="videos-path" className="space-y-3">
+      <SectionHeader
+        id="videos-path-title"
+        icon={<RoleAvatar role={role} className="h-6 w-6" />}
+        title={t('videos.path_title', { defaultValue: 'Your path as {{role}}', role: labels.role(role) })}
+        subtitle={t('videos.path_note', {
+          defaultValue: 'Videos across the project stages, in the order the work happens.',
+        })}
+      />
+      <Rail>
+        {STAGE_META.map((stage) => {
+          const list = path.get(stage.id) ?? [];
+          const Icon = stage.icon;
+          return (
+            <div
+              key={stage.id}
+              data-testid="videos-path-stage"
+              data-stage={stage.id}
+              className={clsx(
+                'flex w-56 shrink-0 snap-start flex-col rounded-xl border border-border-light border-l-[3px] bg-surface-primary p-2.5',
+                stage.tint.accent,
+                list.length === 0 && 'opacity-70',
+              )}
+            >
+              <div className="mb-2 flex items-center gap-1.5">
+                <span className={clsx('flex h-6 w-6 items-center justify-center rounded-md ring-1 ring-inset', stage.tint.tile)}>
+                  <Icon size={13} aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-content-primary">
+                  <span className="mr-1 tabular-nums text-content-tertiary">{stage.num}</span>
+                  {labels.stageShort(stage.id)}
+                </span>
+                <span className="text-2xs tabular-nums text-content-tertiary">{list.length}</span>
+              </div>
+              {list.length === 0 ? (
+                <p className="text-2xs text-content-tertiary">
+                  {t('videos.path_empty', { defaultValue: 'No video for this stage yet.' })}
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {list.slice(0, PATH_SHOWN).map((video) => (
+                    <li key={video.id}>
+                      <button
+                        type="button"
+                        onClick={() => onOpen(video)}
+                        className="flex w-full items-start gap-2 rounded-lg p-1 text-left hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                      >
+                        <span className="relative block h-9 w-16 shrink-0 overflow-hidden rounded bg-slate-900">
+                          <VideoCover src={video.cover} width={64} height={36} className="h-full w-full object-cover" />
+                          {watched[video.id] && (
+                            <span className="absolute inset-0 flex items-center justify-center bg-emerald-600/60 text-white">
+                              <CheckCircle2 size={14} aria-hidden />
+                            </span>
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span lang={video.language} className="line-clamp-2 text-2xs font-medium leading-snug text-content-primary">
+                            {video.title}
+                          </span>
+                          {video.status !== 'published' && (
+                            <span className="text-[9px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                              {t('videos.coming_soon', { defaultValue: 'Coming soon' })}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {list.length > PATH_SHOWN && (
+                <Link
+                  to={`/videos?role=${role}&stage=${stage.id}`}
+                  className="mt-auto pt-1.5 text-2xs font-medium text-oe-blue hover:underline"
+                >
+                  {t('videos.path_more', { defaultValue: '{{more}} more in the library', more: list.length - PATH_SHOWN })}
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </Rail>
+    </section>
+  );
+}
+
 // ── Series ───────────────────────────────────────────────────────────────────
 
 function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: AcademyVideo, s?: number) => void }) {
@@ -534,6 +644,19 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryPr
   const hits = useMemo(() => searchVideos(filters), [filters]);
   const count = activeFilterCount(filters);
   const any = t('common.all', { defaultValue: 'All' });
+  const moduleName = (route: string) => {
+    for (const group of navGroups) {
+      const item = group.items.find((i) => i.to === route);
+      if (item) return t(item.labelKey, { defaultValue: item.defaultLabel ?? route });
+    }
+    return route;
+  };
+  // Arriving from a module screen's "All on the Videos page" lands on the list.
+  const sectionRef = useRef<HTMLElement>(null);
+  const arrivedWithRoute = useRef(Boolean(filters.route));
+  useEffect(() => {
+    if (arrivedWithRoute.current) sectionRef.current?.scrollIntoView?.({ block: 'start' });
+  }, []);
 
   const selects: { key: Exclude<keyof VideoFilters, 'query'>; label: string; options: { value: string; label: string }[] }[] = [
     {
@@ -575,7 +698,7 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryPr
   ];
 
   return (
-    <section aria-labelledby="videos-library-title" data-testid="videos-library" className="space-y-3">
+    <section ref={sectionRef} aria-labelledby="videos-library-title" data-testid="videos-library" className="scroll-mt-4 space-y-3">
       <SectionHeader
         id="videos-library-title"
         icon={<SlidersHorizontal size={16} aria-hidden />}
@@ -598,6 +721,25 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen }: LibraryPr
             className="w-full rounded-xl border border-border-light bg-surface-secondary/50 py-2 pl-9 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/50 focus:bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/20"
           />
         </div>
+        {filters.route && (
+          <p className="flex flex-wrap items-center gap-1.5 text-xs text-content-secondary">
+            {t('videos.for_screen', { defaultValue: 'For the screen' })}
+            <span
+              data-testid="videos-route-chip"
+              className="inline-flex items-center gap-1 rounded-full border border-oe-blue/40 bg-oe-blue/[0.06] py-0.5 pl-2.5 pr-1 font-medium text-oe-blue"
+            >
+              {moduleName(filters.route)}
+              <button
+                type="button"
+                onClick={() => setFilter('route', null)}
+                aria-label={t('common.clear', { defaultValue: 'Clear' })}
+                className="rounded-full p-0.5 hover:bg-oe-blue/15"
+              >
+                <X size={11} aria-hidden />
+              </button>
+            </span>
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {selects.map((s) => (
             <label key={s.key} className="min-w-0">
@@ -684,6 +826,28 @@ function Rail({ children }: { children: ReactNode }) {
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
       <div className="flex snap-x snap-mandatory gap-3 pt-1">{children}</div>
+    </div>
+  );
+}
+
+/** Brings back "Videos for this step" once it was hidden anywhere. */
+function HintsRestore() {
+  const { t } = useTranslation();
+  const hidden = useVideoHintsStore((s) => s.off || s.hidden.length > 0);
+  const showAgain = useVideoHintsStore((s) => s.showAgain);
+  if (!hidden) return null;
+  return (
+    <div
+      data-testid="videos-hints-restore"
+      className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-border-light px-4 py-3 text-xs text-content-secondary"
+    >
+      <EyeOff size={14} className="shrink-0 text-content-tertiary" aria-hidden />
+      <span className="min-w-0 flex-1">
+        {t('videos.hints_hidden', { defaultValue: 'Video tips on module screens are hidden.' })}
+      </span>
+      <button type="button" onClick={showAgain} className="font-medium text-oe-blue hover:underline">
+        {t('videos.hints_show', { defaultValue: 'Show them again' })}
+      </button>
     </div>
   );
 }

@@ -33,6 +33,7 @@ import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import type { AcademyVideo } from './academyTypes';
 import { caseRef, channelUrl, embedUrl, formatClock, playlist, watchUrl } from './academy';
 import { useVideosStore } from './useVideosStore';
+import { VideoCover } from './VideoCover';
 import type { VideoLabels } from './videoLabels';
 
 /** Render with `key={video.id}`: the start second and play state are read
@@ -159,7 +160,7 @@ export function VideoPlayerDialog({
                 />
               ) : (
                 <>
-                  <img src={video.cover} alt="" className="h-full w-full object-cover opacity-90" />
+                  <VideoCover src={video.cover} eager className="h-full w-full object-cover opacity-90" />
                   {published ? (
                     <button
                       type="button"

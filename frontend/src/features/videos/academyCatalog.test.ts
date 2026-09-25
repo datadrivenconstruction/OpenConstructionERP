@@ -10,7 +10,7 @@
 // `normalizeCaseRoute` and `stageForPlaybook`. It is also the check that every
 // case a video links to exists.
 
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PLAYBOOKS } from '@/features/cases/playbooks';
@@ -94,16 +94,25 @@ describe('the video catalogue', () => {
     }
   });
 
-  it('ships a compressed local cover for every video, and no video file', () => {
+  it('shows the channel cover for a published video and ships a local one only for the rest', () => {
     const publicDir = [resolve(process.cwd(), 'public'), resolve(process.cwd(), 'frontend/public')].find((d) =>
       existsSync(d),
     )!;
+    const coversDir = resolve(publicDir, 'assets/videos/academy');
     for (const v of videos) {
-      expect(v.cover, v.id).toMatch(/^\/assets\/videos\/academy\/[a-z0-9-]+\.webp$/);
-      expect(existsSync(resolve(publicDir, `.${v.cover}`)), v.cover).toBe(true);
+      if (v.youtubeId) {
+        expect(v.cover, v.id).toBe(`https://i.ytimg.com/vi/${v.youtubeId}/maxresdefault.jpg`);
+      } else {
+        expect(v.cover, v.id).toMatch(/^\/assets\/videos\/academy\/[a-z0-9-]+\.webp$/);
+        expect(existsSync(resolve(publicDir, `.${v.cover}`)), v.cover).toBe(true);
+      }
     }
+    // A published video's old local cover is deleted by the generator, so the
+    // folder holds exactly the covers the catalogue still points at.
+    const local = new Set(videos.filter((v) => !v.youtubeId).map((v) => v.cover.split('/').pop()));
+    expect(new Set(readdirSync(coversDir))).toEqual(local);
     const text = JSON.stringify(ACADEMY_CATALOG);
-    expect(text).not.toMatch(/\.mp4|\.srt|\.vtt|file:\/\/|[A-Z]:\\\\/i);
+    expect(text).not.toMatch(/\.mp4|\.srt|\.vtt|file:\/\/|[A-Z]:\\/i);
   });
 
   it('has one entry point for somebody new, and it is published', () => {
