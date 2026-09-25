@@ -34,31 +34,48 @@ interface ClaimInvoice {
   amount_subtotal: string;
   retention_amount: string;
   amount_total: string;
+  invoice_direction?: string;
   source_claim_id: string | null;
   line_items?: ClaimInvoiceLineItem[];
 }
+
+export type ClaimInvoiceDirection = 'receivable' | 'payable';
 
 export interface ClaimInvoicePreviewProps {
   /** The certified progress claim to preview / invoice. */
   claimId: string;
   /** Whether the current claim is in `certified` status (gates the action). */
   certified?: boolean;
+  /**
+   * Which way the claim is billed before an invoice exists: a client claim is
+   * a receivable, a subcontractor's claim is a payable. The invoice's own
+   * direction wins once it exists.
+   */
+  direction?: ClaimInvoiceDirection;
   /** Called with the resulting invoice id after a successful raise. */
   onInvoiced?: (invoiceId: string) => void;
 }
 
+/** How often to look again for the invoice the certification raises. */
+const AWAIT_INVOICE_MS = 3000;
+
 export function ClaimInvoicePreview({
   claimId,
   certified = true,
+  direction = 'receivable',
   onInvoiced,
 }: ClaimInvoicePreviewProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  // Does an AR invoice already exist for this claim? 404 => not yet.
+  // Does an invoice already exist for this claim? 404 => not yet. The
+  // certification raises it after its own request commits, so a page that
+  // asked while the claim was still approved kept "Not raised" in the cache.
+  // The status is part of the key, and a certified claim with no invoice yet
+  // keeps asking until the invoice lands.
   const { data: existing, isLoading } = useQuery<ClaimInvoice | null>({
-    queryKey: ['finance', 'claim-receivable', claimId],
+    queryKey: ['finance', 'claim-receivable', claimId, certified],
     queryFn: async () => {
       try {
         return await apiGet<ClaimInvoice>(
@@ -68,6 +85,8 @@ export function ClaimInvoicePreview({
         return null;
       }
     },
+    staleTime: 0,
+    refetchInterval: (query) => (certified && !query.state.data ? AWAIT_INVOICE_MS : false),
   });
 
   const raise = useMutation({
@@ -89,11 +108,17 @@ export function ClaimInvoicePreview({
 
   const invoice = existing ?? null;
   const currency = invoice?.currency_code || '';
+  const payable = (invoice?.invoice_direction ?? direction) === 'payable';
+  // The invoice stores the gross in its subtotal and holds retention beside
+  // it, so what changes hands now is the total less the retention.
+  const netNow = invoice
+    ? String(Math.round((Number(invoice.amount_total) - Number(invoice.retention_amount)) * 100) / 100)
+    : '0';
 
   return (
     <Card>
       <CardHeader
-        title={t('finance.claimInvoice.title')}
+        title={payable ? t('finance.claimInvoice.titlePayable') : t('finance.claimInvoice.title')}
         action={
           invoice ? (
             <Badge variant="success">{t('finance.claimInvoice.raised')}</Badge>
@@ -128,9 +153,13 @@ export function ClaimInvoicePreview({
               </dd>
             </div>
             <div className="flex justify-between border-t border-[var(--border)] pt-2 font-semibold">
-              <dt>{t('finance.claimInvoice.netCollectible')}</dt>
+              <dt>
+                {payable
+                  ? t('finance.claimInvoice.netPayable')
+                  : t('finance.claimInvoice.netCollectible')}
+              </dt>
               <dd>
-                <MoneyDisplay amount={invoice.amount_subtotal} currency={currency} />
+                <MoneyDisplay amount={netNow} currency={currency} />
               </dd>
             </div>
           </dl>
@@ -138,8 +167,12 @@ export function ClaimInvoicePreview({
           <div className="space-y-3">
             <p className="text-xs text-[var(--text-secondary)]">
               {certified
-                ? t('finance.claimInvoice.readyHint')
-                : t('finance.claimInvoice.notCertifiedHint')}
+                ? payable
+                  ? t('finance.claimInvoice.readyHintPayable')
+                  : t('finance.claimInvoice.readyHint')
+                : payable
+                  ? t('finance.claimInvoice.notCertifiedHintPayable')
+                  : t('finance.claimInvoice.notCertifiedHint')}
             </p>
             <Button
               size="sm"
@@ -148,7 +181,9 @@ export function ClaimInvoicePreview({
             >
               {raise.isPending
                 ? t('finance.claimInvoice.raising')
-                : t('finance.claimInvoice.raiseAction')}
+                : payable
+                  ? t('finance.claimInvoice.raiseActionPayable')
+                  : t('finance.claimInvoice.raiseAction')}
             </Button>
           </div>
         )}

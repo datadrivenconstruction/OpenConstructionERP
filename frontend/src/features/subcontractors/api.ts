@@ -302,6 +302,22 @@ export function listAgreements(params: {
   return apiGet<Agreement[]>(`/v1/subcontractors/agreements/?${qs.toString()}`);
 }
 
+export interface CreateAgreementPayload {
+  subcontractor_id: string;
+  project_id: string;
+  title: string;
+  total_value: string;
+  currency: string;
+  retention_percent: string;
+  start_date?: string;
+  end_date?: string;
+}
+
+/** Draw up an agreement. It is born a draft; activating it signs it. */
+export function createAgreement(data: CreateAgreementPayload): Promise<Agreement> {
+  return apiPost<Agreement>('/v1/subcontractors/agreements/', data);
+}
+
 export function updateAgreement(
   id: string,
   data: Partial<
@@ -332,6 +348,19 @@ export function listPaymentApplications(params: {
   const qs = new URLSearchParams({ agreement_id: params.agreement_id });
   if (params.status) qs.set('status', params.status);
   return apiGet<PaymentApplication[]>(`/v1/subcontractors/payment-applications/?${qs.toString()}`);
+}
+
+export interface SubmitPaymentApplicationPayload {
+  agreement_id: string;
+  gross_amount: string;
+  period_start?: string;
+  period_end?: string;
+  currency?: string;
+}
+
+/** Submit a payment application; the server works out retention and net. */
+export function submitPaymentApplication(data: SubmitPaymentApplicationPayload): Promise<PaymentApplication> {
+  return apiPost<PaymentApplication>('/v1/subcontractors/payment-applications/', data);
 }
 
 export function listRetentionLedger(agreementId: string): Promise<RetentionLedgerEntry[]> {

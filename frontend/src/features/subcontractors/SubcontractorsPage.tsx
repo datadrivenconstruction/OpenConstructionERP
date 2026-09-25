@@ -90,6 +90,8 @@ import {
   type Rating,
 } from './api';
 import { WorkPackageSovPicker } from './WorkPackageSovPicker';
+import { certTypeLabel, describeComplianceReasons } from './complianceReasons';
+import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
 import { PayAppAmount, PaymentApprovalActions } from './PaymentApprovalActions';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
@@ -978,7 +980,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   {t('subcontractors.blocked_label', {
                     defaultValue: 'Payments blocked:',
                   })}{' '}
-                  {dashboard.block_reasons.join('; ')}
+                  {describeComplianceReasons(dashboard.block_reasons, t)}
                 </p>
               )}
             </div>
@@ -1170,7 +1172,11 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
             <div className="p-5 space-y-3">
               {tab === 'scope' && (
-                <ScopeTab agreements={agreements} loading={agreementsQ.isLoading} />
+                <ScopeTab
+                  subcontractorId={id}
+                  agreements={agreements}
+                  loading={agreementsQ.isLoading}
+                />
               )}
               {tab === 'payments' && (
                 <PaymentsTab
@@ -1224,7 +1230,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                               : 'success'
                         }
                       >
-                        {c.cert_type}
+                        {certTypeLabel(c.cert_type, t)}
                         {c.valid_until ? ` · ${c.valid_until}` : ''}
                       </Badge>
                     );
@@ -1236,7 +1242,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 + list. Mounted always (not behind a tab) so the list
                 is one scroll away from the Certificates summary. */}
             <div className="border-t border-border-light px-5 py-4">
-              <LienWaiverPanel subcontractorId={sub.id} />
+              <LienWaiverPanel subcontractorId={sub.id} country={sub.country} />
             </div>
           </>
         )}
@@ -1286,32 +1292,46 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 }
 
 function ScopeTab({
+  subcontractorId,
   agreements,
   loading,
 }: {
+  subcontractorId: string;
   agreements: Agreement[];
   loading: boolean;
 }) {
   const { t } = useTranslation();
+  const [creating, setCreating] = useState(false);
   if (loading) return <SkeletonTable rows={3} columns={4} />;
-  if (agreements.length === 0) {
-    return (
-      <EmptyState
-        icon={<FileText size={20} />}
-        title={t('subcontractors.no_agreements', {
-          defaultValue: 'No agreements yet',
-        })}
-        description={t('subcontractors.no_agreements_desc', {
-          defaultValue: 'Subcontract agreements link this vendor to specific projects.',
-        })}
-      />
-    );
-  }
+  const newButton = (
+    <Button size="sm" icon={<Plus size={14} />} onClick={() => setCreating(true)}>
+      {t('subcontractors.new_agreement')}
+    </Button>
+  );
   return (
     <div className="space-y-3">
-      {agreements.map((a) => (
-        <AgreementRow key={a.id} agreement={a} />
-      ))}
+      {agreements.length === 0 ? (
+        <EmptyState
+          icon={<FileText size={20} />}
+          title={t('subcontractors.no_agreements', {
+            defaultValue: 'No agreements yet',
+          })}
+          description={t('subcontractors.no_agreements_desc', {
+            defaultValue: 'Subcontract agreements link this vendor to specific projects.',
+          })}
+          action={newButton}
+        />
+      ) : (
+        <>
+          <div className="flex justify-end">{newButton}</div>
+          {agreements.map((a) => (
+            <AgreementRow key={a.id} agreement={a} />
+          ))}
+        </>
+      )}
+      {creating && (
+        <AgreementFormModal subcontractorId={subcontractorId} onClose={() => setCreating(false)} />
+      )}
     </div>
   );
 }
@@ -1333,9 +1353,12 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
             {agreement.start_date || '—'} → {agreement.end_date || '—'}
           </p>
         </div>
-        <Badge variant={AGREEMENT_VARIANT[agreement.status]} dot>
-          {agreement.status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <SignAgreementButton agreement={agreement} />
+          <Badge variant={AGREEMENT_VARIANT[agreement.status]} dot>
+            {agreement.status}
+          </Badge>
+        </div>
       </div>
       <div className="mt-2 flex items-center justify-between text-xs text-content-secondary">
         <span>
@@ -1469,7 +1492,9 @@ function PaymentsTab({
 }) {
   const { t } = useTranslation();
   const [agreementId, setAgreementId] = useState(agreement?.id ?? '');
+  const [creating, setCreating] = useState(false);
   const effectiveId = agreementId || agreement?.id || '';
+  const selected = agreements.find((a) => a.id === effectiveId);
 
   const paymentsQ = useQuery({
     queryKey: ['subcontractors', 'payments', effectiveId],
@@ -1490,17 +1515,38 @@ function PaymentsTab({
   }
   return (
     <div className="space-y-3">
-      <select
-        value={effectiveId}
-        onChange={(e) => setAgreementId(e.target.value)}
-        className={inputCls}
-      >
-        {agreements.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.title}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center gap-2">
+        <select
+          value={effectiveId}
+          onChange={(e) => setAgreementId(e.target.value)}
+          className={inputCls}
+        >
+          {agreements.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.title}
+            </option>
+          ))}
+        </select>
+        {/* A payment application is taken only against a signed agreement,
+            which is what the server enforces too. */}
+        <Button
+          size="sm"
+          icon={<Plus size={14} />}
+          onClick={() => setCreating(true)}
+          disabled={!selected || (selected.status !== 'active' && selected.status !== 'completed')}
+          title={
+            selected && selected.status === 'draft'
+              ? t('subcontractors.pay_app_needs_signed')
+              : undefined
+          }
+          className="shrink-0"
+        >
+          {t('subcontractors.new_pay_app')}
+        </Button>
+      </div>
+      {creating && selected && (
+        <PaymentApplicationFormModal agreement={selected} onClose={() => setCreating(false)} />
+      )}
       {paymentsQ.isLoading && <SkeletonTable rows={3} columns={3} />}
       {paymentsQ.isError && (
         <p className="text-sm text-semantic-error">
