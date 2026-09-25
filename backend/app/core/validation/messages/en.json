@@ -648,7 +648,8 @@
     "estimate_job_not_found": "Estimate job not found",
     "escrow_not_found": "EscrowTransaction not found",
     "commission_accrual_not_found": "CommissionAccrual not found",
-    "baseline_not_found": "Baseline not found"
+    "baseline_not_found": "Baseline not found",
+    "fx_rate_set_locked": "The ECB rates for {date} are locked, so this refresh did not overwrite them. Unlock that rate set first if it should take the new publication."
   },
   "variations": {
     "boq_lines_are_traced": {

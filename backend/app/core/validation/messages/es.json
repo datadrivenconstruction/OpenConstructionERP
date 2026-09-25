@@ -648,7 +648,8 @@
     "estimate_job_not_found": "Tarea de estimación no encontrada",
     "escrow_not_found": "Transacción de depósito en garantía no encontrada",
     "commission_accrual_not_found": "Devengo de comisión no encontrado",
-    "baseline_not_found": "Línea base no encontrada"
+    "baseline_not_found": "Línea base no encontrada",
+    "fx_rate_set_locked": "Los tipos del BCE del {date} están bloqueados, por lo que esta actualización no los ha sobrescrito. Desbloquee primero ese conjunto de tipos si debe recibir la nueva publicación."
   },
   "variations": {
     "boq_lines_are_traced": {

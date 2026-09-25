@@ -56,6 +56,10 @@ class RateSetLockedError(RuntimeError):
     conflict rather than retrying.
     """
 
+    def __init__(self, message: str, *, rate_date: date | None = None) -> None:
+        super().__init__(message)
+        self.rate_date = rate_date
+
 
 def _q_quote(value: Decimal) -> Decimal:
     """Round a quoted rate to the stored scale (10 dp, half up)."""
@@ -228,7 +232,8 @@ async def upsert_rate_set(
         session.add(rate_set)
     elif rate_set.is_locked:
         raise RateSetLockedError(
-            f"Rate set {base} {rate_date.isoformat()} from {source} is locked and cannot be rewritten"
+            f"Rate set {base} {rate_date.isoformat()} from {source} is locked and cannot be rewritten",
+            rate_date=rate_date,
         )
 
     rate_set.source_ref = source_ref
