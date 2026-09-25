@@ -2462,9 +2462,9 @@ function StepModuleConfig({
           instance is Settings -> Modules, and conflating the two is what made
           a module look "off" here and still be running. */}
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.modules_subtitle_menu', {
+        {t('onboarding.modules_subtitle_switch', {
           defaultValue:
-            'We picked a set that matches your profile. This chooses what appears in your menu - nothing is deleted, and you can change it any time in Settings.',
+            'We picked a set that matches your profile. It decides which modules are switched on for you - nothing is deleted, and you can change it any time in Settings.',
         })}
       </p>
 
