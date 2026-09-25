@@ -88,6 +88,8 @@ const resource = {
     "about.team_name": "DataDrivenConstruction",
     "about.team_role": "Automation, data and open standards for construction",
     "about.team_linkedin": "DataDrivenConstruction on LinkedIn",
+
+    "subcontractors.cert_type.license": "Licence",
   }
 } as { translation: Record<string, string> };
 

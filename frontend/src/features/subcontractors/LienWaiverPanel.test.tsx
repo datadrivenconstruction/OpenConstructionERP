@@ -55,13 +55,15 @@ function payApp(over: Partial<PaymentApplication> = {}): PaymentApplication {
   } as PaymentApplication;
 }
 
-function renderPanel() {
+// The W-9 / W-8 cases below need a US subcontractor: the forms are offered
+// nowhere else.
+function renderPanel(country: string | null = 'US') {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={qc}>
-      <LienWaiverPanel subcontractorId="sub-1" />
+      <LienWaiverPanel subcontractorId="sub-1" country={country} />
     </QueryClientProvider>,
   );
 }
@@ -176,5 +178,15 @@ describe('LienWaiverPanel pay application', () => {
     expect(sentForm().has('payment_application_id')).toBe(false);
     expect(sentForm().has('amount')).toBe(false);
     expect(sentForm().has('currency')).toBe(false);
+  });
+});
+
+describe('LienWaiverPanel outside the US', () => {
+  it.each([['HR'], [null]])('offers no US tax form to a subcontractor in %s', async (country) => {
+    renderPanel(country);
+    const select = (await screen.findByLabelText('Waiver type')) as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+    expect(values).toEqual(['conditional_partial', 'conditional_final', 'unconditional_partial', 'unconditional_final']);
+    expect(screen.queryByText(/W-9/)).toBeNull();
   });
 });

@@ -42,6 +42,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
+  getContract,
   getProgressClaim,
   listClaimLines,
   listContractLines,
@@ -135,6 +136,16 @@ export function ProgressClaimDetailPage() {
     queryFn: () => listContractLines(claimQ.data?.contract_id as string),
     enabled: !!claimQ.data?.contract_id,
   });
+
+  // The contract says which way the claim is billed: a client claim is a
+  // receivable, a subcontractor's claim is a payable.
+  const contractQ = useQuery({
+    queryKey: ['contracts', 'detail', claimQ.data?.contract_id],
+    queryFn: () => getContract(claimQ.data?.contract_id as string),
+    enabled: !!claimQ.data?.contract_id,
+  });
+  const invoiceDirection =
+    contractQ.data?.counterparty_type === 'subcontractor' ? 'payable' : 'receivable';
 
   // Load the project so we can country-gate the AIA G702/G703 panel. The flag
   // is computed server-side (US/CA/AU only); the panel renders only when true,
@@ -447,12 +458,18 @@ export function ProgressClaimDetailPage() {
       <ClaimInvoicePreview
         claimId={claimId as string}
         certified={claim.status === 'certified' || claim.status === 'paid'}
+        direction={invoiceDirection}
         onInvoiced={() =>
           addToast({
             type: 'success',
-            title: t('finance.claimInvoice.raisedToast', {
-              defaultValue: 'Receivable invoice raised from this claim',
-            }),
+            title:
+              invoiceDirection === 'payable'
+                ? t('finance.claimInvoice.raisedToastPayable', {
+                    defaultValue: 'Payable invoice raised from this claim',
+                  })
+                : t('finance.claimInvoice.raisedToast', {
+                    defaultValue: 'Receivable invoice raised from this claim',
+                  }),
           })
         }
       />

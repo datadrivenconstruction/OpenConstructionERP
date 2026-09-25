@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { CheckCircle2, ShieldAlert, Ban, Clock } from 'lucide-react';
 import { getAwardEligibility, type PrequalStatus } from './api';
+import { describeComplianceReasons } from './complianceReasons';
 
 interface AwardEligibilityBannerProps {
   subcontractorId: string;
@@ -95,7 +96,7 @@ export function AwardEligibilityBanner({
     title = t('subcontractors.not_eligible', {
       defaultValue: 'Not approved for award',
     });
-    desc = reasons.length > 0 ? reasons.join('; ') : null;
+    desc = reasons.length > 0 ? describeComplianceReasons(reasons, t) : null;
   } else if (prequalStatus === 'pending') {
     tone = 'warning';
     Icon = Clock;

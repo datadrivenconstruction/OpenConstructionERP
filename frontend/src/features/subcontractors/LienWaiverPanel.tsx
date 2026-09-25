@@ -11,7 +11,9 @@
  * format and we render that as a Toast.
  *
  * Free-standing W-9 / W-8 tax forms are stored alongside per-draw
- * waivers; the difference is purely the ``waiver_type`` enum.
+ * waivers; the difference is purely the ``waiver_type`` enum. They are US IRS
+ * forms, so they are offered only for a subcontractor registered in the US; a
+ * form already on file is still listed under its name wherever it came from.
  *
  * A payment waiver can be filed against one of the sub's pay applications,
  * with the amount it releases. Only then does the payment release gate, and
@@ -35,20 +37,25 @@ import { apiGet, apiDelete, getErrorMessage, getAuthToken, API_BASE } from '@/sh
 import { fmtFixed } from '@/shared/lib/formatters';
 import { listAgreements, listPaymentApplications, type PaymentApplication } from './api';
 
-// Six values to match the backend ``_VALID_WAIVER_TYPES`` enum. Keep
-// labels short (table-row friendly); ``defaultValue`` covers the
-// untranslated case.
-const WAIVER_TYPES: Array<{ value: string; label: string }> = [
-  { value: 'conditional_partial', label: 'Conditional · Partial' },
-  { value: 'conditional_final', label: 'Conditional · Final' },
-  { value: 'unconditional_partial', label: 'Unconditional · Partial' },
-  { value: 'unconditional_final', label: 'Unconditional · Final' },
-  { value: 'w9', label: 'W-9 (US tax)' },
-  { value: 'w8', label: 'W-8 (Intl tax)' },
+// Six values to match the backend ``_VALID_WAIVER_TYPES`` enum. Each is
+// labelled by ``subcontractors.waiver_type.<value>``, kept short so it fits a
+// table row.
+const WAIVER_TYPES: readonly string[] = [
+  'conditional_partial',
+  'conditional_final',
+  'unconditional_partial',
+  'unconditional_final',
+  'w9',
+  'w8',
 ];
 
 function isTaxForm(waiverType: string): boolean {
   return waiverType === 'w9' || waiverType === 'w8';
+}
+
+/** Whether the US tax forms apply to a subcontractor registered in `country`. */
+function offersUsTaxForms(country: string | null | undefined): boolean {
+  return (country ?? '').trim().toUpperCase() === 'US';
 }
 
 // MIME allow-list shown in the <input accept=…> attribute. The server
@@ -76,9 +83,13 @@ interface LienWaiver {
 
 interface LienWaiverPanelProps {
   subcontractorId: string;
+  /** ISO country of the subcontractor; decides whether the US tax forms apply. */
+  country?: string | null;
 }
 
-export function LienWaiverPanel({ subcontractorId }: LienWaiverPanelProps) {
+export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelProps) {
+  const usTaxForms = offersUsTaxForms(country);
+  const uploadTypes = WAIVER_TYPES.filter((w) => usTaxForms || !isTaxForm(w));
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -254,9 +265,9 @@ export function LienWaiverPanel({ subcontractorId }: LienWaiverPanelProps) {
             })}
             disabled={busy}
           >
-            {WAIVER_TYPES.map((w) => (
-              <option key={w.value} value={w.value}>
-                {w.label}
+            {uploadTypes.map((w) => (
+              <option key={w} value={w}>
+                {t(`subcontractors.waiver_type.${w}`)}
               </option>
             ))}
           </select>
@@ -358,10 +369,14 @@ export function LienWaiverPanel({ subcontractorId }: LienWaiverPanelProps) {
           title={t('subcontractors.no_lien_waivers', {
             defaultValue: 'No lien waivers yet',
           })}
-          description={t('subcontractors.no_lien_waivers_desc', {
-            defaultValue:
-              'Upload signed lien waivers (PDF / image) and W-9 / W-8 tax forms here. Server validates file content by magic bytes.',
-          })}
+          description={
+            usTaxForms
+              ? t('subcontractors.no_lien_waivers_desc', {
+                  defaultValue:
+                    'Upload signed lien waivers (PDF / image) and W-9 / W-8 tax forms here. Server validates file content by magic bytes.',
+                })
+              : t('subcontractors.no_lien_waivers_desc_neutral')
+          }
         />
       )}
 
@@ -396,8 +411,9 @@ export function LienWaiverPanel({ subcontractorId }: LienWaiverPanelProps) {
                 <tr key={w.id} className="border-t border-border-light">
                   <td className="px-3 py-2">
                     <Badge variant="blue" size="sm">
-                      {WAIVER_TYPES.find((wt) => wt.value === w.waiver_type)?.label ||
-                        w.waiver_type}
+                      {WAIVER_TYPES.includes(w.waiver_type)
+                        ? t(`subcontractors.waiver_type.${w.waiver_type}`)
+                        : w.waiver_type}
                     </Badge>
                   </td>
                   <td className="px-3 py-2 text-content-secondary">

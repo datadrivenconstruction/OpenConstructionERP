@@ -71,6 +71,8 @@ vi.mock('./api', () => ({
   // Billing a line by hand, and the schedule of values it is picked from.
   createClaimLine: vi.fn(),
   listContractLines: vi.fn(),
+  // The contract says which way the claim invoice goes.
+  getContract: vi.fn().mockResolvedValue({ counterparty_type: 'client' }),
   // The submission check under the header, and the G702 it reads line 7's
   // basis from on AIA projects.
   getClaimValidation: vi.fn(),
