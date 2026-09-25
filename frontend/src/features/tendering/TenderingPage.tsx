@@ -62,7 +62,7 @@ import {
   type Recipient,
   type DistributeResponse,
 } from './api';
-import { fmtList, fmtPercent, getIntlLocale } from '@/shared/lib/formatters';
+import { fmtList, fmtPercent, formatDateValue } from '@/shared/lib/formatters';
 import {
   listSubcontractors,
   type Subcontractor,
@@ -256,7 +256,9 @@ function translateStatus(status: string, t: ReturnType<typeof useTranslation>['t
 
 function formatDate(dateStr: string): string {
   try {
-    return new Intl.DateTimeFormat(getIntlLocale(), { dateStyle: 'medium' }).format(new Date(dateStr));
+    // A package deadline is a plain calendar date; formatDateValue keeps it on
+    // that day in every zone, where new Date() printed it a day early in Toronto.
+    return formatDateValue(dateStr, { dateStyle: 'medium' });
   } catch {
     return dateStr;
   }

@@ -80,7 +80,7 @@ import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { fmtPercent, fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 import { formatCurrency as formatMoney, toNum } from '@/shared/lib/money';
 
 // ---------------------------------------------------------------------------
@@ -287,11 +287,8 @@ export function formatCurrency(value: number, currency?: string): string {
 }
 
 function formatDate(iso: string, locale = 'en-US'): string {
-  return new Date(iso).toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  // Milestone and activity dates are plain calendar dates: keep their day.
+  return formatDateValue(iso, { year: 'numeric', month: 'short', day: 'numeric' }, locale);
 }
 
 const statusVariant: Record<string, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {

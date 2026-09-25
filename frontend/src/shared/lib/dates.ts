@@ -66,6 +66,21 @@ export function isDateOnlyString(value: string): boolean {
 }
 
 /**
+ * The options to format `value` with, pinned to UTC when `value` is date-only.
+ *
+ * A date-only value parsed with `new Date()` is midnight UTC, so formatting it
+ * in the viewer's zone prints the day before anywhere west of UTC. Pinning the
+ * formatter to UTC prints the calendar day as written. A timestamp, and a zone
+ * the caller already chose, are left alone.
+ */
+export function dateOnlyFormatOptions(
+  value: string,
+  options: Intl.DateTimeFormatOptions = {},
+): Intl.DateTimeFormatOptions {
+  return DATE_ONLY_RE.test(value) && !options.timeZone ? { ...options, timeZone: 'UTC' } : options;
+}
+
+/**
  * Parse a date string that may or may not carry a time component.
  *
  * - Date-only ("2026-10-01") is pinned to UTC midnight explicitly so that
