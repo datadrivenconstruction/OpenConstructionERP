@@ -57,7 +57,7 @@ import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
 import { BoqLinkEditor } from './BoqLinkEditor';
-import { generateInWindow, projectWindowDays } from './generateWindow';
+import { generateInWindow, projectWindowDays, refreshAfterGenerate } from './generateWindow';
 import { ActivityGrid } from './ActivityGrid';
 import { WorkCalendarManager } from './WorkCalendarManager';
 import { scheduleGuide } from './scheduleGuide';
@@ -1283,9 +1283,11 @@ function ScheduleDetail({
 
   const generateFromBOQ = useMutation({
     mutationFn: (boqId: string) => generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
-      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+    onSuccess: async () => {
+      // The dialog stays open with its button spinning until the new plan is
+      // loaded, so the toast lands on the generated schedule and not on the
+      // empty one it replaces.
+      await refreshAfterGenerate(queryClient, schedule.id);
       setShowGenerateBOQ(false);
       setSelectedBOQId('');
       // Reset CPM/risk results since activities changed

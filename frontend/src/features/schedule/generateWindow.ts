@@ -1,6 +1,22 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import type { QueryClient } from '@tanstack/react-query';
 import { scheduleApi } from './api';
+
+/**
+ * Refetch what a generation changed and resolve once the new plan is loaded.
+ *
+ * The caller awaits this before closing the dialog and announcing success.
+ * Firing the invalidations and moving on left the page on the schedule it had
+ * before (an empty one, the first time) for the second or so the refetch took,
+ * directly under a toast saying the schedule had been generated.
+ */
+export async function refreshAfterGenerate(queryClient: QueryClient, scheduleId: string): Promise<void> {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ['gantt', scheduleId] }),
+    queryClient.invalidateQueries({ queryKey: ['schedules'] }),
+  ]);
+}
 
 /**
  * Calendar days from ``start`` to ``end``, both included, or ``null`` when

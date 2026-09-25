@@ -35,3 +35,38 @@ describe('generateInWindow', () => {
     expect(scheduleApi.generateFromBOQ).not.toHaveBeenCalled();
   });
 });
+
+describe('refreshAfterGenerate', () => {
+  it('resolves only once the new plan has been fetched', async () => {
+    const { QueryClient, QueryObserver } = await import('@tanstack/react-query');
+    const { refreshAfterGenerate } = await import('./generateWindow');
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    let answer: (value: string[]) => void = () => {};
+    let calls = 0;
+    const observer = new QueryObserver(qc, {
+      queryKey: ['gantt', 's1'],
+      queryFn: () => {
+        calls += 1;
+        if (calls === 1) return Promise.resolve([]);
+        return new Promise<string[]>((resolve) => {
+          answer = resolve;
+        });
+      },
+    });
+    const unsubscribe = observer.subscribe(() => {});
+    await vi.waitFor(() => expect(qc.getQueryData(['gantt', 's1'])).toEqual([]));
+
+    let done = false;
+    const pending = refreshAfterGenerate(qc, 's1').then(() => {
+      done = true;
+    });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(done).toBe(false);
+
+    answer(['generated activity']);
+    await pending;
+    expect(qc.getQueryData(['gantt', 's1'])).toEqual(['generated activity']);
+    unsubscribe();
+  });
+});
