@@ -470,7 +470,9 @@ async def _create_po_from_bid_award(event: Event) -> None:
 
             po = PurchaseOrder(
                 project_id=package.project_id,
-                vendor_contact_id=None,  # bidder is a denormalised snapshot; no FK
+                # The contact the bidder was invited as, when it was picked
+                # from the directory; a bidder typed in by hand has none.
+                vendor_contact_id=str(bidder.contact_id) if bidder.contact_id else None,
                 po_number=po_number,
                 po_type="standard",
                 issue_date=None,

@@ -33,7 +33,6 @@ loaded (``module_loader._load_module`` imports ``events.py``).
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import uuid
 from decimal import Decimal, InvalidOperation
@@ -51,13 +50,6 @@ from app.modules.bid_management.award_contract import (
 )
 
 logger = logging.getLogger(__name__)
-
-#: Pauses before re-reading an award that is not visible yet. The tendering
-#: publisher emits before its request commits, so the first read can land
-#: before the award does. Reading ``awarded`` / ``accepted`` is what keeps a
-#: rolled-back award from producing a contract, and the short wait is what
-#: keeps a committed one from being missed. About four seconds in all.
-_VISIBILITY_WAITS: tuple[float, ...] = (0.25, 0.5, 1.0, 2.0)
 
 
 def _to_decimal(value: object) -> Decimal:
@@ -103,9 +95,10 @@ def _recipient_subcontractor(package_metadata: Any, contact_email: str) -> uuid.
 async def _on_tender_awarded(event: Event) -> None:
     """Schedule the contract draft for a tender award as a detached task.
 
-    Detached for the reason procurement's handler is: the publisher still
-    holds its request transaction, and a second session opened synchronously
-    here would contend with it.
+    The publisher emits after its commit (``publish_after_commit``), so the
+    award is visible to the fresh session opened here. Detaching keeps a slow
+    draft off the publish path, and ``_log_failures`` reports a failed one at
+    WARNING instead of losing it.
     """
     _log_failures(
         _draft_contract_from_tender_award(event),
@@ -121,21 +114,16 @@ async def _draft_contract_from_tender_award(event: Event) -> None:
     if package_id is None or bid_id is None:
         return
 
-    for wait in (0.0, *_VISIBILITY_WAITS):
-        if wait:
-            await asyncio.sleep(wait)
-        outcome = await _try_draft(package_id, bid_id, awarded_by=data.get("awarded_by"))
-        if outcome != "not_visible":
-            return
-    logger.warning(
-        "tender.awarded: package %s is not awarded to bid %s after waiting; no contract drafted",
-        package_id,
-        bid_id,
-    )
+    await _draft(package_id, bid_id, awarded_by=data.get("awarded_by"))
 
 
-async def _try_draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object) -> str:
-    """One attempt. Returns ``not_visible`` when the award is not committed yet."""
+async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object) -> None:
+    """Draft the contract, unless the rows no longer say this bid won.
+
+    The publisher emits after its commit, so the award is visible here. The
+    status check stays as a guard: an event replayed after the award was
+    withdrawn, or a payload naming the wrong bid, must not draft a contract.
+    """
     from app.modules.bid_management.models import BidPackage  # noqa: PLC0415
     from app.modules.boq.models import Position  # noqa: PLC0415
     from app.modules.contracts.models import Contract, ContractLine  # noqa: PLC0415
@@ -145,9 +133,13 @@ async def _try_draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: ob
         package = await session.get(TenderPackage, package_id)
         bid = await session.get(TenderBid, bid_id)
         if package is None or bid is None:
-            return "not_visible"
+            logger.warning("tender.awarded: package %s or bid %s not found; no contract drafted", package_id, bid_id)
+            return
         if package.status != "awarded" or bid.status != "accepted" or bid.package_id != package.id:
-            return "not_visible"
+            logger.warning(
+                "tender.awarded: package %s is not awarded to bid %s; no contract drafted", package_id, bid_id
+            )
+            return
 
         linked_bid_packages = (
             (await session.execute(select(BidPackage.id).where(BidPackage.tender_id == package_id))).scalars().all()
@@ -162,7 +154,7 @@ async def _try_draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: ob
                     existing.code,
                     package_id,
                 )
-                return "done"
+                return
 
         counterparty = await resolve_award_counterparty(
             session,
@@ -277,7 +269,6 @@ async def _try_draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: ob
             source_module="contracts",
         )
         logger.info("Auto-created contract draft %s from tender award (package=%s)", contract.code, package_id)
-        return "done"
 
 
 # Register at module import - module_loader imports this file when
