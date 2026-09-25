@@ -30,7 +30,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuthStore } from '@/stores/useAuthStore';
 
-import { UpdateNotification } from '../UpdateChecker';
+import { UpdateInlineNotice, UpdateNotification } from '../UpdateChecker';
 
 const DISMISS_KEY = 'oe_update_dismissed_version';
 const ENDPOINT = '/api/system/version-check';
@@ -342,6 +342,109 @@ describe('a dismissal is about one version', () => {
     renderNotice();
 
     expect(await screen.findByText(/v15\.2\.0/)).toBeTruthy();
+  });
+});
+
+describe('what a dismiss key covers', () => {
+  /** Render the sidebar card against `offered` with `key` already stored, and
+   *  answer whether it shows once the server's answer has arrived. */
+  async function shownWith(key: string, offered: string, current = '17.7.1'): Promise<boolean> {
+    localStorage.setItem(DISMISS_KEY, key);
+    const fetchMock = answering(versionCheck({ current_version: current, latest_version: offered }));
+    vi.stubGlobal('fetch', fetchMock);
+    const { container, client } = renderNotice();
+    // Wait for the answer itself, so "hidden" means dismissed and never
+    // "not rendered yet".
+    await waitFor(() =>
+      expect(client.getQueryData(['system-version-check'])).toMatchObject({ latest_version: offered }),
+    );
+    await new Promise((r) => setTimeout(r, 0));
+    return container.textContent !== '';
+  }
+
+  it('hides "v17.7.1 -> v18.0.0" for the key 18.0.0 (the reported case)', async () => {
+    expect(await shownWith('18.0.0', '18.0.0')).toBe(false);
+  });
+
+  it('hides it for the key v18.0.0, which is how the card prints the version', async () => {
+    expect(await shownWith('v18.0.0', '18.0.0')).toBe(false);
+  });
+
+  it('hides it for 18.0, the same release written short', async () => {
+    expect(await shownWith('18.0', '18.0.0')).toBe(false);
+  });
+
+  it('hides it for a key written with JSON.stringify', async () => {
+    expect(await shownWith('"18.0.0"', '18.0.0')).toBe(false);
+  });
+
+  it('hides it when the dismissed version is newer than the one offered', async () => {
+    // The server's cache can answer an older release than one this browser
+    // already dismissed; that is not a reason to speak up again.
+    expect(await shownWith('18.0.1', '18.0.0')).toBe(false);
+  });
+
+  it('shows 18.0.0 to a reader who dismissed 17.8.3', async () => {
+    expect(await shownWith('17.8.3', '18.0.0')).toBe(true);
+  });
+
+  it('shows 18.0.10 to a reader who dismissed 18.0.9, which a text compare hides', async () => {
+    expect(await shownWith('18.0.9', '18.0.10')).toBe(true);
+  });
+
+  it('shows the card when the key names no version at all', async () => {
+    expect(await shownWith('yes', '18.0.0')).toBe(true);
+  });
+});
+
+describe('the Settings and About line', () => {
+  function renderLine(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+    return render(
+      <QueryClientProvider client={client}>
+        <UpdateInlineNotice />
+      </QueryClientProvider>,
+    );
+  }
+
+  it('is one line with the release link and no dismiss button of its own', async () => {
+    vi.stubGlobal('fetch', answering(versionCheck()));
+
+    renderLine();
+
+    const link = await screen.findByRole('link', { name: 'Details' });
+    expect(link.getAttribute('href')).toContain('/releases/tag/v15.1.0');
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('stays away once the version on offer was dismissed', async () => {
+    localStorage.setItem(DISMISS_KEY, '15.1.0');
+    const fetchMock = answering(versionCheck());
+    vi.stubGlobal('fetch', fetchMock);
+
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = renderLine(client);
+
+    await waitFor(() => expect(client.getQueryData(['system-version-check'])).toBeTruthy());
+    await new Promise((r) => setTimeout(r, 0));
+    expect(container.textContent).toBe('');
+  });
+
+  it('goes when the sidebar card is dismissed on the same page', async () => {
+    vi.stubGlobal('fetch', answering(versionCheck()));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <QueryClientProvider client={client}>
+        <UpdateNotification />
+        <UpdateInlineNotice />
+      </QueryClientProvider>,
+    );
+
+    await screen.findByRole('link', { name: 'Details' });
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+    await waitFor(() => expect(screen.queryByRole('link', { name: 'Details' })).toBeNull());
+    expect(screen.queryByText(/15\.1\.0/)).toBeNull();
   });
 });
 

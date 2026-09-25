@@ -29,7 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { Newspaper, X, ExternalLink } from 'lucide-react';
 import clsx from 'clsx';
 
-import { APP_VERSION } from '@/shared/lib/version';
+import { APP_VERSION, isNewerFeatureRelease } from '@/shared/lib/version';
 import { openLink } from '@/shared/lib/desktop';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
@@ -55,12 +55,7 @@ const COOKIE_POLICY_URL = 'https://openconstructionerp.com/cookie-policy.html';
 function hasUnseenRelease(current: string): boolean {
   if (!current) return false;
   try {
-    const lastSeen = window.localStorage.getItem(LAST_SEEN_KEY);
-    if (!lastSeen) return true;
-    const c = current.split('.').map((x) => parseInt(x, 10) || 0);
-    const p = lastSeen.split('.').map((x) => parseInt(x, 10) || 0);
-    if ((c[0] ?? 0) !== (p[0] ?? 0)) return (c[0] ?? 0) > (p[0] ?? 0);
-    return (c[1] ?? 0) > (p[1] ?? 0);
+    return isNewerFeatureRelease(current, window.localStorage.getItem(LAST_SEEN_KEY));
   } catch {
     return false;
   }
