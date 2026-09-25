@@ -14106,6 +14106,7 @@ const resource = {
     "finance.summary_committed": "Lekötve",
     "finance.summary_invoiced": "Számlázva",
     "finance.summary_paid": "Kifizetve",
+    "finance.summary_over_commitment": "Lekötésen felül",
     "finance.summary_unpaid_payables": "Kifizetetlen szállítói számlák",
     "finance.po_link_label": "Megrendelés",
     "finance.po_link_hint": "Nem kötelező. A kapcsolt számla a saját megrendelése terhére kerül elszámolásra, így a megrendelés és a számla csak egyszer köti le a költségvetést.",

@@ -11253,6 +11253,7 @@ const resource = {
     "finance.summary_committed": "מחויב",
     "finance.summary_invoiced": "מחויב בחשבונית",
     "finance.summary_paid": "שולם",
+    "finance.summary_over_commitment": "מעבר למחויב",
     "finance.summary_unpaid_payables": "חשבוניות ספקים שלא שולמו",
     "finance.po_link_label": "הזמנת רכש",
     "finance.po_link_hint": "אופציונלי. חשבונית מקושרת נספרת על חשבון הזמנת הרכש שלה, כך שההזמנה והחשבונית מחייבות את התקציב פעם אחת בלבד.",

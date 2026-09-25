@@ -14684,6 +14684,7 @@ const resource = {
     "finance.summary_committed": "Taahhüt edilen",
     "finance.summary_invoiced": "Faturalanan",
     "finance.summary_paid": "Ödendi",
+    "finance.summary_over_commitment": "Taahhüdün üzerinde",
     "finance.summary_unpaid_payables": "Ödenmemiş tedarikçi faturaları",
     "finance.po_link_label": "Satın alma siparişi",
     "finance.po_link_hint": "İsteğe bağlı. Bağlantılı bir fatura kendi siparişine sayılır, böylece sipariş ve fatura bütçeyi yalnızca bir kez taahhüt eder.",

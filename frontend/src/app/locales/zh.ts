@@ -14446,6 +14446,7 @@ const resource = {
     "finance.summary_committed": "已承诺",
     "finance.summary_invoiced": "已开票",
     "finance.summary_paid": "已支付",
+    "finance.summary_over_commitment": "超出承诺",
     "finance.summary_unpaid_payables": "未付供应商发票",
     "finance.po_link_label": "采购订单",
     "finance.po_link_hint": "可选。关联的发票会计入其采购订单，因此该订单和发票只会对预算承诺一次。",

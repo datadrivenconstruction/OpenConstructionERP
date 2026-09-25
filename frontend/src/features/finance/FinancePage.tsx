@@ -511,6 +511,10 @@ interface FinanceDashboardData {
   /** Cash out of the door, VAT included: payments on supplier invoices less
    *  refunds, plus subcontract payment applications marked paid. */
   total_paid?: number | string;
+  /** Net of VAT: incurred beyond what was committed (received past an order
+   *  nobody invoiced, settled past a subcontract's value). Committed stops at
+   *  zero, so this is where that excess shows. */
+  total_over_commitment?: number | string;
   /** Base currency the totals are expressed in. For a project-scoped
    *  dashboard the server FX-converts every foreign record into this
    *  currency via Project.fx_rates; empty when no record carries one. */
@@ -553,6 +557,7 @@ export function FinanceSummaryCards({
   const totalCommitted = Number(dashboard?.total_committed ?? 0);
   const totalInvoiced = Number(dashboard?.total_invoiced ?? 0);
   const totalPaid = Number(dashboard?.total_paid ?? 0);
+  const totalOverCommitment = Number(dashboard?.total_over_commitment ?? 0);
   const totalUnpaid = Number(dashboard?.total_payable ?? 0);
   const totalReceivable = Number(dashboard?.total_receivable ?? 0);
   const totalOverdue = Number(dashboard?.total_overdue ?? 0);
@@ -729,6 +734,19 @@ export function FinanceSummaryCards({
       accent: remaining >= 0 ? 'bg-green-500' : 'bg-red-500',
     },
   ];
+  // Only when there is some: committed never goes below zero, so money spent
+  // beyond what was committed would otherwise vanish into that zero.
+  if (totalOverCommitment > 0) {
+    cards.splice(2, 0, {
+      key: 'over_commitment',
+      label: t('finance.summary_over_commitment', { defaultValue: 'Beyond commitment' }),
+      basis: basisNet,
+      value: totalOverCommitment,
+      icon: <AlertTriangle size={18} />,
+      color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+      accent: 'bg-red-500',
+    });
+  }
 
   const barColor =
     warningLevel === 'critical'

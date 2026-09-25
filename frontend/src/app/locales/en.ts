@@ -9430,6 +9430,7 @@ const resource = {
     "finance.summary_committed": "Committed",
     "finance.summary_invoiced": "Invoiced",
     "finance.summary_paid": "Paid",
+    "finance.summary_over_commitment": "Beyond commitment",
     "finance.summary_unpaid_payables": "Unpaid supplier invoices",
     "finance.po_link_label": "Purchase order",
     "finance.po_link_hint": "Optional. A linked invoice counts against its order, so the order and the invoice are committed once.",

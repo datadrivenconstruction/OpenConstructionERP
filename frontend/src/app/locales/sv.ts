@@ -13702,6 +13702,7 @@ const resource = {
     "finance.summary_committed": "Bekräftad",
     "finance.summary_invoiced": "Fakturerat",
     "finance.summary_paid": "Betald",
+    "finance.summary_over_commitment": "Över bekräftat",
     "finance.summary_unpaid_payables": "Obetalda leverantörsfakturor",
     "finance.po_link_label": "Inköpsorder",
     "finance.po_link_hint": "Valfritt. En kopplad faktura räknas mot sin order, så ordern och fakturan binder budgeten bara en gång.",

@@ -11224,6 +11224,7 @@ const resource = {
     "finance.summary_committed": "Міндеттелген",
     "finance.summary_invoiced": "Есептелген",
     "finance.summary_paid": "Төленген",
+    "finance.summary_over_commitment": "Міндеттемеден тыс",
     "finance.summary_unpaid_payables": "Төленбеген жеткізуші шот-фактуралары",
     "finance.po_link_label": "Сатып алу тапсырысы",
     "finance.po_link_hint": "Міндетті емес. Байланысқан шот-фактура өз тапсырысына есептеледі, сондықтан тапсырыс пен шот-фактура бюджетті бір рет қана міндеттейді.",

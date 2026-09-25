@@ -15062,6 +15062,7 @@ const resource = {
     "finance.summary_committed": "Обязательства",
     "finance.summary_invoiced": "Выставлено",
     "finance.summary_paid": "Оплачено",
+    "finance.summary_over_commitment": "Сверх обязательств",
     "finance.summary_unpaid_payables": "Неоплаченные счета поставщиков",
     "finance.po_link_label": "Заказ на поставку",
     "finance.po_link_hint": "Необязательно. Связанный счёт учитывается в своём заказе, поэтому заказ и счёт учитываются как одно обязательство.",

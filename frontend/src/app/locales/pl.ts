@@ -14833,6 +14833,7 @@ const resource = {
     "finance.summary_committed": "Zobowiązane",
     "finance.summary_invoiced": "Zafakturowane",
     "finance.summary_paid": "Zapłacone",
+    "finance.summary_over_commitment": "Ponad zobowiązanie",
     "finance.summary_unpaid_payables": "Niezapłacone faktury dostawców",
     "finance.po_link_label": "Zamówienie zakupu",
     "finance.po_link_hint": "Opcjonalnie. Powiązana faktura jest rozliczana na poczet swojego zamówienia, więc zamówienie i faktura zobowiązują budżet tylko raz.",

@@ -14428,6 +14428,7 @@ const resource = {
     "finance.summary_committed": "ผูกพันแล้ว",
     "finance.summary_invoiced": "ออกใบแจ้งหนี้แล้ว",
     "finance.summary_paid": "ชำระแล้ว",
+    "finance.summary_over_commitment": "เกินผูกพัน",
     "finance.summary_unpaid_payables": "ใบแจ้งหนี้ผู้จัดจำหน่ายที่ยังไม่ชำระ",
     "finance.po_link_label": "ใบสั่งซื้อ",
     "finance.po_link_hint": "ไม่บังคับ ใบแจ้งหนี้ที่เชื่อมโยงจะถูกนับเข้ากับใบสั่งซื้อของมัน ดังนั้นใบสั่งซื้อและใบแจ้งหนี้จะผูกพันงบประมาณเพียงครั้งเดียว",

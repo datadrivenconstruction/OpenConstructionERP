@@ -11642,6 +11642,7 @@ const resource = {
     "finance.summary_committed": "Үүрэг авсан",
     "finance.summary_invoiced": "Нэхэмжилсэн",
     "finance.summary_paid": "Төлөгдсөн",
+    "finance.summary_over_commitment": "Үүргээс давсан",
     "finance.summary_unpaid_payables": "Төлөгдөөгүй нийлүүлэгчийн нэхэмжлэх",
     "finance.po_link_label": "Худалдан авалтын захиалга",
     "finance.po_link_hint": "Заавал биш. Холбогдсон нэхэмжлэх өөрийн захиалгад тооцогддог тул захиалга, нэхэмжлэх хоёр төсвийг зөвхөн нэг удаа үүрэг болгодог.",

@@ -14386,6 +14386,7 @@ const resource = {
     "finance.summary_committed": "Terikat",
     "finance.summary_invoiced": "Difakturkan",
     "finance.summary_paid": "Dibayar",
+    "finance.summary_over_commitment": "Di atas terikat",
     "finance.summary_unpaid_payables": "Faktur pemasok yang belum dibayar",
     "finance.po_link_label": "Purchase order",
     "finance.po_link_hint": "Opsional. Faktur yang tertaut diperhitungkan terhadap pesanannya, sehingga pesanan dan faktur hanya mengikat anggaran satu kali.",

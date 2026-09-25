@@ -11224,6 +11224,7 @@ const resource = {
     "finance.summary_committed": "طے شدہ",
     "finance.summary_invoiced": "انوائس شدہ",
     "finance.summary_paid": "ادا شدہ",
+    "finance.summary_over_commitment": "طے شدہ سے زائد",
     "finance.summary_unpaid_payables": "غیر ادا شدہ سپلائر انوائسز",
     "finance.po_link_label": "خریداری آرڈر",
     "finance.po_link_hint": "اختیاری۔ منسلک انوائس اپنے آرڈر کے خلاف شمار ہوتا ہے، اس لیے آرڈر اور انوائس بجٹ کو صرف ایک بار طے کرتے ہیں۔",

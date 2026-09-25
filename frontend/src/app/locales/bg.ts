@@ -14549,6 +14549,7 @@ const resource = {
     "finance.summary_committed": "Ангажирано",
     "finance.summary_invoiced": "Фактурирано",
     "finance.summary_paid": "Платено",
+    "finance.summary_over_commitment": "Над ангажимента",
     "finance.summary_unpaid_payables": "Неплатени фактури от доставчици",
     "finance.po_link_label": "Поръчка за покупка",
     "finance.po_link_hint": "Незадължително. Свързаната фактура се отчита към своята поръчка, така че поръчката и фактурата ангажират бюджета само веднъж.",

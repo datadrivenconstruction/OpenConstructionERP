@@ -14446,6 +14446,7 @@ const resource = {
     "finance.summary_committed": "약정됨",
     "finance.summary_invoiced": "청구됨",
     "finance.summary_paid": "지급됨",
+    "finance.summary_over_commitment": "약정 초과",
     "finance.summary_unpaid_payables": "미지급 공급업체 청구서",
     "finance.po_link_label": "구매 발주서",
     "finance.po_link_hint": "선택 사항입니다. 연결된 청구서는 해당 발주서에 반영되므로, 발주서와 청구서는 예산을 한 번만 약정합니다.",

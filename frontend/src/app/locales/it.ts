@@ -14010,6 +14010,7 @@ const resource = {
     "finance.summary_committed": "Impegnato",
     "finance.summary_invoiced": "Fatturato",
     "finance.summary_paid": "Pagato",
+    "finance.summary_over_commitment": "Oltre l'impegnato",
     "finance.summary_unpaid_payables": "Fatture fornitore non pagate",
     "finance.po_link_label": "Ordine di acquisto",
     "finance.po_link_hint": "Facoltativo. Una fattura collegata viene conteggiata sul suo ordine, quindi l'ordine e la fattura vengono impegnati una sola volta.",

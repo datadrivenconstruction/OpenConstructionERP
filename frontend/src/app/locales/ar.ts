@@ -12149,6 +12149,7 @@ const resource = {
     "finance.summary_committed": "ملتزم به",
     "finance.summary_invoiced": "مفوتَر",
     "finance.summary_paid": "مدفوع",
+    "finance.summary_over_commitment": "تجاوز الالتزام",
     "finance.summary_unpaid_payables": "فواتير موردين غير مدفوعة",
     "finance.po_link_label": "أمر الشراء",
     "finance.po_link_hint": "اختياري. تُحسب الفاتورة المرتبطة على أمر الشراء الخاص بها، بحيث يُلزم أمر الشراء والفاتورة الميزانية مرة واحدة فقط.",
