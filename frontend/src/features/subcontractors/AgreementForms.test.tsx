@@ -25,6 +25,23 @@ vi.mock('./api', () => ({
   updateAgreement: vi.fn(),
 }));
 
+vi.mock('@/features/contracts/api', () => ({
+  listContracts: vi.fn().mockResolvedValue({
+    items: [
+      {
+        id: 'ct-9',
+        code: 'SC-009',
+        title: 'Drywall subcontract',
+        total_value: '120000.00',
+        currency: 'EUR',
+        retention_percent: '5.00',
+        counterparty_type: 'subcontractor',
+      },
+    ],
+    total: 1,
+  }),
+}));
+
 vi.mock('@/features/projects/api', () => ({
   projectsApi: {
     list: vi.fn().mockResolvedValue([{ id: 'prj-1', name: 'Zagreb, block B', currency: 'EUR' }]),
@@ -93,7 +110,25 @@ describe('AgreementFormModal', () => {
         retention_percent: '5',
       }),
     );
+    expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.contract_id).toBeUndefined();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('links the same subcontract from contracts and takes its figures', async () => {
+    vi.mocked(api.createAgreement).mockResolvedValue(agreement);
+    wrap(<AgreementFormModal subcontractorId="sub-1" onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('SC-009 Drywall subcontract')).toBeTruthy());
+    fireEvent.change(screen.getByTestId('agreement-contract'), { target: { value: 'ct-9' } });
+    expect((screen.getByTestId('agreement-title') as HTMLInputElement).value).toBe('Drywall subcontract');
+    expect((screen.getByTestId('agreement-value') as HTMLInputElement).value).toBe('120000.00');
+    fireEvent.click(screen.getByText('Create'));
+
+    await waitFor(() =>
+      expect(api.createAgreement).toHaveBeenCalledWith(
+        expect.objectContaining({ contract_id: 'ct-9', total_value: '120000', retention_percent: '5' }),
+      ),
+    );
   });
 
   it('selects the prefilled retention on focus so typing replaces it', () => {

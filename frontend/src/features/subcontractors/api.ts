@@ -123,6 +123,9 @@ export interface Agreement {
   // The GC's contract with the owner this subcontract sits under. Null means
   // "the project's only active client contract", resolved server-side.
   prime_contract_id?: string | null;
+  // The same subcontract written in the contracts module, when there is one.
+  // The agreement then carries the budget commitment and the contract does not.
+  contract_id?: string | null;
   notes?: string | null;
   created_by?: string | null;
   metadata: Record<string, unknown>;
@@ -311,6 +314,7 @@ export interface CreateAgreementPayload {
   retention_percent: string;
   start_date?: string;
   end_date?: string;
+  contract_id?: string;
 }
 
 /** Draw up an agreement. It is born a draft; activating it signs it. */
