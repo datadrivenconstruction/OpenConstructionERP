@@ -1,0 +1,285 @@
+{
+  "_note": "Editorial overlay for the Videos catalogue, read by scripts/build_video_catalog.py. Stage, roles, market, cases and result for every video that the source registries do not classify themselves, plus overrides for the ones they do. These links are editorial hypotheses, not a guarantee: 'provenance' says who proposed them. Stage and role ids are the ERP LifecycleStage and ProfessionalRole ids; market is ISO 3166-1 alpha-2 of the market whose rules the video teaches, or null when the topic applies anywhere. An empty roles list means the video is for every role. Case ids must exist in frontend/src/features/cases/data; the script reports any that do not.",
+  "series": {
+    "getting-started": {
+      "title": "Getting started",
+      "titleKey": "videos.series.getting_started",
+      "language": "en",
+      "market": null,
+      "channel": "academy",
+      "order": 0
+    },
+    "landshut-de": {
+      "title": "OpenConstructionERP auf Deutsch: Lernprojekt Landshut",
+      "language": "de",
+      "market": "DE",
+      "channel": "academy",
+      "order": 10
+    },
+    "playbook-getting-started": {
+      "title": "Builder's Playbook: Getting Started",
+      "language": "en",
+      "market": null,
+      "channel": "academy",
+      "order": 20
+    },
+    "playbook-canada-ontario": {
+      "title": "Builder's Playbook Canada: Ontario Construction",
+      "language": "en",
+      "market": "CA",
+      "channel": "academy",
+      "order": 30
+    },
+    "playbook-quebec": {
+      "title": "Builder's Playbook Québec : la construction en français",
+      "language": "fr",
+      "market": "CA",
+      "channel": "academy",
+      "order": 40
+    },
+    "playbook-chantier-fr": {
+      "title": "Builder's Playbook : gestion de chantier en français",
+      "language": "fr",
+      "market": null,
+      "channel": "academy",
+      "order": 50
+    },
+    "ddc-walkthroughs": {
+      "title": "Product walkthroughs and talks",
+      "titleKey": "videos.series.walkthroughs",
+      "language": "en",
+      "market": null,
+      "channel": "ddc",
+      "order": 90
+    }
+  },
+  "gallery_series": {
+    "Builder's Playbook: Getting Started": "playbook-getting-started",
+    "Builder's Playbook Canada: Ontario Construction": "playbook-canada-ontario",
+    "Builder's Playbook Québec : la construction en français": "playbook-quebec",
+    "Builder's Playbook : gestion de chantier en français": "playbook-chantier-fr"
+  },
+  "videos": {
+    "Setup_EN": {
+      "series": "getting-started",
+      "seriesOrder": 1,
+      "startHere": true,
+      "stage": "define",
+      "roles": [],
+      "market": null,
+      "cases": ["set-up-a-new-project", "project-end-to-end"],
+      "result": null,
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "EP02_L1": {
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": null,
+      "cases": ["estimate-from-cost-database", "build-the-resource-library-and-rates", "build-an-assembly-recipe-rate", "localize-an-estimate-to-a-region"],
+      "result": "rate",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "EP02_L2": {
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "US",
+      "cases": ["estimate-from-cost-database", "estimate-with-your-own-crew-rates", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "EP02_L3": {
+      "stage": "estimate",
+      "roles": ["estimator", "commercial-manager"],
+      "market": null,
+      "cases": ["price-the-preliminaries-and-general-conditions", "cost-risk-and-contingency", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA02": {
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "CA",
+      "cases": ["price-one-bill-for-hst-pst-and-qst", "walk-the-estimate-from-class-d-to-class-a", "take-off-in-metric-and-buy-in-imperial"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA03": {
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer", "commercial-manager"],
+      "market": "CA",
+      "cases": ["level-subcontract-bids-and-flow-the-terms-down", "compare-bids-and-award", "level-bids-to-a-common-scope"],
+      "result": "award",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA04": {
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant", "contract-administrator", "commercial-manager"],
+      "market": "CA",
+      "cases": ["bill-the-monthly-draw-with-holdback-and-a-declaration", "prepare-an-interim-payment-application", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA05": {
+      "stage": "build",
+      "roles": ["accountant", "finance-manager", "commercial-manager", "contract-administrator"],
+      "market": "CA",
+      "cases": ["run-the-ontario-prompt-payment-clock-down-the-chain"],
+      "result": "invoice",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA06": {
+      "stage": "build",
+      "roles": ["project-manager", "contract-administrator", "quantity-surveyor", "commercial-manager"],
+      "market": "CA",
+      "cases": ["record-a-change-under-a-ccdc-family-contract", "assess-and-price-a-variation", "change-to-paid-variation"],
+      "result": "change",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "CA07": {
+      "stage": "handover",
+      "roles": ["project-manager", "contract-administrator", "site-manager", "planner"],
+      "market": "CA",
+      "cases": ["close-out-from-substantial-performance-to-the-final-account", "clear-the-snag-list-before-handover", "schedule-and-track"],
+      "result": "handover",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "QC01": {
+      "stage": "define",
+      "roles": ["project-manager", "estimator"],
+      "market": "CA",
+      "cases": ["set-up-a-new-project", "price-one-bill-for-hst-pst-and-qst"],
+      "result": null,
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "QC02": {
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "CA",
+      "cases": ["check-the-rbq-subclass-and-price-gst-and-qst", "price-one-bill-for-hst-pst-and-qst", "walk-the-estimate-from-class-d-to-class-a"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "QC03": {
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer", "commercial-manager"],
+      "market": "CA",
+      "cases": ["level-subcontract-bids-and-flow-the-terms-down", "compare-bids-and-award"],
+      "result": "award",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "QC04": {
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant", "contract-administrator"],
+      "market": "CA",
+      "cases": ["bill-the-monthly-draw-with-holdback-and-a-declaration", "prepare-an-interim-payment-application", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "QC05": {
+      "stage": "handover",
+      "roles": ["project-manager", "site-manager", "contract-administrator"],
+      "market": "CA",
+      "cases": ["clear-the-snag-list-before-handover", "run-a-handover-acceptance-inspection", "close-out-from-substantial-performance-to-the-final-account"],
+      "result": "handover",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "Budget": {
+      "stage": "estimate",
+      "roles": ["estimator", "project-manager", "commercial-manager"],
+      "market": null,
+      "cases": ["control-cost-against-budget", "estimate-from-cost-database", "write-the-basis-of-estimate"],
+      "result": "cost",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "Achats_Stock": {
+      "stage": "procure",
+      "roles": ["procurement-buyer", "site-manager"],
+      "market": null,
+      "cases": ["procure-from-boq", "receive-and-reconcile-material-deliveries"],
+      "result": "order",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "Terrain": {
+      "stage": "build",
+      "roles": ["site-manager", "foreman"],
+      "market": null,
+      "cases": ["turn-field-time-into-payroll-and-labour-cost", "capture-daywork-and-time-and-materials"],
+      "result": "site",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "Paiement": {
+      "stage": "build",
+      "roles": ["accountant", "commercial-manager", "quantity-surveyor"],
+      "market": null,
+      "cases": ["payment-application-and-reconciliation", "prepare-an-interim-payment-application", "issue-an-electronic-invoice"],
+      "result": "invoice",
+      "provenance": "videos-agent-2026-09-25"
+    },
+    "V01": { "result": "cost" },
+    "V02": { "result": null },
+    "V03": { "result": "qty" },
+    "BIM01": { "result": "qty" },
+    "LV01": { "result": "bill" },
+    "KALK01": { "result": "rate" },
+    "GAEB01": { "result": "gaeb" },
+    "VERGABE01": { "result": "award" },
+    "TERMIN01": { "result": "programme" },
+    "EINKAUF01": { "result": "order" },
+    "KOSTENDB01": { "result": "rate" },
+    "V04": { "result": "cost" }
+  },
+  "extras": [
+    {
+      "id": "ddc-walkthrough-v15",
+      "youtubeId": "vENnh7bBVVM",
+      "series": "ddc-walkthroughs",
+      "seriesOrder": 1,
+      "language": "en",
+      "title": "From a drawing to a priced tender",
+      "description": "The whole chain in one take: a drawing becomes a takeoff, the takeoff becomes a bill, the bill carries its markups and the job is inspected on site. One data model underneath all of it.",
+      "recordedOn": "15.0",
+      "cover": "extra_covers/walkthrough-v15.webp",
+      "stage": "define",
+      "roles": [],
+      "market": null,
+      "cases": ["project-end-to-end"],
+      "result": null,
+      "provenance": "videos-agent-2026-09-25, source marketing-site/news/v15-0-0.html"
+    },
+    {
+      "id": "ddc-walkthrough-full",
+      "youtubeId": "X06cIaroAeI",
+      "series": "ddc-walkthroughs",
+      "seriesOrder": 2,
+      "language": "en",
+      "title": "Full product walkthrough",
+      "description": "Onboarding, a new project, the bill of quantities, BIM linking, DWG and PDF takeoff, the AI estimate and the portfolio dashboard, in the order you would use them.",
+      "duration": 720,
+      "recordedOn": "2.0",
+      "cover": "extra_covers/walkthrough-12min.webp",
+      "stage": "define",
+      "roles": [],
+      "market": null,
+      "cases": ["project-end-to-end", "estimate-from-cost-database"],
+      "result": null,
+      "provenance": "videos-agent-2026-09-25, source README.md and docs/docs.html"
+    },
+    {
+      "id": "ddc-eth-talk",
+      "youtubeId": "R_PQQHXY-rQ",
+      "series": "ddc-walkthroughs",
+      "seriesOrder": 3,
+      "language": "en",
+      "title": "The uberization of construction (ETH Zürich)",
+      "description": "A talk at ETH Zürich on how drawings and models turn into quantities, why cost data stays locked up, and what open formats and AI agents change.",
+      "duration": 862,
+      "cover": "extra_covers/eth-zurich-talk.webp",
+      "stage": "define",
+      "roles": [],
+      "market": null,
+      "cases": [],
+      "result": null,
+      "provenance": "videos-agent-2026-09-25, source marketing-site/uberization (PT14M22S)"
+    }
+  ]
+}
