@@ -43443,6 +43443,7 @@ const resource = {
     "videos.path_title": "Polkusi roolissa {{role}}",
     "videos.player_note": "Soitin latautuu vasta, kun painat play-painiketta, YouTuben yksityisyyttä suojaavalta palvelimelta.",
     "videos.see_all_for_step": "Kaikki {{total}} Videot-sivulla",
+    "videos.example": "Esimerkki: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

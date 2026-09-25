@@ -43418,6 +43418,7 @@ const resource = {
     "videos.path_title": "بطور {{role}} آپ کا راستہ",
     "videos.player_note": "پلیئر تب ہی لوڈ ہوتا ہے جب آپ پلے دبائیں، YouTube کے پرائیویسی دوست میزبان سے۔",
     "videos.see_all_for_step": "ویڈیوز کے صفحے پر تمام {{total}}",
+    "videos.example": "مثال: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

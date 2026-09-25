@@ -43327,6 +43327,7 @@ const resource = {
     "videos.path_title": "เส้นทางของคุณในฐานะ {{role}}",
     "videos.player_note": "ตัวเล่นวิดีโอจะโหลดก็ต่อเมื่อคุณกดเล่นเท่านั้น จากโฮสต์ YouTube แบบที่ปกป้องความเป็นส่วนตัว",
     "videos.see_all_for_step": "ทั้งหมด {{total}} รายการในหน้าวิดีโอ",
+    "videos.example": "ตัวอย่าง: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

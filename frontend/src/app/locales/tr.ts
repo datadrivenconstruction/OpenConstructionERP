@@ -44283,6 +44283,7 @@ const resource = {
     "videos.path_title": "{{role}} olarak öğrenme yolunuz",
     "videos.player_note": "Oynatıcı yalnızca oynat tuşuna bastığınızda, YouTube'un gizliliği koruyan sunucusundan yüklenir.",
     "videos.see_all_for_step": "Videolar sayfasında {{total}} videonun tümü",
+    "videos.example": "Örnek: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -40328,6 +40328,7 @@ const resource = {
     "videos.path_title": "Sua trilha como {{role}}",
     "videos.player_note": "O player só carrega quando você aperta play, a partir do serviço do YouTube que protege a privacidade.",
     "videos.see_all_for_step": "Todos os {{total}} na página Vídeos",
+    "videos.example": "Exemplo: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

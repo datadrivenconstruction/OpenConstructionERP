@@ -43418,6 +43418,7 @@ const resource = {
     "videos.path_title": "Ang iyong landas bilang {{role}}",
     "videos.player_note": "Mago-load lang ang player kapag pinindot mo ang play, mula sa privacy-enhanced na YouTube host.",
     "videos.see_all_for_step": "Lahat ng {{total}} sa page ng Mga Video",
+    "videos.example": "Halimbawa: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

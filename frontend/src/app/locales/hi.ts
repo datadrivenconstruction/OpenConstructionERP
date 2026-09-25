@@ -43442,6 +43442,7 @@ const resource = {
     "videos.path_title": "{{role}} के रूप में आपका पथ",
     "videos.player_note": "प्लेयर तभी लोड होता है जब आप प्ले दबाते हैं, YouTube के प्राइवेसी-एन्हांस्ड होस्ट से।",
     "videos.see_all_for_step": "वीडियो पेज पर सभी {{total}}",
+    "videos.example": "उदाहरण: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

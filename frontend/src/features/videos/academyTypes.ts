@@ -67,6 +67,10 @@ export interface AcademyVideo {
   title: string;
   /** English working title, where the source has one (the German series). */
   titleEn?: string;
+  /** Where the example project the video works through sits, when the source
+   *  names it. An example, not the market whose rules the video teaches: a
+   *  universal video may still be shot on a project in Denver. */
+  example?: { place?: string; country: string };
   description: string;
   /** What the video produces, in English, where the source states it. */
   produces?: string;

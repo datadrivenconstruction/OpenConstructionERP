@@ -38149,6 +38149,7 @@ const resource = {
     "videos.path_title": "Your path as {{role}}",
     "videos.player_note": "The player loads only when you press play, from the privacy-enhanced YouTube host.",
     "videos.see_all_for_step": "All {{total}} on the Videos page",
+    "videos.example": "Example: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

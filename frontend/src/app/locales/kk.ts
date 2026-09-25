@@ -43419,6 +43419,7 @@ const resource = {
     "videos.path_title": "{{role}} ретіндегі сіздің жолыңыз",
     "videos.player_note": "Ойнатқыш тек ойнату түймесін басқанда, YouTube-тың құпиялылығы күшейтілген серверінен жүктеледі.",
     "videos.see_all_for_step": "Бейнелер бетіндегі барлық {{total}}",
+    "videos.example": "Мысалы: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

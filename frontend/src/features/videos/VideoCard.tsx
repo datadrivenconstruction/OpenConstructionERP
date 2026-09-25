@@ -8,7 +8,7 @@
 
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { CheckCircle2, Clock, Hourglass, ListOrdered, Play } from 'lucide-react';
+import { CheckCircle2, Clock, Hourglass, ListOrdered, MapPin, Play } from 'lucide-react';
 import type { AcademyVideo, VideoChapter } from './academyTypes';
 import { VideoCover } from './VideoCover';
 import { formatClock } from './academy';
@@ -31,6 +31,7 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, classNa
   const watched = useVideosStore((s) => Boolean(s.watched[video.id]));
   const soon = video.status !== 'published';
   const hits = chapterHits?.slice(0, 4) ?? [];
+  const example = labels.example(video);
 
   return (
     <article
@@ -103,6 +104,12 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, classNa
             {video.title}
           </button>
         </h3>
+        {example && (
+          <p data-testid="video-example" className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+            <MapPin size={10} className="shrink-0" aria-hidden />
+            <span className="truncate">{example}</span>
+          </p>
+        )}
         {!compact && video.description && (
           <p lang={video.language} className="line-clamp-2 text-xs leading-relaxed text-content-secondary">
             {video.description}

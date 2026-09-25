@@ -43945,6 +43945,7 @@ const resource = {
     "videos.path_title": "{{role}} 역할의 학습 경로",
     "videos.player_note": "재생 버튼을 누를 때만 플레이어가 로드되며, YouTube의 개인정보 보호 강화 호스트에서 제공됩니다.",
     "videos.see_all_for_step": "동영상 페이지에서 전체 {{total}}개 보기",
+    "videos.example": "예시: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

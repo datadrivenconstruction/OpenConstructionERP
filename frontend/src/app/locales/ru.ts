@@ -46285,6 +46285,7 @@ const resource = {
     "videos.path_title": "Ваш путь обучения: {{role}}",
     "videos.player_note": "Плеер загружается только при нажатии кнопки воспроизведения, с хостинга YouTube, защищающего конфиденциальность.",
     "videos.see_all_for_step": "Все {{total}} на странице «Видео»",
+    "videos.example": "Пример: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43418,6 +43418,7 @@ const resource = {
     "videos.path_title": "Η διαδρομή σας ως {{role}}",
     "videos.player_note": "Ο player φορτώνει μόνο όταν πατήσετε αναπαραγωγή, από τον διακομιστή του YouTube με ενισχυμένη προστασία απορρήτου.",
     "videos.see_all_for_step": "Όλα τα {{total}} στη σελίδα Βίντεο",
+    "videos.example": "Παράδειγμα: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

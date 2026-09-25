@@ -46028,6 +46028,7 @@ const resource = {
     "videos.path_title": "Az Ön útja mint {{role}}",
     "videos.player_note": "A lejátszó csak akkor töltődik be, amikor lejátszásra kattint, a YouTube fokozott adatvédelmű szerveréről.",
     "videos.see_all_for_step": "Mind a(z) {{total}} a Videók oldalon",
+    "videos.example": "Példa: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

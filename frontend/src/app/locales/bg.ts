@@ -43443,6 +43443,7 @@ const resource = {
     "videos.path_title": "Вашият път като {{role}}",
     "videos.player_note": "Плейърът се зарежда само когато натиснете play, от версията на YouTube с подобрена поверителност.",
     "videos.see_all_for_step": "Всички {{total}} на страницата Видеа",
+    "videos.example": "Пример: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

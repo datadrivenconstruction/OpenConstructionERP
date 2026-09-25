@@ -45190,6 +45190,7 @@ const resource = {
     "videos.path_title": "Ваш шлях навчання: {{role}}",
     "videos.player_note": "Плеєр завантажується лише після натискання кнопки відтворення, з хостингу YouTube, що захищає конфіденційність.",
     "videos.see_all_for_step": "Усі {{total}} на сторінці «Відео»",
+    "videos.example": "Приклад: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

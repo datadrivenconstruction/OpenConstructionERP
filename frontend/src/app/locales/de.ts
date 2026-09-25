@@ -46081,6 +46081,7 @@ const resource = {
     "videos.path_title": "Ihr Weg als {{role}}",
     "videos.player_note": "Der Player lädt erst, wenn Sie auf Play drücken, vom datenschutzfreundlichen YouTube-Host.",
     "videos.see_all_for_step": "Alle {{total}} auf der Videos-Seite",
+    "videos.example": "Beispiel: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

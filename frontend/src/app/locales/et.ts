@@ -43381,6 +43381,7 @@ const resource = {
     "videos.path_title": "Teie tee rollis {{role}}",
     "videos.player_note": "Pleier laadib alles siis, kui vajutate esitusnuppu, privaatsust arvestavast YouTube'i hostist.",
     "videos.see_all_for_step": "Kõik {{total}} lehel Videod",
+    "videos.example": "Näide: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

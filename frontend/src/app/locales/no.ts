@@ -43439,6 +43439,7 @@ const resource = {
     "videos.path_title": "Din læringssti som {{role}}",
     "videos.player_note": "Spilleren lastes først når du trykker play, fra YouTubes personvernvennlige vert.",
     "videos.see_all_for_step": "Alle {{total}} på Videoer-siden",
+    "videos.example": "Eksempel: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

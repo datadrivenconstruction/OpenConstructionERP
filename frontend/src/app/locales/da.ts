@@ -43439,6 +43439,7 @@ const resource = {
     "videos.path_title": "Din vej som {{role}}",
     "videos.player_note": "Afspilleren indlæses kun, når du trykker på afspil, fra YouTubes privatlivsforbedrede vært.",
     "videos.see_all_for_step": "Alle {{total}} på siden Videoer",
+    "videos.example": "Eksempel: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

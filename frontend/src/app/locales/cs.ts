@@ -44361,6 +44361,7 @@ const resource = {
     "videos.path_title": "Vaše cesta jako {{role}}",
     "videos.player_note": "Přehrávač se načte teprve po stisknutí tlačítka přehrát, z hostitele YouTube s vylepšenou ochranou soukromí.",
     "videos.see_all_for_step": "Všech {{total}} na stránce Videa",
+    "videos.example": "Příklad: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

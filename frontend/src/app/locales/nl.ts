@@ -44320,6 +44320,7 @@ const resource = {
     "videos.path_title": "Uw pad als {{role}}",
     "videos.player_note": "De speler laadt pas nadat u op afspelen drukt, vanaf de privacyvriendelijke YouTube-host.",
     "videos.see_all_for_step": "Alle {{total}} op de pagina Video's",
+    "videos.example": "Voorbeeld: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

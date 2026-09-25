@@ -43418,6 +43418,7 @@ const resource = {
     "videos.path_title": "مسیر شما به عنوان {{role}}",
     "videos.player_note": "پخش‌کننده فقط وقتی روی پخش بزنید بارگذاری می‌شود، از میزبان YouTube با حریم خصوصی تقویت‌شده.",
     "videos.see_all_for_step": "همه {{total}} در صفحه ویدیوها",
+    "videos.example": "مثال: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

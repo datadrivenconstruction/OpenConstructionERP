@@ -273,6 +273,33 @@ def clean_title(title: str) -> str:
     return cleaned
 
 
+# The shelf prefix also names where the example project sits: a flag and a
+# place ("🇺🇸 EN • DENVER • 02/03"). That is the example the video works
+# through, not the market whose rules it teaches, so it is kept apart from
+# ``market`` and shown as "Example: Denver, United States".
+FLAG_COUNTRY = {"🇺🇸": "US", "🇨🇦": "CA", "⚜️": "CA", "🇩🇪": "DE", "🇫🇷": "FR", "🇬🇧": "GB"}
+SHELF = re.compile(
+    r"^\s*(?P<flag>\S+)\s+[A-Z]{2}\s*•\s*(?P<place>[^•|]+?)\s*•\s*\d{2}/\d{2}\s*\|"
+)
+COUNTRY_WORDS = {"USA", "US", "CANADA", "GERMANY", "DEUTSCHLAND", "FRANCE", "UK"}
+
+
+def example_from_title(title: str) -> dict | None:
+    """Where the example project sits, as the channel title names it."""
+    m = SHELF.match(title)
+    if not m:
+        return None
+    country = FLAG_COUNTRY.get(m.group("flag"))
+    if not country:
+        fail(
+            f"title {title!r}: unknown flag {m.group('flag')!r}; add it to FLAG_COUNTRY"
+        )
+    place = m.group("place").strip()
+    if place.upper() in COUNTRY_WORDS:
+        return {"country": country}
+    return {"place": place.title(), "country": country}
+
+
 def first_paragraph(text: str) -> str:
     """The first paragraph of a description, joined onto one line."""
     return " ".join(text.strip().split("\n\n")[0].split())
@@ -417,6 +444,7 @@ def build(args: argparse.Namespace) -> None:
                 "youtubeId": doc_yt,
                 "language": v["language"],
                 "title": clean_title(v["title"]),
+                "example": example_from_title(v["title"]),
                 "description": v["short_description"],
                 "chapters": [
                     {"t": int(c["seconds"]), "title": c["title"]} for c in v["chapters"]
@@ -586,6 +614,7 @@ def build(args: argparse.Namespace) -> None:
         "result",
         "title",
         "titleEn",
+        "example",
         "description",
         "produces",
         "recordedOn",

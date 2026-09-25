@@ -40644,6 +40644,7 @@ const resource = {
     "videos.path_title": "Su camino como {{role}}",
     "videos.player_note": "El reproductor se carga solo cuando presiona reproducir, desde el servidor de YouTube con privacidad mejorada.",
     "videos.see_all_for_step": "Los {{total}} en la página Videos",
+    "videos.example": "Ejemplo: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

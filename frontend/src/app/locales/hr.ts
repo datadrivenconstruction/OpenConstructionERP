@@ -43606,6 +43606,7 @@ const resource = {
     "videos.path_title": "Vaš put kao {{role}}",
     "videos.player_note": "Player se učitava tek kad pritisnete play, s YouTubeova poslužitelja s pojačanom zaštitom privatnosti.",
     "videos.see_all_for_step": "Svih {{total}} na stranici Videozapisi",
+    "videos.example": "Primjer: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

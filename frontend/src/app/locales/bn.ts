@@ -43730,6 +43730,7 @@ const resource = {
     "videos.path_title": "{{role}} হিসেবে আপনার পথ",
     "videos.player_note": "প্লে চাপলেই কেবল প্লেয়ার লোড হয়, প্রাইভেসি-বর্ধিত YouTube হোস্ট থেকে।",
     "videos.see_all_for_step": "ভিডিও পাতায় সবগুলো {{total}}টি",
+    "videos.example": "উদাহরণ: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

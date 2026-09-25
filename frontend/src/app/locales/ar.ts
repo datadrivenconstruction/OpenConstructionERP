@@ -45631,6 +45631,7 @@ const resource = {
     "videos.path_title": "مسارك كـ{{role}}",
     "videos.player_note": "يُحمَّل المشغّل فقط عند الضغط على تشغيل، من مضيف YouTube المعزز للخصوصية.",
     "videos.see_all_for_step": "كل {{total}} في صفحة الفيديوهات",
+    "videos.example": "مثال: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

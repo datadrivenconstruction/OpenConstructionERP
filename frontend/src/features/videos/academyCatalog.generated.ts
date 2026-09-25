@@ -1569,6 +1569,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "rate",
       "title": "Construction Cost Database: Check a Unit Rate",
+      "example": {
+        "country": "US"
+      },
       "description": "Every number in an estimate comes from somewhere. Find a unit rate in a construction cost database, see what it is made of, and adjust it to your market before it goes into a bid.",
       "duration": 242,
       "cover": "https://i.ytimg.com/vi/kEN-F92hNZc/maxresdefault.jpg",
@@ -1597,7 +1600,6 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "status": "published",
       "channel": "academy",
       "language": "en",
-      "market": "US",
       "series": "playbook-getting-started",
       "seriesOrder": 2,
       "stage": "estimate",
@@ -1623,6 +1625,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "bill",
       "title": "Build a Construction Estimate Step by Step",
+      "example": {
+        "place": "Denver",
+        "country": "US"
+      },
       "description": "Build a priced construction estimate from an empty page. A Denver duplex, ten positions in five sections, and every rate traced back to where it came from.",
       "duration": 288,
       "cover": "https://i.ytimg.com/vi/zGgfX19b3gc/maxresdefault.jpg",
@@ -1673,6 +1679,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "bill",
       "title": "Construction Pricing: Overhead, Profit & Contingency",
+      "example": {
+        "country": "US"
+      },
       "description": "The estimate says what the job costs. The price says what you charge. Turn a direct cost into a bid price with overhead, profit and contingency, then check it, save a version and export it.",
       "duration": 234,
       "cover": "https://i.ytimg.com/vi/FRI5_7CsZT0/maxresdefault.jpg",
@@ -1728,6 +1737,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "bill",
       "title": "Price a Construction Job",
+      "example": {
+        "place": "Toronto",
+        "country": "CA"
+      },
       "description": "Every bid on a Toronto job comes down to one number: your contract price, in Canadian dollars, with markups and bond, before HST. Price six stacked townhomes and turn their cost into that number.",
       "duration": 289,
       "cover": "https://i.ytimg.com/vi/LejLQ4skfvM/maxresdefault.jpg",
@@ -1779,6 +1792,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "award",
       "title": "Tender Work to Subcontractors",
+      "example": {
+        "place": "Toronto",
+        "country": "CA"
+      },
       "description": "Three drywall subtrades priced your townhomes, and one came in more than a fifth lower. In Canada, carry the wrong sub's price in your bid and you may be held to it.",
       "duration": 263,
       "cover": "https://i.ytimg.com/vi/7u7Ur3ZFe94/maxresdefault.jpg",
@@ -1833,6 +1850,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "invoice",
       "title": "CCDC 2 Monthly Progress Draw",
+      "example": {
+        "place": "Ontario",
+        "country": "CA"
+      },
       "description": "Once a month on a CCDC 2 job you bill the owner for the work in place, and Ontario law makes the owner hold back 10%. Set up the contract, bill a $184,300 draw, and see what stays on your own calendar.",
       "duration": 298,
       "cover": "https://i.ytimg.com/vi/b-qv_emcDwc/maxresdefault.jpg",
@@ -1884,6 +1905,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "invoice",
       "title": "The Construction Payment Clock",
+      "example": {
+        "place": "Ontario",
+        "country": "CA"
+      },
       "description": "In Ontario, an owner has 28 days to pay a proper invoice, and a contract cannot push that back. Start the payment clock on this month's invoice and see every date that matters.",
       "duration": 275,
       "cover": "https://i.ytimg.com/vi/aQlkuS7ShCM/maxresdefault.jpg",
@@ -1938,6 +1963,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "change",
       "title": "Manage Construction Change Orders",
+      "example": {
+        "country": "CA"
+      },
       "description": "Your crew hits rock the soils report never showed, and the work, the price and the finish date all change. See how CCDC 2 handles it, then record the change order, price it against your estimate and get it approved.",
       "duration": 285,
       "cover": "https://i.ytimg.com/vi/tj7McUl37X0/maxresdefault.jpg",
@@ -1996,6 +2024,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "handover",
       "title": "Schedule to Substantial Performance",
+      "example": {
+        "country": "CA"
+      },
       "description": "On an Ontario job, the day that matters most for your money is the day the work is substantially performed. Take a townhome project from the schedule to that finish line, and see how it starts the holdback clock.",
       "duration": 289,
       "cover": "https://i.ytimg.com/vi/fKGh2e6pJqc/maxresdefault.jpg",
@@ -2046,6 +2077,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ],
       "title": "Démarrer avec OpenConstructionERP en français",
+      "example": {
+        "place": "Québec",
+        "country": "CA"
+      },
       "description": "L'application s'affiche en français, mais c'est le français de France. Passez votre logiciel de construction en français et faites le lien entre ses mots et ceux d'un chantier québécois.",
       "duration": 226,
       "cover": "https://i.ytimg.com/vi/CMuMMej0zwM/maxresdefault.jpg",
@@ -2103,6 +2138,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "bill",
       "title": "Estimer un projet de construction",
+      "example": {
+        "place": "Montréal",
+        "country": "CA"
+      },
       "description": "Toute soumission se résume à un montant : le prix du contrat, avant taxes. Estimez un immeuble locatif à Montréal, ajoutez vos majorations et établissez ce prix.",
       "duration": 258,
       "cover": "https://i.ytimg.com/vi/7eT4lg1ggQY/maxresdefault.jpg",
@@ -2157,6 +2196,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "award",
       "title": "Soumissions et BSDQ",
+      "example": {
+        "place": "Québec",
+        "country": "CA"
+      },
       "description": "Trois sous-traitants ont soumissionné par le BSDQ, et la plus basse soumission est arrivée sans la garantie exigée. Voyez pourquoi vous ne pouvez pas l'accepter, même si l'application la recommande.",
       "duration": 271,
       "cover": "https://i.ytimg.com/vi/gmg2h1JcuGI/maxresdefault.jpg",
@@ -2218,6 +2261,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "invoice",
       "title": "Facturation, retenue et hypothèque légale",
+      "example": {
+        "place": "Québec",
+        "country": "CA"
+      },
       "description": "Votre première demande de paiement s'élève à 184 300 $, avec une retenue de 10 % prévue au contrat. Préparez-la, puis voyez comment conserver votre hypothèque légale au Québec.",
       "duration": 277,
       "cover": "https://i.ytimg.com/vi/4LTXS0QEkzY/maxresdefault.jpg",
@@ -2280,6 +2327,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "handover",
       "title": "Réception des travaux et déficiences",
+      "example": {
+        "place": "Québec",
+        "country": "CA"
+      },
       "description": "À la fin d'un chantier au Québec, le jour qui compte le plus pour votre argent, c'est la réception des travaux. Suivez vos déficiences jusqu'à leur vérification et voyez ce que la réception déclenche.",
       "duration": 224,
       "cover": "https://i.ytimg.com/vi/IWjtAujWPAA/maxresdefault.jpg",

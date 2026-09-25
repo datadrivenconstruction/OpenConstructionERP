@@ -44859,6 +44859,7 @@ const resource = {
     "videos.path_title": "{{role}}としてのあなたの道のり",
     "videos.player_note": "プレーヤーは再生を押したときだけ、YouTubeのプライバシー強化ホストから読み込まれます。",
     "videos.see_all_for_step": "動画ページですべての{{total}}件を見る",
+    "videos.example": "例: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

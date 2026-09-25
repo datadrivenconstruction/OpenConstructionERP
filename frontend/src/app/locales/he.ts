@@ -43568,6 +43568,7 @@ const resource = {
     "videos.path_title": "המסלול שלכם בתור {{role}}",
     "videos.player_note": "הנגן נטען רק כשלוחצים על הפעלה, מהאירוח הפרטי המוגן של YouTube.",
     "videos.see_all_for_step": "כל {{total}} בעמוד הסרטונים",
+    "videos.example": "דוגמה: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

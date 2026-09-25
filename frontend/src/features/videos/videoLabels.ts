@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { ROLE_BY_ID } from '@/features/cases/roles';
 import { STAGE_BY_ID } from '@/features/cases/stages';
 import type { LifecycleStage, ProfessionalRole } from '@/features/cases/types';
-import type { AcademySeries, ResultFamily } from './academyTypes';
-import { seriesById } from './academy';
+import type { AcademySeries, AcademyVideo, ResultFamily } from './academyTypes';
+import { exampleToShow, seriesById } from './academy';
 
 const RESULT_LABELS: Record<ResultFamily, [key: string, fallback: string]> = {
   cost: ['videos.result.cost', 'Cost estimate'],
@@ -98,7 +98,18 @@ export function useVideoLabels() {
     [t],
   );
 
-  return { role, stage, stageShort, result, country, language, series };
+  /** "Example: Denver, United States", or null when there is nothing to add. */
+  const example = useCallback(
+    (video: AcademyVideo) => {
+      const ex = exampleToShow(video);
+      if (!ex) return null;
+      const where = ex.place ? `${ex.place}, ${country(ex.country)}` : country(ex.country);
+      return t('videos.example', { defaultValue: 'Example: {{place}}', place: where });
+    },
+    [t, country],
+  );
+
+  return { role, stage, stageShort, result, country, language, series, example };
 }
 
 export type VideoLabels = ReturnType<typeof useVideoLabels>;

@@ -46170,6 +46170,7 @@ const resource = {
     "videos.path_title": "Votre parcours en tant que {{role}}",
     "videos.player_note": "Le lecteur ne se charge qu'après avoir appuyé sur lecture, depuis l'hébergement YouTube à confidentialité renforcée.",
     "videos.see_all_for_step": "Les {{total}} sur la page Vidéos",
+    "videos.example": "Exemple : {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

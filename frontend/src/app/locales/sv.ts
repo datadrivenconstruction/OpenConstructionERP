@@ -44054,6 +44054,7 @@ const resource = {
     "videos.path_title": "Din lärväg som {{role}}",
     "videos.player_note": "Spelaren laddas först när du trycker play, från YouTubes integritetsvänliga värd.",
     "videos.see_all_for_step": "Alla {{total}} på sidan Videor",
+    "videos.example": "Exempel: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

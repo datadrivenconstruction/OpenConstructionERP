@@ -12,6 +12,7 @@ import {
   VIDEOS,
   activeFilterCount,
   embedUrl,
+  exampleToShow,
   fold,
   formatClock,
   pathForRole,
@@ -198,5 +199,25 @@ describe('the screen filter', () => {
     const hits = searchVideos({ ...NO_FILTERS, route: '/boq' });
     expect(hits.map((h) => h.video.id)).toEqual(ids(videosForRoute('/boq')));
     expect(activeFilterCount({ ...NO_FILTERS, route: '/boq' })).toBe(1);
+  });
+});
+
+describe('example location', () => {
+  it('labels where a universal video is shot, and stays quiet when it only repeats the market', () => {
+    expect(exampleToShow(video({ id: 'a', example: { place: 'Denver', country: 'US' } }))).toEqual({
+      place: 'Denver',
+      country: 'US',
+    });
+    expect(exampleToShow(video({ id: 'b', example: { country: 'US' } }))).toEqual({ country: 'US' });
+    expect(exampleToShow(video({ id: 'c', market: 'CA', example: { country: 'CA' } }))).toBeUndefined();
+    expect(exampleToShow(video({ id: 'd', market: 'CA', example: { place: 'Toronto', country: 'CA' } }))).toBeTruthy();
+    expect(exampleToShow(video({ id: 'e' }))).toBeUndefined();
+  });
+
+  it('keeps the Getting Started series universal, with Denver as its example only', () => {
+    const l2 = VIDEOS.find((v) => v.id === 'EP02_L2')!;
+    expect(l2.market).toBeUndefined();
+    expect(l2.example).toEqual({ place: 'Denver', country: 'US' });
+    expect(recommend({ role: 'estimator', market: 'HR', language: 'hr' }).map((v) => v.id)).toContain('EP02_L2');
   });
 });

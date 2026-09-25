@@ -43595,6 +43595,7 @@ const resource = {
     "videos.path_title": "Parcursul tău ca {{role}}",
     "videos.player_note": "Playerul se încarcă doar când apeși play, de pe gazda YouTube care protejează confidențialitatea.",
     "videos.see_all_for_step": "Toate cele {{total}} din pagina Videouri",
+    "videos.example": "Exemplu: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

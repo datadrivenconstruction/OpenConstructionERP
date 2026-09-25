@@ -43122,6 +43122,7 @@ const resource = {
     "videos.path_title": "{{role}}-ийн хувьд таны зам",
     "videos.player_note": "Тоглуулагч зөвхөн тоглуулах товчийг дарахад, YouTube-ийн нууцлал сайжруулсан сервисээс ачаалагдана.",
     "videos.see_all_for_step": "Видео хуудсан дахь бүх {{total}}",
+    "videos.example": "Жишээ: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

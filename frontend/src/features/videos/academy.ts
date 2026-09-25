@@ -106,6 +106,14 @@ export function videosForCase(caseId: string, videos: AcademyVideo[] = VIDEOS): 
   return videos.filter((v) => v.cases.includes(caseId));
 }
 
+/** The example location worth a label: not when it only repeats the market. */
+export function exampleToShow(video: AcademyVideo): AcademyVideo['example'] | undefined {
+  const ex = video.example;
+  if (!ex) return undefined;
+  if (!ex.place && ex.country === video.market) return undefined;
+  return ex;
+}
+
 /** A video is for a role when it names the role or names no role at all. */
 export function isForRole(video: AcademyVideo, role: ProfessionalRole | null): boolean {
   return !role || video.roles.length === 0 || video.roles.includes(role);

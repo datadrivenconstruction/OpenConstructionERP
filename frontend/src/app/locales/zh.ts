@@ -45796,6 +45796,7 @@ const resource = {
     "videos.path_title": "您作为{{role}}的学习路径",
     "videos.player_note": "播放器只有在您按下播放后才会加载,来自保护隐私的 YouTube 服务器。",
     "videos.see_all_for_step": "视频页面上的全部{{total}}个",
+    "videos.example": "示例：{{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

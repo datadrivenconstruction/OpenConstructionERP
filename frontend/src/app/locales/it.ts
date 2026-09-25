@@ -44471,6 +44471,7 @@ const resource = {
     "videos.path_title": "Il tuo percorso come {{role}}",
     "videos.player_note": "Il player si carica solo quando premi play, dall'host YouTube a privacy avanzata.",
     "videos.see_all_for_step": "Tutti i {{total}} sulla pagina Video",
+    "videos.example": "Esempio: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

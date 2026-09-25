@@ -44351,6 +44351,7 @@ const resource = {
     "videos.path_title": "{{role}} sifatida sizning yoʻlingiz",
     "videos.player_note": "Pleyer faqat play tugmasini bosganingizda, YouTubening maxfiylikni himoya qiluvchi serveridan yuklanadi.",
     "videos.see_all_for_step": "Videolar sahifasidagi barcha {{total}} ta",
+    "videos.example": "Misol: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -237,6 +237,9 @@ export function VideoPlayerDialog({
                   {video.market && (
                     <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.country(video.market)}</span>
                   )}
+                  {labels.example(video) && (
+                    <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.example(video)}</span>
+                  )}
                   {video.duration ? (
                     <span className="rounded bg-surface-secondary px-1.5 py-0.5 font-mono tabular-nums">
                       {formatClock(video.duration)}

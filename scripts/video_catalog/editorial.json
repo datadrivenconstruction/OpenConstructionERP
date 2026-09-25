@@ -85,7 +85,7 @@
     "EP02_L2": {
       "stage": "estimate",
       "roles": ["estimator", "quantity-surveyor"],
-      "market": "US",
+      "market": null,
       "cases": ["estimate-from-cost-database", "estimate-with-your-own-crew-rates", "validate-estimate"],
       "result": "bill",
       "provenance": "videos-agent-2026-09-25"

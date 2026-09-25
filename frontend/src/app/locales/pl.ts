@@ -44590,6 +44590,7 @@ const resource = {
     "videos.path_title": "Twoja ścieżka nauki jako {{role}}",
     "videos.player_note": "Odtwarzacz ładuje się dopiero po naciśnięciu play, z chroniącego prywatność serwera YouTube.",
     "videos.see_all_for_step": "Wszystkie {{total}} na stronie Filmy",
+    "videos.example": "Przykład: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

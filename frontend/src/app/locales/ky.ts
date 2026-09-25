@@ -43553,6 +43553,7 @@ const resource = {
     "videos.path_title": "{{role}} катары сиздин жолуңуз",
     "videos.player_note": "Ойноткуч ойнотуу баскычы басылганда гана, YouTube'дун купуялуулугу күчөтүлгөн серверинен жүктөлөт.",
     "videos.see_all_for_step": "Видеолор бетиндеги бардык {{total}}",
+    "videos.example": "Мисалы: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43335,6 +43335,7 @@ const resource = {
     "videos.path_title": "Lộ trình của bạn với vai trò {{role}}",
     "videos.player_note": "Trình phát chỉ tải khi bạn nhấn phát, từ máy chủ YouTube tăng cường quyền riêng tư.",
     "videos.see_all_for_step": "Cả {{total}} video trên trang Video",
+    "videos.example": "Ví dụ: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

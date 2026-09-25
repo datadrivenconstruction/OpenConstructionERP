@@ -43326,6 +43326,7 @@ const resource = {
     "videos.path_title": "Jalur Anda sebagai {{role}}",
     "videos.player_note": "Pemutar hanya dimuat saat Anda menekan putar, dari host YouTube dengan privasi yang ditingkatkan.",
     "videos.see_all_for_step": "Semua {{total}} di halaman Video",
+    "videos.example": "Contoh: {{place}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };
