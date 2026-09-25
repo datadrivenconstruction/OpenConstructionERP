@@ -449,8 +449,15 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           the zones, and the chip's own name truncation keeps it from
           overflowing. Below lg the co-brand still shows in the dashboard
           banner. */}
-      <div className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2 px-2">
-        <ActivePackChip />
+      <div
+        className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-2 overflow-hidden px-2"
+        data-testid="header-pack-column"
+      >
+        {/* min-w-0 on the chip and overflow-hidden on the column: at 125% and
+            150% text size the column is squeezed below the chip's width, and
+            without both the chip kept its full width and was painted over the
+            project picker instead of truncating its name. */}
+        <ActivePackChip className="min-w-0" />
         {showCoBrand && <PartnerLogoBadge variant="nav" />}
       </div>
 
