@@ -1,0 +1,24 @@
+{
+  "rule_pack_id": "ro_tva_constructii",
+  "name": "TVA on construction",
+  "name_ro": "TVA în construcții",
+  "standard": "Codul fiscal",
+  "jurisdiction": "RO",
+  "applies_to": [
+    "estimate",
+    "invoicing"
+  ],
+  "review_status": "Rates read in the official text of Legea 141/2025. The extension of the 9 percent housing rate by Legea 161/2026 is taken from legal commentary and has not been read in the official text.",
+  "references": [
+    "Legea 227/2015, Codul fiscal, art. 291 (cotele de TVA), as amended by Legea 141/2025 art. I pct. 42 (https://static.anaf.ro/static/10/Anaf/legislatie/L_141_2025.pdf)",
+    "Legea 141/2025 art. III, transitional 9 percent rate for dwellings",
+    "Legea 161/2026, extension of the 9 percent housing rate to 30.09.2026 (reported by https://www.juridice.ro/840847/senat-tva-la-locuinte-ramane-9.html)",
+    "Codul fiscal art. 331, taxarea inversă (https://www.noulcodfiscal.ro/titlu-7/capitol-14/articol-331.html)"
+  ],
+  "description": "TVA is 21 percent at the standard rate and 11 percent at the reduced rate from 1 August 2025, when the earlier 19, 9 and 5 percent rates were replaced. A dwelling of up to 120 square metres and 600,000 RON sold to an individual under a contract signed before 1 August 2025 keeps a transitional 9 percent rate, extended to 30 September 2026. Construction works themselves are not on the list of supplies under the domestic reverse charge in art. 331: a contractor invoices TVA to its client in the normal way.",
+  "practice_notes": [
+    "Unit prices in a deviz are net of TVA, which is added on the summary",
+    "The reverse charge in art. 331(2) g) concerns the supply of buildings and land taxed by option or by law, not construction services"
+  ],
+  "enables_rule_ids": []
+}

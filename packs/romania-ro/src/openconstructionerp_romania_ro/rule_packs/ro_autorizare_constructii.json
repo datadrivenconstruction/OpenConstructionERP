@@ -1,0 +1,24 @@
+{
+  "rule_pack_id": "ro_autorizare_constructii",
+  "name": "Building permits and quality in construction",
+  "name_ro": "Autorizarea executării lucrărilor de construcții și calitatea în construcții",
+  "standard": "Legea 169/2026",
+  "jurisdiction": "RO",
+  "applies_to": [
+    "projects",
+    "documents"
+  ],
+  "review_status": "Reference document only. The repeal of Legea 50/1991 by Legea 169/2026 is taken from legal commentary on the Monitorul Oficial publication and has not been read in the official text; confirm before relying on it.",
+  "references": [
+    "Legea 169/2026, Codul amenajării teritoriului, urbanismului și construcțiilor, Monitorul Oficial 661 of 10.08.2026, in force 25.08.2026 (reported by https://cscon.ro/catuc-codul-amenajarii-teritoriului-urbanismului-si-constructiilor-ce-aduce-nou/)",
+    "Legea 50/1991 privind autorizarea executării lucrărilor de construcții, republished (https://legislatie.just.ro/Public/DetaliiDocument/1515); applies to permit procedures started before 25.08.2026",
+    "Legea 10/1995 privind calitatea în construcții, republished (https://legislatie.just.ro/Public/DetaliiDocument/5729), partly repealed by Legea 169/2026",
+    "P100-1/2013, Cod de proiectare seismică, Partea I, approved by Ordin MDRAP 2465/2013 (https://www.mdlpa.ro/userfiles/reglementari/Domeniul_I/I_22_P100_1_2013.pdf)"
+  ],
+  "description": "Building works in Romania need an autorizație de construire. From 25 August 2026 the permit is governed by the new planning and construction code, Legea 169/2026, which replaces Legea 50/1991 and parts of Legea 10/1995; procedures already started continue under the old law. Seismic design follows P100-1/2013, which matters for cost because much of the country sits in a high seismic zone.",
+  "practice_notes": [
+    "The start of works is notified to the Inspectoratul de Stat în Construcții as well as to the issuing authority",
+    "Permit, notice and quality-control fees are budgeted in chapters 3.2 and 5.2 of the deviz general, not in the works"
+  ],
+  "enables_rule_ids": []
+}
