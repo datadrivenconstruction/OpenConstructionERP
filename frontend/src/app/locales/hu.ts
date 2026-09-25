@@ -36110,6 +36110,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} részleteinek be/kikapcsolása",
     "transmittals.updated": "Átadási jegyzék frissítve",
     "update.apply_now": "Frissítés alkalmazása",
+    "update.runtime_blocked_disabled": "A böngészőből történő frissítés ki van kapcsolva ezen a szerveren. A bekapcsoláshoz állítsa be a ALLOW_RUNTIME_UPGRADE=true értéket a szerver környezetében, és indítsa újra, vagy futtassa az alábbi parancsot a szerveren.",
+    "update.runtime_blocked_demo": "A demófiókok nem frissíthetik a telepítést. Jelentkezzen be saját rendszergazdai fiókjával, vagy futtassa az alábbi parancsot a szerveren.",
     "update.apply_now_button": "Frissítés alkalmazása",
     "update.changes_count": "{{count}} változás",
     "update.changes_count_short": "{{count}} változás",

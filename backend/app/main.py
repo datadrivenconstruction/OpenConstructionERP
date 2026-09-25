@@ -94,12 +94,16 @@ from app.core.module_loader import module_loader
 # can execute it.
 from app.core.postgres_migrator import UNVALIDATED_CONSTRAINTS_SQL
 from app.core.self_upgrade import (
+    DEMO_ACCOUNT_REFUSAL,
+    DISABLED_REFUSAL,
     FROZEN_REFUSAL,
+    UPGRADE_DEMO_ACCOUNT,
     claim_upgrade,
     current_upgrade,
     is_frozen_build,
     repair_hint,
     run_upgrade,
+    runtime_upgrade_refusal,
 )
 from app.dependencies import OptionalUserPayload, RequireRole, get_current_user_id, rls_request_context
 
@@ -3401,7 +3405,7 @@ def create_app() -> FastAPI:
 
         cached = getattr(app.state, cache_key, None)
         if cached and (time.time() - cached["checked_at"]) < 14400:
-            return cached["data"]
+            return {**cached["data"], **await _runtime_upgrade_state(_user_id)}
 
         latest: str | None = None
         # Held apart from what we will publish until we know the release this
@@ -3508,7 +3512,31 @@ def create_app() -> FastAPI:
             ),
         }
         setattr(app.state, cache_key, {"data": result, "checked_at": time.time()})
-        return result
+        return {**result, **await _runtime_upgrade_state(_user_id)}
+
+    async def _caller_email(user_id: str) -> str | None:
+        """The signed-in caller's email as stored, not as the token remembers it."""
+        from app.database import async_session_factory
+        from app.modules.users.models import User
+
+        try:
+            async with async_session_factory() as session:
+                user = await session.get(User, uuid.UUID(str(user_id)))
+        except (ValueError, TypeError):
+            return None
+        return user.email if user is not None else None
+
+    async def _runtime_upgrade_state(user_id: str) -> dict[str, Any]:
+        """Whether THIS caller may press "Apply update", kept out of the shared cache.
+
+        ``runtime_upgrade_allowed`` is the answer and ``runtime_upgrade_blocked``
+        the reason when it is no (``disabled`` or ``demo_account``), so the
+        dialog can say how to switch it on instead of offering a button that
+        will be refused. Separate from ``self_upgrade_supported``, which is a
+        fact about the build (can pip run here) and picks the instructions.
+        """
+        reason = None if is_frozen_build() else runtime_upgrade_refusal(await _caller_email(user_id))
+        return {"runtime_upgrade_allowed": reason is None and not is_frozen_build(), "runtime_upgrade_blocked": reason}
 
     @app.post(
         "/api/system/upgrade",
@@ -3520,6 +3548,7 @@ def create_app() -> FastAPI:
     async def trigger_upgrade(
         version: str | None = None,
         force: bool = False,
+        user_id: str = Depends(get_current_user_id),
     ) -> JSONResponse:
         """Start ``pip install --upgrade openconstructionerp`` in this venv.
 
@@ -3554,34 +3583,28 @@ def create_app() -> FastAPI:
         quickstart install reachable on the network could be forced to
         reinstall / downgrade by anyone.
 
-        Additionally gated by ``ALLOW_RUNTIME_UPGRADE`` (defaults on).
-        Managed deployments that upgrade through a deploy pipeline can set
-        ``ALLOW_RUNTIME_UPGRADE=false`` to disable the route entirely;
-        localhost dev and the desktop / Windows-installer builds leave it
-        on so the Settings panel works out of the box.
+        Additionally gated by ``ALLOW_RUNTIME_UPGRADE``, which is OFF unless
+        set to ``true`` (it used to default on; see
+        :func:`app.core.self_upgrade.runtime_upgrade_enabled` for why), and
+        refused to the seeded demo accounts even when it is on: those are
+        logins shared by everyone the demo is shown to, and the demo admin
+        needs no password wherever the demo login is offered.
         """
-        import os
         import sys
-
-        if os.environ.get("ALLOW_RUNTIME_UPGRADE", "true").lower() not in (
-            "true",
-            "1",
-            "yes",
-        ):
-            raise HTTPException(
-                status_code=403,
-                detail=(
-                    "Runtime upgrade is disabled on this install. "
-                    "Run `pip install --upgrade openconstructionerp` from your "
-                    "shell, then restart the service."
-                ),
-            )
 
         # A frozen build would feed the pip command below back into its own CLI
         # instead of upgrading anything (issue #403), so point at the installer,
-        # which is the route that actually works there.
+        # which is the route that actually works there. First, because no
+        # switch makes pip exist in the bundle.
         if is_frozen_build():
             raise HTTPException(status_code=409, detail=FROZEN_REFUSAL)
+
+        refusal = runtime_upgrade_refusal(await _caller_email(user_id))
+        if refusal is not None:
+            raise HTTPException(
+                status_code=403,
+                detail=DEMO_ACCOUNT_REFUSAL if refusal == UPGRADE_DEMO_ACCOUNT else DISABLED_REFUSAL,
+            )
 
         target = "openconstructionerp"
         if version and version.replace(".", "").replace("-", "").isalnum():

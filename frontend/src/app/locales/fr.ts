@@ -36228,6 +36228,8 @@ const resource = {
     "transmittals.toggle_row": "Basculer les détails pour {{num}}",
     "transmittals.updated": "Transmission mise à jour",
     "update.apply_now": "Appliquer la mise à jour",
+    "update.runtime_blocked_disabled": "La mise à jour depuis le navigateur est désactivée sur ce serveur. Pour l'activer, définissez ALLOW_RUNTIME_UPGRADE=true dans l'environnement du serveur et redémarrez-le, ou exécutez la commande ci-dessous sur le serveur.",
+    "update.runtime_blocked_demo": "Les comptes de démonstration ne peuvent pas mettre à jour l'installation. Connectez-vous avec votre propre compte administrateur ou exécutez la commande ci-dessous sur le serveur.",
     "update.apply_now_button": "Appliquer la mise à jour",
     "update.changes_count": "{{count}} modifications",
     "update.changes_count_short": "{{count}} modifications",

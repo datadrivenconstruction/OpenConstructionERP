@@ -36191,6 +36191,8 @@ const resource = {
     "transmittals.toggle_row": "Veksle detaljer for {{num}}",
     "transmittals.updated": "Sending oppdatert",
     "update.apply_now": "Bruk oppdatering",
+    "update.runtime_blocked_disabled": "Oppdatering fra nettleseren er slått av på denne serveren. Slå den på ved å sette ALLOW_RUNTIME_UPGRADE=true i servermiljøet og starte serveren på nytt, eller kjør kommandoen nedenfor på serveren.",
+    "update.runtime_blocked_demo": "Demokontoer kan ikke oppdatere installasjonen. Logg inn med din egen administratorkonto, eller kjør kommandoen nedenfor på serveren.",
     "update.apply_now_button": "Bruk oppdatering",
     "update.changes_count": "{{count}} endringer",
     "update.changes_count_short": "{{count}} endringer",

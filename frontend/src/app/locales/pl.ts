@@ -36707,6 +36707,8 @@ const resource = {
     "transmittals.toggle_row": "Przełącz szczegóły dla {{num}}",
     "transmittals.updated": "Pismo przesyłowe zaktualizowane",
     "update.apply_now": "Zastosuj aktualizację",
+    "update.runtime_blocked_disabled": "Aktualizacja z przeglądarki jest na tym serwerze wyłączona. Aby ją włączyć, ustaw ALLOW_RUNTIME_UPGRADE=true w środowisku serwera i uruchom go ponownie albo wykonaj poniższe polecenie na serwerze.",
+    "update.runtime_blocked_demo": "Konta demonstracyjne nie mogą aktualizować instalacji. Zaloguj się własnym kontem administratora albo wykonaj poniższe polecenie na serwerze.",
     "update.apply_now_button": "Zastosuj aktualizację",
     "update.changes_count": "{{count}} zmian",
     "update.changes_count_short": "{{count}} zmian",

@@ -36031,6 +36031,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} के लिए विवरण टॉगल करें",
     "transmittals.updated": "ट्रांसमिटल अपडेट किया गया",
     "update.apply_now": "अपडेट लागू करें",
+    "update.runtime_blocked_disabled": "इस सर्वर पर ब्राउज़र से अपडेट करना बंद है। इसे चालू करने के लिए सर्वर के परिवेश में ALLOW_RUNTIME_UPGRADE=true सेट करें और सर्वर को फिर से शुरू करें, या नीचे दिया गया कमांड सर्वर पर चलाएँ।",
+    "update.runtime_blocked_demo": "डेमो खाते इंस्टॉलेशन को अपडेट नहीं कर सकते। अपने स्वयं के व्यवस्थापक खाते से साइन इन करें, या नीचे दिया गया कमांड सर्वर पर चलाएँ।",
     "update.apply_now_button": "अपडेट लागू करें",
     "update.changes_count": "{{count}} परिवर्तन",
     "update.changes_count_short": "{{count}} परिवर्तन",

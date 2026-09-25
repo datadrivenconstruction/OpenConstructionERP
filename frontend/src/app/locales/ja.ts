@@ -36235,6 +36235,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}}の詳細を切り替え",
     "transmittals.updated": "伝送が更新されました",
     "update.apply_now": "アップデートを適用",
+    "update.runtime_blocked_disabled": "このサーバーではブラウザーからの更新が無効になっています。有効にするには、サーバーの環境に ALLOW_RUNTIME_UPGRADE=true を設定して再起動するか、下のコマンドをサーバーで実行してください。",
+    "update.runtime_blocked_demo": "デモアカウントではインストールを更新できません。ご自身の管理者アカウントでサインインするか、下のコマンドをサーバーで実行してください。",
     "update.apply_now_button": "アップデートを適用",
     "update.changes_count": "{{count}}変更",
     "update.changes_count_short": "{{count}}変更",

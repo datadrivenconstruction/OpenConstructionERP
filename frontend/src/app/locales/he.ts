@@ -35630,6 +35630,8 @@ const resource = {
     "transmittals.toggle_row": "הצג/הסתר פרטים עבור {{num}}",
     "transmittals.updated": "תעודת המשלוח עודכנה",
     "update.apply_now": "החל עדכון",
+    "update.runtime_blocked_disabled": "העדכון מהדפדפן כבוי בשרת זה. כדי להפעיל אותו, הגדירו ALLOW_RUNTIME_UPGRADE=true בסביבת השרת והפעילו אותו מחדש, או הריצו את הפקודה שלמטה בשרת.",
+    "update.runtime_blocked_demo": "חשבונות הדגמה אינם יכולים לעדכן את ההתקנה. התחברו עם חשבון מנהל משלכם, או הריצו את הפקודה שלמטה בשרת.",
     "update.apply_now_button": "החל עדכון",
     "update.changes_count": "{{count}} שינויים",
     "update.changes_count_short": "{{count}} שינויים",

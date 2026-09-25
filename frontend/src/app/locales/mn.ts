@@ -35507,6 +35507,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}}-ийн дэлгэрэнгийг солих",
     "transmittals.updated": "Дамжуулалт шинэчлэгдсэн",
     "update.apply_now": "Хөндөлгөөр болох",
+    "update.runtime_blocked_disabled": "Энэ сервер дээр хөтчөөс шинэчлэх боломж унтраалттай байна. Асаахын тулд серверийн орчинд ALLOW_RUNTIME_UPGRADE=true тохируулаад серверийг дахин эхлүүлнэ үү, эсвэл доорх командыг сервер дээр ажиллуулна уу.",
+    "update.runtime_blocked_demo": "Демо бүртгэлүүд суулгацыг шинэчлэх боломжгүй. Өөрийн администраторын бүртгэлээр нэвтэрнэ үү, эсвэл доорх командыг сервер дээр ажиллуулна уу.",
     "update.apply_now_button": "Хөндөлгөөр болох",
     "update.changes_count": "{{count}} өөрчлөлт",
     "update.changes_count_short": "{{count}} өөрчлөлт",

@@ -36194,6 +36194,8 @@ const resource = {
     "transmittals.toggle_row": "Vaihda {{num}} tietoja",
     "transmittals.updated": "Lähettävyys päivitetty",
     "update.apply_now": "Ota päivitys käyttöön",
+    "update.runtime_blocked_disabled": "Päivitys selaimesta on poistettu käytöstä tällä palvelimella. Ota se käyttöön asettamalla ALLOW_RUNTIME_UPGRADE=true palvelimen ympäristöön ja käynnistämällä palvelin uudelleen, tai suorita alla oleva komento palvelimella.",
+    "update.runtime_blocked_demo": "Demotilit eivät voi päivittää asennusta. Kirjaudu omalla ylläpitäjätililläsi tai suorita alla oleva komento palvelimella.",
     "update.apply_now_button": "Ota päivitys käyttöön",
     "update.changes_count": "{{count}} muutosta",
     "update.changes_count_short": "{{count}} muutosta",

@@ -35537,6 +35537,8 @@ const resource = {
     "transmittals.toggle_row": "تغییر وضعیت جزئیات {{num}}",
     "transmittals.updated": "ارسالی به‌روزرسانی شد",
     "update.apply_now": "اعمال به‌روزرسانی",
+    "update.runtime_blocked_disabled": "به‌روزرسانی از مرورگر روی این سرور خاموش است. برای روشن کردن آن، ALLOW_RUNTIME_UPGRADE=true را در محیط سرور تنظیم کنید و سرور را دوباره راه‌اندازی کنید، یا فرمان زیر را روی سرور اجرا کنید.",
+    "update.runtime_blocked_demo": "حساب‌های نمایشی نمی‌توانند نصب را به‌روزرسانی کنند. با حساب مدیر خودتان وارد شوید، یا فرمان زیر را روی سرور اجرا کنید.",
     "update.apply_now_button": "اعمال به‌روزرسانی",
     "update.changes_count": "{{count}} تغییر",
     "update.changes_count_short": "{{count}} تغییر",

@@ -36280,6 +36280,8 @@ const resource = {
     "transmittals.toggle_row": "切换 {{num}} 的详细信息",
     "transmittals.updated": "交付单已更新",
     "update.apply_now": "应用更新",
+    "update.runtime_blocked_disabled": "此服务器已关闭从浏览器更新。如需开启，请在服务器环境中设置 ALLOW_RUNTIME_UPGRADE=true 并重启服务器，或在服务器上运行下面的命令。",
+    "update.runtime_blocked_demo": "演示账户无法更新此安装。请使用您自己的管理员账户登录，或在服务器上运行下面的命令。",
     "update.apply_now_button": "应用更新",
     "update.changes_count": "{{count}} 项更改",
     "update.changes_count_short": "{{count}} 项更改",

@@ -241,6 +241,49 @@ describe('the advice matches the build the reader is running', () => {
       expect(document.body.textContent).toContain('pip install --upgrade openconstructionerp'),
     );
   });
+
+  // P-17. The browser upgrade is off unless the server switches it on, and a
+  // demo account never gets it. The button used to be offered to any admin and
+  // ran pip in the environment the server runs from.
+  it('offers no Apply button while the server has the browser upgrade switched off', async () => {
+    vi.stubGlobal(
+      'fetch',
+      answering(versionCheck({ runtime_upgrade_allowed: false, runtime_upgrade_blocked: 'disabled' })),
+    );
+    renderNotice();
+    fireEvent.click(await screen.findByRole('button', { name: /15\.1\.0/ }));
+
+    const note = await screen.findByTestId('update-runtime-blocked');
+    expect(note.textContent).toContain('ALLOW_RUNTIME_UPGRADE=true');
+    expect(screen.queryByTestId('update-apply-now')).toBeNull();
+    // The command card still tells them what to run.
+    expect(document.body.textContent).toContain('pip install --upgrade openconstructionerp');
+  });
+
+  it('tells a demo account why it cannot update, without a button', async () => {
+    vi.stubGlobal(
+      'fetch',
+      answering(versionCheck({ runtime_upgrade_allowed: false, runtime_upgrade_blocked: 'demo_account' })),
+    );
+    renderNotice();
+    fireEvent.click(await screen.findByRole('button', { name: /15\.1\.0/ }));
+
+    const note = await screen.findByTestId('update-runtime-blocked');
+    expect(note.textContent).toMatch(/demo/i);
+    expect(screen.queryByTestId('update-apply-now')).toBeNull();
+  });
+
+  it('offers the Apply button where the server allows it', async () => {
+    vi.stubGlobal(
+      'fetch',
+      answering(versionCheck({ runtime_upgrade_allowed: true, runtime_upgrade_blocked: null })),
+    );
+    renderNotice();
+    fireEvent.click(await screen.findByRole('button', { name: /15\.1\.0/ }));
+
+    expect(await screen.findByTestId('update-apply-now')).toBeTruthy();
+    expect(screen.queryByTestId('update-runtime-blocked')).toBeNull();
+  });
 });
 
 describe('the excerpt reads as prose', () => {

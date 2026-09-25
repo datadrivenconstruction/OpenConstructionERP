@@ -36443,6 +36443,8 @@ const resource = {
     "transmittals.toggle_row": "Переключить детали для {{num}}",
     "transmittals.updated": "Передача обновлена",
     "update.apply_now": "Применить обновление",
+    "update.runtime_blocked_disabled": "Обновление из браузера на этом сервере выключено. Чтобы включить его, задайте ALLOW_RUNTIME_UPGRADE=true в окружении сервера и перезапустите его, или выполните команду ниже на сервере.",
+    "update.runtime_blocked_demo": "Демо-учётные записи не могут обновлять установку. Войдите под своей учётной записью администратора или выполните команду ниже на сервере.",
     "update.apply_now_button": "Применить обновление",
     "update.changes_count": "{{count}} изменений",
     "update.changes_count_short": "{{count}} изменений",

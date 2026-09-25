@@ -32,8 +32,9 @@ The registry is in this process's memory on purpose. An upgrade ends by asking
 the user to restart, and a restart is exactly what discards the record, which is
 correct: after the restart the installed version answers the question the job
 was tracking. Deployments that run more than one worker cannot share a lock this
-way and should turn the route off with ``ALLOW_RUNTIME_UPGRADE=false``, which is
-what a pipeline-managed install wants regardless.
+way and should leave the route off, as it is unless ``ALLOW_RUNTIME_UPGRADE=true``
+is set (see :func:`runtime_upgrade_enabled`), which is what a pipeline-managed
+install wants regardless.
 """
 
 from __future__ import annotations
@@ -116,6 +117,59 @@ def is_frozen_build() -> bool:
     ``python.exe`` out of a private venv and upgrade themselves perfectly well.
     """
     return bool(getattr(sys, "frozen", False))
+
+
+#: The switch that lets an admin run ``pip install --upgrade`` from the browser.
+RUNTIME_UPGRADE_ENV = "ALLOW_RUNTIME_UPGRADE"
+
+#: Why the browser may not run an upgrade here. The UI reads the code, not the text.
+UPGRADE_DISABLED = "disabled"
+UPGRADE_DEMO_ACCOUNT = "demo_account"
+
+#: The refusal the route answers when the switch is off.
+DISABLED_REFUSAL = (
+    "Updating from the browser is disabled on this install. To switch it on, set "
+    f"{RUNTIME_UPGRADE_ENV}=true in the server's environment and restart it. Or run "
+    "`pip install --upgrade openconstructionerp` from a shell on the server, then restart."
+)
+
+#: The refusal the route answers to a shared demo login.
+DEMO_ACCOUNT_REFUSAL = "Demo accounts cannot update the installation. Sign in with your own administrator account."
+
+
+def runtime_upgrade_enabled() -> bool:
+    """Whether ``ALLOW_RUNTIME_UPGRADE`` switches the browser upgrade on. Off unless set.
+
+    It defaulted to on, so any admin session could replace the packages of the
+    environment the server runs from, and the seeded demo login is an admin
+    that needs no password wherever the demo login is offered. One press
+    upgraded every instance sharing that environment. The installs that
+    actually used it are single-user pip installs, and for them switching it on
+    is one line; the desktop bundle never could (it has no pip), and a Docker
+    container should be upgraded by pulling an image, not by pip inside it.
+
+    Read at call time so a test, or an operator restarting with a new
+    environment, is not fighting a value cached at import.
+    """
+    return os.environ.get(RUNTIME_UPGRADE_ENV, "").strip().lower() in ("true", "1", "yes")
+
+
+def runtime_upgrade_refusal(caller_email: str | None) -> str | None:
+    """Why this caller may not start an upgrade from the browser, or ``None``.
+
+    Only the browser route asks. The ``upgrade`` CLI command is an operator at
+    a shell on the server, who is not the person this protects against.
+
+    A demo account is refused even with the switch on: it is a login shared
+    by everyone the demo is shown to, several of them password-free.
+    """
+    from app.core.demo_accounts import is_demo_account
+
+    if not runtime_upgrade_enabled():
+        return UPGRADE_DISABLED
+    if is_demo_account(caller_email):
+        return UPGRADE_DEMO_ACCOUNT
+    return None
 
 
 #: How long pip is given before the job is failed rather than left hanging.

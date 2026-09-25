@@ -36389,6 +36389,8 @@ const resource = {
     "transmittals.toggle_row": "Comutați detaliile pentru {{num}}",
     "transmittals.updated": "Transmital actualizat",
     "update.apply_now": "Aplicați actualizarea",
+    "update.runtime_blocked_disabled": "Actualizarea din browser este dezactivată pe acest server. Pentru a o activa, setați ALLOW_RUNTIME_UPGRADE=true în mediul serverului și reporniți-l sau rulați comanda de mai jos pe server.",
+    "update.runtime_blocked_demo": "Conturile demo nu pot actualiza instalarea. Autentificați-vă cu propriul cont de administrator sau rulați comanda de mai jos pe server.",
     "update.apply_now_button": "Aplicați actualizarea",
     "update.changes_count": "{{count}} modificări",
     "update.changes_count_short": "{{count}} modificări",

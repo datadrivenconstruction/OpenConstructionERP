@@ -36235,6 +36235,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}}의 세부 정보 전환",
     "transmittals.updated": "송장 업데이트됨",
     "update.apply_now": "업데이트 적용",
+    "update.runtime_blocked_disabled": "이 서버에서는 브라우저에서 업데이트하는 기능이 꺼져 있습니다. 켜려면 서버 환경에 ALLOW_RUNTIME_UPGRADE=true를 설정하고 서버를 다시 시작하거나, 아래 명령을 서버에서 실행하세요.",
+    "update.runtime_blocked_demo": "데모 계정은 설치를 업데이트할 수 없습니다. 본인의 관리자 계정으로 로그인하거나, 아래 명령을 서버에서 실행하세요.",
     "update.apply_now_button": "업데이트 적용",
     "update.changes_count": "{{count}}개 변경 사항",
     "update.changes_count_short": "{{count}}개 변경",

@@ -36326,6 +36326,8 @@ const resource = {
     "transmittals.toggle_row": "Växla detaljer för {{num}}",
     "transmittals.updated": "Försändelse uppdaterad",
     "update.apply_now": "Använd uppdatering",
+    "update.runtime_blocked_disabled": "Uppdatering från webbläsaren är avstängd på den här servern. Slå på den genom att ange ALLOW_RUNTIME_UPGRADE=true i servermiljön och starta om servern, eller kör kommandot nedan på servern.",
+    "update.runtime_blocked_demo": "Demokonton kan inte uppdatera installationen. Logga in med ditt eget administratörskonto eller kör kommandot nedan på servern.",
     "update.apply_now_button": "Använd uppdatering",
     "update.changes_count": "{{count}} ändringar",
     "update.changes_count_short": "{{count}} ändringar",

@@ -36451,6 +36451,8 @@ const resource = {
     "transmittals.toggle_row": "Attiva/disattiva dettagli per {{num}}",
     "transmittals.updated": "Trasmettitore aggiornato",
     "update.apply_now": "Applica aggiornamento",
+    "update.runtime_blocked_disabled": "L'aggiornamento dal browser è disattivato su questo server. Per attivarlo, imposta ALLOW_RUNTIME_UPGRADE=true nell'ambiente del server e riavvialo, oppure esegui il comando qui sotto sul server.",
+    "update.runtime_blocked_demo": "Gli account demo non possono aggiornare l'installazione. Accedi con il tuo account amministratore oppure esegui il comando qui sotto sul server.",
     "update.apply_now_button": "Applica aggiornamento",
     "update.changes_count": "{{count}} modifiche",
     "update.changes_count_short": "{{count}} modifiche",

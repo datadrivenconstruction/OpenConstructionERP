@@ -36532,6 +36532,8 @@ const resource = {
     "transmittals.toggle_row": "{{num}} için ayrıntıları değiştir",
     "transmittals.updated": "Havale belgesi güncellendi",
     "update.apply_now": "Güncellemeyi Uygula",
+    "update.runtime_blocked_disabled": "Tarayıcıdan güncelleme bu sunucuda kapalı. Açmak için sunucu ortamında ALLOW_RUNTIME_UPGRADE=true ayarlayıp sunucuyu yeniden başlatın veya aşağıdaki komutu sunucuda çalıştırın.",
+    "update.runtime_blocked_demo": "Demo hesaplar kurulumu güncelleyemez. Kendi yönetici hesabınızla oturum açın veya aşağıdaki komutu sunucuda çalıştırın.",
     "update.apply_now_button": "Güncellemeyi Uygula",
     "update.changes_count": "{{count}} değişiklik",
     "update.changes_count_short": "{{count}} değişiklik",
