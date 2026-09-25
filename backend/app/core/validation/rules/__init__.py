@@ -1596,7 +1596,11 @@ class UnrealisticRate(ValidationRule):
             scale = multiplier if multiplier is not None else 1.0
             rate_limit = self.RATE_THRESHOLD * scale
             total_limit = self.TOTAL_THRESHOLD * scale
-            rate_ok = rate <= rate_limit
+            # A lump sum is one unit whose rate is the whole line, so its rate
+            # is its total and only the total ceiling says anything about it.
+            # Judging it per unit flagged every lump-sum section of a schedule
+            # of values above the rate ceiling.
+            rate_ok = rate <= rate_limit or _unit_dimension(str(pos.get("unit") or "")) == "lump"
             total_ok = total <= total_limit
             passed = rate_ok and total_ok
             if passed:
