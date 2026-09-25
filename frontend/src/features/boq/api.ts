@@ -3,6 +3,7 @@
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, downloadWithAuth, API_BASE } from '@/shared/lib/api';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
 import { resourceAwareTotalInBase } from './boqHelpers';
+import { toNum } from '@/shared/lib/money';
 
 /* ── Core BOQ types ──────────────────────────────────────────────────── */
 
@@ -1729,7 +1730,15 @@ export async function fetchCostSearch(
     offset?: number;
   }>(`/v1/costs/?${qs.toString()}`);
 
-  const items = raw.items ?? [];
+  // ``rate`` is a Decimal on the server and arrives as a JSON string
+  // ("4465.43"). Coerce it here, once, so every consumer can treat it as the
+  // number the type promises: the modal's "No rate" badge, its selection
+  // preview and the add flow's fallback rate all read it as a number, and a
+  // string made every priced row look unpriced.
+  const items = (raw.items ?? []).map((item) => ({
+    ...item,
+    rate: toNum(item.rate as number | string | null | undefined),
+  }));
   const limit = raw.limit ?? params.limit ?? 50;
   const next_cursor = raw.next_cursor ?? null;
 
