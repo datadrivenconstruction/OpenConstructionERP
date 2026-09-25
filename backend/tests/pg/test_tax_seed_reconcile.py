@@ -169,14 +169,10 @@ _DIGEST_V15_9_1 = "ec4106ee3f0cadcd6fce5ca0ec95fe69d55b4e51d1b4b3283daa462542038
 
 _FIELDS = ("country_code", "tax_code", "rate_pct", "tax_type", "effective_from", "effective_to", "is_default")
 
-#: What Greece is delivered today: the standard rate only. No install before
-#: the Greek pack holds a Greek row, so FPA lands in an empty country-wide slot,
-#: and once it has, the slot rule refuses the 13 and 6 percent tiers beside it
-#: in the same pass. A bill charges the standard rate, so the price is right;
-#: the tiers are the gap. The change that lets a tier join a filled slot
-#: without changing the country's answer (the Croatian tiers need the same)
-#: should add ``GR/FPA_RED`` and ``GR/FPA_SRED`` here when it lands.
-_GREECE_LINES = {"GR/FPA"}
+#: What Greece is delivered: all three lines. No install before the Greek pack
+#: holds a Greek row, so FPA lands in an empty country-wide slot, and the 13 and
+#: 6 percent tiers join it because neither changes the country's standard answer.
+_GREECE_LINES = {"GR/FPA", "GR/FPA_RED", "GR/FPA_SRED"}
 
 #: Croatia's reduced and zero tiers, owed to every cohort that holds its 25 % rate.
 _CROATIA_TIERS = {"HR/PDV_13", "HR/PDV_5", "HR/PDV_0"}
