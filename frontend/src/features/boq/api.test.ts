@@ -313,6 +313,14 @@ describe('billDirectCost', () => {
     expect(billDirectCost(positions, 'EUR', [])).toBe(1300);
   });
 
+  it('still counts a priced line that was imported without a unit', () => {
+    const positions = [
+      makePosition({ id: 'x', unit: '', quantity: 2, unit_rate: 50, total: 100 }),
+      makePosition({ id: 'y', total: 10 }),
+    ];
+    expect(billDirectCost(positions, 'EUR', [])).toBe(110);
+  });
+
   it('agrees with the section subtotals the grid shows', () => {
     const positions = [
       makePosition({ id: 's', unit: '', quantity: 0, unit_rate: 0, total: 0 }),
