@@ -398,8 +398,8 @@ export function ModulesPage() {
           defaultValue: 'Show only the tools this company needs',
         })}
         more={
-          t('modules.intro_more', { defaultValue: '' })
-            ? <IntroRichText text={t('modules.intro_more')} />
+          t('modules.intro_more_profiles', { defaultValue: '' })
+            ? <IntroRichText text={t('modules.intro_more_profiles')} />
             : undefined
         }
         links={[
@@ -414,9 +414,9 @@ export function ModulesPage() {
           { label: t('nav.settings', { defaultValue: 'Settings' }), onClick: () => navigate('/settings') },
         ]}
       >
-        {t('modules.intro_body', {
+        {t('modules.intro_body_profiles', {
           defaultValue:
-            'Switch on a company profile to tailor which modules appear in the sidebar, apply a pack to load a ready-made preset for a country, industry, partner or showcase, and install data packages like cost databases, resource catalogues and languages from the marketplace. System modules lists everything currently loaded so you can see what is active and what an install would add.',
+            'Pick a company profile to switch on the modules your company uses and switch off the rest. A profile with its own workspace also shapes the menu in Simple mode; otherwise the menu stays as it is. Apply a pack to load a ready-made preset for a country, industry, partner or showcase, and install data packages like cost databases, resource catalogues and languages from the marketplace. System modules lists everything currently loaded so you can see what is active and what an install would add.',
         })}
       </DismissibleInfo>
 

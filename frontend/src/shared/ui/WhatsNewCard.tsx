@@ -163,9 +163,9 @@ const SECTIONS_V1110: Section[] = [
           'Choose your national price base first, right at the start of setup.',
       },
       {
-        key: 'whatsnew.v1110.onboarding.b2',
+        key: 'whatsnew.v1110.onboarding.b2_modules',
         default:
-          'The left menu is rebuilt to the company profile you pick, so the app opens shaped to how you work.',
+          'The modules switched on follow the company profile you pick, and a profile with its own workspace opens the menu shaped to how you work.',
       },
     ],
   },
