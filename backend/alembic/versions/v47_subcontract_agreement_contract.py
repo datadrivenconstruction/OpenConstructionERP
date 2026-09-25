@@ -20,7 +20,7 @@ linked". Inspector-guarded, so an install whose schema came from
 ``create_all`` plus the boot heal reaches this revision and adds nothing.
 
 Revision ID: v47_subcontract_agreement_contract
-Revises: v46_erp_chat_action
+Revises: v47_cvr_claim_backcharge_links
 Create Date: 2026-09-25
 """
 
@@ -33,7 +33,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v47_subcontract_agreement_contract"
-down_revision: Union[str, Sequence[str], None] = "v46_erp_chat_action"
+down_revision: Union[str, Sequence[str], None] = "v47_cvr_claim_backcharge_links"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
