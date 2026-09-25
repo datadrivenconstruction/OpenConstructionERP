@@ -3,7 +3,7 @@
 """Idempotent PostgreSQL setup for row-level-security enforcement.
 
 Runs from the startup auto-migrator when ``settings.rls_enforce`` is on, inside
-its advisory-locked transaction, so exactly one worker provisions it and a role
+its advisory-locked transaction, so workers provision it one at a time and a role
 without DDL rights simply skips (best-effort per statement). It:
 
 1. creates the non-superuser runtime role ``oe_app`` (request transactions
@@ -29,7 +29,9 @@ Global reference tables (cost items, catalogs, regional indices) carry no
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
@@ -39,10 +41,15 @@ from app.core.rls import APP_ROLE, GUC_NAME, SYSTEM_ROLE, rls_enabled
 logger = logging.getLogger(__name__)
 
 # Advisory-lock key that serialises RLS provisioning across workers / replicas
-# on a shared external database, so only one runs the idempotent DDL. Distinct
+# on a shared external database, so they run the idempotent DDL one at a time. Distinct
 # from the schema-heal key in ``postgres_migrator`` (826340271) so the two
 # never contend. Arbitrary but must stay constant across releases.
 _RLS_ADVISORY_LOCK_KEY = 826340272
+
+# How long a worker that finds the provisioning lock taken waits for its holder,
+# and how often it asks. Same bound as the schema heal in ``postgres_migrator``.
+_RLS_LOCK_WAIT_SECONDS = 60.0
+_RLS_LOCK_POLL_SECONDS = 0.5
 
 # Name of the isolation policy created on each tenant table. Stable so the
 # catalog guard (pg_policies) recognises an already-provisioned table.
@@ -184,8 +191,8 @@ async def provision_rls(engine: AsyncEngine, base) -> dict[str, int]:  # noqa: A
 
     Runs *after* ``Base.metadata.create_all`` so every tenant table exists
     (whether the database is fresh or upgraded), takes a transaction-scoped
-    advisory lock so exactly one worker provisions on a shared external
-    database, and bounds each DDL with ``lock_timeout`` so it never stalls live
+    advisory lock so workers on a shared external database provision one at
+    a time, and bounds each DDL with ``lock_timeout`` so it never stalls live
     traffic. A no-op that never opens a transaction while the flag is off.
 
     Wrapped by the caller (``main`` lifespan / ``cli init-db``) so a role
@@ -195,20 +202,50 @@ async def provision_rls(engine: AsyncEngine, base) -> dict[str, int]:  # noqa: A
         return {"roles": 0, "tables": 0}
 
     async with engine.begin() as conn:
-        got_lock = (
-            await conn.execute(
-                text("SELECT pg_try_advisory_xact_lock(:k)"),
-                {"k": _RLS_ADVISORY_LOCK_KEY},
+        # A worker that finds the lock taken waits for the holder and then runs
+        # the provisioning itself. It used to skip at once and go straight on to
+        # verify_rls_role and to serving requests, both of which assume the
+        # holder's roles and policies are committed. On a fresh database that
+        # worker logged "role does not exist" for a role the holder was creating
+        # in that very moment, and its first requests could fail on
+        # ``SET LOCAL ROLE``. Every statement is idempotent, so running after the
+        # holder changes nothing it completed and is this worker's own check.
+        if not await _take_rls_lock(conn):
+            logger.warning(
+                "RLS provisioning: another worker held the lock for more than %.0fs - not verified on this worker",
+                _RLS_LOCK_WAIT_SECONDS,
             )
-        ).scalar()
-        if not got_lock:
-            logger.info("RLS provisioning: another worker holds the lock - skipping")
             return {"roles": 0, "tables": 0}
 
         # Never stall live traffic: cap how long any policy/grant DDL waits for
         # its lock. A busy table simply defers to the next boot.
         await conn.execute(text("SET LOCAL lock_timeout = '3s'"))
         return await apply_rls(conn, base)
+
+
+async def _take_rls_lock(conn: AsyncConnection) -> bool:
+    """Take the provisioning lock, waiting up to ``_RLS_LOCK_WAIT_SECONDS`` for its holder.
+
+    Polls the non-blocking form so the wait is bounded here and not by whatever
+    ``lock_timeout`` the role or the database carries.
+    """
+    deadline = time.monotonic() + _RLS_LOCK_WAIT_SECONDS
+    announced = False
+    while True:
+        got_lock = (
+            await conn.execute(
+                text("SELECT pg_try_advisory_xact_lock(:k)"),
+                {"k": _RLS_ADVISORY_LOCK_KEY},
+            )
+        ).scalar()
+        if got_lock:
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        if not announced:
+            logger.info("RLS provisioning: another worker holds the lock - waiting to verify after it")
+            announced = True
+        await asyncio.sleep(_RLS_LOCK_POLL_SECONDS)
 
 
 async def verify_rls_role(engine: AsyncEngine) -> bool:
