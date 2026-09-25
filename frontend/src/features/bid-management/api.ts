@@ -73,6 +73,8 @@ export interface BidPackageLineItem {
   parent_line_id: string | null;
   spec_attachment_url: string | null;
   is_mandatory: boolean;
+  /** Bill position the line was added from; carried onto the contract line on award. */
+  boq_position_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -105,6 +107,9 @@ export interface Bidder {
   status: BidderStatus;
   disqualification_reason: string | null;
   notes: string;
+  /** Directory entry the bidder was invited from; the award's contract counterparty. */
+  subcontractor_id: string | null;
+  contact_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -283,6 +288,8 @@ export interface CreateBidderPayload {
   contact_phone?: string;
   country?: string;
   notes?: string;
+  subcontractor_id?: string | null;
+  contact_id?: string | null;
 }
 
 export interface CreateInvitationPayload {
@@ -360,6 +367,21 @@ export function listLineItems(packageId: string): Promise<BidPackageLineItem[]> 
 
 export function createLineItem(data: CreateLineItemPayload): Promise<BidPackageLineItem> {
   return apiPost<BidPackageLineItem>('/v1/bid-management/bid-package-line-items/', data);
+}
+
+/**
+ * Copy bill positions into the package as scope lines, keeping the link to
+ * each. Returns only the lines created: positions already in the package and
+ * section headers are skipped by the server.
+ */
+export function addLinesFromBoq(
+  packageId: string,
+  positionIds: string[],
+): Promise<BidPackageLineItem[]> {
+  return apiPost<BidPackageLineItem[]>(
+    `/v1/bid-management/bid-packages/${packageId}/lines/from-boq`,
+    { position_ids: positionIds },
+  );
 }
 
 export function deleteLineItem(id: string): Promise<void> {

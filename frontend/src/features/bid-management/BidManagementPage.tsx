@@ -91,6 +91,8 @@ import {
   type PrequalStatus,
 } from '@/features/subcontractors/api';
 import { bidManagementGuide } from './bidManagementGuide';
+import { bidderPayload, linkStillHolds, type PickedSubcontractor } from './inviteBidder';
+import { AddFromBoqModal } from './AddFromBoqModal';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildBidManagementInsights } from './bidManagementInsights';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
@@ -1862,6 +1864,7 @@ function PackageDrawer({
   // submission, so leveling/award were inert for real packages. This holds the
   // invitation a manager is recording a bid against.
   const [recordFor, setRecordFor] = useState<BidInvitation | null>(null);
+  const [boqPickerOpen, setBoqPickerOpen] = useState(false);
 
   const pkgQ = useQuery({
     queryKey: ['bid-management', 'package', packageId],
@@ -2174,6 +2177,26 @@ function PackageDrawer({
                   packageId={packageId}
                   nextOrderIndex={(linesQ.data ?? []).length}
                 />
+                <div className="mt-2 flex justify-end">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={<ListPlus size={14} />}
+                    onClick={() => setBoqPickerOpen(true)}
+                  >
+                    {t('bid_management.add_from_boq', { defaultValue: 'Add from BOQ' })}
+                  </Button>
+                </div>
+                {boqPickerOpen && (
+                  <AddFromBoqModal
+                    packageId={packageId}
+                    projectId={pkg.project_id}
+                    linkedPositionIds={(linesQ.data ?? [])
+                      .map((li) => li.boq_position_id)
+                      .filter((id): id is string => !!id)}
+                    onClose={() => setBoqPickerOpen(false)}
+                  />
+                )}
               </Card>
 
               <Card padding="sm">
@@ -2618,13 +2641,13 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
   // CONN-39: invite straight from the Subcontractor Directory instead of
   // retyping a firm by hand, prefilling the company and its primary contact.
   const [pickerOpen, setPickerOpen] = useState(false);
+  // The directory entry the award will name as the contract counterparty.
+  // It holds only while the company field still reads the picked name.
+  const [picked, setPicked] = useState<PickedSubcontractor | null>(null);
+  const link = linkStillHolds(picked, company);
   const inviteMut = useMutation({
     mutationFn: async () => {
-      const bidder = await createBidder({
-        package_id: packageId,
-        company_name: company.trim() || email.trim(),
-        contact_email: email.trim(),
-      });
+      const bidder = await createBidder(bidderPayload(packageId, company, email, picked));
       return createInvitation({
         package_id: packageId,
         bidder_ref_id: bidder.id,
@@ -2636,6 +2659,7 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
       qc.invalidateQueries({ queryKey: ['bid-management'] });
       setEmail('');
       setCompany('');
+      setPicked(null);
       // quick_win clarity (audit #9): the invite is recorded and marked "sent",
       // but actual email delivery depends on SMTP being configured. Say so
       // instead of implying mail definitely went out.
@@ -2674,6 +2698,14 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
           placeholder={t('bid_management.company', { defaultValue: 'Company' })}
           className={inputCls}
         />
+        {link && (
+          <p className="text-[11px] text-content-tertiary">
+            {t('bid_management.linked_to_directory', {
+              defaultValue: 'Linked to {{name}} in the Subcontractor Directory. The contract from an award names this firm.',
+              name: link.name,
+            })}
+          </p>
+        )}
         <input
           type="email"
           value={email}
@@ -2695,6 +2727,7 @@ function InlineInviteForm({ packageId }: { packageId: string }) {
         <SubcontractorPickerModal
           onPick={(sub, resolvedEmail) => {
             setCompany(sub.legal_name);
+            setPicked({ id: sub.id, name: sub.legal_name });
             if (resolvedEmail) setEmail(resolvedEmail);
             if (!resolvedEmail) {
               addToast({
