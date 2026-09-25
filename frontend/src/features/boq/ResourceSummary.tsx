@@ -553,8 +553,11 @@ export function ResourceSummary({
                             <td className="px-4 py-2 text-xs font-semibold text-content-primary">
                               {t('boq.rs_total', { defaultValue: 'Total' })}
                               <span className="ml-1 text-content-tertiary font-normal">
-                                ({filteredResources.length}{' '}
-                                {t('boq.rs_resources', { defaultValue: 'resources' })})
+                                ({t('boq.rs_resources_count', {
+                                  count: filteredResources.length,
+                                  defaultValue_one: '{{count}} resource',
+                                  defaultValue: '{{count}} resources',
+                                })})
                               </span>
                             </td>
                             <td />

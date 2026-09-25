@@ -151,8 +151,11 @@ function ImportPreview({
     <div className="border border-border-light rounded-lg overflow-hidden">
       <div className="px-3 py-2 bg-surface-tertiary/50 flex items-center justify-between">
         <span className="text-xs font-medium text-content-secondary">
-          {t('regional.preview', { defaultValue: 'Preview' })}: {positions.length}{' '}
-          {t('regional.positions', { defaultValue: 'positions' })}
+          {t('regional.preview', { defaultValue: 'Preview' })}: {t('regional.positions_count', {
+            count: positions.length,
+            defaultValue_one: '{{count}} position',
+            defaultValue: '{{count}} positions',
+          })}
         </span>
         {positions.length > 20 && (
           <button
@@ -678,8 +681,11 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
                 {parsedPositions && (
                   <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600">
                     <CheckCircle2 size={14} />
-                    {parsedPositions.length}{' '}
-                    {t('regional.positions_found', { defaultValue: 'positions found' })}
+                    {t('regional.positions_found_count', {
+                      count: parsedPositions.length,
+                      defaultValue_one: '{{count}} position found',
+                      defaultValue: '{{count}} positions found',
+                    })}
                     <Badge variant="blue" className="ml-2">
                       {template.excelTemplate.classification}
                     </Badge>

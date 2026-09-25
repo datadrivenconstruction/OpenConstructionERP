@@ -312,8 +312,11 @@ function ImportResultBanner({
         <div className="mt-2 text-xs text-amber-700 dark:text-amber-300">
           <div className="flex items-center gap-1 font-medium">
             <AlertTriangle className="w-3.5 h-3.5" />
-            {result.warnings.length}{' '}
-            {t('bim.requirements.warnings', { defaultValue: 'warning(s)' })}
+            {t('bim.requirements.warnings_count', {
+              count: result.warnings.length,
+              defaultValue_one: '{{count}} warning',
+              defaultValue: '{{count}} warnings',
+            })}
           </div>
           {result.warnings.slice(0, 3).map((w, i) => (
             <div key={`warn-${(w.msg ?? '').slice(0, 30)}-${i}`} className="ml-5 mt-0.5">

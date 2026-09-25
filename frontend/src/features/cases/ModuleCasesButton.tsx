@@ -132,8 +132,11 @@ export function ModuleCasesButton({ className }: ModuleCasesButtonProps) {
                       {t(pb.titleKey, { defaultValue: pb.titleDefault })}
                     </span>
                     <span className="block text-[10px] text-content-tertiary mt-0.5">
-                      {pb.steps.length}{' '}
-                      {t('cases_for_module.steps', { defaultValue: 'steps' })}
+                      {t('cases_for_module.steps_count', {
+                        count: pb.steps.length,
+                        defaultValue_one: '{{count}} step',
+                        defaultValue: '{{count}} steps',
+                      })}
                     </span>
                   </span>
                   <ArrowRight

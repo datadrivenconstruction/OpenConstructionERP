@@ -462,8 +462,11 @@ function LaneSection({
               </div>
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary">
                 <span>
-                  {g.element_count}{' '}
-                  {t('match.wizard.elementsLc', { defaultValue: 'elements' })}
+                  {t('match.wizard.elements_count', {
+                    count: g.element_count,
+                    defaultValue_one: '{{count}} element',
+                    defaultValue: '{{count}} elements',
+                  })}
                 </span>
                 {g.suggested_code ? (
                   <>

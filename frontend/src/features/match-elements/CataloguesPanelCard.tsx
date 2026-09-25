@@ -357,8 +357,11 @@ export function CataloguesPanelCard({ preferredRegion }: Props) {
                     {stats.available}
                   </span>{' '}
                   {t('catalogues.stat_available', 'available')} ·{' '}
-                  {stats.total}{' '}
-                  {t('catalogues.stat_total', 'total regions')}
+                  {t('catalogues.stat_total_count', {
+                    count: stats.total,
+                    defaultValue_one: '{{count}} region in total',
+                    defaultValue: '{{count}} regions in total',
+                  })}
                 </>
               )}
             </div>

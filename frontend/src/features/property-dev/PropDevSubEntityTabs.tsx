@@ -2856,13 +2856,18 @@ function EscrowAccountCard({
 
       <div className="mt-3 flex items-center justify-between text-xs">
         <span className="text-content-tertiary">
-          {balanceQ.data?.transaction_count ?? 0}{' '}
-          {t('propdev.escrow.transactions', { defaultValue: 'transactions' })}
+          {t('propdev.escrow.transactions_count', {
+            count: balanceQ.data?.transaction_count ?? 0,
+            defaultValue_one: '{{count}} transaction',
+            defaultValue: '{{count}} transactions',
+          })}
           {balanceQ.data && balanceQ.data.unreconciled_count > 0 && (
             <span className="text-amber-600 ml-2">
-              · {balanceQ.data.unreconciled_count}{' '}
-              {t('propdev.escrow.unreconciled', {
-                defaultValue: 'unreconciled',
+              ·{' '}
+              {t('propdev.escrow.unreconciled_count', {
+                count: balanceQ.data.unreconciled_count,
+                defaultValue_one: '{{count}} unreconciled',
+                defaultValue: '{{count}} unreconciled',
               })}
             </span>
           )}

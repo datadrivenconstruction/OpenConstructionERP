@@ -1568,5 +1568,13 @@
     ],
     "key_count_at_seed": 3,
     "note": "Total and Local, spelled the same in the Romance locales (erp_chat.action.field.total, login.mod.local, takeoff_viewer.local_only). Each of these locales translates the surrounding prose."
+  },
+  {
+    "locale_set": [
+      "es",
+      "fil"
+    ],
+    "key_count_at_seed": 6,
+    "note": "The singular of a counted error label, '{{count}} error': Spanish spells the noun the same as English and Filipino uses the English loanword, as its own error strings already do. Their plural forms (errores, and the unchanged Filipino) are translated."
   }
 ]

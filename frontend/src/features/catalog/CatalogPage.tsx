@@ -2251,8 +2251,11 @@ export function CatalogPage() {
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 animate-fade-in">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-elevated px-5 py-3 shadow-xl">
             <span className="text-sm font-semibold text-content-primary tabular-nums">
-              {selectedIds.size}{' '}
-              {t('catalog.selected', { defaultValue: 'selected' })}
+              {t('catalog.selected_count', {
+                count: selectedIds.size,
+                defaultValue_one: '{{count}} selected',
+                defaultValue: '{{count}} selected',
+              })}
             </span>
             <div className="w-px h-6 bg-border-light" />
             <Button

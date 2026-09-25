@@ -2886,8 +2886,11 @@ export function ImportDatabasePage() {
                   {t('costs.import_complete', { defaultValue: 'Import Complete' })}
                 </h3>
                 <p className="text-sm text-content-secondary">
-                  {result.total_rows}{' '}
-                  {t('costs.import_rows_processed', { defaultValue: 'rows processed' })}
+                  {t('costs.import_rows_processed_count', {
+                    count: result.total_rows,
+                    defaultValue_one: '{{count}} row processed',
+                    defaultValue: '{{count}} rows processed',
+                  })}
                 </p>
               </div>
             </div>

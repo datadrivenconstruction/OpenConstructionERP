@@ -434,8 +434,11 @@ function RecentEstimatesPanel({
                           <>
                             <span aria-hidden="true">·</span>
                             <span>
-                              {job.items_count}{' '}
-                              {t('ai.items', { defaultValue: 'items' })}
+                              {t('ai.items_count', {
+                                count: job.items_count,
+                                defaultValue_one: '{{count}} item',
+                                defaultValue: '{{count}} items',
+                              })}
                             </span>
                           </>
                         )}

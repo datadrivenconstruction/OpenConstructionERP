@@ -3481,8 +3481,11 @@ function AssignmentsTab({
                       {idToName[c.resource_id] || c.resource_name}
                     </p>
                     <p className="mt-0.5 text-xs text-content-secondary">
-                      {c.conflicts.length}{' '}
-                      {t('resources.overlap_count', { defaultValue: 'overlap(s)' })}
+                      {t('resources.overlap_count_n', {
+                        count: c.conflicts.length,
+                        defaultValue_one: '{{count}} overlap',
+                        defaultValue: '{{count}} overlaps',
+                      })}
                     </p>
                   </li>
                 ))}

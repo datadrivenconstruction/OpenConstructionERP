@@ -383,8 +383,11 @@ export function MissingDataPanel({ sessionId }: MissingDataPanelProps) {
             {t('explorer.missingness_title', { defaultValue: 'Column Fill-Rate Matrix' })}
           </h3>
           <Badge size="sm" variant="neutral">
-            {data.columns.length}{' '}
-            {t('explorer.missingness_columns_suffix', { defaultValue: 'columns' })}
+            {t('explorer.missingness_columns_count', {
+              count: data.columns.length,
+              defaultValue_one: '{{count}} column',
+              defaultValue: '{{count}} columns',
+            })}
           </Badge>
           {isFetching && <Loader2 className="animate-spin text-content-tertiary" size={12} />}
         </div>

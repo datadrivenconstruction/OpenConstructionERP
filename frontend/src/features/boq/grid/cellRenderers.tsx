@@ -123,10 +123,12 @@ function getValidationTooltip(
   switch (status) {
     case 'passed':
       return t('boq.validation_passed', { defaultValue: 'Validation passed - position is complete' });
+    // Not boq.validation_warnings/_errors: those are the counted toolbar
+    // summary, and without a count they printed a literal "{{count}}" here.
     case 'warnings':
-      return t('boq.validation_warnings', { defaultValue: 'Validation warnings - review recommended' });
+      return t('boq.validation_tooltip_warnings', { defaultValue: 'Validation warnings, review recommended' });
     case 'errors':
-      return t('boq.validation_errors', { defaultValue: 'Validation errors - action required' });
+      return t('boq.validation_tooltip_errors', { defaultValue: 'Validation errors, action required' });
     case 'pending':
       return t('boq.validation_pending', { defaultValue: 'Validation pending - not yet checked' });
     default:

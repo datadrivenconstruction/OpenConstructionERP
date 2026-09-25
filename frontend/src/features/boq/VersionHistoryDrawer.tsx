@@ -471,8 +471,11 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                             <div className="flex items-center gap-3 mt-1.5">
                               {snap.position_count != null && (
                               <span className="text-2xs text-content-tertiary">
-                                {snap.position_count}{' '}
-                                {t('boq.positions', { defaultValue: 'positions' })}
+                                {t('boq.positions_count', {
+                                  count: snap.position_count,
+                                  defaultValue_one: '{{count}} position',
+                                  defaultValue: '{{count}} positions',
+                                })}
                               </span>
                               )}
                               {snap.grand_total != null && (

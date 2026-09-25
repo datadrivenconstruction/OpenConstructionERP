@@ -282,8 +282,11 @@ function TemplateCard({
         <div className="mt-auto flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
           <span className="flex items-center gap-1">
             <Layers className="h-3.5 w-3.5" />
-            {template.component_count}{' '}
-            {t('assemblies.library.components', 'components')}
+            {t('assemblies.library.components_count', {
+              count: template.component_count,
+              defaultValue_one: '{{count}} component',
+              defaultValue: '{{count}} components',
+            })}
           </span>
           <span className="font-mono text-zinc-700 dark:text-zinc-300">
             {t('assemblies.library.per_unit', 'per')} {unitGlyph(template.unit)}
@@ -546,8 +549,11 @@ function TemplateDrawer({
             </h2>
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
               {categoryLabel(template.category, t)} · {t('assemblies.library.per_unit', 'per')}{' '}
-              {unitGlyph(template.unit)} · {template.component_count}{' '}
-              {t('assemblies.library.components', 'components')}
+              {unitGlyph(template.unit)} · {t('assemblies.library.components_count', {
+                count: template.component_count,
+                defaultValue_one: '{{count}} component',
+                defaultValue: '{{count}} components',
+              })}
             </p>
           </div>
           <button
