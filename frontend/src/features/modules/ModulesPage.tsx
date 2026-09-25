@@ -1986,6 +1986,7 @@ function DataPackagesTab() {
       message: t('marketplace.uninstall_demo_confirm', {
         defaultValue: 'Are you sure you want to uninstall this demo project? All associated data will be deleted.',
       }),
+      confirmLabel: t('marketplace.uninstall', { defaultValue: 'Uninstall' }),
     });
     if (!confirmed) return;
     setInstallingId(`demo-${demoId}`);
@@ -2016,6 +2017,7 @@ function DataPackagesTab() {
       message: t('marketplace.reinstall_demo_confirm', {
         defaultValue: 'This will delete the existing demo project and create a fresh copy. All changes you made to the demo will be lost.',
       }),
+      confirmLabel: t('marketplace.reinstall', { defaultValue: 'Reinstall' }),
     });
     if (!confirmed) return;
     setInstallingId(`demo-${demoId}`);

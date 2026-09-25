@@ -1809,6 +1809,7 @@ function PackageDetail({
                       const ok = await confirm({
                         title: t('tendering.award_confirm_title', { defaultValue: 'Award contract?' }),
                         message: t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? Winning rates are written back to the BOQ and other bids are rejected. This action cannot be undone.', company: bid.company_name }),
+                        confirmLabel: t('tendering.award', 'Award'),
                         variant: 'warning',
                       });
                       if (ok) awardMutation.mutate(bid.id);
