@@ -14,6 +14,7 @@
 // "Re-check", and the gate clears.
 
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldCheck,
@@ -375,6 +376,22 @@ export function ComplianceGate({
   );
 }
 
+/**
+ * What a person calls the rule set a finding came from.
+ *
+ * A finding's id is the rule set joined to the rule (`boq_quality.unrealistic_rate`),
+ * which is for support and not for a reader, so the row names the set in the
+ * reader's language and keeps the id in the tooltip. A set with no name in the
+ * bundle shows nothing rather than its id. The element reference is treated
+ * the same way: the server sends a label for every line and for the contract,
+ * and a finding pointing at anything else shows no bare UUID.
+ */
+function findingSource(t: TFunction, v: ComplianceViolation): string {
+  const set = (v.rule_id || '').split('.')[0];
+  if (!set) return '';
+  return t(`validation.rs_label_${set}`, { defaultValue: '' });
+}
+
 function ViolationGroup({
   tone,
   title,
@@ -384,6 +401,7 @@ function ViolationGroup({
   title: string;
   violations: ComplianceViolation[];
 }) {
+  const { t } = useTranslation();
   const isError = tone === 'error';
   const keys = findingKeys(violations);
   return (
@@ -423,14 +441,16 @@ function ViolationGroup({
               )}
               <div className="min-w-0">
                 <p className="text-content-primary">{v.message}</p>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary">
-                  <span className="font-mono">{v.rule_id}</span>
-                  {v.element_label ? (
-                    <span>· {v.element_label}</span>
-                  ) : (
-                    v.element_ref && (
-                      <span className="font-mono">· {v.element_ref}</span>
-                    )
+                <div
+                  className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-content-tertiary"
+                  title={[v.rule_id, v.element_ref].filter(Boolean).join(' · ')}
+                >
+                  {findingSource(t, v) && <span>{findingSource(t, v)}</span>}
+                  {v.element_label && (
+                    <span>
+                      {findingSource(t, v) ? '· ' : ''}
+                      {v.element_label}
+                    </span>
                   )}
                 </div>
                 {v.suggestion && (
