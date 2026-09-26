@@ -71255,7 +71255,7 @@
           "method": "GET",
           "path": "/progress-claims/",
           "handler": "list_progress_claim_options",
-          "response_model": "list[ProgressClaimOption]",
+          "response_model": "ProgressClaimOptionListResponse",
           "request_schema": "CvrService"
         },
         {
@@ -72129,6 +72129,23 @@
               "name": "currency",
               "type": "str",
               "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "ProgressClaimOptionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every progress claim the picker can offer, plus how many there are.\n\nNot paged: the picker has to see every claim on the project, so ``total``\nequals the length of ``items``. It is there so a reader can tell the whole\nset from a part of it. Declared after :class:`ProgressClaimOption` because\n``from __future__ import annotations`` makes the field a string.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProgressClaimOption]"
+            },
+            {
+              "name": "total",
+              "type": "int"
             }
           ]
         }
@@ -205060,7 +205077,7 @@
           "method": "GET",
           "path": "/unlinked-twins/",
           "handler": "list_unlinked_twins",
-          "response_model": "list[UnlinkedTwinResponse]",
+          "response_model": "UnlinkedTwinListResponse",
           "request_schema": "None"
         },
         {
@@ -206186,6 +206203,23 @@
             {
               "name": "value_close",
               "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "UnlinkedTwinListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every likely twin pair on the project, plus how many there are.\n\nNot paged: the banner has to raise every pair, so ``total`` equals the\nlength of ``items``. Declared after :class:`UnlinkedTwinResponse` because\n``from __future__ import annotations`` makes the field a string.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[UnlinkedTwinResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
             }
           ]
         },
@@ -233398,7 +233432,7 @@
     "total_columns": 7101,
     "total_relationships": 234,
     "total_routes": 3703,
-    "total_schemas": 3483,
+    "total_schemas": 3485,
     "total_python_files": 2208,
     "frontend_features": 190,
     "frontend_ts_files": 2750,
