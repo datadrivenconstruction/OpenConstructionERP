@@ -72,7 +72,7 @@ from app.modules.cvr.schemas import (
     PaymentApplicationListResponse,
     PaymentApplicationResponse,
     PaymentApplicationUpdate,
-    ProgressClaimOption,
+    ProgressClaimOptionListResponse,
 )
 from app.modules.cvr.service import CvrService
 
@@ -511,7 +511,7 @@ async def list_payment_applications(
 
 @router.get(
     "/progress-claims/",
-    response_model=list[ProgressClaimOption],
+    response_model=ProgressClaimOptionListResponse,
     dependencies=[Depends(RequirePermission("cvr.read"))],
 )
 async def list_progress_claim_options(
@@ -519,10 +519,11 @@ async def list_progress_claim_options(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
     service: CvrService = Depends(_get_service),
-) -> list[ProgressClaimOption]:
+) -> ProgressClaimOptionListResponse:
     """Contract progress claims of the project, for the payment application picker."""
     await verify_project_access(project_id, user_id, session)
-    return await service.list_progress_claims_for_project(project_id)
+    claims = await service.list_progress_claims_for_project(project_id)
+    return ProgressClaimOptionListResponse(items=claims, total=len(claims))
 
 
 @router.post(

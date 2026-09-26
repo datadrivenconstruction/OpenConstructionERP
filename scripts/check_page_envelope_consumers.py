@@ -265,6 +265,11 @@ MIGRATED_ENDPOINTS: dict[str, str] = {
     # than a way round it: without a total there is nothing to say a page was
     # short, and the wrapper would have no way to know it had everything.
     "/v1/subcontractors/payment-applications/{}/lines": "pay application lines",
+    # Not paged: every pair on the project comes back and `total` says so. The
+    # CVR claim picker went to the same shape at the same time, but its caller
+    # builds the URL on a `${BASE}` prefix this scan cannot read, so it is not
+    # listed rather than listed at zero call sites.
+    "/v1/subcontractors/unlinked-twins/": "subcontract twin pairs",
 }
 
 # Left bare on purpose in wave 4: `/v1/documents/photos/recent/`. It is a

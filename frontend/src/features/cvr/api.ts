@@ -10,7 +10,7 @@
  * .toFixed on it or use '+' to add two of them.
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
 
 const BASE = '/v1/cvr';
 
@@ -310,9 +310,11 @@ export interface ProgressClaimOption {
 }
 
 export async function fetchProgressClaimOptions(projectId: string): Promise<ProgressClaimOption[]> {
-  return apiGet<ProgressClaimOption[]>(
+  // The route is not paged, it answers with every claim of the project.
+  const page = await apiGet<Pick<Page<ProgressClaimOption>, 'items' | 'total'>>(
     `${BASE}/progress-claims/?project_id=${encodeURIComponent(projectId)}`,
   );
+  return page.items;
 }
 
 export async function deletePaymentApplication(id: string): Promise<void> {

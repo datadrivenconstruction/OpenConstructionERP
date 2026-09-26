@@ -89,6 +89,7 @@ from app.modules.subcontractors.schemas import (
     SuggestedClaimLinesResponse,
     TaxIdValidationRequest,
     TaxIdValidationResponse,
+    UnlinkedTwinListResponse,
     UnlinkedTwinResponse,
     VendorEligibility,
     WorkPackageCreate,
@@ -662,13 +663,13 @@ async def update_agreement(
     return AgreementResponse.model_validate(entity)
 
 
-@router.get("/unlinked-twins/", response_model=list[UnlinkedTwinResponse])
+@router.get("/unlinked-twins/", response_model=UnlinkedTwinListResponse)
 async def list_unlinked_twins(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
     _perm: None = Depends(RequirePermission("subcontractors.read")),
-) -> list[UnlinkedTwinResponse]:
+) -> UnlinkedTwinListResponse:
     """Agreements and contracts on the project that look like the same subcontract.
 
     Unlinked, finance counts such a pair twice. Nothing here merges them: link
@@ -676,7 +677,8 @@ async def list_unlinked_twins(
     """
     await verify_project_access(project_id, user_id, session)
     pairs = await SubcontractorService(session).find_unlinked_twins(project_id)
-    return [UnlinkedTwinResponse.model_validate(pair) for pair in pairs]
+    items = [UnlinkedTwinResponse.model_validate(pair) for pair in pairs]
+    return UnlinkedTwinListResponse(items=items, total=len(items))
 
 
 @router.post("/agreements/{agreement_id}/dismiss-twin/", response_model=AgreementResponse)
