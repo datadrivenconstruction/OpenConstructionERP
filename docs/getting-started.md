@@ -59,6 +59,13 @@ The app runs at [localhost:8080](http://localhost:8080).
 | Docker | Docker with Compose v2 |
 | Source development | Python 3.12+, Node.js 22+, PostgreSQL 16+ |
 
+## Watch
+
+- [Install and set up your first project](https://www.youtube.com/watch?v=WjDK-uk9b1w) (4:41)
+- [Full product walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) (12:00)
+- [Build an estimate step by step](https://www.youtube.com/watch?v=zGgfX19b3gc) (4:48)
+- More by topic in the [Video guides](../README.md#video-guides) section of the README, or on the [OpenConstruction Academy channel](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q/videos).
+
 ## What's Next
 
 - Explore the demo project that ships with every fresh install.
