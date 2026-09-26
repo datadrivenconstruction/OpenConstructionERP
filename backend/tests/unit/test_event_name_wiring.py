@@ -128,6 +128,12 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
     "erp_chat.message.deleted": "erp_chat subscribes to its own delete event that no service publishes",
     "estimate.approved": "core/event_handlers.py:1831; no module publishes an estimate approval",
+    "finance.invoice.created": (
+        "property_dev/events.py:684; its only publisher was the duplicate claim-invoice "
+        "subscriber removed from notifications/_wave5_cross_module_subscribers.py in "
+        "8b71dec65, and that one never sent the metadata.instalment_buyer_id the handler "
+        "keys on. Nothing writes that key, so publishing from finance would not wake it either"
+    ),
     "inspection.completed.passed": "qms subscribes to a pass-specific name; inspections publish a single completion event",
     "inspection.scheduled": "nothing publishes when an inspection is scheduled",
     "meeting.action_item.created": (
