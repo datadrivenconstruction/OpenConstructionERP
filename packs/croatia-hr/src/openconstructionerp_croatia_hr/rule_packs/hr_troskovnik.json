@@ -17,7 +17,6 @@
     "boq_quality.position_has_description",
     "boq_quality.position_has_quantity",
     "boq_quality.position_has_unit_rate",
-    "boq_quality.no_zero_unit_rate",
     "boq_quality.no_duplicate_ordinals",
     "boq_quality.total_mismatch",
     "boq_quality.currency_consistency"

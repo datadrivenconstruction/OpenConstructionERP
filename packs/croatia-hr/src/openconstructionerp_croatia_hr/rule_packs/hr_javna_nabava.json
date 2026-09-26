@@ -15,7 +15,6 @@
   "enables_rule_ids": [
     "boq_quality.position_has_quantity",
     "boq_quality.position_has_unit_rate",
-    "boq_quality.no_missing_quantity",
     "boq_quality.total_mismatch",
     "boq_quality.currency_consistency"
   ]
