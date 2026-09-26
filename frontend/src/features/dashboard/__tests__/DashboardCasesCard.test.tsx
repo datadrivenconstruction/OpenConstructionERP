@@ -32,7 +32,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { DashboardCasesCard } from '../DashboardCasesCard';
@@ -40,6 +41,9 @@ import { useDashboardLayoutStore } from '@/stores/useDashboardLayoutStore';
 import { useCasesStore } from '@/features/cases/useCasesStore';
 import { PLAYBOOKS } from '@/features/cases/playbooks';
 import { dealCaseFaces } from '@/features/cases/caseFaces';
+import { startHereVideo } from '@/features/videos/academy';
+import { dashboardVideos } from '@/features/videos/DashboardVideosStrip';
+import { useVideosStore } from '@/features/videos/useVideosStore';
 
 vi.mock('react-i18next', () => {
   const t = (key: string, opts?: Record<string, unknown>) => {
@@ -112,10 +116,14 @@ function caseTileCount(): number {
 }
 
 function renderCard() {
+  // The video half reads the active project's country through React Query.
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter initialEntries={['/']}>
-      <DashboardCasesCard />
-    </MemoryRouter>,
+    <QueryClientProvider client={client}>
+      <MemoryRouter initialEntries={['/']}>
+        <DashboardCasesCard />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
@@ -270,4 +278,49 @@ describe('DashboardCasesCard faces', () => {
     // gallery when it was cut from four rows to two.
     expect(checked).toBeGreaterThan(8);
   });
+});
+
+describe('DashboardCasesCard video guides', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useVideosStore.setState({ role: 'estimator', market: 'any', started: {}, watched: {} });
+  });
+
+  it('shows a row of video guides above the cases, Start here first, then picks for the role', async () => {
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    const tiles = within(strip).getAllByTestId('dashboard-video');
+    const expected = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 4);
+    expect(tiles).toHaveLength(4);
+    expect(expected[0]!.id).toBe(startHereVideo()!.id);
+    expect(tiles.map((t) => t.getAttribute('aria-label'))).toEqual(expected.map((v) => `Play: ${v.title}`));
+    expect(within(tiles[0]!).getByText('Start here')).toBeTruthy();
+    // Every one plays now, and every cover comes from the video host.
+    for (const v of expected) {
+      expect(v.status).toBe('published');
+      expect(v.cover).toMatch(/^https:\/\/i\.ytimg\.com\//);
+    }
+    // Both halves are labelled, and the video half comes first.
+    const card = screen.getByTestId('dashboard-cases-card');
+    expect(strip.compareDocumentPosition(card.querySelector('div.grid')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(strip).getByText('Video guides')).toBeTruthy();
+    expect(within(card).getByText('Use cases')).toBeTruthy();
+  });
+
+  it('plays nothing on the dashboard: a tile opens the Videos page at that video', async () => {
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    expect(document.querySelector('iframe')).toBeNull();
+    fireEvent.click(within(strip).getAllByTestId('dashboard-video')[0]!);
+    expect(navigateSpy).toHaveBeenCalledWith(`/videos?v=${startHereVideo()!.id}`);
+    expect(within(strip).getByRole('link', { name: /All videos/ }).getAttribute('href')).toBe('/videos');
+  });
+
+  it('shows fewer videos in a narrower card, and keeps two on a phone', async () => {
+    useDashboardLayoutStore.setState({ order: [], hidden: [], spans: { [WIDGET_ID]: 2 } });
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    expect(within(strip).getAllByTestId('dashboard-video')).toHaveLength(2);
+  });
+
 });
