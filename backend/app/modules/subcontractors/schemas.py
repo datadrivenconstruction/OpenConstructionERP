@@ -516,6 +516,18 @@ class UnlinkedTwinResponse(BaseModel):
     value_close: bool
 
 
+class UnlinkedTwinListResponse(BaseModel):
+    """Every likely twin pair on the project, plus how many there are.
+
+    Not paged: the banner has to raise every pair, so ``total`` equals the
+    length of ``items``. Declared after :class:`UnlinkedTwinResponse` because
+    ``from __future__ import annotations`` makes the field a string.
+    """
+
+    items: list[UnlinkedTwinResponse]
+    total: int
+
+
 class DismissTwinRequest(BaseModel):
     """Say an agreement and a contract are different subcontracts."""
 

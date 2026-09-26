@@ -354,10 +354,12 @@ export interface UnlinkedTwin {
   value_close: boolean;
 }
 
-export function listUnlinkedTwins(projectId: string): Promise<UnlinkedTwin[]> {
-  return apiGet<UnlinkedTwin[]>(
+export async function listUnlinkedTwins(projectId: string): Promise<UnlinkedTwin[]> {
+  // The route is not paged, it answers with every pair on the project.
+  const page = await apiGet<Pick<Page<UnlinkedTwin>, 'items' | 'total'>>(
     `/v1/subcontractors/unlinked-twins/?project_id=${encodeURIComponent(projectId)}`,
   );
+  return page.items;
 }
 
 /** Record that the agreement and the contract are different subcontracts. */

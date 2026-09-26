@@ -370,3 +370,16 @@ class ProgressClaimOption(BaseModel):
     retention_amount: DecimalMoney = Decimal("0")
     net_due: DecimalMoney = Decimal("0")
     currency: str = ""
+
+
+class ProgressClaimOptionListResponse(BaseModel):
+    """Every progress claim the picker can offer, plus how many there are.
+
+    Not paged: the picker has to see every claim on the project, so ``total``
+    equals the length of ``items``. It is there so a reader can tell the whole
+    set from a part of it. Declared after :class:`ProgressClaimOption` because
+    ``from __future__ import annotations`` makes the field a string.
+    """
+
+    items: list[ProgressClaimOption]
+    total: int
