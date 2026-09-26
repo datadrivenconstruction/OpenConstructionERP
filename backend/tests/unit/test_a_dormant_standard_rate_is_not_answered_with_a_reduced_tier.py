@@ -58,6 +58,13 @@ MISQUOTED = [
     ("DE", "1990-01-01", "7"),
     ("FI", "2015-01-01", "14"),
     ("GB", "1990-01-01", "0"),
+    # Greece arrived with its 24 % standard row opening on 2016-06-01 beside a
+    # 13 % tier on file from 2011-01-01. The 23 % rate in force from 2010-07-01
+    # to 2016-05-31 is not in the seed, so a Greek date in that span has no
+    # standard rate to answer with. Refusing is the designed answer, the same
+    # one the other members give; filing the 23 % window is a data addition
+    # for later, not something this gate should force by staying red.
+    ("GR", "2014-01-01", "13"),
     ("IE", "2005-01-01", "13.5"),
     ("IT", "2000-01-01", "10"),
     ("RU", "2010-01-01", "10"),
@@ -110,7 +117,7 @@ def _census(rows: list[TaxRateRow], dates: list[str]) -> str:
 def test_a_reduced_tier_in_force_alone_does_not_answer_for_the_standard_rate(
     country: str, on_date: str, was: str
 ) -> None:
-    """Each of the six countries whose standard rate starts after some of its tiers."""
+    """Each country whose standard rate starts after some of its tiers."""
     outcome = resolve(_seed_rows(), country, on_date=on_date)
     assert outcome.status == NOT_IN_FORCE, (
         f"{country} on {on_date} answered {outcome.status} with {outcome.combined_rate_pct}. "
