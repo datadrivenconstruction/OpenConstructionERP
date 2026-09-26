@@ -67,6 +67,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 <td valign="top">
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> **Get Started**
+- [Video guides](#video-guides)
 - [Why OpenConstructionERP?](#why-openconstructionerp)
 - [A Look Inside](#a-look-inside)
 - [Quick Start](#quick-start)
@@ -122,6 +123,101 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 ---
 
 > **Ready to try it?** See the **[Getting Started guide](docs/getting-started.md)** for three ways to install (desktop app, pip, Docker) with prerequisites and step-by-step instructions, or jump straight to the **[Quick Start](#quick-start)** section below.
+
+---
+
+## Video guides
+
+Short, practical videos, most of them from the [OpenConstruction Academy](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q) YouTube channel. Click a thumbnail to watch. Each one follows a real task in the app, from installing it to getting paid. Videos marked DE are in German, the rest are in English.
+
+**Start here**
+
+<table>
+<tr>
+<td width="50%" valign="top"><a href="https://www.youtube.com/watch?v=WjDK-uk9b1w"><img src="https://i.ytimg.com/vi/WjDK-uk9b1w/hqdefault.jpg" alt="Install and set up your first project" width="100%"></a><br/><sub><b>Install and set up your first project</b> · 4:41</sub></td>
+<td width="50%" valign="top"><a href="https://www.youtube.com/watch?v=X06cIaroAeI"><img src="https://i.ytimg.com/vi/X06cIaroAeI/hqdefault.jpg" alt="Full product walkthrough" width="100%"></a><br/><sub><b>Full product walkthrough</b> · 12:00</sub></td>
+</tr>
+</table>
+
+**Estimating and BOQ**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=zGgfX19b3gc"><img src="https://i.ytimg.com/vi/zGgfX19b3gc/hqdefault.jpg" alt="Build an estimate step by step" width="100%"></a><br/><sub><b>Build an estimate step by step</b> · 4:48</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=FRI5_7CsZT0"><img src="https://i.ytimg.com/vi/FRI5_7CsZT0/hqdefault.jpg" alt="Overhead, profit and contingency" width="100%"></a><br/><sub><b>Overhead, profit and contingency</b> · 3:54</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=LejLQ4skfvM"><img src="https://i.ytimg.com/vi/LejLQ4skfvM/hqdefault.jpg" alt="Price a construction job" width="100%"></a><br/><sub><b>Price a construction job</b> · 4:49</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=tZEdPehNE6Q"><img src="https://i.ytimg.com/vi/tZEdPehNE6Q/hqdefault.jpg" alt="Ein Leistungsverzeichnis aufbauen" width="100%"></a><br/><sub><b>Ein Leistungsverzeichnis aufbauen</b> · 5:02 · DE</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=OJ1FMzwY3FM"><img src="https://i.ytimg.com/vi/OJ1FMzwY3FM/hqdefault.jpg" alt="Vom vollständigen LV zur Kostenbasis" width="100%"></a><br/><sub><b>Vom vollständigen LV zur Kostenbasis</b> · 10:15 · DE</sub></td>
+<td width="33%"></td>
+</tr>
+</table>
+
+**Cost databases and unit rates**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=kEN-F92hNZc"><img src="https://i.ytimg.com/vi/kEN-F92hNZc/hqdefault.jpg" alt="Check a unit rate in the cost database" width="100%"></a><br/><sub><b>Check a unit rate in the cost database</b> · 4:02</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=qFGKRIXHM8w"><img src="https://i.ytimg.com/vi/qFGKRIXHM8w/hqdefault.jpg" alt="Einheitspreise und Kosten nachvollziehen" width="100%"></a><br/><sub><b>Einheitspreise und Kosten nachvollziehen</b> · 6:36 · DE</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=uBhNqXw2dm0"><img src="https://i.ytimg.com/vi/uBhNqXw2dm0/hqdefault.jpg" alt="Kostenquellen und Ressourcen anpassen" width="100%"></a><br/><sub><b>Kostenquellen und Ressourcen anpassen</b> · 7:35 · DE</sub></td>
+</tr>
+</table>
+
+**Quantities from CAD, BIM and PDF**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=YEk8F3W28po"><img src="https://i.ytimg.com/vi/YEk8F3W28po/hqdefault.jpg" alt="Mengen aus PDF und DWG ermitteln" width="100%"></a><br/><sub><b>Mengen aus PDF und DWG ermitteln</b> · 5:55 · DE</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=KI6e3s7XScY"><img src="https://i.ytimg.com/vi/KI6e3s7XScY/hqdefault.jpg" alt="BIM-Modelle verstehen und nutzen" width="100%"></a><br/><sub><b>BIM-Modelle verstehen und nutzen</b> · 5:41 · DE</sub></td>
+<td width="33%"></td>
+</tr>
+</table>
+
+**Tendering and procurement**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=7u7Ur3ZFe94"><img src="https://i.ytimg.com/vi/7u7Ur3ZFe94/hqdefault.jpg" alt="Tender work to subcontractors" width="100%"></a><br/><sub><b>Tender work to subcontractors</b> · 4:23</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=T3FBggAeFJ4"><img src="https://i.ytimg.com/vi/T3FBggAeFJ4/hqdefault.jpg" alt="GAEB-Dateien kontrolliert austauschen" width="100%"></a><br/><sub><b>GAEB-Dateien kontrolliert austauschen</b> · 5:34 · DE</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=75sjLEjXiBc"><img src="https://i.ytimg.com/vi/75sjLEjXiBc/hqdefault.jpg" alt="Angebote prüfen und Vergabe vorbereiten" width="100%"></a><br/><sub><b>Angebote prüfen und Vergabe vorbereiten</b> · 3:04 · DE</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=G0a5pEiXaS4"><img src="https://i.ytimg.com/vi/G0a5pEiXaS4/hqdefault.jpg" alt="Material und Teillieferung verfolgen" width="100%"></a><br/><sub><b>Material und Teillieferung verfolgen</b> · 7:01 · DE</sub></td>
+<td width="33%"></td>
+<td width="33%"></td>
+</tr>
+</table>
+
+**Schedule**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=bGUpude30wc"><img src="https://i.ytimg.com/vi/bGUpude30wc/hqdefault.jpg" alt="Abhängigkeiten und Ressourceneinsatz planen" width="100%"></a><br/><sub><b>Abhängigkeiten und Ressourceneinsatz planen</b> · 4:31 · DE</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=fKGh2e6pJqc"><img src="https://i.ytimg.com/vi/fKGh2e6pJqc/hqdefault.jpg" alt="Schedule to substantial performance" width="100%"></a><br/><sub><b>Schedule to substantial performance</b> · 4:49</sub></td>
+<td width="33%"></td>
+</tr>
+</table>
+
+**Finance, payments and contracts**
+
+<table>
+<tr>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=b-qv_emcDwc"><img src="https://i.ytimg.com/vi/b-qv_emcDwc/hqdefault.jpg" alt="Monthly progress draw (CCDC 2)" width="100%"></a><br/><sub><b>Monthly progress draw (CCDC 2)</b> · 4:58</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=aQlkuS7ShCM"><img src="https://i.ytimg.com/vi/aQlkuS7ShCM/hqdefault.jpg" alt="The construction payment clock" width="100%"></a><br/><sub><b>The construction payment clock</b> · 4:35</sub></td>
+<td width="33%" valign="top"><a href="https://www.youtube.com/watch?v=tj7McUl37X0"><img src="https://i.ytimg.com/vi/tj7McUl37X0/hqdefault.jpg" alt="Manage change orders" width="100%"></a><br/><sub><b>Manage change orders</b> · 4:45</sub></td>
+</tr>
+</table>
+
+**More series on the channel**
+
+- German, the Landshut learning project from start to finish: [Projekt und Verantwortung klären](https://www.youtube.com/watch?v=IM9hK6kCZCs) (7:18) · [Dokumente und Entscheidungen sichern](https://www.youtube.com/watch?v=LP-CZOhu6OA) (6:00), plus the German videos above.
+- French, Québec: [Démarrer avec OpenConstructionERP en français](https://www.youtube.com/watch?v=CMuMMej0zwM) (3:46) · [Estimer un projet de construction](https://www.youtube.com/watch?v=7eT4lg1ggQY) (4:18) · [Soumissions et BSDQ](https://www.youtube.com/watch?v=gmg2h1JcuGI) (4:31) · [Facturation, retenue et hypothèque légale](https://www.youtube.com/watch?v=4LTXS0QEkzY) (4:37) · [Réception des travaux et déficiences](https://www.youtube.com/watch?v=IWjtAujWPAA) (3:44)
+- French, site management: [Budget de chantier : justifier chaque coût](https://www.youtube.com/watch?v=L1DUikMF04Y) (5:06) · [Achats et stock : suivre les quantités](https://www.youtube.com/watch?v=ZXbWsG_Syuo) (4:37) · [Chantier : suivre les heures et le matériel](https://www.youtube.com/watch?v=5utorRM1fhY) (5:23) · [Facture et paiement : comprendre le solde](https://www.youtube.com/watch?v=ViuB-ONl5Lk) (5:39)
+- Talk: [The uberization of construction (ETH Zürich)](https://www.youtube.com/watch?v=R_PQQHXY-rQ) (14:22)
+
+**[Browse every video on the OpenConstruction Academy channel](https://www.youtube.com/channel/UCQ3IWLMLnBFwNeG5VBxXQ5Q/videos)**
+
 
 ---
 
