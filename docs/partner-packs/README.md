@@ -456,6 +456,7 @@ teach identifiers that were never rule sets at all.
 | `ai_estimator` | Guards on machine-produced estimate lines |
 | `field_time` | Site time capture |
 | `procurement` | Purchase orders and reconciliation |
+| `invoice_po_match` | Supplier invoice against its order: net within what is still open, quantity and value within what was received |
 | `rfq_issue` | Enquiry at the point of issue |
 | `rfq_award` | Enquiry at the point of award |
 | `subcontract` | Subcontract packages |
