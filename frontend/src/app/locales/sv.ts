@@ -6681,7 +6681,7 @@ const resource = {
     "takeoff_viewer.ortho_lock": "Ortolås",
     "takeoff_viewer.ortho_lock_hint": "Begränsa nya segment till 0, 45 eller 90 grader (håll ned Shift, eller växla här)",
     "takeoff_viewer.vertex_snap": "Fast mot horn",
-    "takeoff_viewer.vertex_snap_hint": "Fast nya punkter till hornen pa befintliga matningar",
+    "takeoff_viewer.vertex_snap_hint": "Fäst nya punkter till hörnen på befintliga mätningar",
     "takeoff_viewer.duplicate_measurement": "Duplicera",
     "takeoff_viewer.pan": "Panorera",
     "takeoff_viewer.pan_hint": "Dra för att panorera. Håll ned Space eller använd mittenmusknappen medan ett verktyg är aktivt.",

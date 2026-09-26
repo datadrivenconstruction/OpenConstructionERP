@@ -13,6 +13,7 @@
   "modules.dev_trouble_7_a"
  ],
  "fr.ts": [
+  "cases.amortise_the_anticipo_before_the_last_estimacion.longdesc",
   "cases.compare_the_tender_bill_against_the_settlement.longdesc",
   "cases.hold_retention_money_on_trust_under_the_construction_contracts_act.longdesc",
   "cases.issue_a_tax_invoice_and_attribute_gst_on_a_progress_payment.longdesc",
