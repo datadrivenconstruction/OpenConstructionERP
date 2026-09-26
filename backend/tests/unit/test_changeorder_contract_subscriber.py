@@ -26,6 +26,7 @@ import pytest
 from sqlalchemy.sql import Select, Update
 
 import app.modules.notifications._wave5_cross_module_subscribers as w5
+from app.modules.contracts import sov_posting
 from app.core.events import Event
 
 
@@ -39,6 +40,7 @@ class _FakeContract:
         project_id: uuid.UUID | None = None,
         currency: str = "EUR",
     ) -> None:
+        self.id = uuid.uuid4()
         self.code = "CT-001"
         self.total_value = total_value
         self.status = status
@@ -95,6 +97,17 @@ def harness(monkeypatch: pytest.MonkeyPatch):
         return session
 
     monkeypatch.setattr(w5, "async_session_factory", _factory)
+
+    # The schedule-of-values posting reads and writes tables of its own and is
+    # covered where it lives. Here it is only recorded, so the tests can tell
+    # which bumps also asked for a line.
+    posted: list[dict] = []
+    state["posted"] = posted
+
+    async def _record_posting(session, contract, **kwargs):
+        posted.append({"contract_id": contract.id, **kwargs})
+
+    monkeypatch.setattr(sov_posting, "post_source_to_sov", _record_posting)
     return state
 
 
@@ -136,6 +149,10 @@ async def test_bumps_contract_value_and_tracks_metadata(harness: dict) -> None:
     assert contract.metadata_["change_order_ids"] == [co_id]
     assert Decimal(contract.metadata_["change_order_total"]) == Decimal("2500.00")
     assert harness["sessions"][-1].committed is True
+    (posting,) = harness["posted"]
+    assert posting["contract_id"] == contract.id
+    assert posting["key"] == f"change_order:{co_id}"
+    assert posting["amount"] == Decimal("2500.00")
 
 
 @pytest.mark.asyncio
