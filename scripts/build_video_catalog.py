@@ -63,12 +63,7 @@ DESKTOP = Path.home() / "Desktop"
 DEFAULTS = {
     "publish_dir": DESKTOP / "BuildersPlaybook" / "YOUTUBE_PUBLISH_2026-09-25",
     "links_doc": DESKTOP / "BuildersPlaybook" / "ВСЕ_ВИДЕО_СО_ССЫЛКАМИ.html",
-    "lessons": DESKTOP
-    / "CodeProjects"
-    / "use_cases_ocerp"
-    / "academy-2030"
-    / "web"
-    / "lessons.json",
+    "lessons": DESKTOP / "CodeProjects" / "use_cases_ocerp" / "academy-2030" / "web" / "lessons.json",
     "films": DESKTOP
     / "CodeProjects"
     / "use_cases_ocerp"
@@ -200,13 +195,9 @@ def load_cases() -> dict[str, dict]:
         category = top("category") or ""
         cases[case_id] = {
             "titleKey": top("titleKey") or "",
-            "titleDefault": json.loads(f'"{title_default.group(1)}"')
-            if title_default
-            else case_id,
+            "titleDefault": json.loads(f'"{title_default.group(1)}"') if title_default else case_id,
             "region": top("region"),
-            "stage": top("stage")
-            or STAGE_OVERRIDES.get(case_id)
-            or STAGE_BY_CATEGORY.get(category, "build"),
+            "stage": top("stage") or STAGE_OVERRIDES.get(case_id) or STAGE_BY_CATEGORY.get(category, "build"),
             "routes": routes,
         }
     if not cases:
@@ -250,9 +241,7 @@ def chapters_from_description(description: str) -> list[dict]:
     """Chapter lines (``00:24 Title``) written into a YouTube description."""
     return [
         {"t": clock_to_seconds(m.group(1)), "title": m.group(2).strip()}
-        for m in re.finditer(
-            r"^((?:\d+:)?\d{1,2}:\d{2})\s+(.+)$", description, re.MULTILINE
-        )
+        for m in re.finditer(r"^((?:\d+:)?\d{1,2}:\d{2})\s+(.+)$", description, re.MULTILINE)
     ]
 
 
@@ -278,9 +267,7 @@ def clean_title(title: str) -> str:
 # through, not the market whose rules it teaches, so it is kept apart from
 # ``market`` and shown as "Example: Denver, United States".
 FLAG_COUNTRY = {"🇺🇸": "US", "🇨🇦": "CA", "⚜️": "CA", "🇩🇪": "DE", "🇫🇷": "FR", "🇬🇧": "GB"}
-SHELF = re.compile(
-    r"^\s*(?P<flag>\S+)\s+[A-Z]{2}\s*•\s*(?P<place>[^•|]+?)\s*•\s*\d{2}/\d{2}\s*\|"
-)
+SHELF = re.compile(r"^\s*(?P<flag>\S+)\s+[A-Z]{2}\s*•\s*(?P<place>[^•|]+?)\s*•\s*\d{2}/\d{2}\s*\|")
 COUNTRY_WORDS = {"USA", "US", "CANADA", "GERMANY", "DEUTSCHLAND", "FRANCE", "UK"}
 
 
@@ -291,9 +278,7 @@ def example_from_title(title: str) -> dict | None:
         return None
     country = FLAG_COUNTRY.get(m.group("flag"))
     if not country:
-        fail(
-            f"title {title!r}: unknown flag {m.group('flag')!r}; add it to FLAG_COUNTRY"
-        )
+        fail(f"title {title!r}: unknown flag {m.group('flag')!r}; add it to FLAG_COUNTRY")
     place = m.group("place").strip()
     if place.upper() in COUNTRY_WORDS:
         return {"country": country}
@@ -401,9 +386,7 @@ def build(args: argparse.Namespace) -> None:
     setup_yt = links["Setup_EN"]
     supplement_yt = re.search(r"([A-Za-z0-9_-]{11})$", setup.get("youtubeUrl") or "")
     if supplement_yt and setup_yt and supplement_yt.group(1) != setup_yt:
-        fail(
-            f"Setup_EN: document says {setup_yt}, setup_supplement.json says {supplement_yt.group(1)}"
-        )
+        fail(f"Setup_EN: document says {setup_yt}, setup_supplement.json says {supplement_yt.group(1)}")
     setup_chapters = chapters_from_description(setup["description"])
     duration_card = re.search(
         r"Setup_EN · [^·]+· (\d+:\d{2})",
@@ -417,9 +400,7 @@ def build(args: argparse.Namespace) -> None:
             "title": setup["title"],
             "description": first_paragraph(setup["description"]),
             "chapters": setup_chapters,
-            "duration": clock_to_seconds(duration_card.group(1))
-            if duration_card
-            else None,
+            "duration": clock_to_seconds(duration_card.group(1)) if duration_card else None,
             "recordedOn": "17.7",
             **{k: setup_overlay[k] for k in ("series", "seriesOrder", "startHere")},
         }
@@ -430,14 +411,10 @@ def build(args: argparse.Namespace) -> None:
     for v in gallery["videos"]:
         doc_yt = links[v["id"]]
         if v.get("youtube_id") and doc_yt and v["youtube_id"] != doc_yt:
-            fail(
-                f"{v['id']}: document says {doc_yt}, gallery.json says {v['youtube_id']}"
-            )
+            fail(f"{v['id']}: document says {doc_yt}, gallery.json says {v['youtube_id']}")
         series_id = editorial["gallery_series"].get(v["series"])
         if not series_id:
-            fail(
-                f"{v['id']}: series {v['series']!r} has no entry in editorial gallery_series"
-            )
+            fail(f"{v['id']}: series {v['series']!r} has no entry in editorial gallery_series")
         videos.append(
             {
                 "id": v["id"],
@@ -446,9 +423,7 @@ def build(args: argparse.Namespace) -> None:
                 "title": clean_title(v["title"]),
                 "example": example_from_title(v["title"]),
                 "description": v["short_description"],
-                "chapters": [
-                    {"t": int(c["seconds"]), "title": c["title"]} for c in v["chapters"]
-                ],
+                "chapters": [{"t": int(c["seconds"]), "title": c["title"]} for c in v["chapters"]],
                 "duration": round(v["duration_seconds"]),
                 "series": series_id,
                 "seriesOrder": v["series_order"],
@@ -474,9 +449,7 @@ def build(args: argparse.Namespace) -> None:
                 "titleEn": f["title"],
                 "description": e["description"],
                 "produces": f.get("produces"),
-                "chapters": [
-                    {"t": int(c["time"]), "title": c["title"]} for c in e["chapters"]
-                ],
+                "chapters": [{"t": int(c["time"]), "title": c["title"]} for c in e["chapters"]],
                 "duration": round(e["duration"]),
                 "series": "landshut-de",
                 "seriesOrder": f["no"],
@@ -486,9 +459,7 @@ def build(args: argparse.Namespace) -> None:
                 "cases": f["cases"],
             }
         )
-        covers[f["id"]] = (
-            Path(args.landshut_covers) / f"landshut-{f['no']:02d}-cover.jpg"
-        )
+        covers[f["id"]] = Path(args.landshut_covers) / f"landshut-{f['no']:02d}-cover.jpg"
 
     # Earlier walkthroughs and talks, kept in the editorial file.
     for x in editorial.get("extras", []):
@@ -560,11 +531,7 @@ def build(args: argparse.Namespace) -> None:
                 if r not in routes:
                     routes.append(r)
         v["routes"] = routes
-        v["cover"] = (
-            thumbnail_url(v["youtubeId"])
-            if v["youtubeId"]
-            else f"{COVER_URL}/{cover_slug(v['id'])}.webp"
-        )
+        v["cover"] = thumbnail_url(v["youtubeId"]) if v["youtubeId"] else f"{COVER_URL}/{cover_slug(v['id'])}.webp"
 
     ids = [v["id"] for v in videos]
     if len(set(ids)) != len(ids):
@@ -581,9 +548,7 @@ def build(args: argparse.Namespace) -> None:
     local = [v for v in videos if not v["youtubeId"]]
     if not args.check:
         for v in local:
-            cover_bytes += write_cover(
-                covers[v["id"]], out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp"
-            )
+            cover_bytes += write_cover(covers[v["id"]], out_root / COVERS_DIR / f"{cover_slug(v['id'])}.webp")
         # A published video's cover now comes from the channel, and a removed
         # video's is dead weight in the wheel: both go.
         wanted = {f"{cover_slug(v['id'])}.webp" for v in local}
@@ -628,18 +593,11 @@ def build(args: argparse.Namespace) -> None:
         "series": [
             {
                 "id": sid,
-                **{
-                    k: s[k]
-                    for k in ("title", "titleKey", "language", "market", "channel")
-                    if k in s
-                },
+                **{k: s[k] for k in ("title", "titleKey", "language", "market", "channel") if k in s},
             }
             for sid, s in sorted(series_meta.items(), key=lambda kv: kv[1]["order"])
         ],
-        "videos": [
-            {k: v[k] for k in field_order if k in v and v[k] is not None}
-            for v in videos
-        ],
+        "videos": [{k: v[k] for k in field_order if k in v and v[k] is not None} for v in videos],
         "cases": {c: cases[c] for c in used_cases},
     }
     body = json.dumps(catalog, ensure_ascii=False, indent=2)
@@ -687,15 +645,12 @@ def build(args: argparse.Namespace) -> None:
 
     published = sum(1 for v in videos if v["status"] == "published")
     chapters = sum(len(v["chapters"]) for v in videos)
-    print(
-        f"videos: {len(videos)} ({published} published, {len(videos) - published} coming soon)"
-    )
+    print(f"videos: {len(videos)} ({published} published, {len(videos) - published} coming soon)")
     print(f"chapters: {chapters}")
     print(f"cases linked: {len(used_cases)} distinct")
     if not args.check:
         print(
-            f"local covers (coming soon only): {len(local)} files, {cover_bytes} bytes"
-            f" ({cover_bytes / 1024:.1f} KiB)"
+            f"local covers (coming soon only): {len(local)} files, {cover_bytes} bytes ({cover_bytes / 1024:.1f} KiB)"
         )
     if not args.offline:
         print(
@@ -712,12 +667,8 @@ def build(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Parse arguments and run the build."""
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parser.add_argument(
-        "--out-root", default=str(ROOT), help="Tree to write into (default: the repo)."
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--out-root", default=str(ROOT), help="Tree to write into (default: the repo).")
     parser.add_argument("--publish-dir", default=str(DEFAULTS["publish_dir"]))
     parser.add_argument("--links-doc", default=str(DEFAULTS["links_doc"]))
     parser.add_argument("--lessons", default=str(DEFAULTS["lessons"]))
