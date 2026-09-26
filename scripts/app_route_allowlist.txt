@@ -14,8 +14,8 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live (sha256 de9d5b56fbb3f554751f0a3ea4d8151480c0c9d2aaf29ee8852978265e9bc772)
-# Segments: 208
+# Extracted from: Caddyfile.live2 (sha256 63c3e1375838fa4d3962584f38066e42a2edc5c537e8491d0681ec27b7e8076a)
+# Segments: 209
 5d
 about
 accommodation
@@ -222,5 +222,6 @@ users
 validation
 value
 variations
+videos
 waste-factors
 workflows
