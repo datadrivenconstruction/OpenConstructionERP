@@ -45275,6 +45275,8 @@ const resource = {
     "videos.matrix_rows": "Рядки",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Ще {{more}}",
+    "cases.featured_article.eyebrow": "Рекомендована стаття",
+    "cases.featured_article.new_tab": "відкриється в новій вкладці",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

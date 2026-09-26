@@ -43527,6 +43527,8 @@ const resource = {
     "videos.matrix_rows": "पंक्तियां",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} और पल",
+    "cases.featured_article.eyebrow": "विशेष लेख",
+    "cases.featured_article.new_tab": "नए टैब में खुलता है",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

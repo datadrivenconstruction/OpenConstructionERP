@@ -44446,6 +44446,8 @@ const resource = {
     "videos.matrix_rows": "Řádky",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Zobrazit {{more}} dalších",
+    "cases.featured_article.eyebrow": "Doporučený článek",
+    "cases.featured_article.new_tab": "otevře se na nové kartě",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

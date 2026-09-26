@@ -43524,6 +43524,8 @@ const resource = {
     "videos.matrix_rows": "Rader",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} øyeblikk til",
+    "cases.featured_article.eyebrow": "Utvalgt artikkel",
+    "cases.featured_article.new_tab": "åpnes i en ny fane",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

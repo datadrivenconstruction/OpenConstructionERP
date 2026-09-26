@@ -43503,6 +43503,8 @@ const resource = {
     "videos.matrix_rows": "قطاریں",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} مزید لمحات",
+    "cases.featured_article.eyebrow": "نمایاں مضمون",
+    "cases.featured_article.new_tab": "نئے ٹیب میں کھلتا ہے",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

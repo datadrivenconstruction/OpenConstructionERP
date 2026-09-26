@@ -43653,6 +43653,8 @@ const resource = {
     "videos.matrix_rows": "שורות",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "עוד {{more}} רגעים",
+    "cases.featured_article.eyebrow": "מאמר נבחר",
+    "cases.featured_article.new_tab": "נפתח בכרטיסייה חדשה",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

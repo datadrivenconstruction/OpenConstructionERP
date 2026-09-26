@@ -39,7 +39,6 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/shared/lib/useI18nReady', () => ({ useI18nReady: () => 0 }));
 vi.mock('./CustomBranding', () => ({ CustomBranding: () => null }));
 vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null }));
-vi.mock('@/shared/ui/ArticleNewsCard', () => ({ ArticleNewsCard: () => null }));
 vi.mock('@/features/modules/RequestCustomModuleDialog', () => ({
   RequestCustomModuleDialog: () => null,
 }));
@@ -95,6 +94,17 @@ beforeEach(() => {
 });
 
 afterEach(() => cleanup());
+
+describe('the featured article', () => {
+  it('is no longer in the menu; it lives on the Cases page', () => {
+    renderSidebar();
+    const article = Array.from(document.querySelectorAll('a')).filter((a) =>
+      (a.getAttribute('href') ?? '').includes('uberization-of-construction'),
+    );
+    expect(article).toEqual([]);
+    expect(screen.queryByText('Uberization of Construction')).toBeNull();
+  });
+});
 
 describe('the Learn card', () => {
   it('opens the menu, above Pinned, with Videos and then Cases', () => {

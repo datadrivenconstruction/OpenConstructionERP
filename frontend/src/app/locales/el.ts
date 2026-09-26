@@ -43503,6 +43503,8 @@ const resource = {
     "videos.matrix_rows": "Γραμμές",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} ακόμη στιγμές",
+    "cases.featured_article.eyebrow": "Προτεινόμενο άρθρο",
+    "cases.featured_article.new_tab": "ανοίγει σε νέα καρτέλα",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

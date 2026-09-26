@@ -46113,6 +46113,8 @@ const resource = {
     "videos.matrix_rows": "Sorok",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Még {{more}} pillanat",
+    "cases.featured_article.eyebrow": "Kiemelt cikk",
+    "cases.featured_article.new_tab": "új lapon nyílik meg",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

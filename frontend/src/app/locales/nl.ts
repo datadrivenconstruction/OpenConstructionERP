@@ -44405,6 +44405,8 @@ const resource = {
     "videos.matrix_rows": "Rijen",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Nog {{more}} momenten",
+    "cases.featured_article.eyebrow": "Uitgelicht artikel",
+    "cases.featured_article.new_tab": "opent in een nieuw tabblad",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

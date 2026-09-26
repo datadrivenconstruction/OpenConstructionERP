@@ -43503,6 +43503,8 @@ const resource = {
     "videos.matrix_rows": "Mga Row",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} pang sandali",
+    "cases.featured_article.eyebrow": "Tampok na artikulo",
+    "cases.featured_article.new_tab": "bubukas sa bagong tab",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

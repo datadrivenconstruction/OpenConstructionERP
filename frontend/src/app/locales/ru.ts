@@ -46370,6 +46370,8 @@ const resource = {
     "videos.matrix_rows": "Строки",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Ещё {{more}}",
+    "cases.featured_article.eyebrow": "Избранная статья",
+    "cases.featured_article.new_tab": "откроется в новой вкладке",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

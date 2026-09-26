@@ -44368,6 +44368,8 @@ const resource = {
     "videos.matrix_rows": "Satırlar",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} an daha",
+    "cases.featured_article.eyebrow": "Öne çıkan makale",
+    "cases.featured_article.new_tab": "yeni sekmede açılır",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

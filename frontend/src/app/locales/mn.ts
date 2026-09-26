@@ -43207,6 +43207,8 @@ const resource = {
     "videos.matrix_rows": "Мөрүүд",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Өөр {{more}} мөч",
+    "cases.featured_article.eyebrow": "Онцлох нийтлэл",
+    "cases.featured_article.new_tab": "шинэ табд нээгдэнэ",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

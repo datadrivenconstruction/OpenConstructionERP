@@ -43420,6 +43420,8 @@ const resource = {
     "videos.matrix_rows": "Hàng",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} khoảnh khắc nữa",
+    "cases.featured_article.eyebrow": "Bài viết nổi bật",
+    "cases.featured_article.new_tab": "mở trong thẻ mới",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

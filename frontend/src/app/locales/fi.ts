@@ -43528,6 +43528,8 @@ const resource = {
     "videos.matrix_rows": "Rivit",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Vielä {{more}} hetkeä",
+    "cases.featured_article.eyebrow": "Suositeltu artikkeli",
+    "cases.featured_article.new_tab": "avautuu uudelle välilehdelle",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

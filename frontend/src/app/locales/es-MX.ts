@@ -40720,6 +40720,8 @@ const resource = {
     "videos.matrix_rows": "Filas",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} momentos más",
+    "cases.featured_article.eyebrow": "Artículo destacado",
+    "cases.featured_article.new_tab": "se abre en una pestaña nueva",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };
