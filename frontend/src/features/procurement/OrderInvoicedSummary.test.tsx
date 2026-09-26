@@ -17,8 +17,8 @@ describe('OrderInvoicedSummary', () => {
     render(<OrderInvoicedSummary invoiced="45000.00" ordered="50000.00" currency="EUR" />);
     const box = screen.getByTestId('po-invoiced-summary');
     expect(box.textContent).toContain('Invoiced (net)');
-    expect(box.textContent).toMatch(/45[,.\s  ]?000/);
-    expect(box.textContent).toMatch(/50[,.\s  ]?000/);
+    expect(box.textContent).toMatch(/45[,.\s\u00a0\u202f]?000/);
+    expect(box.textContent).toMatch(/50[,.\s\u00a0\u202f]?000/);
     expect(box.textContent).not.toContain('Invoiced above the order value');
   });
 

@@ -92,9 +92,9 @@ describe('InvoicePurchaseOrderField', () => {
   it('shows ordered, invoiced to date and still open for the chosen order', async () => {
     renderField({ value: 'po-issued' });
     const figures = await screen.findByTestId('invoice-po-figures');
-    expect(figures.textContent).toMatch(/50[,.\s  ]?000/);
-    expect(figures.textContent).toMatch(/40[,.\s  ]?000/);
-    expect(figures.textContent).toMatch(/10[,.\s  ]?000/);
+    expect(figures.textContent).toMatch(/50[,.\s\u00a0\u202f]?000/);
+    expect(figures.textContent).toMatch(/40[,.\s\u00a0\u202f]?000/);
+    expect(figures.textContent).toMatch(/10[,.\s\u00a0\u202f]?000/);
     expect(figures.textContent).toContain('Net of VAT');
   });
 
