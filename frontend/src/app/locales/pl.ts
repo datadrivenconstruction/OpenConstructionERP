@@ -44675,6 +44675,8 @@ const resource = {
     "videos.matrix_rows": "Wiersze",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Jeszcze {{more}}",
+    "cases.featured_article.eyebrow": "Polecany artykuł",
+    "cases.featured_article.new_tab": "otwiera się w nowej karcie",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

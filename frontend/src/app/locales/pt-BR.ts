@@ -40413,6 +40413,8 @@ const resource = {
     "videos.matrix_rows": "Linhas",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Mais {{more}} momentos",
+    "cases.featured_article.eyebrow": "Artigo em destaque",
+    "cases.featured_article.new_tab": "abre em uma nova aba",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

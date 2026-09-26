@@ -43412,6 +43412,8 @@ const resource = {
     "videos.matrix_rows": "แถว",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "อีก {{more}} ช่วงเวลา",
+    "cases.featured_article.eyebrow": "บทความแนะนำ",
+    "cases.featured_article.new_tab": "เปิดในแท็บใหม่",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

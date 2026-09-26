@@ -45716,6 +45716,8 @@ const resource = {
     "videos.matrix_rows": "الصفوف",
     "videos.matrix_cell": "{{row}}، {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} إضافية",
+    "cases.featured_article.eyebrow": "مقال مميز",
+    "cases.featured_article.new_tab": "يفتح في علامة تبويب جديدة",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

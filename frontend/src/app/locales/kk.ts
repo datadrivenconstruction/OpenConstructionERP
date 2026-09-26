@@ -43504,6 +43504,8 @@ const resource = {
     "videos.matrix_rows": "Жолдар",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Тағы {{more}} сәт",
+    "cases.featured_article.eyebrow": "Таңдаулы мақала",
+    "cases.featured_article.new_tab": "жаңа қойындыда ашылады",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -24,6 +24,7 @@ import React from "react";
 
 import { PLAYBOOKS } from "./playbooks";
 import { CasesPage } from "./CasesPage";
+import { FEATURED_ARTICLE_COVER, FEATURED_ARTICLE_URL } from "./FeaturedArticle";
 
 /* ── Stable `t` (same rationale as casesProjectContext.test.tsx: the shared
    setup mock mints a fresh `t` per call, and CasesList's render-time window
@@ -174,6 +175,35 @@ function renderAndFindCard(): { card: HTMLElement; title: HTMLElement } {
 beforeEach(() => {
   localStorage.clear();
   navigateSpy.mockClear();
+});
+
+describe("featured article", () => {
+  it("opens the Cases page, linking out to the article in a new tab", () => {
+    render(
+      <MemoryRouter initialEntries={["/cases"]}>
+        <CasesPage />
+      </MemoryRouter>,
+    );
+    const link = screen.getByTestId("cases-featured-article");
+    expect(link.getAttribute("href")).toBe(FEATURED_ARTICLE_URL);
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+    expect(link.textContent).toContain("Uberization of Construction");
+    expect(link.textContent).toContain("Read the article");
+  });
+
+  it("draws its own panel when the cover cannot load", () => {
+    render(
+      <MemoryRouter initialEntries={["/cases"]}>
+        <CasesPage />
+      </MemoryRouter>,
+    );
+    const link = screen.getByTestId("cases-featured-article");
+    const cover = link.querySelector("img")!;
+    expect(cover.getAttribute("src")).toBe(FEATURED_ARTICLE_COVER);
+    fireEvent.error(cover);
+    expect(link.querySelector("img")).toBeNull();
+  });
 });
 
 describe("catalogue card - opening a case", () => {

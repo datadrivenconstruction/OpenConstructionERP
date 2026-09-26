@@ -44944,6 +44944,8 @@ const resource = {
     "videos.matrix_rows": "行",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "さらに{{more}}件のモーメント",
+    "cases.featured_article.eyebrow": "注目の記事",
+    "cases.featured_article.new_tab": "新しいタブで開きます",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

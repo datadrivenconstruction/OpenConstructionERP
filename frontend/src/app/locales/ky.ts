@@ -43638,6 +43638,8 @@ const resource = {
     "videos.matrix_rows": "Саптар",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Дагы {{more}} учур",
+    "cases.featured_article.eyebrow": "Тандалган макала",
+    "cases.featured_article.new_tab": "жаңы өтмөктө ачылат",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

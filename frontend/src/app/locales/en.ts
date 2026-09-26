@@ -38234,6 +38234,8 @@ const resource = {
     "videos.matrix_rows": "Rows",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} more moments",
+    "cases.featured_article.eyebrow": "Featured article",
+    "cases.featured_article.new_tab": "opens in a new tab",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

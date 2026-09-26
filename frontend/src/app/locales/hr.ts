@@ -43691,6 +43691,8 @@ const resource = {
     "videos.matrix_rows": "Redovi",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Još {{more}}",
+    "cases.featured_article.eyebrow": "Istaknuti članak",
+    "cases.featured_article.new_tab": "otvara se u novoj kartici",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

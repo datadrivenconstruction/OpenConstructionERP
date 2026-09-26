@@ -43466,6 +43466,8 @@ const resource = {
     "videos.matrix_rows": "Read",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Veel {{more}} hetke",
+    "cases.featured_article.eyebrow": "Esiletõstetud artikkel",
+    "cases.featured_article.new_tab": "avaneb uuel vahelehel",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

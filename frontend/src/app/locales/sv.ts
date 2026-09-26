@@ -44139,6 +44139,8 @@ const resource = {
     "videos.matrix_rows": "Rader",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} ögonblick till",
+    "cases.featured_article.eyebrow": "Utvald artikel",
+    "cases.featured_article.new_tab": "öppnas i en ny flik",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

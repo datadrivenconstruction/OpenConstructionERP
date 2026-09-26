@@ -44436,6 +44436,8 @@ const resource = {
     "videos.matrix_rows": "Qatorlar",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Yana {{more}} ta lahza",
+    "cases.featured_article.eyebrow": "Tanlangan maqola",
+    "cases.featured_article.new_tab": "yangi varaqda ochiladi",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

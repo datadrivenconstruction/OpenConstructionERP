@@ -43815,6 +43815,8 @@ const resource = {
     "videos.matrix_rows": "সারি",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "আরও {{more}}টি মুহূর্ত",
+    "cases.featured_article.eyebrow": "বিশেষ নিবন্ধ",
+    "cases.featured_article.new_tab": "নতুন ট্যাবে খোলে",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

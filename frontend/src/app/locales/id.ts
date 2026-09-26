@@ -43411,6 +43411,8 @@ const resource = {
     "videos.matrix_rows": "Baris",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} momen lagi",
+    "cases.featured_article.eyebrow": "Artikel pilihan",
+    "cases.featured_article.new_tab": "terbuka di tab baru",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

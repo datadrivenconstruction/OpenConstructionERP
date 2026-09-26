@@ -44030,6 +44030,8 @@ const resource = {
     "videos.matrix_rows": "행",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "순간 {{more}}개 더 보기",
+    "cases.featured_article.eyebrow": "추천 글",
+    "cases.featured_article.new_tab": "새 탭에서 열립니다",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

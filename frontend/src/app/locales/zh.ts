@@ -45881,6 +45881,8 @@ const resource = {
     "videos.matrix_rows": "行",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "还有{{more}}个时刻",
+    "cases.featured_article.eyebrow": "精选文章",
+    "cases.featured_article.new_tab": "在新标签页中打开",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

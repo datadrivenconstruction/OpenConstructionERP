@@ -43503,6 +43503,8 @@ const resource = {
     "videos.matrix_rows": "ردیف‌ها",
     "videos.matrix_cell": "{{row}}، {{stage}}: {{n}}",
     "videos.more_moments": "{{more}} لحظه دیگر",
+    "cases.featured_article.eyebrow": "مقاله ویژه",
+    "cases.featured_article.new_tab": "در زبانه جدید باز می‌شود",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

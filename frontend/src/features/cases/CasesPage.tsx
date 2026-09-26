@@ -77,6 +77,7 @@ import { caseIdFromPlaybookId } from "./api";
 import { useAuthoredCases } from "./useCustomCases";
 import { PlaybookRunner } from "./PlaybookRunner";
 import { MarketPackPanel } from "./MarketPackPanel";
+import { FeaturedArticle } from "./FeaturedArticle";
 import {
   CasePackStrip,
   useMarketPackOffers,
@@ -815,6 +816,9 @@ function CasesList() {
           </div>
         </div>
       </div>
+
+      {/* The article on why the cases exist, moved here from the sidebar. */}
+      <FeaturedArticle />
 
       {allPlaybooks.length > 0 && (
         <>

@@ -44556,6 +44556,8 @@ const resource = {
     "videos.matrix_rows": "Righe",
     "videos.matrix_cell": "{{row}}, {{stage}}: {{n}}",
     "videos.more_moments": "Altri {{more}} momenti",
+    "cases.featured_article.eyebrow": "Articolo in evidenza",
+    "cases.featured_article.new_tab": "si apre in una nuova scheda",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

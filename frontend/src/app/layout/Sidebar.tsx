@@ -43,7 +43,6 @@ import { useModuleStore } from '@/stores/useModuleStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet } from '@/shared/lib/api';
 import { UpdateNotification } from '@/shared/ui/UpdateChecker';
-import { ArticleNewsCard } from '@/shared/ui/ArticleNewsCard';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -1736,15 +1735,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         {!iconified && (
           <div className="mt-3">
             <UpdateNotification />
-          </div>
-        )}
-
-        {/* Featured article card - links out to the long-form article on the
-            uberization of construction and the idea behind the platform.
-            Hidden in icon-only mode (the title + subtitle need width). */}
-        {!iconified && (
-          <div className="mt-2">
-            <ArticleNewsCard />
           </div>
         )}
 
