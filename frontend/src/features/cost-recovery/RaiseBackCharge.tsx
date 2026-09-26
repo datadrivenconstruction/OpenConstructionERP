@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { listSubcontractors } from '@/features/subcontractors/api';
 import {
@@ -121,7 +122,7 @@ export function RaiseBackCharge({
         <p className="text-xs text-content-secondary">
           {t('cost_recovery.raise.already_pending', {
             defaultValue: 'Already agreed and not yet deducted on this project: {{amounts}}',
-            amounts: pendingTotals.map(([cur, amount]) => formatCurrency(amount, cur)).join(', '),
+            amounts: fmtList(pendingTotals.map(([cur, amount]) => formatCurrency(amount, cur))),
           })}
         </p>
       )}

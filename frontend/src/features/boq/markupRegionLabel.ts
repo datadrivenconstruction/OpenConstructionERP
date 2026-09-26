@@ -12,6 +12,7 @@
  * GAEB) is a proper name and is shown as it is.
  */
 import { regionOptionLabel } from '@/features/projects/regionLabel';
+import { fmtList } from '@/shared/lib/formatters';
 
 /** Minimal shape of the i18next `t` used here (repo convention). */
 type Translate = (key: string, opts?: Record<string, unknown>) => string;
@@ -50,5 +51,5 @@ export function markupRegionLabel(region: MarkupRegion, lang: string, t: Transla
     regionOptionLabel({ value: iso, label: iso, iso }, lang),
   );
   if (names.length === 1) return names[0]!;
-  return listFormat(lang)?.format(names) ?? names.join(', ');
+  return listFormat(lang)?.format(names) ?? fmtList(names);
 }

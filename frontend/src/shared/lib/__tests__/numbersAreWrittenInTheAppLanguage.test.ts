@@ -383,14 +383,19 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
   /* FIXED-ALLOWED:START */
   [
   {
-    file: 'features/finance/FinancePage.tsx',
-    snippet: 'unit_rate: lineAmount.toFixed(2),',
-    why: 'A field of the invoice line posted to the API, which parses it as a decimal.',
+    file: 'features/finance/invoiceLines.ts',
+    snippet: "return Number.isFinite(value) ? value.toFixed(decimals) : '';",
+    why: 'The value of an <input type="number"> and of the invoice line posted to the API; both parse a plain decimal.',
   },
   {
-    file: 'features/finance/FinancePage.tsx',
-    snippet: 'amount: lineAmount.toFixed(2),',
-    why: 'The same invoice line, same request. Grouping it would reach the server as a different number.',
+    file: 'features/finance/markInvoicePaid.ts',
+    snippet: 'amount: cash.toFixed(2),',
+    why: 'Body of the record-payment POST, which the server parses as a decimal.',
+  },
+  {
+    file: 'features/finance/markInvoicePaid.ts',
+    snippet: 'withholding_amount: withheld.toFixed(2),',
+    why: 'The same record-payment request. Grouping it would reach the server as a different number.',
   },
   {
     file: 'features/procurement/ProcurementPage.tsx',
@@ -669,14 +674,15 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Eighteen entries covering twenty sites in eleven files, against 139
+    // Nineteen entries covering twenty-one sites in twelve files, against 139
     // exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
     // with. A list long enough to skim is a list nobody reads.
     expect(FIXED_ALLOWED.map((a) => `${a.file} :: ${a.snippet}`)).toEqual([
-      'features/finance/FinancePage.tsx :: unit_rate: lineAmount.toFixed(2),',
-      'features/finance/FinancePage.tsx :: amount: lineAmount.toFixed(2),',
+      "features/finance/invoiceLines.ts :: return Number.isFinite(value) ? value.toFixed(decimals) : '';",
+      'features/finance/markInvoicePaid.ts :: amount: cash.toFixed(2),',
+      'features/finance/markInvoicePaid.ts :: withholding_amount: withheld.toFixed(2),',
       'features/procurement/ProcurementPage.tsx :: amount_subtotal: String(poSubtotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: amount_total: String(poTotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: updated.amount = (qty * rate).toFixed(2);',
