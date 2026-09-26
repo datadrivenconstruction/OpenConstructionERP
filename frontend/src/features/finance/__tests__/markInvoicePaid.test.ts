@@ -15,6 +15,7 @@ vi.mock('@/shared/lib/api', () => ({
   }),
 }));
 
+import { apiGet } from '@/shared/lib/api';
 import { remainingSettlement, settleAndMarkPaid } from '../markInvoicePaid';
 
 beforeEach(() => {
@@ -58,6 +59,16 @@ describe('settleAndMarkPaid', () => {
   it('records nothing more for an invoice already paid in full', async () => {
     api.payments = [{ amount: '1210.00' }];
     await settleAndMarkPaid({ id: 'inv-1', amount_total: '1210.00', currency_code: 'EUR' }, '2026-09-25');
+    expect(api.posted.map((p) => p.url)).toEqual(['/v1/finance/inv-1/pay/']);
+  });
+
+  it('reads every page of earlier payments before working out what is open', async () => {
+    const first = Array.from({ length: 100 }, () => ({ amount: '10.00' }));
+    vi.mocked(apiGet)
+      .mockResolvedValueOnce({ items: first, total: 101, offset: 0, limit: 100 })
+      .mockResolvedValueOnce({ items: [{ amount: '10.00' }], total: 101, offset: 100, limit: 100 });
+    await settleAndMarkPaid({ id: 'inv-1', amount_total: '1010.00', currency_code: 'EUR' }, '2026-09-25');
+    expect(vi.mocked(apiGet).mock.calls.at(-1)?.[0]).toContain('offset=100');
     expect(api.posted.map((p) => p.url)).toEqual(['/v1/finance/inv-1/pay/']);
   });
 });

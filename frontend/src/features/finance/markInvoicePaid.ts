@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, type Page } from '@/shared/lib/api';
 
 /** The slice of an invoice that settling it needs (InvoiceResponse on the wire). */
 export interface SettleableInvoice {
@@ -64,10 +64,18 @@ export function remainingSettlement(
  * payments records nothing more.
  */
 export async function settleAndMarkPaid(invoice: SettleableInvoice, paymentDate: string): Promise<void> {
-  const page = await apiGet<{ items?: PaymentRow[] }>(
-    `/v1/finance/payments/?invoice_id=${encodeURIComponent(invoice.id)}&limit=100`,
-  );
-  const { gross, cash, withheld } = remainingSettlement(invoice, page?.items ?? []);
+  // Every earlier payment, not the first page of them: a short read would
+  // leave part of the invoice looking open and pay it a second time.
+  const payments: PaymentRow[] = [];
+  for (;;) {
+    const page = await apiGet<Page<PaymentRow>>(
+      `/v1/finance/payments/?invoice_id=${encodeURIComponent(invoice.id)}&limit=100&offset=${payments.length}`,
+    );
+    const rows = page?.items ?? [];
+    payments.push(...rows);
+    if (rows.length === 0 || payments.length >= (page?.total ?? 0)) break;
+  }
+  const { gross, cash, withheld } = remainingSettlement(invoice, payments);
   if (gross > 0) {
     await apiPost(`/v1/finance/invoices/${encodeURIComponent(invoice.id)}/record-payment/`, {
       payment_date: paymentDate,
