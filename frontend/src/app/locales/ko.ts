@@ -5154,7 +5154,7 @@ const resource = {
     "cases.not_found_body": "이 사례가 존재하지 않거나 삭제되었습니다. 대신 전체 목록을 둘러보세요.",
     "cases.not_found_title": "사례를 찾을 수 없음",
     "cases.page_subtitle": "여러 모듈을 순서대로 안내하는 엔드투엔드 플레이북입니다. 사례를 선택하고, 원한다면 학습용 샘플 프로젝트를 골라 각 단계를 따라가세요.",
-    "cases.page_title": "사례",
+    "cases.page_title": "활용 사례",
     "cases.progress_label": "사례 진행률",
     "cases.reset": "진행 상황 초기화",
     "cases.reset_hint": "이 사례의 진행 상황을 지우고 처음부터 다시 시작합니다",
@@ -5335,7 +5335,7 @@ const resource = {
     "howto.value.title": "실현 가치",
     "howto.value.what": "실현 가치는 플랫폼이 이미 산출하는 수치를 하나의 방어 가능한 \"이것이 우리에게 무엇을 가져다주었는가\" 뷰로 구성합니다. 요약은 승인된 변경이 뒤늦게 발견하는 대신 이제 통제하는 예산 익스포저, 회수한 비용과 회수율, 보조 작업이 돌려준 관리 업무 시간, 그리고 문서화된 분쟁 리스크 감소 대용 지표를 보여줍니다. 모든 수치에는 신뢰도 라벨이 붙고, 통화는 절대 혼합되지 않으며, 전체 뷰의 범위를 하나의 프로젝트 또는 전체 포트폴리오로 지정할 수 있습니다.",
     "howto.value.when": "체계적이고 보조받는 수행이 본인 데이터에서 만들어낸 측정 가능한 가치를 이해관계자에게 보여주고, 어느 프로젝트가 플랫폼을 가장 잘 활용하는지 확인할 때 사용합니다.",
-    "nav.cases": "케이스",
+    "nav.cases": "활용 사례",
     "bim.geo_bbox_volume_base": "경계 볼륨",
     "bim.geo_depth_base": "깊이",
     "bim.geo_diagonal_base": "대각선",
@@ -43919,15 +43919,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI 어시스턴트",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "동영상",
+    "nav.videos": "동영상 가이드",
     "sidebar.group.learn": "학습",
-    "sidebar.learn.hint": "플랫폼을 배우기 위한 튜토리얼 동영상과 안내형 케이스입니다. 이 섹션은 메뉴 하단에서 언제든지 숨기거나 다시 표시할 수 있습니다.",
-    "sidebar.learn.hide": "동영상 및 케이스 숨기기",
+    "sidebar.learn.hide": "동영상 가이드 및 활용 사례 숨기기",
     "sidebar.learn.hide_short": "숨기기",
-    "sidebar.learn.show": "동영상 및 케이스 표시",
-    "sidebar.learn.show_hint": "동영상과 케이스를 메뉴 상단으로 되돌립니다",
-    "sidebar.learn.hidden_toast": "동영상과 케이스가 숨겨졌습니다",
-    "sidebar.learn.hidden_toast_body": "메뉴 하단의 \"동영상 및 케이스 표시\"를 통해 언제든지 다시 불러올 수 있습니다.",
+    "sidebar.learn.show": "동영상 가이드 및 활용 사례 표시",
+    "sidebar.learn.show_hint": "동영상 가이드와 활용 사례를 메뉴 상단으로 되돌립니다",
+    "sidebar.learn.hidden_toast": "동영상 가이드와 활용 사례가 숨겨졌습니다",
     "videos.coming_soon": "준비 중",
     "videos.cases_cta_title": "직접 해보며 배우고 싶으신가요?",
     "videos.cases_cta_body": "케이스는 샘플 프로젝트를 통해 앱 안에서 실제 작업 흐름을 단계별로 안내합니다.",
@@ -44032,6 +44030,8 @@ const resource = {
     "videos.more_moments": "순간 {{more}}개 더 보기",
     "cases.featured_article.eyebrow": "추천 글",
     "cases.featured_article.new_tab": "새 탭에서 열립니다",
+    "sidebar.learn.hint_topbar": "플랫폼을 배우기 위한 튜토리얼 동영상과 안내형 케이스입니다. 이 섹션을 숨기면 상단 바의 학사모 아이콘 안으로 접혀 들어갑니다. 그곳을 클릭하면 다시 나타납니다.",
+    "sidebar.learn.hidden_toast_body_topbar": "이제 상단 바의 학사모 아이콘 뒤에 있습니다. 그곳을 클릭하면 다시 나타납니다.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -5154,7 +5154,7 @@ const resource = {
     "cases.not_found_body": "Kasus ini tidak ada atau telah dihapus. Jelajahi daftar lengkap sebagai gantinya.",
     "cases.not_found_title": "Kasus tidak ditemukan",
     "cases.page_subtitle": "Panduan terpandu menyeluruh yang menuntun Anda melewati beberapa modul secara berurutan. Pilih sebuah kasus, secara opsional pilih proyek contoh untuk berlatih, lalu ikuti setiap langkah.",
-    "cases.page_title": "Kasus",
+    "cases.page_title": "Kasus penggunaan",
     "cases.progress_label": "Progres kasus",
     "cases.reset": "Atur ulang progres",
     "cases.reset_hint": "Hapus progres untuk kasus ini dan mulai dari awal",
@@ -5335,7 +5335,7 @@ const resource = {
     "howto.value.title": "Nilai yang Direalisasikan",
     "howto.value.what": "Nilai yang Direalisasikan menyusun angka-angka yang sudah dihitung platform menjadi satu tampilan \"apa yang telah ini berikan bagi kita\" yang dapat dipertahankan. Ringkasan menunjukkan paparan anggaran yang kini dikendalikan oleh perubahan yang disetujui alih-alih ditemukan terlambat, biaya yang Anda pulihkan dan tingkat pemulihan Anda, jam administrasi yang dikembalikan oleh tindakan berbantuan, dan proksi penurunan-risiko-sengketa yang terdokumentasi. Setiap angka membawa label keyakinan, mata uang tidak pernah dicampur, dan Anda dapat mencakupkan seluruh tampilan ke satu proyek atau seluruh portofolio.",
     "howto.value.when": "Gunakan untuk menunjukkan kepada pemangku kepentingan nilai terukur yang diberikan oleh pelaksanaan yang disiplin dan berbantuan atas data Anda sendiri, dan untuk melihat proyek mana yang paling memanfaatkan platform.",
-    "nav.cases": "Kasus",
+    "nav.cases": "Kasus penggunaan",
     "bim.geo_bbox_volume_base": "Volume pembatas",
     "bim.geo_depth_base": "Kedalaman",
     "bim.geo_diagonal_base": "Diagonal",
@@ -43300,15 +43300,13 @@ const resource = {
     "timeline.mod_erp_chat": "Asisten AI",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Video",
+    "nav.videos": "Panduan video",
     "sidebar.group.learn": "Pelajari",
-    "sidebar.learn.hint": "Video tutorial dan kasus berpandu untuk mempelajari platform. Anda dapat menyembunyikan bagian ini dan menampilkannya lagi kapan saja dari bagian bawah menu.",
-    "sidebar.learn.hide": "Sembunyikan video & kasus",
+    "sidebar.learn.hide": "Sembunyikan panduan video & kasus penggunaan",
     "sidebar.learn.hide_short": "Sembunyikan",
-    "sidebar.learn.show": "Tampilkan video & kasus",
-    "sidebar.learn.show_hint": "Kembalikan Video dan Kasus ke atas menu",
-    "sidebar.learn.hidden_toast": "Video dan kasus disembunyikan",
-    "sidebar.learn.hidden_toast_body": "Tampilkan lagi kapan saja dengan \"Tampilkan video & kasus\" di bagian bawah menu.",
+    "sidebar.learn.show": "Tampilkan panduan video & kasus penggunaan",
+    "sidebar.learn.show_hint": "Kembalikan Panduan Video dan Kasus Penggunaan ke atas menu",
+    "sidebar.learn.hidden_toast": "Panduan video dan kasus penggunaan disembunyikan",
     "videos.coming_soon": "Segera hadir",
     "videos.cases_cta_title": "Lebih suka belajar sambil praktik?",
     "videos.cases_cta_body": "Kasus memandu Anda langkah demi langkah melalui alur kerja nyata, di dalam aplikasi, pada proyek contoh.",
@@ -43413,6 +43411,8 @@ const resource = {
     "videos.more_moments": "{{more}} momen lagi",
     "cases.featured_article.eyebrow": "Artikel pilihan",
     "cases.featured_article.new_tab": "terbuka di tab baru",
+    "sidebar.learn.hint_topbar": "Video tutorial dan kasus berpandu untuk mempelajari platform. Jika Anda menyembunyikan bagian ini, bagian tersebut akan terlipat ke ikon topi wisuda di bar atas; satu klik di sana akan mengembalikannya.",
+    "sidebar.learn.hidden_toast_body_topbar": "Sekarang berada di balik ikon topi wisuda di bar atas. Satu klik di sana akan mengembalikannya.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

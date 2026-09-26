@@ -5811,7 +5811,7 @@ const resource = {
     "cases.not_found_body": "Dieses Fallbeispiel existiert nicht oder wurde entfernt. Sehen Sie sich stattdessen die vollständige Liste an.",
     "cases.not_found_title": "Fallbeispiel nicht gefunden",
     "cases.page_subtitle": "Geführte, durchgängige Fallbeispiele, die Sie der Reihe nach durch mehrere Module führen. Wählen Sie ein Fallbeispiel, optional ein Beispielprojekt zum Lernen, und folgen Sie jedem Schritt.",
-    "cases.page_title": "Fallbeispiele",
+    "cases.page_title": "Anwendungsfälle",
     "cases.progress_label": "Fortschritt des Fallbeispiels",
     "cases.reset": "Fortschritt zurücksetzen",
     "cases.reset_hint": "Fortschritt für dieses Fallbeispiel löschen und neu beginnen",
@@ -5992,7 +5992,7 @@ const resource = {
     "howto.value.title": "Realisierter Wert",
     "howto.value.what": "Realisierter Wert fügt Zahlen, die die Plattform ohnehin berechnet, zu einer belastbaren Ansicht zusammen: was hat uns das gebracht. Die Übersicht zeigt das Budgetrisiko, das genehmigte Änderungen jetzt steuern statt es spät zu entdecken, die zurückgeforderten Kosten und Ihre Rückforderungsquote, die Verwaltungsstunden, die assistierte Aktionen zurückgegeben haben, und einen dokumentierten Näherungswert für die Reduzierung des Streitrisikos. Jede Zahl trägt ein Konfidenz-Label, Währungen werden nie vermischt, und Sie können die gesamte Ansicht auf ein Projekt oder das ganze Portfolio beziehen.",
     "howto.value.when": "Nutzen Sie es, um Stakeholdern den messbaren Wert zu zeigen, den disziplinierte, assistierte Abwicklung anhand Ihrer eigenen Daten gebracht hat, und um zu sehen, welche Projekte am meisten aus der Plattform herausholen.",
-    "nav.cases": "Fallbeispiele",
+    "nav.cases": "Anwendungsfälle",
     "bim.geo_bbox_volume_base": "Hüllvolumen",
     "bim.geo_depth_base": "Tiefe",
     "bim.geo_diagonal_base": "Diagonale",
@@ -46055,15 +46055,13 @@ const resource = {
     "timeline.mod_erp_chat": "KI-Assistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videos",
+    "nav.videos": "Videoanleitungen",
     "sidebar.group.learn": "Lernen",
-    "sidebar.learn.hint": "Video-Tutorials und Fallbeispiele, um die Plattform kennenzulernen. Sie können diesen Bereich jederzeit unten im Menü ausblenden und wieder einblenden.",
-    "sidebar.learn.hide": "Videos & Fallbeispiele ausblenden",
+    "sidebar.learn.hide": "Videoanleitungen und Anwendungsfälle ausblenden",
     "sidebar.learn.hide_short": "Ausblenden",
-    "sidebar.learn.show": "Videos & Fallbeispiele anzeigen",
-    "sidebar.learn.show_hint": "Videos und Fallbeispiele wieder oben im Menü anzeigen",
-    "sidebar.learn.hidden_toast": "Videos und Fallbeispiele sind ausgeblendet",
-    "sidebar.learn.hidden_toast_body": "Über \"Videos & Fallbeispiele anzeigen\" unten im Menü können Sie sie jederzeit wieder einblenden.",
+    "sidebar.learn.show": "Videoanleitungen und Anwendungsfälle einblenden",
+    "sidebar.learn.show_hint": "Videoanleitungen und Anwendungsfälle wieder oben ins Menü holen",
+    "sidebar.learn.hidden_toast": "Videoanleitungen und Anwendungsfälle sind ausgeblendet",
     "videos.coming_soon": "Demnächst",
     "videos.cases_cta_title": "Lieber durch Ausprobieren lernen?",
     "videos.cases_cta_body": "Fallbeispiele führen Sie Schritt für Schritt durch reale Arbeitsabläufe, direkt in der App, an einem Beispielprojekt.",
@@ -46168,6 +46166,8 @@ const resource = {
     "videos.more_moments": "{{more}} weitere Momente",
     "cases.featured_article.eyebrow": "Empfohlener Artikel",
     "cases.featured_article.new_tab": "öffnet in einem neuen Tab",
+    "sidebar.learn.hint_topbar": "Video-Tutorials und Fallbeispiele, um die Plattform kennenzulernen. Wenn Sie diesen Bereich ausblenden, wird er zum Doktorhut-Symbol in der oberen Leiste zusammengeklappt; ein Klick darauf bringt ihn zurück ins Menü.",
+    "sidebar.learn.hidden_toast_body_topbar": "Sie befinden sich jetzt hinter dem Doktorhut-Symbol in der oberen Leiste. Ein Klick darauf bringt sie zurück.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

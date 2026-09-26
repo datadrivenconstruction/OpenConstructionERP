@@ -14,6 +14,7 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
+import { LearnTopBarButton } from './LearnTopBarButton';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { fetchProjectList } from '@/shared/lib/projectList';
@@ -530,6 +531,9 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             The "ask the user for something" CTAs (Support / Subscribe) stay
             adjacent; Bug + Help sit on the right edge so a user filing a
             report doesn't have to scan past the marketing CTAs. */}
+        {/* Only while the Learn card is hidden from the menu: its way back,
+            at every width. */}
+        <LearnTopBarButton />
         <NotificationBell />
         <HeaderNewsButton />
         {/* Building a module is something you do from wherever you noticed the

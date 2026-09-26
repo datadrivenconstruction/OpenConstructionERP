@@ -5260,7 +5260,7 @@ const resource = {
     "cases.not_found_body": "Tento případ neexistuje nebo byl odebrán. Projděte si raději celý seznam.",
     "cases.not_found_title": "Případ nenalezen",
     "cases.page_subtitle": "Vedené, ucelené případy, které vás v pořadí provedou několika moduly. Vyberte případ, volitelně zvolte ukázkový projekt, na kterém se budete učit, a projděte každý krok.",
-    "cases.page_title": "Případy",
+    "cases.page_title": "Případové studie",
     "cases.progress_label": "Postup případu",
     "cases.reset": "Resetovat postup",
     "cases.reset_hint": "Vymazat postup tohoto případu a začít znovu",
@@ -5441,7 +5441,7 @@ const resource = {
     "howto.value.title": "Realizovaná hodnota",
     "howto.value.what": "Realizovaná hodnota skládá údaje, které platforma již počítá, do jednoho obhajitelného pohledu \"co nám to přineslo\". Souhrn ukazuje rozpočtovou expozici, kterou schválené změny nyní řídí, místo aby se objevila pozdě, vymožené náklady a vaši míru vymožení, administrativní hodiny, které asistované akce vrátily, a doložený zástupný ukazatel snížení rizika sporu. Každé číslo nese štítek spolehlivosti, měny se nikdy nemísí a celý pohled můžete zúžit na jeden projekt nebo na celé portfolio.",
     "howto.value.when": "Použijte ji, abyste zainteresovaným stranám ukázali měřitelnou hodnotu, kterou na vašich vlastních datech přinesla ukázněná, asistovaná realizace, a abyste viděli, které projekty z platformy získávají nejvíce.",
-    "nav.cases": "Případy",
+    "nav.cases": "Případové studie",
     "bim.geo_bbox_volume_base": "Objem obalové krychle",
     "bim.geo_depth_base": "Hloubka",
     "bim.geo_diagonal_base": "Úhlopříčka",
@@ -44335,15 +44335,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI asistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videa",
+    "nav.videos": "Video návody",
     "sidebar.group.learn": "Výuka",
-    "sidebar.learn.hint": "Výuková videa a případové studie krok za krokem, které vás naučí pracovat s platformou. Tuto sekci můžete kdykoli skrýt a znovu zobrazit v dolní části menu.",
-    "sidebar.learn.hide": "Skrýt videa a případy",
+    "sidebar.learn.hide": "Skrýt video návody a případové studie",
     "sidebar.learn.hide_short": "Skrýt",
-    "sidebar.learn.show": "Zobrazit videa a případy",
-    "sidebar.learn.show_hint": "Vrátit Videa a Případy zpět nahoru do menu",
-    "sidebar.learn.hidden_toast": "Videa a případy jsou skryté",
-    "sidebar.learn.hidden_toast_body": "Kdykoli je vrátíte zpět pomocí \"Zobrazit videa a případy\" v dolní části menu.",
+    "sidebar.learn.show": "Zobrazit video návody a případové studie",
+    "sidebar.learn.show_hint": "Vrátit Video návody a Případové studie zpět nahoru do menu",
+    "sidebar.learn.hidden_toast": "Video návody a případové studie jsou skryté",
     "videos.coming_soon": "Připravujeme",
     "videos.cases_cta_title": "Chcete se raději učit prakticky?",
     "videos.cases_cta_body": "Případy vás krok za krokem provedou skutečnými pracovními postupy přímo v aplikaci na ukázkovém projektu.",
@@ -44448,6 +44446,8 @@ const resource = {
     "videos.more_moments": "Zobrazit {{more}} dalších",
     "cases.featured_article.eyebrow": "Doporučený článek",
     "cases.featured_article.new_tab": "otevře se na nové kartě",
+    "sidebar.learn.hint_topbar": "Výuková videa a případové studie krok za krokem, které vás naučí pracovat s platformou. Když tuto sekci skryjete, sbalí se do ikony akademického klobouku v horní liště; jedno kliknutí na ni ji vrátí zpět do menu.",
+    "sidebar.learn.hidden_toast_body_topbar": "Nyní jsou skryté za ikonou akademického klobouku v horní liště. Jedním kliknutím na ni je vrátíte zpět.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

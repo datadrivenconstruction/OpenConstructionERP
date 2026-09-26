@@ -5745,7 +5745,7 @@ const resource = {
     "cases.not_found_body": "Bu keys mavjud emas yoki oʻchirilgan. Buning oʻrniga toʻliq roʻyxatni koʻring.",
     "cases.not_found_title": "Keys topilmadi",
     "cases.page_subtitle": "Bir necha modul boʻylab ketma-ket olib boradigan yoʻriqnomali, boshdan-oxirigacha keyslar. Keys tanlang, xohlasangiz oʻrganish uchun namunaviy loyiha tanlang va har bir bosqichni bajaring.",
-    "cases.page_title": "Keyslar",
+    "cases.page_title": "Foydalanish keyslari",
     "cases.progress_label": "Keys jarayoni",
     "cases.reset": "Jarayonni qayta tiklash",
     "cases.reset_hint": "Bu keys uchun jarayonni tozalash va qaytadan boshlash",
@@ -5926,7 +5926,7 @@ const resource = {
     "howto.value.title": "Amalga oshirilgan qiymat",
     "howto.value.what": "Amalga oshirilgan qiymat platforma allaqachon hisoblagan raqamlarni bitta himoyalanadigan \"bu bizga nima berdi\" koʻrinishiga birlashtiradi. Xulosa tasdiqlangan oʻzgarishlar endi kech topish oʻrniga nazorat qilayotgan byudjet taʼsirini, qoplagan xarajatingiz va qoplash darajangizni, yordam berilgan harakatlar qaytargan administrativ soatlarni va hujjatlashtirilgan bahs-xavfi kamayishi vakilini koʻrsatadi. Har bir raqam ishonch belgisini olib yuradi, valyutalar hech qachon aralashtirilmaydi, va butun koʻrinishni bitta loyihaga yoki butun portfelga chegaralashingiz mumkin.",
     "howto.value.when": "Manfaatdor tomonlarga tartibli, yordam berilgan yetkazib berish oʻz maʼlumotlaringizda qanday oʻlchanadigan qiymat sotib olganini koʻrsatish va qaysi loyihalar platformadan eng koʻp foyda olayotganini koʻrish uchun undan foydalaning.",
-    "nav.cases": "Keyslar",
+    "nav.cases": "Foydalanish keyslari",
     "bim.geo_bbox_volume_base": "Chegaralovchi hajm",
     "bim.geo_depth_base": "Chuqurlik",
     "bim.geo_diagonal_base": "Diagonal",
@@ -44325,15 +44325,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI yordamchi",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videolar",
+    "nav.videos": "Video qoʻllanmalar",
     "sidebar.group.learn": "Oʻrganish",
-    "sidebar.learn.hint": "Platformani oʻrganish uchun oʻquv videolari va bosqichma-bosqich keyslar. Ushbu boʻlimni yashirishingiz va istalgan vaqtda menyu pastidan qayta koʻrsatishingiz mumkin.",
-    "sidebar.learn.hide": "Videolar va keyslarni yashirish",
+    "sidebar.learn.hide": "Video qoʻllanmalar va foydalanish keyslarini yashirish",
     "sidebar.learn.hide_short": "Yashirish",
-    "sidebar.learn.show": "Videolar va keyslarni koʻrsatish",
-    "sidebar.learn.show_hint": "Videolar va Keyslarni menyu tepasiga qaytarish",
-    "sidebar.learn.hidden_toast": "Videolar va keyslar yashirilgan",
-    "sidebar.learn.hidden_toast_body": "Ularni istalgan vaqtda menyu pastidagi \"Videolar va keyslarni koʻrsatish\" bilan qaytaring.",
+    "sidebar.learn.show": "Video qoʻllanmalar va foydalanish keyslarini koʻrsatish",
+    "sidebar.learn.show_hint": "Video qoʻllanmalar va Foydalanish keyslarini menyu tepasiga qaytarish",
+    "sidebar.learn.hidden_toast": "Video qoʻllanmalar va foydalanish keyslari yashirilgan",
     "videos.coming_soon": "Tez orada",
     "videos.cases_cta_title": "Amaliy tarzda oʻrganishni afzal koʻrasizmi?",
     "videos.cases_cta_body": "Keyslar sizni namunaviy loyiha ustida, ilova ichida, real ish jarayonlari boʻyicha bosqichma-bosqich yetaklaydi.",
@@ -44438,6 +44436,8 @@ const resource = {
     "videos.more_moments": "Yana {{more}} ta lahza",
     "cases.featured_article.eyebrow": "Tanlangan maqola",
     "cases.featured_article.new_tab": "yangi varaqda ochiladi",
+    "sidebar.learn.hint_topbar": "Platformani oʻrganish uchun oʻquv videolari va bosqichma-bosqich keyslar. Ushbu boʻlimni yashiring, u yuqori paneldagi bitiruv qalpogʻi belgisiga yigʻiladi; u yerga bosish uni qaytaradi.",
+    "sidebar.learn.hidden_toast_body_topbar": "Ular endi yuqori paneldagi bitiruv qalpogʻi belgisi ortida. U yerga bosish ularni qaytaradi.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

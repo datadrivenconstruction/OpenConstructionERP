@@ -5071,7 +5071,7 @@ const resource = {
     "cases.not_found_body": "Ez az eset nem létezik, vagy törölték. Böngésszen a teljes listában.",
     "cases.not_found_title": "Az eset nem található",
     "cases.page_subtitle": "Vezetett, végigvitt esetek, amelyek több modulon vezetnek végig sorrendben. Válasszon egy esetet, opcionálisan válasszon egy minta projektet a gyakorláshoz, és kövesse a lépéseket.",
-    "cases.page_title": "Esetek",
+    "cases.page_title": "Esettanulmányok",
     "cases.progress_label": "Eset állapota",
     "cases.reset": "Haladás visszaállítása",
     "cases.reset_hint": "Törölje ennek az esetnek a haladását, és kezdje elölről",
@@ -46002,15 +46002,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI asszisztens",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videók",
+    "nav.videos": "Videós útmutatók",
     "sidebar.group.learn": "Tanulás",
-    "sidebar.learn.hint": "Oktatóvideók és végigvezetett esettanulmányok a platform megismeréséhez. Ezt a szakaszt bármikor elrejtheti és újra megjelenítheti a menü alján.",
-    "sidebar.learn.hide": "Videók és esettanulmányok elrejtése",
+    "sidebar.learn.hide": "Videós útmutatók és esettanulmányok elrejtése",
     "sidebar.learn.hide_short": "Elrejtés",
-    "sidebar.learn.show": "Videók és esettanulmányok megjelenítése",
-    "sidebar.learn.show_hint": "Videók és Esettanulmányok visszahelyezése a menü tetejére",
-    "sidebar.learn.hidden_toast": "A videók és esettanulmányok el vannak rejtve",
-    "sidebar.learn.hidden_toast_body": "Bármikor visszahozhatja őket a menü alján található \"Videók és esettanulmányok megjelenítése\" gombbal.",
+    "sidebar.learn.show": "Videós útmutatók és esettanulmányok megjelenítése",
+    "sidebar.learn.show_hint": "Videós útmutatók és Esettanulmányok visszahelyezése a menü tetejére",
+    "sidebar.learn.hidden_toast": "A videós útmutatók és esettanulmányok el vannak rejtve",
     "videos.coming_soon": "Hamarosan",
     "videos.cases_cta_title": "Inkább gyakorlatban tanulna?",
     "videos.cases_cta_body": "Az esettanulmányok lépésről lépésre végigvezetik valós munkafolyamatokon, az alkalmazáson belül, egy mintaprojekten.",
@@ -46115,6 +46113,8 @@ const resource = {
     "videos.more_moments": "Még {{more}} pillanat",
     "cases.featured_article.eyebrow": "Kiemelt cikk",
     "cases.featured_article.new_tab": "új lapon nyílik meg",
+    "sidebar.learn.hint_topbar": "Oktatóvideók és végigvezetett esettanulmányok a platform megismeréséhez. Ha elrejti ezt a szakaszt, a felső sáv doktorisapka ikonjába kerül; egy kattintás ott, és visszatér.",
+    "sidebar.learn.hidden_toast_body_topbar": "Most a felső sáv doktorisapka ikonja mögött vannak. Egy kattintás ott, és visszatérnek.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

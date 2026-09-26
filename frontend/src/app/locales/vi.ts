@@ -5154,7 +5154,7 @@ const resource = {
     "cases.not_found_body": "Tình huống này không tồn tại hoặc đã bị gỡ bỏ. Hãy duyệt toàn bộ danh sách thay thế.",
     "cases.not_found_title": "Không tìm thấy tình huống",
     "cases.page_subtitle": "Các kịch bản hướng dẫn trọn vẹn dẫn bạn đi qua nhiều phân hệ theo thứ tự. Chọn một tình huống, tùy chọn một dự án mẫu để học, rồi làm theo từng bước.",
-    "cases.page_title": "Tình huống",
+    "cases.page_title": "Tình huống sử dụng",
     "cases.progress_label": "Tiến trình tình huống",
     "cases.reset": "Đặt lại tiến trình",
     "cases.reset_hint": "Xóa tiến trình cho tình huống này và bắt đầu lại",
@@ -5335,7 +5335,7 @@ const resource = {
     "howto.value.title": "Giá trị đạt được",
     "howto.value.what": "Giá trị đạt được kết hợp các con số nền tảng vốn đã tính thành một góc nhìn có cơ sở bảo vệ về \"thứ này đã mang lại gì cho chúng ta\". Phần tóm tắt cho thấy mức phơi nhiễm ngân sách mà các thay đổi đã phê duyệt giờ kiểm soát thay vì phát hiện muộn, chi phí bạn đã thu hồi và tỷ lệ thu hồi của bạn, số giờ hành chính mà các hành động được hỗ trợ trả lại, và một chỉ số đại diện cho mức giảm rủi ro tranh chấp có ghi nhận. Mỗi con số mang một nhãn độ tin cậy, các loại tiền không bao giờ bị pha trộn, và bạn có thể đặt phạm vi toàn bộ góc nhìn về một dự án hoặc toàn bộ danh mục đầu tư.",
     "howto.value.when": "Dùng nó để cho các bên liên quan thấy giá trị đo lường được mà việc triển khai có kỷ luật, được hỗ trợ đã mang lại trên dữ liệu của riêng bạn, và để thấy dự án nào tận dụng nền tảng nhiều nhất.",
-    "nav.cases": "Tình huống",
+    "nav.cases": "Tình huống sử dụng",
     "bim.geo_bbox_volume_base": "Thể tích bao",
     "bim.geo_depth_base": "Chiều sâu",
     "bim.geo_diagonal_base": "Đường chéo",
@@ -43309,15 +43309,13 @@ const resource = {
     "timeline.mod_erp_chat": "Trợ lý AI",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Video",
+    "nav.videos": "Hướng dẫn video",
     "sidebar.group.learn": "Học tập",
-    "sidebar.learn.hint": "Video hướng dẫn và tình huống có hướng dẫn để học nền tảng. Bạn có thể ẩn mục này và hiện lại bất cứ lúc nào ở cuối menu.",
-    "sidebar.learn.hide": "Ẩn video & tình huống",
+    "sidebar.learn.hide": "Ẩn hướng dẫn video & tình huống sử dụng",
     "sidebar.learn.hide_short": "Ẩn",
-    "sidebar.learn.show": "Hiện video & tình huống",
-    "sidebar.learn.show_hint": "Đưa Video và Tình huống trở lại đầu menu",
-    "sidebar.learn.hidden_toast": "Video và tình huống đã được ẩn",
-    "sidebar.learn.hidden_toast_body": "Hiện lại bất cứ lúc nào bằng \"Hiện video & tình huống\" ở cuối menu.",
+    "sidebar.learn.show": "Hiện hướng dẫn video & tình huống sử dụng",
+    "sidebar.learn.show_hint": "Đưa Hướng dẫn video và Tình huống sử dụng trở lại đầu menu",
+    "sidebar.learn.hidden_toast": "Hướng dẫn video và tình huống sử dụng đã được ẩn",
     "videos.coming_soon": "Sắp ra mắt",
     "videos.cases_cta_title": "Muốn học bằng cách thực hành hơn?",
     "videos.cases_cta_body": "Tình huống dẫn bạn qua các quy trình làm việc thực tế từng bước, ngay trong ứng dụng, trên một dự án mẫu.",
@@ -43422,6 +43420,8 @@ const resource = {
     "videos.more_moments": "{{more}} khoảnh khắc nữa",
     "cases.featured_article.eyebrow": "Bài viết nổi bật",
     "cases.featured_article.new_tab": "mở trong thẻ mới",
+    "sidebar.learn.hint_topbar": "Video hướng dẫn và tình huống có hướng dẫn để học nền tảng. Ẩn mục này thì nó sẽ thu gọn vào biểu tượng mũ tốt nghiệp ở thanh trên cùng; nhấp vào đó một lần để hiện lại.",
+    "sidebar.learn.hidden_toast_body_topbar": "Chúng hiện đang ở sau biểu tượng mũ tốt nghiệp ở thanh trên cùng. Nhấp vào đó một lần để hiện lại.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

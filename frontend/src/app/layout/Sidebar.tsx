@@ -36,6 +36,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { LEARN_GROUP_ID, navGroups, type NavGroup, type NavItem } from './navCatalog';
+import { LEARN_ANCHOR_ATTR, anchorRect, flyLearn } from './learnFlight';
 import { PRESET_WORKSPACES, resolveWorkspace, shownTab } from './workspaces';
 import { useCompanyWorkspace } from './useCompanyWorkspace';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -1026,20 +1027,28 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const learnLabel = learnGroup
     ? t(learnGroup.labelKey, { defaultValue: learnGroup.defaultLabel ?? learnGroup.id })
     : '';
-  const learnHidden = hiddenGroups.includes(LEARN_GROUP_ID);
   const loopGroups = navGroups.filter((group) => group.id !== LEARN_GROUP_ID);
+  // Hidden, the card folds into a graduation cap in the top bar
+  // (`LearnTopBarButton`), and a ghost of the cap flies there so the reader
+  // sees where it went. The start is measured before the card unmounts.
   const hideLearn = () => {
+    const from = anchorRect('sidebar');
     setGroupHidden(LEARN_GROUP_ID, true);
+    flyLearn(from, 'topbar');
     addToast(
       {
         type: 'info',
-        title: t('sidebar.learn.hidden_toast', { defaultValue: 'Videos and cases are hidden' }),
-        message: t('sidebar.learn.hidden_toast_body', {
-          defaultValue: 'Bring them back any time with "Show videos & cases" at the bottom of the menu.',
+        title: t('sidebar.learn.hidden_toast', { defaultValue: 'Video guides and use cases are hidden' }),
+        message: t('sidebar.learn.hidden_toast_body_topbar', {
+          defaultValue: 'They are now behind the graduation cap in the top bar. One click there brings them back.',
         }),
         action: {
           label: t('common.undo', { defaultValue: 'Undo' }),
-          onClick: () => setGroupHidden(LEARN_GROUP_ID, false),
+          onClick: () => {
+            const back = anchorRect('topbar');
+            setGroupHidden(LEARN_GROUP_ID, false);
+            flyLearn(back, 'sidebar');
+          },
         },
       },
       { duration: 8000 },
@@ -1275,7 +1284,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         data-engine="cwicr"
       >
         {/* Learn: videos and cases, above everything else, Pinned included.
-            Hidden from its own header, restored from the foot of the menu. */}
+            Hidden from its own header into a cap in the top bar, and restored
+            from there. */}
         {learnGroup && learnItems.length > 0 && (
           <LearnSection
             label={learnLabel}
@@ -1466,37 +1476,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   count: hiddenModules.length + hiddenGroups.length,
                 })}
               </span>
-            </button>
-          </div>
-        )}
-        {/* Restore for the Learn card. The "{N} hidden" chip above reaches it
-             too, through the menu editor, but that is two clicks and a Save
-             for something that went away in one; this brings it back in one,
-             and it is the control the hide hint and the toast point to. It
-             stays in the icon-only strip as well, where the chip does not. */}
-        {!editMode && learnHidden && (
-          <div className={clsx('pt-2 pb-0.5', iconified ? 'px-1 flex justify-center' : 'px-3')}>
-            <button
-              type="button"
-              data-testid="sidebar-learn-restore"
-              onClick={() => setGroupHidden(LEARN_GROUP_ID, false)}
-              title={t('sidebar.learn.show_hint', {
-                defaultValue: 'Put Videos and Cases back at the top of the menu',
-              })}
-              aria-label={iconified ? t('sidebar.learn.show', { defaultValue: 'Show videos & cases' }) : undefined}
-              className={clsx(
-                'group flex items-center rounded-lg border border-dashed border-oe-blue/35 bg-oe-blue/[0.04] text-oe-blue',
-                'hover:border-oe-blue hover:bg-oe-blue/10 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                iconified ? 'h-8 w-8 justify-center' : 'w-full justify-center gap-1.5 px-2.5 py-1.5',
-              )}
-            >
-              <GraduationCap size={13} strokeWidth={2} className="shrink-0" aria-hidden />
-              {!iconified && (
-                <span className="truncate text-[11px] font-medium">
-                  {t('sidebar.learn.show', { defaultValue: 'Show videos & cases' })}
-                </span>
-              )}
             </button>
           </div>
         )}
@@ -2012,6 +1991,7 @@ function LearnSection({
     return (
       <div
         data-testid="sidebar-learn"
+        {...{ [LEARN_ANCHOR_ATTR]: 'sidebar' }}
         className={clsx(
           'mb-1 rounded-xl bg-oe-blue/[0.06] py-1 ring-1 ring-inset ring-oe-blue/10 dark:bg-oe-blue/[0.12]',
           editMode && isGroupHidden && 'opacity-50',
@@ -2035,6 +2015,7 @@ function LearnSection({
     >
       <div className="group/learnhead relative flex items-center gap-1.5 px-1.5 pb-1 pt-0.5">
         <span
+          {...{ [LEARN_ANCHOR_ATTR]: 'sidebar' }}
           className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-oe-blue/15 text-oe-blue"
           aria-hidden
         >
@@ -2069,7 +2050,7 @@ function LearnSection({
               type="button"
               data-testid="sidebar-learn-hide"
               onClick={onHide}
-              aria-label={t('sidebar.learn.hide', { defaultValue: 'Hide videos & cases' })}
+              aria-label={t('sidebar.learn.hide', { defaultValue: 'Hide video guides & use cases' })}
               aria-describedby={hintId}
               className={clsx(
                 'flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] font-medium text-content-tertiary',
@@ -2100,9 +2081,9 @@ function LearnSection({
                 'group-focus-within/learnhead:visible group-focus-within/learnhead:translate-y-0 group-focus-within/learnhead:opacity-100',
               )}
             >
-              {t('sidebar.learn.hint', {
+              {t('sidebar.learn.hint_topbar', {
                 defaultValue:
-                  'Tutorial videos and guided cases to learn the platform. You can hide this section and show it again at any time from the bottom of the menu.',
+                  'Tutorial videos and guided cases to learn the platform. Hide this section and it folds into the graduation cap in the top bar; one click there brings it back.',
               })}
             </div>
           </>

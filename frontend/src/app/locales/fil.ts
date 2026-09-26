@@ -4414,7 +4414,7 @@ const resource = {
     "cases.not_found_body": "Hindi umiiral ang kasong ito o inalis na. Mag-browse na lang sa buong listahan.",
     "cases.not_found_title": "Hindi Nahanap ang Kaso",
     "cases.page_subtitle": "Mga guided at end-to-end playbook na naggagabay sa iyo sa maraming module nang sunud-sunod. Pumili ng kaso, opsyonal na pumili ng sample na proyekto para matuto, at sundan ang bawat hakbang.",
-    "cases.page_title": "Mga Kaso",
+    "cases.page_title": "Mga Kaso sa Paggamit",
     "cases.progress_label": "Progreso ng Kaso",
     "cases.reset": "I-reset ang Progreso",
     "cases.reset_hint": "Linisin ang progreso para sa kasong ito at magsimula ulit",
@@ -4595,7 +4595,7 @@ const resource = {
     "howto.value.title": "Naisakatuparang Value",
     "howto.value.what": "Binubuo ng Value Realized ang mga figure na kinukwenta na ng platform papasok sa isang maipagtatanggol na \"ano ang nabili nito para sa atin\" view. Ipinapakita ng buod ang budget exposure na kinokontrol na ngayon ng mga naaprubahang pagbabago sa halip na huling matuklasan, ang gastos na nabawi mo at recovery rate mo, ang admin hours na ibinalik ng mga assisted na aksyon, at isang dokumentadong dispute-risk-reduction proxy. Bawat numero ay may dalang confidence label, hindi kailanman hinahalo ang mga currency, at maaari mong i-scope ang buong view sa isang proyekto o sa buong portfolio.",
     "howto.value.when": "Gamitin ito para ipakita sa mga stakeholder ang masusukat na halagang binili ng disiplinado at assisted na delivery batay sa sarili mong datos, at para tingnan kung aling mga proyekto ang pinaka-nakikinabang sa platform.",
-    "nav.cases": "Mga Kaso",
+    "nav.cases": "Mga Kaso sa Paggamit",
     "bim.geo_bbox_volume_base": "Bounding Volume",
     "bim.geo_depth_base": "Lalim",
     "bim.geo_diagonal_base": "Dayagonal",
@@ -43392,15 +43392,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI na Katulong",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Mga Video",
+    "nav.videos": "Mga Gabay sa Video",
     "sidebar.group.learn": "Matuto",
-    "sidebar.learn.hint": "Mga tutorial video at gabay na Kaso para matutunan ang platform. Puwede mong itago ang seksyong ito at ipakita ulit anumang oras mula sa ibaba ng menu.",
-    "sidebar.learn.hide": "Itago ang mga video at kaso",
+    "sidebar.learn.hide": "Itago ang mga gabay sa video at kaso sa paggamit",
     "sidebar.learn.hide_short": "Itago",
-    "sidebar.learn.show": "Ipakita ang mga video at kaso",
-    "sidebar.learn.show_hint": "Ibalik ang Mga Video at Mga Kaso sa itaas ng menu",
-    "sidebar.learn.hidden_toast": "Nakatago ang mga video at kaso",
-    "sidebar.learn.hidden_toast_body": "Ibalik ang mga ito anumang oras gamit ang \"Ipakita ang mga video at kaso\" sa ibaba ng menu.",
+    "sidebar.learn.show": "Ipakita ang mga gabay sa video at kaso sa paggamit",
+    "sidebar.learn.show_hint": "Ibalik ang Mga Gabay sa Video at Mga Kaso sa Paggamit sa itaas ng menu",
+    "sidebar.learn.hidden_toast": "Nakatago ang mga gabay sa video at kaso sa paggamit",
     "videos.coming_soon": "Malapit na",
     "videos.cases_cta_title": "Mas gusto mo bang matuto sa gawa mismo?",
     "videos.cases_cta_body": "Dadalhin ka ng Mga Kaso nang paisa-isang hakbang sa mga totoong workflow, sa loob ng app, gamit ang isang sample na proyekto.",
@@ -43505,6 +43503,8 @@ const resource = {
     "videos.more_moments": "{{more}} pang sandali",
     "cases.featured_article.eyebrow": "Tampok na artikulo",
     "cases.featured_article.new_tab": "bubukas sa bagong tab",
+    "sidebar.learn.hint_topbar": "Mga tutorial video at gabay na Kaso para matutunan ang platform. Kapag itinago mo ang seksyong ito, mapupunta ito sa icon na graduation cap sa itaas na bar; isang click doon at babalik ito.",
+    "sidebar.learn.hidden_toast_body_topbar": "Nasa likod na sila ng icon na graduation cap sa itaas na bar. Isang click doon at babalik ang mga ito.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

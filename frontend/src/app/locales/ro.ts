@@ -5250,7 +5250,7 @@ const resource = {
     "cases.not_found_body": "Acest caz nu există sau a fost eliminat. Răsfoiți în schimb lista completă.",
     "cases.not_found_title": "Cazul nu a fost găsit",
     "cases.page_subtitle": "Cazuri ghidate, de la cap la coadă, care vă conduc prin mai multe module în ordine. Alegeți un caz, opțional un proiect exemplu pe care să învățați, și urmați fiecare pas.",
-    "cases.page_title": "Cazuri",
+    "cases.page_title": "Cazuri de utilizare",
     "cases.progress_label": "Progresul cazului",
     "cases.reset": "Resetează progresul",
     "cases.reset_hint": "Ștergeți progresul acestui caz și reluați de la început",
@@ -5431,7 +5431,7 @@ const resource = {
     "howto.value.title": "Valoare realizată",
     "howto.value.what": "Valoarea realizată compune cifre pe care platforma le calculează deja într-o singură vedere justificabilă de tip \"ce ne-a adus asta\". Rezumatul arată expunerea bugetară pe care modificările aprobate o controlează acum în loc să fie descoperită târziu, costul pe care l-ați recuperat și rata dvs. de recuperare, orele administrative pe care acțiunile asistate le-au redat și un indicator documentat de reducere a riscului de litigiu. Fiecare număr poartă o etichetă de încredere, monedele nu sunt niciodată amestecate, iar puteți delimita întreaga vedere la un singur proiect sau la întregul portofoliu.",
     "howto.value.when": "Folosiți-o pentru a arăta părților interesate valoarea măsurabilă pe care livrarea disciplinată și asistată a adus-o pe propriile dvs. date și pentru a vedea ce proiecte profită cel mai mult de platformă.",
-    "nav.cases": "Cazuri",
+    "nav.cases": "Cazuri de utilizare",
     "bim.geo_bbox_volume_base": "Volum de gabarit",
     "bim.geo_depth_base": "Adâncime",
     "bim.geo_diagonal_base": "Diagonala",
@@ -43569,15 +43569,13 @@ const resource = {
     "timeline.mod_erp_chat": "Asistent AI",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videouri",
+    "nav.videos": "Ghiduri video",
     "sidebar.group.learn": "Învățare",
-    "sidebar.learn.hint": "Videouri tutoriale și cazuri ghidate pentru a învăța platforma. Puteți ascunde această secțiune și o puteți afișa din nou oricând, din partea de jos a meniului.",
-    "sidebar.learn.hide": "Ascunde videourile și cazurile",
+    "sidebar.learn.hide": "Ascunde ghidurile video și cazurile de utilizare",
     "sidebar.learn.hide_short": "Ascunde",
-    "sidebar.learn.show": "Arată videourile și cazurile",
-    "sidebar.learn.show_hint": "Readuceți Videouri și Cazuri în partea de sus a meniului",
-    "sidebar.learn.hidden_toast": "Videourile și cazurile sunt ascunse",
-    "sidebar.learn.hidden_toast_body": "Le puteți readuce oricând cu \"Arată videourile și cazurile\", în partea de jos a meniului.",
+    "sidebar.learn.show": "Arată ghidurile video și cazurile de utilizare",
+    "sidebar.learn.show_hint": "Readuceți Ghiduri video și Cazuri de utilizare în partea de sus a meniului",
+    "sidebar.learn.hidden_toast": "Ghidurile video și cazurile de utilizare sunt ascunse",
     "videos.coming_soon": "În curând",
     "videos.cases_cta_title": "Preferați să învățați prin practică?",
     "videos.cases_cta_body": "Cazurile vă ghidează prin fluxuri de lucru reale, pas cu pas, direct în aplicație, pe un proiect exemplu.",
@@ -43682,6 +43680,8 @@ const resource = {
     "videos.more_moments": "Încă {{more}}",
     "cases.featured_article.eyebrow": "Articol recomandat",
     "cases.featured_article.new_tab": "se deschide într-o filă nouă",
+    "sidebar.learn.hint_topbar": "Videouri tutoriale și cazuri ghidate pentru a învăța platforma. Ascundeți această secțiune și se va restrânge în pictograma tocii de absolvire din bara de sus; un clic acolo o aduce înapoi.",
+    "sidebar.learn.hidden_toast_body_topbar": "Acum sunt în spatele pictogramei tocii de absolvire din bara de sus. Un clic acolo le aduce înapoi.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

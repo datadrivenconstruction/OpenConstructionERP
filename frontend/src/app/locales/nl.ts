@@ -5225,7 +5225,7 @@ const resource = {
     "cases.not_found_body": "Deze case bestaat niet of is verwijderd. Bekijk in plaats daarvan de volledige lijst.",
     "cases.not_found_title": "Case niet gevonden",
     "cases.page_subtitle": "Begeleide, end-to-end cases die u in volgorde door meerdere modules leiden. Kies een case, kies eventueel een voorbeeldproject om op te leren, en volg elke stap.",
-    "cases.page_title": "Cases",
+    "cases.page_title": "Gebruikscases",
     "cases.progress_label": "Case-voortgang",
     "cases.reset": "Voortgang resetten",
     "cases.reset_hint": "Wis de voortgang voor deze case en begin opnieuw",
@@ -5406,7 +5406,7 @@ const resource = {
     "howto.value.title": "Gerealiseerde waarde",
     "howto.value.what": "Gerealiseerde waarde stelt cijfers die het platform al berekent samen tot een verdedigbare weergave van \"wat heeft dit ons opgeleverd\". De samenvatting toont de budgetblootstelling die goedgekeurde wijzigingen nu beheersen in plaats van laat te ontdekken, de kosten die u hebt teruggevorderd en uw terugvorderingspercentage, de administratie-uren die ondersteunde acties hebben opgeleverd, en een gedocumenteerde indicator voor de vermindering van het geschilrisico. Elk cijfer draagt een betrouwbaarheidslabel, valuta's worden nooit vermengd, en u kunt de hele weergave scopen op een project of het hele portfolio.",
     "howto.value.when": "Gebruik het om belanghebbenden de meetbare waarde te tonen die gedisciplineerde, ondersteunde uitvoering op uw eigen gegevens heeft opgeleverd, en om te zien welke projecten het meeste uit het platform halen.",
-    "nav.cases": "Cases",
+    "nav.cases": "Gebruikscases",
     "bim.geo_bbox_volume_base": "Omvattend volume",
     "bim.geo_depth_base": "Diepte",
     "bim.geo_diagonal_base": "Diagonaal",
@@ -44294,15 +44294,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI-assistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Video's",
+    "nav.videos": "Videogidsen",
     "sidebar.group.learn": "Leren",
-    "sidebar.learn.hint": "Instructievideo's en begeleide cases om het platform te leren kennen. U kunt deze sectie op elk moment verbergen en weer weergeven onderaan het menu.",
-    "sidebar.learn.hide": "Video's en cases verbergen",
+    "sidebar.learn.hide": "Videogidsen en gebruikscases verbergen",
     "sidebar.learn.hide_short": "Verbergen",
-    "sidebar.learn.show": "Video's en cases weergeven",
-    "sidebar.learn.show_hint": "Video's en Cases terugzetten bovenaan het menu",
-    "sidebar.learn.hidden_toast": "Video's en cases zijn verborgen",
-    "sidebar.learn.hidden_toast_body": "Zet ze op elk moment terug via \"Video's en cases weergeven\" onderaan het menu.",
+    "sidebar.learn.show": "Videogidsen en gebruikscases weergeven",
+    "sidebar.learn.show_hint": "Videogidsen en Gebruikscases terugzetten bovenaan het menu",
+    "sidebar.learn.hidden_toast": "Videogidsen en gebruikscases zijn verborgen",
     "videos.coming_soon": "Binnenkort",
     "videos.cases_cta_title": "Liever al doende leren?",
     "videos.cases_cta_body": "Cases leiden u stap voor stap door echte werkprocessen, in de app, op een voorbeeldproject.",
@@ -44407,6 +44405,8 @@ const resource = {
     "videos.more_moments": "Nog {{more}} momenten",
     "cases.featured_article.eyebrow": "Uitgelicht artikel",
     "cases.featured_article.new_tab": "opent in een nieuw tabblad",
+    "sidebar.learn.hint_topbar": "Instructievideo's en begeleide cases om het platform te leren kennen. Als u deze sectie verbergt, klapt ze samen in het diploma-icoon in de bovenbalk; één klik daarop brengt haar terug.",
+    "sidebar.learn.hidden_toast_body_topbar": "Ze staan nu achter het diploma-icoon in de bovenbalk. Eén klik daarop brengt ze terug.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

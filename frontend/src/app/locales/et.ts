@@ -5142,7 +5142,7 @@ const resource = {
     "cases.not_found_body": "Seda juhtumit ei ole olemas või see on eemaldatud. Sirvige selle asemel kogu loendit.",
     "cases.not_found_title": "Juhtumit ei leitud",
     "cases.page_subtitle": "Juhendatud, algusest lõpuni tegevuskavad, mis juhatavad teid järjekorras läbi mitme mooduli. Valige juhtum, soovi korral valige õppimiseks näidisprojekt ja järgige iga sammu.",
-    "cases.page_title": "Juhtumid",
+    "cases.page_title": "Praktilised juhtumid",
     "cases.progress_label": "Juhtumi edenemine",
     "cases.reset": "Lähtesta edenemine",
     "cases.reset_hint": "Tühjendage selle juhtumi edenemine ja alustage otsast",
@@ -5323,7 +5323,7 @@ const resource = {
     "howto.value.title": "Realiseeritud väärtus",
     "howto.value.what": "Realiseeritud väärtus koondab platvormi juba arvutatud näitajad üheks põhjendatud vaateks \"mida see meile andis\". Kokkuvõte näitab eelarveriski, mida kinnitatud muudatused nüüd kontrolli all hoiavad selle asemel, et see hiljem avastada, kulu, mille tagasi saite, ja oma tagasisaamise määra, haldustunde, mille abistatud toimingud tagasi andsid, ning dokumenteeritud vaidlusriski vähendamise mõõdikut. Iga arv kannab kindlussilti, valuutasid ei segata kunagi ning kogu vaadet saab piirata ühe projekti või kogu portfelliga.",
     "howto.value.when": "Kasutage seda, et näidata sidusrühmadele distsiplineeritud, abistatud elluviimise mõõdetavat väärtust teie enda andmete põhjal ning näha, millised projektid platvormist kõige rohkem kasu saavad.",
-    "nav.cases": "Juhtumid",
+    "nav.cases": "Praktilised juhtumid",
     "bim.geo_bbox_volume_base": "Ümbritsev ruumala",
     "bim.geo_depth_base": "Sügavus",
     "bim.geo_diagonal_base": "Diagonaal",
@@ -43355,15 +43355,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI assistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videod",
+    "nav.videos": "Videojuhendid",
     "sidebar.group.learn": "Õpi",
-    "sidebar.learn.hint": "Õppevideod ja juhendatud juhtumid platvormi õppimiseks. Saad selle jaotise igal ajal menüü allosast peita ja uuesti nähtavale tuua.",
-    "sidebar.learn.hide": "Peida videod ja juhtumid",
+    "sidebar.learn.hide": "Peida videojuhendid ja praktilised juhtumid",
     "sidebar.learn.hide_short": "Peida",
-    "sidebar.learn.show": "Näita videoid ja juhtumeid",
-    "sidebar.learn.show_hint": "Vii Videod ja Juhtumid tagasi menüü tippu",
-    "sidebar.learn.hidden_toast": "Videod ja juhtumid on peidetud",
-    "sidebar.learn.hidden_toast_body": "Toon nad tagasi igal ajal nupuga \"Näita videoid ja juhtumeid\" menüü allosas.",
+    "sidebar.learn.show": "Näita videojuhendeid ja praktilisi juhtumeid",
+    "sidebar.learn.show_hint": "Vii Videojuhendid ja Praktilised juhtumid tagasi menüü tippu",
+    "sidebar.learn.hidden_toast": "Videojuhendid ja praktilised juhtumid on peidetud",
     "videos.coming_soon": "Peagi",
     "videos.cases_cta_title": "Eelistad õppida tegevuse käigus?",
     "videos.cases_cta_body": "Juhtumid juhatavad sind samm-sammult läbi päris tööprotsesside, rakenduse sees, näidisprojektil.",
@@ -43468,6 +43466,8 @@ const resource = {
     "videos.more_moments": "Veel {{more}} hetke",
     "cases.featured_article.eyebrow": "Esiletõstetud artikkel",
     "cases.featured_article.new_tab": "avaneb uuel vahelehel",
+    "sidebar.learn.hint_topbar": "Õppevideod ja juhendatud juhtumid platvormi õppimiseks. Kui peidad selle jaotise, koondub see ülemises ribas kraadimütsi ikooniks; klõps sellel toob selle menüüsse tagasi.",
+    "sidebar.learn.hidden_toast_body_topbar": "Need on nüüd peidus ülemise riba kraadimütsi ikooni taga. Klõps sellel toob need tagasi.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

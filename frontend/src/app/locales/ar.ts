@@ -45605,15 +45605,13 @@ const resource = {
     "timeline.mod_erp_chat": "مساعد الذكاء الاصطناعي",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "الفيديوهات",
+    "nav.videos": "فيديوهات تعليمية",
     "sidebar.group.learn": "تعلّم",
-    "sidebar.learn.hint": "فيديوهات تعليمية وحالات عملية موجّهة لتعلّم المنصة. يمكنك إخفاء هذا القسم وإظهاره مرة أخرى في أي وقت من أسفل القائمة.",
-    "sidebar.learn.hide": "إخفاء الفيديوهات والحالات العملية",
+    "sidebar.learn.hide": "إخفاء الفيديوهات التعليمية والحالات العملية",
     "sidebar.learn.hide_short": "إخفاء",
-    "sidebar.learn.show": "إظهار الفيديوهات والحالات العملية",
-    "sidebar.learn.show_hint": "إعادة الفيديوهات والحالات العملية إلى أعلى القائمة",
-    "sidebar.learn.hidden_toast": "الفيديوهات والحالات العملية مخفية الآن",
-    "sidebar.learn.hidden_toast_body": "يمكنك إعادتها في أي وقت عبر \"إظهار الفيديوهات والحالات العملية\" أسفل القائمة.",
+    "sidebar.learn.show": "إظهار الفيديوهات التعليمية والحالات العملية",
+    "sidebar.learn.show_hint": "إعادة الفيديوهات التعليمية والحالات العملية إلى أعلى القائمة",
+    "sidebar.learn.hidden_toast": "الفيديوهات التعليمية والحالات العملية مخفية الآن",
     "videos.coming_soon": "قريبًا",
     "videos.cases_cta_title": "تفضّل التعلّم بالتطبيق؟",
     "videos.cases_cta_body": "تأخذك الحالات العملية خطوة بخطوة عبر مسارات عمل حقيقية، داخل التطبيق، على مشروع تجريبي.",
@@ -45718,6 +45716,8 @@ const resource = {
     "videos.more_moments": "{{more}} إضافية",
     "cases.featured_article.eyebrow": "مقال مميز",
     "cases.featured_article.new_tab": "يفتح في علامة تبويب جديدة",
+    "sidebar.learn.hint_topbar": "فيديوهات تعليمية وحالات عملية موجّهة لتعلّم المنصة. عند إخفاء هذا القسم، يُطوى في أيقونة قبعة التخرج في الشريط العلوي؛ نقرة واحدة عليها تعيده إلى القائمة.",
+    "sidebar.learn.hidden_toast_body_topbar": "أصبحت الآن خلف أيقونة قبعة التخرج في الشريط العلوي. نقرة واحدة عليها تعيدها.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

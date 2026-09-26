@@ -5240,7 +5240,7 @@ const resource = {
     "cases.not_found_body": "Bu vaka mevcut değil veya kaldırılmış. Bunun yerine tam listeye göz atın.",
     "cases.not_found_title": "Vaka bulunamadı",
     "cases.page_subtitle": "Sizi birden çok modülde sırayla yönlendiren, uçtan uca rehberli kılavuzlar. Bir vaka seçin, isterseniz üzerinde öğreneceğiniz bir örnek proje belirleyin ve her adımı izleyin.",
-    "cases.page_title": "Vakalar",
+    "cases.page_title": "Kullanım senaryoları",
     "cases.progress_label": "Vaka ilerlemesi",
     "cases.reset": "İlerlemeyi sıfırla",
     "cases.reset_hint": "Bu vakanın ilerlemesini temizleyin ve baştan başlayın",
@@ -5421,7 +5421,7 @@ const resource = {
     "howto.value.title": "Gerçekleşen Değer",
     "howto.value.what": "Gerçekleşen Değer, platformun zaten hesapladığı rakamları savunulabilir tek bir \"bu bize ne kazandırdı\" görünümünde bir araya getirir. Özet; onaylanan değişikliklerin geç fark edilmek yerine artık kontrol ettiği bütçe maruziyetini, tahsil ettiğiniz maliyeti ve tahsilat oranınızı, yardımlı eylemlerin geri kazandırdığı idari saatleri ve belgelenmiş bir anlaşmazlık riski azaltma göstergesini gösterir. Her rakam bir güven etiketi taşır, para birimleri asla karıştırılmaz ve tüm görünümü tek bir projeye veya tüm portföye göre kapsamlandırabilirsiniz.",
     "howto.value.when": "Disiplinli, yardımlı teslimatın kendi verileriniz üzerinde kazandırdığı ölçülebilir değeri paydaşlara göstermek ve hangi projelerin platformdan en çok yararlandığını görmek için kullanın.",
-    "nav.cases": "Vakalar",
+    "nav.cases": "Kullanım senaryoları",
     "bim.geo_bbox_volume_base": "Sınırlayıcı hacim",
     "bim.geo_depth_base": "Derinlik",
     "bim.geo_diagonal_base": "Köşegen",
@@ -44257,15 +44257,13 @@ const resource = {
     "timeline.mod_erp_chat": "Yapay zeka asistanı",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videolar",
+    "nav.videos": "Video rehberleri",
     "sidebar.group.learn": "Öğren",
-    "sidebar.learn.hint": "Platformu öğrenmek için eğitim videoları ve rehberli vakalar. Bu bölümü gizleyebilir ve menünün altından istediğiniz zaman tekrar gösterebilirsiniz.",
-    "sidebar.learn.hide": "Videoları ve vakaları gizle",
+    "sidebar.learn.hide": "Video rehberlerini ve kullanım senaryolarını gizle",
     "sidebar.learn.hide_short": "Gizle",
-    "sidebar.learn.show": "Videoları ve vakaları göster",
-    "sidebar.learn.show_hint": "Videolar ve Vakalar'ı menünün üstüne geri getirin",
-    "sidebar.learn.hidden_toast": "Videolar ve vakalar gizlendi",
-    "sidebar.learn.hidden_toast_body": "Menünün altındaki \"Videoları ve vakaları göster\" ile bunları istediğiniz zaman geri getirebilirsiniz.",
+    "sidebar.learn.show": "Video rehberlerini ve kullanım senaryolarını göster",
+    "sidebar.learn.show_hint": "Video rehberleri ve Kullanım senaryolarını menünün üstüne geri getirin",
+    "sidebar.learn.hidden_toast": "Video rehberleri ve kullanım senaryoları gizlendi",
     "videos.coming_soon": "Yakında",
     "videos.cases_cta_title": "Yaparak öğrenmeyi mi tercih edersiniz?",
     "videos.cases_cta_body": "Vakalar, uygulama içinde örnek bir proje üzerinden gerçek iş akışlarında size adım adım rehberlik eder.",
@@ -44370,6 +44368,8 @@ const resource = {
     "videos.more_moments": "{{more}} an daha",
     "cases.featured_article.eyebrow": "Öne çıkan makale",
     "cases.featured_article.new_tab": "yeni sekmede açılır",
+    "sidebar.learn.hint_topbar": "Platformu öğrenmek için eğitim videoları ve rehberli vakalar. Bu bölümü gizleyin, üst çubuktaki mezuniyet kepi simgesine küçülsün; oraya bir tıklama onu geri getirir.",
+    "sidebar.learn.hidden_toast_body_topbar": "Artık üst çubuktaki mezuniyet kepi simgesinin arkasındalar. Oraya bir tıklama onları geri getirir.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

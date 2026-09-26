@@ -5275,7 +5275,7 @@ const resource = {
     "cases.not_found_body": "Ten scenariusz nie istnieje lub został usunięty. Przejrzyj zamiast tego pełną listę.",
     "cases.not_found_title": "Nie znaleziono scenariusza",
     "cases.page_subtitle": "Kierowane scenariusze od początku do końca, które prowadzą Cię przez kilka modułów po kolei. Wybierz scenariusz, opcjonalnie wskaż przykładowy projekt do nauki i wykonuj kolejne kroki.",
-    "cases.page_title": "Scenariusze",
+    "cases.page_title": "Scenariusze użycia",
     "cases.progress_label": "Postęp scenariusza",
     "cases.reset": "Zresetuj postęp",
     "cases.reset_hint": "Wyczyść postęp tego scenariusza i zacznij od nowa",
@@ -5456,7 +5456,7 @@ const resource = {
     "howto.value.title": "Zrealizowana wartość",
     "howto.value.what": "Zrealizowana wartość składa liczby, które platforma już oblicza, w jeden możliwy do obrony widok \"co nam to dało\". Podsumowanie pokazuje narażenie budżetu, które zatwierdzone zmiany teraz kontrolują, zamiast odkrywać je za późno, odzyskany koszt i Twój wskaźnik odzysku, godziny administracyjne zwrócone przez działania wspomagane oraz udokumentowany wskaźnik zastępczy redukcji ryzyka sporu. Każda liczba niesie etykietę pewności, waluty nigdy nie są mieszane, a cały widok możesz ograniczyć do jednego projektu lub całego portfela.",
     "howto.value.when": "Używaj jej, aby pokazać interesariuszom mierzalną wartość, jaką zdyscyplinowana, wspomagana realizacja przyniosła na Twoich własnych danych, i zobaczyć, które projekty czerpią najwięcej z platformy.",
-    "nav.cases": "Scenariusze",
+    "nav.cases": "Scenariusze użycia",
     "bim.geo_bbox_volume_base": "Objętość bryły brzegowej",
     "bim.geo_depth_base": "Głębokość",
     "bim.geo_diagonal_base": "Przekątna",
@@ -44564,15 +44564,13 @@ const resource = {
     "timeline.mod_erp_chat": "Asystent AI",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Filmy",
+    "nav.videos": "Poradniki wideo",
     "sidebar.group.learn": "Naucz się",
-    "sidebar.learn.hint": "Filmy instruktażowe i prowadzone scenariusze, które pomagają poznać platformę. Możesz w każdej chwili ukryć tę sekcję i przywrócić ją z dołu menu.",
-    "sidebar.learn.hide": "Ukryj filmy i scenariusze",
+    "sidebar.learn.hide": "Ukryj poradniki wideo i scenariusze użycia",
     "sidebar.learn.hide_short": "Ukryj",
-    "sidebar.learn.show": "Pokaż filmy i scenariusze",
-    "sidebar.learn.show_hint": "Przywróć Filmy i Scenariusze na górę menu",
-    "sidebar.learn.hidden_toast": "Filmy i scenariusze są ukryte",
-    "sidebar.learn.hidden_toast_body": "Możesz je przywrócić w każdej chwili opcją \"Pokaż filmy i scenariusze\" na dole menu.",
+    "sidebar.learn.show": "Pokaż poradniki wideo i scenariusze użycia",
+    "sidebar.learn.show_hint": "Przywróć Poradniki wideo i Scenariusze użycia na górę menu",
+    "sidebar.learn.hidden_toast": "Poradniki wideo i scenariusze użycia są ukryte",
     "videos.coming_soon": "Wkrótce",
     "videos.cases_cta_title": "Wolisz uczyć się w praktyce?",
     "videos.cases_cta_body": "Scenariusze prowadzą krok po kroku przez rzeczywiste procesy pracy, w aplikacji, na przykładowym projekcie.",
@@ -44677,6 +44675,8 @@ const resource = {
     "videos.more_moments": "Jeszcze {{more}}",
     "cases.featured_article.eyebrow": "Polecany artykuł",
     "cases.featured_article.new_tab": "otwiera się w nowej karcie",
+    "sidebar.learn.hint_topbar": "Filmy instruktażowe i prowadzone scenariusze, które pomagają poznać platformę. Ukryj tę sekcję, a zwinie się do ikony biretu na górnym pasku; jedno kliknięcie tam ją przywraca.",
+    "sidebar.learn.hidden_toast_body_topbar": "Są teraz ukryte pod ikoną biretu na górnym pasku. Jedno kliknięcie tam je przywraca.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

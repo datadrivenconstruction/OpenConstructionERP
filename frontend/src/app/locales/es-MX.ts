@@ -40609,15 +40609,13 @@ const resource = {
     "timeline.mod_erp_chat": "Asistente IA",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videos",
+    "nav.videos": "Videos tutoriales",
     "sidebar.group.learn": "Aprender",
-    "sidebar.learn.hint": "Videos tutoriales y casos prácticos guiados para aprender la plataforma. Puede ocultar esta sección y volver a mostrarla en cualquier momento desde la parte inferior del menú.",
-    "sidebar.learn.hide": "Ocultar videos y casos prácticos",
+    "sidebar.learn.hide": "Ocultar videos tutoriales y casos prácticos",
     "sidebar.learn.hide_short": "Ocultar",
-    "sidebar.learn.show": "Mostrar videos y casos prácticos",
-    "sidebar.learn.show_hint": "Vuelva a poner Videos y Casos prácticos arriba del menú",
-    "sidebar.learn.hidden_toast": "Los videos y casos prácticos están ocultos",
-    "sidebar.learn.hidden_toast_body": "Recupérelos en cualquier momento con \"Mostrar videos y casos prácticos\", al final del menú.",
+    "sidebar.learn.show": "Mostrar videos tutoriales y casos prácticos",
+    "sidebar.learn.show_hint": "Vuelva a poner Videos tutoriales y Casos prácticos arriba del menú",
+    "sidebar.learn.hidden_toast": "Los videos tutoriales y casos prácticos están ocultos",
     "videos.coming_soon": "Próximamente",
     "videos.cases_cta_title": "¿Prefiere aprender haciendo?",
     "videos.cases_cta_body": "Los casos prácticos lo guían paso a paso por flujos de trabajo reales, dentro de la aplicación, sobre un proyecto de ejemplo.",
@@ -40722,6 +40720,8 @@ const resource = {
     "videos.more_moments": "{{more}} momentos más",
     "cases.featured_article.eyebrow": "Artículo destacado",
     "cases.featured_article.new_tab": "se abre en una pestaña nueva",
+    "sidebar.learn.hint_topbar": "Videos tutoriales y casos prácticos guiados para aprender la plataforma. Si oculta esta sección, se repliega en el ícono del birrete en la barra superior; un clic ahí la devuelve al menú.",
+    "sidebar.learn.hidden_toast_body_topbar": "Ahora están detrás del ícono del birrete en la barra superior. Un clic ahí los devuelve.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -4896,7 +4896,7 @@ const resource = {
     "cases.not_found_body": "Este caso não existe ou foi removido. Veja a lista completa.",
     "cases.not_found_title": "Caso não encontrado",
     "cases.page_subtitle": "Casos guiados de ponta a ponta que conduzem você por vários módulos em ordem. Escolha um caso, opcionalmente escolha um projeto de exemplo para aprender e siga cada etapa.",
-    "cases.page_title": "Casos",
+    "cases.page_title": "Casos de uso",
     "cases.progress_label": "Progresso do caso",
     "cases.reset": "Reiniciar progresso",
     "cases.reset_hint": "Limpe o progresso deste caso e comece de novo",
@@ -5073,7 +5073,7 @@ const resource = {
     "howto.value.title": "Valor Realizado",
     "howto.value.what": "O Valor Realizado reúne números que a plataforma já calcula em uma única visão defensável de \"o que isto nos trouxe\". O resumo mostra a exposição orçamentária que as mudanças aprovadas agora controlam em vez de descobrir tarde, o custo que você recuperou e sua taxa de recuperação, as horas administrativas que as ações assistidas devolveram e um indicador documentado de redução do risco de litígio. Cada número traz um rótulo de confiança, as moedas nunca são misturadas, e você pode delimitar toda a visão a um projeto ou a todo o portfólio.",
     "howto.value.when": "Use-o para mostrar às partes interessadas o valor mensurável que uma entrega disciplinada e assistida trouxe com base nos seus próprios dados, e para ver quais projetos aproveitam mais a plataforma.",
-    "nav.cases": "Casos",
+    "nav.cases": "Casos de uso",
     "bim.geo_bbox_volume_base": "Volume envolvente",
     "bim.geo_depth_base": "Profundidade",
     "bim.geo_diagonal_base": "Diagonal",
@@ -40302,15 +40302,13 @@ const resource = {
     "timeline.mod_erp_chat": "Assistente de IA",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Vídeos",
+    "nav.videos": "Guias em vídeo",
     "sidebar.group.learn": "Aprender",
-    "sidebar.learn.hint": "Vídeos tutoriais e casos guiados para você aprender a plataforma. Você pode ocultar esta seção e mostrá-la novamente a qualquer momento na parte de baixo do menu.",
-    "sidebar.learn.hide": "Ocultar vídeos e casos",
+    "sidebar.learn.hide": "Ocultar guias em vídeo e casos de uso",
     "sidebar.learn.hide_short": "Ocultar",
-    "sidebar.learn.show": "Mostrar vídeos e casos",
-    "sidebar.learn.show_hint": "Colocar Vídeos e Casos de volta no topo do menu",
-    "sidebar.learn.hidden_toast": "Vídeos e casos estão ocultos",
-    "sidebar.learn.hidden_toast_body": "Você pode trazê-los de volta quando quiser em \"Mostrar vídeos e casos\", na parte de baixo do menu.",
+    "sidebar.learn.show": "Mostrar guias em vídeo e casos de uso",
+    "sidebar.learn.show_hint": "Colocar Guias em vídeo e Casos de uso de volta no topo do menu",
+    "sidebar.learn.hidden_toast": "Guias em vídeo e casos de uso estão ocultos",
     "videos.coming_soon": "Em breve",
     "videos.cases_cta_title": "Prefere aprender na prática?",
     "videos.cases_cta_body": "Os Casos guiam você passo a passo por fluxos de trabalho reais, dentro do aplicativo, em um projeto de exemplo.",
@@ -40415,6 +40413,8 @@ const resource = {
     "videos.more_moments": "Mais {{more}} momentos",
     "cases.featured_article.eyebrow": "Artigo em destaque",
     "cases.featured_article.new_tab": "abre em uma nova aba",
+    "sidebar.learn.hint_topbar": "Vídeos tutoriais e casos guiados para você aprender a plataforma. Oculte esta seção e ela se recolhe no ícone de capelo na barra superior; um clique ali traz de volta.",
+    "sidebar.learn.hidden_toast_body_topbar": "Agora estão atrás do ícone de capelo na barra superior. Um clique ali traz de volta.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

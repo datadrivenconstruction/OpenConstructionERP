@@ -5256,7 +5256,7 @@ const resource = {
     "cases.not_found_body": "Ce cas n'existe pas ou a été supprimé. Parcourez plutôt la liste complète.",
     "cases.not_found_title": "Cas introuvable",
     "cases.page_subtitle": "Des cas complets de bout en bout qui vous font passer par plusieurs modules dans l'ordre. Choisissez un cas, sélectionnez éventuellement un projet exemple pour vous entraîner, et suivez chaque étape.",
-    "cases.page_title": "Cas",
+    "cases.page_title": "Cas d'usage",
     "cases.progress_label": "Avancement du cas",
     "cases.reset": "Réinitialiser l'avancement",
     "cases.reset_hint": "Effacer l'avancement de ce cas et recommencer",
@@ -5437,7 +5437,7 @@ const resource = {
     "howto.value.title": "Valeur réalisée",
     "howto.value.what": "La Valeur réalisée assemble des chiffres que la plateforme calcule déjà en une seule vue défendable du « qu'est-ce que cela nous a apporté ». La synthèse montre l'exposition budgétaire que les changements approuvés maîtrisent désormais au lieu de la découvrir trop tard, le coût que vous avez recouvré et votre taux de recouvrement, les heures administratives que les actions assistées ont fait gagner, et un indicateur documenté de réduction du risque de litige. Chaque chiffre porte une étiquette de confiance, les devises ne sont jamais mélangées, et vous pouvez cadrer toute la vue sur un seul projet ou sur l'ensemble du portefeuille.",
     "howto.value.when": "Utilisez-la pour montrer aux parties prenantes la valeur mesurable qu'une exécution rigoureuse et assistée a apportée sur vos propres données, et pour voir quels projets tirent le meilleur parti de la plateforme.",
-    "nav.cases": "Cas",
+    "nav.cases": "Cas d'usage",
     "bim.geo_bbox_volume_base": "Volume englobant",
     "bim.geo_depth_base": "Profondeur",
     "bim.geo_diagonal_base": "Diagonale",
@@ -46144,15 +46144,13 @@ const resource = {
     "timeline.mod_erp_chat": "Assistant IA",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Vidéos",
+    "nav.videos": "Guides vidéo",
     "sidebar.group.learn": "Apprendre",
-    "sidebar.learn.hint": "Vidéos de formation et cas guidés pour apprendre la plateforme. Vous pouvez masquer cette section et la réafficher à tout moment depuis le bas du menu.",
-    "sidebar.learn.hide": "Masquer les vidéos et les cas",
+    "sidebar.learn.hide": "Masquer les guides vidéo et les cas d'usage",
     "sidebar.learn.hide_short": "Masquer",
-    "sidebar.learn.show": "Afficher les vidéos et les cas",
-    "sidebar.learn.show_hint": "Remettre Vidéos et Cas en haut du menu",
-    "sidebar.learn.hidden_toast": "Les vidéos et les cas sont masqués",
-    "sidebar.learn.hidden_toast_body": "Retrouvez-les à tout moment avec \"Afficher les vidéos et les cas\" en bas du menu.",
+    "sidebar.learn.show": "Afficher les guides vidéo et les cas d'usage",
+    "sidebar.learn.show_hint": "Remettre Guides vidéo et Cas d'usage en haut du menu",
+    "sidebar.learn.hidden_toast": "Les guides vidéo et les cas d'usage sont masqués",
     "videos.coming_soon": "Bientôt disponible",
     "videos.cases_cta_title": "Vous préférez apprendre en pratiquant ?",
     "videos.cases_cta_body": "Les cas vous guident pas à pas dans des workflows réels, dans l'application, sur un projet d'exemple.",
@@ -46257,6 +46255,8 @@ const resource = {
     "videos.more_moments": "{{more}} moments de plus",
     "cases.featured_article.eyebrow": "Article à la une",
     "cases.featured_article.new_tab": "s'ouvre dans un nouvel onglet",
+    "sidebar.learn.hint_topbar": "Vidéos de formation et cas guidés pour apprendre la plateforme. Si vous masquez cette section, elle se replie dans l'icône du chapeau de diplômé en haut de la barre supérieure ; un clic dessus la fait revenir.",
+    "sidebar.learn.hidden_toast_body_topbar": "Ils sont maintenant derrière l'icône du chapeau de diplômé dans la barre supérieure. Un clic dessus les fait revenir.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

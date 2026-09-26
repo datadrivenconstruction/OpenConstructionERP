@@ -5213,7 +5213,7 @@ const resource = {
     "cases.not_found_body": "Denne case findes ikke eller blev fjernet. Gennemse hele listen i stedet.",
     "cases.not_found_title": "Case ikke fundet",
     "cases.page_subtitle": "Guidede drejebøger fra ende til anden, der fører dig gennem flere moduler i rækkefølge. Vælg en case, vælg eventuelt et eksempelprojekt at lære på, og følg hvert trin.",
-    "cases.page_title": "Cases",
+    "cases.page_title": "Praktiske cases",
     "cases.progress_label": "Casefremdrift",
     "cases.reset": "Nulstil fremdrift",
     "cases.reset_hint": "Ryd fremdriften for denne case og start forfra",
@@ -5394,7 +5394,7 @@ const resource = {
     "howto.value.title": "Realiseret værdi",
     "howto.value.what": "Realiseret værdi sammensætter tal, platformen allerede beregner, til én forsvarlig \"hvad har dette givet os\"-visning. Resumeet viser den budgeteksponering, som godkendte ændringer nu styrer i stedet for at blive opdaget for sent, den omkostning du inddrev og din inddrivelsesrate, de administrationstimer assisterede handlinger gav tilbage, og en dokumenteret indikator for reduktion af tvistrisiko. Hvert tal bærer en sikkerhedsetiket, valutaer blandes aldrig, og du kan afgrænse hele visningen til ét projekt eller hele porteføljen.",
     "howto.value.when": "Brug det til at vise interessenter den målbare værdi, som disciplineret, assisteret levering har givet på dine egne data, og til at se, hvilke projekter der får mest ud af platformen.",
-    "nav.cases": "Cases",
+    "nav.cases": "Praktiske cases",
     "bim.geo_bbox_volume_base": "Afgrænsningsvolumen",
     "bim.geo_depth_base": "Dybde",
     "bim.geo_diagonal_base": "Diagonal",
@@ -43413,15 +43413,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI-assistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videoer",
+    "nav.videos": "Videoguides",
     "sidebar.group.learn": "Lær",
-    "sidebar.learn.hint": "Instruktionsvideoer og guidede cases, der lærer dig platformen at kende. Du kan skjule denne sektion og vise den igen når som helst nederst i menuen.",
-    "sidebar.learn.hide": "Skjul videoer og cases",
+    "sidebar.learn.hide": "Skjul videoguides og praktiske cases",
     "sidebar.learn.hide_short": "Skjul",
-    "sidebar.learn.show": "Vis videoer og cases",
-    "sidebar.learn.show_hint": "Sæt Videoer og Cases tilbage øverst i menuen",
-    "sidebar.learn.hidden_toast": "Videoer og cases er skjult",
-    "sidebar.learn.hidden_toast_body": "Du kan altid hente dem tilbage med \"Vis videoer og cases\" nederst i menuen.",
+    "sidebar.learn.show": "Vis videoguides og praktiske cases",
+    "sidebar.learn.show_hint": "Sæt Videoguides og Praktiske cases tilbage øverst i menuen",
+    "sidebar.learn.hidden_toast": "Videoguides og praktiske cases er skjult",
     "videos.coming_soon": "Kommer snart",
     "videos.cases_cta_title": "Vil du hellere lære ved at gøre det?",
     "videos.cases_cta_body": "Cases tager dig trin for trin gennem virkelige arbejdsgange, inde i appen, på et eksempelprojekt.",
@@ -43526,6 +43524,8 @@ const resource = {
     "videos.more_moments": "{{more}} øjeblikke mere",
     "cases.featured_article.eyebrow": "Udvalgt artikel",
     "cases.featured_article.new_tab": "åbner i en ny fane",
+    "sidebar.learn.hint_topbar": "Instruktionsvideoer og guidede cases, der lærer dig platformen at kende. Hvis du skjuler denne sektion, samles den i studenterhue-ikonet i topbjælken; et klik der bringer den tilbage i menuen.",
+    "sidebar.learn.hidden_toast_body_topbar": "De er nu gemt bag studenterhue-ikonet i topbjælken. Et klik der bringer dem tilbage.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

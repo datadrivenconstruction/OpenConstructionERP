@@ -5225,7 +5225,7 @@ const resource = {
     "cases.not_found_body": "Det här fallet finns inte eller togs bort. Bläddra i hela listan i stället.",
     "cases.not_found_title": "Fallet hittades inte",
     "cases.page_subtitle": "Vägledda genomgångar från början till slut som tar dig genom flera moduler i ordning. Välj ett fall, välj eventuellt ett exempelprojekt att lära på, och följ varje steg.",
-    "cases.page_title": "Fall",
+    "cases.page_title": "Användningsfall",
     "cases.progress_label": "Förlopp i fallet",
     "cases.reset": "Återställ förlopp",
     "cases.reset_hint": "Rensa förloppet för det här fallet och börja om",
@@ -5406,7 +5406,7 @@ const resource = {
     "howto.value.title": "Realiserat värde",
     "howto.value.what": "Realiserat värde sätter samman siffror som plattformen redan beräknar till en försvarbar vy över \"vad har detta gett oss\". Sammanfattningen visar den budgetexponering som godkända ändringar nu kontrollerar i stället för att upptäckas sent, kostnaden du återvann och din återvinningsgrad, de administrativa timmar som assisterade åtgärder gav tillbaka, och ett dokumenterat mått på minskad tvisterisk. Varje siffra bär en konfidensetikett, valutor blandas aldrig, och du kan avgränsa hela vyn till ett projekt eller hela portföljen.",
     "howto.value.when": "Använd den för att visa intressenter det mätbara värde som disciplinerad, assisterad leverans har gett utifrån dina egna data, och för att se vilka projekt som får ut mest av plattformen.",
-    "nav.cases": "Fall",
+    "nav.cases": "Användningsfall",
     "bim.geo_bbox_volume_base": "Begränsningsvolym",
     "bim.geo_depth_base": "Djup",
     "bim.geo_diagonal_base": "Diagonal",
@@ -44028,15 +44028,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI-assistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videor",
+    "nav.videos": "Videoguider",
     "sidebar.group.learn": "Lär dig",
-    "sidebar.learn.hint": "Instruktionsvideor och guidade fall för att lära dig plattformen. Du kan dölja den här sektionen och visa den igen när som helst längst ner i menyn.",
-    "sidebar.learn.hide": "Dölj videor och fall",
+    "sidebar.learn.hide": "Dölj videoguider och användningsfall",
     "sidebar.learn.hide_short": "Dölj",
-    "sidebar.learn.show": "Visa videor och fall",
-    "sidebar.learn.show_hint": "Lägg tillbaka Videor och Fall högst upp i menyn",
-    "sidebar.learn.hidden_toast": "Videor och fall är dolda",
-    "sidebar.learn.hidden_toast_body": "Ta tillbaka dem när som helst med \"Visa videor och fall\" längst ner i menyn.",
+    "sidebar.learn.show": "Visa videoguider och användningsfall",
+    "sidebar.learn.show_hint": "Lägg tillbaka Videoguider och Användningsfall högst upp i menyn",
+    "sidebar.learn.hidden_toast": "Videoguider och användningsfall är dolda",
     "videos.coming_soon": "Kommer snart",
     "videos.cases_cta_title": "Föredrar du att lära genom att göra?",
     "videos.cases_cta_body": "Fall guidar dig genom verkliga arbetsflöden steg för steg, direkt i appen, på ett exempelprojekt.",
@@ -44141,6 +44139,8 @@ const resource = {
     "videos.more_moments": "{{more}} ögonblick till",
     "cases.featured_article.eyebrow": "Utvald artikel",
     "cases.featured_article.new_tab": "öppnas i en ny flik",
+    "sidebar.learn.hint_topbar": "Instruktionsvideor och guidade fall för att lära dig plattformen. Dölj den här sektionen så samlas den i examensmössan i det övre fältet; ett klick där tar tillbaka den.",
+    "sidebar.learn.hidden_toast_body_topbar": "De ligger nu bakom examensmössan i det övre fältet. Ett klick där tar tillbaka dem.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

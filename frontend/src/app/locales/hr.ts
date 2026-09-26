@@ -5212,7 +5212,7 @@ const resource = {
     "cases.not_found_body": "Ovaj slučaj ne postoji ili je uklonjen. Umjesto toga pregledajte cijeli popis.",
     "cases.not_found_title": "Slučaj nije pronađen",
     "cases.page_subtitle": "Vođeni slučajevi od početka do kraja koji vas redom vode kroz nekoliko modula. Odaberite slučaj, po želji odaberite ogledni projekt za učenje i slijedite svaki korak.",
-    "cases.page_title": "Slučajevi",
+    "cases.page_title": "Slučajevi upotrebe",
     "cases.progress_label": "Napredak slučaja",
     "cases.reset": "Poništi napredak",
     "cases.reset_hint": "Obrišite napredak za ovaj slučaj i počnite ispočetka",
@@ -5393,7 +5393,7 @@ const resource = {
     "howto.value.title": "Ostvarena vrijednost",
     "howto.value.what": "Ostvarena vrijednost slaže brojke koje platforma već izračunava u jedan branjiv prikaz \"što nam je ovo donijelo\". Sažetak prikazuje proračunsku izloženost koju odobrene izmjene sada kontroliraju umjesto da je otkriju prekasno, trošak koji ste naplatili i vašu stopu naplate, administrativne sate koje su potpomognute radnje vratile te dokumentirani posredni pokazatelj smanjenja rizika od spora. Svaki broj nosi oznaku pouzdanosti, valute se nikad ne miješaju, a cijeli prikaz možete ograničiti na jedan projekt ili cijeli portfelj.",
     "howto.value.when": "Upotrijebite je da dionicima pokažete mjerljivu vrijednost koju je disciplinirana, potpomognuta isporuka donijela na vašim vlastitim podacima i da vidite koji projekti najviše izvuku iz platforme.",
-    "nav.cases": "Scenariji",
+    "nav.cases": "Slučajevi upotrebe",
     "bim.geo_bbox_volume_base": "Volumen granicnog okvira",
     "bim.geo_depth_base": "Dubina",
     "bim.geo_diagonal_base": "Dijagonala",
@@ -43580,15 +43580,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI asistent",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videozapisi",
+    "nav.videos": "Video vodiči",
     "sidebar.group.learn": "Učenje",
-    "sidebar.learn.hint": "Video vodiči i scenariji uz vodstvo za učenje platforme. Ovaj odjeljak možete sakriti i ponovno prikazati u bilo kojem trenutku pri dnu izbornika.",
-    "sidebar.learn.hide": "Sakrij videozapise i scenarije",
+    "sidebar.learn.hide": "Sakrij video vodiče i slučajeve upotrebe",
     "sidebar.learn.hide_short": "Sakrij",
-    "sidebar.learn.show": "Prikaži videozapise i scenarije",
-    "sidebar.learn.show_hint": "Vrati Videozapise i Scenarije na vrh izbornika",
-    "sidebar.learn.hidden_toast": "Videozapisi i scenariji su skriveni",
-    "sidebar.learn.hidden_toast_body": "Vratite ih u bilo kojem trenutku pomoću \"Prikaži videozapise i scenarije\" pri dnu izbornika.",
+    "sidebar.learn.show": "Prikaži video vodiče i slučajeve upotrebe",
+    "sidebar.learn.show_hint": "Vrati Video vodiče i Slučajeve upotrebe na vrh izbornika",
+    "sidebar.learn.hidden_toast": "Video vodiči i slučajevi upotrebe su skriveni",
     "videos.coming_soon": "Uskoro",
     "videos.cases_cta_title": "Radije učite kroz praksu?",
     "videos.cases_cta_body": "Scenariji vas korak po korak vode kroz stvarne tijekove rada, unutar aplikacije, na uzorku projekta.",
@@ -43693,6 +43691,8 @@ const resource = {
     "videos.more_moments": "Još {{more}}",
     "cases.featured_article.eyebrow": "Istaknuti članak",
     "cases.featured_article.new_tab": "otvara se u novoj kartici",
+    "sidebar.learn.hint_topbar": "Video vodiči i scenariji uz vodstvo za učenje platforme. Ako sakrijete ovaj odjeljak, on se skuplja u ikonu kape za diplomiranje na gornjoj traci; jedan klik na nju ga vraća.",
+    "sidebar.learn.hidden_toast_body_topbar": "Sada se nalaze iza ikone kape za diplomiranje na gornjoj traci. Jedan klik na nju ih vraća.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

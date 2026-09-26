@@ -5154,7 +5154,7 @@ const resource = {
     "cases.not_found_body": "该案例不存在或已被删除。请改为浏览完整列表。",
     "cases.not_found_title": "未找到案例",
     "cases.page_subtitle": "引导式的端到端实操指南，按顺序带您走完多个模块。选择一个案例，可选地挑选一个示例项目用于学习，然后逐步操作。",
-    "cases.page_title": "案例",
+    "cases.page_title": "应用案例",
     "cases.progress_label": "案例进度",
     "cases.reset": "重置进度",
     "cases.reset_hint": "清除本案例的进度并重新开始",
@@ -5335,7 +5335,7 @@ const resource = {
     "howto.value.title": "已实现价值",
     "howto.value.what": "已实现价值把平台已经计算出的数据汇集成一个可论证的“这为我们带来了什么”视图。摘要显示：已批准变更如今得以掌控而非迟迟才发现的预算敞口、您追回的成本及追回率、辅助操作省回的管理工时，以及一项有据可查的争议风险降低代理指标。每个数字都带有置信度标签，币种绝不混算，您可以把整个视图的范围限定到一个项目或整个组合。",
     "howto.value.when": "用它向相关方展示规范化、辅助式交付在您自己的数据上带来的可量化价值，并了解哪些项目从平台中获益最多。",
-    "nav.cases": "案例",
+    "nav.cases": "应用案例",
     "bim.geo_bbox_volume_base": "包围体积",
     "bim.geo_depth_base": "深度",
     "bim.geo_diagonal_base": "对角线",
@@ -45770,15 +45770,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI 助手",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "视频",
+    "nav.videos": "视频指南",
     "sidebar.group.learn": "学习",
-    "sidebar.learn.hint": "教学视频和引导式案例，帮助您学习本平台。您可以隐藏此部分，并随时从菜单底部重新显示。",
-    "sidebar.learn.hide": "隐藏视频和案例",
+    "sidebar.learn.hide": "隐藏视频指南和应用案例",
     "sidebar.learn.hide_short": "隐藏",
-    "sidebar.learn.show": "显示视频和案例",
-    "sidebar.learn.show_hint": "把视频和案例放回菜单顶部",
-    "sidebar.learn.hidden_toast": "视频和案例已隐藏",
-    "sidebar.learn.hidden_toast_body": "随时可通过菜单底部的“显示视频和案例”找回它们。",
+    "sidebar.learn.show": "显示视频指南和应用案例",
+    "sidebar.learn.show_hint": "把视频指南和应用案例放回菜单顶部",
+    "sidebar.learn.hidden_toast": "视频指南和应用案例已隐藏",
     "videos.coming_soon": "即将推出",
     "videos.cases_cta_title": "更想边做边学？",
     "videos.cases_cta_body": "案例在示例项目上，直接在应用内，逐步带您走完真实的工作流程。",
@@ -45883,6 +45881,8 @@ const resource = {
     "videos.more_moments": "还有{{more}}个时刻",
     "cases.featured_article.eyebrow": "精选文章",
     "cases.featured_article.new_tab": "在新标签页中打开",
+    "sidebar.learn.hint_topbar": "教学视频和引导式案例，帮助您学习本平台。隐藏此部分后，它会收进顶部栏的学位帽图标里；点击该图标即可恢复。",
+    "sidebar.learn.hidden_toast_body_topbar": "现在它们收在顶部栏的学位帽图标后面。点击该图标即可恢复。",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

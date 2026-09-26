@@ -5154,7 +5154,7 @@ const resource = {
     "cases.not_found_body": "このケースは存在しないか、削除されました。代わりに一覧をご覧ください。",
     "cases.not_found_title": "ケースが見つかりません",
     "cases.page_subtitle": "複数のモジュールを順番にたどる、エンドツーエンドのガイド付きプレイブックです。ケースを選び、必要に応じて学習用のサンプルプロジェクトを選んで、各ステップに沿って進めてください。",
-    "cases.page_title": "ケース",
+    "cases.page_title": "活用事例",
     "cases.progress_label": "ケースの進捗",
     "cases.reset": "進捗をリセット",
     "cases.reset_hint": "このケースの進捗を消去して最初からやり直します",
@@ -5335,7 +5335,7 @@ const resource = {
     "howto.value.title": "実現した価値",
     "howto.value.what": "実現した価値は、プラットフォームがすでに算出している数値を、「これで何が得られたか」という1つの説明可能なビューにまとめます。サマリーには、後手に回らず承認済みの変更で今や管理下にある予算エクスポージャー、回収したコストとその回収率、アシスト機能が取り戻した管理工数、そして記録に裏付けられた紛争リスク低減の代理指標が表示されます。すべての数値に信頼度ラベルが付き、通貨が混在することはなく、ビュー全体を1つのプロジェクトにもポートフォリオ全体にも絞り込めます。",
     "howto.value.when": "規律ある、アシストを活用した遂行が自社のデータ上でもたらした計測可能な価値を関係者に示すときや、どのプロジェクトがプラットフォームを最も活用しているかを確認するために使用します。",
-    "nav.cases": "ケース",
+    "nav.cases": "活用事例",
     "bim.geo_bbox_volume_base": "バウンディング体積",
     "bim.geo_depth_base": "奥行き",
     "bim.geo_diagonal_base": "対角線",
@@ -44833,15 +44833,13 @@ const resource = {
     "timeline.mod_erp_chat": "AIアシスタント",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "動画",
+    "nav.videos": "動画ガイド",
     "sidebar.group.learn": "学ぶ",
-    "sidebar.learn.hint": "プラットフォームを学ぶためのチュートリアル動画とガイド付きケースです。このセクションはいつでもメニュー下部から非表示にしたり、再表示したりできます。",
-    "sidebar.learn.hide": "動画とケースを非表示",
+    "sidebar.learn.hide": "動画ガイドと活用事例を非表示",
     "sidebar.learn.hide_short": "非表示",
-    "sidebar.learn.show": "動画とケースを表示",
-    "sidebar.learn.show_hint": "動画とケースをメニューの上部に戻します",
-    "sidebar.learn.hidden_toast": "動画とケースを非表示にしました",
-    "sidebar.learn.hidden_toast_body": "メニュー下部の「動画とケースを表示」からいつでも元に戻せます。",
+    "sidebar.learn.show": "動画ガイドと活用事例を表示",
+    "sidebar.learn.show_hint": "動画ガイドと活用事例をメニューの上部に戻します",
+    "sidebar.learn.hidden_toast": "動画ガイドと活用事例を非表示にしました",
     "videos.coming_soon": "近日公開",
     "videos.cases_cta_title": "手を動かして学びたい方へ",
     "videos.cases_cta_body": "ケースでは、サンプルプロジェクト上でアプリ内の実際の作業手順を順を追って体験できます。",
@@ -44946,6 +44944,8 @@ const resource = {
     "videos.more_moments": "さらに{{more}}件のモーメント",
     "cases.featured_article.eyebrow": "注目の記事",
     "cases.featured_article.new_tab": "新しいタブで開きます",
+    "sidebar.learn.hint_topbar": "プラットフォームを学ぶためのチュートリアル動画とガイド付きケースです。このセクションを非表示にすると、上部バーの角帽アイコンにまとまります。そこをクリックすると元に戻ります。",
+    "sidebar.learn.hidden_toast_body_topbar": "現在は上部バーの角帽アイコンの中にまとまっています。そこをクリックすると元に戻ります。",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

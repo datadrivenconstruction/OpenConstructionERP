@@ -226,7 +226,7 @@ export const navGroups: NavGroup[] = [
     defaultLabel: 'Learn',
     defaultOpen: true,
     items: [
-      { labelKey: 'nav.videos', defaultLabel: 'Videos', to: '/videos', icon: MonitorPlay },
+      { labelKey: 'nav.videos', defaultLabel: 'Video guides', to: '/videos', icon: MonitorPlay },
       { labelKey: 'nav.cases', to: '/cases', icon: Route },
     ],
   },

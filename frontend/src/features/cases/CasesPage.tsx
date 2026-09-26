@@ -755,7 +755,7 @@ function CasesList() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-semibold tracking-tight text-content-primary">
-                {t("cases.page_title", { defaultValue: "Cases" })}
+                {t("cases.page_title", { defaultValue: "Use cases" })}
               </h1>
               {allPlaybooks.length > 0 && (
                 <span className="inline-flex items-center rounded-full bg-oe-blue/10 px-2 py-0.5 text-2xs font-semibold text-oe-blue ring-1 ring-inset ring-oe-blue/20">

@@ -5151,7 +5151,7 @@ const resource = {
     "cases.not_found_body": "Tätä tapausta ei ole olemassa tai se on poistettu. Selaa sen sijaan koko luetteloa.",
     "cases.not_found_title": "Tapausta ei löytynyt",
     "cases.page_subtitle": "Ohjatut, alusta loppuun vievät oppaat, jotka opastavat useiden moduulien läpi järjestyksessä. Valitse tapaus, valitse halutessasi harjoitteluun esimerkkiprojekti ja seuraa jokaista vaihetta.",
-    "cases.page_title": "Tapaukset",
+    "cases.page_title": "Käytännön tapaukset",
     "cases.progress_label": "Tapauksen edistyminen",
     "cases.reset": "Nollaa edistyminen",
     "cases.reset_hint": "Tyhjennä tämän tapauksen edistyminen ja aloita alusta",
@@ -5332,7 +5332,7 @@ const resource = {
     "howto.value.title": "Saavutettu arvo",
     "howto.value.what": "Saavutettu arvo kokoaa luvut, jotka alusta jo laskee, yhdeksi puolustettavaksi \"mitä tämä on tuonut meille\" -näkymäksi. Yhteenveto näyttää budjettialtistuman, jota hyväksytyt muutokset nyt hallitsevat myöhään havaitsemisen sijaan, takaisin perimäsi kustannuksen ja takaisinperintäasteesi, hallintotunnit, jotka avustetut toimet antoivat takaisin, sekä dokumentoidun riitariskin pienentymisen epäsuoran mittarin. Jokainen luku kantaa varmuusmerkinnän, valuuttoja ei koskaan sekoiteta, ja voit rajata koko näkymän yhteen projektiin tai koko salkkuun.",
     "howto.value.when": "Käytä sitä näyttääksesi sidosryhmille mitattavan arvon, jonka kurinalainen, avustettu toteutus on tuonut omilla tiedoillasi, ja nähdäksesi, mitkä projektit hyötyvät alustasta eniten.",
-    "nav.cases": "Tapaukset",
+    "nav.cases": "Käytännön tapaukset",
     "bim.geo_bbox_volume_base": "Rajaustilavuus",
     "bim.geo_depth_base": "Syvyys",
     "bim.geo_diagonal_base": "Diagonaali",
@@ -43417,15 +43417,13 @@ const resource = {
     "timeline.mod_erp_chat": "Tekoälyavustaja",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videot",
+    "nav.videos": "Videooppaat",
     "sidebar.group.learn": "Opi",
-    "sidebar.learn.hint": "Opetusvideoita ja ohjattuja tapauksia alustan oppimiseen. Voit piilottaa tämän osion ja tuoda sen takaisin milloin tahansa valikon alaosasta.",
-    "sidebar.learn.hide": "Piilota videot ja tapaukset",
+    "sidebar.learn.hide": "Piilota videooppaat ja käytännön tapaukset",
     "sidebar.learn.hide_short": "Piilota",
-    "sidebar.learn.show": "Näytä videot ja tapaukset",
-    "sidebar.learn.show_hint": "Tuo Videot ja Tapaukset takaisin valikon yläosaan",
-    "sidebar.learn.hidden_toast": "Videot ja tapaukset on piilotettu",
-    "sidebar.learn.hidden_toast_body": "Tuo ne takaisin milloin tahansa valinnalla \"Näytä videot ja tapaukset\" valikon alaosassa.",
+    "sidebar.learn.show": "Näytä videooppaat ja käytännön tapaukset",
+    "sidebar.learn.show_hint": "Tuo Videooppaat ja Käytännön tapaukset takaisin valikon yläosaan",
+    "sidebar.learn.hidden_toast": "Videooppaat ja käytännön tapaukset on piilotettu",
     "videos.coming_soon": "Tulossa pian",
     "videos.cases_cta_title": "Haluatko mieluummin oppia tekemällä?",
     "videos.cases_cta_body": "Tapaukset opastavat sinut askel askeleelta oikeiden työnkulkujen läpi, sovelluksen sisällä, esimerkkiprojektissa.",
@@ -43530,6 +43528,8 @@ const resource = {
     "videos.more_moments": "Vielä {{more}} hetkeä",
     "cases.featured_article.eyebrow": "Suositeltu artikkeli",
     "cases.featured_article.new_tab": "avautuu uudelle välilehdelle",
+    "sidebar.learn.hint_topbar": "Opetusvideoita ja ohjattuja tapauksia alustan oppimiseen. Jos piilotat tämän osion, se pienenee valmistujaishattu-kuvakkeeksi yläpalkissa; yksi klikkaus siinä tuo sen takaisin valikkoon.",
+    "sidebar.learn.hidden_toast_body_topbar": "Ne ovat nyt yläpalkin valmistujaishattu-kuvakkeen takana. Yksi klikkaus siinä tuo ne takaisin.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

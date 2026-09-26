@@ -6046,8 +6046,8 @@ const resource = {
     "nav.boq": "Bill of Quantities",
     "nav.costs": "Cost Database",
     "nav.dashboard": "Dashboard",
-    "nav.cases": "Cases",
-    "cases.page_title": "Cases",
+    "nav.cases": "Use cases",
+    "cases.page_title": "Use cases",
     "cases.page_subtitle": "Guided, end-to-end playbooks that walk you through several modules in order. Pick a case, optionally choose a sample project to learn on, and follow each step.",
     "cases.empty_title": "No cases yet",
     "cases.empty_body": "Guided playbooks will appear here as they are added.",
@@ -38123,15 +38123,13 @@ const resource = {
     "timeline.mod_erp_chat": "AI assistant",
     // --- /AI dock ---
     // --- Learn: videos and cases ---
-    "nav.videos": "Videos",
+    "nav.videos": "Video guides",
     "sidebar.group.learn": "Learn",
-    "sidebar.learn.hint": "Tutorial videos and guided cases to learn the platform. You can hide this section and show it again at any time from the bottom of the menu.",
-    "sidebar.learn.hide": "Hide videos & cases",
+    "sidebar.learn.hide": "Hide video guides & use cases",
     "sidebar.learn.hide_short": "Hide",
-    "sidebar.learn.show": "Show videos & cases",
-    "sidebar.learn.show_hint": "Put Videos and Cases back at the top of the menu",
-    "sidebar.learn.hidden_toast": "Videos and cases are hidden",
-    "sidebar.learn.hidden_toast_body": "Bring them back any time with \"Show videos & cases\" at the bottom of the menu.",
+    "sidebar.learn.show": "Show video guides & use cases",
+    "sidebar.learn.show_hint": "Put Video guides and Use cases back at the top of the menu",
+    "sidebar.learn.hidden_toast": "Video guides and use cases are hidden",
     "videos.coming_soon": "Coming soon",
     "videos.cases_cta_title": "Rather learn by doing?",
     "videos.cases_cta_body": "Cases walk you through real workflows step by step, inside the app, on a sample project.",
@@ -38236,6 +38234,8 @@ const resource = {
     "videos.more_moments": "{{more}} more moments",
     "cases.featured_article.eyebrow": "Featured article",
     "cases.featured_article.new_tab": "opens in a new tab",
+    "sidebar.learn.hint_topbar": "Tutorial videos and guided cases to learn the platform. Hide this section and it folds into the graduation cap in the top bar; one click there brings it back.",
+    "sidebar.learn.hidden_toast_body_topbar": "They are now behind the graduation cap in the top bar. One click there brings them back.",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };
