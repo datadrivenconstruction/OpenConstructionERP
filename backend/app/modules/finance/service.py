@@ -655,7 +655,9 @@ class FinanceService:
         await resolve_position_cost_lines(self.session, data.line_items)
         default_vat = _default_vat_matching_tax(
             data.line_items,
-            data.tax_amount if "tax_amount" in data.model_fields_set else None,
+            # Weighed only when the tax is stated and the lines are held to make
+            # up the document: a captured scan's lines need not add up to it.
+            data.tax_amount if enforce_line_sum and "tax_amount" in data.model_fields_set else None,
             await self._default_vat_rate(invoice.project_id, invoice.invoice_date, data.line_items),
         )
         for idx, item_data in enumerate(data.line_items):
