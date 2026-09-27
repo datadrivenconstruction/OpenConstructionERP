@@ -2095,10 +2095,45 @@ async def analytics_overview(
     # where there are none, plus documents on cost lines with no budget line.
     from app.modules.costmodel.repository import BudgetLineRepository
 
+    # A project with orders or contracts on its cost lines and no budget line
+    # yet is committed all the same, and used to be left out of the outturn
+    # because only projects with budget lines were asked. The two queries
+    # find a superset (no status filter); ``effective_committed`` applies the
+    # rules and answers zero for a project whose documents do not count.
+    committed_projects = {row[0] for row in budget_rows}
+    if project_ids:
+        from app.modules.contracts.models import Contract, ContractLine
+        from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+
+        committed_projects.update(
+            (
+                await session.execute(
+                    select(PurchaseOrder.project_id)
+                    .join(PurchaseOrderItem, PurchaseOrderItem.po_id == PurchaseOrder.id)
+                    .where(PurchaseOrder.project_id.in_(project_ids), PurchaseOrderItem.cost_line_id.is_not(None))
+                    .distinct()
+                )
+            )
+            .scalars()
+            .all()
+        )
+        committed_projects.update(
+            (
+                await session.execute(
+                    select(Contract.project_id)
+                    .join(ContractLine, ContractLine.contract_id == Contract.id)
+                    .where(Contract.project_id.in_(project_ids), ContractLine.cost_line_id.is_not(None))
+                    .distinct()
+                )
+            )
+            .scalars()
+            .all()
+        )
+
     committed_repo = BudgetLineRepository(session)
     committed_by_line: dict[uuid.UUID, Decimal] = {}
     unbudgeted_by_project: dict[str, Decimal] = {}
-    for committed_project_id in {row[0] for row in budget_rows}:
+    for committed_project_id in committed_projects:
         by_line, unbudgeted, _from_documents = await committed_repo.effective_committed(committed_project_id)
         committed_by_line.update(by_line)
         unbudgeted_by_project[str(committed_project_id)] = unbudgeted
@@ -2157,8 +2192,9 @@ async def analytics_overview(
     ]
     multi_currency = len(by_currency) > 1
 
-    # Projects with budget
-    projects_with_budget = len(budget_map)
+    # Projects with budget: budget lines, not commitments. A project that is
+    # only committed has an outturn in ``budget_map`` and still no budget.
+    projects_with_budget = len({row[0] for row in budget_rows})
 
     # Single grouped query for BOQ counts (fixes N+1)
     if project_ids:
