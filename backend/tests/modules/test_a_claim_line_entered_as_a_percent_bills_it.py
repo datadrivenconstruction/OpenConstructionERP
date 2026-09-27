@@ -122,7 +122,12 @@ async def test_thirty_percent_of_a_120000_line_bills_36000(session) -> None:
 
 async def test_the_percent_is_to_date_so_the_next_claim_bills_the_difference(session) -> None:
     contract, line = await _subcontract(session)
-    await _add(session, await _claim(session, contract, "PC-1", 3), line, "30")
+    march = await _claim(session, contract, "PC-1", 3)
+    await _add(session, march, line, "30")
+    # A draft certified nothing, so it is not a previous claim; March has to
+    # have gone to the payer before April can bill only the difference.
+    march.status = "submitted"
+    await session.flush()
 
     april = await _add(session, await _claim(session, contract, "PC-2", 4), line, "50")
 
