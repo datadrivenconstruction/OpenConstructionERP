@@ -1090,8 +1090,8 @@ async def get_receivable_for_claim(
     description="Record a payment against an invoice, holding back retainage. When "
     "withholding_amount is omitted it is derived from the invoice retention_amount; when "
     "amount is omitted the invoice net (total - retention) is paid. Idempotent on "
-    "idempotency_key. The cash leg (not the withheld retainage) is posted to the cost "
-    "spine. MANAGER-only - a payment is a binding ledger entry.",
+    "idempotency_key. A payment on a client invoice is income and posts nothing to the "
+    "cost spine. MANAGER-only - a payment is a binding ledger entry.",
 )
 async def record_payment_with_withholding(
     invoice_id: uuid.UUID,

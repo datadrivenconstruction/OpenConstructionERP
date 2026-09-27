@@ -12,13 +12,12 @@ per test). Covers:
 * a not-yet-certified claim is rejected (400);
 * a zero-net claim still produces a (zero) invoice;
 * payment-with-withholding splits gross into cash + retainage, is idempotent on
-  the idempotency key, links back to the source claim, and posts only the cash
-  leg to the cost spine;
+  the idempotency key, links back to the source claim, and posts nothing to the
+  cost spine (money the client pays is income, not a cost actual);
 * a payment against a non-claim invoice still records (skips claim linkage).
 
 The cost-spine sink (Gap B) is monkeypatched so these tests stay in the finance
-lane and assert the *contract* with the spine (it is called once, with the cash
-amount, idempotently) without depending on cost-model internals.
+lane and can assert that a receipt never reaches it.
 """
 
 from __future__ import annotations
@@ -463,10 +462,8 @@ async def test_payment_with_withholding_derives_from_invoice(session, monkeypatc
     assert Decimal(str(payment.amount)) == Decimal("95000.00")
     assert payment.source_claim_id == claim.id
 
-    # Only the cash leg posts to the spine, once.
-    assert len(calls) == 1
-    assert Decimal(calls[0]["amount_base"]) == Decimal("95000.00")
-    assert calls[0]["source_kind"] == "claim_payment"
+    # The client paying us is income: nothing reaches the cost spine.
+    assert calls == []
 
 
 @pytest.mark.asyncio
@@ -512,26 +509,8 @@ async def test_payment_idempotency_key_deduplication(session, monkeypatch) -> No
     assert p1.id == p2.id
     rows = (await session.execute(Payment.__table__.select().where(Payment.invoice_id == invoice.id))).fetchall()
     assert len(rows) == 1
-    # Spine posted exactly once across both calls.
-    assert len(calls) == 1
-
-
-@pytest.mark.asyncio
-async def test_post_actual_to_budget_line_idempotency(session, monkeypatch) -> None:
-    # Re-posting the same payment id to the spine is a no-op (same source_ref).
-    calls = _patch_spine(monkeypatch)
-    project = await _make_project(session)
-    contract = await _make_contract(session, project)
-    claim = await _make_claim(session, contract)
-    svc = FinanceService(session)
-    invoice = await svc.create_receivable_from_claim(claim.id)
-
-    payment = await svc.record_payment_with_withholding(
-        invoice.id, RecordClaimPaymentRequest(payment_date="2026-06-10")
-    )
-    # Manually replay the spine posting for the same payment.
-    await svc._post_claim_payment_to_spine(project_id=project.id, payment=payment, currency=invoice.currency_code)
-    assert len(calls) == 1  # still one — idempotent on source_ref
+    # Neither call posts the receipt to the cost spine.
+    assert calls == []
 
 
 @pytest.mark.asyncio
