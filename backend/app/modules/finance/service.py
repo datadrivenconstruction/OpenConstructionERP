@@ -1958,27 +1958,11 @@ class FinanceService:
         )
         payment = await self.payments_repo.create(payment)
 
-        # ── Post the cash paid out onto the cost spine ───────────────────────
-        # Only the cash leg is a realised actual; withheld retainage is a
-        # liability still owed, not yet spent. Non-fatal.
-        #
-        # Not for a supplier invoice: its cost reaches the spine once, at the
-        # invoice's net with retention included, when it is marked paid
-        # (``_post_paid_invoices_to_spine``). Posting this cash leg as well put
-        # the same pay application into the 5D actual twice.
-        if invoice.invoice_direction != "payable":
-            try:
-                await self._post_claim_payment_to_spine(
-                    project_id=invoice.project_id,
-                    payment=payment,
-                    currency=pay_currency,
-                )
-            except Exception:
-                logger.exception(
-                    "Spine posting failed for claim payment %s - payment unaffected",
-                    payment.id,
-                )
-        else:
+        # Nothing here reaches the cost spine. A supplier invoice's cost gets
+        # there once, at its net with retention included, when it is marked
+        # paid (``_post_paid_invoices_to_spine``), and a payment on a client
+        # invoice is money received: income, not a cost actual.
+        if invoice.invoice_direction == "payable":
             await self._sync_budget_quietly(invoice.project_id)
 
         # Audit row - best-effort.
@@ -2015,51 +1999,6 @@ class FinanceService:
             invoice_id,
         )
         return payment
-
-    async def _post_claim_payment_to_spine(
-        self,
-        *,
-        project_id: uuid.UUID,
-        payment: Payment,
-        currency: str,
-    ) -> None:
-        """Post the cash leg of a claim payment onto the cost spine.
-
-        FX: the payment ``amount`` is converted to the project base currency
-        before posting (spine stores base-currency actuals). A missing rate keeps
-        the foreign value as-is, never zeroed. Idempotent on
-        ``(source_kind, source_ref)`` keyed by the payment id, so a replay of
-        the same payment posts exactly once.
-        """
-        import hashlib
-
-        from app.modules.costmodel.service import CostSpineService
-        from app.modules.projects.repository import ProjectRepository
-
-        project = await ProjectRepository(self.session).get_by_id(project_id)
-        base_currency = (getattr(project, "currency", "") or "").strip().upper() if project else ""
-        fx_map = _project_fx_map(project)
-        converted, _missing = _convert_to_base(
-            # Decimal end to end (no lossy float round-trip) for the posted actual.
-            {(currency or "").strip().upper(): _safe_decimal(payment.amount)},
-            base_currency=base_currency,
-            fx_rates_map=fx_map,
-        )
-        amount_base = str(Decimal(str(converted)))
-
-        posting_ref = f"payment:{payment.id}"
-        idempotency = hashlib.sha256(f"claim_payment:{posting_ref}".encode()).hexdigest()[:16]
-        spine = CostSpineService(self.session)
-        await spine.post_actual_to_budget_line(
-            project_id=project_id,
-            cost_line_id=None,
-            cost_category=None,
-            amount_base=amount_base,
-            currency=currency or "",
-            source_kind="claim_payment",
-            source_ref=posting_ref,
-            idempotency_key=idempotency,
-        )
 
     async def list_payments(
         self,
