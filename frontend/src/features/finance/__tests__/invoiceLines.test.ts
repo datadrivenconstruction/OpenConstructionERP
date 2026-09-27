@@ -59,6 +59,43 @@ describe('editorLinesFromInvoice', () => {
     expect(lines).toHaveLength(1);
     expect(invoiceTotals(lines)).toEqual({ subtotal: 1000, tax: 190, total: 1190 });
   });
+
+  it('reads a line stored without a rate from the invoice tax, not as 0', () => {
+    const lines = editorLinesFromInvoice(
+      [
+        { description: 'Claim 1', quantity: '1', unit_rate: '600', amount: '600.00', vat_rate: null },
+        { description: 'Claim 2', quantity: '1', unit_rate: '400', amount: '400.00', vat_rate: null },
+      ],
+      { subtotal: '1000.00', tax: '250.00' },
+      '19',
+    );
+    expect(lines.map((l) => l.vat_rate)).toEqual(['25', '25']);
+    expect(invoiceTotals(lines)).toEqual({ subtotal: 1000, tax: 250, total: 1250 });
+    expect(linesToPayload(lines, 'x').map((l) => l.vat_rate)).toEqual(['25', '25']);
+  });
+
+  it('gives the unrated lines what the rated ones leave of the tax', () => {
+    const lines = editorLinesFromInvoice(
+      [
+        { description: 'Rated', amount: '100.00', vat_rate: '10' },
+        { description: 'Unrated', amount: '200.00', vat_rate: null },
+      ],
+      { subtotal: '300.00', tax: '50.00' },
+      '19',
+    );
+    expect(lines.map((l) => l.vat_rate)).toEqual(['10', '20']);
+    expect(invoiceTotals(lines).tax).toBe(50);
+  });
+
+  it('keeps a zero-tax invoice at zero when its lines carry no rate', () => {
+    const lines = editorLinesFromInvoice(
+      [{ description: 'Exempt', amount: '500.00', vat_rate: null }],
+      { subtotal: '500.00', tax: '0.00' },
+      '19',
+    );
+    expect(lines[0]?.vat_rate).toBe('0');
+    expect(invoiceTotals(lines).tax).toBe(0);
+  });
 });
 
 describe('vatChoices', () => {

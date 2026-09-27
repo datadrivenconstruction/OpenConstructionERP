@@ -130,6 +130,34 @@ export function editLine(
 }
 
 /**
+ * The rate for stored lines saved without one. Claim invoices, invoices made
+ * from a purchase order and the old form stored lines with no rate while the
+ * invoice carries its tax, so reading the missing rate as 0 would save the
+ * invoice again with no VAT. The rate is the one that reproduces the stored tax
+ * over those lines, after the VAT of the lines that do carry a rate; with no
+ * stored tax to read it from, the country default.
+ */
+function unratedLinesRate(
+  stored: StoredInvoiceLine[],
+  storedTax: string | number | null | undefined,
+  defaultVat: string | null,
+): string {
+  const tax = readNumber(storedTax);
+  if (tax == null) return defaultVat ?? '';
+  let unratedNet = 0;
+  let ratedVat = 0;
+  for (const item of stored) {
+    const net = roundCents(readNumber(item.amount) ?? (readNumber(item.quantity) ?? 1) * (readNumber(item.unit_rate) ?? 0));
+    const rate = readNumber(item.vat_rate);
+    if (rate == null) unratedNet += net;
+    else ratedVat += roundCents((net * rate) / 100);
+  }
+  if (unratedNet <= 0) return defaultVat ?? '';
+  const rest = Math.max(tax - ratedVat, 0);
+  return rateText(roundCents((rest / unratedNet) * 10000) / 100);
+}
+
+/**
  * Lines for an existing invoice. Stored lines load as they are; an invoice
  * saved as one sum without lines loads as one line whose rate reproduces its
  * stored tax, so opening it shows the figures it was saved with.
@@ -140,6 +168,7 @@ export function editorLinesFromInvoice(
   defaultVat: string | null,
 ): InvoiceEditorLine[] {
   if (stored && stored.length > 0) {
+    const missingRate = unratedLinesRate(stored, amounts.tax, defaultVat);
     return stored.map((item) => ({
       key: nextKey(),
       description: item.description ?? '',
@@ -147,7 +176,7 @@ export function editorLinesFromInvoice(
       unit: item.unit ?? '',
       unit_rate: item.unit_rate != null ? String(item.unit_rate) : '',
       amount: item.amount != null ? String(item.amount) : '',
-      vat_rate: rateText(item.vat_rate),
+      vat_rate: readNumber(item.vat_rate) != null ? rateText(item.vat_rate) : missingRate,
       // A stored line shows what it was saved with; a country default arriving
       // after it loaded must not rewrite it.
       vat_touched: true,
