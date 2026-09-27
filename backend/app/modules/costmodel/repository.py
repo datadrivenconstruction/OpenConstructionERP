@@ -1208,7 +1208,8 @@ class CostSpineRepository:
         committed figures use:
 
         - purchase orders count when issued, partially received or completed;
-        - contracts count at their line value, except that drafts and
+        - contracts with a subcontractor count at their line value (a client
+          contract is what the project earns, not what it owes), except that drafts and
           cancelled or void contracts bind nobody (0) and a terminated contract
           is bound only for what was certified before it ended (the latest
           certified or paid claim's cumulative value per contract line);
@@ -1256,6 +1257,7 @@ class CostSpineRepository:
             .join(Contract, Contract.id == ContractLine.contract_id)
             .where(
                 Contract.project_id == project_id,
+                Contract.counterparty_type == "subcontractor",
                 ContractLine.cost_line_id.is_not(None),
                 Contract.status.not_in(_CONTRACT_UNBOUND_STATUSES),
             )

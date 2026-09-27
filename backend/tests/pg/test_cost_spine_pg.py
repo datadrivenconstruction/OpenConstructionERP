@@ -563,3 +563,58 @@ async def test_generate_from_boq_idempotent_referenced_positions_pg(pg_session) 
     assert second.accounts_created == 0
     _lines_second, total_second = await line_repo.list_for_project(project_id, limit=1000)
     assert total_second == total_first == 2
+
+
+async def test_committed_by_cost_line_counts_only_subcontract_contracts(pg_session) -> None:
+    """A client contract is what the project earns, so it commits no cost."""
+    from app.modules.contracts.models import Contract, ContractLine
+    from app.modules.costmodel.models import CostLine
+    from app.modules.costmodel.repository import CostSpineRepository
+
+    project_id = await _seed_project(pg_session, currency="EUR")
+    line = CostLine(project_id=project_id, code="CL-SIDE", currency="EUR", estimate_amount="0")
+    pg_session.add(line)
+    await pg_session.flush()
+
+    contracts = {
+        side: Contract(
+            code=f"C-{side[:3].upper()}-{uuid.uuid4().hex[:5]}",
+            title=side,
+            project_id=project_id,
+            counterparty_type=side,
+            total_value=Decimal("0"),
+            currency="EUR",
+            status="active",
+        )
+        for side in ("client", "subcontractor")
+    }
+    pg_session.add_all(contracts.values())
+    await pg_session.flush()
+    pg_session.add_all(
+        [
+            ContractLine(
+                contract_id=contracts["client"].id,
+                code="L1",
+                description="billed to the client",
+                unit="m3",
+                quantity=Decimal("1"),
+                unit_rate=Decimal("5000"),
+                total_value=Decimal("5000"),
+                cost_line_id=line.id,
+            ),
+            ContractLine(
+                contract_id=contracts["subcontractor"].id,
+                code="L1",
+                description="owed to the subcontractor",
+                unit="m3",
+                quantity=Decimal("1"),
+                unit_rate=Decimal("3000"),
+                total_value=Decimal("3000"),
+                cost_line_id=line.id,
+            ),
+        ]
+    )
+    await pg_session.flush()
+
+    out = await CostSpineRepository(pg_session).committed_by_cost_line(project_id)
+    assert out == {str(line.id): Decimal("3000")}
