@@ -120,11 +120,12 @@ class UserRepository:
     async def has_admin(self) -> bool:
         """Return True if at least one *real* active admin user exists.
 
-        Used by the registration bootstrap: if no real admin is present in
-        the DB (fresh install - only seed/demo accounts), the next person
-        to register via the public API is promoted to admin. Once a real
-        admin is on record, subsequent self-registered users default to
-        the configured viewer role.
+        One half of the registration bootstrap: the next person to register
+        via the public API is promoted to admin only when this is False AND
+        :meth:`has_real_user` is False (a genuinely fresh install). A missing
+        admin alone is not enough - on an install whose last admin was
+        deactivated, or whose operator never registered, that rule handed
+        admin to whoever reached the public form first.
 
         The seeded demo account ``demo@openconstructionerp.com`` is intentionally
         excluded: a fresh ``pip install openconstructionerp`` ships with
@@ -138,6 +139,24 @@ class UserRepository:
             select(User.id)
             .where(User.role == "admin", User.is_active.is_(True))
             .where(~User.email.ilike("%@openconstructionerp.com"))
+            .limit(1)
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none() is not None
+
+    async def has_real_user(self) -> bool:
+        """Return True if any *real* user row exists, active or not.
+
+        Same population as :meth:`has_real_active_user` (seeded demo accounts
+        and the desktop bootstrap owner are not real) but without the
+        ``is_active`` filter. The registration bootstrap asks this question:
+        an install is fresh only while no real account was ever created, so a
+        deactivated or dormant account still means somebody got there first
+        and the next public registrant must not be handed admin.
+        """
+        stmt = (
+            select(User.id)
+            .where(~User.email.ilike("%@openconstructionerp.com"))
+            .where(User.email != LOCAL_DESKTOP_OWNER_EMAIL)
             .limit(1)
         )
         return (await self.session.execute(stmt)).scalar_one_or_none() is not None
