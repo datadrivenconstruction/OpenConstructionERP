@@ -304,3 +304,18 @@ def test_what_is_incurred_beyond_the_commitment_is_shown_not_clamped_away() -> N
     assert pos.over_commitment == {"EUR": D("5000")}
     within = build_cost_position([po], [], [], [], [], received_by_po={po.id: D("20000")})
     assert within.over_commitment == {}
+
+
+def test_an_approved_pay_application_with_a_draft_payable_is_still_invoiced() -> None:
+    # Approval raises the payable as a draft; the work stays invoiced and
+    # drawn down on its agreement until that invoice goes out, not dropped.
+    ag = _agreement("120000")
+    app_id = uuid.uuid4()
+    app = PayAppRow(
+        agreement_id=ag.id, status="finance_approved", currency="EUR", gross=D("30000"), cash=D("28500"), id=app_id
+    )
+    for status in ("draft", "cancelled"):
+        payable = _sub_invoice(ag, "30000", "30000", pay_app=app_id, status=status)
+        pos = build_cost_position([], [payable], [], [ag], [app])
+        assert pos.invoiced == {"EUR": D("30000")}, status
+        assert pos.committed == {"EUR": D("120000")}, status
