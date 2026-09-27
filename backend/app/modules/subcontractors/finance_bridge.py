@@ -23,9 +23,10 @@ from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.finance.models import Invoice, InvoiceLineItem
+from app.modules.finance.models import Invoice, InvoiceLineItem, Payment
 
 #: ``Invoice.metadata_["source"]`` for a payable raised from a pay application.
 PAY_APP_SOURCE = "subcontract_payment_application"
@@ -110,6 +111,14 @@ async def raise_payable_for_pay_app(
     if existing_id:
         existing = await session.get(Invoice, uuid.UUID(str(existing_id)))
         if existing is not None:
+            if existing.status == "cancelled":
+                # Finance cancelled it while the application still stands
+                # approved; the bill is still owed, so it comes back as a draft
+                # rather than leaving the application with nothing to be paid on.
+                from app.modules.finance.schemas import InvoiceUpdate  # noqa: PLC0415
+                from app.modules.finance.service import FinanceService  # noqa: PLC0415
+
+                existing = await FinanceService(session).update_invoice(existing.id, InvoiceUpdate(status="draft"))
             return existing
 
     gross = _dec(payment.approved_gross_amount if payment.approved_gross_amount is not None else payment.gross_amount)
@@ -162,3 +171,28 @@ async def raise_payable_for_pay_app(
     await session.flush()
     await FinanceService(session).sync_project_budget(agreement.project_id)
     return invoice
+
+
+async def open_payable_for_pay_app(session: AsyncSession, payment: Any) -> tuple[Invoice | None, bool]:
+    """The payable raised for a pay application unless it is cancelled, and whether money moved on it.
+
+    Money has moved once the invoice is paid or credited, or carries a payment.
+    """
+    existing_id = (getattr(payment, "metadata_", None) or {}).get("payable_invoice_id")
+    if not existing_id:
+        return None, False
+    invoice = await session.get(Invoice, uuid.UUID(str(existing_id)))
+    if invoice is None or invoice.status == "cancelled":
+        return None, False
+    if invoice.status in ("paid", "credit_note_issued"):
+        return invoice, True
+    paid_on = (await session.execute(select(Payment.id).where(Payment.invoice_id == invoice.id).limit(1))).first()
+    return invoice, paid_on is not None
+
+
+async def cancel_payable(session: AsyncSession, invoice_id: uuid.UUID) -> None:
+    """Cancel a payable nothing has been paid on, through finance so the budget follows."""
+    from app.modules.finance.schemas import InvoiceUpdate  # noqa: PLC0415
+    from app.modules.finance.service import FinanceService  # noqa: PLC0415
+
+    await FinanceService(session).update_invoice(invoice_id, InvoiceUpdate(status="cancelled"))

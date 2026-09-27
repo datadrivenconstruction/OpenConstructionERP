@@ -685,3 +685,123 @@ async def test_a_signed_contract_linked_to_a_draft_agreement_stays_committed(
         await SubcontractorService(session).update_agreement(agreement_id, AgreementUpdate(status="active"))
         await session.commit()
     assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+
+# ── A pay application's payable ────────────────────────────────────────────
+
+
+async def _finance_approved_pay_app(world: _World) -> uuid.UUID:
+    agreement_id = await _linked_agreement(world, None, sign=True)
+    async with world.factory() as session:
+        svc = SubcontractorService(session)
+        payment = await svc.submit_payment_application(
+            PaymentApplicationCreate(agreement_id=agreement_id, gross_amount=GROSS, currency="EUR"),
+            today=date(2026, 9, 30),
+        )
+        await svc.approve_payment_application_foreman(payment.id, "foreman")
+        await svc.approve_payment_application_finance(payment.id, "finance")
+        await session.commit()
+        return payment.id
+
+
+@pytest.mark.asyncio
+async def test_rejecting_an_approved_pay_application_cancels_its_payable(
+    world: _World, production_bus: EventBus
+) -> None:
+    payment_id = await _finance_approved_pay_app(world)
+
+    async with world.factory() as session:
+        await SubcontractorService(session).reject_payment_application(payment_id, "defective work")
+        await session.commit()
+    await _drain(production_bus)
+
+    (invoice,) = await world.invoices()
+    assert invoice.status == "cancelled"
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+
+@pytest.mark.asyncio
+async def test_a_pay_application_paid_on_in_finance_is_not_rejected(world: _World, production_bus: EventBus) -> None:
+    from fastapi import HTTPException
+
+    from app.modules.finance.schemas import RecordClaimPaymentRequest
+
+    payment_id = await _finance_approved_pay_app(world)
+    (invoice,) = await world.invoices()
+    async with world.factory() as session:
+        await FinanceService(session).record_payment_with_withholding(
+            invoice.id, RecordClaimPaymentRequest(payment_date="2026-10-01", amount="1000")
+        )
+        await session.commit()
+
+    async with world.factory() as session:
+        with pytest.raises(HTTPException) as exc:
+            await SubcontractorService(session).reject_payment_application(payment_id, "defective work")
+    assert exc.value.status_code == 409
+    assert exc.value.detail["code"] == "payable_paid"
+
+
+@pytest.mark.asyncio
+async def test_a_pay_application_whose_payable_was_cancelled_can_still_be_paid(
+    world: _World, production_bus: EventBus
+) -> None:
+    from app.modules.finance.schemas import InvoiceUpdate
+
+    payment_id = await _finance_approved_pay_app(world)
+    (invoice,) = await world.invoices()
+    async with world.factory() as session:
+        await FinanceService(session).update_invoice(invoice.id, InvoiceUpdate(status="cancelled"))
+        await session.commit()
+    # Cancelled, the payable no longer bills the work, so the approved
+    # application stands for it again.
+    async with world.factory() as session:
+        assert await subcontract_open_commitment(session, world.project_id) == {"EUR": AGREEMENT_VALUE}
+
+    async with world.factory() as session:
+        paid = await SubcontractorService(session).mark_paid(payment_id)
+        await session.commit()
+        assert paid.status == "paid"
+    await _drain(production_bus)
+
+    (invoice,) = await world.invoices()
+    assert invoice.status == "paid"
+    assert await world.budget() == (REMAINING, GROSS)
+
+
+@pytest.mark.asyncio
+async def test_the_paid_event_waits_for_the_payable(
+    world: _World, production_bus: EventBus, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Outside systems were told a pay application was paid before its payable was, even when paying it failed."""
+    from app.modules.subcontractors import finance_bridge
+
+    payment_id = await _finance_approved_pay_app(world)
+    heard: list[dict[str, Any]] = []
+
+    async def _listen(event: Any) -> None:
+        heard.append(event.data)
+
+    production_bus.subscribe("subcontractors.payment_application.paid", _listen)
+
+    settle = finance_bridge.settle_payable
+    failing = True
+
+    async def _settle(*args: Any, **kwargs: Any) -> Any:
+        if failing:
+            raise RuntimeError("bank file rejected")
+        return await settle(*args, **kwargs)
+
+    monkeypatch.setattr(finance_bridge, "settle_payable", _settle)
+    async with world.factory() as session:
+        with pytest.raises(RuntimeError):
+            await SubcontractorService(session).mark_paid(payment_id)
+        await session.rollback()
+    await _drain(production_bus)
+    assert heard == []
+
+    failing = False
+    async with world.factory() as session:
+        await SubcontractorService(session).mark_paid(payment_id)
+        await session.commit()
+    await _drain(production_bus)
+    assert [data["payment_application_id"] for data in heard] == [str(payment_id)]

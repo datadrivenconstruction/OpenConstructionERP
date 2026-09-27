@@ -450,6 +450,12 @@ async def test_a_lowered_approval_is_what_gets_paid_and_what_retention_holds(pg_
         "publish_detached",
         lambda name, data, **_kw: published.append((name, data)),
     )
+    # The paid event waits for the commit, which this rolled-back session never makes.
+    monkeypatch.setattr(
+        service_module,
+        "publish_after_commit",
+        lambda _session, name, data, **_kw: published.append((name, data)),
+    )
 
     world = await _foreman_approved_world(pg_session)
     agreement, pay_app, pa_line = world["agreement"], world["pay_app"], world["pa_line"]
