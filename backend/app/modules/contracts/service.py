@@ -2425,10 +2425,13 @@ class ContractsService:
                 if isinstance(_incoming, dict)
                 else _incoming
             )
-        # Recompute total if quantity / unit_rate changed.
-        qty = Decimal(str(fields.get("quantity", line.quantity) or 0))
-        rate = Decimal(str(fields.get("unit_rate", line.unit_rate) or 0))
-        fields["total_value"] = qty * rate
+        # Recompute the total only when quantity or rate is written. A signed
+        # line's total is the agreed figure (25.90 need not be 0.7 x 37), so a
+        # link or a description edit must leave it exactly as it was signed.
+        if "quantity" in fields or "unit_rate" in fields:
+            qty = Decimal(str(fields.get("quantity", line.quantity) or 0))
+            rate = Decimal(str(fields.get("unit_rate", line.unit_rate) or 0))
+            fields["total_value"] = qty * rate
         await self.line_repo.update_fields(line_id, **fields)
         await self.session.refresh(line)
         return line
