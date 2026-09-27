@@ -43429,7 +43429,6 @@ const resource = {
     "videos.stat_published": "Praegu avaldatud",
     "videos.stat_series": "Sarjad",
     "videos.stat_videos": "Videod",
-    "videos.try_in_app": "Proovi rakenduses",
     "videos.watched": "Vaadatud",
     "videos.you_end_with": "Lõpetuseks saate",
     "videos.for_case": "Videod selle juhtumi kohta",
@@ -43465,6 +43464,9 @@ const resource = {
     "cases.featured_article.label": "Esiletõstetud artikkel: {{title}}. Loe artiklit, avaneb uuel vahelehel",
     "sidebar.learn.hint_topbar": "Õppevideod ja juhendatud juhtumid platvormi õppimiseks. Kui peidad selle jaotise, koondub see ülemises ribas kraadimütsi ikooniks; klõps sellel toob selle menüüsse tagasi.",
     "sidebar.learn.hidden_toast_body_topbar": "Need on nüüd peidus ülemise riba kraadimütsi ikooni taga. Klõps sellel toob need tagasi.",
+    "videos.used_in_cases": "Kasutatud nendes juhtumites",
+    "videos.more_cases": "+{{more}} veel",
+    "videos.jump_to": "Alates {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

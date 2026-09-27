@@ -44102,7 +44102,6 @@ const resource = {
     "videos.stat_published": "Ute nu",
     "videos.stat_series": "Serier",
     "videos.stat_videos": "Videor",
-    "videos.try_in_app": "Prova i appen",
     "videos.watched": "Sedd",
     "videos.you_end_with": "Du slutar med",
     "videos.for_case": "Videor för det här fallet",
@@ -44138,6 +44137,9 @@ const resource = {
     "cases.featured_article.label": "Utvald artikel: {{title}}. Läs artikeln, öppnas i en ny flik",
     "sidebar.learn.hint_topbar": "Instruktionsvideor och guidade fall för att lära dig plattformen. Dölj den här sektionen så samlas den i examensmössan i det övre fältet; ett klick där tar tillbaka den.",
     "sidebar.learn.hidden_toast_body_topbar": "De ligger nu bakom examensmössan i det övre fältet. Ett klick där tar tillbaka dem.",
+    "videos.used_in_cases": "Används i dessa fall",
+    "videos.more_cases": "+{{more}} till",
+    "videos.jump_to": "Från {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

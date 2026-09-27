@@ -280,7 +280,7 @@ export function VideoPlayerDialog({
                 <section aria-labelledby={`${titleId}-cases`} className="rounded-xl border border-border-light bg-surface-secondary/40 p-3">
                   <h3 id={`${titleId}-cases`} className="flex items-center gap-1.5 text-xs font-semibold text-content-primary">
                     <Route size={13} className="text-oe-blue" aria-hidden />
-                    {t('videos.try_in_app', { defaultValue: 'Try it in the app' })}
+                    {t('videos.used_in_cases', { defaultValue: 'Used in these cases' })}
                   </h3>
                   <p className="mt-0.5 text-2xs text-content-tertiary">
                     {t('videos.related_cases_note', {

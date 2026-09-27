@@ -447,7 +447,7 @@ function Recommended({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Acad
       ) : (
         <Rail>
           {list.map((video) => (
-            <VideoCard key={video.id} video={video} labels={labels} onOpen={onOpen} compact className="w-64 shrink-0 snap-start sm:w-72" />
+            <VideoCard key={video.id} video={video} labels={labels} onOpen={onOpen} compact showCases className="w-64 shrink-0 snap-start sm:w-72" />
           ))}
         </Rail>
       )}
@@ -876,7 +876,7 @@ function Library({ labels, filters, setFilter, clearFilters, onOpen, patchParams
       ) : (
         <div className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {hits.map((hit) => (
-            <VideoCard key={hit.video.id} video={hit.video} labels={labels} onOpen={onOpen} chapterHits={hit.chapters} />
+            <VideoCard key={hit.video.id} video={hit.video} labels={labels} onOpen={onOpen} chapterHits={hit.chapters} showCases />
           ))}
         </div>
       )}

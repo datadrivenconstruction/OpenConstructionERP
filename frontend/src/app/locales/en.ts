@@ -38197,7 +38197,6 @@ const resource = {
     "videos.stat_published": "Out now",
     "videos.stat_series": "Series",
     "videos.stat_videos": "Videos",
-    "videos.try_in_app": "Try it in the app",
     "videos.watched": "Watched",
     "videos.you_end_with": "You end with",
     "videos.for_case": "Videos for this case",
@@ -38233,6 +38232,9 @@ const resource = {
     "cases.featured_article.label": "Featured article: {{title}}. Read the article, opens in a new tab",
     "sidebar.learn.hint_topbar": "Tutorial videos and guided cases to learn the platform. Hide this section and it folds into the graduation cap in the top bar; one click there brings it back.",
     "sidebar.learn.hidden_toast_body_topbar": "They are now behind the graduation cap in the top bar. One click there brings them back.",
+    "videos.used_in_cases": "Used in these cases",
+    "videos.more_cases": "+{{more}} more",
+    "videos.jump_to": "From {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

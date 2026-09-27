@@ -43467,7 +43467,6 @@ const resource = {
     "videos.stat_published": "Қазір шыққан",
     "videos.stat_series": "Сериялар",
     "videos.stat_videos": "Бейнелер",
-    "videos.try_in_app": "Қолданбада көріп көріңіз",
     "videos.watched": "Көрілді",
     "videos.you_end_with": "Соңында сізде болады",
     "videos.for_case": "Осы кейске арналған бейнелер",
@@ -43503,6 +43502,9 @@ const resource = {
     "cases.featured_article.label": "Таңдаулы мақала: {{title}}. Мақаланы оқу, жаңа қойындыда ашылады",
     "sidebar.learn.hint_topbar": "Платформаны үйренуге арналған оқыту бейнелері мен нұсқаулық кейстер. Бұл бөлімді жасырсаңыз, ол жоғарғы жолақтағы бітіру қалпағы белгішесіне жиналады; сол жерде бір рет басу оны қайтарады.",
     "sidebar.learn.hidden_toast_body_topbar": "Олар енді жоғарғы жолақтағы бітіру қалпағы белгішесінің артында. Сол жерде бір рет басу оларды қайтарады.",
+    "videos.used_in_cases": "Осы кейстерде қолданылған",
+    "videos.more_cases": "+{{more}} тағы",
+    "videos.jump_to": "{{time}} бастап: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

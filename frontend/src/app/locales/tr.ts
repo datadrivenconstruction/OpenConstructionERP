@@ -44331,7 +44331,6 @@ const resource = {
     "videos.stat_published": "Yayında",
     "videos.stat_series": "Seriler",
     "videos.stat_videos": "Videolar",
-    "videos.try_in_app": "Uygulamada deneyin",
     "videos.watched": "İzlendi",
     "videos.you_end_with": "Elinizde şu kalır",
     "videos.for_case": "Bu vaka için videolar",
@@ -44367,6 +44366,9 @@ const resource = {
     "cases.featured_article.label": "Öne çıkan makale: {{title}}. Makaleyi oku, yeni sekmede açılır",
     "sidebar.learn.hint_topbar": "Platformu öğrenmek için eğitim videoları ve rehberli vakalar. Bu bölümü gizleyin, üst çubuktaki mezuniyet kepi simgesine küçülsün; oraya bir tıklama onu geri getirir.",
     "sidebar.learn.hidden_toast_body_topbar": "Artık üst çubuktaki mezuniyet kepi simgesinin arkasındalar. Oraya bir tıklama onları geri getirir.",
+    "videos.used_in_cases": "Bu vakalarda kullanılıyor",
+    "videos.more_cases": "+{{more}} daha",
+    "videos.jump_to": "{{time}}’ten itibaren: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

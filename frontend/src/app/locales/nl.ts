@@ -44368,7 +44368,6 @@ const resource = {
     "videos.stat_published": "Al uit",
     "videos.stat_series": "Series",
     "videos.stat_videos": "Video's",
-    "videos.try_in_app": "Probeer het in de app",
     "videos.watched": "Bekeken",
     "videos.you_end_with": "U eindigt met",
     "videos.for_case": "Video's voor deze case",
@@ -44404,6 +44403,9 @@ const resource = {
     "cases.featured_article.label": "Uitgelicht artikel: {{title}}. Lees het artikel, opent in een nieuw tabblad",
     "sidebar.learn.hint_topbar": "Instructievideo's en begeleide cases om het platform te leren kennen. Als u deze sectie verbergt, klapt ze samen in het diploma-icoon in de bovenbalk; één klik daarop brengt haar terug.",
     "sidebar.learn.hidden_toast_body_topbar": "Ze staan nu achter het diploma-icoon in de bovenbalk. Eén klik daarop brengt ze terug.",
+    "videos.used_in_cases": "Gebruikt in deze cases",
+    "videos.more_cases": "+{{more}} meer",
+    "videos.jump_to": "Vanaf {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

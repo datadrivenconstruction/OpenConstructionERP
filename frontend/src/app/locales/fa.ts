@@ -43466,7 +43466,6 @@ const resource = {
     "videos.stat_published": "تاکنون منتشر شده",
     "videos.stat_series": "مجموعه‌ها",
     "videos.stat_videos": "ویدیوها",
-    "videos.try_in_app": "در برنامه امتحان کنید",
     "videos.watched": "دیده شد",
     "videos.you_end_with": "در پایان به این می‌رسید",
     "videos.for_case": "ویدیوهایی برای این سناریو",
@@ -43502,6 +43501,9 @@ const resource = {
     "cases.featured_article.label": "مقاله ویژه: {{title}}. خواندن مقاله، در زبانه جدید باز می‌شود",
     "sidebar.learn.hint_topbar": "ویدیوهای آموزشی و سناریوهای هدایت‌شده برای یادگیری پلتفرم. اگر این بخش را پنهان کنید، در نوار بالا به آیکون کلاه فارغ‌التحصیلی تبدیل می‌شود؛ یک کلیک روی آن، بخش را به منو بازمی‌گرداند.",
     "sidebar.learn.hidden_toast_body_topbar": "اکنون پشت آیکون کلاه فارغ‌التحصیلی در نوار بالا هستند. یک کلیک روی آن، آن‌ها را بازمی‌گرداند.",
+    "videos.used_in_cases": "استفاده‌شده در این سناریوها",
+    "videos.more_cases": "+{{more}} مورد دیگر",
+    "videos.jump_to": "از {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

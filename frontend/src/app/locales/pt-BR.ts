@@ -40376,7 +40376,6 @@ const resource = {
     "videos.stat_published": "Já disponíveis",
     "videos.stat_series": "Séries",
     "videos.stat_videos": "Vídeos",
-    "videos.try_in_app": "Experimente no aplicativo",
     "videos.watched": "Assistido",
     "videos.you_end_with": "Você sai com",
     "videos.for_case": "Vídeos para este caso",
@@ -40412,6 +40411,9 @@ const resource = {
     "cases.featured_article.label": "Artigo em destaque: {{title}}. Ler o artigo, abre em uma nova aba",
     "sidebar.learn.hint_topbar": "Vídeos tutoriais e casos guiados para você aprender a plataforma. Oculte esta seção e ela se recolhe no ícone de capelo na barra superior; um clique ali traz de volta.",
     "sidebar.learn.hidden_toast_body_topbar": "Agora estão atrás do ícone de capelo na barra superior. Um clique ali traz de volta.",
+    "videos.used_in_cases": "Usado nestes casos",
+    "videos.more_cases": "+{{more}} mais",
+    "videos.jump_to": "A partir de {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -43466,7 +43466,6 @@ const resource = {
     "videos.stat_published": "Κυκλοφόρησαν",
     "videos.stat_series": "Σειρές",
     "videos.stat_videos": "Βίντεο",
-    "videos.try_in_app": "Δοκιμάστε το στην εφαρμογή",
     "videos.watched": "Παρακολουθήθηκε",
     "videos.you_end_with": "Καταλήγετε με",
     "videos.for_case": "Βίντεο για αυτή την περίπτωση",
@@ -43502,6 +43501,9 @@ const resource = {
     "cases.featured_article.label": "Προτεινόμενο άρθρο: {{title}}. Διαβάστε το άρθρο, ανοίγει σε νέα καρτέλα",
     "sidebar.learn.hint_topbar": "Εκπαιδευτικά βίντεο και καθοδηγούμενες περιπτώσεις για να μάθετε την πλατφόρμα. Αν αποκρύψετε αυτή την ενότητα, συμπτύσσεται στο εικονίδιο πτυχιακού καπέλου στην επάνω γραμμή· ένα κλικ εκεί την επαναφέρει στο μενού.",
     "sidebar.learn.hidden_toast_body_topbar": "Βρίσκονται τώρα πίσω από το εικονίδιο πτυχιακού καπέλου στην επάνω γραμμή. Ένα κλικ εκεί τα επαναφέρει.",
+    "videos.used_in_cases": "Χρησιμοποιείται σε αυτές τις περιπτώσεις",
+    "videos.more_cases": "+{{more}} ακόμη",
+    "videos.jump_to": "Από {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

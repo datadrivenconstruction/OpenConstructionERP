@@ -44638,7 +44638,6 @@ const resource = {
     "videos.stat_published": "Dostępne teraz",
     "videos.stat_series": "Serie",
     "videos.stat_videos": "Filmy",
-    "videos.try_in_app": "Wypróbuj w aplikacji",
     "videos.watched": "Obejrzane",
     "videos.you_end_with": "Otrzymasz",
     "videos.for_case": "Filmy do tego scenariusza",
@@ -44674,6 +44673,9 @@ const resource = {
     "cases.featured_article.label": "Polecany artykuł: {{title}}. Czytaj artykuł, otwiera się w nowej karcie",
     "sidebar.learn.hint_topbar": "Filmy instruktażowe i prowadzone scenariusze, które pomagają poznać platformę. Ukryj tę sekcję, a zwinie się do ikony biretu na górnym pasku; jedno kliknięcie tam ją przywraca.",
     "sidebar.learn.hidden_toast_body_topbar": "Są teraz ukryte pod ikoną biretu na górnym pasku. Jedno kliknięcie tam je przywraca.",
+    "videos.used_in_cases": "Wykorzystywane w tych scenariuszach",
+    "videos.more_cases": "+{{more}} więcej",
+    "videos.jump_to": "Od {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

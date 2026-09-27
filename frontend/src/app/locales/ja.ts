@@ -44907,7 +44907,6 @@ const resource = {
     "videos.stat_published": "公開済み",
     "videos.stat_series": "シリーズ",
     "videos.stat_videos": "動画",
-    "videos.try_in_app": "アプリで試す",
     "videos.watched": "視聴済み",
     "videos.you_end_with": "最終的に得られるもの",
     "videos.for_case": "このケースの動画",
@@ -44943,6 +44942,9 @@ const resource = {
     "cases.featured_article.label": "注目の記事：{{title}}。記事を読む、新しいタブで開きます",
     "sidebar.learn.hint_topbar": "プラットフォームを学ぶためのチュートリアル動画とガイド付きケースです。このセクションを非表示にすると、上部バーの角帽アイコンにまとまります。そこをクリックすると元に戻ります。",
     "sidebar.learn.hidden_toast_body_topbar": "現在は上部バーの角帽アイコンの中にまとまっています。そこをクリックすると元に戻ります。",
+    "videos.used_in_cases": "これらのケースで使用",
+    "videos.more_cases": "+{{more}}件",
+    "videos.jump_to": "{{time}}から: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

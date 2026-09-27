@@ -45238,7 +45238,6 @@ const resource = {
     "videos.stat_published": "Уже вийшло",
     "videos.stat_series": "Серії",
     "videos.stat_videos": "Відео",
-    "videos.try_in_app": "Спробувати в застосунку",
     "videos.watched": "Переглянуто",
     "videos.you_end_with": "У підсумку ви отримаєте",
     "videos.for_case": "Відео до цього кейсу",
@@ -45274,6 +45273,9 @@ const resource = {
     "cases.featured_article.label": "Рекомендована стаття: {{title}}. Читати статтю, відкриється в новій вкладці",
     "sidebar.learn.hint_topbar": "Навчальні відео та покрокові кейси для знайомства з платформою. Сховайте цей розділ, і він згорнеться в значок академічної шапочки на верхній панелі; один клік там поверне його.",
     "sidebar.learn.hidden_toast_body_topbar": "Тепер вони сховані за значком академічної шапочки на верхній панелі. Один клік там поверне їх.",
+    "videos.used_in_cases": "Використовується в цих кейсах",
+    "videos.more_cases": "+ще {{more}}",
+    "videos.jump_to": "З {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

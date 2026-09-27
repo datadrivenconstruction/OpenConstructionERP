@@ -524,6 +524,16 @@ def build(args: argparse.Namespace) -> None:
             fail(f"{vid}: youtube_ids says {yt}, the sources say {known}")
         by_id[vid]["youtubeId"] = yt
 
+    # Case links: added and dropped per video on top of whatever the sources
+    # and the overlay say, each added one with the chapter second a case page
+    # starts the video at. Unlike the sources, these were written against the
+    # current case list, so a wrong case id or a second that is not a chapter
+    # start stops the run instead of being reported as an orphan.
+    case_links = {k: x for k, x in editorial.get("case_links", {}).items() if not k.startswith("_")}
+    for vid in case_links:
+        if vid not in by_id:
+            fail(f"case_links: {vid!r} is not a video in the catalogue")
+
     # Overlay, classification and validation.
     orphans: dict[str, list[str]] = {}
     extras_by_id = {x["id"]: x for x in editorial.get("extras", [])}
@@ -554,6 +564,22 @@ def build(args: argparse.Namespace) -> None:
         if missing:
             orphans[v["id"]] = missing
         v["cases"] = [c for c in v["cases"] if c in cases]
+        links = case_links.get(v["id"], {})
+        for c in links.get("drop", {}):
+            if c not in v["cases"]:
+                fail(f"case_links: {v['id']} drops {c!r}, which it is not linked to")
+            v["cases"].remove(c)
+        starts: dict[str, int] = {}
+        for c, t in links.get("add", {}).items():
+            if c not in cases:
+                fail(f"case_links: {v['id']} adds {c!r}, which is not a case")
+            if not any(ch["t"] == t for ch in v.get("chapters", [])):
+                fail(f"case_links: {v['id']} -> {c}: {t}s is not the start of a chapter")
+            if c not in v["cases"]:
+                v["cases"].append(c)
+            starts[c] = t
+        if starts:
+            v["caseStarts"] = starts
         routes: list[str] = []
         for c in v["cases"]:
             for r in cases[c]["routes"]:
@@ -610,6 +636,7 @@ def build(args: argparse.Namespace) -> None:
         "stage",
         "roles",
         "cases",
+        "caseStarts",
         "routes",
         "result",
         "title",

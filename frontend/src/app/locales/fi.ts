@@ -43491,7 +43491,6 @@ const resource = {
     "videos.stat_published": "Julkaistu tähän mennessä",
     "videos.stat_series": "Sarjaa",
     "videos.stat_videos": "Videota",
-    "videos.try_in_app": "Kokeile sovelluksessa",
     "videos.watched": "Katsottu",
     "videos.you_end_with": "Lopuksi saat",
     "videos.for_case": "Videot tähän tapaukseen",
@@ -43527,6 +43526,9 @@ const resource = {
     "cases.featured_article.label": "Suositeltu artikkeli: {{title}}. Lue artikkeli, avautuu uudelle välilehdelle",
     "sidebar.learn.hint_topbar": "Opetusvideoita ja ohjattuja tapauksia alustan oppimiseen. Jos piilotat tämän osion, se pienenee valmistujaishattu-kuvakkeeksi yläpalkissa; yksi klikkaus siinä tuo sen takaisin valikkoon.",
     "sidebar.learn.hidden_toast_body_topbar": "Ne ovat nyt yläpalkin valmistujaishattu-kuvakkeen takana. Yksi klikkaus siinä tuo ne takaisin.",
+    "videos.used_in_cases": "Käytetty näissä tapauksissa",
+    "videos.more_cases": "+{{more}} lisää",
+    "videos.jump_to": "Alkaen {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

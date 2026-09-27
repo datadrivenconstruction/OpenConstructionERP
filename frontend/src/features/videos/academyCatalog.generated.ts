@@ -173,6 +173,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "feasibility-budget-before-design",
         "write-the-basis-of-estimate"
       ],
+      "caseStarts": {
+        "write-the-basis-of-estimate": 279
+      },
       "routes": [
         "/projects/new",
         "/boq",
@@ -316,14 +319,26 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "answer-an-rfi",
         "issue-a-controlled-drawing-revision",
-        "get-a-key-document-signed-off"
+        "get-a-key-document-signed-off",
+        "set-up-the-common-data-environment",
+        "reconcile-a-drawing-issue-against-the-index"
       ],
+      "caseStarts": {
+        "answer-an-rfi": 69,
+        "set-up-the-common-data-environment": 227,
+        "reconcile-a-drawing-issue-against-the-index": 279
+      },
       "routes": [
         "/rfi",
         "/correspondence",
         "/files",
         "/inspections",
-        "/signing"
+        "/signing",
+        "/cde",
+        "/governance",
+        "/coordination",
+        "/plan-room",
+        "/files/transmittals"
       ],
       "title": "Dokumente und Entscheidungen sichern",
       "titleEn": "Keep documents and decisions under control",
@@ -670,17 +685,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "estimator",
         "quantity-surveyor"
       ],
-      "cases": [
-        "takeoff-quantities-from-a-pdf-plan",
-        "tender-from-boq"
-      ],
-      "routes": [
-        "/files",
-        "/takeoff",
-        "/quantities",
-        "/boq",
-        "/tendering"
-      ],
+      "cases": [],
+      "routes": [],
       "result": "bill",
       "title": "Ein Leistungsverzeichnis aufbauen",
       "titleEn": "Build a Leistungsverzeichnis",
@@ -1079,13 +1085,27 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "cases": [
         "protect-the-programme-from-a-long-lead-item",
-        "crew-and-plant-lookahead-balance"
+        "crew-and-plant-lookahead-balance",
+        "schedule-and-track",
+        "build-the-baseline-programme",
+        "update-the-programme-and-reforecast",
+        "produce-a-short-interval-lookahead"
       ],
+      "caseStarts": {
+        "protect-the-programme-from-a-long-lead-item": 68,
+        "schedule-and-track": 35,
+        "build-the-baseline-programme": 52,
+        "update-the-programme-and-reforecast": 103,
+        "produce-a-short-interval-lookahead": 121
+      },
       "routes": [
         "/procurement",
         "/schedule-advanced",
         "/reports",
-        "/field-time"
+        "/field-time",
+        "/schedule",
+        "/boq",
+        "/change-intelligence"
       ],
       "result": "programme",
       "title": "Abhängigkeiten und Ressourceneinsatz planen",
@@ -1172,12 +1192,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "cases": [
         "procure-from-boq",
-        "receive-and-reconcile-material-deliveries"
+        "receive-and-reconcile-material-deliveries",
+        "run-a-three-way-match-before-paying-a-supplier"
       ],
+      "caseStarts": {
+        "run-a-three-way-match-before-paying-a-supplier": 359
+      },
       "routes": [
         "/boq",
         "/procurement",
-        "/site-inventory"
+        "/site-inventory",
+        "/reconciliation",
+        "/finance"
       ],
       "result": "order",
       "title": "Material und Teillieferung verfolgen",
@@ -1289,15 +1315,24 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "estimate-from-cost-database",
         "build-the-resource-library-and-rates",
-        "localize-an-estimate-to-a-region"
+        "localize-an-estimate-to-a-region",
+        "calculate-with-your-own-efb-rates",
+        "build-an-all-in-labour-rate"
       ],
+      "caseStarts": {
+        "calculate-with-your-own-efb-rates": 261,
+        "build-an-all-in-labour-rate": 303
+      },
       "routes": [
         "/cost-explorer",
         "/boq",
         "/assemblies",
         "/validation",
         "/resources",
-        "/schedule-advanced"
+        "/schedule-advanced",
+        "/labor-rates",
+        "/catalog",
+        "/resource-summary"
       ],
       "result": "rate",
       "title": "Kostenquellen und Ressourcen anpassen",
@@ -1557,8 +1592,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "estimate-from-cost-database",
         "build-the-resource-library-and-rates",
         "build-an-assembly-recipe-rate",
-        "localize-an-estimate-to-a-region"
+        "localize-an-estimate-to-a-region",
+        "sense-check-an-estimate-with-benchmarks"
       ],
+      "caseStarts": {
+        "sense-check-an-estimate-with-benchmarks": 117
+      },
       "routes": [
         "/cost-explorer",
         "/boq",
@@ -1610,8 +1649,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "estimate-from-cost-database",
         "estimate-with-your-own-crew-rates",
-        "validate-estimate"
+        "validate-estimate",
+        "build-an-all-in-labour-rate"
       ],
+      "caseStarts": {
+        "build-an-all-in-labour-rate": 171
+      },
       "routes": [
         "/cost-explorer",
         "/boq",
@@ -1665,13 +1708,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "commercial-manager"
       ],
       "cases": [
-        "price-the-preliminaries-and-general-conditions",
         "cost-risk-and-contingency",
         "validate-estimate"
       ],
       "routes": [
-        "/preliminaries",
-        "/resource-summary",
         "/boq",
         "/risks",
         "/reports",
@@ -1719,18 +1759,15 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "quantity-surveyor"
       ],
       "cases": [
-        "price-one-bill-for-hst-pst-and-qst",
         "walk-the-estimate-from-class-d-to-class-a",
         "take-off-in-metric-and-buy-in-imperial"
       ],
       "routes": [
-        "/costs",
-        "/catalog",
-        "/boq",
         "/estimate-basis",
-        "/reports",
         "/allowances",
+        "/boq",
         "/price-index",
+        "/reports",
         "/takeoff",
         "/quantities",
         "/validation"
@@ -1781,14 +1818,24 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "level-subcontract-bids-and-flow-the-terms-down",
         "compare-bids-and-award",
-        "level-bids-to-a-common-scope"
+        "level-bids-to-a-common-scope",
+        "tender-from-boq",
+        "issue-a-procurement-and-buying-schedule",
+        "raise-a-subcontract-order-from-the-award"
       ],
+      "caseStarts": {
+        "tender-from-boq": 92,
+        "issue-a-procurement-and-buying-schedule": 92,
+        "raise-a-subcontract-order-from-the-award": 215
+      },
       "routes": [
         "/tendering",
         "/subcontractors",
         "/contracts",
         "/reports",
-        "/bid-management"
+        "/bid-management",
+        "/boq",
+        "/procurement"
       ],
       "result": "award",
       "title": "Tender Work to Subcontractors",
@@ -2007,8 +2054,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "close-out-from-substantial-performance-to-the-final-account",
         "clear-the-snag-list-before-handover",
-        "schedule-and-track"
+        "schedule-and-track",
+        "handover-and-closeout"
       ],
+      "caseStarts": {
+        "handover-and-closeout": 187
+      },
       "routes": [
         "/construction-control",
         "/deadlines",
@@ -2020,7 +2071,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/closeout",
         "/schedule",
         "/schedule-advanced",
-        "/field-time"
+        "/field-time",
+        "/files"
       ],
       "result": "handover",
       "title": "Schedule to Substantial Performance",
@@ -2067,6 +2119,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "set-up-a-new-project",
         "price-one-bill-for-hst-pst-and-qst"
       ],
+      "caseStarts": {
+        "price-one-bill-for-hst-pst-and-qst": 138
+      },
       "routes": [
         "/projects/new",
         "/boq",
@@ -2313,8 +2368,15 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "clear-the-snag-list-before-handover",
         "run-a-handover-acceptance-inspection",
-        "close-out-from-substantial-performance-to-the-final-account"
+        "close-out-from-substantial-performance-to-the-final-account",
+        "handover-and-closeout",
+        "defects-liability-period-tracking"
       ],
+      "caseStarts": {
+        "clear-the-snag-list-before-handover": 79,
+        "handover-and-closeout": 79,
+        "defects-liability-period-tracking": 135
+      },
       "routes": [
         "/punchlist",
         "/inspections",
@@ -2323,7 +2385,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/deadlines",
         "/contracts",
         "/finance",
-        "/reports"
+        "/reports",
+        "/files"
       ],
       "result": "handover",
       "title": "Réception des travaux et déficiences",
@@ -2478,14 +2541,24 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "cases": [
         "turn-field-time-into-payroll-and-labour-cost",
-        "capture-daywork-and-time-and-materials"
+        "capture-daywork-and-time-and-materials",
+        "manage-the-plant-and-equipment-register",
+        "run-the-site-day"
       ],
+      "caseStarts": {
+        "manage-the-plant-and-equipment-register": 85,
+        "run-the-site-day": 85
+      },
       "routes": [
         "/field-time",
         "/payroll",
         "/finance",
         "/daily-diary",
-        "/contracts"
+        "/contracts",
+        "/equipment",
+        "/reports",
+        "/files",
+        "/safety"
       ],
       "result": "site",
       "title": "Chantier : suivre les heures et le matériel",
@@ -2709,6 +2782,16 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "build-an-all-in-labour-rate": {
+      "titleKey": "cases.build_an_all_in_labour_rate.title",
+      "titleDefault": "Build an all-in labour rate",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/labor-rates",
+        "/assemblies"
+      ]
+    },
     "build-an-assembly-recipe-rate": {
       "titleKey": "cases.build_an_assembly_recipe_rate.title",
       "titleDefault": "Build an assembly (recipe rate)",
@@ -2718,6 +2801,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/cost-explorer",
         "/assemblies",
         "/boq"
+      ]
+    },
+    "build-the-baseline-programme": {
+      "titleKey": "cases.build_the_baseline_programme.title",
+      "titleDefault": "Build the baseline programme",
+      "region": null,
+      "stage": "plan",
+      "routes": [
+        "/boq",
+        "/schedule",
+        "/schedule-advanced",
+        "/reports"
       ]
     },
     "build-the-resource-library-and-rates": {
@@ -2845,6 +2940,16 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "defects-liability-period-tracking": {
+      "titleKey": "cases.defects_liability_period_tracking.title",
+      "titleDefault": "Manage the defects liability period after occupation",
+      "region": null,
+      "stage": "operate",
+      "routes": [
+        "/punchlist",
+        "/closeout"
+      ]
+    },
     "din-276-cost-plan-for-the-client": {
       "titleKey": "cases.din_276_cost_plan_for_the_client.title",
       "titleDefault": "Report a DIN 276 cost plan to the client",
@@ -2905,6 +3010,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/signing"
       ]
     },
+    "handover-and-closeout": {
+      "titleKey": "cases.handover_and_closeout.title",
+      "titleDefault": "Hand over and close out",
+      "region": null,
+      "stage": "handover",
+      "routes": [
+        "/punchlist",
+        "/inspections",
+        "/files",
+        "/closeout"
+      ]
+    },
     "import-a-gaeb-tender-into-a-priced-boq": {
       "titleKey": "cases.import_a_gaeb_tender_into_a_priced_boq.title",
       "titleDefault": "Import a GAEB tender into a priced BOQ",
@@ -2927,6 +3044,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/files",
         "/correspondence",
         "/inspections"
+      ]
+    },
+    "issue-a-procurement-and-buying-schedule": {
+      "titleKey": "cases.issue_a_procurement_and_buying_schedule.title",
+      "titleDefault": "Issue a procurement and buying schedule",
+      "region": null,
+      "stage": "procure",
+      "routes": [
+        "/boq",
+        "/procurement",
+        "/tendering",
+        "/subcontractors",
+        "/reports"
       ]
     },
     "issue-an-electronic-invoice": {
@@ -2985,6 +3115,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reconciliation"
       ]
     },
+    "manage-the-plant-and-equipment-register": {
+      "titleKey": "cases.manage_the_plant_and_equipment_register.title",
+      "titleDefault": "Manage the plant and equipment register",
+      "region": null,
+      "stage": "build",
+      "routes": [
+        "/equipment",
+        "/field-time",
+        "/reports"
+      ]
+    },
     "payment-application-and-reconciliation": {
       "titleKey": "cases.payment_application_and_reconciliation.title",
       "titleDefault": "Payment application and reconciliation",
@@ -3022,17 +3163,6 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
-    "price-the-preliminaries-and-general-conditions": {
-      "titleKey": "cases.price_the_preliminaries_and_general_conditions.title",
-      "titleDefault": "Price the preliminaries and general conditions",
-      "region": null,
-      "stage": "estimate",
-      "routes": [
-        "/preliminaries",
-        "/resource-summary",
-        "/boq"
-      ]
-    },
     "procure-from-boq": {
       "titleKey": "cases.procure_from_boq.title",
       "titleDefault": "Procure materials from the BOQ",
@@ -3041,6 +3171,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "routes": [
         "/boq",
         "/procurement"
+      ]
+    },
+    "produce-a-short-interval-lookahead": {
+      "titleKey": "cases.produce_a_short_interval_lookahead.title",
+      "titleDefault": "Produce a short-interval lookahead",
+      "region": null,
+      "stage": "plan",
+      "routes": [
+        "/schedule",
+        "/schedule-advanced",
+        "/reports"
       ]
     },
     "project-end-to-end": {
@@ -3078,6 +3219,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation"
       ]
     },
+    "raise-a-subcontract-order-from-the-award": {
+      "titleKey": "cases.raise_a_subcontract_order_from_the_award.title",
+      "titleDefault": "Raise a subcontract order from the award",
+      "region": null,
+      "stage": "procure",
+      "routes": [
+        "/bid-management",
+        "/procurement",
+        "/subcontractors",
+        "/contracts"
+      ]
+    },
     "receive-and-reconcile-material-deliveries": {
       "titleKey": "cases.receive_and_reconcile_material_deliveries.title",
       "titleDefault": "Receive and reconcile material deliveries",
@@ -3086,6 +3239,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "routes": [
         "/site-inventory",
         "/procurement"
+      ]
+    },
+    "reconcile-a-drawing-issue-against-the-index": {
+      "titleKey": "cases.reconcile_a_drawing_issue_against_the_index.title",
+      "titleDefault": "Reconcile a drawing issue against the index",
+      "region": null,
+      "stage": "build",
+      "routes": [
+        "/files",
+        "/plan-room",
+        "/files/transmittals"
       ]
     },
     "record-a-change-under-a-ccdc-family-contract": {
@@ -3112,6 +3276,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/closeout"
       ]
     },
+    "run-a-three-way-match-before-paying-a-supplier": {
+      "titleKey": "cases.run_a_three_way_match_before_paying_a_supplier.title",
+      "titleDefault": "Run a three-way match before paying a supplier",
+      "region": null,
+      "stage": "build",
+      "routes": [
+        "/procurement",
+        "/reconciliation",
+        "/finance"
+      ]
+    },
     "run-the-ontario-prompt-payment-clock-down-the-chain": {
       "titleKey": "cases.run_the_ontario_prompt_payment_clock_down_the_chain.title",
       "titleDefault": "Run the Ontario prompt-payment clock down the chain",
@@ -3126,6 +3301,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "run-the-site-day": {
+      "titleKey": "cases.run_the_site_day.title",
+      "titleDefault": "Run the site day",
+      "region": null,
+      "stage": "build",
+      "routes": [
+        "/daily-diary",
+        "/field-time",
+        "/files",
+        "/safety"
+      ]
+    },
     "schedule-and-track": {
       "titleKey": "cases.schedule_and_track.title",
       "titleDefault": "Build a baseline and track progress",
@@ -3137,6 +3324,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/field-time"
       ]
     },
+    "sense-check-an-estimate-with-benchmarks": {
+      "titleKey": "cases.sense_check_an_estimate_with_benchmarks.title",
+      "titleDefault": "Sense-check an estimate against benchmarks",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/boq",
+        "/cost-explorer",
+        "/validation"
+      ]
+    },
     "set-up-a-new-project": {
       "titleKey": "cases.set_up_a_new_project.title",
       "titleDefault": "Set up a new project",
@@ -3146,6 +3344,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/projects/new",
         "/boq",
         "/schedule"
+      ]
+    },
+    "set-up-the-common-data-environment": {
+      "titleKey": "cases.set_up_the_common_data_environment.title",
+      "titleDefault": "Set up the common data environment",
+      "region": null,
+      "stage": "design",
+      "routes": [
+        "/cde",
+        "/files",
+        "/governance",
+        "/coordination"
       ]
     },
     "take-off-in-metric-and-buy-in-imperial": {
@@ -3203,6 +3413,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/field-time",
         "/payroll",
         "/finance"
+      ]
+    },
+    "update-the-programme-and-reforecast": {
+      "titleKey": "cases.update_the_programme_and_reforecast.title",
+      "titleDefault": "Update the programme and reforecast",
+      "region": null,
+      "stage": "plan",
+      "routes": [
+        "/field-time",
+        "/schedule",
+        "/schedule-advanced",
+        "/change-intelligence",
+        "/reports"
       ]
     },
     "validate-estimate": {

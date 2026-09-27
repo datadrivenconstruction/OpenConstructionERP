@@ -3,6 +3,97 @@
   "youtube_ids": {
     "_note": "YouTube ids for videos uploaded before the published-links document lists them, keyed by video id, for example \"CA02\": \"<11-char id>\". Adding one flips the video from coming soon to published on the next run. An id that contradicts the document or the registries stops the run."
   },
+  "case_links": {
+    "_note": "Links between videos and cases on top of the sources, keyed by video id. 'add' maps a case id to the second of the chapter a case page starts the video at; adding a case the video already has only sets that second. 'drop' maps a case id to why the link was removed. Proposed by matching the modules a video's chapters show against a case's steps, then read chapter by chapter; like every link here they are editorial suggestions. A case id that does not exist, or a second that is not a chapter start, stops the run.",
+    "V01": {
+      "add": {
+        "write-the-basis-of-estimate": 279
+      }
+    },
+    "V02": {
+      "add": {
+        "answer-an-rfi": 69,
+        "set-up-the-common-data-environment": 227,
+        "reconcile-a-drawing-issue-against-the-index": 279
+      }
+    },
+    "TERMIN01": {
+      "add": {
+        "protect-the-programme-from-a-long-lead-item": 68,
+        "schedule-and-track": 35,
+        "build-the-baseline-programme": 52,
+        "update-the-programme-and-reforecast": 103,
+        "produce-a-short-interval-lookahead": 121
+      }
+    },
+    "KOSTENDB01": {
+      "add": {
+        "calculate-with-your-own-efb-rates": 261,
+        "build-an-all-in-labour-rate": 303
+      }
+    },
+    "EINKAUF01": {
+      "add": {
+        "run-a-three-way-match-before-paying-a-supplier": 359
+      }
+    },
+    "EP02_L1": {
+      "add": {
+        "sense-check-an-estimate-with-benchmarks": 117
+      }
+    },
+    "EP02_L2": {
+      "add": {
+        "build-an-all-in-labour-rate": 171
+      }
+    },
+    "CA03": {
+      "add": {
+        "tender-from-boq": 92,
+        "issue-a-procurement-and-buying-schedule": 92,
+        "raise-a-subcontract-order-from-the-award": 215
+      }
+    },
+    "CA07": {
+      "add": {
+        "handover-and-closeout": 187
+      }
+    },
+    "QC01": {
+      "add": {
+        "price-one-bill-for-hst-pst-and-qst": 138
+      }
+    },
+    "QC05": {
+      "add": {
+        "clear-the-snag-list-before-handover": 79,
+        "handover-and-closeout": 79,
+        "defects-liability-period-tracking": 135
+      }
+    },
+    "Terrain": {
+      "add": {
+        "manage-the-plant-and-equipment-register": 85,
+        "run-the-site-day": 85
+      }
+    },
+    "LV01": {
+      "drop": {
+        "tender-from-boq": "LV01 stops before pricing or any tender; CA03 walks the tender.",
+        "takeoff-quantities-from-a-pdf-plan": "LV01 takes the quantities as given and does no takeoff; V03 shows it."
+      }
+    },
+    "EP02_L3": {
+      "drop": {
+        "price-the-preliminaries-and-general-conditions": "The chapters are markups, checks, versions and export; no preliminaries."
+      }
+    },
+    "CA02": {
+      "drop": {
+        "price-one-bill-for-hst-pst-and-qst": "No chapter touches tax; QC01 covers it from its tax chapter."
+      }
+    }
+  },
   "series": {
     "getting-started": {
       "title": "Getting started",

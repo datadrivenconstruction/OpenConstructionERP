@@ -46076,7 +46076,6 @@ const resource = {
     "videos.stat_published": "Megjelent",
     "videos.stat_series": "Sorozat",
     "videos.stat_videos": "Videó",
-    "videos.try_in_app": "Próbálja ki az alkalmazásban",
     "videos.watched": "Megnézve",
     "videos.you_end_with": "Ezzel zárja",
     "videos.for_case": "Videók ehhez az esettanulmányhoz",
@@ -46112,6 +46111,9 @@ const resource = {
     "cases.featured_article.label": "Kiemelt cikk: {{title}}. A cikk elolvasása, új lapon nyílik meg",
     "sidebar.learn.hint_topbar": "Oktatóvideók és végigvezetett esettanulmányok a platform megismeréséhez. Ha elrejti ezt a szakaszt, a felső sáv doktorisapka ikonjába kerül; egy kattintás ott, és visszatér.",
     "sidebar.learn.hidden_toast_body_topbar": "Most a felső sáv doktorisapka ikonja mögött vannak. Egy kattintás ott, és visszatérnek.",
+    "videos.used_in_cases": "Felhasználva ezekben az esettanulmányokban",
+    "videos.more_cases": "+{{more}} további",
+    "videos.jump_to": "Innen: {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

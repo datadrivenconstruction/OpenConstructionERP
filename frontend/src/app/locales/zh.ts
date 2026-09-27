@@ -45844,7 +45844,6 @@ const resource = {
     "videos.stat_published": "已发布",
     "videos.stat_series": "系列",
     "videos.stat_videos": "视频",
-    "videos.try_in_app": "在应用中试用",
     "videos.watched": "已看",
     "videos.you_end_with": "您最终会得到",
     "videos.for_case": "此案例的相关视频",
@@ -45880,6 +45879,9 @@ const resource = {
     "cases.featured_article.label": "精选文章：{{title}}。阅读文章，在新标签页中打开",
     "sidebar.learn.hint_topbar": "教学视频和引导式案例，帮助您学习本平台。隐藏此部分后，它会收进顶部栏的学位帽图标里；点击该图标即可恢复。",
     "sidebar.learn.hidden_toast_body_topbar": "现在它们收在顶部栏的学位帽图标后面。点击该图标即可恢复。",
+    "videos.used_in_cases": "已用于以下案例",
+    "videos.more_cases": "+{{more}}个",
+    "videos.jump_to": "从{{time}}:{{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

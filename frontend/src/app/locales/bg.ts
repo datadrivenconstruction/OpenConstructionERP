@@ -43491,7 +43491,6 @@ const resource = {
     "videos.stat_published": "Излезли досега",
     "videos.stat_series": "Серии",
     "videos.stat_videos": "Видеа",
-    "videos.try_in_app": "Опитайте в приложението",
     "videos.watched": "Гледано",
     "videos.you_end_with": "Завършвате с",
     "videos.for_case": "Видеа за този казус",
@@ -43527,6 +43526,9 @@ const resource = {
     "cases.featured_article.label": "Препоръчана статия: {{title}}. Прочети статията, отваря се в нов раздел",
     "sidebar.learn.hint_topbar": "Видеоуроци и водени казуси за запознаване с платформата. Ако скриете този раздел, той се свива в иконата с академична шапка в горната лента; един клик върху нея го връща в менюто.",
     "sidebar.learn.hidden_toast_body_topbar": "Вече са скрити зад иконата с академична шапка в горната лента. Един клик върху нея ги връща обратно.",
+    "videos.used_in_cases": "Използвано в тези казуси",
+    "videos.more_cases": "+{{more}} още",
+    "videos.jump_to": "От {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

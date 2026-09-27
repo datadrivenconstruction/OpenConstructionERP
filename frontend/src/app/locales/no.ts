@@ -43487,7 +43487,6 @@ const resource = {
     "videos.stat_published": "Ute nå",
     "videos.stat_series": "Serier",
     "videos.stat_videos": "Videoer",
-    "videos.try_in_app": "Prøv det i appen",
     "videos.watched": "Sett",
     "videos.you_end_with": "Du ender opp med",
     "videos.for_case": "Videoer for dette caset",
@@ -43523,6 +43522,9 @@ const resource = {
     "cases.featured_article.label": "Utvalgt artikkel: {{title}}. Les artikkelen, åpnes i en ny fane",
     "sidebar.learn.hint_topbar": "Opplæringsvideoer og veiledede caser for å lære plattformen å kjenne. Skjul denne seksjonen, så samles den i studenterlue-ikonet i topplinjen; ett klikk der henter den tilbake.",
     "sidebar.learn.hidden_toast_body_topbar": "De ligger nå bak studenterlue-ikonet i topplinjen. Ett klikk der henter dem tilbake.",
+    "videos.used_in_cases": "Brukt i disse casene",
+    "videos.more_cases": "+{{more}} til",
+    "videos.jump_to": "Fra {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

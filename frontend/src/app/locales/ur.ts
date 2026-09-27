@@ -43466,7 +43466,6 @@ const resource = {
     "videos.stat_published": "ابھی جاری",
     "videos.stat_series": "سیریز",
     "videos.stat_videos": "ویڈیوز",
-    "videos.try_in_app": "ایپ میں آزمائیں",
     "videos.watched": "دیکھی گئی",
     "videos.you_end_with": "آپ کے پاس آخر میں ہوگا",
     "videos.for_case": "اس کیس کے لیے ویڈیوز",
@@ -43502,6 +43501,9 @@ const resource = {
     "cases.featured_article.label": "نمایاں مضمون: {{title}}۔ مضمون پڑھیں، نئے ٹیب میں کھلتا ہے",
     "sidebar.learn.hint_topbar": "پلیٹ فارم سیکھنے کے لیے تعلیمی ویڈیوز اور رہنمائی والے کیسز۔ اس سیکشن کو چھپائیں تو یہ اوپری بار میں گریجویشن ٹوپی کے آئیکن میں سمٹ جائے گا؛ وہاں ایک کلک اسے واپس لے آئے گا۔",
     "sidebar.learn.hidden_toast_body_topbar": "اب یہ اوپری بار میں گریجویشن ٹوپی کے آئیکن کے پیچھے ہیں۔ وہاں ایک کلک انہیں واپس لے آئے گا۔",
+    "videos.used_in_cases": "ان کیسز میں استعمال ہوتی ہے",
+    "videos.more_cases": "+مزید {{more}}",
+    "videos.jump_to": "{{time}} سے: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

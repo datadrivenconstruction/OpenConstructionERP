@@ -43383,7 +43383,6 @@ const resource = {
     "videos.stat_published": "Đã ra mắt",
     "videos.stat_series": "Chuỗi video",
     "videos.stat_videos": "Video",
-    "videos.try_in_app": "Dùng thử trong ứng dụng",
     "videos.watched": "Đã xem",
     "videos.you_end_with": "Bạn sẽ có được",
     "videos.for_case": "Video cho tình huống này",
@@ -43419,6 +43418,9 @@ const resource = {
     "cases.featured_article.label": "Bài viết nổi bật: {{title}}. Đọc bài viết, mở trong thẻ mới",
     "sidebar.learn.hint_topbar": "Video hướng dẫn và tình huống có hướng dẫn để học nền tảng. Ẩn mục này thì nó sẽ thu gọn vào biểu tượng mũ tốt nghiệp ở thanh trên cùng; nhấp vào đó một lần để hiện lại.",
     "sidebar.learn.hidden_toast_body_topbar": "Chúng hiện đang ở sau biểu tượng mũ tốt nghiệp ở thanh trên cùng. Nhấp vào đó một lần để hiện lại.",
+    "videos.used_in_cases": "Được dùng trong các tình huống này",
+    "videos.more_cases": "+{{more}} nữa",
+    "videos.jump_to": "Từ {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

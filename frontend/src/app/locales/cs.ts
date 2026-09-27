@@ -44409,7 +44409,6 @@ const resource = {
     "videos.stat_published": "Už vyšlo",
     "videos.stat_series": "Série",
     "videos.stat_videos": "Videa",
-    "videos.try_in_app": "Vyzkoušet v aplikaci",
     "videos.watched": "Zhlédnuto",
     "videos.you_end_with": "Skončíte s",
     "videos.for_case": "Videa k tomuto případu",
@@ -44445,6 +44444,9 @@ const resource = {
     "cases.featured_article.label": "Doporučený článek: {{title}}. Přečíst článek, otevře se na nové kartě",
     "sidebar.learn.hint_topbar": "Výuková videa a případové studie krok za krokem, které vás naučí pracovat s platformou. Když tuto sekci skryjete, sbalí se do ikony akademického klobouku v horní liště; jedno kliknutí na ni ji vrátí zpět do menu.",
     "sidebar.learn.hidden_toast_body_topbar": "Nyní jsou skryté za ikonou akademického klobouku v horní liště. Jedním kliknutím na ni je vrátíte zpět.",
+    "videos.used_in_cases": "Použito v těchto případech",
+    "videos.more_cases": "+{{more}} další",
+    "videos.jump_to": "Od {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

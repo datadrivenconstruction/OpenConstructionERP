@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, MonitorPlay } from 'lucide-react';
 import type { AcademyVideo } from './academyTypes';
-import { videosForCase } from './academy';
+import { caseStart, chapterStartingAt, videosForCase } from './academy';
 import { VideoCard } from './VideoCard';
 import { VideoPlayerDialog } from './VideoPlayerDialog';
 import { useVideoLabels } from './videoLabels';
@@ -53,16 +53,22 @@ export default function CaseVideos({ caseId }: { caseId: string }) {
       </div>
       <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
         <div className="flex snap-x gap-3">
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              labels={labels}
-              compact
-              onOpen={(v, start = 0) => setPlaying({ video: v, start })}
-              className="w-60 shrink-0 snap-start"
-            />
-          ))}
+          {videos.map((video) => {
+            // Where a chapter is about this case, the card offers it and a
+            // plain click starts there too.
+            const start = caseStart(video, caseId);
+            return (
+              <VideoCard
+                key={video.id}
+                video={video}
+                labels={labels}
+                compact
+                jumpTo={start > 0 ? chapterStartingAt(video, start) : undefined}
+                onOpen={(v, s) => setPlaying({ video: v, start: s ?? (v.id === video.id ? start : 0) })}
+                className="w-60 shrink-0 snap-start"
+              />
+            );
+          })}
         </div>
       </div>
       {playing && (

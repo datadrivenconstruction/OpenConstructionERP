@@ -43616,7 +43616,6 @@ const resource = {
     "videos.stat_published": "יצאו עד כה",
     "videos.stat_series": "סדרות",
     "videos.stat_videos": "סרטונים",
-    "videos.try_in_app": "נסו באפליקציה",
     "videos.watched": "נצפה",
     "videos.you_end_with": "תסיימו עם",
     "videos.for_case": "סרטונים לתרחיש הזה",
@@ -43652,6 +43651,9 @@ const resource = {
     "cases.featured_article.label": "מאמר נבחר: {{title}}. קריאת המאמר, נפתח בכרטיסייה חדשה",
     "sidebar.learn.hint_topbar": "סרטוני הדרכה ותרחישים מודרכים ללימוד הפלטפורמה. אם תסתירו את הקטע הזה, הוא יתקפל לתוך סמל כובע הסיום בסרגל העליון; לחיצה עליו תחזיר אותו.",
     "sidebar.learn.hidden_toast_body_topbar": "הם נמצאים עכשיו מאחורי סמל כובע הסיום בסרגל העליון. לחיצה עליו תחזיר אותם.",
+    "videos.used_in_cases": "בשימוש בתרחישים האלה",
+    "videos.more_cases": "+{{more}} עוד",
+    "videos.jump_to": "החל מ-{{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

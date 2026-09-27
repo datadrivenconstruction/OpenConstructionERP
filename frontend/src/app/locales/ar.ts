@@ -45679,7 +45679,6 @@ const resource = {
     "videos.stat_published": "صدر الآن",
     "videos.stat_series": "سلسلة",
     "videos.stat_videos": "فيديوهات",
-    "videos.try_in_app": "جرّبها في التطبيق",
     "videos.watched": "تمت المشاهدة",
     "videos.you_end_with": "تنتهي بـ",
     "videos.for_case": "فيديوهات لهذه الحالة العملية",
@@ -45715,6 +45714,9 @@ const resource = {
     "cases.featured_article.label": "مقال مميز: {{title}}. قراءة المقال، يفتح في علامة تبويب جديدة",
     "sidebar.learn.hint_topbar": "فيديوهات تعليمية وحالات عملية موجّهة لتعلّم المنصة. عند إخفاء هذا القسم، يُطوى في أيقونة قبعة التخرج في الشريط العلوي؛ نقرة واحدة عليها تعيده إلى القائمة.",
     "sidebar.learn.hidden_toast_body_topbar": "أصبحت الآن خلف أيقونة قبعة التخرج في الشريط العلوي. نقرة واحدة عليها تعيدها.",
+    "videos.used_in_cases": "مستخدَم في هذه الحالات العملية",
+    "videos.more_cases": "+{{more}} أخرى",
+    "videos.jump_to": "من {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

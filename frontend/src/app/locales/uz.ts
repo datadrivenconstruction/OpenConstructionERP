@@ -44399,7 +44399,6 @@ const resource = {
     "videos.stat_published": "Hozir chiqqan",
     "videos.stat_series": "Turkumlar",
     "videos.stat_videos": "Videolar",
-    "videos.try_in_app": "Ilovada sinab koʻring",
     "videos.watched": "Koʻrildi",
     "videos.you_end_with": "Yakunda sizda quyidagilar boʻladi",
     "videos.for_case": "Bu keys uchun videolar",
@@ -44435,6 +44434,9 @@ const resource = {
     "cases.featured_article.label": "Tanlangan maqola: {{title}}. Maqolani oʻqish, yangi varaqda ochiladi",
     "sidebar.learn.hint_topbar": "Platformani oʻrganish uchun oʻquv videolari va bosqichma-bosqich keyslar. Ushbu boʻlimni yashiring, u yuqori paneldagi bitiruv qalpogʻi belgisiga yigʻiladi; u yerga bosish uni qaytaradi.",
     "sidebar.learn.hidden_toast_body_topbar": "Ular endi yuqori paneldagi bitiruv qalpogʻi belgisi ortida. U yerga bosish ularni qaytaradi.",
+    "videos.used_in_cases": "Ushbu keyslarda ishlatiladi",
+    "videos.more_cases": "+yana {{more}} ta",
+    "videos.jump_to": "{{time}}dan: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

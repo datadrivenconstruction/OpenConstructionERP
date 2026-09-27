@@ -43601,7 +43601,6 @@ const resource = {
     "videos.stat_published": "Азыр чыккан",
     "videos.stat_series": "Сериялар",
     "videos.stat_videos": "Видеолор",
-    "videos.try_in_app": "Колдонмодо колдонуп көрүңүз",
     "videos.watched": "Көрүлдү",
     "videos.you_end_with": "Аягында сизде болот",
     "videos.for_case": "Ушул мисал үчүн видеолор",
@@ -43637,6 +43636,9 @@ const resource = {
     "cases.featured_article.label": "Тандалган макала: {{title}}. Макаланы окуу, жаңы өтмөктө ачылат",
     "sidebar.learn.hint_topbar": "Платформаны үйрөнүү үчүн окуу видеолору жана көрсөтмөлүү мисалдар. Бул бөлүктү жашырсаңыз, ал жогорку панелдеги бүтүрүү калпагы сүрөтчөсүнө жыйналат; ошол жерди басканда ал кайра көрүнөт.",
     "sidebar.learn.hidden_toast_body_topbar": "Алар эми жогорку панелдеги бүтүрүү калпагы сүрөтчөсүнүн артында. Ошол жерди басканда алар кайра көрүнөт.",
+    "videos.used_in_cases": "Ушул мисалдарда колдонулган",
+    "videos.more_cases": "+{{more}} дагы",
+    "videos.jump_to": "{{time}} тартып: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

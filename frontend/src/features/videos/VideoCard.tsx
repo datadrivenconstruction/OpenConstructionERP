@@ -6,12 +6,13 @@
 // player at that second. A video that is not out yet opens the same dialog,
 // which then shows its outline instead of a player.
 
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { CheckCircle2, Clock, Hourglass, ListOrdered, MapPin, Play } from 'lucide-react';
+import { CheckCircle2, Clock, CornerDownRight, Hourglass, ListOrdered, MapPin, Play, Route } from 'lucide-react';
 import type { AcademyVideo, VideoChapter } from './academyTypes';
 import { VideoCover } from './VideoCover';
-import { formatClock } from './academy';
+import { caseRef, formatClock } from './academy';
 import { useVideosStore } from './useVideosStore';
 import type { VideoLabels } from './videoLabels';
 
@@ -23,15 +24,23 @@ export interface VideoCardProps {
   chapterHits?: VideoChapter[];
   /** Compact cards drop the description, for rows and rails. */
   compact?: boolean;
+  /** A chapter to offer as the way in, e.g. the one about the case the card
+   *  sits on. */
+  jumpTo?: VideoChapter;
+  /** List the cases the video is used in (the library does; a case page,
+   *  which is one of them, does not). */
+  showCases?: boolean;
   className?: string;
 }
 
-export function VideoCard({ video, labels, onOpen, chapterHits, compact, className }: VideoCardProps) {
+export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo, showCases, className }: VideoCardProps) {
   const { t } = useTranslation();
   const watched = useVideosStore((s) => Boolean(s.watched[video.id]));
   const soon = video.status !== 'published';
   const hits = chapterHits?.slice(0, 4) ?? [];
   const example = labels.example(video);
+  const cases = showCases ? video.cases.map((id) => ({ id, ref: caseRef(id) })).filter((c) => c.ref) : [];
+  const CASE_CHIPS = 2;
 
   return (
     <article
@@ -134,6 +143,54 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, classNa
               </li>
             ))}
           </ul>
+        )}
+        {jumpTo && (
+          <button
+            type="button"
+            data-testid="video-card-jump"
+            onClick={() => onOpen(video, jumpTo.t)}
+            className="inline-flex max-w-full items-center gap-1 self-start rounded-md border border-oe-blue/30 bg-oe-blue/[0.06] px-1.5 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+          >
+            <CornerDownRight size={11} className="shrink-0" aria-hidden />
+            <span className="truncate">
+              {t('videos.jump_to', {
+                defaultValue: 'From {{time}}: {{chapter}}',
+                time: formatClock(jumpTo.t),
+                chapter: jumpTo.title,
+              })}
+            </span>
+          </button>
+        )}
+        {cases.length > 0 && (
+          <div data-testid="video-card-cases" className="flex min-w-0 flex-wrap items-center gap-1 text-2xs">
+            <span className="inline-flex items-center gap-1 text-content-tertiary">
+              <Route size={11} className="text-oe-blue" aria-hidden />
+              {t('videos.used_in_cases', { defaultValue: 'Used in these cases' })}
+            </span>
+            <ul className="contents">
+              {cases.slice(0, CASE_CHIPS).map(({ id, ref }) => (
+                <li key={id} className="min-w-0 max-w-full">
+                  <Link
+                    to={`/cases/${id}`}
+                    className="block max-w-full truncate rounded-full border border-border-light bg-surface-secondary/60 px-2 py-0.5 text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                  >
+                    {t(ref!.titleKey, { defaultValue: ref!.titleDefault })}
+                  </Link>
+                </li>
+              ))}
+              {cases.length > CASE_CHIPS && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(video)}
+                    className="rounded-full px-1.5 py-0.5 font-medium text-oe-blue hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
+                  >
+                    {t('videos.more_cases', { defaultValue: '+{{more}} more', more: cases.length - CASE_CHIPS })}
+                  </button>
+                </li>
+              )}
+            </ul>
+          </div>
         )}
         <div className="mt-auto flex flex-wrap items-center gap-1 pt-1 text-2xs text-content-tertiary">
           <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.stageShort(video.stage)}</span>

@@ -43490,7 +43490,6 @@ const resource = {
     "videos.stat_published": "अभी जारी",
     "videos.stat_series": "सीरीज़",
     "videos.stat_videos": "वीडियो",
-    "videos.try_in_app": "ऐप में आज़माएं",
     "videos.watched": "देखा गया",
     "videos.you_end_with": "आप इसके साथ खत्म करते हैं",
     "videos.for_case": "इस केस के लिए वीडियो",
@@ -43526,6 +43525,9 @@ const resource = {
     "cases.featured_article.label": "विशेष लेख: {{title}}। लेख पढ़ें, नए टैब में खुलता है",
     "sidebar.learn.hint_topbar": "प्लेटफ़ॉर्म सीखने के लिए ट्यूटोरियल वीडियो और गाइडेड केस। इस सेक्शन को छिपाने पर यह ऊपर की बार में ग्रेजुएशन कैप आइकन में समा जाता है; वहाँ एक क्लिक से यह वापस आ जाता है।",
     "sidebar.learn.hidden_toast_body_topbar": "अब ये ऊपर की बार में ग्रेजुएशन कैप आइकन के पीछे हैं। वहाँ एक क्लिक से ये वापस आ जाते हैं।",
+    "videos.used_in_cases": "इन केस में उपयोग किया गया",
+    "videos.more_cases": "+{{more}} और",
+    "videos.jump_to": "{{time}} से: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

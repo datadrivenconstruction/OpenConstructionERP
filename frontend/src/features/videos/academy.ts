@@ -101,6 +101,16 @@ export function videosForRoute(route: string, videos: AcademyVideo[] = VIDEOS): 
   return videos.filter((v) => v.routes.includes(base));
 }
 
+/** Where a case page starts a video: the chapter about that case, else 0. */
+export function caseStart(video: AcademyVideo, caseId: string): number {
+  return video.caseStarts?.[caseId] ?? 0;
+}
+
+/** The chapter that starts at `t`, if one does. */
+export function chapterStartingAt(video: AcademyVideo, t: number): VideoChapter | undefined {
+  return video.chapters.find((c) => c.t === t);
+}
+
 /** Videos linked to a case. */
 export function videosForCase(caseId: string, videos: AcademyVideo[] = VIDEOS): AcademyVideo[] {
   return videos.filter((v) => v.cases.includes(caseId));

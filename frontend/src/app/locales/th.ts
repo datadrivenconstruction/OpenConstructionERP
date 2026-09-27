@@ -43375,7 +43375,6 @@ const resource = {
     "videos.stat_published": "เผยแพร่แล้ว",
     "videos.stat_series": "ชุดวิดีโอ",
     "videos.stat_videos": "วิดีโอ",
-    "videos.try_in_app": "ลองใช้ในแอป",
     "videos.watched": "ดูแล้ว",
     "videos.you_end_with": "คุณจะได้",
     "videos.for_case": "วิดีโอสำหรับเคสนี้",
@@ -43411,6 +43410,9 @@ const resource = {
     "cases.featured_article.label": "บทความแนะนำ: {{title}} อ่านบทความ เปิดในแท็บใหม่",
     "sidebar.learn.hint_topbar": "วิดีโอสอนและเคสแนะนำเพื่อเรียนรู้แพลตฟอร์ม ซ่อนส่วนนี้แล้วจะยุบไปอยู่ในไอคอนหมวกครุยบนแถบด้านบน คลิกที่นั่นครั้งเดียวเพื่อนำกลับมา",
     "sidebar.learn.hidden_toast_body_topbar": "ตอนนี้ซ่อนอยู่หลังไอคอนหมวกครุยบนแถบด้านบน คลิกที่นั่นครั้งเดียวเพื่อนำกลับมา",
+    "videos.used_in_cases": "ใช้ในเคสเหล่านี้",
+    "videos.more_cases": "+อีก {{more}}",
+    "videos.jump_to": "จาก {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

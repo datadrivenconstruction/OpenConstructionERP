@@ -43778,7 +43778,6 @@ const resource = {
     "videos.stat_published": "এখন প্রকাশিত",
     "videos.stat_series": "সিরিজ",
     "videos.stat_videos": "ভিডিও",
-    "videos.try_in_app": "অ্যাপে চেষ্টা করুন",
     "videos.watched": "দেখা হয়েছে",
     "videos.you_end_with": "আপনি শেষ করবেন",
     "videos.for_case": "এই কেসের জন্য ভিডিও",
@@ -43814,6 +43813,9 @@ const resource = {
     "cases.featured_article.label": "বিশেষ নিবন্ধ: {{title}}। নিবন্ধটি পড়ুন, নতুন ট্যাবে খোলে",
     "sidebar.learn.hint_topbar": "প্ল্যাটফর্মটি শেখার জন্য টিউটোরিয়াল ভিডিও এবং গাইডেড কেস। এই সেকশনটি লুকালে এটি টপ বারে গ্র্যাজুয়েশন ক্যাপ আইকনে গুটিয়ে যায়; সেখানে এক ক্লিকে এটি আবার মেনুতে ফিরে আসে।",
     "sidebar.learn.hidden_toast_body_topbar": "এগুলো এখন টপ বারের গ্র্যাজুয়েশন ক্যাপ আইকনের পেছনে আছে। সেখানে এক ক্লিকে এগুলো ফিরিয়ে আনুন।",
+    "videos.used_in_cases": "এই কেসগুলোতে ব্যবহৃত",
+    "videos.more_cases": "+{{more}} আরও",
+    "videos.jump_to": "{{time}} থেকে: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

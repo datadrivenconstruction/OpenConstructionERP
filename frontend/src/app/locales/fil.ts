@@ -43466,7 +43466,6 @@ const resource = {
     "videos.stat_published": "Nailabas na",
     "videos.stat_series": "Series",
     "videos.stat_videos": "Mga Video",
-    "videos.try_in_app": "Subukan sa app",
     "videos.watched": "Napanood na",
     "videos.you_end_with": "Matatapos ka sa",
     "videos.for_case": "Mga video para sa Case na ito",
@@ -43502,6 +43501,9 @@ const resource = {
     "cases.featured_article.label": "Tampok na artikulo: {{title}}. Basahin ang Artikulo, bubukas sa bagong tab",
     "sidebar.learn.hint_topbar": "Mga tutorial video at gabay na Kaso para matutunan ang platform. Kapag itinago mo ang seksyong ito, mapupunta ito sa icon na graduation cap sa itaas na bar; isang click doon at babalik ito.",
     "sidebar.learn.hidden_toast_body_topbar": "Nasa likod na sila ng icon na graduation cap sa itaas na bar. Isang click doon at babalik ang mga ito.",
+    "videos.used_in_cases": "Ginamit sa mga Case na ito",
+    "videos.more_cases": "+{{more}} pa",
+    "videos.jump_to": "Mula sa {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

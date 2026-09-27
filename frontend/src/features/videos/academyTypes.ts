@@ -60,6 +60,9 @@ export interface AcademyVideo {
   roles: ProfessionalRole[];
   /** Case ids that exist in the Cases hub. */
   cases: string[];
+  /** For some of `cases`: the second of the chapter a case page starts the
+   *  video at, where one chapter is about that case. */
+  caseStarts?: Record<string, number>;
   /** Module routes those cases walk through, unscoped and query-less. */
   routes: string[];
   result?: ResultFamily;

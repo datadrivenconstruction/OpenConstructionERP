@@ -43993,7 +43993,6 @@ const resource = {
     "videos.stat_published": "현재 공개됨",
     "videos.stat_series": "시리즈",
     "videos.stat_videos": "영상",
-    "videos.try_in_app": "앱에서 사용해보기",
     "videos.watched": "시청함",
     "videos.you_end_with": "최종적으로 얻는 것",
     "videos.for_case": "이 케이스를 위한 영상",
@@ -44029,6 +44028,9 @@ const resource = {
     "cases.featured_article.label": "추천 글: {{title}}. 기사 읽기, 새 탭에서 열립니다",
     "sidebar.learn.hint_topbar": "플랫폼을 배우기 위한 튜토리얼 동영상과 안내형 케이스입니다. 이 섹션을 숨기면 상단 바의 학사모 아이콘 안으로 접혀 들어갑니다. 그곳을 클릭하면 다시 나타납니다.",
     "sidebar.learn.hidden_toast_body_topbar": "이제 상단 바의 학사모 아이콘 뒤에 있습니다. 그곳을 클릭하면 다시 나타납니다.",
+    "videos.used_in_cases": "이 케이스에서 사용됨",
+    "videos.more_cases": "+{{more}}개 더",
+    "videos.jump_to": "{{time}}부터: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

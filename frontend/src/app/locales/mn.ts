@@ -43170,7 +43170,6 @@ const resource = {
     "videos.stat_published": "Одоо гарсан",
     "videos.stat_series": "Цуврал",
     "videos.stat_videos": "Видео",
-    "videos.try_in_app": "Аппликэйшн дээр туршиж үзэх",
     "videos.watched": "Үзсэн",
     "videos.you_end_with": "Та эцэст нь дараахийг авна",
     "videos.for_case": "Энэ тохиолдлын видеонууд",
@@ -43206,6 +43205,9 @@ const resource = {
     "cases.featured_article.label": "Онцлох нийтлэл: {{title}}. Нийтлэлийг унших, шинэ табд нээгдэнэ",
     "sidebar.learn.hint_topbar": "Платформыг сурахад зориулсан сургалтын видео болон чиглүүлсэн тохиолдлууд. Энэ хэсгийг нуувал дээд самбар дахь төгсөлтийн малгайн дүрс рүү эвхэгдэнэ; тэнд дарахад буцаж гарна.",
     "sidebar.learn.hidden_toast_body_topbar": "Тэдгээр одоо дээд самбар дахь төгсөлтийн малгайн дүрсний ард байна. Тэнд дарахад буцаж гарна.",
+    "videos.used_in_cases": "Эдгээр тохиолдолд ашигласан",
+    "videos.more_cases": "+{{more}} өөр",
+    "videos.jump_to": "{{time}}-с эхлэн: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

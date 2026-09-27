@@ -43643,7 +43643,6 @@ const resource = {
     "videos.stat_published": "Deja disponibile",
     "videos.stat_series": "Serii",
     "videos.stat_videos": "Videoclipuri",
-    "videos.try_in_app": "Încearcă în aplicație",
     "videos.watched": "Vizionat",
     "videos.you_end_with": "Rămâi cu",
     "videos.for_case": "Videoclipuri pentru acest caz",
@@ -43679,6 +43678,9 @@ const resource = {
     "cases.featured_article.label": "Articol recomandat: {{title}}. Citește articolul, se deschide într-o filă nouă",
     "sidebar.learn.hint_topbar": "Videouri tutoriale și cazuri ghidate pentru a învăța platforma. Ascundeți această secțiune și se va restrânge în pictograma tocii de absolvire din bara de sus; un clic acolo o aduce înapoi.",
     "sidebar.learn.hidden_toast_body_topbar": "Acum sunt în spatele pictogramei tocii de absolvire din bara de sus. Un clic acolo le aduce înapoi.",
+    "videos.used_in_cases": "Folosit în aceste cazuri",
+    "videos.more_cases": "+{{more}} în plus",
+    "videos.jump_to": "De la {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

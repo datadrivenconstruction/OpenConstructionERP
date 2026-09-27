@@ -43654,7 +43654,6 @@ const resource = {
     "videos.stat_published": "Objavljeno",
     "videos.stat_series": "Serije",
     "videos.stat_videos": "Videozapisi",
-    "videos.try_in_app": "Isprobajte u aplikaciji",
     "videos.watched": "Pogledano",
     "videos.you_end_with": "Završavate s",
     "videos.for_case": "Videozapisi za ovaj scenarij",
@@ -43690,6 +43689,9 @@ const resource = {
     "cases.featured_article.label": "Istaknuti članak: {{title}}. Pročitaj članak, otvara se u novoj kartici",
     "sidebar.learn.hint_topbar": "Video vodiči i scenariji uz vodstvo za učenje platforme. Ako sakrijete ovaj odjeljak, on se skuplja u ikonu kape za diplomiranje na gornjoj traci; jedan klik na nju ga vraća.",
     "sidebar.learn.hidden_toast_body_topbar": "Sada se nalaze iza ikone kape za diplomiranje na gornjoj traci. Jedan klik na nju ih vraća.",
+    "videos.used_in_cases": "Korišteno u ovim scenarijima",
+    "videos.more_cases": "+{{more}} više",
+    "videos.jump_to": "Od {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

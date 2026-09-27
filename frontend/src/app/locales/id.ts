@@ -43374,7 +43374,6 @@ const resource = {
     "videos.stat_published": "Sudah rilis",
     "videos.stat_series": "Seri",
     "videos.stat_videos": "Video",
-    "videos.try_in_app": "Coba di aplikasi",
     "videos.watched": "Sudah ditonton",
     "videos.you_end_with": "Anda akan mendapatkan",
     "videos.for_case": "Video untuk kasus ini",
@@ -43410,6 +43409,9 @@ const resource = {
     "cases.featured_article.label": "Artikel pilihan: {{title}}. Baca artikel, terbuka di tab baru",
     "sidebar.learn.hint_topbar": "Video tutorial dan kasus berpandu untuk mempelajari platform. Jika Anda menyembunyikan bagian ini, bagian tersebut akan terlipat ke ikon topi wisuda di bar atas; satu klik di sana akan mengembalikannya.",
     "sidebar.learn.hidden_toast_body_topbar": "Sekarang berada di balik ikon topi wisuda di bar atas. Satu klik di sana akan mengembalikannya.",
+    "videos.used_in_cases": "Digunakan dalam kasus-kasus ini",
+    "videos.more_cases": "+{{more}} lagi",
+    "videos.jump_to": "Dari {{time}}: {{chapter}}",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };
