@@ -839,6 +839,36 @@ async def test_an_invoice_line_without_a_vat_rate_gets_the_project_country_rate(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(("tax", "expected"), [("25.00", "25"), ("0.00", None)])
+async def test_the_country_rate_fills_an_unrated_line_only_when_it_matches_the_stated_tax(
+    client: AsyncClient, tax: str, expected: str | None
+) -> None:
+    """A stated tax of 0 with the line filled at 25% would disagree with itself."""
+    owner, h = await _login(client)
+    project_id, _ = await _seed_project_and_bill(owner, country="HR")
+    vendor = await _supplier(client, h)
+    created = await _ok(
+        await client.post(
+            f"{API}/finance/",
+            json={
+                "project_id": str(project_id),
+                "contact_id": vendor,
+                "invoice_direction": "payable",
+                "invoice_date": "2026-09-24",
+                "currency_code": "EUR",
+                "amount_subtotal": "100.00",
+                "tax_amount": tax,
+                "line_items": [{"description": "No rate given", "amount": "100.00"}],
+            },
+            headers=h,
+        )
+    )
+    rate = created["line_items"][0]["vat_rate"]
+    assert (None if rate is None else Decimal(str(rate))) == (None if expected is None else Decimal(expected))
+    assert Decimal(str(created["tax_amount"])) == Decimal(tax)
+
+
+@pytest.mark.asyncio
 async def test_a_subcontract_billed_through_a_payable_invoice_is_committed_and_incurred_once(
     client: AsyncClient,
 ) -> None:

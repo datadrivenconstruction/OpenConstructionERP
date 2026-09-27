@@ -430,6 +430,41 @@ def _line_item_from(
     )
 
 
+def _default_vat_matching_tax(
+    items: Sequence[InvoiceLineItemCreate],
+    tax: object,
+    default_vat_rate: Decimal | None,
+) -> Decimal | None:
+    """The country default, only when it reproduces the invoice's own tax.
+
+    The header tax is what the invoice says it charges. Filling the lines that
+    carry no rate with the country rate is right when that adds up to it, and
+    wrong when the invoice was taxed at another rate or not at all: a header
+    of 0 with lines at 25% is a document that disagrees with itself, and the
+    e-invoice and the VAT return read the lines. So the default is applied
+    only when explicit line VAT plus default line VAT lands on the header tax
+    within the line rounding tolerance; otherwise those lines keep no rate, as
+    they did before the default existed. A create that states no tax at all
+    (``tax`` is ``None``) has nothing to disagree with and takes the default.
+    """
+    if default_vat_rate is None or tax is None:
+        return default_vat_rate
+    header_tax = _safe_decimal(tax)
+    line_vat = Decimal("0")
+    for item in items:
+        rate = _safe_decimal(item.vat_rate) if item.vat_rate is not None else default_vat_rate
+        line_vat += _q2(_safe_decimal(item.amount) * rate / Decimal("100"))
+    if abs(line_vat - header_tax) > _line_sum_tolerance(len(items)):
+        logger.info(
+            "Country VAT %s%% not applied to unrated invoice lines: they would carry %s against a stated tax of %s",
+            default_vat_rate,
+            line_vat,
+            header_tax,
+        )
+        return None
+    return default_vat_rate
+
+
 async def resolve_position_cost_lines(
     session: AsyncSession,
     items: Sequence[InvoiceLineItemCreate],
@@ -618,7 +653,11 @@ class FinanceService:
 
         # Create line items
         await resolve_position_cost_lines(self.session, data.line_items)
-        default_vat = await self._default_vat_rate(invoice.project_id, invoice.invoice_date, data.line_items)
+        default_vat = _default_vat_matching_tax(
+            data.line_items,
+            data.tax_amount if "tax_amount" in data.model_fields_set else None,
+            await self._default_vat_rate(invoice.project_id, invoice.invoice_date, data.line_items),
+        )
         for idx, item_data in enumerate(data.line_items):
             await self.line_items.create(_line_item_from(invoice.id, item_data, idx, default_vat))
         if invoice.invoice_direction == "payable":
@@ -851,10 +890,14 @@ class FinanceService:
 
             await resolve_position_cost_lines(self.session, data.line_items)
             await self.line_items.delete_by_invoice(invoice_id)
-            default_vat = await self._default_vat_rate(
-                invoice.project_id,
-                fields.get("invoice_date") or getattr(invoice, "invoice_date", None),
+            default_vat = _default_vat_matching_tax(
                 data.line_items,
+                new_tax,
+                await self._default_vat_rate(
+                    invoice.project_id,
+                    fields.get("invoice_date") or getattr(invoice, "invoice_date", None),
+                    data.line_items,
+                ),
             )
             for idx, item_data in enumerate(data.line_items):
                 await self.line_items.create(_line_item_from(invoice_id, item_data, idx, default_vat))
