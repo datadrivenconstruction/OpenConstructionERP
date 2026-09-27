@@ -27,7 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
 from app.core.validation.messages import translate
@@ -2124,11 +2124,23 @@ class SubcontractorService:
                     f"The pay application is billed on a claim that is {claim.status!r} and can no longer be rejected.",
                     claim_status=claim.status,
                 )
+        # Approval raised a payable. Unpaid, it goes with the application; once
+        # money has moved on it the rejection would leave a paid bill for work
+        # nobody accepts, so it is refused.
+        payable, money_moved = await finance_bridge.open_payable_for_pay_app(self.session, entity)
+        if money_moved:
+            raise self._refuse(
+                status.HTTP_409_CONFLICT,
+                "payable_paid",
+                "The payable raised for this payment application has been paid on, so it can no longer be rejected.",
+            )
         await self.payments.update_fields(
             payment_id,
             status="rejected",
             rejection_reason=reason,
         )
+        if payable is not None:
+            await finance_bridge.cancel_payable(self.session, payable.id)
         # Reverse the retention accrual booked at submission - a rejected
         # payment application must not keep inflating the pending-retention
         # balance for the agreement.
@@ -2166,7 +2178,10 @@ class SubcontractorService:
             # approve. A pay application approved before approved figures
             # were recorded was paid as claimed.
             paid = entity.approved_net_amount if entity.approved_net_amount is not None else entity.net_amount
-            event_bus.publish_detached(
+            # After the commit: the payable is paid after this returns, and a
+            # failure there must not leave outside systems told it was paid.
+            publish_after_commit(
+                self.session,
                 "subcontractors.payment_application.paid",
                 {
                     "payment_application_id": str(entity.id),
