@@ -563,7 +563,7 @@ export function BOQToolbar({
                 document.body,
               )}
           </div>
-          {onPasteFromExcel && (
+          {onPasteFromExcel && !readOnly && (
             <IconBtn
               icon={<ClipboardPaste size={15} />}
               title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}
@@ -588,7 +588,7 @@ export function BOQToolbar({
             />
           )}
 
-          {(onManageColumns || onManageVariables || onRenumber || onCycleResourceSplit) && (
+          {(onManageColumns || onManageVariables || (onRenumber && !readOnly) || onCycleResourceSplit) && (
             <span className="mx-0.5 h-5 w-px shrink-0 bg-border-light" />
           )}
 
@@ -610,7 +610,7 @@ export function BOQToolbar({
               testId="boq-manage-variables-button"
             />
           )}
-          {onRenumber && (
+          {onRenumber && !readOnly && (
             <IconBtn
               icon={<ListOrdered size={15} className={isRenumbering ? 'animate-pulse' : ''} />}
               title={t('boq.renumber', { defaultValue: 'Renumber Positions' })}

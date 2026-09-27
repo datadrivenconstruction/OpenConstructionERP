@@ -8165,9 +8165,10 @@ async def enrich_resources(
     1. If metadata has cost_item_code → look up cost item → copy components
     2. Else → fuzzy match by description via _lookup_cost_item_components
 
-    Returns count of enriched positions.
+    Returns count of enriched positions. A locked bill is refused with 409.
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await service._ensure_boq_writable(boq_id)
     boq_data = await service.get_boq_with_positions(boq_id)
     cost_repo = CostItemRepository(session)
     enriched_count = 0
@@ -9603,8 +9604,12 @@ async def renumber_positions(
 
     Positions are processed in their current ``sort_order`` so the user's
     drag-and-drop order is preserved. Only the ``ordinal`` field is rewritten.
+
+    A locked bill is refused with 409: its numbers are what the issued
+    document and every reference to it quote.
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await service._ensure_boq_writable(boq_id)
     opts = options or RenumberRequest()
 
     # Step (gap) per scheme. Sequential and dotted have step=1; gap10/gap100
