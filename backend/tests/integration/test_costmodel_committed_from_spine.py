@@ -446,6 +446,51 @@ async def test_portfolio_outturn_reads_the_documents(http_client, admin_headers)
 
 
 @pytest.mark.asyncio
+async def test_portfolio_outturn_counts_a_project_with_no_budget_lines(http_client, admin_headers):
+    """An issued PO of 400 on a cost line, and no budget line anywhere in the project.
+
+    The portfolio only asked projects with budget lines for their commitments,
+    so this one read an outturn of zero and was left out of the totals, while
+    the project's own dashboard showed the 400. A contract that binds nobody
+    (a draft) is found by the pre-filter and still counts nothing.
+    """
+    project_id = await _create_project(http_client, admin_headers)
+    draft_only = await _create_project(http_client, admin_headers)
+
+    from app.database import async_session_factory
+    from app.modules.costmodel.models import CostLine
+
+    async with async_session_factory() as s:
+        cost_line = CostLine(project_id=project_id, code="CL-N", description="Shell", currency="EUR")
+        draft_line = CostLine(project_id=draft_only, code="CL-D", description="Draft", currency="EUR")
+        s.add_all([cost_line, draft_line])
+        await s.flush()
+        await _seed_po(s, project_id, cost_line.id, amount="400")
+        await _seed_contract(s, draft_only, draft_line.id, value="900", status_="draft")
+        await s.commit()
+
+    before = await http_client.get(f"{API}/projects/analytics/overview/", headers=admin_headers)
+    assert before.status_code == 200, before.text
+    body = before.json()
+    row = next(p for p in body["projects"] if p["id"] == str(project_id))
+    assert Decimal(str(row["outturn"])) == Decimal("400")
+    assert Decimal(str(row["variance"])) == Decimal("-400")
+    assert row["status"] == "over_budget"
+    draft = next(p for p in body["projects"] if p["id"] == str(draft_only))
+    assert Decimal(str(draft["outturn"])) == Decimal("0")
+
+    # The portfolio total carries it: the same response with the project's
+    # 400 taken out equals the outturn of every other project.
+    others = sum(Decimal(str(p["outturn"])) for p in body["projects"] if p["id"] != str(project_id))
+    # Each figure is rounded to the cent on its own, so compare to the cent.
+    assert abs(Decimal(str(body["total_outturn"])) - (others + Decimal("400"))) < Decimal("0.05")
+    eur = next(t for t in body["totals_by_currency"] if t["currency"] == "EUR")
+    eur_projects = [p for p in body["projects"] if p["currency"] == "EUR"]
+    eur_sum = sum(Decimal(str(p["outturn"])) for p in eur_projects)
+    assert abs(Decimal(str(eur["total_outturn"])) - eur_sum) < Decimal("0.05")
+
+
+@pytest.mark.asyncio
 async def test_project_dashboard_shows_the_same_committed_as_the_cost_model(http_client, scenario):
     headers = scenario["headers"]
     project_id = scenario["project_id"]
