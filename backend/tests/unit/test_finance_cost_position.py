@@ -13,7 +13,9 @@ blend. The end-to-end run through the HTTP API lives in
 from __future__ import annotations
 
 import uuid
+from dataclasses import replace
 from decimal import Decimal
+from typing import Any
 
 from app.modules.finance.cost_position import (
     AgreementRow,
@@ -21,6 +23,7 @@ from app.modules.finance.cost_position import (
     OrderRow,
     PayAppRow,
     PaymentRow,
+    award_tokens,
     build_cost_position,
 )
 from app.modules.finance.po_link import invoice_po_link
@@ -344,3 +347,68 @@ def test_an_approved_pay_application_with_a_draft_payable_is_still_invoiced() ->
         pos = build_cost_position([], [payable], [], [ag], [app])
         assert pos.invoiced == {"EUR": D("30000")}, status
         assert pos.committed == {"EUR": D("120000")}, status
+
+
+def _awarded(row: Any, token: str = "tender_package_id:T1") -> Any:
+    return replace(row, awards=frozenset({token}))
+
+
+def test_an_award_ordered_and_contracted_is_committed_once() -> None:
+    po = _awarded(_order("100000"))
+    contract = _awarded(_agreement("100000"))
+    pos = build_cost_position([po], [], [], [contract], [])
+    assert pos.committed == {"EUR": D("100000")}
+    assert [(s.kind, s.ref) for s in pos.sources] == [("po", po.id)]
+    assert pos.subcontract_open == {"EUR": D("100000")}
+
+
+def test_an_award_bills_its_order_from_either_side() -> None:
+    po = _awarded(_order("100000"))
+    contract = _awarded(_agreement("110000"))
+    ag = _agreement("110000")
+    on_contract = InvoiceRow(
+        id=uuid.uuid4(),
+        status="paid",
+        currency="EUR",
+        net=D("20000"),
+        gross=D("20000"),
+        po_id=None,
+        commitment_id=contract.id,
+    )
+    on_order = _invoice("5000", "5000", po=po, status="paid")
+    app = _pay_app(ag, "10000", "9500", status="paid")
+    pos = build_cost_position(
+        [po],
+        [on_contract, on_order],
+        [],
+        [ag, contract],
+        [app],
+        received_by_po={po.id: D("30000")},
+        contract_to_agreement={contract.id: ag.id},
+    )
+    # One source, at the contract's value above the order's, with everything
+    # billed on either side drawn down from it and nothing standing alone.
+    assert [(s.kind, s.ref) for s in pos.sources] == [("po", po.id)]
+    assert pos.actual == {"EUR": D("35000")}
+    assert pos.committed == {"EUR": D("75000")}
+
+
+def test_an_award_whose_order_is_still_a_draft_commits_at_the_contract() -> None:
+    po = _awarded(_order("100000", status="draft"))
+    contract = _awarded(_agreement("100000"))
+    pos = build_cost_position([po], [], [], [contract], [])
+    assert [(s.kind, s.ref) for s in pos.sources] == [("subcontract", contract.id)]
+    assert pos.committed == {"EUR": D("100000")}
+
+
+def test_finance_pairs_an_award_by_the_same_keys_as_the_cost_model() -> None:
+    from app.modules.costmodel.repository import _award_tokens
+
+    for meta in (
+        None,
+        {},
+        {"tender_package_id": "t-1"},
+        {"bid_package_id": "b-1", "tender_package_id": " t-1 "},
+        {"tender_package_id": "  ", "source": "manual"},
+    ):
+        assert award_tokens(meta) == _award_tokens(meta), meta

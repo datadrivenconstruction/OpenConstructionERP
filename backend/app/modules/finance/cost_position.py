@@ -39,7 +39,9 @@ to exactly the same figures (``FinanceService.sync_project_budget``).
     raised against it, never their sum. That of a live subcontract (an
     agreement, or a contract with a subcontractor that no signed agreement
     carries) is the larger of its value and what has been approved against
-    it; a terminated one keeps only what was approved. A supplier invoice with
+    it; a terminated one keeps only what was approved. An order and a
+    subcontract raised from the same tender award are one commitment, counted
+    at the order while it commits. A supplier invoice with
     no order or subcontract behind it is committed at its own net on the day
     it is invoiced: money spent without an order.
 ``over_commitment`` (net of VAT)
@@ -117,6 +119,20 @@ def _add(bucket: dict[str, Decimal], currency: str, amount: Decimal) -> None:
     bucket[currency] = bucket.get(currency, ZERO) + amount
 
 
+#: Metadata keys that name the tender award an order or contract was raised
+#: from, the same keys the cost model pairs them by.
+_AWARD_KEYS = ("tender_package_id", "bid_package_id")
+
+
+def award_tokens(metadata: object) -> frozenset[str]:
+    """The award provenance an order or contract carries, as comparable tokens."""
+    if not isinstance(metadata, dict):
+        return frozenset()
+    return frozenset(
+        f"{key}:{str(metadata[key]).strip()}" for key in _AWARD_KEYS if str(metadata.get(key) or "").strip()
+    )
+
+
 @dataclass(frozen=True)
 class OrderRow:
     """A purchase order as the roll-up needs it."""
@@ -125,6 +141,8 @@ class OrderRow:
     status: str
     currency: str
     net: Decimal
+    #: The award it was raised from (see ``award_tokens``), if any.
+    awards: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -164,6 +182,8 @@ class AgreementRow:
     status: str
     currency: str
     value: Decimal
+    #: The award it was raised from (see ``award_tokens``), if any.
+    awards: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -250,6 +270,12 @@ def build_cost_position(
     the agreement unless only the contract is signed: a signed contract linked
     to a draft agreement stays committed at its own value. An invoice or a
     payment application naming either side bills the one that counts.
+
+    An order and a subcontract raised from the same tender award (a shared
+    ``awards`` token) are one commitment too. While the order commits, the
+    subcontract bills the order, and the order is committed at no less than
+    the subcontract's value; the order stays the source because the order
+    events already moved its value onto the budget rows.
     """
     out = CostPosition()
     invoices = list(invoices)
@@ -272,7 +298,26 @@ def build_cost_position(
             stands_for[agreement_id] = contract_id
         else:
             stands_for[contract_id] = agreement_id
+    tokens: dict[uuid.UUID, frozenset[str]] = {}
+    for row in rows.values():
+        standing = stands_for.get(row.id, row.id)
+        tokens[standing] = tokens.get(standing, frozenset()) | row.awards
     agreements = {a.id: a for a in rows.values() if a.id not in stands_for}
+
+    # A subcontract awarded from the same tender as a committing order bills
+    # that order (see the docstring).
+    into_order: dict[uuid.UUID, uuid.UUID] = {}
+    order_floor: dict[uuid.UUID, Decimal] = {}
+    for order in committing.values():
+        if not order.awards:
+            continue
+        for sub in list(agreements.values()):
+            if sub.currency == order.currency and tokens.get(sub.id, frozenset()) & order.awards:
+                into_order[sub.id] = order.id
+                if sub.status in LIVE_AGREEMENT_STATUSES:
+                    order_floor[order.id] = max(order_floor.get(order.id, ZERO), sub.value)
+                del agreements[sub.id]
+    awarded_orders = set(into_order.values())
 
     def billed(ref: uuid.UUID) -> uuid.UUID:
         return stands_for.get(ref, ref)
@@ -304,7 +349,7 @@ def build_cost_position(
         out.sources.append(figure)
         _add(out.committed, currency, figure.committed)
         _add(out.actual, currency, figure.actual)
-        if kind == "subcontract":
+        if kind == "subcontract" or (kind == "po" and ref in awarded_orders):
             _add(out.subcontract_open, currency, figure.committed)
 
     invoiced_on_order: dict[uuid.UUID, Decimal] = {}
@@ -315,8 +360,9 @@ def build_cost_position(
         if inv.status not in INVOICED_STATUSES:
             continue
         _add(out.invoiced, inv.currency, inv.net)
-        order = committing.get(inv.po_id) if inv.po_id is not None else None
         agreement_id = billed(inv.commitment_id) if inv.commitment_id is not None else None
+        order_id = inv.po_id if inv.po_id is not None else into_order.get(agreement_id) if agreement_id else None
+        order = committing.get(order_id) if order_id is not None else None
         agreement = agreements.get(agreement_id) if agreement_id is not None else None
         if order is not None and order.currency == inv.currency:
             invoiced_on_order[order.id] = invoiced_on_order.get(order.id, ZERO) + inv.net
@@ -331,10 +377,6 @@ def build_cost_position(
             # another currency than its order, where "the larger of the two"
             # has no meaning): committed at its own net, line by line.
             _emit_invoice(emit, inv, settled_net(inv), invoice_lines.get(inv.id) or [])
-    for order in committing.values():
-        full = max(order.net, invoiced_on_order.get(order.id, ZERO))
-        incurred = max(received_by_po.get(order.id, ZERO), settled_on_order.get(order.id, ZERO))
-        emit("po", order.id, order.currency, order_wbs.get(order.id), None, full, incurred)
 
     # A payment application finance has turned into a payable invoice is that
     # invoice from then on; counting both would bill the work twice. Only an
@@ -351,13 +393,23 @@ def build_cost_position(
         if paid:
             _add(out.paid, app.currency, app.cash)
             _add(out.paid_net, app.currency, app.cash)
-        agreement = agreements.get(billed(app.agreement_id))
-        if agreement is not None and agreement.currency == app.currency:
+        agreement_id = billed(app.agreement_id)
+        order = committing.get(into_order[agreement_id]) if agreement_id in into_order else None
+        agreement = agreements.get(agreement_id)
+        if order is not None and order.currency == app.currency:
+            invoiced_on_order[order.id] = invoiced_on_order.get(order.id, ZERO) + app.gross
+            if paid:
+                settled_on_order[order.id] = settled_on_order.get(order.id, ZERO) + app.gross
+        elif agreement is not None and agreement.currency == app.currency:
             approved_on_agreement[agreement.id] = approved_on_agreement.get(agreement.id, ZERO) + app.gross
             if paid:
                 settled_on_agreement[agreement.id] = settled_on_agreement.get(agreement.id, ZERO) + app.gross
         elif app.id is not None:
             emit("pay_app", app.id, app.currency, None, SUBCONTRACT_CATEGORY, app.gross, app.gross if paid else ZERO)
+    for order in committing.values():
+        full = max(order.net, order_floor.get(order.id, ZERO), invoiced_on_order.get(order.id, ZERO))
+        incurred = max(received_by_po.get(order.id, ZERO), settled_on_order.get(order.id, ZERO))
+        emit("po", order.id, order.currency, order_wbs.get(order.id), None, full, incurred)
     for agreement in agreements.values():
         approved = approved_on_agreement.get(agreement.id, ZERO)
         full = max(agreement.value, approved) if agreement.status in LIVE_AGREEMENT_STATUSES else approved
@@ -504,13 +556,19 @@ async def load_cost_position(
         PurchaseOrder = None  # noqa: N806
     if PurchaseOrder is not None:
         po_stmt = select(
-            PurchaseOrder.id, PurchaseOrder.status, PurchaseOrder.currency_code, PurchaseOrder.amount_subtotal
+            PurchaseOrder.id,
+            PurchaseOrder.status,
+            PurchaseOrder.currency_code,
+            PurchaseOrder.amount_subtotal,
+            PurchaseOrder.metadata_,
         )
         po_filter = _scope(PurchaseOrder.project_id, project_id, project_ids)
         if po_filter is not None:
             po_stmt = po_stmt.where(po_filter)
         orders = [
-            OrderRow(id=row[0], status=row[1] or "", currency=_ccy(row[2]), net=_dec(row[3]))
+            OrderRow(
+                id=row[0], status=row[1] or "", currency=_ccy(row[2]), net=_dec(row[3]), awards=award_tokens(row[4])
+            )
             for row in (await session.execute(po_stmt)).all()
         ]
     order_ids = [o.id for o in orders]
@@ -640,7 +698,7 @@ async def _subcontract_contracts(
         from app.modules.contracts.models import Contract
     except ImportError:
         return []
-    stmt = select(Contract.id, Contract.status, Contract.currency, Contract.total_value).where(
+    stmt = select(Contract.id, Contract.status, Contract.currency, Contract.total_value, Contract.metadata_).where(
         Contract.counterparty_type == "subcontractor"
     )
     scope = _scope(Contract.project_id, project_id, project_ids)
@@ -652,6 +710,7 @@ async def _subcontract_contracts(
             status="active" if (row[1] or "") in _LIVE_CONTRACT_STATUSES else (row[1] or ""),
             currency=_ccy(row[2]),
             value=_dec(row[3]),
+            awards=award_tokens(row[4]),
         )
         for row in (await session.execute(stmt)).all()
     ]
