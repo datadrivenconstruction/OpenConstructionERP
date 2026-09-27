@@ -161,7 +161,7 @@ describe('the Learn card', () => {
     expect(toast?.action).toBeDefined();
 
     const restore = screen.getByTestId('header-learn-restore');
-    expect(restore.getAttribute('aria-label')).toMatch(/^Show video guides & use cases\./);
+    expect(restore.getAttribute('aria-label')).toBe('Show video guides & use cases');
     expect(restore.getAttribute('title')).toBe('Put Video guides and Use cases back at the top of the menu');
     fireEvent.click(restore);
 
@@ -208,6 +208,21 @@ describe('the Learn card', () => {
     expect(screen.getByTestId('sidebar-learn').className).not.toContain('opacity-50');
   });
 
+  it('stays shown when the cap restores it while the menu editor is open, and Save keeps it', async () => {
+    useModuleStore.getState().setGroupHidden(LEARN_GROUP_ID, true);
+    renderSidebar();
+    fireEvent.click(screen.getByTitle('Show hidden'));
+    await screen.findByTestId('sidebar-learn');
+
+    fireEvent.click(screen.getByTestId('header-learn-restore'));
+    await waitFor(() => expect(storedHiddenGroups()).toEqual([]));
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => expect(storedHiddenGroups()).toEqual([]));
+    expect(screen.getByTestId('sidebar-learn').className).not.toContain('opacity-50');
+    expect(screen.queryByTestId('header-learn-restore')).toBeNull();
+  });
+
   it('stays hidden after a reload', async () => {
     localStorage.setItem(HIDDEN_GROUPS_KEY, JSON.stringify([LEARN_GROUP_ID]));
     vi.resetModules();
@@ -222,12 +237,19 @@ describe('the Learn card', () => {
 });
 
 describe('the flight between the menu and the top bar', () => {
-  const animate = vi.fn(() => ({ onfinish: null, oncancel: null }) as unknown as Animation);
+  type FakeAnimation = { el: Element; frames: Keyframe[]; onfinish: (() => void) | null; oncancel: (() => void) | null };
+  let animations: FakeAnimation[] = [];
   let reduce = false;
+  // Where each slot is, per test: the menu's cap near the top left, the top
+  // bar's near the top right, both close to the top edge of the window.
+  let rects: Record<string, Partial<DOMRect>> = {};
+  const box = (left: number, top: number, size = 20) =>
+    ({ left, top, width: size, height: size, right: left + size, bottom: top + size, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
 
   beforeEach(() => {
     reduce = false;
-    animate.mockClear();
+    animations = [];
+    rects = { sidebar: box(24, 12), topbar: box(900, 14) };
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: query.includes('prefers-reduced-motion') ? reduce : false,
       media: query,
@@ -236,11 +258,17 @@ describe('the flight between the menu and the top bar', () => {
       addListener: () => {},
       removeListener: () => {},
     }));
-    // jsdom lays nothing out; give every element a box so both slots measure.
-    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
-      left: 10, top: 10, width: 20, height: 20, right: 30, bottom: 30, x: 10, y: 10, toJSON: () => ({}),
-    } as DOMRect);
-    (HTMLElement.prototype as unknown as { animate: typeof animate }).animate = animate;
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const anchor = this.getAttribute('data-learn-anchor');
+      if (anchor) return rects[anchor] as DOMRect;
+      // Everything else, the menu's scroll area included, fills the window.
+      return box(0, 0, 4000);
+    });
+    (HTMLElement.prototype as unknown as { animate: unknown }).animate = function (this: Element, frames: Keyframe[]) {
+      const a: FakeAnimation = { el: this, frames, onfinish: null, oncancel: null };
+      animations.push(a);
+      return a as unknown as Animation;
+    };
   });
 
   afterEach(() => {
@@ -250,28 +278,66 @@ describe('the flight between the menu and the top bar', () => {
     document.querySelectorAll('[data-testid="learn-flight-ghost"]').forEach((g) => g.remove());
   });
 
-  it('flies a ghost of the cap from the menu to the top bar, and back', async () => {
+  const ghost = () => document.querySelector<HTMLElement>('[data-testid="learn-flight-ghost"]');
+  const flight = () => animations.find((a) => a.el.getAttribute('data-testid') === 'learn-flight-ghost')!;
+
+  it('flies a ghost of the cap to the top bar on an arc that stays on screen, then pulses the cap and clears up', async () => {
     renderSidebar();
     fireEvent.click(screen.getByTestId('sidebar-learn-hide'));
-    await waitFor(() => expect(document.querySelector('[data-testid="learn-flight-ghost"]')).not.toBeNull());
-    const ghost = document.querySelector<HTMLElement>('[data-testid="learn-flight-ghost"]')!;
-    expect(ghost.getAttribute('aria-hidden')).toBe('true');
-    const [frames] = animate.mock.calls.at(-1) as unknown as [Keyframe[]];
-    expect(String(frames[0]!.transform)).toContain('translate(');
-    ghost.remove();
+    await waitFor(() => expect(ghost()).not.toBeNull());
+    expect(ghost()!.getAttribute('aria-hidden')).toBe('true');
 
-    fireEvent.click(screen.getByTestId('header-learn-restore'));
-    await waitFor(() => expect(document.querySelector('[data-testid="learn-flight-ghost"]')).not.toBeNull());
+    const frames = flight().frames.map((f) => String(f.transform));
+    const ys = frames.map((f) => Number(/translate\([-\d.]+px, ([-\d.]+)px\)/.exec(f)![1]));
+    expect(frames[0]).toContain('translate(20px, 8px)');
+    expect(frames[2]).toContain('translate(896px, 10px)');
+    // Both slots sit near the top edge; the arc's peak must not leave the window.
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(4);
+
+    flight().onfinish!();
+    expect(ghost()).toBeNull();
+    const pulse = animations.at(-1)!;
+    expect(pulse.el.getAttribute('data-testid')).toBe('header-learn-restore');
+    expect(String(pulse.frames[1]!.transform)).toContain('scale(');
+  });
+
+  it('flies back into the menu from the top bar, and lands focus on the hide control', async () => {
+    useModuleStore.getState().setGroupHidden(LEARN_GROUP_ID, true);
+    renderSidebar();
+    const cap = screen.getByTestId('header-learn-restore');
+    cap.focus();
+    fireEvent.click(cap);
+    await waitFor(() => expect(ghost()).not.toBeNull());
+    expect(document.activeElement).toBe(screen.getByTestId('sidebar-learn-hide'));
+    flight().onfinish!();
+    expect(ghost()).toBeNull();
+  });
+
+  it('moves keyboard focus to the cap after hiding, not to the page', async () => {
+    renderSidebar();
+    const hide = screen.getByTestId('sidebar-learn-hide');
+    hide.focus();
+    fireEvent.click(hide);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId('header-learn-restore')));
+  });
+
+  it('does not fly from a slot the reader cannot see, such as the closed phone drawer', async () => {
+    rects.sidebar = box(-300, 12);
+    renderSidebar();
+    fireEvent.click(screen.getByTestId('sidebar-learn-hide'));
+    // The cap still gets its pulse; nothing flies in from off screen.
+    await waitFor(() => expect(animations.length).toBeGreaterThan(0));
+    expect(ghost()).toBeNull();
+    expect(animations.at(-1)!.el.getAttribute('data-testid')).toBe('header-learn-restore');
   });
 
   it('skips the flight under reduced motion and only fades the cap in', async () => {
     reduce = true;
     renderSidebar();
     fireEvent.click(screen.getByTestId('sidebar-learn-hide'));
-    await waitFor(() => expect(animate).toHaveBeenCalled());
-    expect(document.querySelector('[data-testid="learn-flight-ghost"]')).toBeNull();
-    const [frames] = animate.mock.calls.at(-1) as unknown as [Keyframe[]];
-    expect(frames).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+    await waitFor(() => expect(animations.length).toBeGreaterThan(0));
+    expect(ghost()).toBeNull();
+    expect(animations.at(-1)!.frames).toEqual([{ opacity: 0 }, { opacity: 1 }]);
     expect(screen.getByTestId('header-learn-restore')).toBeTruthy();
   });
 });

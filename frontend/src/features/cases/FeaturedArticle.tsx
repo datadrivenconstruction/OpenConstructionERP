@@ -27,7 +27,10 @@ export function FeaturedArticle() {
   });
   const read = t('sidebar.video_news.read', { defaultValue: 'Read the article' });
   const eyebrow = t('cases.featured_article.eyebrow', { defaultValue: 'Featured article' });
-  const newTab = t('cases.featured_article.new_tab', { defaultValue: 'opens in a new tab' });
+  const label = t('cases.featured_article.label', {
+    defaultValue: 'Featured article: {{title}}. Read the article, opens in a new tab',
+    title,
+  });
 
   return (
     <a
@@ -35,7 +38,7 @@ export function FeaturedArticle() {
       target="_blank"
       rel="noopener noreferrer"
       data-testid="cases-featured-article"
-      aria-label={`${eyebrow}: ${title}. ${read} (${newTab})`}
+      aria-label={label}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-elevated shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:ring-white/5 sm:flex-row"
     >
       <div className="relative aspect-[1200/630] w-full shrink-0 overflow-hidden bg-gradient-to-br from-oe-blue/25 via-oe-blue/10 to-sky-400/10 sm:w-64 md:w-80">

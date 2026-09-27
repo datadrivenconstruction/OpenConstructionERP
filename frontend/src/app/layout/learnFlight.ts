@@ -27,11 +27,26 @@ export function prefersReducedMotion(): boolean {
   }
 }
 
+const overlaps = (a: DOMRect, b: { left: number; top: number; right: number; bottom: number }) =>
+  a.right > b.left && a.left < b.right && a.bottom > b.top && a.top < b.bottom;
+
+/**
+ * The slot's box, or null when the reader cannot see it: no size, outside
+ * the window (the phone drawer is closed by sliding it off screen), or
+ * scrolled out of a clipping ancestor such as the menu's own scroll area.
+ */
 export function anchorRect(anchor: LearnAnchor): DOMRect | null {
   const el = document.querySelector<HTMLElement>(`[${LEARN_ANCHOR_ATTR}="${anchor}"]`);
   if (!el) return null;
   const rect = el.getBoundingClientRect();
-  return rect.width > 0 && rect.height > 0 ? rect : null;
+  if (rect.width <= 0 || rect.height <= 0) return null;
+  if (!overlaps(rect, { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight })) return null;
+  for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    const style = getComputedStyle(p);
+    if (style.overflowX === 'visible' && style.overflowY === 'visible') continue;
+    if (!overlaps(rect, p.getBoundingClientRect())) return null;
+  }
+  return rect;
 }
 
 const canAnimate = (el: Element) => typeof (el as HTMLElement).animate === 'function';
@@ -59,10 +74,13 @@ function land(anchor: LearnAnchor, reduced: boolean) {
  * `from` is measured before the state change, because the element it belongs
  * to is about to leave the page.
  */
-export function flyLearn(from: DOMRect | null, to: LearnAnchor) {
+export function flyLearn(from: DOMRect | null, to: LearnAnchor, focusSelector?: string) {
   const reduced = prefersReducedMotion();
   // Two frames: one for React to commit the new slot, one for layout.
   const run = () => {
+    // The button that was pressed has just unmounted; keyboard focus goes to
+    // the control that brings the section the other way, not to the page.
+    if (focusSelector) document.querySelector<HTMLElement>(focusSelector)?.focus({ preventScroll: true });
     const target = anchorRect(to);
     if (reduced || !from || !target) {
       land(to, reduced);
@@ -99,9 +117,10 @@ export function flyLearn(from: DOMRect | null, to: LearnAnchor) {
     const y0 = from.top + from.height / 2 - size / 2;
     const x1 = target.left + target.width / 2 - size / 2;
     const y1 = target.top + target.height / 2 - size / 2;
-    // A slight arc: the midpoint lifts above the straight line.
+    // A slight arc: the midpoint lifts above the straight line, but never
+    // above the top of the window, where the top bar already sits.
     const xm = (x0 + x1) / 2;
-    const ym = Math.min(y0, y1) - 40;
+    const ym = Math.max(4, Math.min(y0, y1) - 40);
     const anim = ghost.animate(
       [
         { transform: `translate(${x0}px, ${y0}px) scale(1)`, opacity: 0.95 },

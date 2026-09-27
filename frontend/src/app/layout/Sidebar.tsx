@@ -627,6 +627,23 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     setEditingHiddenGroups([]);
   }, []);
 
+  // Sections can change outside the editor while it is open: the top bar's
+  // graduation cap puts Learn back. Carry every such change into the working
+  // copy, or Save would write the copy taken at entry and undo it.
+  const prevHiddenGroups = useRef(hiddenGroups);
+  useEffect(() => {
+    const before = prevHiddenGroups.current;
+    prevHiddenGroups.current = hiddenGroups;
+    if (!editMode || before === hiddenGroups) return;
+    const shown = before.filter((g) => !hiddenGroups.includes(g));
+    const hidden = hiddenGroups.filter((g) => !before.includes(g));
+    if (shown.length === 0 && hidden.length === 0) return;
+    setEditingHiddenGroups((prev) => [
+      ...prev.filter((g) => !shown.includes(g)),
+      ...hidden.filter((g) => !prev.includes(g)),
+    ]);
+  }, [hiddenGroups, editMode]);
+
   const saveEditMode = useCallback(() => {
     setHiddenModules(editingHidden);
     setHiddenGroups(editingHiddenGroups);
@@ -1034,7 +1051,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const hideLearn = () => {
     const from = anchorRect('sidebar');
     setGroupHidden(LEARN_GROUP_ID, true);
-    flyLearn(from, 'topbar');
+    flyLearn(from, 'topbar', '[data-testid="header-learn-restore"]');
     addToast(
       {
         type: 'info',

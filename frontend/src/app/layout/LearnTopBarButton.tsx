@@ -29,9 +29,9 @@ export function LearnTopBarButton() {
       onClick={() => {
         const from = anchorRect('topbar');
         setGroupHidden(LEARN_GROUP_ID, false);
-        flyLearn(from, 'sidebar');
+        flyLearn(from, 'sidebar', '[data-testid="sidebar-learn-hide"]');
       }}
-      aria-label={`${label}. ${hint}`}
+      aria-label={label}
       title={hint}
       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue ring-1 ring-inset ring-oe-blue/20 transition-colors hover:bg-oe-blue/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:bg-oe-blue/20 dark:text-sky-300"
     >
