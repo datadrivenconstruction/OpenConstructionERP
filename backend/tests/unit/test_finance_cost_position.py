@@ -306,6 +306,31 @@ def test_what_is_incurred_beyond_the_commitment_is_shown_not_clamped_away() -> N
     assert within.over_commitment == {}
 
 
+def test_a_signed_contract_linked_to_a_draft_agreement_stays_committed() -> None:
+    # Linking a signed contract to an agreement still being drawn up must not
+    # take the subcontract out of committed until the agreement is signed.
+    ag = _agreement("120000", status="draft")
+    contract = _agreement("120000")
+    billed_on_agreement = _sub_invoice(ag, "30000", "30000", status="paid")
+    app = PayAppRow(
+        agreement_id=ag.id, status="finance_approved", currency="EUR", gross=D("10000"), cash=D("9500"), id=None
+    )
+    pos = build_cost_position(
+        [], [billed_on_agreement], [], [ag, contract], [app], contract_to_agreement={contract.id: ag.id}
+    )
+    assert [(s.kind, s.ref) for s in pos.sources] == [("subcontract", contract.id)]
+    assert pos.committed == pos.subcontract_open == {"EUR": D("90000")}
+    assert pos.actual == {"EUR": D("30000")}
+
+
+def test_a_linked_pair_counts_once_at_the_agreement_once_it_is_signed() -> None:
+    ag = _agreement("120000")
+    contract = _agreement("120000")
+    pos = build_cost_position([], [], [], [ag, contract], [], contract_to_agreement={contract.id: ag.id})
+    assert [(s.kind, s.ref) for s in pos.sources] == [("subcontract", ag.id)]
+    assert pos.committed == {"EUR": D("120000")}
+
+
 def test_an_approved_pay_application_with_a_draft_payable_is_still_invoiced() -> None:
     # Approval raises the payable as a draft; the work stays invoiced and
     # drawn down on its agreement until that invoice goes out, not dropped.

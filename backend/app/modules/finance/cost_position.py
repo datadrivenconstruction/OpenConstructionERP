@@ -37,7 +37,7 @@ to exactly the same figures (``FinanceService.sync_project_budget``).
     Each source's full commitment less its actual, never below zero. The full
     commitment of an order is the larger of its net value and the invoices
     raised against it, never their sum. That of a live subcontract (an
-    agreement, or a contract with a subcontractor that no agreement already
+    agreement, or a contract with a subcontractor that no signed agreement
     carries) is the larger of its value and what has been approved against
     it; a terminated one keeps only what was approved. A supplier invoice with
     no order or subcontract behind it is committed at its own net on the day
@@ -246,8 +246,10 @@ def build_cost_position(
     ``invoice_lines`` the ``(wbs_id, cost_category, amount)`` lines of each
     supplier invoice: both only say which budget line a figure belongs on.
     ``contract_to_agreement`` maps a contract that a subcontract agreement
-    carries to that agreement; such a contract is not a second commitment, and
-    an invoice naming it bills the agreement.
+    carries to that agreement. The pair is one subcontract and counts once, at
+    the agreement unless only the contract is signed: a signed contract linked
+    to a draft agreement stays committed at its own value. An invoice or a
+    payment application naming either side bills the one that counts.
     """
     out = CostPosition()
     invoices = list(invoices)
@@ -257,7 +259,23 @@ def build_cost_position(
     invoice_lines = invoice_lines or {}
     contract_to_agreement = contract_to_agreement or {}
     committing = {o.id: o for o in orders if o.status in COMMITTING_ORDER_STATUSES}
-    agreements = {a.id: a for a in agreements if a.id not in contract_to_agreement}
+    rows = {a.id: a for a in agreements}
+
+    # The record each subcontract row bills: itself, or the side of a linked
+    # contract and agreement pair that counts for both.
+    stands_for: dict[uuid.UUID, uuid.UUID] = {}
+    for contract_id, agreement_id in contract_to_agreement.items():
+        contract, agreement = rows.get(contract_id), rows.get(agreement_id)
+        contract_live = contract is not None and contract.status in LIVE_AGREEMENT_STATUSES
+        agreement_live = agreement is not None and agreement.status in LIVE_AGREEMENT_STATUSES
+        if contract_live and not agreement_live:
+            stands_for[agreement_id] = contract_id
+        else:
+            stands_for[contract_id] = agreement_id
+    agreements = {a.id: a for a in rows.values() if a.id not in stands_for}
+
+    def billed(ref: uuid.UUID) -> uuid.UUID:
+        return stands_for.get(ref, ref)
 
     # Settled per invoice, gross: payments less refunds, retention withheld
     # included (it is owed, only later).
@@ -298,9 +316,7 @@ def build_cost_position(
             continue
         _add(out.invoiced, inv.currency, inv.net)
         order = committing.get(inv.po_id) if inv.po_id is not None else None
-        agreement_id = (
-            contract_to_agreement.get(inv.commitment_id, inv.commitment_id) if inv.commitment_id is not None else None
-        )
+        agreement_id = billed(inv.commitment_id) if inv.commitment_id is not None else None
         agreement = agreements.get(agreement_id) if agreement_id is not None else None
         if order is not None and order.currency == inv.currency:
             invoiced_on_order[order.id] = invoiced_on_order.get(order.id, ZERO) + inv.net
@@ -335,7 +351,7 @@ def build_cost_position(
         if paid:
             _add(out.paid, app.currency, app.cash)
             _add(out.paid_net, app.currency, app.cash)
-        agreement = agreements.get(app.agreement_id)
+        agreement = agreements.get(billed(app.agreement_id))
         if agreement is not None and agreement.currency == app.currency:
             approved_on_agreement[agreement.id] = approved_on_agreement.get(agreement.id, ZERO) + app.gross
             if paid:

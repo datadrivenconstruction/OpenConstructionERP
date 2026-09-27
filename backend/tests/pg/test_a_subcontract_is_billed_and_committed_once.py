@@ -665,3 +665,23 @@ async def test_a_contract_in_another_currency_is_not_a_twin(world: _World, produ
     agreement_id = await _linked_agreement(world, None, sign=False)
 
     assert await _twins_and_warning(world, agreement_id) == ([], [])
+
+
+@pytest.mark.asyncio
+async def test_a_signed_contract_linked_to_a_draft_agreement_stays_committed(
+    world: _World, production_bus: EventBus
+) -> None:
+    """Linking a signed contract to an agreement still in draft took the subcontract out of committed."""
+    contract_id = await _signed_subcontract(world, production_bus)
+    agreement_id = await _linked_agreement(world, None, sign=False)
+
+    async with world.factory() as session:
+        await SubcontractorService(session).update_agreement(agreement_id, AgreementUpdate(contract_id=contract_id))
+        await session.commit()
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
+
+    # Signing the agreement moves the one commitment to it, not a second one.
+    async with world.factory() as session:
+        await SubcontractorService(session).update_agreement(agreement_id, AgreementUpdate(status="active"))
+        await session.commit()
+    assert await world.budget() == (AGREEMENT_VALUE, Decimal("0.00"))
