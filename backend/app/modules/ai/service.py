@@ -665,7 +665,7 @@ async def _match_cost_items(
     embedder / vector DB silently falls back to SQL keyword search, and any
     error yields an empty match list rather than raising.
     """
-    from sqlalchemy import or_, select
+    from sqlalchemy import case, or_, select
 
     from app.modules.costs.models import CostItem
 
@@ -698,12 +698,17 @@ async def _match_cost_items(
         if keywords:
             try:
                 conditions = [CostItem.description.ilike(f"%{kw}%") for kw in keywords]
+                # Rank in the query, before the cap. Without an order the cap
+                # kept whichever 15 rows the scan met first, so on a cost base
+                # of any size the item matching every keyword was often never
+                # scored, and which rate got applied changed from run to run.
+                hits = sum((case((cond, 1), else_=0) for cond in conditions[1:]), case((conditions[0], 1), else_=0))
 
                 async def _kw_search(use_region: bool) -> list[CostItem]:
                     stmt = select(CostItem).where(CostItem.is_active.is_(True), or_(*conditions))
                     if use_region and region:
                         stmt = stmt.where(CostItem.region == region)
-                    stmt = stmt.limit(15)
+                    stmt = stmt.order_by(hits.desc(), CostItem.code.asc()).limit(15)
                     res = await session.execute(stmt)
                     return list(res.scalars().all())
 
