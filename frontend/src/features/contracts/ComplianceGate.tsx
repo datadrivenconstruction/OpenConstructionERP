@@ -392,14 +392,16 @@ export function ComplianceGate({
  * A finding's id is the rule set joined to the rule (`boq_quality.unrealistic_rate`),
  * which is for support and not for a reader, so the row names the set in the
  * reader's language and keeps the id in the tooltip. A set with no name in the
- * bundle shows nothing rather than its id. The element reference is treated
+ * bundle shows its own name with the underscores dropped, never nothing: the
+ * gate promises to say which rule set a finding comes from, and a Romanian or
+ * GESN finding used to arrive with no source at all. The element reference is treated
  * the same way: the server sends a label for every line and for the contract,
  * and a finding pointing at anything else shows no bare UUID.
  */
 function findingSource(t: TFunction, v: ComplianceViolation): string {
   const set = (v.rule_id || '').split('.')[0];
   if (!set) return '';
-  return t(`validation.rs_label_${set}`, { defaultValue: '' });
+  return t(`validation.rs_label_${set}`, { defaultValue: set.replace(/_/g, ' ') });
 }
 
 function ViolationGroup({
