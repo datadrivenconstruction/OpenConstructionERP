@@ -207,7 +207,7 @@ def create_reset_token(user: User, settings: Settings) -> str:
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-async def _send_reset_email(to: str, reset_url: str, recipient_name: str, debug: bool) -> None:
+async def _send_reset_email(to: str, reset_url: str, recipient_name: str, log_url: bool) -> None:
     """Deliver a password-reset email; never raises.
 
     Runs inline or as a background task after the response. Either way the
@@ -224,7 +224,7 @@ async def _send_reset_email(to: str, reset_url: str, recipient_name: str, debug:
     except Exception:
         logger.exception("Password reset email to %s failed", to)
         return
-    if not result.ok and debug:
+    if not result.ok and log_url:
         # Dev-only fallback so developers without SMTP can still complete
         # the reset flow from logs.
         logger.debug("Reset URL for %s (dev-only log): %s", to, reset_url)
@@ -1075,11 +1075,16 @@ class UserService:
 
         reset_url = f"{self.settings.resolved_frontend_url}/auth/reset?token={token}"
         recipient_name = user.full_name or user.email.split("@", 1)[0]
-        debug = bool(self.settings.app_debug)
+        # A reset URL is a live credential: logging it follows the same rule as
+        # the field magic-link secrets (explicit dev flag, never production),
+        # not APP_DEBUG, which operators switch on to chase problems.
+        log_url = bool(getattr(self.settings, "expose_dev_auth_secrets", False)) and (
+            getattr(self.settings, "app_env", "development") != "production"
+        )
         if background is not None:
-            background.add_task(_send_reset_email, user.email, reset_url, recipient_name, debug)
+            background.add_task(_send_reset_email, user.email, reset_url, recipient_name, log_url)
         else:
-            await _send_reset_email(user.email, reset_url, recipient_name, debug)
+            await _send_reset_email(user.email, reset_url, recipient_name, log_url)
 
         return ForgotPasswordResponse(message=message)
 

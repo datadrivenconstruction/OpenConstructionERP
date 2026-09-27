@@ -297,8 +297,9 @@ class Settings(BaseSettings):
     # (``.env.example`` sets APP_DEBUG=true) and the test suite from conftest.
     app_debug: bool = False
     # Dev-only: return the plaintext field magic-link token and PIN in the
-    # request-magic-link response and in the mock SMS log line, so the flow
-    # can be driven without an SMS provider. Separate from APP_DEBUG on
+    # request-magic-link response and in the mock SMS log line, and log the
+    # password-reset URL when the email fails, so these flows can be driven
+    # without an SMS or SMTP provider. Separate from APP_DEBUG on
     # purpose: operators turn debug on to chase a problem and must not hand
     # out login secrets with it. Never honoured when APP_ENV=production.
     # Env: EXPOSE_DEV_AUTH_SECRETS / OE_EXPOSE_DEV_AUTH_SECRETS.
