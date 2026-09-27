@@ -15,6 +15,12 @@ type Translate = (key: string, opts?: Record<string, unknown>) => string;
 export interface ImportToastResult {
   imported: number;
   errors: unknown[];
+  /** Round-trip imports: rows matched to an existing position and rewritten,
+   *  matched and left as they were, and removed. ``imported`` counts only the
+   *  rows created, so re-importing an exported bill has ``imported`` 0. */
+  updated?: number;
+  unchanged?: number;
+  deleted?: number;
   total_items?: number;
   method?: string;
   model_used?: string | null;
@@ -51,17 +57,33 @@ export function importToastText(
     method = t('boq.import_toast.method_direct', { defaultValue: 'direct' });
   }
 
-  // GAEB returns ``skipped`` instead of ``total_items``, so derive a
-  // denominator that reads cleanly for both shapes.
-  const total = result.total_items ?? result.imported + (result.skipped ?? 0);
-  const title = t('boq.import_toast.title', {
-    defaultValue: 'Items imported: {{imported}} of {{total}} ({{method}})',
-    imported: result.imported,
-    total,
-    method,
-  });
-
   const parts: string[] = [];
+  let title: string;
+  if (isRoundTrip(result)) {
+    // A re-import matches rows to the positions already there: counting only
+    // the created ones read "0 of N" for a bill whose every row was updated.
+    title = t('boq.import_toast.title_round_trip', {
+      defaultValue: 'Items added: {{created}}, updated: {{updated}}, unchanged: {{unchanged}} ({{method}})',
+      created: result.imported,
+      updated: result.updated ?? 0,
+      unchanged: result.unchanged ?? 0,
+      method,
+    });
+    if ((result.deleted ?? 0) > 0) {
+      parts.push(t('boq.import_toast.deleted', { defaultValue: 'Items removed: {{count}}', count: result.deleted }));
+    }
+  } else {
+    // GAEB returns ``skipped`` instead of ``total_items``, so derive a
+    // denominator that reads cleanly for both shapes.
+    const total = result.total_items ?? result.imported + (result.skipped ?? 0);
+    title = t('boq.import_toast.title', {
+      defaultValue: 'Items imported: {{imported}} of {{total}} ({{method}})',
+      imported: result.imported,
+      total,
+      method,
+    });
+  }
+
   const summaryRows = (result.warnings ?? []).filter((w) => w?.code === 'summary_row_skipped').length;
   if (summaryRows > 0) {
     parts.push(
@@ -75,4 +97,13 @@ export function importToastText(
     parts.push(t('boq.import_toast.errors', { defaultValue: 'Errors: {{count}}', count: result.errors.length }));
   }
   return { title, message: parts.length > 0 ? parts.join(' · ') : undefined };
+}
+
+function isRoundTrip(result: ImportToastResult): boolean {
+  return (result.updated ?? 0) > 0 || (result.unchanged ?? 0) > 0 || (result.deleted ?? 0) > 0;
+}
+
+/** Whether the import changed or confirmed anything, for the toast's tone. */
+export function importLanded(result: ImportToastResult): boolean {
+  return result.imported > 0 || isRoundTrip(result);
 }

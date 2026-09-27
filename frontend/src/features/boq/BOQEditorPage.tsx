@@ -52,7 +52,7 @@ import { fetchBIMModels } from '@/features/bim/api';
 // AutocompleteInput used in sub-components, not directly here
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
-import { importToastText, type ImportToastResult } from './importToastText';
+import { importLanded, importToastText, type ImportToastResult } from './importToastText';
 import { AICostFinderPanel } from './AICostFinderPanel';
 import { AISmartPanel } from './AISmartPanel';
 import { AIPositionCopilot } from './AIPositionCopilot';
@@ -4398,7 +4398,7 @@ export function BOQEditorPage() {
         const result: ImportToastResult = await res.json();
         const toast = importToastText(result, isGaeb, t);
         addToast({
-          type: result.imported > 0 ? 'success' : 'warning',
+          type: importLanded(result) ? 'success' : 'warning',
           title: toast.title,
           message: toast.message,
         });

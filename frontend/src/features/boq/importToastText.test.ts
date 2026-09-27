@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect } from 'vitest';
-import { importToastText } from './importToastText';
+import { importLanded, importToastText } from './importToastText';
 import en from '@/app/locales/en';
 import hr from '@/app/locales/hr';
 import de from '@/app/locales/de';
@@ -53,6 +53,27 @@ describe('importToastText', () => {
       tFrom(en.translation),
     );
     expect(toast.title).toBe('Items imported: 10 of 12 (GAEB XML, sections: 2, EUR)');
+  });
+
+  it('counts the updated rows of a re-imported bill instead of reading 0 of N', () => {
+    const result = { imported: 0, updated: 12, unchanged: 3, deleted: 0, skipped: 0, errors: [], method: 'direct' };
+    const toast = importToastText(result, false, tFrom(en.translation));
+    expect(toast.title).toBe('Items added: 0, updated: 12, unchanged: 3 (direct)');
+    expect(toast.message).toBeUndefined();
+    expect(importLanded(result)).toBe(true);
+  });
+
+  it('names the rows a re-import removed', () => {
+    const toast = importToastText(
+      { imported: 1, updated: 2, unchanged: 0, deleted: 4, errors: [], method: 'direct' },
+      false,
+      tFrom(en.translation),
+    );
+    expect(toast.message).toBe('Items removed: 4');
+  });
+
+  it('still warns when an import landed nothing', () => {
+    expect(importLanded({ imported: 0, updated: 0, unchanged: 0, errors: [{}] })).toBe(false);
   });
 
   it('names the model of an AI import, and falls back to the translated AI label', () => {
