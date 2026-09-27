@@ -126,7 +126,9 @@ class _StubSession:
             for k, v in values.items():
                 setattr(self.positions[pk], k, v)
         self.executed.append(stmt)
-        return SimpleNamespace(rowcount=1)
+        # ``apply_winner`` first reads ``BOQ.is_locked``; None reads as a bill
+        # that is not locked, so the award writes its rates back.
+        return SimpleNamespace(rowcount=1, scalar_one_or_none=lambda: None)
 
 
 def _make_service(session: _StubSession | None = None) -> TenderingService:
