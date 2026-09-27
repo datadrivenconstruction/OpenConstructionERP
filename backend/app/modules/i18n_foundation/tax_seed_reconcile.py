@@ -390,7 +390,10 @@ def _refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], coun
     wanted = _claimed_jurisdictions(planned)
     held = _claimed_jurisdictions(active_rows(existing, country, date.today().isoformat()))
     collisions = wanted & held
-    if collisions == {None} and _is_a_reduced_tier(planned):
+    # An empty country-wide slot goes through the tier guard as well: a lone
+    # reduced rate there answers as the standard one, so Croatia with its 25 %
+    # deleted would start pricing at 13 %.
+    if collisions <= {None} and _is_a_reduced_tier(planned):
         return _tier_refusal(existing, planned, country)
     if collisions:
         return f"it already has a rate of its own in force for {', '.join(sorted(str(slot) for slot in collisions))}"

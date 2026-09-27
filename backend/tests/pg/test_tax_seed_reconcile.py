@@ -954,3 +954,34 @@ async def test_a_tier_the_customer_already_entered_is_not_added_twice(repair_fac
     assert await _croatian_codes(repair_factory) == {"PDV", "PDV_SNIZENA", "PDV_5", "PDV_0"}
     assert "HR/PDV_13" not in await _deliveries(repair_factory)
     assert (await _resolve_in(repair_factory, "HR")).combined_rate_pct == "25"
+
+
+async def test_a_tier_does_not_become_the_standard_rate_of_a_country_whose_standard_was_deleted(
+    repair_factory, caplog
+) -> None:
+    """Croatia's 25 % deleted by the customer: the tiers must not fill the empty slot.
+
+    With no country-wide row left there is nothing to collide with, and the
+    slot rule alone let 13 % land there, where a lone rate answers as the
+    standard one: Croatia would price at 13 %. The tier guard measures the
+    answer instead, which is "nothing" before and must stay "nothing".
+    """
+    await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
+    async with repair_factory() as session:
+        row = (
+            await session.execute(
+                select(TaxConfiguration).where(
+                    TaxConfiguration.country_code == "HR", TaxConfiguration.tax_code == "PDV"
+                )
+            )
+        ).scalar_one()
+        await session.delete(row)
+        await session.commit()
+    assert not (await _resolve_in(repair_factory, "HR")).resolved
+
+    with caplog.at_level(logging.WARNING, logger=_LOGGER):
+        await run_data_repairs(repair_factory)
+
+    assert await _croatian_codes(repair_factory) == set()
+    assert not (await _resolve_in(repair_factory, "HR")).resolved
+    assert not (_CROATIA_TIERS & await _deliveries(repair_factory)), "a refused tier was recorded as delivered"
