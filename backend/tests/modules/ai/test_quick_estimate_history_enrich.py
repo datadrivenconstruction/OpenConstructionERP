@@ -273,6 +273,41 @@ async def test_match_cost_items_finds_by_keyword(schema) -> None:
 
 
 @pytest.mark.asyncio(loop_scope="module")
+async def test_the_item_matching_every_keyword_is_found_behind_many_partial_ones(schema, monkeypatch) -> None:
+    """The text fallback ranks before it caps, so the full match is not cut off.
+
+    Twenty items share one keyword and are stored first; the one that carries
+    all three is stored last. An unordered cap of 15 kept the first rows the
+    scan met and never scored the full match.
+    """
+    import app.core.vector as vector
+    from app.database import async_session_factory
+    from app.modules.ai.service import _match_cost_items
+
+    def _no_embedder(_texts):
+        raise RuntimeError("no embedder in this test")
+
+    monkeypatch.setattr(vector, "encode_texts", _no_embedder)
+    token = f"zq{uuid.uuid4().hex[:10]}"
+    first, second = f"alpha{uuid.uuid4().hex[:6]}", f"beta{uuid.uuid4().hex[:6]}"
+    for _ in range(20):
+        await _seed_cost_item(description=f"Partial {token} item", rate="10.00")
+    full = await _seed_cost_item(description=f"Full {token} {first} {second} item", rate="99.00")
+
+    async with async_session_factory() as s:
+        matches = await _match_cost_items(
+            s,
+            description=f"{token} {first} {second}",
+            item_unit="m3",
+            region="",
+            limit=5,
+        )
+
+    assert matches, "the text fallback found nothing"
+    assert matches[0]["code"] == full, [m["code"] for m in matches]
+
+
+@pytest.mark.asyncio(loop_scope="module")
 async def test_match_cost_items_empty_for_no_keywords(schema) -> None:
     """A description with no usable keywords must return [] rather than raise."""
     from app.database import async_session_factory
