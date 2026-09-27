@@ -1818,11 +1818,23 @@ async def create_budget_from_boq(
         from app.modules.finance.models import ProjectBudget
         from app.modules.finance.service import FinanceService
 
-        before = set(
-            (await session.execute(sa_select(ProjectBudget.id).where(ProjectBudget.project_id == boq.project_id)))
+        # Idempotency guard (audit M2): the groups this bill already holds a
+        # share of, whether seeded by the lock (``from_boq:<id>`` marker) or
+        # written by this button before 18.1 (``boq_id`` in the metadata).
+        # The writer below leaves them as they are; this set is what the
+        # response reports as skipped rather than created.
+        marker = f"from_boq:{boq_id}"
+        existing_rows = (
+            (await session.execute(sa_select(ProjectBudget).where(ProjectBudget.project_id == boq.project_id)))
             .scalars()
             .all()
         )
+        existing_group_keys = {
+            row.wbs_id or "ungrouped"
+            for row in existing_rows
+            if isinstance(row.metadata_, dict)
+            and (marker in row.metadata_ or row.metadata_.get("boq_id") == str(boq_id))
+        }
         budgets = await FinanceService(session).seed_budget_from_boq(boq.project_id, boq_id)
         # Committed before the cost model runs: when it creates lines it
         # publishes ``costmodel.budget.generated``, and the finance handler
@@ -1841,7 +1853,7 @@ async def create_budget_from_boq(
             detail="No budgetable positions found in BOQ.",
         )
     budget_ids = [str(b.id) for b in budgets]
-    created_ids = [str(b.id) for b in budgets if b.id not in before]
+    created_ids = [str(b.id) for b in budgets if (b.wbs_id or "ungrouped") not in existing_group_keys]
     skipped_existing = len(budget_ids) - len(created_ids)
 
     # 5D Cost Spine baseline: one costmodel BudgetLine per BOQ position so
