@@ -19,11 +19,11 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.modules.contracts.schemas import ContractLineUpdate
-from app.modules.contracts.service import ContractService
+from app.modules.contracts.service import ContractsService
 
 
-def _service(line: SimpleNamespace) -> tuple[ContractService, AsyncMock]:
-    svc = ContractService.__new__(ContractService)
+def _service(line: SimpleNamespace) -> tuple[ContractsService, AsyncMock]:
+    svc = ContractsService.__new__(ContractsService)
     svc.session = SimpleNamespace(refresh=AsyncMock())
     update_fields = AsyncMock()
     svc.line_repo = SimpleNamespace(get_by_id=AsyncMock(return_value=line), update_fields=update_fields)
