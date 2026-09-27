@@ -2209,7 +2209,11 @@ class FinanceService:
         currency_code = await self._project_currency(project_id)
         marker = f"from_boq:{boq_id}"
         touched: list[ProjectBudget] = []
-        for wbs_id, amount in by_wbs.items():
+        # Create the rows in WBS order. The positions come back in whatever
+        # order the table holds them, and the row created first is the one a
+        # cost naming no WBS falls back to, so an unordered walk put that cost
+        # on a different line from one machine or one bill edit to the next.
+        for wbs_id, amount in sorted(by_wbs.items(), key=lambda kv: (kv[0] is not None, kv[0] or "")):
             stmt = select(ProjectBudget).where(
                 ProjectBudget.project_id == project_id,
                 ProjectBudget.category == "estimate",
