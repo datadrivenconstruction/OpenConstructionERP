@@ -321,8 +321,12 @@ def build_cost_position(
         emit("po", order.id, order.currency, order_wbs.get(order.id), None, full, incurred)
 
     # A payment application finance has turned into a payable invoice is that
-    # invoice from then on; counting both would bill the work twice.
-    invoiced_apps = {inv.pay_app_id for inv in invoices if inv.pay_app_id is not None}
+    # invoice from then on; counting both would bill the work twice. Only an
+    # invoice that is itself invoiced: the payable is raised as a draft, and
+    # until it leaves draft (or once it is cancelled) the application counts.
+    invoiced_apps = {
+        inv.pay_app_id for inv in invoices if inv.pay_app_id is not None and inv.status in INVOICED_STATUSES
+    }
     for app in pay_apps:
         if app.status not in APPROVED_PAY_APP_STATUSES or (app.id is not None and app.id in invoiced_apps):
             continue
