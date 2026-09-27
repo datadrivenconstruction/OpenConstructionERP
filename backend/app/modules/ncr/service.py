@@ -54,10 +54,26 @@ class NCRService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="change_order_id is not a change order id",
             ) from exc
-        # Lazy import: ncr stays loadable without the changeorders module.
+        # Lazy import: ncr stays loadable without the changeorders module. With
+        # that module disabled or not installed there is nothing to link to, and
+        # the write is refused as a 400 that says so rather than failing as a 500
+        # on the import or on a table that was never created.
         from sqlalchemy import select  # noqa: PLC0415
 
-        from app.modules.changeorders.models import ChangeOrder  # noqa: PLC0415
+        from app.core.module_loader import module_loader  # noqa: PLC0415
+
+        unavailable = HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Change orders are not enabled, so this NCR cannot be linked to one",
+        )
+        # A process that loaded no modules (a script, a unit test) has nothing
+        # to filter by; the running app has loaded every enabled one.
+        if module_loader.loaded_modules and not module_loader.is_enabled("oe_changeorders"):
+            raise unavailable
+        try:
+            from app.modules.changeorders.models import ChangeOrder  # noqa: PLC0415
+        except ImportError as exc:
+            raise unavailable from exc
 
         found = await self.session.scalar(
             select(ChangeOrder.id).where(ChangeOrder.id == order_uuid, ChangeOrder.project_id == project_id)
