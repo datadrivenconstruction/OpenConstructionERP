@@ -166,6 +166,7 @@ async def _require_field_module_grant(
 )
 async def request_magic_link(
     payload: FieldMagicLinkRequest,
+    request: Request,
     session: SessionDep,
     service: FieldDiaryService = Depends(_get_service),
 ) -> FieldMagicLinkRequestResponse:
@@ -177,14 +178,32 @@ async def request_magic_link(
     granted exclusively via the ``oe_field_module_grant`` table.
 
     Always returns 202 with ``accepted=true`` to avoid leaking whether
-    the phone is provisioned. In dev/test (``APP_DEBUG=true``) the
-    plaintext token + PIN are returned so the consume flow can be
-    driven without an SMS provider.
+    the phone is provisioned. Only with ``EXPOSE_DEV_AUTH_SECRETS=true``
+    outside ``APP_ENV=production`` are the plaintext token + PIN returned,
+    so the consume flow can be driven without an SMS provider. ``APP_DEBUG``
+    alone never exposes them.
+
+    The provisioned row is a ``viewer`` with an unusable password: it
+    cannot sign in to the main app, and field access comes only from an
+    admin-created grant. Anonymous callers are rate-limited per IP, per
+    minute and per hour, because each new phone number writes a user row.
     """
     from sqlalchemy import select
 
-    from app.config import get_settings
+    from app.core.rate_limiter import client_identifier, login_limiter, registration_limiter
+    from app.modules.field_diary.service import dev_auth_secrets_exposed
     from app.modules.users.models import User
+
+    bucket = f"fieldlink_{client_identifier(request)}"
+    allowed, _ = login_limiter.is_allowed(bucket)
+    if allowed:
+        allowed, _ = registration_limiter.is_allowed(bucket)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many requests. Please wait and try again.",
+            headers={"Retry-After": "60"},
+        )
 
     # Find-or-provision the user by phone-derived synthetic email so the
     # FK target exists. A dedicated ``phone`` column on ``oe_users_user``
@@ -197,6 +216,9 @@ async def request_magic_link(
             email=synth_email,
             hashed_password="!FIELD_NO_PASSWORD!",
             full_name=f"Field worker {payload.phone}",
+            # Lowest role. The model default is ``editor``, which would put
+            # an anonymously created row among the editors of the workspace.
+            role="viewer",
             is_active=True,
         )
         session.add(user)
@@ -210,8 +232,7 @@ async def request_magic_link(
         user_id=user.id,
     )
 
-    settings = get_settings()
-    if getattr(settings, "app_debug", False):
+    if dev_auth_secrets_exposed():
         return FieldMagicLinkRequestResponse(
             accepted=True,
             dev_token=plain_token,

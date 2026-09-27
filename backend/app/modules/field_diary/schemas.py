@@ -189,7 +189,8 @@ class FieldMagicLinkRequestResponse(BaseModel):
     """
 
     accepted: bool = True
-    # Populated only when settings.app_debug is True (dev / test).
+    # Populated only with EXPOSE_DEV_AUTH_SECRETS=true outside production
+    # (dev / test); see ``field_diary.service.dev_auth_secrets_exposed``.
     dev_token: str | None = None
     dev_pin: str | None = None
     expires_at: datetime | None = None

@@ -124,15 +124,40 @@ def _ensure_aware(dt: datetime | None) -> datetime | None:
 
 
 _SMS_LOG: list[dict[str, Any]] = []
+_SMS_LOG_MAX = 200
+
+
+def dev_auth_secrets_exposed(settings: Any | None = None) -> bool:
+    """Whether plaintext magic-link secrets may leave the server.
+
+    True only when ``EXPOSE_DEV_AUTH_SECRETS`` is set explicitly and the
+    deployment is not ``APP_ENV=production``. Deliberately independent of
+    ``APP_DEBUG``: debug gets switched on to chase a problem, and that must
+    never start handing field login tokens to whoever asks for one.
+    """
+    if settings is None:
+        from app.config import get_settings
+
+        settings = get_settings()
+    return bool(getattr(settings, "expose_dev_auth_secrets", False)) and (
+        getattr(settings, "app_env", "development") != "production"
+    )
 
 
 def _send_sms(phone: str, body: str) -> None:
     """Stand-in SMS sender for the MVP.
 
-    In production this dispatches via Twilio / MessageBird / etc.; here
-    we simply log it AND append to an in-process list so the test suite
-    can assert on the payload without monkey-patching the network.
+    In production this dispatches via Twilio / MessageBird / etc. The body
+    carries a live login token and PIN, so it is only logged and kept in the
+    in-process list (which the test suite reads) when dev secrets are
+    explicitly exposed. Otherwise the log line records that an SMS was due
+    and nothing that could be replayed.
     """
+    if not dev_auth_secrets_exposed():
+        logger.info("[field_diary][SMS-MOCK] to=%s body=<redacted, %d chars>", phone, len(body))
+        return
+    if len(_SMS_LOG) >= _SMS_LOG_MAX:
+        del _SMS_LOG[: len(_SMS_LOG) - _SMS_LOG_MAX + 1]
     _SMS_LOG.append({"phone": phone, "body": body, "sent_at": now_utc()})
     logger.info(
         "[field_diary][SMS-MOCK] to=%s body=%s",

@@ -13,8 +13,10 @@ Limits are configurable via environment variables:
 
 from __future__ import annotations
 
+import ipaddress
 import time
 from collections import defaultdict
+from functools import lru_cache
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -22,28 +24,89 @@ if TYPE_CHECKING:
     from starlette.requests import Request
 
 
-def client_identifier(request: Request) -> str:
-    """Resolve the best available client identifier for rate-limiting buckets.
+_DEFAULT_TRUSTED_PROXIES = "127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7"
 
-    Prefers the ``X-Forwarded-For`` header when present (first entry - the
-    original client) so that Uvicorn sitting behind a reverse proxy
-    (nginx/Traefik/Caddy) doesn't lump every request under a single proxy IP
-    and accidentally lock out legitimate users after one attacker hits the
-    limit. Falls back to the direct socket peer.
 
-    Trust note: ``X-Forwarded-For`` is spoofable from the public internet.
-    Production deployments MUST strip or overwrite it at the edge proxy
-    before requests reach the app - see deploy/docker/nginx.conf for the
-    standard template.
+@lru_cache(maxsize=8)
+def _parse_networks(spec: str) -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+    """Parse a comma-separated list of IPs / CIDR ranges, skipping junk entries."""
+    nets: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = []
+    for raw in spec.split(","):
+        item = raw.strip()
+        if not item:
+            continue
+        try:
+            nets.append(ipaddress.ip_network(item, strict=False))
+        except ValueError:
+            continue
+    return tuple(nets)
+
+
+def _trusted_networks() -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+    try:
+        from app.config import get_settings
+
+        spec = getattr(get_settings(), "trusted_proxies", _DEFAULT_TRUSTED_PROXIES)
+    except Exception:
+        spec = _DEFAULT_TRUSTED_PROXIES
+    return _parse_networks(spec if isinstance(spec, str) else _DEFAULT_TRUSTED_PROXIES)
+
+
+def _is_trusted(host: str | None, nets: tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]) -> bool:
+    """True when ``host`` parses as an IP inside one of ``nets``.
+
+    Anything that does not parse (``"testclient"``, a hostname, garbage from a
+    header) is untrusted, so it can never unlock the forwarded headers.
     """
+    if not host:
+        return False
+    try:
+        addr = ipaddress.ip_address(host.strip().strip("[]"))
+    except ValueError:
+        return False
+    return any(addr in net for net in nets)
+
+
+def client_ip(request: Request) -> str | None:
+    """Resolve the client address, believing forwarding headers only from a trusted proxy.
+
+    ``X-Forwarded-For`` and ``X-Real-IP`` are plain request headers, so any
+    caller on the internet can set them. They are honoured only when the
+    direct socket peer is in ``TRUSTED_PROXIES`` (loopback and private ranges
+    by default, i.e. a reverse proxy on the same host or docker network).
+    The forwarded chain is then read from the right, skipping hops that are
+    themselves trusted proxies, and the first untrusted address wins: the
+    left end of the chain is whatever the client sent and is never believed.
+    Returns ``None`` when there is no peer at all.
+    """
+    peer = request.client.host if request.client and request.client.host else None
+    nets = _trusted_networks()
+    if not _is_trusted(peer, nets):
+        return peer
+
     xff = request.headers.get("x-forwarded-for")
     if xff:
-        first = xff.split(",", 1)[0].strip()
-        if first:
-            return first
-    if request.client and request.client.host:
-        return request.client.host
-    return "unknown"
+        hops = [h.strip() for h in xff.split(",") if h.strip()]
+        for hop in reversed(hops):
+            if not _is_trusted(hop, nets):
+                return hop
+        if hops:
+            # Every hop is a trusted proxy: the leftmost one is the client.
+            return hops[0]
+
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip and real_ip.strip():
+        return real_ip.strip()
+    return peer
+
+
+def client_identifier(request: Request) -> str:
+    """Client identifier for rate-limiting buckets.
+
+    Same resolution as :func:`client_ip`, so a spoofed ``X-Forwarded-For``
+    from an untrusted peer cannot mint a fresh bucket per request.
+    """
+    return client_ip(request) or "unknown"
 
 
 class RateLimiter:
@@ -110,3 +173,19 @@ approval_limiter = RateLimiter(max_requests=40, window_seconds=60)
 # user could fill disk and/or worker pool if uncapped. 30/min is wide
 # enough for legitimate batch BIM uploads while rejecting abuse.
 upload_limiter = RateLimiter(max_requests=30, window_seconds=60)
+
+
+def _register_hourly_max() -> int:
+    try:
+        from app.config import get_settings
+
+        return int(get_settings().register_rate_limit_per_hour)
+    except Exception:
+        return 20
+
+
+# Hourly cap on anonymous account-creating endpoints (self-registration and
+# the field magic-link request), keyed per client IP. Registration answers
+# 409 for a taken email because the sign-up page shows that message; this cap
+# keeps that answer from being an address-list oracle. REGISTER_RATE_LIMIT_PER_HOUR.
+registration_limiter = RateLimiter(max_requests=_register_hourly_max(), window_seconds=3600)

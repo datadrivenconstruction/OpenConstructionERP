@@ -37,11 +37,12 @@ Endpoints:
 import uuid
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
-from app.core.rate_limiter import client_identifier, login_limiter
+from app.core.demo_privacy import redact_model
+from app.core.rate_limiter import client_identifier, login_limiter, registration_limiter
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -200,9 +201,18 @@ async def register(
     request: Request,
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
-    """Register a new user account. Rate-limited per IP."""
+    """Register a new user account. Rate-limited per IP, per minute and per hour.
+
+    A taken email still answers 409 "Email already registered", because the
+    sign-up page shows that message and immediately logs a fresh account in
+    on 201, so a neutral answer would strand real users. What stops the 409
+    from being an enumeration oracle is the rate limit: the hourly cap, and
+    a client address that only a trusted proxy can override.
+    """
     client_ip = client_identifier(request)
     allowed, _remaining = login_limiter.is_allowed(f"reg_{client_ip}")
+    if allowed:
+        allowed, _remaining = registration_limiter.is_allowed(f"reg_{client_ip}")
     if not allowed:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -640,6 +650,7 @@ async def desktop_bootstrap(
 async def forgot_password(
     data: ForgotPasswordRequest,
     request: Request,
+    background: BackgroundTasks,
     service: UserService = Depends(_get_service),
 ) -> ForgotPasswordResponse:
     """Request a password reset token. Rate-limited per IP.
@@ -655,7 +666,7 @@ async def forgot_password(
             detail="Too many requests. Please wait a minute and try again.",
             headers={"Retry-After": "60"},
         )
-    return await service.forgot_password(data)
+    return await service.forgot_password(data, background)
 
 
 @router.post("/auth/reset-password/", response_model=ResetPasswordResponse)
@@ -1602,6 +1613,7 @@ async def admin_create_user(
     dependencies=[Depends(RequirePermission("users.list"))],
 )
 async def list_users(
+    viewer_id: CurrentUserId,
     service: UserService = Depends(_get_service),
     offset: int = Query(default=0, ge=0),
     # Directory/assignee pickers load the full active-user list in one call,
@@ -1618,28 +1630,11 @@ async def list_users(
     response - first/last names are blanked and the email's local part is
     replaced with a hash. Only the email domain remains visible. This way
     the public demo can show registration counts without leaking PII from
-    real users who signed up to try the product.
+    real users who signed up to try the product. The caller's own row stays
+    real.
     """
-    import os as _os
-
     users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
-    responses = [UserResponse.model_validate(u) for u in users]
-
-    if _os.environ.get("OE_DEMO_MODE", "").lower() in ("1", "true", "yes"):
-        import hashlib as _hl
-
-        def _scrub(r: UserResponse) -> UserResponse:
-            data = r.model_dump()
-            email = (data.get("email") or "").strip()
-            if "@" in email:
-                local, domain = email.split("@", 1)
-                short = _hl.sha1(local.encode("utf-8")).hexdigest()[:6]
-                data["email"] = f"user-{short}@{domain}"
-            data["full_name"] = ""
-            return UserResponse.model_validate(data)
-
-        responses = [_scrub(r) for r in responses]
-    return responses
+    return [redact_model(UserResponse.model_validate(u), subject_id=u.id, viewer_id=viewer_id) for u in users]
 
 
 @router.get(
@@ -1649,11 +1644,16 @@ async def list_users(
 )
 async def get_user(
     user_id: uuid.UUID,
+    viewer_id: CurrentUserId,
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
-    """Get user by ID (admin/manager only)."""
+    """Get user by ID (admin/manager only).
+
+    Redacted in demo mode exactly like the list, so fetching one record by id
+    is not a way around the list's privacy.
+    """
     user = await service.get_user(user_id)
-    return UserResponse.model_validate(user)
+    return redact_model(UserResponse.model_validate(user), subject_id=user.id, viewer_id=viewer_id)
 
 
 @router.patch(
@@ -1664,12 +1664,13 @@ async def get_user(
 async def update_user(
     user_id: uuid.UUID,
     data: UserAdminUpdate,
+    viewer_id: CurrentUserId,
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
-    """Update user (admin only)."""
+    """Update user (admin only). The echoed record is redacted in demo mode."""
     fields = data.model_dump(exclude_unset=True)
     user = await service.update_profile(user_id, **fields)
-    return UserResponse.model_validate(user)
+    return redact_model(UserResponse.model_validate(user), subject_id=user.id, viewer_id=viewer_id)
 
 
 @router.delete(

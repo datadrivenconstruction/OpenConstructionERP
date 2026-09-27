@@ -291,7 +291,24 @@ class Settings(BaseSettings):
     app_name: str = "OpenConstructionERP"
     app_version: str = Field(default_factory=_detect_version)
     app_env: Literal["development", "staging", "production"] = "development"
-    app_debug: bool = True
+    # Off unless asked for. Debug switches on verbose 422 bodies (the raw
+    # input echoed back) and the dev console log renderer, so a server that
+    # never set APP_DEBUG must not get it. Development gets it from .env
+    # (``.env.example`` sets APP_DEBUG=true) and the test suite from conftest.
+    app_debug: bool = False
+    # Dev-only: return the plaintext field magic-link token and PIN in the
+    # request-magic-link response and in the mock SMS log line, so the flow
+    # can be driven without an SMS provider. Separate from APP_DEBUG on
+    # purpose: operators turn debug on to chase a problem and must not hand
+    # out login secrets with it. Never honoured when APP_ENV=production.
+    # Env: EXPOSE_DEV_AUTH_SECRETS / OE_EXPOSE_DEV_AUTH_SECRETS.
+    expose_dev_auth_secrets: bool = False
+    # Peers whose X-Forwarded-For / X-Real-IP headers are believed when
+    # resolving the client address (rate limits, audit rows). Comma-separated
+    # IPs or CIDR ranges. The default covers a reverse proxy on the same host
+    # or on a private docker / LAN network; any other peer is identified by
+    # its socket address. Env: TRUSTED_PROXIES / OE_TRUSTED_PROXIES.
+    trusted_proxies: str = "127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     allowed_origins: str = "http://localhost:5173"
     # Optional allowlist for self-hosted AI provider endpoints (Ollama / vLLM).
@@ -648,6 +665,13 @@ class Settings(BaseSettings):
     login_rate_limit: int = Field(
         default=10,
         description="Maximum login attempts per minute per IP",
+    )
+    register_rate_limit_per_hour: int = Field(
+        default=20,
+        description=(
+            "Maximum self-registration and field magic-link requests per hour per IP. Sits on top of "
+            "the per-minute login limit so the 409 for a taken email cannot sweep an address list."
+        ),
     )
     ai_rate_limit: int = Field(
         default=20,

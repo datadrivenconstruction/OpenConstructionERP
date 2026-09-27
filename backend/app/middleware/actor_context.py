@@ -47,27 +47,16 @@ _MAX_UA_LEN = 500
 def _client_ip(request: Request) -> str | None:
     """Best-effort peer IP extraction.
 
-    Honours ``X-Forwarded-For`` (first hop) and ``X-Real-IP`` when set by
-    a trusted proxy in front of the app - otherwise falls back to the
-    ASGI peer. Returns ``None`` when no value is available (TestClient
-    scope has no peer).
+    Honours ``X-Forwarded-For`` and ``X-Real-IP`` only when the direct peer
+    is a configured trusted proxy (see ``app.core.rate_limiter.client_ip``),
+    otherwise records the ASGI peer, so an audit row cannot be stamped with
+    an address the caller made up. Returns ``None`` when no value is
+    available.
     """
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        # First entry is the original client; everything after is the
-        # proxy chain. Strip whitespace and reject obviously bogus blanks.
-        first = forwarded.split(",")[0].strip()
-        if first:
-            return first[:45]  # IPv6 max length
+    from app.core.rate_limiter import client_ip
 
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip()[:45]
-
-    client = request.client
-    if client and client.host:
-        return client.host[:45]
-    return None
+    ip = client_ip(request)
+    return ip[:45] if ip else None  # 45 = IPv6 max length
 
 
 class ActorContextMiddleware(BaseHTTPMiddleware):

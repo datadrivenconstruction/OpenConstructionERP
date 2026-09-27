@@ -38,8 +38,19 @@ class TestSettingsDefaults:
     def test_app_env_default(self, settings):
         assert settings.app_env == "development"
 
-    def test_app_debug_default(self, settings):
-        assert settings.app_debug is True
+    def test_app_debug_default(self, monkeypatch):
+        # Off unless asked for: a server that never set APP_DEBUG must not echo
+        # request input in 422 bodies. conftest turns it on for the suite, so
+        # the env var is cleared here to read the real default.
+        for name in ("APP_DEBUG", "OE_APP_DEBUG", "EXPOSE_DEV_AUTH_SECRETS", "OE_EXPOSE_DEV_AUTH_SECRETS"):
+            monkeypatch.delenv(name, raising=False)
+        s = Settings(
+            _env_file=None,
+            database_url="postgresql+asyncpg://oe:oe@localhost:5432/oe_test",
+            database_sync_url="postgresql+psycopg2://oe:oe@localhost:5432/oe_test",
+        )
+        assert s.app_debug is False
+        assert s.expose_dev_auth_secrets is False
 
     def test_log_level_default(self, settings):
         assert settings.log_level == "INFO"

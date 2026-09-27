@@ -16,7 +16,7 @@ import os
 import uuid
 from typing import AsyncIterator
 
-os.environ["APP_DEBUG"] = "true"  # so request-magic-link returns dev_token/dev_pin
+os.environ["EXPOSE_DEV_AUTH_SECRETS"] = "true"  # so request-magic-link returns dev_token/dev_pin
 
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
@@ -119,7 +119,7 @@ async def _request_link_and_grant(
     assert r.status_code == 202, r.text
     body = r.json()
     assert body["accepted"] is True
-    assert body["dev_token"] is not None  # APP_DEBUG=true
+    assert body["dev_token"] is not None  # EXPOSE_DEV_AUTH_SECRETS=true
     assert body["dev_pin"] is not None
     assert len(body["dev_pin"]) == 6
 
@@ -186,7 +186,7 @@ async def test_request_magic_link_logs_sms(app_and_client) -> None:
     )
     assert r.status_code == 202
     body = r.json()
-    # APP_DEBUG=true → plaintext exposed in body for test convenience.
+    # EXPOSE_DEV_AUTH_SECRETS=true → plaintext exposed in body for test convenience.
     assert body["dev_token"]
     assert body["dev_pin"]
 

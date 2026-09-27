@@ -125,15 +125,10 @@ _PORTAL_RATE_BUCKET_PREFIX = "propdev_portal:"
 
 
 def _client_ip(request: Request) -> str:
-    """Best-effort client IP for the audit row. Mirrors rate_limiter."""
-    xff = request.headers.get("x-forwarded-for")
-    if xff:
-        first = xff.split(",", 1)[0].strip()
-        if first:
-            return first[:64]
-    if request.client and request.client.host:
-        return request.client.host[:64]
-    return ""
+    """Best-effort client IP for the audit row, resolved as the rate limiter does."""
+    from app.core.rate_limiter import client_ip
+
+    return (client_ip(request) or "")[:64]
 
 
 def _portal_rate_check(token: str) -> None:

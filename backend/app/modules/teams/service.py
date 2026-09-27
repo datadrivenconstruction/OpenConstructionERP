@@ -52,6 +52,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
+from app.core.demo_privacy import anonymize_email, should_redact
 from app.core.events import event_bus
 from app.modules.teams.entity_types import enforced_entity_type_keys, is_known_entity_type
 from app.modules.teams.models import EntityVisibility, Team, TeamMembership
@@ -709,8 +710,13 @@ class TeamService:
         for membership, user in rows:
             response = MembershipResponse.model_validate(membership)
             if user is not None:
-                response.email = user.email or ""
-                response.full_name = user.full_name or ""
+                if should_redact(user.id, actor_id):
+                    # Public hosted demo: other people's identity stays hidden.
+                    response.email = anonymize_email(user.email)
+                    response.full_name = ""
+                else:
+                    response.email = user.email or ""
+                    response.full_name = user.full_name or ""
                 response.is_active = bool(getattr(user, "is_active", True))
             else:
                 # The user row is gone but the membership survived; surface it
@@ -1072,10 +1078,15 @@ class TeamService:
         for membership, team, user in memberships:
             person = people.get(membership.user_id)
             if person is None:
+                email = (user.email or "") if user is not None else ""
+                full_name = (user.full_name or "") if user is not None else ""
+                if should_redact(membership.user_id, actor_id):
+                    # Public hosted demo: other people's identity stays hidden.
+                    email, full_name = anonymize_email(email), ""
                 person = AccessMatrixMember(
                     user_id=membership.user_id,
-                    email=(user.email or "") if user is not None else "",
-                    full_name=(user.full_name or "") if user is not None else "",
+                    email=email,
+                    full_name=full_name,
                     is_project_owner=owner_id is not None and membership.user_id == owner_id,
                     is_system_admin=(getattr(user, "role", "") == "admin") if user is not None else False,
                 )

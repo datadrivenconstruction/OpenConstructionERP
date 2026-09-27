@@ -122,16 +122,13 @@ def _get_handover_service(session: SessionDep) -> HandoverService:
 def _client_ip(request: Request) -> str | None:
     """Best-effort client IP for signature non-repudiation context (never authorisation).
 
-    Honours a single trusted proxy hop via ``X-Forwarded-For`` (spoofable, but the only
-    signal behind a reverse proxy), then falls back to the socket peer.
+    ``X-Forwarded-For`` is believed only from a configured trusted proxy; any other
+    caller is recorded by its socket peer (``app.core.rate_limiter.client_ip``).
     """
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        first = fwd.split(",")[0].strip()
-        if first:
-            return first[:64]
-    client = request.client
-    return client.host[:64] if client and client.host else None
+    from app.core.rate_limiter import client_ip
+
+    ip = client_ip(request)
+    return ip[:64] if ip else None
 
 
 def _asbuilt_response(record, elements) -> AsBuiltRecordResponse:

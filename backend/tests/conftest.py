@@ -363,6 +363,20 @@ _bound_idle_transactions()
 os.environ.setdefault("LOGIN_RATE_LIMIT", "10000")
 os.environ.setdefault("API_RATE_LIMIT", "100000")
 os.environ.setdefault("AI_RATE_LIMIT", "10000")
+os.environ.setdefault("REGISTER_RATE_LIMIT_PER_HOUR", "100000")
+
+# ── Debug on for the suite ─────────────────────────────────────────────────
+# APP_DEBUG defaults to False so an installed server never echoes request
+# input in 422 bodies. The suite was written against the verbose shape (and
+# path-only validation errors answer 400 instead of 422 without debug), so it
+# keeps running with debug on. Tests that pin the production shape set
+# APP_DEBUG themselves.
+os.environ.setdefault("APP_DEBUG", "true")
+# The field-diary suites drive the magic-link flow from the plaintext token
+# and PIN in the response. Settings are cached for the whole session, so the
+# per-module env line in those files is not enough on its own once another
+# module built the settings first; the flag is set here for the suite.
+os.environ.setdefault("EXPOSE_DEV_AUTH_SECRETS", "true")
 
 # ── Open registration for the suite ────────────────────────────────────────
 # The default registration mode is "admin-approve" (every registrant after the

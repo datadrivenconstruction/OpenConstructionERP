@@ -34,10 +34,11 @@ from datetime import UTC, date, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import Select, func, or_, select
+from sqlalchemy import Select, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
+from app.core.demo_privacy import anonymize_email, demo_mode_enabled, should_redact
 from app.core.events import event_bus
 from app.modules.teams.models import RosterMember, Team, TeamMembership
 from app.modules.teams.repository import RosterRepository, TeamRepository
@@ -257,19 +258,37 @@ class RosterService:
         access_user_ids = await self._project_access_user_ids(project_id)
         needle = query.strip().lower()
 
-        candidates = [
-            RosterCandidate(
-                id=user.id,
-                source="user",
-                name=(user.full_name or "").strip() or user.email,
-                email=user.email,
-                on_roster=user.id in rostered_users,
-                has_project_access=user.id in access_user_ids,
+        # On the public hosted demo the user side of the picker is not a
+        # directory of everyone who signed up: it offers only the caller and
+        # people already on this project, for the rows and the count alike (a
+        # count over all users would still answer "does alice@acme.com have
+        # an account"), and shows everyone but the caller redacted.
+        within: set[uuid.UUID] | None = None
+        if demo_mode_enabled():
+            within = {uuid.UUID(str(u)) for u in (*access_user_ids, *rostered_users)}
+            if actor_id is not None:
+                within.add(uuid.UUID(str(actor_id)))
+
+        candidates: list[RosterCandidate] = []
+        for user in await self._search_users(needle, limit, within=within):
+            if should_redact(user.id, actor_id):
+                shown_email = anonymize_email(user.email)
+                shown_name = shown_email
+            else:
+                shown_email = user.email
+                shown_name = (user.full_name or "").strip() or user.email
+            candidates.append(
+                RosterCandidate(
+                    id=user.id,
+                    source="user",
+                    name=shown_name,
+                    email=shown_email,
+                    on_roster=user.id in rostered_users,
+                    has_project_access=user.id in access_user_ids,
+                )
             )
-            for user in await self._search_users(needle, limit)
-        ]
         candidates.extend(await self._search_contacts(needle, limit, rostered_contacts))
-        total = await self._count_users(needle) + await self._count_contacts(needle)
+        total = await self._count_users(needle, within=within) + await self._count_contacts(needle)
         # Somebody already on the roster stays in the list, ticked, rather than
         # disappearing: a name that is absent from a search reads as "we do not
         # have them" and sends the user off to create a duplicate.
@@ -548,22 +567,28 @@ class RosterService:
     # filter added later cannot land on the page query alone and leave the
     # total describing a wider set than the rows it is attached to.
 
-    def _users_stmt(self, needle: str) -> Select[Any]:
-        """Active users matching ``needle`` in their name or email, unpaged."""
+    def _users_stmt(self, needle: str, within: set[uuid.UUID] | None = None) -> Select[Any]:
+        """Active users matching ``needle`` in their name or email, unpaged.
+
+        ``within`` narrows the search to those ids (demo mode), so the page
+        and the count stay one WHERE clause.
+        """
         stmt = select(User).where(User.is_active.is_(True))
+        if within is not None:
+            stmt = stmt.where(User.id.in_(within)) if within else stmt.where(false())
         if needle:
             pattern = f"%{needle}%"
             stmt = stmt.where(or_(User.full_name.ilike(pattern), User.email.ilike(pattern)))
         return stmt
 
-    async def _search_users(self, needle: str, limit: int) -> list[User]:
+    async def _search_users(self, needle: str, limit: int, *, within: set[uuid.UUID] | None = None) -> list[User]:
         """One page of the active users matching ``needle``."""
-        stmt = self._users_stmt(needle).order_by(User.full_name, User.email).limit(limit)
+        stmt = self._users_stmt(needle, within).order_by(User.full_name, User.email).limit(limit)
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def _count_users(self, needle: str) -> int:
+    async def _count_users(self, needle: str, *, within: set[uuid.UUID] | None = None) -> int:
         """How many users match ``needle``, whatever the page size."""
-        stmt = select(func.count()).select_from(self._users_stmt(needle).subquery())
+        stmt = select(func.count()).select_from(self._users_stmt(needle, within).subquery())
         return int((await self.session.execute(stmt)).scalar_one())
 
     @staticmethod

@@ -22,7 +22,7 @@ import os
 import uuid
 from typing import AsyncIterator
 
-os.environ["APP_DEBUG"] = "true"  # request-magic-link returns dev_token/dev_pin
+os.environ["EXPOSE_DEV_AUTH_SECRETS"] = "true"  # request-magic-link returns dev_token/dev_pin
 
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402

@@ -19,7 +19,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from jose import jwt
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -205,6 +205,29 @@ def create_reset_token(user: User, settings: Settings) -> str:
         "jti": _new_jti(),
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+async def _send_reset_email(to: str, reset_url: str, recipient_name: str, debug: bool) -> None:
+    """Deliver a password-reset email; never raises.
+
+    Runs inline or as a background task after the response. Either way the
+    answer to the caller must not depend on whether delivery worked, so SMTP
+    failures are logged, not raised.
+    """
+    try:
+        result = await get_email_service().send_password_reset(
+            to=to,
+            reset_url=reset_url,
+            recipient_name=recipient_name,
+            token_lifetime_minutes=RESET_TOKEN_LIFETIME_MINUTES,
+        )
+    except Exception:
+        logger.exception("Password reset email to %s failed", to)
+        return
+    if not result.ok and debug:
+        # Dev-only fallback so developers without SMTP can still complete
+        # the reset flow from logs.
+        logger.debug("Reset URL for %s (dev-only log): %s", to, reset_url)
 
 
 # ── API Key utilities ──────────────────────────────────────────────────────
@@ -1015,12 +1038,21 @@ class UserService:
 
     # ── Password reset ──────────────────────────────────────────────────
 
-    async def forgot_password(self, data: ForgotPasswordRequest) -> ForgotPasswordResponse:
+    async def forgot_password(
+        self,
+        data: ForgotPasswordRequest,
+        background: BackgroundTasks | None = None,
+    ) -> ForgotPasswordResponse:
         """Generate a password-reset token if the email exists.
 
         Always returns a generic success message to prevent email enumeration.
         The token is NEVER included in the HTTP response - it must be
         delivered only via a secure side-channel (email).
+
+        With ``background`` the email goes out after the response is sent.
+        The SMTP round trip is the one step only a known address pays for,
+        so awaiting it inline made the answer for a real account measurably
+        slower than for an unknown one, which is enumeration by stopwatch.
         """
         user = await self.user_repo.get_by_email(data.email)
 
@@ -1043,19 +1075,11 @@ class UserService:
 
         reset_url = f"{self.settings.resolved_frontend_url}/auth/reset?token={token}"
         recipient_name = user.full_name or user.email.split("@", 1)[0]
-        email_service = get_email_service()
-        result = await email_service.send_password_reset(
-            to=user.email,
-            reset_url=reset_url,
-            recipient_name=recipient_name,
-            token_lifetime_minutes=RESET_TOKEN_LIFETIME_MINUTES,
-        )
-        # Never raise - the response must stay enumeration-proof even
-        # when SMTP is down. The service already logs failure reasons.
-        if not result.ok and self.settings.app_debug:
-            # Dev-only fallback so developers without SMTP can still
-            # complete the reset flow from logs.
-            logger.debug("Reset URL for %s (dev-only log): %s", user.email, reset_url)
+        debug = bool(self.settings.app_debug)
+        if background is not None:
+            background.add_task(_send_reset_email, user.email, reset_url, recipient_name, debug)
+        else:
+            await _send_reset_email(user.email, reset_url, recipient_name, debug)
 
         return ForgotPasswordResponse(message=message)
 
