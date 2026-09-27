@@ -172,9 +172,47 @@ async def test_a_failed_load_can_be_provisioned_again(maker, submitted: list[str
     assert submitted[-1] == f"{base}:after:{second}"
 
 
+async def _cost_item(maker: async_sessionmaker, region: str) -> None:
+    from app.modules.costs.models import CostItem
+
+    async with maker() as session:
+        session.add(CostItem(code=f"T-{uuid.uuid4().hex[:6]}", description="Wall", unit="m2", rate="10", region=region))
+        await session.commit()
+
+
 async def test_a_running_or_finished_load_is_reused(maker, submitted: list[str]) -> None:
     base = f"onboarding:{ALICE}:load_cwicr:ENG_TORONTO"
     await _job(maker, owner=ALICE, status="success", key=base)
+    await _cost_item(maker, "ENG_TORONTO")
     async with _client(maker, ALICE) as client:
         await client.post("/api/v1/onboarding/provision", json={"region": "ENG_TORONTO"})
     assert submitted == [base]
+
+
+async def test_a_loaded_cost_base_that_was_deleted_is_loaded_again(maker, submitted: list[str]) -> None:
+    """A succeeded load whose items are gone says nothing about the database now."""
+    base = f"onboarding:{ALICE}:load_cwicr:ENG_TORONTO"
+    first = await _job(maker, owner=ALICE, status="success", key=base)
+
+    async with _client(maker, ALICE) as client:
+        resp = await client.post("/api/v1/onboarding/provision", json={"region": "ENG_TORONTO"})
+    assert resp.status_code == 200, resp.text
+    assert submitted == [f"{base}:after:{first}"]
+
+
+async def test_a_sample_project_that_was_deleted_is_installed_again(maker, submitted: list[str]) -> None:
+    base = f"onboarding:{ALICE}:install_demo:residential"
+    first = await _job(
+        maker,
+        owner=ALICE,
+        kind=KIND_INSTALL_DEMO,
+        status="success",
+        key=base,
+        result={"project_id": str(uuid.uuid4())},
+        arg="residential",
+    )
+
+    async with _client(maker, ALICE) as client:
+        resp = await client.post("/api/v1/onboarding/provision", json={"demo_ids": ["residential"]})
+    assert resp.status_code == 200, resp.text
+    assert submitted == [f"{base}:after:{first}"]

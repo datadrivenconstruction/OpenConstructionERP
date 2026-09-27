@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
@@ -115,7 +116,11 @@ def _owned_by(user_id: str):
     )
 
 
-async def _attempt_key(session: SessionDep, base_key: str) -> str:
+async def _attempt_key(
+    session: SessionDep,
+    base_key: str,
+    still_there: Callable[[JobRun], Awaitable[bool]] | None = None,
+) -> str:
     """The idempotency key for the next attempt at one onboarding item.
 
     ``submit_job`` hands back whatever row carries the key, in any state, so a
@@ -123,16 +128,44 @@ async def _attempt_key(session: SessionDep, base_key: str) -> str:
     the item could never be retried. A failed attempt passes the key on to the
     next one (``<key>:after:<failed id>``): still deterministic, so a double
     submit after a failure starts one retry, not two.
+
+    A succeeded attempt passes it on too when ``still_there`` says what it
+    loaded is gone: a cost base deleted after onboarding loaded it would
+    otherwise be reported as loaded again, and nothing imported.
     """
     key = base_key
     # Bounded: each hop is a failed attempt the user asked for, but a loop
     # guard costs nothing.
     for _ in range(100):
         row = (await session.execute(select(JobRun).where(JobRun.idempotency_key == key))).scalar_one_or_none()
-        if row is None or row.status not in _FINISHED_BADLY:
+        if row is None:
+            return key
+        gone = row.status == "success" and still_there is not None and not await still_there(row)
+        if row.status not in _FINISHED_BADLY and not gone:
             return key
         key = f"{base_key}:after:{row.id}"
     return key
+
+
+async def _cost_base_still_there(session: SessionDep, db_id: str) -> bool:
+    """Whether the region a succeeded load imported still has active items."""
+    from app.modules.costs.models import CostItem  # noqa: PLC0415
+
+    stmt = select(CostItem.id).where(CostItem.region == db_id, CostItem.is_active.is_(True)).limit(1)
+    return (await session.execute(stmt)).first() is not None
+
+
+async def _sample_still_there(session: SessionDep, row: JobRun) -> bool:
+    """Whether the project a succeeded sample install created still exists."""
+    from app.modules.projects.models import Project  # noqa: PLC0415
+
+    raw = (row.result_jsonb or {}).get("project_id")
+    try:
+        project_id = uuid.UUID(str(raw))
+    except (TypeError, ValueError):
+        # No project on record to look for: trust the job, as before.
+        return True
+    return (await session.execute(select(Project.id).where(Project.id == project_id))).first() is not None
 
 
 @router.post("/provision", response_model=ProvisionResponse)
@@ -146,7 +179,11 @@ async def provision(body: ProvisionRequest, user_id: CurrentUserId, session: Ses
     jobs: list[JobState] = []
 
     if body.region:
-        key = await _attempt_key(session, f"onboarding:{user_id}:load_cwicr:{body.region}")
+        key = await _attempt_key(
+            session,
+            f"onboarding:{user_id}:load_cwicr:{body.region}",
+            lambda _row: _cost_base_still_there(session, str(body.region)),
+        )
         row = await submit_job(
             KIND_LOAD_CWICR,
             {"db_id": body.region, "owner_user_id": user_id},
@@ -158,7 +195,11 @@ async def provision(body: ProvisionRequest, user_id: CurrentUserId, session: Ses
     for demo_id in dict.fromkeys(body.demo_ids):
         if not demo_id:
             continue
-        key = await _attempt_key(session, f"onboarding:{user_id}:install_demo:{demo_id}")
+        key = await _attempt_key(
+            session,
+            f"onboarding:{user_id}:install_demo:{demo_id}",
+            lambda row: _sample_still_there(session, row),
+        )
         row = await submit_job(
             KIND_INSTALL_DEMO,
             {"demo_id": demo_id, "owner_user_id": user_id},
