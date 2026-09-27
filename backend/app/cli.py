@@ -2047,6 +2047,9 @@ async def _promote_user_to_admin(session: AsyncSession, email: str) -> str:
 
 def cmd_promote_admin(args: argparse.Namespace) -> None:
     """Promote an existing user to an active admin (operator recovery)."""
+    if not (args.email or "").strip():
+        print(_red("Give the e-mail of the account to promote: openconstructionerp promote-admin <email>"))
+        sys.exit(2)
     data_dir = _data_dir_from_args(args)
     _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
 
@@ -2697,7 +2700,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "promote-admin",
         help="Make an existing user an active admin (recovery when no admin is left)",
     )
-    promote_p.add_argument("email", help="E-mail of the existing account to promote")
+    # Optional at parse time so ``promote-admin --data-dir X`` parses like every
+    # other data-dir command; cmd_promote_admin refuses a missing e-mail.
+    promote_p.add_argument("email", nargs="?", help="E-mail of the existing account to promote")
     _add_data_dir_arg(promote_p)
 
     # module - install / list / uninstall business modules

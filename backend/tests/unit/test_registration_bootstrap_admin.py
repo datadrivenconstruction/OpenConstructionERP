@@ -57,20 +57,33 @@ def _restore_registration_mode():
     settings.registration_mode = saved  # type: ignore[attr-defined]
 
 
+class _Records(logging.Handler):
+    """Collects every record it is handed, once."""
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.WARNING)
+        self.records: list[logging.LogRecord] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.records.append(record)
+
+
 @pytest.fixture
-def service_warnings(caplog: pytest.LogCaptureFixture):
+def service_warnings():
     """Capture WARNING records from the users service logger directly.
 
-    The handler is attached to the service logger itself so the capture does
-    not depend on whether app logging propagates to the root logger.
+    A private handler on the service logger itself, not caplog: caplog's
+    handler also sits on the root logger, so attaching it here as well counts
+    every propagated record twice, and relying on the root alone would depend
+    on whether app logging propagates at all.
     """
     target = logging.getLogger(SERVICE_LOGGER)
-    target.addHandler(caplog.handler)
-    caplog.handler.setLevel(logging.WARNING)
+    handler = _Records()
+    target.addHandler(handler)
     try:
-        yield caplog
+        yield handler
     finally:
-        target.removeHandler(caplog.handler)
+        target.removeHandler(handler)
 
 
 def _service(session: AsyncSession, *, mode: str = "open"):
@@ -112,8 +125,8 @@ async def _add_user(session: AsyncSession, email: str, *, role: str = "viewer", 
     return user
 
 
-def _no_admin_warnings(caplog: pytest.LogCaptureFixture) -> list[str]:
-    return [r.getMessage() for r in caplog.records if "no active administrator" in r.getMessage()]
+def _no_admin_warnings(handler: _Records) -> list[str]:
+    return [r.getMessage() for r in handler.records if "no active administrator" in r.getMessage()]
 
 
 # ── fresh installs still bootstrap ──────────────────────────────────────────
@@ -278,3 +291,13 @@ def test_promote_admin_is_a_cli_command_with_a_data_dir():
     assert args.command == "promote-admin"
     assert args.email == "ops@example.com"
     assert args.data_dir is not None
+
+
+def test_promote_admin_without_an_email_exits_before_touching_the_database():
+    from app import cli
+
+    args = cli._build_parser().parse_args(["promote-admin"])
+
+    with pytest.raises(SystemExit) as exc:
+        cli.cmd_promote_admin(args)
+    assert exc.value.code == 2
