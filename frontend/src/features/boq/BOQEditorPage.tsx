@@ -927,15 +927,15 @@ export function BOQEditorPage() {
     mutationFn: () => apiPost(`/v1/boq/boqs/${boqId}/lock/`, {}),
     onSuccess: () => {
       invalidateAll();
+      // The lock itself makes the bill the project budget (server side), so
+      // the toast no longer offers "Create Budget" as a next step.
       addToast(
         {
           type: 'success',
           title: t('boq.locked_success', { defaultValue: 'Estimate locked' }),
-          message: t('boq.locked_next', { defaultValue: 'Estimate locked. Create project budget?' }),
-          action: {
-            label: t('boq.create_budget', { defaultValue: 'Create Budget' }),
-            onClick: () => createBudgetMutation.mutate(),
-          },
+          message: t('boq.locked_budget_seeded', {
+            defaultValue: 'Estimate locked. Its total is now the project budget.',
+          }),
         },
         { duration: 8000 },
       );
@@ -986,6 +986,13 @@ export function BOQEditorPage() {
         {},
       ),
     onSuccess: (data) => {
+      if (!data.created && !data.budget_lines_created) {
+        addToast({
+          type: 'info',
+          title: t('boq.budget_up_to_date', { defaultValue: 'The project budget already includes this estimate' }),
+        });
+        return;
+      }
       addToast({
         type: 'success',
         title: t('boq.budget_created', { defaultValue: 'Budget created' }),

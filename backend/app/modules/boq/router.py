@@ -1780,19 +1780,22 @@ async def create_budget_from_boq(
     session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> dict:
-    """Create project budget lines from BOQ sections/positions.
+    """Make the locked bill the project budget, on both the finance and the 5D side.
 
-    Groups positions by WBS (if set) or by section, creates a
-    ProjectBudget entry for each group with original_budget = section total.
-    Idempotent on both sides: finance budgets already created from this BOQ
-    (matched by the boq_id stamped in their metadata plus the group key) are
-    skipped, and the costmodel BudgetLine generation skips positions already
-    wired to a line, so the 5D Cost Spine gets its EVM baseline exactly once.
-    Returns the created budget IDs plus the number of new costmodel budget
-    lines.
+    Locking a bill already does this: the lock generates the cost model's
+    budget lines and the finance budget follows through
+    ``costmodel.budget.generated``. This endpoint is for a bill locked before
+    that existed, or one whose lock-time seeding failed, and it goes through
+    the same writer (``FinanceService.seed_budget_from_boq``), so the finance
+    budget is one set of rows per bill whichever of the two runs first. It
+    used to write a second set of its own (category ``other``), and pressing
+    it after a lock doubled the budget.
+
+    The costmodel BudgetLine generation skips positions already wired to a
+    line, so the 5D Cost Spine gets its EVM baseline exactly once. Returns the
+    bill's finance budget ids, how many of them are new, and the number of new
+    costmodel budget lines.
     """
-    from decimal import Decimal
-
     await _verify_boq_owner(session, boq_id, user_id, payload)
 
     boq = await service.get_boq(boq_id)
@@ -1809,79 +1812,37 @@ async def create_budget_from_boq(
             detail="BOQ has no positions - nothing to budget.",
         )
 
-    # Group positions: by wbs_id if set, otherwise by parent_id (section), else "ungrouped"
-    groups: dict[str, Decimal] = {}
-    for pos in positions:
-        # Skip section headers, which carry no money and would otherwise open a
-        # budget group of their own. Both spellings of the sentinel unit, or an
-        # imported bill's headers become zero-value budget lines.
-        try:
-            total = Decimal(str(pos.total))
-        except Exception:
-            total = Decimal("0")
-        if total == 0 and (pos.unit or "").strip().lower() in SECTION_UNITS:
-            continue
-
-        group_key = pos.wbs_id or (str(pos.parent_id) if pos.parent_id else "ungrouped")
-        groups[group_key] = groups.get(group_key, Decimal("0")) + total
-
-    if not groups:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No budgetable positions found in BOQ.",
-        )
-
-    # Lazy import finance module
-    created_ids: list[str] = []
-    skipped_existing = 0
     try:
         from sqlalchemy import select as sa_select
 
         from app.modules.finance.models import ProjectBudget
+        from app.modules.finance.service import FinanceService
 
-        # Idempotency guard (audit M2): the docstring promises re-running
-        # this endpoint never doubles the finance budget. Load the groups
-        # already materialized from this BOQ (stamped with boq_id in their
-        # metadata) and skip them instead of stacking duplicates.
-        existing_rows = (
-            (await session.execute(sa_select(ProjectBudget).where(ProjectBudget.project_id == boq.project_id)))
+        before = set(
+            (await session.execute(sa_select(ProjectBudget.id).where(ProjectBudget.project_id == boq.project_id)))
             .scalars()
             .all()
         )
-        existing_group_keys = {
-            row.wbs_id or "ungrouped"
-            for row in existing_rows
-            if isinstance(row.metadata_, dict) and row.metadata_.get("boq_id") == str(boq_id)
-        }
-
-        # ProjectBudget.currency_code has no DB default - the model requires
-        # the writer to supply it from the project context. Omitting it here
-        # wrote budget lines with "", which reach the finance table as
-        # em-dashes instead of money. Best-effort resolver, "" on failure.
-        currency_code = await service._resolve_project_currency(boq_id)  # noqa: SLF001
-
-        for group_key, total_amount in groups.items():
-            if group_key in existing_group_keys:
-                skipped_existing += 1
-                continue
-            budget = ProjectBudget(
-                project_id=boq.project_id,
-                wbs_id=group_key if group_key != "ungrouped" else None,
-                category="other",
-                currency_code=currency_code,
-                original_budget=str(total_amount),
-                revised_budget=str(total_amount),
-                metadata_={"source": "boq", "boq_id": str(boq_id)},
-            )
-            session.add(budget)
-            await session.flush()
-            created_ids.append(str(budget.id))
+        budgets = await FinanceService(session).seed_budget_from_boq(boq.project_id, boq_id)
+        # Committed before the cost model runs: when it creates lines it
+        # publishes ``costmodel.budget.generated``, and the finance handler
+        # seeds the same bill from a session of its own. It has to find this
+        # bill's share already there, or it writes it a second time.
+        await session.commit()
     except Exception as exc:
         _log.exception("Failed to create budgets from BOQ %s: %s", boq_id, exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create budget lines. Finance module may not be available.",
         )
+    if not budgets:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No budgetable positions found in BOQ.",
+        )
+    budget_ids = [str(b.id) for b in budgets]
+    created_ids = [str(b.id) for b in budgets if b.id not in before]
+    skipped_existing = len(budget_ids) - len(created_ids)
 
     # 5D Cost Spine baseline: one costmodel BudgetLine per BOQ position so
     # progress entries have a row to land earned value on. The costmodel
@@ -1920,7 +1881,7 @@ async def create_budget_from_boq(
     return {
         "created": len(created_ids),
         "skipped_existing": skipped_existing,
-        "budget_ids": created_ids,
+        "budget_ids": budget_ids,
         "budget_lines_created": budget_lines_created,
         "project_id": str(boq.project_id),
     }

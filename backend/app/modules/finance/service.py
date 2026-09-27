@@ -2177,6 +2177,15 @@ class FinanceService:
           bill on the same WBS adds to the first rather than overwriting it.
         * A change in the original budget moves the revised budget by the same
           amount, so revisions already booked against the row survive.
+        * A bill that already has a budget from the "Create Budget" button of
+          18.0 and earlier (rows stamped ``boq_id`` in their metadata) keeps
+          that budget and gets no second one. Those rows may carry revisions
+          and synced figures, so they are neither converted nor replaced.
+
+        This is the only writer of a bill's finance budget: the lock reaches it
+        through ``costmodel.budget.generated`` and the "Create Budget" endpoint
+        calls it directly, so whichever runs first, the other finds the bill's
+        share already there.
 
         Amounts are net of VAT, as a bill is, in the project currency.
 
@@ -2185,9 +2194,31 @@ class FinanceService:
             boq_id: The bill that was locked.
 
         Returns:
-            The budget rows created or updated.
+            The bill's budget rows: created or updated, or the earlier rows
+            left as they were.
         """
         from app.modules.boq.models import Position
+
+        earlier = list(
+            (
+                await self.session.execute(
+                    select(ProjectBudget).where(
+                        ProjectBudget.project_id == project_id,
+                        ProjectBudget.metadata_["boq_id"].as_string() == str(boq_id),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if earlier:
+            logger.info(
+                "Budget for BOQ %s already created by the earlier endpoint (project=%s rows=%d); not seeding again",
+                boq_id,
+                project_id,
+                len(earlier),
+            )
+            return earlier
 
         rows = (
             await self.session.execute(

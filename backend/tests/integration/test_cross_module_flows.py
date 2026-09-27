@@ -19,7 +19,9 @@ Run:
     python -m pytest tests/integration/test_cross_module_flows.py -v --tb=short
 """
 
+import asyncio
 import uuid
+from decimal import Decimal
 
 import pytest
 import pytest_asyncio
@@ -52,8 +54,6 @@ async def shared_client():
 @pytest_asyncio.fixture(scope="module")
 async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     """Register a unique admin user and return Authorization headers."""
-    import asyncio
-
     unique = uuid.uuid4().hex[:8]
     email = f"crossmod-{unique}@test.io"
     password = f"CrossMod{unique}9"
@@ -222,6 +222,14 @@ class TestBOQLockCreatesBudget:
         assert resp.status_code == 200, f"BOQ lock failed: {resp.text}"
         assert resp.json()["is_locked"] is True
 
+        # The lock seeds the finance budget from a detached event handler, as
+        # in production; let it land before the button is pressed.
+        for _ in range(50):
+            resp = await client.get(f"/api/v1/finance/budgets/?project_id={project_id}", headers=auth)
+            if resp.status_code == 200 and resp.json()["total"] > 0:
+                break
+            await asyncio.sleep(0.1)
+
         # 4. Create budget from BOQ
         resp = await client.post(
             f"{BOQ_PREFIX}/boqs/{boq_id}/create-budget/",
@@ -241,14 +249,19 @@ class TestBOQLockCreatesBudget:
         budgets = resp.json()
         assert budgets["total"] > 0, "No budget lines found after create-budget"
 
-        # Verify budget amounts are non-zero (should match BOQ section totals)
-        for budget_line in budgets["items"]:
-            original = float(budget_line["original_budget"])
-            # At least one budget line should have a meaningful amount
-            if original > 0:
-                break
-        else:
-            pytest.fail("All budget lines have zero original_budget")
+        # The lock seeds the budget and the button goes through the same
+        # writer, so the budget is the bill once: 9 250 + 5 100 + 5 920. The
+        # button used to write a second set beside the lock's, and a check for
+        # "some line is non-zero" passed on the doubled budget too.
+        total_original = sum(Decimal(str(b["original_budget"])) for b in budgets["items"])
+        assert total_original == Decimal("20270"), budgets["items"]
+
+        # Pressing it again changes nothing.
+        resp = await client.post(f"{BOQ_PREFIX}/boqs/{boq_id}/create-budget/", headers=auth)
+        assert resp.status_code == 201, resp.text
+        assert resp.json()["created"] == 0
+        resp = await client.get(f"/api/v1/finance/budgets/?project_id={project_id}", headers=auth)
+        assert sum(Decimal(str(b["original_budget"])) for b in resp.json()["items"]) == Decimal("20270")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
