@@ -434,17 +434,30 @@ class UserService:
         _s = _get_settings()
         mode = getattr(_s, "registration_mode", "open") or "open"
 
-        # "First real user becomes admin" bootstrap. Check for any existing
-        # admin rather than any user - a prior `make seed` run may have
-        # inserted demo/viewer rows that would otherwise block the first
-        # real registrant from receiving admin rights.
+        # "First real user becomes admin" bootstrap, only on a genuinely fresh
+        # install: no real user row at all (active or not) and no real active
+        # admin. Seeded demo accounts and the desktop owner are not real users,
+        # so a demo-seeded install still bootstraps; the admin check keeps a
+        # desktop owner (an admin) from being joined by a second one. Asking
+        # only "is there an admin?" made any install without one - operator
+        # never registered, last admin deactivated - hand admin to whoever
+        # reached the public form first.
         admin_exists = await self.user_repo.has_admin()
+        bootstrap = not admin_exists and not await self.user_repo.has_real_user()
+        if not admin_exists and not bootstrap:
+            logger.warning(
+                "Registration on an install with no active administrator: the new account "
+                "gets the default role, not admin. Promote an existing user with "
+                "'openconstructionerp promote-admin <email>' (or 'python -m app.cli "
+                "promote-admin <email>'), or in SQL: UPDATE oe_users_user SET role = 'admin', "
+                "is_active = true WHERE email = '<email>';"
+            )
 
         # ``closed`` mode rejects every self-registration. The bootstrap
         # path is still allowed: an admin must be reachable on a fresh
-        # install or the operator has no way in. Once one admin exists,
+        # install or the operator has no way in. Once any real user exists,
         # closed truly closes the door.
-        if mode == "closed" and admin_exists:
+        if mode == "closed" and not bootstrap:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Self-registration is disabled. Contact an administrator.",
@@ -472,7 +485,7 @@ class UserService:
             # as admin no matter what config says.
             default_role = "viewer"
 
-        if not admin_exists:
+        if bootstrap:
             # Bootstrap path - always active so the operator can actually
             # log in to a fresh install in admin-approve mode.
             role = "admin"

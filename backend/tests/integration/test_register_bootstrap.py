@@ -4,9 +4,11 @@ Regression test for the v2.0.0 RBAC UX regression where self-registered users
 were universally demoted to `viewer`, causing every write action to 403 in
 fresh dev installs.
 
-The fix: `UserRepository.has_admin()` replaces the raw `count()` check. If no
-admin user exists in the DB, the next registrant is promoted to admin. Once
-any admin is on record, subsequent self-registered users default to viewer.
+The bootstrap is granted only on a genuinely fresh install: no real admin
+(`UserRepository.has_admin()`) and no real user row at all, active or not
+(`UserRepository.has_real_user()`). Seeded demo accounts do not count. Once
+anybody real is on record, subsequent self-registered users default to viewer,
+even when no admin is left (see test_registration_bootstrap_admin.py).
 
 This test drives the service layer directly against a transaction-isolated
 PostgreSQL session so neither the persistent dev DB nor the demo-seed lifespan
@@ -73,13 +75,13 @@ async def test_second_registrant_is_viewer(session):
 
 
 @pytest.mark.asyncio
-async def test_non_admin_seed_does_not_block_bootstrap(session):
-    """Demo/viewer seed rows must not prevent the first admin promotion.
+async def test_existing_real_viewer_blocks_bootstrap(session):
+    """A real non-admin account means the install is not fresh.
 
-    This is the actual v2.0.0 regression: a prior ``count() == 0`` check
-    treated any pre-seeded viewer as "DB not empty" and downgraded the
-    first real user to viewer too. ``has_admin()`` looks for admin
-    specifically, so seed viewer rows are irrelevant.
+    This used to be the other way round: only an admin row counted, so a
+    pre-existing viewer let the next registrant claim admin. On a public
+    server that is anyone who reaches the form while no admin exists. Only
+    seeded demo accounts are exempt now (next test).
     """
     import uuid as _uuid
 
@@ -101,11 +103,12 @@ async def test_non_admin_seed_does_not_block_bootstrap(session):
     await session.commit()
 
     repo = UserRepository(session)
-    assert await repo.has_admin() is False, "has_admin must ignore non-admin seed rows"
+    assert await repo.has_admin() is False
+    assert await repo.has_real_user() is True
 
     first = await _service(session).register(_payload(f"first-{_uuid.uuid4().hex[:6]}@bootstrap.io"))
     await session.commit()
-    assert first.role == "admin", "Pre-seeded viewer must not block first real user from becoming admin"
+    assert first.role != "admin", "An existing real user must stop the next registrant from claiming admin"
 
 
 @pytest.mark.asyncio

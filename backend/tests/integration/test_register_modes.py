@@ -13,8 +13,9 @@ list every project on the instance. The fix introduces the
 * ``admin-approve`` — account created ``is_active=False``; an admin must
   flip it active via ``PATCH /users/{id}`` before login works.
 * ``closed`` — registration is rejected with 403. Bootstrap path is still
-  honoured: if no admin exists yet, the very first registrant is allowed
-  and promoted to admin (otherwise nobody could log in to a fresh install).
+  honoured: on a fresh install (no real user row yet) the very first
+  registrant is allowed and promoted to admin (otherwise nobody could log
+  in to a fresh install).
 
 Login already returns the same generic 401 for inactive accounts as for
 bad credentials, so no enumeration leak is introduced — see

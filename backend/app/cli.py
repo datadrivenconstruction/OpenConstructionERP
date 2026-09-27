@@ -35,6 +35,10 @@ import socket
 import sys
 import webbrowser
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 # ── Console encoding hardening ────────────────────────────────────────────
 # On Windows + Anaconda Python the default console encoding is cp1252,
@@ -2009,6 +2013,62 @@ def cmd_seed(args: argparse.Namespace) -> None:
     asyncio.run(_run_seed())
 
 
+# ── Admin recovery (promote-admin) ──────────────────────────────────────────
+# Public registration hands out admin only on a fresh install, so an install
+# whose last administrator was deactivated (or whose operator never registered
+# before other people did) has no way back in through the web UI. This command
+# is that way back: run on the server, it makes an existing account an active
+# admin.
+
+
+async def _promote_user_to_admin(session: AsyncSession, email: str) -> str:
+    """Make the account at ``email`` an active admin and return a status line.
+
+    Raises:
+        LookupError: No usable account exists at that address (missing or
+            already erased), so there is nothing to promote.
+    """
+    from sqlalchemy import func, select
+
+    from app.modules.users.models import User
+
+    user = (
+        await session.execute(select(User).where(func.lower(User.email) == email.strip().lower()))
+    ).scalar_one_or_none()
+    if user is None or user.deleted_at is not None:
+        raise LookupError(f"No user with e-mail {email!r}.")
+    if user.role == "admin" and user.is_active:
+        return f"{user.email} is already an active admin."
+    user.role = "admin"
+    user.is_active = True
+    await session.flush()
+    return f"{user.email} is now an active admin."
+
+
+def cmd_promote_admin(args: argparse.Namespace) -> None:
+    """Promote an existing user to an active admin (operator recovery)."""
+    data_dir = _data_dir_from_args(args)
+    _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
+
+    import asyncio
+
+    async def _run() -> str:
+        from app.database import async_session_factory
+
+        _register_all_module_models()
+        async with async_session_factory() as session:
+            message = await _promote_user_to_admin(session, args.email)
+            await session.commit()
+            return message
+
+    try:
+        message = asyncio.run(_run())
+    except LookupError as exc:
+        print(_red(str(exc)))
+        sys.exit(1)
+    print(_green(message))
+
+
 # ── Module management (install / list / uninstall) ─────────────────────────
 # A module is a Python package under ``app/modules/`` that carries a
 # ``manifest.py`` exposing a module-level ``manifest = ModuleManifest(...)``.
@@ -2632,6 +2692,14 @@ def _build_parser() -> argparse.ArgumentParser:
     seed_p.add_argument("--demo", action="store_true", help="Install demo project with sample data")
     _add_data_dir_arg(seed_p)
 
+    # promote-admin - operator recovery when no administrator is left
+    promote_p = subparsers.add_parser(
+        "promote-admin",
+        help="Make an existing user an active admin (recovery when no admin is left)",
+    )
+    promote_p.add_argument("email", help="E-mail of the existing account to promote")
+    _add_data_dir_arg(promote_p)
+
     # module - install / list / uninstall business modules
     module_p = subparsers.add_parser(
         "module",
@@ -2736,6 +2804,8 @@ def main() -> None:
         cmd_upgrade(args)
     elif args.command == "seed":
         cmd_seed(args)
+    elif args.command == "promote-admin":
+        cmd_promote_admin(args)
     elif args.command == "module":
         cmd_module(args)
     elif args.command == "pack":
