@@ -184,9 +184,13 @@ def _candidate_sources(name: str) -> list[str]:
         local = None
 
     try:
-        from app.core.embedding_installer import download_locked_off
+        from app.core.embedding_installer import hub_fallback_allowed
 
-        locked = download_locked_off()
+        # Closed by an operator's lock everywhere, and on the desktop unless
+        # the operator opted in: there the model arrives only when a person
+        # asks for it, and a loader that fetched by hub id would be a second,
+        # unguarded way in.
+        locked = not hub_fallback_allowed()
     except Exception:  # noqa: BLE001 - same reasoning as above
         locked = False
 

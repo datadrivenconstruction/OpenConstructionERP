@@ -159,15 +159,49 @@ def test_a_server_deploy_does_not_start_a_download(monkeypatch: pytest.MonkeyPat
     assert _FakeHub.requested == []
 
 
-def test_a_desktop_install_starts_the_download(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+def test_a_desktop_install_waits_for_a_person_to_ask(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+    """No transfer the user did not start: the desktop downloads on a click only.
+
+    It used to start 471 MB of downloads on the first launch, before the user
+    had seen semantic search offered. The wizard toggle and the install
+    endpoint are the click, and they still work.
+    """
     monkeypatch.setenv("OE_DESKTOP", "1")
     monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
 
-    assert installer.download_enabled() is True
-    assert installer.start_background_download() is True
+    assert installer.download_enabled() is False
+    assert installer.start_background_download() is False
+    assert _FakeHub.requested == []
 
+    assert installer.start_background_download(requested=True) is True
     _await_state(installer.STATE_READY)
     assert installer.find_installed_model(REPO) is not None
+
+
+def test_the_desktop_loader_does_not_fetch_by_hub_id(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """The loader is a download path of its own and must obey the same rule.
+
+    A first background reindex after the demo data is seeded would otherwise
+    hand ``SentenceTransformer`` the bare hub id and download the model anyway.
+    """
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: None)
+    assert vector._candidate_sources(REPO) == []
+
+    local = tmp_path / "weights"
+    local.mkdir()
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: local)
+    assert vector._candidate_sources(REPO) == [str(local)]
+
+    # An operator who opted in gets the old behaviour back.
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+    assert vector._candidate_sources(REPO) == [str(local), REPO]
+
+    # And a server is untouched: it still loads by hub id.
+    monkeypatch.delenv("OE_DESKTOP", raising=False)
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    assert vector._candidate_sources(REPO) == [str(local), REPO]
 
 
 def test_one_variable_overrides_the_default_in_both_directions(monkeypatch: pytest.MonkeyPatch, hub) -> None:
