@@ -120,7 +120,9 @@ def run(roots: Sequence[Path], *, list_only: bool, jobs: int) -> int:
         print("error: signtool.exe was not found in the Windows SDK", file=sys.stderr)
         return 1
 
-    already = {f for f in candidates if is_signed(signtool, f)}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        verdicts = dict(zip(candidates, pool.map(lambda f: is_signed(signtool, f), candidates), strict=True))
+    already = {f for f, ok in verdicts.items() if ok}
     todo = [f for f in candidates if f not in already]
     print(f"{len(candidates)} PE files, {len(already)} already signed, {len(todo)} to sign")
 
@@ -145,7 +147,8 @@ def run(roots: Sequence[Path], *, list_only: bool, jobs: int) -> int:
             if code != 0:
                 failures.append(f"{file}: exit {code}: {tail}")
 
-    unverified = [f for f in todo if not is_signed(signtool, f)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, jobs)) as pool:
+        unverified = [f for f, ok in zip(todo, pool.map(lambda f: is_signed(signtool, f), todo), strict=True) if not ok]
     for line in failures:
         print(f"::error title=Signing failed::{line}")
     for f in unverified:
@@ -155,12 +158,68 @@ def run(roots: Sequence[Path], *, list_only: bool, jobs: int) -> int:
     return 0 if not failures and not unverified else 1
 
 
+def check_archive(exe: Path) -> int:
+    """Prove the members sealed inside a onefile build still carry signatures.
+
+    Signing happens before PyInstaller packs, and "signed and verified" there
+    says nothing about what the archive holds afterwards. This opens the
+    archive the way ``inspect_desktop_sidecar_signatures.py`` does, writes each
+    PE member out under its own name and asks signtool about every one. Zero
+    members is a failure, because a reader that found nothing and an archive
+    that is fully signed must not print the same verdict.
+    """
+    import tempfile
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from inspect_desktop_sidecar_signatures import extract, member_names, open_archive
+
+    signtool = find_signtool()
+    if signtool is None:
+        print("error: signtool.exe was not found in the Windows SDK", file=sys.stderr)
+        return 1
+    reader, code = open_archive(exe)
+    if reader is None:
+        return code or 1
+
+    names = [n for n in member_names(reader) if Path(n).suffix.lower() in PE_SUFFIXES]
+    unsigned: list[str] = []
+    unreadable: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for name in names:
+            data = extract(reader, name)
+            if data is None:
+                unreadable.append(name)
+                continue
+            target = Path(tmp) / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+            if not is_signed(signtool, target):
+                unsigned.append(name)
+
+    print(
+        f"{exe.name}: {len(names)} PE members, {len(names) - len(unsigned) - len(unreadable)} signed, "
+        f"{len(unsigned)} unsigned, {len(unreadable)} unreadable"
+    )
+    for name in unsigned:
+        print(f"::error title=Unsigned member in the sidecar archive::{name}")
+    for name in unreadable:
+        print(f"::error title=Archive member could not be read::{name}")
+    return 0 if names and not unsigned and not unreadable else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("paths", nargs="+", type=Path, help="folders or files to sign")
     parser.add_argument("--list", action="store_true", help="print what would be signed, sign nothing")
     parser.add_argument("--jobs", type=int, default=8, help="parallel signing calls (default 8)")
+    parser.add_argument(
+        "--check-archive",
+        action="store_true",
+        help="sign nothing; verify every PE member inside the given PyInstaller onefile executables",
+    )
     args = parser.parse_args(argv)
+    if args.check_archive:
+        return max(check_archive(p) for p in args.paths)
     return run(args.paths, list_only=args.list, jobs=args.jobs)
 
 

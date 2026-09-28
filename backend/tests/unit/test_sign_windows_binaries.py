@@ -195,3 +195,30 @@ def test_a_branch_build_stays_unsigned_even_with_secrets(
     code, written = _run_main(setup, monkeypatch, tmp_path, {**_full(setup), "RELEASE_REF": "main"})
     assert code == 0
     assert written == "WINDOWS_SIGNING=off\n"
+
+
+def _fake_archive(monkeypatch: pytest.MonkeyPatch, members: dict[str, bytes]) -> None:
+    import types
+
+    fake = types.ModuleType("inspect_desktop_sidecar_signatures")
+    fake.open_archive = lambda _path: (object(), 0)
+    fake.member_names = lambda _reader: list(members)
+    fake.extract = lambda _reader, name: members[name]
+    monkeypatch.setitem(sys.modules, "inspect_desktop_sidecar_signatures", fake)
+
+
+def test_the_archive_check_fails_on_an_unsigned_member(signer, monkeypatch: pytest.MonkeyPatch) -> None:
+    _fake_archive(monkeypatch, {"a/ok.pyd": b"MZ", "pginstall/bin/postgres.exe": b"MZ", "x.json": b"{}"})
+    monkeypatch.setattr(signer, "find_signtool", lambda: "signtool")
+    monkeypatch.setattr(signer, "is_signed", lambda _tool, f: f.name == "ok.pyd")
+    assert signer.check_archive(Path("sidecar.exe")) == 1
+
+
+def test_the_archive_check_passes_only_with_members_to_judge(signer, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(signer, "find_signtool", lambda: "signtool")
+    monkeypatch.setattr(signer, "is_signed", lambda _tool, _f: True)
+    _fake_archive(monkeypatch, {"a/ok.pyd": b"MZ", "b/ok.dll": b"MZ"})
+    assert signer.check_archive(Path("sidecar.exe")) == 0
+    # A reader that found no PE members is not a fully signed archive.
+    _fake_archive(monkeypatch, {"data.json": b"{}"})
+    assert signer.check_archive(Path("sidecar.exe")) == 1

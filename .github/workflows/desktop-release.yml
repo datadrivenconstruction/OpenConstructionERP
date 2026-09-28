@@ -201,7 +201,16 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.ARTIFACT_SIGNING_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.ARTIFACT_SIGNING_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.ARTIFACT_SIGNING_CLIENT_SECRET }}
-        run: python scripts/setup_windows_signing.py
+        run: |
+          # A repair dispatch checks out an older tag, and a tag from before
+          # this step existed has no script to run. That tree cannot sign, so
+          # it builds exactly as it did when it was tagged.
+          if [ ! -f scripts/setup_windows_signing.py ]; then
+            echo "WINDOWS_SIGNING=off" >> "$GITHUB_ENV"
+            echo "::notice title=No signing setup in this tree::$RELEASE_REF predates scripts/setup_windows_signing.py, building unsigned."
+            exit 0
+          fi
+          python scripts/setup_windows_signing.py
 
       - name: Sign the binaries the sidecar collects (Windows)
         if: runner.os == 'Windows' && env.WINDOWS_SIGNING == 'on'
@@ -241,7 +250,13 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.ARTIFACT_SIGNING_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.ARTIFACT_SIGNING_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.ARTIFACT_SIGNING_CLIENT_SECRET }}
-        run: python scripts/sign_windows_binaries.py desktop/dist/openconstructionerp-server.exe
+        run: |
+          set -euo pipefail
+          python scripts/sign_windows_binaries.py desktop/dist/openconstructionerp-server.exe
+          # "Signed and verified" above was said about files in site-packages.
+          # This asks the archive itself whether its members kept those
+          # signatures through packing, member by member.
+          python scripts/sign_windows_binaries.py --check-archive desktop/dist/openconstructionerp-server.exe
 
       # Ad-hoc sign the sidecar here, before anything runs it, rather than in
       # the bundling job. The signature is part of the file, so it survives the
@@ -1411,7 +1426,16 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.ARTIFACT_SIGNING_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.ARTIFACT_SIGNING_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.ARTIFACT_SIGNING_CLIENT_SECRET }}
-        run: python scripts/setup_windows_signing.py
+        run: |
+          # A repair dispatch checks out an older tag, and a tag from before
+          # this step existed has no script to run. That tree cannot sign, so
+          # it builds exactly as it did when it was tagged.
+          if [ ! -f scripts/setup_windows_signing.py ]; then
+            echo "WINDOWS_SIGNING=off" >> "$GITHUB_ENV"
+            echo "::notice title=No signing setup in this tree::$RELEASE_REF predates scripts/setup_windows_signing.py, building unsigned."
+            exit 0
+          fi
+          python scripts/setup_windows_signing.py
 
       # The converters are started by the app on a user's request, so Smart
       # App Control judges them like everything else.
@@ -2031,11 +2055,34 @@ jobs:
           AZURE_KV_CLIENT_ID: ${{ secrets.AZURE_KV_CLIENT_ID }}
           AZURE_KV_CLIENT_SECRET: ${{ secrets.AZURE_KV_CLIENT_SECRET }}
           AZURE_KV_TENANT_ID: ${{ secrets.AZURE_KV_TENANT_ID }}
+          # Only emptiness is read, as for the five above.
+          ARTIFACT_SIGNING_ENDPOINT: ${{ secrets.ARTIFACT_SIGNING_ENDPOINT }}
+          ARTIFACT_SIGNING_ACCOUNT: ${{ secrets.ARTIFACT_SIGNING_ACCOUNT }}
+          ARTIFACT_SIGNING_PROFILE: ${{ secrets.ARTIFACT_SIGNING_PROFILE }}
+          ARTIFACT_SIGNING_TENANT_ID: ${{ secrets.ARTIFACT_SIGNING_TENANT_ID }}
+          ARTIFACT_SIGNING_CLIENT_ID: ${{ secrets.ARTIFACT_SIGNING_CLIENT_ID }}
+          ARTIFACT_SIGNING_CLIENT_SECRET: ${{ secrets.ARTIFACT_SIGNING_CLIENT_SECRET }}
           SIGNING_REQUIRED: ${{ vars.WINDOWS_SIGNING_REQUIRED }}
           TAG: ${{ env.RELEASE_REF }}
         shell: bash
         run: |
           set -euo pipefail
+
+          # With Artifact Signing configured, build-tauri already signed the
+          # installer (and everything inside it) before uploading it, so there
+          # is nothing left to sign here. What is left is proving it: download
+          # the published installer and verify it, the same check as below.
+          # This comes first so a release signed that way is never announced
+          # as unsigned, and WINDOWS_SIGNING_REQUIRED holds for it too.
+          as_missing=0
+          for name in ARTIFACT_SIGNING_ENDPOINT ARTIFACT_SIGNING_ACCOUNT ARTIFACT_SIGNING_PROFILE                       ARTIFACT_SIGNING_TENANT_ID ARTIFACT_SIGNING_CLIENT_ID ARTIFACT_SIGNING_CLIENT_SECRET; do
+            if [ -z "${!name:-}" ]; then as_missing=$((as_missing + 1)); fi
+          done
+          if [ "$as_missing" -eq 0 ]; then
+            echo "Artifact Signing is configured, so the installers were signed at build time. Verifying the published ones."
+            echo "mode=verify" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           names=(AZURE_KV_URL AZURE_KV_CERT_NAME AZURE_KV_CLIENT_ID AZURE_KV_CLIENT_SECRET AZURE_KV_TENANT_ID)
           missing=()
@@ -2116,7 +2163,7 @@ jobs:
         run: dotnet tool install --global AzureSignTool
 
       - name: Download Windows installers from the release
-        if: steps.preflight.outputs.mode == 'sign'
+        if: steps.preflight.outputs.mode == 'sign' || steps.preflight.outputs.mode == 'verify'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ env.RELEASE_REF }}
@@ -2196,7 +2243,7 @@ jobs:
           done
 
       - name: Verify the signatures
-        if: steps.preflight.outputs.mode == 'sign'
+        if: steps.preflight.outputs.mode == 'sign' || steps.preflight.outputs.mode == 'verify'
         shell: bash
         run: |
           set -euo pipefail

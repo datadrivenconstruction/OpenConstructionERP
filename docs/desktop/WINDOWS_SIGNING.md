@@ -24,7 +24,7 @@ So the release workflow signs from the inside out, in three places, all skipped 
 
 ### Artifact Signing secrets
 
-Azure Artifact Signing (formerly Trusted Signing) issues short-lived certificates under a Microsoft root and costs 9.99 USD a month on the Basic tier (5,000 signatures a month; one Windows release signs roughly 480 files). Public Trust is open to organisations in the EU, and to individual developers only in the US and Canada, so the account has to be opened in the company's name. Identity validation takes from one to twenty business days. Reputation for SmartScreen still builds over time, as with any certificate, but Smart App Control accepts the signature from the first release.
+Azure Artifact Signing (formerly Trusted Signing) issues short-lived certificates under a Microsoft root and costs 9.99 USD a month on the Basic tier (5,000 signatures a month, then 0.005 USD each). A release uses one signature per unsigned file it signs: every unsigned PE file in the sidecar's build environment plus the launcher, the sidecar, the converters, the NSIS plugins, the uninstaller and the installer, which is several hundred. The signing steps print the exact count, so read the first signed run before relying on the quota. Public Trust is open to organisations in the EU, and to individual developers only in the US and Canada, so the account has to be opened in the company's name. Identity validation takes from one to twenty business days. Reputation for SmartScreen still builds over time, as with any certificate, but Smart App Control accepts the signature from the first release.
 
 Create these six repository secrets under Settings, Secrets and variables, Actions:
 
@@ -41,6 +41,8 @@ The timestamp authority is `http://timestamp.acs.microsoft.com`. Do not remove i
 To check a release, install it on a test machine and run, in PowerShell, `Get-ChildItem "$env:LOCALAPPDATA\OpenConstructionERP\extract" -Recurse -Include *.exe,*.dll,*.pyd | Get-AuthenticodeSignature | Group-Object Status`. Every file should report `Valid`.
 
 The Key Vault path described in the rest of this document signs only the installers after they are published. It is kept for a certificate bought from a CA, but on its own it does not satisfy Smart App Control.
+
+When the Artifact Signing secrets are set, that job does not sign again. It downloads the published installer and runs `signtool verify /pa` on it, so `WINDOWS_SIGNING_REQUIRED` can be set to `true` with either path. Right after PyInstaller, the sidecar step also opens the onefile archive and verifies every PE member inside it, so a signature lost during packing fails the run instead of shipping.
 
 ## What is unsigned today, and how you can tell
 
