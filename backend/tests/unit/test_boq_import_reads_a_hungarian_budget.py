@@ -73,6 +73,15 @@ def test_chapter_headings_stay_sections_and_every_total_line_is_left_out(variant
 
 
 @pytest.mark.parametrize("variant", sorted(_VARIANTS))
+def test_an_unnumbered_heading_does_not_take_the_number_of_a_line(variant: str) -> None:
+    """Headings carry no "Ssz.", and a generated ordinal must not repeat a line's own."""
+    result = _parse(_VARIANTS[variant]())
+
+    ordinals = [position.ordinal for position in result.positions]
+    assert len(ordinals) == len(set(ordinals))
+
+
+@pytest.mark.parametrize("variant", sorted(_VARIANTS))
 def test_the_item_number_is_the_lines_code_and_not_its_ordinal(variant: str) -> None:
     result = _parse(_VARIANTS[variant]())
 

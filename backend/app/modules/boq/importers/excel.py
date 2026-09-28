@@ -1618,6 +1618,12 @@ def _rows_to_positions(
     if summary_rows:
         result.metadata["summary_rows"] = summary_rows
 
+    # Numbers the file writes itself. A generated ordinal steps over them: a
+    # bill that numbers its lines but not its chapter headings ("Ssz." blank
+    # on the heading row) used to give the first heading "1" beside line 1,
+    # and duplicate ordinals fail validation.
+    explicit_ordinals = {str(row.get("ordinal", "")).strip() for _, row in kept_rows} - {""}
+
     for row_idx, row in kept_rows:
         try:
             description = str(row.get("description", "")).strip()
@@ -1635,6 +1641,8 @@ def _rows_to_positions(
 
             ordinal = str(row.get("ordinal", "")).strip()
             if not ordinal:
+                while str(auto_ordinal) in explicit_ordinals:
+                    auto_ordinal += 1
                 ordinal = str(auto_ordinal)
             auto_ordinal += 1
 
