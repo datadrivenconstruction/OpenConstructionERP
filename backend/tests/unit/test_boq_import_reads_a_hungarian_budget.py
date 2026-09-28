@@ -87,7 +87,7 @@ def test_the_item_number_is_the_lines_code_and_not_its_ordinal(variant: str) -> 
 
     panel = next(p for p in result.positions if p.description == hu_boq.PANEL)
     assert panel.ordinal == "3"
-    assert panel.classification == {"code": "31-011-1.1.1"}
+    assert panel.classification == {"code": "31-011-1.1.1", "tetelrend": "31-011-1.1.1"}
 
 
 def test_the_two_row_header_rate_is_material_plus_fee_not_the_material_half() -> None:

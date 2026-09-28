@@ -1803,6 +1803,12 @@ def _rows_to_positions(
             # Heuristic classification (Epics I9 + I10).
             class_value = str(row.get("classification", "")).strip()
             classification = _infer_classification(class_value, description)
+            if header_language == "hu" and "code" in classification:
+                # The Hungarian rules read the item code from ``tetelrend``,
+                # where the workbook profile writes it. A flat bill's code is
+                # carried there too, so those rules judge the code the line
+                # has rather than report it as having none.
+                classification["tetelrend"] = classification["code"]
 
             metadata: dict[str, Any] = {"import_row_index": row_idx}
             if contingency is not None:
