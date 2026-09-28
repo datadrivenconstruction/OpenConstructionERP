@@ -110,6 +110,8 @@ from app.modules.boq.copilot_schemas import (
     CopilotChatRequest,
     CopilotChatResponse,
     CopilotMessageOut,
+    CopilotReviewRequest,
+    CopilotReviewResponse,
 )
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.importers.excel import (
@@ -3842,8 +3844,10 @@ async def ai_chat_boq(
 # A position-scoped chat: the estimator asks the copilot to refine ONE BOQ
 # position and the assistant replies with prose plus structured action
 # proposals (update_description / set_quantity / set_unit_rate / add_resources).
-# High-confidence proposals are auto-applied through BOQService.update_position;
-# the rest can be applied later via the /apply route. Ownership reuses the same
+# Chat never writes: a person accepts or rejects the proposals through the
+# /review route, which applies the accepted ones via
+# BOQService.update_position. /apply (one client-sent action) stays for API
+# compatibility. Ownership reuses the same
 # BOQ -> project check every other position route uses (a cross-tenant
 # position_id 404s/403s before any read or write).
 
@@ -3887,8 +3891,9 @@ async def chat_position_copilot(
     """Run one copilot turn for a position.
 
     Grounds the request against the cost catalogue, asks the configured AI
-    provider for structured proposals, auto-applies high-confidence actions, and
-    returns the assistant message plus the proposal list. When no AI provider is
+    provider for structured proposals, and returns the assistant message plus
+    the proposal list. Nothing is written to the position here; the proposals
+    wait for review. When no AI provider is
     configured the user message is still recorded and a friendly assistant
     message is returned with no actions (HTTP 200).
     """
@@ -3914,6 +3919,29 @@ async def apply_position_copilot_action(
     """Apply a single previously-proposed copilot action via update_position."""
     position, action = await service.apply_action(session, position_id, data.action, payload)
     return CopilotApplyResponse(position=_position_to_response(position), action=action)
+
+
+@router.post(
+    "/positions/{position_id}/copilot/review",
+    response_model=CopilotReviewResponse,
+    summary="Accept or reject position copilot proposals",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def review_position_copilot_proposals(
+    position_id: uuid.UUID,
+    data: CopilotReviewRequest,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: "BOQCopilotService" = Depends(_get_copilot_service),
+) -> CopilotReviewResponse:
+    """Apply the proposals a person accepted and dismiss the ones they rejected.
+
+    Proposals are applied from the payloads stored with the assistant turn, so
+    only what the reviewer saw can land. A locked BOQ answers 409 before any
+    write.
+    """
+    position, message = await service.review(session, position_id, data.message_id, data.accept, data.reject, payload)
+    return CopilotReviewResponse(position=_position_to_response(position), message=message)
 
 
 # ── Export (CSV / Excel) ──────────────────────────────────────────────────────

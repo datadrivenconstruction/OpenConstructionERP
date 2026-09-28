@@ -41,8 +41,6 @@ import {
   type Markup,
   type ActivityEntry,
   type CostAutocompleteItem,
-  type CopilotAction,
-  type CopilotResource,
   DEFAULT_MAX_NESTING_DEPTH,
 } from './api';
 import { resourceSplitMoneyTotals, nextResourceSplitMode, type ResourceSplitMode } from './grid/columnDefs';
@@ -1558,131 +1556,49 @@ export function BOQEditorPage() {
   };
 
   /**
-   * Mirror a copilot {@link CopilotAction} into the grid cache + undo stack via
-   * ``trackedUpdate`` so every copilot change is Ctrl+Z-undoable and the row
+   * Mirror a copilot review into the grid cache + undo stack via
+   * ``trackedUpdate`` so the accepted changes are Ctrl+Z-undoable and the row
    * repaints immediately.
    *
-   * IMPORTANT — no double-apply: the backend already persisted ``auto_applied``
-   * actions AND confirmed ``needs_review`` applies (the dock POSTs the latter
-   * to /copilot/apply itself). This handler therefore only mirrors into the
-   * client; it never issues its own write beyond the trackedUpdate PATCH that
-   * keeps the optimistic cache in sync. The PATCH is idempotent with the
-   * server's stored value, so re-sending the same after-state is safe.
-   *
-   * For ``add_resources`` we append to the position's CURRENT resources (read
-   * from the cache, not the snapshot the dock passed) and recompute unit_rate =
-   * Σ(quantity × unit_rate) over every resource — the exact rollup
-   * ``handleCostDbAddResource`` uses — so money/qty never drift.
+   * The server already wrote every accepted suggestion (the copilot never
+   * writes on its own; the user accepted these in the review list). ``after``
+   * is the server's position once ALL of them landed, so it is mirrored as ONE
+   * undo entry: the fields that differ from the cached row, old values from
+   * that row. Deriving the after-state from the server instead of re-applying
+   * each suggestion on the client keeps several suggestions accepted together
+   * (two resource additions, a rate and a quantity) from overwriting each
+   * other. The follow-up PATCH re-sends values the server already holds.
    */
-  const handleCopilotApplyAction = useCallback(
-    (action: CopilotAction, fallbackPosition: Position) => {
-      // Prefer the live cache row; fall back to the snapshot the dock handed us.
-      const pos =
-        boq?.positions.find((p) => p.id === fallbackPosition.id) ?? fallbackPosition;
-      const posId = pos.id;
+  const handleCopilotReviewApplied = useCallback(
+    (after: Position) => {
+      const next = normalizePosition(after);
+      const pos = boq?.positions.find((p) => p.id === next.id);
+      if (!pos) return;
 
-      const payload = action.payload ?? {};
-
-      const num = (bag: Record<string, unknown>, key: string): number | undefined => {
-        const v = bag[key];
-        if (typeof v === 'number' && Number.isFinite(v)) return v;
-        if (typeof v === 'string' && v.trim() !== '') {
-          const n = Number(v);
-          if (Number.isFinite(n)) return n;
-        }
-        return undefined;
-      };
-      const str = (bag: Record<string, unknown>, key: string): string | undefined => {
-        const v = bag[key];
-        return typeof v === 'string' ? v : undefined;
-      };
-
-      switch (action.action_type) {
-        case 'update_description': {
-          const description = str(payload, 'description');
-          if (description == null) return;
-          trackedUpdate(
-            posId,
-            { description },
-            { description: pos.description },
-          );
-          break;
-        }
-        case 'set_quantity': {
-          const quantity = num(payload, 'quantity');
-          if (quantity == null) return;
-          const unit = str(payload, 'unit');
-          const newData: UpdatePositionData = { quantity };
-          const oldData: UpdatePositionData = { quantity: pos.quantity };
-          if (unit != null && unit !== pos.unit) {
-            newData.unit = unit;
-            oldData.unit = pos.unit;
-          }
-          trackedUpdate(posId, newData, oldData);
-          break;
-        }
-        case 'set_unit_rate': {
-          const unitRate = num(payload, 'unit_rate');
-          if (unitRate == null) return;
-          const currency = str(payload, 'currency');
-          const newData: UpdatePositionData = { unit_rate: unitRate };
-          const oldData: UpdatePositionData = { unit_rate: pos.unit_rate };
-          // A catalog price carries its own currency — stamp it onto metadata
-          // so the row prices in the catalog's native currency (same contract
-          // as handleCostDbAddResource's currencyStamp).
-          if (currency && currency.trim()) {
-            newData.metadata = { ...(pos.metadata ?? {}), currency };
-            oldData.metadata = pos.metadata ?? {};
-          }
-          trackedUpdate(posId, newData, oldData);
-          break;
-        }
-        case 'add_resources': {
-          const incoming = Array.isArray(payload.resources)
-            ? (payload.resources as CopilotResource[])
-            : [];
-          if (incoming.length === 0) return;
-          const existing = [
-            ...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>),
-          ];
-          const newResources: Array<Record<string, unknown>> = incoming.map((r) => {
-            const quantity = Number(r.quantity) || 0;
-            const unitRate = Number(r.unit_rate) || 0;
-            const entry: Record<string, unknown> = {
-              name: r.name,
-              type: r.type || 'material',
-              unit: r.unit,
-              quantity,
-              unit_rate: unitRate,
-              total: Math.round(quantity * unitRate * 100) / 100,
-            };
-            if (r.code) entry.code = r.code;
-            if (r.currency && r.currency.trim()) entry.currency = r.currency;
-            return entry;
-          });
-          const merged = [...existing, ...newResources];
-          // Recompute unit_rate = Σ(quantity × unit_rate) over ALL resources —
-          // identical to handleCostDbAddResource so the rollup stays correct.
-          let computedRate = 0;
-          for (const r of merged) {
-            computedRate +=
-              ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0);
-          }
-          computedRate = Math.round(computedRate * 100) / 100;
-          const newMeta: Record<string, unknown> = {
-            ...(pos.metadata ?? {}),
-            resources: merged,
-          };
-          trackedUpdate(
-            posId,
-            { unit_rate: computedRate, metadata: newMeta },
-            { unit_rate: pos.unit_rate, metadata: pos.metadata ?? {} },
-          );
-          break;
-        }
-        default:
-          break;
+      const newData: UpdatePositionData = {};
+      const oldData: UpdatePositionData = {};
+      if (next.description !== pos.description) {
+        newData.description = next.description;
+        oldData.description = pos.description;
       }
+      if (next.unit !== pos.unit) {
+        newData.unit = next.unit;
+        oldData.unit = pos.unit;
+      }
+      if (next.quantity !== pos.quantity) {
+        newData.quantity = next.quantity;
+        oldData.quantity = pos.quantity;
+      }
+      if (next.unit_rate !== pos.unit_rate) {
+        newData.unit_rate = next.unit_rate;
+        oldData.unit_rate = pos.unit_rate;
+      }
+      if (JSON.stringify(next.metadata ?? {}) !== JSON.stringify(pos.metadata ?? {})) {
+        newData.metadata = next.metadata ?? {};
+        oldData.metadata = pos.metadata ?? {};
+      }
+      if (Object.keys(newData).length === 0) return;
+      trackedUpdate(next.id, newData, oldData);
     },
     [boq?.positions, trackedUpdate],
   );
@@ -1705,11 +1621,11 @@ export function BOQEditorPage() {
           position={pos}
           isOpen
           onClose={() => setAiCopilotOpen(false)}
-          onApplyAction={handleCopilotApplyAction}
+          onReviewApplied={handleCopilotReviewApplied}
         />
       );
     },
-    [boqId, boq?.positions, handleCopilotApplyAction],
+    [boqId, boq?.positions, handleCopilotReviewApplied],
   );
 
   /* ── Batch action handlers ──────────────────────────────────────── */

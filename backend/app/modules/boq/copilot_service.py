@@ -20,12 +20,15 @@ candidate's resource ``components``). The prompt forbids invented prices; an
 action that cites no provided code is still surfaced, but priced actions carry
 the catalogue row in ``source`` so the user can verify provenance.
 
-Confidence gates (per the platform contract):
-
-* ``>= 0.85`` -> auto-apply during chat (status ``auto_applied``)
-* ``0.65 - 0.85`` -> ``needs_review`` (proposed, not applied)
-* ``< 0.65``  -> ``needs_review`` as well (kept, never silently dropped); the
-  frontend may grey out / hide sub-0.65 proposals.
+Human confirmation (per the platform contract: AI suggests, a person confirms).
+``chat`` never writes to the position. Every proposal comes back
+``needs_review`` with its confidence, whatever that confidence is; the estimator
+then accepts or rejects proposals through ``review``, which applies only the
+accepted ones, from the payloads stored with the assistant turn. Confidence
+only decides what the UI preselects for review (``PRESELECT_THRESHOLD``).
+Threads written before 18.1 may still carry ``auto_applied`` proposals from the
+time the copilot applied high-confidence edits on its own; they are read back
+as history and never produced again.
 
 Tenant safety. Reads and applies go through ``_load_position_scoped``, which
 reuses the exact BOQ -> project ownership check the position routes use
@@ -62,19 +65,19 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Confidence thresholds (platform contract).
-AUTO_APPLY_THRESHOLD = 0.85
+# Confidence at or above which the review list preselects a proposal. It is a
+# hint for the reviewer, never a write: nothing is applied until a person
+# accepts it. The frontend mirrors this value.
+PRESELECT_THRESHOLD = 0.85
 REVIEW_THRESHOLD = 0.65
 
-# ``Position.source`` values written by the two copilot write paths. The caller
-# is the only thing that tells them apart, so the value has to be passed down
-# rather than derived from the action: the same proposal, on the same field,
-# reaches the same builder whether the copilot applied it unattended or an
-# estimator read it and pressed apply.
-#: Applied by the copilot alone, on the model's self-reported confidence.
-SOURCE_AUTO_APPLIED = "ai_copilot_auto"
-#: Proposed by the copilot, read and accepted by a person.
+#: ``Position.source`` for a proposal a person read and accepted. Rows written
+#: before 18.1 may also carry ``ai_copilot_auto`` (applied by the copilot on its
+#: own); that value is no longer written.
 SOURCE_HUMAN_ACCEPTED = "ai_copilot_accepted"
+
+# Upper bound on proposals one review request may touch (a turn holds a handful).
+_MAX_REVIEW_ITEMS = 50
 
 # How many sibling positions to feed the model for context.
 _MAX_SIBLINGS = 6
@@ -475,10 +478,8 @@ def _position_update_for(
     from the resource breakdown (its trigger is "resources list changed").
 
     Every update carries ``source`` and ``confidence`` so the row records that
-    the copilot wrote it. ``source`` comes from the caller because that is the
-    only thing distinguishing the two write paths; ``confidence`` is the model's
-    own figure for this proposal, the same number the auto-apply gate compared
-    against.
+    the copilot proposed it and a person accepted it; ``confidence`` is the
+    model's own figure for this proposal.
     """
     at = action.action_type
     payload = action.payload
@@ -638,9 +639,10 @@ class BOQCopilotService:
         """Run one copilot turn for a position.
 
         Verifies ownership, grounds against the cost catalogue, asks the model
-        for STRICT JSON proposals, auto-applies high-confidence actions through
-        ``update_position``, persists the user + assistant turns, and returns the
-        assistant turn plus the proposal list.
+        for STRICT JSON proposals, persists the user + assistant turns, and
+        returns the assistant turn plus the proposal list. It never writes to
+        the position: every proposal is ``needs_review`` until a person accepts
+        it through :meth:`review`.
 
         When no AI provider is configured the user turn is still persisted and a
         friendly assistant message is returned with no actions (HTTP 200) - the
@@ -739,7 +741,8 @@ class BOQCopilotService:
                 actions=[],
             )
 
-        # Build validated proposals, then apply the high-confidence ones.
+        # Build validated proposals. None of them is applied here, whatever the
+        # model's confidence: a person accepts or rejects each one in review.
         proposals: list[CopilotActionProposal] = []
         for raw_action in raw_actions:
             if not isinstance(raw_action, dict):
@@ -752,22 +755,6 @@ class BOQCopilotService:
             )
             if proposal is None:
                 continue
-            if proposal.confidence >= AUTO_APPLY_THRESHOLD:
-                # Auto-apply, wrapped so one failure never fails the whole chat.
-                try:
-                    await self._apply_via_service(position_id, proposal, user_id, source=SOURCE_AUTO_APPLIED)
-                    proposal.status = "auto_applied"
-                    # Refresh the in-memory position so a second action in the
-                    # same turn sees the latest resources/quantity.
-                    refreshed = await self.session.get(type(position), position_id)
-                    if refreshed is not None:
-                        position = refreshed
-                except Exception as exc:  # noqa: BLE001 - per-action isolation
-                    logger.warning("copilot auto-apply failed for position %s: %s", position_id, exc)
-                    proposal.status = "failed"
-                    proposal.error = str(exc)[:300]
-            else:
-                proposal.status = "needs_review"
             proposals.append(proposal)
 
         assistant_row = await self._persist(
@@ -837,6 +824,127 @@ class BOQCopilotService:
             current = await self._load_position_scoped(position_id, user)
             return current, action
 
+    async def review(
+        self,
+        session: AsyncSession,
+        position_id: uuid.UUID,
+        message_id: uuid.UUID,
+        accept: list[int],
+        reject: list[int],
+        user: dict[str, Any],
+    ) -> tuple[Position, CopilotMessageOut]:
+        """Apply the accepted proposals of one assistant turn, dismiss the rejected ones.
+
+        Proposals are addressed by their index in the stored assistant turn and
+        applied from the STORED payload, so what lands on the position is exactly
+        what the reviewer saw, not something a client re-sent. Only proposals
+        still ``needs_review`` (or ``failed``, for a retry) are touched, which
+        makes a repeated request a no-op instead of a second write. Each apply
+        runs in its own savepoint: one failing proposal is stamped ``failed``
+        with an error note and the others still land.
+
+        The new status of every touched proposal is written back onto the stored
+        turn, so a reopened thread shows what was applied or rejected rather
+        than offering the same suggestion again.
+
+        Raises:
+            HTTPException 404: position or message not found / not the caller's.
+            HTTPException 409: the BOQ is locked (checked before any write).
+            HTTPException 422: an index is out of range, or both accepted and rejected.
+        """
+        from app.modules.boq.models import Position
+        from app.modules.boq.service import BOQService
+
+        position = await self._load_position_scoped(position_id, user)
+        row = await self.session.get(PositionCopilotMessage, message_id)
+        if row is None or row.position_id != position.id or row.role != "assistant":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Copilot message not found",
+            )
+
+        stored = list(row.actions) if isinstance(row.actions, list) else []
+        accept_set, reject_set = set(accept), set(reject)
+        if accept_set & reject_set:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="A proposal cannot be both accepted and rejected",
+            )
+        if len(accept_set | reject_set) > _MAX_REVIEW_ITEMS or any(
+            i < 0 or i >= len(stored) for i in accept_set | reject_set
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Unknown proposal index",
+            )
+
+        # A locked bill refuses the whole review up front; checked here, the 409
+        # would otherwise be caught per proposal and reported as a failed item.
+        await BOQService(self.session)._ensure_boq_writable(position.boq_id)
+
+        user_id = self._user_uuid(user)
+        # ``add_resources`` appends, so applying it twice doubles the resources.
+        # Its ``before.resource_count`` says how many the position had when it
+        # was proposed; if that no longer holds, the suggestion is stale.
+        # Compared against the count at the START of this review so two
+        # proposals from the same turn can both be accepted together.
+        meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
+        start_resources = meta.get("resources")
+        start_count = len(start_resources) if isinstance(start_resources, list) else 0
+
+        # Parse every addressed proposal before writing anything, so an
+        # unreadable one refuses the request instead of cutting it short.
+        proposals: dict[int, CopilotActionProposal] = {}
+        for idx in accept_set | reject_set:
+            try:
+                proposals[idx] = CopilotActionProposal.model_validate(stored[idx])
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Stored proposal cannot be read",
+                ) from exc
+
+        updated_actions: list[Any] = list(stored)
+        for idx in sorted(proposals):
+            proposal = proposals[idx]
+            if proposal.status not in ("needs_review", "failed"):
+                continue
+
+            if idx in reject_set:
+                proposal.status = "dismissed"
+                proposal.error = ""
+            elif (
+                proposal.action_type == "add_resources"
+                and "resource_count" in proposal.before
+                and _coerce_number(proposal.before.get("resource_count")) != start_count
+            ):
+                proposal.status = "failed"
+                proposal.error = "The position's resources changed since this suggestion. Ask the copilot again."
+            else:
+                try:
+                    async with self.session.begin_nested():
+                        await self._apply_via_service(position_id, proposal, user_id, source=SOURCE_HUMAN_ACCEPTED)
+                    proposal.status = "applied"
+                    proposal.error = ""
+                except Exception as exc:  # noqa: BLE001 - per-proposal isolation
+                    logger.warning("copilot review apply failed for position %s: %s", position_id, exc)
+                    proposal.status = "failed"
+                    detail = exc.detail if isinstance(exc, HTTPException) else exc
+                    proposal.error = str(detail)[:300]
+            updated_actions[idx] = proposal.model_dump(mode="json")
+
+        # A new list, so the JSON column is seen as changed.
+        row.actions = updated_actions
+        await self.session.flush()
+        await self.session.commit()
+
+        refreshed = await self.session.get(Position, position_id)
+        if refreshed is None:  # pragma: no cover - the row was loaded above
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+        await self.session.refresh(refreshed)
+        await self.session.refresh(row)
+        return refreshed, self._to_message_out(row)
+
     async def _apply_via_service(
         self,
         position_id: uuid.UUID,
@@ -846,8 +954,7 @@ class BOQCopilotService:
     ) -> Position:
         """Translate a proposal to a ``PositionUpdate`` and run the write path.
 
-        ``source`` says which path is writing: both the unattended auto-apply and
-        the human accept land here, and the row cannot tell them apart otherwise.
+        ``source`` is the ``Position.source`` value to stamp on the row.
         """
         from app.modules.boq.models import Position
         from app.modules.boq.service import BOQService

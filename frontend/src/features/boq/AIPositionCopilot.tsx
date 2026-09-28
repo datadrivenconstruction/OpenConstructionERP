@@ -35,13 +35,12 @@ interface AIPositionCopilotProps {
   isOpen: boolean;
   onClose: () => void;
   /**
-   * Mirror an action into the grid cache + undo stack. Called for every
-   * ``auto_applied`` action on chat success (server already persisted it — do
-   * NOT re-POST) and after a confirmed ``needs_review`` apply. The dock passes
-   * back the freshest ``position`` it knows so the handler can append resources
-   * onto the right base.
+   * Called after a review applied at least one accepted action. ``position``
+   * is the server's position after ALL accepted actions of that review; the
+   * editor mirrors it into the grid cache + undo stack in one step, so one
+   * Ctrl+Z reverts the whole review. The server already persisted the change.
    */
-  onApplyAction: (action: CopilotAction, position: Position) => void;
+  onReviewApplied: (position: Position) => void;
   /**
    * Layout mode. ``dock`` (default) renders the standalone card with its own
    * rounded shell and top margin. ``inline`` renders to fill a fixed-height
@@ -66,7 +65,17 @@ interface DockMessage {
   actions?: CopilotAction[] | null;
 }
 
-const AUTO_APPLY_THRESHOLD = 0.85;
+/**
+ * Confidence at or above which a fresh suggestion starts checked in the review
+ * list. Only a preselection: nothing is written until the user applies it.
+ * Mirrors ``PRESELECT_THRESHOLD`` in backend ``copilot_service.py``.
+ */
+const PRESELECT_THRESHOLD = 0.85;
+
+/** Still waiting for a decision (``failed`` stays open so it can be retried). */
+function isPending(action: CopilotAction): boolean {
+  return action.status === 'needs_review' || action.status === 'failed';
+}
 
 /**
  * Per-position input drafts, kept at module scope so a half-typed message
@@ -115,7 +124,7 @@ export function AIPositionCopilot({
   position,
   isOpen,
   onClose,
-  onApplyAction,
+  onReviewApplied,
   variant = 'dock',
 }: AIPositionCopilotProps) {
   const { t } = useTranslation();
@@ -123,21 +132,15 @@ export function AIPositionCopilot({
 
   const [messages, setMessages] = useState<DockMessage[]>([]);
   const [inputValue, setInputValue] = useState(() => draftCache.get(positionId) ?? '');
-  /** Actions the user dismissed locally (key = `${messageId}:${index}`). */
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  /** Actions confirmed via Apply this session (so the card flips to Applied). */
-  const [appliedKeys, setAppliedKeys] = useState<Set<string>>(new Set());
-  /** Actions whose server-apply is in flight (buttons show a pending state). */
-  const [applyingKeys, setApplyingKeys] = useState<Set<string>>(new Set());
+  /** Checked suggestions (key = `${messageId}:${index}`) for "Apply selected". */
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  /** Assistant turns whose review request is in flight (their buttons wait). */
+  const [reviewingIds, setReviewingIds] = useState<Set<string>>(new Set());
+  /** Suggestions applied in this session: only these are on the undo stack. */
+  const [undoableKeys, setUndoableKeys] = useState<Set<string>>(new Set());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  /** Latest position — kept in a ref so onApplyAction always sees the freshest
-   *  base when appending resources, even across async chat resolution. */
-  const positionRef = useRef<Position | null>(position);
-  useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
 
   /* ── History (replayed when the dock opens for a position) ─────────── */
 
@@ -173,9 +176,11 @@ export function AIPositionCopilot({
         actions: m.actions,
       })),
     );
-    setDismissed(new Set());
-    setAppliedKeys(new Set());
-    setApplyingKeys(new Set());
+    // Replayed history starts with nothing checked: an old suggestion is only
+    // applied when the user picks it again, never by a leftover default.
+    setSelected(new Set());
+    setReviewingIds(new Set());
+    setUndoableKeys(new Set());
   }, [historyQuery.data, isOpen, positionId]);
 
   // Auto-scroll to the newest row.
@@ -206,26 +211,25 @@ export function AIPositionCopilot({
       setMessages((prev) => prev.filter((m) => m.role !== 'loading'));
       const assistant = response.assistant_message;
       const actions = response.actions ?? assistant.actions ?? [];
+      const messageId = assistant.id || `assistant-${Date.now()}`;
       setMessages((prev) => [
         ...prev,
         {
-          id: assistant.id || `assistant-${Date.now()}`,
+          id: messageId,
           role: 'assistant',
           content: assistant.content,
           actions,
         },
       ]);
 
-      // Auto-applied actions were ALREADY persisted server-side — do NOT
-      // re-POST. Mirror them into the grid cache + undo stack so Ctrl+Z works
-      // and the row repaints with the new value.
-      const base = positionRef.current;
-      if (base) {
-        for (const action of actions) {
-          if (action.status === 'auto_applied') {
-            onApplyAction(action, base);
-          }
-        }
+      // Nothing was written: every suggestion waits for review. Preselect the
+      // high-confidence ones of THIS turn so accepting them is one click.
+      const preselect = actions
+        .map((a, idx) => ({ a, idx }))
+        .filter(({ a }) => a.status === 'needs_review' && (a.confidence ?? 0) >= PRESELECT_THRESHOLD)
+        .map(({ idx }) => `${messageId}:${idx}`);
+      if (preselect.length > 0) {
+        setSelected((prev) => new Set([...prev, ...preselect]));
       }
 
       // Persisted history now diverges from our optimistic transcript — let the
@@ -252,49 +256,54 @@ export function AIPositionCopilot({
     },
   });
 
-  /* ── Apply mutation (confirmed needs_review actions) ───────────────── */
+  /* ── Review mutation (the user accepts / rejects suggestions) ──────── */
 
-  const applyMutation = useMutation({
-    mutationFn: ({ action }: { action: CopilotAction; key: string }) =>
-      boqApi.positionCopilotApply(positionId, action),
-    onSuccess: (response, { action, key }) => {
-      // The apply endpoint returns HTTP 200 even when the change could not be
-      // persisted: it rolls the write back and reports status="failed" with an
-      // error note. Only treat a genuinely-applied action as applied, otherwise
-      // the card would flip to a green "Applied" badge over a write that never
-      // landed (and push a phantom undo entry).
-      const applied = response.action ?? action;
-      setApplyingKeys((prev) => {
+  const reviewMutation = useMutation({
+    mutationFn: ({
+      messageId,
+      accept,
+      reject,
+    }: {
+      messageId: string;
+      accept: number[];
+      reject: number[];
+      /** The turn's actions as shown when the user decided (to spot changes). */
+      before: CopilotAction[];
+    }) => boqApi.positionCopilotReview(positionId, messageId, accept, reject),
+    onSuccess: (response, { messageId, before }) => {
+      const after = response.message.actions ?? [];
+      // Swap in the server's statuses: applied, dismissed, or failed with a
+      // note on the card. A failed one stays open so the user can retry it.
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, actions: after } : m)),
+      );
+      const touched = after
+        .map((a, idx) => ({ a, idx }))
+        .filter(({ a, idx }) => a.status !== before[idx]?.status);
+      setSelected((prev) => {
         const next = new Set(prev);
-        next.delete(key);
+        for (const { a, idx } of touched) {
+          if (!isPending(a)) next.delete(`${messageId}:${idx}`);
+        }
         return next;
       });
-      if (applied.status === 'failed') {
-        const detail =
-          applied.error ||
-          t('boq.copilot.apply_failed', { defaultValue: 'Could not apply this change.' });
-        setMessages((prev) => [
-          ...prev,
-          { id: `error-${Date.now()}`, role: 'error', content: detail },
-        ]);
-        return;
+      const newlyApplied = touched.filter(({ a }) => a.status === 'applied');
+      if (newlyApplied.length > 0) {
+        setUndoableKeys((prev) => {
+          const next = new Set(prev);
+          for (const { idx } of newlyApplied) next.add(`${messageId}:${idx}`);
+          return next;
+        });
+        onReviewApplied(response.position);
       }
-      const base = positionRef.current;
-      if (base) {
-        // Use the server-returned action (status flipped to "applied") so the
-        // mirror writes the authoritative after-state.
-        onApplyAction(applied, base);
-      }
-      setAppliedKeys((prev) => new Set(prev).add(key));
+      // The stored thread now carries the new statuses; the next open re-pulls
+      // it, but don't refetch now (would clobber the local transcript).
+      queryClient.invalidateQueries({
+        queryKey: ['boq-position-copilot', boqId, positionId],
+        refetchType: 'none',
+      });
     },
-    onError: (error: unknown, { key }) => {
-      // Re-enable the card's buttons so the user can retry, and surface the
-      // failure as an error bubble.
-      setApplyingKeys((prev) => {
-        const next = new Set(prev);
-        next.delete(key);
-        return next;
-      });
+    onError: (error: unknown) => {
       const detail =
         error instanceof ApiError
           ? error.message
@@ -303,6 +312,13 @@ export function AIPositionCopilot({
         ...prev,
         { id: `error-${Date.now()}`, role: 'error', content: detail },
       ]);
+    },
+    onSettled: (_data, _error, { messageId }) => {
+      setReviewingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(messageId);
+        return next;
+      });
     },
   });
 
@@ -334,19 +350,23 @@ export function AIPositionCopilot({
     [send, inputValue],
   );
 
-  const handleApply = useCallback(
-    (action: CopilotAction, key: string) => {
-      if (applyMutation.isPending) return;
-      // Mark this card as applying so its buttons show a pending state; the
-      // mutation clears it and flips to applied (or re-enables) on settle.
-      setApplyingKeys((prev) => new Set(prev).add(key));
-      applyMutation.mutate({ action, key });
+  /** Send one review decision for an assistant turn (indices into its actions). */
+  const review = useCallback(
+    (messageId: string, before: CopilotAction[], accept: number[], reject: number[]) => {
+      if (reviewMutation.isPending || (accept.length === 0 && reject.length === 0)) return;
+      setReviewingIds((prev) => new Set(prev).add(messageId));
+      reviewMutation.mutate({ messageId, accept, reject, before });
     },
-    [applyMutation],
+    [reviewMutation],
   );
 
-  const handleDismiss = useCallback((key: string) => {
-    setDismissed((prev) => new Set(prev).add(key));
+  const toggleSelected = useCallback((key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   }, []);
 
   const isNoApiKey = useMemo(
@@ -549,22 +569,15 @@ export function AIPositionCopilot({
                   </p>
                 )}
                 {msg.actions && msg.actions.length > 0 && (
-                  <div className="space-y-2">
-                    {msg.actions.map((action, idx) => {
-                      const key = `${msg.id}:${idx}`;
-                      return (
-                        <ActionCard
-                          key={key}
-                          action={action}
-                          locallyApplied={appliedKeys.has(key)}
-                          locallyDismissed={dismissed.has(key)}
-                          applying={applyingKeys.has(key)}
-                          onApply={() => handleApply(action, key)}
-                          onDismiss={() => handleDismiss(key)}
-                        />
-                      );
-                    })}
-                  </div>
+                  <ReviewList
+                    messageId={msg.id}
+                    actions={msg.actions}
+                    selected={selected}
+                    undoableKeys={undoableKeys}
+                    busy={reviewingIds.has(msg.id)}
+                    onToggle={toggleSelected}
+                    onReview={(accept, reject) => review(msg.id, msg.actions ?? [], accept, reject)}
+                  />
                 )}
               </div>
             </div>
@@ -621,42 +634,153 @@ export function AIPositionCopilot({
   );
 }
 
+/* ── Review list (one assistant turn) ───────────────────────────────── */
+
+interface ReviewListProps {
+  messageId: string;
+  actions: CopilotAction[];
+  /** Checked suggestions across the thread (key = `${messageId}:${index}`). */
+  selected: Set<string>;
+  /** Suggestions applied in this session (their undo is on the Ctrl+Z stack). */
+  undoableKeys: Set<string>;
+  /** A review request for this turn is in flight: every button waits. */
+  busy: boolean;
+  onToggle: (key: string) => void;
+  /** Accept / reject by index into ``actions``; indices in neither list stay open. */
+  onReview: (accept: number[], reject: number[]) => void;
+}
+
+/**
+ * The suggestions of one assistant turn as a review list. Nothing is written
+ * until the user decides: per suggestion Accept / Reject, or, when more than
+ * one is open, Accept all / Reject all and Apply selected for the checked ones.
+ * High-confidence suggestions of a fresh turn arrive checked.
+ */
+function ReviewList({
+  messageId,
+  actions,
+  selected,
+  undoableKeys,
+  busy,
+  onToggle,
+  onReview,
+}: ReviewListProps) {
+  const { t } = useTranslation();
+
+  const pendingIdx = actions.map((a, idx) => (isPending(a) ? idx : -1)).filter((idx) => idx >= 0);
+  const selectedIdx = pendingIdx.filter((idx) => selected.has(`${messageId}:${idx}`));
+  const showBulk = pendingIdx.length > 1;
+
+  return (
+    <div className="space-y-2" data-testid="copilot-review-list">
+      {pendingIdx.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-2xs font-semibold uppercase tracking-wide text-content-secondary">
+              {t('boq.copilot.review_title', { defaultValue: 'Suggested changes' })}
+            </p>
+            <p className="text-2xs text-content-tertiary">
+              {t('boq.copilot.review_hint', {
+                defaultValue: 'Nothing changes until you accept. Confident suggestions are preselected.',
+              })}
+            </p>
+          </div>
+          {showBulk && (
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => onReview(pendingIdx, [])}
+                disabled={busy}
+                className="rounded-md border border-oe-blue/40 px-2 py-0.5 text-2xs font-semibold text-oe-blue hover:bg-oe-blue-subtle/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {t('boq.copilot.accept_all', { defaultValue: 'Accept all' })}
+              </button>
+              <button
+                type="button"
+                onClick={() => onReview([], pendingIdx)}
+                disabled={busy}
+                className="rounded-md px-2 py-0.5 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {t('boq.copilot.reject_all', { defaultValue: 'Reject all' })}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {actions.map((action, idx) => {
+        const key = `${messageId}:${idx}`;
+        return (
+          <ActionCard
+            key={key}
+            action={action}
+            showCheckbox={showBulk}
+            checked={selected.has(key)}
+            undoable={undoableKeys.has(key)}
+            busy={busy}
+            onToggle={() => onToggle(key)}
+            onAccept={() => onReview([idx], [])}
+            onReject={() => onReview([], [idx])}
+          />
+        );
+      })}
+
+      {showBulk && (
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => onReview(selectedIdx, [])}
+            disabled={busy || selectedIdx.length === 0}
+            className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white hover:bg-oe-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <Check size={11} strokeWidth={3} />
+            {busy
+              ? t('boq.copilot.applying', { defaultValue: 'Applying…' })
+              : t('boq.copilot.apply_selected', { defaultValue: 'Apply selected' })}
+            <span className="rounded-full bg-white/20 px-1.5 tabular-nums">{selectedIdx.length}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Action card ────────────────────────────────────────────────────── */
 
 interface ActionCardProps {
   action: CopilotAction;
-  /** Confirmed via Apply this session (overrides server status for the badge). */
-  locallyApplied: boolean;
-  /** Dismissed locally this session (the user clicked Dismiss). */
-  locallyDismissed: boolean;
-  /** Server-apply in flight for THIS card (buttons show a pending state). */
-  applying: boolean;
-  onApply: () => void;
-  onDismiss: () => void;
+  /** Show the selection checkbox (only when the turn has several open items). */
+  showCheckbox: boolean;
+  checked: boolean;
+  /** Applied in this session, so Ctrl+Z reverts it. */
+  undoable: boolean;
+  /** A review request for this turn is in flight. */
+  busy: boolean;
+  onToggle: () => void;
+  onAccept: () => void;
+  onReject: () => void;
 }
 
 function ActionCard({
   action,
-  locallyApplied,
-  locallyDismissed,
-  applying,
-  onApply,
-  onDismiss,
+  showCheckbox,
+  checked,
+  undoable,
+  busy,
+  onToggle,
+  onAccept,
+  onReject,
 }: ActionCardProps) {
   const { t } = useTranslation();
 
-  const isApplied =
-    locallyApplied || action.status === 'auto_applied' || action.status === 'applied';
+  // ``auto_applied`` only exists in threads stored before 18.1.
+  const autoApplied = action.status === 'auto_applied';
+  const isApplied = autoApplied || action.status === 'applied';
   const isFailed = action.status === 'failed';
-  const isDismissed = locallyDismissed || action.status === 'dismissed';
-  // A confirm card the user can still act on: server says needs_review AND we
-  // haven't locally applied/dismissed it. While ``applying`` the buttons stay
-  // visible but disabled (pending state).
-  const needsReview =
-    action.status === 'needs_review' && !locallyApplied && !isDismissed;
+  const isDismissed = action.status === 'dismissed';
+  const pending = isPending(action);
 
   const confidencePct = Math.round((action.confidence ?? 0) * 100);
-  const autoApplied = action.status === 'auto_applied';
 
   const { title, before, after } = describeAction(action, t);
   const sourceCode = action.source?.code;
@@ -664,22 +788,37 @@ function ActionCard({
 
   return (
     <div
+      data-testid="copilot-action-card"
       className={`rounded-lg border px-3 py-2.5 ${
         isFailed
           ? 'border-semantic-error/40 bg-semantic-error-bg/40'
           : isApplied
             ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-800/60 dark:bg-emerald-900/15'
-            : 'border-border-light bg-surface-primary'
+            : isDismissed
+              ? 'border-border-light bg-surface-secondary/40 opacity-70'
+              : 'border-border-light bg-surface-primary'
       }`}
     >
-      {/* Top row: title + confidence */}
+      {/* Top row: checkbox + title + confidence */}
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-          {title}
-        </span>
+        <label className="flex min-w-0 items-center gap-2">
+          {showCheckbox && pending && (
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={onToggle}
+              disabled={busy}
+              aria-label={t('boq.copilot.select_change', { defaultValue: 'Select this change' })}
+              className="h-3.5 w-3.5 shrink-0 accent-oe-blue"
+            />
+          )}
+          <span className="truncate text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+            {title}
+          </span>
+        </label>
         <span
-          className={`rounded-full px-1.5 py-0.5 text-2xs font-semibold tabular-nums ${
-            confidencePct >= AUTO_APPLY_THRESHOLD * 100
+          className={`shrink-0 rounded-full px-1.5 py-0.5 text-2xs font-semibold tabular-nums ${
+            (action.confidence ?? 0) >= PRESELECT_THRESHOLD
               ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
               : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
           }`}
@@ -711,7 +850,17 @@ function ActionCard({
         </div>
       )}
 
-      {/* Footer: status / actions */}
+      {/* Why the last attempt did not land (kept open for a retry). */}
+      {isFailed && (
+        <div className="mt-1.5 flex items-start gap-1 text-2xs text-semantic-error">
+          <AlertCircle size={11} className="mt-px shrink-0" />
+          <span>
+            {action.error || t('boq.copilot.failed', { defaultValue: 'Could not be applied' })}
+          </span>
+        </div>
+      )}
+
+      {/* Footer: status / decision */}
       <div className="mt-2 flex items-center gap-2">
         {isApplied && (
           <span className="inline-flex items-center gap-1 text-2xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -721,42 +870,37 @@ function ActionCard({
               : t('boq.copilot.applied', { defaultValue: 'Applied' })}
           </span>
         )}
-        {isApplied && (
+        {undoable && (
           <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
             <Undo2 size={11} />
             {t('boq.copilot.undo_hint', { defaultValue: 'Press Ctrl+Z to undo' })}
           </span>
         )}
-        {needsReview && (
+        {pending && (
           <>
             <button
-              onClick={onApply}
-              disabled={applying}
+              type="button"
+              onClick={onAccept}
+              disabled={busy}
               className="inline-flex items-center gap-1 rounded-md bg-oe-blue px-2.5 py-1 text-2xs font-semibold text-white hover:bg-oe-blue-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <Check size={11} strokeWidth={3} />
-              {applying
-                ? t('boq.copilot.applying', { defaultValue: 'Applying…' })
-                : t('boq.copilot.apply', { defaultValue: 'Apply' })}
+              {t('boq.copilot.accept', { defaultValue: 'Accept' })}
             </button>
             <button
-              onClick={onDismiss}
-              disabled={applying}
-              className="rounded-md px-2.5 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+              type="button"
+              onClick={onReject}
+              disabled={busy}
+              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {t('boq.copilot.dismiss', { defaultValue: 'Dismiss' })}
+              <X size={11} />
+              {t('boq.copilot.reject', { defaultValue: 'Reject' })}
             </button>
           </>
         )}
-        {!needsReview && !isApplied && isDismissed && !isFailed && (
+        {isDismissed && (
           <span className="text-2xs text-content-tertiary">
             {t('boq.copilot.dismissed', { defaultValue: 'Dismissed' })}
-          </span>
-        )}
-        {isFailed && (
-          <span className="inline-flex items-center gap-1 text-2xs text-semantic-error">
-            <AlertCircle size={11} />
-            {t('boq.copilot.failed', { defaultValue: 'Could not be applied' })}
           </span>
         )}
       </div>

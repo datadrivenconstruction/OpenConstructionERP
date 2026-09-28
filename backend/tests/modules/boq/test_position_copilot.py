@@ -7,15 +7,19 @@ teardown), with the LLM (``call_ai``) and the catalogue matcher
 
 Coverage:
 
-* a high-confidence proposal is auto-applied and mutates the position;
-* a mid-confidence proposal is returned for review and does NOT mutate;
+* chat never writes: even a high-confidence proposal comes back
+  ``needs_review`` and the position is untouched;
 * the no-AI-key path returns a friendly assistant message with no actions
   (the HTTP layer maps this to 200) and still records the user turn;
-* a cross-tenant ``position_id`` is rejected (403) before any read/apply;
-* an ``add_resources`` action recomputes ``unit_rate`` from the resource
+* a cross-tenant ``position_id`` is rejected (404) before any read/apply/review;
+* review applies only the accepted proposals, from the stored payloads, marks
+  the rejected ones dismissed, and records the statuses on the stored turn;
+* a repeated review is a no-op, a stale ``add_resources`` is refused, and a
+  locked BOQ answers 409 with nothing written;
+* an accepted ``add_resources`` recomputes ``unit_rate`` from the resource
   breakdown via the real ``update_position`` write path;
-* both write paths record who wrote the row: the unattended auto-apply and the
-  human accept stamp different ``source`` values and both store the confidence.
+* both human write paths stamp ``ai_copilot_accepted`` and the confidence;
+* the review route requires ``boq.update``.
 
 Run:
     cd backend
@@ -162,11 +166,12 @@ def _match_result(code: str, *, unit_rate: float, currency: str = "EUR") -> Any:
 
 
 @pytest.mark.asyncio
-async def test_high_confidence_auto_applies_and_mutates(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
-    """confidence >= 0.85 -> applied during chat; the position is mutated."""
+async def test_high_confidence_is_proposed_not_applied(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """confidence >= 0.85 is still only a proposal: chat writes nothing to the position."""
     owner = uuid.uuid4()
     position = await _seed_position(session, owner_id=owner)
     pid = position.id
+    original = (position.description, position.quantity, position.unit_rate, position.source)
 
     _patch_matcher(monkeypatch, results=[])
     _patch_ai(
@@ -186,15 +191,18 @@ async def test_high_confidence_auto_applies_and_mutates(session: AsyncSession, m
     resp = await svc.chat(session, pid, "make the description more precise", _payload_for(owner), _FakeSettings())
 
     assert len(resp.actions) == 1
-    assert resp.actions[0].status == "auto_applied"
+    assert resp.actions[0].status == "needs_review"
     assert resp.actions[0].action_type == "update_description"
+    assert resp.actions[0].confidence == pytest.approx(0.93)
+    assert resp.actions[0].before == {"description": original[0]}
 
-    # The position really changed.
+    # The position did not change, not even its provenance.
     from app.modules.boq.models import Position
 
     refreshed = await session.get(Position, pid)
     assert refreshed is not None
-    assert refreshed.description == "RC wall C30/37, d=240mm, incl. formwork"
+    await session.refresh(refreshed)
+    assert (refreshed.description, refreshed.quantity, refreshed.unit_rate, refreshed.source) == original
 
     # The thread now has the user + assistant turns persisted.
     messages = await svc.list_messages(session, pid, _payload_for(owner))
@@ -282,10 +290,16 @@ async def test_cross_tenant_position_is_forbidden(session: AsyncSession, monkeyp
         await svc.list_messages(session, pid, _payload_for(intruder))
     assert exc_info2.value.status_code == 404
 
+    # So is review, even for a real turn on that position.
+    resp = await svc.chat(session, pid, "whose position is this", _payload_for(owner), _FakeSettings())
+    with pytest.raises(HTTPException) as exc_info3:
+        await svc.review(session, pid, resp.assistant_message.id, [], [], _payload_for(intruder))
+    assert exc_info3.value.status_code == 404
+
 
 @pytest.mark.asyncio
 async def test_add_resources_recomputes_unit_rate(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
-    """add_resources (high confidence) appends resources and re-derives unit_rate.
+    """An accepted add_resources appends resources and re-derives unit_rate.
 
     Resources are per-unit norms: unit_rate = Σ(qty * rate). Here:
         2.0 * 50.00  (concrete)  + 1.0 * 30.00 (labor) = 130.00
@@ -335,12 +349,11 @@ async def test_add_resources_recomputes_unit_rate(session: AsyncSession, monkeyp
     resp = await svc.chat(session, pid, "add a resource breakdown", _payload_for(owner), _FakeSettings())
 
     assert len(resp.actions) == 1
-    assert resp.actions[0].status == "auto_applied"
+    assert resp.actions[0].status == "needs_review"
+    assert resp.actions[0].payload["expected_unit_rate"] == "130.00"
 
-    from app.modules.boq.models import Position
-
-    refreshed = await session.get(Position, pid)
-    assert refreshed is not None
+    refreshed, message = await svc.review(session, pid, resp.assistant_message.id, [0], [], _payload_for(owner))
+    assert message.actions[0].status == "applied"
     # unit_rate re-derived from the per-unit resource subtotals.
     assert Decimal(str(refreshed.unit_rate)) == Decimal("130.00")
     # The resources landed on metadata.
@@ -376,18 +389,17 @@ async def test_apply_action_applies_a_reviewed_proposal(session: AsyncSession, m
 async def test_both_write_paths_record_copilot_provenance(
     session: AsyncSession, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Each write path stamps its own ``source``, and both store the confidence.
+    """Both human write paths stamp ``ai_copilot_accepted`` and store the confidence.
 
-    The two paths share one builder and one writer, so nothing on the row tells
-    them apart unless the caller says which it is. Until this was wired both
-    left ``source`` at ``manual``, which claimed a person had typed a number the
-    model wrote.
+    Before 18.1 the copilot could also write on its own (``ai_copilot_auto``);
+    that path is gone, so every copilot-written row says a person accepted it,
+    together with the model's confidence for the proposal.
     """
     from app.modules.boq.models import Position
 
     owner = uuid.uuid4()
 
-    # Auto-applied: the copilot wrote this one unattended, on its own confidence.
+    # Review path: accepted from the stored assistant turn.
     position = await _seed_position(session, owner_id=owner)
     pid = position.id
     assert position.source == "manual"
@@ -408,18 +420,20 @@ async def test_both_write_paths_record_copilot_provenance(
 
     svc = BOQCopilotService(session)
     resp = await svc.chat(session, pid, "tighten the description", _payload_for(owner), _FakeSettings())
-    assert resp.actions[0].status == "auto_applied"
+    assert resp.actions[0].status == "needs_review"
+    unchanged = await session.get(Position, pid)
+    assert unchanged is not None
+    assert unchanged.source == "manual"
 
-    refreshed = await session.get(Position, pid)
-    assert refreshed is not None
-    assert refreshed.source == "ai_copilot_auto"
+    refreshed, _message = await svc.review(session, pid, resp.assistant_message.id, [0], [], _payload_for(owner))
+    assert refreshed.source == "ai_copilot_accepted"
     # Position.confidence is a String(10) column even though both PositionUpdate
     # and PositionResponse type it float, so it comes back as text here and is
     # coerced to a number again on the way out through the API.
     assert refreshed.confidence is not None
     assert float(refreshed.confidence) == pytest.approx(0.93)
 
-    # Human accept: an estimator read the proposal and applied it themselves.
+    # Legacy apply path: one action sent back by the client.
     reviewed = await _seed_position(session, owner_id=owner, quantity=10.0)
     action = CopilotActionProposal(
         action_type="set_quantity",
@@ -435,3 +449,240 @@ async def test_both_write_paths_record_copilot_provenance(
     assert updated.source == "ai_copilot_accepted"
     assert updated.confidence is not None
     assert float(updated.confidence) == pytest.approx(0.7)
+
+
+# ── Review ──────────────────────────────────────────────────────────────────
+
+
+def _three_actions() -> list[dict[str, Any]]:
+    """A description rewrite, a quantity change and a grounded rate change."""
+    return [
+        {
+            "action_type": "update_description",
+            "payload": {"description": "RC wall C30/37, d=240mm"},
+            "confidence": 0.95,
+            "source_code": None,
+        },
+        {
+            "action_type": "set_quantity",
+            "payload": {"quantity": 42.5},
+            "confidence": 0.70,
+            "source_code": None,
+        },
+        {
+            "action_type": "set_unit_rate",
+            "payload": {"unit_rate": 185.0},
+            "confidence": 0.90,
+            "source_code": "CWICR-CONC-3037",
+        },
+    ]
+
+
+def _one_resource_action() -> list[dict[str, Any]]:
+    """A single grounded add_resources proposal (one concrete line at 50/m3)."""
+    return [
+        {
+            "action_type": "add_resources",
+            "payload": {
+                "resources": [
+                    {"name": "Concrete", "type": "material", "unit": "m3", "quantity": 1.0, "unit_rate": 50.0},
+                ]
+            },
+            "confidence": 0.9,
+            "source_code": "CWICR-CONC-3037",
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_review_applies_only_the_accepted_proposals(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Accepted -> written; rejected -> dismissed, not written; untouched -> still pending."""
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner, quantity=10.0, unit_rate="100.00")
+    pid = position.id
+    original_desc = position.description
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=185.0)])
+    _patch_ai(monkeypatch, reply="Three suggestions.", actions=_three_actions())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "tidy this position", _payload_for(owner), _FakeSettings())
+    assert [a.status for a in resp.actions] == ["needs_review"] * 3
+
+    # Accept the quantity, reject the (high-confidence) description, leave the rate.
+    updated, message = await svc.review(session, pid, resp.assistant_message.id, [1], [0], _payload_for(owner))
+
+    assert Decimal(str(updated.quantity)) == Decimal("42.5")
+    assert updated.description == original_desc
+    assert Decimal(str(updated.unit_rate)) == Decimal("100.00")
+    assert [a.status for a in message.actions] == ["dismissed", "applied", "needs_review"]
+
+    # The statuses live on the stored turn, so a reopened thread shows them.
+    history = await svc.list_messages(session, pid, _payload_for(owner))
+    stored = next(m for m in history if m.id == resp.assistant_message.id)
+    assert [a.status for a in stored.actions] == ["dismissed", "applied", "needs_review"]
+
+    # The remaining proposal can still be accepted later.
+    updated, message = await svc.review(session, pid, resp.assistant_message.id, [2], [], _payload_for(owner))
+    assert Decimal(str(updated.unit_rate)) == Decimal("185")
+    assert [a.status for a in message.actions] == ["dismissed", "applied", "applied"]
+
+
+@pytest.mark.asyncio
+async def test_a_rejected_proposal_cannot_be_accepted_later(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Review only moves pending proposals; accepting a dismissed one writes nothing."""
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner, quantity=10.0)
+    pid = position.id
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=185.0)])
+    _patch_ai(monkeypatch, reply="Three suggestions.", actions=_three_actions())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "tidy this position", _payload_for(owner), _FakeSettings())
+    mid = resp.assistant_message.id
+
+    _updated, message = await svc.review(session, pid, mid, [], [1], _payload_for(owner))
+    assert message.actions[1].status == "dismissed"
+
+    updated, message = await svc.review(session, pid, mid, [1], [], _payload_for(owner))
+    assert message.actions[1].status == "dismissed"
+    assert Decimal(str(updated.quantity)) == Decimal("10")
+
+
+@pytest.mark.asyncio
+async def test_repeated_review_does_not_apply_twice(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Accepting an already-applied add_resources again leaves the resources as they are."""
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner, unit_rate="0.00")
+    pid = position.id
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=50.0)])
+    _patch_ai(monkeypatch, reply="Added concrete.", actions=_one_resource_action())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "add concrete", _payload_for(owner), _FakeSettings())
+    mid = resp.assistant_message.id
+
+    first, _ = await svc.review(session, pid, mid, [0], [], _payload_for(owner))
+    assert len(first.metadata_["resources"]) == 1
+
+    second, message = await svc.review(session, pid, mid, [0], [], _payload_for(owner))
+    assert len(second.metadata_["resources"]) == 1
+    assert Decimal(str(second.unit_rate)) == Decimal("50.00")
+    assert message.actions[0].status == "applied"
+
+
+@pytest.mark.asyncio
+async def test_stale_add_resources_is_refused(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """If the resources changed since the proposal, accepting it fails instead of stacking."""
+    from app.modules.boq.schemas import PositionUpdate
+    from app.modules.boq.service import BOQService
+
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner, unit_rate="0.00")
+    pid = position.id
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=50.0)])
+    _patch_ai(monkeypatch, reply="Added concrete.", actions=_one_resource_action())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "add concrete", _payload_for(owner), _FakeSettings())
+
+    # Someone adds a resource by hand before the proposal is reviewed.
+    manual = [{"name": "Rebar", "type": "material", "unit": "kg", "quantity": 80.0, "unit_rate": 1.2}]
+    await BOQService(session).update_position(pid, PositionUpdate(metadata={"resources": manual}))
+    await session.flush()
+
+    updated, message = await svc.review(session, pid, resp.assistant_message.id, [0], [], _payload_for(owner))
+    assert message.actions[0].status == "failed"
+    assert "resources changed" in message.actions[0].error
+    assert [r["name"] for r in updated.metadata_["resources"]] == ["Rebar"]
+
+
+@pytest.mark.asyncio
+async def test_review_on_a_locked_boq_writes_nothing(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A locked BOQ answers 409 before any write; the proposals stay pending."""
+    from fastapi import HTTPException
+
+    from app.modules.boq.models import BOQ, Position
+
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner, quantity=10.0)
+    pid = position.id
+    original_desc = position.description
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=185.0)])
+    _patch_ai(monkeypatch, reply="Three suggestions.", actions=_three_actions())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "tidy this position", _payload_for(owner), _FakeSettings())
+
+    boq = await session.get(BOQ, position.boq_id)
+    assert boq is not None
+    boq.is_locked = True
+    await session.flush()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await svc.review(session, pid, resp.assistant_message.id, [0, 1, 2], [], _payload_for(owner))
+    assert exc_info.value.status_code == 409
+
+    refreshed = await session.get(Position, pid)
+    assert refreshed is not None
+    await session.refresh(refreshed)
+    assert refreshed.description == original_desc
+    assert Decimal(str(refreshed.quantity)) == Decimal("10")
+
+    history = await svc.list_messages(session, pid, _payload_for(owner))
+    stored = next(m for m in history if m.id == resp.assistant_message.id)
+    assert [a.status for a in stored.actions] == ["needs_review"] * 3
+
+
+@pytest.mark.asyncio
+async def test_review_rejects_bad_requests(session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Unknown message -> 404; out-of-range or contradictory indices -> 422."""
+    from fastapi import HTTPException
+
+    owner = uuid.uuid4()
+    position = await _seed_position(session, owner_id=owner)
+    other = await _seed_position(session, owner_id=owner)
+    pid = position.id
+
+    _patch_matcher(monkeypatch, results=[_match_result("CWICR-CONC-3037", unit_rate=185.0)])
+    _patch_ai(monkeypatch, reply="Three suggestions.", actions=_three_actions())
+
+    svc = BOQCopilotService(session)
+    resp = await svc.chat(session, pid, "tidy this position", _payload_for(owner), _FakeSettings())
+    mid = resp.assistant_message.id
+
+    cases: list[tuple[uuid.UUID, uuid.UUID, list[int], list[int], int]] = [
+        (pid, uuid.uuid4(), [0], [], 404),
+        # A turn of one position cannot be reviewed through another.
+        (other.id, mid, [0], [], 404),
+        (pid, mid, [3], [], 422),
+        (pid, mid, [-1], [], 422),
+        (pid, mid, [0], [0], 422),
+    ]
+    for target, message_id, accept, reject, expected in cases:
+        with pytest.raises(HTTPException) as exc_info:
+            await svc.review(session, target, message_id, accept, reject, _payload_for(owner))
+        assert exc_info.value.status_code == expected, (target, message_id, accept, reject)
+
+
+def test_review_route_requires_boq_update() -> None:
+    """The review route is guarded by the same permission as every position write."""
+    from app.dependencies import RequirePermission
+    from app.modules.boq.router import router
+
+    route = next(r for r in router.routes if getattr(r, "path", "").endswith("/positions/{position_id}/copilot/review"))
+    permissions = [
+        d.dependency.permission
+        for d in route.dependencies  # type: ignore[attr-defined]
+        if isinstance(d.dependency, RequirePermission)
+    ]
+    assert permissions == ["boq.update"]
+    assert route.methods == {"POST"}  # type: ignore[attr-defined]

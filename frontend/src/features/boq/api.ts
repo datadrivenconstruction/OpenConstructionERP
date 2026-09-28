@@ -1012,11 +1012,12 @@ export interface AIChatResponse {
 /* ── Per-position AI copilot types ───────────────────────────────────── */
 
 /**
- * A single concrete change the copilot proposes (or already applied) for one
- * BOQ position. Every action is catalog-sourced — ``source`` carries the cost
- * row's code/description and ``confidence`` (0..1) drives the auto-apply
- * threshold (>= 0.85 lands as ``auto_applied`` server-side, the rest come back
- * as ``needs_review`` confirm cards).
+ * A single concrete change the copilot proposes for one BOQ position. Every
+ * priced action is catalog-sourced — ``source`` carries the cost row's
+ * code/description. Chat never writes: every action arrives ``needs_review``
+ * and lands only when the estimator accepts it through the review endpoint.
+ * ``confidence`` (0..1) is shown and decides what the review list preselects.
+ * ``auto_applied`` only appears in threads stored before 18.1.
  *
  * ``payload`` carries the after-state and ``before`` the prior values, so the
  * dock can render a clean before -> after diff AND the editor can mirror the
@@ -1058,7 +1059,7 @@ export interface CopilotAction {
   payload: Record<string, unknown>;
   /** Prior values for the touched fields — drives the diff + undo oldData. */
   before: Record<string, unknown>;
-  /** Model/catalog confidence (0..1). >= 0.85 auto-applies server-side. */
+  /** Model/catalog confidence (0..1). >= 0.85 is preselected for review. */
   confidence: number;
   /** Catalog provenance — code + human label of the source cost row. */
   source: { code?: string; description?: string } | null;
@@ -1086,6 +1087,13 @@ export interface CopilotChatResponse {
 export interface CopilotApplyResponse {
   position: Position;
   action: CopilotAction;
+}
+
+/** POST review response: the position after the accepted actions, plus the
+ *  assistant turn with each action's new status. */
+export interface CopilotReviewResponse {
+  position: Position;
+  message: CopilotMessage;
 }
 
 /* ── Cost Breakdown types ─────────────────────────────────────────── */
@@ -2056,6 +2064,25 @@ export const boqApi = {
       `/v1/boq/positions/${positionId}/copilot/apply`,
       { action },
     ),
+  /**
+   * Accept and reject actions of one assistant turn by index. The server
+   * applies the accepted ones from what it stored with the turn and marks the
+   * rejected ones dismissed; indices in neither list stay pending.
+   */
+  positionCopilotReview: (
+    positionId: string,
+    messageId: string,
+    accept: number[],
+    reject: number[],
+  ) =>
+    apiPost<
+      CopilotReviewResponse,
+      { message_id: string; accept: number[]; reject: number[] }
+    >(`/v1/boq/positions/${positionId}/copilot/review`, {
+      message_id: messageId,
+      accept,
+      reject,
+    }),
 
   /* Recalculate rates from resource breakdowns */
   recalculateRates: (boqId: string) =>
