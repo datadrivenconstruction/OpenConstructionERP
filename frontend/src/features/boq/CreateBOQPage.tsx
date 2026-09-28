@@ -97,10 +97,18 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     touched && !effectiveName
       ? t('validation.required', { defaultValue: 'This field is required' })
       : undefined;
+  // An Excel 97-2003 workbook is read by no importer. Refuse it here, before
+  // an empty BOQ is created and the upload is refused by the server in English.
+  const isLegacyXls = startMode === 'import' && !!file && file.name.toLowerCase().endsWith('.xls');
   const fileError =
     touched && startMode === 'import' && !file
       ? t('boq.import_needs_file', { defaultValue: 'Choose a file to import, or switch to an empty BOQ.' })
-      : undefined;
+      : isLegacyXls
+        ? t('boq.import_preview.legacy_xls', {
+            defaultValue:
+              'This is an Excel 97-2003 workbook (.xls). Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.',
+          })
+        : undefined;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -110,6 +118,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
     if (!selectedProjectId || !effectiveName) return;
     if (startMode === 'import' && !file) return;
+    if (isLegacyXls) return;
 
     setBusy(true);
     try {
