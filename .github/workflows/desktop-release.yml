@@ -621,12 +621,6 @@ jobs:
         shell: bash
         # Three legs now rather than two, and the first one pays for initdb.
         timeout-minutes: 35
-        # The desktop no longer fetches the encoder unasked; a user starts it
-        # from the setup wizard. This step exists partly to exercise the
-        # encoder in a frozen build (see the counts it prints), so it opts in
-        # the way an operator would, keeping the path it watched on the run.
-        env:
-          OE_DOWNLOAD_EMBEDDING_MODEL: "1"
         run: |
           set -uo pipefail
           bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"

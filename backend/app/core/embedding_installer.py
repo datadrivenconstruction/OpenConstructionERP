@@ -5,9 +5,8 @@
 Semantic search needs an encoder, and the encoder is the one asset the
 platform cannot ship inside the package: the weights are hundreds of
 megabytes and most installations never ask a semantic question. So they are
-fetched once, in the background, from the model hub, when a person asks for
-them (or an operator opts in with ``OE_DOWNLOAD_EMBEDDING_MODEL``), and
-everything keeps working while they are absent.
+fetched once, in the background, from the model hub, and everything keeps
+working while they are absent.
 
 Shape
 -----
@@ -222,51 +221,34 @@ def semantic_library_available() -> bool:
 
 
 def download_enabled() -> bool:
-    """Whether this deployment should fetch the encoder unasked, at startup.
+    """Whether this deployment should fetch the encoder in the background.
 
-    Only :data:`ENV_DOWNLOAD` can say yes. Without it the answer is no on every
-    kind of deployment, the desktop included.
+    Precedence:
 
-    The desktop used to default to yes, which sent a 471 MB transfer to the
-    model hub on the first start of every new install before the user had
-    asked for semantic search or seen it offered. A desktop app that opens
-    connections its user did not start is exactly what reputation checkers and
-    careful administrators object to, so the download now waits for a person:
-    the setup wizard's semantic search toggle, which reads this value as its
-    default, and ``POST /embedding-model/install`` behind it. Both pass
-    ``requested=True`` to :func:`start_background_download`, which a person's
-    click is, so they are unaffected by this default.
+    1. :data:`ENV_DOWNLOAD`, honoured in both directions, so an operator who
+       does want an encoder on a server can have one and an operator who does
+       not want one on a workstation can refuse it.
+    2. Otherwise :func:`app.config.desktop_mode` - on for the local
+       single-user workspace behind the native shell, off for a server deploy,
+       which does not need it.
 
-    ``OE_DOWNLOAD_EMBEDDING_MODEL`` is still honoured in both directions: an
-    operator imaging workstations can turn the unasked download back on, and a
-    falsy value locks it off even against a click (:func:`download_locked_off`).
+    A source checkout counts as a server here, because ``desktop_mode()`` is
+    the platform's one answer to desktop-versus-server and inventing a second
+    one for the same question is how the two drift apart. A developer who
+    wants the download sets the variable.
     """
     raw = os.environ.get(ENV_DOWNLOAD, "").strip().lower()
-    return raw in _TRUTHY
-
-
-def hub_fallback_allowed() -> bool:
-    """Whether the loader may resolve a bare hub id, i.e. fetch weights itself.
-
-    ``SentenceTransformer("<hub id>")`` downloads whatever is not cached, so a
-    loader that offers the hub id is a download path of its own, one that no
-    toggle guards. On the desktop that path would undo :func:`download_enabled`:
-    the first background reindex after the demo data is seeded would pull the
-    model anyway. So the desktop loads only an installed copy unless the
-    operator opted in, and a server keeps loading by hub id exactly as before.
-    A falsy :data:`ENV_DOWNLOAD` closes it everywhere.
-    """
-    raw = os.environ.get(ENV_DOWNLOAD, "").strip().lower()
-    if raw in _FALSY:
-        return False
     if raw in _TRUTHY:
         return True
+    if raw in _FALSY:
+        return False
+
     try:
         from app.config import desktop_mode
 
-        return not desktop_mode()
+        return desktop_mode()
     except Exception:  # noqa: BLE001 - never let a config import decide by crashing
-        return True
+        return False
 
 
 # ── Paths ────────────────────────────────────────────────────────────────
@@ -912,10 +894,7 @@ def _message_for(state: str, repo: str, enabled: bool, locked: bool = False) -> 
             f"{ENV_DOWNLOAD}. Everything else works; an administrator can remove "
             "that setting to allow it."
         )
-    return (
-        "The semantic search model is not downloaded yet. It downloads when you turn semantic search on "
-        f"in the setup wizard, or at startup when {ENV_DOWNLOAD}=1 is set."
-    )
+    return f"The semantic search model is not downloaded on this deployment. Set {ENV_DOWNLOAD}=1 to fetch it."
 
 
 def reset_state_for_tests() -> None:
@@ -940,7 +919,6 @@ __all__ = [
     "STATE_READY",
     "active_repo_id",
     "download_enabled",
-    "hub_fallback_allowed",
     "download_locked_off",
     "download_status",
     "find_installed_model",
