@@ -299,15 +299,24 @@ async def _step_cost_db(slug: str) -> tuple[StepResult, list[str]]:
     if errors:
         detail["errors"] = errors
 
-    if loaded:
-        status = "ok"
-    elif skipped or errors:
-        status = "skipped"
-    else:
-        # The pack declared no cwicr_regions at all.
-        status = "skipped"
+    status = _cost_db_status(loaded, errors)
+    if not regions:
         detail.setdefault("reason", "no cwicr_regions declared")
     return StepResult(step="cost_db", status=status, detail=detail), loaded
+
+
+def _cost_db_status(loaded: list[str], errors: list[dict[str, str]]) -> str:
+    """Status of the cost step: a region that raised is an error, not a skip.
+
+    ``skipped`` is for a pack that asked for nothing this step can load: no
+    ``cwicr_regions``, or only slugs no published base resolves to. A region
+    whose download or import raised is the other case, the pack asked for a
+    base and did not get it, and reading it as ``skipped`` let the install
+    report ``ok`` over an empty cost database.
+    """
+    if errors:
+        return "error"
+    return "ok" if loaded else "skipped"
 
 
 async def _step_vector_db(loaded_regions: list[str]) -> StepResult:
@@ -617,12 +626,8 @@ async def _step_cost_db_detailed(slug: str) -> tuple[StepResult, list[str], int]
     if errors:
         detail["errors"] = errors
 
-    if loaded:
-        status = "ok"
-    elif skipped or errors:
-        status = "skipped"
-    else:
-        status = "skipped"
+    status = _cost_db_status(loaded, errors)
+    if not regions:
         detail.setdefault("reason", "no cwicr_regions declared")
     return StepResult(step="cost_db", status=status, detail=detail), loaded, resources
 
