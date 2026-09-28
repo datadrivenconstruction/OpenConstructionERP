@@ -195,3 +195,84 @@ async def test_the_award_letter_is_drawn_off_the_loop(monkeypatch: pytest.Monkey
     assert filename.endswith(".pdf")
     assert seen, "the letter was never drawn"
     assert threading.get_ident() not in seen
+
+
+@pytest.mark.asyncio
+async def test_the_punch_list_pdf_gets_plain_copies_not_orm_rows(monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import date
+
+    from app.modules.punchlist import service as punch_service
+    from app.modules.punchlist.models import PunchItem
+
+    project_id = uuid.uuid4()
+    item = PunchItem(
+        project_id=project_id,
+        title="Touch up paint at door 1.04",
+        description="Scuffed frame",
+        status="open",
+        priority="high",
+        category="finishes",
+        trade="painting",
+        assigned_to=None,
+        due_date=date(2026, 10, 1),
+        resolution_notes="Repainted",
+        photos=["punch/door-104.jpg"],
+        metadata_={"code": "P-17", "sheet_id": "A-101"},
+        document_id=None,
+        page=2,
+        location_x=0.25,
+        location_y=0.75,
+        reopen_history=[{"reopened_at": "2026-09-20", "previous_status": "closed", "reopened_by": "site"}],
+    )
+    handed: list[list[Any]] = []
+    seen: list[int] = []
+
+    def _spy(real: Callable[..., Any], position: int) -> Callable[..., Any]:
+        def spy(*args: Any, **kwargs: Any) -> Any:
+            seen.append(threading.get_ident())
+            handed.append(list(args[position]))
+            return real(*args, **kwargs)
+
+        return spy
+
+    monkeypatch.setattr(punch_service, "_build_reportlab_pdf", _spy(punch_service._build_reportlab_pdf, 1))
+    monkeypatch.setattr(punch_service, "_build_minimal_pdf", _recording(seen, punch_service._build_minimal_pdf))
+    text_calls: list[list[Any]] = []
+    real_text = punch_service._render_punchlist_text
+
+    def text_spy(pid: Any, items: Any, names: Any) -> Any:
+        text_calls.append(list(items))
+        return real_text(pid, items, names)
+
+    monkeypatch.setattr(punch_service, "_render_punchlist_text", text_spy)
+    service = punch_service.PunchListService(MagicMock())
+    service.repo = SimpleNamespace(all_for_project=AsyncMock(return_value=[item]))
+    monkeypatch.setattr(service, "resolve_party_names", AsyncMock(return_value={}))
+
+    pdf = await service.export_pdf(project_id)
+
+    assert pdf.startswith(b"%PDF")
+    assert seen, "no PDF renderer ran"
+    assert threading.get_ident() not in seen
+    (copies,) = handed or text_calls
+    (copy,) = copies
+    assert not isinstance(copy, PunchItem)
+    for field in (
+        "title",
+        "description",
+        "status",
+        "priority",
+        "category",
+        "trade",
+        "due_date",
+        "resolution_notes",
+        "photos",
+        "metadata_",
+        "page",
+        "location_x",
+        "location_y",
+        "reopen_history",
+    ):
+        assert getattr(copy, field) == getattr(item, field), field
+    # The text form both renderers share reads the copy exactly as it read the row.
+    assert real_text(project_id, [copy], {}) == real_text(project_id, [item], {})

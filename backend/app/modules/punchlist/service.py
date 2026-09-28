@@ -17,6 +17,7 @@ import uuid
 from collections.abc import Iterable, Mapping
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -824,12 +825,13 @@ class PunchListService:
         # The list has no limit and the rich renderer reads a photo from disk
         # and draws it for every item, so a large snag list is seconds of
         # rendering. It runs in a worker thread; the event loop keeps serving
-        # every other request meanwhile. The renderers read the loaded rows
-        # and the name map only, never the session.
+        # every other request meanwhile. The renderers get plain copies of the
+        # rows and the name map, so no ORM instance crosses into the thread.
+        plain = [_pdf_snapshot(item) for item in items]
         if _REPORTLAB_AVAILABLE:
-            pdf = await asyncio.to_thread(_build_reportlab_pdf, project_id, items, names)
+            pdf = await asyncio.to_thread(_build_reportlab_pdf, project_id, plain, names)
         else:
-            pdf = await asyncio.to_thread(_build_minimal_pdf, _render_punchlist_text(project_id, items, names))
+            pdf = await asyncio.to_thread(_build_minimal_pdf, _render_punchlist_text(project_id, plain, names))
 
         logger.info(
             "Punch list PDF exported for project %s (%d items, reportlab=%s)",
@@ -1071,6 +1073,38 @@ def _resolve_photo_path(rel_or_abs: str) -> Path | None:
         return find_existing_upload(p, _PHOTOS_BASE)
     except Exception:  # noqa: BLE001
         return None
+
+
+def _pdf_snapshot(item: PunchItem) -> SimpleNamespace:
+    """Copy the fields the PDF renderers read off a punch item into plain values.
+
+    The PDF is drawn in a worker thread, and a live ORM row must not cross into
+    it. Attributes the renderer reads with ``getattr`` and a default are copied
+    the same way, so a row without them still reads as ``None``.
+    """
+    metadata = getattr(item, "metadata_", None)
+    photos = getattr(item, "photos", None)
+    history = getattr(item, "reopen_history", None)
+    return SimpleNamespace(
+        title=item.title,
+        description=item.description,
+        status=item.status,
+        priority=item.priority,
+        category=item.category,
+        trade=item.trade,
+        assigned_to=item.assigned_to,
+        due_date=item.due_date,
+        created_at=item.created_at,
+        resolution_notes=item.resolution_notes,
+        metadata_=dict(metadata) if isinstance(metadata, dict) else metadata,
+        page=getattr(item, "page", None),
+        location_x=getattr(item, "location_x", None),
+        location_y=getattr(item, "location_y", None),
+        document_id=getattr(item, "document_id", None),
+        photo_path=getattr(item, "photo_path", None),
+        photos=list(photos) if photos is not None else None,
+        reopen_history=list(history) if history is not None else None,
+    )
 
 
 def _build_reportlab_pdf(
