@@ -2081,7 +2081,8 @@ jobs:
           # This comes first so a release signed that way is never announced
           # as unsigned, and WINDOWS_SIGNING_REQUIRED holds for it too.
           as_missing=0
-          for name in ARTIFACT_SIGNING_ENDPOINT ARTIFACT_SIGNING_ACCOUNT ARTIFACT_SIGNING_PROFILE                       ARTIFACT_SIGNING_TENANT_ID ARTIFACT_SIGNING_CLIENT_ID ARTIFACT_SIGNING_CLIENT_SECRET; do
+          for name in ARTIFACT_SIGNING_ENDPOINT ARTIFACT_SIGNING_ACCOUNT ARTIFACT_SIGNING_PROFILE \
+                      ARTIFACT_SIGNING_TENANT_ID ARTIFACT_SIGNING_CLIENT_ID ARTIFACT_SIGNING_CLIENT_SECRET; do
             if [ -z "${!name:-}" ]; then as_missing=$((as_missing + 1)); fi
           done
           if [ "$as_missing" -eq 0 ]; then

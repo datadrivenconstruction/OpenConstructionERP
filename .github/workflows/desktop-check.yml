@@ -39,6 +39,14 @@ on:
   # against it, and read which jobs go red. A lane that has only ever been green
   # has not been shown to be able to fail.
   workflow_dispatch:
+    inputs:
+      run_tests:
+        description: >-
+          Also run cargo test and report whether the build rewrote the tracked
+          ACL schemas under gen/. Off by default: the launcher's tests have no
+          other place to run in the cloud, and a cold test build is long.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -179,3 +187,17 @@ jobs:
         # floating stable toolchain the power to turn this lane red on a day
         # nobody changed anything, and a lane that cries wolf stops being read.
         run: cargo check --locked --all-targets
+
+      # Only on a dispatch that asks for it. The generated ACL schemas are
+      # tracked in git and rewritten by any build, so a permission edited by
+      # hand shows up here as a diff; printed rather than failed, because the
+      # same files can differ by platform and that is not this lane's question.
+      - name: Test
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }}
+        shell: bash
+        working-directory: desktop/src-tauri
+        run: |
+          set -euo pipefail
+          cargo test --locked
+          git diff --stat -- gen/ || true
+          git diff -- gen/ | head -n 80 || true

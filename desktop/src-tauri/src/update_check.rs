@@ -12,10 +12,17 @@
 // notice can never reach, because the notice is served by the thing that did
 // not start.
 //
-// So the launcher asks the question for itself, over one plain HTTPS GET, and
-// says the answer in the failure window that today only offers to mail a log
-// file. It never speaks on a healthy start: the application's own notice covers
-// that, and two cards saying the same thing is noise.
+// So the launcher can ask the question for itself, over one plain HTTPS GET, and
+// say the answer in the failure window that otherwise only offers to mail a log
+// file.
+//
+// ONLY WHEN ASKED. It used to send that GET on every start, healthy or not, in
+// the background. That is a connection the user did not start, on every launch,
+// and a desktop app that phones out unasked is exactly what reputation checkers
+// and careful administrators object to. Now the failure screen carries a
+// "Check for a newer version" button, and the GET happens when it is pressed.
+// A healthy start sends nothing; inside the application, About offers the same
+// check through the backend.
 //
 // A VERSION CHECK THAT CAN STOP THE PRODUCT FROM STARTING IS A WORSE BUG THAN
 // THE ONE IT IS THERE TO CATCH. Every failure here - no network, a rate-limited
@@ -23,8 +30,8 @@
 // malformed tag - ends in exactly one thing: nothing is said, and startup is
 // untouched. Nothing in this file is ever awaited by the startup path.
 //
-// Privacy. This is an outbound request to a third party on every start of an
-// AGPL product that people run on private networks, so: it is one anonymous
+// Privacy. This is an outbound request to a third party from an AGPL product
+// that people run on private networks, so: it is one anonymous
 // GET, it sends no identifier, no telemetry and no version of ours (the
 // user-agent below is a bare product token with no version in it, because
 // GitHub rejects a request with no user-agent at all), the notice says on its
@@ -230,25 +237,19 @@ fn env_flag_is_on(raw: &str) -> bool {
     )
 }
 
-/// Whether the check may run at all.
+/// Whether the check may run when the user presses the button.
 ///
 /// Off in a development build and in tests (`debug_assertions` covers both a
-/// `cargo run` from the source tree and `cargo test`), off when an
-/// administrator has set the environment variable, and off when the user has
-/// turned it off from the notice.
+/// `cargo run` from the source tree and `cargo test`), and off when an
+/// administrator has set the environment variable, which is a policy about the
+/// machine. The user's own "Turn off update checks" file is not read here: it
+/// switches off checks nobody asked for (the application's in-app notice reads
+/// it through the backend), and pressing "Check for a newer version" is asking.
 pub fn is_enabled() -> bool {
     if cfg!(debug_assertions) || cfg!(test) {
         return false;
     }
-    if std::env::var(DISABLE_ENV).map(|v| env_flag_is_on(&v)).unwrap_or(false) {
-        return false;
-    }
-    match opt_out_path() {
-        Some(path) => !path.exists(),
-        // No home directory to read the opt-out from. Saying nothing is the
-        // safe direction when we cannot tell whether the user asked us to.
-        None => false,
-    }
+    !std::env::var(DISABLE_ENV).map(|v| env_flag_is_on(&v)).unwrap_or(false)
 }
 
 /// Record the user's choice to stop checking, or to start again.
@@ -588,69 +589,188 @@ fn paint_if_ready(handle: &tauri::AppHandle, current: &str) {
 /// authentication challenge, a captive portal's own login page, a proxy's error
 /// page, an empty body, valid JSON that is not a release, a release older than
 /// this one. Every one of them is silence.
+#[cfg(test)]
 fn update_from_response(status: u16, body: &str, current: &str) -> Option<AvailableUpdate> {
-    if !(200..300).contains(&status) {
-        return None;
+    match outcome_from_response(status, body, current) {
+        CheckOutcome::Newer(release) => Some(release),
+        _ => None,
     }
-    let parsed: serde_json::Value = serde_json::from_str(body).ok()?;
-    let release = release_from_json(&parsed)?;
-    if !is_newer(&release.version, current) {
-        return None;
-    }
-    Some(release)
 }
 
-// --- The three entry points the launcher uses -------------------------------
-
-/// Start the check, in the background, at startup.
+/// What a check the user asked for came back with.
 ///
-/// Returns immediately and is never awaited. Whether it succeeds, fails, hangs
-/// until its own timeout or is turned off entirely, the startup sequence that
-/// called it is unaffected, and on a start that goes well nothing is ever shown.
-pub fn spawn(handle: tauri::AppHandle, current_version: String) {
-    if !is_enabled() {
-        return;
-    }
-    tauri::async_runtime::spawn(async move {
-        let client = match reqwest::Client::builder()
-            .user_agent(USER_AGENT)
-            .timeout(REQUEST_TIMEOUT)
-            .build()
-        {
-            Ok(client) => client,
-            Err(_) => return,
-        };
-        let url = format!("https://api.github.com/repos/{REPO}/releases/latest");
-        // The socket itself is the one part of this that cannot be reached from
-        // a test. Everything the far end can say back is handed to a plain
-        // function so that it can be.
-        let (status, body) = match client
-            .get(&url)
-            .header("Accept", "application/vnd.github+json")
-            .send()
-            .await
-        {
-            Ok(resp) => {
-                let status = resp.status().as_u16();
-                match resp.text().await {
-                    Ok(text) => (status, text),
-                    // Connection cut part way through the body.
-                    Err(_) => return,
-                }
-            }
-            // Offline, DNS failure, TLS failure, timed out: say nothing.
-            Err(_) => return,
-        };
-        let Some(release) = update_from_response(status, &body, &current_version) else {
-            return;
-        };
-        if was_declined(&release.version, declined_version().as_deref()) {
-            return;
+/// Three answers rather than an `Option`, because the person who pressed the
+/// button is owed the difference between "you are up to date" and "GitHub could
+/// not be asked", which the silent background check never had to say.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum CheckOutcome {
+    Newer(AvailableUpdate),
+    Current,
+    Unreachable,
+}
+
+impl CheckOutcome {
+    /// The word handed back to the button's script.
+    fn as_str(&self) -> &'static str {
+        match self {
+            CheckOutcome::Newer(_) => "newer",
+            CheckOutcome::Current => "current",
+            CheckOutcome::Unreachable => "unreachable",
         }
+    }
+}
+
+/// Everything the far end can answer, sorted into the three outcomes.
+///
+/// Anything that is not a readable release (an error status, a proxy's page,
+/// a body that is not a release) is "could not be asked", never "up to date":
+/// telling somebody they have the latest version on the strength of a captive
+/// portal's login page would be a false reassurance.
+fn outcome_from_response(status: u16, body: &str, current: &str) -> CheckOutcome {
+    if !(200..300).contains(&status) {
+        return CheckOutcome::Unreachable;
+    }
+    let Ok(parsed) = serde_json::from_str::<serde_json::Value>(body) else {
+        return CheckOutcome::Unreachable;
+    };
+    match release_from_json(&parsed) {
+        Some(release) if is_newer(&release.version, current) => CheckOutcome::Newer(release),
+        Some(_) => CheckOutcome::Current,
+        None => CheckOutcome::Unreachable,
+    }
+}
+
+// --- The entry points the launcher uses -------------------------------------
+
+/// Ask GitHub for the latest release. One GET, five seconds at most.
+async fn fetch_latest(current_version: &str) -> CheckOutcome {
+    let client = match reqwest::Client::builder()
+        .user_agent(USER_AGENT)
+        .timeout(REQUEST_TIMEOUT)
+        .build()
+    {
+        Ok(client) => client,
+        Err(_) => return CheckOutcome::Unreachable,
+    };
+    let url = format!("https://api.github.com/repos/{REPO}/releases/latest");
+    // The socket itself is the one part of this that cannot be reached from a
+    // test. Everything the far end can say back is handed to a plain function
+    // so that it can be.
+    match client
+        .get(&url)
+        .header("Accept", "application/vnd.github+json")
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let status = resp.status().as_u16();
+            match resp.text().await {
+                Ok(text) => outcome_from_response(status, &text, current_version),
+                // Connection cut part way through the body.
+                Err(_) => CheckOutcome::Unreachable,
+            }
+        }
+        // Offline, DNS failure, TLS failure, timed out.
+        Err(_) => CheckOutcome::Unreachable,
+    }
+}
+
+/// The "Check for a newer version" button on the startup failure screen.
+///
+/// Answers `newer`, `current`, `unreachable` or `disabled`, and on `newer` puts
+/// the usual notice on screen. A version the user once declined is shown
+/// anyway: pressing the button is a fresh question.
+#[tauri::command]
+pub async fn check_for_update_now(handle: tauri::AppHandle) -> Result<String, String> {
+    let current = env!("CARGO_PKG_VERSION");
+    if !is_enabled() {
+        return Ok("disabled".to_string());
+    }
+    let outcome = fetch_latest(current).await;
+    let word = outcome.as_str().to_string();
+    if let CheckOutcome::Newer(release) = outcome {
         if let Ok(mut guard) = LATEST.lock() {
             *guard = Some(release);
         }
-        paint_if_ready(&handle, &current_version);
+        PAINTED.store(false, Ordering::SeqCst);
+        paint_if_ready(&handle, current);
+    }
+    Ok(word)
+}
+
+/// The button, its privacy line and the line its answer is written into.
+///
+/// Plain DOM for the same reason as the notice: the failure document is the
+/// launcher's own and may be up before any of its script has run. Idempotent by
+/// element id, because the eval that carries it is retried.
+fn check_button_script() -> String {
+    let label = js_escape("Check for a newer version");
+    let privacy = js_escape(
+        "This asks github.com which version is the latest. Nothing about you or this \
+computer is sent, and nothing is asked until you press the button.",
+    );
+    let checking = js_escape("Checking...");
+    let current = js_escape("This is the latest version.");
+    let unreachable = js_escape(
+        "github.com could not be reached. The releases page lists every version: \
+https://github.com/datadrivenconstruction/OpenConstructionERP/releases",
+    );
+    let disabled = js_escape("Update checks are turned off on this computer by an administrator.");
+    let refused = js_escape("The check could not be started.");
+    format!(
+        "(function(){{\
+            var d=document;\
+            if(!d||d.getElementById('oe-update-check')){{return;}}\
+            var host=d.body||d.documentElement;\
+            if(!host){{return;}}\
+            var wrap=d.createElement('div');\
+            wrap.id='oe-update-check';\
+            wrap.setAttribute('style','max-width:640px;margin:18px auto 0;text-align:left;\
+font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5');\
+            var btn=d.createElement('button');\
+            btn.type='button';\
+            btn.textContent='{label}';\
+            btn.setAttribute('style','border:1px solid rgba(127,127,127,0.5);border-radius:10px;\
+padding:8px 14px;font:inherit;cursor:pointer;background:transparent;color:inherit');\
+            var note=d.createElement('div');\
+            note.setAttribute('style','margin-top:6px;opacity:0.75');\
+            note.textContent='{privacy}';\
+            var out=d.createElement('div');\
+            out.setAttribute('style','margin-top:6px');\
+            function say(t){{out.textContent=t;btn.disabled=false;}}\
+            btn.onclick=function(){{\
+                var t=window.__TAURI__;\
+                var f=t&&((t.core&&t.core.invoke)||t.invoke);\
+                if(!f){{say('{refused}');return;}}\
+                btn.disabled=true;out.textContent='{checking}';\
+                try{{\
+                    var p=f('check_for_update_now',{{}});\
+                    if(!p||!p.then){{say('{refused}');return;}}\
+                    p.then(function(r){{\
+                        if(r==='newer'){{say('');}}\
+                        else if(r==='current'){{say('{current}');}}\
+                        else if(r==='disabled'){{say('{disabled}');}}\
+                        else{{say('{unreachable}');}}\
+                    }},function(){{say('{refused}');}});\
+                }}catch(e){{say('{refused}');}}\
+            }};\
+            wrap.appendChild(btn);wrap.appendChild(note);wrap.appendChild(out);\
+            host.appendChild(wrap);\
+        }})()"
+    )
+}
+
+/// Put the button on the failure screen, retried like the notice.
+fn paint_check_button(handle: &tauri::AppHandle) {
+    let js = check_button_script();
+    let handle = handle.clone();
+    tauri::async_runtime::spawn(async move {
+        for _ in 0..8 {
+            if let Some(window) = handle.get_webview_window("main") {
+                let _ = window.eval(&js);
+            }
+            tokio::time::sleep(Duration::from_millis(250)).await;
+        }
     });
 }
 
@@ -663,6 +783,10 @@ pub fn spawn(handle: tauri::AppHandle, current_version: String) {
 /// at all.
 pub fn note_startup_failed(handle: &tauri::AppHandle, current_version: &str) {
     STARTUP_FAILED.store(true, Ordering::SeqCst);
+    // Nothing has been asked yet; the button asks when pressed. An offer that
+    // is already known (the button was pressed on an earlier failure in this
+    // run) is still painted.
+    paint_check_button(handle);
     paint_if_ready(handle, current_version);
 }
 
@@ -1174,5 +1298,111 @@ mod tests {
                 String::from_utf8_lossy(&output.stderr)
             );
         }
+    }
+
+    #[test]
+    fn a_pressed_button_is_told_apart_from_an_unreachable_host() {
+        // Up to date and "could not ask" are different answers for a person
+        // who pressed a button, and only a readable release may say the first.
+        assert_eq!(outcome_from_response(200, &good_body(), "15.0.1"), CheckOutcome::Current);
+        assert_eq!(outcome_from_response(200, &good_body(), "16.0.0"), CheckOutcome::Current);
+        assert!(matches!(
+            outcome_from_response(200, &good_body(), "15.0.0"),
+            CheckOutcome::Newer(_)
+        ));
+        let good = good_body();
+        for (status, body) in [
+            (403, good.as_str()),
+            (200, "<html>captive portal</html>"),
+            (200, ""),
+            (200, "{\"message\":\"Not Found\"}"),
+        ] {
+            assert_eq!(
+                outcome_from_response(status, body, "15.0.0"),
+                CheckOutcome::Unreachable,
+                "status {status} with body {body:?} must not read as up to date"
+            );
+        }
+        assert_eq!(CheckOutcome::Current.as_str(), "current");
+        assert_eq!(CheckOutcome::Unreachable.as_str(), "unreachable");
+    }
+
+    #[test]
+    fn the_failure_screen_button_calls_the_command_and_nothing_else() {
+        let script = check_button_script();
+        assert!(script.contains("'check_for_update_now'"));
+        assert!(script.contains("getElementById('oe-update-check')"), "retries must not add a second button");
+        // It asks nothing on its own: the only call sits inside the click handler.
+        let click = script.find("btn.onclick").expect("the button has a click handler");
+        let call = script.find("f('check_for_update_now'").expect("the command is invoked");
+        assert!(call > click, "the check must run on the click, not when the button is drawn");
+        for word in ["'current'", "'disabled'", "'newer'"] {
+            assert!(script.contains(word), "the script handles the {word} answer");
+        }
+    }
+
+    #[test]
+    fn the_failure_screen_is_granted_the_check() {
+        // The failure screen is a local-origin document, governed by
+        // capabilities/default.json. A command it is not granted is refused
+        // before it runs, and the button would only ever say it could not start.
+        use std::collections::{HashMap, HashSet};
+        const CAPABILITY: &str = include_str!("../capabilities/default.json");
+        const PERMISSIONS: &str = include_str!("../permissions/app-commands.json");
+        let capability: serde_json::Value = serde_json::from_str(CAPABILITY).unwrap();
+        let declared: serde_json::Value = serde_json::from_str(PERMISSIONS).unwrap();
+        let mut commands_of: HashMap<String, Vec<String>> = HashMap::new();
+        for p in declared["permission"].as_array().unwrap() {
+            let cmds = p["commands"]["allow"]
+                .as_array()
+                .map(|l| l.iter().filter_map(|c| c.as_str().map(str::to_string)).collect())
+                .unwrap_or_default();
+            commands_of.insert(p["identifier"].as_str().unwrap().to_string(), cmds);
+        }
+        let mut members_of: HashMap<String, Vec<String>> = HashMap::new();
+        for set in declared["set"].as_array().unwrap() {
+            let members = set["permissions"]
+                .as_array()
+                .map(|l| l.iter().filter_map(|c| c.as_str().map(str::to_string)).collect())
+                .unwrap_or_default();
+            members_of.insert(set["identifier"].as_str().unwrap().to_string(), members);
+        }
+        let mut granted: HashSet<String> = HashSet::new();
+        let mut seen: HashSet<String> = HashSet::new();
+        let mut pending: Vec<String> = capability["permissions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|p| p.as_str().map(str::to_string))
+            .collect();
+        while let Some(id) = pending.pop() {
+            if !seen.insert(id.clone()) {
+                continue;
+            }
+            if let Some(cmds) = commands_of.get(&id) {
+                granted.extend(cmds.iter().cloned());
+            } else if let Some(members) = members_of.get(&id) {
+                pending.extend(members.iter().cloned());
+            }
+        }
+        assert!(granted.contains("check_for_update_now"));
+    }
+
+    #[test]
+    fn the_check_button_script_is_valid_javascript() {
+        let path = std::env::temp_dir().join("oe_update_check_button.js");
+        if std::fs::write(&path, check_button_script().as_bytes()).is_err() {
+            return;
+        }
+        let checked = std::process::Command::new("node").arg("--check").arg(&path).output();
+        let _ = std::fs::remove_file(&path);
+        let Ok(output) = checked else {
+            return; // No node on this machine.
+        };
+        assert!(
+            output.status.success(),
+            "the check button script is not valid JavaScript:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 }

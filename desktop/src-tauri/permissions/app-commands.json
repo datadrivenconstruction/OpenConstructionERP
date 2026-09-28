@@ -31,6 +31,11 @@
       "commands": { "allow": ["set_update_check_enabled"] }
     },
     {
+      "identifier": "allow-check-for-update-now",
+      "description": "Ask github.com, once, which version is the latest, when the user presses the button on the startup failure screen. Takes no argument: the address and the repository are fixed by the launcher, so this cannot be pointed anywhere else. Answers newer, current, unreachable or disabled.",
+      "commands": { "allow": ["check_for_update_now"] }
+    },
+    {
       "identifier": "allow-decline-update-version",
       "description": "Record that the user does not want to be told about one particular version again.",
       "commands": { "allow": ["decline_update_version"] }
@@ -62,6 +67,7 @@
         "allow-get-app-url",
         "allow-set-update-check-enabled",
         "allow-decline-update-version",
+        "allow-check-for-update-now",
         "allow-get-server-choice",
         "allow-set-server-choice",
         "allow-use-local-server"

@@ -4222,7 +4222,8 @@ fn main() {
             set_server_choice,
             use_local_server,
             update_check::set_update_check_enabled,
-            update_check::decline_update_version
+            update_check::decline_update_version,
+            update_check::check_for_update_now
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -4259,14 +4260,9 @@ fn main() {
             report_app_version(&handle);
             boot_stage(&handle, "sidecar", "active", "Starting the backend");
 
-            // Ask, in the background, whether a newer release exists. Started
-            // here rather than when a failure is reported because a failure can
-            // arrive in milliseconds - a sidecar binary that is not there fails
-            // long before any request could finish - and a user staring at an
-            // error is not going to be made to wait for a web request on top of
-            // it. Never awaited, never blocking, and silent unless startup
-            // fails: see the file for what it does and does not do.
-            update_check::spawn(handle.clone(), env!("CARGO_PKG_VERSION").to_string());
+            // No update check here. It used to ask GitHub on every start in the
+            // background; now the startup failure screen offers a button and
+            // the request is sent only when it is pressed. See update_check.rs.
 
             // Tray icon with a right-click menu. The menu is the always-present
             // home for the "open in your browser" choice the founder asked for:
