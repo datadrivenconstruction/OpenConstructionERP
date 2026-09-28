@@ -33,6 +33,12 @@ DEMO_ACCOUNT_EMAILS: frozenset[str] = frozenset(
 )
 
 
+#: The account that owns the showcase projects. Seeders used to take the first
+#: row with role ``admin``, which on a live installation is a real person, and
+#: could be one whose account had been deactivated.
+SHOWCASE_OWNER_EMAIL = "demo@openconstructionerp.com"
+
+
 #: The ``ADMIN_EMAIL`` each seeder script under ``app/scripts`` registers.
 #: They log in and, failing that, POST a registration, so any installation
 #: that has run one of those scripts holds the account. None of them is a

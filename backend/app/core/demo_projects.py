@@ -21,6 +21,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy import delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_showcase import GERMAN_SHOWCASE_DEMO_IDS
 from app.modules.boq.models import BOQ, BOQMarkup, Position
 from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem
@@ -2889,17 +2890,42 @@ def register_pack_templates(templates: list[DemoTemplate]) -> None:
 # ---------------------------------------------------------------------------
 
 
+async def find_showcase_owner(session: AsyncSession) -> User | None:
+    """Return the account the showcase projects belong to, or None.
+
+    The showcase demo account when it is active. Without it, the oldest active
+    admin, then the oldest active user. A deactivated account is never
+    returned: projects handed to it land on a person who can no longer sign in
+    to see or remove them. The order is explicit because ``LIMIT 1`` without
+    one hands the projects to whichever row the database reads first.
+    """
+    active = User.is_active.is_(True)
+    for stmt in (
+        select(User).where(User.email == SHOWCASE_OWNER_EMAIL, active),
+        select(User).where(User.role == "admin", active).order_by(User.created_at, User.id),
+        select(User).where(active).order_by(User.created_at, User.id),
+    ):
+        user = (await session.execute(stmt.limit(1))).scalar_one_or_none()
+        if user is not None:
+            return user
+    return None
+
+
 async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
-    """Find an admin user or create a demo user to own the project."""
-    user = (await session.execute(select(User).where(User.role == "admin").limit(1))).scalar_one_or_none()
+    """Find the showcase owner or create the demo user to own the project."""
+    user = await find_showcase_owner(session)
 
     if user is None:
-        user = (await session.execute(select(User).limit(1))).scalar_one_or_none()
-
-    if user is None:
+        # Only reached with no active account at all. A deactivated demo row
+        # still holds the unique email, and waking it up is an operator's call.
+        dormant = (
+            await session.execute(select(User.id).where(User.email == SHOWCASE_OWNER_EMAIL))
+        ).scalar_one_or_none()
+        if dormant is not None:
+            raise RuntimeError(f"No active account can own the showcase: {SHOWCASE_OWNER_EMAIL} is deactivated")
         user = User(
             id=_id(),
-            email="demo@openconstructionerp.com",
+            email=SHOWCASE_OWNER_EMAIL,
             hashed_password="$2b$12$DEMO_HASH_NOT_FOR_PRODUCTION_USE_ONLY",
             full_name="Elena Marchetti",
             role="admin",

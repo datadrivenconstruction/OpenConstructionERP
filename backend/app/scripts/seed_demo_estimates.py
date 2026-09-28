@@ -21,6 +21,8 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy import select
 
+from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
+from app.core.demo_projects import find_showcase_owner
 from app.database import Base, async_session_factory, engine
 from app.modules.boq.models import BOQ, BOQMarkup, Position  # noqa: F401
 from app.modules.projects.models import Project  # noqa: F401
@@ -628,18 +630,20 @@ async def main() -> None:
         print("  OpenConstructionERP  -  Demo Estimate Seeder")
         print("=" * 78)
 
-        user = (await session.execute(select(User).where(User.role == "admin").limit(1))).scalar_one_or_none()
+        user = await find_showcase_owner(session)
 
         if user is None:
-            user = (await session.execute(select(User).limit(1))).scalar_one_or_none()
-
-        if user is None:
+            dormant = (
+                await session.execute(select(User.id).where(User.email == SHOWCASE_OWNER_EMAIL))
+            ).scalar_one_or_none()
+            if dormant is not None:
+                raise SystemExit(f"No active account can own the demo projects: {SHOWCASE_OWNER_EMAIL} is deactivated")
             # Create a minimal demo user - intentionally *not* admin so the
             # first real registrant on a freshly-seeded DB still gets the
             # admin bootstrap path. See UserService.register.
             user = User(
                 id=uuid.uuid4(),
-                email="demo@openconstructionerp.com",
+                email=SHOWCASE_OWNER_EMAIL,
                 hashed_password="$2b$12$DEMO_HASH_NOT_FOR_PRODUCTION_USE_ONLY",
                 full_name="Elena Marchetti",
                 role="viewer",
