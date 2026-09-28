@@ -1651,6 +1651,8 @@ class SubcontractorService:
         if entity is None:
             raise HTTPException(status_code=404, detail="Work package not found")
         fields = data.model_dump(exclude_unset=True)
+        if "contract_line_id" in fields and fields["contract_line_id"] != entity.contract_line_id:
+            await self._refuse_remap_of_billed_package(wp_id)
         if fields.get("contract_line_id") is not None:
             agreement = await self.agreements.get_by_id(entity.agreement_id)
             if agreement is not None:
@@ -1659,6 +1661,40 @@ class SubcontractorService:
             await self.work_packages.update_fields(wp_id, **fields)
             await self.session.refresh(entity)
         return entity
+
+    async def _refuse_remap_of_billed_package(self, wp_id: uuid.UUID) -> None:
+        """Refuse to move a package's schedule-of-values line under a claim past editing.
+
+        A pay-application line without its own ``contract_line_id`` bills
+        under its package's (``rollup.resolve_contract_line``), so remapping
+        the package moves that billed amount to another GC line, the change
+        :meth:`update_payment_application_line` refuses once the claim has
+        moved on. Lines that carry their own mapping are not moved and do
+        not count.
+        """
+        stmt = (
+            select(PaymentApplicationLine.contract_line_id, PaymentApplication.progress_claim_id)
+            .join(PaymentApplication, PaymentApplication.id == PaymentApplicationLine.payment_application_id)
+            .where(
+                PaymentApplicationLine.work_package_id == wp_id,
+                PaymentApplication.progress_claim_id.is_not(None),
+            )
+        )
+        rows = (await self.session.execute(stmt)).all()
+        claim_ids = {claim_id for own_line, claim_id in rows if own_line is None}
+        if not claim_ids:
+            return
+        reader = PrimeContractReader(self.session)
+        for claim_id in sorted(claim_ids, key=str):
+            claim = await reader.get_claim(claim_id)
+            if claim is not None and claim.status not in self._CLAIM_EDITABLE_STATUSES:
+                raise self._refuse(
+                    status.HTTP_409_CONFLICT,
+                    "claim_not_editable",
+                    f"The work package is billed on a claim that is {claim.status!r}, "
+                    "so its schedule-of-values line can no longer change.",
+                    claim_status=claim.status,
+                )
 
     async def delete_work_package(self, wp_id: uuid.UUID) -> None:
         """Delete a work package nothing has been billed against.
@@ -1807,6 +1843,18 @@ class SubcontractorService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Only submitted payment applications can be edited",
             )
+        # A pay application billed on a GC claim past editing is part of what
+        # that claim says it contained; its period, gross, currency and the
+        # retention accrued on it stay as billed, as its lines do.
+        if entity.progress_claim_id is not None:
+            claim = await PrimeContractReader(self.session).get_claim(entity.progress_claim_id)
+            if claim is not None and claim.status not in self._CLAIM_EDITABLE_STATUSES:
+                raise self._refuse(
+                    status.HTTP_409_CONFLICT,
+                    "claim_not_editable",
+                    f"The pay application is billed on a claim that is {claim.status!r} and can no longer change.",
+                    claim_status=claim.status,
+                )
         fields = data.model_dump(exclude_unset=True)
         # Recompute retention if gross changes.
         if "gross_amount" in fields and fields["gross_amount"] is not None:
