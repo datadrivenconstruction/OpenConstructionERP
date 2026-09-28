@@ -1863,3 +1863,94 @@ jobs:
         # code, the schema moved, /api/health agrees that it moved, and an
         # authenticated read of the affected register answers 200.
         run: python scripts/verify_upgrade_from_previous_release.py
+
+  # Every pack installed the way an admin installs it, each on a fresh
+  # database cloned from a booted template. The unit suite checks pack wiring
+  # from the outside and never installs anything, and every layer of the
+  # installer is fail-soft, so this is the only place a pack that installs half
+  # a workspace goes red. About a hundred demo projects in total, so it is split
+  # six ways and kept out of the main job's thirty minutes (the file skips
+  # itself unless OE_PACK_MATRIX is set).
+  pack-installs:
+    name: Pack installs (shard ${{ matrix.shard }}/6)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      OE_TEST_DB: pg
+      OE_PACK_MATRIX: '1'
+      OE_PACK_SHARD: ${{ matrix.shard }}/6
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+      - name: Install dependencies
+        id: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,server]"
+      - name: Install every pack on a fresh database
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: >-
+          pytest tests/pg/test_every_pack_installs.py -v -rA -p no:cacheprovider
+          --timeout=1800 --timeout-method=thread --durations=0
+
+  # Every cost base a pack resolves to, downloaded from the public CWICR
+  # repository and imported on a fresh database, with the import's own memory
+  # peak printed next to the largest PostgreSQL backend. This is where the
+  # 3 GB floor in CLAUDE.md principle 1 is measured rather than repeated. The
+  # parquet cache is keyed on the loader so a changed file list refetches.
+  cost-bases:
+    name: Pack cost bases (shard ${{ matrix.shard }}/3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      OE_TEST_DB: pg
+      OE_COST_BASE_MATRIX: '1'
+      OE_COST_BASE_SHARD: ${{ matrix.shard }}/3
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+      - name: Install dependencies
+        id: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,server]"
+      - name: Restore the downloaded cost bases
+        uses: actions/cache@v4
+        with:
+          path: ~/.openestimator/cache
+          key: cwicr-parquet-${{ matrix.shard }}-${{ hashFiles('backend/app/modules/costs/base_registry.py') }}
+      - name: Load every pack cost base and measure the import
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: >-
+          pytest tests/pg/test_every_pack_cost_base_loads.py -v -s -rA -p no:cacheprovider
+          --timeout=1800 --timeout-method=thread --durations=0
