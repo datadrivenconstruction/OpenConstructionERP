@@ -195,8 +195,17 @@ class CvrService:
             )
 
     async def delete_report(self, report_id: uuid.UUID) -> None:
-        """Delete a report (its lines cascade)."""
+        """Delete a draft report (its lines cascade).
+
+        A final report is refused like its lines are: set it back to draft
+        first, so the delete is never the way round the line guard.
+        """
         report = await self.get_report(report_id)
+        if report.status == "final":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete a finalized CVR report. Set it back to draft first.",
+            )
         await self.report_repo.delete(report)
 
     async def report_line_count(self, report_id: uuid.UUID) -> int:
