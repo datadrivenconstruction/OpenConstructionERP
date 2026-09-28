@@ -80,6 +80,12 @@ classifiers = [
 # tooling that CI installs, not something a user's install runs.
 dependencies = [
     "fastapi>=0.116.0,<1",
+    # Starlette arrives with FastAPI, but no FastAPI release floors it high
+    # enough for us: 0.116.0 accepts starlette 0.40. The 422 status constant
+    # is HTTP_422_UNPROCESSABLE_CONTENT, which starlette only has from 0.48.0,
+    # and on an older one every handler that raises it fails with an
+    # AttributeError at request time, not at import.
+    "starlette>=0.48.0,<2",
     "uvicorn[standard]>=0.32.0,<1",
     "python-multipart>=0.0.27,<1",
     "sqlalchemy[asyncio]>=2.0.36,<2.1",
