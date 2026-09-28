@@ -226,3 +226,21 @@ async def test_a_pressed_button_skips_the_cache(monkeypatch: pytest.MonkeyPatch)
     assert first["latest_version"] == "15.1.0"
     assert cached["latest_version"] == "15.1.0"
     assert fresh["latest_version"] == "15.2.0"
+
+
+async def test_the_desktop_hears_about_a_release_without_a_button(ask, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The sidebar's notice is how a desktop user learns of a new version.
+
+    The launcher no longer asks GitHub on a healthy start, so this unforced
+    call, the one the sidebar makes after sign-in, is the only thing left that
+    tells the desktop about a release. It has to go out and say so.
+    """
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    data = await ask(
+        monkeypatch,
+        {PYPI: _pypi_version("99.0.0"), GITHUB: _github_release("v99.0.0")},
+    )
+
+    assert data["update_available"] is True
+    assert data["latest_version"] == "99.0.0"
+    assert data.get("check_disabled", False) is False
