@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
@@ -2901,7 +2901,7 @@ async def find_showcase_owner(session: AsyncSession) -> User | None:
     """
     active = User.is_active.is_(True)
     for stmt in (
-        select(User).where(User.email == SHOWCASE_OWNER_EMAIL, active),
+        select(User).where(func.lower(User.email) == SHOWCASE_OWNER_EMAIL, active),
         select(User).where(User.role == "admin", active).order_by(User.created_at, User.id),
         select(User).where(active).order_by(User.created_at, User.id),
     ):
@@ -2919,7 +2919,7 @@ async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
         # Only reached with no active account at all. A deactivated demo row
         # still holds the unique email, and waking it up is an operator's call.
         dormant = (
-            await session.execute(select(User.id).where(User.email == SHOWCASE_OWNER_EMAIL))
+            await session.execute(select(User.id).where(func.lower(User.email) == SHOWCASE_OWNER_EMAIL))
         ).scalar_one_or_none()
         if dormant is not None:
             raise RuntimeError(f"No active account can own the showcase: {SHOWCASE_OWNER_EMAIL} is deactivated")

@@ -19,7 +19,7 @@ import asyncio
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_projects import find_showcase_owner
@@ -634,7 +634,7 @@ async def main() -> None:
 
         if user is None:
             dormant = (
-                await session.execute(select(User.id).where(User.email == SHOWCASE_OWNER_EMAIL))
+                await session.execute(select(User.id).where(func.lower(User.email) == SHOWCASE_OWNER_EMAIL))
             ).scalar_one_or_none()
             if dormant is not None:
                 raise SystemExit(f"No active account can own the demo projects: {SHOWCASE_OWNER_EMAIL} is deactivated")
