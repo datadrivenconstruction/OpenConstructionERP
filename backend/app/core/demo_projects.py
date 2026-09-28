@@ -4893,6 +4893,10 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
 # ``for row in list: session.add(Model(...))`` loops.
 
 
+#: The width of the narrowest column a trade label is written to.
+_TRADE_LABEL_MAX = 100
+
+
 def _clean_trade(section_title: str) -> str:
     """Extract a short, human trade label from a section title.
 
@@ -4910,7 +4914,17 @@ def _clean_trade(section_title: str) -> str:
             if head_token and all(c.isdigit() or c in ". " for c in head_token):
                 title = tail.strip() or title
                 break
-    return title[:120] if title else "General works"
+    if not title:
+        return "General works"
+    if len(title) <= _TRADE_LABEL_MAX:
+        return title
+    # Cut at the last word that fits and drop the separator it leaves behind.
+    # Every column the label lands in (punch list trade, finance budget
+    # category) is String(100), and PostgreSQL rejects a longer value rather
+    # than trimming it, which failed the whole install of the Spanish and
+    # Italian demos whose headings carry an English gloss.
+    head = title[: _TRADE_LABEL_MAX + 1].rsplit(" ", 1)[0]
+    return head.rstrip(" ,;:-") or title[:_TRADE_LABEL_MAX]
 
 
 def _section_trades(template: DemoTemplate) -> list[tuple[str, str, str]]:
