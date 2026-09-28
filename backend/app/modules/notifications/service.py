@@ -403,6 +403,31 @@ class NotificationService:
         if not rows:
             return 0
 
+        # Claim before sending. The in-process worker flushes every five
+        # minutes and the admin endpoint can flush on demand; two flushes that
+        # both read the same unsent rows used to both send the digest. The
+        # conditional UPDATE takes the row locks, so a concurrent flush waits
+        # for this one to commit and then finds nothing left to claim.
+        now = datetime.now(UTC)
+        claimed = set(
+            (
+                await self.session.execute(
+                    update(NotificationDigestQueue)
+                    .where(
+                        NotificationDigestQueue.id.in_([r.id for r in rows]),
+                        NotificationDigestQueue.sent_at.is_(None),
+                    )
+                    .values(sent_at=now)
+                    .returning(NotificationDigestQueue.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        rows = [r for r in rows if r.id in claimed]
+        if not rows:
+            return 0
+
         # Group by user.  Channel is already filtered, so the key is just
         # the user id.
         by_user: dict[uuid.UUID, list[NotificationDigestQueue]] = {}
@@ -445,11 +470,6 @@ class NotificationService:
                 )
             sent_total += len(group)
 
-        # Mark all flushed rows as sent.
-        now = datetime.now(UTC)
-        ids = [r.id for r in rows]
-        upd = update(NotificationDigestQueue).where(NotificationDigestQueue.id.in_(ids)).values(sent_at=now)
-        await self.session.execute(upd)
         await self.session.flush()
         logger.info(
             "Notification digest flush: channel=%s users=%d rows=%d",
