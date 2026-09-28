@@ -206,3 +206,42 @@ def test_the_cp1250_fixture_really_is_not_utf8() -> None:
     with pytest.raises(UnicodeDecodeError):
         content.decode("utf-8")
     assert list(csv.reader(io.StringIO(content.decode("cp1250")), delimiter=";"))[4][2] == "Tétel szövege"
+
+
+def _hu_bill(extra: list[list[str]]) -> bytes:
+    rows = [hu_boq.HEADER, *hu_boq.ROWS[:4], *extra]
+    return "".join(";".join(row) + "\r\n" for row in rows).encode("utf-8")
+
+
+def test_a_contingency_line_imports_as_a_lump_sum_carrying_its_amount() -> None:
+    result = _parse(
+        _hu_bill(
+            [
+                ["", "", "Tartalékkeret 5%", "", "", "", "", "", "18 757"],
+                ["", "", "Összesen tartalékkerettel", "", "", "", "", "", "393 902"],
+            ]
+        )
+    )
+
+    reserve = next(p for p in result.positions if p.description == "Tartalékkeret 5%")
+    assert not reserve.is_section
+    assert (reserve.unit, reserve.quantity, reserve.unit_rate) == ("lsum", 1.0, pytest.approx(18_757.0))
+    assert reserve.metadata["contingency"] is True
+    summary = [w["label"] for w in result.warnings if w.get("code") == "summary_row_skipped"]
+    assert "Összesen tartalékkerettel" in summary
+
+
+def test_a_contingency_heading_without_an_amount_stays_a_section() -> None:
+    result = _parse(_hu_bill([["", "", "Tartalékkeret", "", "", "", "", "", ""]]))
+
+    reserve = next(p for p in result.positions if p.description == "Tartalékkeret")
+    assert reserve.is_section
+
+
+def test_an_english_contingency_line_with_only_an_amount_is_a_lump_sum() -> None:
+    text = "Code;Description;Unit;Qty;Rate;Total\r\nA-10;Blockwork wall;m2;40;40,5;1620\r\n;Contingency 10%;;;;162\r\n"
+    result = _parse(text.encode("utf-8"))
+
+    reserve = result.positions[-1]
+    assert (reserve.description, reserve.unit, reserve.unit_rate) == ("Contingency 10%", "lsum", pytest.approx(162.0))
+    assert result.positions[0].classification == {"code": "A-10"}

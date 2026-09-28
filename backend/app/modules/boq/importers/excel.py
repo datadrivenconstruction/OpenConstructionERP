@@ -1581,6 +1581,45 @@ def _split_metadata(row: dict[str, Any], language: str | None) -> dict[str, Any]
     }
 
 
+# Contingency lines, matched on :func:`normalise_label` at the start of the
+# label. A bill writes its reserve as a line with a name and an amount and no
+# unit, quantity or rate, "Tartalékkeret 5%", which is exactly the shape of a
+# section heading, so it imported as an empty section and the reserve was
+# lost from the total. Such a line is money the client budgets, so it comes in
+# as a lump sum carrying its amount.
+_CONTINGENCY_PHRASES: frozenset[str] = frozenset(
+    normalise_label(phrase)
+    for phrase in (
+        # English
+        "contingency",
+        "contingencies",
+        "contingency sum",
+        "contingency allowance",
+        # Hungarian
+        "tartalékkeret",
+        "tartalék",
+        "előre nem látható költségek",
+    )
+)
+
+
+def _contingency_amount(row: dict[str, Any], description: str) -> float | None:
+    """The amount of a contingency line written without a unit, quantity or rate.
+
+    Returns ``None`` for any other row, and for a contingency line that is
+    priced like work already or carries no amount.
+    """
+    if str(row.get("unit", "") or "").strip():
+        return None
+    if not (_is_blank_cell(row.get("quantity")) and _is_blank_cell(row.get("unit_rate"))):
+        return None
+    words = normalise_label(description).split()
+    if not any(" ".join(words[:length]) in _CONTINGENCY_PHRASES for length in range(1, len(words) + 1)):
+        return None
+    amount = safe_float(row.get("total"), default=0.0)
+    return amount if amount > 0 else None
+
+
 _IMPORT_MAX_QUANTITY = 1e9
 _IMPORT_MAX_UNIT_RATE = 1e8
 
@@ -1655,6 +1694,9 @@ def _rows_to_positions(
             unit_raw = str(row.get("unit", "")).strip()
             quantity_raw = row.get("quantity")
             unit_rate_raw = row.get("unit_rate")
+            contingency = _contingency_amount(row, description)
+            if contingency is not None:
+                unit_raw, quantity_raw, unit_rate_raw = "lsum", 1.0, contingency
             quantity, q_err = parse_numeric_cell(quantity_raw)
             unit_rate, r_err = parse_numeric_cell(unit_rate_raw)
             if q_err is not None:
@@ -1763,6 +1805,8 @@ def _rows_to_positions(
             classification = _infer_classification(class_value, description)
 
             metadata: dict[str, Any] = {"import_row_index": row_idx}
+            if contingency is not None:
+                metadata["contingency"] = True
             split = _split_metadata(row, header_language)
             if split:
                 metadata.update(split)
