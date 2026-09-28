@@ -3902,6 +3902,13 @@ class VariationsService:
                 status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=translate("errors.final_account_not_found", locale=get_locale()),
             )
+        # Same rule as update_final_account: a closed account is the signed
+        # settlement and keeps the value it was closed at.
+        if fa.status == "closed":
+            raise HTTPException(
+                status_code=http_status.HTTP_409_CONFLICT,
+                detail="The final account is closed and is kept at the value it was closed at.",
+            )
         vo_currency = (vo.currency or "").strip()
         fa_currency = (fa.currency or "").strip()
         if vo_currency and fa_currency and vo_currency != fa_currency:

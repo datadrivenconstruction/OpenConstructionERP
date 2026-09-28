@@ -153,3 +153,34 @@ async def test_an_open_account_still_takes_its_figures_and_recomputes() -> None:
     updated = await svc.update_final_account(fa.id, FinalAccountUpdate(status="draft", retention_held=Decimal("0")))
     assert updated.retention_held == Decimal("0")
     assert updated.final_value == CLOSED_AT + Decimal("50000")
+
+
+# ── Applying a variation straight onto the account ──────────────────────────
+
+
+async def test_a_variation_is_not_applied_onto_a_closed_account() -> None:
+    """``apply_variation_to_final_account`` writes the totals directly, so it holds the same line as the PATCH."""
+    svc, fa = await _project_with_an_account("closed")
+    with patch("app.modules.variations.service.event_bus.publish_detached"):
+        vo = await svc.create_order(
+            VariationOrderCreate(
+                project_id=PROJECT_ID, title="late", final_cost_impact=Decimal("10000"), currency="EUR"
+            )
+        )
+    with pytest.raises(HTTPException) as exc:
+        await svc.apply_variation_to_final_account(vo.id, fa.id)
+    assert exc.value.status_code == 409
+    assert fa.final_value == CLOSED_AT
+    assert fa.variations_total == Decimal("35000")
+
+
+async def test_a_variation_is_still_applied_onto_an_open_account() -> None:
+    svc, fa = await _project_with_an_account("agreed")
+    with patch("app.modules.variations.service.event_bus.publish_detached"):
+        vo = await svc.create_order(
+            VariationOrderCreate(
+                project_id=PROJECT_ID, title="late", final_cost_impact=Decimal("10000"), currency="EUR"
+            )
+        )
+    updated = await svc.apply_variation_to_final_account(vo.id, fa.id)
+    assert updated.final_value == CLOSED_AT + Decimal("10000")
