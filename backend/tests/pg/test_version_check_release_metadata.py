@@ -30,6 +30,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+from app.core import update_check_policy
 from app.dependencies import get_current_user_id
 from app.main import create_app
 
@@ -105,7 +106,12 @@ async def ask():
     transport this test speaks over stays real while the route gets the fake.
     """
 
-    async def _ask(monkeypatch: pytest.MonkeyPatch, routes: dict[str, _Response]) -> dict[str, Any]:
+    async def _ask(
+        monkeypatch: pytest.MonkeyPatch, routes: dict[str, _Response], *, disabled: bool = False
+    ) -> dict[str, Any]:
+        # The machine running the suite may carry its own opt-out file or
+        # OE_DISABLE_UPDATE_CHECK, and neither may decide these tests.
+        monkeypatch.setattr(update_check_policy, "update_check_disabled", lambda home=None: disabled)
         app = create_app()
         app.dependency_overrides[get_current_user_id] = lambda: "version-check-reader"
         transport = ASGITransport(app=app)
@@ -182,3 +188,22 @@ async def test_pypi_alone_names_a_version_and_promises_nothing_else(ask, monkeyp
     assert data["latest_version"] == "15.1.0"
     assert data["release_notes"] == ""
     assert data["release_url"].endswith("/releases")
+
+
+async def test_a_disabled_check_asks_nobody(ask, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The launcher's "Turn off update checks" has to reach this route too.
+
+    Both upstreams would announce a far newer release, and the route swallows
+    upstream errors, so only an answer naming the running version proves the
+    route stayed off the network rather than asking and then saying nothing.
+    """
+    data = await ask(
+        monkeypatch,
+        {PYPI: _pypi_version("99.0.0"), GITHUB: _github_release("v99.0.0")},
+        disabled=True,
+    )
+
+    assert data["check_disabled"] is True
+    assert data["update_available"] is False
+    assert data["latest_version"] == data["current_version"]
+    assert data["assets"] == []

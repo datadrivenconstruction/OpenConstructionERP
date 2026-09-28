@@ -3423,9 +3423,33 @@ def create_app() -> FastAPI:
         """
         import httpx
 
+        from app.core.update_check_policy import update_check_disabled
+
         current = settings.app_version
         repo = "datadrivenconstruction/OpenConstructionERP"
         cache_key = "_version_check_cache"
+
+        # Turned off by the user from the desktop launcher's notice or by an
+        # administrator's OE_DISABLE_UPDATE_CHECK: answer from what we know and
+        # send nothing outward. Read on every call rather than cached, so the
+        # switch takes effect without a restart.
+        if update_check_disabled():
+            return {
+                "current_version": current,
+                "latest_version": current,
+                "update_available": False,
+                "check_disabled": True,
+                "release_url": f"https://github.com/{repo}/releases",
+                "release_notes": "",
+                "published_at": "",
+                "assets": [],
+                "self_upgrade_supported": not is_frozen_build(),
+                "upgrade_command": repair_hint(
+                    "pip install --upgrade openconstructionerp",
+                    "Download and run the latest installer",
+                ),
+                **await _runtime_upgrade_state(_user_id),
+            }
 
         cached = getattr(app.state, cache_key, None)
         if cached and (time.time() - cached["checked_at"]) < 14400:
