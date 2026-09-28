@@ -150,6 +150,7 @@ def test_the_matrix_is_not_empty() -> None:
     assert len(DB_IDS) > 0 or os.environ.get("OE_COST_BASE_SHARD"), "no pack resolves to any cost base"
 
 
+@pytest.mark.allow_network
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("db_id", DB_IDS)
 async def test_the_cost_base_loads_once_and_fits_the_floor(db_id: str, fresh_db) -> None:

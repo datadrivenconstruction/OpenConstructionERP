@@ -71,6 +71,15 @@ _APPEND_ONLY_TABLES = {
 }
 
 
+# Countries a shipped pack names that the tax seed does not carry yet. A pack
+# for one of them installs, and its invoices open with no VAT line to pick.
+# Listed rather than skipped so the day the seed gains the country this goes
+# red and the entry comes out. Indonesia: PPN is 12% by statute since
+# 2025-01-01 and 11% in effect for most supplies (PMK 131/2024), which is a
+# rate decision for a person to make, not for a test to guess.
+_VAT_NOT_SEEDED_YET = {"ID"}
+
+
 # ── Which packs ─────────────────────────────────────────────────────────────
 
 
@@ -387,13 +396,18 @@ async def test_the_pack_installs_on_a_fresh_database(pack_dir: str, fresh_db, ca
             empty[demo_id] = counts
     assert not empty, f"{slug}: demo projects with empty core modules: {empty}"
 
+    # ``XX`` is how a sector pack (renewables, modular, retail across DACH)
+    # says it belongs to no single country, so it has no VAT of its own.
     country = (m.metadata or {}).get("country")
-    if country:
+    if country and country != "XX":
         async with factory() as s:
             vat_rows = (
                 await s.execute(select(func.count()).select_from(TaxConfig).where(TaxConfig.country_code == country))
             ).scalar_one()
-        assert vat_rows > 0, f"{slug}: no VAT rows on file for {country}"
+        if country in _VAT_NOT_SEEDED_YET:
+            assert vat_rows == 0, f"{slug}: {country} now has VAT rows, drop it from _VAT_NOT_SEEDED_YET"
+        else:
+            assert vat_rows > 0, f"{slug}: no VAT rows on file for {country}"
 
     # ── 2. The same install again adds nothing ──
     before = await _table_counts(factory)
@@ -433,3 +447,82 @@ async def test_the_pack_installs_on_a_fresh_database(pack_dir: str, fresh_db, ca
 
     warnings = _install_warnings(caplog)
     assert not warnings, f"{slug}: the install logged warnings:\n" + "\n".join(warnings[:40])
+
+
+# ── Switching packs ─────────────────────────────────────────────────────────
+
+# Pairs that share nothing: different country, currency and demos. Switching
+# is the branch where the installer deletes the previous pack's demo projects,
+# an ORM delete over a project with hundreds of child rows inside an ``except``
+# that returns 0, so a delete PostgreSQL refuses reads as "nothing to delete".
+_SWITCH_PAIRS = _shard(["germany-de>france-fr", "us-costdata>uk-jct", "japan-jp>brazil-sinapi"])
+
+
+@pytest.mark.timeout(1500)
+@pytest.mark.parametrize("pair", _SWITCH_PAIRS)
+async def test_switching_packs_removes_the_previous_packs_demos(pair: str, fresh_db, caplog) -> None:
+    from app.core.partner_pack.state import load_applied_state
+
+    caplog.set_level(logging.WARNING)
+    factory = fresh_db
+    first, second = (_load_manifest(d).slug for d in pair.split(">"))
+
+    await _stream_install(first)
+    first_demos = set(_expected_demos(first))
+    assert first_demos, f"{first} installs no demos, so this pair tests nothing"
+    assert first_demos <= set(await _demo_projects(factory))
+
+    done = await _stream_install(second)
+    steps = {s["step"]: s for s in done["steps"]}
+    assert steps["apply_pack"]["detail"].get("switched_from") == first
+    state = load_applied_state()
+    assert state is not None and state.slug == second
+
+    left = (first_demos - set(_expected_demos(second))) & set(await _demo_projects(factory))
+    assert not left, f"switching {first} -> {second} left the previous pack's demos behind: {sorted(left)}"
+    warnings = _install_warnings(caplog)
+    assert not warnings, f"{pair}: the switch logged warnings:\n" + "\n".join(warnings[:40])
+
+
+# ── Showcase templates no pack installs ─────────────────────────────────────
+
+
+def _unreached_templates() -> list[str]:
+    """Demo templates no pack's one-click install reaches, so the loop above never runs them."""
+    if os.environ.get("OE_PACK_MATRIX", "") != "1":
+        return []
+    from app.core.demo_projects import DEMO_TEMPLATES
+
+    reached: set[str] = set()
+    for d in ALL_PACK_DIRS:
+        reached.update(_expected_demos(_load_manifest(d).slug))
+    return _shard(sorted(set(DEMO_TEMPLATES) - reached))
+
+
+@pytest.mark.timeout(900)
+@pytest.mark.parametrize("demo_id", _unreached_templates())
+async def test_a_showcase_template_no_pack_installs_still_installs(demo_id: str, fresh_db, caplog) -> None:
+    from app.core.demo_enrichment import enrich_projects
+    from app.core.demo_projects import install_demo_project
+
+    caplog.set_level(logging.WARNING)
+    factory = fresh_db
+    async with factory() as s:
+        res = await install_demo_project(s, demo_id)
+        await s.commit()
+    pid = uuid.UUID(str(res["project_id"]))
+    await enrich_projects([pid])
+    counts = await _project_children(factory, pid)
+    assert all(counts.values()), f"{demo_id}: empty core modules {counts}"
+
+    before = await _table_counts(factory)
+    async with factory() as s:
+        again = await install_demo_project(s, demo_id)
+        await s.commit()
+    await enrich_projects([pid])
+    after = await _table_counts(factory)
+    assert again.get("already_installed"), f"{demo_id}: a second install did not recognise the first"
+    grew = {t: (before[t], after[t]) for t in before if after[t] != before[t] and t not in _APPEND_ONLY_TABLES}
+    assert not grew, f"{demo_id}: a second install changed row counts: {grew}"
+    warnings = _install_warnings(caplog)
+    assert not warnings, f"{demo_id}: the install logged warnings:\n" + "\n".join(warnings[:40])

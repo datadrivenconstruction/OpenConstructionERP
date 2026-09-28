@@ -1954,3 +1954,38 @@ jobs:
         run: >-
           pytest tests/pg/test_every_pack_cost_base_loads.py -v -s -rA -p no:cacheprovider
           --timeout=1800 --timeout-method=thread --durations=0
+
+  # The packs as an installed wheel sees them. The unit gates read the tree and
+  # the publish workflow reads the archive only at tag time, with a floor of
+  # fifteen packs rather than the list. This builds the wheel, installs it into
+  # a clean virtualenv and asks discovery from outside the repository, so a pack
+  # that only a source checkout can see goes red before a tag exists. The
+  # frontend is a stub: the question is about the packs, not the bundle.
+  pack-wheel:
+    name: Packs in the installed wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p frontend/dist
+          touch frontend/dist/.gitkeep
+      - name: Build and install the wheel into a clean virtualenv
+        id: install
+        run: |
+          python -m pip install --upgrade build
+          (cd backend && python -m build --wheel --outdir "$RUNNER_TEMP/dist/")
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install "$RUNNER_TEMP"/dist/*.whl
+      - name: Ask the installed wheel which packs it lists
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/wheel-venv/bin/python" "$GITHUB_WORKSPACE/scripts/check_wheel_ships_every_pack.py" "$GITHUB_WORKSPACE"
