@@ -286,6 +286,33 @@ async def test_a_certified_client_claim_stays_a_receivable(world: _World, produc
     assert invoices[0].contact_id == str(world.client_contact_id)
 
 
+@pytest.mark.asyncio
+async def test_the_certification_is_announced_after_it_is_committed(world: _World, production_bus: EventBus) -> None:
+    """A subscriber told about a certification must be able to read it.
+
+    The event used to be published the moment the transition began, so the
+    finance subscriber opened its own session while the certifying
+    transaction was still open, read the claim as ``approved`` and refused to
+    invoice it. Whether it lost that race depended on how fast its connection
+    came up, which is why this showed as an intermittent red on PostgreSQL.
+    Letting every scheduled subscriber run before the commit makes the losing
+    order the only order, so the old code fails here every time.
+    """
+    contract_id = await world.contract(counterparty="client")
+    claim_id = await world.approved_claim(contract_id)
+
+    async with world.factory() as session:
+        await ContractsService(session).transition_claim(claim_id, "certified", actor_id=None)
+        # A bounded wait, so a subscriber blocked on this open transaction
+        # fails the test instead of hanging it.
+        await asyncio.wait_for(_drain(production_bus), timeout=30)
+        await session.commit()
+    await _drain(production_bus)
+
+    invoices = await world.invoices()
+    assert [(i.source_claim_id, i.invoice_direction) for i in invoices] == [(claim_id, "receivable")]
+
+
 # ── Commitment and actual ────────────────────────────────────────────────
 
 
